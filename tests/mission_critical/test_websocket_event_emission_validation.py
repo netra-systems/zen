@@ -94,7 +94,7 @@ class TestWebSocketEventEmissionValidation(SSotBaseTestCase):
         emitted_event_types = {event['event_type'] for event in self.emitted_events}
         assert emitted_event_types == expected_events, f"Missing events: {expected_events - emitted_event_types}"
         
-        print("✅ All 5 critical WebSocket events emitted successfully")
+        print(" PASS:  All 5 critical WebSocket events emitted successfully")
         
     @pytest.mark.mission_critical 
     async def test_user_execution_engine_tool_dispatcher_integration(self):
@@ -130,7 +130,7 @@ class TestWebSocketEventEmissionValidation(SSotBaseTestCase):
         # Verify that agent registry was configured with tool dispatcher
         self.mock_agent_registry.set_tool_dispatcher.assert_called_once()
         
-        print("✅ UserExecutionEngine tool dispatcher integration working")
+        print(" PASS:  UserExecutionEngine tool dispatcher integration working")
         
     @pytest.mark.mission_critical
     async def test_agent_factory_websocket_emitter_creation(self):
@@ -159,7 +159,7 @@ class TestWebSocketEventEmissionValidation(SSotBaseTestCase):
         mock_bridge.notify_agent_thinking.assert_called_once() 
         mock_bridge.notify_agent_completed.assert_called_once()
         
-        print("✅ UserWebSocketEmitter working correctly")
+        print(" PASS:  UserWebSocketEmitter working correctly")
         
     @pytest.mark.mission_critical
     async def test_complete_event_flow_integration(self):
@@ -205,7 +205,7 @@ class TestWebSocketEventEmissionValidation(SSotBaseTestCase):
         # Verify events were tracked
         assert len(self.emitted_events) >= 2, "Events not properly emitted"
         
-        print("✅ Complete integration test passed - all components connected correctly")
+        print(" PASS:  Complete integration test passed - all components connected correctly")
         
     def get_event_summary(self) -> Dict[str, Any]:
         """Get summary of emitted events for debugging."""

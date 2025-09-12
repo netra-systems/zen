@@ -1,6 +1,6 @@
 """
 Tests for error handler enumerations and context.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """""
 
 import sys

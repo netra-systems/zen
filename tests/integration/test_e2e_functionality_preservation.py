@@ -11,7 +11,7 @@ This suite validates that essential BaseE2ETest functionality is preserved in SS
 3. Service health checking continues to function
 4. Setup/teardown patterns work with SSOT inheritance
 
-Purpose: Ensure no capability loss during BaseE2ETest → SSOT migration.
+Purpose: Ensure no capability loss during BaseE2ETest  ->  SSOT migration.
 Strategic importance: Maintains E2E testing infrastructure reliability.
 
 Author: E2E Functionality Preservation Agent  
@@ -300,7 +300,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         self.record_metric("port_range_generated", len(port_range))
         self.record_metric("port_utilities_functional", True)
         
-        logger.info("✅ Port utilities functionality preserved with SSOT inheritance")
+        logger.info(" PASS:  Port utilities functionality preserved with SSOT inheritance")
     
     def test_process_management_preserved_in_migration(self):
         """
@@ -344,7 +344,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         self.record_metric("process_monitoring_functional", True)
         self.record_metric("process_cleanup_successful", True)
         
-        logger.info("✅ Process management functionality preserved with SSOT inheritance")
+        logger.info(" PASS:  Process management functionality preserved with SSOT inheritance")
     
     def test_service_health_checking_continues(self):
         """
@@ -400,7 +400,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         self.record_metric("service_wait_elapsed_time", elapsed)
         self.record_metric("service_health_checking_functional", True)
         
-        logger.info("✅ Service health checking functionality preserved with SSOT inheritance")
+        logger.info(" PASS:  Service health checking functionality preserved with SSOT inheritance")
     
     def test_e2e_setup_teardown_patterns_functional(self):
         """
@@ -462,7 +462,7 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         self.record_metric("cleanup_callbacks_working", True)
         self.record_metric("context_management_working", True)
         
-        logger.info("✅ E2E setup/teardown patterns functional with SSOT inheritance")
+        logger.info(" PASS:  E2E setup/teardown patterns functional with SSOT inheritance")
     
     def test_comprehensive_e2e_functionality_validation(self):
         """
@@ -573,13 +573,13 @@ class TestE2EFunctionalityPreservation(SSotBaseTestCase):
         logger.info(f"""
 E2E FUNCTIONALITY PRESERVATION VALIDATION REPORT
 ===============================================
-Port Utilities: {'✅ PRESERVED' if functionality_report['port_utilities'] else '❌ BROKEN'}
-Process Management: {'✅ PRESERVED' if functionality_report['process_management'] else '❌ BROKEN'}
-Service Health Checking: {'✅ PRESERVED' if functionality_report['service_health_checking'] else '❌ BROKEN'}
-Setup/Teardown Patterns: {'✅ PRESERVED' if functionality_report['setup_teardown_patterns'] else '❌ BROKEN'}
-Environment Isolation: {'✅ PRESERVED' if functionality_report['environment_isolation'] else '❌ BROKEN'}
-Metrics Recording: {'✅ PRESERVED' if functionality_report['metrics_recording'] else '❌ BROKEN'}
-Cleanup Functionality: {'✅ PRESERVED' if functionality_report['cleanup_functionality'] else '❌ BROKEN'}
+Port Utilities: {' PASS:  PRESERVED' if functionality_report['port_utilities'] else ' FAIL:  BROKEN'}
+Process Management: {' PASS:  PRESERVED' if functionality_report['process_management'] else ' FAIL:  BROKEN'}
+Service Health Checking: {' PASS:  PRESERVED' if functionality_report['service_health_checking'] else ' FAIL:  BROKEN'}
+Setup/Teardown Patterns: {' PASS:  PRESERVED' if functionality_report['setup_teardown_patterns'] else ' FAIL:  BROKEN'}
+Environment Isolation: {' PASS:  PRESERVED' if functionality_report['environment_isolation'] else ' FAIL:  BROKEN'}
+Metrics Recording: {' PASS:  PRESERVED' if functionality_report['metrics_recording'] else ' FAIL:  BROKEN'}
+Cleanup Functionality: {' PASS:  PRESERVED' if functionality_report['cleanup_functionality'] else ' FAIL:  BROKEN'}
 
 Overall Preservation: {preservation_percentage:.1f}% ({functional_components}/{total_components})
         """)
@@ -591,7 +591,7 @@ Overall Preservation: {preservation_percentage:.1f}% ({functional_components}/{t
             f"Migration may have broken critical E2E capabilities."
         )
         
-        logger.info(f"✅ COMPREHENSIVE VALIDATION PASSED: {preservation_percentage:.1f}% E2E functionality preserved")
+        logger.info(f" PASS:  COMPREHENSIVE VALIDATION PASSED: {preservation_percentage:.1f}% E2E functionality preserved")
 
 
 class TestE2EAsyncFunctionalityPreservation(SSotAsyncTestCase):
@@ -632,7 +632,7 @@ class TestE2EAsyncFunctionalityPreservation(SSotAsyncTestCase):
         await self.functionality_tester.terminate_process_safely(process)
         
         self.record_metric("async_process_management_functional", True)
-        logger.info("✅ Async process management preserved with SSOT inheritance")
+        logger.info(" PASS:  Async process management preserved with SSOT inheritance")
     
     async def test_async_service_waiting_preserved(self):
         """Test async service waiting capabilities."""
@@ -649,7 +649,7 @@ class TestE2EAsyncFunctionalityPreservation(SSotAsyncTestCase):
         self.record_metric("async_service_waiting_functional", True)
         self.record_metric("async_timeout_elapsed", elapsed)
         
-        logger.info("✅ Async service waiting preserved with SSOT inheritance")
+        logger.info(" PASS:  Async service waiting preserved with SSOT inheritance")
 
 
 if __name__ == "__main__":

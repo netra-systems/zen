@@ -31,8 +31,8 @@ def add_summary_section(report: list, summary: Dict[str, Any]) -> None:
     report.append("| Metric | Value |")
     report.append("|--------|-------|")
     report.append(f"| Total Tests | {summary.get('total', 0)} |")
-    report.append(f"| Passed | ✅ {summary.get('passed', 0)} |")
-    report.append(f"| Failed | ❌ {summary.get('failed', 0)} |")
+    report.append(f"| Passed |  PASS:  {summary.get('passed', 0)} |")
+    report.append(f"| Failed |  FAIL:  {summary.get('failed', 0)} |")
     report.append(f"| Success Rate | {summary.get('success_rate', 0):.1f}% |")
 
 
@@ -47,7 +47,7 @@ def add_performance_issues(report: list, summary: Dict[str, Any]) -> None:
     """Add performance issues section if any exist."""
     if not summary.get("performance_issues"):
         return
-    report.append("## ⚠️ Performance Issues")
+    report.append("##  WARNING: [U+FE0F] Performance Issues")
     report.append("")
     report.append("| Test | Issue | Duration |")
     report.append("|------|-------|----------|")
@@ -59,21 +59,21 @@ def add_performance_issues(report: list, summary: Dict[str, Any]) -> None:
 def get_status_icon(status: str) -> str:
     """Get status icon for test result."""
     icons = {
-        "passed": "✅", "failed": "❌",
-        "timeout": "⏱️", "error": "🔥"
+        "passed": " PASS: ", "failed": " FAIL: ",
+        "timeout": "[U+23F1][U+FE0F]", "error": " FIRE: "
     }
-    return icons.get(status, "❓")
+    return icons.get(status, "[U+2753]")
 
 
 def get_performance_indicator(duration: float) -> str:
     """Get performance indicator based on test duration."""
     if duration < 1:
-        return "🟢 Excellent"
+        return "[U+1F7E2] Excellent"
     elif duration < 5:
-        return "🟡 Good"
+        return "[U+1F7E1] Good"
     elif duration < 10:
-        return "🟠 Acceptable"
-    return "🔴 Slow"
+        return "[U+1F7E0] Acceptable"
+    return "[U+1F534] Slow"
 
 
 def add_test_results(report: list, tests: list) -> None:
@@ -118,13 +118,13 @@ def add_recommendations(report: list, summary: Dict[str, Any]) -> None:
     report.append("## Recommendations")
     report.append("")
     if summary.get("performance_issues"):
-        report.append("- 🔍 Investigate timeout issues in slow tests")
-        report.append("- ⚡ Consider parallelizing long-running tests")
-        report.append("- 📊 Profile tests with duration > 10s")
+        report.append("-  SEARCH:  Investigate timeout issues in slow tests")
+        report.append("-  LIGHTNING:  Consider parallelizing long-running tests")
+        report.append("-  CHART:  Profile tests with duration > 10s")
     else:
-        report.append("- ✅ Performance is within acceptable limits")
+        report.append("-  PASS:  Performance is within acceptable limits")
     if summary.get("average_duration", 0) > 5:
-        report.append("- ⏱️ Average test duration is high, consider optimization")
+        report.append("- [U+23F1][U+FE0F] Average test duration is high, consider optimization")
     report.append("")
 
 

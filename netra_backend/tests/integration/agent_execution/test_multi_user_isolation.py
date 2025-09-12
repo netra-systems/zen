@@ -179,7 +179,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                     assert context.metadata["user_specific_data"] != other_context.metadata["user_specific_data"]
                     assert id(context) != id(other_context), "Contexts should not share memory references"
         
-        logger.info("✅ User execution context isolation boundaries verified")
+        logger.info(" PASS:  User execution context isolation boundaries verified")
 
     async def test_concurrent_agent_execution_isolation(self):
         """Test isolation during concurrent agent executions across multiple users.
@@ -225,7 +225,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                     assert other_user_id not in str(result), \
                         f"User {other_user_id} data should not appear in {user_id} results"
         
-        logger.info(f"✅ Concurrent isolation verified: {self.user_count} users in {total_time:.2f}s")
+        logger.info(f" PASS:  Concurrent isolation verified: {self.user_count} users in {total_time:.2f}s")
 
     async def test_factory_pattern_memory_isolation(self):
         """Test that factory patterns create isolated instances without shared memory.
@@ -290,7 +290,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                     assert len(overlap) == 0, \
                         f"Memory overlap detected between {user_id_1} and {user_id_2}: {overlap}"
         
-        logger.info(f"✅ Factory pattern memory isolation verified: {len(all_memory_refs)} unique instances")
+        logger.info(f" PASS:  Factory pattern memory isolation verified: {len(all_memory_refs)} unique instances")
 
     async def test_websocket_event_routing_isolation(self):
         """Test that WebSocket events are routed only to the correct user.
@@ -369,7 +369,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                 if 'user_specific_event' in event['data']:
                     assert event['data']['user_specific_event'] == user_id
                 
-        logger.info("✅ WebSocket event routing isolation verified")
+        logger.info(" PASS:  WebSocket event routing isolation verified")
 
     async def test_database_level_user_isolation(self):
         """Test database-level isolation of user execution data.
@@ -438,7 +438,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                 assert record.user_id == user_id, \
                     f"Cross-user data leak detected in query for {user_id}"
         
-        logger.info("✅ Database-level user isolation verified")
+        logger.info(" PASS:  Database-level user isolation verified")
 
     async def test_resource_cleanup_isolation(self):
         """Test that resource cleanup maintains isolation and prevents leakage.
@@ -496,7 +496,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
                     # Each user's stats should be independent
                     assert final_stats[user_id]['user_id'] != final_stats[other_user_id]['user_id']
         
-        logger.info("✅ Resource cleanup isolation verified")
+        logger.info(" PASS:  Resource cleanup isolation verified")
 
     async def test_stress_isolation_under_high_concurrency(self):
         """Test isolation under high-concurrency stress conditions.
@@ -556,7 +556,7 @@ class TestMultiUserIsolation(BaseAgentExecutionTest):
             assert variance <= 0.5, \
                 f"Uneven distribution for {user_id}: {count} vs expected {expected_per_user:.1f}"
         
-        logger.info(f"✅ Stress isolation verified: {success_rate:.2%} success rate, {total_time:.2f}s total")
+        logger.info(f" PASS:  Stress isolation verified: {success_rate:.2%} success rate, {total_time:.2f}s total")
 
     # Helper methods for multi-user testing
 

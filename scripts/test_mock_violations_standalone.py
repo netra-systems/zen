@@ -72,7 +72,7 @@ def run_mock_violations_test():
                 # Show first 3 examples
                 for v in vlist[:3]:
                     short_path = v.file_path.split('/netra-apex/')[-1] 
-                    print(f"    • {short_path}:{v.line_number}")
+                    print(f"    [U+2022] {short_path}:{v.line_number}")
                 if len(vlist) > 3:
                     print(f"    ... and {len(vlist) - 3} more")
             print()
@@ -87,7 +87,7 @@ def run_mock_violations_test():
         # This is a FAIL
         return False, len(all_violations)
     else:
-        print("✅ SUCCESS: No mock policy violations found!")
+        print(" PASS:  SUCCESS: No mock policy violations found!")
         return True, 0
 
 
@@ -95,9 +95,9 @@ if __name__ == '__main__':
     success, violation_count = run_mock_violations_test()
     
     if not success:
-        print(f"\n❌ TEST FAILED: {violation_count} mock violations found")
+        print(f"\n FAIL:  TEST FAILED: {violation_count} mock violations found")
         print("The test suite MUST fail until all mocks are replaced with real services")
         sys.exit(1)
     else:
-        print(f"\n✅ TEST PASSED: No mock violations")  
+        print(f"\n PASS:  TEST PASSED: No mock violations")  
         sys.exit(0)

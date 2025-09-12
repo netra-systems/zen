@@ -67,23 +67,23 @@ class SystemTemplates:
     
     def _build_system_options(self) -> str:
         """Build system unavailable options."""
-        return ("• Try breaking down the request into smaller parts\n"
-                "• Provide more specific parameters\n"
-                "• Use our template-based optimization guides\n")
+        return ("[U+2022] Try breaking down the request into smaller parts\n"
+                "[U+2022] Provide more specific parameters\n"
+                "[U+2022] Use our template-based optimization guides\n")
     
     def _get_processing_error_template(self) -> str:
         """Get processing error template."""
         intro = "Processing error for {context}."
         workaround = "Suggested workaround:"
         options = self._build_processing_options()
-        reference = "• Contact support with reference: {error_code}"
+        reference = "[U+2022] Contact support with reference: {error_code}"
         return f"{intro} {workaround}\n{options}{reference}"
     
     def _build_processing_options(self) -> str:
         """Build processing error options."""
-        return ("• Simplify the request\n"
-                "• Check input format and data\n"
-                "• Try a different optimization approach\n")
+        return ("[U+2022] Simplify the request\n"
+                "[U+2022] Check input format and data\n"
+                "[U+2022] Try a different optimization approach\n")
     
     def _get_analysis_timeout_template(self) -> str:
         """Get analysis timeout template."""
@@ -94,10 +94,10 @@ class SystemTemplates:
     
     def _build_analysis_actions(self) -> str:
         """Build analysis timeout actions."""
-        return ("• Reduce the scope of analysis\n"
-                "• Process in smaller batches\n"
-                "• Use our quick optimization templates\n"
-                "• Schedule for batch processing")
+        return ("[U+2022] Reduce the scope of analysis\n"
+                "[U+2022] Process in smaller batches\n"
+                "[U+2022] Use our quick optimization templates\n"
+                "[U+2022] Schedule for batch processing")
     
     def _get_request_timeout_template(self) -> str:
         """Get request timeout template."""
@@ -108,10 +108,10 @@ class SystemTemplates:
     
     def _build_request_actions(self) -> str:
         """Build request timeout actions."""
-        return ("• Break into smaller requests\n"
-                "• Use cached optimization patterns\n"
-                "• Try async processing\n"
-                "• Adjust complexity parameters")
+        return ("[U+2022] Break into smaller requests\n"
+                "[U+2022] Use cached optimization patterns\n"
+                "[U+2022] Try async processing\n"
+                "[U+2022] Adjust complexity parameters")
     
     def _get_rate_limit_reached_template(self) -> str:
         """Get rate limit reached template."""
@@ -122,10 +122,10 @@ class SystemTemplates:
     
     def _build_rate_limit_actions(self) -> str:
         """Build rate limit actions."""
-        return ("• Wait {wait_time} before retry\n"
-                "• Consider batching requests\n"
-                "• Use our optimization templates\n"
-                "• Upgrade plan for higher limits")
+        return ("[U+2022] Wait {wait_time} before retry\n"
+                "[U+2022] Consider batching requests\n"
+                "[U+2022] Use our optimization templates\n"
+                "[U+2022] Upgrade plan for higher limits")
     
     def _get_request_limit_exceeded_template(self) -> str:
         """Get request limit exceeded template."""
@@ -136,10 +136,10 @@ class SystemTemplates:
     
     def _build_limit_actions(self) -> str:
         """Build request limit actions."""
-        return ("• Queue for later processing\n"
-                "• Use pre-computed optimizations\n"
-                "• Reduce request frequency\n"
-                "• Check quota usage dashboard")
+        return ("[U+2022] Queue for later processing\n"
+                "[U+2022] Use pre-computed optimizations\n"
+                "[U+2022] Reduce request frequency\n"
+                "[U+2022] Check quota usage dashboard")
     
     def get_generic_template(self) -> str:
         """Get a generic fallback template."""
@@ -151,7 +151,7 @@ class SystemTemplates:
     
     def _build_generic_requirements(self) -> str:
         """Build generic template requirements."""
-        return ("• Specific details about your use case\n"
-                "• Current metrics or configuration\n"
-                "• Desired outcomes or improvements\n"
-                "• Any constraints or requirements\n")
+        return ("[U+2022] Specific details about your use case\n"
+                "[U+2022] Current metrics or configuration\n"
+                "[U+2022] Desired outcomes or improvements\n"
+                "[U+2022] Any constraints or requirements\n")

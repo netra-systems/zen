@@ -2,7 +2,7 @@
 Test User Context Lifecycle Management - State Management & Context Swimlane
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core multi-user chat functionality  
+- Segment: All (Free  ->  Enterprise) - Core multi-user chat functionality  
 - Business Goal: Enable reliable user context management across sessions
 - Value Impact: Ensures 90% of platform value through proper user isolation and memory management
 - Strategic Impact: CRITICAL - Prevents user context corruption and enables true multi-user support

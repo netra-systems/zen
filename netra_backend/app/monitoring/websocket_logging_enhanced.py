@@ -144,7 +144,7 @@ class WebSocketEnhancedLogger:
         self.performance_logs: List[Dict[str, Any]] = []
         self.max_performance_logs = 1000
         
-        logger.info(f"🔍 Enhanced WebSocket logger initialized: {logger_name}")
+        logger.info(f" SEARCH:  Enhanced WebSocket logger initialized: {logger_name}")
     
     @contextmanager
     def log_context(self, context: LogContext):

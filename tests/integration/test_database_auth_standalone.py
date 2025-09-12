@@ -46,7 +46,7 @@ env = get_env()
                 # REMOVED_SYNTAX_ERROR: cur.execute("SELECT 1")
                 # REMOVED_SYNTAX_ERROR: result = cur.fetchone()
                 # REMOVED_SYNTAX_ERROR: assert result[0] == 1, "Database connectivity test failed"
-                # REMOVED_SYNTAX_ERROR: print("✅ Basic database connectivity test passed")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Basic database connectivity test passed")
                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("Skipping test - requires PostgreSQL on localhost:5433")
@@ -80,21 +80,21 @@ env = get_env()
                         # REMOVED_SYNTAX_ERROR: try:
                             # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.database.connection import AuthDatabase
                             # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-                            # REMOVED_SYNTAX_ERROR: print("✅ Auth service imports successful")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Auth service imports successful")
                             # REMOVED_SYNTAX_ERROR: except ImportError as import_error:
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: return
 
                                 # Create database instance
                                 # REMOVED_SYNTAX_ERROR: auth_db = AuthDatabase()
-                                # REMOVED_SYNTAX_ERROR: print("✅ AuthDatabase instance created")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  AuthDatabase instance created")
 
                                 # Try to initialize database connection
                                 # REMOVED_SYNTAX_ERROR: try:
                                     # REMOVED_SYNTAX_ERROR: asyncio.run(asyncio.wait_for(auth_db.initialize(), timeout=10.0))
-                                    # REMOVED_SYNTAX_ERROR: print("✅ Database initialization completed")
+                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Database initialization completed")
                                     # REMOVED_SYNTAX_ERROR: except asyncio.TimeoutError:
-                                        # REMOVED_SYNTAX_ERROR: print("⚠️  Database initialization timed out (may be expected in test environment)")
+                                        # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Database initialization timed out (may be expected in test environment)")
                                         # REMOVED_SYNTAX_ERROR: except Exception as init_error:
                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -122,7 +122,7 @@ env = get_env()
 
                                                             # Report results
                                                             # REMOVED_SYNTAX_ERROR: if found_auth_issues:
-                                                                # REMOVED_SYNTAX_ERROR: print("❌ Found authentication error logs that indicate auth issues:")
+                                                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  Found authentication error logs that indicate auth issues:")
                                                                 # REMOVED_SYNTAX_ERROR: for issue in found_auth_issues:
                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                     # REMOVED_SYNTAX_ERROR: print(" )
@@ -130,7 +130,7 @@ env = get_env()
                                                                     # REMOVED_SYNTAX_ERROR: print(log_output)
                                                                     # REMOVED_SYNTAX_ERROR: return False
                                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                                        # REMOVED_SYNTAX_ERROR: print("✅ No authentication error patterns found in logs")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  No authentication error patterns found in logs")
 
                                                                         # Test basic database operations if possible
                                                                         # REMOVED_SYNTAX_ERROR: try:
@@ -144,7 +144,7 @@ env = get_env()
 
                                                                                         # REMOVED_SYNTAX_ERROR: test_result = asyncio.run(test_db_op())
                                                                                         # REMOVED_SYNTAX_ERROR: if test_result == 1:
-                                                                                            # REMOVED_SYNTAX_ERROR: print("✅ Database operation test passed")
+                                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Database operation test passed")
                                                                                             # REMOVED_SYNTAX_ERROR: else:
                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as op_error:
@@ -196,7 +196,7 @@ env = get_env()
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: try:
                 # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.database.database_manager import AuthDatabaseManager
-                # REMOVED_SYNTAX_ERROR: print("✅ AuthDatabaseManager import successful")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  AuthDatabaseManager import successful")
                 # REMOVED_SYNTAX_ERROR: except ImportError as import_error:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: return False
@@ -211,7 +211,7 @@ env = get_env()
 
                     # REMOVED_SYNTAX_ERROR: try:
                         # REMOVED_SYNTAX_ERROR: manager = AuthDatabaseManager()
-                        # REMOVED_SYNTAX_ERROR: print("✅ AuthDatabaseManager instance created")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  AuthDatabaseManager instance created")
                         # REMOVED_SYNTAX_ERROR: except Exception as manager_error:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: return False
@@ -256,7 +256,7 @@ env = get_env()
 
                                                                                 # Report results
                                                                                 # REMOVED_SYNTAX_ERROR: if found_credentials:
-                                                                                    # REMOVED_SYNTAX_ERROR: print("❌ Found credentials in logs (security issue):")
+                                                                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Found credentials in logs (security issue):")
                                                                                     # REMOVED_SYNTAX_ERROR: for cred in found_credentials:
                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                         # REMOVED_SYNTAX_ERROR: print(" )
@@ -264,7 +264,7 @@ env = get_env()
                                                                                         # REMOVED_SYNTAX_ERROR: print(log_output)
                                                                                         # REMOVED_SYNTAX_ERROR: return False
                                                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                                                            # REMOVED_SYNTAX_ERROR: print("✅ No credentials found in logs")
+                                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  No credentials found in logs")
                                                                                             # REMOVED_SYNTAX_ERROR: return True
 
                                                                                             # REMOVED_SYNTAX_ERROR: finally:
@@ -287,18 +287,18 @@ env = get_env()
     # REMOVED_SYNTAX_ERROR: print("-" * 50)
     # REMOVED_SYNTAX_ERROR: if test_database_connection_no_auth_errors():
         # REMOVED_SYNTAX_ERROR: success_count += 1
-        # REMOVED_SYNTAX_ERROR: print("✅ PASS: Database connection auth logging test")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  PASS: Database connection auth logging test")
         # REMOVED_SYNTAX_ERROR: else:
-            # REMOVED_SYNTAX_ERROR: print("❌ FAIL: Database connection auth logging test")
+            # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAIL: Database connection auth logging test")
             # REMOVED_SYNTAX_ERROR: print()
 
             # REMOVED_SYNTAX_ERROR: print("Test 2: Database manager credential logging")
             # REMOVED_SYNTAX_ERROR: print("-" * 50)
             # REMOVED_SYNTAX_ERROR: if test_database_manager_no_credential_logging():
                 # REMOVED_SYNTAX_ERROR: success_count += 1
-                # REMOVED_SYNTAX_ERROR: print("✅ PASS: Database manager credential logging test")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  PASS: Database manager credential logging test")
                 # REMOVED_SYNTAX_ERROR: else:
-                    # REMOVED_SYNTAX_ERROR: print("❌ FAIL: Database manager credential logging test")
+                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAIL: Database manager credential logging test")
                     # REMOVED_SYNTAX_ERROR: print()
 
                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
@@ -306,10 +306,10 @@ env = get_env()
                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
                     # REMOVED_SYNTAX_ERROR: if success_count == total_tests:
-                        # REMOVED_SYNTAX_ERROR: print("🎉 All tests passed! Database auth logging is working correctly.")
+                        # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  All tests passed! Database auth logging is working correctly.")
                         # REMOVED_SYNTAX_ERROR: return True
                         # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: print("⚠️  Some tests failed. Review the output above for details.")
+                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Some tests failed. Review the output above for details.")
                             # REMOVED_SYNTAX_ERROR: return False
 
 

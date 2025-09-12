@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """Unit Tests for Triage Golden Path - Core Logic Validation
 
 BUSINESS VALUE JUSTIFICATION (BVJ):
@@ -5,7 +43,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
 - Business Goal: Ensure triage agent correctly routes requests to deliver AI value
 - Value Impact: Triage is the entry point that determines how $500K+ ARR user requests are handled
 - Strategic Impact: Critical infrastructure that enables all downstream AI optimization value delivery
-- Revenue Protection: Without proper triage, users get wrong agents → poor experiences → churn
+- Revenue Protection: Without proper triage, users get wrong agents  ->  poor experiences  ->  churn
 
 PURPOSE: This test suite validates the core triage logic that determines agent execution
 workflow for user requests. Triage is the critical first step that must run successfully

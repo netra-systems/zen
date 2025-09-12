@@ -73,7 +73,7 @@ class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
         if REDIS_AVAILABLE:
             try:
                 redis_port = self.env.get("REDIS_PORT", "6381")  # Test Redis port
-                self.redis_client = redis.Redis(host="localhost", port=int(redis_port), decode_responses=True)
+                self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=int(redis_port), decode_responses=True)
             except Exception:
                 self.redis_client = None
         else:
@@ -260,10 +260,10 @@ class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
         try:
             # Check cache keys for this user/thread
             cache_pattern = f"user:{self.test_user_id}:*"
-            cache_keys = await self.redis_client.keys(cache_pattern)
+            cache_keys = await self.await redis_client.keys(cache_pattern)
             
             thread_pattern = f"thread:{self.test_thread_id}:*"  
-            thread_cache_keys = await self.redis_client.keys(thread_pattern)
+            thread_cache_keys = await self.await redis_client.keys(thread_pattern)
             
             all_cache_keys = cache_keys + thread_cache_keys
             
@@ -274,7 +274,7 @@ class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
                 
                 # Check cache content for one key
                 test_key = all_cache_keys[0]
-                cached_data = await self.redis_client.get(test_key)
+                cached_data = await self.await redis_client.get(test_key)
                 
                 if cached_data:
                     # Parse cached data

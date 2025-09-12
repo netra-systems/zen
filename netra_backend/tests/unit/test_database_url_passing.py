@@ -154,21 +154,21 @@ if __name__ == "__main__":
     print("Running #removed-legacypassing tests...")
     
     test_suite.test_database_url_retrieved_from_environment()
-    print("✓ #removed-legacyretrieved from environment")
+    print("[U+2713] #removed-legacyretrieved from environment")
     
     test_suite.test_database_url_builder_uses_environment()
-    print("✓ DatabaseURLBuilder uses #removed-legacyfrom environment")
+    print("[U+2713] DatabaseURLBuilder uses #removed-legacyfrom environment")
     
     test_suite.test_database_url_formatted_for_asyncpg()
-    print("✓ #removed-legacyformatted for asyncpg driver")
+    print("[U+2713] #removed-legacyformatted for asyncpg driver")
     
     test_suite.test_database_manager_retrieves_database_url()
-    print("✓ DatabaseManager retrieves and formats DATABASE_URL")
+    print("[U+2713] DatabaseManager retrieves and formats DATABASE_URL")
     
     test_suite.test_database_url_fallback_to_components()
-    print("✓ System falls back to POSTGRES_* components when needed")
+    print("[U+2713] System falls back to POSTGRES_* components when needed")
     
     test_suite.test_database_url_priority_over_components()
-    print("✓ #removed-legacytakes priority over individual components")
+    print("[U+2713] #removed-legacytakes priority over individual components")
     
     print("\nAll tests passed! #removed-legacyis being properly passed through the system.")

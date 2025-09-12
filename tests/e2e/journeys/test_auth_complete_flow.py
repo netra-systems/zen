@@ -2,7 +2,7 @@
 CRITICAL E2E Authentication Flow Tests - Main Test Suite
 
 BVJ (Business Value Justification):
-1. Segment: All customer segments (Free → Paid conversion critical)
+1. Segment: All customer segments (Free  ->  Paid conversion critical)
 2. Business Goal: Protect $200K+ MRR through authentication funnel validation
 3. Value Impact: Prevents authentication failures that cost user conversions
 4. Revenue Impact: Each test failure caught saves $10K+ MRR monthly
@@ -29,7 +29,7 @@ from tests.e2e.integration.session_security_tester import SessionSecurityLogoutT
 @pytest.mark.e2e
 async def test_complete_new_user_registration_to_first_chat():
     """
-    Test #1: Complete New User Registration → First Chat
+    Test #1: Complete New User Registration  ->  First Chat
     
     BVJ: Protects $50K+ MRR new user funnel conversion
     - Real JWT token creation and validation

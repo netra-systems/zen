@@ -11,7 +11,7 @@ Business Value Justification:
 - Value Impact: Validates complete user journeys with 3+ agents and state preservation
 - Strategic Impact: Protects AI optimization workflows generating $2M+ annual value
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
 Test Architecture:
@@ -41,7 +41,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from loguru import logger
 
-# 🚨 MANDATORY: SSOT E2E Authentication imports - CHEATING violation fix
+#  ALERT:  MANDATORY: SSOT E2E Authentication imports - CHEATING violation fix
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -68,6 +68,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.core.configuration import UnifiedConfigManager
 from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 # ============================================================================
@@ -229,6 +230,15 @@ class AgentHandoffValidator:
 
 
 class ErrorRecoveryTester:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests error recovery scenarios during agent execution."""
     
     def __init__(self):
@@ -385,6 +395,15 @@ async def orchestration_setup(real_services):
 # ============================================================================
 
 class TestCompleteAgentWorkflow(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests complete agent workflow with multiple agents, complex routing, and MANDATORY authentication."""
     
     def setup_method(self):
@@ -395,7 +414,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for comprehensive E2E tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for comprehensive E2E tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -418,7 +437,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
         setup = orchestration_setup
         validator = ComprehensiveOrchestrationValidator()
         
-        # 🚨 MANDATORY: Create authenticated user for complex workflow
+        #  ALERT:  MANDATORY: Create authenticated user for complex workflow
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.complex.workflow@example.com",
@@ -484,7 +503,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
             assert result.final_response, "No final response generated"
             assert len(result.final_response) > 100, "Response too short for complex request"
             
-            # 🚨 CRITICAL: Validate execution time indicates real processing (no CHEATING)
+            #  ALERT:  CRITICAL: Validate execution time indicates real processing (no CHEATING)
             assert execution_time >= 0.5, f"Execution time {execution_time:.3f}s indicates fake execution (CHEATING violation)"
             
             # Validate all captured events are for authenticated user
@@ -515,6 +534,15 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
 
 
 class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests agent handoffs and context preservation across multi-turn conversations with MANDATORY authentication."""
     
     def setup_method(self):
@@ -525,7 +553,7 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers
+        #  ALERT:  MANDATORY: Create authenticated helpers
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -634,6 +662,15 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
 
 
 class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests error recovery scenarios during agent execution with MANDATORY authentication."""
     
     def setup_method(self):
@@ -644,7 +681,7 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for error recovery tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for error recovery tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -778,6 +815,15 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
 # ============================================================================
 
 class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Performance benchmarks and production readiness validation with MANDATORY authentication."""
     
     def setup_method(self):
@@ -788,7 +834,7 @@ class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for performance tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for performance tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     

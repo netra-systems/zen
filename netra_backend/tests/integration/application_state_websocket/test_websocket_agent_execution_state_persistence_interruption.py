@@ -258,7 +258,7 @@ class TestWebSocketAgentExecutionStatePersistenceInterruption(BaseIntegrationTes
         assert len(final_state.get("completed_operations", [])) > 0
         
         self.logger.info(
-            f"✅ State persistence test PASSED - "
+            f" PASS:  State persistence test PASSED - "
             f"Checkpoints: {state_persistence.get('checkpoints_created', 0)}, "
             f"Interruptions: {state_persistence.get('interruptions_handled', 0)}"
         )

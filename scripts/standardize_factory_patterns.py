@@ -390,9 +390,9 @@ class FactoryPatternStandardizer:
         }
         
         if verification_report["remaining_violations"] == 0:
-            logger.info("✅ Verification PASSED: No factory pattern violations found")
+            logger.info(" PASS:  Verification PASSED: No factory pattern violations found")
         else:
-            logger.warning(f"❌ Verification FAILED: {verification_report['remaining_violations']} violations remain")
+            logger.warning(f" FAIL:  Verification FAILED: {verification_report['remaining_violations']} violations remain")
             
             # Show critical violations
             critical_violations = [
@@ -401,7 +401,7 @@ class FactoryPatternStandardizer:
             ]
             
             if critical_violations:
-                logger.error(f"🚨 CRITICAL: {len(critical_violations)} websocket_connection_id violations remain:")
+                logger.error(f" ALERT:  CRITICAL: {len(critical_violations)} websocket_connection_id violations remain:")
                 for violation in critical_violations[:5]:
                     logger.error(f"  {violation.file_path}:{violation.line_number} - {violation.old_parameter}")
         
@@ -436,7 +436,7 @@ class FactoryPatternStandardizer:
         ]
         
         if critical_violations:
-            report_lines.append("🚨 CRITICAL VIOLATIONS (ROOT CAUSE):")
+            report_lines.append(" ALERT:  CRITICAL VIOLATIONS (ROOT CAUSE):")
             report_lines.append(f"  websocket_connection_id violations: {len(critical_violations)}")
             report_lines.append("  These cause the exact supervisor factory bug from the Five Whys analysis!")
             report_lines.append("")
@@ -579,7 +579,7 @@ def main():
                 if v.old_parameter == "websocket_connection_id"
             ]
             if critical_violations:
-                logger.error(f"🚨 CRITICAL: {len(critical_violations)} websocket_connection_id violations found")
+                logger.error(f" ALERT:  CRITICAL: {len(critical_violations)} websocket_connection_id violations found")
                 sys.exit(1)
         
         logger.info("Factory pattern standardization completed successfully")

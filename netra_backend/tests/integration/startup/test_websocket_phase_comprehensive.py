@@ -217,7 +217,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         # Test business value: connection health check
         assert manager.is_connection_active(test_user["id"]), "Connection should be active"
         
-        logger.info("✅ UnifiedWebSocketManager initialization test passed")
+        logger.info(" PASS:  UnifiedWebSocketManager initialization test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_factory_initialization(self):
@@ -273,7 +273,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             for user, manager in zip(users, managers)
         ])
         
-        logger.info("✅ WebSocketManagerFactory initialization test passed")
+        logger.info(" PASS:  WebSocketManagerFactory initialization test passed")
         
     @pytest.mark.asyncio 
     async def test_websocket_connection_handler_setup(self):
@@ -326,7 +326,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         # Should be 0 since connection is new
         assert cleanup_count == 0, "New connections should not be cleaned up"
         
-        logger.info("✅ WebSocket Connection Handler setup test passed")
+        logger.info(" PASS:  WebSocket Connection Handler setup test passed")
         
     # =============================================================================
     # WEBSOCKET AUTHENTICATION & MIDDLEWARE TESTS  
@@ -374,7 +374,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             # Test business value: authentication enables chat access
             assert auth_result["subscription_tier"] == "enterprise"
             
-            logger.info("✅ WebSocket Auth middleware configuration test passed")
+            logger.info(" PASS:  WebSocket Auth middleware configuration test passed")
             
     @pytest.mark.asyncio
     async def test_websocket_cors_middleware_setup(self):
@@ -410,7 +410,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         # Test business value: CORS enables secure web app integration
         assert cors_config["allow_credentials"], "Credentials required for authenticated chat"
         
-        logger.info("✅ WebSocket CORS middleware setup test passed")
+        logger.info(" PASS:  WebSocket CORS middleware setup test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_rate_limiter_initialization(self):
@@ -461,7 +461,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         free_limit = rate_limiter.get_user_limit("free")
         assert enterprise_limit > free_limit, "Enterprise users should have higher limits"
         
-        logger.info("✅ WebSocket Rate Limiter initialization test passed")
+        logger.info(" PASS:  WebSocket Rate Limiter initialization test passed")
         
     # =============================================================================
     # WEBSOCKET MESSAGE HANDLING TESTS
@@ -529,7 +529,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         assert "messages_processed" in stats
         assert "start_agent_requests" in stats
         
-        logger.info("✅ WebSocket Message Handler setup test passed")
+        logger.info(" PASS:  WebSocket Message Handler setup test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_agent_handler_integration(self):
@@ -586,7 +586,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             agent_completed_idx = event_types.index("agent_completed")
             assert agent_started_idx < agent_completed_idx, "Events must be in correct order"
             
-        logger.info("✅ WebSocket Agent Handler integration test passed")
+        logger.info(" PASS:  WebSocket Agent Handler integration test passed")
         
     # =============================================================================
     # WEBSOCKET USER CONTEXT & ISOLATION TESTS
@@ -638,7 +638,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
                     assert context.user_id != other_context.user_id
                     assert context.request_id != other_context.request_id
                     
-        logger.info("✅ WebSocket User Context Extraction test passed")
+        logger.info(" PASS:  WebSocket User Context Extraction test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_multi_user_isolation(self):
@@ -718,7 +718,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             assert manager_stats["is_active"], "Enterprise managers must be active"
             assert manager_stats["connections"]["total"] == 1, "Enterprise isolation validated"
             
-        logger.info("✅ WebSocket multi-user isolation test passed")
+        logger.info(" PASS:  WebSocket multi-user isolation test passed")
         
     # =============================================================================
     # WEBSOCKET ERROR RECOVERY & MONITORING TESTS
@@ -782,7 +782,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         if test_user["subscription_tier"] == "enterprise":
             assert recovery_plan.get("priority") == "high", "Enterprise users should get high priority"
             
-        logger.info("✅ WebSocket Error Recovery Handler test passed")
+        logger.info(" PASS:  WebSocket Error Recovery Handler test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_performance_monitor(self):
@@ -845,7 +845,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         alerts = await performance_monitor.check_alert_conditions(test_user["id"])
         assert isinstance(alerts, list), "Should return alerts list"
         
-        logger.info("✅ WebSocket Performance Monitor test passed")
+        logger.info(" PASS:  WebSocket Performance Monitor test passed")
         
     @pytest.mark.asyncio  
     async def test_websocket_reconnection_manager(self):
@@ -905,7 +905,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
                 expected_delay = reconnection_manager.reconnection_delay_seconds * (2 ** (attempt - 1))
                 assert delay == expected_delay, f"Exponential backoff delay incorrect for attempt {attempt}"
             
-        logger.info("✅ WebSocket Reconnection Manager test passed")
+        logger.info(" PASS:  WebSocket Reconnection Manager test passed")
         
     # =============================================================================
     # WEBSOCKET CRITICAL CHAT EVENTS TESTS
@@ -985,7 +985,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             event_timestamps = [(event.get("type"), event.get("timestamp")) for event in events]
             self._validate_event_timing_for_chat_ux(event_timestamps)
             
-        logger.info("✅ WebSocket Critical Chat Events test passed")
+        logger.info(" PASS:  WebSocket Critical Chat Events test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_message_buffer_configuration(self):
@@ -1049,7 +1049,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         )
         assert delivery_results.get("delivered_count", 0) == 1, "Message should be delivered"
         
-        logger.info("✅ WebSocket Message Buffer configuration test passed")
+        logger.info(" PASS:  WebSocket Message Buffer configuration test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_broadcast_capabilities(self):
@@ -1123,7 +1123,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         enterprise_users_count = len([u for u in users if u["subscription_tier"] == "enterprise"])
         assert enterprise_recipients == enterprise_users_count, "Should target only enterprise users"
         
-        logger.info("✅ WebSocket broadcast capabilities test passed")
+        logger.info(" PASS:  WebSocket broadcast capabilities test passed")
         
     # =============================================================================
     # WEBSOCKET HEALTH CHECK & MONITORING TESTS
@@ -1185,7 +1185,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         monitoring_status = await manager.restart_background_monitoring(force_restart=False)
         assert monitoring_status.get("monitoring_restarted") is not None, "Should report monitoring restart status"
         
-        logger.info("✅ WebSocket health checks and monitoring test passed")
+        logger.info(" PASS:  WebSocket health checks and monitoring test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_configuration_validation(self):
@@ -1249,7 +1249,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         operational_score = sum(1 for feature in operational_config.values() if feature)
         assert operational_score >= 3, f"Operational configuration insufficient: {operational_score}/4 features enabled"
         
-        logger.info("✅ WebSocket configuration validation test passed")
+        logger.info(" PASS:  WebSocket configuration validation test passed")
         
     # =============================================================================
     # HELPER METHODS FOR TESTING

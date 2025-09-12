@@ -70,7 +70,7 @@ class AgentPipelineMocks:
 
             "data_analysis": {
 
-                "high_quality": "Performance analysis results:\n• Query latency: 450ms → 180ms (60% improvement)\n• Throughput: 1,200 → 3,400 QPS (183% increase)\n• Error rate: 0.02% (within SLA)\n• Cost impact: $1,800/month savings",
+                "high_quality": "Performance analysis results:\n[U+2022] Query latency: 450ms  ->  180ms (60% improvement)\n[U+2022] Throughput: 1,200  ->  3,400 QPS (183% increase)\n[U+2022] Error rate: 0.02% (within SLA)\n[U+2022] Cost impact: $1,800/month savings",
 
                 "medium_quality": "Database performance improved significantly with query optimization and indexing changes.",
 

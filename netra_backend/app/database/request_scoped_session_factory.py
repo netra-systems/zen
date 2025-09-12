@@ -245,7 +245,7 @@ class RequestScopedSessionFactory:
         }
         
         logger.info(
-            f"🚀 INITIALIZING: Request-scoped session for user {user_id}. "
+            f"[U+1F680] INITIALIZING: Request-scoped session for user {user_id}. "
             f"Session ID: {session_id}, Request ID: {request_id}. "
             f"Initialization context: {init_context}"
         )
@@ -271,7 +271,7 @@ class RequestScopedSessionFactory:
                     session_metrics.mark_activity()
                     
                     logger.info(
-                        f"✅ SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed)"
+                        f" PASS:  SUCCESS: Created SYSTEM database session {session_id} for user {user_id} (auth bypassed)"
                     )
                     
                     # Yield the system session
@@ -291,7 +291,7 @@ class RequestScopedSessionFactory:
                     session_metrics.state = SessionState.ACTIVE
                     session_metrics.mark_activity()
                     
-                    logger.info(f"✅ SUCCESS: Created regular database session {session_id} for user {user_id}")
+                    logger.info(f" PASS:  SUCCESS: Created regular database session {session_id} for user {user_id}")
                     
                     # CRITICAL FIX: Ensure thread record exists before session operations
                     await self._ensure_thread_record_exists(session, thread_id, user_id)
@@ -325,7 +325,7 @@ class RequestScopedSessionFactory:
                         }
                         
                         logger.error(
-                            f"❌ ERROR: Request-scoped session {session_id} execution failed. "
+                            f" FAIL:  ERROR: Request-scoped session {session_id} execution failed. "
                             f"User: {user_id}, Error: {e}. Full context: {execution_error_context}"
                         )
                         
@@ -601,7 +601,7 @@ class RequestScopedSessionFactory:
             
             if not existing_thread:
                 logger.info(
-                    f"🆕 THREAD CREATION: Creating missing thread record {thread_id} for user {user_id}. "
+                    f"[U+1F195] THREAD CREATION: Creating missing thread record {thread_id} for user {user_id}. "
                     f"This fixes '404: Thread not found' errors by ensuring thread records exist."
                 )
                 
@@ -625,18 +625,18 @@ class RequestScopedSessionFactory:
                 await session.commit()
                 
                 logger.info(
-                    f"✅ THREAD CREATED: Successfully created thread {thread_id} for user {user_id}. "
+                    f" PASS:  THREAD CREATED: Successfully created thread {thread_id} for user {user_id}. "
                     f"Thread record now exists in database to prevent 404 errors."
                 )
             else:
                 logger.debug(
-                    f"🔍 THREAD EXISTS: Thread {thread_id} already exists for user {user_id}. "
+                    f" SEARCH:  THREAD EXISTS: Thread {thread_id} already exists for user {user_id}. "
                     f"No creation needed."
                 )
                 
         except Exception as e:
             logger.error(
-                f"❌ THREAD CREATION FAILED: Failed to ensure thread {thread_id} exists for user {user_id}. "
+                f" FAIL:  THREAD CREATION FAILED: Failed to ensure thread {thread_id} exists for user {user_id}. "
                 f"Error: {e}. This may cause '404: Thread not found' errors."
             )
             # Don't re-raise - session can still work without thread record

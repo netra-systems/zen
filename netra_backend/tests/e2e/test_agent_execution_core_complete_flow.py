@@ -2,7 +2,7 @@
 Agent Execution Core Complete E2E Flow Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Validate complete agent execution delivers end-to-end user value
 - Value Impact: E2E tests ensure agents work in realistic production-like scenarios
 - Strategic Impact: Confidence in complete system delivering business insights to real users
@@ -11,7 +11,7 @@ This test suite validates Agent Execution Core functionality through complete
 end-to-end testing with authentication, real WebSocket connections, and
 full system integration, focusing on actual user value delivery scenarios.
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -82,7 +82,7 @@ class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
         
         BVJ: Validates the complete user value delivery pipeline with security.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.agent.execution@example.com",
@@ -190,7 +190,7 @@ class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures data privacy and security in multi-tenant production environment.
         """
-        # 🚨 MANDATORY: Create multiple authenticated users
+        #  ALERT:  MANDATORY: Create multiple authenticated users
         users = []
         for i in range(2):
             token, user_data = await create_authenticated_user(
@@ -274,7 +274,7 @@ class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures graceful error handling maintains user trust and system stability.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.error.handling@example.com",
@@ -357,7 +357,7 @@ class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures system maintains connectivity for uninterrupted user experience.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.reconnection@example.com",
@@ -417,7 +417,7 @@ class TestAgentExecutionCoreCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures system maintains performance standards under realistic user load.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.performance@example.com",

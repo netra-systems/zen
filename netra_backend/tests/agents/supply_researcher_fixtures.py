@@ -1,6 +1,6 @@
 """
 Shared test fixtures for SupplyResearcherAgent tests
-Modular design with ≤300 lines, ≤8 lines per function
+Modular design with  <= 300 lines,  <= 8 lines per function
 """
 
 import json
@@ -36,13 +36,13 @@ def mock_llm_manager():
     return llm
 
 def _setup_llm_responses(llm):
-    """Setup default LLM responses (≤8 lines)"""
+    """Setup default LLM responses ( <= 8 lines)"""
     default_response = _get_default_llm_response()
     llm.ask_llm = AsyncMock(return_value=json.dumps(default_response))
     llm.structured_output = AsyncMock(return_value=default_response)
 
 def _get_default_llm_response():
-    """Get default LLM response structure (≤8 lines)"""
+    """Get default LLM response structure ( <= 8 lines)"""
     return {
         "research_type": "pricing",
         "provider": "openai",
@@ -58,7 +58,7 @@ def mock_supply_service(mock_db):
     return service
 
 def _setup_supply_service(service, db):
-    """Setup supply service mock methods (≤8 lines)"""
+    """Setup supply service mock methods ( <= 8 lines)"""
     service.db = db
     service.get_supply_items = Mock(return_value=[])
     service.create_or_update_supply_item = Mock()
@@ -78,7 +78,7 @@ def agent(mock_llm_manager, mock_db, mock_supply_service):
     return agent
 
 def _setup_agent_websocket(agent):
-    """Setup agent WebSocket manager (≤8 lines)"""
+    """Setup agent WebSocket manager ( <= 8 lines)"""
     agent.websocket_manager = Mock()
     agent.websocket_manager.send_agent_update = AsyncMock()
     agent.websocket_manager.broadcast = AsyncMock()
@@ -101,7 +101,7 @@ def high_confidence_research_data():
     }
 
 def _get_sample_citations():
-    """Get sample citations for testing (≤8 lines)"""
+    """Get sample citations for testing ( <= 8 lines)"""
     return [
         {"source": "Official API Docs", "url": "https://api.openai.com"},
         {"source": "Pricing Page", "url": "https://openai.com/pricing"},
@@ -109,7 +109,7 @@ def _get_sample_citations():
     ]
 
 def _get_sample_qa_pairs():
-    """Get sample Q&A pairs for testing (≤8 lines)"""
+    """Get sample Q&A pairs for testing ( <= 8 lines)"""
     return [
         {"question": "pricing", "answer": "detailed pricing info"},
         {"question": "capabilities", "answer": "full capabilities"}
@@ -158,7 +158,7 @@ def mock_redis_manager():
     return redis
 
 def _get_cached_data():
-    """Get cached data structure (≤8 lines)"""
+    """Get cached data structure ( <= 8 lines)"""
     return {
         "pricing_input": 30,
         "pricing_output": 60,
@@ -181,7 +181,7 @@ def research_query_test_cases():
     return _get_query_test_cases()
 
 def _get_query_test_cases():
-    """Get query test case data (≤8 lines)"""
+    """Get query test case data ( <= 8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return [
         _get_pricing_test_case(),
@@ -190,7 +190,7 @@ def _get_query_test_cases():
     ]
 
 def _get_pricing_test_case():
-    """Get pricing query test case (≤8 lines)"""
+    """Get pricing query test case ( <= 8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
@@ -203,7 +203,7 @@ def _get_pricing_test_case():
     }
 
 def _get_capabilities_test_case():
-    """Get capabilities query test case (≤8 lines)"""
+    """Get capabilities query test case ( <= 8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
@@ -216,7 +216,7 @@ def _get_capabilities_test_case():
     }
 
 def _get_availability_test_case():
-    """Get availability query test case (≤8 lines)"""
+    """Get availability query test case ( <= 8 lines)"""
     from netra_backend.app.agents.supply_researcher_sub_agent import ResearchType
     return {
         "parsed": {
@@ -242,7 +242,7 @@ def anomaly_test_data():
         }]
     }
 
-# Helper functions for test assertions (≤8 lines each)
+# Helper functions for test assertions ( <= 8 lines each)
 
 def assert_websocket_updates_sent(agent):
     """Assert WebSocket updates were sent"""

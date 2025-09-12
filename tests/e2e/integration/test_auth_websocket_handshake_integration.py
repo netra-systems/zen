@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Prevents $25K+ MRR loss from connection failures
 
 Tests comprehensive JWT token validation during WebSocket connection establishment,
-token refresh handling, and cross-service validation flow (Auth → Backend → WebSocket).
+token refresh handling, and cross-service validation flow (Auth  ->  Backend  ->  WebSocket).
 
 CRITICAL: This is test #1 from CRITICAL_INTEGRATION_TEST_PLAN.md
 NO MOCKING - Real service integration testing only.

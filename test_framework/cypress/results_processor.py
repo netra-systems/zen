@@ -377,7 +377,7 @@ class CypressResults:
         skipped = results.get('skipped', 0)
         duration = results.get('execution_time_seconds', 0)
         
-        status_icon = "✅" if success else "❌"
+        status_icon = " PASS: " if success else " FAIL: "
         
         report = [
             f"{status_icon} Cypress E2E Test Results",

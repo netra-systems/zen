@@ -20,10 +20,10 @@ def setup_large_optimization_content():
     ```
     
     Expected Results:
-    - Throughput: 500 RPS → 1500 RPS (200% increase)
-    - Latency: 200ms → 120ms (40% reduction)
-    - Memory: 12GB → 6GB (50% reduction)
-    - Cost: $1000/month → $600/month
+    - Throughput: 500 RPS  ->  1500 RPS (200% increase)
+    - Latency: 200ms  ->  120ms (40% reduction)
+    - Memory: 12GB  ->  6GB (50% reduction)
+    - Cost: $1000/month  ->  $600/month
     
     Trade-offs: 0.5% accuracy loss acceptable for 3x performance gain.
     """

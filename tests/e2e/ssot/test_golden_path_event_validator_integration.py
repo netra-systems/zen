@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path E2E Integration Tests for EventValidator SSOT
 
@@ -20,9 +58,19 @@ from unittest.mock import patch
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E Integration tests for EventValidator SSOT with Golden Path user flow.
     
@@ -116,7 +164,7 @@ class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
         print(f"Failed validations: {len(failed_events)}")
         
         for event_type, result in validation_results.items():
-            print(f"  {event_type}: {'✅ PASS' if result['success'] else '❌ FAIL'}")
+            print(f"  {event_type}: {' PASS:  PASS' if result['success'] else ' FAIL:  FAIL'}")
             if not result['success'] and 'error_details' in result:
                 for error in result['error_details']:
                     print(f"    Error: {error}")
@@ -234,7 +282,7 @@ class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
         print(f"Failed calculations: {len(failed_calculations)}")
         
         for scenario, result in business_calculation_results.items():
-            status = '✅ PASS' if result.get('meets_threshold', False) else '❌ FAIL'
+            status = ' PASS:  PASS' if result.get('meets_threshold', False) else ' FAIL:  FAIL'
             print(f"  {scenario}: {status}")
             if 'calculated_impact' in result:
                 print(f"    Revenue impact: ${result['calculated_impact']:,.0f}")

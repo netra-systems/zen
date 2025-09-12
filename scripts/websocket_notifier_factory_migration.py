@@ -82,7 +82,7 @@ class FactoryPatternMigrator:
         canonical_file = "/Users/anthony/Desktop/netra-apex/netra_backend/app/services/agent_websocket_bridge.py"
         
         if not os.path.exists(canonical_file):
-            print(f"❌ Canonical file not found: {canonical_file}")
+            print(f" FAIL:  Canonical file not found: {canonical_file}")
             return False
         
         try:
@@ -91,7 +91,7 @@ class FactoryPatternMigrator:
             
             # Check if factory method already exists
             if 'create_for_user' in content:
-                print("✅ Factory method already exists in canonical implementation")
+                print(" PASS:  Factory method already exists in canonical implementation")
                 return True
             
             # Find WebSocketNotifier class definition
@@ -159,14 +159,14 @@ class FactoryPatternMigrator:
                 with open(canonical_file, 'w') as f:
                     f.write(enhanced_content)
                 
-                print("✅ Factory method added to canonical implementation")
+                print(" PASS:  Factory method added to canonical implementation")
                 return True
             else:
-                print("⚠️  Could not automatically add factory method - manual review required")
+                print(" WARNING: [U+FE0F]  Could not automatically add factory method - manual review required")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error enhancing canonical implementation: {e}")
+            print(f" FAIL:  Error enhancing canonical implementation: {e}")
             return False
     
     def migrate_factory_pattern_in_file(self, file_path: str) -> bool:
@@ -205,7 +205,7 @@ class FactoryPatternMigrator:
             return False
         
         except Exception as e:
-            print(f"❌ Error processing {file_path}: {e}")
+            print(f" FAIL:  Error processing {file_path}: {e}")
             self.failed_files.append(file_path)
             return False
 
@@ -243,9 +243,9 @@ class FactoryPatternMigrator:
         report.append("WebSocketNotifier Factory Pattern Migration Report")
         report.append("=" * 60)
         
-        report.append(f"✅ Successfully migrated: {len(self.migrated_files)} files")
-        report.append(f"❌ Failed: {len(self.failed_files)} files")
-        report.append(f"🔍 Analyzed: {len(self.analyzed_files)} files")
+        report.append(f" PASS:  Successfully migrated: {len(self.migrated_files)} files")
+        report.append(f" FAIL:  Failed: {len(self.failed_files)} files")
+        report.append(f" SEARCH:  Analyzed: {len(self.analyzed_files)} files")
         
         # Pattern analysis summary
         total_direct = sum(len(analysis['patterns']['direct_instantiation']) for analysis in self.analyzed_files)
@@ -254,20 +254,20 @@ class FactoryPatternMigrator:
         total_complex = sum(len(analysis['patterns']['complex_instantiation']) for analysis in self.analyzed_files)
         
         report.append(f"\nPattern Analysis:")
-        report.append(f"  📊 Direct instantiation patterns: {total_direct}")
-        report.append(f"  🏭 Factory patterns (already migrated): {total_factory}")
-        report.append(f"  🔄 Singleton patterns (need manual review): {total_singleton}")
-        report.append(f"  🔧 Complex patterns (need manual review): {total_complex}")
+        report.append(f"   CHART:  Direct instantiation patterns: {total_direct}")
+        report.append(f"  [U+1F3ED] Factory patterns (already migrated): {total_factory}")
+        report.append(f"   CYCLE:  Singleton patterns (need manual review): {total_singleton}")
+        report.append(f"  [U+1F527] Complex patterns (need manual review): {total_complex}")
         
         if self.migrated_files:
             report.append("\nMigrated Files:")
             for file in self.migrated_files:
-                report.append(f"  ✅ {file}")
+                report.append(f"   PASS:  {file}")
         
         if self.failed_files:
             report.append("\nFailed Files:")
             for file in self.failed_files:
-                report.append(f"  ❌ {file}")
+                report.append(f"   FAIL:  {file}")
         
         # Files requiring manual review
         manual_review_files = []
@@ -278,34 +278,34 @@ class FactoryPatternMigrator:
         if manual_review_files:
             report.append("\nFiles Requiring Manual Review:")
             for file in manual_review_files:
-                report.append(f"  🔧 {file}")
+                report.append(f"  [U+1F527] {file}")
         
         return "\n".join(report)
 
 def main():
     """Execute factory pattern migration process."""
-    print("🏭 Starting WebSocketNotifier Factory Pattern Migration")
-    print("📋 GitHub Issue #216 - Phase 2.1: Factory Pattern Enforcement")
+    print("[U+1F3ED] Starting WebSocketNotifier Factory Pattern Migration")
+    print("[U+1F4CB] GitHub Issue #216 - Phase 2.1: Factory Pattern Enforcement")
     print("=" * 60)
     
     migrator = FactoryPatternMigrator()
     
     # Step 1: Enhance canonical implementation with factory method
-    print("🔧 Step 1: Enhancing canonical implementation with factory method...")
+    print("[U+1F527] Step 1: Enhancing canonical implementation with factory method...")
     if not migrator.enhance_canonical_implementation():
-        print("⚠️  Could not enhance canonical implementation - proceeding with migration anyway")
+        print(" WARNING: [U+FE0F]  Could not enhance canonical implementation - proceeding with migration anyway")
     
     # Step 2: Find files needing migration
-    print("\n🔍 Step 2: Scanning for files with direct instantiation...")
+    print("\n SEARCH:  Step 2: Scanning for files with direct instantiation...")
     files = migrator.find_files_with_direct_instantiation()
-    print(f"📁 Found {len(files)} files with direct instantiation")
+    print(f"[U+1F4C1] Found {len(files)} files with direct instantiation")
     
     if not files:
-        print("✅ No files found with direct instantiation - migration complete!")
+        print(" PASS:  No files found with direct instantiation - migration complete!")
         return 0
     
     # Show files to be migrated
-    print("\n📝 Files to be migrated:")
+    print("\n[U+1F4DD] Files to be migrated:")
     for file in files[:10]:  # Show first 10
         print(f"  - {file}")
     if len(files) > 10:
@@ -313,23 +313,23 @@ def main():
     
     # Confirm migration
     try:
-        response = input("\n❓ Proceed with factory pattern migration? (y/N): ").strip().lower()
+        response = input("\n[U+2753] Proceed with factory pattern migration? (y/N): ").strip().lower()
         if response not in ['y', 'yes']:
-            print("❌ Migration cancelled by user")
+            print(" FAIL:  Migration cancelled by user")
             return 1
     except KeyboardInterrupt:
-        print("\n❌ Migration cancelled by user")
+        print("\n FAIL:  Migration cancelled by user")
         return 1
     
     # Step 3: Execute migration
-    print("\n🔄 Step 3: Executing factory pattern migration...")
+    print("\n CYCLE:  Step 3: Executing factory pattern migration...")
     for i, file_path in enumerate(files, 1):
-        print(f"  📄 [{i}/{len(files)}] Migrating {file_path}...")
+        print(f"  [U+1F4C4] [{i}/{len(files)}] Migrating {file_path}...")
         success = migrator.migrate_factory_pattern_in_file(file_path)
         if success:
-            print(f"    ✅ Migrated successfully")
+            print(f"     PASS:  Migrated successfully")
         else:
-            print(f"    ⏭️  No changes needed or failed")
+            print(f"    [U+23ED][U+FE0F]  No changes needed or failed")
     
     # Generate and display report
     print("\n" + migrator.generate_analysis_report())
@@ -338,20 +338,20 @@ def main():
     report_file = "websocket_notifier_factory_migration_report.txt"
     with open(report_file, 'w') as f:
         f.write(migrator.generate_analysis_report())
-    print(f"\n📄 Migration report saved to: {report_file}")
+    print(f"\n[U+1F4C4] Migration report saved to: {report_file}")
     
     # Next steps
-    print("\n📋 Next Steps:")
+    print("\n[U+1F4CB] Next Steps:")
     print("  1. Review files marked for manual review")
     print("  2. Run tests: python tests/mission_critical/test_websocket_agent_events_suite.py")
     print("  3. Validate user isolation: python tests/integration/test_websocket_user_isolation.py")
     print("  4. Execute Phase 2.2: Singleton Pattern Elimination")
     
     if migrator.failed_files:
-        print("\n⚠️  Migration completed with some failures - review failed files")
+        print("\n WARNING: [U+FE0F]  Migration completed with some failures - review failed files")
         return 2
     else:
-        print("\n🎉 Factory pattern migration completed successfully!")
+        print("\n CELEBRATION:  Factory pattern migration completed successfully!")
         return 0
 
 if __name__ == "__main__":

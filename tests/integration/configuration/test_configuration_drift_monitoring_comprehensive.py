@@ -85,7 +85,7 @@ class TestE2EOAuthSimulationKeyValidator:
             assert drift_detail["config_key"] == "E2E_OAUTH_SIMULATION_KEY"
             assert "e2e_authentication_bypass_failure" in drift_detail["cascade_risk"]
             
-            logger.info("✅ Missing E2E OAuth key detection test passed")
+            logger.info(" PASS:  Missing E2E OAuth key detection test passed")
     
     @pytest.mark.asyncio
     async def test_short_e2e_oauth_key_detection(self, oauth_validator):
@@ -109,7 +109,7 @@ class TestE2EOAuthSimulationKeyValidator:
             assert drift_detail["business_impact_mrr"] == 10000.0
             assert "weak_e2e_authentication" in drift_detail["cascade_risk"]
             
-            logger.info("✅ Short E2E OAuth key detection test passed")
+            logger.info(" PASS:  Short E2E OAuth key detection test passed")
     
     @pytest.mark.asyncio
     async def test_valid_e2e_oauth_key(self, oauth_validator):
@@ -132,7 +132,7 @@ class TestE2EOAuthSimulationKeyValidator:
                 assert result["key_available"] is True
                 assert result["key_length"] == 59
                 
-                logger.info("✅ Valid E2E OAuth key test passed")
+                logger.info(" PASS:  Valid E2E OAuth key test passed")
     
     @pytest.mark.asyncio
     async def test_e2e_oauth_functionality_failure(self, oauth_validator):
@@ -162,7 +162,7 @@ class TestE2EOAuthSimulationKeyValidator:
                 assert critical_drift["business_impact_mrr"] == 120000.0
                 assert "websocket_authentication_failure" in critical_drift["cascade_risk"]
                 
-                logger.info("✅ E2E OAuth functionality failure detection test passed")
+                logger.info(" PASS:  E2E OAuth functionality failure detection test passed")
 
 
 class TestJWTSecretAlignmentValidator:
@@ -194,7 +194,7 @@ class TestJWTSecretAlignmentValidator:
             assert drift_detail["config_key"] == "JWT_SECRET_KEY"
             assert "complete_authentication_failure" in drift_detail["cascade_risk"]
             
-            logger.info("✅ Missing JWT secret detection test passed")
+            logger.info(" PASS:  Missing JWT secret detection test passed")
     
     @pytest.mark.asyncio
     async def test_short_jwt_secret_detection(self, jwt_validator):
@@ -221,7 +221,7 @@ class TestJWTSecretAlignmentValidator:
                 assert drift_detail["business_impact_mrr"] == 50000.0
                 assert "weak_jwt_security" in drift_detail["cascade_risk"]
                 
-                logger.info("✅ Short JWT secret detection test passed")
+                logger.info(" PASS:  Short JWT secret detection test passed")
     
     @pytest.mark.asyncio
     async def test_jwt_functionality_failure(self, jwt_validator):
@@ -250,7 +250,7 @@ class TestJWTSecretAlignmentValidator:
                 assert critical_drift["business_impact_mrr"] == 120000.0
                 assert "jwt_validation_failure" in critical_drift["cascade_risk"]
                 
-                logger.info("✅ JWT functionality failure detection test passed")
+                logger.info(" PASS:  JWT functionality failure detection test passed")
 
 
 class TestWebSocketConfigurationValidator:
@@ -289,7 +289,7 @@ class TestWebSocketConfigurationValidator:
                 assert url_drift["business_impact_mrr"] == 120000.0
                 assert "no_websocket_connection" in url_drift["cascade_risk"]
                 
-                logger.info("✅ Missing WebSocket URL detection test passed")
+                logger.info(" PASS:  Missing WebSocket URL detection test passed")
     
     @pytest.mark.asyncio
     async def test_websocket_auth_integration_failure(self, websocket_validator):
@@ -322,7 +322,7 @@ class TestWebSocketConfigurationValidator:
                 assert auth_drift["business_impact_mrr"] == 80000.0
                 assert "websocket_auth_failure" in auth_drift["cascade_risk"]
                 
-                logger.info("✅ WebSocket auth integration failure detection test passed")
+                logger.info(" PASS:  WebSocket auth integration failure detection test passed")
 
 
 class TestConfigurationDriftMonitor:
@@ -416,7 +416,7 @@ class TestConfigurationDriftMonitor:
                     assert business_impact["total_mrr_at_risk"] == 290000.0
                     assert "complete_service_disruption" in business_impact["impact_categories"]
                     
-                    logger.info("✅ Comprehensive drift detection test passed")
+                    logger.info(" PASS:  Comprehensive drift detection test passed")
     
     @pytest.mark.asyncio
     async def test_no_drift_detection(self, drift_monitor):
@@ -445,7 +445,7 @@ class TestConfigurationDriftMonitor:
                     assert alert_status["level"] == "none"
                     assert alert_status["should_alert"] is False
                     
-                    logger.info("✅ No drift detection test passed")
+                    logger.info(" PASS:  No drift detection test passed")
 
 
 class TestConfigurationDriftAlerting:
@@ -504,7 +504,7 @@ class TestConfigurationDriftAlerting:
         # Verify executive escalation was triggered for high impact
         mock_executive.assert_called_once()
         
-        logger.info("✅ Critical drift alerting test passed")
+        logger.info(" PASS:  Critical drift alerting test passed")
     
     @pytest.mark.asyncio
     async def test_alert_throttling(self, drift_alerting):
@@ -539,7 +539,7 @@ class TestConfigurationDriftAlerting:
             mock_slack.assert_not_called()
             assert result["alerts_triggered"] == 0
             
-            logger.info("✅ Alert throttling test passed")
+            logger.info(" PASS:  Alert throttling test passed")
 
 
 class TestUnifiedConfigurationMonitoring:
@@ -583,7 +583,7 @@ class TestUnifiedConfigurationMonitoring:
             assert unified_monitoring.is_monitoring is False
             assert "final_statistics" in stop_result
             
-            logger.info("✅ Monitoring startup and shutdown test passed")
+            logger.info(" PASS:  Monitoring startup and shutdown test passed")
     
     @pytest.mark.asyncio
     async def test_immediate_drift_check(self, unified_monitoring):
@@ -611,7 +611,7 @@ class TestUnifiedConfigurationMonitoring:
             assert result["status"] == "completed"
             assert result["execution_time_seconds"] == 2
             
-            logger.info("✅ Immediate drift check test passed")
+            logger.info(" PASS:  Immediate drift check test passed")
     
     @pytest.mark.asyncio
     async def test_drift_history_retrieval(self, unified_monitoring):
@@ -642,7 +642,7 @@ class TestUnifiedConfigurationMonitoring:
         assert history["total_alerts_triggered"] == 5
         assert len(history["incidents"]) == 5
         
-        logger.info("✅ Drift history retrieval test passed")
+        logger.info(" PASS:  Drift history retrieval test passed")
 
 
 class TestIntegrationScenarios:
@@ -698,7 +698,7 @@ class TestIntegrationScenarios:
                 # Multiple alerts should be triggered
                 assert result["alerts_triggered"] > 0
                 
-                logger.info(f"✅ WebSocket authentication failure scenario test passed - ${result['business_impact_mrr']:,.0f} MRR impact detected")
+                logger.info(f" PASS:  WebSocket authentication failure scenario test passed - ${result['business_impact_mrr']:,.0f} MRR impact detected")
     
     @pytest.mark.asyncio
     async def test_configuration_drift_prevention_success(self):
@@ -770,7 +770,7 @@ class TestIntegrationScenarios:
                 # Business impact should be reduced or eliminated
                 assert final_impact <= initial_impact
                 
-                logger.info(f"✅ Configuration drift prevention test passed - Impact reduced from ${initial_impact:,.0f} to ${final_impact:,.0f} MRR")
+                logger.info(f" PASS:  Configuration drift prevention test passed - Impact reduced from ${initial_impact:,.0f} to ${final_impact:,.0f} MRR")
 
 
 @pytest.mark.asyncio
@@ -784,7 +784,7 @@ async def test_configuration_monitoring_system_integration():
     3. Business impact calculation accuracy
     4. System resilience and error handling
     """
-    logger.info("🚀 Starting comprehensive configuration monitoring system integration test")
+    logger.info("[U+1F680] Starting comprehensive configuration monitoring system integration test")
     
     # Get the unified monitoring instance
     monitoring_system = get_unified_configuration_monitoring()
@@ -809,7 +809,7 @@ async def test_configuration_monitoring_system_integration():
     assert "total_cycles" in history
     assert "incidents" in history
     
-    logger.info("✅ Comprehensive configuration monitoring system integration test passed")
+    logger.info(" PASS:  Comprehensive configuration monitoring system integration test passed")
 
 
 if __name__ == "__main__":
@@ -829,9 +829,9 @@ if __name__ == "__main__":
             await oauth_tests.test_short_e2e_oauth_key_detection(oauth_validator)
             await oauth_tests.test_valid_e2e_oauth_key(oauth_validator)
             await oauth_tests.test_e2e_oauth_functionality_failure(oauth_validator)
-            test_results.append("✅ E2E OAuth Validation Tests: PASSED")
+            test_results.append(" PASS:  E2E OAuth Validation Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ E2E OAuth Validation Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  E2E OAuth Validation Tests: FAILED - {e}")
         
         # Test JWT Secret Validation
         jwt_tests = TestJWTSecretAlignmentValidator()
@@ -841,9 +841,9 @@ if __name__ == "__main__":
             await jwt_tests.test_missing_jwt_secret_detection(jwt_validator)
             await jwt_tests.test_short_jwt_secret_detection(jwt_validator)
             await jwt_tests.test_jwt_functionality_failure(jwt_validator)
-            test_results.append("✅ JWT Secret Validation Tests: PASSED")
+            test_results.append(" PASS:  JWT Secret Validation Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ JWT Secret Validation Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  JWT Secret Validation Tests: FAILED - {e}")
         
         # Test WebSocket Configuration Validation
         ws_tests = TestWebSocketConfigurationValidator()
@@ -852,9 +852,9 @@ if __name__ == "__main__":
         try:
             await ws_tests.test_missing_websocket_url_detection(ws_validator)
             await ws_tests.test_websocket_auth_integration_failure(ws_validator)
-            test_results.append("✅ WebSocket Configuration Validation Tests: PASSED")
+            test_results.append(" PASS:  WebSocket Configuration Validation Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ WebSocket Configuration Validation Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  WebSocket Configuration Validation Tests: FAILED - {e}")
         
         # Test Configuration Drift Monitor
         monitor_tests = TestConfigurationDriftMonitor()
@@ -863,9 +863,9 @@ if __name__ == "__main__":
         try:
             await monitor_tests.test_comprehensive_drift_detection(drift_monitor)
             await monitor_tests.test_no_drift_detection(drift_monitor)
-            test_results.append("✅ Configuration Drift Monitor Tests: PASSED")
+            test_results.append(" PASS:  Configuration Drift Monitor Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ Configuration Drift Monitor Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  Configuration Drift Monitor Tests: FAILED - {e}")
         
         # Test Configuration Drift Alerting
         alert_tests = TestConfigurationDriftAlerting()
@@ -874,9 +874,9 @@ if __name__ == "__main__":
         try:
             await alert_tests.test_critical_drift_alerting(drift_alerting)
             await alert_tests.test_alert_throttling(drift_alerting)
-            test_results.append("✅ Configuration Drift Alerting Tests: PASSED")
+            test_results.append(" PASS:  Configuration Drift Alerting Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ Configuration Drift Alerting Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  Configuration Drift Alerting Tests: FAILED - {e}")
         
         # Test Unified Configuration Monitoring
         unified_tests = TestUnifiedConfigurationMonitoring()
@@ -886,9 +886,9 @@ if __name__ == "__main__":
             await unified_tests.test_monitoring_startup_and_shutdown(unified_monitoring)
             await unified_tests.test_immediate_drift_check(unified_monitoring)
             await unified_tests.test_drift_history_retrieval(unified_monitoring)
-            test_results.append("✅ Unified Configuration Monitoring Tests: PASSED")
+            test_results.append(" PASS:  Unified Configuration Monitoring Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ Unified Configuration Monitoring Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  Unified Configuration Monitoring Tests: FAILED - {e}")
         
         # Test Integration Scenarios
         integration_tests = TestIntegrationScenarios()
@@ -896,23 +896,23 @@ if __name__ == "__main__":
         try:
             await integration_tests.test_websocket_authentication_failure_scenario()
             await integration_tests.test_configuration_drift_prevention_success()
-            test_results.append("✅ Integration Scenario Tests: PASSED")
+            test_results.append(" PASS:  Integration Scenario Tests: PASSED")
         except Exception as e:
-            test_results.append(f"❌ Integration Scenario Tests: FAILED - {e}")
+            test_results.append(f" FAIL:  Integration Scenario Tests: FAILED - {e}")
         
         # Test System Integration
         try:
             await test_configuration_monitoring_system_integration()
-            test_results.append("✅ System Integration Test: PASSED")
+            test_results.append(" PASS:  System Integration Test: PASSED")
         except Exception as e:
-            test_results.append(f"❌ System Integration Test: FAILED - {e}")
+            test_results.append(f" FAIL:  System Integration Test: FAILED - {e}")
         
         # Print results
         print("\n" + "="*80)
         print("CONFIGURATION DRIFT MONITORING COMPREHENSIVE TEST RESULTS")
         print("="*80)
         
-        passed_count = len([r for r in test_results if "✅" in r])
+        passed_count = len([r for r in test_results if " PASS: " in r])
         total_count = len(test_results)
         
         for result in test_results:
@@ -922,10 +922,10 @@ if __name__ == "__main__":
         print(f"SUMMARY: {passed_count}/{total_count} test suites passed")
         
         if passed_count == total_count:
-            print("🎉 ALL TESTS PASSED - Configuration drift monitoring system is ready for deployment!")
+            print(" CELEBRATION:  ALL TESTS PASSED - Configuration drift monitoring system is ready for deployment!")
             return True
         else:
-            print("❌ SOME TESTS FAILED - Review and fix issues before deployment")
+            print(" FAIL:  SOME TESTS FAILED - Review and fix issues before deployment")
             return False
     
     # Run the test suite

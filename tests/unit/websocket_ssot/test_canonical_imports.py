@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. Dynamic/lazy imports create runtime instability
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import sys
 import importlib
 import inspect
@@ -31,7 +32,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerCanonicalImports(unittest.TestCase):
+class TestWebSocketManagerCanonicalImports(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager canonical import violations exist.
     

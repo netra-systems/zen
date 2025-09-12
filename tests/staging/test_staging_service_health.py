@@ -314,12 +314,12 @@ class StagingServiceHealthTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all service health tests."""
-        print(f"🏥 Running Service Health Tests")
+        print(f"[U+1F3E5] Running Service Health Tests")
         print(f"Environment: {self.environment}")
         print()
         
         for service_key, config in CRITICAL_SERVICES.items():
-            print(f"🔗 {config['name']}: {self.urls[service_key]}")
+            print(f"[U+1F517] {config['name']}: {self.urls[service_key]}")
         print()
         
         results = {}
@@ -332,15 +332,15 @@ class StagingServiceHealthTestRunner:
             print(f"     Testing {CRITICAL_SERVICES[service_key]['name']}...")
             health_result = await self.test_service_health(service_key)
             service_health_results[service_key] = health_result
-            print(f"     ✅ {CRITICAL_SERVICES[service_key]['name']}: {health_result['success']} ({health_result.get('response_time', 0):.2f}s)")
+            print(f"      PASS:  {CRITICAL_SERVICES[service_key]['name']}: {health_result['success']} ({health_result.get('response_time', 0):.2f}s)")
             
         results.update(service_health_results)
         
         # Dependency tests
         dependency_results = await self.test_service_dependencies()
         results.update(dependency_results)
-        print(f"     ✅ External connectivity: {dependency_results.get('external_connectivity', {}).get('success', False)}")
-        print(f"     ✅ DNS resolution: {dependency_results.get('dns_resolution', {}).get('success', False)}")
+        print(f"      PASS:  External connectivity: {dependency_results.get('external_connectivity', {}).get('success', False)}")
+        print(f"      PASS:  DNS resolution: {dependency_results.get('dns_resolution', {}).get('success', False)}")
         
         # Performance tests
         performance_results = await self.test_service_performance()
@@ -372,11 +372,11 @@ class StagingServiceHealthTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
-        print(f"🏥 System status: {'✅ Operational' if results['summary']['system_operational'] else '❌ Critical services down'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
+        print(f"[U+1F3E5] System status: {' PASS:  Operational' if results['summary']['system_operational'] else ' FAIL:  Critical services down'}")
         
         if critical_services_down:
-            print(f"🚨 CRITICAL: Services down: {', '.join(critical_services_down)}")
+            print(f" ALERT:  CRITICAL: Services down: {', '.join(critical_services_down)}")
             
         return results
 

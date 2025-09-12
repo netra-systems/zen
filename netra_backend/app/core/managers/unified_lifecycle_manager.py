@@ -1270,7 +1270,7 @@ def _emit_deprecation_warning(old_name: str, new_name: str) -> None:
     )
 
 class _DeprecatedUnifiedLifecycleManager:
-    """Deprecated wrapper for UnifiedLifecycleManager → SystemLifecycle migration."""
+    """Deprecated wrapper for UnifiedLifecycleManager  ->  SystemLifecycle migration."""
     def __new__(cls, *args, **kwargs):
         _emit_deprecation_warning("UnifiedLifecycleManager", "SystemLifecycle")
         return SystemLifecycle(*args, **kwargs)

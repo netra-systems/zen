@@ -73,10 +73,10 @@ def main():
         print("")
         print("=" * 60)
         if return_code == 0:
-            print("🎉 SSOT COMPLIANCE: PASSED")
+            print(" CELEBRATION:  SSOT COMPLIANCE: PASSED")
             print("All ClickHouse SSOT requirements are met!")
         else:
-            print("❌ SSOT COMPLIANCE: FAILED")
+            print(" FAIL:  SSOT COMPLIANCE: FAILED")
             print("ClickHouse SSOT violations detected.")
             print("")
             print("NEXT STEPS:")

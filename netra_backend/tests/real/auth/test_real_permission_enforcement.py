@@ -84,7 +84,7 @@ class TestRealPermissionEnforcement:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for permission enforcement testing."""
-        print("🐳 Starting Docker services for permission enforcement tests...")
+        print("[U+1F433] Starting Docker services for permission enforcement tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -96,13 +96,13 @@ class TestRealPermissionEnforcement:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for permission enforcement tests")
+            print(" PASS:  Docker services ready for permission enforcement tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for permission tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for permission tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after permission enforcement tests...")
+            print("[U+1F9F9] Cleaning up Docker services after permission enforcement tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -232,7 +232,7 @@ class TestRealPermissionEnforcement:
             assert current_permissions.issubset(next_permissions) or len(current_permissions) == 0, \
                 f"Role hierarchy violation: {next_role.value} should have at least {current_role.value} permissions"
         
-        print(f"✅ Role-based permission assignment validated for {len(test_users)} roles")
+        print(f" PASS:  Role-based permission assignment validated for {len(test_users)} roles")
 
     @pytest.mark.asyncio
     async def test_permission_enforcement_on_resource_access(
@@ -277,20 +277,20 @@ class TestRealPermissionEnforcement:
                 has_access = required_permissions.issubset(user_permission_values)
                 
                 if has_access:
-                    print(f"✅ {role.value} can access {resource_data['description']}")
+                    print(f" PASS:  {role.value} can access {resource_data['description']}")
                     
                     # Verify user can access the resource
                     assert user_permission_values.intersection(required_permissions), \
                         f"{role.value} should have access to {resource_data['description']}"
                         
                 else:
-                    print(f"❌ {role.value} cannot access {resource_data['description']}")
+                    print(f" FAIL:  {role.value} cannot access {resource_data['description']}")
                     
                     # Verify user cannot access the resource
                     assert not required_permissions.issubset(user_permission_values), \
                         f"{role.value} should NOT have access to {resource_data['description']}"
         
-        print("✅ Permission enforcement on resource access validated")
+        print(" PASS:  Permission enforcement on resource access validated")
 
     @pytest.mark.asyncio
     async def test_unauthorized_access_prevention(
@@ -332,10 +332,10 @@ class TestRealPermissionEnforcement:
                 assert limited_response.status_code in [401, 403, 404], \
                     f"Limited user should be denied access to {endpoint}"
                 
-                print(f"✅ Limited user correctly denied access to {endpoint}")
+                print(f" PASS:  Limited user correctly denied access to {endpoint}")
                 
             except Exception as e:
-                print(f"⚠️ Testing limited user access to {endpoint}: {e}")
+                print(f" WARNING: [U+FE0F] Testing limited user access to {endpoint}: {e}")
             
             # Test with admin user (may succeed depending on endpoint implementation)
             admin_headers = {
@@ -346,10 +346,10 @@ class TestRealPermissionEnforcement:
             try:
                 admin_response = await async_client.get(endpoint, headers=admin_headers)
                 
-                print(f"✅ Admin user access to {endpoint} - Status: {admin_response.status_code}")
+                print(f" PASS:  Admin user access to {endpoint} - Status: {admin_response.status_code}")
                 
             except Exception as e:
-                print(f"⚠️ Testing admin user access to {endpoint}: {e}")
+                print(f" WARNING: [U+FE0F] Testing admin user access to {endpoint}: {e}")
 
     @pytest.mark.asyncio
     async def test_permission_inheritance_and_delegation(self, jwt_secret_key: str):
@@ -411,9 +411,9 @@ class TestRealPermissionEnforcement:
                 assert user_permissions.issubset(parent_permissions), \
                     f"User {user_id} permissions should inherit from parent {parent_id}"
                 
-                print(f"✅ Permission inheritance validated: {user['level']} -> parent level")
+                print(f" PASS:  Permission inheritance validated: {user['level']} -> parent level")
         
-        print("✅ Permission inheritance and delegation validated")
+        print(" PASS:  Permission inheritance and delegation validated")
 
     @pytest.mark.asyncio
     async def test_resource_level_permission_granularity(self, jwt_secret_key: str):
@@ -468,25 +468,25 @@ class TestRealPermissionEnforcement:
                 
                 # Verify permission logic
                 if can_read:
-                    print(f"✅ User {user_id} can READ resource {resource_id}")
+                    print(f" PASS:  User {user_id} can READ resource {resource_id}")
                 else:
-                    print(f"❌ User {user_id} cannot READ resource {resource_id}")
+                    print(f" FAIL:  User {user_id} cannot READ resource {resource_id}")
                 
                 if can_write:
-                    print(f"✅ User {user_id} can WRITE resource {resource_id}")
+                    print(f" PASS:  User {user_id} can WRITE resource {resource_id}")
                     # Write permission should imply read permission
                     assert can_read, f"User {user_id} has write but not read permission on {resource_id}"
                 else:
-                    print(f"❌ User {user_id} cannot write resource {resource_id}")
+                    print(f" FAIL:  User {user_id} cannot write resource {resource_id}")
                 
                 if can_delete:
-                    print(f"✅ User {user_id} can DELETE resource {resource_id}")
+                    print(f" PASS:  User {user_id} can DELETE resource {resource_id}")
                     # Delete permission should imply read and write permissions
                     assert can_read and can_write, f"User {user_id} has delete but not read/write permission on {resource_id}"
                 else:
-                    print(f"❌ User {user_id} cannot delete resource {resource_id}")
+                    print(f" FAIL:  User {user_id} cannot delete resource {resource_id}")
         
-        print("✅ Resource-level permission granularity validated")
+        print(" PASS:  Resource-level permission granularity validated")
 
     @pytest.mark.asyncio
     async def test_permission_caching_and_invalidation(self, jwt_secret_key: str):
@@ -512,7 +512,7 @@ class TestRealPermissionEnforcement:
         expected_initial = set(p.value for p in initial_permissions)
         assert cached_permissions == expected_initial
         
-        print(f"✅ Initial permissions cached: {cached_permissions}")
+        print(f" PASS:  Initial permissions cached: {cached_permissions}")
         
         # Simulate permission upgrade
         upgraded_permissions = [Permission.READ, Permission.WRITE, Permission.VIEW_ANALYTICS]
@@ -532,7 +532,7 @@ class TestRealPermissionEnforcement:
         assert updated_cached == expected_updated
         assert expected_initial.issubset(expected_updated)  # Should be superset
         
-        print(f"✅ Permissions upgraded and cache invalidated: {updated_cached}")
+        print(f" PASS:  Permissions upgraded and cache invalidated: {updated_cached}")
         
         # Simulate permission revocation
         revoked_permissions = [Permission.READ]  # Back to basic permissions
@@ -552,7 +552,7 @@ class TestRealPermissionEnforcement:
         assert revoked_cached == expected_revoked
         assert not (expected_updated - expected_revoked).issubset(revoked_cached)  # Should lose permissions
         
-        print(f"✅ Permissions revoked and cache updated: {revoked_cached}")
+        print(f" PASS:  Permissions revoked and cache updated: {revoked_cached}")
 
     @pytest.mark.asyncio
     async def test_cross_tenant_permission_isolation(self, jwt_secret_key: str):
@@ -601,7 +601,7 @@ class TestRealPermissionEnforcement:
                     decoded = jwt.decode(user_a["token"], jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
                     assert decoded["tenant_id"] == resource_b["tenant_id"]
                     
-                    print(f"✅ User in {tenant_a} can access resource in {tenant_b} (same tenant)")
+                    print(f" PASS:  User in {tenant_a} can access resource in {tenant_b} (same tenant)")
                     
                 else:
                     # Different tenant - should NOT have access
@@ -611,9 +611,9 @@ class TestRealPermissionEnforcement:
                     # Verify isolation - user A cannot access tenant B's resources
                     assert user_a["tenant_id"] != resource_b["tenant_id"]
                     
-                    print(f"❌ User in {tenant_a} cannot access resource in {tenant_b} (different tenant)")
+                    print(f" FAIL:  User in {tenant_a} cannot access resource in {tenant_b} (different tenant)")
         
-        print("✅ Cross-tenant permission isolation validated")
+        print(" PASS:  Cross-tenant permission isolation validated")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

@@ -153,25 +153,25 @@ class WebSocketDeploymentValidator:
                     response_data = json.loads(response)
                     
                     if "error" in response_data and "auth" in response_data.get("error", "").lower():
-                        self.logger.info(f"✅ Authentication properly required")
+                        self.logger.info(f" PASS:  Authentication properly required")
                         return True, "Authentication properly enforced"
                     else:
-                        self.logger.info(f"⚠️ Expected auth error but got: {response_data}")
+                        self.logger.info(f" WARNING: [U+FE0F] Expected auth error but got: {response_data}")
                         return False, f"Authentication not enforced: {response_data}"
                         
                 except websockets.exceptions.ConnectionClosedError as e:
                     if e.code == 1008:  # Authentication required
-                        self.logger.info(f"✅ Authentication properly required (code 1008)")
+                        self.logger.info(f" PASS:  Authentication properly required (code 1008)")
                         return True, "Authentication enforced with proper close code"
                     else:
-                        self.logger.info(f"⚠️ Unexpected close code: {e.code}")
+                        self.logger.info(f" WARNING: [U+FE0F] Unexpected close code: {e.code}")
                         return False, f"Unexpected close code: {e.code}"
                 except asyncio.TimeoutError:
-                    self.logger.info(f"⚠️ No auth response - connection might be working but no auth enforcement")
+                    self.logger.info(f" WARNING: [U+FE0F] No auth response - connection might be working but no auth enforcement")
                     return False, "No authentication enforcement detected"
                         
         except Exception as e:
-            self.logger.info(f"❌ Auth WebSocket test error: {e}")
+            self.logger.info(f" FAIL:  Auth WebSocket test error: {e}")
             return False, f"Auth test error: {e}"
     
     async def validate_websocket_headers(self) -> Tuple[bool, str]:
@@ -198,14 +198,14 @@ class WebSocketDeploymentValidator:
                 timeout=10,
                 extra_headers=headers
             ) as websocket:
-                self.logger.info(f"✅ WebSocket headers properly handled")
+                self.logger.info(f" PASS:  WebSocket headers properly handled")
                 return True, "WebSocket headers properly handled"
                 
         except websockets.exceptions.InvalidHandshake as e:
-            self.logger.info(f"❌ WebSocket handshake failed: {e}")
+            self.logger.info(f" FAIL:  WebSocket handshake failed: {e}")
             return False, f"Invalid handshake: {e}"
         except Exception as e:
-            self.logger.info(f"❌ Header test error: {e}")
+            self.logger.info(f" FAIL:  Header test error: {e}")
             return False, f"Header test error: {e}"
     
     async def validate_load_balancer_timeout(self) -> Tuple[bool, str]:
@@ -242,21 +242,21 @@ class WebSocketDeploymentValidator:
                     except Exception as e:
                         elapsed = time.time() - start_time
                         if elapsed < 35:  # Failed before expected timeout
-                            self.logger.info(f"❌ Connection failed after {elapsed:.1f}s: {e}")
+                            self.logger.info(f" FAIL:  Connection failed after {elapsed:.1f}s: {e}")
                             return False, f"Connection failed after {elapsed:.1f}s"
                         else:
-                            self.logger.info(f"⚠️ Connection closed after {elapsed:.1f}s (expected)")
+                            self.logger.info(f" WARNING: [U+FE0F] Connection closed after {elapsed:.1f}s (expected)")
                             break
                 
                 elapsed = time.time() - start_time
                 if elapsed >= 40:  # Successfully lasted longer than old timeout
-                    self.logger.info(f"✅ Connection lasted {elapsed:.1f}s (load balancer timeout fixed)")
+                    self.logger.info(f" PASS:  Connection lasted {elapsed:.1f}s (load balancer timeout fixed)")
                     return True, f"Load balancer timeout fixed - connection lasted {elapsed:.1f}s"
                 else:
                     return False, f"Connection only lasted {elapsed:.1f}s"
                     
         except Exception as e:
-            self.logger.info(f"❌ Timeout test error: {e}")
+            self.logger.info(f" FAIL:  Timeout test error: {e}")
             return False, f"Timeout test error: {e}"
     
     async def run_validation(self) -> bool:
@@ -265,7 +265,7 @@ class WebSocketDeploymentValidator:
         print("=" * 80)
         
         if not WEBSOCKETS_AVAILABLE:
-            print("❌ CRITICAL: websockets library not available")
+            print(" FAIL:  CRITICAL: websockets library not available")
             print("Install with: pip install websockets")
             return False
         
@@ -286,15 +286,15 @@ class WebSocketDeploymentValidator:
         self.results.append(("Load Balancer Timeout", success, message))
         
         # Print results
-        print("\n📊 Validation Results:")
+        print("\n CHART:  Validation Results:")
         print("-" * 80)
         all_passed = True
         critical_failed = False
         
         for test_name, passed, message in self.results:
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             print(f"  {test_name:.<30} {status}")
-            print(f"    └─ {message}")
+            print(f"    [U+2514][U+2500] {message}")
             
             if not passed:
                 all_passed = False
@@ -304,17 +304,17 @@ class WebSocketDeploymentValidator:
         # Overall assessment
         print("\n" + "=" * 80)
         if all_passed:
-            print("🎉 ALL WebSocket validation tests PASSED")
-            print("✅ WebSocket deployment is ready for production traffic")
-            print("✅ $180K+ MRR chat functionality infrastructure verified")
+            print(" CELEBRATION:  ALL WebSocket validation tests PASSED")
+            print(" PASS:  WebSocket deployment is ready for production traffic")
+            print(" PASS:  $180K+ MRR chat functionality infrastructure verified")
         elif critical_failed:
-            print("🚨 CRITICAL WebSocket validation FAILED")
-            print("❌ DO NOT proceed with production deployment")
-            print("❌ Chat functionality at risk - $180K+ MRR impact")
+            print(" ALERT:  CRITICAL WebSocket validation FAILED")
+            print(" FAIL:  DO NOT proceed with production deployment")
+            print(" FAIL:  Chat functionality at risk - $180K+ MRR impact")
         else:
-            print("⚠️  WebSocket validation PARTIALLY PASSED")
-            print("⚠️  Minor issues detected - review before production")
-            print("✅ Basic functionality should work")
+            print(" WARNING: [U+FE0F]  WebSocket validation PARTIALLY PASSED")
+            print(" WARNING: [U+FE0F]  Minor issues detected - review before production")
+            print(" PASS:  Basic functionality should work")
         
         print(f"\nValidation completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         return all_passed
@@ -344,10 +344,10 @@ def main():
         success = asyncio.run(validator.run_validation())
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        print("\n⚠️  Validation interrupted by user")
+        print("\n WARNING: [U+FE0F]  Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Validation error: {e}")
+        print(f" FAIL:  Validation error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """
 Helper functions for supervisor agent tests.
-Extracts common setup, mock creation, and assertion logic to keep test functions ≤8 lines.
+Extracts common setup, mock creation, and assertion logic to keep test functions  <= 8 lines.
 """
 
 import asyncio

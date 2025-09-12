@@ -94,7 +94,7 @@ class TestNetworkCallVerification:
         assert not ip_address.startswith('127.'), f"DNS resolved to localhost {ip_address} - fake test"
         assert not ip_address.startswith('0.'), f"DNS resolved to invalid IP {ip_address} - fake test"
         
-        print(f"✓ REAL DNS: {domain} -> {ip_address} (took {dns_time:.3f}s)")
+        print(f"[U+2713] REAL DNS: {domain} -> {ip_address} (took {dns_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_002_tcp_socket_connection_to_staging(self):
@@ -121,7 +121,7 @@ class TestNetworkCallVerification:
         assert result == 0, f"TCP connection failed to {domain}:{port} - error code {result}"
         
         sock.close()
-        print(f"✓ REAL TCP: Connected to {domain}:{port} (took {connect_time:.3f}s)")
+        print(f"[U+2713] REAL TCP: Connected to {domain}:{port} (took {connect_time:.3f}s)")
     
     @pytest.mark.asyncio 
     async def test_003_ssl_certificate_validation(self):
@@ -166,7 +166,7 @@ class TestNetworkCallVerification:
                     gcp_matched = any('run.app' in san or 'googleapis.com' in san for san in subject_alt_names)
                     assert gcp_matched, f"Certificate not valid for {domain}. SANs: {subject_alt_names}"
                 
-                print(f"✓ REAL SSL: Valid certificate for {domain} (took {handshake_time:.3f}s)")
+                print(f"[U+2713] REAL SSL: Valid certificate for {domain} (took {handshake_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_004_http_response_timing_validation(self):
@@ -202,7 +202,7 @@ class TestNetworkCallVerification:
         avg_time = sum(timings) / len(timings)
         assert avg_time > 0.02, f"Average request time too fast ({avg_time}s) - likely all mocked"
         
-        print(f"✓ REAL HTTP: Average request time {avg_time:.3f}s (timings: {timings})")
+        print(f"[U+2713] REAL HTTP: Average request time {avg_time:.3f}s (timings: {timings})")
 
 
 class TestWebSocketConnectionAuthenticity:
@@ -240,7 +240,7 @@ class TestWebSocketConnectionAuthenticity:
             # Wait for response or connection close (both indicate real connection)
             # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
             response = await asyncio.wait_for(websocket.recv(), timeout=5)
-            print(f"✓ REAL WebSocket: Handshake took {handshake_time:.3f}s, got response: {response[:100]}")
+            print(f"[U+2713] REAL WebSocket: Handshake took {handshake_time:.3f}s, got response: {response[:100]}")
     
     @pytest.mark.asyncio
     async def test_006_websocket_protocol_upgrade(self):
@@ -298,9 +298,9 @@ class TestWebSocketConnectionAuthenticity:
             if "101 Switching Protocols" in response:
                 assert "upgrade: websocket" in response.lower(), "Missing Upgrade header"
                 assert "connection: upgrade" in response.lower(), "Missing Connection header"
-                print("✓ REAL WebSocket: Protocol upgrade successful")
+                print("[U+2713] REAL WebSocket: Protocol upgrade successful")
             else:
-                print(f"✓ REAL WebSocket: Server rejected connection (auth required): {response.split()[1]}")
+                print(f"[U+2713] REAL WebSocket: Server rejected connection (auth required): {response.split()[1]}")
 
 
 class TestAPIResponseAuthenticity:
@@ -341,7 +341,7 @@ class TestAPIResponseAuthenticity:
                 actual_length = int(headers['content-length'])
                 assert actual_length == expected_length, f"Content-Length mismatch: {actual_length} != {expected_length}"
             
-            print(f"✓ REAL API: Found {found_indicators} server headers")
+            print(f"[U+2713] REAL API: Found {found_indicators} server headers")
     
     @pytest.mark.asyncio
     async def test_008_api_response_content_variation(self):
@@ -387,11 +387,11 @@ class TestAPIResponseAuthenticity:
                         break
             
             if dynamic_found:
-                print("✓ REAL API: Dynamic content detected")
+                print("[U+2713] REAL API: Dynamic content detected")
             else:
-                print("⚠ API responses appear static (might be cached)")
+                print(" WARNING:  API responses appear static (might be cached)")
         else:
-            print(f"✓ REAL API: Got {len(responses)} responses")
+            print(f"[U+2713] REAL API: Got {len(responses)} responses")
     
     @pytest.mark.asyncio
     async def test_009_api_error_handling_authenticity(self):
@@ -425,7 +425,7 @@ class TestAPIResponseAuthenticity:
                     error_data = response.json()
                     assert isinstance(error_data, dict), "Error response not JSON object"
                 
-                print(f"✓ REAL API: {endpoint} -> {response.status_code}")
+                print(f"[U+2713] REAL API: {endpoint} -> {response.status_code}")
 
 
 class TestTimingBasedAuthenticity:
@@ -460,7 +460,7 @@ class TestTimingBasedAuthenticity:
         assert total_time > max(timings) * 2, f"Total time ({total_time}s) too low for sequential requests"
         assert avg_time > 0.02, f"Average request time ({avg_time}s) too fast - likely mocked"
         
-        print(f"✓ REAL TIMING: 5 requests took {total_time:.3f}s (avg: {avg_time:.3f}s)")
+        print(f"[U+2713] REAL TIMING: 5 requests took {total_time:.3f}s (avg: {avg_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_011_concurrent_request_timing(self):
@@ -504,7 +504,7 @@ class TestTimingBasedAuthenticity:
         timing_range = max_time - min_time
         assert timing_range > 0.005, f"Timing variance too low ({timing_range}s) - likely mocked"
         
-        print(f"✓ REAL CONCURRENCY: 5 requests in {total_time:.3f}s (range: {min_time:.3f}-{max_time:.3f}s)")
+        print(f"[U+2713] REAL CONCURRENCY: 5 requests in {total_time:.3f}s (range: {min_time:.3f}-{max_time:.3f}s)")
     
     @pytest.mark.asyncio
     async def test_012_timeout_behavior_validation(self):
@@ -552,7 +552,7 @@ class TestDataIntegrityAndPersistence:
             
             # Check if server set any cookies or headers
             if response1.cookies:
-                print(f"✓ REAL SESSION: Server set cookies: {list(response1.cookies.keys())}")
+                print(f"[U+2713] REAL SESSION: Server set cookies: {list(response1.cookies.keys())}")
             
             # Second request should maintain session
             response2 = await client.get(
@@ -566,7 +566,7 @@ class TestDataIntegrityAndPersistence:
             common_headers = set(response1.headers.keys()) & set(response2.headers.keys())
             assert len(common_headers) > 3, "Too few common headers - likely not a real server"
             
-            print(f"✓ REAL SESSION: Consistent headers across requests: {len(common_headers)}")
+            print(f"[U+2713] REAL SESSION: Consistent headers across requests: {len(common_headers)}")
     
     @pytest.mark.asyncio
     async def test_014_server_state_consistency(self):
@@ -610,7 +610,7 @@ class TestDataIntegrityAndPersistence:
                 if first_sig.get('server') and sig.get('server'):
                     assert first_sig['server'] == sig['server'], "Inconsistent server headers"
         
-        print(f"✓ REAL SERVER: {len(working_endpoints)} consistent endpoints")
+        print(f"[U+2713] REAL SERVER: {len(working_endpoints)} consistent endpoints")
 
 
 class TestResourceUsageValidation:
@@ -644,7 +644,7 @@ class TestResourceUsageValidation:
         assert bytes_sent > 100, f"Too little data sent ({bytes_sent} bytes) - likely mocked"
         assert bytes_recv > 100, f"Too little data received ({bytes_recv} bytes) - likely mocked"
         
-        print(f"✓ REAL NETWORK I/O: Sent {bytes_sent} bytes, received {bytes_recv} bytes")
+        print(f"[U+2713] REAL NETWORK I/O: Sent {bytes_sent} bytes, received {bytes_recv} bytes")
     
     @pytest.mark.asyncio
     async def test_016_memory_usage_during_requests(self):
@@ -681,7 +681,7 @@ class TestResourceUsageValidation:
         final_memory = process.memory_info().rss
         total_increase = final_memory - initial_memory
         
-        print(f"✓ REAL MEMORY: Used {total_increase} additional bytes for HTTP operations")
+        print(f"[U+2713] REAL MEMORY: Used {total_increase} additional bytes for HTTP operations")
 
 
 class TestAsyncBehaviorValidation:
@@ -734,7 +734,7 @@ class TestAsyncBehaviorValidation:
         
         assert overlap, "No overlap detected - operations may be running synchronously"
         
-        print(f"✓ REAL ASYNC: Concurrent execution in {total_time:.3f}s (vs {expected_sequential:.3f}s sequential)")
+        print(f"[U+2713] REAL ASYNC: Concurrent execution in {total_time:.3f}s (vs {expected_sequential:.3f}s sequential)")
     
     @pytest.mark.asyncio
     async def test_018_event_loop_integration(self):
@@ -769,7 +769,7 @@ class TestAsyncBehaviorValidation:
         assert switches_during_request > 0, \
             "No task switches during async operation - likely synchronous/mocked"
         
-        print(f"✓ REAL ASYNC: {switches_during_request} task switches during HTTP request")
+        print(f"[U+2713] REAL ASYNC: {switches_during_request} task switches during HTTP request")
         
         # Restore original
         loop.call_soon = original_call_soon
@@ -807,7 +807,7 @@ class TestAuthenticationValidation:
                 if response.status_code in [401, 403]:
                     assert len(response.content) > 10, "Auth error response too minimal"
                 
-                print(f"✓ REAL AUTH: {endpoint} -> {response.status_code} (protected)")
+                print(f"[U+2713] REAL AUTH: {endpoint} -> {response.status_code} (protected)")
     
     @pytest.mark.asyncio
     async def test_020_websocket_auth_enforcement(self):
@@ -833,7 +833,7 @@ class TestAuthenticationValidation:
             
             # If we get a response, check if it indicates auth required
             if "auth" in response.lower() or "unauthorized" in response.lower():
-                print("✓ REAL WebSocket AUTH: Connection closed/rejected due to missing auth")
+                print("[U+2713] REAL WebSocket AUTH: Connection closed/rejected due to missing auth")
             else:
                 pytest.fail(f"WebSocket accepted unauthorized message: {response}")
 
@@ -907,10 +907,10 @@ class TestComprehensiveFakeDetection:
             f"This appears to be running against FAKE TESTS!"
         
         if real_evidence_count == total_checks:
-            print("✅ VERDICT: All evidence points to REAL staging environment")
+            print(" PASS:  VERDICT: All evidence points to REAL staging environment")
         elif real_evidence_count >= total_checks * 0.8:
-            print("✅ VERDICT: Strong evidence of REAL staging environment")
+            print(" PASS:  VERDICT: Strong evidence of REAL staging environment")
         else:
-            print("⚠️ VERDICT: Some evidence of real environment, but not conclusive")
+            print(" WARNING: [U+FE0F] VERDICT: Some evidence of real environment, but not conclusive")
         
         print(f"{'='*60}")

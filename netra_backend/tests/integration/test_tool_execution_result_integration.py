@@ -11,7 +11,7 @@ CRITICAL: Tests validate that tools executed by agents produce meaningful result
 properly captured, processed, and integrated into reports delivered to users. Tool execution
 failures or incomplete result integration directly impact the value users receive.
 
-Golden Path Focus: Tool execution → Result capture → Analysis integration → Report delivery → User value
+Golden Path Focus: Tool execution  ->  Result capture  ->  Analysis integration  ->  Report delivery  ->  User value
 NO MOCKS: Uses real services to test actual tool execution patterns and result processing
 """
 
@@ -1291,7 +1291,7 @@ class TestToolExecutionResultIntegration(BaseIntegrationTest):
         # Final compliance validation
         assert compliance_validation["audited_executions"] == compliance_validation["total_executions"]  # All executions audited
         assert compliance_validation["compliance_levels_covered"] == 3  # High, medium, low compliance covered
-        assert audit_validation["total_audit_events"] >= 12  # Comprehensive audit trail (4 events × 3 tools)
+        assert audit_validation["total_audit_events"] >= 12  # Comprehensive audit trail (4 events  x  3 tools)
         assert audit_validation["event_types_covered"] >= 4  # All essential event types covered
         assert len(compliance_summary["regulatory_frameworks_covered"]) >= 2  # Multiple regulatory frameworks
 

@@ -14,7 +14,7 @@ Expected Behavior:
 - FAIL: With current inconsistent SERVICE_ID values between services
 - PASS: After SSOT remediation ensures all services use same constant
 
-CRITICAL: This test protects the Golden Path: users login → get AI responses
+CRITICAL: This test protects the Golden Path: users login  ->  get AI responses
 """
 
 import asyncio

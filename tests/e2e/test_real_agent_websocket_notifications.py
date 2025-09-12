@@ -115,11 +115,11 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
             self._assert_performance_within_limits(execution_time)
             
             self.logger.info(
-                f"✅ MISSION CRITICAL TEST PASSED: All 5 WebSocket events delivered in {execution_time:.2f}s"
+                f" PASS:  MISSION CRITICAL TEST PASSED: All 5 WebSocket events delivered in {execution_time:.2f}s"
             )
             
         except Exception as e:
-            self.logger.error(f"❌ MISSION CRITICAL TEST FAILED: {e}")
+            self.logger.error(f" FAIL:  MISSION CRITICAL TEST FAILED: {e}")
             self.logger.error(f"Events received: {[e['type'] for e in self.received_events]}")
             raise AssertionError(f"MISSION CRITICAL FAILURE - WebSocket events not delivered: {e}")
 
@@ -165,7 +165,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         # Performance should be within acceptable limits even with real LLM
         self._assert_performance_within_limits(execution_time, max_time=30.0)
         
-        self.logger.info(f"✅ Real LLM WebSocket integration test passed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Real LLM WebSocket integration test passed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.mission_critical
@@ -218,7 +218,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         # Validate user isolation (no cross-user event leakage)
         self._assert_user_isolation_in_events(num_concurrent_users)
         
-        self.logger.info(f"✅ Concurrent load test passed with {num_concurrent_users} users in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Concurrent load test passed with {num_concurrent_users} users in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.mission_critical
@@ -259,7 +259,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         # Performance should still be reasonable despite issues
         self._assert_performance_within_limits(execution_time, max_time=15.0)
         
-        self.logger.info(f"✅ WebSocket resilience test passed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  WebSocket resilience test passed in {execution_time:.2f}s")
 
     # =============================================================================
     # HELPER METHODS
@@ -453,7 +453,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
                 f"Required event {event_type} not received. Event counts: {event_counts}"
             )
         
-        self.logger.info(f"✅ All 5 critical events received: {event_counts}")
+        self.logger.info(f" PASS:  All 5 critical events received: {event_counts}")
 
     def _assert_proper_event_sequencing(self):
         """Assert events are delivered in proper sequence."""
@@ -488,7 +488,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
             "Tool executing events without corresponding completed events"
         )
         
-        self.logger.info("✅ Event sequencing validated")
+        self.logger.info(" PASS:  Event sequencing validated")
 
     def _assert_event_content_quality(self):
         """Assert event content meets quality standards."""
@@ -515,7 +515,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
                 assert "final_response" in event, f"agent_completed event missing 'final_response': {event}"
                 assert len(event["final_response"]) > 0, f"agent_completed response is empty: {event}"
         
-        self.logger.info("✅ Event content quality validated")
+        self.logger.info(" PASS:  Event content quality validated")
 
     def _assert_performance_within_limits(self, execution_time: float, max_time: float = 10.0):
         """Assert performance is within acceptable limits."""
@@ -533,7 +533,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
                 f"Event delivery span {event_span:.2f}s too long. Events should be delivered promptly."
             )
         
-        self.logger.info(f"✅ Performance validated: {execution_time:.2f}s execution time")
+        self.logger.info(f" PASS:  Performance validated: {execution_time:.2f}s execution time")
 
     def _assert_real_llm_content_quality(self):
         """Assert content quality when using real LLM."""
@@ -547,7 +547,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
                 f"Expected more substantial content from real LLM."
             )
         
-        self.logger.info("✅ Real LLM content quality validated")
+        self.logger.info(" PASS:  Real LLM content quality validated")
 
     def _assert_user_isolation_in_events(self, expected_user_count: int):
         """Assert user isolation in concurrent events."""
@@ -572,7 +572,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
                     f"User events: {user_event_types}. User isolation may be compromised."
                 )
         
-        self.logger.info(f"✅ User isolation validated for {expected_user_count} users")
+        self.logger.info(f" PASS:  User isolation validated for {expected_user_count} users")
 
     def _assert_graceful_degradation_occurred(self):
         """Assert graceful degradation occurred during connection issues."""
@@ -586,7 +586,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
         # Should still have received critical events through some mechanism
         self._assert_all_critical_events_received()
         
-        self.logger.info(f"✅ Graceful degradation validated: {len(fallback_events)} fallback events")
+        self.logger.info(f" PASS:  Graceful degradation validated: {len(fallback_events)} fallback events")
 
     def _assert_core_functionality_preserved(self):
         """Assert core business functionality was preserved despite issues."""
@@ -600,7 +600,7 @@ class TestRealAgentWebSocketNotifications(BaseE2ETest):
             "Core functionality compromised: no agent_completed event"
         )
         
-        self.logger.info("✅ Core functionality preservation validated")
+        self.logger.info(" PASS:  Core functionality preservation validated")
 
     def _has_llm_credentials(self) -> bool:
         """Check if LLM credentials are available for real LLM testing."""

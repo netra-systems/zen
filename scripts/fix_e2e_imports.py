@@ -421,7 +421,7 @@ def main():
     logger.info(f"Fixes Applied: {results['fixes_applied']}")
     
     if results['files_fixed'] > 0:
-        logger.info("\n✓ E2E test imports have been fixed!")
+        logger.info("\n[U+2713] E2E test imports have been fixed!")
         logger.info("Run 'python scripts/check_e2e_imports.py' to verify")
     else:
         logger.info("\nNo fixes were needed")

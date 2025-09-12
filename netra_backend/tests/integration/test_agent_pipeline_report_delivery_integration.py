@@ -11,7 +11,7 @@ CRITICAL: Tests the complete agent execution pipeline that generates the reports
 This is the core business value delivery mechanism - agents must execute successfully and
 produce actionable reports that reach end users.
 
-Golden Path Focus: Agent execution pipeline → Report generation → User delivery
+Golden Path Focus: Agent execution pipeline  ->  Report generation  ->  User delivery
 NO MOCKS: Uses real services and actual agent execution patterns
 """
 
@@ -133,7 +133,7 @@ class TestAgentPipelineReportDeliveryIntegration(BaseIntegrationTest):
     async def test_basic_agent_pipeline_execution_with_report_generation(self, real_services_fixture):
         """
         BVJ: Validates basic agent pipeline generates reports users can access
-        Critical Path: Agent start → Tool execution → Result generation → User report
+        Critical Path: Agent start  ->  Tool execution  ->  Result generation  ->  User report
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for pipeline execution testing")

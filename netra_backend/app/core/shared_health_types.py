@@ -1,7 +1,7 @@
 """Shared health monitoring types - single source of truth.
 
 Consolidates all health-related types used across core modules to eliminate
-duplication and ensure consistency. All functions ≤8 lines.
+duplication and ensure consistency. All functions  <= 8 lines.
 """
 
 from abc import ABC, abstractmethod

@@ -46,7 +46,7 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
 
     def test_duplicate_registration_silent_return_bug(self):
         """
-        🚨 BUG REPRODUCTION: Duplicate registration silently returns existing machine
+         ALERT:  BUG REPRODUCTION: Duplicate registration silently returns existing machine
         
         Expected Behavior: Should detect duplicate as potential race condition
         Actual Behavior: Silently returns existing machine (the bug)
@@ -65,7 +65,7 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
         # CURRENT BUG: Both registrations succeed and return the same object
         assert first_machine is second_machine, "Bug behavior: both registrations return same object"
         
-        # 🚨 THIS IS WHERE THE BUG MANIFESTS:
+        #  ALERT:  THIS IS WHERE THE BUG MANIFESTS:
         # The registry should detect this as a potential race condition and either:
         # 1. Raise a DuplicateRegistrationError
         # 2. Log a WARNING about potential race condition
@@ -86,7 +86,7 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
 
     def test_concurrent_registration_race_condition_detection(self):
         """
-        🚨 RACE CONDITION REPRODUCTION: Multiple threads registering same connection
+         ALERT:  RACE CONDITION REPRODUCTION: Multiple threads registering same connection
         
         This test reproduces the race condition where multiple threads attempt to
         register the same connection simultaneously. This can lead to:
@@ -135,7 +135,7 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
         assert len(registration_errors) == 0, f"Unexpected errors: {registration_errors}"
         assert len(registration_results) == 5, f"Expected 5 results, got {len(registration_results)}"
         
-        # 🚨 BUG DETECTION: All threads should get the same machine object
+        #  ALERT:  BUG DETECTION: All threads should get the same machine object
         machine_objects = [result[1] for result in registration_results]
         machine_ids = [result[2] for result in registration_results]
         
@@ -183,7 +183,7 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
         assert machine_1 is machine_2, "Bug: returns same machine despite different user"
         assert machine_1.user_id == user_id_1, "Machine should keep original user ID"
         
-        # 🚨 BUG: Should detect user ID conflict
+        #  ALERT:  BUG: Should detect user ID conflict
         # When fixed, should raise UserIDConflictError or similar
         
         # Verify the registry ignores the second user ID (current bug behavior)
@@ -288,14 +288,14 @@ class TestDuplicateStateMachineRegistration(SSotBaseTestCase):
         # Log metrics for bug tracking
         metrics = self.get_all_metrics()
         if "duplicate_registration_allowed" in metrics:
-            print(f"\n🚨 DUPLICATE REGISTRATION BUG REPORT:")
+            print(f"\n ALERT:  DUPLICATE REGISTRATION BUG REPORT:")
             print(f"Duplicates Allowed: {metrics.get('duplicate_registration_allowed')}")
             print(f"Same Object Returned: {metrics.get('same_object_returned')}")
             print(f"Registration Attempts: {metrics.get('registration_count')}")
             print(f"Test Duration: {metrics.get('execution_time'):.3f}s")
         
         if "race_condition_detected" in metrics:
-            print(f"\n🚨 RACE CONDITION BUG REPORT:")
+            print(f"\n ALERT:  RACE CONDITION BUG REPORT:")
             print(f"Concurrent Registrations: {metrics.get('concurrent_registrations')}")
             print(f"Unique Machines Created: {metrics.get('unique_machines')}")
             print(f"Race Condition Detected: {metrics.get('race_condition_detected')}")

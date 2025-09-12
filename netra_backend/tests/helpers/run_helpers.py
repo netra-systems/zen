@@ -1,7 +1,7 @@
 """Run database repository test helper functions.
 
 This module provides helper functions for run test operations
-on database repositories. All functions are ≤8 lines.
+on database repositories. All functions are  <= 8 lines.
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 

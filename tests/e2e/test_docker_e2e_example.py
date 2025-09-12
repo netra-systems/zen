@@ -75,7 +75,7 @@ class TestE2EDockerExample:
             assert service_name in e2e_services
             service_url = e2e_services[service_name]
             assert service_url.startswith(("http://", "https://", "ws://", "wss://"))
-            print(f"✅ Service '{service_name}' available at: {service_url}")
+            print(f" PASS:  Service '{service_name}' available at: {service_url}")
     
     @pytest.mark.asyncio
     async def test_backend_api_interaction(self, e2e_http_client):
@@ -117,15 +117,15 @@ class TestE2EDockerExample:
                     
                     # Verify response structure
                     assert isinstance(response_data, dict)
-                    print(f"✅ WebSocket response: {response_data}")
+                    print(f" PASS:  WebSocket response: {response_data}")
                     
                 except asyncio.TimeoutError:
                     # WebSocket might not respond to unknown messages - that's OK
-                    print("⚠️ WebSocket connection established but no response to ping (expected)")
+                    print(" WARNING: [U+FE0F] WebSocket connection established but no response to ping (expected)")
                     
         except Exception as e:
             # Log the error but don't fail - WebSocket might have auth requirements
-            print(f"⚠️ WebSocket connection test: {e}")
+            print(f" WARNING: [U+FE0F] WebSocket connection test: {e}")
             # In a real test, you might want to assert based on specific error types
     
     @pytest.mark.asyncio
@@ -208,7 +208,7 @@ class TestE2EDockerReliability:
         
         # Verify fresh database state (if applicable)
         # This depends on your specific application endpoints
-        print("✅ Clean state verified - each test run starts fresh")
+        print(" PASS:  Clean state verified - each test run starts fresh")
     
     def test_environment_variables_set(self, e2e_services: Dict[str, str]):
         """Test that proper environment variables are set for E2E tests."""
@@ -226,7 +226,7 @@ class TestE2EDockerReliability:
         for var_name in expected_vars:
             var_value = env.get(var_name)
             assert var_value is not None, f"Environment variable {var_name} not set"
-            print(f"✅ {var_name} = {var_value}")
+            print(f" PASS:  {var_name} = {var_value}")
 
 
 @pytest.mark.slow
@@ -255,7 +255,7 @@ class TestE2EDockerPerformance:
             assert response.status_code == 200
             assert response_time < 2.0, f"Health check took {response_time:.2f}s (too slow for CI)"
             
-            print(f"✅ Service response time: {response_time:.2f}s")
+            print(f" PASS:  Service response time: {response_time:.2f}s")
     
     @pytest.mark.asyncio 
     async def test_concurrent_requests(self, e2e_services: Dict[str, str]):
@@ -273,7 +273,7 @@ class TestE2EDockerPerformance:
         
         # All requests should succeed
         assert all(code == 200 for code in status_codes)
-        print(f"✅ All {len(status_codes)} concurrent requests succeeded")
+        print(f" PASS:  All {len(status_codes)} concurrent requests succeeded")
 
 
 # Utility functions for other E2E tests to use

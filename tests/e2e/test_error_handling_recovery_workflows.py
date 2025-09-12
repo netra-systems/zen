@@ -83,8 +83,8 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing agent execution failure and recovery")
-        print(f"👤 User: {user_data['email']}")
+        print(f"[U+1F680] Testing agent execution failure and recovery")
+        print(f"[U+1F464] User: {user_data['email']}")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -141,7 +141,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             test_request = scenario["request"]
             expected_handling = scenario["expected_error_handling"]
             
-            print(f"\n🧪 Testing failure scenario: {scenario_name}")
+            print(f"\n[U+1F9EA] Testing failure scenario: {scenario_name}")
             print(f"   Expected handling: {expected_handling}")
             
             scenario_result = {
@@ -157,11 +157,11 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             try:
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                     scenario_result["connection_successful"] = True
-                    print(f"✅ WebSocket connected for {scenario_name}")
+                    print(f" PASS:  WebSocket connected for {scenario_name}")
                     
                     # Send potentially problematic request
                     await websocket.send(json.dumps(test_request))
-                    print(f"📤 Sent {scenario_name} test request")
+                    print(f"[U+1F4E4] Sent {scenario_name} test request")
                     
                     start_time = time.time()
                     timeout_duration = 45.0  # Reasonable timeout for error handling
@@ -175,7 +175,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             scenario_result["events_received"].append(event)
                             event_type = event['type']
                             
-                            print(f"📨 {scenario_name}: {event_type}")
+                            print(f"[U+1F4E8] {scenario_name}: {event_type}")
                             
                             # Analyze error handling quality
                             if event_type == 'error':
@@ -190,7 +190,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 
                                 if any(indicator in error_message for indicator in graceful_indicators):
                                     scenario_result["error_handled_gracefully"] = True
-                                    print(f"✅ Graceful error handling detected")
+                                    print(f" PASS:  Graceful error handling detected")
                                 
                                 # Check for recovery suggestions
                                 suggestion_indicators = [
@@ -199,7 +199,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 
                                 if any(indicator in error_message for indicator in suggestion_indicators):
                                     scenario_result["recovery_suggestions_provided"] = True
-                                    print(f"✅ Recovery suggestions provided")
+                                    print(f" PASS:  Recovery suggestions provided")
                                     
                                 # Business context preservation
                                 business_indicators = ['optimization', 'cost', 'ai', 'platform']
@@ -218,22 +218,22 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 if any(word in result_text for word in ['recommend', 'suggest', 'try', 'consider']):
                                     scenario_result["business_value_preserved"] = True
                                 
-                                print(f"✅ Agent completed despite potential issues")
+                                print(f" PASS:  Agent completed despite potential issues")
                                 break
                             
                             elif event_type == 'agent_started':
                                 # Good sign - system is attempting to process request
-                                print(f"✅ System attempting to process {scenario_name}")
+                                print(f" PASS:  System attempting to process {scenario_name}")
                                 
                         except asyncio.TimeoutError:
-                            print(f"⏰ {scenario_name} event timeout")
+                            print(f"[U+23F0] {scenario_name} event timeout")
                             break
                         except json.JSONDecodeError:
-                            print(f"⚠️ {scenario_name} JSON decode error")
+                            print(f" WARNING: [U+FE0F] {scenario_name} JSON decode error")
                             continue
                     
                     # Test system stability after potential error
-                    print(f"🔍 Testing system stability after {scenario_name}")
+                    print(f" SEARCH:  Testing system stability after {scenario_name}")
                     
                     stability_request = {
                         "type": "agent_request",
@@ -252,18 +252,18 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                         
                         if stability_event['type'] in ['agent_started', 'agent_thinking', 'agent_completed']:
                             scenario_result["system_stable_after_error"] = True
-                            print(f"✅ System stable after {scenario_name}")
+                            print(f" PASS:  System stable after {scenario_name}")
                         
                     except asyncio.TimeoutError:
-                        print(f"⚠️ System may be unstable after {scenario_name}")
+                        print(f" WARNING: [U+FE0F] System may be unstable after {scenario_name}")
             
             except Exception as e:
-                print(f"❌ {scenario_name} connection/execution error: {e}")
+                print(f" FAIL:  {scenario_name} connection/execution error: {e}")
             
             failure_recovery_results[scenario_name] = scenario_result
         
         # Analyze failure recovery results
-        print(f"\n📊 FAILURE RECOVERY ANALYSIS:")
+        print(f"\n CHART:  FAILURE RECOVERY ANALYSIS:")
         
         total_scenarios = len(failure_recovery_results)
         successful_connections = sum(1 for r in failure_recovery_results.values() if r["connection_successful"])
@@ -279,7 +279,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             print(f"     Business value preserved: {result['business_value_preserved']}")
             print(f"     System stable after: {result['system_stable_after_error']}")
         
-        print(f"\n📈 SUMMARY:")
+        print(f"\n[U+1F4C8] SUMMARY:")
         print(f"   Successful connections: {successful_connections}/{total_scenarios}")
         print(f"   Graceful error handling: {graceful_handling_count}/{total_scenarios}")
         print(f"   System stability after errors: {stable_after_error_count}/{total_scenarios}")
@@ -293,11 +293,11 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         assert graceful_rate >= 0.5, f"Graceful handling rate too low: {graceful_rate:.1%}" 
         assert stability_rate >= 0.7, f"System stability rate too low: {stability_rate:.1%}"
         
-        print(f"✅ AGENT EXECUTION FAILURE RECOVERY SUCCESS!")
-        print(f"   ✓ {graceful_rate:.1%} graceful error handling rate")
-        print(f"   ✓ {stability_rate:.1%} system stability after errors")
-        print(f"   ✓ Error recovery preserves business value")
-        print(f"   ✓ User-friendly error messages provided")
+        print(f" PASS:  AGENT EXECUTION FAILURE RECOVERY SUCCESS!")
+        print(f"   [U+2713] {graceful_rate:.1%} graceful error handling rate")
+        print(f"   [U+2713] {stability_rate:.1%} system stability after errors")
+        print(f"   [U+2713] Error recovery preserves business value")
+        print(f"   [U+2713] User-friendly error messages provided")
 
 
     @pytest.mark.e2e
@@ -318,7 +318,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing WebSocket connection recovery")
+        print(f"[U+1F680] Testing WebSocket connection recovery")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -343,7 +343,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             scenario_name = scenario["name"]
             disconnect_duration = scenario["disconnect_duration"]
             
-            print(f"\n🔄 Testing {scenario_name} (disconnect: {disconnect_duration}s)")
+            print(f"\n CYCLE:  Testing {scenario_name} (disconnect: {disconnect_duration}s)")
             
             scenario_result = {
                 "initial_connection": False,
@@ -359,7 +359,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                 # Initial connection and request
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                     scenario_result["initial_connection"] = True
-                    print(f"✅ Initial connection established")
+                    print(f" PASS:  Initial connection established")
                     
                     # Send request that should take some time to process
                     recovery_request = {
@@ -375,7 +375,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                     
                     await websocket.send(json.dumps(recovery_request))
                     scenario_result["request_sent"] = True
-                    print(f"📤 Sent recovery test request")
+                    print(f"[U+1F4E4] Sent recovery test request")
                     
                     # Collect some initial events
                     start_time = time.time()
@@ -388,17 +388,17 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             initial_events.append(event)
                             scenario_result["events_before_disconnect"] += 1
                             
-                            print(f"📨 Pre-disconnect: {event['type']}")
+                            print(f"[U+1F4E8] Pre-disconnect: {event['type']}")
                             
                         except asyncio.TimeoutError:
                             break
                         except json.JSONDecodeError:
                             continue
                     
-                    print(f"📊 Collected {len(initial_events)} events before disconnect")
+                    print(f" CHART:  Collected {len(initial_events)} events before disconnect")
                 
                 # Simulate connection loss by closing and waiting
-                print(f"💔 Simulating connection loss for {disconnect_duration}s...")
+                print(f"[U+1F494] Simulating connection loss for {disconnect_duration}s...")
                 await asyncio.sleep(disconnect_duration)
                 
                 # Attempt reconnection
@@ -409,10 +409,10 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                         scenario_result["reconnection_successful"] = True
                         scenario_result["recovery_time"] = time.time() - reconnect_start
                         
-                        print(f"✅ Reconnection successful ({scenario_result['recovery_time']:.2f}s)")
+                        print(f" PASS:  Reconnection successful ({scenario_result['recovery_time']:.2f}s)")
                         
                         # Test if we can continue receiving events or need to resend request
-                        print(f"🔍 Testing context preservation after reconnection...")
+                        print(f" SEARCH:  Testing context preservation after reconnection...")
                         
                         # First, try to receive any pending events
                         try:
@@ -420,15 +420,15 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             pending_event = json.loads(pending_message)
                             scenario_result["total_events"] += 1
                             
-                            print(f"📨 Post-reconnect: {pending_event['type']}")
+                            print(f"[U+1F4E8] Post-reconnect: {pending_event['type']}")
                             
                             # If we get events, context might be preserved
                             if pending_event.get('data') and 'recovery_test' in str(pending_event['data']):
                                 scenario_result["context_preserved"] = True
-                                print(f"✅ Context preserved through reconnection")
+                                print(f" PASS:  Context preserved through reconnection")
                                 
                         except asyncio.TimeoutError:
-                            print(f"⚠️ No immediate events after reconnection")
+                            print(f" WARNING: [U+FE0F] No immediate events after reconnection")
                         
                         # Send new request to test connection functionality
                         continuity_request = {
@@ -443,7 +443,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                         }
                         
                         await new_websocket.send(json.dumps(continuity_request))
-                        print(f"📤 Sent post-recovery verification request")
+                        print(f"[U+1F4E4] Sent post-recovery verification request")
                         
                         # Collect events to verify functionality
                         verification_start = time.time()
@@ -454,10 +454,10 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 event = json.loads(message)
                                 scenario_result["total_events"] += 1
                                 
-                                print(f"📨 Verification: {event['type']}")
+                                print(f"[U+1F4E8] Verification: {event['type']}")
                                 
                                 if event['type'] == 'agent_completed':
-                                    print(f"✅ Post-recovery functionality confirmed")
+                                    print(f" PASS:  Post-recovery functionality confirmed")
                                     break
                                     
                             except asyncio.TimeoutError:
@@ -466,15 +466,15 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 continue
                 
                 except Exception as e:
-                    print(f"❌ Reconnection failed: {e}")
+                    print(f" FAIL:  Reconnection failed: {e}")
             
             except Exception as e:
-                print(f"❌ {scenario_name} failed: {e}")
+                print(f" FAIL:  {scenario_name} failed: {e}")
             
             recovery_results[scenario_name] = scenario_result
         
         # Analyze recovery results
-        print(f"\n📊 WEBSOCKET RECOVERY ANALYSIS:")
+        print(f"\n CHART:  WEBSOCKET RECOVERY ANALYSIS:")
         
         for scenario_name, result in recovery_results.items():
             print(f"   {scenario_name}:")
@@ -498,12 +498,12 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         if recovery_times:
             avg_recovery_time = sum(recovery_times) / len(recovery_times)
             assert avg_recovery_time < 10, f"Average recovery time too slow: {avg_recovery_time:.2f}s"
-            print(f"📊 Average recovery time: {avg_recovery_time:.2f}s")
+            print(f" CHART:  Average recovery time: {avg_recovery_time:.2f}s")
         
-        print(f"✅ WEBSOCKET CONNECTION RECOVERY SUCCESS!")
-        print(f"   ✓ {reconnection_rate:.1%} successful reconnection rate")
-        print(f"   ✓ Connection recovery within acceptable time")
-        print(f"   ✓ Post-recovery functionality verified")
+        print(f" PASS:  WEBSOCKET CONNECTION RECOVERY SUCCESS!")
+        print(f"   [U+2713] {reconnection_rate:.1%} successful reconnection rate")
+        print(f"   [U+2713] Connection recovery within acceptable time")
+        print(f"   [U+2713] Post-recovery functionality verified")
 
 
     @pytest.mark.e2e
@@ -524,7 +524,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing service unavailability and graceful degradation")
+        print(f"[U+1F680] Testing service unavailability and graceful degradation")
         
         # Test various service unavailability scenarios
         service_test_scenarios = [
@@ -550,7 +550,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             service_name = scenario["service_name"]
             test_endpoints = scenario["test_endpoints"]
             
-            print(f"\n🔍 Testing {service_name} availability")
+            print(f"\n SEARCH:  Testing {service_name} availability")
             
             scenario_result = {
                 "service_reachable": False,
@@ -573,16 +573,16 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             
                             if response.status in [200, 401, 403]:  # Any response means service is up
                                 scenario_result["endpoints_working"] += 1
-                                print(f"✅ {endpoint}: Service responding ({response.status})")
+                                print(f" PASS:  {endpoint}: Service responding ({response.status})")
                             else:
-                                print(f"⚠️ {endpoint}: Service issues ({response.status})")
+                                print(f" WARNING: [U+FE0F] {endpoint}: Service issues ({response.status})")
                                 
                     except aiohttp.ClientConnectorError:
-                        print(f"❌ {endpoint}: Service unavailable (connection refused)")
+                        print(f" FAIL:  {endpoint}: Service unavailable (connection refused)")
                     except asyncio.TimeoutError:
-                        print(f"❌ {endpoint}: Service timeout")
+                        print(f" FAIL:  {endpoint}: Service timeout")
                     except Exception as e:
-                        print(f"❌ {endpoint}: Service error - {e}")
+                        print(f" FAIL:  {endpoint}: Service error - {e}")
             
             # Test how WebSocket handles service issues
             websocket_url = "ws://localhost:8000/ws" 
@@ -603,7 +603,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                     }
                     
                     await websocket.send(json.dumps(degradation_request))
-                    print(f"📤 Sent service dependency test request")
+                    print(f"[U+1F4E4] Sent service dependency test request")
                     
                     start_time = time.time()
                     
@@ -613,7 +613,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             event = json.loads(message)
                             event_type = event['type']
                             
-                            print(f"📨 Service test: {event_type}")
+                            print(f"[U+1F4E8] Service test: {event_type}")
                             
                             if event_type == 'error':
                                 error_data = event.get('data', {})
@@ -628,7 +628,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 if any(indicator in error_message for indicator in graceful_indicators):
                                     scenario_result["graceful_degradation"] = True
                                     scenario_result["user_communication"] = True
-                                    print(f"✅ Graceful degradation detected")
+                                    print(f" PASS:  Graceful degradation detected")
                                 
                             elif event_type == 'agent_completed':
                                 result_data = event.get('data', {}).get('result', {})
@@ -637,7 +637,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 # Check if partial functionality was delivered
                                 if len(result_text) > 50:  # Some meaningful response
                                     scenario_result["partial_functionality"] = True
-                                    print(f"✅ Partial functionality delivered despite service issues")
+                                    print(f" PASS:  Partial functionality delivered despite service issues")
                                     
                                 # Check for service limitation acknowledgment
                                 limitation_indicators = [
@@ -650,18 +650,18 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 break
                                 
                         except asyncio.TimeoutError:
-                            print(f"⏰ Service test timeout")
+                            print(f"[U+23F0] Service test timeout")
                             break
                         except json.JSONDecodeError:
                             continue
             
             except Exception as e:
-                print(f"❌ WebSocket service test failed: {e}")
+                print(f" FAIL:  WebSocket service test failed: {e}")
             
             degradation_results[scenario_name] = scenario_result
         
         # Analyze degradation results
-        print(f"\n📊 SERVICE DEGRADATION ANALYSIS:")
+        print(f"\n CHART:  SERVICE DEGRADATION ANALYSIS:")
         
         for scenario_name, result in degradation_results.items():
             service_name = next(s["service_name"] for s in service_test_scenarios if s["name"] == scenario_name)
@@ -684,15 +684,15 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             graceful_rate = graceful_handling / len(unavailable_services)
             
             assert graceful_rate >= 0.5, f"Graceful degradation rate too low: {graceful_rate:.1%}"
-            print(f"✅ Graceful degradation rate: {graceful_rate:.1%}")
+            print(f" PASS:  Graceful degradation rate: {graceful_rate:.1%}")
         else:
-            print(f"ℹ️ All services available - degradation not tested")
+            print(f"[U+2139][U+FE0F] All services available - degradation not tested")
         
-        print(f"✅ SERVICE UNAVAILABILITY HANDLING TESTED!")
-        print(f"   ✓ Service availability detection")
-        print(f"   ✓ Graceful degradation strategies")
-        print(f"   ✓ User communication about limitations")
-        print(f"   ✓ Partial functionality delivery")
+        print(f" PASS:  SERVICE UNAVAILABILITY HANDLING TESTED!")
+        print(f"   [U+2713] Service availability detection")
+        print(f"   [U+2713] Graceful degradation strategies")
+        print(f"   [U+2713] User communication about limitations")
+        print(f"   [U+2713] Partial functionality delivery")
 
 
     @pytest.mark.e2e
@@ -714,7 +714,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing data consistency during error conditions")
+        print(f"[U+1F680] Testing data consistency during error conditions")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -759,14 +759,14 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                print(f"✅ WebSocket connected for consistency test")
+                print(f" PASS:  WebSocket connected for consistency test")
                 
                 for conversation_step in consistency_test_conversation:
                     step_num = conversation_step["step"]
                     message = conversation_step["message"]
                     context = conversation_step["context"]
                     
-                    print(f"\n💬 Step {step_num}: {message[:50]}...")
+                    print(f"\n[U+1F4AC] Step {step_num}: {message[:50]}...")
                     
                     consistency_request = {
                         "type": "agent_request",
@@ -782,14 +782,14 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                     
                     try:
                         await websocket.send(json.dumps(consistency_request))
-                        print(f"📤 Sent step {step_num}")
+                        print(f"[U+1F4E4] Sent step {step_num}")
                     except Exception as e:
                         if step_num == 3:  # Expected error step
-                            print(f"✅ Step {step_num} failed as expected: {e}")
+                            print(f" PASS:  Step {step_num} failed as expected: {e}")
                             consistency_results["error_step_handled"] = True
                             continue
                         else:
-                            print(f"❌ Unexpected error at step {step_num}: {e}")
+                            print(f" FAIL:  Unexpected error at step {step_num}: {e}")
                             break
                     
                     # Collect events for this step
@@ -804,12 +804,12 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             step_events.append(event)
                             consistency_results["all_events"].append(event)
                             
-                            print(f"📨 Step {step_num}: {event['type']}")
+                            print(f"[U+1F4E8] Step {step_num}: {event['type']}")
                             
                             # Special handling for error step
                             if step_num == 3 and event['type'] == 'error':
                                 consistency_results["error_step_handled"] = True
-                                print(f"✅ Error step handled gracefully")
+                                print(f" PASS:  Error step handled gracefully")
                                 break
                             
                             # Check for completion
@@ -826,23 +826,23 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                     
                                     if found_context >= 2:
                                         consistency_results["context_preserved_after_error"] = True
-                                        print(f"✅ Context preserved after error (step {step_num})")
+                                        print(f" PASS:  Context preserved after error (step {step_num})")
                                 
                                 # Check data consistency references
                                 if step_num == 5:  # Final step should reference earlier data
                                     if '5000' in result_text and ('customer' in result_text or 'service' in result_text):
                                         consistency_results["data_consistency_maintained"] = True
-                                        print(f"✅ Data consistency maintained through conversation")
+                                        print(f" PASS:  Data consistency maintained through conversation")
                                 
                                 break
                                 
                         except asyncio.TimeoutError:
                             if step_num == 3:  # Error step may timeout
                                 consistency_results["error_step_handled"] = True
-                                print(f"✅ Error step timed out (expected behavior)")
+                                print(f" PASS:  Error step timed out (expected behavior)")
                                 break
                             else:
-                                print(f"⏰ Step {step_num} timeout")
+                                print(f"[U+23F0] Step {step_num} timeout")
                                 break
                         except json.JSONDecodeError:
                             continue
@@ -863,7 +863,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(recovery_request))
-                print(f"📤 Sent conversation recovery test")
+                print(f"[U+1F4E4] Sent conversation recovery test")
                 
                 try:
                     recovery_message = await asyncio.wait_for(websocket.recv(), timeout=20)
@@ -878,16 +878,16 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                         
                         if found_recovery >= 2:
                             consistency_results["conversation_recoverable"] = True
-                            print(f"✅ Conversation recoverable after errors")
+                            print(f" PASS:  Conversation recoverable after errors")
                     
                 except asyncio.TimeoutError:
-                    print(f"⏰ Recovery test timeout")
+                    print(f"[U+23F0] Recovery test timeout")
         
         except Exception as e:
-            print(f"❌ Consistency test failed: {e}")
+            print(f" FAIL:  Consistency test failed: {e}")
         
         # Analyze consistency results
-        print(f"\n📊 DATA CONSISTENCY ANALYSIS:")
+        print(f"\n CHART:  DATA CONSISTENCY ANALYSIS:")
         print(f"   Conversation steps completed: {consistency_results['conversation_steps_completed']}")
         print(f"   Error step handled: {consistency_results['error_step_handled']}")
         print(f"   Context preserved after error: {consistency_results['context_preserved_after_error']}")
@@ -908,12 +908,12 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         
         assert consistency_score >= 1, f"No data consistency indicators passed: {consistency_score}/3"
         
-        print(f"✅ DATA CONSISTENCY DURING ERRORS SUCCESS!")
-        print(f"   ✓ Error handling without data corruption")
-        print(f"   ✓ Context preservation through errors")
-        print(f"   ✓ Data consistency maintained")
-        print(f"   ✓ Conversation recoverability validated")
-        print(f"   ✓ Consistency score: {consistency_score}/3")
+        print(f" PASS:  DATA CONSISTENCY DURING ERRORS SUCCESS!")
+        print(f"   [U+2713] Error handling without data corruption")
+        print(f"   [U+2713] Context preservation through errors")
+        print(f"   [U+2713] Data consistency maintained")
+        print(f"   [U+2713] Conversation recoverability validated")
+        print(f"   [U+2713] Consistency score: {consistency_score}/3")
 
 
     @pytest.mark.e2e
@@ -934,7 +934,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing error cascade prevention")
+        print(f"[U+1F680] Testing error cascade prevention")
         
         # Create additional user to test isolation
         secondary_user_token, secondary_user_data = await create_authenticated_user(
@@ -943,7 +943,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
             permissions=["read", "write", "agent_execution"]
         )
         
-        print(f"✅ Created secondary user for isolation testing")
+        print(f" PASS:  Created secondary user for isolation testing")
         
         websocket_url = "ws://localhost:8000/ws"
         
@@ -985,7 +985,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 # Send as raw string for malformed/oversized
                                 await websocket.send(req_data["message"])
                             
-                            print(f"📤 Sent problematic request #{i+1}")
+                            print(f"[U+1F4E4] Sent problematic request #{i+1}")
                             
                             # Try to receive response
                             try:
@@ -994,19 +994,19 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                                 
                                 if event['type'] == 'error':
                                     session_result["error_generated"] = True
-                                    print(f"✅ Error generated and handled: {event.get('message', 'Unknown error')[:50]}...")
+                                    print(f" PASS:  Error generated and handled: {event.get('message', 'Unknown error')[:50]}...")
                                     
                             except asyncio.TimeoutError:
-                                print(f"⏰ No response to problematic request #{i+1}")
+                                print(f"[U+23F0] No response to problematic request #{i+1}")
                             except json.JSONDecodeError:
-                                print(f"⚠️ Received non-JSON response")
+                                print(f" WARNING: [U+FE0F] Received non-JSON response")
                             
                         except Exception as e:
                             session_result["error_generated"] = True
-                            print(f"✅ Request #{i+1} generated error: {str(e)[:50]}...")
+                            print(f" PASS:  Request #{i+1} generated error: {str(e)[:50]}...")
                             
             except Exception as e:
-                print(f"❌ Error-inducing session failed: {e}")
+                print(f" FAIL:  Error-inducing session failed: {e}")
             
             return session_result
         
@@ -1038,7 +1038,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                     }
                     
                     await websocket.send(json.dumps(normal_request))
-                    print(f"📤 Sent normal session request")
+                    print(f"[U+1F4E4] Sent normal session request")
                     
                     start_time = time.time()
                     
@@ -1048,7 +1048,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             event = json.loads(message)
                             
                             session_result["events_received"] += 1
-                            print(f"📨 Normal session: {event['type']}")
+                            print(f"[U+1F4E8] Normal session: {event['type']}")
                             
                             if event['type'] == 'agent_completed':
                                 session_result["request_completed"] = True
@@ -1065,12 +1065,12 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
                             continue
                             
             except Exception as e:
-                print(f"❌ Normal session failed: {e}")
+                print(f" FAIL:  Normal session failed: {e}")
             
             return session_result
         
         # Execute error-inducing session and normal sessions concurrently
-        print(f"🏃 Running concurrent sessions: error-inducing + normal sessions")
+        print(f"[U+1F3C3] Running concurrent sessions: error-inducing + normal sessions")
         
         tasks = [
             error_inducing_session(),
@@ -1081,7 +1081,7 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Analyze cascade prevention results
-        print(f"\n📊 ERROR CASCADE PREVENTION ANALYSIS:")
+        print(f"\n CHART:  ERROR CASCADE PREVENTION ANALYSIS:")
         
         error_session_result = results[0] if not isinstance(results[0], Exception) else {"error": str(results[0])}
         primary_normal_result = results[1] if not isinstance(results[1], Exception) else {"error": str(results[1])}
@@ -1134,8 +1134,8 @@ class TestErrorHandlingRecoveryWorkflows(SSotBaseTestCase):
         
         assert business_value_delivered, "No business value delivered in normal sessions during error conditions"
         
-        print(f"✅ ERROR CASCADE PREVENTION SUCCESS!")
-        print(f"   ✓ {isolation_rate:.1%} normal session isolation rate")
-        print(f"   ✓ Business value preserved in normal sessions")
-        print(f"   ✓ Error isolation between users verified")
-        print(f"   ✓ System stability maintained during errors")
+        print(f" PASS:  ERROR CASCADE PREVENTION SUCCESS!")
+        print(f"   [U+2713] {isolation_rate:.1%} normal session isolation rate")
+        print(f"   [U+2713] Business value preserved in normal sessions")
+        print(f"   [U+2713] Error isolation between users verified")
+        print(f"   [U+2713] System stability maintained during errors")

@@ -113,7 +113,7 @@ class ServiceInitializationManager:
         }
         
         self._initialized = True
-        self.logger.info("✓ ServiceInitializationManager singleton created")
+        self.logger.info("[U+2713] ServiceInitializationManager singleton created")
     
     def get_app(self) -> Optional[FastAPI]:
         """Get the FastAPI app instance."""
@@ -122,7 +122,7 @@ class ServiceInitializationManager:
     def set_app(self, app: FastAPI) -> None:
         """Set the FastAPI app instance."""
         self.app = app
-        self.logger.info("✓ ServiceInitializationManager app instance set")
+        self.logger.info("[U+2713] ServiceInitializationManager app instance set")
     
     async def initialize_missing_services(
         self, 
@@ -141,15 +141,15 @@ class ServiceInitializationManager:
         """
         if not self.app:
             error_msg = "FastAPI app not set - cannot initialize services"
-            self.logger.error(f"🚨 {error_msg}")
+            self.logger.error(f" ALERT:  {error_msg}")
             return False, {'error': error_msg}
         
-        self.logger.info(f"🔄 Starting SSOT service initialization for: {missing_services}")
+        self.logger.info(f" CYCLE:  Starting SSOT service initialization for: {missing_services}")
         
         async with self.global_initialization_lock:
             # Check if already initialized
             if self.initialization_complete:
-                self.logger.info("✓ Services already initialized - skipping")
+                self.logger.info("[U+2713] Services already initialized - skipping")
                 return True, {'status': 'already_complete', 'services': list(missing_services)}
             
             # Start initialization
@@ -164,15 +164,15 @@ class ServiceInitializationManager:
                 
                 for service_name in missing_services:
                     if service_name not in self.critical_services:
-                        self.logger.warning(f"⚠️ Service '{service_name}' not in critical services list")
+                        self.logger.warning(f" WARNING: [U+FE0F] Service '{service_name}' not in critical services list")
                     
                     success = await self._initialize_single_service(service_name)
                     if success:
                         success_count += 1
-                        self.logger.info(f"✓ Service '{service_name}' initialized successfully")
+                        self.logger.info(f"[U+2713] Service '{service_name}' initialized successfully")
                     else:
                         failed_services.append(service_name)
-                        self.logger.error(f"❌ Service '{service_name}' initialization failed")
+                        self.logger.error(f" FAIL:  Service '{service_name}' initialization failed")
                 
                 # Check overall success
                 total_time = time.time() - self.initialization_start_time
@@ -184,7 +184,7 @@ class ServiceInitializationManager:
                     critical_failures = [s for s in failed_services if s in self.critical_services]
                     if critical_failures:
                         error_msg = f"CRITICAL service initialization failed: {critical_failures}"
-                        self.logger.error(f"🚨 {error_msg}")
+                        self.logger.error(f" ALERT:  {error_msg}")
                         return False, {
                             'error': error_msg,
                             'failed_services': failed_services,
@@ -194,7 +194,7 @@ class ServiceInitializationManager:
                 
                 # Success
                 self.initialization_complete = True
-                self.logger.info(f"✅ Service initialization complete: {success_count}/{len(missing_services)} in {total_time:.2f}s")
+                self.logger.info(f" PASS:  Service initialization complete: {success_count}/{len(missing_services)} in {total_time:.2f}s")
                 
                 return True, {
                     'status': 'success',
@@ -210,7 +210,7 @@ class ServiceInitializationManager:
                 self.initialization_error = str(e)
                 
                 error_msg = f"Service initialization exception: {e}"
-                self.logger.error(f"🚨 {error_msg}", exc_info=True)
+                self.logger.error(f" ALERT:  {error_msg}", exc_info=True)
                 
                 return False, {
                     'error': error_msg,
@@ -235,7 +235,7 @@ class ServiceInitializationManager:
         async with self.initialization_locks[service_name]:
             # Check if already initialized
             if hasattr(self.app.state, service_name) and getattr(self.app.state, service_name) is not None:
-                self.logger.info(f"✓ Service '{service_name}' already initialized")
+                self.logger.info(f"[U+2713] Service '{service_name}' already initialized")
                 return True
             
             # Update status
@@ -256,13 +256,13 @@ class ServiceInitializationManager:
                 if success:
                     status.state = InitializationState.COMPLETED
                     status.completion_time = time.time()
-                    self.logger.info(f"✅ Service '{service_name}' initialized in {status.elapsed_time:.2f}s")
+                    self.logger.info(f" PASS:  Service '{service_name}' initialized in {status.elapsed_time:.2f}s")
                     return True
                 else:
                     status.state = InitializationState.FAILED
                     status.completion_time = time.time()
                     status.error_message = f"SSOT initialization returned False"
-                    self.logger.error(f"❌ Service '{service_name}' SSOT initialization failed")
+                    self.logger.error(f" FAIL:  Service '{service_name}' SSOT initialization failed")
                     return False
                     
             except Exception as e:
@@ -270,7 +270,7 @@ class ServiceInitializationManager:
                 status.completion_time = time.time()
                 status.error_message = str(e)
                 
-                self.logger.error(f"❌ Service '{service_name}' initialization exception: {e}", exc_info=True)
+                self.logger.error(f" FAIL:  Service '{service_name}' initialization exception: {e}", exc_info=True)
                 return False
     
     def get_initialization_status(self) -> Dict[str, Any]:
@@ -302,7 +302,7 @@ class ServiceInitializationManager:
     
     def reset_initialization_state(self) -> None:
         """Reset initialization state for fresh start."""
-        self.logger.info("🔄 Resetting service initialization state")
+        self.logger.info(" CYCLE:  Resetting service initialization state")
         
         self.services_status.clear()
         self.initialization_locks.clear()
@@ -311,7 +311,7 @@ class ServiceInitializationManager:
         self.initialization_failed = False
         self.initialization_error = None
         
-        self.logger.info("✓ Service initialization state reset complete")
+        self.logger.info("[U+2713] Service initialization state reset complete")
 
 
 # Global singleton access function

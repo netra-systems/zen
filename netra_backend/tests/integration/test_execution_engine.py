@@ -497,7 +497,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         assert stats["total_executions"] >= 1
         assert stats["success_rate"] == 1.0  # Should be successful
         
-        logger.info(f"✅ Core execution pipeline test passed - {len(execution_data['stages_executed'])} stages in {execution_time:.3f}s")
+        logger.info(f" PASS:  Core execution pipeline test passed - {len(execution_data['stages_executed'])} stages in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -558,7 +558,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         total_workflow_time = sum(execution_times)
         assert total_workflow_time < 3.0  # Coordinated workflow should be efficient
         
-        logger.info(f"✅ Multi-agent coordination test passed - 3 agents, {total_stages_executed} total stages")
+        logger.info(f" PASS:  Multi-agent coordination test passed - 3 agents, {total_stages_executed} total stages")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -618,7 +618,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         reliable_stats = reliable_agent.get_execution_statistics()
         assert reliable_stats["success_rate"] == 1.0, "Reliable agent should maintain perfect success rate"
         
-        logger.info("✅ Error handling and recovery test passed")
+        logger.info(" PASS:  Error handling and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -657,7 +657,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         stages_executed = execution_data["stages_executed"]
         assert len(stages_executed) >= 3, "Should execute multiple stages with WebSocket updates"
         
-        logger.info("✅ WebSocket integration test passed")
+        logger.info(" PASS:  WebSocket integration test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -733,7 +733,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         assert len(user_ids) == len(successful_results)  # Each execution has unique user
         assert len(run_ids) == len(successful_results)  # Each execution has unique run
         
-        logger.info(f"✅ Concurrent execution isolation test passed - {len(successful_results)}/3 successful in {execution_time:.3f}s")
+        logger.info(f" PASS:  Concurrent execution isolation test passed - {len(successful_results)}/3 successful in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -797,7 +797,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         assert final_stats["success_rate"] == 1.0
         assert final_stats["stages_completion_rate"] >= 0.9
         
-        logger.info(f"✅ Performance optimization test passed - {avg_execution_time:.3f}s avg time, {avg_efficiency:.2f} efficiency")
+        logger.info(f" PASS:  Performance optimization test passed - {avg_execution_time:.3f}s avg time, {avg_efficiency:.2f} efficiency")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -858,7 +858,7 @@ class TestExecutionEngine(BaseIntegrationTest):
         assert execution_metrics["execution_efficiency"] == 1.0  # Perfect efficiency
         assert execution_metrics["avg_stage_duration_ms"] > 0  # Stages took measurable time
         
-        logger.info(f"✅ Comprehensive workflow test passed - {len(stages_executed)} stages, {execution_data['duration_seconds']:.3f}s total")
+        logger.info(f" PASS:  Comprehensive workflow test passed - {len(stages_executed)} stages, {execution_data['duration_seconds']:.3f}s total")
 
 
 if __name__ == "__main__":

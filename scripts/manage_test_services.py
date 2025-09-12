@@ -103,7 +103,7 @@ class TestServiceCLI:
                 return
             
             print(f"Environment: {report.get('environment', 'Unknown')}")
-            print(f"Overall Health: {'✓ Healthy' if report.get('overall_health') else '✗ Unhealthy'}")
+            print(f"Overall Health: {'[U+2713] Healthy' if report.get('overall_health') else '[U+2717] Unhealthy'}")
             print()
             
             # Show service details
@@ -111,7 +111,7 @@ class TestServiceCLI:
             if services:
                 for service_name, service_data in services.items():
                     health = service_data.get('health', {})
-                    status_icon = "✓" if health.get('is_healthy') else "✗"
+                    status_icon = "[U+2713]" if health.get('is_healthy') else "[U+2717]"
                     port = health.get('port', 'N/A')
                     response_time = health.get('response_time_ms', 0.0)
                     

@@ -196,8 +196,8 @@ class MyClass:
         """Test imports with unicode and special characters"""
         test_file = Path(self.temp_dir) / "test_unicode.py"
         test_file.write_text('''
-from module..cönfig import Config
-from module..🔥 import Fire
+from module..c[U+00F6]nfig import Config
+from module.. FIRE:  import Fire
 from module..config! import Config
 ''', encoding="utf-8")
 

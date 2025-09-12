@@ -20,7 +20,7 @@ def main():
 
 def _show_setup_banner():
     """Display setup banner and requirements."""
-    print("\n🚀 Netra AI Platform - Quick Setup\n")
+    print("\n[U+1F680] Netra AI Platform - Quick Setup\n")
     print("This will install and configure your development environment.")
     print("Please ensure you have Python 3.9+ and Node.js 18+ installed.\n")
 
@@ -58,12 +58,12 @@ def _execute_installer():
 
 def _print_setup_error():
     """Print setup error message."""
-    print("\n⚠️  Setup encountered some issues.")
+    print("\n WARNING: [U+FE0F]  Setup encountered some issues.")
     print("Please check the output above and resolve any errors.")
 
 def _print_interrupted_error():
     """Print setup interrupted message."""
-    print("\n⚠️  Setup interrupted.")
+    print("\n WARNING: [U+FE0F]  Setup interrupted.")
 
 if __name__ == "__main__":
     main()

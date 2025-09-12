@@ -257,11 +257,11 @@ class UserFactoryCoordinator:
                 
             except Exception as e:
                 logger.critical(
-                    f"🚨 CRITICAL: Failed to create component set for user "
+                    f" ALERT:  CRITICAL: Failed to create component set for user "
                     f"{user_context.user_id[:8]}...: {e}"
                 )
                 logger.critical(
-                    f"🚨 BUSINESS VALUE AT RISK: User isolation creation failed"
+                    f" ALERT:  BUSINESS VALUE AT RISK: User isolation creation failed"
                 )
                 raise
     
@@ -562,11 +562,11 @@ class UserFactoryCoordinator:
             
             if isolation_issues:
                 logger.critical(
-                    f"🚨 CRITICAL: User isolation violations detected for user "
+                    f" ALERT:  CRITICAL: User isolation violations detected for user "
                     f"{user_context.user_id[:8]}...: {isolation_issues}"
                 )
                 logger.critical(
-                    f"🚨 BUSINESS VALUE AT RISK: Component isolation compromised"
+                    f" ALERT:  BUSINESS VALUE AT RISK: Component isolation compromised"
                 )
                 return False
             
@@ -574,7 +574,7 @@ class UserFactoryCoordinator:
             
         except Exception as e:
             logger.critical(
-                f"🚨 CRITICAL: User isolation validation failed for user "
+                f" ALERT:  CRITICAL: User isolation validation failed for user "
                 f"{user_context.user_id[:8]}...: {e}"
             )
             return False

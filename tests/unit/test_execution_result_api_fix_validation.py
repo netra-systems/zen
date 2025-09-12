@@ -116,7 +116,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         self.assertNotIn("supervisor_result", result, "Legacy 'supervisor_result' field should be removed")
         self.assertNotIn("results", result, "Legacy 'results' field should be moved to 'data'")
         
-        print("✅ SSOT ExecutionResult format validation PASSED - API fix is working correctly!")
+        print(" PASS:  SSOT ExecutionResult format validation PASSED - API fix is working correctly!")
 
     async def test_failed_execution_returns_ssot_format(self):
         """Validate that failed executions also return SSOT format."""
@@ -159,7 +159,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         # Error information should be in data field
         self.assertIn("error", result["data"])
         
-        print("✅ Failed execution SSOT format validation PASSED")
+        print(" PASS:  Failed execution SSOT format validation PASSED")
 
     async def test_golden_path_compatibility_after_fix(self):
         """Validate specific Golden Path test compatibility after API fix."""
@@ -208,7 +208,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         mock_websocket_bridge.notify_agent_started.assert_called()
         mock_websocket_bridge.notify_agent_completed.assert_called()
         
-        print("✅ Golden Path test compatibility validation PASSED")
+        print(" PASS:  Golden Path test compatibility validation PASSED")
 
     async def test_execution_status_enum_value_correctness(self):
         """Validate ExecutionStatus enum values are used correctly in API responses."""
@@ -247,7 +247,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
             # Validate correct ExecutionStatus enum value is used
             self.assertEqual(result["status"], expected_status.value)
             
-        print("✅ ExecutionStatus enum value correctness validation PASSED")
+        print(" PASS:  ExecutionStatus enum value correctness validation PASSED")
 
     async def test_data_field_contains_legacy_information(self):
         """Validate that 'data' field contains all necessary execution information."""
@@ -298,7 +298,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         self.assertIn("user_id", data)
         self.assertIn("run_id", data)
         
-        print("✅ Data field structure validation PASSED")
+        print(" PASS:  Data field structure validation PASSED")
 
     async def test_backward_compatibility_maintained(self):
         """Validate that legacy access patterns can still work with adaptation."""
@@ -332,7 +332,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         standard_status = result["status"]
         self.assertEqual(standard_status, "completed")
         
-        print("✅ Backward compatibility validation PASSED")
+        print(" PASS:  Backward compatibility validation PASSED")
 
     async def test_request_id_propagation_correctness(self):
         """Validate that request_id is correctly propagated from UserExecutionContext."""
@@ -362,7 +362,7 @@ class TestExecutionResultAPIFixValidation(SSotAsyncTestCase):
         # Validate exact request_id propagation
         self.assertEqual(result["request_id"], test_request_id)
         
-        print("✅ Request ID propagation validation PASSED")
+        print(" PASS:  Request ID propagation validation PASSED")
 
 
 if __name__ == "__main__":

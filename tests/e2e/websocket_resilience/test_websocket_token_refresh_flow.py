@@ -111,7 +111,7 @@ async def test_token_refresh_prompt_and_flow(jwt_generator, audit_logger, token_
         
         await new_client.disconnect()
         
-        logger.info("✓ Token refresh flow completed successfully with proper security controls")
+        logger.info("[U+2713] Token refresh flow completed successfully with proper security controls")
 
 
 @pytest.mark.asyncio
@@ -195,7 +195,7 @@ async def test_refresh_token_validation_and_security(jwt_generator, audit_logger
     successful_refreshes = [r for r in test_results if r["success"]]
     assert len(refresh_events) >= len(successful_refreshes), "Successful refreshes should be logged"
     
-    logger.info(f"✓ Refresh token validation: {len(test_results)} scenarios tested")
+    logger.info(f"[U+2713] Refresh token validation: {len(test_results)} scenarios tested")
 
 
 @pytest.mark.asyncio
@@ -300,7 +300,7 @@ async def test_refresh_token_lifecycle_and_cleanup(jwt_generator, audit_logger, 
     
     await final_client.disconnect()
     
-    logger.info("✓ Token lifecycle and cleanup validated through multiple refresh cycles")
+    logger.info("[U+2713] Token lifecycle and cleanup validated through multiple refresh cycles")
 
 
 if __name__ == "__main__":

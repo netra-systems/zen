@@ -1190,9 +1190,9 @@ def main():
         print("\n" + "="*50)
         print("GTM Configuration Complete!")
         print("="*50)
-        print(f"✓ Variables created: {result['variables']}")
-        print(f"✓ Triggers created: {result['triggers']}")
-        print(f"✓ Tags created: {result['tags']}")
+        print(f"[U+2713] Variables created: {result['variables']}")
+        print(f"[U+2713] Triggers created: {result['triggers']}")
+        print(f"[U+2713] Tags created: {result['tags']}")
         print("\nConfiguration exported to: gtm_configuration.json")
         
         if not args.publish:

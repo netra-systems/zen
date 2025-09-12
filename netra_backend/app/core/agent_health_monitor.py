@@ -393,7 +393,7 @@ class UnifiedAgentHealthMonitor:
         # Agent is considered dead if no heartbeat for > 10 seconds
         if time_since_heartbeat > 10:
             logger.critical(
-                f"💀 AGENT DEATH DETECTED: {agent_name} - No heartbeat for {time_since_heartbeat:.1f}s"
+                f"[U+1F480] AGENT DEATH DETECTED: {agent_name} - No heartbeat for {time_since_heartbeat:.1f}s"
             )
             return True
         
@@ -402,7 +402,7 @@ class UnifiedAgentHealthMonitor:
         for execution in dead_executions:
             if execution.agent_name == agent_name:
                 logger.critical(
-                    f"💀 AGENT DEATH DETECTED via tracker: {agent_name} - {execution.error or 'No heartbeat'}"
+                    f"[U+1F480] AGENT DEATH DETECTED via tracker: {agent_name} - {execution.error or 'No heartbeat'}"
                 )
                 return True
         
@@ -751,9 +751,9 @@ class UnifiedAgentHealthMonitor:
                 
                 logger.info(f"Service {name} marked as ready")
                 if ports:
-                    logger.info(f"  → Verified ports: {sorted(ports)}")
+                    logger.info(f"   ->  Verified ports: {sorted(ports)}")
                 if process_pid:
-                    logger.info(f"  → Process PID: {process_pid}")
+                    logger.info(f"   ->  Process PID: {process_pid}")
                     
                 return True
             return False

@@ -348,7 +348,7 @@ class TestPerformanceSLA:
 
         assert total_time < 10.0, f"Concurrent execution too slow: {total_time:.2f}s"
     
-    # Helper methods (≤8 lines each)
+    # Helper methods ( <= 8 lines each)
     
 
     def _should_use_real_llm(self) -> bool:

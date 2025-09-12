@@ -2,7 +2,7 @@
 Frontend Login Journey E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers with focus on Free → Early conversion
+- Segment: All tiers with focus on Free  ->  Early conversion
 - Business Goal: Optimize conversion funnel worth $500K+ MRR
 - Value Impact: Reduces login friction by 40%, increasing conversions
 - Strategic Impact: Direct revenue impact through improved activation

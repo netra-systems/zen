@@ -97,13 +97,13 @@ class BackendServerController:
         while time.time() - start_time < max_wait:
             if self.is_port_listening(timeout=0.5):
                 elapsed = time.time() - start_time
-                print(f"✅ Server started listening after {elapsed:.1f}s")
+                print(f" PASS:  Server started listening after {elapsed:.1f}s")
                 return True
             
             # Check if process died
             if self.process and self.process.poll() is not None:
                 stdout, stderr = self.process.communicate(timeout=1)
-                print(f"❌ Backend server process died during startup")
+                print(f" FAIL:  Backend server process died during startup")
                 print(f"Exit code: {self.process.returncode}")
                 print(f"STDOUT: {stdout[-1000:] if stdout else 'None'}")  
                 print(f"STDERR: {stderr[-1000:] if stderr else 'None'}")
@@ -112,13 +112,13 @@ class BackendServerController:
             time.sleep(0.5)
             print(".", end="", flush=True)
         
-        print(f"\n❌ Server did not start listening within {max_wait}s")
+        print(f"\n FAIL:  Server did not start listening within {max_wait}s")
         return False
     
     def test_health_endpoint(self) -> bool:
         """Test the health endpoint once server is listening."""
         if not self.is_port_listening():
-            print("❌ Cannot test health - server not listening")
+            print(" FAIL:  Cannot test health - server not listening")
             return False
         
         try:
@@ -128,15 +128,15 @@ class BackendServerController:
             response = requests.get(url, timeout=5)
             
             if response.status_code == 200:
-                print("✅ Health endpoint responded successfully")
+                print(" PASS:  Health endpoint responded successfully")
                 print(f"Response: {response.json()}")
                 return True
             else:
-                print(f"❌ Health endpoint returned {response.status_code}: {response.text}")
+                print(f" FAIL:  Health endpoint returned {response.status_code}: {response.text}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Health endpoint test failed: {e}")
+            print(f" FAIL:  Health endpoint test failed: {e}")
             return False
     
     def get_server_output(self) -> tuple[str, str]:
@@ -167,12 +167,12 @@ class BackendServerController:
                 # Wait for graceful shutdown
                 try:
                     self.process.wait(timeout=5)
-                    print("✅ Server stopped gracefully")
+                    print(" PASS:  Server stopped gracefully")
                 except subprocess.TimeoutExpired:
-                    print("⚠️ Server didn't stop gracefully, forcing kill")
+                    print(" WARNING: [U+FE0F] Server didn't stop gracefully, forcing kill")
                     self.process.kill()
                     self.process.wait()
-                    print("✅ Server force-killed")
+                    print(" PASS:  Server force-killed")
                     
             except Exception as e:
                 print(f"Error stopping server: {e}")
@@ -197,14 +197,14 @@ class BackendServerController:
         # Check if process is still running
         if self.process:
             if self.process.poll() is None:
-                print("\n🔍 Process is still running but not listening")
+                print("\n SEARCH:  Process is still running but not listening")
                 print("   Possible causes:")
                 print("   - Startup sequence hanging in lifespan event")
                 print("   - Database connection blocking")
                 print("   - Infinite loop in startup code")
                 print("   - AsyncIO event loop issues")
             else:
-                print(f"\n💀 Process exited with code: {self.process.returncode}")
+                print(f"\n[U+1F480] Process exited with code: {self.process.returncode}")
                 print("   Possible causes:")
                 print("   - Startup exception before server binding")
                 print("   - Environment/configuration issues")  
@@ -245,7 +245,7 @@ class TestBackendServerListening:
         health_ok = self.server.test_health_endpoint()
         assert health_ok, "Health endpoint test failed"
         
-        print("✅ Backend server startup test PASSED")
+        print(" PASS:  Backend server startup test PASSED")
     
     @pytest.mark.unit
     def test_port_availability_check(self):
@@ -295,14 +295,14 @@ def test_diagnose_backend_server_issue():
         print(f"   Port 8000 available: {port_available}")
         
         if not port_available:
-            print("   ⚠️ Port 8000 is already in use")
+            print("    WARNING: [U+FE0F] Port 8000 is already in use")
             print("   This could indicate a server is already running")
             return
         
         print("\n2. STARTING SERVER PROCESS")
         started = controller.start_backend_server()
         assert started, "Failed to start server process"
-        print(f"   ✅ Server process started (PID: {controller.process.pid})")
+        print(f"    PASS:  Server process started (PID: {controller.process.pid})")
         
         print("\n3. MONITORING STARTUP PROGRESS")
         # Check process state during startup
@@ -311,7 +311,7 @@ def test_diagnose_backend_server_issue():
             
             # Check if process is alive
             if controller.process.poll() is not None:
-                print(f"\n   💀 Process died after {i}s")
+                print(f"\n   [U+1F480] Process died after {i}s")
                 stdout, stderr = controller.get_server_output()
                 if stdout:
                     print(f"   STDOUT: {stdout[-500:]}")
@@ -322,24 +322,24 @@ def test_diagnose_backend_server_issue():
             
             # Check if listening
             if controller.is_port_listening():
-                print(f"\n   ✅ Server started listening after {i}s")
+                print(f"\n    PASS:  Server started listening after {i}s")
                 
                 # Test health endpoint
                 health_ok = controller.test_health_endpoint()
                 if health_ok:
-                    print("   ✅ Health endpoint working")
-                    print("\n🎉 DIAGNOSIS: Server startup is WORKING correctly!")
+                    print("    PASS:  Health endpoint working")
+                    print("\n CELEBRATION:  DIAGNOSIS: Server startup is WORKING correctly!")
                 else:
-                    print("   ⚠️ Health endpoint not working")
-                    print("\n🔍 DIAGNOSIS: Server binds to port but health endpoint fails")
+                    print("    WARNING: [U+FE0F] Health endpoint not working")
+                    print("\n SEARCH:  DIAGNOSIS: Server binds to port but health endpoint fails")
                 return
             
             if i % 5 == 0:
                 print(f"   Still waiting... ({i}s elapsed)")
         
-        print("\n   ❌ Server never started listening within 30s")
+        print("\n    FAIL:  Server never started listening within 30s")
         controller.diagnose_startup_failure()
-        print("\n🔍 DIAGNOSIS: Server process starts but never binds to port")
+        print("\n SEARCH:  DIAGNOSIS: Server process starts but never binds to port")
         print("   Possible causes:")
         print("   - FastAPI lifespan event hanging")
         print("   - Startup sequence blocking before uvicorn.run()")

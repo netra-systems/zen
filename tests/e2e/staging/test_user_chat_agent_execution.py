@@ -117,9 +117,9 @@ class TestUserChatAgentExecution:
                 try:
                     async with session.get(endpoint, timeout=15) as resp:
                         assert resp.status == 200, f"Staging {service} service unhealthy: {resp.status}"
-                        logger.info(f"✅ Staging {service} service healthy")
+                        logger.info(f" PASS:  Staging {service} service healthy")
                 except Exception as e:
-                    pytest.fail(f"❌ Staging {service} service unavailable: {e}")
+                    pytest.fail(f" FAIL:  Staging {service} service unavailable: {e}")
     
     async def _cleanup_test_artifacts(self):
         """Clean up any test artifacts created during testing."""
@@ -148,7 +148,7 @@ class TestUserChatAgentExecution:
         }
         
         await websocket.send(json.dumps(chat_message))
-        logger.info(f"📤 Sent chat message: {message[:50]}...")
+        logger.info(f"[U+1F4E4] Sent chat message: {message[:50]}...")
         
         # Collect responses and events
         responses = []
@@ -165,7 +165,7 @@ class TestUserChatAgentExecution:
                 event_type = response_data.get("type", "unknown")
                 events_received.append(event_type)
                 
-                logger.info(f"📥 Received WebSocket event: {event_type}")
+                logger.info(f"[U+1F4E5] Received WebSocket event: {event_type}")
                 
                 # Track different types of responses
                 if event_type in ["agent_started", "agent_thinking", "tool_executing", "tool_completed"]:
@@ -173,7 +173,7 @@ class TestUserChatAgentExecution:
                 elif event_type == "agent_completed":
                     responses.append(response_data)
                     agent_execution_complete = True
-                    logger.info(f"✅ Agent execution completed")
+                    logger.info(f" PASS:  Agent execution completed")
                     break
                 elif event_type == "agent_response":
                     responses.append(response_data)
@@ -181,11 +181,11 @@ class TestUserChatAgentExecution:
                     agent_response = response_data.get("response", "")
                     if agent_response and len(agent_response) > 50:  # Substantial response
                         agent_execution_complete = True
-                        logger.info(f"✅ Substantial agent response received")
+                        logger.info(f" PASS:  Substantial agent response received")
                         break
                 elif event_type == "error":
                     responses.append(response_data)
-                    logger.warning(f"⚠️ Agent execution error: {response_data.get('message', 'Unknown error')}")
+                    logger.warning(f" WARNING: [U+FE0F] Agent execution error: {response_data.get('message', 'Unknown error')}")
                     break
                 else:
                     # Other events (pings, status updates, etc.)
@@ -197,20 +197,20 @@ class TestUserChatAgentExecution:
             except asyncio.TimeoutError:
                 # Check if we got some response and agent execution is complete
                 if agent_execution_complete or len(responses) > 0:
-                    logger.info(f"⏰ Response collection timeout, but got {len(responses)} responses")
+                    logger.info(f"[U+23F0] Response collection timeout, but got {len(responses)} responses")
                     break
                 else:
-                    logger.warning(f"⏰ No response received after {time.time() - start_time:.1f}s")
+                    logger.warning(f"[U+23F0] No response received after {time.time() - start_time:.1f}s")
                     continue
             except websockets.exceptions.ConnectionClosed:
-                logger.warning("🔌 WebSocket connection closed during response collection")
+                logger.warning("[U+1F50C] WebSocket connection closed during response collection")
                 break
             except Exception as e:
-                logger.error(f"❌ Error receiving WebSocket response: {e}")
+                logger.error(f" FAIL:  Error receiving WebSocket response: {e}")
                 break
         
         if expect_agent_execution and not agent_execution_complete and len(responses) == 0:
-            logger.warning(f"⚠️ Expected agent execution but got no substantial responses")
+            logger.warning(f" WARNING: [U+FE0F] Expected agent execution but got no substantial responses")
         
         return responses, events_received
     
@@ -238,7 +238,7 @@ class TestUserChatAgentExecution:
         try:
             # Step 1: Connect authenticated WebSocket
             websocket = await self.ws_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info(f"🔌 WebSocket connected successfully")
+            logger.info(f"[U+1F50C] WebSocket connected successfully")
             
             # Step 2: Send chat message requesting assistance
             user_message = (
@@ -264,7 +264,7 @@ class TestUserChatAgentExecution:
             agent_events_received = any(event in received_event_types for event in expected_events)
             
             if not agent_events_received:
-                logger.warning(f"⚠️ Expected agent events not received. Got: {list(received_event_types)}")
+                logger.warning(f" WARNING: [U+FE0F] Expected agent events not received. Got: {list(received_event_types)}")
             
             # Step 4: Validate agent response quality
             agent_responses_with_content = [
@@ -320,14 +320,14 @@ class TestUserChatAgentExecution:
             assert result.business_value_delivered, "No business value delivered to user"
             assert execution_time < 120.0, f"Agent response too slow: {execution_time}s"
             
-            logger.info(f"✅ BUSINESS VALUE: User received AI assistance through chat")
+            logger.info(f" PASS:  BUSINESS VALUE: User received AI assistance through chat")
             logger.info(f"   Response quality: {', '.join(business_value_indicators)}")
             logger.info(f"   Execution time: {execution_time:.1f}s")
             logger.info(f"   Events received: {len(set(events))} unique event types")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Chat agent workflow failed: {e}")
+            logger.error(f" FAIL:  Chat agent workflow failed: {e}")
             pytest.fail(f"Complete chat message to agent response workflow failed: {e}")
     
     @pytest.mark.asyncio
@@ -354,7 +354,7 @@ class TestUserChatAgentExecution:
         try:
             # Step 1: Connect WebSocket
             websocket = await self.ws_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info(f"🔌 WebSocket connected for multi-agent test")
+            logger.info(f"[U+1F50C] WebSocket connected for multi-agent test")
             
             # Step 2: Send complex request requiring tools/collaboration
             complex_request = (
@@ -389,12 +389,12 @@ class TestUserChatAgentExecution:
                     tool_name = response.get("tool_name", "unknown_tool")
                     tools_used.append(tool_name)
                     collaboration_indicators.append("tool_execution")
-                    logger.info(f"🔧 Tool executed: {tool_name}")
+                    logger.info(f"[U+1F527] Tool executed: {tool_name}")
                 
                 elif response_type == "agent_started":
                     agent_name = response.get("agent_name", "unknown_agent")
                     collaboration_indicators.append("multi_agent")
-                    logger.info(f"🤖 Agent started: {agent_name}")
+                    logger.info(f"[U+1F916] Agent started: {agent_name}")
                 
                 # Check response content for collaboration indicators
                 content = (
@@ -446,7 +446,7 @@ class TestUserChatAgentExecution:
             assert len(tool_execution_events) > 0, "No tool execution detected"
             assert result.business_value_delivered, "Advanced features failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: Advanced AI collaboration delivered comprehensive analysis")
+            logger.info(f" PASS:  BUSINESS VALUE: Advanced AI collaboration delivered comprehensive analysis")
             logger.info(f"   Tools used: {', '.join(unique_tools) if unique_tools else 'None detected'}")
             logger.info(f"   Collaboration types: {', '.join(unique_collaboration_types)}")
             logger.info(f"   Execution time: {execution_time:.1f}s")
@@ -454,7 +454,7 @@ class TestUserChatAgentExecution:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Multi-agent collaboration failed: {e}")
+            logger.error(f" FAIL:  Multi-agent collaboration failed: {e}")
             pytest.fail(f"Multi-agent collaboration with tool execution failed: {e}")
     
     @pytest.mark.asyncio
@@ -481,7 +481,7 @@ class TestUserChatAgentExecution:
         try:
             # Step 1: Connect WebSocket
             websocket = await self.ws_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info(f"🔌 WebSocket connected for long-running task test")
+            logger.info(f"[U+1F50C] WebSocket connected for long-running task test")
             
             # Step 2: Submit long-running analysis request
             long_running_request = (
@@ -594,7 +594,7 @@ class TestUserChatAgentExecution:
             assert user_experience_metrics["regular_communication"], "Insufficient user communication during long task"
             assert result.business_value_delivered, "Long-running task failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: User maintained engagement during long AI analysis")
+            logger.info(f" PASS:  BUSINESS VALUE: User maintained engagement during long AI analysis")
             logger.info(f"   Progress updates: {user_experience_metrics['progress_updates']}")
             logger.info(f"   Total communications: {user_experience_metrics['total_responses']}")
             logger.info(f"   Analysis quality: {', '.join(comprehensive_analysis_indicators)}")
@@ -602,7 +602,7 @@ class TestUserChatAgentExecution:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Long-running agent task failed: {e}")
+            logger.error(f" FAIL:  Long-running agent task failed: {e}")
             pytest.fail(f"Long-running agent tasks with progress updates failed: {e}")
     
     @pytest.mark.asyncio
@@ -629,7 +629,7 @@ class TestUserChatAgentExecution:
         try:
             # Step 1: Connect WebSocket
             websocket = await self.ws_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info(f"🔌 WebSocket connected for failure recovery test")
+            logger.info(f"[U+1F50C] WebSocket connected for failure recovery test")
             
             # Step 2: Submit challenging request that might cause issues
             challenging_request = (
@@ -737,14 +737,14 @@ class TestUserChatAgentExecution:
             assert user_experience_quality["system_recovery"], "System did not recover to normal operation"
             assert result.business_value_delivered, "Failure recovery did not maintain user experience quality"
             
-            logger.info(f"✅ BUSINESS VALUE: System maintains user trust during challenging scenarios")
+            logger.info(f" PASS:  BUSINESS VALUE: System maintains user trust during challenging scenarios")
             logger.info(f"   Error handling: {', '.join(error_handling_indicators)}")
             logger.info(f"   Recovery indicators: {', '.join(recovery_indicators)}")
             logger.info(f"   User experience quality: {sum(user_experience_quality.values())}/5 aspects maintained")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Agent failure recovery test failed: {e}")
+            logger.error(f" FAIL:  Agent failure recovery test failed: {e}")
             pytest.fail(f"Agent failure recovery and error handling failed: {e}")
     
     @pytest.mark.asyncio
@@ -771,7 +771,7 @@ class TestUserChatAgentExecution:
         try:
             # Step 1: Connect WebSocket
             websocket = await self.ws_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info(f"🔌 WebSocket connected for complex business workflow test")
+            logger.info(f"[U+1F50C] WebSocket connected for complex business workflow test")
             
             # Step 2: Initiate complex business workflow
             business_workflow_request = (
@@ -884,7 +884,7 @@ class TestUserChatAgentExecution:
             assert deliverable_quality >= 2, f"Insufficient business deliverables: {deliverable_quality}"
             assert result.business_value_delivered, "Complex business workflow failed to deliver enterprise value"
             
-            logger.info(f"✅ BUSINESS VALUE: Enterprise workflow delivered comprehensive business analysis")
+            logger.info(f" PASS:  BUSINESS VALUE: Enterprise workflow delivered comprehensive business analysis")
             logger.info(f"   Workflow coverage: {workflow_completeness:.1%} ({len(workflow_steps_addressed)}/6 steps)")
             logger.info(f"   Steps addressed: {', '.join(workflow_steps_addressed)}")
             logger.info(f"   Business deliverables: {', '.join(business_deliverables)}")
@@ -894,7 +894,7 @@ class TestUserChatAgentExecution:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Complex business workflow failed: {e}")
+            logger.error(f" FAIL:  Complex business workflow failed: {e}")
             pytest.fail(f"Complex business workflows with multiple agent interactions failed: {e}")
 
 

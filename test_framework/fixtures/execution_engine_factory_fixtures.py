@@ -73,7 +73,7 @@ class ExecutionEngineFactoryTestManager:
             if not self.websocket_bridge:
                 raise RuntimeError("Failed to create AgentWebSocketBridge for tests")
                 
-            logger.info("✓ AgentWebSocketBridge created for tests")
+            logger.info("[U+2713] AgentWebSocketBridge created for tests")
             
             # Step 2: Create infrastructure managers for tests
             logger.info("Creating infrastructure managers for tests...")
@@ -94,14 +94,14 @@ class ExecutionEngineFactoryTestManager:
             if not self.factory_instance:
                 raise RuntimeError("Failed to configure ExecutionEngineFactory")
                 
-            logger.info("✓ ExecutionEngineFactory configured with WebSocket bridge")
+            logger.info("[U+2713] ExecutionEngineFactory configured with WebSocket bridge")
             
             # Step 4: Initialize AgentClassRegistry for tests
             try:
                 logger.info("Initializing AgentClassRegistry for tests...")
                 from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
                 agent_class_registry = initialize_agent_class_registry()
-                logger.info(f"✓ AgentClassRegistry initialized with {len(agent_class_registry)} agent classes")
+                logger.info(f"[U+2713] AgentClassRegistry initialized with {len(agent_class_registry)} agent classes")
             except Exception as e:
                 logger.warning(f"AgentClassRegistry initialization failed: {e}")
                 agent_class_registry = None
@@ -115,7 +115,7 @@ class ExecutionEngineFactoryTestManager:
                     llm_manager=None,  # Tests can provide their own
                     tool_dispatcher=None  # Will be created per-request
                 )
-                logger.info("✓ AgentInstanceFactory configured for tests")
+                logger.info("[U+2713] AgentInstanceFactory configured for tests")
             except Exception as e:
                 # Non-critical for basic factory functionality
                 logger.warning(f"AgentInstanceFactory configuration skipped: {e}")
@@ -123,11 +123,11 @@ class ExecutionEngineFactoryTestManager:
             # Step 6: Verify factory functionality
             await self._verify_factory_functionality()
             
-            logger.info("✅ ExecutionEngineFactory fully initialized for tests")
+            logger.info(" PASS:  ExecutionEngineFactory fully initialized for tests")
             return self.factory_instance
             
         except Exception as e:
-            logger.error(f"❌ ExecutionEngineFactory test initialization failed: {e}")
+            logger.error(f" FAIL:  ExecutionEngineFactory test initialization failed: {e}")
             await self.cleanup()
             raise RuntimeError(f"ExecutionEngineFactory initialization failed: {e}") from e
     
@@ -148,7 +148,7 @@ class ExecutionEngineFactoryTestManager:
         if self.factory_instance._websocket_bridge is None:
             raise RuntimeError("Factory WebSocket bridge is None")
             
-        logger.info("✓ Factory functionality verified")
+        logger.info("[U+2713] Factory functionality verified")
     
     async def cleanup(self):
         """Clean up test factory resources."""
@@ -157,7 +157,7 @@ class ExecutionEngineFactoryTestManager:
             if self.factory_instance:
                 try:
                     await self.factory_instance.shutdown()
-                    logger.info("✓ ExecutionEngineFactory shutdown complete")
+                    logger.info("[U+2713] ExecutionEngineFactory shutdown complete")
                 except Exception as e:
                     logger.warning(f"Factory shutdown error: {e}")
                     
@@ -166,7 +166,7 @@ class ExecutionEngineFactoryTestManager:
             async with _factory_lock:
                 _factory_instance = None
                 
-            logger.info("✓ Factory singleton state reset")
+            logger.info("[U+2713] Factory singleton state reset")
             
             # Run any additional cleanup tasks
             for task in self.cleanup_tasks:
@@ -180,7 +180,7 @@ class ExecutionEngineFactoryTestManager:
             self.websocket_bridge = None
             
         except Exception as e:
-            logger.error(f"❌ Factory cleanup error: {e}")
+            logger.error(f" FAIL:  Factory cleanup error: {e}")
 
 
 # Global test manager instance
@@ -207,7 +207,7 @@ async def execution_engine_factory_test_initialized() -> AsyncGenerator[Executio
     
     try:
         factory = await _test_manager.initialize_for_tests()
-        logger.info("🔧 ExecutionEngineFactory test fixture ready")
+        logger.info("[U+1F527] ExecutionEngineFactory test fixture ready")
         yield factory
         
     finally:
@@ -215,7 +215,7 @@ async def execution_engine_factory_test_initialized() -> AsyncGenerator[Executio
         if _test_manager:
             await _test_manager.cleanup()
             _test_manager = None
-            logger.info("🧹 ExecutionEngineFactory test fixture cleaned up")
+            logger.info("[U+1F9F9] ExecutionEngineFactory test fixture cleaned up")
 
 
 @pytest.fixture(scope="session")
@@ -237,7 +237,7 @@ async def execution_engine_factory_session() -> AsyncGenerator[ExecutionEngineFa
     
     try:
         factory = await _test_manager.initialize_for_tests()
-        logger.info("🏭 ExecutionEngineFactory session fixture ready")
+        logger.info("[U+1F3ED] ExecutionEngineFactory session fixture ready")
         yield factory
         
     finally:
@@ -245,7 +245,7 @@ async def execution_engine_factory_session() -> AsyncGenerator[ExecutionEngineFa
         if _test_manager:
             await _test_manager.cleanup()
             _test_manager = None
-            logger.info("🏭 ExecutionEngineFactory session fixture cleaned up")
+            logger.info("[U+1F3ED] ExecutionEngineFactory session fixture cleaned up")
 
 
 async def configure_execution_engine_factory_for_test() -> ExecutionEngineFactory:

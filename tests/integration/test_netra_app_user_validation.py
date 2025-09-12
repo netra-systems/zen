@@ -237,7 +237,7 @@
                             # REMOVED_SYNTAX_ERROR: env_name = validator.env.get('ENVIRONMENT', 'unknown')
                             # REMOVED_SYNTAX_ERROR: if env_name == 'development':
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: ⚠️  netra_app user not found in development - this is acceptable")
+                                # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  netra_app user not found in development - this is acceptable")
                                 # REMOVED_SYNTAX_ERROR: print("   Development can use postgres user as fallback")
                                 # REMOVED_SYNTAX_ERROR: pytest.skip("netra_app user not configured in development environment")
                                 # REMOVED_SYNTAX_ERROR: else:

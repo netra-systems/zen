@@ -840,9 +840,9 @@ if __name__ == "__main__":
     # CRITICAL: Add execution time validation to prevent 0.00s E2E test violations
     def validate_e2e_execution_time():
         """Validate that E2E tests execute with measurable time to prevent CLAUDE.md violations."""
-        print("\n🔍 E2E Authentication Test Execution Time Validation Enabled")
-        print("⚠️  Any E2E test completing in <1ms will be flagged as a CLAUDE.md violation")
-        print("✅ This ensures tests use REAL services and authentication\n")
+        print("\n SEARCH:  E2E Authentication Test Execution Time Validation Enabled")
+        print(" WARNING: [U+FE0F]  Any E2E test completing in <1ms will be flagged as a CLAUDE.md violation")
+        print(" PASS:  This ensures tests use REAL services and authentication\n")
     
     validate_e2e_execution_time()
     pytest.main([__file__, "-v", "--tb=short", "--real-services"])

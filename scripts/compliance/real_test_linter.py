@@ -102,7 +102,7 @@ class RealTestLinter:
     def _print_results(self, violations: List[TestViolation], show_fix_suggestions: bool):
         """Print validation results"""
         if not violations:
-            print("✅ All test files comply with real test requirements!")
+            print(" PASS:  All test files comply with real test requirements!")
             return
         
         # Group by severity
@@ -114,13 +114,13 @@ class RealTestLinter:
         major_count = len(by_severity["major"])
         minor_count = len(by_severity["minor"])
         
-        print(f"\n❌ Found {len(violations)} test requirement violations:")
+        print(f"\n FAIL:  Found {len(violations)} test requirement violations:")
         if critical_count > 0:
-            print(f"   🔴 {critical_count} CRITICAL (must fix)")
+            print(f"   [U+1F534] {critical_count} CRITICAL (must fix)")
         if major_count > 0:
-            print(f"   🟡 {major_count} MAJOR (should fix)")
+            print(f"   [U+1F7E1] {major_count} MAJOR (should fix)")
         if minor_count > 0:
-            print(f"   🟢 {minor_count} MINOR (nice to fix)")
+            print(f"   [U+1F7E2] {minor_count} MINOR (nice to fix)")
         
         # Show top violations by type
         by_type = {}
@@ -138,16 +138,16 @@ class RealTestLinter:
             
             # Show examples
             for v in type_violations[:3]:
-                severity_icon = {"critical": "🔴", "major": "🟡", "minor": "🟢"}[v.severity]
+                severity_icon = {"critical": "[U+1F534]", "major": "[U+1F7E1]", "minor": "[U+1F7E2]"}[v.severity]
                 print(f"    {severity_icon} {v.file_path}:{v.line_number}")
         
         if show_fix_suggestions:
-            print(f"\n💡 Suggested fixes:")
-            print(f"  • Run with --fix to attempt automatic fixes")
-            print(f"  • For file_size violations: Split large test files into focused modules")
-            print(f"  • For function_size violations: Extract helper methods")
-            print(f"  • For excessive_mocking violations: Use real components where possible")
-            print(f"  • For mock_component violations: Replace with real component instantiation")
+            print(f"\n IDEA:  Suggested fixes:")
+            print(f"  [U+2022] Run with --fix to attempt automatic fixes")
+            print(f"  [U+2022] For file_size violations: Split large test files into focused modules")
+            print(f"  [U+2022] For function_size violations: Extract helper methods")
+            print(f"  [U+2022] For excessive_mocking violations: Use real components where possible")
+            print(f"  [U+2022] For mock_component violations: Replace with real component instantiation")
     
     def _attempt_fixes(self, violations: List[TestViolation]) -> int:
         """Attempt to automatically fix violations"""
@@ -159,23 +159,23 @@ class RealTestLinter:
                     if self.fixer.fix_mock_component_function(violation.file_path, 
                                                             violation.line_number):
                         fixed_count += 1
-                        print(f"✓ Fixed mock component function in {violation.file_path}")
+                        print(f"[U+2713] Fixed mock component function in {violation.file_path}")
                 
                 elif violation.violation_type == "excessive_mocking":
                     if self.fixer.reduce_mocking_in_integration_test(violation.file_path):
                         fixed_count += 1
-                        print(f"✓ Reduced mocking in {violation.file_path}")
+                        print(f"[U+2713] Reduced mocking in {violation.file_path}")
                 
                 # File size and function size violations require manual intervention
                 # but we can provide specific guidance
                 elif violation.violation_type == "file_size":
-                    print(f"⚠ Manual fix needed: Split {violation.file_path} (too large)")
+                    print(f" WARNING:  Manual fix needed: Split {violation.file_path} (too large)")
                 
                 elif violation.violation_type == "function_size":
-                    print(f"⚠ Manual fix needed: Extract helpers in {violation.file_path}:{violation.line_number}")
+                    print(f" WARNING:  Manual fix needed: Extract helpers in {violation.file_path}:{violation.line_number}")
             
             except Exception as e:
-                print(f"❌ Failed to fix {violation.violation_type} in {violation.file_path}: {e}")
+                print(f" FAIL:  Failed to fix {violation.violation_type} in {violation.file_path}: {e}")
         
         return fixed_count
     

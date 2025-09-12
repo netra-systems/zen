@@ -488,7 +488,7 @@ class TestWebSocketRobustnessProof:
                 {"type": "test", "data": float('inf')},  # Infinity
                 {"type": "test", "data": float('nan')},  # NaN
                 {"type": "test", "data": {"nested": {"deep": "value"}}},  # Deep nesting
-                {"type": "test", "data": "Unicode: 🚀 🎯 ✅"},  # Unicode
+                {"type": "test", "data": "Unicode: [U+1F680]  TARGET:   PASS: "},  # Unicode
                 {"type": "test", "data": list(range(1000))},  # Large data
                 {"type": "test", "circular": None},  # Will add circular reference
             ]
@@ -640,7 +640,7 @@ class TestWebSocketRobustnessProof:
 @pytest.mark.asyncio
 async def test_comprehensive_robustness_audit():
     """Run comprehensive audit of all WebSocket robustness improvements."""
-    logger.info("🚀 Starting Comprehensive WebSocket Robustness Audit")
+    logger.info("[U+1F680] Starting Comprehensive WebSocket Robustness Audit")
     
     test_suite = TestWebSocketRobustnessProof()
     await test_suite.setup_standalone_test()
@@ -662,7 +662,7 @@ async def test_comprehensive_robustness_audit():
             result = await test()
             results.append(result)
             
-            status = "✅ PASSED" if result.passed else "❌ FAILED"
+            status = " PASS:  PASSED" if result.passed else " FAIL:  FAILED"
             logger.info(f"{status} {result.test_name} ({result.duration_seconds:.2f}s)")
             
             if result.error_message:
@@ -676,7 +676,7 @@ async def test_comprehensive_robustness_audit():
                 duration_seconds=0
             )
             results.append(failed_result)
-            logger.error(f"❌ FAILED {test.__name__} - Exception: {e}")
+            logger.error(f" FAIL:  FAILED {test.__name__} - Exception: {e}")
     
     # Cleanup
     await test_suite._cleanup_all()
@@ -690,13 +690,13 @@ async def test_comprehensive_robustness_audit():
     logger.info("\n" + "="*80)
     logger.info("WEBSOCKET ROBUSTNESS AUDIT REPORT")
     logger.info("="*80)
-    logger.info(f"Overall Status: {'✅ ALL IMPROVEMENTS VERIFIED' if overall_success else '❌ SOME ISSUES FOUND'}")
+    logger.info(f"Overall Status: {' PASS:  ALL IMPROVEMENTS VERIFIED' if overall_success else ' FAIL:  SOME ISSUES FOUND'}")
     logger.info(f"Tests Passed: {passed_tests}/{total_tests}")
     logger.info(f"Total Duration: {total_duration:.2f} seconds")
     logger.info("")
     
     for result in results:
-        status = "✅ PASS" if result.passed else "❌ FAIL"
+        status = " PASS:  PASS" if result.passed else " FAIL:  FAIL"
         logger.info(f"{status} {result.test_name}")
         
         if result.metrics:
@@ -711,16 +711,16 @@ async def test_comprehensive_robustness_audit():
     
     # Business value summary
     if overall_success:
-        logger.info("🎯 BUSINESS VALUE CONFIRMED:")
-        logger.info("  • Chat reliability improved - messages won't be lost")
-        logger.info("  • Error recovery prevents user disconnections")
-        logger.info("  • Memory leaks eliminated - system stable under load")
-        logger.info("  • Concurrent users properly isolated - no cross-talk")
-        logger.info("  • Thread safety prevents race conditions and crashes")
+        logger.info(" TARGET:  BUSINESS VALUE CONFIRMED:")
+        logger.info("  [U+2022] Chat reliability improved - messages won't be lost")
+        logger.info("  [U+2022] Error recovery prevents user disconnections")
+        logger.info("  [U+2022] Memory leaks eliminated - system stable under load")
+        logger.info("  [U+2022] Concurrent users properly isolated - no cross-talk")
+        logger.info("  [U+2022] Thread safety prevents race conditions and crashes")
         logger.info("")
-        logger.info("✅ WebSocket improvements meet business requirements!")
+        logger.info(" PASS:  WebSocket improvements meet business requirements!")
     else:
-        logger.error("❌ Some WebSocket robustness improvements need attention")
+        logger.error(" FAIL:  Some WebSocket robustness improvements need attention")
     
     # Assert for test framework
     assert overall_success, f"Robustness audit failed: {passed_tests}/{total_tests} tests passed"
@@ -734,7 +734,7 @@ async def test_comprehensive_robustness_audit():
 
 if __name__ == "__main__":
     """Run the standalone robustness proof."""
-    print("🚀 Running Standalone WebSocket Robustness Proof")
+    print("[U+1F680] Running Standalone WebSocket Robustness Proof")
     print("This test requires NO external services - proves improvements work!")
     print("")
     

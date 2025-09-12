@@ -111,10 +111,10 @@ class TestFixLoop:
         iteration_result['failures_found'] = failures[:5]  # Store first 5 failures
         
         if success:
-            print("✅ All tests passed!")
+            print(" PASS:  All tests passed!")
             iteration_result['status'] = 'all_passed'
         else:
-            print(f"❌ Found {len(failures)} failing tests")
+            print(f" FAIL:  Found {len(failures)} failing tests")
             
             # Step 2: Fix one failing test
             first_failure = self.get_first_failing_test(failures)
@@ -147,7 +147,7 @@ class TestFixLoop:
             
             # If all tests pass, we could stop early
             if result['tests_passed']:
-                print(f"\n🎉 All tests passing after {self.current_iteration} iterations!")
+                print(f"\n CELEBRATION:  All tests passing after {self.current_iteration} iterations!")
                 if input("Continue anyway? (y/n): ").lower() != 'y':
                     break
             

@@ -2,7 +2,7 @@
 Test Auth Service Integration
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure authentication system reliability and security
 - Value Impact: Prevent auth failures that cause customer churn and security breaches
 - Strategic Impact: Core platform functionality - auth must work for all features

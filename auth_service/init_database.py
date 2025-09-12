@@ -70,10 +70,10 @@ async def main():
     success = await init_auth_database()
     
     if success:
-        logger.info("✅ Auth database initialization successful")
+        logger.info(" PASS:  Auth database initialization successful")
         return 0
     else:
-        logger.error("❌ Auth database initialization failed")
+        logger.error(" FAIL:  Auth database initialization failed")
         return 1
 
 

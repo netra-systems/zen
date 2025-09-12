@@ -414,7 +414,7 @@ class TestConfigurationValidatorSSOTViolations(SSotAsyncTestCase, unittest.TestC
         Test Golden Path configuration failures due to SSOT violations.
         
         Reproduces end-to-end configuration failures that impact the Golden Path
-        user flow (login → WebSocket → AI response) due to validator inconsistencies.
+        user flow (login  ->  WebSocket  ->  AI response) due to validator inconsistencies.
         """
         # Golden Path configuration requirements
         golden_path_config = {

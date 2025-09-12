@@ -60,7 +60,7 @@ class ClaudeCommitHook:
         if not self.should_activate():
             return 0
         
-        print("🤖 Claude Commit Helper is checking your changes...")
+        print("[U+1F916] Claude Commit Helper is checking your changes...")
         
         try:
             # Run the manager
@@ -75,12 +75,12 @@ class ClaudeCommitHook:
                 staging_file = self.repo_root / ".git" / "CLAUDE_COMMIT_MSG"
                 with open(staging_file, 'w') as f:
                     f.write(result.stdout.strip())
-                print(f"✅ Commit message prepared. Review it when git opens your editor.")
+                print(f" PASS:  Commit message prepared. Review it when git opens your editor.")
             else:
-                print("ℹ️ Claude commit helper completed (no message generated)")
+                print("[U+2139][U+FE0F] Claude commit helper completed (no message generated)")
             
         except Exception as e:
-            print(f"⚠️ Claude commit helper error: {e}")
+            print(f" WARNING: [U+FE0F] Claude commit helper error: {e}")
             # Don't block commit on errors
         
         return 0

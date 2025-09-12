@@ -1,7 +1,7 @@
 """
 MISSION CRITICAL: Windows Asyncio Deadlock Protection Tests for Golden Path
 
-🚨 MISSION CRITICAL TEST 🚨
+ ALERT:  MISSION CRITICAL TEST  ALERT: 
 This test suite detects and prevents Windows-specific asyncio deadlocks that have
 caused system hangs and blocked business operations on Windows development environments.
 
@@ -45,7 +45,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
     """
-    🚨 MISSION CRITICAL TEST SUITE 🚨
+     ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     
     Detects and prevents Windows-specific asyncio deadlocks that can halt
     the entire system during golden path operations.
@@ -88,7 +88,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
                     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
                     self.record_metric("windows_proactor_policy_set", True)
             except Exception as policy_error:
-                print(f"⚠️  Windows event loop policy warning: {policy_error}")
+                print(f" WARNING: [U+FE0F]  Windows event loop policy warning: {policy_error}")
         
     async def async_teardown_method(self, method=None):
         """Critical cleanup with deadlock prevention."""
@@ -112,7 +112,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
                         timeout=5.0
                     )
                 except asyncio.TimeoutError:
-                    print("⚠️  Task cancellation timeout during cleanup")
+                    print(" WARNING: [U+FE0F]  Task cancellation timeout during cleanup")
             
             # Close connections
             for connection in self.active_connections:
@@ -125,7 +125,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             gc.collect()
             
         except Exception as e:
-            print(f"⚠️  Deadlock protection cleanup error: {e}")
+            print(f" WARNING: [U+FE0F]  Deadlock protection cleanup error: {e}")
         
         await super().async_teardown_method(method)
     
@@ -135,7 +135,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_asyncio_deadlock_protection(self):
         """
-        🚨 WINDOWS DEADLOCK PROTECTION: WebSocket Asyncio Operations
+         ALERT:  WINDOWS DEADLOCK PROTECTION: WebSocket Asyncio Operations
         
         Tests that WebSocket operations do not cause asyncio deadlocks on Windows,
         particularly during connection establishment and message handling.
@@ -264,7 +264,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             ])
             
             pytest.fail(
-                f"🚨 CRITICAL WINDOWS DEADLOCK DETECTED\n"
+                f" ALERT:  CRITICAL WINDOWS DEADLOCK DETECTED\n"
                 f"Platform: {platform.system()} {platform.release()}\n"
                 f"Python: {sys.version}\n"
                 f"Deadlocks Detected: {deadlocks_detected}/{total_operations}\n"
@@ -283,20 +283,20 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             # Only fail if this is Windows and failures suggest deadlock risk
             if self.is_windows and operations_failed > 1:
                 pytest.fail(
-                    f"🚨 WINDOWS ASYNCIO INSTABILITY DETECTED\n"
+                    f" ALERT:  WINDOWS ASYNCIO INSTABILITY DETECTED\n"
                     f"Failed Operations: {operations_failed}/{total_operations}\n"
                     f"Failure Details:\n{failure_details}\n"
                     f"This may indicate deadlock susceptibility on Windows!"
                 )
         
         # SUCCESS CASE: No deadlocks detected
-        print(f"\n✅ WINDOWS DEADLOCK PROTECTION: AsyncIO Operations Test PASSED")
-        print(f"   🖥️  Platform: {platform.system()} {platform.release()}")
-        print(f"   🐍 Python: {sys.version_info}")
-        print(f"   🔒 Deadlocks Detected: {deadlocks_detected}")
-        print(f"   ✅ Operations Tested: {total_operations}")
-        print(f"   ⏱️  Total Test Time: {total_deadlock_test_time:.2f}s")
-        print(f"   💻 Development Environment: PROTECTED")
+        print(f"\n PASS:  WINDOWS DEADLOCK PROTECTION: AsyncIO Operations Test PASSED")
+        print(f"   [U+1F5A5][U+FE0F]  Platform: {platform.system()} {platform.release()}")
+        print(f"   [U+1F40D] Python: {sys.version_info}")
+        print(f"   [U+1F512] Deadlocks Detected: {deadlocks_detected}")
+        print(f"    PASS:  Operations Tested: {total_operations}")
+        print(f"   [U+23F1][U+FE0F]  Total Test Time: {total_deadlock_test_time:.2f}s")
+        print(f"   [U+1F4BB] Development Environment: PROTECTED")
     
     async def _test_rapid_connection_cycles(self, jwt_token: str, user_context) -> None:
         """Test rapid WebSocket connection/disconnection cycles for deadlocks."""
@@ -464,7 +464,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_event_loop_starvation_protection(self):
         """
-        🚨 WINDOWS DEADLOCK PROTECTION: Event Loop Starvation
+         ALERT:  WINDOWS DEADLOCK PROTECTION: Event Loop Starvation
         
         Tests that CPU-intensive operations do not starve the event loop,
         causing apparent deadlocks on Windows systems.
@@ -601,7 +601,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             
             if successful_cpu_tasks == 0 and not websocket_success:
                 pytest.fail(
-                    f"🚨 CRITICAL EVENT LOOP DEADLOCK: All operations failed\n"
+                    f" ALERT:  CRITICAL EVENT LOOP DEADLOCK: All operations failed\n"
                     f"CPU Tasks Completed: {successful_cpu_tasks}/3\n"
                     f"WebSocket Success: {websocket_success}\n"
                     f"This indicates complete event loop starvation!"
@@ -609,7 +609,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             
             elif not websocket_success:
                 pytest.fail(
-                    f"🚨 EVENT LOOP STARVATION: WebSocket operations blocked\n"
+                    f" ALERT:  EVENT LOOP STARVATION: WebSocket operations blocked\n"
                     f"CPU Tasks Completed: {successful_cpu_tasks}/3\n"
                     f"WebSocket Success: {websocket_success}\n"
                     f"WebSocket Error: {websocket_result.get('error') if isinstance(websocket_result, dict) else websocket_result}\n"
@@ -617,15 +617,15 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
                 )
             
             # SUCCESS CASE
-            print(f"\n✅ EVENT LOOP STARVATION PROTECTION: Test PASSED")
-            print(f"   🔄 CPU Tasks Completed: {successful_cpu_tasks}/3")
-            print(f"   🌐 WebSocket Operations: {'✅' if websocket_success else '❌'}")
-            print(f"   ⏱️  Test Duration: {starvation_test_time:.2f}s")
-            print(f"   💻 Event Loop: RESPONSIVE")
+            print(f"\n PASS:  EVENT LOOP STARVATION PROTECTION: Test PASSED")
+            print(f"    CYCLE:  CPU Tasks Completed: {successful_cpu_tasks}/3")
+            print(f"   [U+1F310] WebSocket Operations: {' PASS: ' if websocket_success else ' FAIL: '}")
+            print(f"   [U+23F1][U+FE0F]  Test Duration: {starvation_test_time:.2f}s")
+            print(f"   [U+1F4BB] Event Loop: RESPONSIVE")
             
         except asyncio.TimeoutError:
             pytest.fail(
-                f"🚨 CRITICAL EVENT LOOP DEADLOCK: Test timed out after {self.deadlock_timeout}s\n"
+                f" ALERT:  CRITICAL EVENT LOOP DEADLOCK: Test timed out after {self.deadlock_timeout}s\n"
                 f"This indicates a complete event loop deadlock!\n"
                 f"Platform: {platform.system()}\n"
                 f"Tasks may be blocking the event loop indefinitely"
@@ -638,7 +638,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_windows_specific_asyncio_patterns(self):
         """
-        🚨 WINDOWS-SPECIFIC DEADLOCK PROTECTION
+         ALERT:  WINDOWS-SPECIFIC DEADLOCK PROTECTION
         
         Tests Windows-specific asyncio patterns that are known to cause deadlocks,
         including Proactor event loop and Windows threading interactions.
@@ -759,7 +759,7 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             ])
             
             pytest.fail(
-                f"🚨 CRITICAL WINDOWS ASYNCIO DEADLOCK DETECTED\n"
+                f" ALERT:  CRITICAL WINDOWS ASYNCIO DEADLOCK DETECTED\n"
                 f"Windows Version: {platform.platform()}\n"
                 f"Python: {sys.version}\n"
                 f"Deadlocks: {deadlocks_detected}/{total_tests}\n"
@@ -775,20 +775,20 @@ class TestWindowsAsyncioDeadlockProtection(SSotAsyncTestCase):
             ])
             
             pytest.fail(
-                f"🚨 WINDOWS ASYNCIO INSTABILITY DETECTED\n"
+                f" ALERT:  WINDOWS ASYNCIO INSTABILITY DETECTED\n"
                 f"Failed Tests: {tests_failed}/{total_tests}\n"
                 f"Failure Details:\n{failure_details}\n"
                 f"This indicates Windows-specific asyncio issues!"
             )
         
         # SUCCESS CASE
-        print(f"\n✅ WINDOWS ASYNCIO DEADLOCK PROTECTION: Test PASSED")
-        print(f"   🖥️  Windows Version: {platform.platform()}")
-        print(f"   🐍 Python: {sys.version}")
-        print(f"   🔒 Deadlocks Detected: {deadlocks_detected}")
-        print(f"   ✅ Tests Passed: {total_tests - tests_failed}/{total_tests}")
-        print(f"   ⏱️  Test Duration: {total_windows_test_time:.2f}s")
-        print(f"   💻 Windows Development: PROTECTED")
+        print(f"\n PASS:  WINDOWS ASYNCIO DEADLOCK PROTECTION: Test PASSED")
+        print(f"   [U+1F5A5][U+FE0F]  Windows Version: {platform.platform()}")
+        print(f"   [U+1F40D] Python: {sys.version}")
+        print(f"   [U+1F512] Deadlocks Detected: {deadlocks_detected}")
+        print(f"    PASS:  Tests Passed: {total_tests - tests_failed}/{total_tests}")
+        print(f"   [U+23F1][U+FE0F]  Test Duration: {total_windows_test_time:.2f}s")
+        print(f"   [U+1F4BB] Windows Development: PROTECTED")
 
 
 if __name__ == "__main__":

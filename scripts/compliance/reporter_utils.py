@@ -51,9 +51,9 @@ class ReporterUtils:
             }
             return text_markers.get(severity, '[ ]')
         markers = {
-            'critical': '🚨',
-            'high': '🔴',
-            'medium': '🟡',
-            'low': '🟢'
+            'critical': ' ALERT: ',
+            'high': '[U+1F534]',
+            'medium': '[U+1F7E1]',
+            'low': '[U+1F7E2]'
         }
-        return markers.get(severity, '⚪')
+        return markers.get(severity, '[U+26AA]')

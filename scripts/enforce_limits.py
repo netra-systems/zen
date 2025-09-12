@@ -161,10 +161,10 @@ class EnforcementReporter:
     def generate_console_report(violations: List[ViolationDetail]) -> str:
         """Generate human-readable console report"""
         if not violations:
-            return "✅ All files comply with architectural limits"
+            return " PASS:  All files comply with architectural limits"
         
         report_lines = []
-        report_lines.append("🔴 ARCHITECTURAL LIMIT VIOLATIONS DETECTED")
+        report_lines.append("[U+1F534] ARCHITECTURAL LIMIT VIOLATIONS DETECTED")
         report_lines.append("=" * 60)
         
         # Group by violation type
@@ -173,7 +173,7 @@ class EnforcementReporter:
         for vtype, items in by_type.items():
             report_lines.append(f"\n{vtype.upper()} VIOLATIONS ({len(items)}):")
             for violation in items:
-                report_lines.append(f"  📁 {violation.file_path}")
+                report_lines.append(f"  [U+1F4C1] {violation.file_path}")
                 if violation.line_number:
                     report_lines.append(f"     Line {violation.line_number}")
                 if violation.function_name:

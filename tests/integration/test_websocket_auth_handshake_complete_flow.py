@@ -34,7 +34,7 @@ This test validates the complete WebSocket authentication handshake flow from
 initial connection through JWT validation, session binding, and state persistence.
 
 CRITICAL: Real integration testing with minimal mocking.
-Tests the complete auth flow: OAuth → JWT → WebSocket → Session.
+Tests the complete auth flow: OAuth  ->  JWT  ->  WebSocket  ->  Session.
 """
 
 import asyncio

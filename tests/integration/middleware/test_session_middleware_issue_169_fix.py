@@ -70,7 +70,7 @@ class TestSessionMiddlewareIssue169Fix:
         assert isinstance(session_data, dict)
         assert 'user_id' in session_data  # Should get from cookies or state
         
-        self.logger.info("✅ Phase 1: Defensive session access patterns working")
+        self.logger.info(" PASS:  Phase 1: Defensive session access patterns working")
     
     def test_phase1_session_availability_detector(self):
         """Test Phase 1: Session availability detection utility."""
@@ -96,7 +96,7 @@ class TestSessionMiddlewareIssue169Fix:
             availability = detector._detect_session_environment()
             assert availability is False
         
-        self.logger.info("✅ Phase 1: Session availability detection working")
+        self.logger.info(" PASS:  Phase 1: Session availability detection working")
     
     def test_phase1_safe_session_accessor(self):
         """Test Phase 1: Safe session accessor with fallback strategies."""
@@ -121,7 +121,7 @@ class TestSessionMiddlewareIssue169Fix:
         assert 'user_id' in session_data
         assert 'user_email' in session_data
         
-        self.logger.info("✅ Phase 1: Safe session accessor fallbacks working")
+        self.logger.info(" PASS:  Phase 1: Safe session accessor fallbacks working")
     
     @patch('shared.isolated_environment.get_env')
     def test_phase2_secret_key_configuration_fix(self, mock_env):
@@ -146,7 +146,7 @@ class TestSessionMiddlewareIssue169Fix:
         assert len(secret_key) >= 32
         assert secret_key is not None
         
-        self.logger.info("✅ Phase 2: SECRET_KEY configuration fixes working")
+        self.logger.info(" PASS:  Phase 2: SECRET_KEY configuration fixes working")
     
     def test_phase2_middleware_registration_order(self):
         """Test Phase 2: Middleware registration order fixes."""
@@ -186,7 +186,7 @@ class TestSessionMiddlewareIssue169Fix:
         expected_order = ['session', 'gcp_auth', 'cors', 'auth']
         assert setup_calls == expected_order
         
-        self.logger.info("✅ Phase 2: Middleware registration order fixed")
+        self.logger.info(" PASS:  Phase 2: Middleware registration order fixed")
     
     def test_phase2_session_middleware_validation(self):
         """Test Phase 2: SessionMiddleware installation validation."""
@@ -207,7 +207,7 @@ class TestSessionMiddlewareIssue169Fix:
         
         assert validation_passed
         
-        self.logger.info("✅ Phase 2: SessionMiddleware validation working")
+        self.logger.info(" PASS:  Phase 2: SessionMiddleware validation working")
     
     def test_phase3_unified_secret_manager(self):
         """Test Phase 3: Consolidated secret management SSOT."""
@@ -229,7 +229,7 @@ class TestSessionMiddlewareIssue169Fix:
             assert validation_report['overall_status'] in ['success', 'error']
             assert 'SECRET_KEY' in validation_report['secrets']
             
-        self.logger.info("✅ Phase 3: Unified secret manager SSOT working")
+        self.logger.info(" PASS:  Phase 3: Unified secret manager SSOT working")
     
     def test_phase3_secret_manager_fallback_strategies(self):
         """Test Phase 3: Secret manager fallback strategies."""
@@ -250,7 +250,7 @@ class TestSessionMiddlewareIssue169Fix:
             assert secret_info.source == SecretSource.DEVELOPMENT_FALLBACK
             assert secret_info.is_fallback is True
             
-        self.logger.info("✅ Phase 3: Secret manager fallback strategies working")
+        self.logger.info(" PASS:  Phase 3: Secret manager fallback strategies working")
     
     @patch('shared.isolated_environment.get_env')
     def test_phase3_gcp_secret_manager_integration(self, mock_env):
@@ -271,7 +271,7 @@ class TestSessionMiddlewareIssue169Fix:
             assert secret_info.source == SecretSource.GCP_SECRET_MANAGER
             assert len(secret_info.value) >= 32
         
-        self.logger.info("✅ Phase 3: GCP Secret Manager integration working")
+        self.logger.info(" PASS:  Phase 3: GCP Secret Manager integration working")
     
     def test_end_to_end_session_middleware_fix(self):
         """Test end-to-end SessionMiddleware functionality after fixes."""
@@ -318,7 +318,7 @@ class TestSessionMiddlewareIssue169Fix:
         assert data["status"] == "success"
         assert "session_data" in data
         
-        self.logger.info("✅ End-to-end SessionMiddleware functionality working")
+        self.logger.info(" PASS:  End-to-end SessionMiddleware functionality working")
     
     def test_regression_sessionmiddleware_not_installed_error(self):
         """Test regression: Ensure we handle 'SessionMiddleware must be installed' error."""
@@ -341,7 +341,7 @@ class TestSessionMiddlewareIssue169Fix:
         data = response.json()
         assert "session_data" in data
         
-        self.logger.info("✅ Regression test: No SessionMiddleware crash handled")
+        self.logger.info(" PASS:  Regression test: No SessionMiddleware crash handled")
 
 
 class TestIssue169BusinessImpactValidation:
@@ -396,7 +396,7 @@ class TestIssue169BusinessImpactValidation:
                             assert secret_info.is_fallback or secret_info.is_generated, \
                                 f"Expected fallback/generated secret for {scenario['name']}, got {secret_info.source}"
                     
-                    print(f"✅ Business continuity maintained for: {scenario['name']} (source: {secret_info.source.value})")
+                    print(f" PASS:  Business continuity maintained for: {scenario['name']} (source: {secret_info.source.value})")
                     
                 except Exception as e:
                     pytest.fail(f"Business continuity broken for {scenario['name']}: {e}")
@@ -419,7 +419,7 @@ class TestIssue169BusinessImpactValidation:
             assert not secret_info.is_fallback  # Production must use real secrets
             assert not secret_info.is_generated  # No generated secrets in production
             
-            print("✅ Enterprise compliance requirements maintained")
+            print(" PASS:  Enterprise compliance requirements maintained")
 
 
 if __name__ == '__main__':

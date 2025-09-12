@@ -612,16 +612,16 @@ distributed tracing effectiveness and incident resolution speed.
             
             # Simulate cross-service logging based on scenario
             if scenario == 'backend_to_auth':
-                # Simulate backend → auth logging
+                # Simulate backend  ->  auth logging
                 time.sleep(0.002)  # 2ms simulated network/processing delay
             elif scenario == 'backend_to_analytics':
-                # Simulate backend → analytics logging
+                # Simulate backend  ->  analytics logging
                 time.sleep(0.003)  # 3ms simulated delay
             elif scenario == 'auth_to_analytics':
-                # Simulate auth → analytics logging
+                # Simulate auth  ->  analytics logging
                 time.sleep(0.0025)  # 2.5ms simulated delay
             elif scenario == 'websocket_to_backend':
-                # Simulate WebSocket → backend logging
+                # Simulate WebSocket  ->  backend logging
                 time.sleep(0.001)  # 1ms simulated delay
             
             end = time.perf_counter()

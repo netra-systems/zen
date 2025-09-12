@@ -243,9 +243,9 @@ class StaticCodeAnalyzer:
         
         for detail in self.results["details"]:
             if detail["type"] == "SUCCESS":
-                report.append(f"✅ {detail['file']}: {detail['message']}")
+                report.append(f" PASS:  {detail['file']}: {detail['message']}")
             else:
-                report.append(f"❌ {detail['file']}: {detail.get('error', detail.get('missing', detail.get('pattern', 'Unknown issue')))}")
+                report.append(f" FAIL:  {detail['file']}: {detail.get('error', detail.get('missing', detail.get('pattern', 'Unknown issue')))}")
         
         report.append("=" * 60)
         return "\n".join(report)
@@ -338,11 +338,11 @@ class TestSuiteExecutor:
             
             if passed:
                 self.results["summary"]["passed"] += 1
-                logger.info(f"✅ {suite_path} PASSED")
+                logger.info(f" PASS:  {suite_path} PASSED")
             else:
                 self.results["summary"]["failed"] += 1
                 all_passed = False
-                logger.error(f"❌ {suite_path} FAILED")
+                logger.error(f" FAIL:  {suite_path} FAILED")
                 
                 # Log error details
                 if "error" in results:
@@ -371,7 +371,7 @@ class TestSuiteExecutor:
         ]
         
         for suite_path, suite_result in self.results["suites"].items():
-            status = "✅ PASSED" if suite_result["passed"] else "❌ FAILED"
+            status = " PASS:  PASSED" if suite_result["passed"] else " FAIL:  FAILED"
             duration = suite_result["results"].get("duration", 0)
             report.append(f"{status} {suite_path} ({duration:.2f}s)")
             
@@ -478,9 +478,9 @@ class LearningDocumentationValidator:
         
         for detail in self.results["details"]:
             if detail["type"] == "SUCCESS":
-                report.append(f"✅ {detail['file']}: {detail['message']}")
+                report.append(f" PASS:  {detail['file']}: {detail['message']}")
             else:
-                report.append(f"❌ {detail['file']}: {detail.get('error', detail.get('missing', detail.get('pattern', 'Unknown issue')))}")
+                report.append(f" FAIL:  {detail['file']}: {detail.get('error', detail.get('missing', detail.get('pattern', 'Unknown issue')))}")
         
         report.append("=" * 60)
         return "\n".join(report)
@@ -504,11 +504,11 @@ class BusinessImpactValidator:
         # Check ARR impact protection
         if static_results["failed"] == 0 and test_results["summary"]["failed"] == 0:
             self.results["criteria_met"].append(
-                f"✅ ${criteria['arr_impact']:,} ARR protected - all critical systems validated"
+                f" PASS:  ${criteria['arr_impact']:,} ARR protected - all critical systems validated"
             )
         else:
             self.results["criteria_failed"].append(
-                f"❌ ${criteria['arr_impact']:,} ARR at risk - validation failures detected"
+                f" FAIL:  ${criteria['arr_impact']:,} ARR at risk - validation failures detected"
             )
             all_met = False
         
@@ -518,22 +518,22 @@ class BusinessImpactValidator:
         # For now, assume coverage if tests pass
         if test_results["summary"]["failed"] == 0:
             self.results["criteria_met"].append(
-                f"✅ All {len(required_events)} required WebSocket events validated"
+                f" PASS:  All {len(required_events)} required WebSocket events validated"
             )
         else:
             self.results["criteria_failed"].append(
-                f"❌ Required WebSocket events validation failed"
+                f" FAIL:  Required WebSocket events validation failed"
             )
             all_met = False
         
         # Check documentation completeness
         if doc_results["failed"] == 0:
             self.results["criteria_met"].append(
-                "✅ Comprehensive learning documentation complete with cross-links"
+                " PASS:  Comprehensive learning documentation complete with cross-links"
             )
         else:
             self.results["criteria_failed"].append(
-                "❌ Learning documentation incomplete - knowledge gaps detected"
+                " FAIL:  Learning documentation incomplete - knowledge gaps detected"
             )
             all_met = False
         
@@ -582,38 +582,38 @@ def main():
     validation_passed = True
     
     # 1. Static Code Analysis
-    logger.info("\n🔍 Running Static Code Analysis...")
+    logger.info("\n SEARCH:  Running Static Code Analysis...")
     static_passed = static_analyzer.validate_injection_files()
     static_passed = static_analyzer.validate_constructor_compatibility() and static_passed
     
     if not static_passed:
         validation_passed = False
-        logger.error("❌ Static code analysis FAILED")
+        logger.error(" FAIL:  Static code analysis FAILED")
     else:
-        logger.info("✅ Static code analysis PASSED")
+        logger.info(" PASS:  Static code analysis PASSED")
     
     # 2. Test Suite Execution
-    logger.info("\n🧪 Running Critical Test Suites...")
+    logger.info("\n[U+1F9EA] Running Critical Test Suites...")
     test_passed = test_executor.run_all_critical_suites()
     
     if not test_passed:
         validation_passed = False
-        logger.error("❌ Critical test suites FAILED")
+        logger.error(" FAIL:  Critical test suites FAILED")
     else:
-        logger.info("✅ Critical test suites PASSED")
+        logger.info(" PASS:  Critical test suites PASSED")
     
     # 3. Learning Documentation Validation
-    logger.info("\n📚 Validating Learning Documentation...")
+    logger.info("\n[U+1F4DA] Validating Learning Documentation...")
     doc_passed = doc_validator.validate_learning_documents()
     
     if not doc_passed:
         validation_passed = False
-        logger.error("❌ Learning documentation validation FAILED")
+        logger.error(" FAIL:  Learning documentation validation FAILED")
     else:
-        logger.info("✅ Learning documentation validation PASSED")
+        logger.info(" PASS:  Learning documentation validation PASSED")
     
     # 4. Business Impact Validation
-    logger.info("\n💼 Validating Business Impact Criteria...")
+    logger.info("\n[U+1F4BC] Validating Business Impact Criteria...")
     business_passed = business_validator.validate_business_criteria(
         static_analyzer.results,
         test_executor.results,
@@ -622,12 +622,12 @@ def main():
     
     if not business_passed:
         validation_passed = False
-        logger.error("❌ Business impact criteria NOT MET")
+        logger.error(" FAIL:  Business impact criteria NOT MET")
     else:
-        logger.info("✅ Business impact criteria SATISFIED")
+        logger.info(" PASS:  Business impact criteria SATISFIED")
     
     # Generate comprehensive report
-    logger.info("\n📊 Generating Validation Report...")
+    logger.info("\n CHART:  Generating Validation Report...")
     
     report_sections = [
         static_analyzer.generate_report(),
@@ -637,7 +637,7 @@ def main():
     ]
     
     # Final summary
-    final_status = "✅ VALIDATION PASSED" if validation_passed else "❌ VALIDATION FAILED"
+    final_status = " PASS:  VALIDATION PASSED" if validation_passed else " FAIL:  VALIDATION FAILED"
     summary = [
         "\n" + "=" * 80,
         "WEBSOCKET INJECTION FIX - COMPLETE VALIDATION SUMMARY",
@@ -647,10 +647,10 @@ def main():
         f"Deployment Ready: {'YES' if validation_passed else 'NO - FIX REQUIRED'}",
         "",
         "Validation Components:",
-        f"  Static Code Analysis: {'✅ PASSED' if static_passed else '❌ FAILED'}",
-        f"  Critical Test Suites: {'✅ PASSED' if test_passed else '❌ FAILED'}",
-        f"  Learning Documentation: {'✅ PASSED' if doc_passed else '❌ FAILED'}",
-        f"  Business Impact Criteria: {'✅ SATISFIED' if business_passed else '❌ NOT MET'}",
+        f"  Static Code Analysis: {' PASS:  PASSED' if static_passed else ' FAIL:  FAILED'}",
+        f"  Critical Test Suites: {' PASS:  PASSED' if test_passed else ' FAIL:  FAILED'}",
+        f"  Learning Documentation: {' PASS:  PASSED' if doc_passed else ' FAIL:  FAILED'}",
+        f"  Business Impact Criteria: {' PASS:  SATISFIED' if business_passed else ' FAIL:  NOT MET'}",
         "=" * 80
     ]
     
@@ -663,18 +663,18 @@ def main():
     try:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(full_report)
-        logger.info(f"📄 Full validation report saved to: {report_file}")
+        logger.info(f"[U+1F4C4] Full validation report saved to: {report_file}")
     except Exception as e:
         logger.warning(f"Could not save report to file: {e}")
     
     # Exit with appropriate code
     if validation_passed:
-        logger.info("\n🎉 WebSocket injection fix validation SUCCESSFUL")
-        logger.info("✅ System is ready for deployment")
+        logger.info("\n CELEBRATION:  WebSocket injection fix validation SUCCESSFUL")
+        logger.info(" PASS:  System is ready for deployment")
         sys.exit(0)
     else:
-        logger.error("\n💥 WebSocket injection fix validation FAILED")
-        logger.error("❌ DO NOT DEPLOY - Fix issues before proceeding")
+        logger.error("\n[U+1F4A5] WebSocket injection fix validation FAILED")
+        logger.error(" FAIL:  DO NOT DEPLOY - Fix issues before proceeding")
         sys.exit(1)
 
 

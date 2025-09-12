@@ -5,7 +5,7 @@ This module tests for race conditions in WebSocket connection state management.
 Validates that WebSocket connections remain stable under concurrent load.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure reliable real-time communication for chat functionality
 - Value Impact: Prevents connection drops, message loss, and degraded user experience
 - Strategic Impact: CRITICAL - WebSocket connections enable core chat value delivery
@@ -367,7 +367,7 @@ class TestWebSocketConnectionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 25 concurrent WebSocket connections established successfully in {connection_time:.2f}s. "
+            f" PASS:  25 concurrent WebSocket connections established successfully in {connection_time:.2f}s. "
             f"Success rate: {successful_connections}/25, Send success: {successful_sends}/25, "
             f"Race conditions: {len(self.race_condition_detections)}"
         )
@@ -482,7 +482,7 @@ class TestWebSocketConnectionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Connection state race test passed: "
+            f" PASS:  Connection state race test passed: "
             f"{successful_lifecycles}/20 successful lifecycles, "
             f"0 race conditions detected, 0 connections leaked"
         )
@@ -557,7 +557,7 @@ class TestWebSocketConnectionRaces(SSotBaseTestCase):
         
         # Verify message routing isolation
         total_messages_sent = sum(result["sent_count"] for result in messaging_results)
-        expected_messages = 10 * 3  # 10 users × 3 messages each
+        expected_messages = 10 * 3  # 10 users  x  3 messages each
         
         assert total_messages_sent == expected_messages, (
             f"Expected {expected_messages} messages sent, got {total_messages_sent}. "
@@ -596,8 +596,8 @@ class TestWebSocketConnectionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Message routing isolation test passed: "
-            f"10 users × 3 connections = 30 total connections, "
+            f" PASS:  Message routing isolation test passed: "
+            f"10 users  x  3 connections = 30 total connections, "
             f"{total_messages_sent} messages routed correctly, "
             f"0 routing errors, 0 race conditions"
         )
@@ -714,7 +714,7 @@ class TestWebSocketConnectionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ WebSocket authentication race test passed: "
+            f" PASS:  WebSocket authentication race test passed: "
             f"15/15 successful authentications, 15/15 successful connections, "
             f"15/15 successful authenticated sends, 0 race conditions"
         )

@@ -1,7 +1,7 @@
 """Data structure builders for supervisor flow observability.
 
 Provides spec-compliant data structure builders for TODO and flow events.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 import time
 from typing import Any, Dict, List, Optional

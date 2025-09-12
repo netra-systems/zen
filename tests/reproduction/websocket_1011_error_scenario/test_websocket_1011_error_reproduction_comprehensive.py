@@ -172,12 +172,12 @@ class TestWebSocket1011ErrorReproduction:
         CRITICAL REPRODUCTION: Complete end-to-end 1011 error scenario
         
         This test reproduces the EXACT sequence of events that leads to 1011 errors:
-        1. WebSocket connection is established (✅ works)
-        2. Authentication succeeds (✅ works)  
-        3. AgentMessageHandler.handle_message() is called (✅ works)
-        4. create_websocket_manager() is called (❌ FAILS HERE)
-        5. Service initialization fails (❌ ROOT CAUSE)
-        6. Connection closes with 1011 internal error (❌ SYMPTOM)
+        1. WebSocket connection is established ( PASS:  works)
+        2. Authentication succeeds ( PASS:  works)  
+        3. AgentMessageHandler.handle_message() is called ( PASS:  works)
+        4. create_websocket_manager() is called ( FAIL:  FAILS HERE)
+        5. Service initialization fails ( FAIL:  ROOT CAUSE)
+        6. Connection closes with 1011 internal error ( FAIL:  SYMPTOM)
         
         Expected: This test should FAIL with RuntimeError containing "1011 internal server error"
         """
@@ -187,9 +187,9 @@ class TestWebSocket1011ErrorReproduction:
             websocket=mock_websocket_1011
         )
         
-        print(f"🔍 Reproducing 1011 error for user: {test_user_id}")
-        print(f"🔍 WebSocket state: {mock_websocket_1011.state}")
-        print(f"🔍 Message type: {start_agent_message.type}")
+        print(f" SEARCH:  Reproducing 1011 error for user: {test_user_id}")
+        print(f" SEARCH:  WebSocket state: {mock_websocket_1011.state}")
+        print(f" SEARCH:  Message type: {start_agent_message.type}")
         
         # CRITICAL: This should fail exactly as it does in production
         with pytest.raises(RuntimeError) as exc_info:
@@ -203,7 +203,7 @@ class TestWebSocket1011ErrorReproduction:
             
             # If we reach here, the reproduction failed to match production behavior
             assert False, (
-                f"🚨 1011 ERROR REPRODUCTION FAILED: "
+                f" ALERT:  1011 ERROR REPRODUCTION FAILED: "
                 f"Expected RuntimeError with 1011 but handler succeeded with result: {success}. "
                 f"WebSocket state: {mock_websocket_1011.state}. "
                 f"Connection closed: {mock_websocket_1011.connection_closed}. "
@@ -225,7 +225,7 @@ class TestWebSocket1011ErrorReproduction:
         pattern_found = any(pattern.lower() in error_message.lower() for pattern in critical_1011_patterns)
         
         assert pattern_found, (
-            f"🚨 1011 ERROR PATTERN VALIDATION FAILED: "
+            f" ALERT:  1011 ERROR PATTERN VALIDATION FAILED: "
             f"Caught RuntimeError '{error_message}' but it doesn't contain expected 1011 patterns. "
             f"Expected patterns: {critical_1011_patterns}. "
             f"This suggests the reproduction is not matching the exact production failure."
@@ -239,9 +239,9 @@ class TestWebSocket1011ErrorReproduction:
         stats = handler.get_stats()
         assert stats["errors"] > 0, f"Handler should record error in statistics: {stats}"
         
-        print(f"✅ 1011 ERROR SUCCESSFULLY REPRODUCED: {error_message}")
-        print(f"✅ WebSocket closed with code: {mock_websocket_1011.close_code}")
-        print(f"✅ Handler error count: {stats['errors']}")
+        print(f" PASS:  1011 ERROR SUCCESSFULLY REPRODUCED: {error_message}")
+        print(f" PASS:  WebSocket closed with code: {mock_websocket_1011.close_code}")
+        print(f" PASS:  Handler error count: {stats['errors']}")
     
     async def test_service_initialization_failure_causes_1011_error(
         self, mock_websocket_1011, test_user_id, start_agent_message, message_handler_service_mock
@@ -302,7 +302,7 @@ class TestWebSocket1011ErrorReproduction:
             assert mock_websocket_1011.connection_closed, "WebSocket should close on service failure"
             assert mock_websocket_1011.close_code == 1011, f"Service failure should cause 1011 close code, got {mock_websocket_1011.close_code}"
             
-            print(f"✅ SERVICE INITIALIZATION FAILURE -> 1011 ERROR REPRODUCED: {error_message}")
+            print(f" PASS:  SERVICE INITIALIZATION FAILURE -> 1011 ERROR REPRODUCED: {error_message}")
     
     async def test_staging_environment_conditions_cause_1011_error(
         self, mock_websocket_1011, test_user_id, start_agent_message, message_handler_service_mock
@@ -371,7 +371,7 @@ class TestWebSocket1011ErrorReproduction:
                 assert mock_websocket_1011.connection_closed, "Staging failures should close WebSocket"
                 assert mock_websocket_1011.close_code == 1011, f"Staging failures should cause 1011, got {mock_websocket_1011.close_code}"
                 
-                print(f"✅ STAGING ENVIRONMENT CONDITIONS -> 1011 ERROR REPRODUCED: {error_message}")
+                print(f" PASS:  STAGING ENVIRONMENT CONDITIONS -> 1011 ERROR REPRODUCED: {error_message}")
     
     async def test_concurrent_websocket_requests_cause_1011_resource_contention(
         self, test_user_id, start_agent_message, message_handler_service_mock
@@ -485,8 +485,8 @@ class TestWebSocket1011ErrorReproduction:
                 assert ws.connection_closed, f"Failed WebSocket should be closed: {ws.user_id}"
                 assert ws.close_code == 1011, f"Failed WebSocket should have 1011 close code: {ws.user_id} got {ws.close_code}"
             
-            print(f"✅ CONCURRENT RESOURCE CONTENTION -> 1011 ERRORS REPRODUCED")
-            print(f"✅ Failed requests: {len(exceptions)}, Successful: {len(successes)}")
+            print(f" PASS:  CONCURRENT RESOURCE CONTENTION -> 1011 ERRORS REPRODUCED")
+            print(f" PASS:  Failed requests: {len(exceptions)}, Successful: {len(successes)}")
             for i, exc in enumerate(exceptions[:3]):  # Show first 3 exceptions
                 print(f"  Exception {i+1}: {exc}")
     
@@ -511,8 +511,8 @@ class TestWebSocket1011ErrorReproduction:
         assert not mock_websocket_1011.connection_closed, "WebSocket should not be closed initially"
         assert mock_websocket_1011.close_code is None, "No close code should be set initially"
         
-        print(f"🔍 Initial WebSocket state: {mock_websocket_1011.state}")
-        print(f"🔍 Connection closed: {mock_websocket_1011.connection_closed}")
+        print(f" SEARCH:  Initial WebSocket state: {mock_websocket_1011.state}")
+        print(f" SEARCH:  Connection closed: {mock_websocket_1011.connection_closed}")
         
         # Mock service failure that triggers 1011 error
         with patch('netra_backend.app.websocket_core.agent_handler.create_websocket_manager') as mock_create:
@@ -534,7 +534,7 @@ class TestWebSocket1011ErrorReproduction:
             error_message = str(exc_info.value)
             assert "1011" in error_message, f"Error should mention 1011 close code: {error_message}"
             
-            print(f"✅ WEBSOCKET STATE PROGRESSION DURING 1011 ERROR REPRODUCED:")
+            print(f" PASS:  WEBSOCKET STATE PROGRESSION DURING 1011 ERROR REPRODUCED:")
             print(f"  Final state: {mock_websocket_1011.state}")
             print(f"  Connection closed: {mock_websocket_1011.connection_closed}")  
             print(f"  Close code: {mock_websocket_1011.close_code}")

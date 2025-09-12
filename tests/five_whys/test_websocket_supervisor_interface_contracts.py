@@ -10,7 +10,7 @@ across the WebSocket supervisor creation chain.
 
 FIVE WHYS INTERFACE CONTRACT VALIDATION:
 WHY #2 - IMMEDIATE CAUSE: Interface drift between old/new signatures
-- Validates supervisor factory → SupervisorAgent.create() parameter mapping
+- Validates supervisor factory  ->  SupervisorAgent.create() parameter mapping
 - Validates UserExecutionContext parameter consistency 
 - Validates WebSocket bridge parameter flow
 - Validates factory method interface contracts
@@ -51,7 +51,7 @@ class TestWebSocketSupervisorInterfaceContracts:
     
     def test_why_2_websocket_factory_supervisor_create_parameter_mapping(self):
         """
-        WHY #2 - INTERFACE DRIFT: WebSocket factory → SupervisorAgent.create() mapping is consistent.
+        WHY #2 - INTERFACE DRIFT: WebSocket factory  ->  SupervisorAgent.create() mapping is consistent.
         
         This test validates that the WebSocket supervisor factory correctly maps
         its parameters to SupervisorAgent.create() without name mismatches.
@@ -73,11 +73,11 @@ class TestWebSocketSupervisorInterfaceContracts:
         assert expected_create_params.issubset(create_params), \
             f"SupervisorAgent.create() missing parameters: {expected_create_params - create_params}"
         
-        print("✅ WHY #2 - WebSocket factory → SupervisorAgent.create() parameter mapping validated")
+        print(" PASS:  WHY #2 - WebSocket factory  ->  SupervisorAgent.create() parameter mapping validated")
     
     def test_why_2_core_factory_supervisor_create_parameter_consistency(self):
         """
-        WHY #2 - INTERFACE DRIFT: Core factory → SupervisorAgent interface is consistent.
+        WHY #2 - INTERFACE DRIFT: Core factory  ->  SupervisorAgent interface is consistent.
         
         This test validates that the core supervisor factory has consistent
         parameter interfaces with SupervisorAgent to prevent mismatches.
@@ -99,7 +99,7 @@ class TestWebSocketSupervisorInterfaceContracts:
         assert 'websocket_client_id' in core_factory_params, "Core factory missing 'websocket_client_id'"
         assert 'websocket_bridge' in init_params, "SupervisorAgent missing 'websocket_bridge'"
         
-        print("✅ WHY #2 - Core factory → SupervisorAgent interface consistency validated")
+        print(" PASS:  WHY #2 - Core factory  ->  SupervisorAgent interface consistency validated")
     
     def test_why_2_user_execution_context_parameter_standardization(self):
         """
@@ -125,7 +125,7 @@ class TestWebSocketSupervisorInterfaceContracts:
         assert websocket_param.default is None, \
             "websocket_client_id should default to None for optional usage"
         
-        print("✅ WHY #2 - UserExecutionContext parameter standardization validated")
+        print(" PASS:  WHY #2 - UserExecutionContext parameter standardization validated")
     
     def test_why_2_websocket_supervisor_factory_source_code_consistency(self):
         """
@@ -150,7 +150,7 @@ class TestWebSocketSupervisorInterfaceContracts:
                 assert 'websocket_connection_id=' not in source_code, \
                     "REGRESSION: WebSocket factory using deprecated websocket_connection_id parameter"
         
-        print("✅ WHY #2 - WebSocket supervisor factory source code consistency validated")
+        print(" PASS:  WHY #2 - WebSocket supervisor factory source code consistency validated")
     
     def test_why_2_parameter_flow_validation_end_to_end(self):
         """
@@ -192,7 +192,7 @@ class TestWebSocketSupervisorInterfaceContracts:
         assert supervisor is not None
         assert context.websocket_client_id is not None
         
-        print("✅ WHY #2 - End-to-end parameter flow validated without interface drift")
+        print(" PASS:  WHY #2 - End-to-end parameter flow validated without interface drift")
     
     def test_why_2_interface_contract_regression_prevention(self):
         """
@@ -254,11 +254,11 @@ class TestWebSocketSupervisorInterfaceContracts:
             
             pytest.fail(f"INTERFACE CONTRACT VIOLATIONS - Future regressions possible:\n" + "\n".join(failure_details))
         
-        print("✅ WHY #2 - Interface contracts prevent future parameter regressions")
+        print(" PASS:  WHY #2 - Interface contracts prevent future parameter regressions")
         
         # Report contract validation results
         for result in validation_results:
-            status = "✅" if result['result'] else "❌"
+            status = " PASS: " if result['result'] else " FAIL: "
             print(f"  {status} {result['check']}: {result['result']}")
 
 

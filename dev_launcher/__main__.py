@@ -47,14 +47,14 @@ def setup_signal_handlers():
     def signal_handler(signum, frame):
         """Handle shutdown signals gracefully."""
         signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-        print(f"\n🛑 SHUTDOWN | Received {signal_name} signal")
+        print(f"\n[U+1F6D1] SHUTDOWN | Received {signal_name} signal")
         if _launcher_instance:
             try:
                 # Trigger graceful shutdown
                 asyncio.create_task(_launcher_instance.cleanup())
             except RuntimeError:
                 # If no event loop is running, cleanup synchronously
-                print("⚠️  WARNING | Performing emergency cleanup...")
+                print(" WARNING: [U+FE0F]  WARNING | Performing emergency cleanup...")
                 _launcher_instance.emergency_cleanup()
         sys.exit(0)
     
@@ -433,13 +433,13 @@ def main():
     
     # Handle docker-compose mode
     if args.docker_compose:
-        print("🐳 Starting all services via docker-compose...")
-        print("   → Starting 12 services (6 dev + 6 test)")
+        print("[U+1F433] Starting all services via docker-compose...")
+        print("    ->  Starting 12 services (6 dev + 6 test)")
         try:
             import subprocess
             
             # First stop any existing containers
-            print("   → Cleaning up existing containers...")
+            print("    ->  Cleaning up existing containers...")
             subprocess.run(
                 ["docker-compose", "-f", "docker-compose.all.yml", "down"],
                 capture_output=True,
@@ -450,7 +450,7 @@ def main():
             )
             
             # Now start all services
-            print("   → Starting services...")
+            print("    ->  Starting services...")
             result = subprocess.run(
                 ["docker-compose", "-f", "docker-compose.all.yml", "up", "-d"],
                 capture_output=True,
@@ -460,30 +460,30 @@ def main():
                 timeout=120
             )
             if result.returncode == 0:
-                print("✅ All Docker services started successfully!")
+                print(" PASS:  All Docker services started successfully!")
                 print("\nDevelopment Services:")
-                print("  → Backend: http://localhost:8000")
-                print("  → Auth: http://localhost:8081")
-                print("  → Frontend: http://localhost:3000")
-                print("  → PostgreSQL: localhost:5432")
-                print("  → Redis: localhost:6379")
-                print("  → ClickHouse: localhost:8123")
+                print("   ->  Backend: http://localhost:8000")
+                print("   ->  Auth: http://localhost:8081")
+                print("   ->  Frontend: http://localhost:3000")
+                print("   ->  PostgreSQL: localhost:5432")
+                print("   ->  Redis: localhost:6379")
+                print("   ->  ClickHouse: localhost:8123")
                 print("\nTest Services (docker-compose.all.yml):")
-                print("  → Backend: http://localhost:8001")
-                print("  → Auth: http://localhost:8082")
-                print("  → Frontend: http://localhost:3001")
-                print("  → PostgreSQL: localhost:5433")
-                print("  → Redis: localhost:6380")
-                print("  → ClickHouse: localhost:8124")
+                print("   ->  Backend: http://localhost:8001")
+                print("   ->  Auth: http://localhost:8082")
+                print("   ->  Frontend: http://localhost:3001")
+                print("   ->  PostgreSQL: localhost:5433")
+                print("   ->  Redis: localhost:6380")
+                print("   ->  ClickHouse: localhost:8124")
                 sys.exit(0)
             else:
-                print(f"❌ Failed to start Docker services: {result.stderr}")
+                print(f" FAIL:  Failed to start Docker services: {result.stderr}")
                 sys.exit(1)
         except subprocess.TimeoutExpired:
-            print("❌ Timeout starting Docker services")
+            print(" FAIL:  Timeout starting Docker services")
             sys.exit(1)
         except Exception as e:
-            print(f"❌ Error starting Docker services: {e}")
+            print(f" FAIL:  Error starting Docker services: {e}")
             sys.exit(1)
     
     # Handle service configuration commands first
@@ -504,11 +504,11 @@ def main():
     # Run the async launcher with enhanced error handling
     exit_code = 0
     try:
-        print("🚀 Starting Netra AI Development Environment...")
+        print("[U+1F680] Starting Netra AI Development Environment...")
         if sys.platform == "win32":
-            print("   → Windows environment detected")
-            print("   → Enhanced process tree management enabled")
-            print("   → Port cleanup verification enabled")
+            print("    ->  Windows environment detected")
+            print("    ->  Enhanced process tree management enabled")
+            print("    ->  Port cleanup verification enabled")
         
         exit_code = asyncio.run(launcher.run())
         
@@ -517,21 +517,21 @@ def main():
             launcher.signal_handler.mark_clean_exit()
         
         if exit_code == 0:
-            print("\n✅ SUCCESS | Development environment started successfully")
+            print("\n PASS:  SUCCESS | Development environment started successfully")
             if sys.platform == "win32":
-                print("   → Press Ctrl+C to gracefully shutdown all services")
+                print("    ->  Press Ctrl+C to gracefully shutdown all services")
             else:
-                print("   → Press Ctrl+C or send SIGTERM to shutdown")
+                print("    ->  Press Ctrl+C or send SIGTERM to shutdown")
         else:
-            print(f"\n❌ FAILURE | Development environment failed to start (exit code: {exit_code})")
+            print(f"\n FAIL:  FAILURE | Development environment failed to start (exit code: {exit_code})")
             _print_troubleshooting_info()
             
     except KeyboardInterrupt:
-        print("\n🛑 SHUTDOWN | Interrupted by user")
+        print("\n[U+1F6D1] SHUTDOWN | Interrupted by user")
         exit_code = 0
         
     except Exception as e:
-        print(f"\n💥 CRITICAL ERROR | Launcher failed: {e}")
+        print(f"\n[U+1F4A5] CRITICAL ERROR | Launcher failed: {e}")
         logger.error(f"Launcher exception: {e}", exc_info=True)
         _print_troubleshooting_info()
         exit_code = 1
@@ -549,7 +549,7 @@ def main():
 
 def _print_troubleshooting_info():
     """Print comprehensive troubleshooting information."""
-    print("\n🔧 TROUBLESHOOTING GUIDE:")
+    print("\n[U+1F527] TROUBLESHOOTING GUIDE:")
     print("="*50)
     
     # System-specific process management
@@ -567,23 +567,23 @@ def _print_troubleshooting_info():
         print("   3. System resources: ps aux | grep -E \"(uvicorn|next|node)\"")
     
     print("\nService Configuration Issues:")
-    print("   • If local services not available, the platform auto-switches to shared services")
-    print("   • For Redis/ClickHouse/PostgreSQL: Install locally or use shared mode")
-    print("   • For AI features: Set up API keys (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)")
-    print("   • Check service status: python -m dev_launcher --list-services")
-    print("   • Reset services: python -m dev_launcher --reset-services")
+    print("   [U+2022] If local services not available, the platform auto-switches to shared services")
+    print("   [U+2022] For Redis/ClickHouse/PostgreSQL: Install locally or use shared mode")
+    print("   [U+2022] For AI features: Set up API keys (ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.)")
+    print("   [U+2022] Check service status: python -m dev_launcher --list-services")
+    print("   [U+2022] Reset services: python -m dev_launcher --reset-services")
     
     print("\nGeneral Issues:")
-    print("   • Review logs in ./logs/ directory")
-    print("   • Run with --verbose for detailed output")
-    print("   • Check all dependencies are installed")
-    print("   • Verify .env files are properly configured")
-    print("   • Ensure you're in the project root directory")
+    print("   [U+2022] Review logs in ./logs/ directory")
+    print("   [U+2022] Run with --verbose for detailed output")
+    print("   [U+2022] Check all dependencies are installed")
+    print("   [U+2022] Verify .env files are properly configured")
+    print("   [U+2022] Ensure you're in the project root directory")
     
     print("\nQuick Fixes:")
-    print("   • Try: python -m dev_launcher --reset-services")
-    print("   • Try: python -m dev_launcher --no-cache")
-    print("   • Try: python -m dev_launcher --verbose")
+    print("   [U+2022] Try: python -m dev_launcher --reset-services")
+    print("   [U+2022] Try: python -m dev_launcher --no-cache")
+    print("   [U+2022] Try: python -m dev_launcher --verbose")
     
     print("="*50)
 

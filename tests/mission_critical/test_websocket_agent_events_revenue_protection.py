@@ -54,8 +54,10 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env
 
 # Import SSOT test framework
-from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
-from test_framework.ssot.websocket_golden_path_helpers import (
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import (
     WebSocketGoldenPathHelper,
     GoldenPathTestConfig,
     GoldenPathTestResult,
@@ -71,8 +73,8 @@ from netra_backend.app.websocket_core.event_validator import (
 )
 
 # Import real services - NO MOCKS per CLAUDE.md
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotBaseTestCase
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 
 # ============================================================================
@@ -113,14 +115,14 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         cls.docker_manager = UnifiedDockerManager()
         cls.id_generator = UnifiedIdGenerator()
         
-        logger.critical("🚨 MISSION CRITICAL TESTS STARTING - Revenue Protection Mode 🚨")
+        logger.critical(" ALERT:  MISSION CRITICAL TESTS STARTING - Revenue Protection Mode  ALERT: ")
         logger.info(f"Environment: {cls.test_environment}")
         logger.info("Required: ALL 5 critical WebSocket events MUST be validated")
     
     @classmethod
     def teardown_class(cls):
         """Clean up mission critical test environment."""
-        logger.critical("🚨 MISSION CRITICAL TESTS COMPLETED 🚨")
+        logger.critical(" ALERT:  MISSION CRITICAL TESTS COMPLETED  ALERT: ")
         super().teardown_class()
     
     def setup_method(self, method):
@@ -136,7 +138,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         self.golden_path_config.validate_event_timing = True
         self.golden_path_config.validate_business_value = True
         
-        logger.info(f"🔍 Mission Critical Test: {method.__name__}")
+        logger.info(f" SEARCH:  Mission Critical Test: {method.__name__}")
     
     # ========================================================================
     # CRITICAL EVENT VALIDATION TESTS
@@ -151,7 +153,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         This test MUST pass - it validates the core revenue-generating flow.
         Failure indicates users won't see AI value delivery.
         """
-        logger.critical("🎯 TESTING: All 5 critical events for single user")
+        logger.critical(" TARGET:  TESTING: All 5 critical events for single user")
         
         # Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -191,7 +193,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             f"Poor UX directly impacts revenue conversion!"
         )
         
-        logger.success(f"✅ CRITICAL TEST PASSED: All 5 events received, UX: {result.execution_metrics.user_experience_rating}")
+        logger.success(f" PASS:  CRITICAL TEST PASSED: All 5 events received, UX: {result.execution_metrics.user_experience_rating}")
     
     @pytest.mark.critical
     @pytest.mark.asyncio  
@@ -202,7 +204,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Tests 10+ concurrent users to ensure the system can handle real-world load
         while maintaining revenue-critical event delivery.
         """
-        logger.critical("🎯 TESTING: Concurrent 10-user critical events validation")
+        logger.critical(" TARGET:  TESTING: Concurrent 10-user critical events validation")
         
         # Test with 10 concurrent users (realistic production load)
         user_count = 10
@@ -252,7 +254,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             f"Failed users: {failed_users}"
         )
         
-        logger.success(f"✅ CONCURRENT TEST PASSED: {successful_users}/{user_count} users received all critical events")
+        logger.success(f" PASS:  CONCURRENT TEST PASSED: {successful_users}/{user_count} users received all critical events")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -263,7 +265,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Tests that events are delivered within acceptable timeframes to ensure
         good user experience and revenue conversion.
         """
-        logger.critical("🎯 TESTING: Event timing performance requirements")
+        logger.critical(" TARGET:  TESTING: Event timing performance requirements")
         
         # Create user context
         user_context = await create_authenticated_user_context(
@@ -304,7 +306,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         )
         
         logger.success(
-            f"✅ TIMING TEST PASSED: First event: {result.execution_metrics.first_event_time:.2f}s, "
+            f" PASS:  TIMING TEST PASSED: First event: {result.execution_metrics.first_event_time:.2f}s, "
             f"Total: {total_time:.2f}s, Throughput: {result.execution_metrics.throughput_events_per_second:.2f} events/sec"
         )
     
@@ -317,7 +319,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Tests that events follow the expected sequence to ensure coherent
         user experience and proper AI workflow visibility.
         """
-        logger.critical("🎯 TESTING: Event sequence validation")
+        logger.critical(" TARGET:  TESTING: Event sequence validation")
         
         # Create user context
         user_context = await create_authenticated_user_context(
@@ -378,7 +380,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
                 f"This breaks logical flow and confuses users!"
             )
         
-        logger.success(f"✅ SEQUENCE TEST PASSED: Events received in logical order: {critical_events_sequence}")
+        logger.success(f" PASS:  SEQUENCE TEST PASSED: Events received in logical order: {critical_events_sequence}")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -389,7 +391,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Tests that events contain meaningful content that demonstrates
         AI value to users and drives revenue conversion.
         """
-        logger.critical("🎯 TESTING: Business value content validation")
+        logger.critical(" TARGET:  TESTING: Business value content validation")
         
         # Create user context
         user_context = await create_authenticated_user_context(
@@ -437,7 +439,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             assert final_event.data, "agent_completed event missing data - no final value delivery!"
             assert final_event.data.get("agent"), "agent_completed missing agent info - incomplete closure!"
         
-        logger.success("✅ CONTENT TEST PASSED: All events contain business value content")
+        logger.success(" PASS:  CONTENT TEST PASSED: All events contain business value content")
     
     # ========================================================================
     # STRESS AND RELIABILITY TESTS
@@ -452,7 +454,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Tests 25+ concurrent users to ensure the system maintains
         revenue-critical event delivery under stress.
         """
-        logger.critical("🎯 STRESS TESTING: 25-user high concurrency revenue protection")
+        logger.critical(" TARGET:  STRESS TESTING: 25-user high concurrency revenue protection")
         
         # Stress test with 25 concurrent users
         user_count = 25
@@ -511,7 +513,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         # Log stress test metrics
         high_perf_rate = (high_performance_users / user_count) * 100
         logger.success(
-            f"✅ STRESS TEST PASSED: {successful_users}/{user_count} successful ({success_rate:.1f}%), "
+            f" PASS:  STRESS TEST PASSED: {successful_users}/{user_count} successful ({success_rate:.1f}%), "
             f"{high_performance_users} excellent UX ({high_perf_rate:.1f}%)"
         )
     
@@ -524,7 +526,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Executes multiple sequential golden paths to ensure reliable
         event delivery and consistent business value.
         """
-        logger.critical("🎯 RELIABILITY TESTING: Multiple sequential golden path executions")
+        logger.critical(" TARGET:  RELIABILITY TESTING: Multiple sequential golden path executions")
         
         run_count = 5
         successful_runs = 0
@@ -589,7 +591,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             )
         
         logger.success(
-            f"✅ RELIABILITY TEST PASSED: {successful_runs}/{run_count} runs successful, "
+            f" PASS:  RELIABILITY TEST PASSED: {successful_runs}/{run_count} runs successful, "
             f"Avg score: {avg_score:.1f}%, Avg time: {avg_time:.2f}s"
         )
     
@@ -606,7 +608,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Simulates connection issues to ensure the system gracefully
         handles interruptions without losing critical events.
         """
-        logger.critical("🎯 EDGE CASE TESTING: Connection interruption recovery")
+        logger.critical(" TARGET:  EDGE CASE TESTING: Connection interruption recovery")
         
         # Create user context
         user_context = await create_authenticated_user_context(
@@ -651,7 +653,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             f"Connection issues must not block revenue-critical events!"
         )
         
-        logger.success(f"✅ RECOVERY TEST PASSED: Core events delivered despite potential interruptions")
+        logger.success(f" PASS:  RECOVERY TEST PASSED: Core events delivered despite potential interruptions")
     
     @pytest.mark.edge_case
     @pytest.mark.asyncio
@@ -662,7 +664,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
         Ensures the system can handle large user requests while still
         delivering all critical events for business value.
         """
-        logger.critical("🎯 EDGE CASE TESTING: Large message event handling")
+        logger.critical(" TARGET:  EDGE CASE TESTING: Large message event handling")
         
         # Create user context
         user_context = await create_authenticated_user_context(
@@ -708,7 +710,7 @@ class TestWebSocketAgentEventsRevenueProtection(SSotBaseTestCase):
             f"Complex user requests must still deliver full business value!"
         )
         
-        logger.success("✅ LARGE MESSAGE TEST PASSED: All critical events delivered for complex request")
+        logger.success(" PASS:  LARGE MESSAGE TEST PASSED: All critical events delivered for complex request")
 
 
 # ============================================================================
@@ -796,14 +798,14 @@ def pytest_collection_modifyitems(config, items):
 def pytest_runtest_call(pyfuncitem):
     """Hook for mission critical test execution."""
     if "mission_critical" in [mark.name for mark in pyfuncitem.iter_markers()]:
-        logger.critical(f"🚨 EXECUTING MISSION CRITICAL TEST: {pyfuncitem.name} 🚨")
+        logger.critical(f" ALERT:  EXECUTING MISSION CRITICAL TEST: {pyfuncitem.name}  ALERT: ")
 
 
 @pytest.hookimpl(trylast=True)
 def pytest_runtest_teardown(pyfuncitem, nextitem):
     """Hook for mission critical test teardown."""
     if "mission_critical" in [mark.name for mark in pyfuncitem.iter_markers()]:
-        logger.critical(f"🚨 MISSION CRITICAL TEST COMPLETED: {pyfuncitem.name} 🚨")
+        logger.critical(f" ALERT:  MISSION CRITICAL TEST COMPLETED: {pyfuncitem.name}  ALERT: ")
 
 
 if __name__ == "__main__":

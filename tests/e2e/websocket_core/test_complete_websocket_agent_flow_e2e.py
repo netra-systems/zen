@@ -7,8 +7,8 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures complete user journey from message to AI response works flawlessly
 - Strategic Impact: Core business value delivery - validates the entire AI chat pipeline
 
-These E2E tests validate the complete user journey: authentication → WebSocket connection 
-→ agent request → real-time updates → AI response delivery with full business context.
+These E2E tests validate the complete user journey: authentication  ->  WebSocket connection 
+ ->  agent request  ->  real-time updates  ->  AI response delivery with full business context.
 
 CRITICAL: All E2E tests MUST use authentication as per CLAUDE.md requirements.
 """

@@ -39,7 +39,7 @@ class TestAuthResilienceFixes:
             assert "status" in data
             assert data["status"] in ["healthy", "degraded", "unhealthy"]
             
-            print(f"✅ Health endpoint working: {data['status']}")
+            print(f" PASS:  Health endpoint working: {data['status']}")
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_monitoring(self):
@@ -58,12 +58,12 @@ class TestAuthResilienceFixes:
                 breakers = data.get("circuit_breakers", {})
                 if "auth_service" in breakers:
                     auth_breaker = breakers["auth_service"]
-                    print(f"✅ Auth service circuit breaker state: {auth_breaker['state']}")
+                    print(f" PASS:  Auth service circuit breaker state: {auth_breaker['state']}")
                     print(f"   Stats: {auth_breaker.get('stats', {})}")
                 else:
-                    print("ℹ️ Auth service circuit breaker not yet initialized")
+                    print("[U+2139][U+FE0F] Auth service circuit breaker not yet initialized")
             else:
-                print(f"⚠️ Circuit breaker endpoint returned {response.status_code}")
+                print(f" WARNING: [U+FE0F] Circuit breaker endpoint returned {response.status_code}")
     
     @pytest.mark.asyncio
     async def test_auth_service_failover(self):
@@ -75,7 +75,7 @@ class TestAuthResilienceFixes:
                 assert response.status_code == 200, f"Request {i+1} failed"
                 await asyncio.sleep(0.5)
             
-            print("✅ Health endpoint resilient to auth service issues")
+            print(" PASS:  Health endpoint resilient to auth service issues")
     
     @pytest.mark.asyncio
     async def test_websocket_with_fallback(self):
@@ -104,18 +104,18 @@ class TestAuthResilienceFixes:
                 # Wait for response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=2)
-                    print(f"✅ WebSocket connected and responsive: {response[:100]}")
+                    print(f" PASS:  WebSocket connected and responsive: {response[:100]}")
                 except asyncio.TimeoutError:
-                    print("⚠️ WebSocket connected but no response received")
+                    print(" WARNING: [U+FE0F] WebSocket connected but no response received")
                     
         except Exception as e:
             # WebSocket might reject invalid tokens in staging
             # but the important thing is it doesn't crash
-            print(f"ℹ️ WebSocket connection test: {str(e)[:200]}")
+            print(f"[U+2139][U+FE0F] WebSocket connection test: {str(e)[:200]}")
             
             # The fact we got a proper rejection is good
             if "401" in str(e) or "403" in str(e) or "authentication" in str(e).lower():
-                print("✅ WebSocket properly enforcing authentication")
+                print(" PASS:  WebSocket properly enforcing authentication")
             else:
                 raise
     
@@ -139,26 +139,26 @@ class TestAuthResilienceFixes:
                 # After a few requests, circuit breaker should open
                 # and response times should improve
                 if i > 5 and response_time < 100:  # Under 100ms
-                    print(f"✅ Fast response after circuit open: {response_time:.1f}ms")
+                    print(f" PASS:  Fast response after circuit open: {response_time:.1f}ms")
                 
                 await asyncio.sleep(0.1)
             
             avg_time = sum(response_times) / len(response_times)
-            print(f"📊 Average response time: {avg_time:.1f}ms")
+            print(f" CHART:  Average response time: {avg_time:.1f}ms")
             
             # Check if later requests were faster (circuit breaker effect)
             early_avg = sum(response_times[:3]) / 3
             late_avg = sum(response_times[-3:]) / 3
             
             if late_avg < early_avg:
-                print(f"✅ Performance improved: {early_avg:.1f}ms → {late_avg:.1f}ms")
+                print(f" PASS:  Performance improved: {early_avg:.1f}ms  ->  {late_avg:.1f}ms")
             else:
-                print(f"ℹ️ Performance stable: {early_avg:.1f}ms → {late_avg:.1f}ms")
+                print(f"[U+2139][U+FE0F] Performance stable: {early_avg:.1f}ms  ->  {late_avg:.1f}ms")
 
 
 async def main():
     """Run all tests."""
-    print("🧪 Testing Auth Service Resilience Fixes")
+    print("[U+1F9EA] Testing Auth Service Resilience Fixes")
     print("=" * 50)
     
     test_suite = TestAuthResilienceFixes()
@@ -174,25 +174,25 @@ async def main():
     
     results = []
     for test_name, test_func in tests:
-        print(f"\n📝 Testing: {test_name}")
+        print(f"\n[U+1F4DD] Testing: {test_name}")
         print("-" * 40)
         try:
             await test_func()
-            results.append((test_name, "✅ PASSED"))
+            results.append((test_name, " PASS:  PASSED"))
         except Exception as e:
-            print(f"❌ Failed: {e}")
-            results.append((test_name, f"❌ FAILED: {str(e)[:100]}"))
+            print(f" FAIL:  Failed: {e}")
+            results.append((test_name, f" FAIL:  FAILED: {str(e)[:100]}"))
     
     # Summary
     print("\n" + "=" * 50)
-    print("📊 TEST SUMMARY")
+    print(" CHART:  TEST SUMMARY")
     print("=" * 50)
     for test_name, result in results:
         print(f"{test_name}: {result}")
     
-    passed = sum(1 for _, r in results if "✅" in r)
+    passed = sum(1 for _, r in results if " PASS: " in r)
     total = len(results)
-    print(f"\n🎯 Result: {passed}/{total} tests passed")
+    print(f"\n TARGET:  Result: {passed}/{total} tests passed")
     
     return passed == total
 

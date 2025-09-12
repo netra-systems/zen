@@ -280,7 +280,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        approval_message = f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+        approval_message = f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
         
         # Create approval result
         result = SyntheticDataResult(
@@ -298,7 +298,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         
         # Send approval update
         if stream_updates:
-            await self.emit_progress(f"⏳ {approval_message}")
+            await self.emit_progress(f"[U+23F3] {approval_message}")
         
         return safe_json_dumps(result)
 
@@ -315,7 +315,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
             Data generation result
         """
         if stream_updates:
-            await self.emit_progress(f"🔄 Generating {profile.volume:,} synthetic records...")
+            await self.emit_progress(f" CYCLE:  Generating {profile.volume:,} synthetic records...")
         
         # Generate data with user isolation
         result = await self.generator.generate_data(
@@ -328,7 +328,7 @@ class ModernSyntheticDataSubAgent(BaseAgent):
         
         if stream_updates:
             records_count = result.generation_status.records_generated
-            await self.emit_progress(f"✅ Successfully generated {records_count:,} synthetic records", is_complete=True)
+            await self.emit_progress(f" PASS:  Successfully generated {records_count:,} synthetic records", is_complete=True)
         
         return safe_json_dumps(result)
 

@@ -184,7 +184,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
         # Test 1: Direct database manager import
         try:
             from netra_backend.app.db.database_manager import DatabaseManager
-            logger.info("✓ WebSocket factory can import DatabaseManager")
+            logger.info("[U+2713] WebSocket factory can import DatabaseManager")
             self.record_metric("database_manager_import_success", True)
         except ImportError as e:
             import_success = False
@@ -198,7 +198,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
         # Test 2: Configuration import
         try:
             from netra_backend.app.core.config import get_config
-            logger.info("✓ WebSocket factory can import get_config")
+            logger.info("[U+2713] WebSocket factory can import get_config")
             self.record_metric("config_import_success", True)
         except ImportError as e:
             import_success = False
@@ -212,7 +212,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
         # Test 3: Shared utilities import
         try:
             from shared.isolated_environment import get_env
-            logger.info("✓ WebSocket factory can import shared utilities")
+            logger.info("[U+2713] WebSocket factory can import shared utilities")
             self.record_metric("shared_utilities_import_success", True)
         except ImportError as e:
             # This is acceptable - shared utilities might not be needed
@@ -227,7 +227,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
         try:
             # Import the actual WebSocket factory if it exists
             import netra_backend.app.factories.websocket_factory
-            logger.info("✓ WebSocket factory module can be imported")
+            logger.info("[U+2713] WebSocket factory module can be imported")
             self.record_metric("websocket_factory_module_import_success", True)
         except ImportError as e:
             # This is acceptable - WebSocket factory might not exist yet
@@ -270,7 +270,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
             # Step 1: Environment and configuration
             from shared.isolated_environment import get_env
             env = get_env()
-            logger.info("✓ Step 1: Environment initialization")
+            logger.info("[U+2713] Step 1: Environment initialization")
             self.record_metric("step1_environment_success", True)
         except Exception as e:
             initialization_success = False
@@ -281,7 +281,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
             # Step 2: Configuration loading
             from netra_backend.app.core.config import get_config
             config = get_config()
-            logger.info("✓ Step 2: Configuration loading")
+            logger.info("[U+2713] Step 2: Configuration loading")
             self.record_metric("step2_config_success", True)
         except Exception as e:
             initialization_success = False
@@ -292,7 +292,7 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
             # Step 3: Database manager initialization
             from netra_backend.app.db.database_manager import DatabaseManager
             db_manager = DatabaseManager()
-            logger.info("✓ Step 3: Database manager creation")
+            logger.info("[U+2713] Step 3: Database manager creation")
             self.record_metric("step3_database_manager_success", True)
         except Exception as e:
             initialization_success = False
@@ -303,10 +303,10 @@ class TestDatabaseImportDependencyResolution(SSotBaseTestCase):
             # Step 4: WebSocket components (if they exist)
             try:
                 from netra_backend.app.websocket_core.manager import WebSocketManager
-                logger.info("✓ Step 4: WebSocket manager import")
+                logger.info("[U+2713] Step 4: WebSocket manager import")
                 self.record_metric("step4_websocket_manager_success", True)
             except ImportError:
-                logger.info("○ Step 4: WebSocket manager not found (acceptable)")
+                logger.info("[U+25CB] Step 4: WebSocket manager not found (acceptable)")
                 self.record_metric("step4_websocket_manager_optional", True)
         except Exception as e:
             initialization_success = False

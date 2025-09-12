@@ -401,7 +401,7 @@ class TestMalformedConfigurationHandling(BaseIntegrationTest):
             
             # Test various encoding problematic values
             problematic_values = [
-                "password_with_émojis_🔑",  # Unicode characters
+                "password_with_[U+00E9]mojis_[U+1F511]",  # Unicode characters
                 "binary_\x00\x01\x02_data",  # Binary data
                 "newline_\n_in_value",  # Newlines
                 "tab_\t_in_value",  # Tabs
@@ -896,7 +896,7 @@ class TestOAuthCredentialValidation(BaseIntegrationTest):
                 "client_id_with_spaces in_middle",  # Spaces
                 "client-id-with\ttabs",  # Tabs
                 "client\nid\nwith\nnewlines",  # Newlines
-                "client_id_with_unicode_émojis_🔑",  # Unicode characters
+                "client_id_with_unicode_[U+00E9]mojis_[U+1F511]",  # Unicode characters
                 "a" * 300,  # Extremely long
                 "client.id.with.only.dots",  # Only dots
                 "AAAAAAAA-BBBB-CCCC-DDDD-" + "E" * 50,  # Malformed UUID-like

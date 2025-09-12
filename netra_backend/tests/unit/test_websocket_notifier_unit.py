@@ -2,7 +2,7 @@
 WebSocket Notifier Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure real-time user feedback works reliably for engagement
 - Value Impact: WebSocket notifications enable transparent AI processing and user retention
 - Strategic Impact: Real-time feedback is critical for user experience and platform stickiness
@@ -11,7 +11,7 @@ This test suite validates the WebSocket Notifier functionality through focused
 unit testing, ensuring message formatting, event creation, and notification
 logic work correctly without external dependencies.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+ WARNING: [U+FE0F] DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
 These tests validate the legacy functionality for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:

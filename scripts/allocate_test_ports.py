@@ -147,10 +147,10 @@ class PortAllocator:
             
             if available_port:
                 allocated_ports[service] = available_port
-                print(f"  ✓ Allocated port {available_port} for {service}")
+                print(f"  [U+2713] Allocated port {available_port} for {service}")
             else:
                 failed_services.append(service)
-                print(f"  ✗ Failed to allocate port for {service}")
+                print(f"  [U+2717] Failed to allocate port for {service}")
         
         if failed_services:
             print(f"\nError: Could not allocate ports for: {', '.join(failed_services)}")
@@ -189,7 +189,7 @@ class PortAllocator:
         for service, port in ports.items():
             available = self.is_port_available(port) and self.check_docker_port(port)
             status[service] = available
-            symbol = "✓" if available else "✗"
+            symbol = "[U+2713]" if available else "[U+2717]"
             print(f"  {symbol} {service}: {port} - {'available' if available else 'occupied'}")
         return status
     
@@ -278,7 +278,7 @@ def check_system_ports() -> None:
     allocator = PortAllocator()
     for name, port in common_ports.items():
         available = allocator.is_port_available(port)
-        symbol = "✓" if available else "✗"
+        symbol = "[U+2713]" if available else "[U+2717]"
         status = "available" if available else "occupied"
         print(f"{symbol} {name:25} {port:5} - {status}")
 

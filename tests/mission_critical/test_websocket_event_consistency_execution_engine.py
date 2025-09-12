@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 PURPOSE: Validate that ExecutionEngine implementations consistently deliver all 5 critical WebSocket events
 in the correct order with proper content for every agent execution.
 
-GOLDEN PATH PROTECTION: Users login → get AI responses
+GOLDEN PATH PROTECTION: Users login  ->  get AI responses
 The "AI responses" part critically depends on these WebSocket events working correctly.
 
 Critical WebSocket Events (ALL MUST BE SENT):
@@ -664,6 +664,6 @@ if __name__ == "__main__":
     Run WebSocket event consistency tests.
     
     Expected Result: ALL TESTS SHOULD PASS for proper chat functionality.
-    These tests are mission critical for the Golden Path: Users login → get AI responses.
+    These tests are mission critical for the Golden Path: Users login  ->  get AI responses.
     """
     pytest.main([__file__, "-v", "--tb=short", "-x"])  # Stop on first failure

@@ -135,7 +135,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert exp_timestamp > current_time, "Token must not be expired"
         assert exp_timestamp < current_time + 3600, "Token expiry should be reasonable (< 1 hour)"
         
-        self.logger.info(f"✅ JWT validation successful for WebSocket handshake: {auth_user.user_id}")
+        self.logger.info(f" PASS:  JWT validation successful for WebSocket handshake: {auth_user.user_id}")
     
     @pytest.mark.integration 
     @pytest.mark.real_services
@@ -216,7 +216,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         # Clean up OAuth state
         await redis.delete(f"oauth_state:{oauth_state}")
         
-        self.logger.info(f"✅ OAuth flow integration successful for user: {user_id}")
+        self.logger.info(f" PASS:  OAuth flow integration successful for user: {user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -294,7 +294,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
             "refresh_count": 1
         }, ex=3600)
         
-        self.logger.info(f"✅ Session persistence and refresh flow successful: {session_id}")
+        self.logger.info(f" PASS:  Session persistence and refresh flow successful: {session_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -349,7 +349,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert user_context.thread_id is not None, "Each context must have thread ID"
         assert user_context.run_id is not None, "Each context must have run ID"
         
-        self.logger.info(f"✅ Authentication middleware integration successful: {auth_user.user_id}")
+        self.logger.info(f" PASS:  Authentication middleware integration successful: {auth_user.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -432,7 +432,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert user2_cache["private"] == "user2_secret"
         assert user1_cache["private"] != user2_cache["private"], "Cache data must be isolated"
         
-        self.logger.info(f"✅ User context isolation validated: {user1.user_id} ↔ {user2.user_id}")
+        self.logger.info(f" PASS:  User context isolation validated: {user1.user_id} [U+2194] {user2.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -521,7 +521,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
             assert perm not in free_user.permissions, f"Free user must NOT have: {perm}"
             assert perm not in enterprise_user.permissions, f"Enterprise user must NOT have: {perm}"
         
-        self.logger.info(f"✅ Authorization levels validated: Free({len(free_user.permissions)}) < Enterprise({len(enterprise_user.permissions)}) < Admin({len(admin_user.permissions)})")
+        self.logger.info(f" PASS:  Authorization levels validated: Free({len(free_user.permissions)}) < Enterprise({len(enterprise_user.permissions)}) < Admin({len(admin_user.permissions)})")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -599,7 +599,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         is_blacklisted = await redis.exists(blacklist_key)
         assert is_blacklisted, "Old token must be blacklisted after refresh"
         
-        self.logger.info(f"✅ Token expiration and refresh scenarios validated: {auth_user.user_id}")
+        self.logger.info(f" PASS:  Token expiration and refresh scenarios validated: {auth_user.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -693,7 +693,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert audit_entry["event_type"] == "authentication_failure"
         assert audit_entry["ip_address"] == test_ip
         
-        self.logger.info(f"✅ Authentication error handling and security fallback validated")
+        self.logger.info(f" PASS:  Authentication error handling and security fallback validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -784,7 +784,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
             assert event_payload["authenticated"] is True
             assert event_payload["thread_id"] is not None
         
-        self.logger.info(f"✅ WebSocket authentication during agent execution validated: {auth_user.user_id}")
+        self.logger.info(f" PASS:  WebSocket authentication during agent execution validated: {auth_user.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -858,7 +858,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert auth_chain["chain_valid"] is True
         assert auth_chain["user_context"]["user_id"] == auth_user.user_id
         
-        self.logger.info(f"✅ Cross-service authentication validation successful: {auth_user.user_id}")
+        self.logger.info(f" PASS:  Cross-service authentication validation successful: {auth_user.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1001,7 +1001,7 @@ class TestAuthenticationSecurityComprehensive(BaseIntegrationTest):
         assert stored_summary is not None, "Audit summary must be generated"
         assert stored_summary["high_severity_events"] >= 2
         
-        self.logger.info(f"✅ Security audit logging and monitoring validated")
+        self.logger.info(f" PASS:  Security audit logging and monitoring validated")
     
     async def cleanup_resources(self):
         """Clean up test resources."""

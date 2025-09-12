@@ -2,7 +2,7 @@
 """
 Script Creation and Testing for Netra AI Platform installer.
 Startup scripts and installation verification.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import os

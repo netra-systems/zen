@@ -2,7 +2,7 @@
 Tool Dispatcher and Execution Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure reliable tool execution for agent workflows delivers actionable insights
 - Value Impact: Tools must execute correctly to provide users with valuable AI-powered solutions
 - Strategic Impact: Core platform capability for AI agent functionality that drives user engagement and retention
@@ -241,7 +241,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert len(data_tools) == 1
             assert len(report_tools) == 1
             
-            self.logger.info(f"✅ Tool registration validated: {len(available_tools)} business tools registered")
+            self.logger.info(f" PASS:  Tool registration validated: {len(available_tools)} business tools registered")
             
         finally:
             await dispatcher.cleanup()
@@ -302,7 +302,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert metrics1['user_id'] == "user_001"
             assert metrics2['user_id'] == "user_002"
             
-            self.logger.info("✅ Tool execution context isolation validated")
+            self.logger.info(" PASS:  Tool execution context isolation validated")
             
         finally:
             await asyncio.gather(
@@ -381,7 +381,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert cost_result.execution_time_ms > 0
             assert data_result.execution_time_ms > 0
             
-            self.logger.info("✅ Tool result processing and business value validation completed")
+            self.logger.info(" PASS:  Tool result processing and business value validation completed")
             
         finally:
             await dispatcher.cleanup()
@@ -462,7 +462,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             if completed_call:
                 self.logger.info("WebSocket completed notification was sent")
         
-        self.logger.info(f"✅ Workflow management validated: {total_time:.3f}s total, metrics tracked")
+        self.logger.info(f" PASS:  Workflow management validated: {total_time:.3f}s total, metrics tracked")
 
     @pytest.mark.integration
     async def test_tool_chaining_and_pipeline_execution(self):
@@ -530,9 +530,9 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             
             # Validate WebSocket notifications for entire pipeline
             notification_calls = self.mock_websocket_manager.send_event.call_count
-            assert notification_calls >= 8  # 4 tools × 2 events each (executing + completed)
+            assert notification_calls >= 8  # 4 tools  x  2 events each (executing + completed)
             
-            self.logger.info(f"✅ Tool pipeline executed: {len(pipeline_results)} stages, {total_pipeline_time:.1f}ms total")
+            self.logger.info(f" PASS:  Tool pipeline executed: {len(pipeline_results)} stages, {total_pipeline_time:.1f}ms total")
             
         finally:
             await dispatcher.cleanup()
@@ -617,7 +617,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             if failed_attempts:
                 assert metrics['failed_executions'] >= 1
             
-            self.logger.info(f"✅ Error handling validated: {len(failed_attempts)} failures handled gracefully")
+            self.logger.info(f" PASS:  Error handling validated: {len(failed_attempts)} failures handled gracefully")
             
         finally:
             await dispatcher.cleanup()
@@ -690,9 +690,9 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             
             # Validate WebSocket notification performance
             notification_count = self.mock_websocket_manager.send_event.call_count
-            assert notification_count >= 6  # 3 tools × 2 notifications each
+            assert notification_count >= 6  # 3 tools  x  2 notifications each
             
-            self.logger.info(f"✅ Performance monitoring validated: avg {avg_execution_time:.1f}ms per tool")
+            self.logger.info(f" PASS:  Performance monitoring validated: avg {avg_execution_time:.1f}ms per tool")
             
         finally:
             await dispatcher.cleanup()
@@ -771,7 +771,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             if "result" in completed_event:
                 assert len(str(completed_event["result"])) > 0
             
-            self.logger.info(f"✅ WebSocket notifications validated: {notification_tracker['total_events']} events sent")
+            self.logger.info(f" PASS:  WebSocket notifications validated: {notification_tracker['total_events']} events sent")
             
         finally:
             await dispatcher.cleanup()
@@ -863,7 +863,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert large_result.success
             assert large_result.result["parameters_processed"] == 100
             
-            self.logger.info("✅ Parameter validation and sanitization completed")
+            self.logger.info(" PASS:  Parameter validation and sanitization completed")
             
         finally:
             await dispatcher.cleanup()
@@ -934,7 +934,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             # Test resource cleanup
             assert dispatcher._is_active
             
-            self.logger.info(f"✅ Concurrent execution validated: 5 tools in {total_time:.3f}s")
+            self.logger.info(f" PASS:  Concurrent execution validated: 5 tools in {total_time:.3f}s")
             
         finally:
             await dispatcher.cleanup()
@@ -1007,7 +1007,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert "execution_count" in compliance_result
             assert "timestamp" in compliance_result
             
-            self.logger.info("✅ Audit logging and compliance tracking validated")
+            self.logger.info(" PASS:  Audit logging and compliance tracking validated")
             
         finally:
             await dispatcher.cleanup()
@@ -1077,7 +1077,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             except RuntimeError as e:
                 assert "forbidden" in str(e).lower()
             
-            self.logger.info("✅ Factory patterns validated: proper isolation and creation")
+            self.logger.info(" PASS:  Factory patterns validated: proper isolation and creation")
             
         finally:
             await asyncio.gather(
@@ -1188,7 +1188,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             total_workflow_time = metrics['total_execution_time_ms']
             assert total_workflow_time > 0
             
-            self.logger.info(f"✅ Agent workflow integration validated: 4 stages, {total_workflow_time:.1f}ms total")
+            self.logger.info(f" PASS:  Agent workflow integration validated: 4 stages, {total_workflow_time:.1f}ms total")
             
         finally:
             await dispatcher.cleanup()
@@ -1221,7 +1221,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
                         "nested_objects": {"key": "value"},
                         "arrays": [1, 2, 3, "string", True],
                         "numbers": [42, 3.14, -10],
-                        "unicode_text": "Hello 世界 🌍",
+                        "unicode_text": "Hello [U+4E16][U+754C] [U+1F30D]",
                         "timestamps": datetime.now(timezone.utc).isoformat()
                     }
                 }
@@ -1257,7 +1257,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
                     assert "execution_time_ms" in business_result
                     assert "timestamp" in business_result
                 
-                self.logger.info(f"✅ Serialization validated: {len(serialized)} chars JSON")
+                self.logger.info(f" PASS:  Serialization validated: {len(serialized)} chars JSON")
                 
             except (TypeError, ValueError) as e:
                 pytest.fail(f"Result serialization failed: {e}")
@@ -1363,7 +1363,7 @@ class TestToolDispatcherExecution(BaseIntegrationTest):
             assert basic_metrics['permission_checks'] >= 2
             assert admin_metrics['permission_checks'] >= 1
             
-            self.logger.info("✅ Security and permission validation completed")
+            self.logger.info(" PASS:  Security and permission validation completed")
             
         finally:
             await asyncio.gather(
@@ -1508,7 +1508,7 @@ class TestToolDispatcherSystemIntegration(BaseIntegrationTest):
             
             # Validate WebSocket notification system
             notification_count = websocket_manager.send_event.call_count
-            assert notification_count >= 10  # 5 tools × 2 events minimum
+            assert notification_count >= 10  # 5 tools  x  2 events minimum
             
             # Calculate business impact metrics
             total_execution_time = sum(
@@ -1519,7 +1519,7 @@ class TestToolDispatcherSystemIntegration(BaseIntegrationTest):
             )
             
             self.logger.info(
-                f"✅ Complete ecosystem integration validated: "
+                f" PASS:  Complete ecosystem integration validated: "
                 f"5 tools, {total_execution_time:.1f}ms total, "
                 f"{notification_count} notifications"
             )

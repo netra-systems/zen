@@ -140,7 +140,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
             f"This suggests the factory is failing for different reasons than expected."
         )
         
-        print(f"✅ FACTORY INITIALIZATION FAILURE REPRODUCED: {error_message}")
+        print(f" PASS:  FACTORY INITIALIZATION FAILURE REPRODUCED: {error_message}")
     
     async def test_websocket_manager_factory_dependency_resolution_failure(
         self, real_user_execution_context
@@ -195,7 +195,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
             # Verify the factory getter was called
             mock_get_factory.assert_called_once()
             
-            print(f"✅ FACTORY DEPENDENCY RESOLUTION FAILURE REPRODUCED: {error_message}")
+            print(f" PASS:  FACTORY DEPENDENCY RESOLUTION FAILURE REPRODUCED: {error_message}")
     
     async def test_isolated_websocket_manager_creation_with_invalid_context_types(self):
         """
@@ -247,7 +247,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
             f"Error '{error_message}' doesn't match type validation patterns: {type_error_patterns}"
         )
         
-        print(f"✅ INVALID CONTEXT TYPE FAILURE REPRODUCED: {error_message}")
+        print(f" PASS:  INVALID CONTEXT TYPE FAILURE REPRODUCED: {error_message}")
     
     async def test_websocket_manager_factory_database_session_integration_failure(
         self, real_user_execution_context
@@ -308,7 +308,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
                 f"Error '{error_message}' doesn't match database failure patterns: {db_error_patterns}"
             )
             
-            print(f"✅ DATABASE SESSION INTEGRATION FAILURE REPRODUCED: {error_message}")
+            print(f" PASS:  DATABASE SESSION INTEGRATION FAILURE REPRODUCED: {error_message}")
     
     async def test_websocket_manager_factory_environment_variable_missing_failure(
         self, real_user_execution_context
@@ -370,7 +370,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
                 f"Error '{error_message}' doesn't match environment failure patterns: {env_error_patterns}"
             )
             
-            print(f"✅ ENVIRONMENT VARIABLE FAILURE REPRODUCED: {error_message}")
+            print(f" PASS:  ENVIRONMENT VARIABLE FAILURE REPRODUCED: {error_message}")
             
         finally:
             # Restore original environment variables
@@ -432,7 +432,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
                 f"Error '{error_message}' doesn't match auth service failure patterns: {auth_error_patterns}"
             )
             
-            print(f"✅ AUTH SERVICE INTEGRATION FAILURE REPRODUCED: {error_message}")
+            print(f" PASS:  AUTH SERVICE INTEGRATION FAILURE REPRODUCED: {error_message}")
     
     async def test_factory_thread_safety_concurrent_initialization_failure(
         self, real_user_execution_context
@@ -502,7 +502,7 @@ class TestWebSocketManagerFactoryInitializationFailure:
             f"Exceptions {exception_messages} don't match concurrency patterns: {concurrency_error_patterns}"
         )
         
-        print(f"✅ CONCURRENCY FAILURE REPRODUCED: {len(exceptions)} failures with patterns found")
+        print(f" PASS:  CONCURRENCY FAILURE REPRODUCED: {len(exceptions)} failures with patterns found")
         for i, exc in enumerate(exceptions[:3]):  # Show first 3 exceptions
             print(f"  Exception {i+1}: {exc}")
 

@@ -1,3 +1,4 @@
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # REMOVED_SYNTAX_ERROR: '''E2E Test: Agent Orchestration with Real LLM Integration - CLAUDE.md Compliant
 
 # REMOVED_SYNTAX_ERROR: MISSION CRITICAL E2E test for agent orchestration with real LLM API calls.
@@ -115,7 +116,7 @@
 
     # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if failures:

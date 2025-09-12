@@ -54,7 +54,7 @@ class LoggingCoverageValidator:
         test_file = self.test_categories[category]
         test_path = Path(__file__).parent / test_file
         
-        print(f"🧪 Running {category} logging coverage tests...")
+        print(f"[U+1F9EA] Running {category} logging coverage tests...")
         
         # Run pytest with verbose output
         cmd = [
@@ -118,7 +118,7 @@ class LoggingCoverageValidator:
     
     def run_all_tests(self) -> dict:
         """Run all logging coverage validation tests."""
-        print("🚀 Golden Path Logging Coverage Validation")
+        print("[U+1F680] Golden Path Logging Coverage Validation")
         print("=" * 60)
         print(f"Business Impact: Protecting $500K+ ARR through comprehensive failure logging")
         print(f"Started: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
@@ -138,11 +138,11 @@ class LoggingCoverageValidator:
                 total_failed += result['failed_count']
             
             # Print category summary
-            status = "✅ PASSED" if result['passed'] else "❌ FAILED"
+            status = " PASS:  PASSED" if result['passed'] else " FAIL:  FAILED"
             print(f"{status} {category.upper()}: {result.get('passed_count', 0)} passed, {result.get('failed_count', 0)} failed")
         
         print()
-        print("📊 OVERALL RESULTS")
+        print(" CHART:  OVERALL RESULTS")
         print("-" * 30)
         print(f"Total Tests: {total_passed + total_failed}")
         print(f"Passed: {total_passed}")
@@ -301,13 +301,13 @@ class LoggingCoverageValidator:
     def print_coverage_report(self):
         """Print comprehensive coverage analysis report."""
         print()
-        print("📋 LOGGING COVERAGE ANALYSIS")
+        print("[U+1F4CB] LOGGING COVERAGE ANALYSIS")
         print("=" * 60)
         
         coverage_gaps = self.analyze_coverage_gaps()
         
         for category, analysis in coverage_gaps.items():
-            print(f"\\n🔍 {category.upper().replace('_', ' ')}")
+            print(f"\\n SEARCH:  {category.upper().replace('_', ' ')}")
             print(f"   Current Coverage: {analysis['current_coverage']}")
             print(f"   Business Impact: {analysis['business_impact']}")
             print(f"   Critical Gaps ({len(analysis['critical_gaps'])}):")
@@ -315,7 +315,7 @@ class LoggingCoverageValidator:
                 print(f"      - {gap}")
         
         print()
-        print("🎯 IMPLEMENTATION PRIORITIES")
+        print(" TARGET:  IMPLEMENTATION PRIORITIES")
         print("=" * 60)
         
         priorities = self.generate_implementation_priorities()
@@ -323,18 +323,18 @@ class LoggingCoverageValidator:
         for priority_group in priorities:
             print(f"\\n{priority_group['priority']}")
             for item in priority_group['items']:
-                print(f"   • {item['area']} ({item['category']})")
+                print(f"   [U+2022] {item['area']} ({item['category']})")
                 print(f"     Impact: {item['impact']}")
                 if 'location' in item:
                     print(f"     Location: {item['location']}")
         
         print()
-        print("📈 EXPECTED BENEFITS")
+        print("[U+1F4C8] EXPECTED BENEFITS")
         print("-" * 30)
-        print("• 60-80% reduction in mean time to resolution (MTTR)")
-        print("• Proactive issue detection before customer impact")
-        print("• Complete audit trail for security and compliance")
-        print("• Protection of $500K+ ARR through rapid issue resolution")
+        print("[U+2022] 60-80% reduction in mean time to resolution (MTTR)")
+        print("[U+2022] Proactive issue detection before customer impact")
+        print("[U+2022] Complete audit trail for security and compliance")
+        print("[U+2022] Protection of $500K+ ARR through rapid issue resolution")
 
 
 def main():
@@ -388,11 +388,11 @@ Examples:
         if args.output_json:
             with open(args.output_json, 'w') as f:
                 json.dump(results, f, indent=2)
-            print(f"\\n💾 Results saved to: {args.output_json}")
+            print(f"\\n[U+1F4BE] Results saved to: {args.output_json}")
         
         # Print final summary
         print()
-        print("🎯 NEXT STEPS")
+        print(" TARGET:  NEXT STEPS")
         print("-" * 30)
         print("1. Review the comprehensive report: reports/GOLDEN_PATH_LOGGING_COVERAGE_VALIDATION_REPORT.md")
         print("2. Implement Priority 1 logging gaps immediately")
@@ -407,10 +407,10 @@ Examples:
             sys.exit(0 if total_failed == 0 else 1)
             
     except KeyboardInterrupt:
-        print("\\n❌ Test execution interrupted by user")
+        print("\\n FAIL:  Test execution interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\\n❌ Test execution failed: {e}")
+        print(f"\\n FAIL:  Test execution failed: {e}")
         sys.exit(1)
 
 

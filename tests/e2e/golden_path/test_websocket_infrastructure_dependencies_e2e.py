@@ -27,8 +27,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 WEBSOCKET INFRASTRUCTURE DEPENDENCY FLOW:
 ```
-Database Health Check → Redis Health Check → WebSocket Connection →
-Infrastructure Failure Detection → Hard Failure with Infra Diagnosis → Test Failure
+Database Health Check  ->  Redis Health Check  ->  WebSocket Connection  -> 
+Infrastructure Failure Detection  ->  Hard Failure with Infra Diagnosis  ->  Test Failure
 ```
 """
 
@@ -36,7 +36,7 @@ import asyncio
 import json
 import pytest
 import time
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import asyncpg
 import websockets
 from datetime import datetime, timezone
@@ -263,11 +263,11 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
             if websocket_connection:
                 await websocket_connection.close()
         
-        print(f"✅ DATABASE INTEGRATION: WORKING")
-        print(f"   🟢 Database: Available")
-        print(f"   🟢 User creation: Success")
-        print(f"   🟢 WebSocket with DB ops: Success")
-        print(f"   📊 DB-related events: {len(database_events)}")
+        print(f" PASS:  DATABASE INTEGRATION: WORKING")
+        print(f"   [U+1F7E2] Database: Available")
+        print(f"   [U+1F7E2] User creation: Success")
+        print(f"   [U+1F7E2] WebSocket with DB ops: Success")
+        print(f"    CHART:  DB-related events: {len(database_events)}")
 
     async def _test_websocket_blocked_when_database_unavailable(self, db_error: str, response_time: float):
         """Test WebSocket operations are blocked when database is unavailable."""
@@ -290,26 +290,26 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
         # User creation may succeed with fallback auth, but database operations should fail
         
         database_unavailable_message = (
-            f"🚨 DATABASE UNAVAILABILITY DETECTED:\n"
-            f"   🔴 Database URL: {self._database_url}\n"
-            f"   🔴 Health Check Error: {db_error}\n"
-            f"   🔴 Response Time: {response_time:.3f}s\n"
-            f"   🔴 User Creation Failed: {user_creation_failed}\n"
-            f"   🔴 User Creation Error: {user_creation_error}\n"
+            f" ALERT:  DATABASE UNAVAILABILITY DETECTED:\n"
+            f"   [U+1F534] Database URL: {self._database_url}\n"
+            f"   [U+1F534] Health Check Error: {db_error}\n"
+            f"   [U+1F534] Response Time: {response_time:.3f}s\n"
+            f"   [U+1F534] User Creation Failed: {user_creation_failed}\n"
+            f"   [U+1F534] User Creation Error: {user_creation_error}\n"
             f"\n"
-            f"   💼 BUSINESS IMPACT:\n"
-            f"   • User data cannot be persisted to database\n"
-            f"   • WebSocket chat history may not be saved\n"
-            f"   • Agent execution results may not be stored\n"
-            f"   • User session data may be lost\n"
-            f"   • Data integrity compromised for WebSocket operations\n"
+            f"   [U+1F4BC] BUSINESS IMPACT:\n"
+            f"   [U+2022] User data cannot be persisted to database\n"
+            f"   [U+2022] WebSocket chat history may not be saved\n"
+            f"   [U+2022] Agent execution results may not be stored\n"
+            f"   [U+2022] User session data may be lost\n"
+            f"   [U+2022] Data integrity compromised for WebSocket operations\n"
             f"\n"
-            f"   🔧 RESOLUTION REQUIRED:\n"
-            f"   • Start database service: {self._database_url}\n"
-            f"   • Verify PostgreSQL service is running and accessible\n"
-            f"   • Check database connection pool configuration\n"
-            f"   • Validate database schema and migrations\n"
-            f"   • Ensure sufficient database resources and connections\n"
+            f"   [U+1F527] RESOLUTION REQUIRED:\n"
+            f"   [U+2022] Start database service: {self._database_url}\n"
+            f"   [U+2022] Verify PostgreSQL service is running and accessible\n"
+            f"   [U+2022] Check database connection pool configuration\n"
+            f"   [U+2022] Validate database schema and migrations\n"
+            f"   [U+2022] Ensure sufficient database resources and connections\n"
         )
         
         # Print detailed database diagnosis
@@ -356,7 +356,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_db = 0
             
             # Attempt Redis connection
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=redis_host,
                 port=redis_port,
                 db=redis_db,
@@ -365,18 +365,18 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
             )
             
             # Test basic Redis operation
-            redis_client.ping()
+            await redis_client.ping()
             
             # Test set/get operation
             test_key = f"websocket_test_{int(time.time())}"
-            redis_client.set(test_key, "test_value", ex=60)
-            test_value = redis_client.get(test_key)
+            await redis_client.set(test_key, "test_value", ex=60)
+            test_value = await redis_client.get(test_key)
             
             assert test_value == b"test_value", "Redis set/get operation failed"
             
             # Cleanup
-            redis_client.delete(test_key)
-            redis_client.close()
+            await redis_client.delete(test_key)
+            await redis_client.close()
             
             redis_response_time = time.time() - redis_start
             redis_available = True
@@ -458,10 +458,10 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
             if websocket_connection:
                 await websocket_connection.close()
         
-        print(f"✅ REDIS INTEGRATION: WORKING")
-        print(f"   🟢 Redis: Available")
-        print(f"   🟢 WebSocket sessions: Success")
-        print(f"   📊 Session operations: Success")
+        print(f" PASS:  REDIS INTEGRATION: WORKING")
+        print(f"   [U+1F7E2] Redis: Available")
+        print(f"   [U+1F7E2] WebSocket sessions: Success")
+        print(f"    CHART:  Session operations: Success")
 
     async def _test_websocket_sessions_affected_when_redis_unavailable(self, redis_error: str, response_time: float):
         """Test WebSocket sessions are affected when Redis is unavailable."""
@@ -494,9 +494,9 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 connection_success = True
                 
                 # Connection may succeed but session functionality may be limited
-                print(f"ℹ️ WebSocket connection succeeded despite Redis unavailability")
-                print(f"   📡 Connection established but session management may be limited")
-                print(f"   🔐 Authentication working (may not require Redis)")
+                print(f"[U+2139][U+FE0F] WebSocket connection succeeded despite Redis unavailability")
+                print(f"   [U+1F4E1] Connection established but session management may be limited")
+                print(f"   [U+1F510] Authentication working (may not require Redis)")
                 
                 await websocket_connection.close()
                 
@@ -511,24 +511,24 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
         # === REDIS UNAVAILABILITY IMPACT ANALYSIS ===
         
         redis_unavailable_message = (
-            f"🚨 REDIS UNAVAILABILITY DETECTED:\n"
-            f"   🔴 Redis URL: {self._redis_url}\n"
-            f"   🔴 Health Check Error: {redis_error}\n"
-            f"   🔴 Response Time: {response_time:.3f}s\n"
+            f" ALERT:  REDIS UNAVAILABILITY DETECTED:\n"
+            f"   [U+1F534] Redis URL: {self._redis_url}\n"
+            f"   [U+1F534] Health Check Error: {redis_error}\n"
+            f"   [U+1F534] Response Time: {response_time:.3f}s\n"
             f"\n"
-            f"   💼 BUSINESS IMPACT:\n"
-            f"   • WebSocket session management may be compromised\n"
-            f"   • User session data may not be cached/stored\n"
-            f"   • Real-time feature performance may be degraded\n"
-            f"   • Session-based WebSocket features may not work\n"
-            f"   • Concurrent user session tracking may fail\n"
+            f"   [U+1F4BC] BUSINESS IMPACT:\n"
+            f"   [U+2022] WebSocket session management may be compromised\n"
+            f"   [U+2022] User session data may not be cached/stored\n"
+            f"   [U+2022] Real-time feature performance may be degraded\n"
+            f"   [U+2022] Session-based WebSocket features may not work\n"
+            f"   [U+2022] Concurrent user session tracking may fail\n"
             f"\n"
-            f"   🔧 RESOLUTION REQUIRED:\n"
-            f"   • Start Redis service: {self._redis_url}\n"
-            f"   • Verify Redis server is running and accessible\n"
-            f"   • Check Redis configuration and memory settings\n"
-            f"   • Validate Redis connection pool configuration\n"
-            f"   • Ensure Redis has sufficient memory for session data\n"
+            f"   [U+1F527] RESOLUTION REQUIRED:\n"
+            f"   [U+2022] Start Redis service: {self._redis_url}\n"
+            f"   [U+2022] Verify Redis server is running and accessible\n"
+            f"   [U+2022] Check Redis configuration and memory settings\n"
+            f"   [U+2022] Validate Redis connection pool configuration\n"
+            f"   [U+2022] Ensure Redis has sufficient memory for session data\n"
         )
         
         # Print detailed Redis diagnosis
@@ -567,49 +567,49 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
         
         if database_available and redis_available:
             infrastructure_status = "fully_available"
-            print(f"✅ COMBINED INFRASTRUCTURE: FULLY AVAILABLE")
-            print(f"   🟢 Database: Available")
-            print(f"   🟢 Redis: Available")
-            print(f"   🚀 WebSocket operations should work normally")
+            print(f" PASS:  COMBINED INFRASTRUCTURE: FULLY AVAILABLE")
+            print(f"   [U+1F7E2] Database: Available")
+            print(f"   [U+1F7E2] Redis: Available")
+            print(f"   [U+1F680] WebSocket operations should work normally")
             
         elif database_available and not redis_available:
             infrastructure_status = "database_only"
-            print(f"⚠️ COMBINED INFRASTRUCTURE: PARTIAL (DATABASE ONLY)")
-            print(f"   🟢 Database: Available")
-            print(f"   🔴 Redis: Unavailable")
-            print(f"   📉 WebSocket operations may be limited")
+            print(f" WARNING: [U+FE0F] COMBINED INFRASTRUCTURE: PARTIAL (DATABASE ONLY)")
+            print(f"   [U+1F7E2] Database: Available")
+            print(f"   [U+1F534] Redis: Unavailable")
+            print(f"   [U+1F4C9] WebSocket operations may be limited")
             
         elif not database_available and redis_available:
             infrastructure_status = "redis_only"
-            print(f"⚠️ COMBINED INFRASTRUCTURE: PARTIAL (REDIS ONLY)")
-            print(f"   🔴 Database: Unavailable")
-            print(f"   🟢 Redis: Available")
-            print(f"   📉 WebSocket data operations compromised")
+            print(f" WARNING: [U+FE0F] COMBINED INFRASTRUCTURE: PARTIAL (REDIS ONLY)")
+            print(f"   [U+1F534] Database: Unavailable")
+            print(f"   [U+1F7E2] Redis: Available")
+            print(f"   [U+1F4C9] WebSocket data operations compromised")
             
         else:
             infrastructure_status = "completely_unavailable"
             
             # Both database and Redis unavailable - critical failure
             combined_failure_message = (
-                f"🚨 COMPLETE INFRASTRUCTURE FAILURE:\n"
-                f"   🔴 Database: UNAVAILABLE\n"
-                f"   🔴 Redis: UNAVAILABLE\n"
-                f"   🔴 Database URL: {self._database_url}\n"
-                f"   🔴 Redis URL: {self._redis_url}\n"
+                f" ALERT:  COMPLETE INFRASTRUCTURE FAILURE:\n"
+                f"   [U+1F534] Database: UNAVAILABLE\n"
+                f"   [U+1F534] Redis: UNAVAILABLE\n"
+                f"   [U+1F534] Database URL: {self._database_url}\n"
+                f"   [U+1F534] Redis URL: {self._redis_url}\n"
                 f"\n"
-                f"   💼 CRITICAL BUSINESS IMPACT:\n"
-                f"   • ALL WebSocket data operations blocked\n"
-                f"   • NO user data persistence possible\n"
-                f"   • NO session management available\n"
-                f"   • Complete real-time AI feature unavailability\n"
-                f"   • System is effectively non-functional for WebSocket features\n"
+                f"   [U+1F4BC] CRITICAL BUSINESS IMPACT:\n"
+                f"   [U+2022] ALL WebSocket data operations blocked\n"
+                f"   [U+2022] NO user data persistence possible\n"
+                f"   [U+2022] NO session management available\n"
+                f"   [U+2022] Complete real-time AI feature unavailability\n"
+                f"   [U+2022] System is effectively non-functional for WebSocket features\n"
                 f"\n"
-                f"   🚨 EMERGENCY RESOLUTION REQUIRED:\n"
-                f"   • Immediately start database service\n"
-                f"   • Immediately start Redis service\n"
-                f"   • Verify all infrastructure services are healthy\n"
-                f"   • Check service dependencies and startup order\n"
-                f"   • Validate network connectivity between services\n"
+                f"    ALERT:  EMERGENCY RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Immediately start database service\n"
+                f"   [U+2022] Immediately start Redis service\n"
+                f"   [U+2022] Verify all infrastructure services are healthy\n"
+                f"   [U+2022] Check service dependencies and startup order\n"
+                f"   [U+2022] Validate network connectivity between services\n"
             )
             
             print(combined_failure_message)
@@ -642,7 +642,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_port = 6381
                 redis_db = 0
             
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=redis_host,
                 port=redis_port,
                 db=redis_db,
@@ -650,8 +650,8 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 socket_connect_timeout=5.0
             )
             
-            redis_client.ping()
-            redis_client.close()
+            await redis_client.ping()
+            await redis_client.close()
             return True
         except Exception:
             return False
@@ -663,9 +663,9 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
             final_metrics = self.get_all_metrics()
             db_status = "available" if final_metrics.get("database_available") else "unavailable"
             redis_status = "available" if final_metrics.get("redis_available") else "unavailable"
-            print(f"\n📊 WEBSOCKET INFRASTRUCTURE DEPENDENCIES TEST SUMMARY:")
-            print(f"   🗄️ Database Status: {db_status}")
-            print(f"   📦 Redis Status: {redis_status}")
-            print(f"   📊 Total Infrastructure Metrics: {len(final_metrics)}")
+            print(f"\n CHART:  WEBSOCKET INFRASTRUCTURE DEPENDENCIES TEST SUMMARY:")
+            print(f"   [U+1F5C4][U+FE0F] Database Status: {db_status}")
+            print(f"   [U+1F4E6] Redis Status: {redis_status}")
+            print(f"    CHART:  Total Infrastructure Metrics: {len(final_metrics)}")
         
         await super().async_teardown_method(method)

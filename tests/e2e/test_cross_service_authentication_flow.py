@@ -34,7 +34,7 @@ async def check_service_availability(session: aiohttp.ClientSession, service_nam
         health_url = f"{url}/health"
         async with session.get(health_url, timeout=aiohttp.ClientTimeout(total=5)) as response:
             if response.status == 200:
-                logger.info(f"✅ {service_name} health check passed at {health_url}")
+                logger.info(f" PASS:  {service_name} health check passed at {health_url}")
                 return True
     except Exception:
         pass
@@ -43,12 +43,12 @@ async def check_service_availability(session: aiohttp.ClientSession, service_nam
     try:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
             if response.status in [200, 404]:  # 404 is acceptable for root endpoint
-                logger.info(f"✅ {service_name} root endpoint accessible at {url}")
+                logger.info(f" PASS:  {service_name} root endpoint accessible at {url}")
                 return True
     except Exception:
         pass
 
-    logger.warning(f"❌ {service_name} not available at {url}")
+    logger.warning(f" FAIL:  {service_name} not available at {url}")
     return False
 
 @pytest.mark.e2e
@@ -76,9 +76,9 @@ async def test_cross_service_authentication_flow():
     frontend_service_url = "http://localhost:3000"
     
     # Debug: print actual URLs being used
-    print(f"🔧 Auth Service URL: {auth_service_url}")
-    print(f"🔧 Backend Service URL: {backend_service_url}")
-    print(f"🔧 Frontend Service URL: {frontend_service_url}")
+    print(f"[U+1F527] Auth Service URL: {auth_service_url}")
+    print(f"[U+1F527] Backend Service URL: {backend_service_url}")
+    print(f"[U+1F527] Frontend Service URL: {frontend_service_url}")
 
                                         # Test user credentials
                                         # REMOVED_SYNTAX_ERROR: test_user = { )

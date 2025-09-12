@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for auth_integration/validators.py - AUTH Validation SSOT
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Auth validation is security foundation
+- Segment: ALL (Free  ->  Enterprise) - Auth validation is security foundation
 - Business Goal: Prevent security vulnerabilities and reduce auth errors by 15-20%
 - Value Impact: Proper validation protects $50K+ MRR AI optimization platform
 - Strategic Impact: Validation prevents injection attacks, ensures GDPR compliance

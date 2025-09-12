@@ -297,10 +297,10 @@ async def test_staging_websocket():
         # Connect to WebSocket
         connected = await client.connect()
         if not connected:
-            print("✗ Failed to connect to staging WebSocket")
+            print("[U+2717] Failed to connect to staging WebSocket")
             return False
         
-        print(f"✓ Connected to staging WebSocket")
+        print(f"[U+2713] Connected to staging WebSocket")
         
         # Register message handler
         agent_events = []
@@ -315,18 +315,18 @@ async def test_staging_websocket():
         
         # Send a test message
         success = await client.send_chat_message("Hello from staging E2E test")
-        print(f"✓ Sent test message: {success}")
+        print(f"[U+2713] Sent test message: {success}")
         
         # Test agent flow
         success = await client.test_agent_flow("What is 2+2?")
-        print(f"✓ Agent flow test: {'passed' if success else 'failed'}")
+        print(f"[U+2713] Agent flow test: {'passed' if success else 'failed'}")
         
         # Wait a bit for any remaining messages
         await asyncio.sleep(2)
         
         # Get stats
         stats = client.get_message_stats()
-        print(f"✓ Message stats:")
+        print(f"[U+2713] Message stats:")
         print(f"  - Total messages: {stats['total_messages']}")
         print(f"  - Event types: {stats['event_types']}")
         print(f"  - Connection time: {stats['connection_time']:.2f}s")
@@ -334,7 +334,7 @@ async def test_staging_websocket():
         return True
         
     except Exception as e:
-        print(f"✗ Test failed: {e}")
+        print(f"[U+2717] Test failed: {e}")
         return False
         
     finally:

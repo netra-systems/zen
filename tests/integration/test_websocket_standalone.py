@@ -114,29 +114,29 @@ class WebSocketStandaloneTest:
                     response_data = json.loads(response) if response else {}
                     
                     result = f"Connected in {connection_time:.3f}s, received: {type(response_data).__name__}"
-                    logger.info(f"✅ {test_name} - {result}")
+                    logger.info(f" PASS:  {test_name} - {result}")
                     return True, result
                     
                 except asyncio.TimeoutError:
                     # Connection successful even without specific response
                     result = f"Connected in {connection_time:.3f}s (no response, but connection OK)"
-                    logger.info(f"✅ {test_name} - {result}")
+                    logger.info(f" PASS:  {test_name} - {result}")
                     return True, result
                     
         except ConnectionRefusedError:
             error_msg = f"Connection refused - WebSocket service not running on {url}"
-            logger.warning(f"⏭️  {test_name} - SKIPPED: {error_msg}")
+            logger.warning(f"[U+23ED][U+FE0F]  {test_name} - SKIPPED: {error_msg}")
             self.results["summary"]["skipped"] += 1
             return None, error_msg  # None indicates skip
             
         except InvalidURI:
             error_msg = f"Invalid WebSocket URI: {url}"
-            logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+            logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
             return False, error_msg
             
         except Exception as e:
             error_msg = f"Unexpected error: {type(e).__name__}: {str(e)}"
-            logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+            logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
             return False, error_msg
 
     def test_critical_websocket_event_structure(self) -> Tuple[bool, str]:
@@ -178,16 +178,16 @@ class WebSocketStandaloneTest:
             
             if validation_results:
                 error_msg = f"Event structure validation failed: {'; '.join(validation_results)}"
-                logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+                logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
                 return False, error_msg
             else:
                 result = f"All {len(self.critical_events)} critical event structures valid"
-                logger.info(f"✅ {test_name} - {result}")
+                logger.info(f" PASS:  {test_name} - {result}")
                 return True, result
                 
         except Exception as e:
             error_msg = f"Event structure test failed: {type(e).__name__}: {str(e)}"
-            logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+            logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
             return False, error_msg
 
     def _get_sample_event_data(self, event_type: str) -> Dict:
@@ -377,21 +377,21 @@ class WebSocketStandaloneTest:
             
             if sequence_errors:
                 error_msg = f"Agent event flow validation failed: {'; '.join(sequence_errors)}"
-                logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+                logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
                 return False, error_msg
             else:
                 result = f"Agent event flow sequence valid ({len(event_sequence)} events)"
-                logger.info(f"✅ {test_name} - {result}")
+                logger.info(f" PASS:  {test_name} - {result}")
                 return True, result
                 
         except Exception as e:
             error_msg = f"Agent event flow test failed: {type(e).__name__}: {str(e)}"
-            logger.error(f"❌ {test_name} - FAILED: {error_msg}")
+            logger.error(f" FAIL:  {test_name} - FAILED: {error_msg}")
             return False, error_msg
 
     async def run_all_tests(self) -> Dict:
         """Run all WebSocket integration tests."""
-        logger.info("🚀 Starting WebSocket Standalone Integration Tests")
+        logger.info("[U+1F680] Starting WebSocket Standalone Integration Tests")
         logger.info("=" * 60)
         
         # Test 1: Basic WebSocket Connection
@@ -442,7 +442,7 @@ class WebSocketStandaloneTest:
     def print_summary(self):
         """Print comprehensive test results summary."""
         logger.info("=" * 60)
-        logger.info("📊 WEBSOCKET INTEGRATION TEST RESULTS")
+        logger.info(" CHART:  WEBSOCKET INTEGRATION TEST RESULTS")
         logger.info("=" * 60)
         
         summary = self.results["summary"]
@@ -454,16 +454,16 @@ class WebSocketStandaloneTest:
         skipped = summary["skipped"]
         
         logger.info(f"Total Tests: {total}")
-        logger.info(f"✅ Passed: {passed}")
-        logger.info(f"❌ Failed: {failed}")
-        logger.info(f"⏭️  Skipped: {skipped}")
+        logger.info(f" PASS:  Passed: {passed}")
+        logger.info(f" FAIL:  Failed: {failed}")
+        logger.info(f"[U+23ED][U+FE0F]  Skipped: {skipped}")
         
         if total > 0:
             success_rate = (passed / total) * 100
-            logger.info(f"📈 Success Rate: {success_rate:.1f}%")
+            logger.info(f"[U+1F4C8] Success Rate: {success_rate:.1f}%")
         
         # Detailed Results
-        logger.info("\n📋 DETAILED RESULTS:")
+        logger.info("\n[U+1F4CB] DETAILED RESULTS:")
         logger.info("-" * 40)
         
         all_tests = (
@@ -473,21 +473,21 @@ class WebSocketStandaloneTest:
         )
         
         for test_info in all_tests:
-            status_icon = "✅" if test_info["result"] else "❌" if test_info["result"] is False else "⏭️"
+            status_icon = " PASS: " if test_info["result"] else " FAIL: " if test_info["result"] is False else "[U+23ED][U+FE0F]"
             logger.info(f"{status_icon} {test_info['test']}: {test_info['message']}")
         
         # Business Value Summary
-        logger.info("\n💼 BUSINESS VALUE ASSESSMENT:")
+        logger.info("\n[U+1F4BC] BUSINESS VALUE ASSESSMENT:")
         logger.info("-" * 40)
         
         if failed == 0:
-            logger.info("🎉 WebSocket infrastructure ready for chat value delivery!")
-            logger.info("🔥 Critical agent events (agent_started, tool_executing, etc.) validated")
-            logger.info("💰 System ready to support $500K+ ARR chat functionality")
+            logger.info(" CELEBRATION:  WebSocket infrastructure ready for chat value delivery!")
+            logger.info(" FIRE:  Critical agent events (agent_started, tool_executing, etc.) validated")
+            logger.info("[U+1F4B0] System ready to support $500K+ ARR chat functionality")
         else:
-            logger.info("⚠️  WebSocket infrastructure has issues that may impact chat value")
-            logger.info("🚨 Critical agent event delivery may be compromised")
-            logger.info("📉 Chat functionality reliability at risk")
+            logger.info(" WARNING: [U+FE0F]  WebSocket infrastructure has issues that may impact chat value")
+            logger.info(" ALERT:  Critical agent event delivery may be compromised")
+            logger.info("[U+1F4C9] Chat functionality reliability at risk")
         
         logger.info("=" * 60)
 
@@ -502,17 +502,17 @@ async def main():
         
         # Return exit code based on results
         if results["summary"]["failed"] == 0:
-            logger.info("🎉 ALL TESTS PASSED - WebSocket integration ready!")
+            logger.info(" CELEBRATION:  ALL TESTS PASSED - WebSocket integration ready!")
             return 0
         else:
-            logger.error(f"❌ {results['summary']['failed']} TESTS FAILED")
+            logger.error(f" FAIL:  {results['summary']['failed']} TESTS FAILED")
             return 1
             
     except KeyboardInterrupt:
-        logger.info("🛑 Tests interrupted by user")
+        logger.info("[U+1F6D1] Tests interrupted by user")
         return 130
     except Exception as e:
-        logger.error(f"💥 Test execution failed: {type(e).__name__}: {str(e)}")
+        logger.error(f"[U+1F4A5] Test execution failed: {type(e).__name__}: {str(e)}")
         return 1
 
 

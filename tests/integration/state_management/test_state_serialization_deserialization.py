@@ -2,7 +2,7 @@
 Test State Serialization and Deserialization - State Management & Context Swimlane
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core data persistence and transfer functionality
+- Segment: All (Free  ->  Enterprise) - Core data persistence and transfer functionality
 - Business Goal: Ensure reliable state preservation across system boundaries and storage layers
 - Value Impact: Enables conversation continuity, state recovery, and cross-service communication
 - Strategic Impact: CRITICAL - State serialization enables all persistent AI interactions and system reliability

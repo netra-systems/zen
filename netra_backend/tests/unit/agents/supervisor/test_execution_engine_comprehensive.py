@@ -1070,7 +1070,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
                 "type": "agent_started",
                 "data": {
                     "nested_config": {"optimization": {"targets": ["cost", "performance"], "weights": [0.7, 0.3]}},
-                    "unicode_text": "Optimización de costos 🚀 análisis completo",
+                    "unicode_text": "Optimizaci[U+00F3]n de costos [U+1F680] an[U+00E1]lisis completo",
                     "special_chars": "Cost@Analysis#Data$Processing%Results^Summary&Report*Details",
                     "numbers": {"large_int": 999999999999, "precise_float": 3.141592653589793},
                     "arrays": {"regions": ["us-east-1", "eu-west-1", "ap-southeast-2"], "metrics": [100, 200, 300]}
@@ -1078,7 +1078,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
             },
             {
                 "type": "agent_thinking", 
-                "reasoning": "Multi-line reasoning with\nnewlines and\ttabs, plus unicode: 测试数据 🔍 and symbols: @#$%^&*()",
+                "reasoning": "Multi-line reasoning with\nnewlines and\ttabs, plus unicode: [U+6D4B][U+8BD5][U+6570][U+636E]  SEARCH:  and symbols: @#$%^&*()",
                 "step_number": 42
             },
             {
@@ -1128,7 +1128,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
         # Check agent_thinking data integrity
         thinking_event = next(e for e in events if e["type"] == "agent_thinking")
         self.assertIn("newlines and\ttabs", thinking_event["reasoning"])
-        self.assertIn("测试数据 🔍", thinking_event["reasoning"])
+        self.assertIn("[U+6D4B][U+8BD5][U+6570][U+636E]  SEARCH: ", thinking_event["reasoning"])
         self.assertEqual(thinking_event["step"], 42)
         
         # Check tool_executing data integrity
@@ -3393,21 +3393,21 @@ class TestExecutionEngineValidationEdgeCasesComprehensive(AsyncBaseTestCase):
         # Test with various Unicode characters
         unicode_contexts = [
             AgentExecutionContext(
-                run_id="run_测试_中文",
-                thread_id="thread_日本語",
-                user_id="user_العربية",
+                run_id="run_[U+6D4B][U+8BD5]_[U+4E2D][U+6587]",
+                thread_id="thread_[U+65E5][U+672C][U+8A9E]",
+                user_id="user_[U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]",
                 agent_name="unicode_agent"
             ),
             AgentExecutionContext(
-                run_id="run_русский_язык",
-                thread_id="thread_ελληνικά",
-                user_id="user_한국어",
+                run_id="run_pucck[U+0438][U+0439]_[U+044F][U+0437][U+044B]k",
+                thread_id="thread_[U+03B5][U+03BB][U+03BB][U+03B7][U+03BD][U+03B9][U+03BA][U+03AC]",
+                user_id="user_[U+D55C][U+AD6D][U+C5B4]",
                 agent_name="unicode_agent"
             ),
             AgentExecutionContext(
-                run_id="run_with_emojis_🚀_✨",
-                thread_id="thread_with_symbols_🔥_⭐",
-                user_id="user_with_hearts_❤️_💙",
+                run_id="run_with_emojis_[U+1F680]_[U+2728]",
+                thread_id="thread_with_symbols_ FIRE: _ STAR: ",
+                user_id="user_with_hearts_[U+2764][U+FE0F]_[U+1F499]",
                 agent_name="emoji_agent"
             )
         ]

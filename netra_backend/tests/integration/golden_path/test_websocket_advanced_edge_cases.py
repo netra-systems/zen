@@ -239,7 +239,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Validate message delivery (allow some tolerance for network timing)
         delivery_rate = final_received_count / total_expected
-        assert delivery_rate >= 0.8, f"Message delivery rate too low: {delivery_rate:.2%} (expected ≥80%)"
+        assert delivery_rate >= 0.8, f"Message delivery rate too low: {delivery_rate:.2%} (expected  >= 80%)"
         
         # Validate connection state transitions
         expected_transitions = [
@@ -260,7 +260,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         queued_delivered = len(interrupted_msg_ids.intersection(received_msg_ids))
         queued_delivery_rate = queued_delivered / len(interrupted_messages) if interrupted_messages else 1.0
         
-        assert queued_delivery_rate >= 0.7, f"Queued message delivery rate too low: {queued_delivery_rate:.2%} (expected ≥70%)"
+        assert queued_delivery_rate >= 0.7, f"Queued message delivery rate too low: {queued_delivery_rate:.2%} (expected  >= 70%)"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -365,7 +365,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Validate message delivery completeness
         delivery_rate = total_received / total_sent
-        assert delivery_rate >= 0.95, f"Message delivery rate too low: {delivery_rate:.2%} (expected ≥95%)"
+        assert delivery_rate >= 0.95, f"Message delivery rate too low: {delivery_rate:.2%} (expected  >= 95%)"
         
         # Phase 3: Analyze message ordering
         ordering_violations = []
@@ -401,7 +401,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         logger.info(f"Message ordering: Violations={len(ordering_violations)}, Accuracy={ordering_accuracy:.2%}")
         
         # Validate ordering quality (allow some flexibility for high-load scenarios)
-        assert ordering_accuracy >= 0.90, f"Message ordering accuracy too low: {ordering_accuracy:.2%} (expected ≥90%)"
+        assert ordering_accuracy >= 0.90, f"Message ordering accuracy too low: {ordering_accuracy:.2%} (expected  >= 90%)"
         
         # Phase 4: Test batch ordering within reasonable bounds
         batch_ordering_violations = 0
@@ -426,13 +426,13 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                     batch_ordering_violations += 1
         
         batch_ordering_rate = 1.0 - (batch_ordering_violations / total_received) if total_received > 0 else 1.0
-        assert batch_ordering_rate >= 0.85, f"Batch ordering rate too low: {batch_ordering_rate:.2%} (expected ≥85%)"
+        assert batch_ordering_rate >= 0.85, f"Batch ordering rate too low: {batch_ordering_rate:.2%} (expected  >= 85%)"
         
         # Performance validation
         execution_time = time.time() - start_time
         throughput = total_sent / execution_time  # messages per second
         
-        assert throughput >= 10.0, f"Message throughput too low: {throughput:.1f} msg/s (expected ≥10 msg/s)"
+        assert throughput >= 10.0, f"Message throughput too low: {throughput:.1f} msg/s (expected  >= 10 msg/s)"
         assert execution_time < 45.0, f"Load test should complete in <45s, took {execution_time:.2f}s"
         
         logger.info(f"Message ordering test completed in {execution_time:.2f}s with {throughput:.1f} msg/s throughput")
@@ -593,7 +593,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Validate delivery rate (allow some failures for extremely large messages)
         delivery_rate = total_received / total_sent if total_sent > 0 else 0.0
-        assert delivery_rate >= 0.75, f"Large message delivery rate too low: {delivery_rate:.2%} (expected ≥75%)"
+        assert delivery_rate >= 0.75, f"Large message delivery rate too low: {delivery_rate:.2%} (expected  >= 75%)"
         
         # Validate message integrity
         integrity_checks = 0
@@ -614,7 +614,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                     pass
         
         integrity_rate = integrity_checks / total_received if total_received > 0 else 0.0
-        assert integrity_rate >= 0.8, f"Message integrity rate too low: {integrity_rate:.2%} (expected ≥80%)"
+        assert integrity_rate >= 0.8, f"Message integrity rate too low: {integrity_rate:.2%} (expected  >= 80%)"
         
         # Validate fragmentation handling
         large_message_count = len([msg for msg in large_messages_received if msg.get("received_size", 0) > 50000])
@@ -691,7 +691,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                 logger.error(f"Failed to establish connection {connection_id}: {e}")
         
         successful_connections = len(connections)
-        assert successful_connections >= 3, f"Should establish ≥3 connections, got {successful_connections}"
+        assert successful_connections >= 3, f"Should establish  >= 3 connections, got {successful_connections}"
         
         # Phase 2: Send broadcast messages to all connections
         broadcast_messages = []
@@ -768,7 +768,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         # Validate broadcast delivery rates
         for conn_id, stats in broadcast_delivery_stats.items():
             delivery_rate = stats["rate"]
-            assert delivery_rate >= 0.8, f"Connection {conn_id} broadcast delivery rate too low: {delivery_rate:.2%} (expected ≥80%)"
+            assert delivery_rate >= 0.8, f"Connection {conn_id} broadcast delivery rate too low: {delivery_rate:.2%} (expected  >= 80%)"
         
         # Phase 6: Validate targeted message delivery
         targeted_delivery_stats = {}
@@ -802,7 +802,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                                  if stats["target_received"] and stats["isolation_success"])
         targeting_accuracy = successful_targeting / len(targeted_messages) if targeted_messages else 1.0
         
-        assert targeting_accuracy >= 0.8, f"Targeted message accuracy too low: {targeting_accuracy:.2%} (expected ≥80%)"
+        assert targeting_accuracy >= 0.8, f"Targeted message accuracy too low: {targeting_accuracy:.2%} (expected  >= 80%)"
         
         # Phase 7: Test connection cleanup
         # Close half the connections
@@ -848,7 +848,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                 cleanup_received += 1
         
         cleanup_delivery_rate = cleanup_received / len(remaining_connections) if remaining_connections else 0.0
-        assert cleanup_delivery_rate >= 0.8, f"Post-cleanup message delivery too low: {cleanup_delivery_rate:.2%} (expected ≥80%)"
+        assert cleanup_delivery_rate >= 0.8, f"Post-cleanup message delivery too low: {cleanup_delivery_rate:.2%} (expected  >= 80%)"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -1065,7 +1065,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Performance validation
         execution_time = time.time() - start_time
-        assert execution_time >= 15.0, f"Auth edge case test should take ≥15s (for expiration), took {execution_time:.2f}s"
+        assert execution_time >= 15.0, f"Auth edge case test should take  >= 15s (for expiration), took {execution_time:.2f}s"
         assert execution_time < 45.0, f"Auth edge case test should complete in <45s, took {execution_time:.2f}s"
         
         logger.info(f"Authentication edge cases test completed in {execution_time:.2f}s with {len(auth_events)} auth events")
@@ -1245,7 +1245,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                                if msg.get("data", {}).get("message_id", "").startswith("recovery_")])
         recovery_rate = recovery_received / len(recovery_messages) if recovery_messages else 1.0
         
-        assert recovery_rate >= 0.8, f"Recovery rate too low: {recovery_rate:.2%} (expected ≥80%)"
+        assert recovery_rate >= 0.8, f"Recovery rate too low: {recovery_rate:.2%} (expected  >= 80%)"
         
         # Validate backpressure events were detected
         assert len(backpressure_events) > 0, "Should have detected backpressure events"
@@ -1263,7 +1263,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
                 ordering_violations += 1
         
         ordering_accuracy = 1.0 - (ordering_violations / len(rapid_received)) if rapid_received else 1.0
-        assert ordering_accuracy >= 0.8, f"Message ordering accuracy too low: {ordering_accuracy:.2%} (expected ≥80%)"
+        assert ordering_accuracy >= 0.8, f"Message ordering accuracy too low: {ordering_accuracy:.2%} (expected  >= 80%)"
         
         # Performance validation
         execution_time = time.time() - start_time

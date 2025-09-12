@@ -9,6 +9,7 @@ Prevents test pollution and configuration leakage between test runs that can cau
 cascade failures and flaky tests.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from typing import Dict, Any, Optional, Callable, List
 from contextlib import contextmanager
 import unittest
@@ -21,7 +22,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = logging.getLogger(__name__)
 
 
-class IsolatedTestCase(unittest.TestCase):
+class IsolatedTestCase(SSotBaseTestCase):
     """
     Base test case with automatic environment isolation.
     """
@@ -149,7 +150,7 @@ def create_isolated_user_context(
 
 # MIGRATION GUIDE:
 # 
-# 1. Replace unittest.TestCase with IsolatedTestCase:
+# 1. Replace SSotBaseTestCase with IsolatedTestCase:
 #    class TestMyFeature(IsolatedTestCase):
 #        def test_something(self):
 #            self.set_env('KEY', 'value')

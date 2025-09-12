@@ -1,7 +1,7 @@
 """LLM management utilities module.
 
 Provides health checking, statistics, and configuration information utilities.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 import time
 from datetime import UTC, datetime

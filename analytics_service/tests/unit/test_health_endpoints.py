@@ -134,7 +134,7 @@ async def real_redis_health_checker():
             
             async def check_health(self):
                 try:
-                    self.client = redis.Redis(
+                    self.client = await get_redis_client()  # MIGRATED: was redis.Redis(
                         host='localhost',
                         port=6379,
                         db=4,  # Use separate DB for health tests
@@ -157,7 +157,7 @@ async def real_redis_health_checker():
             async def check_connectivity(self):
                 try:
                     if not self.client:
-                        self.client = redis.Redis(
+                        self.client = await get_redis_client()  # MIGRATED: was redis.Redis(
                             host='localhost',
                             port=6379,
                             db=4,
@@ -526,7 +526,7 @@ class TestHealthEndpointErrorHandling:
             class FailingRedisHealthChecker:
                 async def check_health(self):
                     try:
-                        client = redis.Redis(
+                        client = await get_redis_client()  # MIGRATED: was redis.Redis(
                             host='invalid-host',
                             port=9999,
                             db=0,

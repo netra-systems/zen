@@ -490,7 +490,7 @@ class TestWebSocketEventValidationSuite:
             assert "agent_name" in started_event.content, "agent_name field missing from agent_started event"
             assert "timestamp" in started_event.content, "timestamp field missing from agent_started event"
             
-            logger.info(f"✓ agent_started event validation passed: {started_event.event_id}")
+            logger.info(f"[U+2713] agent_started event validation passed: {started_event.event_id}")
     
     @requires_docker
     @pytest.mark.asyncio
@@ -524,7 +524,7 @@ class TestWebSocketEventValidationSuite:
             # Validate thinking-specific fields
             assert "reasoning" in thinking_event.content or "thought" in thinking_event.content, "Reasoning/thought content missing"
             
-            logger.info(f"✓ agent_thinking event validation passed: {thinking_event.event_id}")
+            logger.info(f"[U+2713] agent_thinking event validation passed: {thinking_event.event_id}")
     
     @requires_docker
     @pytest.mark.asyncio
@@ -558,7 +558,7 @@ class TestWebSocketEventValidationSuite:
             # Validate tool-specific fields
             assert "tool_name" in executing_event.content, "tool_name field missing"
             
-            logger.info(f"✓ tool_executing event validation passed: {executing_event.event_id}")
+            logger.info(f"[U+2713] tool_executing event validation passed: {executing_event.event_id}")
     
     @requires_docker
     @pytest.mark.asyncio
@@ -593,7 +593,7 @@ class TestWebSocketEventValidationSuite:
             assert "tool_name" in completed_event.content, "tool_name field missing"
             assert "results" in completed_event.content or "output" in completed_event.content, "Results/output missing"
             
-            logger.info(f"✓ tool_completed event validation passed: {completed_event.event_id}")
+            logger.info(f"[U+2713] tool_completed event validation passed: {completed_event.event_id}")
     
     @requires_docker
     @pytest.mark.asyncio
@@ -627,7 +627,7 @@ class TestWebSocketEventValidationSuite:
             # Validate completion-specific fields
             assert "response" in completed_event.content or "result" in completed_event.content, "Final response/result missing"
             
-            logger.info(f"✓ agent_completed event validation passed: {completed_event.event_id}")
+            logger.info(f"[U+2713] agent_completed event validation passed: {completed_event.event_id}")
     
     # ========================================================================
     # INTEGRATION TESTS: Full Pipeline Validation
@@ -696,7 +696,7 @@ class TestWebSocketEventValidationSuite:
             assert thread_id in [s.thread_id for s in websocket_manager.event_capture.completed_sequences], \
                 "Event sequence not marked as completed"
             
-            logger.info(f"✓ Full agent execution event sequence validated for thread {thread_id}")
+            logger.info(f"[U+2713] Full agent execution event sequence validated for thread {thread_id}")
     
     @requires_docker
     @pytest.mark.asyncio
@@ -753,7 +753,7 @@ class TestWebSocketEventValidationSuite:
                 event_types = [e.event_type for e in events]
                 assert len(event_types) > 0, f"User {user_id} received no events"
                 
-                logger.info(f"✓ User {user_id} event isolation validated - {len(events)} events received")
+                logger.info(f"[U+2713] User {user_id} event isolation validated - {len(events)} events received")
         
         finally:
             # Clean up connections
@@ -812,7 +812,7 @@ class TestWebSocketEventValidationSuite:
             f"Maximum latency {max_latency:.2f}ms is too high (>{test_config.max_latency_ms * 2}ms)"
         
         # Log performance results
-        logger.info(f"✓ Performance validation passed:")
+        logger.info(f"[U+2713] Performance validation passed:")
         logger.info(f"  Average latency: {avg_latency:.2f}ms")
         logger.info(f"  Maximum latency: {max_latency:.2f}ms")
         logger.info(f"  Samples: {len(latencies)}")
@@ -857,7 +857,7 @@ class TestWebSocketEventValidationSuite:
             total_events = len(initial_events) + len(remaining_events)
             assert total_events > 0, "No events received across reconnection"
             
-            logger.info(f"✓ Reconnection continuity validated: {len(initial_events)} + {len(remaining_events)} = {total_events} events")
+            logger.info(f"[U+2713] Reconnection continuity validated: {len(initial_events)} + {len(remaining_events)} = {total_events} events")
     
     # ========================================================================
     # SECURITY TESTS: User Isolation
@@ -920,7 +920,7 @@ class TestWebSocketEventValidationSuite:
             assert user1_id not in str(event.content), \
                 f"User 2 event contains User 1 context: {event.content}"
         
-        logger.info(f"✓ User isolation security validated:")
+        logger.info(f"[U+2713] User isolation security validated:")
         logger.info(f"  User 1 events: {len(user1_events)}, unique threads: {len(user1_thread_ids)}")
         logger.info(f"  User 2 events: {len(user2_events)}, unique threads: {len(user2_thread_ids)}")
     
@@ -1017,7 +1017,7 @@ class TestWebSocketEventValidationSuite:
             f"Average latency {performance['avg_latency_ms']:.2f}ms exceeds {test_config.max_latency_ms}ms limit"
         assert sequences["missing_events"] == 0, f"Missing events detected: {sequences['missing_events']}"
         
-        logger.info("✓ Comprehensive validation report generated and validated")
+        logger.info("[U+2713] Comprehensive validation report generated and validated")
 
 
 if __name__ == "__main__":

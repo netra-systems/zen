@@ -51,7 +51,7 @@ async def initialize_memory_optimization_system() -> Dict[str, Any]:
     Returns:
         Dictionary containing initialized services and status
     """
-    logger.info("🧠 Initializing Memory Optimization System...")
+    logger.info("[U+1F9E0] Initializing Memory Optimization System...")
     
     try:
         # Initialize core memory services
@@ -65,7 +65,7 @@ async def initialize_memory_optimization_system() -> Dict[str, Any]:
         # Set up memory monitoring hooks
         await _setup_memory_monitoring_hooks(memory_service)
         
-        logger.info("✅ Memory Optimization System initialized successfully")
+        logger.info(" PASS:  Memory Optimization System initialized successfully")
         
         return {
             'memory_service': memory_service,
@@ -75,13 +75,13 @@ async def initialize_memory_optimization_system() -> Dict[str, Any]:
         }
         
     except Exception as e:
-        logger.error(f"❌ Failed to initialize Memory Optimization System: {e}")
+        logger.error(f" FAIL:  Failed to initialize Memory Optimization System: {e}")
         raise
 
 
 async def _register_lazy_components(component_loader) -> None:
     """Register heavy components for lazy loading."""
-    logger.info("📋 Registering components for lazy loading...")
+    logger.info("[U+1F4CB] Registering components for lazy loading...")
     
     # Analytics components (heavy, optional)
     component_loader.register_component(
@@ -134,25 +134,25 @@ async def _register_lazy_components(component_loader) -> None:
         description="Background task scheduler"
     )
     
-    logger.info("✅ Registered components for lazy loading")
+    logger.info(" PASS:  Registered components for lazy loading")
 
 
 async def _setup_memory_monitoring_hooks(memory_service) -> None:
     """Set up memory monitoring and cleanup hooks."""
-    logger.info("🔗 Setting up memory monitoring hooks...")
+    logger.info("[U+1F517] Setting up memory monitoring hooks...")
     
     # Hook into WebSocket disconnection events (if available)
     try:
         # Note: WebSocket manager is user-scoped in factory pattern
         # Hooks should be installed per-user via the factory, not globally
-        logger.info("ℹ️ WebSocket cleanup hooks managed per-user via factory pattern")
+        logger.info("[U+2139][U+FE0F] WebSocket cleanup hooks managed per-user via factory pattern")
         logger.debug("Memory cleanup will be handled by user-scoped WebSocket managers")
     except Exception as e:
         logger.warning(f"Note: WebSocket hook installation deferred to user context: {e}")
     
     # Hook into HTTP request completion
     # This would be integrated with FastAPI middleware in a real implementation
-    logger.info("✅ Memory monitoring hooks configured")
+    logger.info(" PASS:  Memory monitoring hooks configured")
 
 
 async def _on_websocket_disconnect(websocket_id: str) -> None:
@@ -160,7 +160,7 @@ async def _on_websocket_disconnect(websocket_id: str) -> None:
     try:
         session_manager = get_session_manager()
         await session_manager.websocket_disconnected(websocket_id)
-        logger.debug(f"🔌 Handled WebSocket disconnect for {websocket_id}")
+        logger.debug(f"[U+1F50C] Handled WebSocket disconnect for {websocket_id}")
     except Exception as e:
         logger.error(f"Error handling WebSocket disconnect {websocket_id}: {e}")
 
@@ -169,7 +169,7 @@ async def _on_websocket_disconnect(websocket_id: str) -> None:
 async def _create_clickhouse_manager():
     """Create ClickHouse manager (lazy loaded)."""
     from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
-    logger.info("🔧 Creating ClickHouse manager...")
+    logger.info("[U+1F527] Creating ClickHouse manager...")
     
     try:
         await initialize_clickhouse_tables()
@@ -181,7 +181,7 @@ async def _create_clickhouse_manager():
 
 async def _create_performance_monitor():
     """Create performance monitoring service (lazy loaded)."""
-    logger.info("🔧 Creating performance monitor...")
+    logger.info("[U+1F527] Creating performance monitor...")
     
     try:
         from netra_backend.app.agents.base.monitoring import performance_monitor
@@ -194,7 +194,7 @@ async def _create_performance_monitor():
 
 async def _create_llm_model_cache():
     """Create LLM model cache (lazy loaded)."""
-    logger.info("🔧 Creating LLM model cache...")
+    logger.info("[U+1F527] Creating LLM model cache...")
     
     # This would create a caching layer for LLM models
     # Implementation would depend on specific LLM requirements
@@ -208,7 +208,7 @@ async def _create_llm_model_cache():
 
 def _create_tool_execution_pool():
     """Create tool execution pool (lazy loaded)."""
-    logger.info("🔧 Creating tool execution pool...")
+    logger.info("[U+1F527] Creating tool execution pool...")
     
     import concurrent.futures
     
@@ -227,7 +227,7 @@ def _create_tool_execution_pool():
 
 def _create_background_scheduler():
     """Create background task scheduler (lazy loaded)."""
-    logger.info("🔧 Creating background scheduler...")
+    logger.info("[U+1F527] Creating background scheduler...")
     
     # This would create a background task scheduler
     # Implementation would use APScheduler or similar
@@ -248,7 +248,7 @@ class MemoryOptimizedStartupIntegration:
     
     async def integrate_with_startup(self) -> None:
         """Integrate memory optimization with existing startup sequence."""
-        logger.info("🔗 Integrating memory optimization with startup...")
+        logger.info("[U+1F517] Integrating memory optimization with startup...")
         
         try:
             # Initialize memory optimization system
@@ -262,10 +262,10 @@ class MemoryOptimizedStartupIntegration:
             # Mark memory optimization as available
             self.app.state.memory_optimization_enabled = True
             
-            logger.info("✅ Memory optimization integrated with startup")
+            logger.info(" PASS:  Memory optimization integrated with startup")
             
         except Exception as e:
-            logger.error(f"❌ Failed to integrate memory optimization: {e}")
+            logger.error(f" FAIL:  Failed to integrate memory optimization: {e}")
             # Set fallback state
             self.app.state.memory_optimization_enabled = False
             raise

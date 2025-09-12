@@ -613,7 +613,7 @@ class TestWebSocketEventValidator(SSotAsyncTestCase):
         """Test validation of events from multiple agents in pipeline."""
         base_time = time.time()
         
-        # Create events for Data → Optimization → Report pipeline
+        # Create events for Data  ->  Optimization  ->  Report pipeline
         multi_agent_events = [
             # Data Agent
             self._create_test_event(

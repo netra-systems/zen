@@ -48,20 +48,20 @@ def validate_websocket_manager_on_startup(manager: Any, context: str = "Startup"
         RuntimeError: If validation fails and strict mode is enabled
     """
     try:
-        logger.info(f"🔍 Validating WebSocket Manager Protocol compliance for {context}...")
+        logger.info(f" SEARCH:  Validating WebSocket Manager Protocol compliance for {context}...")
         
         validation_result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
         
         if validation_result['compliant']:
             logger.info(
-                f"✅ PROTOCOL VALIDATION PASSED: {context} WebSocket manager "
+                f" PASS:  PROTOCOL VALIDATION PASSED: {context} WebSocket manager "
                 f"({validation_result['manager_type']}) is fully compliant with WebSocketManagerProtocol. "
                 f"Compliance: {validation_result['summary']['compliance_percentage']}%"
             )
             return True
         else:
             logger.error(
-                f"❌ PROTOCOL VALIDATION FAILED: {context} WebSocket manager "
+                f" FAIL:  PROTOCOL VALIDATION FAILED: {context} WebSocket manager "
                 f"({validation_result['manager_type']}) is NOT compliant with WebSocketManagerProtocol. "
                 f"Compliance: {validation_result['summary']['compliance_percentage']}%. "
                 f"Missing methods: {validation_result['missing_methods']}. "
@@ -72,7 +72,7 @@ def validate_websocket_manager_on_startup(manager: Any, context: str = "Startup"
             for method_name, details in validation_result['method_check_details'].items():
                 if not (details['exists'] and details['callable'] and details['async_correct']):
                     logger.error(
-                        f"  ❌ Method '{method_name}': exists={details['exists']}, "
+                        f"   FAIL:  Method '{method_name}': exists={details['exists']}, "
                         f"callable={details['callable']}, async_correct={details['async_correct']}"
                     )
             
@@ -286,12 +286,12 @@ async def test_critical_method_functionality(manager: Any) -> Dict[str, Any]:
         
         if test_results['overall_success']:
             logger.info(
-                f"✅ Five Whys Critical Method Testing PASSED: "
+                f" PASS:  Five Whys Critical Method Testing PASSED: "
                 f"{test_results['tests_passed']}/{test_results['tests_run']} tests passed"
             )
         else:
             logger.warning(
-                f"⚠️  Five Whys Critical Method Testing ISSUES: "
+                f" WARNING: [U+FE0F]  Five Whys Critical Method Testing ISSUES: "
                 f"{test_results['tests_passed']}/{test_results['tests_run']} tests passed. "
                 f"Errors: {len(test_results['errors'])}"
             )
@@ -311,7 +311,7 @@ def log_protocol_compliance_summary(managers: List[tuple]) -> None:
     Args:
         managers: List of (manager, context_name) tuples to validate
     """
-    logger.info("🔍 WebSocket Manager Protocol Compliance Summary")
+    logger.info(" SEARCH:  WebSocket Manager Protocol Compliance Summary")
     logger.info("=" * 60)
     
     total_managers = len(managers)
@@ -325,16 +325,16 @@ def log_protocol_compliance_summary(managers: List[tuple]) -> None:
     compliance_rate = (compliant_managers / total_managers * 100) if total_managers > 0 else 0
     
     logger.info(
-        f"📊 PROTOCOL COMPLIANCE SUMMARY: {compliant_managers}/{total_managers} managers compliant "
+        f" CHART:  PROTOCOL COMPLIANCE SUMMARY: {compliant_managers}/{total_managers} managers compliant "
         f"({compliance_rate:.1f}%)"
     )
     
     if compliance_rate == 100:
-        logger.info("✅ ALL WebSocket managers are protocol compliant! Five Whys root cause is prevented.")
+        logger.info(" PASS:  ALL WebSocket managers are protocol compliant! Five Whys root cause is prevented.")
     elif compliance_rate >= 80:
-        logger.warning("⚠️  Most managers are compliant, but some need attention.")
+        logger.warning(" WARNING: [U+FE0F]  Most managers are compliant, but some need attention.")
     else:
-        logger.error("❌ CRITICAL: Multiple managers are not protocol compliant. Five Whys root cause risk is HIGH.")
+        logger.error(" FAIL:  CRITICAL: Multiple managers are not protocol compliant. Five Whys root cause risk is HIGH.")
     
     logger.info("=" * 60)
 

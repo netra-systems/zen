@@ -941,7 +941,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
             "user-with-dashes", 
             "user_with_underscores",
             "user123!@#$%",
-            "用户中文"  # Chinese characters
+            "[U+7528][U+6237][U+4E2D][U+6587]"  # Chinese characters
         ]
         
         managers = []
@@ -1274,4 +1274,4 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
         missing_coverage = set(required_coverage_areas) - covered_areas
         assert len(missing_coverage) == 0, f"Missing test coverage for areas: {missing_coverage}"
         
-        self.logger.info(f"✅ Comprehensive test suite validated: {len(test_methods)} tests covering all {len(required_coverage_areas)} security-critical areas")
+        self.logger.info(f" PASS:  Comprehensive test suite validated: {len(test_methods)} tests covering all {len(required_coverage_areas)} security-critical areas")

@@ -78,7 +78,7 @@ class TestDataPersistenceRecovery:
             email=self.user_context.agent_context['user_email']
         )
         
-        logger.info(f"✅ Setup authenticated context for data persistence tests")
+        logger.info(f" PASS:  Setup authenticated context for data persistence tests")
         logger.info(f"User ID: {self.user_context.user_id}")
         logger.info(f"Thread ID: {self.user_context.thread_id}")
 
@@ -159,7 +159,7 @@ class TestDataPersistenceRecovery:
         }
         
         # SESSION 1: Create and store business data
-        logger.info("📝 SESSION 1: Creating and storing business-critical data")
+        logger.info("[U+1F4DD] SESSION 1: Creating and storing business-critical data")
         
         async with aiohttp.ClientSession() as session:
             headers = self.websocket_helper.get_websocket_headers(self.auth_token)
@@ -188,7 +188,7 @@ class TestDataPersistenceRecovery:
                 }
                 
                 await websocket.send(json.dumps(data_storage_request))
-                logger.info("📤 Sent business data storage request")
+                logger.info("[U+1F4E4] Sent business data storage request")
                 
                 # Wait for storage confirmation
                 storage_timeout = 30.0
@@ -203,24 +203,24 @@ class TestDataPersistenceRecovery:
                         event_type = event_data.get("event_type", "")
                         status = event_data.get("status", "")
                         
-                        logger.info(f"📥 Storage event: {event_type} - {status}")
+                        logger.info(f"[U+1F4E5] Storage event: {event_type} - {status}")
                         
                         if event_type in ["data_stored", "persistence_confirmed"]:
                             if "success" in status.lower() or "confirmed" in status.lower():
                                 persistence_validation_results["session_1_data_stored"] = True
                                 storage_confirmed = True
-                                logger.info("✅ Business data storage confirmed in Session 1")
+                                logger.info(" PASS:  Business data storage confirmed in Session 1")
                                 
                                 # Verify data integrity immediately after storage
                                 if event_data.get("data_integrity_hash"):
                                     persistence_validation_results["session_1_data_verified"] = True
-                                    logger.info("🔍 Data integrity verification passed in Session 1")
+                                    logger.info(" SEARCH:  Data integrity verification passed in Session 1")
                                     
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout waiting for storage confirmation")
+                        logger.warning(" WARNING: [U+FE0F] Timeout waiting for storage confirmation")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Storage event decode error: {e}")
+                        logger.error(f" FAIL:  Storage event decode error: {e}")
                         continue
                 
                 # Additional business context storage
@@ -237,16 +237,16 @@ class TestDataPersistenceRecovery:
                 }
                 
                 await websocket.send(json.dumps(context_storage_request))
-                logger.info("📤 Sent thread context persistence request")
+                logger.info("[U+1F4E4] Sent thread context persistence request")
                 
                 # Brief wait for context storage
                 await asyncio.sleep(2.0)
         
-        logger.info("🔚 SESSION 1: Terminated - simulating session disconnection")
+        logger.info("[U+1F51A] SESSION 1: Terminated - simulating session disconnection")
         await asyncio.sleep(3.0)  # Simulate time gap between sessions
         
         # SESSION 2: Retrieve and validate persisted data
-        logger.info("🔄 SESSION 2: Retrieving and validating persisted data")
+        logger.info(" CYCLE:  SESSION 2: Retrieving and validating persisted data")
         
         # Create new authentication context for Session 2 (same user)
         session_2_auth_token = await self.auth_helper.get_staging_token_async(
@@ -274,7 +274,7 @@ class TestDataPersistenceRecovery:
                 }
                 
                 await websocket.send(json.dumps(data_retrieval_request))
-                logger.info("📤 Sent business data retrieval request")
+                logger.info("[U+1F4E4] Sent business data retrieval request")
                 
                 # Monitor data retrieval and validation
                 retrieval_timeout = 30.0
@@ -289,33 +289,33 @@ class TestDataPersistenceRecovery:
                         event_type = event_data.get("event_type", "")
                         status = event_data.get("status", "")
                         
-                        logger.info(f"📥 Retrieval event: {event_type} - {status}")
+                        logger.info(f"[U+1F4E5] Retrieval event: {event_type} - {status}")
                         
                         if event_type in ["data_retrieved", "business_data_loaded"]:
                             if "success" in status.lower():
                                 persistence_validation_results["session_2_data_retrieved"] = True
                                 retrieved_data = event_data.get("data_payload", {})
-                                logger.info("✅ Business data retrieval successful in Session 2")
+                                logger.info(" PASS:  Business data retrieval successful in Session 2")
                                 
                                 # Validate data integrity
                                 if self._validate_data_integrity(test_business_data, retrieved_data):
                                     persistence_validation_results["session_2_data_integrity_confirmed"] = True
-                                    logger.info("🔍 Data integrity validation passed in Session 2")
+                                    logger.info(" SEARCH:  Data integrity validation passed in Session 2")
                                 else:
                                     persistence_validation_results["data_loss_detected"] = True
-                                    logger.error("❌ Data integrity validation failed - data loss detected")
+                                    logger.error(" FAIL:  Data integrity validation failed - data loss detected")
                                     
                         elif event_type == "business_continuity_validated":
                             if "confirmed" in status.lower():
                                 persistence_validation_results["business_continuity_validated"] = True
-                                logger.info("🏢 Business continuity validation confirmed")
+                                logger.info("[U+1F3E2] Business continuity validation confirmed")
                                 break
                                 
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout waiting for retrieval events")
+                        logger.warning(" WARNING: [U+FE0F] Timeout waiting for retrieval events")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Retrieval event decode error: {e}")
+                        logger.error(f" FAIL:  Retrieval event decode error: {e}")
                         continue
                 
                 # Test business continuity by resuming optimization workflow
@@ -330,7 +330,7 @@ class TestDataPersistenceRecovery:
                     }
                     
                     await websocket.send(json.dumps(continuation_request))
-                    logger.info("📤 Sent workflow continuation request")
+                    logger.info("[U+1F4E4] Sent workflow continuation request")
                     
                     # Brief monitoring for continuation success
                     continuation_timeout = 15.0
@@ -343,7 +343,7 @@ class TestDataPersistenceRecovery:
                             
                             if event_data.get("event_type") == "workflow_resumed":
                                 persistence_validation_results["business_continuity_validated"] = True
-                                logger.info("🏢 Workflow continuation successful - business continuity confirmed")
+                                logger.info("[U+1F3E2] Workflow continuation successful - business continuity confirmed")
                                 break
                                 
                         except asyncio.TimeoutError:
@@ -371,7 +371,7 @@ class TestDataPersistenceRecovery:
         # Assert 5: Business continuity validated
         assert persistence_validation_results["business_continuity_validated"], "Business continuity validation failed"
         
-        logger.info(f"✅ PASS: Cross-session data persistence with business continuity - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Cross-session data persistence with business continuity - {test_duration:.2f}s")
         logger.info(f"Session 1 storage: {persistence_validation_results['session_1_data_stored']}")
         logger.info(f"Session 1 verification: {persistence_validation_results['session_1_data_verified']}")
         logger.info(f"Session 2 retrieval: {persistence_validation_results['session_2_data_retrieved']}")
@@ -425,7 +425,7 @@ class TestDataPersistenceRecovery:
         }
         
         # Step 1: Start long-running agent workflow
-        logger.info("🤖 Starting long-running agent execution for state recovery test")
+        logger.info("[U+1F916] Starting long-running agent execution for state recovery test")
         
         async with aiohttp.ClientSession() as session:
             headers = self.websocket_helper.get_websocket_headers(self.auth_token)
@@ -456,7 +456,7 @@ class TestDataPersistenceRecovery:
                 }
                 
                 await websocket.send(json.dumps(long_running_request))
-                logger.info("📤 Sent long-running agent execution request")
+                logger.info("[U+1F4E4] Sent long-running agent execution request")
                 
                 # Monitor initial execution and checkpoints
                 execution_start = time.time()
@@ -470,20 +470,20 @@ class TestDataPersistenceRecovery:
                         
                         event_type = event_data.get("event_type", "")
                         
-                        logger.info(f"🔍 Agent execution event: {event_type}")
+                        logger.info(f" SEARCH:  Agent execution event: {event_type}")
                         
                         if event_type == "agent_started":
                             agent_state_tracking["execution_started"] = True
-                            logger.info("🚀 Long-running agent execution started")
+                            logger.info("[U+1F680] Long-running agent execution started")
                             
                         elif event_type == "checkpoint_created" or "checkpoint" in event_type.lower():
                             agent_state_tracking["checkpoints_created"] += 1
-                            logger.info(f"📍 Checkpoint {agent_state_tracking['checkpoints_created']} created")
+                            logger.info(f" PIN:  Checkpoint {agent_state_tracking['checkpoints_created']} created")
                             
                         elif event_type == "intermediate_result":
                             intermediate_result = event_data.get("result_data", {})
                             agent_state_tracking["intermediate_results"].append(intermediate_result)
-                            logger.info("📊 Intermediate result captured")
+                            logger.info(" CHART:  Intermediate result captured")
                             
                     except asyncio.TimeoutError:
                         continue
@@ -491,12 +491,12 @@ class TestDataPersistenceRecovery:
                         continue
         
         # Step 2: Simulate system interruption
-        logger.info("⚡ SIMULATING SYSTEM INTERRUPTION - WebSocket connection terminated")
+        logger.info(" LIGHTNING:  SIMULATING SYSTEM INTERRUPTION - WebSocket connection terminated")
         agent_state_tracking["interruption_detected"] = True
         await asyncio.sleep(5.0)  # Simulate downtime
         
         # Step 3: Attempt state recovery
-        logger.info("🔄 Attempting agent execution state recovery")
+        logger.info(" CYCLE:  Attempting agent execution state recovery")
         
         # Create new WebSocket connection to simulate system recovery
         recovery_auth_token = await self.auth_helper.get_staging_token_async(
@@ -524,7 +524,7 @@ class TestDataPersistenceRecovery:
                 }
                 
                 await websocket.send(json.dumps(state_recovery_request))
-                logger.info("📤 Sent agent state recovery request")
+                logger.info("[U+1F4E4] Sent agent state recovery request")
                 
                 # Monitor state recovery process
                 recovery_timeout = 30.0
@@ -539,35 +539,35 @@ class TestDataPersistenceRecovery:
                         event_type = event_data.get("event_type", "")
                         status = event_data.get("status", "")
                         
-                        logger.info(f"🔧 Recovery event: {event_type} - {status}")
+                        logger.info(f"[U+1F527] Recovery event: {event_type} - {status}")
                         
                         if event_type == "recovery_initiated":
                             agent_state_tracking["recovery_initiated"] = True
-                            logger.info("🔄 Agent state recovery initiated")
+                            logger.info(" CYCLE:  Agent state recovery initiated")
                             
                         elif event_type == "state_restored":
                             agent_state_tracking["state_restored"] = True
-                            logger.info("💾 Agent execution state restored")
+                            logger.info("[U+1F4BE] Agent execution state restored")
                             
                             # Validate preserved intermediate results
                             recovered_results = event_data.get("intermediate_results", [])
                             if len(recovered_results) > 0:
-                                logger.info(f"📊 {len(recovered_results)} intermediate results recovered")
+                                logger.info(f" CHART:  {len(recovered_results)} intermediate results recovered")
                                 
                         elif event_type == "workflow_resumed":
                             agent_state_tracking["workflow_resumed"] = True
-                            logger.info("▶️ Agent workflow execution resumed")
+                            logger.info("[U+25B6][U+FE0F] Agent workflow execution resumed")
                             
                         elif event_type == "agent_completed":
                             agent_state_tracking["final_completion"] = True
-                            logger.info("✅ Agent execution completed after recovery")
+                            logger.info(" PASS:  Agent execution completed after recovery")
                             break
                             
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout in recovery monitoring")
+                        logger.warning(" WARNING: [U+FE0F] Timeout in recovery monitoring")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Recovery event decode error: {e}")
+                        logger.error(f" FAIL:  Recovery event decode error: {e}")
                         continue
         
         # Validation: Comprehensive agent state recovery validation
@@ -599,7 +599,7 @@ class TestDataPersistenceRecovery:
         missing_events = required_recovery_events - event_types
         assert not missing_events, f"Missing required recovery events: {missing_events}"
         
-        logger.info(f"✅ PASS: Agent execution state recovery after system interruption - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Agent execution state recovery after system interruption - {test_duration:.2f}s")
         logger.info(f"Execution started: {agent_state_tracking['execution_started']}")
         logger.info(f"Checkpoints created: {agent_state_tracking['checkpoints_created']}")
         logger.info(f"Recovery initiated: {agent_state_tracking['recovery_initiated']}")
@@ -692,7 +692,7 @@ class TestDataPersistenceRecovery:
                     open_timeout=20.0
                 ) as websocket:
                     
-                    logger.info(f"👤 User {user_index}: Connected for concurrent data operations")
+                    logger.info(f"[U+1F464] User {user_index}: Connected for concurrent data operations")
                     
                     # Perform concurrent data operations
                     for op_index, operation in enumerate(concurrency_config["data_operations"]):
@@ -753,7 +753,7 @@ class TestDataPersistenceRecovery:
                                     operation_completed = True
                                     user_metrics["operations_completed"] += 1
                                     multi_user_integrity_tracking["total_operations_completed"] += 1
-                                    logger.info(f"👤 User {user_index}: Operation {operation} completed")
+                                    logger.info(f"[U+1F464] User {user_index}: Operation {operation} completed")
                                     
                                 elif event_type == "data_integrity_validated":
                                     if "passed" in status.lower():
@@ -762,15 +762,15 @@ class TestDataPersistenceRecovery:
                                         
                                 elif event_type == "isolation_violation":
                                     multi_user_integrity_tracking["isolation_violations"] += 1
-                                    logger.warning(f"⚠️ User {user_index}: Isolation violation detected")
+                                    logger.warning(f" WARNING: [U+FE0F] User {user_index}: Isolation violation detected")
                                     
                                 elif event_type == "data_corruption":
                                     multi_user_integrity_tracking["data_corruption_detected"] += 1
-                                    logger.error(f"❌ User {user_index}: Data corruption detected")
+                                    logger.error(f" FAIL:  User {user_index}: Data corruption detected")
                                     
                                 elif event_type == "transaction_conflict":
                                     multi_user_integrity_tracking["transaction_conflicts"] += 1
-                                    logger.warning(f"⚠️ User {user_index}: Transaction conflict")
+                                    logger.warning(f" WARNING: [U+FE0F] User {user_index}: Transaction conflict")
                                     
                             except asyncio.TimeoutError:
                                 continue
@@ -779,7 +779,7 @@ class TestDataPersistenceRecovery:
                         
                         if not operation_completed:
                             user_metrics["operations_failed"] += 1
-                            logger.warning(f"👤 User {user_index}: Operation {operation} timed out")
+                            logger.warning(f"[U+1F464] User {user_index}: Operation {operation} timed out")
                     
                     # Final data integrity check for this user
                     integrity_check_request = {
@@ -805,7 +805,7 @@ class TestDataPersistenceRecovery:
                                 if "passed" in event_data.get("status", "").lower():
                                     user_metrics["isolation_validated"] = True
                                     user_metrics["user_data_checksum"] = event_data.get("data_checksum", "")
-                                    logger.info(f"👤 User {user_index}: Final integrity check passed")
+                                    logger.info(f"[U+1F464] User {user_index}: Final integrity check passed")
                                 break
                                 
                         except asyncio.TimeoutError:
@@ -814,13 +814,13 @@ class TestDataPersistenceRecovery:
                             continue
             
             except Exception as e:
-                logger.error(f"👤 User {user_index}: Concurrent operations failed - {e}")
+                logger.error(f"[U+1F464] User {user_index}: Concurrent operations failed - {e}")
                 user_metrics["operations_failed"] = concurrency_config["operations_per_user"]
             
             return user_metrics
         
         # Execute concurrent multi-user data operations
-        logger.info(f"🚀 Starting multi-user concurrent data integrity test with {concurrency_config['concurrent_users']} users")
+        logger.info(f"[U+1F680] Starting multi-user concurrent data integrity test with {concurrency_config['concurrent_users']} users")
         
         concurrent_user_tasks = []
         for user_index in range(concurrency_config["concurrent_users"]):
@@ -836,7 +836,7 @@ class TestDataPersistenceRecovery:
                 timeout=concurrent_timeout
             )
         except asyncio.TimeoutError:
-            logger.error("❌ Concurrent multi-user test timed out")
+            logger.error(" FAIL:  Concurrent multi-user test timed out")
             user_results = [task.result() if task.done() else None for task in concurrent_user_tasks]
         
         # Analyze multi-user data integrity results
@@ -881,7 +881,7 @@ class TestDataPersistenceRecovery:
         transaction_conflict_rate = multi_user_integrity_tracking["transaction_conflicts"] / multi_user_integrity_tracking["total_operations_attempted"] if multi_user_integrity_tracking["total_operations_attempted"] > 0 else 0
         assert transaction_conflict_rate <= 0.3, f"Transaction conflict rate too high ({transaction_conflict_rate:.2%}) - poor concurrency control"
         
-        logger.info(f"✅ PASS: Multi-user concurrent data integrity with transaction isolation - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Multi-user concurrent data integrity with transaction isolation - {test_duration:.2f}s")
         logger.info(f"Users created: {multi_user_integrity_tracking['users_created']}")
         logger.info(f"Successful users: {successful_users}")
         logger.info(f"Operations attempted: {multi_user_integrity_tracking['total_operations_attempted']}")
@@ -928,9 +928,9 @@ class TestDataPersistenceRecovery:
                     logger.error("Workflow stage not preserved in retrieved data")
                     return False
             
-            logger.info("✅ Data integrity validation passed")
+            logger.info(" PASS:  Data integrity validation passed")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Data integrity validation failed with exception: {e}")
+            logger.error(f" FAIL:  Data integrity validation failed with exception: {e}")
             return False

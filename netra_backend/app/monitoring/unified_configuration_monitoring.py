@@ -14,15 +14,15 @@ of the specific configuration drift pattern that caused:
 3. Configuration changes breaking authentication flows without detection
 
 INTEGRATION ARCHITECTURE:
-├── ConfigurationDriftMonitor (monitoring/configuration_drift_monitor.py)
-│   ├── E2EOAuthSimulationKeyValidator - Validates OAuth simulation key consistency
-│   ├── JWTSecretAlignmentValidator - Tracks JWT secret alignment
-│   └── WebSocketConfigurationValidator - Ensures WebSocket auth coherence
-├── ConfigurationDriftAlerting (monitoring/configuration_drift_alerts.py) 
-│   ├── Business impact-aware alerting (Slack, PagerDuty, Executive escalation)
-│   └── Automated remediation triggers with rollback capabilities
-└── StagingHealthMonitor (monitoring/staging_health_monitor.py)
-    └── Extended with configuration drift detection capabilities
+[U+251C][U+2500][U+2500] ConfigurationDriftMonitor (monitoring/configuration_drift_monitor.py)
+[U+2502]   [U+251C][U+2500][U+2500] E2EOAuthSimulationKeyValidator - Validates OAuth simulation key consistency
+[U+2502]   [U+251C][U+2500][U+2500] JWTSecretAlignmentValidator - Tracks JWT secret alignment
+[U+2502]   [U+2514][U+2500][U+2500] WebSocketConfigurationValidator - Ensures WebSocket auth coherence
+[U+251C][U+2500][U+2500] ConfigurationDriftAlerting (monitoring/configuration_drift_alerts.py) 
+[U+2502]   [U+251C][U+2500][U+2500] Business impact-aware alerting (Slack, PagerDuty, Executive escalation)
+[U+2502]   [U+2514][U+2500][U+2500] Automated remediation triggers with rollback capabilities
+[U+2514][U+2500][U+2500] StagingHealthMonitor (monitoring/staging_health_monitor.py)
+    [U+2514][U+2500][U+2500] Extended with configuration drift detection capabilities
 
 BUSINESS CONTINUITY FEATURES:
 - Real-time configuration drift detection with <5 minute latency
@@ -159,7 +159,7 @@ class UnifiedConfigurationMonitoring:
                 "timestamp": time.time()
             }
             
-            logger.info(f"🟢 CONFIGURATION MONITORING STARTED: Protecting ${self.total_mrr_protected:,.0f} MRR - Initial check: {initial_check.get('status', 'unknown')}")
+            logger.info(f"[U+1F7E2] CONFIGURATION MONITORING STARTED: Protecting ${self.total_mrr_protected:,.0f} MRR - Initial check: {initial_check.get('status', 'unknown')}")
             
             return startup_result
             
@@ -202,7 +202,7 @@ class UnifiedConfigurationMonitoring:
                 "timestamp": time.time()
             }
             
-            logger.info(f"🔴 CONFIGURATION MONITORING STOPPED: Protected ${final_stats.get('total_business_impact_prevented', 0):,.0f} MRR over {final_stats.get('cycles_completed', 0)} cycles")
+            logger.info(f"[U+1F534] CONFIGURATION MONITORING STOPPED: Protected ${final_stats.get('total_business_impact_prevented', 0):,.0f} MRR over {final_stats.get('cycles_completed', 0)} cycles")
             
             return stop_result
             
@@ -242,9 +242,9 @@ class UnifiedConfigurationMonitoring:
                 
                 # Log cycle summary
                 if cycle_result.drift_detected:
-                    logger.warning(f"🟡 MONITORING CYCLE {cycle_result.cycle_id}: Drift detected - {cycle_result.alerts_triggered} alerts, ${cycle_result.business_impact_mrr:,.0f} MRR impact")
+                    logger.warning(f"[U+1F7E1] MONITORING CYCLE {cycle_result.cycle_id}: Drift detected - {cycle_result.alerts_triggered} alerts, ${cycle_result.business_impact_mrr:,.0f} MRR impact")
                 else:
-                    logger.debug(f"✅ MONITORING CYCLE {cycle_result.cycle_id}: No drift detected")
+                    logger.debug(f" PASS:  MONITORING CYCLE {cycle_result.cycle_id}: No drift detected")
                 
                 # Wait for next monitoring interval
                 await asyncio.sleep(self.monitoring_interval)
@@ -453,9 +453,9 @@ class UnifiedConfigurationMonitoring:
             }
             
             if cycle_result.drift_detected:
-                logger.warning(f"🚨 IMMEDIATE DRIFT CHECK: Drift detected - ${cycle_result.business_impact_mrr:,.0f} MRR impact, {cycle_result.alerts_triggered} alerts triggered")
+                logger.warning(f" ALERT:  IMMEDIATE DRIFT CHECK: Drift detected - ${cycle_result.business_impact_mrr:,.0f} MRR impact, {cycle_result.alerts_triggered} alerts triggered")
             else:
-                logger.info("✅ IMMEDIATE DRIFT CHECK: No configuration drift detected")
+                logger.info(" PASS:  IMMEDIATE DRIFT CHECK: No configuration drift detected")
             
             return result
             

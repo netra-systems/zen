@@ -1,7 +1,7 @@
 """Agent State Synchronization E2E Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Ensure agent state synchronization maintains chat reliability
 - Value Impact: Validates multi-agent workflows deliver consistent AI responses
 - Revenue Impact: Protects $500K+ ARR by preventing agent state corruption
@@ -82,7 +82,7 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
     operations, WebSocket events, and agent execution patterns.
     
     Key Business Scenarios:
-    - Multi-agent optimization workflow (triage → data → optimization → report)
+    - Multi-agent optimization workflow (triage  ->  data  ->  optimization  ->  report)
     - Agent handoff with state preservation
     - Concurrent agent execution with proper isolation
     - WebSocket event delivery for real-time user feedback
@@ -382,7 +382,7 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         """Test that multiple agents properly synchronize state changes.
         
         Business Scenario: User requests optimization analysis that requires
-        multiple agents (data helper → optimization agent) to coordinate and
+        multiple agents (data helper  ->  optimization agent) to coordinate and
         maintain consistent state throughout the workflow.
         
         CRITICAL: This test must FAIL if agent state is not properly synchronized.
@@ -499,7 +499,7 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
             assert "thread_id" in event_data, "Event data must include thread_id"
             assert "agent_name" in event_data, "Event data must include agent_name"
         
-        self.logger.info("✅ Agent state synchronization test completed successfully")
+        self.logger.info(" PASS:  Agent state synchronization test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -613,7 +613,7 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         for event in user2_events:
             assert event["data"]["user_id"] == self.test_user_2, "User 2 events must only contain user 2 data"
         
-        self.logger.info("✅ Concurrent agent isolation test completed successfully")
+        self.logger.info(" PASS:  Concurrent agent isolation test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -723,7 +723,7 @@ class TestAgentStateSyncIntegrationHelpers(SSotBaseTestCase):
         assert "agent_started" in event_types, "Must have agent_started event for recovery"
         assert "agent_completed" in event_types, "Must have agent_completed event for successful recovery"
         
-        self.logger.info("✅ Agent state recovery test completed successfully")
+        self.logger.info(" PASS:  Agent state recovery test completed successfully")
 
 
 # Additional test functions can be added below

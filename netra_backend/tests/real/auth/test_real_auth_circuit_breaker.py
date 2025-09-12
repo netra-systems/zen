@@ -70,7 +70,7 @@ class TestRealAuthCircuitBreaker:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for circuit breaker testing."""
-        print("🐳 Starting Docker services for auth circuit breaker tests...")
+        print("[U+1F433] Starting Docker services for auth circuit breaker tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -82,13 +82,13 @@ class TestRealAuthCircuitBreaker:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for circuit breaker tests")
+            print(" PASS:  Docker services ready for circuit breaker tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for circuit breaker tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for circuit breaker tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after circuit breaker tests...")
+            print("[U+1F9F9] Cleaning up Docker services after circuit breaker tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -107,7 +107,7 @@ class TestRealAuthCircuitBreaker:
             await client.ping()
             yield client
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for circuit breaker tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for circuit breaker tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -175,7 +175,7 @@ class TestRealAuthCircuitBreaker:
             assert final_state["success_count"] == 15
             assert final_state["failure_count"] == 0
             
-            print("✅ Circuit breaker normal operation validated")
+            print(" PASS:  Circuit breaker normal operation validated")
             
         finally:
             await redis_client.delete(cb_key)
@@ -221,7 +221,7 @@ class TestRealAuthCircuitBreaker:
                     
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
                 
-                print(f"❌ Failure {i+1}: {failure['error']} - Count: {stored_state['failure_count']}")
+                print(f" FAIL:  Failure {i+1}: {failure['error']} - Count: {stored_state['failure_count']}")
             
             # Verify circuit breaker opened after threshold
             final_state = json.loads(await redis_client.get(cb_key))
@@ -229,7 +229,7 @@ class TestRealAuthCircuitBreaker:
             assert final_state["failure_count"] == 3
             assert final_state["service_health_status"] == "unhealthy"
             
-            print("✅ Circuit breaker failure detection and opening validated")
+            print(" PASS:  Circuit breaker failure detection and opening validated")
             
         finally:
             await redis_client.delete(cb_key)
@@ -269,7 +269,7 @@ class TestRealAuthCircuitBreaker:
                 assert stored_state["state"] == CircuitState.OPEN.value
                 
                 # In real implementation, this would return fast failure
-                print(f"❌ Request to {request['endpoint']} rejected (circuit breaker open)")
+                print(f" FAIL:  Request to {request['endpoint']} rejected (circuit breaker open)")
                 
                 # Simulate fast failure response
                 circuit_breaker_response = {
@@ -282,7 +282,7 @@ class TestRealAuthCircuitBreaker:
                 assert circuit_breaker_response["circuit_breaker_state"] == "open"
                 assert "unavailable" in circuit_breaker_response["message"]
             
-            print("✅ Circuit breaker open state request rejection validated")
+            print(" PASS:  Circuit breaker open state request rejection validated")
             
         finally:
             await redis_client.delete(cb_key)
@@ -339,11 +339,11 @@ class TestRealAuthCircuitBreaker:
                 if i < 2:  # First 2 succeed
                     half_open_state["success_count"] += 1
                     half_open_state["last_success_time"] = datetime.utcnow().isoformat()
-                    print(f"✅ Half-open test request {i+1} succeeded")
+                    print(f" PASS:  Half-open test request {i+1} succeeded")
                 else:  # Last one fails
                     half_open_state["failure_count"] += 1
                     half_open_state["last_failure_time"] = datetime.utcnow().isoformat()
-                    print(f"❌ Half-open test request {i+1} failed")
+                    print(f" FAIL:  Half-open test request {i+1} failed")
                 
                 await redis_client.setex(cb_key, 3600, json.dumps(half_open_state))
             
@@ -364,7 +364,7 @@ class TestRealAuthCircuitBreaker:
             final_half_open["state_changed_at"] = datetime.utcnow().isoformat()
             await redis_client.setex(cb_key, 3600, json.dumps(final_half_open))
             
-            print(f"✅ Half-open recovery attempt completed - Final state: {final_half_open['state']}")
+            print(f" PASS:  Half-open recovery attempt completed - Final state: {final_half_open['state']}")
             
         finally:
             await redis_client.delete(cb_key)
@@ -400,7 +400,7 @@ class TestRealAuthCircuitBreaker:
                 stored_state["last_success_time"] = datetime.utcnow().isoformat()
                 
                 await redis_client.setex(cb_key, 3600, json.dumps(stored_state))
-                print(f"✅ Recovery attempt {i+1} succeeded")
+                print(f" PASS:  Recovery attempt {i+1} succeeded")
             
             # Check if all attempts succeeded - close circuit breaker
             final_state = json.loads(await redis_client.get(cb_key))
@@ -425,7 +425,7 @@ class TestRealAuthCircuitBreaker:
             assert recovered_state["service_health_status"] == "healthy"
             assert "recovered_at" in recovered_state
             
-            print("✅ Successful circuit breaker recovery to closed state validated")
+            print(" PASS:  Successful circuit breaker recovery to closed state validated")
             
         finally:
             await redis_client.delete(cb_key)
@@ -487,9 +487,9 @@ class TestRealAuthCircuitBreaker:
                 assert "fallback" in degradation_response["fallback_strategy"]
                 assert degradation_response["circuit_breaker_state"] == "open"
                 
-                print(f"✅ Graceful degradation for {scenario['feature']}: {scenario['fallback']}")
+                print(f" PASS:  Graceful degradation for {scenario['feature']}: {scenario['fallback']}")
             
-            print("✅ Circuit breaker graceful degradation validated")
+            print(" PASS:  Circuit breaker graceful degradation validated")
             
         finally:
             await redis_client.delete(cb_key)
@@ -578,7 +578,7 @@ class TestRealAuthCircuitBreaker:
             assert final_metrics["uptime_percentage"] == 60.0  # 3/5 * 100
             assert final_metrics["average_response_time"] > 0
             
-            print("✅ Circuit breaker metrics and monitoring validated")
+            print(" PASS:  Circuit breaker metrics and monitoring validated")
             print(f"   Total requests: {final_metrics['total_requests']}")
             print(f"   Success rate: {final_metrics['uptime_percentage']}%")
             print(f"   Avg response time: {final_metrics['average_response_time']:.3f}s")
@@ -622,7 +622,7 @@ class TestRealAuthCircuitBreaker:
                 assert stored_state["service_name"] == service['name']
                 assert stored_state["state"] == service['state'].value
                 
-                print(f"✅ {service['name']}: {service['state'].value}")
+                print(f" PASS:  {service['name']}: {service['state'].value}")
                 
                 # Simulate state changes for one service
                 if service['name'] == "primary_auth_service":
@@ -646,9 +646,9 @@ class TestRealAuthCircuitBreaker:
                     assert final_state["state"] == CircuitState.CLOSED.value
                     assert final_state["failure_count"] == 0
                 
-                print(f"✅ {service['name']} final state: {final_state['state']}")
+                print(f" PASS:  {service['name']} final state: {final_state['state']}")
             
-            print("✅ Multiple service circuit breakers operate independently")
+            print(" PASS:  Multiple service circuit breakers operate independently")
             
         finally:
             # Cleanup all circuit breakers

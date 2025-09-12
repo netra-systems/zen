@@ -262,7 +262,7 @@ class TestWebSocketManagerMethodCompatibility:
             assert callable(getattr(manager, method_name)), \
                 f"{method_name} must be callable"
         
-        print("✓ All required methods exist in IsolatedWebSocketManager")
+        print("[U+2713] All required methods exist in IsolatedWebSocketManager")
 
 
 # Test runner
@@ -275,13 +275,13 @@ if __name__ == "__main__":
     # Run async tests that were previously sync (FIXED: All tests are now async)
     async def run_sync_like_tests():
         await test_instance.test_isolated_manager_has_get_connection_id_by_websocket()
-        print("✓ test_isolated_manager_has_get_connection_id_by_websocket passed")
+        print("[U+2713] test_isolated_manager_has_get_connection_id_by_websocket passed")
         
         await test_instance.test_isolated_manager_has_update_connection_thread()
-        print("✓ test_isolated_manager_has_update_connection_thread passed")
+        print("[U+2713] test_isolated_manager_has_update_connection_thread passed")
         
         await test_instance.test_all_required_methods_exist()
-        print("✓ test_all_required_methods_exist passed")
+        print("[U+2713] test_all_required_methods_exist passed")
     
     # Run the tests that were previously sync
     asyncio.run(run_sync_like_tests())
@@ -289,14 +289,14 @@ if __name__ == "__main__":
     # Run async tests
     async def run_async_tests():
         await test_instance.test_get_connection_id_by_websocket_functionality()
-        print("✓ test_get_connection_id_by_websocket_functionality passed")
+        print("[U+2713] test_get_connection_id_by_websocket_functionality passed")
         
         await test_instance.test_update_connection_thread_functionality()
-        print("✓ test_update_connection_thread_functionality passed")
+        print("[U+2713] test_update_connection_thread_functionality passed")
         
         await test_instance.test_compatibility_with_agent_handler_pattern()
-        print("✓ test_compatibility_with_agent_handler_pattern passed")
+        print("[U+2713] test_compatibility_with_agent_handler_pattern passed")
     
     asyncio.run(run_async_tests())
     
-    print("\n✅ All WebSocket manager compatibility tests passed!")
+    print("\n PASS:  All WebSocket manager compatibility tests passed!")

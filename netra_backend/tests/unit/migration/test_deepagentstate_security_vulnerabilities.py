@@ -153,7 +153,7 @@ class TestDeepAgentStateSecurityVulnerabilities(SSotAsyncTestCase):
             
         # Assert that vulnerabilities exist (test designed to fail)
         assert len(vulnerabilities_detected) > 0, f"""
-🚨 TEST WORKING CORRECTLY: Cross-User Data Contamination Detected
+ ALERT:  TEST WORKING CORRECTLY: Cross-User Data Contamination Detected
 
 DeepAgentState allows Enterprise Customer data to leak to Competitor:
 
@@ -209,7 +209,7 @@ REMEDIATION: Migrate to UserExecutionContext for proper isolation
             
         # Assert that contamination was detected (test designed to fail)
         assert len(contamination_detected) > 0, f"""
-🚨 TEST WORKING CORRECTLY: Concurrent User Data Contamination Detected
+ ALERT:  TEST WORKING CORRECTLY: Concurrent User Data Contamination Detected
 
 During concurrent execution, competitor accessed enterprise data:
 
@@ -293,7 +293,7 @@ REMEDIATION: UserExecutionContext provides thread-safe per-user isolation
         
         # Assert memory leaks were detected (test designed to fail)
         assert data_accumulated > 0 or results_accumulated > 0, f"""
-🚨 TEST WORKING CORRECTLY: Memory Leak Vulnerability Detected
+ ALERT:  TEST WORKING CORRECTLY: Memory Leak Vulnerability Detected
 
 DeepAgentState accumulates data across user sessions without cleanup:
 

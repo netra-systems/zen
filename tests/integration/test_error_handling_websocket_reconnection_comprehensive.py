@@ -537,7 +537,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             # Clean up test table
             await postgres.execute("DROP TABLE IF EXISTS websocket_connections")
         
-        logger.info("✅ WebSocket connection and authentication test passed")
+        logger.info(" PASS:  WebSocket connection and authentication test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -651,7 +651,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
         # Clean up
         await client.disconnect()
         
-        logger.info("✅ Automatic reconnection after network failure test passed")
+        logger.info(" PASS:  Automatic reconnection after network failure test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -823,7 +823,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             await postgres.execute("DROP TABLE IF EXISTS websocket_message_log")
             await client.disconnect()
         
-        logger.info("✅ Message persistence and replay after reconnection test passed")
+        logger.info(" PASS:  Message persistence and replay after reconnection test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -975,7 +975,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             cleanup_tasks = [client.disconnect() for client in websocket_clients]
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
-        logger.info("✅ Concurrent WebSocket connection isolation test passed")
+        logger.info(" PASS:  Concurrent WebSocket connection isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1164,7 +1164,7 @@ class TestWebSocketErrorHandling(BaseIntegrationTest):
             await postgres.execute("DROP TABLE IF EXISTS auth_renewal_log")
             await client.disconnect()
         
-        logger.info("✅ WebSocket error recovery with authentication renewal test passed")
+        logger.info(" PASS:  WebSocket error recovery with authentication renewal test passed")
 
 
 if __name__ == "__main__":

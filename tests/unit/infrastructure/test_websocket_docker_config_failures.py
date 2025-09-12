@@ -277,11 +277,11 @@ class TestWebSocketInfrastructureBusinessImpact:
         golden_path_dependencies = [
             "User logs in successfully",
             "User sends message to AI agent", 
-            "WebSocket connection established",  # ← BLOCKED BY INFRASTRUCTURE ISSUES
+            "WebSocket connection established",  #  <-  BLOCKED BY INFRASTRUCTURE ISSUES
             "Agent execution begins",
-            "Real-time WebSocket events delivered (agent_started, agent_thinking, etc.)",  # ← BLOCKED
+            "Real-time WebSocket events delivered (agent_started, agent_thinking, etc.)",  #  <-  BLOCKED
             "Agent completes with substantive response",
-            "User receives valuable AI insights"  # ← BUSINESS VALUE DELIVERY BLOCKED
+            "User receives valuable AI insights"  #  <-  BUSINESS VALUE DELIVERY BLOCKED
         ]
         
         # The infrastructure issues block steps 3 and 5, breaking the entire Golden Path

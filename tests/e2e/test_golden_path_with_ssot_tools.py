@@ -1,15 +1,53 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 E2E Test Suite: Golden Path with SSOT Tools on Staging GCP
 
 Business Value: $500K+ ARR Protection - Complete User Journey Validation
-Critical end-to-end validation that users login → get AI responses via SSOT tools.
+Critical end-to-end validation that users login  ->  get AI responses via SSOT tools.
 
 This test suite validates:
 1. Complete Golden Path user flow on staging GCP
 2. SSOT tool dispatch during agent execution 
 3. All 5 WebSocket events sent via SSOT channels
-4. User authentication → agent response cycle
+4. User authentication  ->  agent response cycle
 5. Real LLM integration with SSOT tool patterns
 
 The tests FAIL with current violations and PASS after SSOT fixes.
@@ -36,6 +74,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Real service imports for staging GCP - NO MOCKS (following CLAUDE.md)
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @dataclass
@@ -200,6 +239,15 @@ class WebSocketEventCollector:
 
 
 class TestGoldenPathSSotTools(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """CRITICAL: Golden Path E2E testing with SSOT tool validation."""
 
     async def asyncSetUp(self):
@@ -217,7 +265,7 @@ class TestGoldenPathSSotTools(SSotAsyncTestCase):
 
     async def test_complete_golden_path_user_login_to_ai_response(self):
         """
-        CRITICAL: Complete Golden Path - User login → AI response with SSOT tools.
+        CRITICAL: Complete Golden Path - User login  ->  AI response with SSOT tools.
         
         This is the ultimate business value test. If this fails, the system
         doesn't deliver on its core promise.
@@ -460,26 +508,26 @@ class TestGoldenPathSSotTools(SSotAsyncTestCase):
         print(f"\n{'='*80}")
         print(f"GOLDEN PATH SSOT COMPLIANCE REPORT (Staging GCP)")
         print(f"{'='*80}")
-        print(f"🔐 User Login: {'✅' if latest_result.user_login_success else '❌'}")
-        print(f"🔌 WebSocket Connection: {'✅' if latest_result.websocket_connection_success else '❌'}")
-        print(f"📤 Agent Request Sent: {'✅' if latest_result.agent_request_sent else '❌'}")
-        print(f"📨 WebSocket Events: {events_received}/5 required")
-        print(f"🤖 Agent Response: {'✅' if latest_result.agent_response_received else '❌'}")
-        print(f"🔧 SSOT Tools Used: {'✅' if latest_result.ssot_tools_used else '❌'}")
-        print(f"💰 Business Value: {'✅' if latest_result.business_value_delivered else '❌'}")
-        print(f"⏱️  Total Execution Time: {latest_result.total_execution_time_ms:.1f}ms")
-        print(f"🚨 Errors: {error_count}")
-        print(f"📊 Success Rate: {success_rate:.1f}%")
+        print(f"[U+1F510] User Login: {' PASS: ' if latest_result.user_login_success else ' FAIL: '}")
+        print(f"[U+1F50C] WebSocket Connection: {' PASS: ' if latest_result.websocket_connection_success else ' FAIL: '}")
+        print(f"[U+1F4E4] Agent Request Sent: {' PASS: ' if latest_result.agent_request_sent else ' FAIL: '}")
+        print(f"[U+1F4E8] WebSocket Events: {events_received}/5 required")
+        print(f"[U+1F916] Agent Response: {' PASS: ' if latest_result.agent_response_received else ' FAIL: '}")
+        print(f"[U+1F527] SSOT Tools Used: {' PASS: ' if latest_result.ssot_tools_used else ' FAIL: '}")
+        print(f"[U+1F4B0] Business Value: {' PASS: ' if latest_result.business_value_delivered else ' FAIL: '}")
+        print(f"[U+23F1][U+FE0F]  Total Execution Time: {latest_result.total_execution_time_ms:.1f}ms")
+        print(f" ALERT:  Errors: {error_count}")
+        print(f" CHART:  Success Rate: {success_rate:.1f}%")
         print(f"{'='*80}")
         
         if latest_result.errors:
             print("\nERRORS DETECTED:")
             for error in latest_result.errors:
-                print(f"  ❌ {error}")
+                print(f"   FAIL:  {error}")
         
         print(f"\nWEBSOCKET EVENTS RECEIVED:")
         for event_type in latest_result.websocket_events_received:
-            print(f"  📨 {event_type}")
+            print(f"  [U+1F4E8] {event_type}")
         
         return success_rate
 
@@ -546,15 +594,15 @@ if __name__ == "__main__":
         
         try:
             await test_case.test_complete_golden_path_user_login_to_ai_response()
-            print("✅ Golden Path test completed")
+            print(" PASS:  Golden Path test completed")
         except Exception as e:
-            print(f"❌ Golden Path test failed: {e}")
+            print(f" FAIL:  Golden Path test failed: {e}")
         
         try:
             await test_case.test_websocket_events_via_ssot_channels()
-            print("✅ WebSocket SSOT test completed")
+            print(" PASS:  WebSocket SSOT test completed")
         except Exception as e:
-            print(f"❌ WebSocket SSOT test failed: {e}")
+            print(f" FAIL:  WebSocket SSOT test failed: {e}")
         
         # Generate report
         success_rate = test_case.test_generate_golden_path_ssot_report()

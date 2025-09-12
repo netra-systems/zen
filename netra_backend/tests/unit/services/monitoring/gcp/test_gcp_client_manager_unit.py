@@ -64,7 +64,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Basic credential object creation should work
         """
-        print("\n🔐 UNIT TEST: GCP Credentials Creation")
+        print("\n[U+1F510] UNIT TEST: GCP Credentials Creation")
         print("=" * 50)
         
         # Test basic credentials creation
@@ -76,7 +76,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert credentials.project_id == self.test_project_id
         assert credentials.service_account_key == self.test_credentials
         
-        print("✅ GCP credentials object created successfully")
+        print(" PASS:  GCP credentials object created successfully")
         
         # Test credentials without service account key (default credentials)
         default_credentials = GCPCredentials(project_id=self.test_project_id)
@@ -84,7 +84,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert default_credentials.project_id == self.test_project_id
         assert default_credentials.service_account_key is None
         
-        print("✅ Default credentials (no service account key) created successfully")
+        print(" PASS:  Default credentials (no service account key) created successfully")
     
     def test_gcp_client_manager_initialization_without_gcp_libraries(self):
         """
@@ -92,7 +92,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Mock clients should be created when GCP not available
         """
-        print("\n📚 UNIT TEST: GCP Client Manager Without Libraries")
+        print("\n[U+1F4DA] UNIT TEST: GCP Client Manager Without Libraries")
         print("=" * 55)
         
         credentials = GCPCredentials(project_id=self.test_project_id)
@@ -105,7 +105,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert manager._monitoring_client is None
         assert manager._logging_client is None
         
-        print("✅ GCP Client Manager initialized with correct initial state")
+        print(" PASS:  GCP Client Manager initialized with correct initial state")
         
         # Test getting mock clients when GCP not available
         error_client = manager.get_error_reporting_client()
@@ -117,7 +117,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert isinstance(monitoring_client, MockMonitoringClient)
         assert isinstance(logging_client, MockLoggingClient)
         
-        print("✅ Mock clients returned when GCP libraries not available")
+        print(" PASS:  Mock clients returned when GCP libraries not available")
     
     @patch('netra_backend.app.services.monitoring.gcp_client_manager.GOOGLE_CLOUD_AVAILABLE', True)
     @patch('netra_backend.app.services.monitoring.gcp_client_manager.error_reporting')
@@ -134,7 +134,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP configuration
         This test shows what should happen when GCP is properly configured.
         """
-        print("\n☁️ UNIT TEST: GCP Client Manager With Libraries")
+        print("\n[U+2601][U+FE0F] UNIT TEST: GCP Client Manager With Libraries")
         print("=" * 50)
         
         # Setup mocks
@@ -165,7 +165,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert manager._monitoring_client == mock_monitoring_client
         assert manager._logging_client == mock_logging_client
         
-        print("✅ GCP Client Manager initialized with real GCP clients")
+        print(" PASS:  GCP Client Manager initialized with real GCP clients")
         
         # Test client access
         error_client = manager.get_error_reporting_client()
@@ -176,7 +176,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert monitoring_client == mock_monitoring_client
         assert logging_client == mock_logging_client
         
-        print("✅ Real GCP clients returned after initialization")
+        print(" PASS:  Real GCP clients returned after initialization")
         
         # Verify service account credentials were used
         mock_service_account.Credentials.from_service_account_info.assert_called_once_with(
@@ -196,7 +196,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
             credentials=mock_credentials
         )
         
-        print("✅ GCP clients created with correct credentials")
+        print(" PASS:  GCP clients created with correct credentials")
     
     @patch('netra_backend.app.services.monitoring.gcp_client_manager.GOOGLE_CLOUD_AVAILABLE', True)
     @patch('netra_backend.app.services.monitoring.gcp_client_manager.error_reporting')
@@ -207,7 +207,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Error handling should work correctly
         """
-        print("\n❌ UNIT TEST: GCP Client Initialization Failure")
+        print("\n FAIL:  UNIT TEST: GCP Client Initialization Failure")
         print("=" * 50)
         
         # Setup mock to fail
@@ -223,7 +223,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert "GCP initialization failed" in str(exc_info.value)
         assert not manager._initialized
         
-        print("✅ GCP initialization failure handled correctly")
+        print(" PASS:  GCP initialization failure handled correctly")
     
     def test_gcp_client_manager_uninitialized_access(self):
         """
@@ -231,7 +231,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should raise RuntimeError for uninitialized access
         """
-        print("\n🚫 UNIT TEST: Uninitialized Client Access")
+        print("\n[U+1F6AB] UNIT TEST: Uninitialized Client Access")
         print("=" * 45)
         
         # Setup manager with GCP available but not initialized
@@ -252,7 +252,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
                 manager.get_logging_client()
             assert "GCP clients not initialized" in str(exc_info.value)
             
-            print("✅ Proper RuntimeError raised for uninitialized client access")
+            print(" PASS:  Proper RuntimeError raised for uninitialized client access")
     
     @pytest.mark.asyncio
     async def test_gcp_client_manager_health_check_unavailable(self):
@@ -261,7 +261,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should return mock status
         """
-        print("\n🩺 UNIT TEST: Health Check - GCP Unavailable")
+        print("\n[U+1FA7A] UNIT TEST: Health Check - GCP Unavailable")
         print("=" * 45)
         
         credentials = GCPCredentials(project_id=self.test_project_id)
@@ -273,7 +273,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert health_status["available"] is False
         assert "Google Cloud libraries not available" in health_status["message"]
         
-        print("✅ Health check returns correct mock status")
+        print(" PASS:  Health check returns correct mock status")
     
     @patch('netra_backend.app.services.monitoring.gcp_client_manager.GOOGLE_CLOUD_AVAILABLE', True)
     @pytest.mark.asyncio
@@ -283,7 +283,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP configuration
         """
-        print("\n🩺 UNIT TEST: Health Check - GCP Available")
+        print("\n[U+1FA7A] UNIT TEST: Health Check - GCP Available")
         print("=" * 42)
         
         credentials = GCPCredentials(project_id=self.test_project_id)
@@ -304,7 +304,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert health_status["logging"] is True
         assert isinstance(health_status["timestamp"], datetime)
         
-        print("✅ Health check returns correct healthy status")
+        print(" PASS:  Health check returns correct healthy status")
     
     def test_mock_error_reporting_client(self):
         """
@@ -312,7 +312,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Mock client should work correctly
         """
-        print("\n🎭 UNIT TEST: Mock Error Reporting Client")
+        print("\n[U+1F3AD] UNIT TEST: Mock Error Reporting Client")
         print("=" * 42)
         
         mock_client = MockErrorReportingClient()
@@ -326,7 +326,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         result = mock_client.report("Test error message")
         assert result is True
         
-        print("✅ Mock Error Reporting Client functions correctly")
+        print(" PASS:  Mock Error Reporting Client functions correctly")
     
     def test_mock_monitoring_client(self):
         """
@@ -334,7 +334,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Mock client should work correctly
         """
-        print("\n📊 UNIT TEST: Mock Monitoring Client")
+        print("\n CHART:  UNIT TEST: Mock Monitoring Client")
         print("=" * 35)
         
         mock_client = MockMonitoringClient()
@@ -347,7 +347,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         result = mock_client.list_time_series()
         assert result == []
         
-        print("✅ Mock Monitoring Client functions correctly")
+        print(" PASS:  Mock Monitoring Client functions correctly")
     
     def test_mock_logging_client(self):
         """
@@ -355,7 +355,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Mock client should work correctly
         """
-        print("\n📝 UNIT TEST: Mock Logging Client")
+        print("\n[U+1F4DD] UNIT TEST: Mock Logging Client")
         print("=" * 32)
         
         mock_client = MockLoggingClient()
@@ -376,7 +376,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         result = mock_client.list_entries(filter_="test filter")
         assert result == []
         
-        print("✅ Mock Logging Client functions correctly")
+        print(" PASS:  Mock Logging Client functions correctly")
     
     def test_gcp_client_manager_factory(self):
         """
@@ -384,7 +384,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Factory should create manager correctly
         """
-        print("\n🏭 UNIT TEST: GCP Client Manager Factory")
+        print("\n[U+1F3ED] UNIT TEST: GCP Client Manager Factory")
         print("=" * 40)
         
         # Test factory without service account key
@@ -394,7 +394,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert manager.credentials.project_id == self.test_project_id
         assert manager.credentials.service_account_key is None
         
-        print("✅ Factory creates manager without service account key")
+        print(" PASS:  Factory creates manager without service account key")
         
         # Test factory with service account key
         manager_with_key = create_gcp_client_manager(
@@ -406,7 +406,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         assert manager_with_key.credentials.project_id == self.test_project_id
         assert manager_with_key.credentials.service_account_key == self.test_credentials
         
-        print("✅ Factory creates manager with service account key")
+        print(" PASS:  Factory creates manager with service account key")
     
     @pytest.mark.asyncio
     async def test_async_error_reporting_client_access(self):
@@ -415,7 +415,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing async integration
         """
-        print("\n⚡ UNIT TEST: Async Error Reporting Client Access")
+        print("\n LIGHTNING:  UNIT TEST: Async Error Reporting Client Access")
         print("=" * 48)
         
         credentials = GCPCredentials(project_id=self.test_project_id)
@@ -426,7 +426,7 @@ class TestGCPClientManagerUnit(SSotBaseTestCase):
             client = await manager.get_error_reporting_client_async()
             # Should return mock client when GCP not available
             assert isinstance(client, MockErrorReportingClient)
-            print("✅ Async error reporting client access works")
+            print(" PASS:  Async error reporting client access works")
         except AttributeError:
             pytest.fail("Missing async error reporting client access method")
 

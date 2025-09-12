@@ -118,7 +118,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         # Performance validation: context creation should be fast
         assert creation_time < 5.0, f"Context creation took too long: {creation_time}s"
         
-        print(f"✅ Created 12 isolated ClickHouse contexts in {creation_time:.2f}s")
+        print(f" PASS:  Created 12 isolated ClickHouse contexts in {creation_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_redis_factory_creates_isolated_contexts_under_load(self):
@@ -165,7 +165,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         # Performance validation: context creation should be fast
         assert creation_time < 5.0, f"Context creation took too long: {creation_time}s"
         
-        print(f"✅ Created 15 isolated Redis contexts in {creation_time:.2f}s")
+        print(f" PASS:  Created 15 isolated Redis contexts in {creation_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_factory_enforces_per_user_context_limits(self):
@@ -201,7 +201,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         new_context = await factory.create_user_context(user_context)
         assert new_context is not None
         
-        print("✅ Factory properly enforces per-user context limits")
+        print(" PASS:  Factory properly enforces per-user context limits")
     
     @pytest.mark.asyncio 
     async def test_factory_handles_service_unavailable_gracefully(self):
@@ -219,12 +219,12 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
             if hasattr(context, '_initialized'):
                 # For UserClickHouseContext, we can test initialization
                 pass
-            print("✅ Factory handled service availability appropriately")
+            print(" PASS:  Factory handled service availability appropriately")
             
         except Exception as e:
             # If service unavailable, error should be clear and informative
             assert "ClickHouse" in str(e) or "connection" in str(e).lower()
-            print(f"✅ Factory handled service unavailability with clear error: {e}")
+            print(f" PASS:  Factory handled service unavailability with clear error: {e}")
     
     @pytest.mark.asyncio
     async def test_factory_cleanup_prevents_resource_leaks(self):
@@ -267,7 +267,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         assert ch_stats["users_with_contexts"] == 0
         assert redis_stats["users_with_contexts"] == 0
         
-        print("✅ Factory cleanup prevents resource leaks")
+        print(" PASS:  Factory cleanup prevents resource leaks")
     
     @pytest.mark.asyncio
     async def test_factory_handles_context_ttl_expiration(self):
@@ -298,7 +298,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         stats = await factory.get_context_stats()
         assert stats["total_contexts"] == 0
         
-        print("✅ Factory properly handles context TTL expiration")
+        print(" PASS:  Factory properly handles context TTL expiration")
     
     @pytest.mark.asyncio
     async def test_concurrent_factory_operations_thread_safety(self):
@@ -340,7 +340,7 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
         assert isinstance(final_stats["total_contexts"], int)
         assert final_stats["total_contexts"] >= 0
         
-        print(f"✅ Factory handles 20 concurrent operations in {duration:.2f}s")
+        print(f" PASS:  Factory handles 20 concurrent operations in {duration:.2f}s")
     
     @pytest.mark.asyncio
     async def test_factory_statistics_accuracy_under_load(self):
@@ -392,4 +392,4 @@ class TestDataAccessFactoryIsolation(BaseIntegrationTest):
             assert ch_stats["user_context_counts"][user_id] == expected_count
             assert redis_stats["user_context_counts"][user_id] == expected_count
         
-        print("✅ Factory statistics remain accurate under complex load patterns")
+        print(" PASS:  Factory statistics remain accurate under complex load patterns")

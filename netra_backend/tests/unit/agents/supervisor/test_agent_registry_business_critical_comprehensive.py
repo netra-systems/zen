@@ -1,8 +1,46 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
-🚨 CRITICAL BUSINESS VALUE TEST SUITE: Agent Registry Comprehensive Unit Tests
+ ALERT:  CRITICAL BUSINESS VALUE TEST SUITE: Agent Registry Comprehensive Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Protects $500K+ ARR
+- Segment: ALL (Free  ->  Enterprise) - Protects $500K+ ARR
 - Business Goal: Core agent orchestration reliability ensuring chat functionality
 - Value Impact: Validates user isolation preventing enterprise security breaches ($15K+ MRR per customer)
 - Revenue Impact: Protects 90% of platform value delivery through agent execution orchestration

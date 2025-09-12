@@ -26,8 +26,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md Section 6.2):
 
 WEBSOCKET AUTHENTICATION VALIDATION FLOW:
 ```
-Authentication Required → WebSocket Headers → Connection Validation →
-Event Delivery (authenticated) → User Isolation → Security Validation → Success
+Authentication Required  ->  WebSocket Headers  ->  Connection Validation  -> 
+Event Delivery (authenticated)  ->  User Isolation  ->  Security Validation  ->  Success
 ```
 """
 
@@ -283,7 +283,7 @@ class TestWebSocketAuthenticationValidationE2E(SSotAsyncTestCase):
             # At least some events should have authentication context
             if authenticated_event_count > 0:
                 self.record_metric("events_with_auth_context", authenticated_event_count)
-                print(f"✅ {authenticated_event_count}/{len(authenticated_events)} events included authentication context")
+                print(f" PASS:  {authenticated_event_count}/{len(authenticated_events)} events included authentication context")
             
         finally:
             # Clean up authenticated connection
@@ -376,14 +376,14 @@ class TestWebSocketAuthenticationValidationE2E(SSotAsyncTestCase):
         self.record_metric("multi_user_isolation_validated", True)
         
         # Log WebSocket authentication compliance success
-        print(f"\n✅ PHASE 1 WEBSOCKET AUTHENTICATION VALIDATION SUCCESS:")
-        print(f"   🚫 Anonymous connections: BLOCKED")
-        print(f"   🚫 Invalid token connections: BLOCKED")  
-        print(f"   ✅ Authenticated connections: ALLOWED")
-        print(f"   📡 Authenticated events received: {len(authenticated_events)}")
-        print(f"   👥 Multi-user isolation: VALIDATED")
-        print(f"   ⏱️  Total validation time: {total_execution_time:.2f}s")
-        print(f"   🛡️  WebSocket security enforcement: CONFIRMED")
+        print(f"\n PASS:  PHASE 1 WEBSOCKET AUTHENTICATION VALIDATION SUCCESS:")
+        print(f"   [U+1F6AB] Anonymous connections: BLOCKED")
+        print(f"   [U+1F6AB] Invalid token connections: BLOCKED")  
+        print(f"    PASS:  Authenticated connections: ALLOWED")
+        print(f"   [U+1F4E1] Authenticated events received: {len(authenticated_events)}")
+        print(f"   [U+1F465] Multi-user isolation: VALIDATED")
+        print(f"   [U+23F1][U+FE0F]  Total validation time: {total_execution_time:.2f}s")
+        print(f"   [U+1F6E1][U+FE0F]  WebSocket security enforcement: CONFIRMED")
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_edge_cases(self, real_services_fixture):
@@ -464,19 +464,19 @@ class TestWebSocketAuthenticationValidationE2E(SSotAsyncTestCase):
         
         # Should fail without proper Bearer prefix (depending on implementation)
         if missing_bearer_failed:
-            print("✅ Missing Bearer prefix properly rejected")
+            print(" PASS:  Missing Bearer prefix properly rejected")
         else:
-            print("ℹ️ System accepts tokens without Bearer prefix (implementation choice)")
+            print("[U+2139][U+FE0F] System accepts tokens without Bearer prefix (implementation choice)")
         
         # Record edge case validation success
         self.record_metric("expired_token_rejected", True)
         self.record_metric("malformed_tokens_rejected", len(malformed_tokens))
         self.record_metric("websocket_auth_edge_cases_validated", True)
         
-        print(f"\n✅ WEBSOCKET AUTHENTICATION EDGE CASES VALIDATED:")
-        print(f"   🚫 Expired tokens: REJECTED")
-        print(f"   🚫 Malformed tokens: REJECTED ({len(malformed_tokens)} tested)")
-        print(f"   🛡️  Edge case security: CONFIRMED")
+        print(f"\n PASS:  WEBSOCKET AUTHENTICATION EDGE CASES VALIDATED:")
+        print(f"   [U+1F6AB] Expired tokens: REJECTED")
+        print(f"   [U+1F6AB] Malformed tokens: REJECTED ({len(malformed_tokens)} tested)")
+        print(f"   [U+1F6E1][U+FE0F]  Edge case security: CONFIRMED")
 
     async def async_teardown_method(self, method=None):
         """Clean up WebSocket authentication test resources."""

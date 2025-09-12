@@ -52,11 +52,11 @@ class MigrationStateDiagnostic:
         self.database_url = await self.env.get_database_url()
         
         if not self.database_url:
-            print("❌ ERROR: No database URL configured")
+            print(" FAIL:  ERROR: No database URL configured")
             print("   Set NETRA_DATABASE_URL environment variable")
             sys.exit(1)
             
-        print(f"🔍 Using database: {self._mask_database_url(self.database_url)}")
+        print(f" SEARCH:  Using database: {self._mask_database_url(self.database_url)}")
     
     def _mask_database_url(self, url: str) -> str:
         """Mask sensitive parts of database URL for display."""
@@ -71,7 +71,7 @@ class MigrationStateDiagnostic:
     
     async def diagnose(self, detailed: bool = False) -> Dict[str, Any]:
         """Diagnose current migration state."""
-        print("🔍 Diagnosing migration state...")
+        print(" SEARCH:  Diagnosing migration state...")
         
         try:
             state = await analyze_migration_state(self.database_url)
@@ -82,74 +82,74 @@ class MigrationStateDiagnostic:
             return state
             
         except Exception as e:
-            print(f"❌ ERROR: Failed to diagnose migration state: {e}")
+            print(f" FAIL:  ERROR: Failed to diagnose migration state: {e}")
             return {"error": str(e)}
     
     def _display_diagnosis_results(self, state: Dict[str, Any], detailed: bool):
         """Display diagnosis results in user-friendly format."""
         print("\n" + "="*60)
-        print("📊 MIGRATION STATE DIAGNOSIS RESULTS")
+        print(" CHART:  MIGRATION STATE DIAGNOSIS RESULTS")
         print("="*60)
         
         if "error" in state:
-            print(f"❌ Analysis failed: {state['error']}")
+            print(f" FAIL:  Analysis failed: {state['error']}")
             return
         
         # Basic state information
-        print(f"📋 Schema exists: {'✅' if state.get('has_existing_schema') else '❌'}")
-        print(f"📋 Alembic version table: {'✅' if state.get('has_alembic_version') else '❌'}")
-        print(f"📋 Requires recovery: {'⚠️ YES' if state.get('requires_recovery') else '✅ NO'}")
-        print(f"📋 Recovery strategy: {state.get('recovery_strategy', 'UNKNOWN')}")
+        print(f"[U+1F4CB] Schema exists: {' PASS: ' if state.get('has_existing_schema') else ' FAIL: '}")
+        print(f"[U+1F4CB] Alembic version table: {' PASS: ' if state.get('has_alembic_version') else ' FAIL: '}")
+        print(f"[U+1F4CB] Requires recovery: {' WARNING: [U+FE0F] YES' if state.get('requires_recovery') else ' PASS:  NO'}")
+        print(f"[U+1F4CB] Recovery strategy: {state.get('recovery_strategy', 'UNKNOWN')}")
         
         if state.get('current_revision'):
-            print(f"📋 Current revision: {state['current_revision']}")
+            print(f"[U+1F4CB] Current revision: {state['current_revision']}")
         
         # Existing tables
         if state.get('existing_tables'):
-            print(f"\n📋 Existing tables ({len(state['existing_tables'])}):")
+            print(f"\n[U+1F4CB] Existing tables ({len(state['existing_tables'])}):")
             for table in sorted(state['existing_tables']):
-                print(f"   • {table}")
+                print(f"   [U+2022] {table}")
         
         # Missing tables (if any)
         if state.get('missing_expected_tables'):
-            print(f"\n⚠️  Missing expected tables ({len(state['missing_expected_tables'])}):")
+            print(f"\n WARNING: [U+FE0F]  Missing expected tables ({len(state['missing_expected_tables'])}):")
             for table in sorted(state['missing_expected_tables']):
-                print(f"   • {table}")
+                print(f"   [U+2022] {table}")
         
         # Recommendations
-        print(f"\n💡 RECOMMENDATIONS:")
+        print(f"\n IDEA:  RECOMMENDATIONS:")
         
         if state.get('requires_recovery'):
             strategy = state.get('recovery_strategy', '')
             
             if strategy == "INITIALIZE_ALEMBIC_VERSION":
-                print("   🔧 Run: python scripts/diagnose_migration_state.py --recover")
+                print("   [U+1F527] Run: python scripts/diagnose_migration_state.py --recover")
                 print("      This will initialize alembic_version table for existing schema")
                 
             elif strategy == "COMPLETE_PARTIAL_MIGRATION":
-                print("   🔧 Run migrations to complete partial schema")
+                print("   [U+1F527] Run migrations to complete partial schema")
                 print("      python scripts/diagnose_migration_state.py --recover")
                 
             elif strategy == "REPAIR_CORRUPTED_ALEMBIC":
-                print("   🔧 Repair corrupted alembic_version table")
+                print("   [U+1F527] Repair corrupted alembic_version table")
                 print("      python scripts/diagnose_migration_state.py --recover")
                 
             else:
-                print("   🔧 Manual inspection may be required")
+                print("   [U+1F527] Manual inspection may be required")
                 print(f"      Strategy: {strategy}")
         else:
-            print("   ✅ Migration state is healthy - no action needed")
+            print("    PASS:  Migration state is healthy - no action needed")
         
         if detailed:
-            print(f"\n🔍 DETAILED STATE INFORMATION:")
+            print(f"\n SEARCH:  DETAILED STATE INFORMATION:")
             print(json.dumps(state, indent=2, default=str))
     
     async def recover(self, dry_run: bool = False) -> bool:
         """Attempt to recover migration state."""
         if dry_run:
-            print("🏃‍♂️ DRY RUN: Would attempt migration state recovery...")
+            print("[U+1F3C3][U+200D][U+2642][U+FE0F] DRY RUN: Would attempt migration state recovery...")
         else:
-            print("🔧 Attempting migration state recovery...")
+            print("[U+1F527] Attempting migration state recovery...")
         
         try:
             if dry_run:
@@ -162,21 +162,21 @@ class MigrationStateDiagnostic:
                 success, recovery_info = await ensure_migration_state_healthy(self.database_url)
                 
                 if success:
-                    print("✅ Migration state recovery completed successfully!")
+                    print(" PASS:  Migration state recovery completed successfully!")
                     print(f"Recovery info: {recovery_info.get('recovery_strategy', 'Unknown')}")
                     return True
                 else:
-                    print("❌ Migration state recovery failed")
+                    print(" FAIL:  Migration state recovery failed")
                     print(f"Recovery info: {recovery_info}")
                     return False
                     
         except Exception as e:
-            print(f"❌ ERROR: Recovery failed: {e}")
+            print(f" FAIL:  ERROR: Recovery failed: {e}")
             return False
     
     async def status(self) -> Dict[str, Any]:
         """Get comprehensive migration status."""
-        print("📊 Getting migration status...")
+        print(" CHART:  Getting migration status...")
         
         try:
             manager = MigrationStateManager(self.database_url)
@@ -188,59 +188,59 @@ class MigrationStateDiagnostic:
             return report
             
         except Exception as e:
-            print(f"❌ ERROR: Failed to get status: {e}")
+            print(f" FAIL:  ERROR: Failed to get status: {e}")
             return {"error": str(e)}
     
     def _display_status_report(self, report: Dict[str, Any]):
         """Display comprehensive status report."""
         print("\n" + "="*60)
-        print("📊 COMPREHENSIVE MIGRATION STATUS REPORT")
+        print(" CHART:  COMPREHENSIVE MIGRATION STATUS REPORT")
         print("="*60)
         
-        print(f"🔗 Database: {self._mask_database_url(report.get('database_url', 'Unknown'))}")
-        print(f"💚 Health Status: {report.get('health_status', 'Unknown')}")
-        print(f"🔧 Recommended Action: {report.get('recommended_action', 'Unknown')}")
-        print(f"⏰ Report Time: {report.get('timestamp', 'Unknown')}")
+        print(f"[U+1F517] Database: {self._mask_database_url(report.get('database_url', 'Unknown'))}")
+        print(f"[U+1F49A] Health Status: {report.get('health_status', 'Unknown')}")
+        print(f"[U+1F527] Recommended Action: {report.get('recommended_action', 'Unknown')}")
+        print(f"[U+23F0] Report Time: {report.get('timestamp', 'Unknown')}")
         
         # Migration state details
         if 'migration_state' in report:
             state = report['migration_state']
-            print(f"\n📋 MIGRATION STATE DETAILS:")
+            print(f"\n[U+1F4CB] MIGRATION STATE DETAILS:")
             print(f"   Schema Exists: {'Yes' if state.get('has_existing_schema') else 'No'}")
             print(f"   Alembic Tracking: {'Yes' if state.get('has_alembic_version') else 'No'}")
             print(f"   Current Revision: {state.get('current_revision', 'None')}")
             print(f"   Table Count: {len(state.get('existing_tables', []))}")
         
-        print(f"\n📄 FULL REPORT:")
+        print(f"\n[U+1F4C4] FULL REPORT:")
         print(json.dumps(report, indent=2, default=str))
     
     async def interactive_mode(self):
         """Run in interactive mode for step-by-step recovery."""
-        print("🎛️  INTERACTIVE MIGRATION RECOVERY MODE")
+        print("[U+1F39B][U+FE0F]  INTERACTIVE MIGRATION RECOVERY MODE")
         print("="*50)
         
         # Step 1: Diagnose
         state = await self.diagnose(detailed=False)
         
         if not state.get('requires_recovery'):
-            print("\n✅ Migration state is healthy - no recovery needed!")
+            print("\n PASS:  Migration state is healthy - no recovery needed!")
             return
         
         # Step 2: Ask for recovery
-        print(f"\n⚠️  Recovery needed: {state.get('recovery_strategy')}")
+        print(f"\n WARNING: [U+FE0F]  Recovery needed: {state.get('recovery_strategy')}")
         response = input("Would you like to proceed with recovery? (y/N): ").lower().strip()
         
         if response in ['y', 'yes']:
-            print("\n🔧 Proceeding with recovery...")
+            print("\n[U+1F527] Proceeding with recovery...")
             success = await self.recover(dry_run=False)
             
             if success:
-                print("\n🎉 Recovery completed! Re-diagnosing...")
+                print("\n CELEBRATION:  Recovery completed! Re-diagnosing...")
                 await self.diagnose(detailed=False)
             else:
-                print("\n❌ Recovery failed - manual intervention may be required")
+                print("\n FAIL:  Recovery failed - manual intervention may be required")
         else:
-            print("\n⏭️  Recovery skipped - you can run it later with --recover")
+            print("\n[U+23ED][U+FE0F]  Recovery skipped - you can run it later with --recover")
 
 
 async def main():

@@ -308,7 +308,7 @@ class TestLoggingBurstPatterns(SSotBaseTestCase):
         assert integration_duration <= 30, f"Integration test timeout: {integration_duration}s"
         
         # This test should FAIL initially - demonstrating concurrent logging issues
-        total_logs_expected = user_count * 15  # 10 users × 15 logs each
+        total_logs_expected = user_count * 15  # 10 users  x  15 logs each
         total_logs_actual = sum(user_log_counts.values())
         
         assert total_logs_actual >= total_logs_expected, \

@@ -162,7 +162,7 @@ class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
             
             self.assert_business_value_delivered(websocket_success_result, "automation")
             
-        self.logger.info("✅ WebSocket events during successful tool execution test passed")
+        self.logger.info(" PASS:  WebSocket events during successful tool execution test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -248,7 +248,7 @@ class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
             
             self.assert_business_value_delivered(websocket_failure_result, "automation")
             
-        self.logger.info("✅ WebSocket events during failed tool execution test passed")
+        self.logger.info(" PASS:  WebSocket events during failed tool execution test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -351,7 +351,7 @@ class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
         
         self.assert_business_value_delivered(concurrent_websocket_result, "automation")
         
-        self.logger.info("✅ WebSocket events during concurrent tool execution test passed")
+        self.logger.info(" PASS:  WebSocket events during concurrent tool execution test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -456,7 +456,7 @@ class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
             
             self.assert_business_value_delivered(data_completeness_result, "automation")
             
-        self.logger.info("✅ WebSocket event data completeness test passed")
+        self.logger.info(" PASS:  WebSocket event data completeness test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -557,4 +557,4 @@ class TestWebSocketToolExecutionIntegration(BaseIntegrationTest):
             
             self.assert_business_value_delivered(bridge_adapter_result, "automation")
             
-        self.logger.info("✅ WebSocket events with AgentWebSocketBridge adapter test passed")
+        self.logger.info(" PASS:  WebSocket events with AgentWebSocketBridge adapter test passed")

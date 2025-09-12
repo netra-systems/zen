@@ -42,16 +42,16 @@ class P0RegressionTest:
     def print_header(self):
         """Print test header."""
         print("=" * 70)
-        print("🛡️  P0 SYSTEM REGRESSION TEST")
+        print("[U+1F6E1][U+FE0F]  P0 SYSTEM REGRESSION TEST")
         print("=" * 70) 
-        print("🎯 Mission: Prove zero breaking changes from P0 fixes")
-        print("💰 Protecting: $1.5M+ ARR Data Helper Agent functionality")
-        print("🔧 Testing: Core component stability without external dependencies")
+        print(" TARGET:  Mission: Prove zero breaking changes from P0 fixes")
+        print("[U+1F4B0] Protecting: $1.5M+ ARR Data Helper Agent functionality")
+        print("[U+1F527] Testing: Core component stability without external dependencies")
         print("")
     
     def test_websocket_manager_stability(self) -> Dict[str, Any]:
         """Test WebSocket Manager core functionality remains intact."""
-        print("🔍 TESTING: WebSocket Manager Stability")
+        print(" SEARCH:  TESTING: WebSocket Manager Stability")
         print("-" * 50)
         
         try:
@@ -59,7 +59,7 @@ class P0RegressionTest:
             
             # Test 1: Basic instantiation works
             manager = UnifiedWebSocketManager()
-            print("   ✅ UnifiedWebSocketManager instantiation works")
+            print("    PASS:  UnifiedWebSocketManager instantiation works")
             
             # Test 2: Core methods exist and are callable
             required_methods = [
@@ -69,9 +69,9 @@ class P0RegressionTest:
             
             for method_name in required_methods:
                 if hasattr(manager, method_name) and callable(getattr(manager, method_name)):
-                    print(f"   ✅ Method {method_name} exists and callable")
+                    print(f"    PASS:  Method {method_name} exists and callable")
                 else:
-                    print(f"   ❌ Method {method_name} missing or not callable")
+                    print(f"    FAIL:  Method {method_name} missing or not callable")
                     raise AttributeError(f"Required method {method_name} not available")
             
             # Test 3: GCP staging detection doesn't break normal usage
@@ -80,7 +80,7 @@ class P0RegressionTest:
                 
                 # This should not raise any exceptions
                 manager_test = UnifiedWebSocketManager()
-                print("   ✅ GCP staging auto-detection doesn't break initialization")
+                print("    PASS:  GCP staging auto-detection doesn't break initialization")
             
             return {
                 "status": "PASSED",
@@ -89,7 +89,7 @@ class P0RegressionTest:
             }
             
         except Exception as e:
-            print(f"   ❌ WebSocket Manager stability test failed: {e}")
+            print(f"    FAIL:  WebSocket Manager stability test failed: {e}")
             return {
                 "status": "FAILED", 
                 "error": str(e),
@@ -98,7 +98,7 @@ class P0RegressionTest:
     
     def test_agent_registry_stability(self) -> Dict[str, Any]:
         """Test Agent Registry validation doesn't break existing workflows."""
-        print("\n🔍 TESTING: Agent Registry Stability")
+        print("\n SEARCH:  TESTING: Agent Registry Stability")
         print("-" * 50)
         
         try:
@@ -109,31 +109,31 @@ class P0RegressionTest:
             mock_llm_manager.name = "test_llm"
             
             registry = AgentRegistry(mock_llm_manager)
-            print("   ✅ AgentRegistry with valid llm_manager works")
+            print("    PASS:  AgentRegistry with valid llm_manager works")
             
             # Test 2: Core methods still exist
             required_methods = ['register_agent', 'get_agent', 'list_agents']
             
             for method_name in required_methods:
                 if hasattr(registry, method_name):
-                    print(f"   ✅ Method {method_name} exists")
+                    print(f"    PASS:  Method {method_name} exists")
                 else:
-                    print(f"   ❌ Method {method_name} missing")
+                    print(f"    FAIL:  Method {method_name} missing")
                     raise AttributeError(f"Required method {method_name} not available")
             
             # Test 3: Invalid initialization properly fails (new validation)
             try:
                 invalid_registry = AgentRegistry(None)
-                print("   ❌ AgentRegistry should reject None llm_manager")
+                print("    FAIL:  AgentRegistry should reject None llm_manager")
                 return {
                     "status": "FAILED",
                     "error": "Validation not working - None llm_manager accepted"
                 }
             except ValueError as e:
                 if "llm_manager is required" in str(e):
-                    print("   ✅ Invalid initialization properly rejected")
+                    print("    PASS:  Invalid initialization properly rejected")
                 else:
-                    print(f"   ❌ Unexpected error message: {e}")
+                    print(f"    FAIL:  Unexpected error message: {e}")
                     return {
                         "status": "FAILED", 
                         "error": f"Unexpected validation message: {e}"
@@ -141,12 +141,12 @@ class P0RegressionTest:
             
             return {
                 "status": "PASSED",
-                "validation_enhancement": "✅ Added without breaking existing workflows",
+                "validation_enhancement": " PASS:  Added without breaking existing workflows",
                 "regression_risk": "NONE - Validation is additive-only"
             }
             
         except Exception as e:
-            print(f"   ❌ Agent Registry stability test failed: {e}")
+            print(f"    FAIL:  Agent Registry stability test failed: {e}")
             return {
                 "status": "FAILED",
                 "error": str(e),
@@ -155,7 +155,7 @@ class P0RegressionTest:
     
     def test_core_imports_stability(self) -> Dict[str, Any]:
         """Test all core imports still work after fixes."""
-        print("\n🔍 TESTING: Core Import Stability")
+        print("\n SEARCH:  TESTING: Core Import Stability")
         print("-" * 50)
         
         core_modules = [
@@ -172,12 +172,12 @@ class P0RegressionTest:
         for module_name in core_modules:
             try:
                 __import__(module_name)
-                import_results[module_name] = "✅ SUCCESS"
-                print(f"   ✅ {module_name}")
+                import_results[module_name] = " PASS:  SUCCESS"
+                print(f"    PASS:  {module_name}")
             except Exception as e:
-                import_results[module_name] = f"❌ FAILED: {str(e)[:50]}..."
+                import_results[module_name] = f" FAIL:  FAILED: {str(e)[:50]}..."
                 failed_imports.append(module_name)
-                print(f"   ❌ {module_name}: {str(e)[:50]}...")
+                print(f"    FAIL:  {module_name}: {str(e)[:50]}...")
         
         success_rate = (len(core_modules) - len(failed_imports)) / len(core_modules)
         
@@ -191,7 +191,7 @@ class P0RegressionTest:
     
     def test_websocket_event_types_stability(self) -> Dict[str, Any]:
         """Test WebSocket event type handling remains stable."""
-        print("\n🔍 TESTING: WebSocket Event Types Stability")
+        print("\n SEARCH:  TESTING: WebSocket Event Types Stability")
         print("-" * 50)
         
         try:
@@ -228,20 +228,20 @@ class P0RegressionTest:
                         with patch('asyncio.create_task', return_value=future):
                             manager.emit_critical_event(test_user_id, event_type, test_data)
                         
-                        print(f"   ✅ Event type '{event_type}' validation works")
+                        print(f"    PASS:  Event type '{event_type}' validation works")
                     except Exception as e:
-                        print(f"   ❌ Event type '{event_type}' failed: {e}")
+                        print(f"    FAIL:  Event type '{event_type}' failed: {e}")
                         raise
             
             return {
                 "status": "PASSED",
                 "events_tested": len(critical_events),
-                "business_impact": "✅ All Data Helper Agent events supported",
+                "business_impact": " PASS:  All Data Helper Agent events supported",
                 "regression_risk": "NONE - Event processing unchanged"
             }
             
         except Exception as e:
-            print(f"   ❌ WebSocket event types test failed: {e}")
+            print(f"    FAIL:  WebSocket event types test failed: {e}")
             return {
                 "status": "FAILED",
                 "error": str(e),
@@ -250,7 +250,7 @@ class P0RegressionTest:
     
     def test_environment_detection_stability(self) -> Dict[str, Any]:
         """Test environment detection logic doesn't break existing behavior."""
-        print("\n🔍 TESTING: Environment Detection Stability")
+        print("\n SEARCH:  TESTING: Environment Detection Stability")
         print("-" * 50)
         
         try:
@@ -258,12 +258,12 @@ class P0RegressionTest:
             
             # Test 1: get_env() still works
             env = get_env()
-            print("   ✅ get_env() function works")
+            print("    PASS:  get_env() function works")
             
             # Test 2: Environment variable access still works
             test_var = env.get("TEST_VAR", "default_value")
             if test_var == "default_value":
-                print("   ✅ Environment variable fallback works")
+                print("    PASS:  Environment variable fallback works")
             
             # Test 3: GCP staging detection logic doesn't interfere
             with patch.dict('os.environ', {
@@ -273,7 +273,7 @@ class P0RegressionTest:
             }):
                 env_dev = get_env()
                 environment = env_dev.get("ENVIRONMENT", "development")
-                print(f"   ✅ Development environment detection: {environment}")
+                print(f"    PASS:  Development environment detection: {environment}")
             
             # Test 4: Staging detection patterns don't break other logic
             with patch.dict('os.environ', {
@@ -281,16 +281,16 @@ class P0RegressionTest:
                 'BACKEND_URL': 'https://staging.netrasystems.ai'
             }):
                 env_staging = get_env()
-                print("   ✅ Staging environment detection patterns work")
+                print("    PASS:  Staging environment detection patterns work")
             
             return {
                 "status": "PASSED",
-                "detection_logic": "✅ Additive - doesn't break existing patterns",
+                "detection_logic": " PASS:  Additive - doesn't break existing patterns",
                 "regression_risk": "NONE - Environment access unchanged"
             }
             
         except Exception as e:
-            print(f"   ❌ Environment detection test failed: {e}")
+            print(f"    FAIL:  Environment detection test failed: {e}")
             return {
                 "status": "FAILED",
                 "error": str(e),
@@ -299,7 +299,7 @@ class P0RegressionTest:
     
     def test_data_helper_workflow_stability(self) -> Dict[str, Any]:
         """Test Data Helper Agent workflow components remain functional."""
-        print("\n🔍 TESTING: Data Helper Workflow Stability")
+        print("\n SEARCH:  TESTING: Data Helper Workflow Stability")
         print("-" * 50)
         
         try:
@@ -313,9 +313,9 @@ class P0RegressionTest:
             for module_name, component_desc in workflow_components:
                 try:
                     __import__(module_name)
-                    print(f"   ✅ {component_desc} import stable")
+                    print(f"    PASS:  {component_desc} import stable")
                 except Exception as e:
-                    print(f"   ❌ {component_desc} import failed: {e}")
+                    print(f"    FAIL:  {component_desc} import failed: {e}")
                     raise
             
             # Test workflow patterns
@@ -325,21 +325,21 @@ class P0RegressionTest:
             # Test ID generation patterns
             test_user_id = UserID("test_user_123")  
             test_thread_id = ThreadID("test_thread_456")
-            print("   ✅ Strongly typed ID creation works")
+            print("    PASS:  Strongly typed ID creation works")
             
             # Test WebSocket manager instantiation for workflows
             manager = UnifiedWebSocketManager()
-            print("   ✅ WebSocket manager for agent workflows works")
+            print("    PASS:  WebSocket manager for agent workflows works")
             
             return {
                 "status": "PASSED",
                 "workflow_components": f"{len(workflow_components)} core components stable",
-                "business_impact": "✅ Data Helper Agent workflow foundation intact",
+                "business_impact": " PASS:  Data Helper Agent workflow foundation intact",
                 "regression_risk": "NONE - All workflow building blocks functional"
             }
             
         except Exception as e:
-            print(f"   ❌ Data Helper workflow test failed: {e}")
+            print(f"    FAIL:  Data Helper workflow test failed: {e}")
             return {
                 "status": "FAILED", 
                 "error": str(e),
@@ -376,7 +376,7 @@ class P0RegressionTest:
                     passed_tests += 0.5
                     
             except Exception as e:
-                print(f"   💥 {test_name} test failed with exception: {e}")
+                print(f"   [U+1F4A5] {test_name} test failed with exception: {e}")
                 self.test_results[test_name] = {
                     "status": "FAILED",
                     "error": str(e),
@@ -391,47 +391,47 @@ class P0RegressionTest:
         total_time = time.time() - self.start_time
         
         print("\n" + "=" * 70)
-        print("🏁 P0 SYSTEM REGRESSION TEST RESULTS")
+        print("[U+1F3C1] P0 SYSTEM REGRESSION TEST RESULTS")
         print("=" * 70)
-        print(f"⏱️  Total Test Time: {total_time:.2f} seconds")
-        print(f"🎯 Overall Status: {overall_status}")
-        print(f"📊 Success Rate: {success_rate:.1%} ({passed_tests:.1f}/{total_tests} tests)")
+        print(f"[U+23F1][U+FE0F]  Total Test Time: {total_time:.2f} seconds")
+        print(f" TARGET:  Overall Status: {overall_status}")
+        print(f" CHART:  Success Rate: {success_rate:.1%} ({passed_tests:.1f}/{total_tests} tests)")
         print("")
         
         # Detailed results
         high_risk_count = 0
         for test_name, result in self.test_results.items():
-            status_emoji = "✅" if result["status"] == "PASSED" else "⚠️" if result["status"] == "PARTIAL" else "❌"
+            status_emoji = " PASS: " if result["status"] == "PASSED" else " WARNING: [U+FE0F]" if result["status"] == "PARTIAL" else " FAIL: "
             print(f"   {status_emoji} {test_name}: {result['status']}")
             
             if result.get("regression_risk") == "HIGH" or result.get("regression_risk") == "CRITICAL":
                 high_risk_count += 1
         
         print("")
-        print("🔒 REGRESSION RISK ASSESSMENT:")
+        print("[U+1F512] REGRESSION RISK ASSESSMENT:")
         if high_risk_count == 0:
-            print("   ✅ ZERO HIGH-RISK REGRESSIONS DETECTED")
-            print("   ✅ All P0 fixes are additive-only")
-            print("   ✅ System stability maintained")
+            print("    PASS:  ZERO HIGH-RISK REGRESSIONS DETECTED")
+            print("    PASS:  All P0 fixes are additive-only")
+            print("    PASS:  System stability maintained")
         else:
-            print(f"   ⚠️  {high_risk_count} HIGH-RISK REGRESSIONS DETECTED")
-            print("   📝 Review failed components before deployment")
+            print(f"    WARNING: [U+FE0F]  {high_risk_count} HIGH-RISK REGRESSIONS DETECTED")
+            print("   [U+1F4DD] Review failed components before deployment")
         
         print("")
-        print("💰 BUSINESS VALUE IMPACT:")
-        print("   📈 Data Helper Agent: PROTECTED")
-        print("   📈 WebSocket Events: ENHANCED") 
-        print("   📈 Multi-user Workflows: MAINTAINED")
-        print("   📈 Authentication: IMPROVED")
+        print("[U+1F4B0] BUSINESS VALUE IMPACT:")
+        print("   [U+1F4C8] Data Helper Agent: PROTECTED")
+        print("   [U+1F4C8] WebSocket Events: ENHANCED") 
+        print("   [U+1F4C8] Multi-user Workflows: MAINTAINED")
+        print("   [U+1F4C8] Authentication: IMPROVED")
         
         if overall_status == "PASSED":
-            print("\n🎉 REGRESSION TEST PASSED!")
-            print("✅ P0 fixes are safe for deployment")
-            print("✅ Zero breaking changes introduced")
-            print("✅ $1.5M+ ARR functionality protected")
+            print("\n CELEBRATION:  REGRESSION TEST PASSED!")
+            print(" PASS:  P0 fixes are safe for deployment")
+            print(" PASS:  Zero breaking changes introduced")
+            print(" PASS:  $1.5M+ ARR functionality protected")
         else:
-            print(f"\n⚠️  REGRESSION TEST {overall_status}!")
-            print("📝 Review results before deployment")
+            print(f"\n WARNING: [U+FE0F]  REGRESSION TEST {overall_status}!")
+            print("[U+1F4DD] Review results before deployment")
         
         print("=" * 70)
         

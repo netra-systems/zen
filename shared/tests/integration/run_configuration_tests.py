@@ -127,14 +127,14 @@ def run_configuration_tests(verbose: bool = False, test_pattern: str = None) -> 
     print(f"Exit Code: {exit_code}")
     
     if success:
-        print("\n✅ All configuration tests passed!")
-        print("✅ Configuration management systems are working correctly")
-        print("✅ Regression prevention measures are in place")
-        print("✅ Environment isolation is functioning properly")
+        print("\n PASS:  All configuration tests passed!")
+        print(" PASS:  Configuration management systems are working correctly")
+        print(" PASS:  Regression prevention measures are in place")
+        print(" PASS:  Environment isolation is functioning properly")
     else:
-        print("\n❌ Configuration tests failed!")
-        print("❌ Review the errors above to identify configuration issues")
-        print("❌ These failures indicate potential deployment risks")
+        print("\n FAIL:  Configuration tests failed!")
+        print(" FAIL:  Review the errors above to identify configuration issues")
+        print(" FAIL:  These failures indicate potential deployment risks")
     
     print("="*80)
     
@@ -178,7 +178,7 @@ def validate_test_structure():
                 test_methods = [method for method in dir(test_class) if method.startswith("test_")]
                 method_count = len(test_methods)
                 
-                print(f"✅ {test_file}")
+                print(f" PASS:  {test_file}")
                 print(f"   Class: {test_class.__name__}")
                 print(f"   Methods: {method_count}")
                 
@@ -190,7 +190,7 @@ def validate_test_structure():
                 })
                 
             except Exception as e:
-                print(f"❌ {test_file} - Import error: {e}")
+                print(f" FAIL:  {test_file} - Import error: {e}")
                 validation_results.append({
                     "file": test_file,
                     "exists": True,
@@ -198,7 +198,7 @@ def validate_test_structure():
                     "error": str(e)
                 })
         else:
-            print(f"❌ {test_file} - File not found")
+            print(f" FAIL:  {test_file} - File not found")
             validation_results.append({
                 "file": test_file,
                 "exists": False,
@@ -216,9 +216,9 @@ def validate_test_structure():
     all_valid = all(result.get("importable", False) for result in validation_results)
     
     if all_valid:
-        print("✅ All test files are valid and ready to run")
+        print(" PASS:  All test files are valid and ready to run")
     else:
-        print("❌ Some test files have issues")
+        print(" FAIL:  Some test files have issues")
     
     print("="*60)
     
@@ -263,7 +263,7 @@ def main():
         sys.exit(0 if structure_valid else 1)
     
     if not structure_valid:
-        print("❌ Test structure validation failed. Fix issues before running tests.")
+        print(" FAIL:  Test structure validation failed. Fix issues before running tests.")
         sys.exit(1)
     
     # Run tests

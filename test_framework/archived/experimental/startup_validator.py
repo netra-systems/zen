@@ -225,20 +225,20 @@ class StartupValidator:
         
         for result in results:
             if isinstance(result, Exception):
-                print(f"❌ Exception: {str(result)}")
+                print(f" FAIL:  Exception: {str(result)}")
                 report["results"].append({
                     "name": "Unknown",
                     "passed": False,
                     "error": str(result)
                 })
             else:
-                status = "✅" if result.passed else "❌"
+                status = " PASS: " if result.passed else " FAIL: "
                 print(f"{status} {result.name}: {result.duration:.2f}s")
                 
                 if result.error and self.verbose:
                     print(f"   Error: {result.error}")
                 if result.warning:
-                    print(f"   ⚠️  Warning: {result.warning}")
+                    print(f"    WARNING: [U+FE0F]  Warning: {result.warning}")
                 
                 report["results"].append({
                     "name": result.name,

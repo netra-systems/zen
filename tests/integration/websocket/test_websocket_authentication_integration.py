@@ -171,7 +171,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             assert sent_message['user_id'] == user_data['id']
             assert sent_message['payload']['requires_auth'] is True
             
-            self.logger.info(f"✅ JWT token validation successful for user {user_data['id']}")
+            self.logger.info(f" PASS:  JWT token validation successful for user {user_data['id']}")
             
         finally:
             await websocket_manager.shutdown()
@@ -274,7 +274,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             refreshed_message = json.loads(connection.websocket.send.call_args[0][0])
             assert refreshed_message['payload']['session_status'] == 'active'
             
-            self.logger.info("✅ Session validation and refresh handling successful")
+            self.logger.info(" PASS:  Session validation and refresh handling successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -362,7 +362,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             await websocket_manager.send_to_user(user_data['id'], recovery_message.dict())
             recovery_connection.websocket.send.assert_called()
             
-            self.logger.info("✅ Invalid token handling and system recovery successful")
+            self.logger.info(" PASS:  Invalid token handling and system recovery successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -475,7 +475,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             reauth_message = json.loads(new_connection.websocket.send.call_args[0][0])
             assert reauth_message['payload']['auth_status'] == 'renewed'
             
-            self.logger.info("✅ Token expiration handling and re-authentication successful")
+            self.logger.info(" PASS:  Token expiration handling and re-authentication successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -593,7 +593,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             assert refresh_message['payload']['oauth_provider'] == 'google'
             assert refresh_message['payload']['token_status'] == 'refreshed'
             
-            self.logger.info("✅ OAuth WebSocket integration successful")
+            self.logger.info(" PASS:  OAuth WebSocket integration successful")
             
         finally:
             await websocket_manager.shutdown()
@@ -725,7 +725,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             assert context_message['payload']['user_context_verified'] is True
             assert len(context_message['payload']['services_authenticated']) == 3
             
-            self.logger.info("✅ Cross-service authentication consistency verified")
+            self.logger.info(" PASS:  Cross-service authentication consistency verified")
             
         finally:
             await websocket_manager.shutdown()
@@ -900,7 +900,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
             assert final_message['payload']['security_status'] == 'enterprise_grade'
             assert final_message['payload']['csrf_protected'] is True
             
-            self.logger.info("✅ Security headers validation successful - enterprise-grade security verified")
+            self.logger.info(" PASS:  Security headers validation successful - enterprise-grade security verified")
             
         finally:
             await websocket_manager.shutdown()

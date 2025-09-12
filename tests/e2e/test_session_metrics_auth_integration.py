@@ -61,7 +61,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
             num_users=3  # Multi-user testing
         )
         
-        print(f"\n🔐 AUTHENTICATED E2E SETUP:")
+        print(f"\n[U+1F510] AUTHENTICATED E2E SETUP:")
         print(f"  Users authenticated: {len(self.auth_tokens)}")
         print(f"  Auth service: {self.auth_config.auth_service_url}")  
         print(f"  Backend service: {self.auth_config.backend_url}")
@@ -79,7 +79,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         This test validates that WebSocket connections create proper session
         metrics and handle authentication errors without crashing due to SSOT bugs.
         """
-        print(f"\n🔌 TESTING WEBSOCKET AUTH + SESSION METRICS")
+        print(f"\n[U+1F50C] TESTING WEBSOCKET AUTH + SESSION METRICS")
         
         if not self.auth_tokens:
             pytest.skip("No authenticated tokens available")
@@ -99,7 +99,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 }
             ) as websocket:
                 
-                print("✅ WebSocket connection established with auth")
+                print(" PASS:  WebSocket connection established with auth")
                 
                 # Send a message that should trigger session activity
                 test_message = {
@@ -112,7 +112,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                print("📤 Sent agent execution message")
+                print("[U+1F4E4] Sent agent execution message")
                 
                 # Wait for response that involves session metrics
                 messages_received = []
@@ -127,21 +127,21 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                         
                         message_data = json.loads(response)
                         messages_received.append(message_data)
-                        print(f"📥 Received: {message_data.get('type', 'unknown')}")
+                        print(f"[U+1F4E5] Received: {message_data.get('type', 'unknown')}")
                         
                         # Look for any error messages that might indicate SSOT bug
                         if message_data.get('type') == 'error':
                             error_details = message_data.get('data', {})
                             error_msg = str(error_details)
                             
-                            print(f"🔍 ERROR MESSAGE ANALYSIS:")
+                            print(f" SEARCH:  ERROR MESSAGE ANALYSIS:")
                             print(f"  Error: {error_msg}")
                             
                             # Check for SessionMetrics SSOT bug indicators
                             if "has no attribute" in error_msg:
                                 ssot_fields = ["last_activity", "operations_count", "errors"]
                                 if any(field in error_msg for field in ssot_fields):
-                                    print("🐛 SSOT BUG DETECTED in WebSocket error handling!")
+                                    print("[U+1F41B] SSOT BUG DETECTED in WebSocket error handling!")
                                     print("This proves SessionMetrics SSOT violation affects real user flows")
                                     
                                     pytest.fail(
@@ -158,23 +158,23 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                         timeout_counter += 1
                         continue
                 
-                print(f"📊 WebSocket session completed: {len(messages_received)} messages")
+                print(f" CHART:  WebSocket session completed: {len(messages_received)} messages")
                 
                 # Verify we got meaningful responses (proves session metrics working)
                 if len(messages_received) > 0:
-                    print("✅ WebSocket auth session completed without SSOT errors")
+                    print(" PASS:  WebSocket auth session completed without SSOT errors")
                 else:
-                    print("⚠️ No messages received - may indicate session issues")
+                    print(" WARNING: [U+FE0F] No messages received - may indicate session issues")
                 
         except Exception as e:
             error_msg = str(e)
-            print(f"❌ WebSocket connection error: {error_msg}")
+            print(f" FAIL:  WebSocket connection error: {error_msg}")
             
             # Check if this is the SSOT bug we're looking for
             if "has no attribute" in error_msg:
                 ssot_indicators = ["last_activity", "operations_count", "errors"]
                 if any(indicator in error_msg for indicator in ssot_indicators):
-                    print("🐛 SSOT BUG CONFIRMED: WebSocket auth failed due to SessionMetrics SSOT violation")
+                    print("[U+1F41B] SSOT BUG CONFIRMED: WebSocket auth failed due to SessionMetrics SSOT violation")
                     pytest.fail(
                         f"SSOT BUG REPRODUCTION: WebSocket authentication failed due to SessionMetrics field access error: {error_msg}\n"
                         f"This proves the bug impacts real authenticated user sessions."
@@ -190,7 +190,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         This test ensures SessionMetrics work correctly when multiple users
         are active simultaneously with proper isolation.
         """
-        print(f"\n👥 TESTING MULTI-USER SESSION METRICS")
+        print(f"\n[U+1F465] TESTING MULTI-USER SESSION METRICS")
         
         if len(self.auth_tokens) < 2:
             pytest.skip("Need at least 2 authenticated users for concurrent testing")
@@ -213,7 +213,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         # Wait for all sessions to complete
         results = await asyncio.gather(*concurrent_sessions, return_exceptions=True)
         
-        print(f"\n📊 CONCURRENT SESSION RESULTS:")
+        print(f"\n CHART:  CONCURRENT SESSION RESULTS:")
         
         ssot_bugs_found = 0
         successful_sessions = 0
@@ -228,7 +228,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                     ssot_fields = ["last_activity", "operations_count", "errors"]
                     if any(field in error_msg for field in ssot_fields):
                         ssot_bugs_found += 1
-                        print(f"    🐛 SSOT BUG detected in user {i} session")
+                        print(f"    [U+1F41B] SSOT BUG detected in user {i} session")
             else:
                 successful_sessions += 1
                 print(f"  User {i} SUCCESS: {result}")
@@ -245,7 +245,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         
         # Verify we had at least some successful sessions
         assert successful_sessions > 0, "Expected at least some successful concurrent sessions"
-        print("✅ Multi-user sessions completed without SSOT violations")
+        print(" PASS:  Multi-user sessions completed without SSOT violations")
     
     async def _run_authenticated_session(
         self, 
@@ -320,7 +320,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         This test forces database authentication issues to trigger the
         error handling path where the SSOT bug occurs.
         """
-        print(f"\n🔐💾 TESTING SESSION METRICS + DATABASE AUTH ERRORS")
+        print(f"\n[U+1F510][U+1F4BE] TESTING SESSION METRICS + DATABASE AUTH ERRORS")
         
         if not self.auth_tokens:
             pytest.skip("No authenticated tokens available")
@@ -351,24 +351,24 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                     timeout=10.0
                 ) as response:
                     
-                    print(f"📡 Thread creation response: {response.status}")
+                    print(f"[U+1F4E1] Thread creation response: {response.status}")
                     
                     if response.status != 201:
                         # Error response might trigger session metrics error logging
                         response_text = await response.text()
-                        print(f"❌ Thread creation failed: {response_text}")
+                        print(f" FAIL:  Thread creation failed: {response_text}")
                         
                         # Check for SSOT bug in error response
                         if "has no attribute" in response_text:
                             ssot_fields = ["last_activity", "operations_count", "errors"] 
                             if any(field in response_text for field in ssot_fields):
-                                print("🐛 SSOT BUG DETECTED in database auth error handling!")
+                                print("[U+1F41B] SSOT BUG DETECTED in database auth error handling!")
                                 pytest.fail(
                                     f"SSOT BUG CONFIRMED: Database auth error triggered SessionMetrics field access bug: {response_text}\n"
                                     f"This proves the bug affects authenticated API operations."
                                 )
                     else:
-                        print("✅ Thread creation successful without SSOT errors")
+                        print(" PASS:  Thread creation successful without SSOT errors")
                         thread_response = await response.json()
                         thread_id = thread_response.get('id')
                         
@@ -379,7 +379,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                         
             except Exception as e:
                 error_msg = str(e)
-                print(f"💥 Database auth test error: {error_msg}")
+                print(f"[U+1F4A5] Database auth test error: {error_msg}")
                 
                 # Check for SSOT bug
                 if "has no attribute" in error_msg:
@@ -417,23 +417,23 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 timeout=30.0  # Agent execution takes longer
             ) as response:
                 
-                print(f"🤖 Agent execution response: {response.status}")
+                print(f"[U+1F916] Agent execution response: {response.status}")
                 response_text = await response.text()
                 
                 if response.status >= 400:
-                    print(f"❌ Agent execution error: {response_text}")
+                    print(f" FAIL:  Agent execution error: {response_text}")
                     
                     # Check for SSOT bug in agent execution error
                     if "has no attribute" in response_text:
                         ssot_fields = ["last_activity", "operations_count", "errors"]
                         if any(field in response_text for field in ssot_fields):
-                            print("🐛 SSOT BUG in agent execution session management!")
+                            print("[U+1F41B] SSOT BUG in agent execution session management!")
                             raise AttributeError(f"SessionMetrics SSOT bug during agent execution: {response_text}")
                 else:
-                    print("✅ Agent execution completed without session metrics errors")
+                    print(" PASS:  Agent execution completed without session metrics errors")
                     
         except asyncio.TimeoutError:
-            print("⏱️ Agent execution timeout (may indicate session issues)")
+            print("[U+23F1][U+FE0F] Agent execution timeout (may indicate session issues)")
         except Exception as e:
             # Re-raise to be caught by parent test
             raise e
@@ -445,7 +445,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
         This validates that session metrics are properly cleaned up
         without triggering SSOT bugs during auth session teardown.
         """
-        print(f"\n🧹 TESTING SESSION CLEANUP + AUTH")
+        print(f"\n[U+1F9F9] TESTING SESSION CLEANUP + AUTH")
         
         if not self.auth_tokens:
             pytest.skip("No authenticated tokens available")
@@ -496,9 +496,9 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                 if "has no attribute" in error_msg:
                     ssot_fields = ["last_activity", "operations_count", "errors"]
                     if any(field in error_msg for field in ssot_fields):
-                        print(f"🐛 SSOT BUG during session {i} cleanup!")
+                        print(f"[U+1F41B] SSOT BUG during session {i} cleanup!")
         
-        print(f"\n📊 CLEANUP RESULTS:")
+        print(f"\n CHART:  CLEANUP RESULTS:")
         print(f"  Successful cleanups: {successful_cleanups}")
         print(f"  Cleanup errors: {len(cleanup_errors)}")
         
@@ -516,7 +516,7 @@ class TestSessionMetricsAuthIntegration(SSotBaseTestCase):
                     f"\nThis proves the SSOT violation affects session lifecycle management."
                 )
         
-        print("✅ All session cleanups completed without SSOT violations")
+        print(" PASS:  All session cleanups completed without SSOT violations")
 
 
 if __name__ == "__main__":

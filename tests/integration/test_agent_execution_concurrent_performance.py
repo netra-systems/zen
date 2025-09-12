@@ -252,7 +252,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
             return metrics
         
         # Execute concurrent agent simulations
-        print(f"🤖 Starting {concurrent_agents} concurrent agent executions...")
+        print(f"[U+1F916] Starting {concurrent_agents} concurrent agent executions...")
         concurrent_start = time.time()
         
         agent_tasks = [
@@ -305,7 +305,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         assert overall_p95 <= 5.0, f"P95 execution time {overall_p95:.2f}s exceeds 5s SLA"
         assert average_memory_per_agent <= 50.0, f"Average memory per agent {average_memory_per_agent:.1f}MB exceeds 50MB SLA"
         
-        print(f"✅ Concurrent Agent Execution Performance Results:")
+        print(f" PASS:  Concurrent Agent Execution Performance Results:")
         print(f"   Concurrent agents: {concurrent_agents}")
         print(f"   Successful agents: {len(successful_agent_metrics)}")
         print(f"   Failed agents: {failed_agents}")
@@ -423,7 +423,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
                 }
         
         # Execute high contention test
-        print(f"⚔️ Starting resource contention test with {high_contention_agents} agents...")
+        print(f"[U+2694][U+FE0F] Starting resource contention test with {high_contention_agents} agents...")
         contention_start = time.time()
         
         contention_tasks = [
@@ -464,7 +464,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         # Fairness check - completion times shouldn't vary too much
         assert contention_metrics["fairness_variance"] <= 5.0, f"Fairness variance {contention_metrics['fairness_variance']:.2f}s too high"
         
-        print(f"✅ Agent Resource Contention Test Results:")
+        print(f" PASS:  Agent Resource Contention Test Results:")
         print(f"   Test duration: {contention_duration:.2f}s")
         print(f"   Successful agents: {contention_metrics['successful_agents']}/{high_contention_agents}")
         print(f"   Failed agents: {contention_metrics['failed_agents']}")
@@ -501,7 +501,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         scalability_results = []
         
         for scale in scale_tests:
-            print(f"📈 Testing scalability at {scale} concurrent agents...")
+            print(f"[U+1F4C8] Testing scalability at {scale} concurrent agents...")
             
             scale_start = time.time()
             agent_metrics = []
@@ -624,7 +624,7 @@ class TestAgentExecutionConcurrentPerformance(BaseIntegrationTest):
         min_success_rate = min([r["success_rate"] for r in scalability_results])
         assert min_success_rate >= 0.95, f"Minimum success rate {min_success_rate:.3f} below 95% across scales"
         
-        print(f"✅ Agent Scalability Test Results:")
+        print(f" PASS:  Agent Scalability Test Results:")
         for result in scalability_results:
             print(f"   Scale {result['scale']:2d}: {result['successful_agents']:2d}/{result['total_agents']:2d} agents, "
                   f"efficiency: {result['efficiency']:.3f}, throughput: {result['throughput_agents_per_second']:.1f} agents/s")

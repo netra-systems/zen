@@ -6,7 +6,7 @@ This module provides the central registry that coordinates:
 - Enterprise monitoring and health tracking
 - Single point of access for all resilience operations
 
-All functions are ≤8 lines per MANDATORY requirements.
+All functions are  <= 8 lines per MANDATORY requirements.
 """
 
 import asyncio

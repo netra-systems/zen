@@ -49,12 +49,12 @@ class SSotViolationCLI:
         Returns:
             True if compliant, False if violations found
         """
-        print("🔍 Checking SSOT Compliance...")
+        print(" SEARCH:  Checking SSOT Compliance...")
         
         # Analyze codebase patterns
         analysis_result = self.analyzer.analyze_codebase(target_dirs)
         
-        print(f"📊 Analysis Results:")
+        print(f" CHART:  Analysis Results:")
         print(f"   Files scanned: {analysis_result.total_files_scanned}")
         print(f"   Violations found: {analysis_result.total_matches}")
         print(f"   Critical violations: {analysis_result.violations_by_severity.get('critical', 0)}")
@@ -72,11 +72,11 @@ class SSotViolationCLI:
         )
         
         if is_compliant:
-            print("✅ SSOT Compliance: PASSED")
+            print(" PASS:  SSOT Compliance: PASSED")
             return True
         else:
-            print("❌ SSOT Compliance: FAILED")
-            print("\n🚨 Critical Issues Found:")
+            print(" FAIL:  SSOT Compliance: FAILED")
+            print("\n ALERT:  Critical Issues Found:")
             
             for match in analysis_result.pattern_matches:
                 if match.severity in ["critical", "high"]:
@@ -91,24 +91,24 @@ class SSotViolationCLI:
         Returns:
             AnalysisResult with detailed pattern analysis
         """
-        print("🔍 Analyzing Message Creation Patterns...")
+        print(" SEARCH:  Analyzing Message Creation Patterns...")
         
         analysis_result = self.analyzer.analyze_codebase(target_dirs)
         
-        print(f"\n📊 Pattern Analysis Complete:")
+        print(f"\n CHART:  Pattern Analysis Complete:")
         print(f"   Total files scanned: {analysis_result.total_files_scanned}")
         print(f"   Pattern matches found: {analysis_result.total_matches}")
         print(f"   Files with violations: {len(analysis_result.files_with_violations)}")
         
         # Show violations by type
         if analysis_result.violations_by_type:
-            print(f"\n📋 Violations by Type:")
+            print(f"\n[U+1F4CB] Violations by Type:")
             for violation_type, count in sorted(analysis_result.violations_by_type.items(), key=lambda x: x[1], reverse=True):
                 print(f"   {violation_type}: {count}")
                 
         # Show top violation files
         if analysis_result.summary.get("files_with_highest_violations"):
-            print(f"\n🎯 Top Violation Files:")
+            print(f"\n TARGET:  Top Violation Files:")
             for file_info in analysis_result.summary["files_with_highest_violations"]:
                 print(f"   {file_info['file']}: {file_info['violation_count']} violations")
                 
@@ -124,7 +124,7 @@ class SSotViolationCLI:
         Returns:
             Dictionary with paths to generated report files
         """
-        print("📝 Generating SSOT Violation Report...")
+        print("[U+1F4DD] Generating SSOT Violation Report...")
         
         # Analyze patterns
         analysis_result = await self.analyze_patterns()
@@ -141,7 +141,7 @@ class SSotViolationCLI:
             report_name=f"ssot_violation_analysis_{int(time.time())}"
         )
         
-        print(f"\n📄 Reports Generated:")
+        print(f"\n[U+1F4C4] Reports Generated:")
         for report_type, file_path in report_files.items():
             print(f"   {report_type}: {file_path}")
             
@@ -158,26 +158,26 @@ class SSotViolationCLI:
         Returns:
             Detailed analysis of the specific violation
         """
-        print(f"🔍 Analyzing specific violation: {file_path}:{line_number}")
+        print(f" SEARCH:  Analyzing specific violation: {file_path}:{line_number}")
         
         analysis = self.analyzer.analyze_specific_violation(file_path, line_number)
         
         if "error" in analysis:
-            print(f"❌ Error: {analysis['error']}")
+            print(f" FAIL:  Error: {analysis['error']}")
             return analysis
             
-        print(f"\n📋 Violation Analysis:")
+        print(f"\n[U+1F4CB] Violation Analysis:")
         print(f"   File: {analysis['file_path']}")
         print(f"   Line: {analysis['line_number']}")
         print(f"   Content: {analysis['line_content']}")
         
         if analysis.get("matching_patterns"):
-            print(f"\n🚨 Matching Patterns:")
+            print(f"\n ALERT:  Matching Patterns:")
             for pattern in analysis["matching_patterns"]:
                 print(f"   {pattern['pattern_name']} ({pattern['severity']}): {pattern['description']}")
                 
         if analysis.get("remediation_suggestions"):
-            print(f"\n💡 Remediation Suggestions:")
+            print(f"\n IDEA:  Remediation Suggestions:")
             for suggestion in analysis["remediation_suggestions"]:
                 print(f"   - {suggestion}")
                 
@@ -282,7 +282,7 @@ Examples:
                 return 0
                 
         except Exception as e:
-            print(f"💥 CLI Error: {e}")
+            print(f"[U+1F4A5] CLI Error: {e}")
             return 1
             
     # Run the async CLI

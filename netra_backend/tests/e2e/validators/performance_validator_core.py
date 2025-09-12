@@ -1,7 +1,7 @@
 """
 Core Performance Validator for E2E Agent Testing
 Main validation framework integrating measurement and analysis.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import asyncio

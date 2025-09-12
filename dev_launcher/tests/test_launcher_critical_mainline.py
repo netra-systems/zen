@@ -1,5 +1,44 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 env = get_env()
 Comprehensive failing tests for mainline dev_launcher critical functionality.
@@ -43,7 +82,7 @@ def create_test_project_structure(base_dir: Path) -> None:
     (base_dir / "frontend").mkdir(parents=True, exist_ok=True)
 
 
-class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
+class TestDockerServiceDiscoveryIntegration(SSotAsyncTestCase):
     """Test 1: Docker Service Discovery Integration - Comprehensive edge cases."""
     
     def setUp(self):
@@ -169,7 +208,7 @@ class TestDockerServiceDiscoveryIntegration(unittest.TestCase):
         self.assertEqual(launcher._running_docker_services, {})
 
 
-class TestPortConflictResolution(unittest.TestCase):
+class TestPortConflictResolution(SSotAsyncTestCase):
     """Test 2: Port Conflict Resolution - Auto-fallback mechanisms."""
     
     def setUp(self):
@@ -279,7 +318,7 @@ class TestPortConflictResolution(unittest.TestCase):
         self.assertGreater(len(force_free_calls), 0)
 
 
-class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
+class TestServiceAvailabilityAutoAdjustment(SSotAsyncTestCase):
     """Test 3: Service Availability Auto-Adjustment - Mode switching logic."""
     
     def setUp(self):
@@ -403,7 +442,7 @@ class TestServiceAvailabilityAutoAdjustment(unittest.TestCase):
         return mock_config
 
 
-class TestStartupSequenceOrdering(unittest.TestCase):
+class TestStartupSequenceOrdering(SSotAsyncTestCase):
     """Test 4: Startup Sequence Ordering - 13-step sequence validation."""
     
     def setUp(self):
@@ -554,7 +593,7 @@ class TestStartupSequenceOrdering(unittest.TestCase):
             asyncio.run(asyncio.wait_for(run_test(), timeout=5))
 
 
-class TestHealthMonitoringDelayedStart(unittest.TestCase):
+class TestHealthMonitoringDelayedStart(SSotAsyncTestCase):
     """Test 5: Health Monitoring Delayed Start - Proper timing validation."""
     
     def setUp(self):
@@ -670,7 +709,7 @@ class TestHealthMonitoringDelayedStart(unittest.TestCase):
         launcher.health_monitor.start.assert_called_once()
 
 
-class TestDatabaseValidationMockMode(unittest.TestCase):
+class TestDatabaseValidationMockMode(SSotAsyncTestCase):
     """Test 6: Database Validation with Mock Mode - Proper skipping logic."""
     
     def setUp(self):
@@ -781,7 +820,7 @@ class TestDatabaseValidationMockMode(unittest.TestCase):
         asyncio.run(run_test())
 
 
-class TestCrossServiceAuthentication(unittest.TestCase):
+class TestCrossServiceAuthentication(SSotAsyncTestCase):
     """Test 7: Cross-Service Authentication - Token generation and propagation."""
     
     def setUp(self):
@@ -907,7 +946,7 @@ class TestCrossServiceAuthentication(unittest.TestCase):
             self.assertTrue(url_safe_pattern.match(token), f"Token '{token}' not URL-safe")
 
 
-class TestParallelPreCheckExecution(unittest.TestCase):
+class TestParallelPreCheckExecution(SSotAsyncTestCase):
     """Test 8: Parallel Pre-Check Execution - Concurrent validation logic."""
     
     def setUp(self):
@@ -1023,7 +1062,7 @@ class TestParallelPreCheckExecution(unittest.TestCase):
         self.assertIsNone(launcher.parallel_executor)
 
 
-class TestGracefulShutdownCleanup(unittest.TestCase):
+class TestGracefulShutdownCleanup(SSotAsyncTestCase):
     """Test 9: Graceful Shutdown Cleanup - Resource cleanup validation."""
     
     def setUp(self):
@@ -1183,7 +1222,7 @@ class TestGracefulShutdownCleanup(unittest.TestCase):
         launcher.parallel_executor.cleanup.assert_called_once()
 
 
-class TestEmergencyRecovery(unittest.TestCase):
+class TestEmergencyRecovery(SSotAsyncTestCase):
     """Test 10: Emergency Recovery - Critical error handling scenarios."""
     
     def setUp(self):

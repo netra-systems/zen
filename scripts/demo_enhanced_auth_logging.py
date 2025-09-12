@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 async def demo_enhanced_auth_logging():
     """Demonstrate enhanced authentication logging."""
-    print("🚀 DEMO: Enhanced Authentication Debug Logging")
+    print("[U+1F680] DEMO: Enhanced Authentication Debug Logging")
     print("=" * 60)
     
     try:
@@ -37,10 +37,10 @@ async def demo_enhanced_auth_logging():
             AuthTraceContext
         )
         
-        print("✅ Auth trace logger imported successfully")
+        print(" PASS:  Auth trace logger imported successfully")
         
         # Demo 1: Basic context dump without error
-        print("\n📍 Demo 1: Successful authentication context")
+        print("\n PIN:  Demo 1: Successful authentication context")
         log_authentication_context_dump(
             user_id="demo_user",
             request_id="demo_req_001",
@@ -51,7 +51,7 @@ async def demo_enhanced_auth_logging():
         )
         
         # Demo 2: System user authentication failure (the main issue)
-        print("\n🔴 Demo 2: System user 403 'Not authenticated' error")
+        print("\n[U+1F534] Demo 2: System user 403 'Not authenticated' error")
         context = AuthTraceContext(
             user_id="system",
             request_id="system_req_002", 
@@ -70,7 +70,7 @@ async def demo_enhanced_auth_logging():
         })
         
         # Demo 3: Comprehensive context dump
-        print("\n📊 Demo 3: Comprehensive context dump")
+        print("\n CHART:  Demo 3: Comprehensive context dump")
         comprehensive_dump = auth_tracer.dump_all_context_safely(
             context, 
             auth_error,
@@ -87,25 +87,25 @@ async def demo_enhanced_auth_logging():
         print("Debug hints count:", len(comprehensive_dump.get("debug_hints", [])))
         
         # Demo 4: Environment detection
-        print("\n🌍 Demo 4: Environment detection") 
+        print("\n[U+1F30D] Demo 4: Environment detection") 
         print(f"Development: {auth_tracer._is_development_env()}")
         print(f"Staging: {auth_tracer._is_staging_env()}")
         print(f"Production: {auth_tracer._is_production_env()}")
         
-        print("\n✅ Demo completed successfully!")
-        print("📄 Check 'auth_debug_demo.log' for detailed log output")
+        print("\n PASS:  Demo completed successfully!")
+        print("[U+1F4C4] Check 'auth_debug_demo.log' for detailed log output")
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" FAIL:  Import error: {e}")
         print("Make sure you're running from the project root directory")
     except Exception as e:
-        print(f"❌ Demo error: {e}")
+        print(f" FAIL:  Demo error: {e}")
         import traceback
         traceback.print_exc()
 
 async def demo_dependencies_logging():
     """Demo the enhanced logging in dependencies.py."""
-    print("\n🔧 DEMO: Dependencies Enhanced Logging")
+    print("\n[U+1F527] DEMO: Dependencies Enhanced Logging")
     print("=" * 60)
     
     try:
@@ -116,20 +116,20 @@ async def demo_dependencies_logging():
         
         try:
             async for session in get_request_scoped_db_session():
-                print(f"✅ Session created successfully: {type(session)}")
+                print(f" PASS:  Session created successfully: {type(session)}")
                 break
         except Exception as e:
-            print(f"⚠️  Session creation failed (expected): {e}")
-            print("💡 Check the logs above for enhanced debugging context")
+            print(f" WARNING: [U+FE0F]  Session creation failed (expected): {e}")
+            print(" IDEA:  Check the logs above for enhanced debugging context")
             
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" FAIL:  Import error: {e}")
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
 
 def main():
     """Main demo function."""
-    print("🎯 Enhanced Authentication Debug Logging Demo")
+    print(" TARGET:  Enhanced Authentication Debug Logging Demo")
     print("This demonstrates 10x better debugging for 403 'Not authenticated' errors")
     print()
     
@@ -139,8 +139,8 @@ def main():
     print("\n" + "=" * 60)
     asyncio.run(demo_dependencies_logging())
     
-    print("\n🎉 Demo completed!")
-    print("💡 Key improvements:")
+    print("\n CELEBRATION:  Demo completed!")
+    print(" IDEA:  Key improvements:")
     print("   - Comprehensive context dumps with all IDs")
     print("   - Authentication failure analysis")  
     print("   - System user detection and debugging")

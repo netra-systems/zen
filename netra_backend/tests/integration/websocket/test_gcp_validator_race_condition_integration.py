@@ -219,7 +219,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert redis_manager.is_connected(), "Redis should be connected"
         assert not redis_manager.is_fully_ready(), "Background tasks should not be ready yet"
         
-        print("🔍 INTEGRATION RACE CONDITION SCENARIO SETUP:")
+        print(" SEARCH:  INTEGRATION RACE CONDITION SCENARIO SETUP:")
         print(f"   Redis init delay: {redis_init_delay}s")
         print(f"   Background task delay: {background_task_delay}s")
         print(f"   Current state - Connected: {redis_manager.is_connected()}, Fully ready: {redis_manager.is_fully_ready()}")
@@ -236,7 +236,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         # After grace period, Redis should be ready
         assert redis_ready, "Redis validation should pass after grace period"
         
-        print("✅ INTEGRATION RACE CONDITION FIX VALIDATED:")
+        print(" PASS:  INTEGRATION RACE CONDITION FIX VALIDATED:")
         print(f"   Validation time with grace period: {validation_elapsed:.3f}s")
         print(f"   Redis validation result: {redis_ready}")
     
@@ -261,7 +261,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         await asyncio.sleep(0.5)
         
         # Test Phase 1: Dependencies (Database, Redis, Auth)
-        print("🧪 TESTING PHASE 1: Dependencies validation")
+        print("[U+1F9EA] TESTING PHASE 1: Dependencies validation")
         phase1_start = time.time()
         phase1_result = await validator._validate_service_group([
             'database', 'redis', 'auth_validation'
@@ -273,7 +273,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert phase1_elapsed <= 3.0, f"Phase 1 should complete reasonably: {phase1_elapsed}s"
         
         # Test Phase 2: Services (Agent Supervisor, WebSocket Bridge)
-        print("🧪 TESTING PHASE 2: Services validation")
+        print("[U+1F9EA] TESTING PHASE 2: Services validation")
         phase2_start = time.time()
         phase2_result = await validator._validate_service_group([
             'agent_supervisor', 'websocket_bridge'
@@ -284,7 +284,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert phase2_elapsed <= 1.0, f"Phase 2 should be fast (no grace period): {phase2_elapsed}s"
         
         # Test Phase 3: WebSocket Integration
-        print("🧪 TESTING PHASE 3: WebSocket integration validation")
+        print("[U+1F9EA] TESTING PHASE 3: WebSocket integration validation")
         phase3_start = time.time()
         phase3_result = await validator._validate_service_group([
             'websocket_integration'
@@ -294,7 +294,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert phase3_result['success'], f"Phase 3 should succeed: {phase3_result}"
         assert phase3_elapsed <= 0.5, f"Phase 3 should be very fast: {phase3_elapsed}s"
         
-        print("✅ SERVICE GROUP VALIDATION INTEGRATION COMPLETE:")
+        print(" PASS:  SERVICE GROUP VALIDATION INTEGRATION COMPLETE:")
         print(f"   Phase 1 (Dependencies): {phase1_elapsed:.3f}s - {phase1_result['success_count']}/{phase1_result['total_count']} services")
         print(f"   Phase 2 (Services): {phase2_elapsed:.3f}s - {phase2_result['success_count']}/{phase2_result['total_count']} services")
         print(f"   Phase 3 (Integration): {phase3_elapsed:.3f}s - {phase3_result['success_count']}/{phase3_result['total_count']} services")
@@ -317,7 +317,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         validator.environment = "staging"
         
         # Run complete validation
-        print("🚀 STARTING COMPLETE GCP READINESS VALIDATION")
+        print("[U+1F680] STARTING COMPLETE GCP READINESS VALIDATION")
         validation_start = time.time()
         result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=30.0)
         validation_elapsed = time.time() - validation_start
@@ -333,7 +333,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         # No services should fail
         assert len(result.failed_services) == 0, f"No services should fail: {result.failed_services}"
         
-        print("✅ COMPLETE GCP READINESS VALIDATION INTEGRATION SUCCESS:")
+        print(" PASS:  COMPLETE GCP READINESS VALIDATION INTEGRATION SUCCESS:")
         print(f"   Total validation time: {validation_elapsed:.3f}s")
         print(f"   Final state: {result.state.value}")
         print(f"   Failed services: {result.failed_services}")
@@ -367,7 +367,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         await asyncio.sleep(2.5)  # Wait past redis_init_delay
         
         # Test single service validation with timeout
-        print("🐌 TESTING SLOW COMPONENT INITIALIZATION")
+        print("[U+1F40C] TESTING SLOW COMPONENT INITIALIZATION")
         slow_validation_start = time.time()
         redis_ready = await validator._validate_single_service(redis_check, timeout_seconds=60.0)
         slow_validation_elapsed = time.time() - slow_validation_start
@@ -379,7 +379,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert slow_validation_elapsed >= 0.5, f"Should include grace period: {slow_validation_elapsed}s"
         assert slow_validation_elapsed <= 10.0, f"Should not take excessively long: {slow_validation_elapsed}s"
         
-        print("✅ TIMEOUT EFFECTIVENESS WITH SLOW COMPONENTS VALIDATED:")
+        print(" PASS:  TIMEOUT EFFECTIVENESS WITH SLOW COMPONENTS VALIDATED:")
         print(f"   Redis init delay: 2.0s")
         print(f"   Background task delay: 3.0s")
         print(f"   Validation time: {slow_validation_elapsed:.3f}s")
@@ -403,7 +403,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         await asyncio.sleep(0.8)
         
         # Test context manager
-        print("🛡️ TESTING READINESS GUARD CONTEXT MANAGER")
+        print("[U+1F6E1][U+FE0F] TESTING READINESS GUARD CONTEXT MANAGER")
         guard_start = time.time()
         
         async with gcp_websocket_readiness_guard(app_state, timeout=20.0) as result:
@@ -417,7 +417,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
             assert guard_elapsed >= 0.5, f"Should include grace period: {guard_elapsed}s"
             assert guard_elapsed <= 3.0, f"Should complete quickly: {guard_elapsed}s"
             
-            print("✅ CONTEXT MANAGER INTEGRATION SUCCESS:")
+            print(" PASS:  CONTEXT MANAGER INTEGRATION SUCCESS:")
             print(f"   Guard validation time: {guard_elapsed:.3f}s")
             print(f"   Result state: {result.state.value}")
             print(f"   WebSocket connection allowed: {result.ready}")
@@ -439,7 +439,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         await asyncio.sleep(0.6)
         
         # Test health check endpoint
-        print("❤️ TESTING HEALTH CHECK ENDPOINT INTEGRATION")
+        print("[U+2764][U+FE0F] TESTING HEALTH CHECK ENDPOINT INTEGRATION")
         health_start = time.time()
         ready, details = await gcp_websocket_readiness_check(app_state)
         health_elapsed = time.time() - health_start
@@ -456,7 +456,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         # Should have correct environment detection
         assert details.get('gcp_environment') is not None, "Should detect GCP environment status"
         
-        print("✅ HEALTH CHECK ENDPOINT INTEGRATION SUCCESS:")
+        print(" PASS:  HEALTH CHECK ENDPOINT INTEGRATION SUCCESS:")
         print(f"   Health check time: {health_elapsed:.3f}s")
         print(f"   Ready status: {ready}")
         print(f"   WebSocket ready: {details['websocket_ready']}")
@@ -482,7 +482,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         validator.environment = "staging"
         
         # Test validation with failing Redis
-        print("💥 TESTING ERROR SCENARIO INTEGRATION")
+        print("[U+1F4A5] TESTING ERROR SCENARIO INTEGRATION")
         error_start = time.time()
         result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=10.0)
         error_elapsed = time.time() - error_start
@@ -495,7 +495,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         # Should complete quickly without hanging
         assert error_elapsed <= 5.0, f"Error scenario should fail fast: {error_elapsed}s"
         
-        print("✅ ERROR SCENARIO INTEGRATION HANDLED:")
+        print(" PASS:  ERROR SCENARIO INTEGRATION HANDLED:")
         print(f"   Error handling time: {error_elapsed:.3f}s")
         print(f"   Final state: {result.state.value}")
         print(f"   Failed services: {result.failed_services}")
@@ -516,7 +516,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         validator.environment = "local"
         
         # Test validation in non-GCP environment
-        print("🏠 TESTING NON-GCP ENVIRONMENT BYPASS")
+        print("[U+1F3E0] TESTING NON-GCP ENVIRONMENT BYPASS")
         bypass_start = time.time()
         result = await validator.validate_gcp_readiness_for_websocket(timeout_seconds=5.0)
         bypass_elapsed = time.time() - bypass_start
@@ -532,7 +532,7 @@ class TestGCPValidatorRaceConditionIntegration(SSotBaseTestCase):
         assert len(result.warnings) > 0, "Should have bypass warning"
         assert any("non-GCP" in warning.lower() for warning in result.warnings), f"Should mention non-GCP: {result.warnings}"
         
-        print("✅ NON-GCP ENVIRONMENT BYPASS SUCCESS:")
+        print(" PASS:  NON-GCP ENVIRONMENT BYPASS SUCCESS:")
         print(f"   Bypass time: {bypass_elapsed:.3f}s")
         print(f"   Result state: {result.state.value}")
         print(f"   Environment detected: {result.details.get('environment')}")
@@ -591,7 +591,7 @@ class TestComponentIntegrationTimingAnalysis:
                 "ready": redis_ready
             })
         
-        print("📊 REDIS INITIALIZATION TIMING PATTERN ANALYSIS:")
+        print(" CHART:  REDIS INITIALIZATION TIMING PATTERN ANALYSIS:")
         for result in timing_results:
             print(f"   {result['pattern']}:")
             print(f"     Init: {result['init_delay']}s, Background: {result['background_delay']}s")
@@ -605,7 +605,7 @@ class TestComponentIntegrationTimingAnalysis:
             f"At least half the patterns should apply grace period: {grace_applied_count}/{len(timing_patterns)}"
         )
         
-        print(f"✅ TIMING ANALYSIS COMPLETE: {grace_applied_count}/{len(timing_patterns)} patterns applied grace period")
+        print(f" PASS:  TIMING ANALYSIS COMPLETE: {grace_applied_count}/{len(timing_patterns)} patterns applied grace period")
 
 
 if __name__ == "__main__":

@@ -254,7 +254,7 @@ class UserExecutionEngine(IExecutionEngine):
         # Integrate data access capabilities for user-scoped ClickHouse and Redis access
         UserExecutionEngineExtensions.integrate_data_access(self)
         
-        logger.info(f"✅ Created UserExecutionEngine {self.engine_id} for user {context.user_id} "
+        logger.info(f" PASS:  Created UserExecutionEngine {self.engine_id} for user {context.user_id} "
                    f"(max_concurrent: {self.max_concurrent}, run_id: {context.run_id}) with data access capabilities")
     
     @property
@@ -498,7 +498,7 @@ class UserExecutionEngine(IExecutionEngine):
                     tools=[],  # Tools will be registered as needed
                     enable_admin_tools=False
                 )
-                logger.debug(f"✅ Created dispatcher with AgentWebSocketBridge adapter for user {self.context.user_id}")
+                logger.debug(f" PASS:  Created dispatcher with AgentWebSocketBridge adapter for user {self.context.user_id}")
                     
             else:
                 logger.warning(f"No WebSocket bridge available for user {self.context.user_id}, creating dispatcher without events")
@@ -511,7 +511,7 @@ class UserExecutionEngine(IExecutionEngine):
                 )
             
             logger.info(
-                f"✅ TOOL_DISPATCHER_CREATED: Real tool dispatcher initialized with WebSocket integration. "
+                f" PASS:  TOOL_DISPATCHER_CREATED: Real tool dispatcher initialized with WebSocket integration. "
                 f"User: {self.context.user_id[:8]}..., WebSocket_bridge: configured, "
                 f"Tools_registered: 0 (will register on demand), Admin_tools: disabled, "
                 f"Business_context: Ready for agent tool execution with real-time event delivery"
@@ -520,7 +520,7 @@ class UserExecutionEngine(IExecutionEngine):
             
         except Exception as e:
             logger.error(
-                f"🚨 TOOL_DISPATCHER_CREATION_FAILED: Failed to create real tool dispatcher - degraded functionality. "
+                f" ALERT:  TOOL_DISPATCHER_CREATION_FAILED: Failed to create real tool dispatcher - degraded functionality. "
                 f"User: {self.context.user_id[:8]}..., Error: {e}, "
                 f"Error_type: {type(e).__name__}, "
                 f"Business_impact: Tool execution capabilities compromised, falling back to mock dispatcher, "
@@ -569,7 +569,7 @@ class UserExecutionEngine(IExecutionEngine):
             
             mock_dispatcher.execute_tool = mock_execute_tool
             logger.warning(
-                f"⚠️ TOOL_DISPATCHER_MOCK: Using mock tool dispatcher - limited functionality. "
+                f" WARNING: [U+FE0F] TOOL_DISPATCHER_MOCK: Using mock tool dispatcher - limited functionality. "
                 f"User: {self.context.user_id[:8]}..., Reason: Real dispatcher creation failed, "
                 f"Mock_tools: 4 basic tools available, WebSocket_events: simulated, "
                 f"Business_impact: Reduced tool capabilities, suitable for testing only"
@@ -826,7 +826,7 @@ class UserExecutionEngine(IExecutionEngine):
                 )
                 
                 logger.error(
-                    f"🚨 USER_AGENT_EXECUTION_FAILED: Agent execution failed in user isolation engine. "
+                    f" ALERT:  USER_AGENT_EXECUTION_FAILED: Agent execution failed in user isolation engine. "
                     f"Agent: {context.agent_name}, User: {self.context.user_id[:8]}..., "
                     f"Error: {e}, Error_type: {type(e).__name__}, "
                     f"Business_impact: User receives error instead of AI response (90% platform value lost), "
@@ -914,12 +914,12 @@ class UserExecutionEngine(IExecutionEngine):
                 tool_dispatcher = await self.get_tool_dispatcher()
                 if hasattr(agent, 'set_tool_dispatcher'):
                     agent.set_tool_dispatcher(tool_dispatcher)
-                    logger.info(f"✅ Set tool dispatcher on {context.agent_name} via set_tool_dispatcher method")
+                    logger.info(f" PASS:  Set tool dispatcher on {context.agent_name} via set_tool_dispatcher method")
                 elif hasattr(agent, 'tool_dispatcher'):
                     agent.tool_dispatcher = tool_dispatcher
-                    logger.info(f"✅ Set tool dispatcher on {context.agent_name} via direct assignment")
+                    logger.info(f" PASS:  Set tool dispatcher on {context.agent_name} via direct assignment")
                 else:
-                    logger.warning(f"⚠️ Agent {context.agent_name} doesn't have tool dispatcher support")
+                    logger.warning(f" WARNING: [U+FE0F] Agent {context.agent_name} doesn't have tool dispatcher support")
             
             # Execute with user isolation - use the agent_core for proper lifecycle management
             result = await self.agent_core.execute_agent(context, secure_context)
@@ -1291,7 +1291,7 @@ class UserExecutionEngine(IExecutionEngine):
             # Mark as inactive
             self._is_active = False
             
-            logger.info(f"✅ Cleaned up UserExecutionEngine {self.engine_id} for user {self.context.user_id}")
+            logger.info(f" PASS:  Cleaned up UserExecutionEngine {self.engine_id} for user {self.context.user_id}")
             
         except Exception as e:
             logger.error(f"Error cleaning up UserExecutionEngine {self.engine_id}: {e}")

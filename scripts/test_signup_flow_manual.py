@@ -28,12 +28,12 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 201:
-            print("✅ Valid registration successful")
+            print(" PASS:  Valid registration successful")
             result = response.json()
             print(f"   User ID: {result.get('user_id')}")
             print(f"   Email: {result.get('email')}")
         else:
-            print(f"❌ Registration failed: {response.status_code} - {response.text}")
+            print(f" FAIL:  Registration failed: {response.status_code} - {response.text}")
         
         # Test 2: Duplicate email
         print("\n2. Testing duplicate email...")
@@ -47,10 +47,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ Duplicate email correctly rejected")
+            print(" PASS:  Duplicate email correctly rejected")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ Duplicate not handled: {response.status_code}")
+            print(f" FAIL:  Duplicate not handled: {response.status_code}")
         
         # Test 3: Invalid email format
         print("\n3. Testing invalid email format...")
@@ -64,10 +64,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ Invalid email correctly rejected")
+            print(" PASS:  Invalid email correctly rejected")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ Invalid email not caught: {response.status_code}")
+            print(f" FAIL:  Invalid email not caught: {response.status_code}")
         
         # Test 4: Weak password
         print("\n4. Testing weak password...")
@@ -81,10 +81,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ Weak password correctly rejected")
+            print(" PASS:  Weak password correctly rejected")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ Weak password not caught: {response.status_code}")
+            print(f" FAIL:  Weak password not caught: {response.status_code}")
         
         # Test 5: Password mismatch
         print("\n5. Testing password mismatch...")
@@ -98,10 +98,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ Password mismatch correctly rejected")
+            print(" PASS:  Password mismatch correctly rejected")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ Password mismatch not caught: {response.status_code}")
+            print(f" FAIL:  Password mismatch not caught: {response.status_code}")
         
         # Test 6: Missing required fields
         print("\n6. Testing missing required fields...")
@@ -112,10 +112,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ Missing fields correctly rejected")
+            print(" PASS:  Missing fields correctly rejected")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ Missing fields not caught: {response.status_code}")
+            print(f" FAIL:  Missing fields not caught: {response.status_code}")
         
         # Test 7: SQL injection attempt
         print("\n7. Testing SQL injection prevention...")
@@ -129,10 +129,10 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 400:
-            print("✅ SQL injection attempt blocked")
+            print(" PASS:  SQL injection attempt blocked")
             print(f"   Error: {response.json().get('detail')}")
         else:
-            print(f"❌ SQL injection not blocked: {response.status_code}")
+            print(f" FAIL:  SQL injection not blocked: {response.status_code}")
         
         # Test 8: Login with registered user
         print("\n8. Testing login with registered user...")
@@ -144,12 +144,12 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 200:
-            print("✅ Login successful")
+            print(" PASS:  Login successful")
             result = response.json()
             print(f"   Access token: {result.get('access_token')[:50]}...")
             print(f"   User ID: {result.get('user', {}).get('id')}")
         else:
-            print(f"❌ Login failed: {response.status_code}")
+            print(f" FAIL:  Login failed: {response.status_code}")
         
         # Test 9: Login with wrong password
         print("\n9. Testing login with wrong password...")
@@ -161,9 +161,9 @@ async def test_signup_flow():
             }
         )
         if response.status_code == 422:
-            print("✅ Wrong password correctly rejected")
+            print(" PASS:  Wrong password correctly rejected")
         else:
-            print(f"❌ Wrong password not handled: {response.status_code}")
+            print(f" FAIL:  Wrong password not handled: {response.status_code}")
         
         print("\n=== SIGNUP FLOW TESTING COMPLETE ===\n")
 

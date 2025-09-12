@@ -74,7 +74,7 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
             violation_summary = self._format_violation_report(violations)
             self.fail(f"Redis SSOT import pattern violations found:\n{violation_summary}")
             
-        logger.info(f"✅ SSOT import pattern compliance verified across {len(python_files)} Python files")
+        logger.info(f" PASS:  SSOT import pattern compliance verified across {len(python_files)} Python files")
 
     def test_deprecated_pattern_elimination(self):
         """Test that deprecated Redis import patterns are eliminated."""
@@ -95,7 +95,7 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
             violation_summary = self._format_violation_report(deprecated_violations)
             self.fail(f"Deprecated Redis import patterns found:\n{violation_summary}")
             
-        logger.info("✅ No deprecated Redis import patterns found")
+        logger.info(" PASS:  No deprecated Redis import patterns found")
 
     def test_golden_path_critical_files_compliance(self):
         """Test that Golden Path critical files use correct Redis patterns."""
@@ -118,7 +118,7 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
             violation_summary = self._format_violation_report(critical_violations)
             self.fail(f"CRITICAL: Golden Path files have Redis import violations:\n{violation_summary}")
             
-        logger.info("✅ Golden Path critical files Redis compliance verified")
+        logger.info(" PASS:  Golden Path critical files Redis compliance verified")
 
     def test_no_direct_redis_manager_instantiation(self):
         """Test that no code directly instantiates RedisManager bypassing SSOT."""
@@ -143,7 +143,7 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
             violation_summary = self._format_violation_report(direct_instantiation_violations)
             self.fail(f"Direct RedisManager instantiation violations found:\n{violation_summary}")
             
-        logger.info("✅ No direct RedisManager instantiation violations found")
+        logger.info(" PASS:  No direct RedisManager instantiation violations found")
 
     # Helper methods
     
@@ -307,12 +307,12 @@ class RedisImportPatternComplianceTest(SSotBaseTestCase):
                 report.append("-" * 50)
                 
                 for violation in by_severity[severity]:
-                    report.append(f"  📁 {violation['file']}")
-                    report.append(f"  📍 Line {violation['line']}: {violation['violation_type']}")
-                    report.append(f"  💻 Code: {violation['content']}")
+                    report.append(f"  [U+1F4C1] {violation['file']}")
+                    report.append(f"   PIN:  Line {violation['line']}: {violation['violation_type']}")
+                    report.append(f"  [U+1F4BB] Code: {violation['content']}")
                     report.append("")
                     
-        report.append("🔧 REMEDIATION:")
+        report.append("[U+1F527] REMEDIATION:")
         report.append("  1. Replace deprecated imports with SSOT pattern:")
         report.append("     from netra_backend.app.redis_manager import redis_manager")
         report.append("  2. Remove direct RedisManager() instantiation")

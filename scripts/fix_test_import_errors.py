@@ -4,6 +4,7 @@ Comprehensive script to fix all test import errors systematically.
 Analyzes failing test files and fixes common import patterns.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import re
 import ast
@@ -100,8 +101,8 @@ class TestImportFixer:
             ),
             ImportFix(
                 r"from netra_backend\.tests\.user_flow_base import.*",
-                "# UserFlowTestBase - using unittest.TestCase\nimport unittest\nfrom unittest.mock import Mock\nUserFlowTestBase = unittest.TestCase\nassert_successful_registration = Mock\nassert_plan_compliance = Mock",
-                "Created UserFlowTestBase using unittest.TestCase"
+                "# UserFlowTestBase - using SSotBaseTestCase\nimport unittest\nfrom unittest.mock import Mock\nUserFlowTestBase = SSotBaseTestCase\nassert_successful_registration = Mock\nassert_plan_compliance = Mock",
+                "Created UserFlowTestBase using SSotBaseTestCase"
             ),
             
             # Additional missing models
@@ -237,11 +238,11 @@ class TestImportFixer:
                 fixes_made.append("Added mock imports")
         
         # Replace missing base classes
-        if "UserFlowTestBase" in content and "unittest.TestCase" not in content:
-            content = content.replace("UserFlowTestBase", "unittest.TestCase")
+        if "UserFlowTestBase" in content and "SSotBaseTestCase" not in content:
+            content = content.replace("UserFlowTestBase", "SSotBaseTestCase")
             if "import unittest" not in content:
                 content = "import unittest\n" + content
-            fixes_made.append("Replaced UserFlowTestBase with unittest.TestCase")
+            fixes_made.append("Replaced UserFlowTestBase with SSotBaseTestCase")
         
         return content
 

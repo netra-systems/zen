@@ -804,7 +804,7 @@
 
                                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                                                     # REMOVED_SYNTAX_ERROR: """Run stress tests directly."""
-                                                    # REMOVED_SYNTAX_ERROR: print("🚀 Starting UserExecutionContext Stress Testing Suite")
+                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F680] Starting UserExecutionContext Stress Testing Suite")
                                                     # REMOVED_SYNTAX_ERROR: print("="*60)
 
                                                     # Run pytest on this module
@@ -812,7 +812,7 @@
 
                                                     # REMOVED_SYNTAX_ERROR: if exit_code == 0:
                                                         # REMOVED_SYNTAX_ERROR: print(" )
-                                                        # REMOVED_SYNTAX_ERROR: ✅ All stress tests passed!")
+                                                        # REMOVED_SYNTAX_ERROR:  PASS:  All stress tests passed!")
                                                         # REMOVED_SYNTAX_ERROR: else:
                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

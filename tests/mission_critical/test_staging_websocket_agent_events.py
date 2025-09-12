@@ -176,7 +176,7 @@
 
     # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if failures:
@@ -235,7 +235,7 @@
                 # REMOVED_SYNTAX_ERROR: assert self.helper.is_connected, "Helper should report connected state"
                 # REMOVED_SYNTAX_ERROR: assert self.helper.current_token is not None, "Should have authentication token"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ Successfully connected to staging WebSocket with authentication")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Successfully connected to staging WebSocket with authentication")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.staging
@@ -295,7 +295,7 @@
 
             # REMOVED_SYNTAX_ERROR: assert is_valid, "formatted_string"
 
-            # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Agent flow completed successfully in staging:")
+            # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Agent flow completed successfully in staging:")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -325,7 +325,7 @@
                 
                 # REMOVED_SYNTAX_ERROR: assert success, "Failed to send message over secure WebSocket connection"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket SSL/TLS security validated")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket SSL/TLS security validated")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.staging
@@ -360,7 +360,7 @@
                     
                     # REMOVED_SYNTAX_ERROR: assert success, "Reconnected WebSocket should work"
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket reconnection working")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket reconnection working")
 
                     # Removed problematic line: @pytest.mark.asyncio
                     # REMOVED_SYNTAX_ERROR: @pytest.mark.staging
@@ -399,7 +399,7 @@
                                 # REMOVED_SYNTAX_ERROR: assert successful_sends >= message_count * 0.9, "formatted_string"
                                 # REMOVED_SYNTAX_ERROR: assert messages_per_second > 10, "formatted_string"
 
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket performance acceptable")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket performance acceptable")
 
 
                                 # ============================================================================
@@ -447,7 +447,7 @@
                 # REMOVED_SYNTAX_ERROR: connected = await self.helper.connect_with_auth()
                 # REMOVED_SYNTAX_ERROR: assert connected, "Connection should work with correct auth headers"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket authentication headers correct")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket authentication headers correct")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.staging
@@ -482,7 +482,7 @@
                     
                     # REMOVED_SYNTAX_ERROR: assert valid_success, "Should be able to send valid messages after error"
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket error handling working")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket error handling working")
 
 
                     # ============================================================================
@@ -507,13 +507,13 @@
         # REMOVED_SYNTAX_ERROR: if not config.validate_configuration():
             # REMOVED_SYNTAX_ERROR: pytest.fail("Staging configuration validation failed - cannot run WebSocket tests")
 
-            # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Staging configuration validated:")
+            # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Staging configuration validated:")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
             # This test validates the suite itself is operational
-            # REMOVED_SYNTAX_ERROR: logger.info("✅ Staging WebSocket test suite is operational")
+            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Staging WebSocket test suite is operational")
             # REMOVED_SYNTAX_ERROR: logger.info("Run individual tests with: pytest tests/mission_critical/test_staging_websocket_agent_events.py -v")
 
 

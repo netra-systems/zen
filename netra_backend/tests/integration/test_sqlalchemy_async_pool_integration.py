@@ -72,7 +72,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         self.test_sessions = []
         self.pool_configuration_results = []
         
-        self.logger.info("🔧 SQLAlchemy Pool Integration Test Setup")
+        self.logger.info("[U+1F527] SQLAlchemy Pool Integration Test Setup")
     
     def teardown_method(self):
         """Cleanup with comprehensive database resource cleanup."""
@@ -100,7 +100,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         self.test_sessions.clear()
         self.pool_configuration_results.clear()
         
-        self.logger.info("🧹 Database Pool Integration Cleanup Complete")
+        self.logger.info("[U+1F9F9] Database Pool Integration Cleanup Complete")
     
     async def _ensure_database_connectivity(self) -> bool:
         """Ensure database connectivity for integration testing."""
@@ -115,11 +115,11 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 result = await conn.execute(text("SELECT 'integration_test_ready' as status"))
                 assert result.scalar() == "integration_test_ready"
             
-            self.logger.info("✅ Database connectivity validated for integration testing")
+            self.logger.info(" PASS:  Database connectivity validated for integration testing")
             return True
             
         except Exception as e:
-            self.logger.error(f"❌ Database connectivity failed: {e}")
+            self.logger.error(f" FAIL:  Database connectivity failed: {e}")
             return False
     
     @pytest.mark.integration
@@ -135,7 +135,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         if not database_ready:
             pytest.skip("Database connectivity required for cross-service integration testing")
         
-        self.logger.info("🔄 Testing cross-service pool configuration consistency")
+        self.logger.info(" CYCLE:  Testing cross-service pool configuration consistency")
         
         database_url = get_database_url()
         
@@ -151,7 +151,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         auth_error = None
         
         try:
-            self.logger.info("🔐 Testing auth_service pool configuration (NullPool)")
+            self.logger.info("[U+1F510] Testing auth_service pool configuration (NullPool)")
             auth_engine = create_async_engine(
                 database_url,
                 poolclass=auth_service_config["poolclass"],
@@ -174,11 +174,11 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 assert test_result == expected, f"auth_service session test failed: {test_result} != {expected}"
             
             auth_success = True
-            self.logger.info("✅ auth_service pool configuration - Integration SUCCESS")
+            self.logger.info(" PASS:  auth_service pool configuration - Integration SUCCESS")
             
         except Exception as e:
             auth_error = str(e)
-            self.logger.error(f"❌ auth_service pool configuration failed: {e}")
+            self.logger.error(f" FAIL:  auth_service pool configuration failed: {e}")
         
         # Test 2: netra_backend pool configuration (updated/fixed config)
         netra_backend_config = {
@@ -190,7 +190,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         netra_backend_error = None
         
         try:
-            self.logger.info("🔧 Testing netra_backend current pool configuration")
+            self.logger.info("[U+1F527] Testing netra_backend current pool configuration")
             
             # Use the actual netra_backend database configuration
             netra_engine = get_netra_engine()
@@ -212,14 +212,14 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 assert test_result == expected, f"netra_backend session test failed: {test_result} != {expected}"
             
             netra_backend_success = True
-            self.logger.info("✅ netra_backend pool configuration - Integration SUCCESS")
+            self.logger.info(" PASS:  netra_backend pool configuration - Integration SUCCESS")
             
         except Exception as e:
             netra_backend_error = str(e)
-            self.logger.error(f"❌ netra_backend pool configuration failed: {e}")
+            self.logger.error(f" FAIL:  netra_backend pool configuration failed: {e}")
         
         # Test 3: Cross-service concurrent database operations
-        self.logger.info("🔄 Testing cross-service concurrent database operations")
+        self.logger.info(" CYCLE:  Testing cross-service concurrent database operations")
         
         concurrent_ops_success = False
         concurrent_error = None
@@ -263,17 +263,17 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 await asyncio.gather(*concurrent_tasks)
             
             concurrent_ops_success = True
-            self.logger.info("✅ Cross-service concurrent operations - SUCCESS")
+            self.logger.info(" PASS:  Cross-service concurrent operations - SUCCESS")
             
         except Exception as e:
             concurrent_error = str(e)
-            self.logger.error(f"❌ Cross-service concurrent operations failed: {e}")
+            self.logger.error(f" FAIL:  Cross-service concurrent operations failed: {e}")
         
         # Integration test validation
-        self.logger.info("📊 CROSS-SERVICE INTEGRATION RESULTS:")
-        self.logger.info(f"  🔐 auth_service: {'SUCCESS' if auth_success else 'FAILED'}")
-        self.logger.info(f"  🔧 netra_backend: {'SUCCESS' if netra_backend_success else 'FAILED'}")
-        self.logger.info(f"  🔄 Concurrent ops: {'SUCCESS' if concurrent_ops_success else 'FAILED'}")
+        self.logger.info(" CHART:  CROSS-SERVICE INTEGRATION RESULTS:")
+        self.logger.info(f"  [U+1F510] auth_service: {'SUCCESS' if auth_success else 'FAILED'}")
+        self.logger.info(f"  [U+1F527] netra_backend: {'SUCCESS' if netra_backend_success else 'FAILED'}")
+        self.logger.info(f"   CYCLE:  Concurrent ops: {'SUCCESS' if concurrent_ops_success else 'FAILED'}")
         
         if auth_error:
             self.logger.info(f"    auth_service error: {auth_error[:100]}...")
@@ -287,7 +287,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         assert netra_backend_success, f"netra_backend pool configuration failed: {netra_backend_error}"
         assert concurrent_ops_success, f"Cross-service concurrent operations failed: {concurrent_error}"
         
-        self.logger.info("✅ Cross-service pool configuration consistency validated")
+        self.logger.info(" PASS:  Cross-service pool configuration consistency validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -302,7 +302,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         if not database_ready:
             pytest.skip("Database connectivity required for multi-user session testing")
         
-        self.logger.info("👥 Testing multi-user concurrent database sessions")
+        self.logger.info("[U+1F465] Testing multi-user concurrent database sessions")
         
         # Simulate multiple users with concurrent database operations
         user_count = 8
@@ -365,7 +365,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
             task = asyncio.create_task(simulate_user_database_operations(user_id, user_index))
             concurrent_user_tasks.append(task)
         
-        self.logger.info(f"⚡ Executing {user_count} concurrent user database operations...")
+        self.logger.info(f" LIGHTNING:  Executing {user_count} concurrent user database operations...")
         
         # Execute all user operations concurrently
         start_time = time.time()
@@ -392,14 +392,14 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         success_rate = (successful_users / user_count) * 100
         operations_per_second = total_operations / max(execution_time, 0.001)
         
-        self.logger.info("📊 MULTI-USER DATABASE SESSION RESULTS:")
-        self.logger.info(f"  👥 Total users: {user_count}")
-        self.logger.info(f"  ✅ Successful users: {successful_users}")
-        self.logger.info(f"  ❌ Failed users: {failed_users}")
-        self.logger.info(f"  📈 Success rate: {success_rate:.1f}%")
-        self.logger.info(f"  🔢 Total operations: {total_operations}")
-        self.logger.info(f"  ⚡ Operations/second: {operations_per_second:.1f}")
-        self.logger.info(f"  ⏱️ Execution time: {execution_time:.2f}s")
+        self.logger.info(" CHART:  MULTI-USER DATABASE SESSION RESULTS:")
+        self.logger.info(f"  [U+1F465] Total users: {user_count}")
+        self.logger.info(f"   PASS:  Successful users: {successful_users}")
+        self.logger.info(f"   FAIL:  Failed users: {failed_users}")
+        self.logger.info(f"  [U+1F4C8] Success rate: {success_rate:.1f}%")
+        self.logger.info(f"  [U+1F522] Total operations: {total_operations}")
+        self.logger.info(f"   LIGHTNING:  Operations/second: {operations_per_second:.1f}")
+        self.logger.info(f"  [U+23F1][U+FE0F] Execution time: {execution_time:.2f}s")
         
         # CRITICAL ASSERTIONS: Multi-user operations must be reliable
         assert success_rate >= 90.0, f"Multi-user success rate too low: {success_rate:.1f}% (expected >= 90%)"
@@ -407,7 +407,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         assert total_operations >= user_count * operations_per_user * 0.9, f"Too few operations completed: {total_operations}"
         assert execution_time <= 30.0, f"Multi-user operations too slow: {execution_time:.2f}s (expected <= 30s)"
         
-        self.logger.info("✅ Multi-user concurrent database sessions validated")
+        self.logger.info(" PASS:  Multi-user concurrent database sessions validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -422,7 +422,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         if not database_ready:
             pytest.skip("Database connectivity required for connection pool load testing")
         
-        self.logger.info("⚡ Testing connection pool behavior under load")
+        self.logger.info(" LIGHTNING:  Testing connection pool behavior under load")
         
         database_url = get_database_url()
         
@@ -438,7 +438,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         load_test_results = []
         
         for pool_config in pool_load_tests:
-            self.logger.info(f"🧪 Testing {pool_config['name']}: {pool_config['description']}")
+            self.logger.info(f"[U+1F9EA] Testing {pool_config['name']}: {pool_config['description']}")
             
             test_engine = None
             load_result = {
@@ -466,7 +466,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 operations_per_connection = 3
                 
                 # Phase 1: Burst load test
-                self.logger.info(f"⚡ Phase 1: Burst load ({burst_connections} concurrent connections)")
+                self.logger.info(f" LIGHTNING:  Phase 1: Burst load ({burst_connections} concurrent connections)")
                 
                 burst_tasks = []
                 burst_start_time = time.time()
@@ -508,7 +508,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 burst_duration = time.time() - burst_start_time
                 
                 # Phase 2: Sustained load test
-                self.logger.info(f"🔄 Phase 2: Sustained load ({sustained_connections} connections)")
+                self.logger.info(f" CYCLE:  Phase 2: Sustained load ({sustained_connections} connections)")
                 
                 sustained_tasks = []
                 sustained_start_time = time.time()
@@ -561,19 +561,19 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                     "sustained_duration": sustained_duration
                 })
                 
-                self.logger.info(f"✅ {pool_config['name']} load test completed successfully")
+                self.logger.info(f" PASS:  {pool_config['name']} load test completed successfully")
                 
             except Exception as e:
                 load_result["error"] = str(e)
-                self.logger.error(f"❌ {pool_config['name']} load test failed: {e}")
+                self.logger.error(f" FAIL:  {pool_config['name']} load test failed: {e}")
             
             load_test_results.append(load_result)
         
         # Validate load test results
-        self.logger.info("📊 CONNECTION POOL LOAD TEST RESULTS:")
+        self.logger.info(" CHART:  CONNECTION POOL LOAD TEST RESULTS:")
         
         for result in load_test_results:
-            success_icon = "✅" if result["success"] else "❌"
+            success_icon = " PASS: " if result["success"] else " FAIL: "
             self.logger.info(f"  {success_icon} {result['config_name']}:")
             self.logger.info(f"    Total connections: {result['total_connections']}")
             self.logger.info(f"    Avg response time: {result['avg_response_time']:.4f}s")
@@ -594,7 +594,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 f"{result['config_name']} peak response time too slow: {result['peak_response_time']:.4f}s"
             )
         
-        self.logger.info("✅ Connection pool load testing validated")
+        self.logger.info(" PASS:  Connection pool load testing validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -609,7 +609,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         if not database_ready:
             pytest.skip("Database connectivity required for session factory testing")
         
-        self.logger.info("🏭 Testing database session factory consistency")
+        self.logger.info("[U+1F3ED] Testing database session factory consistency")
         
         session_factory_results = []
         
@@ -618,7 +618,7 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         direct_factory_error = None
         
         try:
-            self.logger.info("🔧 Testing direct netra_backend session factory")
+            self.logger.info("[U+1F527] Testing direct netra_backend session factory")
             
             sessionmaker = get_netra_sessionmaker()
             
@@ -638,18 +638,18 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                 await session.close()
             
             direct_factory_success = True
-            self.logger.info("✅ Direct session factory - SUCCESS")
+            self.logger.info(" PASS:  Direct session factory - SUCCESS")
             
         except Exception as e:
             direct_factory_error = str(e)
-            self.logger.error(f"❌ Direct session factory failed: {e}")
+            self.logger.error(f" FAIL:  Direct session factory failed: {e}")
         
         # Test 2: Dependency injection pattern (get_request_scoped_db_session)
         dependency_pattern_success = False
         dependency_pattern_error = None
         
         try:
-            self.logger.info("🔗 Testing dependency injection session pattern")
+            self.logger.info("[U+1F517] Testing dependency injection session pattern")
             
             # Test multiple request-scoped sessions
             for request_num in range(3):
@@ -664,18 +664,18 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                     break  # Exit after first session
             
             dependency_pattern_success = True
-            self.logger.info("✅ Dependency injection pattern - SUCCESS")
+            self.logger.info(" PASS:  Dependency injection pattern - SUCCESS")
             
         except Exception as e:
             dependency_pattern_error = str(e)
-            self.logger.error(f"❌ Dependency injection pattern failed: {e}")
+            self.logger.error(f" FAIL:  Dependency injection pattern failed: {e}")
         
         # Test 3: Async context manager pattern
         context_manager_success = False
         context_manager_error = None
         
         try:
-            self.logger.info("📋 Testing async context manager session pattern")
+            self.logger.info("[U+1F4CB] Testing async context manager session pattern")
             
             # Import database module context manager
             from netra_backend.app.database import get_db
@@ -692,18 +692,18 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
                     assert context_result == expected
             
             context_manager_success = True
-            self.logger.info("✅ Async context manager pattern - SUCCESS")
+            self.logger.info(" PASS:  Async context manager pattern - SUCCESS")
             
         except Exception as e:
             context_manager_error = str(e)
-            self.logger.error(f"❌ Async context manager pattern failed: {e}")
+            self.logger.error(f" FAIL:  Async context manager pattern failed: {e}")
         
         # Test 4: Cross-pattern compatibility (mixed usage)
         cross_pattern_success = False
         cross_pattern_error = None
         
         try:
-            self.logger.info("🔄 Testing cross-pattern session compatibility")
+            self.logger.info(" CYCLE:  Testing cross-pattern session compatibility")
             
             # Concurrent access using different patterns
             async def direct_pattern_task():
@@ -737,11 +737,11 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
             assert mixed_results == expected_results, f"Cross-pattern results mismatch: {mixed_results}"
             
             cross_pattern_success = True
-            self.logger.info("✅ Cross-pattern compatibility - SUCCESS")
+            self.logger.info(" PASS:  Cross-pattern compatibility - SUCCESS")
             
         except Exception as e:
             cross_pattern_error = str(e)
-            self.logger.error(f"❌ Cross-pattern compatibility failed: {e}")
+            self.logger.error(f" FAIL:  Cross-pattern compatibility failed: {e}")
         
         # Collect factory consistency results
         session_factory_results = [
@@ -752,11 +752,11 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         ]
         
         # Validate session factory consistency
-        self.logger.info("📊 SESSION FACTORY CONSISTENCY RESULTS:")
+        self.logger.info(" CHART:  SESSION FACTORY CONSISTENCY RESULTS:")
         
         successful_patterns = 0
         for result in session_factory_results:
-            success_icon = "✅" if result["success"] else "❌"
+            success_icon = " PASS: " if result["success"] else " FAIL: "
             self.logger.info(f"  {success_icon} {result['pattern']}: {'SUCCESS' if result['success'] else 'FAILED'}")
             
             if result["error"]:
@@ -772,4 +772,4 @@ class TestSQLAlchemyAsyncPoolIntegration(BaseIntegrationTest):
         assert direct_factory_success, "Direct session factory must work for core functionality"
         assert dependency_pattern_success, "Dependency injection pattern must work for FastAPI integration"
         
-        self.logger.info(f"✅ Session factory consistency validated: {successful_patterns}/4 patterns successful")
+        self.logger.info(f" PASS:  Session factory consistency validated: {successful_patterns}/4 patterns successful")

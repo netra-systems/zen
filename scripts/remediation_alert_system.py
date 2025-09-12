@@ -554,13 +554,13 @@ class RemediationAlertSystem:
     def _handle_log_alert(self, alert: RemediationAlert):
         """Handle log-based alerts"""
         severity_icons = {
-            AlertSeverity.INFO: "ℹ️",
-            AlertSeverity.WARNING: "⚠️", 
-            AlertSeverity.CRITICAL: "🔴",
-            AlertSeverity.EMERGENCY: "🚨"
+            AlertSeverity.INFO: "[U+2139][U+FE0F]",
+            AlertSeverity.WARNING: " WARNING: [U+FE0F]", 
+            AlertSeverity.CRITICAL: "[U+1F534]",
+            AlertSeverity.EMERGENCY: " ALERT: "
         }
         
-        icon = severity_icons.get(alert.severity, "📢")
+        icon = severity_icons.get(alert.severity, "[U+1F4E2]")
         log_message = f"{icon} REMEDIATION ALERT [{alert.severity.upper()}] {alert.title}"
         
         if alert.severity == AlertSeverity.EMERGENCY:

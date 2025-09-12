@@ -5,7 +5,7 @@ ALL JWT operations MUST go through the external auth service.
 This module provides a unified interface but delegates to auth service.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Security consistency via centralized auth service
 - Value Impact: Eliminates JWT-related security bugs, ensures single auth source
 - Strategic Impact: Improved security posture and compliance

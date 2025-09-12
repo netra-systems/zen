@@ -389,14 +389,14 @@ class StagingDatabaseConnectivityTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all database connectivity tests."""
-        print(f"🗃️  Running Database Connectivity Tests")
+        print(f"[U+1F5C3][U+FE0F]  Running Database Connectivity Tests")
         print(f"Environment: {self.environment}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print()
         
         # Get test token first
-        print("🔑 Getting test token...")
+        print("[U+1F511] Getting test token...")
         self.access_token = await self.get_test_token()
         print(f"     Token obtained: {bool(self.access_token)}")
         print()
@@ -452,13 +452,13 @@ class StagingDatabaseConnectivityTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
-        print(f"🗃️  Database health: {'✅ Healthy' if databases_healthy else '❌ Issues detected'}")
-        print(f"📖 Read operations: {'✅ Working' if read_ops_working else '❌ Failed'}")
-        print(f"✏️  Write operations: {'✅ Working' if write_ops_working else '❌ Failed'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
+        print(f"[U+1F5C3][U+FE0F]  Database health: {' PASS:  Healthy' if databases_healthy else ' FAIL:  Issues detected'}")
+        print(f"[U+1F4D6] Read operations: {' PASS:  Working' if read_ops_working else ' FAIL:  Failed'}")
+        print(f"[U+270F][U+FE0F]  Write operations: {' PASS:  Working' if write_ops_working else ' FAIL:  Failed'}")
         
         if results["summary"]["critical_database_failure"]:
-            print("🚨 CRITICAL: Database health issues detected!")
+            print(" ALERT:  CRITICAL: Database health issues detected!")
             
         return results
 

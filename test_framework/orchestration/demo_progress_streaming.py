@@ -22,23 +22,23 @@ from test_framework.orchestration.progress_streaming_agent import (
 
 async def demo_progress_streaming():
     """Quick demo showing progress streaming in action"""
-    print("🚀 ProgressStreamingAgent Demo")
+    print("[U+1F680] ProgressStreamingAgent Demo")
     print("=" * 50)
     
     # Create console streaming agent
     agent = create_console_streaming_agent()
-    print(f"✅ Agent initialized: {agent.agent_id}")
+    print(f" PASS:  Agent initialized: {agent.agent_id}")
     
     # Start streaming for test layers
     layers = ["fast_feedback", "integration"]
     await agent.start_streaming(layers, "demo_run")
-    print("✅ Progress streaming started\n")
+    print(" PASS:  Progress streaming started\n")
     
     try:
         # Simulate test execution progress
         
         # Layer 1: Fast Feedback
-        print("📊 Executing Layer 1: Fast Feedback")
+        print(" CHART:  Executing Layer 1: Fast Feedback")
         await agent.update_layer_progress("fast_feedback", status=ProgressStatus.RUNNING)
         
         # Category: smoke tests
@@ -61,10 +61,10 @@ async def demo_progress_streaming():
         await agent.update_layer_progress("fast_feedback", "unit", status=ProgressStatus.COMPLETED)
         
         await agent.update_layer_progress("fast_feedback", status=ProgressStatus.COMPLETED)
-        print("✅ Layer 1 completed\n")
+        print(" PASS:  Layer 1 completed\n")
         
         # Layer 2: Integration
-        print("📊 Executing Layer 2: Integration")
+        print(" CHART:  Executing Layer 2: Integration")
         await agent.update_layer_progress("integration", status=ProgressStatus.RUNNING)
         
         await agent.update_layer_progress("integration", "api", status=ProgressStatus.RUNNING)
@@ -76,23 +76,23 @@ async def demo_progress_streaming():
         await agent.update_layer_progress("integration", "api", status=ProgressStatus.COMPLETED)
         
         await agent.update_layer_progress("integration", status=ProgressStatus.COMPLETED)
-        print("✅ Layer 2 completed\n")
+        print(" PASS:  Layer 2 completed\n")
         
         # Background task simulation
-        print("🔄 Background tasks started")
+        print(" CYCLE:  Background tasks started")
         await agent.update_background_task("e2e_test", "started", progress=0)
         for i in range(0, 101, 20):
             await asyncio.sleep(0.2)
             await agent.update_background_task("e2e_test", "running", progress=i)
         await agent.update_background_task("e2e_test", "completed", progress=100)
-        print("✅ Background tasks completed\n")
+        print(" PASS:  Background tasks completed\n")
         
         # Wait a moment to see final status
         await asyncio.sleep(0.5)
         
         # Get final statistics
         stats = agent.get_statistics()
-        print("📈 Final Statistics:")
+        print("[U+1F4C8] Final Statistics:")
         print(f"   Total Updates: {stats['update_count']}")
         print(f"   Execution Duration: {stats['duration']:.2f}s")
         print(f"   Layers Processed: {stats['layers_count']}")
@@ -101,19 +101,19 @@ async def demo_progress_streaming():
         success = True
         
     except Exception as e:
-        print(f"❌ Demo failed: {e}")
+        print(f" FAIL:  Demo failed: {e}")
         success = False
     
     finally:
         # Stop streaming
         await agent.stop_streaming(success=success)
-        print(f"\n🎯 Demo completed {'successfully' if success else 'with errors'}")
+        print(f"\n TARGET:  Demo completed {'successfully' if success else 'with errors'}")
 
 
 async def demo_json_output():
     """Demo JSON output mode"""
     print("\n" + "=" * 50)
-    print("🔧 JSON Output Mode Demo")
+    print("[U+1F527] JSON Output Mode Demo")
     print("=" * 50)
     
     from test_framework.orchestration.progress_streaming_agent import (
@@ -136,7 +136,7 @@ async def demo_json_output():
     await asyncio.sleep(0.2)  # Allow processing
     await agent.stop_streaming(success=True)
     
-    print("✅ JSON output demo completed")
+    print(" PASS:  JSON output demo completed")
 
 
 if __name__ == "__main__":
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(run_demos())
     except KeyboardInterrupt:
-        print("\n👋 Demo interrupted by user")
+        print("\n[U+1F44B] Demo interrupted by user")
     except Exception as e:
-        print(f"\n💥 Demo failed: {e}")
+        print(f"\n[U+1F4A5] Demo failed: {e}")
         sys.exit(1)

@@ -115,9 +115,9 @@ class ACTWrapper:
         cmd = ["act", "-W", str(workflow_file), "-l"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode == 0:
-            console.print(f"[green]✓[/green] {workflow_file.name}")
+            console.print(f"[green][U+2713][/green] {workflow_file.name}")
             return True
-        console.print(f"[red]✗[/red] {workflow_file.name}: {result.stderr}")
+        console.print(f"[red][U+2717][/red] {workflow_file.name}: {result.stderr}")
         return False
     
     def display_workflows(self) -> None:

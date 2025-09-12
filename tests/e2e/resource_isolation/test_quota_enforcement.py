@@ -83,7 +83,7 @@ async def test_cpu_memory_quota_enforcement(resource_isolation_suite, tenant_age
     assert quota_results["violations_detected"] == 0, \
         f"Normal workload should not violate quotas: {quota_results['violations_detected']}"
     
-    logger.info("✓ Normal operation within quotas validated")
+    logger.info("[U+2713] Normal operation within quotas validated")
     
     # Phase 3: Test quota enforcement with heavy workload
     logger.info("Phase 3: Testing quota enforcement with heavy workload")

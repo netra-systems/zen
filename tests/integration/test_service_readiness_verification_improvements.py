@@ -636,7 +636,7 @@ class TestServiceReadinessVerificationImprovements:
             result = await verifier.perform_readiness_check(service_name)
             service_results[service_name] = result
 
-            status = "✅ READY" if result.success else "❌ NOT READY"
+            status = " PASS:  READY" if result.success else " FAIL:  NOT READY"
             print(f"  Status: {status}")
             print(f"  State: {result.state.value}")
             print(f"  Response time: {result.response_time:.2f}s")
@@ -690,18 +690,18 @@ class TestServiceReadinessVerificationImprovements:
             verifier = ImprovedReadinessVerifier()
             readiness_result = await verifier.perform_readiness_check(service_name)
 
-            print(f"  Health: {'✅ HEALTHY' if health_result['healthy'] else '❌ NOT HEALTHY'}")
-            print(f"  Readiness: {'✅ READY' if readiness_result.success else '❌ NOT READY'}")
+            print(f"  Health: {' PASS:  HEALTHY' if health_result['healthy'] else ' FAIL:  NOT HEALTHY'}")
+            print(f"  Readiness: {' PASS:  READY' if readiness_result.success else ' FAIL:  NOT READY'}")
 
             # Compare results
             if health_result['healthy'] and not readiness_result.success:
-                print(f"    🔍 Service is healthy but not ready - may be still initializing")
+                print(f"     SEARCH:  Service is healthy but not ready - may be still initializing")
             elif not health_result['healthy'] and readiness_result.success:
-                print(f"    ⚠️  Service reports ready but not healthy - potential issue")
+                print(f"     WARNING: [U+FE0F]  Service reports ready but not healthy - potential issue")
             elif health_result['healthy'] and readiness_result.success:
-                print(f"    ✅ Service is both healthy and ready")
+                print(f"     PASS:  Service is both healthy and ready")
             else:
-                print(f"    ❌ Service is neither healthy nor ready")
+                print(f"     FAIL:  Service is neither healthy nor ready")
 
             # Show detailed comparison
             if health_result.get('details') or readiness_result.details:
@@ -773,14 +773,14 @@ class TestServiceReadinessVerificationImprovements:
             result = await resilient_check()
             response_time = time.time() - start_time
 
-            status = "✅ READY" if result['ready'] else "❌ NOT READY"
+            status = " PASS:  READY" if result['ready'] else " FAIL:  NOT READY"
             print(f"  Status: {status}")
             print(f"  Response time: {response_time:.2f}s")
 
             # Show strategy results
             print(f"  Strategy results:")
             for strategy_name, strategy_result in result['strategy_results'].items():
-                strategy_status = "✅ PASS" if strategy_result.get('success') else "❌ FAIL"
+                strategy_status = " PASS:  PASS" if strategy_result.get('success') else " FAIL:  FAIL"
                 print(f"    {strategy_name}: {strategy_status}")
                 if strategy_result.get('endpoint'):
                     print(f"      Endpoint: {strategy_result['endpoint']}")
@@ -825,11 +825,11 @@ class TestServiceReadinessVerificationImprovements:
                 issues.append("No required checks defined")
 
             if issues:
-                print(f"  ⚠️  Configuration issues:")
+                print(f"   WARNING: [U+FE0F]  Configuration issues:")
                 for issue in issues:
                     print(f"    - {issue}")
             else:
-                print(f"  ✅ Configuration appears valid")
+                print(f"   PASS:  Configuration appears valid")
 
         # Test passes to document configuration validation
         assert len(verifier.readiness_configs) > 0, "Should have readiness configurations"
@@ -848,7 +848,7 @@ class TestServiceReadinessVerificationImprovements:
 
             for service_name in ['auth_service', 'backend']:
                 result = await verifier.perform_readiness_check(service_name)
-                status = "✅ READY" if result.success else "❌ NOT READY"
+                status = " PASS:  READY" if result.success else " FAIL:  NOT READY"
                 print(f"  {service_name}: {status}")
 
             # Small delay between checks
@@ -873,15 +873,15 @@ class TestServiceReadinessVerificationImprovements:
 
             # Provide recommendations based on trends
             if trends['trend'] == 'stable_ready':
-                print(f"  📈 Recommendation: Service readiness is stable")
+                print(f"  [U+1F4C8] Recommendation: Service readiness is stable")
             elif trends['trend'] == 'improving':
-                print(f"  📈 Recommendation: Service readiness is improving")
+                print(f"  [U+1F4C8] Recommendation: Service readiness is improving")
             elif trends['trend'] == 'degrading':
-                print(f"  📉 Recommendation: Service readiness is degrading - investigate")
+                print(f"  [U+1F4C9] Recommendation: Service readiness is degrading - investigate")
             elif trends['trend'] == 'unstable':
-                print(f"  ⚠️  Recommendation: Service readiness is unstable - check configuration")
+                print(f"   WARNING: [U+FE0F]  Recommendation: Service readiness is unstable - check configuration")
             else:
-                print(f"  📊 Recommendation: Need more data for trend analysis")
+                print(f"   CHART:  Recommendation: Need more data for trend analysis")
 
         # Test passes to document trending functionality
         assert True, "Readiness trending analysis completed"

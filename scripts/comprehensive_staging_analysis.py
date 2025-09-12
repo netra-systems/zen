@@ -260,7 +260,7 @@ class StagingLogAnalyzer:
         medium_issues = len([i for i in all_issues if i['severity'] == 'MEDIUM'])
         low_issues = len([i for i in all_issues if i['severity'] == 'LOW'])
         
-        report.append("## 📊 Executive Summary")
+        report.append("##  CHART:  Executive Summary")
         report.append(f"- **Total Issues Found:** {total_issues}")
         report.append(f"- **Critical Issues:** {critical_issues}")
         report.append(f"- **High Priority Issues:** {high_issues}")
@@ -269,16 +269,16 @@ class StagingLogAnalyzer:
         report.append("")
         
         # Service Health Status
-        report.append("## 🏥 Service Health Status")
+        report.append("## [U+1F3E5] Service Health Status")
         for service in self.services:
             status = health_status.get(service, "unknown")
-            emoji = "✅" if "healthy" in status else "❌"
+            emoji = " PASS: " if "healthy" in status else " FAIL: "
             report.append(f"- **{service}:** {emoji} {status}")
         report.append("")
         
         # Issues by Severity  
         if all_issues:
-            report.append("## 🚨 Issues Found (Five Whys Analysis)")
+            report.append("##  ALERT:  Issues Found (Five Whys Analysis)")
             
             # Group by severity
             issues_by_severity = {}
@@ -294,7 +294,7 @@ class StagingLogAnalyzer:
                     continue
                     
                 issues = issues_by_severity[severity]
-                emoji = {"CRITICAL": "🔥", "HIGH": "⚠️", "MEDIUM": "⚡", "LOW": "ℹ️"}[severity]
+                emoji = {"CRITICAL": " FIRE: ", "HIGH": " WARNING: [U+FE0F]", "MEDIUM": " LIGHTNING: ", "LOW": "[U+2139][U+FE0F]"}[severity]
                 
                 report.append(f"### {emoji} {severity} Priority Issues ({len(issues)} found)")
                 
@@ -312,21 +312,21 @@ class StagingLogAnalyzer:
                         report.append(f"- {why}")
                     report.append("")
         else:
-            report.append("## ✅ No Issues Found")
+            report.append("##  PASS:  No Issues Found")
             report.append("All services are operating within normal parameters.")
             report.append("")
         
         # Recommendations
-        report.append("## 💡 Recommendations")
+        report.append("##  IDEA:  Recommendations")
         
         if critical_issues > 0:
-            report.append("### 🔥 Critical Actions Required:")
+            report.append("###  FIRE:  Critical Actions Required:")
             report.append("- **Immediate:** Fix SECRET_KEY configuration in GCP Secret Manager")
             report.append("- **Immediate:** Validate all security configurations before deployment")
             report.append("- **Short-term:** Add configuration validation to CI/CD pipeline")
         
         if medium_issues > 0:
-            report.append("### ⚡ Medium Priority Actions:")
+            report.append("###  LIGHTNING:  Medium Priority Actions:")
             if any("CLICKHOUSE" in i['type'] for i in all_issues):
                 report.append("- **Document:** ClickHouse graceful degradation as expected staging behavior")
                 report.append("- **Monitor:** Ensure no non-graceful ClickHouse failures occur")
@@ -334,12 +334,12 @@ class StagingLogAnalyzer:
             report.append("- **Create:** Health check monitoring with SLO/SLA definitions")
         
         if low_issues > 0:
-            report.append("### ℹ️ Low Priority Improvements:")
+            report.append("### [U+2139][U+FE0F] Low Priority Improvements:")
             report.append("- **Enhance:** Structured logging with correlation IDs")
             report.append("- **Document:** Expected graceful degradation patterns")
             report.append("- **Improve:** Error message clarity and actionability")
         
-        report.append("### 📋 General Recommendations:")
+        report.append("### [U+1F4CB] General Recommendations:")
         report.append("- **Create:** Runbooks for identified issue patterns")
         report.append("- **Implement:** Proactive monitoring and alerting")
         report.append("- **Establish:** Regular staging environment health checks")

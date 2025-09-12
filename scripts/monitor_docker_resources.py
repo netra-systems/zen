@@ -214,7 +214,7 @@ class DockerResourceMonitor:
         
         # Generate recommendations
         if analysis['critical']:
-            analysis['recommendations'].append("🚨 CRITICAL: Reduce memory limits or stop non-essential services")
+            analysis['recommendations'].append(" ALERT:  CRITICAL: Reduce memory limits or stop non-essential services")
             analysis['recommendations'].append("Consider using Alpine-based images for lower memory usage")
         
         if analysis['total_memory_mb'] > 2000:
@@ -250,27 +250,27 @@ class DockerResourceMonitor:
     def _get_status(self, memory_mb: float, cpu_percent: float, expected: Dict) -> str:
         """Determine container health status"""
         if not expected:
-            return '❓'
+            return '[U+2753]'
         
         mem_limit = expected.get('memory_mb', 0)
         if mem_limit > 0:
             if memory_mb > mem_limit * 1.5:
-                return '🔴'  # Critical
+                return '[U+1F534]'  # Critical
             elif memory_mb > mem_limit:
-                return '🟡'  # Warning
+                return '[U+1F7E1]'  # Warning
         
-        return '🟢'  # OK
+        return '[U+1F7E2]'  # OK
     
     def print_report(self, analysis: Dict):
         """Print formatted resource analysis report"""
         print("\n" + "="*60)
-        print("📊 DOCKER RESOURCE MONITORING REPORT")
+        print(" CHART:  DOCKER RESOURCE MONITORING REPORT")
         print("="*60)
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"Runtime: {self.runtime}")
         
         # Container details
-        print("\n📦 Container Resource Usage:")
+        print("\n[U+1F4E6] Container Resource Usage:")
         print("-" * 60)
         print(f"{'Container':<20} {'Memory (MB)':<15} {'CPU %':<10} {'Status':<10}")
         print("-" * 60)
@@ -289,28 +289,28 @@ class DockerResourceMonitor:
         # WSL2 Memory (if Windows)
         if 'wsl_memory' in analysis:
             wsl = analysis['wsl_memory']
-            print(f"\n🖥️ WSL2 Memory: {wsl['used_mb']}/{wsl['total_mb']}MB ({wsl['percent']:.1f}%)")
+            print(f"\n[U+1F5A5][U+FE0F] WSL2 Memory: {wsl['used_mb']}/{wsl['total_mb']}MB ({wsl['percent']:.1f}%)")
         
         # Warnings and Critical issues
         if analysis['critical']:
-            print("\n🚨 CRITICAL ISSUES:")
+            print("\n ALERT:  CRITICAL ISSUES:")
             for issue in analysis['critical']:
                 print(f"  - {issue}")
         
         if analysis['warnings']:
-            print("\n⚠️  WARNINGS:")
+            print("\n WARNING: [U+FE0F]  WARNINGS:")
             for warning in analysis['warnings']:
                 print(f"  - {warning}")
         
         # Recommendations
         if analysis['recommendations']:
-            print("\n💡 RECOMMENDATIONS:")
+            print("\n IDEA:  RECOMMENDATIONS:")
             for rec in analysis['recommendations']:
                 print(f"  - {rec}")
         
         # Success message if all good
         if not analysis['critical'] and not analysis['warnings']:
-            print("\n✅ All containers within resource limits!")
+            print("\n PASS:  All containers within resource limits!")
         
         print("\n" + "="*60)
     
@@ -328,7 +328,7 @@ class DockerResourceMonitor:
                     
                     # Alert if critical
                     if analysis['critical']:
-                        print("\n🔔 ALERT: Critical resource issues detected!")
+                        print("\n[U+1F514] ALERT: Critical resource issues detected!")
                 else:
                     print(f"\nNo containers running. Checking again in {interval}s...")
                 
@@ -339,7 +339,7 @@ class DockerResourceMonitor:
     
     def deep_analysis(self):
         """Perform deep analysis with system checks"""
-        print("\n🔍 DEEP RESOURCE ANALYSIS")
+        print("\n SEARCH:  DEEP RESOURCE ANALYSIS")
         print("="*60)
         
         # 1. Check Docker/Podman system info

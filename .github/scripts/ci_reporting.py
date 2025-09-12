@@ -298,31 +298,31 @@ class CIReporter:
         if test_metrics.failed_tests > 0:
             failure_rate = test_metrics.failed_tests / test_metrics.total_tests * 100
             if failure_rate > 10:
-                recommendations.append(f"🚨 High test failure rate ({failure_rate:.1f}%) - investigate test reliability")
+                recommendations.append(f" ALERT:  High test failure rate ({failure_rate:.1f}%) - investigate test reliability")
             else:
-                recommendations.append(f"⚠️ {test_metrics.failed_tests} test(s) failed - review and fix")
+                recommendations.append(f" WARNING: [U+FE0F] {test_metrics.failed_tests} test(s) failed - review and fix")
         
         # Coverage recommendations
         if test_metrics.coverage_percentage < 80:
-            recommendations.append(f"📊 Test coverage is {test_metrics.coverage_percentage:.1f}% - consider adding more tests")
+            recommendations.append(f" CHART:  Test coverage is {test_metrics.coverage_percentage:.1f}% - consider adding more tests")
         elif test_metrics.coverage_percentage > 95:
-            recommendations.append("✅ Excellent test coverage!")
+            recommendations.append(" PASS:  Excellent test coverage!")
         
         # Performance recommendations
         if performance_metrics.test_duration > 15 * 60:  # 15 minutes
-            recommendations.append("⏱️ Test execution is slow - consider test optimization or parallelization")
+            recommendations.append("[U+23F1][U+FE0F] Test execution is slow - consider test optimization or parallelization")
         
         if performance_metrics.throughput < 1.0:  # Less than 1 test per minute
-            recommendations.append("🐌 Low test throughput - review test performance")
+            recommendations.append("[U+1F40C] Low test throughput - review test performance")
         
         # Success rate recommendations
         if performance_metrics.success_rate < 0.9:
-            recommendations.append("📉 Pipeline success rate is low - investigate flaky tests or infrastructure issues")
+            recommendations.append("[U+1F4C9] Pipeline success rate is low - investigate flaky tests or infrastructure issues")
         
         # Stage-specific recommendations
         failed_stages = [name for name, data in stage_results.items() if data.get('status') == 'failure']
         if failed_stages:
-            recommendations.append(f"🔍 Failed stages: {', '.join(failed_stages)} - check logs for details")
+            recommendations.append(f" SEARCH:  Failed stages: {', '.join(failed_stages)} - check logs for details")
         
         return recommendations
     
@@ -333,47 +333,47 @@ class CIReporter:
         
         # Status emoji
         status_emoji = {
-            'success': '✅',
-            'failure': '❌',
-            'cancelled': '🛑',
-            'partial': '⚠️'
-        }.get(report.status, '❓')
+            'success': ' PASS: ',
+            'failure': ' FAIL: ',
+            'cancelled': '[U+1F6D1]',
+            'partial': ' WARNING: [U+FE0F]'
+        }.get(report.status, '[U+2753]')
         
         # Coverage emoji and trend
-        coverage_emoji = '🟢' if report.test_metrics.coverage_percentage >= 80 else '🟡' if report.test_metrics.coverage_percentage >= 60 else '🔴'
+        coverage_emoji = '[U+1F7E2]' if report.test_metrics.coverage_percentage >= 80 else '[U+1F7E1]' if report.test_metrics.coverage_percentage >= 60 else '[U+1F534]'
         coverage_trend = ""
         if report.test_metrics.coverage_change is not None:
             if report.test_metrics.coverage_change > 0:
-                coverage_trend = f" ↗️ (+{report.test_metrics.coverage_change:.1f}%)"
+                coverage_trend = f" [U+2197][U+FE0F] (+{report.test_metrics.coverage_change:.1f}%)"
             elif report.test_metrics.coverage_change < 0:
-                coverage_trend = f" ↘️ ({report.test_metrics.coverage_change:.1f}%)"
+                coverage_trend = f" [U+2198][U+FE0F] ({report.test_metrics.coverage_change:.1f}%)"
         
         # Performance indicators
-        duration_emoji = '🚀' if report.performance_metrics.test_duration < 300 else '⏱️' if report.performance_metrics.test_duration < 900 else '🐌'
+        duration_emoji = '[U+1F680]' if report.performance_metrics.test_duration < 300 else '[U+23F1][U+FE0F]' if report.performance_metrics.test_duration < 900 else '[U+1F40C]'
         
         comment = f"""## {status_emoji} CI/CD Pipeline Results
 
-### 📊 Test Summary
+###  CHART:  Test Summary
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Tests Run** | {report.test_metrics.total_tests} | {report.test_metrics.passed_tests} ✅ {report.test_metrics.failed_tests} ❌ {report.test_metrics.skipped_tests} ⏭️ |
+| **Tests Run** | {report.test_metrics.total_tests} | {report.test_metrics.passed_tests}  PASS:  {report.test_metrics.failed_tests}  FAIL:  {report.test_metrics.skipped_tests} [U+23ED][U+FE0F] |
 | **Coverage** | {coverage_emoji} {report.test_metrics.coverage_percentage:.1f}%{coverage_trend} | {self._get_coverage_status(report.test_metrics.coverage_percentage)} |
 | **Duration** | {duration_emoji} {self._format_duration(report.performance_metrics.test_duration)} | {self._get_duration_status(report.performance_metrics.test_duration)} |
 
-### 🎯 Pipeline Stages
+###  TARGET:  Pipeline Stages
 """
         
         # Add stage results
         for stage_name, stage_data in report.stages.items():
             status = stage_data.get('status', 'unknown')
             duration = stage_data.get('duration', 0)
-            emoji = {'success': '✅', 'failure': '❌', 'skipped': '⏭️', 'cancelled': '🛑'}.get(status, '❓')
+            emoji = {'success': ' PASS: ', 'failure': ' FAIL: ', 'skipped': '[U+23ED][U+FE0F]', 'cancelled': '[U+1F6D1]'}.get(status, '[U+2753]')
             
             comment += f"- **{stage_name}**: {emoji} {status} ({self._format_duration(duration)})\n"
         
         # Add performance metrics
         comment += f"""
-### ⚡ Performance Metrics
+###  LIGHTNING:  Performance Metrics
 - **Total Duration**: {self._format_duration(report.performance_metrics.total_duration)}
 - **Success Rate**: {report.performance_metrics.success_rate*100:.1f}%
 - **Test Throughput**: {report.performance_metrics.throughput:.1f} tests/min
@@ -381,14 +381,14 @@ class CIReporter:
         
         # Add recommendations if there are failures or issues
         if report.recommendations:
-            comment += "\n### 💡 Recommendations\n"
+            comment += "\n###  IDEA:  Recommendations\n"
             for rec in report.recommendations:
                 comment += f"- {rec}\n"
         
         # Add artifacts section
         if report.artifacts:
             comment += f"""
-### 📁 Artifacts
+### [U+1F4C1] Artifacts
 - [Test Results](${{{{ github.server_url }}}}/${{{{ github.repository }}}}/actions/runs/{report.workflow_run_id})
 - [Coverage Report](${{{{ github.server_url }}}}/${{{{ github.repository }}}}/actions/runs/{report.workflow_run_id})
 """
@@ -407,7 +407,7 @@ class CIReporter:
 
 </details>
 
-*Generated by CI/CD Reporting System v2.0* 🤖
+*Generated by CI/CD Reporting System v2.0* [U+1F916]
 """
         
         return comment

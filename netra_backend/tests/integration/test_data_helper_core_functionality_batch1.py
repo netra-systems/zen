@@ -16,11 +16,11 @@ Test Coverage:
 - Test Suite 1.4: WebSocket Event Integration (5 tests)
 
 CRITICAL COMPLIANCE:
-- ✅ Real services only (PostgreSQL, Redis, real LLM when available)
-- ✅ E2E authentication for all tests
-- ✅ All 5 WebSocket events validated: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
-- ✅ SSOT patterns from test_framework/
-- ✅ Business scenario focused testing
+-  PASS:  Real services only (PostgreSQL, Redis, real LLM when available)
+-  PASS:  E2E authentication for all tests
+-  PASS:  All 5 WebSocket events validated: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+-  PASS:  SSOT patterns from test_framework/
+-  PASS:  Business scenario focused testing
 """
 
 import asyncio
@@ -125,7 +125,7 @@ async def data_helper_agent(real_services_fixture, mock_websocket_manager, user_
         try:
             llm_manager = LLMManager()
             await llm_manager.initialize()
-            logger.info("✅ Using REAL LLM manager for DataHelperAgent tests")
+            logger.info(" PASS:  Using REAL LLM manager for DataHelperAgent tests")
         except Exception as e:
             logger.warning(f"Failed to initialize real LLM: {e}, using mock")
             llm_manager = await _create_mock_llm_manager()
@@ -257,7 +257,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
         # Validate authentication context preservation
         assert result_context.user_id == authenticated_user.user_id
         
-        logger.info("✅ Basic data request generation test passed with all WebSocket events")
+        logger.info(" PASS:  Basic data request generation test passed with all WebSocket events")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -331,7 +331,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
         # Should contain performance-related categories
         assert any(word in categories_text for word in ["performance", "latency", "response", "speed"])
         
-        logger.info("✅ Triage context integration test passed")
+        logger.info(" PASS:  Triage context integration test passed")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -408,7 +408,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
         structured_items = data_result["data_request"]["structured_items"]
         assert len(structured_items) >= 6, "Should generate detailed data requirements"
         
-        logger.info("✅ Category extraction accuracy test passed")
+        logger.info(" PASS:  Category extraction accuracy test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -480,7 +480,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
         enterprise_terms = ["infrastructure", "compliance", "budget", "team", "scale"]
         assert any(term in instructions_lower for term in enterprise_terms), "Should address enterprise concerns"
         
-        logger.info("✅ User instructions generation test passed")
+        logger.info(" PASS:  User instructions generation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -568,7 +568,7 @@ class TestDataHelperCoreBasicGeneration(SSotBaseTestCase):
                 assert key in item, f"Missing structured item key: {key}"
             assert isinstance(item["required"], bool), "required field must be boolean"
         
-        logger.info("✅ Response structure validation test passed")
+        logger.info(" PASS:  Response structure validation test passed")
 
 
 class TestDataHelperUserExecutionContext(SSotBaseTestCase):
@@ -667,7 +667,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         assert str(user1.user_id) not in result2_text
         assert str(user2.user_id) not in result1_text
         
-        logger.info("✅ User context isolation test passed")
+        logger.info(" PASS:  User context isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -740,7 +740,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         assert "data_helper_result" in result_context.metadata
         assert result_context.metadata["data_helper_result"]["success"] is True
         
-        logger.info("✅ Metadata storage and retrieval test passed")
+        logger.info(" PASS:  Metadata storage and retrieval test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -831,7 +831,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         assert "data_helper_result" in result_context.metadata
         assert result_context.metadata["data_helper_result"]["success"] is True
         
-        logger.info("✅ Context metadata preservation test passed")
+        logger.info(" PASS:  Context metadata preservation test passed")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -925,7 +925,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         user_ids = [result[0].user_id for result in results]
         assert len(set(user_ids)) == num_concurrent_users, "All user IDs should be unique"
         
-        logger.info("✅ Concurrent user contexts test passed")
+        logger.info(" PASS:  Concurrent user contexts test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -1012,7 +1012,7 @@ class TestDataHelperUserExecutionContext(SSotBaseTestCase):
         expected_checksum = factory_metadata["validation_checksum"]
         assert result_context.metadata["validation_checksum"] == expected_checksum
         
-        logger.info("✅ Context factory pattern test passed")
+        logger.info(" PASS:  Context factory pattern test passed")
 
 
 class TestDataHelperLLMIntegration(SSotBaseTestCase):
@@ -1121,7 +1121,7 @@ class TestDataHelperLLMIntegration(SSotBaseTestCase):
         items_text = str(structured_items).lower()
         assert any(compliance in items_text for compliance in ["pci", "sox", "gdpr", "compliance"])
         
-        logger.info("✅ LLM prompt optimization test passed")
+        logger.info(" PASS:  LLM prompt optimization test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1161,12 +1161,12 @@ Data Collection Instructions:
 Please provide your monthly AI usage reports and performance metrics.""",
             
             # Bullet point format
-            """• Cost Data Requirements:
+            """[U+2022] Cost Data Requirements:
   - API usage reports from providers
   - Monthly billing statements
   - Peak usage times and patterns
   
-• Performance Requirements:
+[U+2022] Performance Requirements:
   - Response time logs
   - Error rate tracking
   - System availability metrics""",
@@ -1250,9 +1250,9 @@ Please gather this information for comprehensive analysis."""
             assert len(data_request["data_categories"]) >= 1, f"No categories extracted from format {i}"
             assert len(data_request["structured_items"]) >= 2, f"Insufficient items extracted from format {i}"
             
-            logger.info(f"✅ Successfully parsed LLM response format {i}")
+            logger.info(f" PASS:  Successfully parsed LLM response format {i}")
         
-        logger.info("✅ LLM response parsing robustness test passed")
+        logger.info(" PASS:  LLM response parsing robustness test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1380,7 +1380,7 @@ performance data, and usage analytics for comprehensive optimization."""
             
             assert similarity >= 0.6, f"Low category similarity ({similarity:.2f}) in execution {i}"
         
-        logger.info("✅ Temperature consistency test passed")
+        logger.info(" PASS:  Temperature consistency test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1558,7 +1558,7 @@ compliance and performance requirements."""
         found_terms = [term for term in enterprise_terms if term in response_text]
         assert len(found_terms) >= 2, f"Should reflect enterprise context, found: {found_terms}"
         
-        logger.info("✅ Token limit handling test passed")
+        logger.info(" PASS:  Token limit handling test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1653,7 +1653,7 @@ Please provide system monitoring data to validate resilience improvements."""
         # Verify retry mechanism was triggered (2 calls made)
         assert call_count == 2, f"Should have made exactly 2 LLM calls (1 failure + 1 success), made {call_count}"
         
-        logger.info("✅ LLM retry mechanism test passed")
+        logger.info(" PASS:  LLM retry mechanism test passed")
 
 
 class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
@@ -1743,7 +1743,7 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         data_result = result_context.metadata["data_helper_result"]
         assert data_result["success"] is True
         
-        logger.info(f"✅ Complete WebSocket event flow test passed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Complete WebSocket event flow test passed in {execution_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1816,7 +1816,7 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         data_result = result_context.metadata["data_helper_result"]
         assert data_result["success"] is True
         
-        logger.info(f"✅ WebSocket event timing test passed - total time: {total_time:.2f}s")
+        logger.info(f" PASS:  WebSocket event timing test passed - total time: {total_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1900,7 +1900,7 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         response_text = str(data_result).lower()
         assert "secure" in response_text or "financial" in response_text
         
-        logger.info("✅ WebSocket event authentication test passed")
+        logger.info(" PASS:  WebSocket event authentication test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1976,7 +1976,7 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
             error_msg = result_context.metadata["data_helper_error"]
             assert "LLM service failure" in error_msg
         
-        logger.info("✅ WebSocket event error handling test passed")
+        logger.info(" PASS:  WebSocket event error handling test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -2081,7 +2081,7 @@ class TestDataHelperWebSocketIntegration(SSotBaseTestCase):
         assert result_context.metadata["business_context"]["department"] == "Data Science"
         assert result_context.metadata["triage_result"]["timeline"] == "Q2_2024"
         
-        logger.info("✅ WebSocket event metadata inclusion test passed")
+        logger.info(" PASS:  WebSocket event metadata inclusion test passed")
 
 
 if __name__ == "__main__":

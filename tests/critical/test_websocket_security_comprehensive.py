@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """CRITICAL WEBSOCKET SECURITY TEST SUITE
-🚨 MISSION CRITICAL: Multi-User WebSocket Security Isolation
+ ALERT:  MISSION CRITICAL: Multi-User WebSocket Security Isolation
 
 This test suite validates the WebSocket security architecture to prevent:
 1. Singleton pattern usage that causes user data leakage
@@ -262,7 +262,7 @@ class TestSingletonPatternPrevention:
         assert user2_id in manager2_users
         assert user2_id not in manager1_users
         
-        logger.info("✅ SECURITY VERIFIED: No singleton WebSocket managers detected")
+        logger.info(" PASS:  SECURITY VERIFIED: No singleton WebSocket managers detected")
 
     async def test_no_shared_agent_registry(self, security_test_context):
         """CRITICAL: Verify AgentRegistry instances are not shared between requests."""
@@ -289,7 +289,7 @@ class TestSingletonPatternPrevention:
                     assert registry1 is not registry2, f"Registry {i} and {j} share same instance"
                     assert registry1.user_context != registry2.user_context, f"Registries {i} and {j} share user context"
         
-        logger.info("✅ SECURITY VERIFIED: AgentRegistry instances are properly isolated")
+        logger.info(" PASS:  SECURITY VERIFIED: AgentRegistry instances are properly isolated")
 
     async def test_no_shared_execution_engine(self, security_test_context):
         """CRITICAL: Verify ExecutionEngine instances are not shared."""
@@ -313,7 +313,7 @@ class TestSingletonPatternPrevention:
                     assert engine1 is not engine2, f"ExecutionEngine {i} and {j} share instance"
                     assert engine1.user_context != engine2.user_context, f"Engines {i} and {j} share context"
         
-        logger.info("✅ SECURITY VERIFIED: ExecutionEngine instances are isolated")
+        logger.info(" PASS:  SECURITY VERIFIED: ExecutionEngine instances are isolated")
 
 
 # ============================================================================
@@ -359,7 +359,7 @@ class TestFactoryPatternUserIsolation:
         assert child1.request_id != child2.request_id
         assert child1.metadata != child2.metadata
         
-        logger.info("✅ SECURITY VERIFIED: UserExecutionContext provides complete isolation")
+        logger.info(" PASS:  SECURITY VERIFIED: UserExecutionContext provides complete isolation")
 
     async def test_websocket_manager_per_user_isolation(self, security_test_users):
         """CRITICAL: Verify each user has isolated WebSocket manager."""
@@ -415,7 +415,7 @@ class TestFactoryPatternUserIsolation:
             sent_message = messages[0]["message"]
             assert sent_message["data"]["user_index"] == i, f"User {i} received wrong message"
         
-        logger.info("✅ SECURITY VERIFIED: WebSocket managers provide complete user isolation")
+        logger.info(" PASS:  SECURITY VERIFIED: WebSocket managers provide complete user isolation")
 
     async def test_tool_dispatcher_factory_isolation(self, security_test_users):
         """CRITICAL: Verify tool dispatcher uses factory pattern, not singleton."""
@@ -448,7 +448,7 @@ class TestFactoryPatternUserIsolation:
             assert hasattr(dispatcher, 'user_context')
             assert dispatcher.user_context.user_id == user.user_id
         
-        logger.info("✅ SECURITY VERIFIED: Tool dispatchers use factory pattern with proper isolation")
+        logger.info(" PASS:  SECURITY VERIFIED: Tool dispatchers use factory pattern with proper isolation")
 
 
 # ============================================================================
@@ -518,7 +518,7 @@ class TestUserContextExtraction:
                     assert context1.run_id != context2.run_id
                     assert context1.request_id != context2.request_id
         
-        logger.info("✅ SECURITY VERIFIED: UserExecutionContext created for all WebSocket message types")
+        logger.info(" PASS:  SECURITY VERIFIED: UserExecutionContext created for all WebSocket message types")
 
     async def test_context_validation_prevents_dangerous_values(self, security_test_context):
         """CRITICAL: Verify context validation prevents dangerous placeholder values."""
@@ -556,7 +556,7 @@ class TestUserContextExtraction:
                     run_id="valid_run"
                 )
         
-        logger.info("✅ SECURITY VERIFIED: Context validation prevents dangerous placeholder values")
+        logger.info(" PASS:  SECURITY VERIFIED: Context validation prevents dangerous placeholder values")
 
     async def test_websocket_connection_id_isolation(self, security_test_users):
         """CRITICAL: Verify WebSocket connection IDs are properly isolated per user."""
@@ -579,7 +579,7 @@ class TestUserContextExtraction:
                     assert user1.user_id not in context2.websocket_connection_id
                     assert user2.user_id not in context1.websocket_connection_id
         
-        logger.info("✅ SECURITY VERIFIED: WebSocket connection IDs are properly isolated")
+        logger.info(" PASS:  SECURITY VERIFIED: WebSocket connection IDs are properly isolated")
 
 
 # ============================================================================
@@ -619,7 +619,7 @@ class TestWebSocketAuthenticationSecurity:
                 )
                 assert context.user_id == scenario["user_id"]
         
-        logger.info("✅ SECURITY VERIFIED: WebSocket authentication requirements enforced")
+        logger.info(" PASS:  SECURITY VERIFIED: WebSocket authentication requirements enforced")
 
     async def test_user_context_cannot_be_forged(self, security_test_context):
         """CRITICAL: Verify user contexts cannot be forged or manipulated."""
@@ -667,7 +667,7 @@ class TestWebSocketAuthenticationSecurity:
         assert context1.metadata == original_metadata
         assert context2.metadata == original_metadata
         
-        logger.info("✅ SECURITY VERIFIED: User contexts are immutable and cannot be forged")
+        logger.info(" PASS:  SECURITY VERIFIED: User contexts are immutable and cannot be forged")
 
     async def test_supervisor_factory_prevents_auth_bypass(self, security_test_context):
         """CRITICAL: Verify get_request_scoped_supervisor prevents authentication bypass."""
@@ -698,7 +698,7 @@ class TestWebSocketAuthenticationSecurity:
                     # Supervisors must have correct user context
                     assert supervisor1.user_context.user_id != supervisor2.user_context.user_id
         
-        logger.info("✅ SECURITY VERIFIED: Request-scoped supervisor prevents authentication bypass")
+        logger.info(" PASS:  SECURITY VERIFIED: Request-scoped supervisor prevents authentication bypass")
 
 
 # ============================================================================
@@ -775,7 +775,7 @@ class TestConcurrentMultiUserSecurity:
                 assert message["data"]["user_id"] == user.user_id, \
                     f"User {i} received message for different user_id"
         
-        logger.info("✅ SECURITY VERIFIED: Concurrent user message isolation maintained")
+        logger.info(" PASS:  SECURITY VERIFIED: Concurrent user message isolation maintained")
 
     async def test_race_condition_protection(self, security_test_context):
         """CRITICAL: Verify WebSocket manager protects against race conditions."""
@@ -830,7 +830,7 @@ class TestConcurrentMultiUserSecurity:
         assert health["active_connections"] == 5
         assert health["total_connections"] == 5
         
-        logger.info("✅ SECURITY VERIFIED: Race condition protection working correctly")
+        logger.info(" PASS:  SECURITY VERIFIED: Race condition protection working correctly")
 
     async def test_memory_leak_prevention(self, security_test_context):
         """CRITICAL: Verify WebSocket connections don't cause memory leaks."""
@@ -897,7 +897,7 @@ class TestConcurrentMultiUserSecurity:
         assert memory_increase_mb < 50, \
             f"Excessive memory usage: {memory_increase_mb:.1f}MB increase"
         
-        logger.info(f"✅ SECURITY VERIFIED: Memory leak prevention working correctly "
+        logger.info(f" PASS:  SECURITY VERIFIED: Memory leak prevention working correctly "
                    f"({alive_connections}/{total_connections} connections alive, "
                    f"{memory_increase_mb:.1f}MB memory increase)")
 
@@ -937,7 +937,7 @@ class TestWebSocketAuthenticationFailureHandling:
             with pytest.raises(InvalidContextError, match=scenario["expected_error"]):
                 UserExecutionContext.from_request(**scenario["params"])
         
-        logger.info("✅ SECURITY VERIFIED: Invalid context handling working correctly")
+        logger.info(" PASS:  SECURITY VERIFIED: Invalid context handling working correctly")
 
     async def test_websocket_connection_failure_recovery(self, security_test_context):
         """CRITICAL: Verify proper handling of WebSocket connection failures."""
@@ -995,7 +995,7 @@ class TestWebSocketAuthenticationFailureHandling:
         assert len(working_conn.messages_sent) == 1
         assert working_conn.messages_sent[0]["message"]["type"] == "test_failure"
         
-        logger.info("✅ SECURITY VERIFIED: WebSocket connection failure recovery working correctly")
+        logger.info(" PASS:  SECURITY VERIFIED: WebSocket connection failure recovery working correctly")
 
     async def test_authentication_state_consistency(self, security_test_users):
         """CRITICAL: Verify authentication state remains consistent across operations."""
@@ -1047,7 +1047,7 @@ class TestWebSocketAuthenticationFailureHandling:
                 received_msg = messages[i]["message"]
                 assert received_msg["type"] == expected_op["type"]
         
-        logger.info("✅ SECURITY VERIFIED: Authentication state consistency maintained")
+        logger.info(" PASS:  SECURITY VERIFIED: Authentication state consistency maintained")
 
 
 # ============================================================================
@@ -1062,7 +1062,7 @@ async def test_websocket_security_comprehensive_suite():
     comprehensive reporting on security vulnerabilities.
     """
     
-    logger.info("🚨 STARTING COMPREHENSIVE WEBSOCKET SECURITY SUITE")
+    logger.info(" ALERT:  STARTING COMPREHENSIVE WEBSOCKET SECURITY SUITE")
     logger.info("=" * 80)
     
     # Test categories and their criticality
@@ -1079,7 +1079,7 @@ async def test_websocket_security_comprehensive_suite():
     overall_status = "PASS"
     
     for category_name, test_class in test_categories:
-        logger.info(f"🔒 TESTING: {category_name}")
+        logger.info(f"[U+1F512] TESTING: {category_name}")
         logger.info("-" * 60)
         
         category_result = {
@@ -1097,7 +1097,7 @@ async def test_websocket_security_comprehensive_suite():
         for test_method_name in test_methods:
             try:
                 # Execute the test
-                logger.info(f"  🧪 {test_method_name}")
+                logger.info(f"  [U+1F9EA] {test_method_name}")
                 category_result["tests_run"] += 1
                 
                 # Note: In a real pytest environment, these would be executed by pytest
@@ -1114,14 +1114,14 @@ async def test_websocket_security_comprehensive_suite():
                     "type": type(e).__name__
                 })
                 
-                logger.error(f"    ❌ FAILED: {e}")
+                logger.error(f"     FAIL:  FAILED: {e}")
         
         results.append(category_result)
-        logger.info(f"  ✅ {category_name}: {category_result['status']}")
+        logger.info(f"   PASS:  {category_name}: {category_result['status']}")
         logger.info("")
     
     # Generate final security report
-    logger.info("🔒 WEBSOCKET SECURITY SUITE RESULTS")
+    logger.info("[U+1F512] WEBSOCKET SECURITY SUITE RESULTS")
     logger.info("=" * 80)
     
     total_tests = sum(r["tests_run"] for r in results)
@@ -1134,26 +1134,26 @@ async def test_websocket_security_comprehensive_suite():
     logger.info("")
     
     for result in results:
-        status_emoji = "✅" if result["status"] == "PASS" else "❌"
+        status_emoji = " PASS: " if result["status"] == "PASS" else " FAIL: "
         logger.info(f"{status_emoji} {result['category']}: "
                    f"{result['tests_run'] - result['tests_failed']}/{result['tests_run']} passed")
         
         for failure in result["failures"]:
-            logger.error(f"    ❌ {failure['test']}: {failure['error']}")
+            logger.error(f"     FAIL:  {failure['test']}: {failure['error']}")
     
     logger.info("")
-    logger.info("🚨 SECURITY COMPLIANCE STATUS:")
+    logger.info(" ALERT:  SECURITY COMPLIANCE STATUS:")
     
     if overall_status == "PASS":
-        logger.info("✅ ALL WEBSOCKET SECURITY TESTS PASSED")
-        logger.info("✅ Multi-user isolation is SECURE")
-        logger.info("✅ Factory patterns are properly enforced")
-        logger.info("✅ No singleton vulnerabilities detected")  
-        logger.info("✅ DEPLOYMENT APPROVED")
+        logger.info(" PASS:  ALL WEBSOCKET SECURITY TESTS PASSED")
+        logger.info(" PASS:  Multi-user isolation is SECURE")
+        logger.info(" PASS:  Factory patterns are properly enforced")
+        logger.info(" PASS:  No singleton vulnerabilities detected")  
+        logger.info(" PASS:  DEPLOYMENT APPROVED")
     else:
-        logger.error("❌ CRITICAL WEBSOCKET SECURITY FAILURES DETECTED")
-        logger.error("❌ DEPLOYMENT MUST BE BLOCKED")
-        logger.error("❌ Fix all security issues before proceeding")
+        logger.error(" FAIL:  CRITICAL WEBSOCKET SECURITY FAILURES DETECTED")
+        logger.error(" FAIL:  DEPLOYMENT MUST BE BLOCKED")
+        logger.error(" FAIL:  Fix all security issues before proceeding")
     
     logger.info("=" * 80)
     

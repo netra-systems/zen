@@ -3,11 +3,11 @@
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure multi-agent workflows deliver complete AI solutions
-- Value Impact: Multi-agent workflows are the core value proposition - DataHelper → Optimization workflows
+- Value Impact: Multi-agent workflows are the core value proposition - DataHelper  ->  Optimization workflows
 - Strategic Impact: Foundation for complex AI problem solving and enterprise-grade solutions
 
 This test suite validates:
-1. DataHelper → Optimization agent workflows execute in correct order
+1. DataHelper  ->  Optimization agent workflows execute in correct order
 2. Agent handoffs and state transitions work properly 
 3. Supervisor pattern manages child agents correctly
 4. Cross-agent data passing maintains integrity
@@ -480,16 +480,16 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
             if agent.consumes_data:
                 assert agent.execution_count == 1, f"Data consumer {agent_name} should have executed once"
                 
-        logger.info(f"✅ Sequential workflow execution order test passed - {len(results)} agents in {execution_time:.3f}s")
+        logger.info(f" PASS:  Sequential workflow execution order test passed - {len(results)} agents in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_datahelper_to_optimization_handoff(
         self, workflow_user_context, workflow_registry, workflow_agents, mock_llm_manager
     ):
-        """Test critical DataHelper → Optimization agent handoff with data integrity."""
+        """Test critical DataHelper  ->  Optimization agent handoff with data integrity."""
         
-        # Business Value: DataHelper → Optimization is the core value-generating workflow
+        # Business Value: DataHelper  ->  Optimization is the core value-generating workflow
         
         websocket_bridge = await self.websocket_manager.create_bridge(workflow_user_context)
         engine = ExecutionEngine._init_from_factory(
@@ -578,7 +578,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         tool_events = [e for e in events if e["event_type"] in ["tool_executing", "tool_completed"]]
         assert len(tool_events) >= 4  # At least 2 tools per agent
         
-        logger.info("✅ DataHelper → Optimization handoff test passed")
+        logger.info(" PASS:  DataHelper  ->  Optimization handoff test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -671,7 +671,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         time_diff = (start_times[1] - start_times[0]).total_seconds() if len(start_times) > 1 else 0
         assert abs(time_diff) < 0.1  # Started within 100ms of each other
         
-        logger.info(f"✅ Parallel agent execution test passed - {len(results)} agents in {execution_time:.3f}s")
+        logger.info(f" PASS:  Parallel agent execution test passed - {len(results)} agents in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -785,7 +785,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         # optimization should NOT be in completed (it failed)
         assert "optimization" not in completed_agents
         
-        logger.info("✅ Workflow error propagation and recovery test passed")
+        logger.info(" PASS:  Workflow error propagation and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -903,7 +903,7 @@ class TestMultiAgentWorkflowIntegration(BaseIntegrationTest):
         # (Note: We're using same agent instances, so execution_count accumulates)
         assert workflow_agents["triage"].execution_count >= 3
         
-        logger.info(f"✅ Concurrent multi-user workflows test passed - 3 users in {execution_time:.3f}s")
+        logger.info(f" PASS:  Concurrent multi-user workflows test passed - 3 users in {execution_time:.3f}s")
 
 
 if __name__ == "__main__":

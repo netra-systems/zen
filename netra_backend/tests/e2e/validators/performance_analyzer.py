@@ -1,7 +1,7 @@
 """
 Performance Analysis Classes for E2E Agent Testing
 Classes for regression detection and benchmark comparison.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from typing import Dict, List, Optional, Tuple

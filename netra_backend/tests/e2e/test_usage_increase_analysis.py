@@ -11,7 +11,7 @@ Tests end-to-end usage increase analysis workflows to ensure customers
 can predict and manage infrastructure impacts before scaling operations.
 
 CRITICAL: These tests validate usage scaling prediction accuracy for business continuity.
-Maximum 300 lines, functions ≤8 lines per SSOT standards.
+Maximum 300 lines, functions  <= 8 lines per SSOT standards.
 """
 
 import pytest
@@ -52,7 +52,7 @@ class TestUsageIncreaseAnalysis(BaseE2ETest):
         assert 'test_type' in state.metadata
 
 
-# Helper functions (≤8 lines each per SSOT standards)
+# Helper functions ( <= 8 lines each per SSOT standards)
 
 def _create_basic_usage_increase_state() -> DeepAgentState:
     """Create state for basic usage increase analysis test."""

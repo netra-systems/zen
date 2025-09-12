@@ -119,7 +119,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         # In a real implementation, this would verify the record exists in PostgreSQL
         await self._verify_database_persistence(execution_id, record)
         
-        logger.info(f"✅ Execution record {execution_id} created and persisted successfully")
+        logger.info(f" PASS:  Execution record {execution_id} created and persisted successfully")
 
     async def test_execution_state_updates_persist_across_restarts(self):
         """Test that execution state updates survive service restarts.
@@ -161,7 +161,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         assert final_record.state == ExecutionState.COMPLETED
         assert final_record.result == "State updated to completed"
         
-        logger.info(f"✅ Execution state updates persisted across restart simulation")
+        logger.info(f" PASS:  Execution state updates persisted across restart simulation")
 
     async def test_concurrent_execution_persistence_isolation(self):
         """Test that concurrent executions are properly isolated in database.
@@ -198,7 +198,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
             # Verify database isolation
             await self._verify_user_isolation_in_database(execution_id, expected_user)
         
-        logger.info(f"✅ Concurrent execution isolation verified for {len(execution_ids)} executions")
+        logger.info(f" PASS:  Concurrent execution isolation verified for {len(execution_ids)} executions")
 
     async def test_execution_heartbeat_persistence_reliability(self):
         """Test that heartbeat tracking persists reliably under load.
@@ -242,7 +242,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         assert record.time_since_heartbeat.total_seconds() > 0
         
         await self.execution_tracker.stop_monitoring()
-        logger.info(f"✅ Heartbeat persistence and monitoring verified")
+        logger.info(f" PASS:  Heartbeat persistence and monitoring verified")
 
     async def test_execution_phase_tracking_database_storage(self):
         """Test that execution phases are tracked and stored in database.
@@ -293,7 +293,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         # Verify database storage of phase history
         await self._verify_phase_history_in_database(execution_id, state_history)
         
-        logger.info(f"✅ Phase tracking and database storage verified for {len(phase_sequence)} phases")
+        logger.info(f" PASS:  Phase tracking and database storage verified for {len(phase_sequence)} phases")
 
     async def test_execution_cleanup_preserves_audit_trail(self):
         """Test that execution cleanup maintains audit trails for compliance.
@@ -337,7 +337,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         # In real implementation, would verify audit tables contain the data
         await self._verify_audit_trail_preservation(completed_executions)
         
-        logger.info(f"✅ Execution cleanup and audit trail preservation verified")
+        logger.info(f" PASS:  Execution cleanup and audit trail preservation verified")
 
     async def test_database_connection_failure_recovery(self):
         """Test recovery from database connection failures.
@@ -385,7 +385,7 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         # Verify final state persisted
         await self._verify_database_persistence(execution_id, None)
         
-        logger.info("✅ Database failure recovery verified")
+        logger.info(" PASS:  Database failure recovery verified")
 
     # Helper methods for database verification
 
@@ -493,4 +493,4 @@ class TestExecutionPersistence(BaseAgentExecutionTest):
         expected_success_rate = 2.0 / len(test_cases)  # 2 successful out of 5
         assert abs(metrics['success_rate'] - expected_success_rate) < 0.1
         
-        logger.info(f"✅ Execution metrics verification completed: {metrics}")
+        logger.info(f" PASS:  Execution metrics verification completed: {metrics}")

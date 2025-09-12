@@ -2,7 +2,7 @@
 WebSocket + Database Coordination Test Suite - Issue #370 Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Foundation for all real-time features
+- Segment: ALL (Free  ->  Enterprise) - Foundation for all real-time features
 - Business Goal: Ensure WebSocket events and database operations are properly coordinated
 - Value Impact: Prevents data inconsistency and user experience degradation
 - Strategic Impact: CRITICAL - WebSocket/DB misalignment breaks chat functionality ($500K+ ARR risk)

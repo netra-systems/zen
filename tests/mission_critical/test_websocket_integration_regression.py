@@ -55,11 +55,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
         integration gap. After fixes, it becomes the primary regression guardian.
         
         Critical Integration Chain:
-        1. ExecutionEngineFactory.configure() → Success
-        2. ExecutionEngineFactory.create_execution_engine() → UserExecutionEngine
-        3. UserExecutionEngine._websocket_bridge → AgentWebSocketBridge
-        4. AgentWebSocketBridge._user_emitter → UserWebSocketEmitter
-        5. UserWebSocketEmitter.emit_*() → WebSocket events to user
+        1. ExecutionEngineFactory.configure()  ->  Success
+        2. ExecutionEngineFactory.create_execution_engine()  ->  UserExecutionEngine
+        3. UserExecutionEngine._websocket_bridge  ->  AgentWebSocketBridge
+        4. AgentWebSocketBridge._user_emitter  ->  UserWebSocketEmitter
+        5. UserWebSocketEmitter.emit_*()  ->  WebSocket events to user
         
         This test validates EVERY link in the chain to prevent future breaks.
         """
@@ -94,10 +94,10 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
             try:
                 execution_factory.configure()
                 chain_validation["factory_configuration"] = True
-                logger.info("✓ REGRESSION CHECK: ExecutionEngineFactory configuration succeeded")
+                logger.info("[U+2713] REGRESSION CHECK: ExecutionEngineFactory configuration succeeded")
             except Exception as e:
                 integration_failures.append(f"Factory configuration failed: {e}")
-                logger.error(f"✗ REGRESSION FAILURE: Factory configuration: {e}")
+                logger.error(f"[U+2717] REGRESSION FAILURE: Factory configuration: {e}")
             
             # LINK 2: UserExecutionEngine Creation  
             if chain_validation["factory_configuration"]:
@@ -106,11 +106,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     
                     assert user_execution_engine is not None, "create_execution_engine returned None"
                     chain_validation["execution_engine_creation"] = True
-                    logger.info("✓ REGRESSION CHECK: UserExecutionEngine creation succeeded")
+                    logger.info("[U+2713] REGRESSION CHECK: UserExecutionEngine creation succeeded")
                     
                 except Exception as e:
                     integration_failures.append(f"ExecutionEngine creation failed: {e}")
-                    logger.error(f"✗ REGRESSION FAILURE: ExecutionEngine creation: {e}")
+                    logger.error(f"[U+2717] REGRESSION FAILURE: ExecutionEngine creation: {e}")
             
             # LINK 3: WebSocket Bridge Attachment
             if chain_validation["execution_engine_creation"]:
@@ -141,11 +141,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     )
                     
                     chain_validation["websocket_bridge_attachment"] = True
-                    logger.info(f"✓ REGRESSION CHECK: WebSocket bridge attached ({websocket_bridge_attr})")
+                    logger.info(f"[U+2713] REGRESSION CHECK: WebSocket bridge attached ({websocket_bridge_attr})")
                     
                 except Exception as e:
                     integration_failures.append(f"WebSocket bridge attachment failed: {e}")
-                    logger.error(f"✗ REGRESSION FAILURE: WebSocket bridge: {e}")
+                    logger.error(f"[U+2717] REGRESSION FAILURE: WebSocket bridge: {e}")
             
             # LINK 4: User Emitter Creation
             if chain_validation["websocket_bridge_attachment"]:
@@ -182,11 +182,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                         )
                     
                     chain_validation["user_emitter_creation"] = True
-                    logger.info(f"✓ REGRESSION CHECK: User emitter created ({user_emitter_attr})")
+                    logger.info(f"[U+2713] REGRESSION CHECK: User emitter created ({user_emitter_attr})")
                     
                 except Exception as e:
                     integration_failures.append(f"User emitter creation failed: {e}")
-                    logger.error(f"✗ REGRESSION FAILURE: User emitter: {e}")
+                    logger.error(f"[U+2717] REGRESSION FAILURE: User emitter: {e}")
             
             # LINK 5: Event Emission Capability
             if chain_validation["user_emitter_creation"]:
@@ -212,11 +212,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     )
                     
                     chain_validation["event_emission_capability"] = True
-                    logger.info("✓ REGRESSION CHECK: Event emission capability verified")
+                    logger.info("[U+2713] REGRESSION CHECK: Event emission capability verified")
                     
                 except Exception as e:
                     integration_failures.append(f"Event emission capability check failed: {e}")
-                    logger.error(f"✗ REGRESSION FAILURE: Event emission: {e}")
+                    logger.error(f"[U+2717] REGRESSION FAILURE: Event emission: {e}")
             
             # LINK 6: End-to-End Event Delivery
             if chain_validation["event_emission_capability"]:
@@ -275,7 +275,7 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     )
                     
                     chain_validation["end_to_end_event_delivery"] = True
-                    logger.info(f"✓ REGRESSION CHECK: End-to-end event delivery verified ({len(captured_events)} events)")
+                    logger.info(f"[U+2713] REGRESSION CHECK: End-to-end event delivery verified ({len(captured_events)} events)")
                     
                     # Restore original methods
                     for method_name, original_method in original_methods.items():
@@ -283,7 +283,7 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     
                 except Exception as e:
                     integration_failures.append(f"End-to-end event delivery failed: {e}")
-                    logger.error(f"✗ REGRESSION FAILURE: End-to-end delivery: {e}")
+                    logger.error(f"[U+2717] REGRESSION FAILURE: End-to-end delivery: {e}")
             
             # CRITICAL REGRESSION ANALYSIS
             total_links = len(chain_validation)
@@ -619,11 +619,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                     factory.configure()
                 
                 architecture_validation["factory_pattern_consistency"] = True
-                logger.info("✓ ARCHITECTURE CHECK: Factory pattern consistency verified")
+                logger.info("[U+2713] ARCHITECTURE CHECK: Factory pattern consistency verified")
                 
             except Exception as e:
                 architecture_failures.append(f"Factory pattern consistency failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: Factory pattern: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: Factory pattern: {e}")
             
             # ARCHITECTURE TEST 2: Singleton Elimination
             try:
@@ -664,11 +664,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                             )
                 
                 architecture_validation["singleton_elimination"] = True
-                logger.info("✓ ARCHITECTURE CHECK: Singleton elimination verified")
+                logger.info("[U+2713] ARCHITECTURE CHECK: Singleton elimination verified")
                 
             except Exception as e:
                 architecture_failures.append(f"Singleton elimination check failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: Singleton elimination: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: Singleton elimination: {e}")
             
             # ARCHITECTURE TEST 3: Dependency Injection
             try:
@@ -709,11 +709,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                 )
                 
                 architecture_validation["dependency_injection"] = True
-                logger.info(f"✓ ARCHITECTURE CHECK: Dependency injection verified ({len(injected_components)} components)")
+                logger.info(f"[U+2713] ARCHITECTURE CHECK: Dependency injection verified ({len(injected_components)} components)")
                 
             except Exception as e:
                 architecture_failures.append(f"Dependency injection check failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: Dependency injection: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: Dependency injection: {e}")
             
             # ARCHITECTURE TEST 4: Service Orchestration
             try:
@@ -753,11 +753,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                 assert user_emitter is not None, "User emitter creation failed in orchestration"
                 
                 architecture_validation["service_orchestration"] = True
-                logger.info("✓ ARCHITECTURE CHECK: Service orchestration verified")
+                logger.info("[U+2713] ARCHITECTURE CHECK: Service orchestration verified")
                 
             except Exception as e:
                 architecture_failures.append(f"Service orchestration check failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: Service orchestration: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: Service orchestration: {e}")
             
             # ARCHITECTURE TEST 5: SSOT Compliance
             try:
@@ -796,11 +796,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                 )
                 
                 architecture_validation["ssot_compliance"] = True
-                logger.info(f"✓ ARCHITECTURE CHECK: SSOT compliance verified ({len(ssot_indicators)} indicators)")
+                logger.info(f"[U+2713] ARCHITECTURE CHECK: SSOT compliance verified ({len(ssot_indicators)} indicators)")
                 
             except Exception as e:
                 architecture_failures.append(f"SSOT compliance check failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: SSOT compliance: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: SSOT compliance: {e}")
             
             # ARCHITECTURE TEST 6: Interface Contracts
             try:
@@ -860,11 +860,11 @@ class TestWebSocketIntegrationRegression(BaseIntegrationTest):
                         )
                 
                 architecture_validation["interface_contracts"] = True
-                logger.info("✓ ARCHITECTURE CHECK: Interface contracts verified")
+                logger.info("[U+2713] ARCHITECTURE CHECK: Interface contracts verified")
                 
             except Exception as e:
                 architecture_failures.append(f"Interface contracts check failed: {e}")
-                logger.error(f"✗ ARCHITECTURE FAILURE: Interface contracts: {e}")
+                logger.error(f"[U+2717] ARCHITECTURE FAILURE: Interface contracts: {e}")
             
             # CRITICAL ARCHITECTURE ANALYSIS
             total_checks = len(architecture_validation)

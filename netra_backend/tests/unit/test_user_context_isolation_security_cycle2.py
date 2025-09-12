@@ -330,7 +330,7 @@ class TestUserContextIsolationSecurity:
                 all_contexts.append((scenario["tier"], i, context))
         
         # Assert: Factory maintains proper isolation
-        assert len(all_contexts) == 9, "Should create 9 total contexts (3 tiers × 3 users)"
+        assert len(all_contexts) == 9, "Should create 9 total contexts (3 tiers  x  3 users)"
         
         # Verify isolation between all contexts
         for tier1, index1, context1 in all_contexts:

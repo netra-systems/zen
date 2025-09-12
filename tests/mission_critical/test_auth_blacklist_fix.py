@@ -48,7 +48,7 @@ class TestBlacklistAsyncFix:
         try:
             result = await auth_service.is_token_blacklisted(sample_token)
             assert isinstance(result, bool), "Should return a boolean"
-            logger.info("✅ WHY #1 Fix validated: No await bool error")
+            logger.info(" PASS:  WHY #1 Fix validated: No await bool error")
         except TypeError as e:
             if "can't be used in 'await' expression" in str(e):
                 pytest.fail(f"WHY #1 Fix failed: {e}")
@@ -73,7 +73,7 @@ class TestBlacklistAsyncFix:
         await auth_service.blacklist_token(sample_token)
         mock_jwt.blacklist_token.assert_called_once_with(sample_token)
         
-        logger.info("✅ WHY #2 Fix validated: Sync/async boundary handled correctly")
+        logger.info(" PASS:  WHY #2 Fix validated: Sync/async boundary handled correctly")
     
     @pytest.mark.asyncio
     async def test_why_3_unified_interface(self, auth_service, sample_token):
@@ -95,7 +95,7 @@ class TestBlacklistAsyncFix:
         result = await auth_service.is_token_blacklisted(sample_token)
         assert result is True  # Should find in memory blacklist
         
-        logger.info("✅ WHY #3 Fix validated: Unified async interface works")
+        logger.info(" PASS:  WHY #3 Fix validated: Unified async interface works")
     
     @pytest.mark.asyncio
     async def test_why_4_real_integration(self, sample_token):
@@ -115,7 +115,7 @@ class TestBlacklistAsyncFix:
         is_blacklisted = await auth_service.is_token_blacklisted(other_token)
         assert is_blacklisted is False, "Other token should not be blacklisted"
         
-        logger.info("✅ WHY #4 Fix validated: Real integration works")
+        logger.info(" PASS:  WHY #4 Fix validated: Real integration works")
     
     @pytest.mark.asyncio
     async def test_why_5_ssot_principle(self, auth_service):
@@ -144,7 +144,7 @@ class TestBlacklistAsyncFix:
                 f"SSOT violation: {method_name} must be async"
             )
         
-        logger.info("✅ WHY #5 Fix validated: SSOT principle maintained")
+        logger.info(" PASS:  WHY #5 Fix validated: SSOT principle maintained")
     
     @pytest.mark.asyncio
     async def test_error_handling_resilience(self, auth_service, sample_token):
@@ -167,7 +167,7 @@ class TestBlacklistAsyncFix:
         result = await auth_service.is_token_blacklisted(sample_token)
         assert result is True, "Should have blacklisted in memory after error"
         
-        logger.info("✅ Error handling validated: Graceful degradation works")
+        logger.info(" PASS:  Error handling validated: Graceful degradation works")
     
     @pytest.mark.asyncio
     async def test_concurrent_operations(self, auth_service):
@@ -190,7 +190,7 @@ class TestBlacklistAsyncFix:
         result = await auth_service.is_token_blacklisted("not_blacklisted")
         assert result is False, "Non-blacklisted token should return False"
         
-        logger.info("✅ Concurrent operations validated")
+        logger.info(" PASS:  Concurrent operations validated")
 
 
 class TestBlacklistEndpointIntegration:
@@ -220,7 +220,7 @@ class TestBlacklistEndpointIntegration:
         assert "blacklisted" in data
         assert isinstance(data["blacklisted"], bool)
         
-        logger.info("✅ Endpoint integration validated")
+        logger.info(" PASS:  Endpoint integration validated")
 
 
 def test_five_whys_documentation():
@@ -240,9 +240,9 @@ def test_five_whys_documentation():
         if os.path.exists(file_path):
             with open(file_path, 'r') as f:
                 content = f.read()
-                logger.info(f"✅ Five Whys {file_path}: {content[:100]}...")
+                logger.info(f" PASS:  Five Whys {file_path}: {content[:100]}...")
     
-    logger.info("✅ Five Whys documentation validated")
+    logger.info(" PASS:  Five Whys documentation validated")
 
 
 if __name__ == "__main__":

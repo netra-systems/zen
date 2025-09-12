@@ -191,7 +191,7 @@ class TestAlgorithmicPerformanceUnit:
             f"Memory usage too high: {summary['avg_memory_usage_mb']}MB per state"
         )
         
-        print(f"✓ Agent state creation: {summary['avg_execution_time_ms']:.2f}ms avg")
+        print(f"[U+2713] Agent state creation: {summary['avg_execution_time_ms']:.2f}ms avg")
         
     def test_user_context_performance(self, profiler, isolated_env):
         """Test user execution context performance - critical for multi-user isolation.
@@ -229,7 +229,7 @@ class TestAlgorithmicPerformanceUnit:
         assert summary["p95_execution_time_ms"] < target_time_ms * 2
         assert summary["avg_memory_usage_mb"] < 0.5
         
-        print(f"✓ User context creation: {summary['avg_execution_time_ms']:.2f}ms avg")
+        print(f"[U+2713] User context creation: {summary['avg_execution_time_ms']:.2f}ms avg")
         
     def test_data_structure_performance(self, profiler, isolated_env):
         """Test core data structure operations - impacts all business operations.
@@ -287,7 +287,7 @@ class TestAlgorithmicPerformanceUnit:
                 f"(target: {target_ms}ms)"
             )
             
-        print("✓ Data structure operations within SLA targets")
+        print("[U+2713] Data structure operations within SLA targets")
         
     @pytest.mark.asyncio
     async def test_async_operation_performance(self, profiler, isolated_env):
@@ -333,7 +333,7 @@ class TestAlgorithmicPerformanceUnit:
             "Concurrent async operations not providing expected speedup"
         )
         
-        print(f"✓ Async operations: sequential {sequential_summary['avg_execution_time_ms']:.2f}ms, "
+        print(f"[U+2713] Async operations: sequential {sequential_summary['avg_execution_time_ms']:.2f}ms, "
               f"concurrent {concurrent_time:.2f}ms")
               
     def test_memory_efficiency_algorithms(self, profiler, isolated_env):
@@ -378,7 +378,7 @@ class TestAlgorithmicPerformanceUnit:
             test_result_efficient = list(item for item in (f"item_{i}" for i in range(50)) if "1" in item)
             test_result_wasteful = [item for item in [f"item_{i}" for i in range(50)] if "1" in item]
             assert len(test_result_efficient) == len(test_result_wasteful), "Both algorithms should produce same results"
-            print("✓ Memory efficiency test passed - algorithms validated functionally (zero memory delta in unit test mode)")
+            print("[U+2713] Memory efficiency test passed - algorithms validated functionally (zero memory delta in unit test mode)")
         else:
             # Only check memory efficiency if we have meaningful measurements
             assert efficient_memory <= wasteful_memory * 1.1, (  # Allow 10% margin due to measurement variability
@@ -400,7 +400,7 @@ class TestAlgorithmicPerformanceUnit:
                 "Memory usage scaling too aggressively"
             )
             
-        print(f"✓ Memory efficiency: efficient {efficient_summary['avg_memory_usage_mb']:.2f}MB, "
+        print(f"[U+2713] Memory efficiency: efficient {efficient_summary['avg_memory_usage_mb']:.2f}MB, "
               f"wasteful {wasteful_summary['avg_memory_usage_mb']:.2f}MB")
               
     def test_cpu_intensive_algorithm_performance(self, profiler, isolated_env):
@@ -454,9 +454,9 @@ class TestAlgorithmicPerformanceUnit:
             speedup = inefficient_summary["avg_execution_time_ms"] / efficient_summary["avg_execution_time_ms"]
             assert speedup > 1.5, f"Efficient algorithm should be faster, got speedup: {speedup:.2f}x"  # Relaxed for unit test mode
         else:
-            print("✓ CPU algorithm efficiency test - no inefficient comparison available (expected in unit test mode)")
+            print("[U+2713] CPU algorithm efficiency test - no inefficient comparison available (expected in unit test mode)")
             
-        print(f"✓ Algorithm efficiency: {efficient_summary['avg_execution_time_ms']:.2f}ms avg")
+        print(f"[U+2713] Algorithm efficiency: {efficient_summary['avg_execution_time_ms']:.2f}ms avg")
         
     def test_string_operation_performance(self, profiler, isolated_env):
         """Test string operation performance - impacts message processing.
@@ -520,7 +520,7 @@ class TestAlgorithmicPerformanceUnit:
                 f"{name} too slow: {latest_time}ms (target: {target_ms}ms)"
             )
             
-        print("✓ String operations within performance targets")
+        print("[U+2713] String operations within performance targets")
         
     def test_concurrency_performance_patterns(self, profiler, isolated_env):
         """Test concurrency performance patterns - critical for multi-user handling.
@@ -581,11 +581,11 @@ class TestAlgorithmicPerformanceUnit:
             speedup = locked_time / lock_free_time
             # In unit test mode, speedup might be minimal due to small workloads
             if speedup > 0.8:  # Allow lock-free to be 20% slower due to overhead in small tests
-                print(f"✓ Concurrency: locked {locked_time:.2f}ms, lock-free {lock_free_time:.2f}ms (speedup: {speedup:.1f}x)")
+                print(f"[U+2713] Concurrency: locked {locked_time:.2f}ms, lock-free {lock_free_time:.2f}ms (speedup: {speedup:.1f}x)")
             else:
-                print(f"✓ Concurrency: Both patterns functional (locked {locked_time:.2f}ms, lock-free {lock_free_time:.2f}ms)")
+                print(f"[U+2713] Concurrency: Both patterns functional (locked {locked_time:.2f}ms, lock-free {lock_free_time:.2f}ms)")
         else:
-            print("✓ Concurrency: Both patterns functional (unit test mode - minimal timing differences expected)")
+            print("[U+2713] Concurrency: Both patterns functional (unit test mode - minimal timing differences expected)")
 
 
 @pytest.mark.unit
@@ -638,7 +638,7 @@ class TestPerformanceSLACompliance:
                 )
                 
         assert not sla_violations, f"SLA violations detected: {sla_violations}"
-        print("✓ All unit operations meet SLA requirements")
+        print("[U+2713] All unit operations meet SLA requirements")
         
     def test_memory_usage_sla(self):
         """Validate memory usage meets business requirements.
@@ -669,7 +669,7 @@ class TestPerformanceSLACompliance:
             f"exceeds limit {max_total_memory_growth_mb}MB"
         )
         
-        print(f"✓ Memory usage within SLA: {summary['avg_memory_usage_mb']:.2f}MB avg, "
+        print(f"[U+2713] Memory usage within SLA: {summary['avg_memory_usage_mb']:.2f}MB avg, "
               f"{summary['total_memory_used_mb']:.2f}MB total")
 
 

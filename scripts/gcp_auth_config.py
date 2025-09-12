@@ -71,21 +71,21 @@ class GCPAuthConfig:
         if env_key:
             env_path = Path(env_key)
             if env_path.exists():
-                print(f"✅ Using service account from environment: {env_path}")
+                print(f" PASS:  Using service account from environment: {env_path}")
                 return env_path
             else:
-                print(f"⚠️ GOOGLE_APPLICATION_CREDENTIALS points to non-existent file: {env_key}")
+                print(f" WARNING: [U+FE0F] GOOGLE_APPLICATION_CREDENTIALS points to non-existent file: {env_key}")
         
         # Check predefined paths
         for key_path in cls.KEY_SEARCH_PATHS:
             if key_path.exists():
-                print(f"✅ Found service account key: {key_path}")
+                print(f" PASS:  Found service account key: {key_path}")
                 return key_path
         
         # Search for any JSON file with service account structure
         for json_file in Path(".").glob("*.json"):
             if cls._is_service_account_key(json_file):
-                print(f"✅ Found service account key by content: {json_file}")
+                print(f" PASS:  Found service account key by content: {json_file}")
                 return json_file
         
         return None
@@ -120,8 +120,8 @@ class GCPAuthConfig:
         if not key_path:
             key_path = cls.find_service_account_key()
             if not key_path:
-                print("❌ No service account key found!")
-                print("\n📋 To fix this:")
+                print(" FAIL:  No service account key found!")
+                print("\n[U+1F4CB] To fix this:")
                 print(f"  1. Place your service account key at: {cls.PRIMARY_KEY_PATH}")
                 print("  2. Or set GOOGLE_APPLICATION_CREDENTIALS environment variable")
                 print("  3. Or run: python scripts/setup_gcp_service_account.py")
@@ -129,12 +129,12 @@ class GCPAuthConfig:
         
         # Verify key exists
         if not key_path.exists():
-            print(f"❌ Service account key file not found: {key_path}")
+            print(f" FAIL:  Service account key file not found: {key_path}")
             return False
         
         # Set environment variable for Application Default Credentials
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(key_path)
-        print(f"✅ Set GOOGLE_APPLICATION_CREDENTIALS to: {key_path}")
+        print(f" PASS:  Set GOOGLE_APPLICATION_CREDENTIALS to: {key_path}")
         
         # Activate service account in gcloud
         if not cls._activate_gcloud_service_account(key_path):
@@ -155,10 +155,10 @@ class GCPAuthConfig:
                 service_account_email = key_data.get("client_email")
             
             if not service_account_email:
-                print("⚠️ Could not extract service account email from key file")
+                print(" WARNING: [U+FE0F] Could not extract service account email from key file")
                 return True  # Continue anyway, ADC will work
             
-            print(f"🔐 Activating service account: {service_account_email}")
+            print(f"[U+1F510] Activating service account: {service_account_email}")
             
             # Activate service account
             result = subprocess.run(
@@ -173,22 +173,22 @@ class GCPAuthConfig:
             )
             
             if result.returncode == 0:
-                print("✅ Service account activated in gcloud")
+                print(" PASS:  Service account activated in gcloud")
                 return True
             else:
                 # Check if gcloud is not installed
                 if "not found" in result.stderr or "not recognized" in result.stderr:
-                    print("⚠️ gcloud CLI not installed - using Application Default Credentials only")
+                    print(" WARNING: [U+FE0F] gcloud CLI not installed - using Application Default Credentials only")
                     return True  # ADC will still work
                 else:
-                    print(f"⚠️ Failed to activate service account in gcloud: {result.stderr}")
+                    print(f" WARNING: [U+FE0F] Failed to activate service account in gcloud: {result.stderr}")
                     return True  # Continue anyway, ADC might work
                     
         except FileNotFoundError:
-            print("⚠️ gcloud CLI not installed - using Application Default Credentials only")
+            print(" WARNING: [U+FE0F] gcloud CLI not installed - using Application Default Credentials only")
             return True  # ADC will still work
         except Exception as e:
-            print(f"⚠️ Error activating service account: {e}")
+            print(f" WARNING: [U+FE0F] Error activating service account: {e}")
             return True  # Continue anyway
     
     @classmethod
@@ -218,7 +218,7 @@ class GCPAuthConfig:
         if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
             creds_path = Path(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
             if creds_path.exists():
-                print(f"✅ Already authenticated with: {creds_path}")
+                print(f" PASS:  Already authenticated with: {creds_path}")
                 return True
         
         # Set up authentication
@@ -256,28 +256,28 @@ class GCPAuthConfig:
 
 def main():
     """Test the authentication configuration."""
-    print("🔍 GCP Authentication Configuration Check\n")
+    print(" SEARCH:  GCP Authentication Configuration Check\n")
     print("=" * 60)
     
     # Get configuration summary
     config = GCPAuthConfig.get_config_summary()
     
-    print("\n📊 Current Configuration:")
-    print(f"  Authenticated: {'✅ Yes' if config['authenticated'] else '❌ No'}")
+    print("\n CHART:  Current Configuration:")
+    print(f"  Authenticated: {' PASS:  Yes' if config['authenticated'] else ' FAIL:  No'}")
     print(f"  Key Path: {config['key_path'] or 'Not found'}")
     print(f"  Service Account: {config['service_account_email'] or 'Unknown'}")
     print(f"  Project ID: {config['project_id'] or 'Unknown'}")
-    print(f"  Environment Variable Set: {'✅ Yes' if config['env_var_set'] else '❌ No'}")
+    print(f"  Environment Variable Set: {' PASS:  Yes' if config['env_var_set'] else ' FAIL:  No'}")
     
     print("\n" + "=" * 60)
-    print("\n🔐 Testing Authentication Setup...")
+    print("\n[U+1F510] Testing Authentication Setup...")
     
     if GCPAuthConfig.ensure_authentication():
-        print("\n✅ Authentication setup successful!")
-        print("\n📋 You can now use any GCP script with proper authentication.")
+        print("\n PASS:  Authentication setup successful!")
+        print("\n[U+1F4CB] You can now use any GCP script with proper authentication.")
     else:
-        print("\n❌ Authentication setup failed!")
-        print("\n📋 Please follow the instructions above to configure authentication.")
+        print("\n FAIL:  Authentication setup failed!")
+        print("\n[U+1F4CB] Please follow the instructions above to configure authentication.")
         sys.exit(1)
 
 

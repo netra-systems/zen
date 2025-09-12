@@ -1,7 +1,7 @@
 """
 Comprehensive E2E Model Selection Workflows Test Suite - Main Index Module
 Re-exports all test classes from focused modules for backwards compatibility.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """""
 
 import sys

@@ -76,7 +76,7 @@ class RealRaceConditionTester:
         count: int
     ) -> List[RaceConditionResult]:
         """Create multiple REAL authenticated WebSocket connections concurrently."""
-        logger.info(f"🏁 Starting REAL concurrent connection race condition test with {count} connections")
+        logger.info(f"[U+1F3C1] Starting REAL concurrent connection race condition test with {count} connections")
         
         # Create multiple authenticated users concurrently
         user_tasks = []
@@ -90,7 +90,7 @@ class RealRaceConditionTester:
         
         # Wait for all user creation to complete
         users = await asyncio.gather(*user_tasks)
-        logger.info(f"✓ Created {len(users)} authenticated users for race condition testing")
+        logger.info(f"[U+2713] Created {len(users)} authenticated users for race condition testing")
         
         # Create connection tasks that will execute concurrently
         connection_tasks = []
@@ -125,7 +125,7 @@ class RealRaceConditionTester:
             
             race_results.append(race_result)
         
-        logger.info(f"🏁 Race condition test completed: {successful_connections}/{count} connections successful in {total_time:.3f}s")
+        logger.info(f"[U+1F3C1] Race condition test completed: {successful_connections}/{count} connections successful in {total_time:.3f}s")
         return race_results
     
     async def _attempt_websocket_connection(
@@ -166,7 +166,7 @@ class RealRaceConditionTester:
             try:
                 response_str = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                 response = json.loads(response_str) if response_str else {}
-                logger.info(f"📨 Connection {sequence} received response: {response.get('type', 'unknown')}")
+                logger.info(f"[U+1F4E8] Connection {sequence} received response: {response.get('type', 'unknown')}")
             except asyncio.TimeoutError:
                 # No response is acceptable for connection test
                 pass
@@ -183,7 +183,7 @@ class RealRaceConditionTester:
             
         except Exception as e:
             connection_time = time.time() - start_time
-            logger.warning(f"⚠️ Connection {sequence} failed: {type(e).__name__}: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Connection {sequence} failed: {type(e).__name__}: {e}")
             
             return RaceConditionResult(
                 success=False,
@@ -201,7 +201,7 @@ class RealRaceConditionTester:
         reconnection_count: int = 3
     ) -> List[RaceConditionResult]:
         """Test rapid reconnection scenarios to detect race conditions."""
-        logger.info(f"🔄 Testing rapid reconnection race conditions with {reconnection_count} cycles")
+        logger.info(f" CYCLE:  Testing rapid reconnection race conditions with {reconnection_count} cycles")
         
         # Create single user for reconnection testing
         user_data = await auth_helper.create_authenticated_user(
@@ -213,7 +213,7 @@ class RealRaceConditionTester:
         results = []
         
         for cycle in range(reconnection_count):
-            logger.info(f"🔄 Reconnection cycle {cycle + 1}/{reconnection_count}")
+            logger.info(f" CYCLE:  Reconnection cycle {cycle + 1}/{reconnection_count}")
             
             # Connect
             connect_result = await self._attempt_websocket_connection(user_data, cycle * 2)
@@ -248,7 +248,7 @@ class RealRaceConditionTester:
             await asyncio.sleep(0.1)
         
         successful_ops = sum(1 for r in results if r.success)
-        logger.info(f"🔄 Rapid reconnection test completed: {successful_ops}/{len(results)} operations successful")
+        logger.info(f" CYCLE:  Rapid reconnection test completed: {successful_ops}/{len(results)} operations successful")
         
         return results
     
@@ -258,7 +258,7 @@ class RealRaceConditionTester:
         concurrent_auth_attempts: int = 3
     ) -> List[RaceConditionResult]:
         """Test concurrent authentication state changes to detect races."""
-        logger.info(f"🔐 Testing authentication state race conditions with {concurrent_auth_attempts} concurrent attempts")
+        logger.info(f"[U+1F510] Testing authentication state race conditions with {concurrent_auth_attempts} concurrent attempts")
         
         # Create user
         user_data = await auth_helper.create_authenticated_user(
@@ -297,7 +297,7 @@ class RealRaceConditionTester:
             race_results.append(race_result)
         
         successful_auths = sum(1 for r in race_results if r.success)
-        logger.info(f"🔐 Auth state race test completed: {successful_auths}/{concurrent_auth_attempts} authentications successful in {total_time:.3f}s")
+        logger.info(f"[U+1F510] Auth state race test completed: {successful_auths}/{concurrent_auth_attempts} authentications successful in {total_time:.3f}s")
         
         return race_results
     
@@ -351,7 +351,7 @@ class RealRaceConditionTester:
     
     async def cleanup_connections(self):
         """Cleanup all active connections."""
-        logger.info(f"🧹 Cleaning up {len(self.active_connections)} active connections")
+        logger.info(f"[U+1F9F9] Cleaning up {len(self.active_connections)} active connections")
         
         cleanup_tasks = []
         for connection in list(self.active_connections):
@@ -364,7 +364,7 @@ class RealRaceConditionTester:
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
         self.active_connections.clear()
-        logger.info("✓ All connections cleaned up")
+        logger.info("[U+2713] All connections cleaned up")
 
 
 @pytest.mark.e2e  
@@ -411,15 +411,15 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         """Test that concurrent WebSocket connections don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Tests REAL concurrent connection scenarios
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks, NO fake race conditions
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard failures for race condition violations
+         PASS:  Tests REAL concurrent connection scenarios
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks, NO fake race conditions
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard failures for race condition violations
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL concurrent WebSocket connection race conditions")
+        logger.info("[U+1F680] Testing REAL concurrent WebSocket connection race conditions")
         
         try:
             # Test concurrent connections
@@ -432,9 +432,9 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
             successful_connections = [r for r in results if r.success]
             failed_connections = [r for r in results if not r.success]
             
-            logger.info(f"📊 Concurrent connection results:")
-            logger.info(f"   ✅ Successful: {len(successful_connections)}")
-            logger.info(f"   ❌ Failed: {len(failed_connections)}")
+            logger.info(f" CHART:  Concurrent connection results:")
+            logger.info(f"    PASS:  Successful: {len(successful_connections)}")
+            logger.info(f"    FAIL:  Failed: {len(failed_connections)}")
             
             # Log timing analysis
             if successful_connections:
@@ -443,12 +443,12 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
                 max_timing = max(timings)
                 min_timing = min(timings)
                 
-                logger.info(f"   ⏱️ Timing - Avg: {avg_timing:.3f}s, Min: {min_timing:.3f}s, Max: {max_timing:.3f}s")
+                logger.info(f"   [U+23F1][U+FE0F] Timing - Avg: {avg_timing:.3f}s, Min: {min_timing:.3f}s, Max: {max_timing:.3f}s")
                 
                 # Check for race condition indicators (extreme timing variations)
                 timing_variance = max_timing - min_timing
                 if timing_variance > RACE_CONDITION_DETECTION_THRESHOLD:
-                    logger.warning(f"⚠️ Large timing variance detected: {timing_variance:.3f}s - possible race condition")
+                    logger.warning(f" WARNING: [U+FE0F] Large timing variance detected: {timing_variance:.3f}s - possible race condition")
             
             # Log failure analysis
             if failed_connections:
@@ -457,7 +457,7 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
                     error_type = type(result.error).__name__ if result.error else "Unknown"
                     failure_types[error_type] = failure_types.get(error_type, 0) + 1
                 
-                logger.info(f"   📋 Failure types: {failure_types}")
+                logger.info(f"   [U+1F4CB] Failure types: {failure_types}")
             
             # CLAUDE.md compliance assertions - NO TOLERANCE for race conditions
             
@@ -489,8 +489,8 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         execution_time = time.time() - start_time
         assert execution_time >= MINIMUM_EXECUTION_TIME, f"Test executed too quickly ({execution_time:.3f}s) - likely using fake race conditions"
         
-        logger.info(f"✅ REAL concurrent connection race condition test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   🏁 Race condition protection verified for {CONCURRENT_CONNECTION_COUNT} concurrent connections")
+        logger.info(f" PASS:  REAL concurrent connection race condition test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"   [U+1F3C1] Race condition protection verified for {CONCURRENT_CONNECTION_COUNT} concurrent connections")
     
     @pytest.mark.critical
     @pytest.mark.timeout(60)
@@ -498,15 +498,15 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         """Test that rapid reconnection scenarios don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Tests REAL rapid reconnection scenarios
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks, NO simulated disconnections
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard failures for reconnection race conditions
+         PASS:  Tests REAL rapid reconnection scenarios
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks, NO simulated disconnections
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard failures for reconnection race conditions
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL rapid reconnection race conditions")
+        logger.info("[U+1F680] Testing REAL rapid reconnection race conditions")
         
         try:
             # Test rapid reconnection cycles
@@ -519,9 +519,9 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
             successful_operations = [r for r in results if r.success]
             failed_operations = [r for r in results if not r.success]
             
-            logger.info(f"📊 Rapid reconnection results:")
-            logger.info(f"   ✅ Successful operations: {len(successful_operations)}")
-            logger.info(f"   ❌ Failed operations: {len(failed_operations)}")
+            logger.info(f" CHART:  Rapid reconnection results:")
+            logger.info(f"    PASS:  Successful operations: {len(successful_operations)}")
+            logger.info(f"    FAIL:  Failed operations: {len(failed_operations)}")
             
             # Check for reconnection-specific race conditions
             reconnection_failures = [
@@ -529,7 +529,7 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
                 if r.error and any(keyword in r.error.lower() for keyword in ["connection", "already", "state", "closed"])
             ]
             
-            logger.info(f"   🔄 Reconnection-specific failures: {len(reconnection_failures)}")
+            logger.info(f"    CYCLE:  Reconnection-specific failures: {len(reconnection_failures)}")
             
             # CLAUDE.md compliance assertions
             
@@ -549,8 +549,8 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         execution_time = time.time() - start_time
         assert execution_time >= MINIMUM_EXECUTION_TIME, f"Test executed too quickly ({execution_time:.3f}s) - likely using fake scenarios"
         
-        logger.info(f"✅ REAL rapid reconnection race condition test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   🔄 Reconnection race condition protection verified")
+        logger.info(f" PASS:  REAL rapid reconnection race condition test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"    CYCLE:  Reconnection race condition protection verified")
     
     @pytest.mark.critical
     @pytest.mark.timeout(45)
@@ -558,15 +558,15 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         """Test that concurrent authentication operations don't cause race conditions.
         
         CLAUDE.md COMPLIANCE:  
-        ✅ Tests REAL concurrent authentication scenarios
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks, NO fake auth states
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard failures for auth race conditions
+         PASS:  Tests REAL concurrent authentication scenarios
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks, NO fake auth states
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard failures for auth race conditions
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL authentication state race conditions")
+        logger.info("[U+1F680] Testing REAL authentication state race conditions")
         
         try:
             # Test concurrent authentication validations
@@ -579,9 +579,9 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
             successful_auths = [r for r in results if r.success]
             failed_auths = [r for r in results if not r.success]
             
-            logger.info(f"📊 Authentication state race results:")
-            logger.info(f"   ✅ Successful authentications: {len(successful_auths)}")  
-            logger.info(f"   ❌ Failed authentications: {len(failed_auths)}")
+            logger.info(f" CHART:  Authentication state race results:")
+            logger.info(f"    PASS:  Successful authentications: {len(successful_auths)}")  
+            logger.info(f"    FAIL:  Failed authentications: {len(failed_auths)}")
             
             # Check for auth-specific race conditions
             if failed_auths:
@@ -590,7 +590,7 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
                     error_key = "expired" if "expired" in result.error.lower() else "invalid"
                     auth_error_types[error_key] = auth_error_types.get(error_key, 0) + 1
                 
-                logger.info(f"   🔐 Auth error types: {auth_error_types}")
+                logger.info(f"   [U+1F510] Auth error types: {auth_error_types}")
             
             # CLAUDE.md compliance assertions
             
@@ -614,8 +614,8 @@ class TestWebSocketStartupRaceConditionReal(BaseE2ETest):
         execution_time = time.time() - start_time
         assert execution_time >= MINIMUM_EXECUTION_TIME, f"Test executed too quickly ({execution_time:.3f}s) - likely using fake auth scenarios"
         
-        logger.info(f"✅ REAL authentication state race condition test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   🔐 Authentication race condition protection verified")
+        logger.info(f" PASS:  REAL authentication state race condition test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"   [U+1F510] Authentication race condition protection verified")
 
 
 if __name__ == "__main__":

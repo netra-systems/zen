@@ -54,9 +54,9 @@ class TestWebSocketJWTAuthFix:
         test_jwt_token = config.create_test_jwt_token()
         
         if test_jwt_token:
-            print(f"   ✅ StagingConfig generated JWT token: {test_jwt_token[:50]}...")
+            print(f"    PASS:  StagingConfig generated JWT token: {test_jwt_token[:50]}...")
         else:
-            print(f"   ❌ StagingConfig failed to generate JWT token")
+            print(f"    FAIL:  StagingConfig failed to generate JWT token")
         
         # Test the UserContextExtractor JWT validation
         print(f"3. Testing UserContextExtractor JWT validation...")
@@ -73,10 +73,10 @@ class TestWebSocketJWTAuthFix:
             payload = await extractor.validate_and_decode_jwt(test_jwt_token)  # CRITICAL FIX: Added await
             
             if payload:
-                print(f"   ✅ JWT validation SUCCESS - fix is working!")
+                print(f"    PASS:  JWT validation SUCCESS - fix is working!")
                 print(f"   User ID: {payload.get('sub', 'unknown')}")
             else:
-                print(f"   ❌ JWT validation FAILED - secret mismatch detected!")
+                print(f"    FAIL:  JWT validation FAILED - secret mismatch detected!")
                 print(f"   This reproduces the original bug")
                 
                 # Try to debug the mismatch
@@ -86,7 +86,7 @@ class TestWebSocketJWTAuthFix:
                     print(f"   Token is valid with test secret: {test_payload.get('sub')}")
                     
                     # This means the backend is using a different secret
-                    print(f"   ❌ CONFIRMED: Backend and test config use different JWT secrets")
+                    print(f"    FAIL:  CONFIRMED: Backend and test config use different JWT secrets")
                 except Exception as e:
                     print(f"   Token verification error: {e}")
         
@@ -160,9 +160,9 @@ class TestWebSocketJWTAuthFix:
             
             # Verify the secret matches expectation
             if actual_secret == case["expected"]:
-                print(f"   ✅ Secret loading works correctly")
+                print(f"    PASS:  Secret loading works correctly")
             else:
-                print(f"   ❌ Secret loading failed - environment variable issue")
+                print(f"    FAIL:  Secret loading failed - environment variable issue")
             
             # Clean up this test case
             for key in ["JWT_SECRET_STAGING", "JWT_SECRET_KEY", "JWT_SECRET", "ENVIRONMENT"]:
@@ -195,7 +195,7 @@ class TestWebSocketJWTAuthFix:
             auth_header = headers["Authorization"]
             if auth_header.startswith("Bearer "):
                 token = auth_header.split("Bearer ")[1]
-                print(f"   ✅ Found Bearer token in headers: {token[:30]}...")
+                print(f"    PASS:  Found Bearer token in headers: {token[:30]}...")
                 
                 # Test that this token can be validated by backend
                 print("2. Testing token validation by backend...")
@@ -203,15 +203,15 @@ class TestWebSocketJWTAuthFix:
                 payload = await extractor.validate_and_decode_jwt(token)  # CRITICAL FIX: Added await
                 
                 if payload:
-                    print(f"   ✅ Token validation SUCCESS!")
+                    print(f"    PASS:  Token validation SUCCESS!")
                     print(f"   User ID: {payload.get('sub', 'unknown')}")
                     print(f"   Token expiry: {datetime.fromtimestamp(payload.get('exp', 0))}")
                 else:
-                    print(f"   ❌ Token validation FAILED - this indicates the bug still exists")
+                    print(f"    FAIL:  Token validation FAILED - this indicates the bug still exists")
             else:
-                print(f"   ❌ Authorization header malformed: {auth_header}")
+                print(f"    FAIL:  Authorization header malformed: {auth_header}")
         else:
-            print(f"   ❌ No Authorization header generated")
+            print(f"    FAIL:  No Authorization header generated")
         
         # Clean up
         for key in ["JWT_SECRET_STAGING", "ENVIRONMENT"]:
@@ -255,11 +255,11 @@ class TestWebSocketJWTAuthFix:
         try:
             payload = await extractor.validate_and_decode_jwt(test_token) if test_token else None  # CRITICAL FIX: Added await
             if payload:
-                print(f"   ❌ UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario")
+                print(f"    FAIL:  UNEXPECTED: Token validation succeeded - this shouldn't happen in bug scenario")
             else:
-                print(f"   ✅ REPRODUCED: Token validation failed as expected in bug scenario")
+                print(f"    PASS:  REPRODUCED: Token validation failed as expected in bug scenario")
         except Exception as e:
-            print(f"   ✅ REPRODUCED: Backend validation error: {str(e)[:100]}")
+            print(f"    PASS:  REPRODUCED: Backend validation error: {str(e)[:100]}")
         
         # Clean up
         for key in ["ENVIRONMENT"]:
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     try:
         asyncio.run(test.test_reproduce_jwt_secret_mismatch())  # CRITICAL FIX: Added asyncio.run
     except AssertionError as e:
-        print(f"✅ CONFIRMED BUG: {e}")
+        print(f" PASS:  CONFIRMED BUG: {e}")
     
     test.test_environment_variable_loading_issue()
     

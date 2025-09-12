@@ -175,12 +175,12 @@ def main():
     print(f"\nFound {len(violations)} functions exceeding 8 lines")
     
     if violations:
-        print("\n🔴 TOP 10 WORST OFFENDERS:")
+        print("\n[U+1F534] TOP 10 WORST OFFENDERS:")
         for i, func in enumerate(violations[:10], 1):
             print(f"{i:2}. {func.name}() - {func.line_count} lines in {func.file_path}")
             
         # Generate detailed suggestions for top 3
-        print("\n📋 DECOMPOSITION SUGGESTIONS:")
+        print("\n[U+1F4CB] DECOMPOSITION SUGGESTIONS:")
         for func in violations[:3]:
             suggestions = suggest_decomposition(func)
             print(f"\n{func.name}() ({func.line_count} lines):")
@@ -192,7 +192,7 @@ def main():
         report_path = 'function_decomposition_report.md'
         with open(report_path, 'w') as f:
             f.write(report)
-        print(f"\n📄 Full report saved to: {report_path}")
+        print(f"\n[U+1F4C4] Full report saved to: {report_path}")
         
     return len(violations)
 

@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -66,7 +67,7 @@
             # Pytest imports for test markers - using standard pytest marks
 
 
-# REMOVED_SYNTAX_ERROR: class TestServiceStartupSequencing(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestServiceStartupSequencing(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for service startup sequence coordination failures.
 
@@ -185,7 +186,7 @@
             # REMOVED_SYNTAX_ERROR: "Infrastructure services should start in parallel")
 
 
-# REMOVED_SYNTAX_ERROR: class TestReadinessCheckCoordination(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestReadinessCheckCoordination(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for readiness check coordination across services.
 
@@ -317,7 +318,7 @@
         # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class TestServiceDiscoveryCoordination(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestServiceDiscoveryCoordination(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for service discovery coordination during startup.
 
@@ -449,7 +450,7 @@
                                         # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class TestStartupErrorRecovery(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestStartupErrorRecovery(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for startup error recovery coordination.
 

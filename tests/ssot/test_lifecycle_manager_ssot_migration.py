@@ -1,5 +1,5 @@
 """
-SSOT Tests for UnifiedLifecycleManager → SystemLifecycle Migration
+SSOT Tests for UnifiedLifecycleManager  ->  SystemLifecycle Migration
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Risk Reduction, Development Velocity  
@@ -583,7 +583,7 @@ if __name__ == "__main__":
     import sys
     
     print("=== SSOT Lifecycle Manager Migration Tests ===")
-    print("Running 20% NEW SSOT tests for UnifiedLifecycleManager → SystemLifecycle migration")
+    print("Running 20% NEW SSOT tests for UnifiedLifecycleManager  ->  SystemLifecycle migration")
     print()
     
     # Test 1: SSOT Naming Convention Compliance
@@ -591,27 +591,27 @@ if __name__ == "__main__":
     try:
         test_class = TestSSotNamingConventionCompliance()
         test_class.test_current_class_naming_violation()
-        print("❌ EXPECTED FAILURE: Current naming violates business-focused conventions")
+        print(" FAIL:  EXPECTED FAILURE: Current naming violates business-focused conventions")
     except AssertionError:
-        print("✅ EXPECTED: Current naming violation detected (test working correctly)")
+        print(" PASS:  EXPECTED: Current naming violation detected (test working correctly)")
     
     # Test 2: Factory Pattern Integrity  
     print("\nTest 2: Factory Pattern Integrity")
     try:
         test_class = TestFactoryPatternIntegrity()
         test_class.test_factory_user_isolation_integrity()
-        print("✅ PASS: Factory pattern maintains user isolation")
+        print(" PASS:  PASS: Factory pattern maintains user isolation")
     except Exception as e:
-        print(f"❌ FAIL: Factory pattern test failed: {e}")
+        print(f" FAIL:  FAIL: Factory pattern test failed: {e}")
     
     # Test 3: Import Compatibility
     print("\nTest 3: Import Compatibility")
     try:
         test_class = TestImportCompatibilityDuringMigration()
         test_class.test_current_import_path_works()
-        print("✅ PASS: Current import paths work")
+        print(" PASS:  PASS: Current import paths work")
     except Exception as e:
-        print(f"❌ FAIL: Import compatibility test failed: {e}")
+        print(f" FAIL:  FAIL: Import compatibility test failed: {e}")
     
     # Test 4: WebSocket Integration
     print("\nTest 4: WebSocket Integration")
@@ -619,20 +619,20 @@ if __name__ == "__main__":
         import asyncio
         test_class = TestWebSocketIntegrationLifecycleEvents()
         asyncio.run(test_class.test_websocket_lifecycle_event_integration())
-        print("✅ PASS: WebSocket lifecycle events work")
+        print(" PASS:  PASS: WebSocket lifecycle events work")
     except Exception as e:
-        print(f"❌ FAIL: WebSocket integration test failed: {e}")
+        print(f" FAIL:  FAIL: WebSocket integration test failed: {e}")
     
     # Test 5: Mega Class Compliance
     print("\nTest 5: Mega Class Compliance")
     try:
         test_class = TestMegaClassComplianceAfterMigration()
         test_class.test_current_class_line_count_compliance()
-        print("✅ PASS: Class within mega class limits")
+        print(" PASS:  PASS: Class within mega class limits")
     except Exception as e:
-        print(f"❌ FAIL: Mega class compliance test failed: {e}")
+        print(f" FAIL:  FAIL: Mega class compliance test failed: {e}")
     
     print("\n=== SSOT Migration Tests Summary ===")
-    print("Tests created to validate UnifiedLifecycleManager → SystemLifecycle migration")
+    print("Tests created to validate UnifiedLifecycleManager  ->  SystemLifecycle migration")
     print("Expected behavior: Some tests SHOULD FAIL until migration is complete")
     print("Focus: SSOT compliance, naming conventions, architectural integrity")

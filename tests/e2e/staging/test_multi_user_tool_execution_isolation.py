@@ -799,7 +799,7 @@ class TestMultiUserToolExecutionIsolation(SSotAsyncTestCase):
                         # Cross-tenant data leak detected!
                         self.fail(
                             f"Cross-tenant data leak detected: "
-                            f"User {user.user_id} (tenant {user.tenant_id}) → "
+                            f"User {user.user_id} (tenant {user.tenant_id})  ->  "
                             f"User {target_user_id} (tenant {target_user.tenant_id})"
                         )
                         

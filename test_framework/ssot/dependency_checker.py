@@ -30,9 +30,9 @@ class DependencyCheckResult:
     
     def __str__(self) -> str:
         if self.success:
-            return f"✓ All dependencies available ({len(self.available)} dependencies)"
+            return f"[U+2713] All dependencies available ({len(self.available)} dependencies)"
         else:
-            return f"✗ Missing {len(self.missing)} dependencies: {', '.join(self.missing)}"
+            return f"[U+2717] Missing {len(self.missing)} dependencies: {', '.join(self.missing)}"
 
 
 class TestDependencyChecker:

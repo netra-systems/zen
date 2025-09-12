@@ -43,7 +43,7 @@ async def validate_e2e_docker_helper(quick_test: bool = False):
     Args:
         quick_test: If True, run minimal validation
     """
-    logger.info("🧪 Validating E2EDockerHelper functionality...")
+    logger.info("[U+1F9EA] Validating E2EDockerHelper functionality...")
     
     test_id = "validation-test"
     helper = E2EDockerHelper(test_id=test_id)
@@ -54,7 +54,7 @@ async def validate_e2e_docker_helper(quick_test: bool = False):
         timeout = 60 if quick_test else 180
         service_urls = await helper.setup_e2e_environment(timeout=timeout)
         
-        logger.info("   ✅ E2E environment setup successful!")
+        logger.info("    PASS:  E2E environment setup successful!")
         for service, url in service_urls.items():
             logger.info(f"      {service}: {url}")
         
@@ -67,7 +67,7 @@ async def validate_e2e_docker_helper(quick_test: bool = False):
             # Check ports are E2E specific (8002, 8083)
             assert ':8002' in backend_url, f"Expected backend port 8002, got {backend_url}"
             assert ':8083' in auth_url, f"Expected auth port 8083, got {auth_url}"
-            logger.info("   ✅ Port isolation validated!")
+            logger.info("    PASS:  Port isolation validated!")
             
             # Test 3: Basic service health check
             logger.info("   Step 3: Testing service connectivity...")
@@ -78,31 +78,31 @@ async def validate_e2e_docker_helper(quick_test: bool = False):
                     # Test backend health
                     response = await client.get(f"{service_urls['backend']}/health")
                     if response.status_code == 200:
-                        logger.info("   ✅ Backend service responding!")
+                        logger.info("    PASS:  Backend service responding!")
                     else:
-                        logger.warning(f"   ⚠️ Backend returned {response.status_code}")
+                        logger.warning(f"    WARNING: [U+FE0F] Backend returned {response.status_code}")
                 except Exception as e:
-                    logger.warning(f"   ⚠️ Backend connection issue: {e}")
+                    logger.warning(f"    WARNING: [U+FE0F] Backend connection issue: {e}")
                 
                 try:
                     # Test auth health  
                     response = await client.get(f"{service_urls['auth']}/health")
                     if response.status_code == 200:
-                        logger.info("   ✅ Auth service responding!")
+                        logger.info("    PASS:  Auth service responding!")
                     else:
-                        logger.warning(f"   ⚠️ Auth returned {response.status_code}")
+                        logger.warning(f"    WARNING: [U+FE0F] Auth returned {response.status_code}")
                 except Exception as e:
-                    logger.warning(f"   ⚠️ Auth connection issue: {e}")
+                    logger.warning(f"    WARNING: [U+FE0F] Auth connection issue: {e}")
         
         # Test 4: Teardown
         logger.info("   Step 4: Tearing down E2E environment...")
         await helper.teardown_e2e_environment()
-        logger.info("   ✅ E2E environment teardown successful!")
+        logger.info("    PASS:  E2E environment teardown successful!")
         
         return True
         
     except Exception as e:
-        logger.error(f"   ❌ E2EDockerHelper validation failed: {e}")
+        logger.error(f"    FAIL:  E2EDockerHelper validation failed: {e}")
         
         # Ensure cleanup happens even on failure
         try:
@@ -115,7 +115,7 @@ async def validate_e2e_docker_helper(quick_test: bool = False):
 
 def validate_reliability_patches():
     """Validate Docker reliability patches."""
-    logger.info("🔧 Validating Docker reliability patches...")
+    logger.info("[U+1F527] Validating Docker reliability patches...")
     
     try:
         patcher = DockerReliabilityPatcher("e2e")
@@ -137,17 +137,17 @@ def validate_reliability_patches():
                    f"{cleanup_results['volumes']} volumes, "
                    f"{cleanup_results['networks']} networks")
         
-        logger.info("   ✅ Reliability patches validation successful!")
+        logger.info("    PASS:  Reliability patches validation successful!")
         return True
         
     except Exception as e:
-        logger.error(f"   ❌ Reliability patches validation failed: {e}")
+        logger.error(f"    FAIL:  Reliability patches validation failed: {e}")
         return False
 
 
 async def validate_test_runner_integration():
     """Validate that unified test runner can use E2E Docker."""
-    logger.info("🏃 Validating test runner integration...")
+    logger.info("[U+1F3C3] Validating test runner integration...")
     
     try:
         # Import test runner components
@@ -172,21 +172,21 @@ async def validate_test_runner_integration():
         categories_to_run = runner._determine_categories_to_run(args)
         
         if "e2e" in categories_to_run:
-            logger.info("   ✅ Test runner correctly detects E2E category!")
+            logger.info("    PASS:  Test runner correctly detects E2E category!")
         else:
-            logger.warning("   ⚠️ Test runner does not detect E2E category")
+            logger.warning("    WARNING: [U+FE0F] Test runner does not detect E2E category")
         
-        logger.info("   ✅ Test runner integration validated!")
+        logger.info("    PASS:  Test runner integration validated!")
         return True
         
     except Exception as e:
-        logger.error(f"   ❌ Test runner integration validation failed: {e}")
+        logger.error(f"    FAIL:  Test runner integration validation failed: {e}")
         return False
 
 
 async def cleanup_all_test_resources():
     """Clean up all test resources."""
-    logger.info("🧹 Cleaning up all test resources...")
+    logger.info("[U+1F9F9] Cleaning up all test resources...")
     
     try:
         patcher = DockerReliabilityPatcher("e2e")
@@ -202,11 +202,11 @@ async def cleanup_all_test_resources():
                    f"{cleanup_results['volumes']} volumes, "
                    f"{cleanup_results['networks']} networks")
         
-        logger.info("   ✅ Cleanup completed!")
+        logger.info("    PASS:  Cleanup completed!")
         return True
         
     except Exception as e:
-        logger.error(f"   ❌ Cleanup failed: {e}")
+        logger.error(f"    FAIL:  Cleanup failed: {e}")
         return False
 
 
@@ -225,7 +225,7 @@ async def main():
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     
-    logger.info("🚀 Starting E2E Docker validation...")
+    logger.info("[U+1F680] Starting E2E Docker validation...")
     
     results = {}
     
@@ -243,22 +243,22 @@ async def main():
     
     # Summary
     logger.info("\n" + "="*50)
-    logger.info("📊 VALIDATION RESULTS SUMMARY")
+    logger.info(" CHART:  VALIDATION RESULTS SUMMARY")
     logger.info("="*50)
     
     all_passed = True
     for test_name, passed in results.items():
-        status = "✅ PASS" if passed else "❌ FAIL"
+        status = " PASS:  PASS" if passed else " FAIL:  FAIL"
         logger.info(f"  {status} {test_name}")
         if not passed:
             all_passed = False
     
     if all_passed:
-        logger.info("\n🎉 ALL VALIDATIONS PASSED!")
+        logger.info("\n CELEBRATION:  ALL VALIDATIONS PASSED!")
         logger.info("   E2E tests with Docker are now 100% reliable!")
         return 0
     else:
-        logger.error("\n💥 SOME VALIDATIONS FAILED!")
+        logger.error("\n[U+1F4A5] SOME VALIDATIONS FAILED!")
         logger.error("   Please check the errors above and fix issues.")
         return 1
 

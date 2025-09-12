@@ -282,11 +282,11 @@
 
                         # REMOVED_SYNTAX_ERROR: if not backend_status.get("backend_http", {}).get("available"):
                             # REMOVED_SYNTAX_ERROR: print(f" )
-                            # REMOVED_SYNTAX_ERROR: ❌ Backend HTTP not available")
+                            # REMOVED_SYNTAX_ERROR:  FAIL:  Backend HTTP not available")
 
                             # REMOVED_SYNTAX_ERROR: if not backend_status.get("websocket_endpoint", {}).get("reachable"):
                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                # REMOVED_SYNTAX_ERROR: ❌ WebSocket endpoint not reachable")
+                                # REMOVED_SYNTAX_ERROR:  FAIL:  WebSocket endpoint not reachable")
 
                                 # This assertion is expected to FAIL, demonstrating the issue
                                 # REMOVED_SYNTAX_ERROR: assert len(connection_result["connection_errors"]) == 0, ( )

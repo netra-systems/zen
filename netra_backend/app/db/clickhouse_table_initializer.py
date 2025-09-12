@@ -126,20 +126,20 @@ class ClickHouseTableInitializer:
             
             for database, tables in self.REQUIRED_TABLES.items():
                 # Ensure database exists
-                logger.info(f"🔍 Checking database: {database}")
+                logger.info(f" SEARCH:  Checking database: {database}")
                 try:
                     client.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
                     result['databases_checked'].append(database)
                 except Exception as e:
                     error_msg = f"Failed to create database {database}: {e}"
-                    logger.error(f"❌ {error_msg}")
+                    logger.error(f" FAIL:  {error_msg}")
                     result['errors'].append(error_msg)
                     continue
                 
                 # Create each table
                 for table_name, schema in tables.items():
                     try:
-                        logger.info(f"📋 Creating table: {database}.{table_name}")
+                        logger.info(f"[U+1F4CB] Creating table: {database}.{table_name}")
                         client.execute(f"USE {database}")
                         client.execute(schema)
                         result['tables_created'].append(f"{database}.{table_name}")
@@ -148,23 +148,23 @@ class ClickHouseTableInitializer:
                         tables_in_db = client.execute(f"SHOW TABLES FROM {database}")
                         if any(table_name in str(row) for row in tables_in_db):
                             result['tables_verified'].append(f"{database}.{table_name}")
-                            logger.info(f"✅ Table verified: {database}.{table_name}")
+                            logger.info(f" PASS:  Table verified: {database}.{table_name}")
                         else:
                             error_msg = f"Table {database}.{table_name} not found after creation"
-                            logger.error(f"❌ {error_msg}")
+                            logger.error(f" FAIL:  {error_msg}")
                             result['errors'].append(error_msg)
                             
                     except ServerException as e:
                         if e.code == ErrorCodes.TABLE_ALREADY_EXISTS:
-                            logger.info(f"✓ Table already exists: {database}.{table_name}")
+                            logger.info(f"[U+2713] Table already exists: {database}.{table_name}")
                             result['tables_verified'].append(f"{database}.{table_name}")
                         else:
                             error_msg = f"Failed to create table {database}.{table_name}: {e}"
-                            logger.error(f"❌ {error_msg}")
+                            logger.error(f" FAIL:  {error_msg}")
                             result['errors'].append(error_msg)
                     except Exception as e:
                         error_msg = f"Unexpected error creating table {database}.{table_name}: {e}"
-                        logger.error(f"❌ {error_msg}")
+                        logger.error(f" FAIL:  {error_msg}")
                         result['errors'].append(error_msg)
             
             # Determine overall success
@@ -172,13 +172,13 @@ class ClickHouseTableInitializer:
             result['success'] = len(result['tables_verified']) == expected_tables
             
             if result['success']:
-                logger.info(f"✅ All {expected_tables} required tables verified")
+                logger.info(f" PASS:  All {expected_tables} required tables verified")
             else:
-                logger.error(f"⚠️ Only {len(result['tables_verified'])}/{expected_tables} tables verified")
+                logger.error(f" WARNING: [U+FE0F] Only {len(result['tables_verified'])}/{expected_tables} tables verified")
                 
         except Exception as e:
             error_msg = f"Critical error during table initialization: {e}"
-            logger.error(f"🔴 {error_msg}")
+            logger.error(f"[U+1F534] {error_msg}")
             result['errors'].append(error_msg)
         finally:
             if self.client:
@@ -200,7 +200,7 @@ class ClickHouseTableInitializer:
                 # Check database exists
                 databases = client.execute("SHOW DATABASES")
                 if not any(database in str(row) for row in databases):
-                    logger.error(f"❌ Database {database} does not exist")
+                    logger.error(f" FAIL:  Database {database} does not exist")
                     return False
                 
                 # Check each table
@@ -208,23 +208,23 @@ class ClickHouseTableInitializer:
                     try:
                         # Try to select from table
                         client.execute(f"SELECT 1 FROM {database}.{table_name} LIMIT 1")
-                        logger.debug(f"✓ Table accessible: {database}.{table_name}")
+                        logger.debug(f"[U+2713] Table accessible: {database}.{table_name}")
                     except ServerException as e:
                         if e.code == ErrorCodes.UNKNOWN_TABLE:
-                            logger.error(f"❌ Table does not exist: {database}.{table_name}")
+                            logger.error(f" FAIL:  Table does not exist: {database}.{table_name}")
                             return False
                         elif e.code == ErrorCodes.UNKNOWN_DATABASE:
-                            logger.error(f"❌ Database does not exist: {database}")
+                            logger.error(f" FAIL:  Database does not exist: {database}")
                             return False
                         else:
                             # Table exists but might be empty - that's OK
-                            logger.debug(f"✓ Table exists (empty): {database}.{table_name}")
+                            logger.debug(f"[U+2713] Table exists (empty): {database}.{table_name}")
                             
-            logger.info("✅ All critical tables verified")
+            logger.info(" PASS:  All critical tables verified")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error verifying tables: {e}")
+            logger.error(f" FAIL:  Error verifying tables: {e}")
             return False
         finally:
             if self.client:
@@ -252,7 +252,7 @@ def ensure_clickhouse_tables(host: str = 'dev-clickhouse',
     Raises:
         RuntimeError: If fail_fast=True and initialization fails
     """
-    logger.info("🚀 Starting ClickHouse table initialization")
+    logger.info("[U+1F680] Starting ClickHouse table initialization")
     
     initializer = ClickHouseTableInitializer(host, port, user, password)
     
@@ -261,7 +261,7 @@ def ensure_clickhouse_tables(host: str = 'dev-clickhouse',
     
     if not result['success']:
         error_msg = f"ClickHouse table initialization failed: {result['errors']}"
-        logger.error(f"🔴 {error_msg}")
+        logger.error(f"[U+1F534] {error_msg}")
         
         if fail_fast:
             # CRITICAL: Fail fast for production to prevent silent failures
@@ -271,11 +271,11 @@ def ensure_clickhouse_tables(host: str = 'dev-clickhouse',
     # Verify tables
     if not initializer.verify_critical_tables():
         error_msg = "ClickHouse table verification failed"
-        logger.error(f"🔴 {error_msg}")
+        logger.error(f"[U+1F534] {error_msg}")
         
         if fail_fast:
             raise RuntimeError(error_msg)
         return False
     
-    logger.info("✅ ClickHouse table initialization complete")
+    logger.info(" PASS:  ClickHouse table initialization complete")
     return True

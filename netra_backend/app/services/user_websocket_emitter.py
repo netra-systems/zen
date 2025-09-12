@@ -48,7 +48,7 @@ class UserWebSocketEmitter:
             router: WebSocket event router for infrastructure
             connection_id: Optional specific connection ID to target
         """
-        logger.info(f"🔄 UserWebSocketEmitter redirecting to UnifiedWebSocketEmitter for user {context.user_id[:8]}...")
+        logger.info(f" CYCLE:  UserWebSocketEmitter redirecting to UnifiedWebSocketEmitter for user {context.user_id[:8]}...")
         
         # Get the WebSocket manager from the router
         websocket_manager = getattr(router, 'websocket_manager', None)
@@ -75,7 +75,7 @@ class UserWebSocketEmitter:
         self.events_failed = 0
         self.created_at = datetime.now(timezone.utc)
         
-        logger.info(f"✅ UserWebSocketEmitter → UnifiedWebSocketEmitter redirect complete for user {self.user_id[:8]}...")
+        logger.info(f" PASS:  UserWebSocketEmitter  ->  UnifiedWebSocketEmitter redirect complete for user {self.user_id[:8]}...")
     
     async def notify_agent_started(self, agent_name: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
         """Send agent started event via SSOT emitter."""
@@ -92,7 +92,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_started: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_started: {e}")
             return False
     
     async def notify_agent_thinking(self, agent_name: str, thought: str, 
@@ -112,7 +112,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_thinking: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_thinking: {e}")
             return False
     
     async def notify_tool_executing(self, agent_name: str, tool_name: str, 
@@ -132,7 +132,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for tool_executing: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for tool_executing: {e}")
             return False
     
     async def notify_tool_completed(self, agent_name: str, tool_name: str, 
@@ -153,7 +153,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for tool_completed: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for tool_completed: {e}")
             return False
     
     async def notify_agent_completed(self, agent_name: str, result: Dict[str, Any], 
@@ -173,7 +173,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_completed: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_completed: {e}")
             return False
     
     async def notify_agent_error(self, agent_name: str, error_type: str, 
@@ -194,7 +194,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_error: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_error: {e}")
             return False
     
     async def notify_progress_update(self, agent_name: str, progress_percentage: float, 
@@ -215,7 +215,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for progress_update: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for progress_update: {e}")
             return False
     
     async def notify_custom(self, event_type: str, payload: Dict[str, Any], 
@@ -233,7 +233,7 @@ class UserWebSocketEmitter:
             return True
         except Exception as e:
             self.events_failed += 1
-            logger.error(f"🚨 SSOT redirect failed for {event_type}: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for {event_type}: {e}")
             return False
     
     # Statistics and debugging methods (delegated to SSOT)
@@ -259,12 +259,12 @@ class UserWebSocketEmitter:
             "uptime_seconds": uptime,
             "connection_id": self.connection_id,
             "ssot_redirect": True,
-            "emitter_type": "UserWebSocketEmitter → UnifiedWebSocketEmitter"
+            "emitter_type": "UserWebSocketEmitter  ->  UnifiedWebSocketEmitter"
         }
     
     def __str__(self) -> str:
         """String representation for debugging."""
-        return f"UserWebSocketEmitter→SSOT(user={self.user_id[:8]}..., run_id={self.run_id})"
+        return f"UserWebSocketEmitter -> SSOT(user={self.user_id[:8]}..., run_id={self.run_id})"
     
     # Private helper methods (preserved for compatibility)
     

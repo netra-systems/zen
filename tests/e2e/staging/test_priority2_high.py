@@ -50,11 +50,11 @@ class TestHighAuthentication:
                     f"Auth endpoint {endpoint} returned unexpected status: {response.status_code}"
                 
                 if response.status_code == 401:
-                    print(f"✓ Auth required at {endpoint} (expected)")
+                    print(f"[U+2713] Auth required at {endpoint} (expected)")
                 elif response.status_code == 200:
-                    print(f"✓ Auth endpoint accessible: {endpoint}")
+                    print(f"[U+2713] Auth endpoint accessible: {endpoint}")
                 elif response.status_code == 404:
-                    print(f"• Auth endpoint not implemented: {endpoint}")
+                    print(f"[U+2022] Auth endpoint not implemented: {endpoint}")
         
         # Test health endpoint (shouldn't require auth)
         async with httpx.AsyncClient(timeout=30) as client:
@@ -103,13 +103,13 @@ class TestHighAuthentication:
                     redirect_url = response.headers.get("location", "")
                     if "google" in redirect_url.lower():
                         oauth_results[endpoint]["google_oauth"] = True
-                        print(f"✓ Google OAuth redirect found at {endpoint}")
+                        print(f"[U+2713] Google OAuth redirect found at {endpoint}")
                 elif response.status_code == 200:
                     # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
                     data = response.json()
                     if "google" in json.dumps(data).lower():
                         oauth_results[endpoint]["google_config"] = True
-                        print(f"✓ Google OAuth config found at {endpoint}")
+                        print(f"[U+2713] Google OAuth config found at {endpoint}")
             
             # Test service discovery for OAuth info
             # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
@@ -179,11 +179,11 @@ class TestHighAuthentication:
                 # - Return 200/201 for successful refresh
                 
                 if post_response.status_code in [400, 401]:
-                    print(f"✓ Token refresh properly validates at {endpoint}")
+                    print(f"[U+2713] Token refresh properly validates at {endpoint}")
                 elif post_response.status_code == 405:
-                    print(f"• Token refresh method not allowed at {endpoint}")
+                    print(f"[U+2022] Token refresh method not allowed at {endpoint}")
                 elif post_response.status_code in [200, 201]:
-                    print(f"✓ Token refresh endpoint active at {endpoint}")
+                    print(f"[U+2713] Token refresh endpoint active at {endpoint}")
                     # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
                     token_data = post_response.json()
                     if "access_token" in token_data or "token" in token_data:
@@ -239,7 +239,7 @@ class TestHighAuthentication:
                     
                     # Expired/invalid tokens should return 401
                     if response.status_code == 401:
-                        print(f"✓ Expired token properly rejected at {endpoint}")
+                        print(f"[U+2713] Expired token properly rejected at {endpoint}")
                 
                 expiry_results[f"token_{i+1}"] = token_results
             
@@ -310,15 +310,15 @@ class TestHighAuthentication:
                 # Check for logout success indicators
                 if get_response.status_code == 200:
                     logout_results[endpoint]["get_logout_available"] = True
-                    print(f"✓ GET logout available at {endpoint}")
+                    print(f"[U+2713] GET logout available at {endpoint}")
                 
                 if post_response.status_code in [200, 204]:
                     logout_results[endpoint]["post_logout_available"] = True
-                    print(f"✓ POST logout available at {endpoint}")
+                    print(f"[U+2713] POST logout available at {endpoint}")
                 elif post_response.status_code == 401:
-                    print(f"• Logout requires auth at {endpoint} (expected)")
+                    print(f"[U+2022] Logout requires auth at {endpoint} (expected)")
                 elif post_response.status_code == 404:
-                    print(f"• Logout not implemented at {endpoint}")
+                    print(f"[U+2022] Logout not implemented at {endpoint}")
                 
                 # Check for session clearing indicators in headers
                 if "set-cookie" in get_response.headers:
@@ -399,11 +399,11 @@ class TestHighSecurity:
                 
                 # Log security findings
                 if security_headers["strict-transport-security"]:
-                    print(f"✓ HSTS enabled on {endpoint}")
+                    print(f"[U+2713] HSTS enabled on {endpoint}")
                 if cookie_security.get("has_secure") and cookie_security.get("has_httponly"):
-                    print(f"✓ Secure cookies on {endpoint}")
+                    print(f"[U+2713] Secure cookies on {endpoint}")
                 if security_headers["x-frame-options"]:
-                    print(f"✓ Clickjacking protection on {endpoint}")
+                    print(f"[U+2713] Clickjacking protection on {endpoint}")
         
         duration = time.time() - start_time
         print(f"Session security test results:")
@@ -455,13 +455,13 @@ class TestHighSecurity:
                     security_score = 0
                     if response.headers.get("strict-transport-security"):
                         security_score += 1
-                        print(f"✓ HSTS header found on {endpoint}")
+                        print(f"[U+2713] HSTS header found on {endpoint}")
                     if response.headers.get("x-content-type-options") == "nosniff":
                         security_score += 1
-                        print(f"✓ X-Content-Type-Options protection on {endpoint}")
+                        print(f"[U+2713] X-Content-Type-Options protection on {endpoint}")
                     if response.headers.get("x-frame-options"):
                         security_score += 1
-                        print(f"✓ X-Frame-Options protection on {endpoint}")
+                        print(f"[U+2713] X-Frame-Options protection on {endpoint}")
                         
                     cert_results[endpoint]["security_score"] = security_score
             
@@ -475,7 +475,7 @@ class TestHighSecurity:
                 "redirects_to_https": "https://" in http_response.headers.get("location", "")
             }
             if http_response.status_code in [301, 302, 307, 308]:
-                print("✓ HTTP to HTTPS redirect configured")
+                print("[U+2713] HTTP to HTTPS redirect configured")
         
         duration = time.time() - start_time
         print(f"HTTPS certificate validation results:")
@@ -548,9 +548,9 @@ class TestHighSecurity:
                     # Check for proper CORS configuration
                     if response.status_code == 200 and cors_headers["access-control-allow-origin"]:
                         if origin == "https://malicious-site.com" and cors_headers["access-control-allow-origin"] != "*":
-                            print(f"✓ CORS properly blocks malicious origin on {endpoint}")
+                            print(f"[U+2713] CORS properly blocks malicious origin on {endpoint}")
                         elif origin in ["https://app.netrasystems.ai", "https://app.staging.netrasystems.ai"]:
-                            print(f"✓ CORS allows legitimate origin {origin} on {endpoint}")
+                            print(f"[U+2713] CORS allows legitimate origin {origin} on {endpoint}")
                 
                 cors_results[endpoint] = endpoint_results
         
@@ -614,10 +614,10 @@ class TestHighSecurity:
                     # Check for rate limiting
                     if response.status_code == 429:
                         rate_limited = True
-                        print(f"✓ Rate limit triggered at request {i+1} on {endpoint}")
+                        print(f"[U+2713] Rate limit triggered at request {i+1} on {endpoint}")
                         break
                     elif response.status_code >= 500:
-                        print(f"• Server error during rate test: {response.status_code}")
+                        print(f"[U+2022] Server error during rate test: {response.status_code}")
                         break
                     
                     # Very short delay to simulate rapid requests
@@ -638,7 +638,7 @@ class TestHighSecurity:
                     reset_response = await client.get(f"{config.backend_url}{endpoint}")
                     rate_limit_results[endpoint]["reset_works"] = reset_response.status_code != 429
                     if reset_response.status_code != 429:
-                        print(f"✓ Rate limit reset successfully on {endpoint}")
+                        print(f"[U+2713] Rate limit reset successfully on {endpoint}")
         
         duration = time.time() - start_time
         print(f"Rate limiting test results:")
@@ -664,7 +664,7 @@ class TestHighSecurity:
                 print(message)
             except UnicodeEncodeError:
                 # Replace Unicode characters with ASCII equivalents
-                safe_message = message.replace("✓", "[OK]").replace("⚠", "[WARNING]").replace("•", "-")
+                safe_message = message.replace("[U+2713]", "[OK]").replace(" WARNING: ", "[WARNING]").replace("[U+2022]", "-")
                 print(safe_message)
         
         # Test WebSocket connection security
@@ -705,16 +705,16 @@ class TestHighSecurity:
                     }
                     
                     if websocket_results["auth_enforcement"]["auth_required"]:
-                        safe_print("✓ WebSocket properly enforces authentication in message response")
+                        safe_print("[U+2713] WebSocket properly enforces authentication in message response")
                         auth_enforced = True
                     else:
-                        safe_print("⚠ WebSocket may not enforce authentication")
+                        safe_print(" WARNING:  WebSocket may not enforce authentication")
                         
         except websockets.exceptions.InvalidStatus as e:
             # Expected: WebSocket rejects connection with 403/401 
             if "403" in str(e) or "401" in str(e):
                 auth_enforced = True
-                safe_print("✓ WebSocket properly enforces authentication at connection level")
+                safe_print("[U+2713] WebSocket properly enforces authentication at connection level")
                 websocket_results["auth_enforcement"] = {
                     "connection_allowed": False,
                     "auth_enforced": True,
@@ -757,7 +757,7 @@ class TestHighSecurity:
             # Expected: WebSocket rejects malformed auth with 403/401
             if "403" in str(e) or "401" in str(e):
                 malformed_auth_enforced = True
-                safe_print("✓ WebSocket properly rejects malformed auth tokens")
+                safe_print("[U+2713] WebSocket properly rejects malformed auth tokens")
                 websocket_results["malformed_auth"] = {
                     "connection_allowed": False,
                     "auth_enforced": True,
@@ -786,7 +786,7 @@ class TestHighSecurity:
             }
             
             if websocket_results["upgrade_handling"]["proper_upgrade"]:
-                safe_print("✓ WebSocket upgrade handling configured")
+                safe_print("[U+2713] WebSocket upgrade handling configured")
         
         duration = time.time() - start_time
         safe_print(f"WebSocket security test results:")
@@ -808,7 +808,7 @@ class TestHighSecurity:
         
         # Accept the test if we have secure protocol + general error (403 auth rejection)
         if len(websocket_results) == 2 and websocket_results.get("general_error") and "403" in str(websocket_results["general_error"]):
-            safe_print("✓ WebSocket security test passed: Server properly rejects unauthorized connections")
+            safe_print("[U+2713] WebSocket security test passed: Server properly rejects unauthorized connections")
         else:
             # More flexible assertion - accept meaningful security validation
             has_auth_test = any(k in websocket_results for k in ["auth_enforcement", "general_error"])
@@ -822,7 +822,7 @@ class TestHighSecurity:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.1):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

@@ -496,53 +496,53 @@ def main():
             # Run key tests
             print("Testing singleton behavior...")
             await test_instance.test_singleton_behavior()
-            print("✅ Singleton test passed")
+            print(" PASS:  Singleton test passed")
             
             print("Testing database configuration...")
             await test_instance.test_database_url_configuration()
-            print("✅ Database configuration test passed")
+            print(" PASS:  Database configuration test passed")
             
             print("Testing session management...")
             await test_instance.test_session_management_lifecycle()
-            print("✅ Session management test passed")
+            print(" PASS:  Session management test passed")
             
             print("Testing user repository CRUD...")
             await test_instance.test_user_repository_crud_operations()
-            print("✅ User repository test passed")
+            print(" PASS:  User repository test passed")
             
             print("Testing transaction isolation...")
             await test_instance.test_transaction_isolation_between_sessions()
-            print("✅ Transaction isolation test passed")
+            print(" PASS:  Transaction isolation test passed")
             
             print("Testing data factories...")
             await test_instance.test_data_factories()
-            print("✅ Data factories test passed")
+            print(" PASS:  Data factories test passed")
             
             print("Testing compliance checking...")
             await test_instance.test_compliance_checking()
-            print("✅ Compliance checking test passed")
+            print(" PASS:  Compliance checking test passed")
             
             print("Testing error handling...")
             await test_instance.test_error_handling_and_cleanup()
-            print("✅ Error handling test passed")
+            print(" PASS:  Error handling test passed")
             
             print("Testing convenience functions...")
             await test_instance.test_convenience_functions()
-            print("✅ Convenience functions test passed")
+            print(" PASS:  Convenience functions test passed")
             
             print("Testing resource cleanup...")
             await test_instance.test_resource_cleanup()
-            print("✅ Resource cleanup test passed")
+            print(" PASS:  Resource cleanup test passed")
             
         except Exception as e:
-            print(f"❌ Test failed: {e}")
+            print(f" FAIL:  Test failed: {e}")
             raise
         finally:
             # Cleanup
             factory = get_test_repository_factory()
             await factory.cleanup_resources()
         
-        print("\n🎉 All integration tests passed!")
+        print("\n CELEBRATION:  All integration tests passed!")
         print("\nThe TestRepositoryFactory is ready for use!")
     
     asyncio.run(run_tests())

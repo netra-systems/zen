@@ -297,15 +297,15 @@ async def test_complete_jwt_auth_flow(real_services):
             # Got response - verify it's properly formatted
             response = message_result["response"]
             assert isinstance(response, dict), "Response should be JSON object"
-            print(f"✓ Message response received: {response.get('type', 'unknown')}")
+            print(f"[U+2713] Message response received: {response.get('type', 'unknown')}")
         else:
             # No response is acceptable for chat messages in some implementations
-            print("ℹ No immediate response received (acceptable for async processing)")
+            print("[U+2139] No immediate response received (acceptable for async processing)")
         
     finally:
         await websocket.disconnect()
     
-    print(f"✓ Complete JWT auth flow successful in {token_data['auth_time']:.3f}s auth + "
+    print(f"[U+2713] Complete JWT auth flow successful in {token_data['auth_time']:.3f}s auth + "
           f"{ws_result['connection_time']:.3f}s connection + "
           f"{message_result['response_time']:.3f}s message")
 
@@ -328,7 +328,7 @@ async def test_invalid_token_rejection(real_services):
         assert rejection_result["rejection_time"] < 1.0, \
             f"{token_type} token rejection took {rejection_result['rejection_time']:.3f}s, should be <1s"
         
-        print(f"✓ {token_type} token properly rejected in {rejection_result['rejection_time']:.3f}s")
+        print(f"[U+2713] {token_type} token properly rejected in {rejection_result['rejection_time']:.3f}s")
 
 
 @pytest.mark.asyncio
@@ -392,7 +392,7 @@ async def test_token_expiry_and_reconnection(real_services):
             )
             assert message_result["sent"], "Message after reconnection failed"
             
-            print(f"✓ Token reconnection successful in {reconnection_time:.3f}s")
+            print(f"[U+2713] Token reconnection successful in {reconnection_time:.3f}s")
     
     finally:
         if new_websocket:
@@ -420,12 +420,12 @@ async def test_concurrent_authenticated_connections(real_services):
         )
         if ws_result["connected"]:
             websockets.append(ws_result["websocket"])
-            print(f"✓ User {i+1} connected successfully")
+            print(f"[U+2713] User {i+1} connected successfully")
         else:
-            print(f"⚠ User {i+1} connection failed: {ws_result.get('error')}")
+            print(f" WARNING:  User {i+1} connection failed: {ws_result.get('error')}")
     
     # Verify at least 2 concurrent connections work
-    assert len(websockets) >= 2, f"Expected ≥2 concurrent connections, got {len(websockets)}"
+    assert len(websockets) >= 2, f"Expected  >= 2 concurrent connections, got {len(websockets)}"
     
     try:
         # Send messages from each connection concurrently
@@ -446,9 +446,9 @@ async def test_concurrent_authenticated_connections(real_services):
         )
         
         assert successful_messages >= 2, \
-            f"Expected ≥2 successful concurrent messages, got {successful_messages}"
+            f"Expected  >= 2 successful concurrent messages, got {successful_messages}"
         
-        print(f"✓ {successful_messages} concurrent authenticated messages sent successfully")
+        print(f"[U+2713] {successful_messages} concurrent authenticated messages sent successfully")
     
     finally:
         # Cleanup all connections
@@ -486,7 +486,7 @@ async def test_cross_service_token_consistency(real_services):
     assert websocket_valid, \
         f"WebSocket rejected token accepted by Backend: {ws_result.get('error')}"
     
-    print("✓ Token consistently validated across Auth → Backend → WebSocket services")
+    print("[U+2713] Token consistently validated across Auth  ->  Backend  ->  WebSocket services")
 
 
 # Business Impact Summary
@@ -500,7 +500,7 @@ Revenue Impact: $80K+ MRR Protection
 - Tests concurrent user scenarios essential for enterprise deployments
 
 Security Compliance:
-- JWT token validation across Auth → Backend → WebSocket services
+- JWT token validation across Auth  ->  Backend  ->  WebSocket services
 - Invalid token rejection with proper performance characteristics  
 - Token expiry and refresh handling for long-running sessions
 - Cross-service authentication consistency for SOC2/GDPR compliance

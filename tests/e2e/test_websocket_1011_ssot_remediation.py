@@ -141,7 +141,7 @@ class TestWebSocket1011SSoTRemediation(SSotAsyncTestCase):
         success_rate = len(connection_successes) / len(self.test_users) if self.test_users else 0
         self.assertGreaterEqual(
             success_rate, 0.8,  # 80% success rate minimum
-            f"WebSocket connection success rate should be ≥80% after SSOT fix. "
+            f"WebSocket connection success rate should be  >= 80% after SSOT fix. "
             f"Current: {success_rate:.1%} ({len(connection_successes)}/{len(self.test_users)})"
         )
 
@@ -310,7 +310,7 @@ class TestWebSocket1011SSoTRemediation(SSotAsyncTestCase):
         # After SSOT fix, success rate should be very high
         self.assertGreaterEqual(
             success_rate, 0.9,
-            f"WebSocket connection success rate should be ≥90% after SSOT remediation. "
+            f"WebSocket connection success rate should be  >= 90% after SSOT remediation. "
             f"Current: {success_rate:.1%} ({connection_stats['successes']}/{connection_stats['attempts']})"
         )
         

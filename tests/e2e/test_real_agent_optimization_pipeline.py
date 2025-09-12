@@ -228,7 +228,7 @@ class RealOptimizationPipelineE2ETest(BaseE2ETest):
             # Log tool execution for transparency
             if event_type == "tool_executing":
                 tool_name = event.get("data", {}).get("tool", "unknown")
-                logger.info(f"  → Executing optimization tool: {tool_name}")
+                logger.info(f"   ->  Executing optimization tool: {tool_name}")
             
             # Stop on completion
             if event_type == "agent_completed":
@@ -396,7 +396,7 @@ class TestRealOptimizationPipeline(RealOptimizationPipelineE2ETest):
                 f"ROI potential too low: {self.metrics.roi_potential}x"
             )
             
-        logger.success("✓ Comprehensive optimization pipeline validated")
+        logger.success("[U+2713] Comprehensive optimization pipeline validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -459,9 +459,9 @@ class TestRealOptimizationPipeline(RealOptimizationPipelineE2ETest):
                         f"Early tier should get some optimization opportunities. Got: {self.metrics.optimization_opportunities}"
                     )
                 
-                logger.info(f"✓ {tier} tier optimization validated: ${self.metrics.potential_monthly_savings} savings")
+                logger.info(f"[U+2713] {tier} tier optimization validated: ${self.metrics.potential_monthly_savings} savings")
         
-        logger.success("✓ Multi-tier optimization pipeline validated")
+        logger.success("[U+2713] Multi-tier optimization pipeline validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -522,7 +522,7 @@ class TestRealOptimizationPipeline(RealOptimizationPipelineE2ETest):
                 f"Vendor optimization should yield substantial savings. Got: ${self.metrics.potential_monthly_savings}"
             )
             
-        logger.success("✓ Vendor analysis optimization validated")
+        logger.success("[U+2713] Vendor analysis optimization validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -613,7 +613,7 @@ class TestRealOptimizationPipeline(RealOptimizationPipelineE2ETest):
                 f"User {result['user_id']} got no recommendations"
             )
         
-        logger.success(f"✓ Concurrent optimization isolation validated ({total_concurrent_time:.1f}s total)")
+        logger.success(f"[U+2713] Concurrent optimization isolation validated ({total_concurrent_time:.1f}s total)")
 
 
 if __name__ == "__main__":
@@ -634,10 +634,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_optimization_pipeline(mock_services)
-            logger.success("✓ All optimization pipeline tests passed")
+            logger.success("[U+2713] All optimization pipeline tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Optimization pipeline tests failed: {e}")
+            logger.error(f"[U+2717] Optimization pipeline tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

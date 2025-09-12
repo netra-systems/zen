@@ -628,7 +628,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('average_classification_confidence', avg_confidence)
         self.record_metric('classification_accuracy', 100.0)
         
-        logger.info("✅ Error type pattern matching and extraction completed")
+        logger.info(" PASS:  Error type pattern matching and extraction completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -718,7 +718,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('reconstruction_quality', reconstruction_quality)
         self.record_metric('context_preservation_accuracy', 100.0)
         
-        logger.info("✅ Multi-line error log parsing and reconstruction completed")
+        logger.info(" PASS:  Multi-line error log parsing and reconstruction completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -807,7 +807,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('unstructured_accuracy', unstructured_accuracy)
         self.record_metric('accuracy_improvement', structured_accuracy - unstructured_accuracy)
         
-        logger.info("✅ Structured vs unstructured log processing differentiation completed")
+        logger.info(" PASS:  Structured vs unstructured log processing differentiation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -897,7 +897,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('context_enrichment_score', enrichment_score)
         self.record_metric('average_relevance_score', temporal_context['average_relevance'])
         
-        logger.info("✅ Error context extraction from surrounding logs completed")
+        logger.info(" PASS:  Error context extraction from surrounding logs completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -994,7 +994,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('high_confidence_inference_rate', high_confidence_rate)
         self.record_metric('escalation_accuracy', 100.0)
         
-        logger.info("✅ Error severity inference from log patterns completed")
+        logger.info(" PASS:  Error severity inference from log patterns completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -1111,7 +1111,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('team_mapping_success_rate', mapping_rate)
         self.record_metric('triage_time_reduction', 80.0)
         
-        logger.info("✅ Error source code location extraction completed")
+        logger.info(" PASS:  Error source code location extraction completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1248,7 +1248,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('journey_steps_reconstructed', len(journey_steps))
         self.record_metric('support_resolution_improvement', 45.0)
         
-        logger.info("✅ Error user session correlation completed")
+        logger.info(" PASS:  Error user session correlation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1377,7 +1377,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('sla_breach_prediction_confidence', breach_prediction['breach_probability'])
         self.record_metric('alerts_triggered', len(triggered_alerts))
         
-        logger.info("✅ Error rate calculation and trending completed")
+        logger.info(" PASS:  Error rate calculation and trending completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1516,7 +1516,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('deduplication_rate', deduplication_rate)
         self.record_metric('alert_noise_reduction', 85.0)
         
-        logger.info("✅ Error fingerprinting for duplicate detection completed")
+        logger.info(" PASS:  Error fingerprinting for duplicate detection completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1679,7 +1679,7 @@ class TestGCPErrorTypeLogProcessing(SSotAsyncTestCase):
         self.record_metric('intelligence_quality_score', intelligence_quality)
         self.record_metric('escalation_time_improvement', 55.0)
         
-        logger.info("✅ Error enrichment with business context completed")
+        logger.info(" PASS:  Error enrichment with business context completed")
     
     # Helper methods for advanced log processing
     

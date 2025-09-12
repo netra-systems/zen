@@ -431,7 +431,7 @@ class TestThreadContinuityMultiSession(DockerTestBase):
         self._validate_cross_session_context(agent_result_1, agent_result_2, agent_result_3)
         self._validate_message_history_completeness(history_3)
         
-        logger.info("✅ INTEGRATION TEST 7 PASSED: Thread continuity across sessions working correctly")
+        logger.info(" PASS:  INTEGRATION TEST 7 PASSED: Thread continuity across sessions working correctly")
         
     def _validate_thread_continuity(self, state_1: Dict[str, Any], 
                                    state_2: Dict[str, Any], state_3: Dict[str, Any]):
@@ -458,7 +458,7 @@ class TestThreadContinuityMultiSession(DockerTestBase):
         assert len(str(context_3)) >= len(str(context_2)), "Context should accumulate across sessions"
         assert len(str(context_2)) >= len(str(context_1)), "Context should accumulate across sessions"
         
-        logger.info("✅ Thread state continuity validated across all sessions")
+        logger.info(" PASS:  Thread state continuity validated across all sessions")
         
     def _validate_cross_session_context(self, result_1: Dict[str, Any], 
                                        result_2: Dict[str, Any], result_3: Dict[str, Any]):
@@ -485,7 +485,7 @@ class TestThreadContinuityMultiSession(DockerTestBase):
             logger.warning("Agent responses may not show optimal context awareness")
             # Don't fail the test, but log for improvement
             
-        logger.info("✅ Cross-session context validation completed")
+        logger.info(" PASS:  Cross-session context validation completed")
         
     def _validate_message_history_completeness(self, history: Dict[str, Any]):
         """Validate that thread history contains all messages from all sessions"""
@@ -508,7 +508,7 @@ class TestThreadContinuityMultiSession(DockerTestBase):
         # Should have references to multiple sessions (at least 2)
         assert len(session_references) >= 2, f"Expected messages from multiple sessions, found: {session_references}"
         
-        logger.info(f"✅ Message history completeness validated: {len(messages)} messages across {len(session_references)} sessions")
+        logger.info(f" PASS:  Message history completeness validated: {len(messages)} messages across {len(session_references)} sessions")
         
     @pytest.mark.asyncio
     async def test_thread_state_isolation_between_users(self):
@@ -535,7 +535,7 @@ class TestThreadContinuityMultiSession(DockerTestBase):
         # Attempt to access first user's thread with different user context should fail
         # This would require expanding the test framework
         
-        logger.info("✅ INTEGRATION TEST 7b PASSED: Thread isolation validation completed")
+        logger.info(" PASS:  INTEGRATION TEST 7b PASSED: Thread isolation validation completed")
 
 
 if __name__ == "__main__":

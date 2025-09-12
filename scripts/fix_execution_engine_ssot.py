@@ -66,7 +66,7 @@ def deprecate_file(file_path: Path) -> None:
     
     # Add deprecation notice at the top
     deprecation_notice = '''"""
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 

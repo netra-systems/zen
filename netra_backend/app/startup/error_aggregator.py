@@ -5,8 +5,8 @@ Centralized error collection and analysis for startup issues.
 Implements requirements from SPEC/startup_coverage.xml.
 
 CRITICAL ARCHITECTURAL COMPLIANCE:
-- ALL functions MUST be ≤8 lines (MANDATORY)
-- File MUST be ≤250 lines total
+- ALL functions MUST be  <= 8 lines (MANDATORY)
+- File MUST be  <= 250 lines total
 - Strong typing with Pydantic models
 - Pattern detection using similarity clustering
 - SQLite database for error persistence

@@ -356,7 +356,7 @@ class TestThreadSafetyAndConcurrency:
         
         # Verify results
         assert len(errors) == 0
-        assert len(generated_ids) == 50  # 5 workers × 10 IDs each
+        assert len(generated_ids) == 50  # 5 workers  x  10 IDs each
         assert len(set(generated_ids)) == 50  # All should be unique
     
     def test_concurrent_registration_and_validation(self):

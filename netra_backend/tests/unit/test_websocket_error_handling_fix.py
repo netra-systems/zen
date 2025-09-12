@@ -214,7 +214,7 @@ class TestWebSocketErrorHandlingFix:
     @pytest.mark.integration
     async def test_end_to_end_error_recovery(self, handler, mock_websocket):
         """
-        Integration test: Complete error → recovery → prevention cycle
+        Integration test: Complete error  ->  recovery  ->  prevention cycle
         
         Validates that the Five Whys fix addresses the complete error scenario
         from initial failure through proper error communication to client.

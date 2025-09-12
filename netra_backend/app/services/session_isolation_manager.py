@@ -2,7 +2,7 @@
 Session Isolation Manager - SSOT for User Session Isolation
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure complete isolation between user sessions
 - Value Impact: Prevents data leakage and ensures user privacy
 - Strategic Impact: Critical for multi-tenant system security and compliance

@@ -266,14 +266,14 @@ async def cleanup_all_ssot_resources():
 def print_ssot_usage_guide():
     """Print comprehensive SSOT usage guide to console."""
     print("""
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                    NETRA SSOT TEST FRAMEWORK USAGE GUIDE                    ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+[U+2554][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2557]
+[U+2551]                    NETRA SSOT TEST FRAMEWORK USAGE GUIDE                    [U+2551]
+[U+255A][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+255D]
 
 CRITICAL: ALL tests must use this SSOT framework. No custom test infrastructure allowed.
 
-📋 BASIC TEST SETUP
-━━━━━━━━━━━━━━━━━━━━
+[U+1F4CB] BASIC TEST SETUP
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import BaseTestCase
 
@@ -282,8 +282,8 @@ class MyTest(BaseTestCase):
         # Test implementation
         pass
 
-🗄️ DATABASE TESTING
-━━━━━━━━━━━━━━━━━━━━
+[U+1F5C4][U+FE0F] DATABASE TESTING
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import DatabaseTestCase
 
@@ -297,8 +297,8 @@ class MyDatabaseTest(DatabaseTestCase):
             async with db.transaction_scope() as session:
                 # Transaction automatically rolled back
 
-🌐 WEBSOCKET TESTING  
-━━━━━━━━━━━━━━━━━━━━
+[U+1F310] WEBSOCKET TESTING  
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import WebSocketTestCase, WebSocketEventType
 
@@ -317,8 +317,8 @@ class MyWebSocketTest(WebSocketTestCase):
             WebSocketEventType.PONG
         )
 
-🐳 DOCKER/INTEGRATION TESTING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[U+1F433] DOCKER/INTEGRATION TESTING
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import IntegrationTestCase, DockerTestUtility
 
@@ -335,8 +335,8 @@ class MyIntegrationTest(IntegrationTestCase):
             
             # Test with services running
 
-🎭 MOCK TESTING
-━━━━━━━━━━━━━━━━
+[U+1F3AD] MOCK TESTING
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import get_mock_factory
 
@@ -350,8 +350,8 @@ def test_with_mocks():
     
     # Use mocks in tests
 
-⚡ ASYNC TESTING
-━━━━━━━━━━━━━━━━
+ LIGHTNING:  ASYNC TESTING
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 from test_framework.ssot import AsyncBaseTestCase
 
@@ -364,8 +364,8 @@ class MyAsyncTest(AsyncBaseTestCase):
         result = await some_async_function()
         self.assertEqual(result, expected_value)
 
-📊 TEST CATEGORIES
-━━━━━━━━━━━━━━━━━━
+ CHART:  TEST CATEGORIES
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 - BaseTestCase: Basic unit tests
 - AsyncBaseTestCase: Async unit tests  
@@ -373,8 +373,8 @@ class MyAsyncTest(AsyncBaseTestCase):
 - WebSocketTestCase: WebSocket functionality tests
 - IntegrationTestCase: Multi-service integration tests
 
-🔧 UTILITY FUNCTIONS
-━━━━━━━━━━━━━━━━━━━━━
+[U+1F527] UTILITY FUNCTIONS
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 # Validate test class compliance
 from test_framework.ssot import validate_test_class
@@ -388,8 +388,8 @@ BaseClass = get_test_base_for_category("integration")
 from test_framework.ssot import get_ssot_status
 status = get_ssot_status()
 
-⚠️  CRITICAL REQUIREMENTS
-━━━━━━━━━━━━━━━━━━━━━━━━━━
+ WARNING: [U+FE0F]  CRITICAL REQUIREMENTS
+[U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501][U+2501]
 
 1. ALL test classes MUST inherit from BaseTestCase or subclasses
 2. NO direct os.environ access - use self.env instead  
@@ -398,14 +398,14 @@ status = get_ssot_status()
 5. NO custom WebSocket clients - use WebSocketTestUtility
 6. NO manual Docker management - use DockerTestUtility
 
-❌ VIOLATIONS WILL CAUSE TEST FAILURES ❌
+ FAIL:  VIOLATIONS WILL CAUSE TEST FAILURES  FAIL: 
 
 For questions or issues with SSOT framework, check:
 - docs/test_framework_ssot_architecture.xml
 - test_framework/ssot/ source code
 - DEFINITION_OF_DONE_CHECKLIST.md
 
-═══════════════════════════════════════════════════════════════════════════════
+[U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550]
 """)
 
 

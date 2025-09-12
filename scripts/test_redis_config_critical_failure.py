@@ -1,5 +1,43 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 env = get_env()
 CRITICAL FAILING TEST: Redis Configuration Inconsistency Across Services and Environments
@@ -243,11 +281,11 @@ class TestRedisCriticalConfigurationFailure:
             failure_details.extend([
                 "",
                 "SOLUTION STATUS: RedisConfigurationBuilder implemented with:",
-                "  ✓ Unified configuration source for all services",
-                "  ✓ Environment-aware fallback behavior", 
-                "  ✓ Integrated Secret Manager support",
-                "  ✓ Composable SSL/TLS configuration",
-                "  ✓ Standardized connection pooling",
+                "  [U+2713] Unified configuration source for all services",
+                "  [U+2713] Environment-aware fallback behavior", 
+                "  [U+2713] Integrated Secret Manager support",
+                "  [U+2713] Composable SSL/TLS configuration",
+                "  [U+2713] Standardized connection pooling",
                 "",
                 "This test should now PASS with the new implementation."
             ])

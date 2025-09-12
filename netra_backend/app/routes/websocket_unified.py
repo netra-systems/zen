@@ -1,7 +1,7 @@
 """
 SSOT REDIRECTION: Unified Shim Consolidated
 
-🚨 CRITICAL NOTICE: This file now redirects to websocket_ssot.py (legacy mode)
+ ALERT:  CRITICAL NOTICE: This file now redirects to websocket_ssot.py (legacy mode)
 
 Business Value Justification:
 - Segment: Platform/Internal
@@ -10,13 +10,13 @@ Business Value Justification:
 - Strategic Impact: Simplifies import chain through direct SSOT redirection
 
 CONSOLIDATION STATUS:
-✅ Original websocket_unified.py (15 lines) → SSOT websocket_ssot.py (legacy mode)
+ PASS:  Original websocket_unified.py (15 lines)  ->  SSOT websocket_ssot.py (legacy mode)
 
 LEGACY COMPATIBILITY PRESERVED:
-✅ Backward compatibility constants maintained
-✅ Import star patterns supported
-✅ Function aliases preserved
-✅ Configuration constants available
+ PASS:  Backward compatibility constants maintained
+ PASS:  Import star patterns supported
+ PASS:  Function aliases preserved
+ PASS:  Configuration constants available
 
 REDIRECTION STRATEGY:
 This shim now properly redirects to SSOT implementation instead of creating

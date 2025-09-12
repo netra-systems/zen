@@ -2,7 +2,7 @@
 LLM Fixtures Core - Basic LLM testing fixtures
 
 Core LLM manager mocks for basic, streaming, and structured outputs.
-Each function is ≤8 lines, following modular architecture.
+Each function is  <= 8 lines, following modular architecture.
 """
 
 import json

@@ -16,7 +16,12 @@ SSOT service accessors in the codebase.
 
 import logging
 from typing import Optional, Any
-import redis
+
+# Import redis for type annotations only - SSOT pattern
+try:
+    import redis
+except ImportError:
+    redis = None
 
 from netra_backend.app.services.redis_service import redis_service
 from netra_backend.app.core.redis_connection_handler import RedisConnectionHandler
@@ -29,7 +34,7 @@ class RedisClientError(Exception):
     pass
 
 
-async def get_redis_client(user_context: Optional[Any] = None) -> redis.Redis:
+async def get_redis_client(user_context: Optional[Any] = None) -> Any:
     """Get Redis client instance following SSOT patterns.
     
     This function provides a consistent interface for accessing Redis clients
@@ -88,7 +93,7 @@ def get_redis_service() -> Any:
 
 
 # Synchronous wrapper for compatibility with existing patterns
-def get_redis_client_sync() -> redis.Redis:
+def get_redis_client_sync() -> Any:
     """Get Redis client synchronously using RedisConnectionHandler.
     
     This is a synchronous version for compatibility with non-async contexts.

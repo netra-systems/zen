@@ -41,15 +41,15 @@ class ClaudeCommitConfigurator:
         
         # Check hook installation
         if self.hook_file.exists():
-            hook_status = "Hook: installed ✅"
+            hook_status = "Hook: installed  PASS: "
         else:
-            hook_status = "Hook: not installed ❌"
+            hook_status = "Hook: not installed  FAIL: "
         
         # Check Claude CLI
         if shutil.which("claude"):
-            claude_status = "Claude CLI: available ✅"
+            claude_status = "Claude CLI: available  PASS: "
         else:
-            claude_status = "Claude CLI: not found ⚠️"
+            claude_status = "Claude CLI: not found  WARNING: [U+FE0F]"
         
         return f"""
 Claude Commit Helper Status:
@@ -67,29 +67,29 @@ Claude Commit Helper Status:
         if self.hook_file.exists():
             self.hook_file.chmod(0o755)
         
-        print(f"✅ Claude commit helper enabled (mode: {mode})")
+        print(f" PASS:  Claude commit helper enabled (mode: {mode})")
         print("    Use 'BYPASS_CLAUDE' in message to skip")
         print("    Or set DISABLE_CLAUDE_COMMIT=1 environment variable")
     
     def disable(self) -> None:
         """Disable Claude commit helper"""
         subprocess.run(["git", "config", "netra.claude-commit", "false"])
-        print("❌ Claude commit helper disabled")
+        print(" FAIL:  Claude commit helper disabled")
         print("    The hook remains installed but won't activate")
     
     def install_hook(self) -> None:
         """Ensure the prepare-commit-msg hook is properly installed"""
         if not self.hook_file.exists():
-            print("⚠️ Hook file not found. Please ensure .git/hooks/prepare-commit-msg exists")
+            print(" WARNING: [U+FE0F] Hook file not found. Please ensure .git/hooks/prepare-commit-msg exists")
             return
         
         # Make executable
         self.hook_file.chmod(0o755)
-        print("✅ Hook installed and made executable")
+        print(" PASS:  Hook installed and made executable")
     
     def test(self) -> None:
         """Test the Claude commit helper with a dry run"""
-        print("🧪 Testing Claude commit helper...")
+        print("[U+1F9EA] Testing Claude commit helper...")
         
         # Create a test change
         test_file = self.repo_root / "test_claude_commit.tmp"
@@ -108,12 +108,12 @@ Claude Commit Helper Status:
             )
             
             if result.returncode == 0 and result.stdout.strip():
-                print("✅ Test successful! Generated message:")
-                print("─" * 50)
+                print(" PASS:  Test successful! Generated message:")
+                print("[U+2500]" * 50)
                 print(result.stdout.strip())
-                print("─" * 50)
+                print("[U+2500]" * 50)
             else:
-                print("❌ Test failed. Check your Claude CLI installation.")
+                print(" FAIL:  Test failed. Check your Claude CLI installation.")
                 if result.stderr:
                     print(f"Error: {result.stderr}")
             
@@ -125,7 +125,7 @@ Claude Commit Helper Status:
     def show_usage_tips(self) -> None:
         """Show usage tips"""
         print("""
-📝 Claude Commit Helper Usage Tips:
+[U+1F4DD] Claude Commit Helper Usage Tips:
 
 1. Normal commit (Claude will help):
    git commit

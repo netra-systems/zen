@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 """
@@ -22,7 +23,7 @@ from dev_launcher.service_discovery import ServiceDiscovery
 # Remove service_config import until module exists
 
 
-class TestLauncherConfig(unittest.TestCase):
+class TestLauncherConfig(SSotBaseTestCase):
     """Test configuration management."""
     
     def test_config_defaults(self):
@@ -93,7 +94,7 @@ class TestLauncherConfig(unittest.TestCase):
         self.assertTrue(config.no_browser)
 
 
-class TestServiceDiscovery(unittest.TestCase):
+class TestServiceDiscovery(SSotBaseTestCase):
     """Test service discovery functionality."""
     
     def test_service_info_persistence(self):
@@ -177,7 +178,7 @@ class TestServiceDiscovery(unittest.TestCase):
         pass
 
 
-class TestEnvironmentConfiguration(unittest.TestCase):
+class TestEnvironmentConfiguration(SSotBaseTestCase):
     """Test environment-based configuration."""
     
     def test_multi_environment_launch(self):

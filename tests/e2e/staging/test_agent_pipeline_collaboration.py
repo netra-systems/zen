@@ -77,7 +77,7 @@ class TestAgentPipelineCollaboration:
             email=self.user_context.agent_context['user_email']
         )
         
-        logger.info(f"✅ Setup authenticated context for agent pipeline tests")
+        logger.info(f" PASS:  Setup authenticated context for agent pipeline tests")
         logger.info(f"User ID: {self.user_context.user_id}")
         logger.info(f"Thread ID: {self.user_context.thread_id}")
 
@@ -124,7 +124,7 @@ class TestAgentPipelineCollaboration:
                 open_timeout=15.0
             ) as websocket:
                 
-                logger.info("🚀 Starting multi-agent collaborative optimization workflow")
+                logger.info("[U+1F680] Starting multi-agent collaborative optimization workflow")
                 
                 # Step 1: Initiate collaborative workflow
                 workflow_request = {
@@ -138,7 +138,7 @@ class TestAgentPipelineCollaboration:
                 }
                 
                 await websocket.send(json.dumps(workflow_request))
-                logger.info("📤 Sent collaborative workflow request")
+                logger.info("[U+1F4E4] Sent collaborative workflow request")
                 
                 # Step 2: Monitor agent pipeline collaboration
                 pipeline_timeout = 120.0  # 2 minutes for complex multi-agent workflow
@@ -159,7 +159,7 @@ class TestAgentPipelineCollaboration:
                         event_type = event_data.get("event_type", "")
                         agent_name = event_data.get("agent_name", "")
                         
-                        logger.info(f"📥 Received event: {event_type} from {agent_name}")
+                        logger.info(f"[U+1F4E5] Received event: {event_type} from {agent_name}")
                         
                         # Track agent execution states
                         if agent_name and event_type:
@@ -178,7 +178,7 @@ class TestAgentPipelineCollaboration:
                                 
                             elif event_type == "data_handoff":
                                 collaboration_metrics["data_handoffs"] += 1
-                                logger.info(f"🔄 Data handoff detected: {agent_name}")
+                                logger.info(f" CYCLE:  Data handoff detected: {agent_name}")
                                 
                             elif event_type == "inter_agent_communication":
                                 collaboration_metrics["inter_agent_communications"] += 1
@@ -189,19 +189,19 @@ class TestAgentPipelineCollaboration:
                         # Check for collaboration completion signals
                         if event_type == "workflow_completed" or event_type == "collaboration_finished":
                             collaboration_complete = True
-                            logger.info("✅ Multi-agent collaboration workflow completed")
+                            logger.info(" PASS:  Multi-agent collaboration workflow completed")
                             
                         # Alternative completion check: all expected agents completed
                         expected_agents = set(optimization_request["expected_agents"])
                         if expected_agents.issubset(agents_completed):
                             collaboration_complete = True
-                            logger.info("✅ All expected agents completed their tasks")
+                            logger.info(" PASS:  All expected agents completed their tasks")
                             
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout waiting for next WebSocket event in collaboration")
+                        logger.warning(" WARNING: [U+FE0F] Timeout waiting for next WebSocket event in collaboration")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Failed to decode WebSocket message: {e}")
+                        logger.error(f" FAIL:  Failed to decode WebSocket message: {e}")
                         continue
         
         # Validation: Comprehensive collaboration workflow validation
@@ -233,7 +233,7 @@ class TestAgentPipelineCollaboration:
         business_value_events = [e for e in websocket_events if "optimization" in str(e).lower() or "value" in str(e).lower()]
         assert len(business_value_events) > 0, "No business value indicators found in collaboration workflow"
         
-        logger.info(f"✅ PASS: Multi-agent collaborative optimization workflow - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Multi-agent collaborative optimization workflow - {test_duration:.2f}s")
         logger.info(f"Agents participated: {list(agent_execution_states.keys())}")
         logger.info(f"Collaboration metrics: {collaboration_metrics}")
         logger.info(f"WebSocket events received: {len(websocket_events)}")
@@ -281,7 +281,7 @@ class TestAgentPipelineCollaboration:
                 open_timeout=15.0
             ) as websocket:
                 
-                logger.info("🎼 Starting orchestrated agent pipeline coordination")
+                logger.info("[U+1F3BC] Starting orchestrated agent pipeline coordination")
                 
                 # Step 1: Initiate orchestrated pipeline
                 pipeline_request = {
@@ -295,7 +295,7 @@ class TestAgentPipelineCollaboration:
                 }
                 
                 await websocket.send(json.dumps(pipeline_request))
-                logger.info("📤 Sent pipeline coordination request")
+                logger.info("[U+1F4E4] Sent pipeline coordination request")
                 
                 # Step 2: Monitor sophisticated pipeline orchestration
                 orchestration_timeout = 90.0  # 1.5 minutes for orchestrated pipeline
@@ -317,7 +317,7 @@ class TestAgentPipelineCollaboration:
                         event_type = event_data.get("event_type", "")
                         agent_name = event_data.get("agent_name", "")
                         
-                        logger.info(f"🎵 Pipeline event: {event_type} from {agent_name}")
+                        logger.info(f"[U+1F3B5] Pipeline event: {event_type} from {agent_name}")
                         
                         # Track agent sequence and transitions
                         if event_type == "agent_started" and agent_name:
@@ -334,20 +334,20 @@ class TestAgentPipelineCollaboration:
                             
                         elif event_type == "state_preserved":
                             orchestration_metrics["state_preservations"] += 1
-                            logger.info("💾 State preservation detected in pipeline")
+                            logger.info("[U+1F4BE] State preservation detected in pipeline")
                             
                         elif event_type == "pipeline_coordination" or event_type == "orchestration_event":
                             orchestration_metrics["coordination_events"] += 1
                             
                         elif event_type == "pipeline_completed":
                             pipeline_complete = True
-                            logger.info("✅ Orchestrated pipeline completed")
+                            logger.info(" PASS:  Orchestrated pipeline completed")
                             
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout in orchestrated pipeline monitoring")
+                        logger.warning(" WARNING: [U+FE0F] Timeout in orchestrated pipeline monitoring")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Pipeline event decode error: {e}")
+                        logger.error(f" FAIL:  Pipeline event decode error: {e}")
                         continue
         
         # Validation: Comprehensive pipeline orchestration validation
@@ -379,7 +379,7 @@ class TestAgentPipelineCollaboration:
             transition_count = orchestration_metrics["agent_transitions"]
             orchestration_metrics["pipeline_efficiency"] = transition_count / total_time
         
-        logger.info(f"✅ PASS: Agent pipeline coordination with WebSocket orchestration - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Agent pipeline coordination with WebSocket orchestration - {test_duration:.2f}s")
         logger.info(f"Agent sequence: {[a['agent'] for a in agent_sequence_tracking]}")
         logger.info(f"Orchestration metrics: {orchestration_metrics}")
         logger.info(f"Pipeline events: {len(pipeline_events)}")
@@ -431,7 +431,7 @@ class TestAgentPipelineCollaboration:
                 open_timeout=15.0
             ) as websocket:
                 
-                logger.info("🔄 Starting complex agent handoff with state preservation")
+                logger.info(" CYCLE:  Starting complex agent handoff with state preservation")
                 
                 # Step 1: Initiate complex handoff workflow
                 handoff_request = {
@@ -445,7 +445,7 @@ class TestAgentPipelineCollaboration:
                 }
                 
                 await websocket.send(json.dumps(handoff_request))
-                logger.info("📤 Sent complex agent handoff request")
+                logger.info("[U+1F4E4] Sent complex agent handoff request")
                 
                 # Step 2: Monitor sophisticated handoff orchestration  
                 handoff_timeout = 100.0  # Extended timeout for complex handoffs
@@ -466,7 +466,7 @@ class TestAgentPipelineCollaboration:
                         event_type = event_data.get("event_type", "")
                         agent_name = event_data.get("agent_name", "")
                         
-                        logger.info(f"🔗 Handoff event: {event_type} from {agent_name}")
+                        logger.info(f"[U+1F517] Handoff event: {event_type} from {agent_name}")
                         
                         # Track handoff progression
                         if event_type == "agent_handoff_initiated":
@@ -492,17 +492,17 @@ class TestAgentPipelineCollaboration:
                             
                         elif event_type == "data_integrity_check":
                             handoff_metrics["data_integrity_checks"] += 1
-                            logger.info("🔍 Data integrity check performed during handoff")
+                            logger.info(" SEARCH:  Data integrity check performed during handoff")
                             
                         elif event_type == "handoff_completed" or event_type == "workflow_completed":
                             handoff_complete = True
-                            logger.info("✅ Complex agent handoff workflow completed")
+                            logger.info(" PASS:  Complex agent handoff workflow completed")
                             
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout in complex handoff monitoring")
+                        logger.warning(" WARNING: [U+FE0F] Timeout in complex handoff monitoring")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Handoff event decode error: {e}")
+                        logger.error(f" FAIL:  Handoff event decode error: {e}")
                         continue
         
         # Validation: Comprehensive handoff and state preservation validation
@@ -542,7 +542,7 @@ class TestAgentPipelineCollaboration:
         )
         assert business_context_preserved, "No business context preserved during complex handoffs"
         
-        logger.info(f"✅ PASS: Complex agent handoff with state preservation - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Complex agent handoff with state preservation - {test_duration:.2f}s")
         logger.info(f"Handoff chain: {len(handoff_chain)} handoffs")
         logger.info(f"State preservation events: {len(state_preservation_log)}")
         logger.info(f"Handoff metrics: {handoff_metrics}")

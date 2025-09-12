@@ -4,7 +4,7 @@
 import time
 import requests
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import sys
 from datetime import datetime
 from shared.isolated_environment import IsolatedEnvironment
@@ -31,7 +31,7 @@ def test_postgres():
 def test_redis():
     """Test Redis connectivity."""
     try:
-        r = redis.Redis(host='localhost', port=6380, db=0)
+        r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6380, db=0)
         r.ping()
         return True, "Redis is accessible"
     except Exception as e:

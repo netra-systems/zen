@@ -192,7 +192,7 @@ def memory_reporter():
             def report(self, label: str = "") -> float:
                 current_memory = process.memory_info().rss / 1024 / 1024  # MB
                 delta = current_memory - self.initial_memory
-                print(f"Memory Report {label}: {current_memory:.1f} MB (Δ{delta:+.1f} MB)")
+                print(f"Memory Report {label}: {current_memory:.1f} MB ([U+0394]{delta:+.1f} MB)")
                 return current_memory
                 
             def get_loaded_modules(self) -> list:

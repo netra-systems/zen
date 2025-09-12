@@ -102,7 +102,7 @@ class WorkflowOrchestrator:
         
         UVS SIMPLIFIED:
         - Only 2 agents are REQUIRED: Triage and Reporting (with UVS)
-        - Default flow: Triage → Data Helper → Reporting
+        - Default flow: Triage  ->  Data Helper  ->  Reporting
         - Reporting with UVS handles ALL scenarios, even failures
         
         Args:
@@ -133,7 +133,7 @@ class WorkflowOrchestrator:
                 self._create_pipeline_step("reporting", "partial_report", 4, dependencies=[])  # UVS handles partial
             ]
         elif data_sufficiency == "insufficient":
-            # DEFAULT UVS FLOW: Triage → Data Helper → Reporting
+            # DEFAULT UVS FLOW: Triage  ->  Data Helper  ->  Reporting
             return [
                 self._create_pipeline_step("triage", "classification", 1, dependencies=[]),
                 self._create_pipeline_step("data_helper", "data_collection_guide", 2, dependencies=[]),
@@ -249,7 +249,7 @@ class WorkflowOrchestrator:
                         'details': validation_result.validation_details
                     }
         else:
-            logger.info(f"✅ Coordination validation passed for workflow {workflow_id}")
+            logger.info(f" PASS:  Coordination validation passed for workflow {workflow_id}")
 
         await self._send_workflow_completed(context, results)
         return results

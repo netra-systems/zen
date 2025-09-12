@@ -9,7 +9,7 @@ This module tests critical race conditions in database transaction management th
 - Session leaks and resource exhaustion
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Data integrity is fundamental to platform trust
+- Segment: All (Free  ->  Enterprise) - Data integrity is fundamental to platform trust
 - Business Goal: Ensure data consistency and prevent corruption under concurrent load
 - Value Impact: Prevents data loss and corruption that would make platform unusable
 - Strategic Impact: CRITICAL - Database reliability directly impacts user trust and legal compliance

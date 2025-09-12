@@ -106,7 +106,7 @@
     # REMOVED_SYNTAX_ERROR: "empty_response": {"content": "", "tokens": {"input": 10, "output": 0, "total": 10}},
     # REMOVED_SYNTAX_ERROR: "malformed_json": {"content": "{'invalid': json}", "tokens": {"input": 10, "output": 20, "total": 30}},
     # REMOVED_SYNTAX_ERROR: "extremely_long_response": {"content": "A" * 10000, "tokens": {"input": 10, "output": 2500, "total": 2510}},
-    # REMOVED_SYNTAX_ERROR: "unicode_chaos": {"content": "🔥💀🚨🎯⚡🌟💥🎉🔮🌈" * 100, "tokens": {"input": 10, "output": 300, "total": 310}},
+    # REMOVED_SYNTAX_ERROR: "unicode_chaos": {"content": " FIRE: [U+1F480] ALERT:  TARGET:  LIGHTNING: [U+1F31F][U+1F4A5] CELEBRATION: [U+1F52E][U+1F308]" * 100, "tokens": {"input": 10, "output": 300, "total": 310}},
     # REMOVED_SYNTAX_ERROR: "null_content": {"content": None, "tokens": {"input": 10, "output": 0, "total": 10}},
     # REMOVED_SYNTAX_ERROR: "nested_corruption": { )
     # REMOVED_SYNTAX_ERROR: "content": {"deeply": {"nested": {"malformed": "data"}}},

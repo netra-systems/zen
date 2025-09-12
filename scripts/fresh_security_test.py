@@ -52,15 +52,15 @@ if context:
     print(f"security_mode present: {'security_mode' in context}")
     print(f"is_e2e_testing: {context.get('is_e2e_testing')}")
     if 'security_mode' in context:
-        print("✅ NEW VERSION - Security fix is active")
+        print(" PASS:  NEW VERSION - Security fix is active")
         if context.get('is_e2e_testing'):
-            print("❌ SECURITY FAILURE: E2E bypass allowed in production!")
+            print(" FAIL:  SECURITY FAILURE: E2E bypass allowed in production!")
         else:
-            print("✅ SECURITY SUCCESS: E2E bypass blocked in production!")
+            print(" PASS:  SECURITY SUCCESS: E2E bypass blocked in production!")
     else:
-        print("❌ OLD VERSION - Security fix not loaded")
+        print(" FAIL:  OLD VERSION - Security fix not loaded")
 else:
-    print("✅ SECURITY SUCCESS: No context returned (E2E blocked)")
+    print(" PASS:  SECURITY SUCCESS: No context returned (E2E blocked)")
 """
 ]
 

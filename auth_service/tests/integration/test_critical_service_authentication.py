@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Critical Service Authentication Integration Tests
 
@@ -147,7 +185,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
         
         self.record_metric("service_secret_validation", "working")
         self.increment_db_query_count(1)  # Validation attempt
-        logger.info("✅ SERVICE_SECRET validation working correctly")
+        logger.info(" PASS:  SERVICE_SECRET validation working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -200,7 +238,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
         )
         
         self.record_metric("service_id_validation", "working")
-        logger.info("✅ SERVICE_ID hardcoded validation working correctly")
+        logger.info(" PASS:  SERVICE_ID hardcoded validation working correctly")
     
     async def _test_service_id_authentication(
         self,
@@ -324,7 +362,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
         
         self.record_metric("circuit_breaker_max_consecutive_failures", consecutive_failures)
         self.record_metric("circuit_breaker_permanent_failure_prevention", "working")
-        logger.info(f"✅ Circuit breaker working correctly (max consecutive failures: {consecutive_failures})")
+        logger.info(f" PASS:  Circuit breaker working correctly (max consecutive failures: {consecutive_failures})")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -356,7 +394,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
             assert recovery_confirmed, "Authentication should recover immediately after SERVICE_SECRET restoration"
         
         self.record_metric("cascade_failure_recovery", "working")
-        logger.info("✅ Cascade failure recovery working correctly")
+        logger.info(" PASS:  Cascade failure recovery working correctly")
     
     async def _verify_authentication_failure(
         self, auth_manager: IntegrationAuthServiceManager, scenario: str
@@ -496,7 +534,7 @@ class TestCriticalServiceAuthentication(SSotBaseTestCase):
         self.record_metric("max_auth_response_time_ms", max_response_time * 1000)
         self.record_metric("authentication_performance", "acceptable")
         
-        logger.info(f"✅ Authentication performance acceptable (avg: {avg_response_time:.3f}s, max: {max_response_time:.3f}s)")
+        logger.info(f" PASS:  Authentication performance acceptable (avg: {avg_response_time:.3f}s, max: {max_response_time:.3f}s)")
     
     # === TEARDOWN AND VALIDATION ===
     

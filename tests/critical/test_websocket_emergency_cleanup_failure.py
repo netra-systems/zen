@@ -448,7 +448,7 @@ class TestWebSocketEmergencyCleanupFailure:
 
 # Test execution metadata
 if __name__ == "__main__":
-    print("🚨 CRITICAL TEST SUITE - WebSocket Emergency Cleanup Failure")
+    print(" ALERT:  CRITICAL TEST SUITE - WebSocket Emergency Cleanup Failure")
     print("Testing the critical resource exhaustion issue from GCP staging logs:")
     print("- User hits 20 WebSocket manager limit")
     print("- Emergency cleanup fails to free resources")

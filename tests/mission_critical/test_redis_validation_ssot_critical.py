@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Mission Critical Test: Redis Validation SSOT Compliance
 
@@ -82,7 +120,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         This test MUST FAIL to demonstrate current SSOT violations.
         When this test passes, it indicates SSOT violations have been resolved.
         """
-        logger.info("🚨 TESTING: Redis validation SSOT violations (Expected to FAIL)")
+        logger.info(" ALERT:  TESTING: Redis validation SSOT violations (Expected to FAIL)")
         
         violations_found = self._scan_for_redis_validation_implementations()
         
@@ -93,7 +131,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         # CRITICAL: This assertion MUST FAIL with current violations
         # When Redis validation is properly centralized, this will pass
         assert len(violations_found) <= 1, (
-            f"🚨 SSOT VIOLATION: Found {len(violations_found)} Redis validation implementations. "
+            f" ALERT:  SSOT VIOLATION: Found {len(violations_found)} Redis validation implementations. "
             f"ONLY ONE implementation should exist in the SSOT location. "
             f"Violations: {list(violations_found.keys())}"
         )
@@ -108,7 +146,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         This demonstrates why SSOT is critical - different services have
         different interfaces and return formats.
         """
-        logger.info("🔍 TESTING: Redis validation interface consistency")
+        logger.info(" SEARCH:  TESTING: Redis validation interface consistency")
         
         implementations = self._analyze_redis_validation_interfaces()
         
@@ -123,7 +161,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         # Should find interface inconsistencies (demonstrating SSOT need)
         assert len(interface_mismatches) == 0, (
-            f"🚨 INTERFACE INCONSISTENCY: Found {len(interface_mismatches)} interface mismatches "
+            f" ALERT:  INTERFACE INCONSISTENCY: Found {len(interface_mismatches)} interface mismatches "
             f"between Redis validation implementations. This proves the need for SSOT: {interface_mismatches}"
         )
     
@@ -134,7 +172,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         This test examines the actual validation logic to detect differences
         in error handling, timeout values, and response formats.
         """
-        logger.info("🔍 TESTING: Redis validation behavior consistency")
+        logger.info(" SEARCH:  TESTING: Redis validation behavior consistency")
         
         implementations = self._extract_redis_validation_behaviors()
         
@@ -148,7 +186,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         # Should find behavioral differences (demonstrating SSOT need)
         assert len(behavior_differences) == 0, (
-            f"🚨 BEHAVIOR INCONSISTENCY: Found {len(behavior_differences)} behavioral differences "
+            f" ALERT:  BEHAVIOR INCONSISTENCY: Found {len(behavior_differences)} behavioral differences "
             f"between Redis validation implementations: {behavior_differences}"
         )
     
@@ -159,7 +197,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         This test checks for the expected centralized Redis validation
         implementation that should replace all scattered implementations.
         """
-        logger.info("🔍 TESTING: Redis validation SSOT location existence")
+        logger.info(" SEARCH:  TESTING: Redis validation SSOT location existence")
         
         # Check for expected SSOT location
         project_root = Path(__file__).parent.parent.parent
@@ -183,7 +221,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         # This should FAIL until SSOT is implemented
         assert ssot_found, (
-            f"🚨 MISSING SSOT: No Redis validation SSOT implementation found. "
+            f" ALERT:  MISSING SSOT: No Redis validation SSOT implementation found. "
             f"Expected at one of: {[str(p) for p in expected_paths]}"
         )
     
@@ -194,7 +232,7 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         This test checks that services import and use the SSOT implementation
         instead of maintaining their own Redis validation logic.
         """
-        logger.info("🔍 TESTING: Services use Redis validation SSOT")
+        logger.info(" SEARCH:  TESTING: Services use Redis validation SSOT")
         
         service_imports = self._check_service_redis_imports()
         
@@ -213,12 +251,12 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         # This should FAIL until services migrate to SSOT
         assert local_implementers == 0, (
-            f"🚨 SSOT VIOLATION: {local_implementers} services still have local Redis validation. "
+            f" ALERT:  SSOT VIOLATION: {local_implementers} services still have local Redis validation. "
             f"All services must use centralized SSOT. Service details: {service_imports}"
         )
         
         assert ssot_users >= 3, (
-            f"🚨 INCOMPLETE MIGRATION: Only {ssot_users} services use Redis SSOT. "
+            f" ALERT:  INCOMPLETE MIGRATION: Only {ssot_users} services use Redis SSOT. "
             f"Expected at least 3 services (backend, auth, analytics) to use SSOT."
         )
     
@@ -604,13 +642,13 @@ class RedisValidationSsotCriticalTest(SSotBaseTestCase):
         
         # Log test results
         violations = self.metrics.get_custom("violations_detected", 0)
-        logger.info(f"🚨 Redis Validation SSOT Test Complete: {violations} violations detected")
+        logger.info(f" ALERT:  Redis Validation SSOT Test Complete: {violations} violations detected")
         
         if violations > 1:
             logger.error(f"SSOT VIOLATION: {violations} Redis validation implementations found. "
                         f"This is a DEPLOYMENT BLOCKER until consolidated.")
         else:
-            logger.info("✅ Redis validation appears to be SSOT compliant")
+            logger.info(" PASS:  Redis validation appears to be SSOT compliant")
         
         super().tearDown()
 

@@ -187,22 +187,22 @@ env = get_env()
 
                     # REMOVED_SYNTAX_ERROR: try:
                         # REMOVED_SYNTAX_ERROR: test_jwt_secrets_are_synchronized()
-                        # REMOVED_SYNTAX_ERROR: print("✅ JWT synchronization test passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  JWT synchronization test passed")
 
                         # REMOVED_SYNTAX_ERROR: test_shared_jwt_manager_consistency()
-                        # REMOVED_SYNTAX_ERROR: print("✅ Shared manager consistency test passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Shared manager consistency test passed")
 
                         # REMOVED_SYNTAX_ERROR: test_jwt_secret_environment_specific()
-                        # REMOVED_SYNTAX_ERROR: print("✅ Environment-specific secret test passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Environment-specific secret test passed")
 
                         # REMOVED_SYNTAX_ERROR: test_jwt_secret_validation()
-                        # REMOVED_SYNTAX_ERROR: print("✅ Secret validation test passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Secret validation test passed")
 
                         # REMOVED_SYNTAX_ERROR: test_jwt_synchronization_validation()
-                        # REMOVED_SYNTAX_ERROR: print("✅ Deployment validation test passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Deployment validation test passed")
 
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: 🎉 All JWT synchronization tests PASSED!")
+                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  All JWT synchronization tests PASSED!")
 
                         # REMOVED_SYNTAX_ERROR: except AssertionError as e:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")

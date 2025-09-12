@@ -143,7 +143,7 @@ async def get_websocket_scoped_supervisor(
             _track_registry_for_cleanup(context.connection_id, tool_dispatcher.registry)
         
         logger.info(
-            f"✅ Created WebSocket-scoped SupervisorAgent: "
+            f" PASS:  Created WebSocket-scoped SupervisorAgent: "
             f"connection={context.connection_id}, user={context.user_id}, "
             f"thread={context.thread_id}, run={context.run_id}"
         )
@@ -446,7 +446,7 @@ def _track_registry_for_cleanup(connection_id: str, registry) -> None:
             registry_ref = weakref.ref(registry)
             _connection_registries[connection_id].add(registry_ref)
             
-            logger.debug(f"🔍 Tracking registry for connection {connection_id}")
+            logger.debug(f" SEARCH:  Tracking registry for connection {connection_id}")
             
     except Exception as e:
         logger.error(f"Failed to track registry for cleanup: {e}")
@@ -479,7 +479,7 @@ def cleanup_websocket_registries(connection_id: str) -> None:
                         # Clear the registry
                         registry.clear()
                         cleaned_count += 1
-                        logger.debug(f"🧹 Cleaned registry {registry.name}")
+                        logger.debug(f"[U+1F9F9] Cleaned registry {registry.name}")
                     except Exception as e:
                         logger.warning(f"Failed to clean registry {getattr(registry, 'name', 'unknown')}: {e}")
                 else:
@@ -489,7 +489,7 @@ def cleanup_websocket_registries(connection_id: str) -> None:
             # Remove the connection from tracking
             del _connection_registries[connection_id]
             
-            logger.info(f"✅ Cleaned up {cleaned_count} registries for WebSocket connection {connection_id}")
+            logger.info(f" PASS:  Cleaned up {cleaned_count} registries for WebSocket connection {connection_id}")
             
     except Exception as e:
         logger.error(f"Failed to cleanup registries for connection {connection_id}: {e}")

@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncpg
 import httpx
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import websockets
 
 # Configure logger
@@ -159,7 +159,7 @@ class TestRealServiceE2ESuite:
         CRITICAL Test: Complete cold start from zero state to AI response.
         
         Performance Requirement: < 5 seconds total
-        Coverage: User signup → JWT generation → Backend init → WebSocket → AI response
+        Coverage: User signup  ->  JWT generation  ->  Backend init  ->  WebSocket  ->  AI response
         
         BVJ: Protects $100K+ MRR by ensuring new users get immediate value
         """

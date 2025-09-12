@@ -1,6 +1,6 @@
 """E2E Agent Billing Flow Test - REAL SERVICES ONLY - Critical Usage-Based Billing Validation
 
-CRITICAL E2E test for complete agent request → processing → billing flow.
+CRITICAL E2E test for complete agent request  ->  processing  ->  billing flow.
 Validates usage-based billing accuracy for all paid tiers using REAL services.
 
 Business Value Justification (BVJ):

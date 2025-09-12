@@ -1,7 +1,7 @@
 """E2E Test #9: Real Billing Pipeline - Critical Revenue Protection Validation
 
 CRITICAL E2E test for complete billing metrics collection and calculation pipeline.
-Validates agent usage tracking → ClickHouse storage → billing calculation → invoice generation.
+Validates agent usage tracking  ->  ClickHouse storage  ->  billing calculation  ->  invoice generation.
 
 Business Value Justification (BVJ):
 1. Segment: ALL paid tiers (revenue protection critical)

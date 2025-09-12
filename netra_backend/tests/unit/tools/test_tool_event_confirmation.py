@@ -88,7 +88,7 @@ class TestToolEventConfirmationMissing:
             assert False, "EXPECTED TO FAIL: Current implementation missing event confirmation, but test passed"
         except (AttributeError, KeyError):
             # This is expected - the current implementation doesn't have event confirmation
-            logger.info("✅ EXPECTED FAILURE: Event confirmation mechanism is missing as expected")
+            logger.info(" PASS:  EXPECTED FAILURE: Event confirmation mechanism is missing as expected")
 
     @pytest.mark.asyncio
     async def test_websocket_event_retry_mechanism_missing(self):

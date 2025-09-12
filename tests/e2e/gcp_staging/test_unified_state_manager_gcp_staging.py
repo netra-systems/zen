@@ -15,7 +15,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Any
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import json
 
 from netra_backend.app.core.managers.unified_state_manager import (
@@ -41,7 +41,7 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
         cls.id_manager = UnifiedIDManager()
         
         # Real GCP Redis Cloud connection
-        cls.redis_client = redis.Redis(
+        cls.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
             host=cls.env.get("REDIS_HOST", "redis-cloud.googleapis.com"),
             port=int(cls.env.get("REDIS_PORT", 6379)),
             db=0,
@@ -64,9 +64,9 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
     async def asyncTearDown(self):
         """Clean up after each test."""
         # Clean test data from Redis
-        test_keys = [k for k in self.redis_client.keys() if k.startswith("test_")]
+        test_keys = [k for k in self.await redis_client.keys() if k.startswith("test_")]
         if test_keys:
-            self.redis_client.delete(*test_keys)
+            self.await redis_client.delete(*test_keys)
         
         await super().asyncTearDown()
 
@@ -123,7 +123,7 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
         persisted_count = 0
         for state_key in state_data.keys():
             redis_key = f"state:{user_id}:{StateScope.THREAD.value}:{state_key}"
-            if self.redis_client.exists(redis_key):
+            if self.await redis_client.exists(redis_key):
                 persisted_count += 1
         
         # At least 95% should be persisted successfully
@@ -372,7 +372,7 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
             self.assertEqual(len(retrieved["agent_execution_log"]), 100)
         
         # Check Redis memory efficiency (compressed storage)
-        memory_info = self.redis_client.info('memory')
+        memory_info = self.await redis_client.info('memory')
         used_memory = memory_info.get('used_memory', 0)
         
         # With compression, should use less than 50% of uncompressed size
@@ -789,7 +789,7 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
         
         # Verify data is encrypted in Redis
         redis_key = f"state:{user_id}:{StateScope.USER.value}:{state_key}"
-        raw_redis_data = self.redis_client.get(redis_key)
+        raw_redis_data = self.await redis_client.get(redis_key)
         self.assertIsNotNone(raw_redis_data, "State not found in Redis")
         
         # Raw data should not contain plaintext sensitive information

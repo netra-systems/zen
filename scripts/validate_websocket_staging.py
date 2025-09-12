@@ -29,7 +29,7 @@ try:
         # In newer versions, this might be renamed or moved
         from websockets.exceptions import InvalidStatus as InvalidStatusCode
 except ImportError:
-    print("❌ websockets library not found. Install with: pip install websockets")
+    print(" FAIL:  websockets library not found. Install with: pip install websockets")
     sys.exit(1)
 
 
@@ -64,7 +64,7 @@ class WebSocketStagingValidator:
         test_name = "WebSocket Handshake"
         
         try:
-            print(f"🔌 Testing {test_name}: {ws_url}")
+            print(f"[U+1F50C] Testing {test_name}: {ws_url}")
             
             # Test WebSocket connection with extended timeout for GCP load balancer
             headers = {
@@ -79,8 +79,8 @@ class WebSocketStagingValidator:
                 close_timeout=10,
                 additional_headers=headers
             ) as websocket:
-                print(f"  ✅ WebSocket connection established")
-                print(f"  📊 Connection state: {websocket.state.name}")
+                print(f"   PASS:  WebSocket connection established")
+                print(f"   CHART:  Connection state: {websocket.state.name}")
                 
                 # Test basic message exchange
                 test_message = {
@@ -90,39 +90,39 @@ class WebSocketStagingValidator:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                print(f"  📤 Sent ping message")
+                print(f"  [U+1F4E4] Sent ping message")
                 
                 # Wait for any response or connection status
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     response_data = json.loads(response)
-                    print(f"  📥 Received response: {response_data.get('type', 'unknown')}")
+                    print(f"  [U+1F4E5] Received response: {response_data.get('type', 'unknown')}")
                     
                     self.results.append((test_name, True, "Connection established and message exchange successful"))
                     return True
                     
                 except asyncio.TimeoutError:
-                    print(f"  ⏰ No response within timeout (this may be expected for unauthenticated connection)")
+                    print(f"  [U+23F0] No response within timeout (this may be expected for unauthenticated connection)")
                     # Even if no response, connection establishment is success
                     self.results.append((test_name, True, "Connection established (no response expected for unauthenticated)"))
                     return True
                     
         except ConnectionClosedError as e:
             if e.code == 1008:  # Authentication required
-                print(f"  ✅ Connection closed with code 1008 (Authentication required - expected)")
+                print(f"   PASS:  Connection closed with code 1008 (Authentication required - expected)")
                 self.results.append((test_name, True, f"Proper authentication required (code {e.code})"))
                 return True
             elif e.code == 1011:  # Internal server error
-                print(f"  ❌ WebSocket 1011 internal error - infrastructure issue")
+                print(f"   FAIL:  WebSocket 1011 internal error - infrastructure issue")
                 self.results.append((test_name, False, f"WebSocket 1011 internal error"))
                 return False
             else:
-                print(f"  ❌ WebSocket closed unexpectedly: code {e.code}, reason: {e.reason}")
+                print(f"   FAIL:  WebSocket closed unexpectedly: code {e.code}, reason: {e.reason}")
                 self.results.append((test_name, False, f"WebSocket closed: code {e.code}"))
                 return False
                 
         except InvalidStatusCode as e:
-            print(f"  ❌ Invalid HTTP status during handshake: {e.status_code}")
+            print(f"   FAIL:  Invalid HTTP status during handshake: {e.status_code}")
             if e.status_code == 403:
                 print(f"      This indicates load balancer is blocking WebSocket upgrades")
                 self.results.append((test_name, False, f"HTTP 403 - Load balancer blocking WebSocket upgrade"))
@@ -134,17 +134,17 @@ class WebSocketStagingValidator:
             return False
             
         except OSError as e:
-            print(f"  ❌ Network error: {e}")
+            print(f"   FAIL:  Network error: {e}")
             self.results.append((test_name, False, f"Network error: {e}"))
             return False
             
         except WebSocketException as e:
-            print(f"  ❌ WebSocket protocol error: {e}")
+            print(f"   FAIL:  WebSocket protocol error: {e}")
             self.results.append((test_name, False, f"WebSocket protocol error: {e}"))
             return False
             
         except Exception as e:
-            print(f"  ❌ Unexpected error: {e}")
+            print(f"   FAIL:  Unexpected error: {e}")
             self.results.append((test_name, False, f"Unexpected error: {e}"))
             return False
     
@@ -154,7 +154,7 @@ class WebSocketStagingValidator:
         test_name = "WebSocket Invalid Auth"
         
         try:
-            print(f"🔐 Testing {test_name}: {ws_url}")
+            print(f"[U+1F510] Testing {test_name}: {ws_url}")
             
             headers = {
                 "Origin": self.base_urls["frontend"],
@@ -171,32 +171,32 @@ class WebSocketStagingValidator:
                 # This should close with authentication error
                 try:
                     await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    print(f"  ❌ Expected auth error but connection stayed open")
+                    print(f"   FAIL:  Expected auth error but connection stayed open")
                     self.results.append((test_name, False, "Authentication not properly enforced"))
                     return False
                     
                 except ConnectionClosedError as e:
                     if e.code == 1008:  # Authentication required/failed
-                        print(f"  ✅ Proper authentication rejection (code 1008)")
+                        print(f"   PASS:  Proper authentication rejection (code 1008)")
                         self.results.append((test_name, True, f"Authentication properly enforced"))
                         return True
                     else:
-                        print(f"  ⚠️  Closed with code {e.code} instead of 1008")
+                        print(f"   WARNING: [U+FE0F]  Closed with code {e.code} instead of 1008")
                         self.results.append((test_name, True, f"Connection closed (code {e.code})"))
                         return True
                         
         except ConnectionClosedError as e:
             if e.code in [1008, 1003]:  # Authentication required or unsupported data
-                print(f"  ✅ Authentication properly rejected (code {e.code})")
+                print(f"   PASS:  Authentication properly rejected (code {e.code})")
                 self.results.append((test_name, True, f"Authentication enforced (code {e.code})"))
                 return True
             else:
-                print(f"  ❌ Unexpected close code: {e.code}")
+                print(f"   FAIL:  Unexpected close code: {e.code}")
                 self.results.append((test_name, False, f"Unexpected close code: {e.code}"))
                 return False
                 
         except Exception as e:
-            print(f"  ❌ Auth test error: {e}")
+            print(f"   FAIL:  Auth test error: {e}")
             self.results.append((test_name, False, f"Auth test error: {e}"))
             return False
     
@@ -206,7 +206,7 @@ class WebSocketStagingValidator:
         test_name = "WebSocket Timing"
         
         try:
-            print(f"⏱️  Testing {test_name}: Connection timing")
+            print(f"[U+23F1][U+FE0F]  Testing {test_name}: Connection timing")
             
             start_time = time.time()
             
@@ -222,30 +222,30 @@ class WebSocketStagingValidator:
             ) as websocket:
                 
                 connection_time = time.time() - start_time
-                print(f"  📊 Connection established in {connection_time:.2f} seconds")
+                print(f"   CHART:  Connection established in {connection_time:.2f} seconds")
                 
                 if connection_time < 5.0:
-                    print(f"  ✅ Fast connection establishment")
+                    print(f"   PASS:  Fast connection establishment")
                     self.results.append((test_name, True, f"Connected in {connection_time:.2f}s"))
                     return True
                 elif connection_time < 15.0:
-                    print(f"  ⚠️  Slower than expected but acceptable")
+                    print(f"   WARNING: [U+FE0F]  Slower than expected but acceptable")
                     self.results.append((test_name, True, f"Connected in {connection_time:.2f}s (slow)"))
                     return True
                 else:
-                    print(f"  ❌ Very slow connection establishment")
+                    print(f"   FAIL:  Very slow connection establishment")
                     self.results.append((test_name, False, f"Slow connection: {connection_time:.2f}s"))
                     return False
                     
         except asyncio.TimeoutError:
             connection_time = time.time() - start_time
-            print(f"  ❌ Connection timeout after {connection_time:.2f} seconds")
+            print(f"   FAIL:  Connection timeout after {connection_time:.2f} seconds")
             self.results.append((test_name, False, f"Connection timeout after {connection_time:.2f}s"))
             return False
             
         except Exception as e:
             connection_time = time.time() - start_time
-            print(f"  ❌ Connection failed after {connection_time:.2f}s: {e}")
+            print(f"   FAIL:  Connection failed after {connection_time:.2f}s: {e}")
             self.results.append((test_name, False, f"Failed after {connection_time:.2f}s: {e}"))
             return False
     
@@ -255,7 +255,7 @@ class WebSocketStagingValidator:
         test_name = "Load Balancer Headers"
         
         try:
-            print(f"🔄 Testing {test_name}: Header processing")
+            print(f" CYCLE:  Testing {test_name}: Header processing")
             
             # Test with explicit WebSocket upgrade headers
             headers = {
@@ -272,30 +272,30 @@ class WebSocketStagingValidator:
                 additional_headers=headers
             ) as websocket:
                 
-                print(f"  ✅ Load balancer properly handled WebSocket upgrade")
+                print(f"   PASS:  Load balancer properly handled WebSocket upgrade")
                 self.results.append((test_name, True, "WebSocket upgrade headers processed correctly"))
                 return True
                 
         except InvalidStatusCode as e:
             if e.status_code == 403:
-                print(f"  ❌ Load balancer blocking WebSocket upgrade (HTTP 403)")
+                print(f"   FAIL:  Load balancer blocking WebSocket upgrade (HTTP 403)")
                 self.results.append((test_name, False, "Load balancer blocking WebSocket upgrade"))
                 return False
             else:
-                print(f"  ❌ HTTP {e.status_code} during upgrade")
+                print(f"   FAIL:  HTTP {e.status_code} during upgrade")
                 self.results.append((test_name, False, f"HTTP {e.status_code} during upgrade"))
                 return False
                 
         except Exception as e:
-            print(f"  ❌ Header test error: {e}")
+            print(f"   FAIL:  Header test error: {e}")
             self.results.append((test_name, False, f"Header test error: {e}"))
             return False
     
     async def run_comprehensive_validation(self) -> bool:
         """Run complete WebSocket validation suite."""
-        print(f"\n🔌 WebSocket Staging Validation - {self.environment.upper()}")
-        print(f"🎯 Target: {self.base_urls['api']}")
-        print(f"🕒 Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\n[U+1F50C] WebSocket Staging Validation - {self.environment.upper()}")
+        print(f" TARGET:  Target: {self.base_urls['api']}")
+        print(f"[U+1F552] Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
         
         tests = [
@@ -314,21 +314,21 @@ class WebSocketStagingValidator:
                     all_passed = False
                 print()  # Add spacing between tests
             except Exception as e:
-                print(f"❌ {test_name} failed with exception: {e}")
+                print(f" FAIL:  {test_name} failed with exception: {e}")
                 self.results.append((test_name, False, f"Exception: {e}"))
                 all_passed = False
                 print()
         
         # Print summary
         print("=" * 60)
-        print("📊 VALIDATION RESULTS SUMMARY")
+        print(" CHART:  VALIDATION RESULTS SUMMARY")
         print("=" * 60)
         
         passed_count = 0
         failed_count = 0
         
         for test_name, passed, details in self.results:
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             print(f"{status:<10} {test_name}: {details}")
             if passed:
                 passed_count += 1
@@ -336,25 +336,25 @@ class WebSocketStagingValidator:
                 failed_count += 1
         
         print("=" * 60)
-        print(f"📈 Tests Passed: {passed_count}")
-        print(f"📉 Tests Failed: {failed_count}")
-        print(f"📊 Success Rate: {(passed_count/(passed_count+failed_count)*100):.1f}%")
+        print(f"[U+1F4C8] Tests Passed: {passed_count}")
+        print(f"[U+1F4C9] Tests Failed: {failed_count}")
+        print(f" CHART:  Success Rate: {(passed_count/(passed_count+failed_count)*100):.1f}%")
         
         if all_passed:
-            print("\n🎉 ALL WEBSOCKET VALIDATION TESTS PASSED!")
-            print("✅ WebSocket infrastructure is working correctly")
-            print("✅ Staging environment is ready for business-critical chat functionality")
+            print("\n CELEBRATION:  ALL WEBSOCKET VALIDATION TESTS PASSED!")
+            print(" PASS:  WebSocket infrastructure is working correctly")
+            print(" PASS:  Staging environment is ready for business-critical chat functionality")
         else:
-            print("\n🚨 WEBSOCKET VALIDATION FAILED!")
-            print("❌ WebSocket infrastructure issues detected")
-            print("❌ Chat functionality will NOT work properly")
-            print("\n🔧 RECOMMENDED ACTIONS:")
+            print("\n ALERT:  WEBSOCKET VALIDATION FAILED!")
+            print(" FAIL:  WebSocket infrastructure issues detected")
+            print(" FAIL:  Chat functionality will NOT work properly")
+            print("\n[U+1F527] RECOMMENDED ACTIONS:")
             print("1. Check if terraform infrastructure changes have been applied")
             print("2. Verify GCP load balancer configuration")
             print("3. Check Cloud Run service deployment status")
             print("4. Review GCP logs for WebSocket-related errors")
         
-        print(f"\n🕒 Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\n[U+1F552] Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
         
         return all_passed
@@ -393,10 +393,10 @@ Examples:
         sys.exit(0 if success else 1)
         
     except KeyboardInterrupt:
-        print("\n\n⚠️ Validation interrupted by user")
+        print("\n\n WARNING: [U+FE0F] Validation interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n❌ Validation failed with error: {e}")
+        print(f"\n FAIL:  Validation failed with error: {e}")
         sys.exit(1)
 
 

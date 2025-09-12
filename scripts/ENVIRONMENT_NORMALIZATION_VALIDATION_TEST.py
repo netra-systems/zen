@@ -49,8 +49,8 @@ def test_environment_normalization():
         backend_env = BackendEnvironment()
         actual_env = backend_env.get_environment()
         
-        status = "✅ PASS" if actual_env == expected_env else "❌ FAIL"
-        print(f"  {status} '{input_env}' → '{actual_env}' (expected: '{expected_env}')")
+        status = " PASS:  PASS" if actual_env == expected_env else " FAIL:  FAIL"
+        print(f"  {status} '{input_env}'  ->  '{actual_env}' (expected: '{expected_env}')")
         
         if actual_env != expected_env:
             return False
@@ -100,7 +100,7 @@ def test_context_detection():
         
         is_test_context = env._is_test_context()
         
-        status = "✅ PASS" if is_test_context == case["expected"] else "❌ FAIL"
+        status = " PASS:  PASS" if is_test_context == case["expected"] else " FAIL:  FAIL"
         print(f"  {status} {case['name']}: {is_test_context} (expected: {case['expected']})")
         
         if is_test_context != case["expected"]:
@@ -119,14 +119,14 @@ def main():
     
     print("\n" + "=" * 50)
     if normalization_passed and context_detection_passed:
-        print("🎉 ALL TESTS PASSED - Bug fixes working correctly!")
+        print(" CELEBRATION:  ALL TESTS PASSED - Bug fixes working correctly!")
         print("\nThe following issues are now resolved:")
-        print("- Environment aliases properly normalize (dev → development)")
+        print("- Environment aliases properly normalize (dev  ->  development)")
         print("- Test context detection respects isolation boundaries")
         print("- BackendEnvironment uses SSOT environment detection")
         return 0
     else:
-        print("❌ SOME TESTS FAILED - Bug fixes need review")
+        print(" FAIL:  SOME TESTS FAILED - Bug fixes need review")
         return 1
 
 

@@ -687,12 +687,12 @@ class TestAgentCompletedEvents(BaseIntegrationTest):
             
             if isinstance(result, str) and len(result) > 20:
                 # Should not rely on visual-only formatting
-                visual_only = ["█", "░", "▓", "◆", "★"]
+                visual_only = ["[U+2588]", "[U+2591]", "[U+2593]", "[U+25C6]", "[U+2605]"]
                 has_visual_only = any(char in result for char in visual_only)
                 assert not has_visual_only, "Should not rely on visual-only formatting"
                 
                 # Should use descriptive text instead of symbols
-                symbol_heavy = result.count('→') + result.count('•') + result.count('◦')
+                symbol_heavy = result.count(' -> ') + result.count('[U+2022]') + result.count('[U+25E6]')
                 if symbol_heavy > len(result) / 20:  # More than 5% symbols
                     pytest.fail("Should use descriptive text, not heavy symbol usage")
                 

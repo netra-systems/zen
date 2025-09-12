@@ -317,9 +317,9 @@ class TestEventIngestionErrorHandling:
                 {
                     "type": "unicode_test",
                     "data": {
-                        "text": "Hello 世界! 🌍 Special chars: <>&\"'",
-                        "emoji": "🚀💡🔥⭐",
-                        "symbols": "©®™€£¥§¶"
+                        "text": "Hello [U+4E16][U+754C]! [U+1F30D] Special chars: <>&\"'",
+                        "emoji": "[U+1F680] IDEA:  FIRE:  STAR: ",
+                        "symbols": "[U+00A9][U+00AE][U+2122][U+20AC][U+00A3][U+00A5][U+00A7][U+00B6]"
                     }
                 }
             ]

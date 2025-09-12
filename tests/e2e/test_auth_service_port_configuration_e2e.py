@@ -184,7 +184,7 @@ PORT_CONFIGURATIONS = [ ]
                         # REMOVED_SYNTAX_ERROR: print(f" )
                         # REMOVED_SYNTAX_ERROR: === DETAILED RESULTS ===")
                         # REMOVED_SYNTAX_ERROR: for config_result in results['configuration_results']:
-                            # REMOVED_SYNTAX_ERROR: status = "✅ WORKING" if config_result['connection_successful'] else "❌ FAILED"
+                            # REMOVED_SYNTAX_ERROR: status = " PASS:  WORKING" if config_result['connection_successful'] else " FAIL:  FAILED"
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: if config_result['error']:

@@ -127,7 +127,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                         # Check for state consistency
                         if concurrent_data.get("status") != state_update["status"]:
                             # Race condition detected
-                            print(f"⚠️  Redis race condition detected in attempt {attempt}, update {i}")
+                            print(f" WARNING: [U+FE0F]  Redis race condition detected in attempt {attempt}, update {i}")
                     
                     await asyncio.sleep(0.01)  # 10ms between updates to trigger race
                 
@@ -186,22 +186,22 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         inconsistent_states = sum(1 for a in connection_attempts if not a.get("state_consistent", True))
         avg_connection_time = sum(a.get("connection_time", 0) for a in connection_attempts) / len(connection_attempts)
         
-        print(f"\n🔄 WEBSOCKET-REDIS RACE CONDITION ANALYSIS:")
-        print(f"📊 Successful attempts: {successful_attempts}/{len(connection_attempts)}")
-        print(f"❌ Inconsistent states: {inconsistent_states}")
-        print(f"⏱️  Average connection time: {avg_connection_time:.3f}s")
+        print(f"\n CYCLE:  WEBSOCKET-REDIS RACE CONDITION ANALYSIS:")
+        print(f" CHART:  Successful attempts: {successful_attempts}/{len(connection_attempts)}")
+        print(f" FAIL:  Inconsistent states: {inconsistent_states}")
+        print(f"[U+23F1][U+FE0F]  Average connection time: {avg_connection_time:.3f}s")
         
         # Print detailed results
         for attempt in connection_attempts:
             attempt_num = attempt["attempt"]
             if attempt.get("success"):
-                status = "✅ SUCCESS" if attempt.get("state_consistent") else "⚠️  INCONSISTENT"
+                status = " PASS:  SUCCESS" if attempt.get("state_consistent") else " WARNING: [U+FE0F]  INCONSISTENT"
                 conn_time = attempt.get("connection_time", 0)
                 final_status = attempt.get("final_status", "unknown")
                 print(f"   Attempt {attempt_num}: {status} ({conn_time:.3f}s) - Final: {final_status}")
             else:
                 error = attempt.get("error", "Unknown error")
-                print(f"   Attempt {attempt_num}: ❌ FAILED - {error}")
+                print(f"   Attempt {attempt_num}:  FAIL:  FAILED - {error}")
         
         # Check for race conditions
         race_conditions_detected = (
@@ -211,7 +211,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         )
         
         if race_conditions_detected:
-            print(f"\n🚨 WEBSOCKET-REDIS RACE CONDITIONS DETECTED:")
+            print(f"\n ALERT:  WEBSOCKET-REDIS RACE CONDITIONS DETECTED:")
             print(f"   State inconsistencies suggest race conditions between WebSocket and Redis")
             print(f"   These can cause connection state corruption")
             
@@ -224,7 +224,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 f"This proves WebSocket-Redis synchronization race conditions exist."
             )
         else:
-            print(f"\n✅ WEBSOCKET-REDIS SYNCHRONIZATION APPEARS STABLE:")
+            print(f"\n PASS:  WEBSOCKET-REDIS SYNCHRONIZATION APPEARS STABLE:")
             print(f"   No race conditions detected in state synchronization")
 
     @pytest.mark.integration
@@ -333,17 +333,17 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         # Find validation failures under delay
         failed_under_delay = [r for r in auth_validation_results if r.get("delay_ms", 0) > 0 and not r.get("success", False)]
         
-        print(f"\n🔐 AUTH VALIDATION WITH REDIS DELAY ANALYSIS:")
-        print(f"📊 Successful validations: {successful_validations}/{len(auth_validation_results)}")
-        print(f"⏱️  Maximum validation time: {max_validation_time:.3f}s")
-        print(f"📈 Average validation time: {avg_validation_time:.3f}s")
-        print(f"❌ Failures under delay: {len(failed_under_delay)}")
+        print(f"\n[U+1F510] AUTH VALIDATION WITH REDIS DELAY ANALYSIS:")
+        print(f" CHART:  Successful validations: {successful_validations}/{len(auth_validation_results)}")
+        print(f"[U+23F1][U+FE0F]  Maximum validation time: {max_validation_time:.3f}s")
+        print(f"[U+1F4C8] Average validation time: {avg_validation_time:.3f}s")
+        print(f" FAIL:  Failures under delay: {len(failed_under_delay)}")
         
         # Print detailed results
-        print(f"\n📋 Validation Results by Delay:")
+        print(f"\n[U+1F4CB] Validation Results by Delay:")
         for result in auth_validation_results:
             delay = result.get("delay_ms", 0)
-            success = "✅" if result.get("success", False) else "❌"
+            success = " PASS: " if result.get("success", False) else " FAIL: "
             val_time = result.get("total_validation_time", 0)
             error = result.get("error", "")
             print(f"   {delay:4d}ms delay: {success} ({val_time:.3f}s) {error}")
@@ -356,7 +356,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         )
         
         if auth_timing_issues:
-            print(f"\n🚨 AUTH VALIDATION TIMING ISSUES DETECTED:")
+            print(f"\n ALERT:  AUTH VALIDATION TIMING ISSUES DETECTED:")
             print(f"   Redis delays cause auth validation failures")
             print(f"   These can prevent WebSocket connections during Redis latency spikes")
             
@@ -368,7 +368,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 f"This proves auth validation race conditions exist with Redis delays."
             )
         else:
-            print(f"\n✅ AUTH VALIDATION TIMING APPEARS ROBUST:")
+            print(f"\n PASS:  AUTH VALIDATION TIMING APPEARS ROBUST:")
             print(f"   Auth validation handles Redis delays properly")
 
     @pytest.mark.integration  
@@ -422,7 +422,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 scenario_name = scenario["name"]
                 simulation_type = scenario["simulation"]
                 
-                print(f"\n🔄 Testing scenario: {scenario_name}")
+                print(f"\n CYCLE:  Testing scenario: {scenario_name}")
                 
                 if simulation_type == "normal":
                     # Normal session activity
@@ -558,16 +558,16 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         failed_scenarios = [r for r in session_persistence_results if not r.get("success", False)]
         avg_scenario_time = sum(r.get("scenario_time", 0) for r in session_persistence_results) / len(session_persistence_results)
         
-        print(f"\n💾 SESSION PERSISTENCE ANALYSIS:")
-        print(f"📊 Successful scenarios: {successful_scenarios}/{len(session_persistence_results)}")
-        print(f"❌ Failed scenarios: {len(failed_scenarios)}")
-        print(f"⏱️  Average scenario time: {avg_scenario_time:.3f}s")
+        print(f"\n[U+1F4BE] SESSION PERSISTENCE ANALYSIS:")
+        print(f" CHART:  Successful scenarios: {successful_scenarios}/{len(session_persistence_results)}")
+        print(f" FAIL:  Failed scenarios: {len(failed_scenarios)}")
+        print(f"[U+23F1][U+FE0F]  Average scenario time: {avg_scenario_time:.3f}s")
         
         # Print detailed results
-        print(f"\n📋 Session Persistence Results:")
+        print(f"\n[U+1F4CB] Session Persistence Results:")
         for result in session_persistence_results:
             scenario = result.get("scenario", "unknown")
-            success = "✅" if result.get("success", False) else "❌"
+            success = " PASS: " if result.get("success", False) else " FAIL: "
             time_taken = result.get("scenario_time", 0)
             error = result.get("error", "")
             print(f"   {scenario}: {success} ({time_taken:.3f}s) {error}")
@@ -579,7 +579,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         )
         
         if persistence_issues:
-            print(f"\n🚨 SESSION PERSISTENCE ISSUES DETECTED:")
+            print(f"\n ALERT:  SESSION PERSISTENCE ISSUES DETECTED:")
             print(f"   Session persistence failures during connection lifecycle")
             print(f"   These can cause loss of user context during reconnections")
             
@@ -593,7 +593,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 f"This proves session persistence race conditions exist."
             )
         else:
-            print(f"\n✅ SESSION PERSISTENCE APPEARS ROBUST:")
+            print(f"\n PASS:  SESSION PERSISTENCE APPEARS ROBUST:")
             print(f"   All session persistence scenarios passed")
 
     @pytest.mark.integration
@@ -727,18 +727,18 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         consistent_states = sum(1 for r in isolation_test_results if r.get("state_consistent", False))
         no_contamination_count = sum(1 for r in isolation_test_results if r.get("no_contamination", False))
         
-        print(f"\n👥 MULTI-USER ISOLATION ANALYSIS:")
-        print(f"📊 Successful user operations: {successful_users}/{len(isolation_test_results)}")
-        print(f"✅ Consistent states: {consistent_states}/{len(isolation_test_results)}")
-        print(f"🔒 No contamination: {no_contamination_count}/{len(isolation_test_results)}")
+        print(f"\n[U+1F465] MULTI-USER ISOLATION ANALYSIS:")
+        print(f" CHART:  Successful user operations: {successful_users}/{len(isolation_test_results)}")
+        print(f" PASS:  Consistent states: {consistent_states}/{len(isolation_test_results)}")
+        print(f"[U+1F512] No contamination: {no_contamination_count}/{len(isolation_test_results)}")
         
         # Print detailed isolation results
-        print(f"\n📋 User Isolation Results:")
+        print(f"\n[U+1F4CB] User Isolation Results:")
         for result in isolation_test_results:
             user_idx = result.get("user_index", "unknown")
-            success = "✅" if result.get("success", False) else "❌"
-            consistent = "✅" if result.get("state_consistent", False) else "❌"
-            no_contam = "✅" if result.get("no_contamination", False) else "❌"
+            success = " PASS: " if result.get("success", False) else " FAIL: "
+            consistent = " PASS: " if result.get("state_consistent", False) else " FAIL: "
+            no_contam = " PASS: " if result.get("no_contamination", False) else " FAIL: "
             msg_count = result.get("message_count", 0)
             error = result.get("error", "")
             
@@ -760,7 +760,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 # Check if user A's data contains user B's information
                 if user_data_a.get("user_index") != i:
                     contamination_detected = True
-                    print(f"   ⚠️  User {i} data contaminated with user {user_data_a.get('user_index')} data")
+                    print(f"    WARNING: [U+FE0F]  User {i} data contaminated with user {user_data_a.get('user_index')} data")
         
         # Check for isolation failures
         isolation_failures = (
@@ -771,7 +771,7 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
         )
         
         if isolation_failures:
-            print(f"\n🚨 USER ISOLATION FAILURES DETECTED:")
+            print(f"\n ALERT:  USER ISOLATION FAILURES DETECTED:")
             print(f"   Multi-user isolation race conditions found")
             print(f"   These can cause user data leakage and state corruption")
             
@@ -784,6 +784,6 @@ class TestWebSocketLifecycleManagement(BaseIntegrationTest):
                 f"This proves user isolation race conditions exist."
             )
         else:
-            print(f"\n✅ USER ISOLATION APPEARS ROBUST:")
+            print(f"\n PASS:  USER ISOLATION APPEARS ROBUST:")
             print(f"   All users maintained proper state isolation")
             print(f"   No cross-user contamination detected")

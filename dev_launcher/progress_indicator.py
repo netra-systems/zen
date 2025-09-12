@@ -108,7 +108,7 @@ class ProgressIndicator:
             
         total_duration = time.time() - (self.start_time or time.time())
         self._clear_line()
-        print(f"\n🚀 System Ready ({total_duration:.1f}s)")
+        print(f"\n[U+1F680] System Ready ({total_duration:.1f}s)")
         self._show_service_urls()
     
     def _create_phases(self, phase_data: List[Tuple[str, str, float]]) -> List[Phase]:
@@ -169,13 +169,13 @@ class ProgressIndicator:
         if status == PhaseStatus.RUNNING:
             return self.spinner.next_frame()
         elif status == PhaseStatus.COMPLETED:
-            return "✅"
+            return " PASS: "
         elif status == PhaseStatus.FAILED:
-            return "❌"
+            return " FAIL: "
         elif status == PhaseStatus.SKIPPED:
-            return "⏭️"
+            return "[U+23ED][U+FE0F]"
         else:
-            return "⏳"
+            return "[U+23F3]"
     
     def _clear_line(self) -> None:
         """Clear current terminal line."""
@@ -208,7 +208,7 @@ class QuietProgressIndicator:
     def start(self) -> None:
         """Start silent progress."""
         self.start_time = time.time()
-        print("⚡ Starting Netra Apex...")
+        print(" LIGHTNING:  Starting Netra Apex...")
         
     def next_phase(self, skip_current: bool = False) -> bool:
         """Silent phase transition."""
@@ -216,7 +216,7 @@ class QuietProgressIndicator:
         
     def fail_current_phase(self, error: str = "") -> None:
         """Show failure in silent mode."""
-        print(f"❌ Startup failed: {error}")
+        print(f" FAIL:  Startup failed: {error}")
         
     def update_progress(self, message: Optional[str] = None) -> None:
         """No updates in silent mode."""
@@ -226,7 +226,7 @@ class QuietProgressIndicator:
         """Show completion in silent mode."""
         if self.start_time:
             duration = time.time() - self.start_time
-            print(f"🚀 Ready ({duration:.1f}s)")
+            print(f"[U+1F680] Ready ({duration:.1f}s)")
 
 
 class ProgressFactory:

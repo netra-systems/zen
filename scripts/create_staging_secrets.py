@@ -129,9 +129,9 @@ def _check_existing_secrets(project_id: str) -> Tuple[List[str], List[str]]:
     missing_required = []
     for secret_name in REQUIRED_SECRETS:
         if check_secret_exists(project_id, secret_name):
-            print(f"✓ {secret_name} already exists")
+            print(f"[U+2713] {secret_name} already exists")
         else:
-            print(f"✗ {secret_name} is missing")
+            print(f"[U+2717] {secret_name} is missing")
             missing_required.append(secret_name)
     return missing_required, []
 
@@ -144,10 +144,10 @@ def _create_missing_secrets(project_id: str, missing_required: List[str], create
         prod_value = get_production_secret(project_id, secret_name)
         if prod_value:
             if create_secret(project_id, secret_name, prod_value):
-                print(f"✓ Created {secret_name} from production")
+                print(f"[U+2713] Created {secret_name} from production")
                 created_secrets.append(secret_name)
             else:
-                print(f"✗ Failed to create {secret_name}")
+                print(f"[U+2717] Failed to create {secret_name}")
         else:
             _provide_manual_instructions(secret_name)
     return created_secrets
@@ -155,11 +155,11 @@ def _create_missing_secrets(project_id: str, missing_required: List[str], create
 def _provide_manual_instructions(secret_name: str):
     """Provide manual instructions for critical secrets."""
     if "jwt-secret-key" in secret_name:
-        print(f"⚠ {secret_name}: Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+        print(f" WARNING:  {secret_name}: Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
     elif "fernet-key" in secret_name:
-        print(f"⚠ {secret_name}: Generate with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
+        print(f" WARNING:  {secret_name}: Generate with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
     else:
-        print(f"⚠ {secret_name}: Must be manually configured")
+        print(f" WARNING:  {secret_name}: Must be manually configured")
 
 def _print_summary(missing_required: List[str], created_secrets: List[str]):
     """Print summary of created secrets."""

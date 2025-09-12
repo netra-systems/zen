@@ -189,7 +189,7 @@ class TestWebSocketMultiUserIsolationE2E(BaseE2ETest):
             assert execution_id.startswith(expected_pattern), \
                 f"Expected isolated execution pattern '{expected_pattern}', got: {execution_id}"
                 
-        print(f"✅ Multi-user chat isolation validated for {len(user_scenarios)} concurrent users")
+        print(f" PASS:  Multi-user chat isolation validated for {len(user_scenarios)} concurrent users")
 
     async def test_websocket_connection_resource_isolation_EXPECTED_FAILURE(self):
         """
@@ -610,7 +610,7 @@ class TestWebSocketMultiUserIsolationE2E(BaseE2ETest):
                 assert len(leaked_messages) == 0, \
                     f"Context state leaked from user {user_id} to user {other_user_id}"
                     
-        print(f"✅ Session state isolation validated across {len(user_ids)} users")
+        print(f" PASS:  Session state isolation validated across {len(user_ids)} users")
 
     # Helper methods for multi-user isolation testing
     

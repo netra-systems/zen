@@ -19,11 +19,11 @@ async def test_missing_endpoints():
     results = {}
     
     async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-        print("🧪 Testing Missing API Endpoints")
+        print("[U+1F9EA] Testing Missing API Endpoints")
         print("=" * 50)
         
         # Agent Control Endpoints
-        print("\n📋 Testing Agent Control Endpoints:")
+        print("\n[U+1F4CB] Testing Agent Control Endpoints:")
         
         # Test /api/agents/start (POST)
         try:
@@ -37,7 +37,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code in [200, 201, 202]
             }
-            print(f"  POST /api/agents/start: {response.status_code} {'✅' if results['POST /api/agents/start']['success'] else '❌'}")
+            print(f"  POST /api/agents/start: {response.status_code} {' PASS: ' if results['POST /api/agents/start']['success'] else ' FAIL: '}")
             if response.status_code == 200:
                 data = response.json()
                 print(f"    Response: {data.get('message', 'No message')}")
@@ -56,7 +56,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code in [200, 201, 202]
             }
-            print(f"  POST /api/agents/stop: {response.status_code} {'✅' if results['POST /api/agents/stop']['success'] else '❌'}")
+            print(f"  POST /api/agents/stop: {response.status_code} {' PASS: ' if results['POST /api/agents/stop']['success'] else ' FAIL: '}")
         except Exception as e:
             results["POST /api/agents/stop"] = {"status": "error", "error": str(e)}
             print(f"  POST /api/agents/stop: Error - {e}")
@@ -72,7 +72,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code in [200, 201, 202]
             }
-            print(f"  POST /api/agents/cancel: {response.status_code} {'✅' if results['POST /api/agents/cancel']['success'] else '❌'}")
+            print(f"  POST /api/agents/cancel: {response.status_code} {' PASS: ' if results['POST /api/agents/cancel']['success'] else ' FAIL: '}")
         except Exception as e:
             results["POST /api/agents/cancel"] = {"status": "error", "error": str(e)}
             print(f"  POST /api/agents/cancel: Error - {e}")
@@ -84,7 +84,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code == 200
             }
-            print(f"  GET /api/agents/status: {response.status_code} {'✅' if results['GET /api/agents/status']['success'] else '❌'}")
+            print(f"  GET /api/agents/status: {response.status_code} {' PASS: ' if results['GET /api/agents/status']['success'] else ' FAIL: '}")
             if response.status_code == 200:
                 data = response.json()
                 print(f"    Found {len(data)} agents")
@@ -93,7 +93,7 @@ async def test_missing_endpoints():
             print(f"  GET /api/agents/status: Error - {e}")
         
         # Streaming Endpoints
-        print("\n🌊 Testing Streaming Endpoints:")
+        print("\n[U+1F30A] Testing Streaming Endpoints:")
         
         # Test /api/agents/stream (GET info)
         try:
@@ -102,7 +102,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code == 200
             }
-            print(f"  GET /api/agents/stream: {response.status_code} {'✅' if results['GET /api/agents/stream']['success'] else '❌'}")
+            print(f"  GET /api/agents/stream: {response.status_code} {' PASS: ' if results['GET /api/agents/stream']['success'] else ' FAIL: '}")
         except Exception as e:
             results["GET /api/agents/stream"] = {"status": "error", "error": str(e)}
             print(f"  GET /api/agents/stream: Error - {e}")
@@ -121,11 +121,11 @@ async def test_missing_endpoints():
                     "status": response.status_code,
                     "success": response.status_code == 200
                 }
-                print(f"  POST /api/agents/stream: {response.status_code} {'✅' if results['POST /api/agents/stream']['success'] else '❌'}")
+                print(f"  POST /api/agents/stream: {response.status_code} {' PASS: ' if results['POST /api/agents/stream']['success'] else ' FAIL: '}")
         except httpx.TimeoutException:
             # Timeout is expected for streaming endpoints
             results["POST /api/agents/stream"] = {"status": "timeout", "success": True}
-            print(f"  POST /api/agents/stream: Timeout (Expected) ✅")
+            print(f"  POST /api/agents/stream: Timeout (Expected)  PASS: ")
         except Exception as e:
             results["POST /api/agents/stream"] = {"status": "error", "error": str(e)}
             print(f"  POST /api/agents/stream: Error - {e}")
@@ -138,17 +138,17 @@ async def test_missing_endpoints():
                     "status": response.status_code,
                     "success": response.status_code == 200
                 }
-                print(f"  GET /api/events/stream: {response.status_code} {'✅' if results['GET /api/events/stream']['success'] else '❌'}")
+                print(f"  GET /api/events/stream: {response.status_code} {' PASS: ' if results['GET /api/events/stream']['success'] else ' FAIL: '}")
         except httpx.TimeoutException:
             # Timeout is expected for streaming endpoints
             results["GET /api/events/stream"] = {"status": "timeout", "success": True}
-            print(f"  GET /api/events/stream: Timeout (Expected) ✅")
+            print(f"  GET /api/events/stream: Timeout (Expected)  PASS: ")
         except Exception as e:
             results["GET /api/events/stream"] = {"status": "error", "error": str(e)}
             print(f"  GET /api/events/stream: Error - {e}")
         
         # Message Endpoints (verify they still work)
-        print("\n💬 Testing Message Endpoints (Should already exist):")
+        print("\n[U+1F4AC] Testing Message Endpoints (Should already exist):")
         
         # Test /api/chat/messages (GET)
         try:
@@ -157,7 +157,7 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code in [200, 401, 403]  # 401/403 acceptable if auth required
             }
-            print(f"  GET /api/chat/messages: {response.status_code} {'✅' if results['GET /api/chat/messages']['success'] else '❌'}")
+            print(f"  GET /api/chat/messages: {response.status_code} {' PASS: ' if results['GET /api/chat/messages']['success'] else ' FAIL: '}")
         except Exception as e:
             results["GET /api/chat/messages"] = {"status": "error", "error": str(e)}
             print(f"  GET /api/chat/messages: Error - {e}")
@@ -173,13 +173,13 @@ async def test_missing_endpoints():
                 "status": response.status_code,
                 "success": response.status_code in [200, 201, 401, 403]  # 401/403 acceptable if auth required
             }
-            print(f"  POST /api/chat/messages: {response.status_code} {'✅' if results['POST /api/chat/messages']['success'] else '❌'}")
+            print(f"  POST /api/chat/messages: {response.status_code} {' PASS: ' if results['POST /api/chat/messages']['success'] else ' FAIL: '}")
         except Exception as e:
             results["POST /api/chat/messages"] = {"status": "error", "error": str(e)}
             print(f"  POST /api/chat/messages: Error - {e}")
     
     # Summary
-    print("\n📊 Test Summary:")
+    print("\n CHART:  Test Summary:")
     print("=" * 50)
     
     total_tests = len(results)
@@ -190,9 +190,9 @@ async def test_missing_endpoints():
     print(f"Success rate: {successful_tests/total_tests*100:.1f}%")
     
     if successful_tests == total_tests:
-        print("\n🎉 All endpoints are working!")
+        print("\n CELEBRATION:  All endpoints are working!")
     else:
-        print(f"\n⚠️  {total_tests - successful_tests} endpoints need attention")
+        print(f"\n WARNING: [U+FE0F]  {total_tests - successful_tests} endpoints need attention")
         
         # Show failed endpoints
         failed = [endpoint for endpoint, result in results.items() if not result.get("success", False)]
@@ -203,7 +203,7 @@ async def test_missing_endpoints():
                 error = results[endpoint].get("error", "")
                 print(f"  - {endpoint}: Status {status} {error}")
     
-    print(f"\n💾 Full results saved to: test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    print(f"\n[U+1F4BE] Full results saved to: test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
     
     # Save detailed results
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -213,13 +213,13 @@ async def test_missing_endpoints():
     return results
 
 if __name__ == "__main__":
-    print("🚀 Starting API Endpoint Test")
+    print("[U+1F680] Starting API Endpoint Test")
     print(f"Testing backend at: {BACKEND_URL}")
     print(f"Timeout: {TIMEOUT}s")
     
     try:
         results = asyncio.run(test_missing_endpoints())
     except KeyboardInterrupt:
-        print("\n⏹️  Test interrupted by user")
+        print("\n[U+23F9][U+FE0F]  Test interrupted by user")
     except Exception as e:
-        print(f"\n💥 Test failed with error: {e}")
+        print(f"\n[U+1F4A5] Test failed with error: {e}")

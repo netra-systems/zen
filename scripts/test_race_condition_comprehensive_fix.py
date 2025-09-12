@@ -54,7 +54,7 @@ class ComprehensiveRaceConditionFixValidator:
         
     async def test_phase_1_authentication_circuit_breaker(self) -> ConcurrentTestResult:
         """Test Phase 1: Authentication circuit breaker and concurrent token management."""
-        self.logger.info("🔧 PHASE 1 TEST: Authentication Circuit Breaker")
+        self.logger.info("[U+1F527] PHASE 1 TEST: Authentication Circuit Breaker")
         
         # Simulate concurrent authentication attempts
         concurrent_users = 10
@@ -128,14 +128,14 @@ class ComprehensiveRaceConditionFixValidator:
             }
         )
         
-        self.logger.info(f"✅ PHASE 1: {successful_auths}/{total_connections} successful authentications")
+        self.logger.info(f" PASS:  PHASE 1: {successful_auths}/{total_connections} successful authentications")
         self.logger.info(f"   Failure rate: {failure_rate:.2%} (target: <1%)")
         
         return result
     
     async def test_phase_2_websocket_parameter_compatibility(self) -> ConcurrentTestResult:
         """Test Phase 2: WebSocket connection parameter compatibility."""
-        self.logger.info("🔧 PHASE 2 TEST: WebSocket Parameter Compatibility")
+        self.logger.info("[U+1F527] PHASE 2 TEST: WebSocket Parameter Compatibility")
         
         # Simulate WebSocket connection attempts with different parameter variants
         connection_attempts = 20
@@ -199,14 +199,14 @@ class ComprehensiveRaceConditionFixValidator:
             }
         )
         
-        self.logger.info(f"✅ PHASE 2: {successful_connections}/{total_connections} successful connections")
+        self.logger.info(f" PASS:  PHASE 2: {successful_connections}/{total_connections} successful connections")
         self.logger.info(f"   Failure rate: {failure_rate:.2%} (target: <1%)")
         
         return result
     
     async def test_phase_3_gcp_timing_adjustments(self) -> ConcurrentTestResult:
         """Test Phase 3: GCP Cloud Run timing adjustments."""
-        self.logger.info("🔧 PHASE 3 TEST: GCP Cloud Run Timing Adjustments")
+        self.logger.info("[U+1F527] PHASE 3 TEST: GCP Cloud Run Timing Adjustments")
         
         # Simulate GCP Cloud Run readiness validation
         readiness_checks = 15
@@ -272,14 +272,14 @@ class ComprehensiveRaceConditionFixValidator:
             }
         )
         
-        self.logger.info(f"✅ PHASE 3: {successful_checks}/{total_checks} successful readiness validations")
+        self.logger.info(f" PASS:  PHASE 3: {successful_checks}/{total_checks} successful readiness validations")
         self.logger.info(f"   Failure rate: {failure_rate:.2%} (target: <1%)")
         
         return result
     
     async def test_phase_4_message_handler_concurrency(self) -> ConcurrentTestResult:
         """Test Phase 4: Message handler concurrency during connection storms."""
-        self.logger.info("🔧 PHASE 4 TEST: Message Handler Concurrency")
+        self.logger.info("[U+1F527] PHASE 4 TEST: Message Handler Concurrency")
         
         # Simulate concurrent message handler creation during connection storm
         concurrent_handlers = 12
@@ -356,7 +356,7 @@ class ComprehensiveRaceConditionFixValidator:
             }
         )
         
-        self.logger.info(f"✅ PHASE 4: {successful_creations}/{total_creations} successful handler creations")
+        self.logger.info(f" PASS:  PHASE 4: {successful_creations}/{total_creations} successful handler creations")
         self.logger.info(f"   Race conditions detected and resolved: {race_conditions_detected}")
         self.logger.info(f"   Failure rate: {failure_rate:.2%} (target: <1%)")
         
@@ -364,7 +364,7 @@ class ComprehensiveRaceConditionFixValidator:
     
     async def test_comprehensive_integration(self) -> ConcurrentTestResult:
         """Test all phases working together under realistic concurrent load."""
-        self.logger.info("🔧 COMPREHENSIVE TEST: All Phases Integration")
+        self.logger.info("[U+1F527] COMPREHENSIVE TEST: All Phases Integration")
         
         # Simulate realistic WebSocket connection storm
         concurrent_connections = 25
@@ -466,7 +466,7 @@ class ComprehensiveRaceConditionFixValidator:
             }
         )
         
-        self.logger.info(f"✅ COMPREHENSIVE: {successful_connections}/{total_connections} successful full flows")
+        self.logger.info(f" PASS:  COMPREHENSIVE: {successful_connections}/{total_connections} successful full flows")
         self.logger.info(f"   Failure rate: {failure_rate:.2%} (target: <1%)")
         self.logger.info(f"   Total test time: {total_test_time:.2f}s")
         
@@ -474,7 +474,7 @@ class ComprehensiveRaceConditionFixValidator:
     
     async def run_all_tests(self) -> List[ConcurrentTestResult]:
         """Run all race condition fix tests."""
-        self.logger.info("🚀 STARTING COMPREHENSIVE RACE CONDITION FIX VALIDATION")
+        self.logger.info("[U+1F680] STARTING COMPREHENSIVE RACE CONDITION FIX VALIDATION")
         self.logger.info("=" * 70)
         
         tests = [
@@ -488,19 +488,19 @@ class ComprehensiveRaceConditionFixValidator:
         all_results = []
         
         for test_name, test_func in tests:
-            self.logger.info(f"\n📋 Running: {test_name}")
+            self.logger.info(f"\n[U+1F4CB] Running: {test_name}")
             try:
                 result = await test_func()
                 all_results.append(result)
                 
                 # Check if test meets success criteria
                 if result.failure_rate <= 0.01:  # <1% failure rate
-                    self.logger.info(f"✅ PASSED: {test_name} (failure rate: {result.failure_rate:.2%})")
+                    self.logger.info(f" PASS:  PASSED: {test_name} (failure rate: {result.failure_rate:.2%})")
                 else:
-                    self.logger.warning(f"⚠️  MARGINAL: {test_name} (failure rate: {result.failure_rate:.2%})")
+                    self.logger.warning(f" WARNING: [U+FE0F]  MARGINAL: {test_name} (failure rate: {result.failure_rate:.2%})")
                     
             except Exception as e:
-                self.logger.error(f"❌ FAILED: {test_name} - {e}")
+                self.logger.error(f" FAIL:  FAILED: {test_name} - {e}")
                 # Create failure result
                 failure_result = ConcurrentTestResult(
                     test_name=test_name.lower().replace(" ", "_"),
@@ -518,7 +518,7 @@ class ComprehensiveRaceConditionFixValidator:
         
         # Generate summary report
         self.logger.info("\n" + "=" * 70)
-        self.logger.info("📊 COMPREHENSIVE RACE CONDITION FIX VALIDATION SUMMARY")
+        self.logger.info(" CHART:  COMPREHENSIVE RACE CONDITION FIX VALIDATION SUMMARY")
         self.logger.info("=" * 70)
         
         total_connections = sum(r.total_connections for r in all_results)
@@ -528,29 +528,29 @@ class ComprehensiveRaceConditionFixValidator:
         
         overall_failure_rate = total_failed / total_connections if total_connections > 0 else 0
         
-        self.logger.info(f"📈 OVERALL RESULTS:")
+        self.logger.info(f"[U+1F4C8] OVERALL RESULTS:")
         self.logger.info(f"   Total connections tested: {total_connections}")
         self.logger.info(f"   Successful connections: {total_successful}")
         self.logger.info(f"   Failed connections: {total_failed}")
         self.logger.info(f"   Overall failure rate: {overall_failure_rate:.2%}")
         self.logger.info(f"   Race conditions detected and resolved: {total_race_conditions}")
         
-        self.logger.info(f"\n📋 INDIVIDUAL TEST RESULTS:")
+        self.logger.info(f"\n[U+1F4CB] INDIVIDUAL TEST RESULTS:")
         for result in all_results:
-            status = "✅ PASS" if result.failure_rate <= 0.01 else "⚠️  MARGINAL" if result.failure_rate <= 0.05 else "❌ FAIL"
+            status = " PASS:  PASS" if result.failure_rate <= 0.01 else " WARNING: [U+FE0F]  MARGINAL" if result.failure_rate <= 0.05 else " FAIL:  FAIL"
             self.logger.info(f"   {result.test_name}: {status} (failure rate: {result.failure_rate:.2%})")
         
         # Final assessment
         if overall_failure_rate <= 0.01:
-            self.logger.info(f"\n🎉 SUCCESS: Race condition fixes achieve target <1% failure rate!")
+            self.logger.info(f"\n CELEBRATION:  SUCCESS: Race condition fixes achieve target <1% failure rate!")
             self.logger.info(f"   $120K+ MRR chat functionality is restored and resilient under concurrent load.")
             self.logger.info(f"   All 4 phases working together successfully.")
         elif overall_failure_rate <= 0.05:
-            self.logger.info(f"\n✅ GOOD: Race condition fixes significantly improve reliability")
+            self.logger.info(f"\n PASS:  GOOD: Race condition fixes significantly improve reliability")
             self.logger.info(f"   {overall_failure_rate:.2%} failure rate is a major improvement over 100% failure rate")
             self.logger.info(f"   Chat functionality is largely restored with minor edge cases.")
         else:
-            self.logger.warning(f"\n⚠️  NEEDS IMPROVEMENT: {overall_failure_rate:.2%} failure rate still too high")
+            self.logger.warning(f"\n WARNING: [U+FE0F]  NEEDS IMPROVEMENT: {overall_failure_rate:.2%} failure rate still too high")
             self.logger.warning(f"   Additional tuning needed to reach <1% target")
         
         return all_results

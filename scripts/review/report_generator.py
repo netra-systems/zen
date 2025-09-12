@@ -60,7 +60,7 @@ class ReportGenerator:
         report.append("## System Health")
         report.append("### Smoke Test Results")
         for test, passed in review_data.smoke_test_results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             report.append(f"- {test}: {status}")
         report.append("")
     

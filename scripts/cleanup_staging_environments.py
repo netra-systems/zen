@@ -294,7 +294,7 @@ class StagingEnvironmentCleaner:
                 "Content-Type": "application/json"
             }
             
-            comment = f"""## 🧹 Staging Environment Cleaned Up
+            comment = f"""## [U+1F9F9] Staging Environment Cleaned Up
 
 **Reason:** {reason}
 **Timestamp:** {datetime.now(timezone.utc).isoformat()}

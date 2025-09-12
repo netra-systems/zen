@@ -163,53 +163,53 @@ class UserContextExtractor:
         environment = env.get("ENVIRONMENT", "development").lower()
         
         # Enhanced diagnostic logging for staging
-        logger.critical(f"🔑 GOLDEN PATH JWT: Starting auth service token validation in {environment} environment")
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Starting auth service token validation in {environment}")
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Fast path enabled: {fast_path_enabled}")
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token length: {len(token) if token else 0}")
-        logger.info(f"🔍 WEBSOCKET JWT VALIDATION - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
+        logger.critical(f"[U+1F511] GOLDEN PATH JWT: Starting auth service token validation in {environment} environment")
+        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Starting auth service token validation in {environment}")
+        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Fast path enabled: {fast_path_enabled}")
+        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Token length: {len(token) if token else 0}")
+        logger.info(f" SEARCH:  WEBSOCKET JWT VALIDATION - Token prefix: {token[:20]}..." if token and len(token) > 20 else token)
         
         # SSOT COMPLIANCE: Use auth service for ALL JWT operations
         try:
             
             # SSOT COMPLIANCE: Remove JWT bypass - ALL validation through UnifiedAuthInterface
             # Previous JWT decode with verify_signature: False VIOLATES SSOT architecture
-            logger.info("🔒 SSOT COMPLIANCE: Using UnifiedAuthInterface for ALL token validation")
+            logger.info("[U+1F512] SSOT COMPLIANCE: Using UnifiedAuthInterface for ALL token validation")
             
             # Fast path optimization: Use cached result if available for E2E performance
             if fast_path_enabled and environment in ["staging", "test"]:
-                logger.info("🚀 FAST PATH: Using cached auth service validation for E2E performance")
+                logger.info("[U+1F680] FAST PATH: Using cached auth service validation for E2E performance")
                 # Fast path still uses proper auth service validation - just with caching
             
             # SSOT COMPLIANCE: Use UnifiedAuthInterface for ALL JWT validation 
             if get_unified_auth:
-                logger.info("🔄 SSOT: Using UnifiedAuthInterface for token validation")
+                logger.info(" CYCLE:  SSOT: Using UnifiedAuthInterface for token validation")
                 unified_auth = get_unified_auth()
                 validation_result = unified_auth.validate_token(token)
                 
                 if validation_result:
                     user_id = validation_result.get("user_id") or validation_result.get("sub")
                     if user_id and user_id != "None":
-                        logger.info(f"✅ GOLDEN PATH JWT SUCCESS: Unified auth validated token for user {user_id[:8]}... in {environment}")
-                        logger.info(f"✅ UNIFIED AUTH SUCCESS - Token validated for user: {user_id[:8]}...")
+                        logger.info(f" PASS:  GOLDEN PATH JWT SUCCESS: Unified auth validated token for user {user_id[:8]}... in {environment}")
+                        logger.info(f" PASS:  UNIFIED AUTH SUCCESS - Token validated for user: {user_id[:8]}...")
                         return validation_result
                     else:
-                        logger.critical(f"🚨 GOLDEN PATH JWT FAILURE: Token missing valid user ID claim (environment: {environment})")
-                        logger.warning("🔍 UNIFIED AUTH - token missing valid user ID claim")
+                        logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Token missing valid user ID claim (environment: {environment})")
+                        logger.warning(" SEARCH:  UNIFIED AUTH - token missing valid user ID claim")
                         return None
                 else:
-                    logger.critical(f"🚨 GOLDEN PATH JWT FAILURE: Unified auth token validation failed (environment: {environment})")
-                    logger.error("❌ UNIFIED AUTH FAILED - Token validation failed")
+                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Unified auth token validation failed (environment: {environment})")
+                    logger.error(" FAIL:  UNIFIED AUTH FAILED - Token validation failed")
                     return None
             else:
                 # Fallback to auth_client_core if UnifiedAuthInterface not available
-                logger.info("🔄 FALLBACK: Using auth_client_core for token validation")
+                logger.info(" CYCLE:  FALLBACK: Using auth_client_core for token validation")
                 from netra_backend.app.clients.auth_client_core import auth_client
                 
                 validation_result = await auth_client.validate_token(token)
                 if not validation_result or not validation_result.get('valid'):
-                    logger.critical(f"🚨 GOLDEN PATH JWT FAILURE: Auth service validation failed (environment: {environment}, fallback mode)")
-                    logger.error(f"❌ WEBSOCKET JWT FAILED - Auth service validation failed")
+                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Auth service validation failed (environment: {environment}, fallback mode)")
+                    logger.error(f" FAIL:  WEBSOCKET JWT FAILED - Auth service validation failed")
                     return None
                 
                 payload = validation_result.get('payload', {})
@@ -227,20 +227,20 @@ class UserContextExtractor:
                 # Basic validation
                 user_id = payload.get("sub")
                 if not user_id or user_id == "None":
-                    logger.critical(f"🚨 GOLDEN PATH JWT FAILURE: Token missing 'sub' (user ID) claim (environment: {environment}, fallback mode)")
-                    logger.warning("🔍 WEBSOCKET JWT - token missing 'sub' (user ID) claim")
-                    logger.info(f"🔍 WEBSOCKET JWT - Payload keys: {list(payload.keys())}")
+                    logger.critical(f" ALERT:  GOLDEN PATH JWT FAILURE: Token missing 'sub' (user ID) claim (environment: {environment}, fallback mode)")
+                    logger.warning(" SEARCH:  WEBSOCKET JWT - token missing 'sub' (user ID) claim")
+                    logger.info(f" SEARCH:  WEBSOCKET JWT - Payload keys: {list(payload.keys())}")
                     return None
                 
-                logger.info(f"✅ GOLDEN PATH JWT SUCCESS: Auth service fallback validated token for user {user_id[:8]}... (environment: {environment})")
-                logger.info(f"✅ WEBSOCKET JWT VALIDATION SUCCESS - Token validated for user: {user_id[:8]}...")
+                logger.info(f" PASS:  GOLDEN PATH JWT SUCCESS: Auth service fallback validated token for user {user_id[:8]}... (environment: {environment})")
+                logger.info(f" PASS:  WEBSOCKET JWT VALIDATION SUCCESS - Token validated for user: {user_id[:8]}...")
                 payload["source"] = "auth_service_fallback"
                 return payload
             
         except Exception as e:
-            logger.critical(f"🚨 GOLDEN PATH JWT EXCEPTION: JWT validation error in {environment} - {e} (type: {type(e).__name__})")
-            logger.error(f"❌ WEBSOCKET JWT FAILED - Validation error: {e}")
-            logger.error(f"❌ Exception type: {type(e).__name__}")
+            logger.critical(f" ALERT:  GOLDEN PATH JWT EXCEPTION: JWT validation error in {environment} - {e} (type: {type(e).__name__})")
+            logger.error(f" FAIL:  WEBSOCKET JWT FAILED - Validation error: {e}")
+            logger.error(f" FAIL:  Exception type: {type(e).__name__}")
             
             # SSOT COMPLIANCE: No fallback validation - auth service/UnifiedAuthInterface is SSOT
             logger.debug("SSOT COMPLIANCE: No fallback validation - maintaining single source of truth")
@@ -372,13 +372,13 @@ class UserContextExtractor:
                 e2e_headers["X-Auth-Fast-Path"] in ["enabled", "true", "1"]
             )
             
-            logger.info(f"🔍 E2E Detection in context extractor: {is_e2e_test}")
-            logger.info(f"🔍 E2E Headers: {e2e_headers}")
+            logger.info(f" SEARCH:  E2E Detection in context extractor: {is_e2e_test}")
+            logger.info(f" SEARCH:  E2E Headers: {e2e_headers}")
             
             # Extract JWT token
             jwt_token = self.extract_jwt_from_websocket(websocket)
             if not jwt_token:
-                logger.critical(f"🚨 GOLDEN PATH TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket connection")
+                logger.critical(f" ALERT:  GOLDEN PATH TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket connection")
                 logger.warning("No JWT token found in WebSocket connection")
                 raise HTTPException(
                     status_code=401,
@@ -392,7 +392,7 @@ class UserContextExtractor:
             jwt_payload = await self.validate_and_decode_jwt(jwt_token, fast_path_enabled=is_e2e_test)
             if not jwt_payload:
                 # This is the key fix - different error message for validation failure
-                logger.critical(f"🚨 GOLDEN PATH JWT VALIDATION FAILURE: Token validation failed - likely secret mismatch, expiration, or malformed token")
+                logger.critical(f" ALERT:  GOLDEN PATH JWT VALIDATION FAILURE: Token validation failed - likely secret mismatch, expiration, or malformed token")
                 logger.warning("JWT token validation failed - likely due to secret mismatch or expiration")
                 raise HTTPException(
                     status_code=401,
@@ -424,7 +424,7 @@ class UserContextExtractor:
             }
             
             # Security logging
-            logger.info(f"✅ GOLDEN PATH CONTEXT SUCCESS: Successfully created user context for WebSocket connection: user={user_context.user_id[:8]}..., context={user_context.websocket_client_id}")
+            logger.info(f" PASS:  GOLDEN PATH CONTEXT SUCCESS: Successfully created user context for WebSocket connection: user={user_context.user_id[:8]}..., context={user_context.websocket_client_id}")
             logger.info(
                 f"Successfully authenticated WebSocket connection: "
                 f"user={user_context.user_id[:8]}..., "
@@ -438,7 +438,7 @@ class UserContextExtractor:
             # Re-raise HTTP exceptions (authentication failures)
             raise
         except Exception as e:
-            logger.critical(f"🚨 GOLDEN PATH CONTEXT EXCEPTION: Unexpected error during WebSocket context extraction: {e} (type: {type(e).__name__})")
+            logger.critical(f" ALERT:  GOLDEN PATH CONTEXT EXCEPTION: Unexpected error during WebSocket context extraction: {e} (type: {type(e).__name__})")
             logger.error(f"Unexpected error during WebSocket context extraction: {e}")
             raise HTTPException(
                 status_code=500,

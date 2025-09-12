@@ -84,7 +84,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Singleton pattern should work correctly
         """
-        print("\n🔒 UNIT TEST: GCP Error Reporter Singleton")
+        print("\n[U+1F512] UNIT TEST: GCP Error Reporter Singleton")
         print("=" * 45)
         
         # Test singleton creation
@@ -94,13 +94,13 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         assert reporter1 is reporter2
         assert id(reporter1) == id(reporter2)
         
-        print("✅ Singleton pattern enforced correctly")
+        print(" PASS:  Singleton pattern enforced correctly")
         
         # Test get_error_reporter function
         reporter3 = get_error_reporter()
         assert reporter3 is reporter1
         
-        print("✅ get_error_reporter returns same singleton instance")
+        print(" PASS:  get_error_reporter returns same singleton instance")
     
     def test_gcp_error_reporter_should_enable_detection(self):
         """
@@ -108,14 +108,14 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should correctly detect when to enable
         """
-        print("\n🔍 UNIT TEST: GCP Error Reporter Enable Detection")
+        print("\n SEARCH:  UNIT TEST: GCP Error Reporter Enable Detection")
         print("=" * 52)
         
         # Test 1: Should not enable by default (no environment)
         with patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True):
             reporter = GCPErrorReporter()
             assert not reporter.enabled
-            print("✅ Not enabled by default when no environment indicators")
+            print(" PASS:  Not enabled by default when no environment indicators")
         
         # Reset singleton
         GCPErrorReporter._instance = None
@@ -126,7 +126,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         with patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True):
             reporter = GCPErrorReporter()
             assert reporter.enabled
-            print("✅ Enabled in Cloud Run environment (K_SERVICE)")
+            print(" PASS:  Enabled in Cloud Run environment (K_SERVICE)")
         del os.environ['K_SERVICE']
         
         # Reset singleton
@@ -138,7 +138,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         with patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True):
             reporter = GCPErrorReporter()
             assert reporter.enabled
-            print("✅ Enabled with GCP_PROJECT environment variable")
+            print(" PASS:  Enabled with GCP_PROJECT environment variable")
         del os.environ['GCP_PROJECT']
         
         # Reset singleton
@@ -150,7 +150,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         with patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True):
             reporter = GCPErrorReporter()
             assert reporter.enabled
-            print("✅ Enabled when explicitly set via ENABLE_GCP_ERROR_REPORTING")
+            print(" PASS:  Enabled when explicitly set via ENABLE_GCP_ERROR_REPORTING")
         del os.environ['ENABLE_GCP_ERROR_REPORTING']
         
         # Reset singleton
@@ -162,7 +162,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
             os.environ['K_SERVICE'] = 'test-service'
             reporter = GCPErrorReporter()
             assert not reporter.enabled
-            print("✅ Not enabled when GCP libraries not available")
+            print(" PASS:  Not enabled when GCP libraries not available")
     
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.error_reporting')
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True)
@@ -172,7 +172,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP configuration
         """
-        print("\n☁️ UNIT TEST: GCP Client Initialization Success")
+        print("\n[U+2601][U+FE0F] UNIT TEST: GCP Client Initialization Success")
         print("=" * 48)
         
         # Setup mock
@@ -190,7 +190,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         # Verify client was created
         mock_error_reporting.Client.assert_called_once()
         
-        print("✅ GCP Error Reporting client initialized successfully")
+        print(" PASS:  GCP Error Reporting client initialized successfully")
     
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.error_reporting')
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True)
@@ -200,7 +200,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should gracefully handle initialization failure
         """
-        print("\n❌ UNIT TEST: GCP Client Initialization Failure")
+        print("\n FAIL:  UNIT TEST: GCP Client Initialization Failure")
         print("=" * 48)
         
         # Setup mock to fail
@@ -215,7 +215,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         assert not reporter.enabled
         assert reporter.client is None
         
-        print("✅ GCP client initialization failure handled gracefully")
+        print(" PASS:  GCP client initialization failure handled gracefully")
     
     def test_gcp_error_reporter_rate_limiting(self):
         """
@@ -223,7 +223,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Rate limiting should work correctly
         """
-        print("\n⏱️ UNIT TEST: GCP Error Reporter Rate Limiting")
+        print("\n[U+23F1][U+FE0F] UNIT TEST: GCP Error Reporter Rate Limiting")
         print("=" * 46)
         
         # Create reporter but don't enable GCP
@@ -242,7 +242,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
                 successful_reports += 1
         
         assert successful_reports == 5  # Should be limited to max
-        print(f"✅ Rate limiting enforced: {successful_reports}/10 reports allowed")
+        print(f" PASS:  Rate limiting enforced: {successful_reports}/10 reports allowed")
         
         # Test rate limit window reset
         import time
@@ -259,7 +259,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
             assert reporter._check_rate_limit()
             assert reporter._rate_limit_counter == 1  # Reset to 1
             
-            print("✅ Rate limit window reset works correctly")
+            print(" PASS:  Rate limit window reset works correctly")
     
     def test_gcp_error_reporter_report_exception_disabled(self):
         """
@@ -267,7 +267,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should handle disabled state gracefully
         """
-        print("\n🚫 UNIT TEST: Exception Reporting - Disabled")
+        print("\n[U+1F6AB] UNIT TEST: Exception Reporting - Disabled")
         print("=" * 43)
         
         reporter = GCPErrorReporter()
@@ -286,7 +286,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         # Should complete without error (returns None)
         assert result is None
         
-        print("✅ Exception reporting handled gracefully when disabled")
+        print(" PASS:  Exception reporting handled gracefully when disabled")
     
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.error_reporting')
     @patch('netra_backend.app.services.monitoring.gcp_error_reporter.GCP_AVAILABLE', True)
@@ -296,7 +296,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP integration
         """
-        print("\n✅ UNIT TEST: Exception Reporting - Enabled")
+        print("\n PASS:  UNIT TEST: Exception Reporting - Enabled")
         print("=" * 42)
         
         # Setup mock client
@@ -333,7 +333,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         # Verify client was called
         mock_client.report_exception.assert_called_once()
         
-        print("✅ Exception reported to GCP client successfully")
+        print(" PASS:  Exception reported to GCP client successfully")
     
     def test_gcp_error_reporter_message_reporting(self):
         """
@@ -341,7 +341,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Message reporting should work
         """
-        print("\n📝 UNIT TEST: Message Reporting")
+        print("\n[U+1F4DD] UNIT TEST: Message Reporting")
         print("=" * 33)
         
         reporter = GCPErrorReporter()
@@ -354,7 +354,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         )
         
         assert result is None
-        print("✅ Message reporting handled when disabled")
+        print(" PASS:  Message reporting handled when disabled")
     
     @pytest.mark.asyncio
     async def test_gcp_error_reporter_async_report_error(self):
@@ -363,7 +363,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing async integration
         """
-        print("\n⚡ UNIT TEST: Async Error Reporting")
+        print("\n LIGHTNING:  UNIT TEST: Async Error Reporting")
         print("=" * 35)
         
         reporter = GCPErrorReporter()
@@ -380,7 +380,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         # Should return False when disabled
         assert result is False
-        print("✅ Async error reporting returns False when disabled")
+        print(" PASS:  Async error reporting returns False when disabled")
         
         # Test with enabled state (mocked)
         with patch.object(reporter, 'enabled', True), \
@@ -398,7 +398,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
                 extra_context=test_context
             )
             
-            print("✅ Async error reporting works when enabled")
+            print(" PASS:  Async error reporting works when enabled")
     
     def test_request_context_management(self):
         """
@@ -406,7 +406,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Context management should work correctly
         """
-        print("\n🔄 UNIT TEST: Request Context Management")
+        print("\n CYCLE:  UNIT TEST: Request Context Management")
         print("=" * 42)
         
         # Test setting context
@@ -423,11 +423,11 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         # Context should be accessible (we can't directly test the ContextVar,
         # but we can test that the function doesn't error)
-        print("✅ Request context set without error")
+        print(" PASS:  Request context set without error")
         
         # Test clearing context
         clear_request_context()
-        print("✅ Request context cleared without error")
+        print(" PASS:  Request context cleared without error")
     
     def test_gcp_reportable_decorator_sync(self):
         """
@@ -435,7 +435,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Decorator should work correctly
         """
-        print("\n🎨 UNIT TEST: GCP Reportable Decorator (Sync)")
+        print("\n[U+1F3A8] UNIT TEST: GCP Reportable Decorator (Sync)")
         print("=" * 44)
         
         # Test decorator with re-raise
@@ -447,7 +447,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
             test_function_reraise()
         
         assert "Test error for decorator" in str(exc_info.value)
-        print("✅ Decorator re-raises exceptions correctly")
+        print(" PASS:  Decorator re-raises exceptions correctly")
         
         # Test decorator without re-raise
         @gcp_reportable(reraise=False)
@@ -456,7 +456,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         result = test_function_no_reraise()
         assert result is None  # Should return None when not re-raising
-        print("✅ Decorator handles exceptions without re-raising")
+        print(" PASS:  Decorator handles exceptions without re-raising")
         
         # Test decorator with successful function
         @gcp_reportable()
@@ -465,7 +465,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         result = test_function_success()
         assert result == "success"
-        print("✅ Decorator doesn't interfere with successful execution")
+        print(" PASS:  Decorator doesn't interfere with successful execution")
     
     @pytest.mark.asyncio
     async def test_gcp_reportable_decorator_async(self):
@@ -474,7 +474,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Async decorator should work correctly
         """
-        print("\n⚡ UNIT TEST: GCP Reportable Decorator (Async)")
+        print("\n LIGHTNING:  UNIT TEST: GCP Reportable Decorator (Async)")
         print("=" * 45)
         
         # Test async decorator with re-raise
@@ -486,7 +486,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
             await test_async_function_reraise()
         
         assert "Test async error for decorator" in str(exc_info.value)
-        print("✅ Async decorator re-raises exceptions correctly")
+        print(" PASS:  Async decorator re-raises exceptions correctly")
         
         # Test async decorator without re-raise
         @gcp_reportable(reraise=False)
@@ -495,7 +495,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         result = await test_async_function_no_reraise()
         assert result is None
-        print("✅ Async decorator handles exceptions without re-raising")
+        print(" PASS:  Async decorator handles exceptions without re-raising")
         
         # Test async decorator with successful function
         @gcp_reportable()
@@ -504,7 +504,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         result = await test_async_function_success()
         assert result == "async_success"
-        print("✅ Async decorator doesn't interfere with successful execution")
+        print(" PASS:  Async decorator doesn't interfere with successful execution")
     
     def test_convenience_functions(self):
         """
@@ -512,7 +512,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Convenience functions should work
         """
-        print("\n🎯 UNIT TEST: Convenience Functions")
+        print("\n TARGET:  UNIT TEST: Convenience Functions")
         print("=" * 35)
         
         # Test report_exception convenience function
@@ -521,12 +521,12 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         # Should not raise error (reporter is disabled by default)
         result = report_exception(test_exception, user="test-user")
         assert result is None
-        print("✅ report_exception convenience function works")
+        print(" PASS:  report_exception convenience function works")
         
         # Test report_error convenience function
         result = report_error("Convenience test error message", user="test-user")
         assert result is None
-        print("✅ report_error convenience function works")
+        print(" PASS:  report_error convenience function works")
     
     def test_netra_exception_handling(self):
         """
@@ -534,7 +534,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Should extract NetraException details
         """
-        print("\n🔧 UNIT TEST: NetraException Handling")
+        print("\n[U+1F527] UNIT TEST: NetraException Handling")
         print("=" * 37)
         
         # Create NetraException for testing
@@ -552,7 +552,7 @@ class TestGCPErrorReporterUnit(SSotBaseTestCase):
         
         result = test_function_netra_exception()
         assert result is None
-        print("✅ NetraException handled correctly by decorator")
+        print(" PASS:  NetraException handled correctly by decorator")
 
 
 if __name__ == "__main__":

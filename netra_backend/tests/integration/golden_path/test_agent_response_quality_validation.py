@@ -186,10 +186,10 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
         3. **Reserved Instance Opportunity**: $8,400 annual savings available
         
         ### Recommendations:
-        1. **Implement right-sizing** for 15 EC2 instances → Est. savings: $3,200/month
-        2. **Configure S3 lifecycle policies** → Est. savings: $1,800/month  
-        3. **Purchase Reserved Instances** for production workloads → Est. savings: $700/month
-        4. **Enable auto-scaling** for variable workloads → Est. savings: $1,500/month
+        1. **Implement right-sizing** for 15 EC2 instances  ->  Est. savings: $3,200/month
+        2. **Configure S3 lifecycle policies**  ->  Est. savings: $1,800/month  
+        3. **Purchase Reserved Instances** for production workloads  ->  Est. savings: $700/month
+        4. **Enable auto-scaling** for variable workloads  ->  Est. savings: $1,500/month
         
         ### Total Potential Savings: $7,200/month (28.8% reduction)
         
@@ -332,9 +332,9 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
                 - Risk Assessment: Low risk, high reward
                 
                 **Value Recommendations**:
-                1. **Immediate Actions** (Week 1-2): Right-size 12 EC2 instances → $2,400/month savings
-                2. **Short-term** (Month 1): Implement storage optimization → $1,800/month savings  
-                3. **Medium-term** (Month 2-3): Reserved Instance strategy → $1,350/month savings
+                1. **Immediate Actions** (Week 1-2): Right-size 12 EC2 instances  ->  $2,400/month savings
+                2. **Short-term** (Month 1): Implement storage optimization  ->  $1,800/month savings  
+                3. **Medium-term** (Month 2-3): Reserved Instance strategy  ->  $1,350/month savings
                 
                 **Business Justification**: This optimization aligns with the 25-30% reduction identified in triage and validates the high-confidence data from our analysis.
                 
@@ -930,19 +930,19 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
         ### Implementation Roadmap
         
         #### Phase 1: Quick Wins (Week 1-2)
-        1. **Right-size EC2 instances** → Immediate impact
-        2. **Implement S3 lifecycle policies** → Low risk, high savings
-        3. **Enable detailed monitoring** → Better optimization insights
+        1. **Right-size EC2 instances**  ->  Immediate impact
+        2. **Implement S3 lifecycle policies**  ->  Low risk, high savings
+        3. **Enable detailed monitoring**  ->  Better optimization insights
         
         #### Phase 2: Advanced Optimization (Week 3-4)
-        1. **Deploy auto-scaling groups** → Handle variable loads
-        2. **Implement CloudFront CDN** → Reduce egress costs
-        3. **Optimize database configurations** → Performance + cost benefits
+        1. **Deploy auto-scaling groups**  ->  Handle variable loads
+        2. **Implement CloudFront CDN**  ->  Reduce egress costs
+        3. **Optimize database configurations**  ->  Performance + cost benefits
         
         #### Phase 3: Long-term Strategy (Month 2)
-        1. **Reserved Instance strategy** → 40-60% compute savings
-        2. **Advanced monitoring setup** → Continuous optimization
-        3. **Cost governance policies** → Prevent cost drift
+        1. **Reserved Instance strategy**  ->  40-60% compute savings
+        2. **Advanced monitoring setup**  ->  Continuous optimization
+        3. **Cost governance policies**  ->  Prevent cost drift
         
         ### Risk Assessment
         
@@ -1119,7 +1119,7 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
         
         ### Optimization Strategy
         #### Phase 1: Immediate Cost Reduction (Week 1-2)
-        - **Right-size over-provisioned instances**: 18 instances → $2,400/month savings
+        - **Right-size over-provisioned instances**: 18 instances  ->  $2,400/month savings
         - **Implement S3 lifecycle policies**: $800/month savings
         - **Reserved Instance quick wins**: $1,000/month commitment savings
         
@@ -1160,7 +1160,7 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
         - **Application Code**: Profiling and optimization of critical paths
         
         ### Expected Improvements
-        - **Response Time**: 75% reduction (850ms → 200ms)
+        - **Response Time**: 75% reduction (850ms  ->  200ms)
         - **Throughput**: 3x improvement (current bottlenecks removed)
         - **User Experience**: Dramatic improvement in application responsiveness
         
@@ -1257,7 +1257,7 @@ class TestAgentResponseQualityValidation(WebSocketIntegrationTest):
         
         ### Uptime Protection (99.9% Requirement)
         - **Blue-Green Deployments**: Zero-downtime updates
-        - **Gradual Rollouts**: 10% → 50% → 100% traffic migration
+        - **Gradual Rollouts**: 10%  ->  50%  ->  100% traffic migration
         - **Automated Rollback**: Instant reversion if issues detected
         - **Maintenance Windows**: Off-peak scheduled maintenance only
         

@@ -15,6 +15,7 @@ EXPECTED BEHAVIOR:
 - Tests PASS after migrating to UnifiedJSONSerializer SSOT
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import Mock, AsyncMock
 import asyncio
@@ -27,7 +28,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestReportingSubAgentJSONIntegration(unittest.TestCase):
+class TestReportingSubAgentJSONIntegration(SSotAsyncTestCase):
     """Integration tests for ReportingSubAgent SSOT JSON functionality."""
     
     def setUp(self):

@@ -215,7 +215,7 @@ class TypeDeduplicationValidator:
     
     def run_validation(self) -> ValidationResult:
         """Run complete validation and return results."""
-        print("🔍 Scanning for duplicate type definitions...")
+        print(" SEARCH:  Scanning for duplicate type definitions...")
         
         # Scan for duplicates
         python_duplicates = self.scan_python_duplicates()
@@ -225,7 +225,7 @@ class TypeDeduplicationValidator:
         critical_duplicates = [d for d in python_duplicates if d.severity == "critical"]
         
         # Validate imports
-        print("🔍 Validating canonical import paths...")
+        print(" SEARCH:  Validating canonical import paths...")
         violations = self.validate_canonical_imports()
         
         total_duplicates = len(python_duplicates) + len(typescript_duplicates)
@@ -250,33 +250,33 @@ class TypeDeduplicationValidator:
 
     def _add_success_message(self, report):
         """Add success message and return early"""
-        report.append("✅ SUCCESS: No duplicate types or import violations found!")
+        report.append(" PASS:  SUCCESS: No duplicate types or import violations found!")
         return report
 
     def _add_failure_summary(self, report, result):
         """Add failure summary to report"""
-        report.append(f"❌ FAILURE: Found {result.total_duplicates} duplicate types and {len(result.violations)} violations")
+        report.append(f" FAIL:  FAILURE: Found {result.total_duplicates} duplicate types and {len(result.violations)} violations")
         report.append("")
         return report
 
     def _add_critical_duplicates_section(self, report, critical_duplicates):
         """Add critical duplicates section to report"""
         if not critical_duplicates: return report
-        report.append("🔴 CRITICAL DUPLICATES (Must Fix Immediately):")
+        report.append("[U+1F534] CRITICAL DUPLICATES (Must Fix Immediately):")
         report.append("-" * 50)
         for dup in critical_duplicates:
             report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
             for loc in dup.locations:
-                report.append(f"    📁 {loc}")
+                report.append(f"    [U+1F4C1] {loc}")
             if dup.canonical_location:
-                report.append(f"    ✅ Canonical: {dup.canonical_location}")
+                report.append(f"     PASS:  Canonical: {dup.canonical_location}")
             report.append("")
         return report
 
     def _add_python_duplicates_section(self, report, python_duplicates):
         """Add Python duplicates section to report"""
         if not python_duplicates: return report
-        report.append(f"🐍 PYTHON DUPLICATES ({len(python_duplicates)}):")
+        report.append(f"[U+1F40D] PYTHON DUPLICATES ({len(python_duplicates)}):")
         report.append("-" * 30)
         for dup in python_duplicates[:10]:  # Show top 10
             report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
@@ -288,7 +288,7 @@ class TypeDeduplicationValidator:
     def _add_typescript_duplicates_section(self, report, typescript_duplicates):
         """Add TypeScript duplicates section to report"""
         if not typescript_duplicates: return report
-        report.append(f"🔷 TYPESCRIPT DUPLICATES ({len(typescript_duplicates)}):")
+        report.append(f"[U+1F537] TYPESCRIPT DUPLICATES ({len(typescript_duplicates)}):")
         report.append("-" * 35)
         for dup in typescript_duplicates[:10]:  # Show top 10
             report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
@@ -300,7 +300,7 @@ class TypeDeduplicationValidator:
     def _add_violations_section(self, report, violations):
         """Add import violations section to report"""
         if not violations: return report
-        report.append(f"⚠️  IMPORT VIOLATIONS ({len(violations)}):")
+        report.append(f" WARNING: [U+FE0F]  IMPORT VIOLATIONS ({len(violations)}):")
         report.append("-" * 30)
         for violation in violations[:10]:  # Show top 10
             report.append(f"  {violation}")
@@ -314,7 +314,7 @@ class TypeDeduplicationValidator:
         report.append("=" * 80)
         report.append("NEXT STEPS:")
         report.append("1. Review TYPE_DEDUPLICATION_PLAN.md for consolidation strategy")
-        report.append("2. Fix critical duplicates first (marked with 🔴)")
+        report.append("2. Fix critical duplicates first (marked with [U+1F534])")
         report.append("3. Update imports to use canonical locations")
         report.append("4. Re-run validation: python scripts/validate_type_deduplication.py")
         report.append("=" * 80)
@@ -369,9 +369,9 @@ def main():
             sys.exit(2)
     
     if result.success:
-        print("🎉 Type deduplication validation PASSED!")
+        print(" CELEBRATION:  Type deduplication validation PASSED!")
     else:
-        print(f"❌ Found {result.total_duplicates} duplicates and {len(result.violations)} violations")
+        print(f" FAIL:  Found {result.total_duplicates} duplicates and {len(result.violations)} violations")
 
 
 if __name__ == "__main__":

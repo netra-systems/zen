@@ -15,6 +15,7 @@ EXPECTED BEHAVIOR:
 - Tests PASS after migrating to unified_json_handler SSOT
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import inspect
 import unittest
@@ -22,7 +23,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
-class TestReportingAgentSSOTJSONCompliance(unittest.TestCase):
+class TestReportingAgentSSOTJSONCompliance(SSotBaseTestCase):
     """Mission critical tests detecting SSOT violations in ReportingSubAgent JSON handling."""
     
     def setUp(self):

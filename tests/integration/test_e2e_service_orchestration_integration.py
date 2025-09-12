@@ -83,7 +83,7 @@ class TestE2EServiceOrchestration:
             assert "localhost:5433" in env.get("DATABASE_URL"), "Wrong PostgreSQL port in DATABASE_URL"
             assert "localhost:6381" in env.get("REDIS_URL"), "Wrong Redis port in REDIS_URL"
             
-            logger.info("✅ Basic service orchestration test passed")
+            logger.info(" PASS:  Basic service orchestration test passed")
             
         finally:
             # Cleanup
@@ -109,7 +109,7 @@ class TestE2EServiceOrchestration:
             async with manager.postgres() as postgres:
                 result = await postgres.fetchval("SELECT 1 as test_value")
                 assert result == 1, "PostgreSQL connection test failed"
-                logger.info("✅ PostgreSQL connection test passed")
+                logger.info(" PASS:  PostgreSQL connection test passed")
             
             # Test Redis connection  
             async with manager.redis() as redis:
@@ -117,9 +117,9 @@ class TestE2EServiceOrchestration:
                 value = await redis.get("test_key")
                 assert value == "test_value", "Redis connection test failed"
                 await redis.delete("test_key")
-                logger.info("✅ Redis connection test passed")
+                logger.info(" PASS:  Redis connection test passed")
             
-            logger.info("✅ Real services integration after orchestration passed")
+            logger.info(" PASS:  Real services integration after orchestration passed")
             
         finally:
             # Cleanup
@@ -147,9 +147,9 @@ class TestE2EServiceOrchestration:
                     # Test port connectivity
                     connected = await self._test_port_connectivity(health.port)
                     assert connected, f"Port {health.port} for {service_name} is not connectable"
-                    logger.info(f"✅ {service_name} port {health.port} connectivity validated")
+                    logger.info(f" PASS:  {service_name} port {health.port} connectivity validated")
             
-            logger.info("✅ Service connectivity validation passed")
+            logger.info(" PASS:  Service connectivity validation passed")
             
         finally:
             if orchestrator.started_services:
@@ -179,7 +179,7 @@ class TestE2EServiceOrchestration:
                 value = env.get(var)
                 assert value is not None, f"Environment variable {var} not set"
                 assert "localhost" in value, f"Environment variable {var} should use localhost"
-                logger.info(f"✅ {var}={value}")
+                logger.info(f" PASS:  {var}={value}")
             
             # Validate port mappings are correct
             database_url = env.get("DATABASE_URL")
@@ -188,7 +188,7 @@ class TestE2EServiceOrchestration:
             redis_url = env.get("REDIS_URL") 
             assert ":6381/" in redis_url, f"REDIS_URL should use test port 6381: {redis_url}"
             
-            logger.info("✅ Environment configuration validation passed")
+            logger.info(" PASS:  Environment configuration validation passed")
             
         finally:
             if orchestrator.started_services:
@@ -216,7 +216,7 @@ class TestE2EServiceOrchestration:
         assert "nonexistent_service" in health_report, "Error report should mention failed service"
         assert "UNHEALTHY" in health_report, "Error report should show unhealthy status"
         
-        logger.info("✅ Orchestration error handling test passed")
+        logger.info(" PASS:  Orchestration error handling test passed")
 
     async def test_service_health_monitoring(self):
         """Test service health monitoring functionality."""
@@ -242,7 +242,7 @@ class TestE2EServiceOrchestration:
                 if health.is_healthy:
                     assert health.error_message is None, f"Healthy service should not have error: {service_name}"
                 
-                logger.info(f"✅ {service_name} health monitoring data validated")
+                logger.info(f" PASS:  {service_name} health monitoring data validated")
             
             # Test health report generation
             report = orchestrator.get_health_report()
@@ -250,7 +250,7 @@ class TestE2EServiceOrchestration:
             assert "Environment: test" in report, "Environment not in health report"
             assert "Healthy services:" in report, "Health summary missing"
             
-            logger.info("✅ Service health monitoring test passed")
+            logger.info(" PASS:  Service health monitoring test passed")
             
         finally:
             if orchestrator.started_services:
@@ -291,7 +291,7 @@ class TestE2EServiceOrchestration:
                 success, _ = result
                 assert success, f"Orchestration {i} should succeed"
             
-            logger.info("✅ Concurrent service orchestration test passed")
+            logger.info(" PASS:  Concurrent service orchestration test passed")
             
         finally:
             # Cleanup all orchestrators
@@ -343,7 +343,7 @@ class TestE2EServiceOrchestrationPerformance:
                 if health.is_healthy:
                     assert health.response_time_ms < 5000, f"{service_name} response too slow: {health.response_time_ms}ms"
             
-            logger.info(f"✅ Orchestration performance test passed ({elapsed:.1f}s)")
+            logger.info(f" PASS:  Orchestration performance test passed ({elapsed:.1f}s)")
             
         finally:
             if orchestrator.started_services:

@@ -139,7 +139,7 @@ def test_only(reason: Optional[str] = None, allow_override: bool = False) -> Cal
             # Check for override (dangerous but useful for debugging)
             if allow_override and os.environ.get('FORCE_TEST_ONLY_OVERRIDE', '').lower() == 'true':
                 logger.warning(
-                    f"⚠️  DANGEROUS: test_only override active for {func.__name__}. "
+                    f" WARNING: [U+FE0F]  DANGEROUS: test_only override active for {func.__name__}. "
                     f"This should NEVER happen in production!"
                 )
                 return func(*args, **kwargs)
@@ -153,7 +153,7 @@ def test_only(reason: Optional[str] = None, allow_override: bool = False) -> Cal
                     suggestion="Set TESTING=true environment variable or run via unified_test_runner.py"
                 )
             
-            logger.debug(f"✅ Test-only function {func.__name__} called in valid test mode")
+            logger.debug(f" PASS:  Test-only function {func.__name__} called in valid test mode")
             return func(*args, **kwargs)
         
         # Add metadata to the wrapped function for introspection

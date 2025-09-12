@@ -164,18 +164,18 @@ class SupplyResearchResult(BaseModel):
 class DeepAgentState(BaseModel):
     """DEPRECATED: Strongly typed state for the deep agent system.
     
-    🚨 CRITICAL DEPRECATION WARNING: DeepAgentState creates user isolation risks
+     ALERT:  CRITICAL DEPRECATION WARNING: DeepAgentState creates user isolation risks
     and will be REMOVED in v3.0.0 (Q1 2025).
     
-    📋 MIGRATION REQUIRED:
+    [U+1F4CB] MIGRATION REQUIRED:
     - Replace with UserExecutionContext pattern for complete user isolation
     - Use context.metadata for request-specific data instead of global state
     - Access database via context.db_session instead of global sessions
     
-    📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md
-    ⚠️  USER DATA AT RISK: This pattern may cause data leakage between users
+    [U+1F4D6] Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md
+     WARNING: [U+FE0F]  USER DATA AT RISK: This pattern may cause data leakage between users
     
-    🚀 GOLDEN PATH FIX (2025-09-10): Added thread_id property for backward compatibility.
+    [U+1F680] GOLDEN PATH FIX (2025-09-10): Added thread_id property for backward compatibility.
     The supervisor agent execution was failing with "'DeepAgentState' object has no attribute 'thread_id'"
     because the model has chat_thread_id but code expects thread_id. This fix enables:
     - Property access: state.thread_id maps to state.chat_thread_id
@@ -244,17 +244,17 @@ class DeepAgentState(BaseModel):
         
         # CRITICAL SECURITY WARNING: Issue comprehensive deprecation warning with security implications
         warnings.warn(
-            f"🚨 CRITICAL SECURITY VULNERABILITY: DeepAgentState usage creates user isolation risks. "
+            f" ALERT:  CRITICAL SECURITY VULNERABILITY: DeepAgentState usage creates user isolation risks. "
             f"This pattern will be REMOVED in v3.0.0 (Q1 2025). "
             f"\n"
-            f"📋 IMMEDIATE MIGRATION REQUIRED:"
+            f"[U+1F4CB] IMMEDIATE MIGRATION REQUIRED:"
             f"\n1. Replace with UserExecutionContext pattern"
             f"\n2. Use 'context.metadata' for request data instead of DeepAgentState fields"
             f"\n3. Access database via 'context.db_session' instead of global sessions"
             f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
             f"\n"
-            f"📖 Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
-            f"\n⚠️  CRITICAL: Multiple users may see each other's data with this pattern",
+            f"[U+1F4D6] Migration Guide: See EXECUTION_PATTERN_TECHNICAL_DESIGN.md"
+            f"\n WARNING: [U+FE0F]  CRITICAL: Multiple users may see each other's data with this pattern",
             DeprecationWarning,
             stacklevel=2
         )
@@ -288,7 +288,7 @@ class DeepAgentState(BaseModel):
             # Basic validation that thread belongs to user (simplified check)
             if not str(thread_id).startswith(str(user_id)[:8]):
                 logger.warning(
-                    f"🔒 SECURITY ALERT: Thread ID '{thread_id}' may not belong to user '{user_id}'. "
+                    f"[U+1F512] SECURITY ALERT: Thread ID '{thread_id}' may not belong to user '{user_id}'. "
                     f"Potential cross-user thread assignment detected."
                 )
         
@@ -304,7 +304,7 @@ class DeepAgentState(BaseModel):
             for pattern in sensitive_patterns:
                 if pattern in agent_input_str:
                     logger.warning(
-                        f"🔒 SECURITY ALERT: Potential sensitive data pattern '{pattern}' "
+                        f"[U+1F512] SECURITY ALERT: Potential sensitive data pattern '{pattern}' "
                         f"detected in agent_input for user '{user_id}'"
                     )
         
@@ -327,11 +327,11 @@ class DeepAgentState(BaseModel):
         if security_violations:
             violation_summary = "; ".join(security_violations)
             logger.error(
-                f"🚨 CRITICAL SECURITY VIOLATIONS DETECTED: {violation_summary}. "
+                f" ALERT:  CRITICAL SECURITY VIOLATIONS DETECTED: {violation_summary}. "
                 f"User: {user_id}, Thread: {thread_id}, Run: {run_id}"
             )
             raise ValueError(
-                f"🚨 SECURITY BOUNDARY VIOLATION: DeepAgentState creation blocked due to "
+                f" ALERT:  SECURITY BOUNDARY VIOLATION: DeepAgentState creation blocked due to "
                 f"security violations: {violation_summary}. "
                 f"This pattern poses cross-user contamination risks."
             )
@@ -360,16 +360,16 @@ class DeepAgentState(BaseModel):
             if isinstance(value, (list, dict, set)):
                 # Deep copy all mutable collections to prevent sharing
                 isolated_data[key] = copy.deepcopy(value)
-                logger.debug(f"🔒 Security isolation: Deep copied mutable field '{key}' for user isolation")
+                logger.debug(f"[U+1F512] Security isolation: Deep copied mutable field '{key}' for user isolation")
             elif hasattr(value, '__dict__') and not isinstance(value, (str, int, float, bool, type(None))):
                 # Deep copy objects with state
                 try:
                     isolated_data[key] = copy.deepcopy(value)
-                    logger.debug(f"🔒 Security isolation: Deep copied object field '{key}' for user isolation")
+                    logger.debug(f"[U+1F512] Security isolation: Deep copied object field '{key}' for user isolation")
                 except Exception as e:
                     # Fallback for non-copyable objects
                     isolated_data[key] = value
-                    logger.warning(f"⚠️ Could not deep copy field '{key}': {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Could not deep copy field '{key}': {e}")
             else:
                 # Immutable types are safe to share
                 isolated_data[key] = value
@@ -385,7 +385,7 @@ class DeepAgentState(BaseModel):
         if 'agent_context' not in isolated_data:
             isolated_data['agent_context'] = {}  # New dict instance
         
-        logger.info(f"🔒 Security isolation applied to DeepAgentState initialization")
+        logger.info(f"[U+1F512] Security isolation applied to DeepAgentState initialization")
         return isolated_data
     
     def _validate_updates_security(self, updates: Dict[str, Any]) -> None:
@@ -448,11 +448,11 @@ class DeepAgentState(BaseModel):
         if security_violations:
             violation_summary = "; ".join(security_violations)
             logger.error(
-                f"🚨 CRITICAL SECURITY VIOLATIONS in copy_with_updates: {violation_summary}. "
+                f" ALERT:  CRITICAL SECURITY VIOLATIONS in copy_with_updates: {violation_summary}. "
                 f"User: {self.user_id}, Thread: {self.chat_thread_id}"
             )
             raise ValueError(
-                f"🚨 SECURITY VIOLATION: copy_with_updates blocked due to security violations: "
+                f" ALERT:  SECURITY VIOLATION: copy_with_updates blocked due to security violations: "
                 f"{violation_summary}. This prevents cross-user contamination."
             )
     
@@ -506,7 +506,7 @@ class DeepAgentState(BaseModel):
         for pattern in sensitive_patterns:
             if pattern in other_str:
                 logger.warning(
-                    f"🔒 SECURITY ALERT: Merge operation involves sensitive data pattern '{pattern}' "
+                    f"[U+1F512] SECURITY ALERT: Merge operation involves sensitive data pattern '{pattern}' "
                     f"from user {other_user} to user {current_user}"
                 )
         
@@ -514,11 +514,11 @@ class DeepAgentState(BaseModel):
         if security_violations:
             violation_summary = "; ".join(security_violations)
             logger.error(
-                f"🚨 CRITICAL SECURITY VIOLATIONS in merge_from: {violation_summary}. "
+                f" ALERT:  CRITICAL SECURITY VIOLATIONS in merge_from: {violation_summary}. "
                 f"Current user: {current_user}, Other user: {other_user}"
             )
             raise ValueError(
-                f"🚨 SECURITY VIOLATION: merge_from blocked due to cross-user contamination risk: "
+                f" ALERT:  SECURITY VIOLATION: merge_from blocked due to cross-user contamination risk: "
                 f"{violation_summary}. This prevents unauthorized data access between users."
             )
     

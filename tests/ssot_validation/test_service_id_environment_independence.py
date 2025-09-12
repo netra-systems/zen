@@ -14,7 +14,7 @@ Expected Behavior:
 - FAIL: Initially with environment variable dependencies
 - PASS: After SSOT remediation with environment independence
 
-CRITICAL: This test validates the Golden Path: users login → get AI responses
+CRITICAL: This test validates the Golden Path: users login  ->  get AI responses
 """
 
 import os

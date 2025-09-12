@@ -645,7 +645,7 @@ class CentralConfigurationValidator:
                     if environment in rule.environments:
                         try:
                             self._validate_single_requirement_with_timing(rule, environment)
-                            logger.debug(f"✅ {rule.env_var} validation passed")
+                            logger.debug(f" PASS:  {rule.env_var} validation passed")
                         except ValueError as e:
                             # Enhanced error attribution
                             timing_issue = self._detect_timing_issue()
@@ -654,13 +654,13 @@ class CentralConfigurationValidator:
                             else:
                                 error_msg = f"{rule.env_var} validation failed: {e}"
                             validation_errors.append(error_msg)
-                            logger.error(f"❌ {error_msg}")
+                            logger.error(f" FAIL:  {error_msg}")
                 
                 # CRITICAL: Additional validation for database configuration in staging/production
                 if environment in [Environment.STAGING, Environment.PRODUCTION]:
                     try:
                         self._validate_database_configuration(environment)
-                        logger.debug("✅ Database configuration validation passed")
+                        logger.debug(" PASS:  Database configuration validation passed")
                     except ValueError as e:
                         timing_issue = self._detect_timing_issue()
                         if timing_issue:
@@ -668,7 +668,7 @@ class CentralConfigurationValidator:
                         else:
                             error_msg = f"Database configuration validation failed: {e}"
                         validation_errors.append(error_msg)
-                        logger.error(f"❌ {error_msg}")
+                        logger.error(f" FAIL:  {error_msg}")
                 
                 # HARD STOP: If any validation fails, prevent startup with detailed attribution
                 if validation_errors:
@@ -681,7 +681,7 @@ class CentralConfigurationValidator:
                 # Success
                 self._readiness_state = "ready" 
                 self._is_initialized = True
-                logger.info(f"✅ All configuration requirements validated for {environment.value}")
+                logger.info(f" PASS:  All configuration requirements validated for {environment.value}")
                 
             except Exception as e:
                 self._readiness_state = "failed"
@@ -1214,7 +1214,7 @@ class CentralConfigurationValidator:
         FAILS HARD if any critical configuration is missing or invalid.
         """
         environment = self.get_environment()
-        logger.info(f"🔍 Central Configuration Validation - {environment.value.upper()} Environment")
+        logger.info(f" SEARCH:  Central Configuration Validation - {environment.value.upper()} Environment")
         
         try:
             # Check for legacy variable usage
@@ -1226,10 +1226,10 @@ class CentralConfigurationValidator:
             # Additional startup validations
             self._validate_environment_consistency()
             
-            logger.info(f"✅ Central configuration validation PASSED for {environment.value}")
+            logger.info(f" PASS:  Central configuration validation PASSED for {environment.value}")
             
         except ValueError as e:
-            logger.critical(f"❌ Central configuration validation FAILED: {e}")
+            logger.critical(f" FAIL:  Central configuration validation FAILED: {e}")
             raise
     
     def _check_and_warn_legacy_configs(self) -> None:

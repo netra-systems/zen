@@ -18,7 +18,7 @@ from netra_backend.app.core.async_resource_manager import (
 )
 from netra_backend.app.core.async_retry_logic import AsyncCircuitBreaker, AsyncLock
 
-# Setup helpers (≤8 lines each)
+# Setup helpers ( <= 8 lines each)
 def create_mock_resources():
     """Create mock resources for testing"""
     callback1 = AsyncMock()
@@ -40,7 +40,7 @@ def setup_task_pool_mocks():
     """Setup mocks for task pool tests"""
     return Mock(), Mock()
 
-# Assertion helpers (≤8 lines each)
+# Assertion helpers ( <= 8 lines each)
 def assert_resource_manager_state(manager, is_shutting_down=True, callback_count=0):
     """Assert resource manager state"""
     assert manager._shutting_down == is_shutting_down
@@ -63,7 +63,7 @@ def assert_callbacks_called(callback1, callback2):
     callback1.assert_called_once()
     callback2.assert_called_once()
 
-# Test operation factories (≤8 lines each)
+# Test operation factories ( <= 8 lines each)
 async def create_quick_operation():
     """Create quick async operation"""
     await asyncio.sleep(0.01)
@@ -88,7 +88,7 @@ def create_dummy_processor():
         return f"processed_{len(items)}"
     return processor
 
-# Progress callback helpers (≤8 lines each)
+# Progress callback helpers ( <= 8 lines each)
 def create_progress_tracker():
     """Create progress tracking callback"""
     progress_calls = []
@@ -102,7 +102,7 @@ def assert_progress_tracking(progress_calls, expected_calls):
     for expected in expected_calls:
         assert expected in progress_calls
 
-# Circuit breaker helpers (≤8 lines each)
+# Circuit breaker helpers ( <= 8 lines each)
 def create_circuit_breaker_operation(should_fail=True):
     """Create circuit breaker test operation"""
     async def operation():
@@ -116,7 +116,7 @@ def assert_circuit_breaker_state(breaker, state, failure_count):
     assert breaker.state == state
     assert breaker.failure_count == failure_count
 
-# Connection pool helpers (≤8 lines each)
+# Connection pool helpers ( <= 8 lines each)
 def create_connection_counter():
     """Create connection counter for pool tests"""
     counter = {'value': 0}
@@ -143,7 +143,7 @@ def create_slow_connection_factory():
         return "connection"
     return create_connection
 
-# Timing helpers (≤8 lines each)
+# Timing helpers ( <= 8 lines each)
 def assert_timing_constraint(start_time, end_time, min_duration):
     """Assert operation took at least minimum duration"""
     duration = end_time - start_time
@@ -158,7 +158,7 @@ def measure_timing(operation_func):
         return result, end - start
     return wrapper
 
-# Batch processing helpers (≤8 lines each)
+# Batch processing helpers ( <= 8 lines each)
 def create_sum_processor():
     """Create sum processor for batch tests"""
     async def processor(batch):
@@ -172,7 +172,7 @@ def assert_batch_results(results, expected_sums):
     for i, expected in enumerate(expected_sums):
         assert results[i] == expected
 
-# Lock helpers (≤8 lines each)
+# Lock helpers ( <= 8 lines each)
 def assert_lock_state(lock, is_locked, name):
     """Assert lock state"""
     assert lock.is_locked == is_locked
@@ -180,7 +180,7 @@ def assert_lock_state(lock, is_locked, name):
     assert info["name"] == name
     assert info["locked"] == is_locked
 
-# Retry helpers (≤8 lines each)
+# Retry helpers ( <= 8 lines each)
 def create_retry_counter():
     """Create counter for retry tests"""
     counter = {'value': 0}

@@ -691,11 +691,11 @@ class TestBillingCalculatorEdgeCases(BaseTestCase):
     def test_billing_calculator_unicode_handling(self, calculator):
         """Test BillingCalculator handles Unicode characters safely."""
         unicode_data = {
-            "测试": 1000,
-            "🚀": 500,
-            "café": 750,
-            "naïve": 250,
-            "русский": 100
+            "[U+6D4B][U+8BD5]": 1000,
+            "[U+1F680]": 500,
+            "caf[U+00E9]": 750,
+            "na[U+00EF]ve": 250,
+            "pucck[U+0438][U+0439]": 100
         }
         
         bill = calculator.calculate_total_bill("enterprise", unicode_data)

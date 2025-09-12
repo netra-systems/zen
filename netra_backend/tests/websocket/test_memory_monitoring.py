@@ -107,7 +107,7 @@ async def _validate_cleanup_and_processing(connections: List, initial_memory: fl
     final_memory = psutil.Process().memory_info().rss / 1024 / 1024
     total_processed = sum(conn.total_messages_processed for conn in connections)
     expected_messages = num_conn * msgs_per_sec * duration
-    assert total_processed >= expected_messages * 0.7, f"Should process ≥70% messages: {total_processed} >= {expected_messages * 0.7}"
+    assert total_processed >= expected_messages * 0.7, f"Should process  >= 70% messages: {total_processed} >= {expected_messages * 0.7}"
     connections.clear()
     gc.collect()
     await _validate_memory_cleanup(initial_memory, final_memory)

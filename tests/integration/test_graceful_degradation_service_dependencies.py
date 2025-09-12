@@ -18,7 +18,7 @@ Test Coverage:
 - User messaging about service status and capabilities
 - Business continuity validation - no complete service failures
 
-🚨 CRITICAL: These tests must pass to ensure revenue protection during service outages.
+ ALERT:  CRITICAL: These tests must pass to ensure revenue protection during service outages.
 """
 
 import asyncio

@@ -41,10 +41,6 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         super().setup_method()
         self._setUp()
     
-    def setUp(self):
-        """Compatibility method for BaseIntegrationTest."""
-        self._setUp()
-        
     def _setUp(self):
         """Set up test fixtures."""
         self.mock_registry = Mock()
@@ -78,15 +74,17 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         )
         
         # Simulate timeout scenario
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             # Test default timeout is applied
             result = asyncio.run(self.core.execute_agent(context, user_context, timeout=1.0))
             
             # Verify timeout is registered with tracker
-            mock_register.assert_called_once()
-            call_args = mock_register.call_args[1]
+            mock_create.assert_called_once()
+            call_args = mock_create.call_args[1]
             assert call_args['timeout_seconds'] == 1.0
 
     @pytest.mark.unit
@@ -108,11 +106,15 @@ class TestAgentExecutionCore(BaseIntegrationTest):
             run_id="run-404"
         )
         
-        # Mock registry to return None (agent not found)
+        # Mock registry to return None (agent not found) and fix iteration issue
         self.mock_registry.get.return_value = None
+        # Fix the iteration issue by providing a _registry attribute
+        self.mock_registry._registry = {}  # Empty registry for agent not found scenario
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -144,8 +146,10 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.return_value = {"success": True, "savings": "$500/month"}
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -206,8 +210,10 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.return_value = None
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -244,8 +250,10 @@ class TestAgentExecutionCore(BaseIntegrationTest):
             mock_trace.return_value = mock_trace_instance
             mock_trace_instance.start_span.return_value = Mock()
             
-            with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-                mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+                 patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+                mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+                mock_start.return_value = True
                 
                 result = asyncio.run(self.core.execute_agent(context, user_context))
                 
@@ -279,8 +287,10 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.side_effect = RuntimeError("Critical agent failure")
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register:
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -373,9 +383,8 @@ class TestAgentExecutionCore(BaseIntegrationTest):
 
     @pytest.mark.unit
     def test_user_execution_context_migration_security(self):
-        """Test migration from DeepAgentState to UserExecutionContext for security."""
+        """Test UserExecutionContext validation security (DeepAgentState removed)."""
         # Business Value: Prevents user data isolation vulnerabilities
-        from netra_backend.app.agents.state import DeepAgentState
         
         context = AgentExecutionContext(
             run_id=str(RequestID("run-migrate-123")),
@@ -385,22 +394,21 @@ class TestAgentExecutionCore(BaseIntegrationTest):
             correlation_id="corr-migrate-456"
         )
         
-        # Create deprecated DeepAgentState
-        deep_state = DeepAgentState(
+        # Test proper UserExecutionContext validation (no DeepAgentState)
+        user_context = UserContextFactory.create_context(
             user_id="legacy-user-123",
             thread_id="legacy-thread-456",
-            run_id="legacy-run-789",
-            user_request="Legacy migration test"
+            run_id="legacy-run-789"
         )
         
-        with patch('warnings.warn') as mock_warn:
-            migrated_context = self.core._ensure_user_execution_context(deep_state, context)
-            
-            # Verify migration and security warning
-            assert isinstance(migrated_context, UserExecutionContext)
-            assert migrated_context.user_id == "legacy-user-123"
-            mock_warn.assert_called_once()
-            assert "SECURITY WARNING" in mock_warn.call_args[0][0]
+        # Verify UserExecutionContext validation works correctly
+        validated_context = self.core._validate_user_execution_context(user_context, context)
+        
+        # Verify proper validation and security enforcement
+        assert isinstance(validated_context, UserExecutionContext)
+        assert validated_context.user_id == "legacy-user-123"
+        assert validated_context.thread_id == "legacy-thread-456"
+        assert validated_context.run_id == "legacy-run-789"
 
     @pytest.mark.unit 
     def test_circuit_breaker_fallback_business_continuity(self):
@@ -428,12 +436,14 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         
         circuit_error = CircuitBreakerOpenError("Circuit breaker open")
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
-             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout, \
-             patch.object(self.core.timeout_manager, 'create_fallback_response') as mock_fallback:
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start, \
+             patch.object(self.core, '_execute_with_protection') as mock_protection, \
+             patch.object(self.core, 'create_fallback_response') as mock_fallback:
             
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
-            mock_timeout.side_effect = circuit_error
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
+            mock_protection.side_effect = circuit_error
             mock_fallback.return_value = {"fallback": "Graceful degradation response"}
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
@@ -468,18 +478,14 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.return_value = {"success": True, "result": "Phase test"}
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start, \
              patch.object(self.core.state_tracker, 'start_execution') as mock_state_start, \
-             patch.object(self.core.state_tracker, 'transition_phase') as mock_transition, \
-             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+             patch.object(self.core.state_tracker, 'transition_state') as mock_transition:
             
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             mock_state_start.return_value = "phase_exec_123"
-            
-            # Mock timeout manager to call the wrapped function
-            async def mock_timeout_execution(func, *args, **kwargs):
-                return await func()
-            mock_timeout.side_effect = mock_timeout_execution
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -516,17 +522,19 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent = AsyncMock()
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
-             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start, \
+             patch('asyncio.wait_for') as mock_wait_for:
             
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
-            mock_timeout.side_effect = TimeoutError("Agent execution timed out")
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
+            mock_wait_for.side_effect = TimeoutError("Agent execution timed out")
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
             # Verify timeout protection activates
             assert not result.success
-            assert "Agent execution timed out" in result.error
+            assert "timed out" in result.error
             assert result.agent_name == "timeout_agent"
 
     @pytest.mark.unit
@@ -551,15 +559,11 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.return_value = {"success": True, "insights": "Key business insights"}
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
-             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
             
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
-            
-            # Mock timeout manager to call the wrapped function
-            async def mock_timeout_execution(func, *args, **kwargs):
-                return await func()
-            mock_timeout.side_effect = mock_timeout_execution
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             
@@ -603,15 +607,11 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         mock_agent.execute.side_effect = ValueError("Invalid business parameters provided")
         self.mock_registry.get.return_value = mock_agent
         
-        with patch.object(self.core.execution_tracker, 'register_execution') as mock_register, \
-             patch.object(self.core.timeout_manager, 'execute_agent_with_timeout') as mock_timeout:
+        with patch.object(self.core.agent_tracker, 'create_execution') as mock_create, \
+             patch.object(self.core.agent_tracker, 'start_execution') as mock_start:
             
-            mock_register.return_value = UUID('12345678-1234-5678-9abc-123456789012')
-            
-            # Mock timeout manager to call the wrapped function
-            async def mock_timeout_execution(func, *args, **kwargs):
-                return await func()
-            mock_timeout.side_effect = mock_timeout_execution
+            mock_create.return_value = UUID('12345678-1234-5678-9abc-123456789012')
+            mock_start.return_value = True
             
             result = asyncio.run(self.core.execute_agent(context, user_context))
             

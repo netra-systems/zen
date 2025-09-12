@@ -164,7 +164,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
         assert time_to_expiry < 7200, f"Token should expire in less than 2 hours, got {time_to_expiry:.0f}s"
         
         self.record_metric("token_expiry_validation", "success")
-        logger.info(f"✅ JWT token lifecycle working correctly (expires in {time_to_expiry:.0f}s)")
+        logger.info(f" PASS:  JWT token lifecycle working correctly (expires in {time_to_expiry:.0f}s)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -230,7 +230,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
         
         self.record_metric("jwt_secret_synchronization", "working")
         self.increment_db_query_count(2)  # Creation + validation
-        logger.info("✅ JWT secret synchronization working correctly")
+        logger.info(" PASS:  JWT secret synchronization working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -279,7 +279,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
         assert refresh_success, "Token refresh mechanism failed"
         self.record_metric("token_refresh_mechanism", "working")
         self.increment_db_query_count(3)  # Initial creation + validation + refresh
-        logger.info("✅ JWT token refresh cycle working correctly")
+        logger.info(" PASS:  JWT token refresh cycle working correctly")
     
     async def _test_token_refresh_mechanism(
         self, 
@@ -410,7 +410,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
         
         self.record_metric("multi_user_tokens_created", len(tokens))
         self.record_metric("token_isolation", "working")
-        logger.info(f"✅ JWT multi-user token isolation working correctly ({len(tokens)} users)")
+        logger.info(f" PASS:  JWT multi-user token isolation working correctly ({len(tokens)} users)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -481,7 +481,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
         self.record_metric("jwt_validation_performance", "acceptable")
         
         logger.info(
-            f"✅ JWT validation performance acceptable "
+            f" PASS:  JWT validation performance acceptable "
             f"(avg: {avg_validation_time:.3f}s, max: {max_validation_time:.3f}s, min: {min_validation_time:.3f}s)"
         )
     
@@ -550,7 +550,7 @@ class TestJWTTokenLifecycleComprehensive(SSotBaseTestCase):
             self.increment_db_query_count(1)
         
         self.record_metric("jwt_security_validation", "working")
-        logger.info(f"✅ JWT invalid token scenarios handled correctly ({len(invalid_scenarios)} scenarios)")
+        logger.info(f" PASS:  JWT invalid token scenarios handled correctly ({len(invalid_scenarios)} scenarios)")
     
     def _create_expired_token(self, jwt_config: Dict[str, Any]) -> str:
         """Create an expired JWT token for testing."""

@@ -604,7 +604,7 @@ class TestDatabaseConnectionPoolPerformance:
             tolerance = 20  # Allow 20% tolerance for timing variations
             
             assert abs(utilization - expected) <= tolerance, \
-                f"Utilization should be ~{expected}%, got {utilization}% (tolerance: ±{tolerance}%)"
+                f"Utilization should be ~{expected}%, got {utilization}% (tolerance:  +/- {tolerance}%)"
             
             # Cleanup
             for task in blocking_tasks:

@@ -407,7 +407,7 @@ class TestWebSocketAgentExecutionErrorHandlingRecoveryIntegration(BaseIntegratio
         assert error_analysis["recovery_events"] > 0, "Recovery events must be sent"
         assert error_analysis["error_handling_metrics"]["graceful_handling"] is True
         
-        self.logger.info("✅ Tool failure error handling test PASSED")
+        self.logger.info(" PASS:  Tool failure error handling test PASSED")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -472,7 +472,7 @@ class TestWebSocketAgentExecutionErrorHandlingRecoveryIntegration(BaseIntegratio
         assert error_analysis["total_events"] >= len(error_scenarios) * 3  # Minimum events per scenario
         
         self.logger.info(
-            f"✅ Multiple error scenarios test PASSED - "
+            f" PASS:  Multiple error scenarios test PASSED - "
             f"{len(error_scenarios)} scenarios, "
             f"{error_analysis['total_events']} total events, "
             f"{error_analysis['recovery_events']} recovery events"

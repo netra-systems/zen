@@ -7,7 +7,7 @@ and fallback mechanisms for staging and production environments.
 Business Value: Prevents user authentication failures costing $75K+ MRR
 Critical for user login and Google OAuth integration.
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import logging

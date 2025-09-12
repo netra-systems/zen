@@ -110,12 +110,12 @@ def test_jwt_token_creation_and_validation_flow():
         }
         
         test_token = jwt.encode(payload, test_secret, algorithm="HS256")
-        print(f"✓ Created JWT token using test environment secret")
+        print(f"[U+2713] Created JWT token using test environment secret")
         print(f"  Token (first 50 chars): {test_token[:50]}...")
         print(f"  User ID: {payload['sub']}")
         
     except Exception as e:
-        print(f"❌ Failed to create JWT token: {e}")
+        print(f" FAIL:  Failed to create JWT token: {e}")
         
     finally:
         if original_env:
@@ -129,25 +129,25 @@ def test_jwt_token_creation_and_validation_flow():
             from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
             extractor = UserContextExtractor()
             
-            print(f"\n🔍 Validating token with backend extractor...")
+            print(f"\n SEARCH:  Validating token with backend extractor...")
             decoded_payload = extractor.validate_and_decode_jwt(test_token)
             
             if decoded_payload:
-                print(f"✅ JWT validation SUCCESS")
+                print(f" PASS:  JWT validation SUCCESS")
                 print(f"  Decoded user: {decoded_payload.get('sub', 'unknown')}")
                 print(f"  Permissions: {decoded_payload.get('permissions', [])}")
                 return True
             else:
-                print(f"❌ JWT validation FAILED")
-                print(f"🚨 This explains the WebSocket 403 errors!")
+                print(f" FAIL:  JWT validation FAILED")
+                print(f" ALERT:  This explains the WebSocket 403 errors!")
                 print(f"   Backend rejected the token due to signature mismatch")
                 return False
                 
         except Exception as e:
-            print(f"❌ Exception during JWT validation: {e}")
+            print(f" FAIL:  Exception during JWT validation: {e}")
             return False
     else:
-        print(f"❌ No token to validate")
+        print(f" FAIL:  No token to validate")
         return False
 
 
@@ -173,9 +173,9 @@ def test_environment_configuration_diagnosis():
     print(f"\nJWT Environment Variables:")
     for key, value in staging_secrets.items():
         if value:
-            print(f"✓ {key}: {value[:20]}... (length: {len(value)})")
+            print(f"[U+2713] {key}: {value[:20]}... (length: {len(value)})")
         else:
-            print(f"❌ {key}: NOT SET")
+            print(f" FAIL:  {key}: NOT SET")
     
     # Check unified JWT secret manager behavior
     try:
@@ -188,7 +188,7 @@ def test_environment_configuration_diagnosis():
             print(f"  {key}: {value}")
             
     except Exception as e:
-        print(f"❌ Failed to get JWT manager debug info: {e}")
+        print(f" FAIL:  Failed to get JWT manager debug info: {e}")
 
 
 if __name__ == "__main__":

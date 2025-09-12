@@ -69,7 +69,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
         
     def test_configuration_system_availability(self):
         """Test that UserExecutionEngine can access configuration system"""
-        print("\n🔍 Testing configuration system availability...")
+        print("\n SEARCH:  Testing configuration system availability...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -102,11 +102,11 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 method = getattr(engine, method_name)
                 if callable(method):
                     available_config_methods.append(method_name)
-                    print(f"    ✅ {method_name} method available")
+                    print(f"     PASS:  {method_name} method available")
                 else:
-                    print(f"    ⚠️  {method_name} attribute available but not callable")
+                    print(f"     WARNING: [U+FE0F]  {method_name} attribute available but not callable")
             else:
-                print(f"    ℹ️  {method_name} method not available")
+                print(f"    [U+2139][U+FE0F]  {method_name} method not available")
         
         # Test 2: Check if engine has access to global configuration
         try:
@@ -114,7 +114,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
             global_config = get_config()
             
             if global_config is not None:
-                print(f"  ✅ Global configuration available: {type(global_config).__name__}")
+                print(f"   PASS:  Global configuration available: {type(global_config).__name__}")
                 config_capture.record_config_access('global_config', type(global_config).__name__, 'access')
             else:
                 config_violations.append("Global configuration is None")
@@ -147,7 +147,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 except Exception as e:
                     config_violations.append(f"Environment variable {env_var} access failed: {e}")
             
-            print(f"  ✅ Environment variable access tested: {sum(env_access_results.values())}/{len(test_env_vars)} available")
+            print(f"   PASS:  Environment variable access tested: {sum(env_access_results.values())}/{len(test_env_vars)} available")
             
         except ImportError as e:
             config_violations.append(f"Cannot import IsolatedEnvironment: {e}")
@@ -160,7 +160,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
             if hasattr(db_config, 'get_connection_string'):
                 connection_info = db_config.get_connection_string()
                 if connection_info:
-                    print(f"  ✅ Database configuration accessible")
+                    print(f"   PASS:  Database configuration accessible")
                     config_capture.record_config_access('database_config', 'accessible', 'database')
                 else:
                     config_violations.append("Database configuration returned empty connection string")
@@ -168,7 +168,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 config_violations.append("Database configuration missing get_connection_string method")
                 
         except ImportError as e:
-            print(f"  ⚠️  Database configuration not available: {e}")
+            print(f"   WARNING: [U+FE0F]  Database configuration not available: {e}")
         except Exception as e:
             config_violations.append(f"Database configuration access failed: {e}")
         
@@ -192,10 +192,10 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                     except Exception as e:
                         config_violations.append(f"Service configuration method {method_name} failed: {e}")
             
-            print(f"  ✅ Service configuration methods tested: {len(available_service_methods)}/{len(service_methods)} available")
+            print(f"   PASS:  Service configuration methods tested: {len(available_service_methods)}/{len(service_methods)} available")
             
         except ImportError as e:
-            print(f"  ⚠️  Services configuration not available: {e}")
+            print(f"   WARNING: [U+FE0F]  Services configuration not available: {e}")
         except Exception as e:
             config_violations.append(f"Services configuration access failed: {e}")
         
@@ -203,11 +203,11 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
         if config_violations:
             self.fail(f"Configuration system availability violations: {config_violations}")
         
-        print(f"  ✅ Configuration system availability validated")
+        print(f"   PASS:  Configuration system availability validated")
     
     def test_user_specific_configuration_isolation(self):
         """Test that user-specific configuration is properly isolated"""
-        print("\n🔍 Testing user-specific configuration isolation...")
+        print("\n SEARCH:  Testing user-specific configuration isolation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -331,13 +331,13 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                     isolation_violations.append(f"Shared user context object between {config_object_ids[context_id]} and {user_id}")
                 config_object_ids[context_id] = user_id
         
-        print(f"  ✅ Configuration isolation tested for {len(test_users)} users")
+        print(f"   PASS:  Configuration isolation tested for {len(test_users)} users")
         
         # CRITICAL: Configuration isolation prevents data leaks and security issues
         if isolation_violations:
             self.fail(f"User-specific configuration isolation violations: {isolation_violations}")
         
-        print(f"  ✅ User-specific configuration isolation validated")
+        print(f"   PASS:  User-specific configuration isolation validated")
     
     def _test_environment_access_isolation(self, engine) -> bool:
         """Test environment variable access isolation"""
@@ -352,7 +352,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 
                 for indicator in sensitive_env_indicators:
                     if indicator in context_str:
-                        print(f"    ⚠️  Potential sensitive data in user context: {indicator}")
+                        print(f"     WARNING: [U+FE0F]  Potential sensitive data in user context: {indicator}")
                         return False
                 
                 return True
@@ -375,7 +375,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                     
                     for indicator in db_indicators:
                         if indicator in context_str:
-                            print(f"    ⚠️  Potential database connection leak: {indicator}")
+                            print(f"     WARNING: [U+FE0F]  Potential database connection leak: {indicator}")
                             return False
                 
                 return True
@@ -395,7 +395,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 required_user_fields = ['user_id', 'session_id']
                 for field in required_user_fields:
                     if field not in user_context:
-                        print(f"    ⚠️  Missing required user field: {field}")
+                        print(f"     WARNING: [U+FE0F]  Missing required user field: {field}")
                         return False
                 
                 return True
@@ -406,7 +406,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
     
     async def test_configuration_performance_and_caching(self):
         """Test configuration access performance and caching behavior"""
-        print("\n🔍 Testing configuration performance and caching...")
+        print("\n SEARCH:  Testing configuration performance and caching...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -462,8 +462,8 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 avg_access_time = sum(access_times) / len(access_times)
                 max_access_time = max(access_times)
                 
-                print(f"    ✅ Average access time: {avg_access_time:.4f}s")
-                print(f"    ✅ Maximum access time: {max_access_time:.4f}s")
+                print(f"     PASS:  Average access time: {avg_access_time:.4f}s")
+                print(f"     PASS:  Maximum access time: {max_access_time:.4f}s")
                 
                 # Performance thresholds
                 if avg_access_time > 0.01:  # 10ms average is too slow for config access
@@ -480,7 +480,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                     if second_half_avg > first_half_avg * 2:  # Second half shouldn't be much slower
                         performance_violations.append(f"{scenario['name']} performance degraded over time")
                     else:
-                        print(f"    ✅ Performance stable over multiple accesses")
+                        print(f"     PASS:  Performance stable over multiple accesses")
         
         # Test concurrent configuration access
         async def concurrent_config_access(access_index: int):
@@ -503,7 +503,7 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
                 return float('inf')
         
         # Run concurrent access test
-        print(f"  🔄 Testing concurrent configuration access...")
+        print(f"   CYCLE:  Testing concurrent configuration access...")
         
         concurrent_tasks = [concurrent_config_access(i) for i in range(20)]
         concurrent_times = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
@@ -514,8 +514,8 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
             concurrent_avg = sum(valid_times) / len(valid_times)
             concurrent_max = max(valid_times)
             
-            print(f"  ✅ Concurrent access average: {concurrent_avg:.4f}s")
-            print(f"  ✅ Concurrent access maximum: {concurrent_max:.4f}s")
+            print(f"   PASS:  Concurrent access average: {concurrent_avg:.4f}s")
+            print(f"   PASS:  Concurrent access maximum: {concurrent_max:.4f}s")
             
             # Concurrent access shouldn't be much slower than sequential
             if concurrent_avg > 0.02:  # 20ms average for concurrent access
@@ -524,13 +524,13 @@ class TestConfigurationIntegration(SSotAsyncTestCase):
             if concurrent_max > 0.1:  # 100ms max for any concurrent access
                 performance_violations.append(f"Concurrent config access max too slow: {concurrent_max:.4f}s")
         
-        print(f"  ✅ {len(valid_times)}/{len(concurrent_tasks)} concurrent accesses successful")
+        print(f"   PASS:  {len(valid_times)}/{len(concurrent_tasks)} concurrent accesses successful")
         
         # CRITICAL: Configuration performance affects overall system responsiveness
         if performance_violations:
             self.fail(f"Configuration performance violations: {performance_violations}")
         
-        print(f"  ✅ Configuration performance and caching validated")
+        print(f"   PASS:  Configuration performance and caching validated")
     
     def _access_global_config(self):
         """Helper to access global configuration"""

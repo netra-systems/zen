@@ -69,7 +69,7 @@ class WebSocketEventCapture:
             error_msg = event_data.get('message', 'Unknown error')
             self.errors.append(error_msg)
             if "already registered" in error_msg or "modelmetaclass" in error_msg:
-                logger.error(f"🚨 Registry error captured: {error_msg}")
+                logger.error(f" ALERT:  Registry error captured: {error_msg}")
     
     def has_complete_agent_flow(self) -> bool:
         """Check if all 5 critical agent events were received."""
@@ -155,7 +155,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         self.test_start_time = time.time()
         self.event_capture = WebSocketEventCapture()
         
-        logger.info(f"🚀 Starting mission critical chat test: {method.__name__}")
+        logger.info(f"[U+1F680] Starting mission critical chat test: {method.__name__}")
     
     def teardown_method(self, method):
         """Analyze business value and cleanup."""
@@ -166,7 +166,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         
         # CRITICAL: Validate test actually connected to real services
         if execution_time < 1.0:
-            pytest.fail(f"🚨 CRITICAL: Mission critical test {method.__name__} executed in {execution_time:.3f}s. "
+            pytest.fail(f" ALERT:  CRITICAL: Mission critical test {method.__name__} executed in {execution_time:.3f}s. "
                       f"This indicates the test did not connect to real services or was mocked.")
         
         # Analyze business value
@@ -180,10 +180,10 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
             'analysis': analysis
         }
         
-        logger.info(f"📊 Mission critical test results for {method.__name__}:")
-        logger.info(f"   ⏱️ Execution time: {execution_time:.3f}s")
-        logger.info(f"   💰 Business value score: {business_value_score:.2f}/1.0")
-        logger.info(f"   📈 Analysis: {analysis}")
+        logger.info(f" CHART:  Mission critical test results for {method.__name__}:")
+        logger.info(f"   [U+23F1][U+FE0F] Execution time: {execution_time:.3f}s")
+        logger.info(f"   [U+1F4B0] Business value score: {business_value_score:.2f}/1.0")
+        logger.info(f"   [U+1F4C8] Analysis: {analysis}")
     
     async def test_complete_chat_flow_after_toolregistry_fix(self):
         """
@@ -203,18 +203,18 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         - Agent responses contain valuable insights
         - Business value restored
         """
-        logger.info("🎯 ULTIMATE TEST: Complete chat flow business value validation")
+        logger.info(" TARGET:  ULTIMATE TEST: Complete chat flow business value validation")
         
         try:
             # Step 1: Authenticate with staging (real business user)
-            logger.info("🔐 Getting real user authentication...")
+            logger.info("[U+1F510] Getting real user authentication...")
             token = await self.ws_auth_helper.get_staging_token_async()
             user_id = self._extract_user_id_from_token(token)
             
             # Step 2: Connect to chat system
-            logger.info("🔌 Connecting to chat system...")
+            logger.info("[U+1F50C] Connecting to chat system...")
             websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=20.0)
-            logger.info("✅ Chat connection established")
+            logger.info(" PASS:  Chat connection established")
             
             # Step 3: Send meaningful business query
             business_query = {
@@ -225,7 +225,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                 "session_id": f"chat_test_{int(time.time())}"
             }
             
-            logger.info("💬 Sending business query to AI agent...")
+            logger.info("[U+1F4AC] Sending business query to AI agent...")
             await websocket.send(json.dumps(business_query))
             
             # Step 4: Capture complete chat interaction
@@ -242,7 +242,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                     self.event_capture.capture_event(event_data)
                     
                     event_type = event_data.get('type', 'unknown')
-                    logger.info(f"📥 Received event: {event_type}")
+                    logger.info(f"[U+1F4E5] Received event: {event_type}")
                     
                     # Check for registry errors that break business value
                     if event_type == 'error':
@@ -255,23 +255,23 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                     # Complete when agent finishes
                     if event_type == 'agent_completed':
                         chat_complete = True
-                        logger.info("✅ Agent completed response - chat interaction successful")
+                        logger.info(" PASS:  Agent completed response - chat interaction successful")
                         break
                         
                 except asyncio.TimeoutError:
                     # Check if we have partial events (indicates progress)
                     if len(self.event_capture.events) > 0:
-                        logger.info(f"⏱️ Timeout waiting for more events (have {len(self.event_capture.events)} so far)")
+                        logger.info(f"[U+23F1][U+FE0F] Timeout waiting for more events (have {len(self.event_capture.events)} so far)")
                         continue
                     else:
-                        logger.error("⏰ No events received - chat system may be completely broken")
+                        logger.error("[U+23F0] No events received - chat system may be completely broken")
                         break
             
             await websocket.close()
             
             # Step 5: Analyze business value delivery
             analysis = self.event_capture.get_analysis_report()
-            logger.info(f"📊 Chat business value analysis: {analysis}")
+            logger.info(f" CHART:  Chat business value analysis: {analysis}")
             
             # CRITICAL BUSINESS VALUE VALIDATIONS:
             
@@ -311,18 +311,18 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                 ]
                 
                 if not any(indicator in final_response.lower() for indicator in business_indicators):
-                    logger.warning("⚠️ Response may not contain substantial business value")
+                    logger.warning(" WARNING: [U+FE0F] Response may not contain substantial business value")
             
-            logger.info(f"🎉 BUSINESS VALUE RESTORED: Chat functionality working with score {business_score:.2f}/1.0")
+            logger.info(f" CELEBRATION:  BUSINESS VALUE RESTORED: Chat functionality working with score {business_score:.2f}/1.0")
             
         except ConnectionClosedError as e:
-            logger.error(f"❌ Chat connection failed: {e}")
+            logger.error(f" FAIL:  Chat connection failed: {e}")
             if hasattr(e, 'reason') and e.reason and "already registered" in str(e.reason):
                 pytest.fail(f"REPRODUCED: Registry error caused connection failure - {e.reason}")
             pytest.fail(f"Chat connection broken - business value at risk: {e}")
             
         except Exception as e:
-            logger.error(f"❌ Chat system failure: {e}")
+            logger.error(f" FAIL:  Chat system failure: {e}")
             if "modelmetaclass already registered" in str(e):
                 pytest.fail(f"REPRODUCED STAGING BUG: {e}")
             raise
@@ -338,7 +338,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         4. tool_completed - Tool results display
         5. agent_completed - Final response ready
         """
-        logger.info("🎯 Testing all 5 WebSocket agent events delivery")
+        logger.info(" TARGET:  Testing all 5 WebSocket agent events delivery")
         
         # Connect with authentication
         token = await self.ws_auth_helper.get_staging_token_async()
@@ -367,7 +367,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                 
                 event_type = event_data.get('type')
                 if event_type in required_events:
-                    logger.info(f"✅ Received required event: {event_type}")
+                    logger.info(f" PASS:  Received required event: {event_type}")
                 
                 # Stop early if we have all events
                 if self.event_capture.has_complete_agent_flow():
@@ -391,7 +391,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         # 2. Validate all 5 critical events received
         missing_events = required_events - received_events
         if missing_events:
-            logger.error(f"❌ BUSINESS VALUE BROKEN: Missing WebSocket events: {missing_events}")
+            logger.error(f" FAIL:  BUSINESS VALUE BROKEN: Missing WebSocket events: {missing_events}")
             logger.error(f"   Received events: {list(received_events)}")
             pytest.fail(f"CRITICAL WebSocket events missing - chat experience broken: {missing_events}")
         
@@ -401,10 +401,10 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
             pytest.fail("Agent events out of sequence - should start with 'agent_started'")
         
         if 'agent_completed' not in event_sequence[-2:]:  # Should be last or second-to-last
-            logger.warning("⚠️ agent_completed not at end of sequence - may indicate issues")
+            logger.warning(" WARNING: [U+FE0F] agent_completed not at end of sequence - may indicate issues")
         
-        logger.info(f"✅ All 5 critical WebSocket events delivered successfully")
-        logger.info(f"📈 Event sequence: {event_sequence}")
+        logger.info(f" PASS:  All 5 critical WebSocket events delivered successfully")
+        logger.info(f"[U+1F4C8] Event sequence: {event_sequence}")
     
     async def test_concurrent_users_chat_without_registry_conflicts(self):
         """
@@ -413,7 +413,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         Current State: Multiple users connecting simultaneously cause registry conflicts
         After Fix: Each user gets isolated registry, no cross-user conflicts
         """
-        logger.info("🎯 Testing concurrent users chat without registry conflicts")
+        logger.info(" TARGET:  Testing concurrent users chat without registry conflicts")
         
         # Create 3 concurrent chat sessions
         num_concurrent_users = 3
@@ -484,14 +484,14 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                 }
         
         # Execute concurrent chat sessions
-        logger.info(f"⚡ Starting {num_concurrent_users} concurrent chat sessions...")
+        logger.info(f" LIGHTNING:  Starting {num_concurrent_users} concurrent chat sessions...")
         concurrent_start = time.time()
         
         tasks = [concurrent_chat_session(i) for i in range(num_concurrent_users)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         concurrent_time = time.time() - concurrent_start
-        logger.info(f"⏱️ Concurrent chat sessions completed in {concurrent_time:.3f}s")
+        logger.info(f"[U+23F1][U+FE0F] Concurrent chat sessions completed in {concurrent_time:.3f}s")
         
         # Analyze concurrent results
         successful_sessions = 0
@@ -519,11 +519,11 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
                         registry_conflicts += 1
         
         # Report results
-        logger.info(f"📊 Concurrent chat analysis:")
-        logger.info(f"   ✅ Successful sessions: {successful_sessions}/{num_concurrent_users}")
-        logger.info(f"   ❌ Registry conflicts: {registry_conflicts}")
-        logger.info(f"   💰 Average business value: {total_business_value/max(1, successful_sessions):.2f}")
-        logger.info(f"   🚨 Total errors: {len(all_errors)}")
+        logger.info(f" CHART:  Concurrent chat analysis:")
+        logger.info(f"    PASS:  Successful sessions: {successful_sessions}/{num_concurrent_users}")
+        logger.info(f"    FAIL:  Registry conflicts: {registry_conflicts}")
+        logger.info(f"   [U+1F4B0] Average business value: {total_business_value/max(1, successful_sessions):.2f}")
+        logger.info(f"    ALERT:  Total errors: {len(all_errors)}")
         
         # CRITICAL BUSINESS VALUE VALIDATIONS:
         
@@ -544,7 +544,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         
         # 4. All errors should be analyzed
         if all_errors:
-            logger.warning(f"⚠️ Concurrent session errors detected: {all_errors}")
+            logger.warning(f" WARNING: [U+FE0F] Concurrent session errors detected: {all_errors}")
             # Fail if errors indicate system problems
             system_errors = [err for err in all_errors if any(
                 indicator in err.lower() for indicator in ['timeout', 'connection', 'server', 'registry']
@@ -552,7 +552,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
             if len(system_errors) > num_concurrent_users * 0.3:  # More than 30% system errors
                 pytest.fail(f"SYSTEM RELIABILITY ISSUES: {system_errors}")
         
-        logger.info(f"🎉 MULTI-USER BUSINESS VALUE CONFIRMED: {successful_sessions} users chatting successfully")
+        logger.info(f" CELEBRATION:  MULTI-USER BUSINESS VALUE CONFIRMED: {successful_sessions} users chatting successfully")
     
     async def test_no_performance_regression_after_registry_fixes(self):
         """
@@ -560,7 +560,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         
         Business impact: Chat system should remain fast and responsive.
         """
-        logger.info("🎯 Testing no performance regression after registry fixes")
+        logger.info(" TARGET:  Testing no performance regression after registry fixes")
         
         performance_metrics = []
         
@@ -606,10 +606,10 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
         avg_response = sum(m['response_time'] for m in performance_metrics) / len(performance_metrics)
         avg_total = sum(m['total_time'] for m in performance_metrics) / len(performance_metrics)
         
-        logger.info(f"📊 Performance metrics:")
-        logger.info(f"   ⚡ Average connect time: {avg_connect:.3f}s")
-        logger.info(f"   💬 Average response time: {avg_response:.3f}s")
-        logger.info(f"   ⏱️ Average total time: {avg_total:.3f}s")
+        logger.info(f" CHART:  Performance metrics:")
+        logger.info(f"    LIGHTNING:  Average connect time: {avg_connect:.3f}s")
+        logger.info(f"   [U+1F4AC] Average response time: {avg_response:.3f}s")
+        logger.info(f"   [U+23F1][U+FE0F] Average total time: {avg_total:.3f}s")
         
         # Performance thresholds
         if avg_connect > 5.0:
@@ -622,7 +622,7 @@ class TestChatBusinessValueRestoration(SSotBaseTestCase):
             timeout_count = sum(1 for m in performance_metrics if m['response_time'] >= 10.0)
             pytest.fail(f"PERFORMANCE ISSUES: {timeout_count} sessions timed out")
         
-        logger.info("✅ No performance regression - chat system remains responsive")
+        logger.info(" PASS:  No performance regression - chat system remains responsive")
     
     def _extract_user_id_from_token(self, token: str) -> str:
         """Extract user ID from JWT token."""

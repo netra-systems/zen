@@ -2,7 +2,7 @@
 Assertion helpers for agent orchestration tests.
 
 Provides reusable assertion functions to verify agent service behavior,
-orchestration metrics, and test outcomes with ≤8 lines per function.
+orchestration metrics, and test outcomes with  <= 8 lines per function.
 """
 
 import sys
@@ -16,6 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # Test framework import - using pytest fixtures instead
 
 from typing import Any, Dict, List
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 def assert_agent_service_initialized(service, supervisor):
     """Assert agent service is properly initialized."""

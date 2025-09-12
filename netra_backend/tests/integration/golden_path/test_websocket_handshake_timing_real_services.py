@@ -13,7 +13,7 @@ CRITICAL: This test validates REAL service interactions:
 - Real WebSocket connections with timing constraints
 - NO MOCKS - Integration testing with actual handshake timing
 
-Tests core Golden Path: User connects → Handshake starts → Database validates → Redis stores → Connection establishes → Race conditions handled
+Tests core Golden Path: User connects  ->  Handshake starts  ->  Database validates  ->  Redis stores  ->  Connection establishes  ->  Race conditions handled
 """
 
 import asyncio

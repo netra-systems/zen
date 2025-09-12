@@ -215,7 +215,7 @@
 
                                             # Simulate dynamic response time changes
                                             # REMOVED_SYNTAX_ERROR: if selected_node.total_requests % 1000 == 0:  # Every 1000 requests
-                                            # REMOVED_SYNTAX_ERROR: selected_node.response_time_ms *= random.uniform(0.9, 1.1)  # ±10% variance
+                                            # REMOVED_SYNTAX_ERROR: selected_node.response_time_ms *= random.uniform(0.9, 1.1)  #  +/- 10% variance
 
                                             # REMOVED_SYNTAX_ERROR: else:
                                                 # REMOVED_SYNTAX_ERROR: failed_requests += 1
@@ -640,7 +640,7 @@
                                                                 # REMOVED_SYNTAX_ERROR: scenario_name = result["scenario_name"]
 
                                                                 # Should trigger appropriate number of scaling events
-                                                                # REMOVED_SYNTAX_ERROR: event_count_tolerance = 1  # Allow ±1 event variance
+                                                                # REMOVED_SYNTAX_ERROR: event_count_tolerance = 1  # Allow  +/- 1 event variance
                                                                 # REMOVED_SYNTAX_ERROR: assert abs(result["total_scaling_events"] - result["expected_scale_events"]) <= event_count_tolerance, "formatted_string"
 
                                                                 # Scaling should be fast
@@ -856,11 +856,11 @@
 
                                                                 # REMOVED_SYNTAX_ERROR: print("Running ENTERPRISE-SCALE Orchestration Performance & Load Balancing Tests...")
                                                                 # REMOVED_SYNTAX_ERROR: print("=" * 95)
-                                                                # REMOVED_SYNTAX_ERROR: print("⚡ PERFORMANCE MODE: Testing load balancing, failover, auto-scaling at scale")
-                                                                # REMOVED_SYNTAX_ERROR: print("🚀 High-throughput validation: 100K-1M+ requests, sub-100ms response times")
-                                                                # REMOVED_SYNTAX_ERROR: print("🔄 Auto-scaling: <30s response, accurate trigger detection, efficient resource use")
-                                                                # REMOVED_SYNTAX_ERROR: print("🛡️  Failover: <10s detection, 99.9% availability maintenance, graceful degradation")
-                                                                # REMOVED_SYNTAX_ERROR: print("📊 SLA Validation: Enterprise-ready for 100+ services, millions of daily requests")
+                                                                # REMOVED_SYNTAX_ERROR: print(" LIGHTNING:  PERFORMANCE MODE: Testing load balancing, failover, auto-scaling at scale")
+                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F680] High-throughput validation: 100K-1M+ requests, sub-100ms response times")
+                                                                # REMOVED_SYNTAX_ERROR: print(" CYCLE:  Auto-scaling: <30s response, accurate trigger detection, efficient resource use")
+                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Failover: <10s detection, 99.9% availability maintenance, graceful degradation")
+                                                                # REMOVED_SYNTAX_ERROR: print(" CHART:  SLA Validation: Enterprise-ready for 100+ services, millions of daily requests")
                                                                 # REMOVED_SYNTAX_ERROR: print("=" * 95)
 
                                                                 # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
@@ -868,21 +868,21 @@
                                                                 # REMOVED_SYNTAX_ERROR: if result == 0:
                                                                     # REMOVED_SYNTAX_ERROR: print(" )
                                                                     # REMOVED_SYNTAX_ERROR: " + "=" * 95)
-                                                                    # REMOVED_SYNTAX_ERROR: print("✅ ALL PERFORMANCE & LOAD BALANCING TESTS PASSED")
-                                                                    # REMOVED_SYNTAX_ERROR: print("🚀 Orchestration system PERFORMANCE-VALIDATED for enterprise deployment")
-                                                                    # REMOVED_SYNTAX_ERROR: print("⚡ Load balancing: <5ms overhead, accurate distribution, fast failover")
-                                                                    # REMOVED_SYNTAX_ERROR: print("📈 Auto-scaling: <30s response, efficient resource management, SLA compliance")
-                                                                    # REMOVED_SYNTAX_ERROR: print("🎯 High-throughput: 100K+ RPS sustained, <100ms P95, 99.9%+ success rate")
-                                                                    # REMOVED_SYNTAX_ERROR: print("🏆 ENTERPRISE-READY for production-scale workloads and strict SLAs")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL PERFORMANCE & LOAD BALANCING TESTS PASSED")
+                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F680] Orchestration system PERFORMANCE-VALIDATED for enterprise deployment")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" LIGHTNING:  Load balancing: <5ms overhead, accurate distribution, fast failover")
+                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F4C8] Auto-scaling: <30s response, efficient resource management, SLA compliance")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" TARGET:  High-throughput: 100K+ RPS sustained, <100ms P95, 99.9%+ success rate")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" TROPHY:  ENTERPRISE-READY for production-scale workloads and strict SLAs")
                                                                     # REMOVED_SYNTAX_ERROR: print("=" * 95)
                                                                     # REMOVED_SYNTAX_ERROR: else:
                                                                         # REMOVED_SYNTAX_ERROR: print(" )
                                                                         # REMOVED_SYNTAX_ERROR: " + "=" * 95)
-                                                                        # REMOVED_SYNTAX_ERROR: print("❌ PERFORMANCE & LOAD BALANCING TESTS FAILED")
-                                                                        # REMOVED_SYNTAX_ERROR: print("🚨 Orchestration system NOT ready for enterprise-scale deployment")
-                                                                        # REMOVED_SYNTAX_ERROR: print("⚠️  Performance issues detected: slow failover, poor load distribution, or scaling problems")
-                                                                        # REMOVED_SYNTAX_ERROR: print("🔧 Optimize load balancing algorithms, auto-scaling triggers, or throughput capacity")
-                                                                        # REMOVED_SYNTAX_ERROR: print("📉 Does not meet enterprise SLA requirements - immediate optimization needed")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" FAIL:  PERFORMANCE & LOAD BALANCING TESTS FAILED")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration system NOT ready for enterprise-scale deployment")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Performance issues detected: slow failover, poor load distribution, or scaling problems")
+                                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F527] Optimize load balancing algorithms, auto-scaling triggers, or throughput capacity")
+                                                                        # REMOVED_SYNTAX_ERROR: print("[U+1F4C9] Does not meet enterprise SLA requirements - immediate optimization needed")
                                                                         # REMOVED_SYNTAX_ERROR: print("=" * 95)
 
                                                                         # REMOVED_SYNTAX_ERROR: sys.exit(result)

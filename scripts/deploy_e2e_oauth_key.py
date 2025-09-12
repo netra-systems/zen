@@ -23,7 +23,7 @@ def deploy_e2e_oauth_key(project_id: str) -> bool:
     Returns:
         True if deployment successful, False otherwise
     """
-    print(f"🔐 Deploying E2E_OAUTH_SIMULATION_KEY to GCP Secret Manager in project: {project_id}")
+    print(f"[U+1F510] Deploying E2E_OAUTH_SIMULATION_KEY to GCP Secret Manager in project: {project_id}")
     
     # Generate secure random key
     key_value = "e0e9c5d29e7aea3942f47855b4870d3e0272e061c2de22827e71b893071d777e"
@@ -37,7 +37,7 @@ def deploy_e2e_oauth_key(project_id: str) -> bool:
         ], capture_output=True, text=True, check=False)
         
         if check_result.returncode == 0:
-            print(f"✅ Secret {secret_name} already exists - updating with new version")
+            print(f" PASS:  Secret {secret_name} already exists - updating with new version")
             
             # Add new version to existing secret
             result = subprocess.run([
@@ -47,7 +47,7 @@ def deploy_e2e_oauth_key(project_id: str) -> bool:
             ], input=key_value, text=True, check=True)
             
         else:
-            print(f"📝 Creating new secret: {secret_name}")
+            print(f"[U+1F4DD] Creating new secret: {secret_name}")
             
             # Create new secret
             subprocess.run([
@@ -62,17 +62,17 @@ def deploy_e2e_oauth_key(project_id: str) -> bool:
                 "--data-file=-"
             ], input=key_value, text=True, check=True)
         
-        print(f"✅ Successfully deployed E2E_OAUTH_SIMULATION_KEY to {project_id}")
-        print(f"🔑 Secret value: {key_value[:8]}... (64 char hex)")
-        print(f"📋 Usage: Backend services can now access this key for E2E OAuth simulation")
+        print(f" PASS:  Successfully deployed E2E_OAUTH_SIMULATION_KEY to {project_id}")
+        print(f"[U+1F511] Secret value: {key_value[:8]}... (64 char hex)")
+        print(f"[U+1F4CB] Usage: Backend services can now access this key for E2E OAuth simulation")
         
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to deploy E2E_OAUTH_SIMULATION_KEY: {e}")
+        print(f" FAIL:  Failed to deploy E2E_OAUTH_SIMULATION_KEY: {e}")
         return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         return False
 
 def main():
@@ -85,20 +85,20 @@ def main():
     
     args = parser.parse_args()
     
-    print("🚀 E2E OAuth Simulation Key Deployment")
+    print("[U+1F680] E2E OAuth Simulation Key Deployment")
     print("=" * 50)
     
     success = deploy_e2e_oauth_key(args.project)
     
     if success:
-        print("\n✅ DEPLOYMENT SUCCESSFUL")
-        print("📋 Next Steps:")
+        print("\n PASS:  DEPLOYMENT SUCCESSFUL")
+        print("[U+1F4CB] Next Steps:")
         print("1. Verify key is accessible in staging environment")
         print("2. Update backend service configuration if needed")
         print("3. Test E2E OAuth flows work correctly")
     else:
-        print("\n❌ DEPLOYMENT FAILED")
-        print("📋 Troubleshooting:")
+        print("\n FAIL:  DEPLOYMENT FAILED")
+        print("[U+1F4CB] Troubleshooting:")
         print("1. Ensure gcloud CLI is authenticated")
         print("2. Verify project ID is correct")
         print("3. Check Secret Manager API is enabled")

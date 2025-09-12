@@ -23,9 +23,9 @@ IDENTIFIED VIOLATIONS:
 4. auth_service/auth_core/unified_auth_interface.py: 2 violations (lines 257,309)
 
 Expected Workflow:
-1. Run tests → FAIL (detect violations)
-2. Migrate code → Use UnifiedIdGenerator
-3. Run tests → PASS (validate migration)
+1. Run tests  ->  FAIL (detect violations)
+2. Migrate code  ->  Use UnifiedIdGenerator
+3. Run tests  ->  PASS (validate migration)
 """
 
 import pytest

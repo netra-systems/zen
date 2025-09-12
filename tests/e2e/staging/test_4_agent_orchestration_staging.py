@@ -11,9 +11,19 @@ from typing import List, Dict
 from shared.isolated_environment import IsolatedEnvironment
 
 from tests.e2e.staging_test_base import StagingTestBase, staging_test
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestAgentOrchestrationStaging(StagingTestBase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test agent orchestration in staging environment"""
     
     @staging_test

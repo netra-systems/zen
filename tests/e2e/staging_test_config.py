@@ -32,9 +32,9 @@ class StagingConfig:
     retry_delay: float = 2.0  # seconds
     
     # Cloud-native WebSocket timeouts for staging (35s > 30s agent coordination)
-    websocket_recv_timeout: int = 35  # PRIORITY 3 FIX: 3s → 35s for Cloud Run
+    websocket_recv_timeout: int = 35  # PRIORITY 3 FIX: 3s  ->  35s for Cloud Run
     websocket_connection_timeout: int = 60
-    agent_execution_timeout: int = 30  # PRIORITY 3 FIX: 15s → 30s (< WebSocket timeout)
+    agent_execution_timeout: int = 30  # PRIORITY 3 FIX: 15s  ->  30s (< WebSocket timeout)
     
     # Authentication (for tests that need it)
     test_api_key: Optional[str] = os.environ.get("STAGING_TEST_API_KEY")

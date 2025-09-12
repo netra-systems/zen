@@ -103,11 +103,11 @@ async def _verify_workload_events_table(existing_tables: List[str], verbose: boo
     """Verify workload_events table exists."""
     if 'workload_events' in existing_tables:
         if verbose:
-            logger.info("✓ workload_events table verified successfully")
+            logger.info("[U+2713] workload_events table verified successfully")
         else:
-            logger.debug("✓ workload_events table verified successfully")
+            logger.debug("[U+2713] workload_events table verified successfully")
     else:
-        logger.warning("⚠ workload_events table not found after initialization")
+        logger.warning(" WARNING:  workload_events table not found after initialization")
 
 async def _verify_table_creation(client, verbose: bool = False) -> None:
     """Verify all tables were created successfully."""

@@ -3,7 +3,7 @@ Comprehensive LLM Integration Test Suite with Real Response Patterns
 
 Tests critical LLM integration scenarios including response parsing, 
 fallback mechanisms, retry logic, and model switching.
-Maximum 300 lines, functions ≤8 lines per architecture requirements.
+Maximum 300 lines, functions  <= 8 lines per architecture requirements.
 """
 
 import sys

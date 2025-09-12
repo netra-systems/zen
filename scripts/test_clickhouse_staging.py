@@ -45,7 +45,7 @@ async def test_staging_clickhouse():
     env = EnvironmentDetector.get_environment()
     print(f"   Detected environment: {env}")
     assert env == "staging", f"Expected 'staging', got '{env}'"
-    print("   ✓ Environment detection correct")
+    print("   [U+2713] Environment detection correct")
     
     # Test 2: Database Configuration Manager
     print("\n2. Testing Database Configuration Manager:")
@@ -73,13 +73,13 @@ async def test_staging_clickhouse():
         secrets = secret_manager.load_all_secrets()
         
         if 'CLICKHOUSE_PASSWORD' in secrets:
-            print("   ✓ CLICKHOUSE_PASSWORD loaded from GCP Secret Manager")
+            print("   [U+2713] CLICKHOUSE_PASSWORD loaded from GCP Secret Manager")
             print(f"   Password length: {len(secrets['CLICKHOUSE_PASSWORD'])} characters")
         else:
-            print("   ⚠ CLICKHOUSE_PASSWORD not found in GCP secrets")
+            print("    WARNING:  CLICKHOUSE_PASSWORD not found in GCP secrets")
             print("   Available secrets:", list(secrets.keys()))
     except Exception as e:
-        print(f"   ⚠ Failed to load from GCP Secret Manager: {e}")
+        print(f"    WARNING:  Failed to load from GCP Secret Manager: {e}")
     
     # Test 4: ClickHouse Connection
     print("\n4. Testing ClickHouse Connection:")
@@ -89,14 +89,14 @@ async def test_staging_clickhouse():
         async with get_clickhouse_client() as client:
             # Try a simple query
             result = await client.execute("SELECT 1 as test")
-            print(f"   ✓ Connection successful! Query result: {result}")
+            print(f"   [U+2713] Connection successful! Query result: {result}")
             
             # Try to get database version
             version_result = await client.execute("SELECT version()")
             print(f"   ClickHouse version: {version_result}")
             
     except Exception as e:
-        print(f"   ✗ Connection failed: {e}")
+        print(f"   [U+2717] Connection failed: {e}")
         import traceback
         traceback.print_exc()
     

@@ -216,7 +216,7 @@ class MessagePatternGenerator:
     
     def _create_unicode_message(self) -> Dict[str, Any]:
         """Create unicode message."""
-        content = "Unicode: 你好 🚀 Δφμ ñíƒ"
+        content = "Unicode: [U+4F60][U+597D] [U+1F680] [U+0394][U+03C6][U+03BC] [U+00F1][U+00ED][U+0192]"
         return {"content": content, "type": "unicode", "id": str(uuid.uuid4())}
 
 

@@ -293,7 +293,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         assert "read" in auth_result["permissions"]
         assert "write" not in auth_result["permissions"]  # Free tier limitation
         
-        self.logger.info("✅ Free tier user successfully authenticated with limited permissions")
+        self.logger.info(" PASS:  Free tier user successfully authenticated with limited permissions")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -319,7 +319,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         assert all(perm in auth_result["permissions"] for perm in 
                   ["websocket_access", "read", "write", "admin"])
         
-        self.logger.info("✅ Enterprise user authenticated with full permissions")
+        self.logger.info(" PASS:  Enterprise user authenticated with full permissions")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -348,7 +348,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         assert auth_result is not None
         assert auth_result["user_id"] == self.test_users["mid_tier"]["user_id"]
         
-        self.logger.info("✅ JWT subprotocol authentication successful")
+        self.logger.info(" PASS:  JWT subprotocol authentication successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -378,7 +378,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         stats = authenticator.get_auth_stats()
         assert stats["failed_auths"] > 0
         
-        self.logger.info("✅ Invalid JWT signature properly rejected - security maintained")
+        self.logger.info(" PASS:  Invalid JWT signature properly rejected - security maintained")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -406,7 +406,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         stats = authenticator.get_auth_stats()
         assert stats["failed_auths"] > 0
         
-        self.logger.info("✅ Expired JWT token properly rejected - session security enforced")
+        self.logger.info(" PASS:  Expired JWT token properly rejected - session security enforced")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -429,7 +429,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         auth_result = await authenticator.authenticate("")
         assert auth_result is None
         
-        self.logger.info("✅ Missing JWT token properly handled - anonymous access denied")
+        self.logger.info(" PASS:  Missing JWT token properly handled - anonymous access denied")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -477,7 +477,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         security_manager.unregister_connection(free_conn_id)
         security_manager.unregister_connection(enterprise_conn_id)
         
-        self.logger.info("✅ Multi-user connection isolation validated - data separation ensured")
+        self.logger.info(" PASS:  Multi-user connection isolation validated - data separation ensured")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -521,7 +521,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
                 assert hasattr(e, 'status_code')
                 assert e.status_code == scenario['expected_status']
                 
-                self.logger.info(f"✅ {scenario['name']} properly rejected with status {e.status_code}")
+                self.logger.info(f" PASS:  {scenario['name']} properly rejected with status {e.status_code}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -558,7 +558,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         
         auth_middleware.cleanup_connection(enterprise_conn)
         
-        self.logger.info("✅ Tiered rate limiting enforced - monetization model validated")
+        self.logger.info(" PASS:  Tiered rate limiting enforced - monetization model validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -594,7 +594,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         extracted_token = authenticator.extract_token_from_websocket(suspicious_websocket)
         assert extracted_token == token
         
-        self.logger.info("✅ Cross-origin request handling validated - security maintained")
+        self.logger.info(" PASS:  Cross-origin request handling validated - security maintained")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -627,7 +627,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         assert total_time < 10.0  # Should complete in reasonable time
         assert (total_time / len(tokens)) < 0.2  # Under 200ms per auth
         
-        self.logger.info(f"✅ Concurrent authentication performance: {successful_auths} auths in {total_time:.2f}s")
+        self.logger.info(f" PASS:  Concurrent authentication performance: {successful_auths} auths in {total_time:.2f}s")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -669,7 +669,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # Clean up
         security_manager.unregister_connection(connection_id_2)
         
-        self.logger.info("✅ Session persistence across reconnects validated")
+        self.logger.info(" PASS:  Session persistence across reconnects validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -701,7 +701,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # May succeed or fail depending on actual auth service availability
         # The important thing is no exceptions are thrown
         
-        self.logger.info("✅ Authentication circuit breaker behavior validated")
+        self.logger.info(" PASS:  Authentication circuit breaker behavior validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -735,7 +735,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         query_token = authenticator.extract_token_from_websocket(query_websocket)
         assert query_token == token
         
-        self.logger.info("✅ Multiple token extraction methods validated")
+        self.logger.info(" PASS:  Multiple token extraction methods validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -780,7 +780,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # Clean up
         security_manager.unregister_connection(connection_id)
         
-        self.logger.info("✅ Security violation reporting system validated")
+        self.logger.info(" PASS:  Security violation reporting system validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -807,7 +807,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
             stats = authenticator.get_auth_stats()
             assert stats["failed_auths"] > 0
             
-            self.logger.info(f"✅ Authentication error logged for {scenario['scenario']}")
+            self.logger.info(f" PASS:  Authentication error logged for {scenario['scenario']}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -842,7 +842,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         auth_result = await authenticator.authenticate(complete_token)
         assert auth_result is not None  # Should succeed
         
-        self.logger.info("✅ Comprehensive JWT claim validation working correctly")
+        self.logger.info(" PASS:  Comprehensive JWT claim validation working correctly")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -877,7 +877,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # Verify cleanup worked
         assert not security_manager.validate_connection_security(connection_id)
         
-        self.logger.info("✅ WebSocket connection lifecycle management validated")
+        self.logger.info(" PASS:  WebSocket connection lifecycle management validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -902,7 +902,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         assert decoded_token["email"] == self.test_users["enterprise"]["email"]
         assert "admin" in decoded_token["permissions"]
         
-        self.logger.info("✅ WebSocket authentication consistent with REST API patterns")
+        self.logger.info(" PASS:  WebSocket authentication consistent with REST API patterns")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -940,7 +940,7 @@ class TestWebSocketAuthenticationComprehensive(BaseIntegrationTest):
         # Cleanup
         auth_middleware.cleanup_connection(connection_id)
         
-        self.logger.info("✅ WebSocket authentication middleware integration complete")
+        self.logger.info(" PASS:  WebSocket authentication middleware integration complete")
 
     async def teardown_method(self):
         """Clean up test resources and validate no resource leaks."""

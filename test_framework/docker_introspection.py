@@ -557,14 +557,14 @@ class DockerIntrospector:
         # Critical issue recommendations
         critical_issues = [i for i in issues.values() if i.severity == ErrorSeverity.CRITICAL]
         if critical_issues:
-            recommendations.append("🚨 CRITICAL: Address critical issues immediately")
+            recommendations.append(" ALERT:  CRITICAL: Address critical issues immediately")
             for issue in critical_issues[:3]:  # Top 3
                 recommendations.extend(issue.suggested_fixes[:2])  # Top 2 fixes per issue
         
         # Service status recommendations
         down_services = [svc for svc, status in service_status.items() if status != 'running']
         if down_services:
-            recommendations.append(f"⚠️ Restart down services: {', '.join(down_services)}")
+            recommendations.append(f" WARNING: [U+FE0F] Restart down services: {', '.join(down_services)}")
         
         # Resource usage recommendations
         high_cpu_services = []
@@ -583,15 +583,15 @@ class DockerIntrospector:
                 continue
         
         if high_cpu_services:
-            recommendations.append(f"⚠️ High CPU usage: {', '.join(high_cpu_services)} - consider scaling")
+            recommendations.append(f" WARNING: [U+FE0F] High CPU usage: {', '.join(high_cpu_services)} - consider scaling")
         
         if high_memory_services:
-            recommendations.append(f"⚠️ High memory usage: {', '.join(high_memory_services)} - check for leaks")
+            recommendations.append(f" WARNING: [U+FE0F] High memory usage: {', '.join(high_memory_services)} - check for leaks")
         
         # General maintenance recommendations
         error_issues = [i for i in issues.values() if i.severity == ErrorSeverity.ERROR]
         if len(error_issues) > 5:
-            recommendations.append("📊 Consider reviewing error patterns for systemic issues")
+            recommendations.append(" CHART:  Consider reviewing error patterns for systemic issues")
         
         return recommendations
     
@@ -689,11 +689,11 @@ def main():
     introspector = DockerIntrospector(args.compose_file, args.project_name)
     
     if args.cleanup:
-        print("🧹 Cleaning up Docker resources...")
+        print("[U+1F9F9] Cleaning up Docker resources...")
         results = introspector.cleanup_docker_resources()
         print(f"Cleanup results: {results}")
     
-    print("🔍 Analyzing Docker services...")
+    print(" SEARCH:  Analyzing Docker services...")
     report = introspector.analyze_services(
         services=args.services,
         since=args.since,
@@ -701,26 +701,26 @@ def main():
     )
     
     # Print summary
-    print(f"\\n📊 Analysis Summary:")
+    print(f"\\n CHART:  Analysis Summary:")
     print(f"Services analyzed: {len(report.services_analyzed)}")
     print(f"Log lines processed: {report.total_log_lines}")
     print(f"Issues found: {len(report.issues_found)}")
     print(f"Critical issues: {len(report.critical_issues)}")
     
     if report.critical_issues:
-        print("\\n🚨 CRITICAL ISSUES:")
+        print("\\n ALERT:  CRITICAL ISSUES:")
         for issue in report.critical_issues:
             print(f"  - {issue.title}")
     
     if report.recommendations:
-        print("\\n💡 RECOMMENDATIONS:")
+        print("\\n IDEA:  RECOMMENDATIONS:")
         for rec in report.recommendations:
             print(f"  - {rec}")
     
     # Export report
     output_file = Path(args.output) if args.output else None
     exported_file = introspector.export_report(report, output_file)
-    print(f"\\n📄 Full report exported to: {exported_file}")
+    print(f"\\n[U+1F4C4] Full report exported to: {exported_file}")
 
 
 if __name__ == "__main__":

@@ -363,19 +363,6 @@ class TestStartupPhaseValidationLogic(SSotBaseTestCase):
 class TestServiceReadinessValidationLogic(SSotBaseTestCase):
     """Unit tests for individual service readiness checks with startup awareness."""
     
-    def setUp(self):
-        """Set up test fixtures with SSOT patterns."""
-        super().setUp()
-        self.test_metrics = SsotTestMetrics()
-        self.test_metrics.start_timing()
-        
-        # Configure test environment  
-        self.env_patch = patch.dict('os.environ', {
-            'ENVIRONMENT': 'staging',
-            'K_SERVICE': 'netra-backend-staging'
-        })
-        self.env_patch.start()
-    
     def tearDown(self):
         """Clean up test fixtures."""
         self.env_patch.stop()
@@ -479,20 +466,6 @@ class TestServiceReadinessValidationLogic(SSotBaseTestCase):
 
 class TestRetryAndTimingLogic(SSotBaseTestCase):
     """Unit tests for retry mechanisms and timeout handling in GCP environment."""
-    
-    def setUp(self):
-        """Set up test fixtures with GCP environment simulation."""
-        super().setUp()
-        self.test_metrics = SsotTestMetrics()
-        self.test_metrics.start_timing()
-        
-        # Configure GCP staging environment
-        self.env_patch = patch.dict('os.environ', {
-            'ENVIRONMENT': 'staging',
-            'K_SERVICE': 'netra-backend-staging',
-            'K_REVISION': 'netra-backend-staging-00042'
-        })
-        self.env_patch.start()
     
     def tearDown(self):
         """Clean up test fixtures."""
@@ -642,12 +615,6 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
 
 class TestStartupPhaseTransitions(SSotBaseTestCase):
     """Unit tests for startup phase transition edge cases."""
-    
-    def setUp(self):
-        """Set up test fixtures."""
-        super().setUp()
-        self.test_metrics = SsotTestMetrics()
-        self.test_metrics.start_timing()
     
     def tearDown(self):
         """Clean up test fixtures."""

@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL ISSUE #341:
 Current problem: 60s agent execution timeouts fail for complex analytical workflows
-Target solution: 60s→300s timeout progression for extended processing
+Target solution: 60s -> 300s timeout progression for extended processing
 Test Strategy: Integration tests with simulated long-running agents (NO Docker)
 
 REQUIREMENTS:
@@ -597,7 +597,7 @@ class TestLongRunningAgentStreaming(SSotAsyncTestCase):
         """
         Test streaming timeout progression requirements for Issue #341.
         
-        This test validates the 60s→300s timeout progression need.
+        This test validates the 60s -> 300s timeout progression need.
         Should INITIALLY FAIL to prove progression requirement.
         """
         self.set_env_var("ENVIRONMENT", "staging")
@@ -650,7 +650,7 @@ class TestLongRunningAgentStreaming(SSotAsyncTestCase):
             f"Agent timeout: {current_agent_timeout}s, WebSocket timeout: {current_websocket_timeout}s. "
             f"Gaps found in phases: {[g['phase'] for g in progression_gaps]}. "
             f"Maximum required: {max(p['required_timeout'] for p in timeout_progression)}s. "
-            f"This proves Issue #341: Need 60s→300s timeout progression for enterprise workflows."
+            f"This proves Issue #341: Need 60s -> 300s timeout progression for enterprise workflows."
         )
 
 

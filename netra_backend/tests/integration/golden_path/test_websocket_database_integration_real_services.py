@@ -102,7 +102,7 @@ class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
         assert "database optimization" in chat_history[0]["message"]
         assert "AI Agent" in chat_history[1]["message"]
         
-        print("✅ WebSocket user session database persistence test passed")
+        print(" PASS:  WebSocket user session database persistence test passed")
 
     @pytest.mark.asyncio
     async def test_multi_user_websocket_database_isolation(self):
@@ -171,7 +171,7 @@ class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
                 user_threads = user_session["active_threads"]
                 assert not any(thread in user_threads for thread in other_threads)
         
-        print("✅ Multi-user WebSocket database isolation test passed")
+        print(" PASS:  Multi-user WebSocket database isolation test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_message_queue_database_integration(self):
@@ -248,7 +248,7 @@ class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
         queue_cleared = await self._clear_delivered_messages_from_database(user_id)
         assert queue_cleared is True, "Message queue should be cleared after delivery"
         
-        print("✅ WebSocket message queue database integration test passed")
+        print(" PASS:  WebSocket message queue database integration test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_session_recovery_database_consistency(self):
@@ -319,7 +319,7 @@ class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
         assert "optimization_summary" in recovered_session["final_results"]
         assert "$1,200" in recovered_session["final_results"]["optimization_summary"]
         
-        print("✅ WebSocket session recovery database consistency test passed")
+        print(" PASS:  WebSocket session recovery database consistency test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_database_transaction_integrity(self):
@@ -387,7 +387,7 @@ class TestWebSocketDatabaseIntegrationRealServices(SSotBaseTestCase):
         assert transaction_result["partial_failures"] == 0, "Should have no partial failures"
         assert transaction_result["rollback_required"] is False, "Should not require rollback"
         
-        print("✅ WebSocket database transaction integrity test passed")
+        print(" PASS:  WebSocket database transaction integrity test passed")
 
     # Helper methods for real database operations
     

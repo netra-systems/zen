@@ -26,9 +26,19 @@ from unittest.mock import patch, AsyncMock
 
 from netra_backend.tests.integration.business_value.enhanced_base_integration_test import EnhancedBaseIntegrationTest
 from test_framework.ssot.websocket import WebSocketEventType
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestAgentOrchestrationValue(EnhancedBaseIntegrationTest):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Integration tests validating agent orchestration delivers multiplied business value.
     

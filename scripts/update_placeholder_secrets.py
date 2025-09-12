@@ -29,13 +29,13 @@ def update_secret(secret_name: str, value: str, project: str = "netra-staging") 
         stdout, stderr = process.communicate(input=value)
         
         if process.returncode == 0:
-            print(f"✅ Successfully updated {secret_name}")
+            print(f" PASS:  Successfully updated {secret_name}")
             return True
         else:
-            print(f"❌ Failed to update {secret_name}: {stderr}")
+            print(f" FAIL:  Failed to update {secret_name}: {stderr}")
             return False
     except Exception as e:
-        print(f"❌ Error updating {secret_name}: {e}")
+        print(f" FAIL:  Error updating {secret_name}: {e}")
         return False
 
 
@@ -54,7 +54,7 @@ def get_current_value(secret_name: str, project: str = "netra-staging") -> Optio
 
 
 def main():
-    print("🔐 Netra Staging Secrets Updater")
+    print("[U+1F510] Netra Staging Secrets Updater")
     print("=" * 50)
     print("\nThis script will help you update the placeholder secrets that are blocking deployment.")
     print("You'll need to provide your actual API keys.\n")
@@ -78,13 +78,13 @@ def main():
     updated_count = 0
     
     for secret_name, config in secrets_to_update.items():
-        print(f"\n📝 {secret_name}")
+        print(f"\n[U+1F4DD] {secret_name}")
         print(f"   {config['description']}")
         
         # Check current value
         current_value = get_current_value(secret_name)
         if current_value and config["placeholder"] not in current_value and "REPLACE" not in current_value:
-            print(f"   ✅ Already configured (not a placeholder)")
+            print(f"    PASS:  Already configured (not a placeholder)")
             continue
         
         # Special handling for redis-url
@@ -99,20 +99,20 @@ def main():
             value = getpass.getpass(f"   Enter {config['description']}: ").strip()
         
         if not value:
-            print("   ⚠️  Skipped (no value provided)")
+            print("    WARNING: [U+FE0F]  Skipped (no value provided)")
             continue
         
         if update_secret(secret_name, value):
             updated_count += 1
     
     print(f"\n{'='*50}")
-    print(f"✅ Updated {updated_count} secrets")
+    print(f" PASS:  Updated {updated_count} secrets")
     
     if updated_count > 0:
-        print("\n🚀 You can now deploy with:")
+        print("\n[U+1F680] You can now deploy with:")
         print("   python scripts/deploy_to_gcp.py --project netra-staging --build-local")
     else:
-        print("\n⚠️  No secrets were updated. Make sure to update them before deployment.")
+        print("\n WARNING: [U+FE0F]  No secrets were updated. Make sure to update them before deployment.")
 
 
 if __name__ == "__main__":

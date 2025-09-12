@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core platform functionality - thread-agent integration enables chat value delivery
 
 This test suite validates the CRITICAL integration between threads and agents that enables
-chat functionality. It tests the complete workflow: thread creation → message → agent execution → response
+chat functionality. It tests the complete workflow: thread creation  ->  message  ->  agent execution  ->  response
 
 Focus Areas:
 1. Thread-Agent Binding: Secure agent execution within thread context

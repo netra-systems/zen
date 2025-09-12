@@ -9,16 +9,16 @@ Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise) | Goal: Core Security | Impact: $100K+ MRR Protection
 - Security breach = 100% Enterprise customer loss
 - Prevents authentication bypass vulnerabilities in real-time AI interactions
-- Ensures JWT token validation consistency across Auth → Backend → WebSocket services
+- Ensures JWT token validation consistency across Auth  ->  Backend  ->  WebSocket services
 - Tests token refresh, expiry, and reconnection flows critical for user retention
 - Validates unauthorized access blocking for compliance requirements
 
 CLAUDE.md COMPLIANCE:
-✅ ALL e2e tests MUST use authentication (JWT/OAuth) - MANDATORY
-✅ Real services only - NO MOCKS allowed (ABOMINATION if violated)
-✅ Tests fail hard - no bypassing/cheating (ABOMINATION if violated)
-✅ Use test_framework/ssot/e2e_auth_helper.py (SSOT) for authentication - MANDATORY
-✅ NO exceptions for auth requirement except tests that directly validate auth system
+ PASS:  ALL e2e tests MUST use authentication (JWT/OAuth) - MANDATORY
+ PASS:  Real services only - NO MOCKS allowed (ABOMINATION if violated)
+ PASS:  Tests fail hard - no bypassing/cheating (ABOMINATION if violated)
+ PASS:  Use test_framework/ssot/e2e_auth_helper.py (SSOT) for authentication - MANDATORY
+ PASS:  NO exceptions for auth requirement except tests that directly validate auth system
 
 Performance Requirements:
 - JWT Generation: <100ms
@@ -103,7 +103,7 @@ class CompleteJWTAuthTesterClaude:
             # JWT Generation performance requirement: <100ms
             performance_ok = auth_time < 0.1
             if not performance_ok:
-                print(f"⚠️ JWT generation slow: {auth_time:.3f}s (target: <100ms)")
+                print(f" WARNING: [U+FE0F] JWT generation slow: {auth_time:.3f}s (target: <100ms)")
             
             return {
                 "access_token": token,
@@ -116,7 +116,7 @@ class CompleteJWTAuthTesterClaude:
             }
             
         except Exception as e:
-            print(f"❌ CLAUDE.md AUTH ERROR: {e}")
+            print(f" FAIL:  CLAUDE.md AUTH ERROR: {e}")
             return {
                 "access_token": None,
                 "email": email,
@@ -145,7 +145,7 @@ class CompleteJWTAuthTesterClaude:
             # Token Validation performance requirement: <50ms
             performance_ok = validation_time < 0.05
             if not performance_ok:
-                print(f"⚠️ Token validation slow: {validation_time:.3f}s (target: <50ms)")
+                print(f" WARNING: [U+FE0F] Token validation slow: {validation_time:.3f}s (target: <50ms)")
             
             return {
                 "valid": is_valid,
@@ -157,7 +157,7 @@ class CompleteJWTAuthTesterClaude:
             }
             
         except Exception as e:
-            print(f"❌ CLAUDE.md TOKEN VALIDATION ERROR: {e}")
+            print(f" FAIL:  CLAUDE.md TOKEN VALIDATION ERROR: {e}")
             return {
                 "valid": False,
                 "validation_time": time.time() - start_time,
@@ -185,7 +185,7 @@ class CompleteJWTAuthTesterClaude:
             # WebSocket Connection performance requirement: <2s
             performance_ok = connection_time < 2.0
             if not performance_ok:
-                print(f"⚠️ WebSocket connection slow: {connection_time:.3f}s (target: <2s)")
+                print(f" WARNING: [U+FE0F] WebSocket connection slow: {connection_time:.3f}s (target: <2s)")
             
             return {
                 "websocket": websocket,
@@ -198,7 +198,7 @@ class CompleteJWTAuthTesterClaude:
             }
             
         except Exception as e:
-            print(f"❌ CLAUDE.md WEBSOCKET CONNECTION ERROR: {e}")
+            print(f" FAIL:  CLAUDE.md WEBSOCKET CONNECTION ERROR: {e}")
             return {
                 "websocket": None,
                 "connected": False,
@@ -245,7 +245,7 @@ class CompleteJWTAuthTesterClaude:
             }
             
         except Exception as e:
-            print(f"❌ CLAUDE.md WEBSOCKET MESSAGE ERROR: {e}")
+            print(f" FAIL:  CLAUDE.md WEBSOCKET MESSAGE ERROR: {e}")
             return {
                 "message_sent": False,
                 "response": None,
@@ -276,54 +276,54 @@ class TestWebSocketJWTCompleteAuthenticated:
         CLAUDE.md COMPLIANT: Test complete JWT authentication flow with MANDATORY SSOT authentication.
         
         Validates complete flow:
-        ✅ MANDATORY JWT authentication (SSOT E2EAuthHelper)
-        ✅ Real JWT token generation and validation
-        ✅ WebSocket connection with proper authentication
-        ✅ Message handling through authenticated connection
-        ✅ Performance requirements met
+         PASS:  MANDATORY JWT authentication (SSOT E2EAuthHelper)
+         PASS:  Real JWT token generation and validation
+         PASS:  WebSocket connection with proper authentication
+         PASS:  Message handling through authenticated connection
+         PASS:  Performance requirements met
         """
-        print("🔐 CLAUDE.md COMPLIANT: Complete JWT Authentication Flow Test")
+        print("[U+1F510] CLAUDE.md COMPLIANT: Complete JWT Authentication Flow Test")
         
         # STEP 1: JWT Generation with MANDATORY SSOT authentication
         jwt_result = await self.tester.get_jwt_from_auth_service()
         
         # CLAUDE.md COMPLIANCE ASSERTIONS
-        assert jwt_result["success"], f"❌ CLAUDE.md VIOLATION: JWT generation failed: {jwt_result['error']}"
-        assert jwt_result["claude_md_compliant"], "❌ CLAUDE.md VIOLATION: JWT generation not using SSOT auth"
-        assert jwt_result["access_token"], "❌ No JWT token generated"
+        assert jwt_result["success"], f" FAIL:  CLAUDE.md VIOLATION: JWT generation failed: {jwt_result['error']}"
+        assert jwt_result["claude_md_compliant"], " FAIL:  CLAUDE.md VIOLATION: JWT generation not using SSOT auth"
+        assert jwt_result["access_token"], " FAIL:  No JWT token generated"
         
         token = jwt_result["access_token"]
-        print(f"✅ JWT generated using SSOT auth ({jwt_result['generation_time']:.3f}s)")
+        print(f" PASS:  JWT generated using SSOT auth ({jwt_result['generation_time']:.3f}s)")
         
         # STEP 2: JWT Validation 
         validation_result = await self.tester.validate_jwt_in_backend(token)
         
-        assert validation_result["success"], f"❌ JWT validation failed: {validation_result['error']}"
-        assert validation_result["claude_md_compliant"], "❌ CLAUDE.md VIOLATION: JWT validation not using SSOT auth"
-        assert validation_result["valid"], "❌ JWT token not valid"
+        assert validation_result["success"], f" FAIL:  JWT validation failed: {validation_result['error']}"
+        assert validation_result["claude_md_compliant"], " FAIL:  CLAUDE.md VIOLATION: JWT validation not using SSOT auth"
+        assert validation_result["valid"], " FAIL:  JWT token not valid"
         
-        print(f"✅ JWT validated using SSOT auth ({validation_result['validation_time']:.3f}s)")
+        print(f" PASS:  JWT validated using SSOT auth ({validation_result['validation_time']:.3f}s)")
         
         # STEP 3: WebSocket Connection with Authentication
         ws_result = await self.tester.test_websocket_jwt_connection(token)
         
-        assert ws_result["success"], f"❌ WebSocket connection failed: {ws_result['error']}"
-        assert ws_result["claude_md_compliant"], "❌ CLAUDE.md VIOLATION: WebSocket connection not using SSOT auth"
-        assert ws_result["connected"], "❌ WebSocket not connected"
+        assert ws_result["success"], f" FAIL:  WebSocket connection failed: {ws_result['error']}"
+        assert ws_result["claude_md_compliant"], " FAIL:  CLAUDE.md VIOLATION: WebSocket connection not using SSOT auth"
+        assert ws_result["connected"], " FAIL:  WebSocket not connected"
         
         websocket = ws_result["websocket"]
-        print(f"✅ WebSocket connected using SSOT auth ({ws_result['connection_time']:.3f}s)")
+        print(f" PASS:  WebSocket connected using SSOT auth ({ws_result['connection_time']:.3f}s)")
         
         # STEP 4: Authenticated Message Exchange
         message_result = await self.tester.test_websocket_message_with_jwt(
             websocket, "Test authenticated message flow"
         )
         
-        assert message_result["success"], f"❌ WebSocket messaging failed: {message_result['error']}"
-        assert message_result["claude_md_compliant"], "❌ CLAUDE.md VIOLATION: WebSocket messaging not using SSOT auth"
-        assert message_result["message_sent"], "❌ Message not sent"
+        assert message_result["success"], f" FAIL:  WebSocket messaging failed: {message_result['error']}"
+        assert message_result["claude_md_compliant"], " FAIL:  CLAUDE.md VIOLATION: WebSocket messaging not using SSOT auth"
+        assert message_result["message_sent"], " FAIL:  Message not sent"
         
-        print(f"✅ Message sent through authenticated WebSocket ({message_result['response_time']:.3f}s)")
+        print(f" PASS:  Message sent through authenticated WebSocket ({message_result['response_time']:.3f}s)")
         
         # STEP 5: Performance Validation
         performance_issues = []
@@ -338,9 +338,9 @@ class TestWebSocketJWTCompleteAuthenticated:
             performance_issues.append(f"WebSocket connection: {ws_result['connection_time']:.3f}s > 2.0s")
         
         if performance_issues:
-            print(f"⚠️ Performance issues detected: {', '.join(performance_issues)}")
+            print(f" WARNING: [U+FE0F] Performance issues detected: {', '.join(performance_issues)}")
         else:
-            print("✅ All performance requirements met")
+            print(" PASS:  All performance requirements met")
         
         # Clean up
         try:
@@ -348,7 +348,7 @@ class TestWebSocketJWTCompleteAuthenticated:
         except:
             pass
         
-        print("✅ CLAUDE.md COMPLIANT: Complete JWT authentication flow PASSED")
+        print(" PASS:  CLAUDE.md COMPLIANT: Complete JWT authentication flow PASSED")
     
     @pytest.mark.asyncio
     async def test_jwt_performance_under_load_claude_compliant(self):
@@ -356,11 +356,11 @@ class TestWebSocketJWTCompleteAuthenticated:
         CLAUDE.md COMPLIANT: Test JWT performance under load with MANDATORY SSOT authentication.
         
         Validates performance at scale:
-        ✅ Multiple concurrent JWT operations using SSOT auth
-        ✅ Performance maintained under realistic load
-        ✅ Authentication consistency across concurrent requests
+         PASS:  Multiple concurrent JWT operations using SSOT auth
+         PASS:  Performance maintained under realistic load
+         PASS:  Authentication consistency across concurrent requests
         """
-        print("⚡ CLAUDE.md COMPLIANT: JWT Performance Under Load Test")
+        print(" LIGHTNING:  CLAUDE.md COMPLIANT: JWT Performance Under Load Test")
         
         # Test concurrent JWT operations (realistic load)
         concurrent_operations = 5
@@ -384,7 +384,7 @@ class TestWebSocketJWTCompleteAuthenticated:
         
         for result in jwt_results:
             if isinstance(result, Exception):
-                print(f"❌ Concurrent JWT operation failed: {result}")
+                print(f" FAIL:  Concurrent JWT operation failed: {result}")
                 continue
             
             if result.get("success", False):
@@ -399,18 +399,18 @@ class TestWebSocketJWTCompleteAuthenticated:
         compliance_rate = claude_compliant_operations / concurrent_operations
         avg_generation_time = total_generation_time / successful_operations if successful_operations > 0 else 0
         
-        assert success_rate >= 0.9, f"⚡ JWT load test success rate {success_rate:.1%} below 90%"
-        assert compliance_rate == 1.0, f"❌ CLAUDE.md COMPLIANCE FAILURE: {compliance_rate:.1%} operations not SSOT compliant"
-        assert total_time <= 10.0, f"⚡ Total concurrent JWT time {total_time:.1f}s exceeded 10s limit"
-        assert avg_generation_time <= 0.2, f"⚡ Average JWT time {avg_generation_time:.3f}s too slow under load"
+        assert success_rate >= 0.9, f" LIGHTNING:  JWT load test success rate {success_rate:.1%} below 90%"
+        assert compliance_rate == 1.0, f" FAIL:  CLAUDE.md COMPLIANCE FAILURE: {compliance_rate:.1%} operations not SSOT compliant"
+        assert total_time <= 10.0, f" LIGHTNING:  Total concurrent JWT time {total_time:.1f}s exceeded 10s limit"
+        assert avg_generation_time <= 0.2, f" LIGHTNING:  Average JWT time {avg_generation_time:.3f}s too slow under load"
         
-        print(f"✅ JWT Load Test Results:")
+        print(f" PASS:  JWT Load Test Results:")
         print(f"   - Success rate: {success_rate:.1%} ({successful_operations}/{concurrent_operations})")
         print(f"   - CLAUDE.md compliance: {compliance_rate:.1%}")
         print(f"   - Total time: {total_time:.1f}s")
         print(f"   - Average generation time: {avg_generation_time:.3f}s")
         
-        print("✅ CLAUDE.md COMPLIANT: JWT performance under load PASSED")
+        print(" PASS:  CLAUDE.md COMPLIANT: JWT performance under load PASSED")
     
     @pytest.mark.e2e
     async def test_token_refresh_flow(self, email: str, original_token: str) -> Dict[str, Any]:
@@ -502,7 +502,7 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
     token = auth_response["access_token"]
     user_email = auth_response["email"]
     
-    print(f"✓ JWT token generated in {auth_response['generation_time']:.3f}s")
+    print(f"[U+2713] JWT token generated in {auth_response['generation_time']:.3f}s")
     
     # Phase 2: Validate JWT in Backend service
     print("\n=== Phase 2: Backend JWT Validation ===")
@@ -510,7 +510,7 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
     assert backend_result["success"], f"Backend JWT validation failed: {backend_result['error']}"
     assert backend_result["valid"], "Backend rejected valid JWT token"
     
-    print(f"✓ JWT validated by Backend in {backend_result['validation_time']:.3f}s")
+    print(f"[U+2713] JWT validated by Backend in {backend_result['validation_time']:.3f}s")
     
     # Phase 3: Test WebSocket connection with JWT
     print("\n=== Phase 3: WebSocket JWT Connection ===")
@@ -519,7 +519,7 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
     assert ws_result["connected"], "WebSocket not connected with valid JWT"
     
     websocket = ws_result["websocket"]
-    print(f"✓ WebSocket connected with JWT in {ws_result['connection_time']:.3f}s")
+    print(f"[U+2713] WebSocket connected with JWT in {ws_result['connection_time']:.3f}s")
     
     try:
         # Phase 4: Send authenticated message through WebSocket
@@ -531,14 +531,14 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
         assert message_result["ping_success"], "WebSocket ping failed with valid JWT"
         assert message_result["message_sent"], "Failed to send authenticated message"
         
-        print(f"✓ Authenticated message sent in {message_result['response_time']:.3f}s")
+        print(f"[U+2713] Authenticated message sent in {message_result['response_time']:.3f}s")
         
         # Verify response handling
         if message_result["response"]:
             response = message_result["response"]
-            print(f"✓ Message response received: {response.get('type', 'unknown')}")
+            print(f"[U+2713] Message response received: {response.get('type', 'unknown')}")
         else:
-            print("ℹ No immediate response (acceptable for async processing)")
+            print("[U+2139] No immediate response (acceptable for async processing)")
         
     finally:
         if websocket:
@@ -550,9 +550,9 @@ async def test_websocket_jwt_auth_complete_flow(real_services):
     assert refresh_result["success"], f"Token refresh failed: {refresh_result['error']}"
     assert refresh_result["websocket_success"], "Refreshed token failed WebSocket connection"
     
-    print(f"✓ Token refresh completed in {refresh_result['refresh_time']:.3f}s")
+    print(f"[U+2713] Token refresh completed in {refresh_result['refresh_time']:.3f}s")
     
-    print(f"\n🎯 Complete JWT authentication flow successful!")
+    print(f"\n TARGET:  Complete JWT authentication flow successful!")
     print(f"   - JWT Generation: {auth_response['generation_time']:.3f}s")
     print(f"   - Backend Validation: {backend_result['validation_time']:.3f}s")
     print(f"   - WebSocket Connection: {ws_result['connection_time']:.3f}s")
@@ -578,7 +578,7 @@ async def test_websocket_jwt_invalid_token_rejection(real_services):
     
     for token_type, invalid_token in invalid_tokens:
         if not invalid_token:  # Skip empty token for WebSocket
-            print(f"⚠ Skipping empty token test for WebSocket")
+            print(f" WARNING:  Skipping empty token test for WebSocket")
             continue
             
         print(f"\nTesting {token_type} token rejection...")
@@ -588,9 +588,9 @@ async def test_websocket_jwt_invalid_token_rejection(real_services):
         assert rejection_result["success"], f"{token_type} token was not properly blocked"
         assert rejection_result["blocked"], f"{token_type} token should be rejected but was accepted"
         
-        print(f"✓ {token_type} token properly blocked in {rejection_result['rejection_time']:.3f}s")
+        print(f"[U+2713] {token_type} token properly blocked in {rejection_result['rejection_time']:.3f}s")
     
-    print(f"\n🔒 All invalid tokens properly rejected by WebSocket!")
+    print(f"\n[U+1F512] All invalid tokens properly rejected by WebSocket!")
 
 
 @pytest.mark.asyncio
@@ -612,7 +612,7 @@ async def test_websocket_jwt_token_expiry_handling(real_services):
     assert ws_result["success"], "Initial WebSocket connection failed"
     
     initial_websocket = ws_result["websocket"]
-    print(f"✓ Initial connection established")
+    print(f"[U+2713] Initial connection established")
     
     try:
         # Send test message to verify connection works
@@ -620,7 +620,7 @@ async def test_websocket_jwt_token_expiry_handling(real_services):
             initial_websocket, "Pre-expiry test message"
         )
         assert message_result["success"], "Initial message failed"
-        print(f"✓ Initial message sent successfully")
+        print(f"[U+2713] Initial message sent successfully")
         
     finally:
         # Disconnect initial connection
@@ -645,12 +645,12 @@ async def test_websocket_jwt_token_expiry_handling(real_services):
             new_websocket, "Post-refresh test message"
         )
         assert message_result["success"], "Message with refreshed token failed"
-        print(f"✓ Message sent successfully with refreshed token")
+        print(f"[U+2713] Message sent successfully with refreshed token")
         
     finally:
         await new_websocket.disconnect()
     
-    print(f"🔄 Token expiry handling successful!")
+    print(f" CYCLE:  Token expiry handling successful!")
     print(f"   - Refresh Time: {refresh_result['refresh_time']:.3f}s")
 
 
@@ -667,13 +667,13 @@ async def test_websocket_jwt_cross_service_consistency(real_services):
     assert auth_response["success"], "Failed to get token from Auth service"
     
     token = auth_response["access_token"]
-    print(f"✓ Token generated by Auth service")
+    print(f"[U+2713] Token generated by Auth service")
     
     # Test Backend service accepts the token
     backend_result = await tester.validate_jwt_in_backend(token)
     assert backend_result["success"], f"Backend service failed: {backend_result['error']}"
     assert backend_result["valid"], "Backend service rejected Auth service token"
-    print(f"✓ Token accepted by Backend service")
+    print(f"[U+2713] Token accepted by Backend service")
     
     # Test WebSocket service accepts the same token
     ws_result = await tester.test_websocket_jwt_connection(token)
@@ -688,13 +688,13 @@ async def test_websocket_jwt_cross_service_consistency(real_services):
             websocket, "Cross-service consistency test message"
         )
         assert message_result["success"], "WebSocket message processing failed"
-        print(f"✓ Token processed by WebSocket service for messaging")
+        print(f"[U+2713] Token processed by WebSocket service for messaging")
         
     finally:
         await websocket.disconnect()
     
-    print(f"🔗 JWT token consistently validated across all services!")
-    print(f"   Auth → Backend → WebSocket: All services accept same token")
+    print(f"[U+1F517] JWT token consistently validated across all services!")
+    print(f"   Auth  ->  Backend  ->  WebSocket: All services accept same token")
 
 
 @pytest.mark.asyncio
@@ -717,7 +717,7 @@ async def test_websocket_jwt_concurrent_connections(real_services):
             "email": auth_response["email"],
             "user_id": i + 1
         })
-        print(f"✓ User {i+1} token generated")
+        print(f"[U+2713] User {i+1} token generated")
     
     # Establish concurrent WebSocket connections
     websockets = []
@@ -735,13 +735,13 @@ async def test_websocket_jwt_concurrent_connections(real_services):
         
         if result["success"]:
             websockets.append(result["websocket"])
-            print(f"✓ User {user_id} connected successfully")
+            print(f"[U+2713] User {user_id} connected successfully")
         else:
-            print(f"⚠ User {user_id} connection failed: {result['error']}")
+            print(f" WARNING:  User {user_id} connection failed: {result['error']}")
     
     # Verify at least 2 concurrent connections work
     successful_connections = len(websockets)
-    assert successful_connections >= 2, f"Expected ≥2 concurrent connections, got {successful_connections}"
+    assert successful_connections >= 2, f"Expected  >= 2 concurrent connections, got {successful_connections}"
     
     try:
         # Send messages from each connection concurrently
@@ -758,11 +758,11 @@ async def test_websocket_jwt_concurrent_connections(real_services):
             message_result = await task
             if message_result["success"]:
                 successful_messages += 1
-                print(f"✓ User {user_id} message sent successfully")
+                print(f"[U+2713] User {user_id} message sent successfully")
             else:
-                print(f"⚠ User {user_id} message failed: {message_result['error']}")
+                print(f" WARNING:  User {user_id} message failed: {message_result['error']}")
         
-        assert successful_messages >= 2, f"Expected ≥2 successful messages, got {successful_messages}"
+        assert successful_messages >= 2, f"Expected  >= 2 successful messages, got {successful_messages}"
         
     finally:
         # Cleanup all connections
@@ -772,7 +772,7 @@ async def test_websocket_jwt_concurrent_connections(real_services):
             except Exception as e:
                 print(f"Warning: Error disconnecting WebSocket: {e}")
     
-    print(f"🔀 Concurrent JWT authentication successful!")
+    print(f"[U+1F500] Concurrent JWT authentication successful!")
     print(f"   - {successful_connections} concurrent connections")
     print(f"   - {successful_messages} concurrent authenticated messages")
 
@@ -784,33 +784,33 @@ async def test_websocket_jwt_concurrent_connections(real_services):
 """
 Complete WebSocket JWT Authentication Test - Business Impact Summary
 
-🎯 Revenue Protection: $100K+ MRR at Risk
+ TARGET:  Revenue Protection: $100K+ MRR at Risk
 - Security breach = 100% Enterprise customer loss
 - Prevents authentication bypass in real-time AI agent interactions  
 - Ensures JWT validation consistency across microservice boundaries
 - Tests critical token refresh flows for long-running user sessions
 
-🔒 Security Compliance Validation:
+[U+1F512] Security Compliance Validation:
 - End-to-end JWT authentication from Auth Service to WebSocket delivery
 - Invalid token rejection with proper performance characteristics (<1s)
 - Token expiry and refresh handling for session continuity
 - Cross-service authentication consistency for SOC2/GDPR compliance
 - Concurrent user authentication for enterprise scalability
 
-⚡ Performance Requirements Enforced:
+ LIGHTNING:  Performance Requirements Enforced:
 - JWT Generation: <100ms (Auth Service)
 - Token Validation: <50ms (Backend Service) 
 - WebSocket Connection: <2s (Real-time requirement)
 - Token Refresh: <500ms (Session continuity)
 - Unauthorized Rejection: <1s (Security responsiveness)
 
-👥 Customer Impact by Segment:
+[U+1F465] Customer Impact by Segment:
 - All Segments: Secure real-time AI interactions without auth failures
 - Enterprise: Security compliance enabling high-value contract execution
 - Free/Early: Smooth onboarding with secure chat functionality
 - Mid: Reliable concurrent connections for team collaboration
 
-🏗️ System Reliability:
+[U+1F3D7][U+FE0F] System Reliability:
 - Tests REAL security, not mocks - validates production-ready authentication
 - Comprehensive invalid token rejection (expired, malformed, tampered, none-algorithm)
 - Token refresh and reconnection flows critical for user retention

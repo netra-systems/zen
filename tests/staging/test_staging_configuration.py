@@ -434,7 +434,7 @@ class StagingConfigurationTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all staging configuration tests."""
-        print(f"⚙️  Running Staging Configuration Tests")
+        print(f"[U+2699][U+FE0F]  Running Staging Configuration Tests")
         print(f"Environment: {self.environment}")
         print(f"Backend URL: {self.urls['backend']}")
         print(f"Auth URL: {self.urls['auth']}")
@@ -442,7 +442,7 @@ class StagingConfigurationTestRunner:
         print()
         
         # Get test token first
-        print("🔑 Getting test token...")
+        print("[U+1F511] Getting test token...")
         self.access_token = await self.get_test_token()
         print(f"     Token obtained: {bool(self.access_token)}")
         print()
@@ -503,14 +503,14 @@ class StagingConfigurationTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
-        print(f"🌍 Environment config: {'✅ Correct' if environment_config_correct else '❌ Issues'}")
-        print(f"🔗 CORS config: {'✅ Working' if cors_config_working else '❌ Issues'}")
-        print(f"🗃️  Database config: {'✅ Correct' if database_config_correct else '❌ Issues'}")
-        print(f"🔐 Secrets config: {'✅ All configured' if secrets_all_configured else '❌ Missing secrets'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
+        print(f"[U+1F30D] Environment config: {' PASS:  Correct' if environment_config_correct else ' FAIL:  Issues'}")
+        print(f"[U+1F517] CORS config: {' PASS:  Working' if cors_config_working else ' FAIL:  Issues'}")
+        print(f"[U+1F5C3][U+FE0F]  Database config: {' PASS:  Correct' if database_config_correct else ' FAIL:  Issues'}")
+        print(f"[U+1F510] Secrets config: {' PASS:  All configured' if secrets_all_configured else ' FAIL:  Missing secrets'}")
         
         if results["summary"]["critical_config_issues"]:
-            print("🚨 CRITICAL: Configuration issues detected!")
+            print(" ALERT:  CRITICAL: Configuration issues detected!")
             
         return results
 

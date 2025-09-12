@@ -2,7 +2,7 @@
 WebSocket Notifier Complete E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Validate real-time notifications work in production-like environment
 - Value Impact: E2E tests ensure users receive timely feedback for engagement and transparency
 - Strategic Impact: Real-time notifications are critical for user retention and platform stickiness
@@ -11,10 +11,10 @@ This test suite validates WebSocket Notifier functionality through complete
 end-to-end testing with authentication, real WebSocket connections, and
 production-like infrastructure, ensuring users receive reliable real-time feedback.
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+ WARNING: [U+FE0F] DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
 These E2E tests validate the complete notification flow for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:
@@ -79,7 +79,7 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         BVJ: Validates end-to-end user notification experience with security.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.notification.flow@example.com",
@@ -193,7 +193,7 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures notification privacy and security in multi-tenant environment.
         """
-        # 🚨 MANDATORY: Create multiple authenticated users
+        #  ALERT:  MANDATORY: Create multiple authenticated users
         users = []
         for i in range(2):  # Conservative number for E2E
             token, user_data = await create_authenticated_user(
@@ -291,7 +291,7 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures users receive clear error feedback for better experience and trust.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.error.notifications@example.com",
@@ -388,7 +388,7 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures users receive timely and properly ordered notifications for clarity.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.notification.timing@example.com",
@@ -492,7 +492,7 @@ class TestWebSocketNotifierCompleteE2E(SSotBaseTestCase):
         
         BVJ: Ensures notification reliability under network issues for user confidence.
         """
-        # 🚨 MANDATORY: Create authenticated user
+        #  ALERT:  MANDATORY: Create authenticated user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.notification.resilience@example.com",

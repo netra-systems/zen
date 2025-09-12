@@ -734,7 +734,7 @@ class WebSocketAcceptRaceConditionE2ETest(BaseE2ETest):
         ]
         
         if business_critical_failures:
-            print(f"\n🚨 BUSINESS CRITICAL FAILURES REPRODUCED: {len(business_critical_failures)}")
+            print(f"\n ALERT:  BUSINESS CRITICAL FAILURES REPRODUCED: {len(business_critical_failures)}")
             print("These race conditions directly impact $500K+ ARR:")
             for failure in business_critical_failures:
                 print(f"  - {failure}")

@@ -174,7 +174,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         self.assertEqual(context.user_id, user_data['user_id'], "User ID should be preserved")
         self.assertIsNotNone(context.created_at, "Context should have creation timestamp")
         
-        self.logger.info(f"✅ Successfully created valid UserExecutionContext for user {user_data['user_id']}")
+        self.logger.info(f" PASS:  Successfully created valid UserExecutionContext for user {user_data['user_id']}")
 
     async def test_concurrent_auth_creates_isolated_contexts(self):
         """Test 2: Concurrent authentication creates completely isolated contexts."""
@@ -281,7 +281,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
                     self.assertNotEqual(ctx1.thread_id, ctx2.thread_id, "Thread IDs should be different")
                     self.assertNotEqual(ctx1.run_id, ctx2.run_id, "Run IDs should be different")
         
-        self.logger.info(f"✅ Successfully verified isolation across {num_concurrent_users} concurrent contexts")
+        self.logger.info(f" PASS:  Successfully verified isolation across {num_concurrent_users} concurrent contexts")
 
     async def test_invalid_jwt_prevents_context_creation(self):
         """Test 3: Invalid JWT tokens prevent UserExecutionContext creation."""
@@ -330,7 +330,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
                     # Context exists but represents a failed authentication attempt
                     self.assertIsNotNone(context, "Context should be created even for failed auth")
         
-        self.logger.info("✅ Successfully verified invalid JWT tokens prevent valid context creation")
+        self.logger.info(" PASS:  Successfully verified invalid JWT tokens prevent valid context creation")
 
     async def test_auth_service_handles_context_validation_errors(self):
         """Test 4: Auth service properly handles context validation errors."""
@@ -401,7 +401,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
                     except (InvalidContextError, ContextIsolationError):
                         pass  # Expected validation failure
         
-        self.logger.info("✅ Successfully verified auth service handles context validation errors")
+        self.logger.info(" PASS:  Successfully verified auth service handles context validation errors")
 
     async def test_user_context_maintains_auth_state(self):
         """Test 5: UserExecutionContext maintains auth state throughout lifecycle."""
@@ -492,7 +492,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
             self.assertEqual(operation_context.user_id, context.user_id, f"User ID should persist through operation {i}")
             self.assertEqual(operation_context.thread_id, context.thread_id, f"Thread ID should persist through operation {i}")
         
-        self.logger.info("✅ Successfully verified UserExecutionContext maintains auth state throughout lifecycle")
+        self.logger.info(" PASS:  Successfully verified UserExecutionContext maintains auth state throughout lifecycle")
 
     def test_jwt_token_format_validation(self):
         """Test JWT token format validation utility."""
@@ -518,7 +518,7 @@ class TestAuthContextIntegration(SSotAsyncTestCase):
         for token in invalid_tokens:
             self.assertFalse(validate_jwt_format(token), f"Token should be invalid: {token}")
         
-        self.logger.info("✅ Successfully verified JWT token format validation")
+        self.logger.info(" PASS:  Successfully verified JWT token format validation")
 
 
 if __name__ == "__main__":

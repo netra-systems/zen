@@ -242,7 +242,7 @@ class TestLLMResourceManagementIntegration(BaseIntegrationTest):
             for results in all_results
         )
         
-        assert total_requests == 150, "Should have 150 total requests (10 users × 15 requests)"
+        assert total_requests == 150, "Should have 150 total requests (10 users  x  15 requests)"
         assert successful_requests >= 140, "At least 93% requests should succeed"
         
         # Verify resource usage stayed reasonable

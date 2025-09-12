@@ -712,7 +712,7 @@ class TestWebSocketConnectionStateMachineUnit:
             (WebSocketConnectionState.CONNECTED, "metrics_test", True),
             (WebSocketConnectionState.AUTHENTICATED, "metrics_test", True),
             (WebSocketConnectionState.DISCONNECTED, "invalid_transition", False),  # Invalid - can't go to DISCONNECTED from AUTHENTICATED
-            (WebSocketConnectionState.IDLE, "metrics_test", True),  # Valid - AUTHENTICATED → IDLE is allowed
+            (WebSocketConnectionState.IDLE, "metrics_test", True),  # Valid - AUTHENTICATED  ->  IDLE is allowed
             (WebSocketConnectionState.ACTIVE, "metrics_test", True),
             (WebSocketConnectionState.ERROR, "simulated_error", True),
             (WebSocketConnectionState.CONNECTING, "recovery", True)

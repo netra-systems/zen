@@ -311,15 +311,15 @@ if __name__ == "__main__":
         # Test 1: Authenticated simple flow
         try:
             await test_authenticated_chat_flow()
-            logger.success("✓ Authenticated chat flow test passed")
+            logger.success("[U+2713] Authenticated chat flow test passed")
         except Exception as e:
-            logger.error(f"✗ Authenticated chat flow test failed: {e}")
+            logger.error(f"[U+2717] Authenticated chat flow test failed: {e}")
             
         # Test 2: Multiple authenticated messages
         try:
             await test_multiple_authenticated_messages()  
-            logger.success("✓ Multiple authenticated messages test passed")
+            logger.success("[U+2713] Multiple authenticated messages test passed")
         except Exception as e:
-            logger.error(f"✗ Multiple authenticated messages test failed: {e}")
+            logger.error(f"[U+2717] Multiple authenticated messages test failed: {e}")
             
     asyncio.run(main())

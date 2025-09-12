@@ -5,7 +5,7 @@ This module tests critical circuit breaker functionality including state transit
 failure thresholds, recovery timeouts, and business logic validation.
 
 Business Value: Circuit breakers protect system stability and prevent cascade failures,
-ensuring reliable service for all customer segments (Free → Enterprise).
+ensuring reliable service for all customer segments (Free  ->  Enterprise).
 """
 
 import asyncio

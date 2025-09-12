@@ -34,12 +34,12 @@ class EnvironmentChecker:
     
     def check_environment(self) -> bool:
         """Check if environment is ready for launch."""
-        self._print("🔍", "CHECK", "Checking environment...")
+        self._print(" SEARCH: ", "CHECK", "Checking environment...")
         if not self._check_dependencies():
             return False
         if not self._check_project_structure():
             return False
-        self._print("✅", "OK", "Environment check passed")
+        self._print(" PASS: ", "OK", "Environment check passed")
         return True
     
     def _check_dependencies(self) -> bool:
@@ -82,9 +82,9 @@ class EnvironmentChecker:
     
     def _print_missing_deps(self, missing_deps: List[str]):
         """Print missing dependencies error."""
-        self._print("❌", "ERROR", "Missing required dependencies:")
+        self._print(" FAIL: ", "ERROR", "Missing required dependencies:")
         for dep in missing_deps:
-            print(f"     • {dep}")
+            print(f"     [U+2022] {dep}")
         print("\nInstall the missing dependencies and try again.")
     
     def _check_project_structure(self) -> bool:
@@ -121,7 +121,7 @@ class EnvironmentChecker:
     
     def _print_missing_structure(self, missing_structure: List[str]):
         """Print missing structure error."""
-        self._print("❌", "ERROR", "Invalid project structure:")
+        self._print(" FAIL: ", "ERROR", "Invalid project structure:")
         for issue in missing_structure:
-            print(f"     • {issue}")
+            print(f"     [U+2022] {issue}")
         print(f"\nMake sure you're running from the project root: {self.project_root}")

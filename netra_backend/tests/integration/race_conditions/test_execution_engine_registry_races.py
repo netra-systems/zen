@@ -5,7 +5,7 @@ This module tests for race conditions in execution engine registry state managem
 Validates that execution engines remain stable and isolated under concurrent load.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure reliable agent execution engine management
 - Value Impact: Prevents execution failures, engine corruption, and inconsistent behavior
 - Strategic Impact: CRITICAL - Execution engine registry is core to agent operations
@@ -332,7 +332,7 @@ class TestExecutionEngineRegistryRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 30 concurrent engine registrations completed successfully in {registration_time:.2f}s. "
+            f" PASS:  30 concurrent engine registrations completed successfully in {registration_time:.2f}s. "
             f"Success rate: {successful_registrations}/30, Retrievals: {successful_retrievals}/30, "
             f"Unique engines: {len(unique_engine_ids)}, Registered agents: {len(registered_agents)}, "
             f"Race conditions: {len(self.race_condition_detections)}"
@@ -463,7 +463,7 @@ class TestExecutionEngineRegistryRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 50 concurrent engine executions completed successfully. "
+            f" PASS:  50 concurrent engine executions completed successfully. "
             f"Success rate: {successful_executions}/50, Agent executions: {successful_agent_executions}/50, "
             f"Engines used: {len(executions_by_engine)}, Race conditions: {len(self.race_condition_detections)}"
         )
@@ -577,7 +577,7 @@ class TestExecutionEngineRegistryRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Agent factory integration race test passed: "
+            f" PASS:  Agent factory integration race test passed: "
             f"{successful_tests}/24 successful tests, {successful_creations} agent creations, "
             f"3 agent types with 8 creations each, 0 race conditions detected"
         )
@@ -713,7 +713,7 @@ class TestExecutionEngineRegistryRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Registry state corruption detection test passed: "
+            f" PASS:  Registry state corruption detection test passed: "
             f"{successful_batches}/15 successful batches, {total_operations} total operations "
             f"in {stress_time:.2f}s. Final agent count: {final_agent_count}, "
             f"Expected registrations: {expected_registrations}, "

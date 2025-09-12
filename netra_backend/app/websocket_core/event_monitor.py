@@ -474,14 +474,14 @@ class ChatEventMonitor(ComponentMonitor):
             if component_id not in self.component_health_history:
                 self.component_health_history[component_id] = []
             
-            logger.info(f"✅ Component {component_id} registered for monitoring successfully")
+            logger.info(f" PASS:  Component {component_id} registered for monitoring successfully")
             
             # Perform initial health audit
             await self._perform_initial_audit(component_id)
             
         except Exception as e:
             logger.warning(
-                f"⚠️ Failed to register component {component_id} for monitoring: {e}. "
+                f" WARNING: [U+FE0F] Failed to register component {component_id} for monitoring: {e}. "
                 f"Component will continue operating independently."
             )
     
@@ -792,13 +792,13 @@ class ChatEventMonitor(ComponentMonitor):
                 # Check if this is the expected uninitialized state for the bridge
                 if component_id == "agent_websocket_bridge" and health_data.get('state') == 'uninitialized':
                     logger.info(
-                        f"ℹ️ Component {component_id} in expected uninitialized state. "
+                        f"[U+2139][U+FE0F] Component {component_id} in expected uninitialized state. "
                         f"This is normal - bridge uses per-request initialization. "
                         f"See AGENT_WEBSOCKET_BRIDGE_UNINITIALIZED_FIVE_WHYS.md for details."
                     )
                 else:
                     logger.warning(
-                        f"🚨 Component {component_id} reported unhealthy status: "
+                        f" ALERT:  Component {component_id} reported unhealthy status: "
                         f"{health_data.get('state', 'unknown')}. "
                         f"Error: {health_data.get('error_message', 'No details provided')}"
                     )

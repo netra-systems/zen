@@ -4,12 +4,12 @@ Service Startup Sequence and Health Cascade Real Integration Test
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
 - Business Goal: Zero-downtime deployments
-- Value Impact: Ensures proper startup sequence: Auth → Backend → Frontend  
+- Value Impact: Ensures proper startup sequence: Auth  ->  Backend  ->  Frontend  
 - Revenue Impact: $70K+ MRR (System reliability prevents downtime costs)
 - Strategic Impact: Validates inter-service dependencies and failure handling
 
 CRITICAL REQUIREMENTS:
-1. Test proper startup sequence: Auth → Backend → Frontend
+1. Test proper startup sequence: Auth  ->  Backend  ->  Frontend
 2. Validate health check propagation between services
 3. Test service discovery with dynamic ports
 4. Simulate failure recovery when one service is down
@@ -76,7 +76,7 @@ class ServiceStartupSequencer:
         self.health_checker = ServiceHealthChecker()
         
     async def validate_startup_sequence(self) -> Dict[str, Any]:
-        """Validate proper startup sequence: Auth → Backend → Frontend."""
+        """Validate proper startup sequence: Auth  ->  Backend  ->  Frontend."""
         sequence_results = {
             "auth": await self._validate_auth_startup(),
             "backend": await self._validate_backend_startup(),
@@ -406,7 +406,7 @@ class TestServiceStartupHealthReal:
     
     @pytest.mark.e2e
     async def test_proper_startup_sequence_auth_backend_frontend(self, startup_sequencer):
-        """Test proper startup sequence: Auth → Backend → Frontend."""
+        """Test proper startup sequence: Auth  ->  Backend  ->  Frontend."""
         logger.info("Testing service startup sequence validation")
         
         # Validate startup sequence
@@ -427,7 +427,7 @@ class TestServiceStartupHealthReal:
         else:
             logger.info("Frontend service not running (acceptable in test environment)")
         
-        logger.info("✓ Service startup sequence validated successfully")
+        logger.info("[U+2713] Service startup sequence validated successfully")
     
     @pytest.mark.e2e
     async def test_health_check_propagation_between_services(self, health_cascade_validator):
@@ -446,7 +446,7 @@ class TestServiceStartupHealthReal:
         assert details["backend_to_frontend"]["propagation_detected"], "Backend to Frontend propagation failed"
         assert details["inter_service_health"]["propagation_detected"], "Inter-service health coordination failed"
         
-        logger.info("✓ Health check propagation validated successfully")
+        logger.info("[U+2713] Health check propagation validated successfully")
     
     @pytest.mark.e2e
     async def test_service_discovery_with_dynamic_ports(self, startup_sequencer):
@@ -472,7 +472,7 @@ class TestServiceStartupHealthReal:
             assert frontend_port != auth_port and frontend_port != backend_port, "Frontend port conflicts"
             assert 1000 <= frontend_port <= 65535, f"Invalid frontend port: {frontend_port}"
         
-        logger.info("✓ Service discovery with dynamic ports validated successfully")
+        logger.info("[U+2713] Service discovery with dynamic ports validated successfully")
     
     @pytest.mark.e2e
     async def test_failure_recovery_simulation(self, health_cascade_validator):
@@ -497,7 +497,7 @@ class TestServiceStartupHealthReal:
         final_health = await health_cascade_validator._test_inter_service_health()
         assert final_health["healthy_services"] >= 1, "No healthy services detected"
         
-        logger.info("✓ Failure recovery patterns validated successfully")
+        logger.info("[U+2713] Failure recovery patterns validated successfully")
     
     @pytest.mark.e2e
     async def test_dependent_services_handle_upstream_failures(self, startup_sequencer, health_cascade_validator):
@@ -526,7 +526,7 @@ class TestServiceStartupHealthReal:
         # System should maintain some level of functionality
         assert inter_service_health["system_health_score"] > 0, "System completely non-functional"
         
-        logger.info("✓ Upstream failure handling validated successfully")
+        logger.info("[U+2713] Upstream failure handling validated successfully")
 
 
 async def run_service_startup_health_test():

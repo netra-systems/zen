@@ -20,9 +20,9 @@ class TemplateManager:
         return {
             (ContentType.OPTIMIZATION, FailureReason.LOW_QUALITY): [
                 "The optimization analysis for {context} requires additional refinement. Consider:\n"
-                "• Reviewing input parameters for completeness\n"
-                "• Ensuring all constraints are properly defined\n"
-                "• Validating the objective function",
+                "[U+2022] Reviewing input parameters for completeness\n"
+                "[U+2022] Ensuring all constraints are properly defined\n"
+                "[U+2022] Validating the objective function",
                 
                 "Unable to generate high-quality optimization results for {context}. "
                 "Please verify the problem formulation and constraints."
@@ -30,9 +30,9 @@ class TemplateManager:
             
             (ContentType.DATA_ANALYSIS, FailureReason.LOW_QUALITY): [
                 "The data analysis for {context} needs more specific parameters:\n"
-                "• Dataset characteristics and size\n"
-                "• Analysis objectives and key metrics\n"
-                "• Expected output format",
+                "[U+2022] Dataset characteristics and size\n"
+                "[U+2022] Analysis objectives and key metrics\n"
+                "[U+2022] Expected output format",
                 
                 "Data analysis incomplete for {context}. "
                 "Consider providing more context or breaking down the analysis into smaller steps."
@@ -40,9 +40,9 @@ class TemplateManager:
             
             (ContentType.REPORT, FailureReason.LOW_QUALITY): [
                 "Report generation for {context} requires clarification:\n"
-                "• Report scope and intended audience\n"
-                "• Key metrics to include\n"
-                "• Preferred format and structure",
+                "[U+2022] Report scope and intended audience\n"
+                "[U+2022] Key metrics to include\n"
+                "[U+2022] Preferred format and structure",
                 
                 "Unable to generate comprehensive report for {context}. "
                 "Please specify the reporting requirements more clearly."

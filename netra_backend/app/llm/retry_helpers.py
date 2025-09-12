@@ -1,7 +1,7 @@
 """
 Retry Helper Functions
 
-This module contains helper functions for the retry logic to keep each function ≤8 lines.
+This module contains helper functions for the retry logic to keep each function  <= 8 lines.
 Implements Template Method pattern components for retry operations.
 """
 

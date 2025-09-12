@@ -224,7 +224,7 @@ class TestGCPRedisReadinessRaceCondition:
             "Background tasks should not be stable yet - this is the race condition"
         )
         
-        print("✅ RACE CONDITION REPRODUCED: Redis reports ready but background tasks not stable")
+        print(" PASS:  RACE CONDITION REPRODUCED: Redis reports ready but background tasks not stable")
         print(f"   Connection time: {connection_delay}s")
         print(f"   Stabilization time: {stabilization_delay}s")
         print(f"   Total system readiness time: {connection_delay + stabilization_delay}s")
@@ -290,7 +290,7 @@ class TestGCPRedisReadinessRaceCondition:
         else:
             print(f"WARNING: Total elapsed ({elapsed_after:.3f}s) < required ({expected_total_time}s) - background tasks may not be stable yet")
         
-        print("✅ RACE CONDITION FIX VALIDATED: Grace period allows system stabilization")
+        print(" PASS:  RACE CONDITION FIX VALIDATED: Grace period allows system stabilization")
         print(f"   Grace period applied: {grace_elapsed:.3f}s")
         print(f"   Background tasks stable: {redis_manager._background_tasks_stable}")
     
@@ -322,7 +322,7 @@ class TestGCPRedisReadinessRaceCondition:
             f"Redis timeout should be 10s in non-GCP, got {non_gcp_redis_check.timeout_seconds}s"
         )
         
-        print("✅ TIMEOUT INCREASE VALIDATED: 60s timeout in GCP vs 10s non-GCP")
+        print(" PASS:  TIMEOUT INCREASE VALIDATED: 60s timeout in GCP vs 10s non-GCP")
         print(f"   GCP timeout: {redis_check.timeout_seconds}s")
         print(f"   Non-GCP timeout: {non_gcp_redis_check.timeout_seconds}s")
     
@@ -357,7 +357,7 @@ class TestGCPRedisReadinessRaceCondition:
         assert phase1_elapsed >= 0.5, f"Phase 1 should include grace period: {phase1_elapsed}s"
         assert phase1_elapsed <= 2.5, f"Phase 1 should complete quickly: {phase1_elapsed}s"
         
-        print("✅ SERVICE GROUP VALIDATION TIMING MEASURED")
+        print(" PASS:  SERVICE GROUP VALIDATION TIMING MEASURED")
         print(f"   Phase 1 (with Redis grace period): {phase1_elapsed:.3f}s")
         print(f"   Services validated: {phase1_result['success_count']}/{phase1_result['total_count']}")
     
@@ -396,10 +396,10 @@ class TestGCPRedisReadinessRaceCondition:
         result = validator._validate_redis_readiness()
         assert not result, "Should fail when is_connected raises exception"
         
-        print("✅ REDIS MANAGER STATE VARIATIONS TESTED")
-        print("   ✓ None manager handled")
-        print("   ✓ Missing method handled") 
-        print("   ✓ Exception during check handled")
+        print(" PASS:  REDIS MANAGER STATE VARIATIONS TESTED")
+        print("   [U+2713] None manager handled")
+        print("   [U+2713] Missing method handled") 
+        print("   [U+2713] Exception during check handled")
     
     @pytest.mark.asyncio
     async def test_race_condition_timing_manipulation(self):
@@ -427,7 +427,7 @@ class TestGCPRedisReadinessRaceCondition:
         # RACE CONDITION: Connected but not stable
         expected_race_condition = is_connected and not is_stable
         
-        print("✅ TIMING MANIPULATION RACE CONDITION TEST")
+        print(" PASS:  TIMING MANIPULATION RACE CONDITION TEST")
         print(f"   Connection delay: {connection_delay}s")
         print(f"   Stabilization delay: {stabilization_delay}s")
         print(f"   After 0.3s - Connected: {is_connected}, Stable: {is_stable}")
@@ -467,7 +467,7 @@ class TestGCPRedisReadinessRaceCondition:
         # Should include grace period in timing (at least 500ms for Redis)
         assert total_elapsed >= 0.5, f"Should include grace period: {total_elapsed}s"
         
-        print("✅ COMPLETE VALIDATION WITH RACE CONDITION FIX SUCCESSFUL")
+        print(" PASS:  COMPLETE VALIDATION WITH RACE CONDITION FIX SUCCESSFUL")
         print(f"   Total validation time: {total_elapsed:.3f}s")
         print(f"   Final state: {result.state.value}")
         print(f"   Failed services: {result.failed_services}")
@@ -494,10 +494,10 @@ class TestGCPRedisReadinessRaceCondition:
         # Both should be equivalent
         assert type(validator1) == type(validator2)
         
-        print("✅ SSOT FACTORY FUNCTION COMPLIANCE VALIDATED")
-        print("   ✓ create_gcp_websocket_validator() works")
-        print("   ✓ Direct instantiation works") 
-        print("   ✓ Both create equivalent objects")
+        print(" PASS:  SSOT FACTORY FUNCTION COMPLIANCE VALIDATED")
+        print("   [U+2713] create_gcp_websocket_validator() works")
+        print("   [U+2713] Direct instantiation works") 
+        print("   [U+2713] Both create equivalent objects")
 
 
 class TestRaceConditionPerformanceBenchmarks:
@@ -551,7 +551,7 @@ class TestRaceConditionPerformanceBenchmarks:
                 "grace_period_applied": validation_time >= 0.49
             })
         
-        print("✅ RACE CONDITION TIMING BENCHMARKS")
+        print(" PASS:  RACE CONDITION TIMING BENCHMARKS")
         for result in results:
             print(f"   {result['scenario']}:")
             print(f"     Connection: {result['connection_delay']}s, Stabilization: {result['stabilization_delay']}s")
@@ -585,7 +585,7 @@ class TestRaceConditionPerformanceBenchmarks:
         validator_new.is_gcp_environment = True
         validator_new.readiness_checks['redis'].timeout_seconds = 60.0  # New timeout
         
-        print("✅ TIMEOUT EFFECTIVENESS COMPARISON SETUP")
+        print(" PASS:  TIMEOUT EFFECTIVENESS COMPARISON SETUP")
         print(f"   Simulated initialization time: 35s (20s + 15s)")
         print(f"   Old timeout: 30s (would fail)")
         print(f"   New timeout: 60s (should succeed)")
@@ -595,7 +595,7 @@ class TestRaceConditionPerformanceBenchmarks:
         assert validator_old.readiness_checks['redis'].timeout_seconds == 30.0
         assert validator_new.readiness_checks['redis'].timeout_seconds == 60.0
         
-        print("   ✓ Timeout configuration difference validated")
+        print("   [U+2713] Timeout configuration difference validated")
 
 
 if __name__ == "__main__":

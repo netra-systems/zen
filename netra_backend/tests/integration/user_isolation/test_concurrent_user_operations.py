@@ -2,7 +2,7 @@
 Integration Tests for Concurrent User Operations
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Scalability foundation
+- Segment: All (Free  ->  Enterprise) - Scalability foundation
 - Business Goal: Ensure system stability and data integrity under concurrent user load
 - Value Impact: System handles real-world concurrent usage without data corruption or performance degradation
 - Revenue Impact: Enables platform scaling to support growth from Free to Enterprise segments
@@ -172,7 +172,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
         peak_mb = peak / 1024 / 1024
         assert peak_mb < 100, f"Excessive memory usage: {peak_mb:.2f}MB"
         
-        print(f"✅ Created {total_contexts_created} contexts with {num_concurrent_users} concurrent users "
+        print(f" PASS:  Created {total_contexts_created} contexts with {num_concurrent_users} concurrent users "
               f"in {total_time:.2f}s ({contexts_per_second:.1f} ctx/sec), peak memory: {peak_mb:.2f}MB")
     
     @pytest.mark.asyncio
@@ -304,7 +304,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
         operations_per_second = successful_operations / duration
         assert operations_per_second > 100, f"Performance too slow: {operations_per_second:.1f} ops/sec"
         
-        print(f"✅ {successful_operations} concurrent operations completed consistently "
+        print(f" PASS:  {successful_operations} concurrent operations completed consistently "
               f"across {num_users} users in {duration:.2f}s ({operations_per_second:.1f} ops/sec)")
     
     @pytest.mark.asyncio
@@ -391,7 +391,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
         functionality_rate = functional_contexts / min(10, len(created_contexts))
         assert functionality_rate >= 0.8, f"Too many non-functional contexts: {functionality_rate:.2%}"
         
-        print(f"✅ System handled connection pool stress: {successful_users}/{num_users} users successful, "
+        print(f" PASS:  System handled connection pool stress: {successful_users}/{num_users} users successful, "
               f"{total_contexts} total contexts, {functionality_rate:.1%} functionality rate")
     
     @pytest.mark.asyncio
@@ -477,7 +477,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
         # Peak memory should not exceed 200MB
         assert peak_memory_usage < 200, f"Peak memory too high: {peak_memory_usage:.2f}MB"
         
-        print(f"✅ Memory leak test passed: {total_memory_growth:.2f}MB growth, "
+        print(f" PASS:  Memory leak test passed: {total_memory_growth:.2f}MB growth, "
               f"{peak_memory_usage:.2f}MB peak, {memory_per_operation * 1024:.2f}KB/op")
     
     @pytest.mark.asyncio
@@ -621,7 +621,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
             dept_success_rate = stats["success"] / stats["total"] if stats["total"] > 0 else 0
             assert dept_success_rate >= 0.90, f"{dept} success rate too low: {dept_success_rate:.2%}"
         
-        print(f"✅ Enterprise simulation completed: {successful_users}/{total_users} users successful "
+        print(f" PASS:  Enterprise simulation completed: {successful_users}/{total_users} users successful "
               f"({total_sessions} sessions in {total_duration:.2f}s, {sessions_per_second:.1f} sessions/sec)")
         
         # Print department breakdown
@@ -710,7 +710,7 @@ class TestConcurrentUserOperations(BaseIntegrationTest):
                 error_rate = count / extreme_users
                 print(f"   {error_type}: {count} ({error_rate:.2%})")
         
-        print(f"✅ Graceful degradation under extreme load: {successful_users}/{extreme_users} users successful "
+        print(f" PASS:  Graceful degradation under extreme load: {successful_users}/{extreme_users} users successful "
               f"({success_rate:.1%}), {total_operations} operations completed")
         
         # System should not have deadlocked or crashed completely

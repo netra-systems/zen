@@ -43,7 +43,7 @@ class PerformanceValidator:
     
     async def concurrent_load_test(self, path: str, concurrent_requests: int, total_requests: int) -> Dict[str, Any]:
         """Run concurrent requests to test load handling."""
-        print(f"  🔄 Testing {path} with {concurrent_requests} concurrent requests ({total_requests} total)")
+        print(f"   CYCLE:  Testing {path} with {concurrent_requests} concurrent requests ({total_requests} total)")
         
         connector = aiohttp.TCPConnector(limit=100)
         timeout = aiohttp.ClientTimeout(total=30)
@@ -113,9 +113,9 @@ class PerformanceValidator:
     
     async def validate_performance(self) -> Dict[str, Any]:
         """Run comprehensive performance validation."""
-        print(f"🚀 Performance Validation - UserContextManager")
-        print(f"🎯 Target: {self.staging_url}")
-        print(f"📋 Testing performance under various load conditions\n")
+        print(f"[U+1F680] Performance Validation - UserContextManager")
+        print(f" TARGET:  Target: {self.staging_url}")
+        print(f"[U+1F4CB] Testing performance under various load conditions\n")
         
         test_scenarios = [
             {
@@ -141,7 +141,7 @@ class PerformanceValidator:
         results = []
         
         for scenario in test_scenarios:
-            print(f"🧪 Running: {scenario['name']}")
+            print(f"[U+1F9EA] Running: {scenario['name']}")
             result = await self.concurrent_load_test(
                 scenario["path"],
                 scenario["concurrent"], 
@@ -151,11 +151,11 @@ class PerformanceValidator:
             results.append(result)
             
             # Print immediate results
-            print(f"  ✅ Success Rate: {result['success_rate']:.1f}%")
-            print(f"  ⚡ Requests/sec: {result['requests_per_second']:.1f}")
+            print(f"   PASS:  Success Rate: {result['success_rate']:.1f}%")
+            print(f"   LIGHTNING:  Requests/sec: {result['requests_per_second']:.1f}")
             if 'avg_response_time_ms' in result:
-                print(f"  ⏱️  Avg Response Time: {result['avg_response_time_ms']:.1f}ms")
-                print(f"  📊 P95 Response Time: {result['p95_response_time_ms']:.1f}ms")
+                print(f"  [U+23F1][U+FE0F]  Avg Response Time: {result['avg_response_time_ms']:.1f}ms")
+                print(f"   CHART:  P95 Response Time: {result['p95_response_time_ms']:.1f}ms")
             print()
         
         return {
@@ -176,14 +176,14 @@ async def main():
     results = report["performance_results"]
     
     print(f"{'='*70}")
-    print(f"📊 PERFORMANCE VALIDATION SUMMARY")
+    print(f" CHART:  PERFORMANCE VALIDATION SUMMARY")
     print(f"{'='*70}")
     
     all_successful = True
     performance_issues = []
     
     for result in results:
-        print(f"\n🧪 {result['scenario_name']}:")
+        print(f"\n[U+1F9EA] {result['scenario_name']}:")
         print(f"   Success Rate: {result['success_rate']:.1f}%")
         print(f"   Requests/sec: {result['requests_per_second']:.1f}")
         
@@ -208,22 +208,22 @@ async def main():
         if 'error_summary' in result:
             print(f"   Errors: {result['error_summary']}")
     
-    print(f"\n🏆 Overall Performance: {'✅ EXCELLENT' if all_successful else '⚠️ ISSUES DETECTED'}")
+    print(f"\n TROPHY:  Overall Performance: {' PASS:  EXCELLENT' if all_successful else ' WARNING: [U+FE0F] ISSUES DETECTED'}")
     
     if performance_issues:
-        print(f"\n🚨 Performance Issues:")
+        print(f"\n ALERT:  Performance Issues:")
         for issue in performance_issues:
-            print(f"   ❌ {issue}")
+            print(f"    FAIL:  {issue}")
     else:
-        print(f"✅ UserContextManager shows excellent performance characteristics")
-        print(f"✅ No performance regressions detected")
-        print(f"✅ Suitable for production workloads")
+        print(f" PASS:  UserContextManager shows excellent performance characteristics")
+        print(f" PASS:  No performance regressions detected")
+        print(f" PASS:  Suitable for production workloads")
     
     # Save detailed report
     with open('/Users/anthony/Desktop/netra-apex/performance_validation_report.json', 'w') as f:
         json.dump(report, f, indent=2)
     
-    print(f"\n📋 Detailed report saved to: performance_validation_report.json")
+    print(f"\n[U+1F4CB] Detailed report saved to: performance_validation_report.json")
     
     return 0 if all_successful else 1
 

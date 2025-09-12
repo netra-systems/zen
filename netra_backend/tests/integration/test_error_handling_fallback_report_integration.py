@@ -11,7 +11,7 @@ CRITICAL: Tests validate that error scenarios are handled gracefully with meanin
 fallback reports, partial results, and clear error communication. Users must never
 receive empty responses or unclear error messages.
 
-Golden Path Focus: Error detection → Fallback activation → Partial report generation → User notification
+Golden Path Focus: Error detection  ->  Fallback activation  ->  Partial report generation  ->  User notification
 NO MOCKS: Uses real services to test actual failure scenarios and recovery mechanisms
 """
 

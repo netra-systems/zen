@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import httpx
 import psutil
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import websocket
 from sqlalchemy import create_engine, text
 
@@ -32,6 +32,44 @@ from sqlalchemy import create_engine, text
 
 from netra_backend.app.db.postgres import async_engine, initialize_postgres
 # REMOVED_SYNTAX_ERROR: from test_framework.test_helpers import ( )
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 cleanup_test_environment,
 wait_for_service,
 get_available_port,
@@ -112,7 +150,7 @@ create_test_user_with_oauth
 
                 # REMOVED_SYNTAX_ERROR: try:
                     # Clear Redis
-                    # REMOVED_SYNTAX_ERROR: r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+                    # REMOVED_SYNTAX_ERROR: r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, decode_responses=True)
                     # REMOVED_SYNTAX_ERROR: r.flushall()
                     # REMOVED_SYNTAX_ERROR: except Exception:
                         # REMOVED_SYNTAX_ERROR: pass
@@ -238,7 +276,7 @@ create_test_user_with_oauth
                     # REMOVED_SYNTAX_ERROR: assert table_count > 0, "Database tables not created"
 
                     # Verify Redis connectivity
-                    # REMOVED_SYNTAX_ERROR: r = redis.Redis(host='localhost', port=6379, decode_responses=True)
+                    # REMOVED_SYNTAX_ERROR: r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, decode_responses=True)
                     # REMOVED_SYNTAX_ERROR: assert r.ping(), "Redis not accessible"
 
                     # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e

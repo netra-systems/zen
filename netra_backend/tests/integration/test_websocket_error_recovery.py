@@ -13,7 +13,7 @@ Tests WebSocket error scenarios, performance under load, race condition handling
 and recovery behavior with corrupted state. Critical for system reliability and SLA compliance.
 
 COVERAGE TARGET: 100% for error recovery and performance scenarios
-All functions ≤8 lines per CLAUDE.md requirements.
+All functions  <= 8 lines per CLAUDE.md requirements.
 """""
 
 from netra_backend.app.websocket_core import WebSocketManager

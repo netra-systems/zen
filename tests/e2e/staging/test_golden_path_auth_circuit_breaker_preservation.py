@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Test Golden Path Authentication Flow Circuit Breaker Preservation
 
@@ -27,9 +65,19 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.websocket_helpers import WebSocketTestClient
 from shared.isolated_environment import get_env
 from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManager
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """E2E validation of Golden Path authentication flow with SSOT circuit breaker migration."""
 
     @pytest.mark.e2e
@@ -177,7 +225,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         # Log successful Golden Path completion
         total_duration = time.time() - auth_start_time
         # Success: Complete Golden Path flow preserved during SSOT migration
-        print(f"✅ GOLDEN PATH PRESERVED: Complete flow succeeded in {total_duration:.2f}s: "
+        print(f" PASS:  GOLDEN PATH PRESERVED: Complete flow succeeded in {total_duration:.2f}s: "
               f"auth({auth_duration:.2f}s) + websocket({websocket_duration:.2f}s) + agent({agent_duration:.2f}s)")
 
     @pytest.mark.e2e
@@ -238,7 +286,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert success_count >= 2, f"Should succeed consistently after recovery, got {success_count}/3"
         
         # Success: Auth circuit breaker failure recovery preserved during SSOT migration
-        print(f"✅ FAILURE RECOVERY VERIFIED: Circuit breaker handled {failures_caught} failures and recovered, "
+        print(f" PASS:  FAILURE RECOVERY VERIFIED: Circuit breaker handled {failures_caught} failures and recovered, "
               f"allowing {success_count}/3 subsequent successful authentications")
 
     @pytest.mark.e2e
@@ -289,7 +337,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert time_variance < 0.1, f"Time variance {time_variance:.3f}s should be < 0.1s (consistent performance)"
         
         # Success: Auth circuit breaker performance impact minimal after SSOT migration
-        print(f"✅ PERFORMANCE VERIFIED: Circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
+        print(f" PASS:  PERFORMANCE VERIFIED: Circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
               f"max={max_time:.3f}s, variance={time_variance:.3f}s over 10 calls")
 
     @pytest.mark.e2e
@@ -356,5 +404,5 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert final_result["valid"] is True, "Final call should succeed"
         
         # Success: Auth circuit breaker state transitions preserved during SSOT migration
-        print(f"✅ STATE TRANSITIONS VERIFIED: Circuit breaker handled intermittent pattern: {success_count} successes, "
+        print(f" PASS:  STATE TRANSITIONS VERIFIED: Circuit breaker handled intermittent pattern: {success_count} successes, "
               f"{failure_count} handled failures, final state operational")

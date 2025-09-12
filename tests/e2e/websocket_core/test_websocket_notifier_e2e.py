@@ -331,7 +331,7 @@ class TestWebSocketNotifierE2EAgentFlow(BaseTestCase):
         # Assert - Verify all events were delivered despite concurrent load
         messages_sent = mock_websocket.messages_sent
         
-        # Should have 15 total messages (3 agents × 5 events each)
+        # Should have 15 total messages (3 agents  x  5 events each)
         expected_message_count = 15
         assert len(messages_sent) == expected_message_count, \
             f"STRESS TEST FAILURE: Expected {expected_message_count} messages under concurrent load, " \

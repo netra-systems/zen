@@ -242,7 +242,7 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
         )
         
         self.logger.info("=== Race Condition Analysis Results ===")
-        self.logger.info(f"Race conditions detected: {'YES ⚠️' if has_race_conditions else 'NO ✅'}")
+        self.logger.info(f"Race conditions detected: {'YES  WARNING: [U+FE0F]' if has_race_conditions else 'NO  PASS: '}")
         
         if isolation_violations:
             self.logger.warning(f"User isolation violations: {len(isolation_violations)}")
@@ -511,7 +511,7 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
             len(message_race_results.get("thread_state_corruption", [])) > 0
         )
         
-        self.logger.info(f"Message routing race conditions: {'DETECTED ⚠️' if race_conditions_found else 'NONE ✅'}")
+        self.logger.info(f"Message routing race conditions: {'DETECTED  WARNING: [U+FE0F]' if race_conditions_found else 'NONE  PASS: '}")
         
         success_rate = message_race_results["concurrent_message_creation"]["success_rate"]
         self.logger.info(f"Overall message creation success rate: {success_rate:.1%}")
@@ -784,7 +784,7 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
             registry_race_results["performance_degradation"]["significant_degradation"]
         )
         
-        self.logger.info(f"Registry race conditions: {'DETECTED ⚠️' if registry_issues else 'NONE ✅'}")
+        self.logger.info(f"Registry race conditions: {'DETECTED  WARNING: [U+FE0F]' if registry_issues else 'NONE  PASS: '}")
         
         success_rate = registry_race_results["concurrent_registry_operations"]["success_rate"]
         self.logger.info(f"Registry operation success rate: {success_rate:.1%}")
@@ -1085,7 +1085,7 @@ class TestThreadRoutingRaceConditions(BaseIntegrationTest):
             len(transaction_race_results["deadlock_scenarios"]) > 0
         )
         
-        self.logger.info(f"Transaction isolation violations: {'DETECTED ⚠️' if isolation_violations_found else 'NONE ✅'}")
+        self.logger.info(f"Transaction isolation violations: {'DETECTED  WARNING: [U+FE0F]' if isolation_violations_found else 'NONE  PASS: '}")
         
         for violation_type in ["lost_updates", "phantom_reads", "dirty_reads", "deadlock_scenarios"]:
             violations = transaction_race_results.get(violation_type, [])

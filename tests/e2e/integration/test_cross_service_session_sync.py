@@ -4,7 +4,7 @@ Cross-Service Session Consistency Test - P1 DATA INTEGRITY
 Test #7 from CRITICAL_AUTH_WEBSOCKET_TESTS_IMPLEMENTATION_PLAN.md
 
 BVJ (Business Value Justification):
-- Segment: All tiers (Free → Enterprise) 
+- Segment: All tiers (Free  ->  Enterprise) 
 - Business Goal: Data integrity and user trust via consistent session state
 - Value Impact: Prevents user confusion from inconsistent login states across services
 - Revenue Impact: Critical for user retention - login inconsistencies cause immediate churn

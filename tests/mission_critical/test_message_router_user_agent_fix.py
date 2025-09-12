@@ -175,7 +175,7 @@ class TestUserAgentMessageTypes:
             assert success == True, f"Message type '{message_data['type']}' should be routed successfully"
             
             # Verify no error was logged (by checking the message was handled)
-            print(f"✓ Successfully routed message type: {message_data['type']}")
+            print(f"[U+2713] Successfully routed message type: {message_data['type']}")
 
 
 if __name__ == "__main__":

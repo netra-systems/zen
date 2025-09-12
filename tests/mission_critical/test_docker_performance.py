@@ -138,7 +138,7 @@
     # REMOVED_SYNTAX_ERROR: self.docker_manager = UnifiedDockerManager()
     # REMOVED_SYNTAX_ERROR: self.rate_limiter = get_docker_rate_limiter()
 
-    # REMOVED_SYNTAX_ERROR: logger.info("🔧 Docker Performance Profiler initialized")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F527] Docker Performance Profiler initialized")
 
 # REMOVED_SYNTAX_ERROR: def get_system_snapshot(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Get comprehensive system performance snapshot."""
@@ -298,7 +298,7 @@
 # REMOVED_SYNTAX_ERROR: def cleanup(self):
     # REMOVED_SYNTAX_ERROR: """Clean up all test resources."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🧹 Cleaning up performance test resources...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9F9] Cleaning up performance test resources...")
 
     # REMOVED_SYNTAX_ERROR: cleanup_operations = 0
     # REMOVED_SYNTAX_ERROR: for container in self.test_containers:
@@ -351,7 +351,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_container_lifecycle_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark complete container lifecycle performance."""
-    # REMOVED_SYNTAX_ERROR: logger.info("📊 Benchmarking container lifecycle performance")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CHART:  Benchmarking container lifecycle performance")
 
 # REMOVED_SYNTAX_ERROR: def container_lifecycle_operation(iteration: int):
     # REMOVED_SYNTAX_ERROR: container_name = 'formatted_string'
@@ -408,7 +408,7 @@
 # REMOVED_SYNTAX_ERROR: def test_network_operation_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark network operation performance."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🌐 Benchmarking network operation performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F310] Benchmarking network operation performance")
 
 # REMOVED_SYNTAX_ERROR: def network_operation(iteration: int):
     # REMOVED_SYNTAX_ERROR: pass
@@ -456,7 +456,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_volume_operation_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark volume operation performance."""
-    # REMOVED_SYNTAX_ERROR: logger.info("💾 Benchmarking volume operation performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Benchmarking volume operation performance")
 
 # REMOVED_SYNTAX_ERROR: def volume_operation(iteration: int):
     # REMOVED_SYNTAX_ERROR: volume_name = 'formatted_string'
@@ -505,7 +505,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_concurrent_container_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test performance of concurrent container operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Testing concurrent container operation performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Testing concurrent container operation performance")
 
 # REMOVED_SYNTAX_ERROR: def concurrent_container_operation(thread_id: int) -> Dict[str, float]:
     # REMOVED_SYNTAX_ERROR: """Perform container operations and return timing data."""
@@ -583,7 +583,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_rate_limiter_performance_impact(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test performance impact of rate limiting."""
-    # REMOVED_SYNTAX_ERROR: logger.info("⏱️ Testing rate limiter performance impact")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+23F1][U+FE0F] Testing rate limiter performance impact")
 
     # REMOVED_SYNTAX_ERROR: rate_limiter_stats_before = performance_profiler.rate_limiter.get_statistics()
 
@@ -628,7 +628,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_memory_usage_during_operations(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test memory usage patterns during Docker operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧠 Testing memory usage during Docker operations")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing memory usage during Docker operations")
 
     # REMOVED_SYNTAX_ERROR: initial_memory = psutil.virtual_memory().used / (1024 * 1024)  # MB
 
@@ -689,7 +689,7 @@
 # REMOVED_SYNTAX_ERROR: def test_performance_under_memory_pressure(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test Docker performance when system is under memory pressure."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🔥 Testing performance under memory pressure")
+    # REMOVED_SYNTAX_ERROR: logger.info(" FIRE:  Testing performance under memory pressure")
 
 # REMOVED_SYNTAX_ERROR: def allocate_memory_pressure():
     # REMOVED_SYNTAX_ERROR: """Allocate memory to create system pressure."""
@@ -759,7 +759,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_bulk_cleanup_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test performance of bulk cleanup operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧹 Testing bulk cleanup performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9F9] Testing bulk cleanup performance")
 
     # Create many resources to clean up
     # REMOVED_SYNTAX_ERROR: containers_to_cleanup = []
@@ -849,7 +849,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_container_creation_throughput_benchmark(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark container creation throughput > 0.5 containers/second."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Benchmarking container creation throughput")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Benchmarking container creation throughput")
 
 # REMOVED_SYNTAX_ERROR: def container_throughput_test(iteration: int):
     # REMOVED_SYNTAX_ERROR: container_name = 'formatted_string'
@@ -878,7 +878,7 @@
 # REMOVED_SYNTAX_ERROR: def test_health_check_latency_benchmark(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark health check latency < 2 seconds."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🏥 Benchmarking health check latency")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3E5] Benchmarking health check latency")
 
     # REMOVED_SYNTAX_ERROR: env_name = "formatted_string"
 
@@ -910,7 +910,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_memory_usage_benchmark(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark memory usage < 500MB per container."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧠 Benchmarking memory usage per container")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Benchmarking memory usage per container")
 
     # REMOVED_SYNTAX_ERROR: container_name = 'formatted_string'
 
@@ -951,7 +951,7 @@
 # REMOVED_SYNTAX_ERROR: def test_alpine_performance_comparison(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark Alpine containers 3x faster than regular."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🏔️ Benchmarking Alpine vs regular container performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3D4][U+FE0F] Benchmarking Alpine vs regular container performance")
 
     # REMOVED_SYNTAX_ERROR: alpine_times = []
     # REMOVED_SYNTAX_ERROR: regular_times = []
@@ -994,7 +994,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_resource_allocation_efficiency(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test efficient resource allocation and deallocation."""
-    # REMOVED_SYNTAX_ERROR: logger.info("⚡ Testing resource allocation efficiency")
+    # REMOVED_SYNTAX_ERROR: logger.info(" LIGHTNING:  Testing resource allocation efficiency")
 
     # REMOVED_SYNTAX_ERROR: initial_containers = len(execute_docker_command(["docker", "ps", "-a", "-q"]).stdout.strip().split(" ))
     # REMOVED_SYNTAX_ERROR: ")) if execute_docker_command(["docker", "ps", "-a", "-q"]).stdout.strip() else 0
@@ -1035,7 +1035,7 @@
                         # REMOVED_SYNTAX_ERROR: deallocation_rate = len(containers_created) / deallocation_time if deallocation_time > 0 else 0
                         # REMOVED_SYNTAX_ERROR: memory_efficiency = abs(final_memory - initial_memory) / len(containers_created) if containers_created else 0
 
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Resource allocation efficiency:")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Resource allocation efficiency:")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -1047,7 +1047,7 @@
 # REMOVED_SYNTAX_ERROR: def test_scalability_limits_identification(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Identify Docker scalability limits under load."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("📈 Identifying Docker scalability limits")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4C8] Identifying Docker scalability limits")
 
     # REMOVED_SYNTAX_ERROR: containers = []
     # REMOVED_SYNTAX_ERROR: max_containers = 0
@@ -1104,7 +1104,7 @@
                         # REMOVED_SYNTAX_ERROR: system_memory = psutil.virtual_memory().percent
                         # REMOVED_SYNTAX_ERROR: system_cpu = psutil.cpu_percent(interval=1)
 
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Scalability analysis:")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Scalability analysis:")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -1127,7 +1127,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_disk_io_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark disk I/O performance in containers."""
-    # REMOVED_SYNTAX_ERROR: logger.info("💾 Benchmarking disk I/O performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Benchmarking disk I/O performance")
 
     # REMOVED_SYNTAX_ERROR: container_name = 'formatted_string'
 
@@ -1173,7 +1173,7 @@
 # REMOVED_SYNTAX_ERROR: def test_network_io_performance(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Benchmark network I/O performance between containers."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🌐 Benchmarking network I/O performance")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F310] Benchmarking network I/O performance")
 
     # REMOVED_SYNTAX_ERROR: network_name = 'formatted_string'
     # REMOVED_SYNTAX_ERROR: server_container = 'formatted_string'
@@ -1222,7 +1222,7 @@
                                 # REMOVED_SYNTAX_ERROR: setup_time = next((m.duration_ms for m in network_metrics if 'setup' in m.operation), 0)
                                 # REMOVED_SYNTAX_ERROR: benchmark_time = next((m.duration_ms for m in network_metrics if 'benchmark' in m.operation), 0)
 
-                                # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Network I/O performance:")
+                                # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Network I/O performance:")
                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
@@ -1236,7 +1236,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_concurrent_operation_throughput(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test throughput of concurrent Docker operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Testing concurrent operation throughput")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Testing concurrent operation throughput")
 
 # REMOVED_SYNTAX_ERROR: def concurrent_operation_batch(batch_id: int) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Execute a batch of concurrent operations."""
@@ -1297,7 +1297,7 @@
 
                                     # REMOVED_SYNTAX_ERROR: avg_batch_time = statistics.mean([r['operations_time'] for r in batch_results]) if batch_results else 0
 
-                                    # REMOVED_SYNTAX_ERROR: logger.info(f"✅ Concurrent operation throughput:")
+                                    # REMOVED_SYNTAX_ERROR: logger.info(f" PASS:  Concurrent operation throughput:")
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -1310,7 +1310,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_recovery_time_from_failures(self, performance_profiler):
     # REMOVED_SYNTAX_ERROR: """Test recovery time from various failure scenarios."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing recovery time from failures")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing recovery time from failures")
 
     # REMOVED_SYNTAX_ERROR: env_name = "formatted_string"
 
@@ -1368,7 +1368,7 @@
                                                 # REMOVED_SYNTAX_ERROR: profiler = DockerPerformanceProfiler()
 
                                                 # REMOVED_SYNTAX_ERROR: try:
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Starting Docker Performance Benchmark Suite...")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting Docker Performance Benchmark Suite...")
 
                                                     # Run core performance tests
                                                     # REMOVED_SYNTAX_ERROR: latency_test = TestDockerOperationLatency()
@@ -1392,13 +1392,13 @@
                                                     # REMOVED_SYNTAX_ERROR: results_file = "formatted_string"
                                                     # REMOVED_SYNTAX_ERROR: profiler.export_results(results_file)
 
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Docker Performance Benchmark Suite completed successfully")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Docker Performance Benchmark Suite completed successfully")
                                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                                     # Print summary
                                                     # REMOVED_SYNTAX_ERROR: if profiler.benchmarks:
                                                         # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                                        # REMOVED_SYNTAX_ERROR: 📈 PERFORMANCE SUMMARY:")
+                                                        # REMOVED_SYNTAX_ERROR: [U+1F4C8] PERFORMANCE SUMMARY:")
                                                         # REMOVED_SYNTAX_ERROR: for benchmark in profiler.benchmarks:
                                                             # REMOVED_SYNTAX_ERROR: if benchmark.summary_stats:
                                                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")

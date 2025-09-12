@@ -13,7 +13,7 @@ Expected Behavior:
 - FAIL: Initially when SSOT constant doesn't exist
 - PASS: After SSOT remediation with centralized SERVICE_ID constant
 
-CRITICAL: This test validates the Golden Path: users login → get AI responses
+CRITICAL: This test validates the Golden Path: users login  ->  get AI responses
 """
 
 import ast

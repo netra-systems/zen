@@ -666,7 +666,7 @@
         # REMOVED_SYNTAX_ERROR: print(f" )
         # REMOVED_SYNTAX_ERROR: Verification strategy results:")
         # REMOVED_SYNTAX_ERROR: for result in state.verification_results:
-            # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result.success else "❌ FAIL"
+            # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -693,7 +693,7 @@
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: else:
                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                # REMOVED_SYNTAX_ERROR: ✅ No specific recommendations - auth verification looks good")
+                                # REMOVED_SYNTAX_ERROR:  PASS:  No specific recommendations - auth verification looks good")
 
                                 # Test should pass to document improved verification
                                 # REMOVED_SYNTAX_ERROR: assert len(state.verification_results) >= 5, "Should test multiple verification strategies"
@@ -776,15 +776,15 @@
                                                         # REMOVED_SYNTAX_ERROR: both_failed = not resilient_result['auth_verified'] and not standard_result['verified']
 
                                                         # REMOVED_SYNTAX_ERROR: if improvement_detected:
-                                                            # REMOVED_SYNTAX_ERROR: print(f"✅ IMPROVEMENT DETECTED: Resilient verification succeeded where standard failed")
+                                                            # REMOVED_SYNTAX_ERROR: print(f" PASS:  IMPROVEMENT DETECTED: Resilient verification succeeded where standard failed")
                                                             # REMOVED_SYNTAX_ERROR: print(f"   This demonstrates the value of multi-strategy verification")
                                                             # REMOVED_SYNTAX_ERROR: elif both_successful:
-                                                                # REMOVED_SYNTAX_ERROR: print(f"✅ BOTH SUCCESSFUL: Auth service is healthy according to both methods")
+                                                                # REMOVED_SYNTAX_ERROR: print(f" PASS:  BOTH SUCCESSFUL: Auth service is healthy according to both methods")
                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: elif both_failed:
-                                                                    # REMOVED_SYNTAX_ERROR: print(f"⚠️  BOTH FAILED: Auth service appears to have genuine issues")
+                                                                    # REMOVED_SYNTAX_ERROR: print(f" WARNING: [U+FE0F]  BOTH FAILED: Auth service appears to have genuine issues")
                                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                                        # REMOVED_SYNTAX_ERROR: print(f"⚠️  UNEXPECTED: Standard succeeded but resilient failed")
+                                                                        # REMOVED_SYNTAX_ERROR: print(f" WARNING: [U+FE0F]  UNEXPECTED: Standard succeeded but resilient failed")
 
                                                                         # Show recommendations if available
                                                                         # REMOVED_SYNTAX_ERROR: recommendations = resilient_result.get('recommendations', [])
@@ -848,7 +848,7 @@
                                         # REMOVED_SYNTAX_ERROR: state = await verifier.comprehensive_auth_verification()
                                         # REMOVED_SYNTAX_ERROR: verification_results.append(state)
 
-                                        # REMOVED_SYNTAX_ERROR: status = "✅ HEALTHY" if state.overall_healthy else "❌ UNHEALTHY"
+                                        # REMOVED_SYNTAX_ERROR: status = " PASS:  HEALTHY" if state.overall_healthy else " FAIL:  UNHEALTHY"
                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                         # Brief delay between rounds

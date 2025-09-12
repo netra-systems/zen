@@ -1,8 +1,8 @@
 """
-🚀 INTEGRATION TEST SUITE: Agent Registry with Real Services (Non-Docker)
+[U+1F680] INTEGRATION TEST SUITE: Agent Registry with Real Services (Non-Docker)
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Protects $500K+ ARR
+- Segment: ALL (Free  ->  Enterprise) - Protects $500K+ ARR
 - Business Goal: Validate agent orchestration works with real backend services
 - Value Impact: Ensures agent registry integrates correctly with WebSocket, database, and tool systems
 - Revenue Impact: Prevents production failures that could lose enterprise customers ($15K+ MRR each)

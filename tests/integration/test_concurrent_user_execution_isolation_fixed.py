@@ -1,7 +1,7 @@
 """Fixed integration tests for concurrent user execution isolation.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)  
+- Segment: ALL (Free  ->  Enterprise)  
 - Business Goal: Concurrent Multi-User Execution Safety
 - Value Impact: Prevents $500K+ ARR loss from user data mixing under concurrent load
 - Strategic Impact: Enables enterprise-scale concurrent user processing with guaranteed isolation

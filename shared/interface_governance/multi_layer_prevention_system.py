@@ -800,7 +800,7 @@ class MultiLayerPreventionSystem:
         if context is None:
             context = {"root_path": Path.cwd()}
         
-        logger.info("🛡️ Running Multi-Layer Prevention System validation...")
+        logger.info("[U+1F6E1][U+FE0F] Running Multi-Layer Prevention System validation...")
         
         results = {}
         overall_status = "PASS"
@@ -833,14 +833,14 @@ class MultiLayerPreventionSystem:
                 
                 # Log layer results
                 if layer_result.status == "PASS":
-                    logger.info(f"✅ Layer {layer.get_layer_id().value}: PASSED")
+                    logger.info(f" PASS:  Layer {layer.get_layer_id().value}: PASSED")
                 elif layer_result.status == "WARN":
-                    logger.warning(f"⚠️ Layer {layer.get_layer_id().value}: WARNINGS ({len(layer_result.warnings)})")
+                    logger.warning(f" WARNING: [U+FE0F] Layer {layer.get_layer_id().value}: WARNINGS ({len(layer_result.warnings)})")
                 else:
-                    logger.error(f"❌ Layer {layer.get_layer_id().value}: FAILED ({len(layer_result.violations)} violations)")
+                    logger.error(f" FAIL:  Layer {layer.get_layer_id().value}: FAILED ({len(layer_result.violations)} violations)")
             
             except Exception as e:
-                logger.error(f"💥 Layer {layer.get_layer_id().value}: EXCEPTION - {e}")
+                logger.error(f"[U+1F4A5] Layer {layer.get_layer_id().value}: EXCEPTION - {e}")
                 results[f"layer_{layer.get_layer_id().value}"] = {
                     "layer_name": layer.get_layer_description(),
                     "status": "FAIL",
@@ -859,7 +859,7 @@ class MultiLayerPreventionSystem:
             "validation_timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        logger.info(f"🎯 Multi-Layer Prevention System Summary:")
+        logger.info(f" TARGET:  Multi-Layer Prevention System Summary:")
         logger.info(f"   Overall Status: {overall_status}")
         logger.info(f"   Violations: {total_violations}")
         logger.info(f"   Warnings: {total_warnings}")
@@ -890,7 +890,7 @@ class MultiLayerPreventionSystem:
         ]
         
         for layer_key, result in layer_results.items():
-            status_emoji = {"PASS": "✅", "WARN": "⚠️", "FAIL": "❌"}.get(result["status"], "❓")
+            status_emoji = {"PASS": " PASS: ", "WARN": " WARNING: [U+FE0F]", "FAIL": " FAIL: "}.get(result["status"], "[U+2753]")
             
             report_lines.extend([
                 f"{status_emoji} {result['layer_name']}",
@@ -902,7 +902,7 @@ class MultiLayerPreventionSystem:
             if result.get("recommendations"):
                 report_lines.append("   Recommendations:")
                 for rec in result["recommendations"][:3]:  # Show first 3
-                    report_lines.append(f"     • {rec}")
+                    report_lines.append(f"     [U+2022] {rec}")
             
             report_lines.append("")
         
@@ -916,11 +916,11 @@ class MultiLayerPreventionSystem:
         
         if critical_violations:
             report_lines.extend([
-                "🚨 CRITICAL VIOLATIONS (ROOT CAUSE PREVENTION):",
+                " ALERT:  CRITICAL VIOLATIONS (ROOT CAUSE PREVENTION):",
                 ""
             ])
             for violation in critical_violations[:10]:  # Show first 10
-                report_lines.append(f"   • {violation.get('type', 'unknown')}: {violation.get('message', '')}")
+                report_lines.append(f"   [U+2022] {violation.get('type', 'unknown')}: {violation.get('message', '')}")
             
             if len(critical_violations) > 10:
                 report_lines.append(f"   ... and {len(critical_violations) - 10} more critical violations")
@@ -930,14 +930,14 @@ class MultiLayerPreventionSystem:
         # Add success metrics
         if summary["overall_status"] == "PASS":
             report_lines.extend([
-                "🎉 SUCCESS: Multi-Layer Prevention System is fully operational!",
+                " CELEBRATION:  SUCCESS: Multi-Layer Prevention System is fully operational!",
                 "",
                 "The Five Whys root cause analysis has been systematically addressed:",
-                "• WHY #1: Clear error messages and diagnostics ✅",
-                "• WHY #2: Parameter name standardization ✅", 
-                "• WHY #3: Factory pattern consistency ✅",
-                "• WHY #4: Interface change management ✅",
-                "• WHY #5: Interface evolution governance ✅",
+                "[U+2022] WHY #1: Clear error messages and diagnostics  PASS: ",
+                "[U+2022] WHY #2: Parameter name standardization  PASS: ", 
+                "[U+2022] WHY #3: Factory pattern consistency  PASS: ",
+                "[U+2022] WHY #4: Interface change management  PASS: ",
+                "[U+2022] WHY #5: Interface evolution governance  PASS: ",
                 ""
             ])
         

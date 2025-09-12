@@ -108,7 +108,7 @@ class TestUserExecutionContextPlaceholderValidationReproduction(SSotBaseTestCase
         
         # The key validation is that the context was created successfully
         # Logging verification is secondary since this module uses loguru which bypasses standard logging
-        print("✅ SUCCESS: 'default_user' is now accepted as a legitimate user ID pattern")
+        print(" PASS:  SUCCESS: 'default_user' is now accepted as a legitimate user ID pattern")
 
     def test_default_pattern_matching_logic(self):
         """

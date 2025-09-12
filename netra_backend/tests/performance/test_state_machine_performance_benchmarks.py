@@ -871,12 +871,12 @@ class StateTransitionPerformanceBenchmark(BaseTestCase):
                 print(f"  P99: {metrics.get('p99_ms', 0):.3f}ms")
             
             if self.sla_violations:
-                print(f"\n⚠️  SLA VIOLATIONS: {len(self.sla_violations)}")
+                print(f"\n WARNING: [U+FE0F]  SLA VIOLATIONS: {len(self.sla_violations)}")
                 for violation in self.sla_violations:
                     print(f"  {violation['test']}: {violation['sla']} "
                           f"(target: {violation['target']}, actual: {violation['actual']})")
             else:
-                print("\n✅ ALL PERFORMANCE SLAS MET")
+                print("\n PASS:  ALL PERFORMANCE SLAS MET")
         
         super().tearDown()
 

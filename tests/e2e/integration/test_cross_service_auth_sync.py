@@ -4,7 +4,7 @@ Cross-Service Auth Synchronization Test - P0 CRITICAL
 Test #3 from CRITICAL_INTEGRATION_TEST_PLAN.md
 
 BVJ (Business Value Justification):
-- Segment: All tiers (Free → Enterprise)
+- Segment: All tiers (Free  ->  Enterprise)
 - Business Goal: Platform Stability via service independence validation
 - Value Impact: Prevents cross-service auth failures that break user experience
 - Strategic Impact: Validates microservice architecture correctness ($500K+ infrastructure investment)
@@ -81,7 +81,7 @@ class CrossServiceAuthValidator:
         result = CrossServiceAuthResult()
         
         try:
-            # Test 1: User login via Auth service → token validation
+            # Test 1: User login via Auth service  ->  token validation
             await self._test_auth_service_token_creation(result)
             
             # Test 2: Token works in Backend service

@@ -257,7 +257,7 @@ from shared.isolated_environment import IsolatedEnvironment
                     # REMOVED_SYNTAX_ERROR: assert matched[0]["id"] == "t1"
 
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: ✓ JSONB simulation: Correctly filtered threads")
+                    # REMOVED_SYNTAX_ERROR: [U+2713] JSONB simulation: Correctly filtered threads")
 
                     # Now test with integer user_id normalization
                     # REMOVED_SYNTAX_ERROR: target_user = "123"
@@ -272,7 +272,7 @@ from shared.isolated_environment import IsolatedEnvironment
                             # REMOVED_SYNTAX_ERROR: assert len(matched) == 1
                             # REMOVED_SYNTAX_ERROR: assert matched[0]["id"] == "t5"
 
-                            # REMOVED_SYNTAX_ERROR: print("✓ JSONB simulation: Integer user_id normalized correctly")
+                            # REMOVED_SYNTAX_ERROR: print("[U+2713] JSONB simulation: Integer user_id normalized correctly")
 
 
                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

@@ -11,12 +11,12 @@ CRITICAL PURPOSE: These tests reproduce the specific production scenarios that b
 existing tests, focusing on the root causes identified in the Five Whys analysis:
 
 ROOT CAUSE REPRODUCTION:
-✅ Thread ID Inconsistency - Multiple components generating different thread IDs
-✅ Cloud Run Container Lifecycle - Cold starts, restarts, connection orphaning  
-✅ Concurrent Same-User Connections - Browser tabs, mobile apps, reconnections
-✅ ID Generation Timing Issues - Race conditions in isolation key creation
-✅ Database Session vs WebSocket Context Mismatch - Different operation strings
-✅ Emergency Cleanup Timing Failures - Background cleanup vs creation rate mismatch
+ PASS:  Thread ID Inconsistency - Multiple components generating different thread IDs
+ PASS:  Cloud Run Container Lifecycle - Cold starts, restarts, connection orphaning  
+ PASS:  Concurrent Same-User Connections - Browser tabs, mobile apps, reconnections
+ PASS:  ID Generation Timing Issues - Race conditions in isolation key creation
+ PASS:  Database Session vs WebSocket Context Mismatch - Different operation strings
+ PASS:  Emergency Cleanup Timing Failures - Background cleanup vs creation rate mismatch
 
 These scenarios were NOT covered in existing tests and represent the real production
 environment conditions causing 20-manager limit crashes.
@@ -114,7 +114,7 @@ class ProductionLeakReproducer:
         generate_user_context_ids() with different operation strings or timing,
         creating isolation key mismatches.
         """
-        logger.info("🌐 PRODUCTION SCENARIO 1: Browser Multi-Tab Pattern")
+        logger.info("[U+1F310] PRODUCTION SCENARIO 1: Browser Multi-Tab Pattern")
         
         baseline_memory = self.capture_memory_snapshot("multi_tab_baseline")
         tab_managers = []
@@ -225,7 +225,7 @@ class ProductionLeakReproducer:
         ROOT CAUSE REPRODUCTION: Background cleanup task may not be started during
         cold start, allowing managers to accumulate rapidly.
         """
-        logger.info("☁️ PRODUCTION SCENARIO 2: Cloud Run Cold Start + Connection Burst")
+        logger.info("[U+2601][U+FE0F] PRODUCTION SCENARIO 2: Cloud Run Cold Start + Connection Burst")
         
         baseline_memory = self.capture_memory_snapshot("cold_start_baseline")
         
@@ -301,7 +301,7 @@ class ProductionLeakReproducer:
         ROOT CAUSE REPRODUCTION: Rapid reconnections may create new managers before
         old ones are cleaned up, especially if isolation keys are inconsistent.
         """
-        logger.info("📶 PRODUCTION SCENARIO 3: Network Reconnection Cycles")
+        logger.info("[U+1F4F6] PRODUCTION SCENARIO 3: Network Reconnection Cycles")
         
         baseline_memory = self.capture_memory_snapshot("reconnection_baseline")
         
@@ -392,7 +392,7 @@ class ProductionLeakReproducer:
         ROOT CAUSE REPRODUCTION: This directly reproduces the thread_id inconsistency
         identified in the Five Whys analysis.
         """
-        logger.info("🔀 PRODUCTION SCENARIO 4: Database + WebSocket Context ID Mismatch")
+        logger.info("[U+1F500] PRODUCTION SCENARIO 4: Database + WebSocket Context ID Mismatch")
         
         baseline_memory = self.capture_memory_snapshot("context_mismatch_baseline")
         
@@ -509,7 +509,7 @@ class ProductionLeakReproducer:
         ROOT CAUSE REPRODUCTION: Tests the timing mismatch between synchronous
         resource limit enforcement and asynchronous background cleanup.
         """
-        logger.info("⚡ PRODUCTION SCENARIO 5: Background Cleanup vs Creation Rate Race")
+        logger.info(" LIGHTNING:  PRODUCTION SCENARIO 5: Background Cleanup vs Creation Rate Race")
         
         baseline_memory = self.capture_memory_snapshot("cleanup_race_baseline")
         
@@ -652,7 +652,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         Reproduces the exact pattern where multiple browser tabs create
         WebSocket managers with inconsistent thread_ids, preventing cleanup.
         """
-        logger.info("🌐 TESTING: Browser Multi-Tab Resource Leak Pattern")
+        logger.info("[U+1F310] TESTING: Browser Multi-Tab Resource Leak Pattern")
         
         result = await self.leak_reproducer.simulate_browser_multi_tab_pattern(
             self.factory, 
@@ -667,7 +667,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         
         # Check for thread_id consistency issues (production problem reproduction)
         if not result['thread_id_consistency']:
-            logger.warning("⚠️ Thread ID inconsistency detected - reproducing production issue")
+            logger.warning(" WARNING: [U+FE0F] Thread ID inconsistency detected - reproducing production issue")
         
         # Check for memory growth (leak indicator)
         assert result['memory_growth_mb'] < 100, f"Excessive memory growth: {result['memory_growth_mb']:.2f}MB"
@@ -676,7 +676,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         remaining_managers = self.factory.get_factory_stats()['factory_metrics']['managers_active']
         assert remaining_managers <= 8, f"Too many managers remaining: {remaining_managers}"
         
-        logger.info(f"✅ Multi-tab test completed: {result}")
+        logger.info(f" PASS:  Multi-tab test completed: {result}")
     
     @pytest.mark.asyncio
     async def test_cloud_run_cold_start_burst_reproduction(self):
@@ -686,7 +686,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         Reproduces GCP Cloud Run cold start followed by connection burst
         that overwhelms background cleanup before it starts.
         """
-        logger.info("☁️ TESTING: Cloud Run Cold Start Connection Burst")
+        logger.info("[U+2601][U+FE0F] TESTING: Cloud Run Cold Start Connection Burst")
         
         result = await self.leak_reproducer.simulate_cloud_run_cold_start_burst(
             self.factory,
@@ -710,7 +710,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         # Memory growth should be reasonable
         assert result['memory_growth_mb'] < 150, f"Excessive memory growth: {result['memory_growth_mb']:.2f}MB"
         
-        logger.info(f"✅ Cold start burst test completed: {result}")
+        logger.info(f" PASS:  Cold start burst test completed: {result}")
     
     @pytest.mark.asyncio
     async def test_network_reconnection_cycles_reproduction(self):
@@ -720,7 +720,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         Reproduces unstable network causing rapid reconnection cycles
         that may create isolation key conflicts.
         """
-        logger.info("📶 TESTING: Network Reconnection Cycles")
+        logger.info("[U+1F4F6] TESTING: Network Reconnection Cycles")
         
         result = await self.leak_reproducer.simulate_network_reconnection_cycles(
             self.factory,
@@ -735,7 +735,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         
         # Check for isolation key conflicts (production issue reproduction)
         if result['isolation_key_conflicts'] > 0:
-            logger.warning(f"⚠️ Isolation key conflicts detected: {result['isolation_key_conflicts']}")
+            logger.warning(f" WARNING: [U+FE0F] Isolation key conflicts detected: {result['isolation_key_conflicts']}")
         
         # Should not have excessive remaining managers (leak indicator)
         assert not result['leak_detected'], f"Resource leak detected: {result['active_managers_remaining']} managers remaining"
@@ -746,7 +746,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         # Memory growth should be reasonable
         assert result['memory_growth_mb'] < 75, f"Excessive memory growth: {result['memory_growth_mb']:.2f}MB"
         
-        logger.info(f"✅ Reconnection cycles test completed: {result}")
+        logger.info(f" PASS:  Reconnection cycles test completed: {result}")
     
     @pytest.mark.asyncio
     async def test_database_websocket_context_mismatch_reproduction(self):
@@ -757,7 +757,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         the Five Whys analysis where different components generate different
         thread_ids for the same user context.
         """
-        logger.info("🔀 TESTING: Database + WebSocket Context ID Mismatch")
+        logger.info("[U+1F500] TESTING: Database + WebSocket Context ID Mismatch")
         
         result = await self.leak_reproducer.simulate_database_websocket_context_mismatch(
             self.factory,
@@ -775,20 +775,20 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         # In current system, mismatches are expected due to different operation strings
         # This test validates the problem exists and will validate fixes
         if result['thread_id_mismatches'] > 0:
-            logger.warning(f"⚠️ REPRODUCING PRODUCTION ISSUE: {result['thread_id_mismatches']} thread_id mismatches")
+            logger.warning(f" WARNING: [U+FE0F] REPRODUCING PRODUCTION ISSUE: {result['thread_id_mismatches']} thread_id mismatches")
         
         # Check for resulting cleanup failures
         if result['cleanup_failures'] > 0:
-            logger.warning(f"⚠️ REPRODUCING PRODUCTION ISSUE: {result['cleanup_failures']} cleanup failures")
+            logger.warning(f" WARNING: [U+FE0F] REPRODUCING PRODUCTION ISSUE: {result['cleanup_failures']} cleanup failures")
         
         # Memory growth should be reasonable
         assert result['memory_growth_mb'] < 50, f"Excessive memory growth: {result['memory_growth_mb']:.2f}MB"
         
         # Should detect leak evidence if mismatches cause cleanup failures
         if result['leak_evidence_count'] > 0:
-            logger.warning(f"⚠️ LEAK EVIDENCE FOUND: {result['leak_evidence_count']} instances")
+            logger.warning(f" WARNING: [U+FE0F] LEAK EVIDENCE FOUND: {result['leak_evidence_count']} instances")
         
-        logger.info(f"✅ Context mismatch test completed: {result}")
+        logger.info(f" PASS:  Context mismatch test completed: {result}")
     
     @pytest.mark.asyncio
     async def test_background_cleanup_race_condition_reproduction(self):
@@ -798,7 +798,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         Reproduces the timing mismatch where managers are created faster
         than background cleanup can remove them.
         """
-        logger.info("⚡ TESTING: Background Cleanup vs Creation Rate Race")
+        logger.info(" LIGHTNING:  TESTING: Background Cleanup vs Creation Rate Race")
         
         result = await self.leak_reproducer.simulate_background_cleanup_race_condition(
             self.factory,
@@ -815,7 +815,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         
         # May hit resource limit during race condition (expected behavior)
         if result['creation_failures'] > 0:
-            logger.warning(f"⚠️ REPRODUCING PRODUCTION ISSUE: Hit resource limit after {result['creation_failures']} failures")
+            logger.warning(f" WARNING: [U+FE0F] REPRODUCING PRODUCTION ISSUE: Hit resource limit after {result['creation_failures']} failures")
         
         # Emergency cleanup should be effective
         if result['emergency_cleanup_count'] > 0:
@@ -827,7 +827,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         # Memory growth should be reasonable
         assert result['memory_growth_mb'] < 100, f"Excessive memory growth: {result['memory_growth_mb']:.2f}MB"
         
-        logger.info(f"✅ Cleanup race test completed: {result}")
+        logger.info(f" PASS:  Cleanup race test completed: {result}")
     
     @pytest.mark.asyncio
     async def test_comprehensive_production_leak_scenarios_integration(self):
@@ -837,7 +837,7 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         Runs all production leak scenarios in sequence to test cumulative
         effects and overall system stability.
         """
-        logger.info("🔥 COMPREHENSIVE INTEGRATION: All Production Leak Scenarios")
+        logger.info(" FIRE:  COMPREHENSIVE INTEGRATION: All Production Leak Scenarios")
         
         initial_memory = self.leak_reproducer.capture_memory_snapshot("integration_start")
         
@@ -891,8 +891,8 @@ class TestWebSocketProductionLeakScenarios(SSotAsyncTestCase):
         total_remaining_managers = final_stats['factory_metrics']['managers_active']
         assert total_remaining_managers <= 15, f"Too many managers remaining: {total_remaining_managers}"
         
-        logger.info(f"✅ Comprehensive integration test completed")
-        logger.info(f"📊 FINAL ANALYSIS: {leak_analysis}")
+        logger.info(f" PASS:  Comprehensive integration test completed")
+        logger.info(f" CHART:  FINAL ANALYSIS: {leak_analysis}")
         
         # Store comprehensive results
         self.leak_reproducer.scenario_results['comprehensive_integration'] = {

@@ -14,9 +14,9 @@ CRITICAL REQUIREMENTS per CLAUDE.md:
 5. Agent execution context management and user session preservation
 6. Agent execution error handling and recovery scenarios
 7. Agent execution timeout and cancellation mechanisms
-8. Cross-service coordination (backend ↔ agents)
+8. Cross-service coordination (backend [U+2194] agents)
 9. Agent execution performance monitoring and resource tracking
-10. Business-critical workflows: triage → data → optimization
+10. Business-critical workflows: triage  ->  data  ->  optimization
 
 FAILURE CONDITIONS:
 - Any mocked agent execution = ARCHITECTURAL VIOLATION
@@ -1007,7 +1007,7 @@ class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
             engine.AGENT_EXECUTION_TIMEOUT = original_timeout
     
     # ============================================================================
-    # TEST 7: Cross-Service Agent Execution Coordination (Backend ↔ Agents)
+    # TEST 7: Cross-Service Agent Execution Coordination (Backend [U+2194] Agents)
     # ============================================================================
     
     @pytest.mark.integration 
@@ -1026,7 +1026,7 @@ class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
         # Test coordination with multiple service interactions
         coordination_results = []
         
-        # Simulate backend → agent coordination
+        # Simulate backend  ->  agent coordination
         backend_requests = [
             {"agent": "triage_agent", "service_request": "user_classification"},
             {"agent": "data_agent", "service_request": "data_analysis"},
@@ -1327,7 +1327,7 @@ class TestExecutionEngineComprehensiveRealServices(SSotAsyncTestCase):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_business_critical_agent_execution_workflows(self, agent_registry, websocket_bridge):
-        """Test business-critical workflows: triage → data → optimization.
+        """Test business-critical workflows: triage  ->  data  ->  optimization.
         
         BVJ: Validates core business value - the complete workflow that delivers $500K+ ARR.
         """

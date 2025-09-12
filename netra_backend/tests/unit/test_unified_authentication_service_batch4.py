@@ -782,7 +782,7 @@ class TestUnifiedAuthenticationServiceErrorHandling(SSotAsyncTestCase):
             "valid_token\x00malicious_part",
             
             # Unicode attacks
-            "𝕒𝕕𝕞𝕚𝕟",
+            "[U+1D552][U+1D555][U+1D55E][U+1D55A][U+1D55F]",
             
             # Algorithm confusion
             "eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdWIiOiJhZG1pbiIsImFkbWluIjp0cnVlfQ.",

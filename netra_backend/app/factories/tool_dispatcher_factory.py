@@ -57,9 +57,9 @@ class ToolDispatcherFactory:
     """SSOT Factory for all tool dispatcher creation patterns.
     
     This factory consolidates all previous factory implementations:
-    - UnifiedToolDispatcherFactory → ToolDispatcherFactory
-    - ToolExecutorFactory → ToolDispatcherFactory  
-    - Legacy factory methods → ToolDispatcherFactory
+    - UnifiedToolDispatcherFactory  ->  ToolDispatcherFactory
+    - ToolExecutorFactory  ->  ToolDispatcherFactory  
+    - Legacy factory methods  ->  ToolDispatcherFactory
     
     Key Design Principles:
     - RequestScopedToolDispatcher as the SSOT implementation
@@ -101,7 +101,7 @@ class ToolDispatcherFactory:
             'last_creation_time': None
         }
         
-        logger.info(f"🏭✅ SSOT ToolDispatcherFactory {self.factory_id} initialized - consolidating 4 competing implementations")
+        logger.info(f"[U+1F3ED] PASS:  SSOT ToolDispatcherFactory {self.factory_id} initialized - consolidating 4 competing implementations")
     
     # ===================== PHASE 2A: SSOT FACTORY INTERFACE =====================
     
@@ -152,7 +152,7 @@ class ToolDispatcherFactory:
                 )
                 dispatcher.websocket_emitter = websocket_emitter
                 self._metrics['websocket_events_enabled'] += 1
-                logger.debug(f"🔌 Enabled WebSocket events for {user_context.get_correlation_id()}")
+                logger.debug(f"[U+1F50C] Enabled WebSocket events for {user_context.get_correlation_id()}")
             
             # Update consolidated metrics
             creation_time_ms = (time.time() - start_time) * 1000
@@ -161,12 +161,12 @@ class ToolDispatcherFactory:
             self._metrics['last_creation_time'] = datetime.now(timezone.utc)
             
             # Estimate memory optimization from factory consolidation
-            # Previous pattern: 4 factory instances + overhead ≈ 2KB per dispatcher
-            # Current pattern: 1 SSOT factory ≈ 0.5KB per dispatcher  
+            # Previous pattern: 4 factory instances + overhead [U+2248] 2KB per dispatcher
+            # Current pattern: 1 SSOT factory [U+2248] 0.5KB per dispatcher  
             self._metrics['memory_optimization_bytes'] += 1536  # ~1.5KB saved per dispatcher
             
             logger.info(
-                f"🏭✅ Created SSOT RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
+                f"[U+1F3ED] PASS:  Created SSOT RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
                 f"in {creation_time_ms:.1f}ms (WebSocket: {'enabled' if ws_manager else 'disabled'})"
             )
             
@@ -174,7 +174,7 @@ class ToolDispatcherFactory:
             
         except Exception as e:
             self._metrics['failed_creations'] += 1
-            logger.error(f"🚨 SSOT factory creation failed for {user_context.get_correlation_id()}: {e}")
+            logger.error(f" ALERT:  SSOT factory creation failed for {user_context.get_correlation_id()}: {e}")
             raise ValueError(f"Failed to create SSOT tool dispatcher: {e}")
     
     @asynccontextmanager
@@ -204,13 +204,13 @@ class ToolDispatcherFactory:
         dispatcher = None
         try:
             dispatcher = await self.create_for_request(user_context, tools, websocket_manager)
-            logger.debug(f"📦 SSOT SCOPED: {user_context.get_correlation_id()} created with auto-cleanup")
+            logger.debug(f"[U+1F4E6] SSOT SCOPED: {user_context.get_correlation_id()} created with auto-cleanup")
             yield dispatcher
         finally:
             if dispatcher:
                 await dispatcher.cleanup()
                 self._metrics['active_instances'] -= 1
-                logger.debug(f"📦 SSOT SCOPED: {user_context.get_correlation_id()} disposed")
+                logger.debug(f"[U+1F4E6] SSOT SCOPED: {user_context.get_correlation_id()} disposed")
     
     # ===================== PHASE 2A: BACKWARD COMPATIBILITY METHODS =====================
     
@@ -247,7 +247,7 @@ class ToolDispatcherFactory:
         self._metrics['unified_redirects'] += 1
         
         logger.warning(
-            f"🔄 DEPRECATED: create_for_user() → create_for_request() "
+            f" CYCLE:  DEPRECATED: create_for_user()  ->  create_for_request() "
             f"for user {user_context.user_id} (SSOT consolidation)"
         )
         
@@ -265,7 +265,7 @@ class ToolDispatcherFactory:
         # TODO: Handle enable_admin_tools parameter in future phase
         if enable_admin_tools:
             logger.warning(
-                f"⚠️ Admin tools requested but not yet supported in SSOT factory. "
+                f" WARNING: [U+FE0F] Admin tools requested but not yet supported in SSOT factory. "
                 f"This will be implemented in Phase 3 of consolidation."
             )
         
@@ -312,7 +312,7 @@ class ToolDispatcherFactory:
         self._metrics['executor_redirects'] += 1
         
         logger.warning(
-            f"🔄 DEPRECATED: create_tool_executor() → create_for_request() "
+            f" CYCLE:  DEPRECATED: create_tool_executor()  ->  create_for_request() "
             f"for user {user_context.user_id} (SSOT consolidation)"
         )
         
@@ -354,7 +354,7 @@ class ToolDispatcherFactory:
         self._metrics['executor_redirects'] += 1
         
         logger.warning(
-            f"🔄 DEPRECATED: create_request_scoped_dispatcher() → create_for_request() "
+            f" CYCLE:  DEPRECATED: create_request_scoped_dispatcher()  ->  create_for_request() "
             f"for user {user_context.user_id} (SSOT consolidation)"
         )
         
@@ -395,7 +395,7 @@ class ToolDispatcherFactory:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolDispatcher.create_request_scoped_dispatcher() → "
+            f" CYCLE:  DEPRECATED: ToolDispatcher.create_request_scoped_dispatcher()  ->  "
             f"ToolDispatcherFactory.create_for_request() for user {user_context.user_id}"
         )
         
@@ -438,7 +438,7 @@ class ToolDispatcherFactory:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolDispatcher.create_scoped_dispatcher_context() → "
+            f" CYCLE:  DEPRECATED: ToolDispatcher.create_scoped_dispatcher_context()  ->  "
             f"ToolDispatcherFactory.create_scoped() for user {user_context.user_id}"
         )
         
@@ -472,7 +472,7 @@ class ToolDispatcherFactory:
                 self._is_active = dispatcher._is_active
                 self.strategy = "default"  # Default strategy
                 
-                logger.debug(f"🎭 Created UnifiedCompatibilityWrapper for {dispatcher.dispatcher_id}")
+                logger.debug(f"[U+1F3AD] Created UnifiedCompatibilityWrapper for {dispatcher.dispatcher_id}")
             
             @property
             def tools(self):
@@ -515,7 +515,7 @@ class ToolDispatcherFactory:
             async def cleanup(self):
                 """Clean up the wrapped dispatcher."""
                 await self._dispatcher.cleanup()
-                logger.debug(f"🎭 Cleaned up UnifiedCompatibilityWrapper for {self.dispatcher_id}")
+                logger.debug(f"[U+1F3AD] Cleaned up UnifiedCompatibilityWrapper for {self.dispatcher_id}")
         
         return UnifiedCompatibilityWrapper(dispatcher, websocket_bridge)
     
@@ -528,7 +528,7 @@ class ToolDispatcherFactory:
             websocket_manager: WebSocket manager to use as default
         """
         self.websocket_manager = websocket_manager
-        logger.info(f"🔌 Set WebSocket manager for SSOT ToolDispatcherFactory {self.factory_id}")
+        logger.info(f"[U+1F50C] Set WebSocket manager for SSOT ToolDispatcherFactory {self.factory_id}")
     
     # ===================== METRICS AND MONITORING =====================
     
@@ -619,7 +619,7 @@ class ToolDispatcherFactory:
             # Check for memory optimization effectiveness
             if self._metrics['memory_optimization_bytes'] > 0:
                 optimization_mb = self._metrics['memory_optimization_bytes'] / (1024 * 1024)
-                logger.info(f"📊 SSOT factory has optimized {optimization_mb:.2f} MB through consolidation")
+                logger.info(f" CHART:  SSOT factory has optimized {optimization_mb:.2f} MB through consolidation")
             
             # Check deprecation warning rate (should decrease over time)
             deprecation_rate = health_status['factory_metrics']['deprecation_warnings_rate']
@@ -649,8 +649,8 @@ def get_tool_dispatcher_factory() -> ToolDispatcherFactory:
     """Get the global SSOT ToolDispatcherFactory instance.
     
     This replaces all previous factory getter functions:
-    - get_tool_executor_factory() → get_tool_dispatcher_factory()
-    - Scattered factory creation patterns → get_tool_dispatcher_factory()
+    - get_tool_executor_factory()  ->  get_tool_dispatcher_factory()
+    - Scattered factory creation patterns  ->  get_tool_dispatcher_factory()
     
     Returns:
         ToolDispatcherFactory: Global SSOT factory instance
@@ -658,7 +658,7 @@ def get_tool_dispatcher_factory() -> ToolDispatcherFactory:
     global _global_tool_dispatcher_factory
     if _global_tool_dispatcher_factory is None:
         _global_tool_dispatcher_factory = ToolDispatcherFactory()
-        logger.info("🏭✅ Created global SSOT ToolDispatcherFactory instance")
+        logger.info("[U+1F3ED] PASS:  Created global SSOT ToolDispatcherFactory instance")
     return _global_tool_dispatcher_factory
 
 

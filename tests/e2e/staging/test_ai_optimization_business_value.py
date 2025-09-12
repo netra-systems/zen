@@ -87,7 +87,7 @@ class TestAIOptimizationBusinessValue:
         )
         
         if authenticated_user and authenticated_user.jwt_token:
-            logger.info(f"✓ Generated SSOT staging JWT token for user {user_id}")
+            logger.info(f"[U+2713] Generated SSOT staging JWT token for user {user_id}")
             return authenticated_user.jwt_token
         
         # If SSOT authentication fails, raise clear error
@@ -109,7 +109,7 @@ class TestAIOptimizationBusinessValue:
         if not connected:
             raise RuntimeError(f"Failed to establish WebSocket connection to staging for user {user_id}")
         
-        logger.info(f"✓ WebSocket connected successfully for user {user_id}")
+        logger.info(f"[U+2713] WebSocket connected successfully for user {user_id}")
         return client
 
     async def _verify_backend_health(self, max_retries: int = 3) -> bool:
@@ -270,9 +270,9 @@ class TestAIOptimizationBusinessValue:
         has_business_value = indicator_count >= 2
         
         if has_business_value:
-            logger.info(f"✓ Business value verified with {indicator_count} indicators")
+            logger.info(f"[U+2713] Business value verified with {indicator_count} indicators")
         else:
-            logger.warning(f"✗ Insufficient business value indicators: {indicator_count}/2")
+            logger.warning(f"[U+2717] Insufficient business value indicators: {indicator_count}/2")
         
         return has_business_value
 
@@ -1048,5 +1048,5 @@ class TestAIOptimizationBusinessValue:
             word_count = len(response_text.split())
             assert word_count > 100, f"Comprehensive analysis too brief ({word_count} words)"
             
-            logger.info(f"✓ Full pipeline cost analysis completed with {word_count} words, "
+            logger.info(f"[U+2713] Full pipeline cost analysis completed with {word_count} words, "
                        f"{financial_count} financial indicators, {roadmap_count} roadmap elements")

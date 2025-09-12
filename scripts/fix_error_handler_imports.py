@@ -139,7 +139,7 @@ def fix_imports_in_file(file_path: Path) -> Tuple[bool, List[str]]:
 
 def main():
     """Main execution function."""
-    print("🔧 CRITICAL: Starting Error Handler Import Consolidation...")
+    print("[U+1F527] CRITICAL: Starting Error Handler Import Consolidation...")
     print(f"Processing directory: {NETRA_BACKEND_DIR}")
     
     # Find all Python files
@@ -156,42 +156,42 @@ def main():
         if was_modified:
             total_modified += 1
             relative_path = file_path.relative_to(BASE_DIR)
-            print(f"✅ Fixed imports in: {relative_path}")
+            print(f" PASS:  Fixed imports in: {relative_path}")
             
             for change in changes:
                 print(f"   - {change}")
                 all_changes.append(f"{relative_path}: {change}")
     
-    print(f"\n🎯 CONSOLIDATION COMPLETE!")
-    print(f"📊 Statistics:")
+    print(f"\n TARGET:  CONSOLIDATION COMPLETE!")
+    print(f" CHART:  Statistics:")
     print(f"   - Files processed: {len(python_files)}")
     print(f"   - Files modified: {total_modified}")
     print(f"   - Total import fixes: {len(all_changes)}")
     
     if total_modified > 0:
-        print(f"\n📋 Summary of all changes:")
+        print(f"\n[U+1F4CB] Summary of all changes:")
         for change in all_changes[:20]:  # Show first 20 changes
             print(f"   - {change}")
         if len(all_changes) > 20:
             print(f"   ... and {len(all_changes) - 20} more changes")
     
     # Final validation
-    print(f"\n🔍 Running import validation...")
+    print(f"\n SEARCH:  Running import validation...")
     try:
         import subprocess
         result = subprocess.run([
             "python", "-c", 
-            "from netra_backend.app.core.unified_error_handler import api_error_handler, agent_error_handler, websocket_error_handler; print('✅ All imports working!')"
+            "from netra_backend.app.core.unified_error_handler import api_error_handler, agent_error_handler, websocket_error_handler; print(' PASS:  All imports working!')"
         ], capture_output=True, text=True, cwd=str(BASE_DIR))
         
         if result.returncode == 0:
-            print("✅ Import validation successful!")
+            print(" PASS:  Import validation successful!")
         else:
-            print(f"❌ Import validation failed: {result.stderr}")
+            print(f" FAIL:  Import validation failed: {result.stderr}")
     except Exception as e:
-        print(f"⚠️  Could not run import validation: {e}")
+        print(f" WARNING: [U+FE0F]  Could not run import validation: {e}")
     
-    print("\n🎯 Error Handler SSOT Consolidation Complete!")
+    print("\n TARGET:  Error Handler SSOT Consolidation Complete!")
 
 if __name__ == "__main__":
     main()

@@ -114,7 +114,7 @@ class TestAgentOrchestratorAccessIntegrationIssue118:
             
             # CRITICAL ASSERTION: Must never be None (Issue #118 root cause)
             assert orchestrator is not None, \
-                f"🚨 CRITICAL FAILURE: Agent service got None orchestrator for {agent_type} - Issue #118 regression!"
+                f" ALERT:  CRITICAL FAILURE: Agent service got None orchestrator for {agent_type} - Issue #118 regression!"
             
             # Validate orchestrator is functional for agent execution
             exec_context, notifier = await orchestrator.create_execution_context(
@@ -252,7 +252,7 @@ class TestAgentOrchestratorAccessIntegrationIssue118:
                 
                 # CRITICAL: No shared orchestrator instances between users
                 assert orchestrator_i is not orchestrator_j, \
-                    f"🚨 ISOLATION VIOLATION: Users {user_i['user_id']} and {user_j['user_id']} share orchestrator instance"
+                    f" ALERT:  ISOLATION VIOLATION: Users {user_i['user_id']} and {user_j['user_id']} share orchestrator instance"
                 
                 # Validate user contexts properly isolated
                 assert orchestrator_i.user_context.user_id != orchestrator_j.user_context.user_id, \
@@ -531,10 +531,10 @@ class TestAgentOrchestratorAccessIntegrationIssue118:
         
         # CRITICAL: Original Issue #118 error must NOT occur
         assert not original_error_occurred, \
-            "🚨 REGRESSION DETECTED: Issue #118 error pattern returned - orchestrator None access!"
+            " ALERT:  REGRESSION DETECTED: Issue #118 error pattern returned - orchestrator None access!"
         
         assert orchestrator is not None, \
-            "🚨 REGRESSION: Orchestrator factory returned None - Issue #118 root cause reintroduced!"
+            " ALERT:  REGRESSION: Orchestrator factory returned None - Issue #118 root cause reintroduced!"
         
         # Validate complete execution pipeline still works
         exec_context, notifier = await orchestrator.create_execution_context(

@@ -20,7 +20,7 @@ CRITICAL TESTING REQUIREMENT:
 - Tests MUST initially FAIL to demonstrate current SSOT violations
 - Tests pass after successful SSOT consolidation
 
-🚀 GOLDEN PATH REFERENCE:
+[U+1F680] GOLDEN PATH REFERENCE:
 See docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md for complete user journey analysis
 """
 

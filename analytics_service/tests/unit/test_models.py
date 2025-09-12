@@ -502,7 +502,7 @@ class TestEdgeCases:
             "thread_id": "thread-unicode",
             "message_id": "msg-unicode",
             "message_type": "user_prompt",
-            "prompt_text": "¿Cómo puedo optimizar los costos de IA? 🤖💰",
+            "prompt_text": "[U+00BF]C[U+00F3]mo puedo optimizar los costos de IA? [U+1F916][U+1F4B0]",
             "prompt_length": 42,
             "is_follow_up": False
         }
@@ -519,7 +519,7 @@ class TestEdgeCases:
         
         event = EventModel(**event_data)
         parsed_props = json.loads(event.properties)
-        assert "🤖💰" in parsed_props["prompt_text"]
+        assert "[U+1F916][U+1F4B0]" in parsed_props["prompt_text"]
     
     def test_large_property_values(self):
         """Test handling of large property values"""

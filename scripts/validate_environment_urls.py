@@ -294,7 +294,7 @@ def print_validation_report(report: ValidationReport) -> None:
     print(f"ENVIRONMENT URL VALIDATION REPORT")
     print(f"{'='*60}")
     print(f"Environment: {report.environment.upper()}")
-    print(f"Result: {'✅ PASS' if report.success else '❌ FAIL'}")
+    print(f"Result: {' PASS:  PASS' if report.success else ' FAIL:  FAIL'}")
     print(f"Summary: {report.summary}")
     
     if report.issues:
@@ -303,9 +303,9 @@ def print_validation_report(report: ValidationReport) -> None:
         
         for i, issue in enumerate(report.issues, 1):
             severity_icon = {
-                ValidationResult.SUCCESS: "✅",
-                ValidationResult.WARNING: "⚠️", 
-                ValidationResult.FAILURE: "❌"
+                ValidationResult.SUCCESS: " PASS: ",
+                ValidationResult.WARNING: " WARNING: [U+FE0F]", 
+                ValidationResult.FAILURE: " FAIL: "
             }[issue.severity]
             
             print(f"{i}. {severity_icon} {issue.severity.value.upper()}")
@@ -315,7 +315,7 @@ def print_validation_report(report: ValidationReport) -> None:
             print(f"   Message: {issue.message}")
             print()
     else:
-        print("\n✅ No issues found!")
+        print("\n PASS:  No issues found!")
         
     print(f"{'='*60}")
 
@@ -376,7 +376,7 @@ specifically preventing localhost URLs from being used in staging/production env
         sys.exit(0 if report.success else 1)
         
     except Exception as e:
-        print(f"❌ ERROR: {e}", file=sys.stderr)
+        print(f" FAIL:  ERROR: {e}", file=sys.stderr)
         sys.exit(1)
 
 

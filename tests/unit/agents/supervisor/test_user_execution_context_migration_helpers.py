@@ -481,7 +481,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log migration success
         self.test_logger.info(
-            f"✅ MINIMAL MIGRATION: Mock-to-Context pattern validated: "
+            f" PASS:  MINIMAL MIGRATION: Mock-to-Context pattern validated: "
             f"user_id={real_context.user_id}, security_improvements={len(pattern.security_benefits)}"
         )
 
@@ -526,7 +526,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log WebSocket migration success
         self.test_logger.info(
-            f"✅ WEBSOCKET MIGRATION: Mock WebSocket migrated to real context: "
+            f" PASS:  WEBSOCKET MIGRATION: Mock WebSocket migrated to real context: "
             f"ws_client_id={ws_context.websocket_client_id}, improvements={len(comparison)}"
         )
 
@@ -558,7 +558,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log agent migration success
         self.test_logger.info(
-            f"✅ AGENT MIGRATION: Mock agent migrated to real context: "
+            f" PASS:  AGENT MIGRATION: Mock agent migrated to real context: "
             f"agent={agent_context.agent_context['agent_name']}, config_keys={len(agent_context.agent_context)}"
         )
 
@@ -608,7 +608,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log multi-user migration success
         self.test_logger.info(
-            f"✅ MULTI-USER MIGRATION: {len(user_contexts)} isolated contexts created: "
+            f" PASS:  MULTI-USER MIGRATION: {len(user_contexts)} isolated contexts created: "
             f"unique_users={len(set(user_ids))}, isolation_validated=True"
         )
 
@@ -648,7 +648,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log error migration success
         self.test_logger.info(
-            f"✅ ERROR MIGRATION: Mock error migrated to real context: "
+            f" PASS:  ERROR MIGRATION: Mock error migrated to real context: "
             f"error_type={error_context.agent_context['expected_error_type']}, secure=True"
         )
 
@@ -702,7 +702,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
             
         # Log complete workflow success
         self.test_logger.info(
-            f"✅ COMPLETE MIGRATION WORKFLOW: Mock-to-Context workflow validated: "
+            f" PASS:  COMPLETE MIGRATION WORKFLOW: Mock-to-Context workflow validated: "
             f"execution_success={result.success}, security_validated=True, "
             f"context_type={type(migrated_context).__name__}"
         )
@@ -751,7 +751,7 @@ class TestUserExecutionContextMigrationHelpers(SSotAsyncTestCase):
         
         # Log migration documentation
         self.test_logger.info(
-            f"✅ MIGRATION DOCUMENTATION: Complete guide generated: "
+            f" PASS:  MIGRATION DOCUMENTATION: Complete guide generated: "
             f"patterns={migration_guide['total_patterns']}, "
             f"factory_methods={len(migration_guide['factory_methods'])}, "
             f"security_improvements={len(migration_guide['security_improvements'])}"

@@ -111,7 +111,7 @@ class TestConfigRegressionPreventionAlgorithms(BaseTestCase):
             
         # Test regression: HTTPS becomes HTTP (security downgrade)
         http_downgrade = baseline_urls.copy()
-        http_downgrade["NEXT_PUBLIC_API_URL"] = "http://api.staging.netrasystems.ai"  # HTTPS → HTTP regression
+        http_downgrade["NEXT_PUBLIC_API_URL"] = "http://api.staging.netrasystems.ai"  # HTTPS  ->  HTTP regression
         
         result = self.validator.validate_url_regression(baseline_urls, http_downgrade)
         assert not result.is_valid, "HTTPS to HTTP downgrade should be prevented"

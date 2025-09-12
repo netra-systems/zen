@@ -10,7 +10,7 @@ AGENT 17: Extended User Journey Tests - OAuth and Advanced Flows
 Extends the base user journey tests with OAuth authentication flows,
 real WebSocket testing, and comprehensive data consistency validation.
 
-ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
+ARCHITECTURE COMPLIANCE:  <= 300 lines, functions  <= 8 lines, modular design
 """
 
 import asyncio
@@ -51,7 +51,7 @@ class OAuthLoginJourneyTest(JourneyTestBase):
     async def test_oauth_login_journey(self) -> JourneyTestResult:
         """
         BVJ: OAuth login = Enterprise customer requirement
-        Test OAuth provider → callback → user creation → dashboard redirect
+        Test OAuth provider  ->  callback  ->  user creation  ->  dashboard redirect
         """
         result = await self.setup_journey("oauth_login")
         start_time = time.time()
@@ -209,7 +209,7 @@ class RealWebSocketJourneyTest(JourneyTestBase):
     async def test_real_websocket_journey(self) -> JourneyTestResult:
         """
         BVJ: WebSocket reliability = core product functionality
-        Test actual WebSocket connection → authentication → real message flow
+        Test actual WebSocket connection  ->  authentication  ->  real message flow
         """
         result = await self.setup_journey("real_websocket")
         start_time = time.time()

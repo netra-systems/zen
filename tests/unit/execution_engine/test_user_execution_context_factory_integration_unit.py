@@ -7,7 +7,7 @@ ExecutionEngineFactory, ensuring proper context validation, immutability enforce
 and factory cleanup integration.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - affects every user request
+- Segment: ALL (Free  ->  Enterprise) - affects every user request
 - Business Goal: Stability/Security - ensures proper context isolation and validation
 - Value Impact: Guarantees request isolation and prevents context corruption
 - Revenue Impact: Prevents data corruption bugs that could cause system instability
@@ -853,7 +853,7 @@ class TestUserExecutionContextFactoryIntegrationUnit(SSotBaseTestCase):
 """
 BUSINESS VALUE JUSTIFICATION for User Context Factory Integration Tests
 
-Segment: ALL (Free → Enterprise) - affects every user request to the platform
+Segment: ALL (Free  ->  Enterprise) - affects every user request to the platform
 Business Goal: Stability/Security - ensures proper context isolation, validation, and system integrity
 Value Impact: Guarantees request isolation, prevents context corruption, and maintains system security
 Revenue Impact: Prevents data corruption bugs and security vulnerabilities that could cause:

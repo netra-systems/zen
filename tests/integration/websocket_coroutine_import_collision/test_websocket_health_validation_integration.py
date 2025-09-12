@@ -73,7 +73,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
             request_id="integration_request_456"
         )
         
-        self.logger.info("🏗️ INTEGRATION SETUP: Real services initializing...")
+        self.logger.info("[U+1F3D7][U+FE0F] INTEGRATION SETUP: Real services initializing...")
     
     @pytest.mark.asyncio
     async def test_real_service_health_validation_dict_return(self):
@@ -86,7 +86,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
         
         CRITICAL: Must FAIL if real services cause coroutine return.
         """
-        self.logger.info("🧪 INTEGRATION TEST: Real service health validation starting")
+        self.logger.info("[U+1F9EA] INTEGRATION TEST: Real service health validation starting")
         
         # Ensure real services are running 
         await self._ensure_real_services_available()
@@ -116,7 +116,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
             self.assertIsInstance(failed_components, list) 
             self.assertIsInstance(healthy_status, bool)
             
-            self.logger.info("✅ INTEGRATION SUCCESS: Real services return proper dict health_report")
+            self.logger.info(" PASS:  INTEGRATION SUCCESS: Real services return proper dict health_report")
             
         except AttributeError as e:
             if "coroutine" in str(e) and "get" in str(e):
@@ -137,7 +137,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
         access health_report.get() after real service failures, reproducing
         the staging coroutine error in exception handling paths.
         """
-        self.logger.info("🧪 INTEGRATION TEST: Exception handler with real service failures")
+        self.logger.info("[U+1F9EA] INTEGRATION TEST: Exception handler with real service failures")
         
         await self._ensure_real_services_available()
         
@@ -176,7 +176,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
                     # This is websocket.py:557 - the exact line causing the error
                     error_response["suggestions"] = health_report.get("error_suggestions", [])
                     
-                    self.logger.info("✅ INTEGRATION SUCCESS: Exception handler dict operations work")
+                    self.logger.info(" PASS:  INTEGRATION SUCCESS: Exception handler dict operations work")
                 
             except AttributeError as e:
                 if "coroutine" in str(e) and "get" in str(e):
@@ -196,7 +196,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
         This validates that the factory pattern properly handles async health checks
         from real services without creating coroutine/dict type mismatches.
         """
-        self.logger.info("🧪 INTEGRATION TEST: WebSocket factory with real connections")
+        self.logger.info("[U+1F9EA] INTEGRATION TEST: WebSocket factory with real connections")
         
         await self._ensure_real_services_available()
         
@@ -221,7 +221,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
                 f"Manager health check must return bool, got {type(manager_health)}"
             )
             
-            self.logger.info("✅ INTEGRATION SUCCESS: WebSocket factory handles real services correctly")
+            self.logger.info(" PASS:  INTEGRATION SUCCESS: WebSocket factory handles real services correctly")
             
         except AttributeError as e:
             if "coroutine" in str(e):
@@ -245,7 +245,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
         connections trigger async health checks simultaneously, potentially
         causing coroutine/dict type inconsistencies.
         """
-        self.logger.info("🧪 INTEGRATION TEST: Concurrent health validation race conditions")
+        self.logger.info("[U+1F9EA] INTEGRATION TEST: Concurrent health validation race conditions")
         
         await self._ensure_real_services_available()
         
@@ -283,7 +283,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
                     f"Concurrent task {i} should succeed without coroutine errors"
                 )
         
-        self.logger.info("✅ INTEGRATION SUCCESS: Concurrent health validation handles race conditions")
+        self.logger.info(" PASS:  INTEGRATION SUCCESS: Concurrent health validation handles race conditions")
     
     async def _validate_health_report_async(self, user_context: UserExecutionContext, task_id: str) -> bool:
         """Helper method to validate health_report in async context."""
@@ -327,7 +327,7 @@ class TestWebSocketHealthValidationIntegration(SSotAsyncTestCase):
     
     def tearDown(self):
         super().tearDown()
-        self.logger.info("🏁 INTEGRATION TEST COMPLETE: WebSocket health validation finished")
+        self.logger.info("[U+1F3C1] INTEGRATION TEST COMPLETE: WebSocket health validation finished")
 
 
 if __name__ == '__main__':

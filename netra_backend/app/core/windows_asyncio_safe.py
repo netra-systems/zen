@@ -96,7 +96,7 @@ class WindowsAsyncioSafePatterns:
         """Setup cloud-specific asyncio optimizations to prevent selector.select() blocking."""
         try:
             # ISSUE #128 FIX: GCP Cloud Run asyncio optimizations
-            logger.info("🌩️ Setting up cloud environment asyncio optimizations for Issue #128")
+            logger.info("[U+1F329][U+FE0F] Setting up cloud environment asyncio optimizations for Issue #128")
             
             # Try to use SelectorEventLoop with optimized selector settings
             if hasattr(asyncio, 'SelectorEventLoop'):
@@ -117,7 +117,7 @@ class WindowsAsyncioSafePatterns:
                             return original_select(timeout)
                         
                         loop._selector.select = timeout_select
-                        logger.info("✅ Applied selector.select() timeout optimization for cloud environment")
+                        logger.info(" PASS:  Applied selector.select() timeout optimization for cloud environment")
                 except Exception as selector_error:
                     logger.debug(f"Could not optimize selector: {selector_error}")
                 

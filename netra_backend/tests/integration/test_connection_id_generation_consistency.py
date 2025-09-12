@@ -2,7 +2,7 @@
 Test WebSocket Connection ID Generation Consistency
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure reliable WebSocket message routing
 - Value Impact: Prevents "Message routing failed" errors that break real-time chat
 - Strategic Impact: CRITICAL - Connection ID inconsistency destroys chat value
@@ -147,8 +147,8 @@ class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
         assert len(routing_failures) > 0, \
             f"EXPECTED ROUTING FAILURES due to ID inconsistency: {routing_failures}"
         
-        print(f"🚨 ROUTING FAILURES REPRODUCED: {routing_failures}")
-        print(f"🚨 This demonstrates the 'Message routing failed' bug")
+        print(f" ALERT:  ROUTING FAILURES REPRODUCED: {routing_failures}")
+        print(f" ALERT:  This demonstrates the 'Message routing failed' bug")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -214,7 +214,7 @@ class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
         assert routing_success == False, \
             f"EXPECTED FAILURE: Routing should fail with mismatched IDs"
         
-        print(f"🚨 ID MISMATCH REPRODUCED:")
+        print(f" ALERT:  ID MISMATCH REPRODUCED:")
         print(f"   Context WebSocket ID: {context_websocket_id}")
         print(f"   Handler Connection ID: {handler_connection_id}")
         print(f"   Routing Success: {routing_success}")
@@ -293,7 +293,7 @@ class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
         assert routing_results["handler"] == False, "Handler connection ID should fail routing"  
         assert routing_results["context"] == False, "Context WebSocket ID should fail routing"
         
-        print(f"🚨 ROUTING TABLE SYNC FAILURES:")
+        print(f" ALERT:  ROUTING TABLE SYNC FAILURES:")
         for component, result in routing_results.items():
             print(f"   {component}: {all_connection_ids[component]} -> {result}")
         
@@ -383,7 +383,7 @@ class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
         # CRITICAL BUG: Under concurrency, registration failures increase
         failure_rate = len(failed_registrations) / len(results)
         
-        print(f"🚨 CONCURRENT CONNECTION RESULTS:")
+        print(f" ALERT:  CONCURRENT CONNECTION RESULTS:")
         print(f"   Total connections: {len(results)}")
         print(f"   Successful registrations: {len(successful_registrations)}")
         print(f"   Failed registrations: {len(failed_registrations)}")
@@ -500,7 +500,7 @@ class TestConnectionIdGenerationConsistency(BaseIntegrationTest):
             "Should reproduce routing failures for problematic cases"
         
         # Log detailed failure information
-        print(f"🚨 REPRODUCED ROUTING FAILURES:")
+        print(f" ALERT:  REPRODUCED ROUTING FAILURES:")
         for failure in routing_failures:
             print(f"   User: {failure['user_id']}")
             print(f"   Connection: {failure['connection_id']}")

@@ -35,7 +35,7 @@ class WebSocketFixValidator:
         
     async def run_comprehensive_test(self) -> Dict:
         """Run comprehensive WebSocket validation tests."""
-        logger.info("🚀 Starting WebSocket HTTP 500 Fix Validation")
+        logger.info("[U+1F680] Starting WebSocket HTTP 500 Fix Validation")
         logger.info(f"Target: {self.base_url} (SSL: {self.use_ssl})")
         
         test_results = {
@@ -98,7 +98,7 @@ class WebSocketFixValidator:
                             "details": f"Health status: {status}",
                             "response_time": response.headers.get("X-Response-Time", "N/A")
                         })
-                        logger.info(f"✅ {test_name}: PASSED - Status: {status}")
+                        logger.info(f" PASS:  {test_name}: PASSED - Status: {status}")
                     else:
                         results["failed_tests"] += 1
                         results["test_details"].append({
@@ -106,7 +106,7 @@ class WebSocketFixValidator:
                             "status": "FAILED",
                             "details": f"HTTP {response.status}: {await response.text()}"
                         })
-                        logger.error(f"❌ {test_name}: FAILED - HTTP {response.status}")
+                        logger.error(f" FAIL:  {test_name}: FAILED - HTTP {response.status}")
                         
         except Exception as e:
             results["failed_tests"] += 1
@@ -115,7 +115,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_websocket_config(self, results: Dict) -> None:
         """Test WebSocket configuration endpoint."""
@@ -139,7 +139,7 @@ class WebSocketFixValidator:
                             "status": "PASSED",
                             "details": f"Endpoint: {endpoint}, Features: {len(websocket_config.get('features', {}))}"
                         })
-                        logger.info(f"✅ {test_name}: PASSED - Endpoint: {endpoint}")
+                        logger.info(f" PASS:  {test_name}: PASSED - Endpoint: {endpoint}")
                     else:
                         results["failed_tests"] += 1
                         results["test_details"].append({
@@ -147,7 +147,7 @@ class WebSocketFixValidator:
                             "status": "FAILED",
                             "details": f"HTTP {response.status}"
                         })
-                        logger.error(f"❌ {test_name}: FAILED - HTTP {response.status}")
+                        logger.error(f" FAIL:  {test_name}: FAILED - HTTP {response.status}")
                         
         except Exception as e:
             results["failed_tests"] += 1
@@ -156,7 +156,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_basic_websocket_connection(self, results: Dict) -> None:
         """Test basic WebSocket connection to test endpoint (no auth required)."""
@@ -182,7 +182,7 @@ class WebSocketFixValidator:
                         "status": "PASSED",
                         "details": "Ping/Pong successful"
                     })
-                    logger.info(f"✅ {test_name}: PASSED - Ping/Pong successful")
+                    logger.info(f" PASS:  {test_name}: PASSED - Ping/Pong successful")
                 else:
                     results["failed_tests"] += 1
                     results["test_details"].append({
@@ -190,7 +190,7 @@ class WebSocketFixValidator:
                         "status": "FAILED",
                         "details": f"Unexpected response: {response_data}"
                     })
-                    logger.error(f"❌ {test_name}: FAILED - Unexpected response")
+                    logger.error(f" FAIL:  {test_name}: FAILED - Unexpected response")
                     
         except Exception as e:
             results["failed_tests"] += 1
@@ -199,7 +199,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_authenticated_websocket_connection(self, results: Dict) -> None:
         """Test WebSocket connection with authentication to main endpoint."""
@@ -211,7 +211,7 @@ class WebSocketFixValidator:
             jwt_token = await self._get_test_jwt_token()
             
             if not jwt_token:
-                logger.warning(f"⚠️ {test_name}: SKIPPED - No JWT token available")
+                logger.warning(f" WARNING: [U+FE0F] {test_name}: SKIPPED - No JWT token available")
                 results["test_details"].append({
                     "test": test_name,
                     "status": "SKIPPED",
@@ -234,7 +234,7 @@ class WebSocketFixValidator:
                         "status": "PASSED", 
                         "details": f"Connection ID: {welcome_data.get('connection_id', 'N/A')}"
                     })
-                    logger.info(f"✅ {test_name}: PASSED - Connection established")
+                    logger.info(f" PASS:  {test_name}: PASSED - Connection established")
                 else:
                     results["failed_tests"] += 1
                     results["test_details"].append({
@@ -242,7 +242,7 @@ class WebSocketFixValidator:
                         "status": "FAILED",
                         "details": f"No welcome message: {welcome_data}"
                     })
-                    logger.error(f"❌ {test_name}: FAILED - No welcome message")
+                    logger.error(f" FAIL:  {test_name}: FAILED - No welcome message")
                     
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code == 500:
@@ -252,7 +252,7 @@ class WebSocketFixValidator:
                     "status": "FAILED",
                     "details": f"HTTP 500 ERROR - The fix did not work! {e}"
                 })
-                logger.error(f"❌ {test_name}: FAILED - HTTP 500 ERROR (Fix unsuccessful)")
+                logger.error(f" FAIL:  {test_name}: FAILED - HTTP 500 ERROR (Fix unsuccessful)")
             else:
                 results["failed_tests"] += 1
                 results["test_details"].append({
@@ -260,7 +260,7 @@ class WebSocketFixValidator:
                     "status": "FAILED", 
                     "details": f"HTTP {e.status_code}: {e}"
                 })
-                logger.error(f"❌ {test_name}: FAILED - HTTP {e.status_code}")
+                logger.error(f" FAIL:  {test_name}: FAILED - HTTP {e.status_code}")
         except Exception as e:
             results["failed_tests"] += 1
             results["test_details"].append({
@@ -268,7 +268,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_websocket_message_flow(self, results: Dict) -> None:
         """Test WebSocket message handling flow."""
@@ -298,7 +298,7 @@ class WebSocketFixValidator:
                         "status": "PASSED",
                         "details": "Echo message flow successful"
                     })
-                    logger.info(f"✅ {test_name}: PASSED - Echo flow successful")
+                    logger.info(f" PASS:  {test_name}: PASSED - Echo flow successful")
                 else:
                     results["failed_tests"] += 1
                     results["test_details"].append({
@@ -306,7 +306,7 @@ class WebSocketFixValidator:
                         "status": "FAILED",
                         "details": f"Unexpected response: {response_data}"
                     })
-                    logger.error(f"❌ {test_name}: FAILED - Unexpected response")
+                    logger.error(f" FAIL:  {test_name}: FAILED - Unexpected response")
                     
         except Exception as e:
             results["failed_tests"] += 1
@@ -315,7 +315,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_websocket_error_handling(self, results: Dict) -> None:
         """Test WebSocket error handling."""
@@ -340,7 +340,7 @@ class WebSocketFixValidator:
                         "status": "PASSED",
                         "details": "Error handling working correctly"
                     })
-                    logger.info(f"✅ {test_name}: PASSED - Error handling works")
+                    logger.info(f" PASS:  {test_name}: PASSED - Error handling works")
                 else:
                     results["failed_tests"] += 1
                     results["test_details"].append({
@@ -348,7 +348,7 @@ class WebSocketFixValidator:
                         "status": "FAILED",
                         "details": f"No error response: {response_data}"
                     })
-                    logger.error(f"❌ {test_name}: FAILED - No error response")
+                    logger.error(f" FAIL:  {test_name}: FAILED - No error response")
                     
         except Exception as e:
             results["failed_tests"] += 1
@@ -357,7 +357,7 @@ class WebSocketFixValidator:
                 "status": "ERROR",
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _test_concurrent_websocket_connections(self, results: Dict) -> None:
         """Test multiple concurrent WebSocket connections."""
@@ -396,7 +396,7 @@ class WebSocketFixValidator:
                     "status": "PASSED",
                     "details": f"{successful_connections}/{concurrent_connections} connections successful"
                 })
-                logger.info(f"✅ {test_name}: PASSED - All {concurrent_connections} connections successful")
+                logger.info(f" PASS:  {test_name}: PASSED - All {concurrent_connections} connections successful")
             else:
                 results["failed_tests"] += 1
                 results["test_details"].append({
@@ -404,7 +404,7 @@ class WebSocketFixValidator:
                     "status": "FAILED",
                     "details": f"Only {successful_connections}/{concurrent_connections} connections successful"
                 })
-                logger.error(f"❌ {test_name}: FAILED - Only {successful_connections}/{concurrent_connections} successful")
+                logger.error(f" FAIL:  {test_name}: FAILED - Only {successful_connections}/{concurrent_connections} successful")
                 
         except Exception as e:
             results["failed_tests"] += 1
@@ -413,7 +413,7 @@ class WebSocketFixValidator:
                 "status": "ERROR", 
                 "details": str(e)
             })
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     async def _get_test_jwt_token(self) -> Optional[str]:
         """Get a test JWT token for authentication."""
@@ -445,30 +445,30 @@ class WebSocketFixValidator:
     def _print_test_summary(self, results: Dict) -> None:
         """Print comprehensive test summary."""
         print("\n" + "="*80)
-        print("🔬 WEBSOCKET HTTP 500 FIX VALIDATION RESULTS")
+        print("[U+1F52C] WEBSOCKET HTTP 500 FIX VALIDATION RESULTS")
         print("="*80)
         
-        print(f"📊 Test Summary:")
+        print(f" CHART:  Test Summary:")
         print(f"   Total Tests:    {results['total_tests']}")
-        print(f"   Passed:         {results['passed_tests']} ✅")
-        print(f"   Failed:         {results['failed_tests']} ❌") 
+        print(f"   Passed:         {results['passed_tests']}  PASS: ")
+        print(f"   Failed:         {results['failed_tests']}  FAIL: ") 
         print(f"   Success Rate:   {results['success_rate']:.1f}%")
         
         if results['success_rate'] >= 85:
-            print(f"   Overall Status: 🎉 EXCELLENT - WebSocket fixes working well!")
+            print(f"   Overall Status:  CELEBRATION:  EXCELLENT - WebSocket fixes working well!")
         elif results['success_rate'] >= 70:
-            print(f"   Overall Status: ✅ GOOD - Minor issues remain")
+            print(f"   Overall Status:  PASS:  GOOD - Minor issues remain")
         else:
-            print(f"   Overall Status: ❌ POOR - Significant issues remain")
+            print(f"   Overall Status:  FAIL:  POOR - Significant issues remain")
         
-        print(f"\n📋 Test Details:")
+        print(f"\n[U+1F4CB] Test Details:")
         for test_detail in results['test_details']:
             status_emoji = {
-                'PASSED': '✅',
-                'FAILED': '❌', 
-                'ERROR': '💥',
-                'SKIPPED': '⏭️'
-            }.get(test_detail['status'], '❓')
+                'PASSED': ' PASS: ',
+                'FAILED': ' FAIL: ', 
+                'ERROR': '[U+1F4A5]',
+                'SKIPPED': '[U+23ED][U+FE0F]'
+            }.get(test_detail['status'], '[U+2753]')
             
             print(f"   {status_emoji} {test_detail['test']}: {test_detail['status']}")
             print(f"      {test_detail['details']}")
@@ -498,10 +498,10 @@ async def main():
     
     # Return exit code based on results
     if results['success_rate'] >= 70:
-        print("\n🎉 WebSocket fixes are working! Staging tests should now pass.")
+        print("\n CELEBRATION:  WebSocket fixes are working! Staging tests should now pass.")
         sys.exit(0)
     else:
-        print("\n❌ WebSocket fixes need more work. Check the errors above.")
+        print("\n FAIL:  WebSocket fixes need more work. Check the errors above.")
         sys.exit(1)
 
 if __name__ == "__main__":

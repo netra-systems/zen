@@ -149,7 +149,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         
         phase1_time = time.time() - phase1_start
         self.startup_metrics["environment_init"] = phase1_time
-        self.logger.info(f"✅ Phase 1: Environment initialization completed in {phase1_time:.2f}s")
+        self.logger.info(f" PASS:  Phase 1: Environment initialization completed in {phase1_time:.2f}s")
         
         # Phase 2: Database connection initialization
         phase2_start = time.time()
@@ -189,7 +189,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         
         phase2_time = time.time() - phase2_start
         self.startup_metrics["database_init"] = phase2_time
-        self.logger.info(f"✅ Phase 2: Database initialization completed in {phase2_time:.2f}s")
+        self.logger.info(f" PASS:  Phase 2: Database initialization completed in {phase2_time:.2f}s")
         
         # Phase 3: Redis session management setup
         phase3_start = time.time()
@@ -229,7 +229,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         
         phase3_time = time.time() - phase3_start
         self.startup_metrics["redis_init"] = phase3_time
-        self.logger.info(f"✅ Phase 3: Redis initialization completed in {phase3_time:.2f}s")
+        self.logger.info(f" PASS:  Phase 3: Redis initialization completed in {phase3_time:.2f}s")
         
         # Phase 4: Health endpoints validation
         phase4_start = time.time()
@@ -258,7 +258,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         
         phase4_time = time.time() - phase4_start
         self.startup_metrics["health_endpoints"] = phase4_time
-        self.logger.info(f"✅ Phase 4: Health endpoints validation completed in {phase4_time:.2f}s")
+        self.logger.info(f" PASS:  Phase 4: Health endpoints validation completed in {phase4_time:.2f}s")
         
         # Calculate total startup time
         total_startup_time = time.time() - startup_start
@@ -271,7 +271,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         assert phase3_time < 10.0, f"Redis init should complete in under 10s, took {phase3_time:.2f}s"
         assert phase4_time < 15.0, f"Health endpoints should be ready in under 15s, took {phase4_time:.2f}s"
         
-        self.logger.info(f"🎉 Complete startup sequence validated in {total_startup_time:.2f}s")
+        self.logger.info(f" CELEBRATION:  Complete startup sequence validated in {total_startup_time:.2f}s")
         self.logger.info(f"Startup metrics: {json.dumps(self.startup_metrics, indent=2)}")
     
     @pytest.mark.integration
@@ -365,7 +365,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
             # Log the issue but don't fail the test
             pass
         
-        self.logger.info(f"✅ Database initialization validated - ready in {init_time:.2f}s")
+        self.logger.info(f" PASS:  Database initialization validated - ready in {init_time:.2f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -400,7 +400,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
                 if "environment" in health_data:
                     assert health_data["environment"] in ["test", "development", "staging", "production"]
                 
-                self.logger.info(f"✅ Health endpoint responding in {health_time:.2f}s with status: {health_data['status']}")
+                self.logger.info(f" PASS:  Health endpoint responding in {health_time:.2f}s with status: {health_data['status']}")
             
             # Test readiness endpoint
             ready_start = time.time()
@@ -426,7 +426,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
                     assert ready_data["status"] == "not_ready", "503 response should have 'not_ready' status"
                     assert "reason" in ready_data, "Not ready response should include reason"
                 
-                self.logger.info(f"✅ Readiness endpoint responding in {ready_time:.2f}s with status: {ready_data['status']}")
+                self.logger.info(f" PASS:  Readiness endpoint responding in {ready_time:.2f}s with status: {ready_data['status']}")
             
             # Test CORS test endpoint
             cors_start = time.time()
@@ -441,7 +441,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
                     assert cors_data["service"] == "auth-service", "CORS test should identify auth service"
                     assert cors_data["cors_status"] == "configured", "CORS should be configured"
                     
-                    self.logger.info(f"✅ CORS test endpoint responding in {cors_time:.2f}s")
+                    self.logger.info(f" PASS:  CORS test endpoint responding in {cors_time:.2f}s")
             except Exception as e:
                 # CORS endpoint might not be available in all configurations
                 self.logger.warning(f"CORS test endpoint not available: {e}")
@@ -480,7 +480,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         assert len(google_client_secret) > 20, f"Google Client Secret appears too short: {len(google_client_secret)} chars"
         assert google_client_id.endswith(".apps.googleusercontent.com"), "Client ID should end with .apps.googleusercontent.com"
         
-        self.logger.info(f"✅ OAuth Client ID configured: {google_client_id[:20]}...")
+        self.logger.info(f" PASS:  OAuth Client ID configured: {google_client_id[:20]}...")
         
         # Test OAuth manager initialization
         oauth_manager = OAuthManager()
@@ -504,7 +504,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         assert "accounts.google.com" in auth_url, "Authorization URL should point to Google"
         assert test_state in auth_url, "Authorization URL should include state parameter"
         
-        self.logger.info(f"✅ OAuth provider validated - can generate auth URLs")
+        self.logger.info(f" PASS:  OAuth provider validated - can generate auth URLs")
         
         # Test OAuth status endpoint
         async with aiohttp.ClientSession() as session:
@@ -518,7 +518,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
                 google_status = oauth_status["oauth_providers"]["google"]
                 assert google_status["is_healthy"] is True, f"Google provider should be healthy: {google_status}"
                 
-                self.logger.info(f"✅ OAuth status endpoint confirms healthy configuration")
+                self.logger.info(f" PASS:  OAuth status endpoint confirms healthy configuration")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -561,7 +561,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
             # Cleanup test data
             await auth_redis_manager.redis_client.delete(test_key)
             
-            self.logger.info("✅ Redis cleanup mechanisms validated")
+            self.logger.info(" PASS:  Redis cleanup mechanisms validated")
         
         # Test 3: Service status monitoring with better error handling
         async with aiohttp.ClientSession() as session:
@@ -593,7 +593,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
             assert 1.0 <= shutdown_timeout_float <= 10.0, f"Shutdown timeout should be 1-10 seconds, got {shutdown_timeout_float}"
             assert 1.0 <= cleanup_timeout_float <= 10.0, f"Cleanup timeout should be 1-10 seconds, got {cleanup_timeout_float}"
             
-            self.logger.info(f"✅ Shutdown timeouts configured: shutdown={shutdown_timeout_float}s, cleanup={cleanup_timeout_float}s")
+            self.logger.info(f" PASS:  Shutdown timeouts configured: shutdown={shutdown_timeout_float}s, cleanup={cleanup_timeout_float}s")
         except ValueError as e:
             pytest.fail(f"Shutdown timeout configuration invalid: {e}")
         
@@ -607,7 +607,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         for component, ready_state in components_ready.items():
             assert ready_state, f"Component {component} should be ready for graceful shutdown"
         
-        self.logger.info(f"✅ All components ready for graceful shutdown: {components_ready}")
+        self.logger.info(f" PASS:  All components ready for graceful shutdown: {components_ready}")
         
         # Test 6: Verify service can handle shutdown signals (without actually sending them)
         # Check that signal handlers are set up
@@ -620,7 +620,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         signal_handlers_configured = True  # This would be validated by reviewing main.py startup
         assert signal_handlers_configured, "Service should have signal handlers configured for graceful shutdown"
         
-        self.logger.info("✅ Graceful shutdown mechanisms validated (components ready for cleanup)")
+        self.logger.info(" PASS:  Graceful shutdown mechanisms validated (components ready for cleanup)")
     
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -721,7 +721,7 @@ class TestAuthServiceStartup(BaseIntegrationTest):
         
         performance_metrics["overall_score"] = performance_score
         
-        self.logger.info(f"🎯 Startup performance metrics: {json.dumps(performance_metrics, indent=2)}")
-        self.logger.info(f"📊 Overall performance score: {performance_score}/100")
+        self.logger.info(f" TARGET:  Startup performance metrics: {json.dumps(performance_metrics, indent=2)}")
+        self.logger.info(f" CHART:  Overall performance score: {performance_score}/100")
         
         assert performance_score >= 70, f"Performance score should be at least 70/100, got {performance_score}"

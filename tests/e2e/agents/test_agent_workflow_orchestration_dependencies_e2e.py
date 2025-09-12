@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: $3M+ ARR enabler - complex workflows differentiate us from simple chat bots
 
 CRITICAL MISSION: Test Agent Workflow Orchestration and Dependencies ensuring:
-1. Multi-agent workflows execute in correct dependency order (Data → Optimization → Report)
+1. Multi-agent workflows execute in correct dependency order (Data  ->  Optimization  ->  Report)
 2. Agent dependencies are enforced and validated before execution
 3. WebSocket events provide real-time workflow progress visibility
 4. Workflow state is preserved across agent transitions
@@ -197,7 +197,7 @@ def simple_sequential_workflow():
     return AgentWorkflow(
         workflow_id=f"sequential_workflow_{uuid.uuid4().hex[:8]}",
         name="Simple Sequential Analysis",
-        description="Basic sequential data → analysis → report workflow",
+        description="Basic sequential data  ->  analysis  ->  report workflow",
         steps=[
             WorkflowStep(
                 step_id="data_step",

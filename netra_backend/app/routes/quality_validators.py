@@ -1,7 +1,7 @@
 """Quality Routes Input Validation and Response Formatting
 
 This module provides validation and formatting utilities for quality routes.
-Each function is ≤8 lines as per architectural requirements.
+Each function is  <= 8 lines as per architectural requirements.
 """
 
 from datetime import UTC, datetime

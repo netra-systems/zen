@@ -91,10 +91,10 @@ class TestChatMessageBusinessValue:
         )
         
         # Business Impact Assessment
-        print(f"✅ BUSINESS SUCCESS: 'chat_message' type is recognized by MessageRouter")
-        print(f"✅ SUCCESS: Users can send chat messages to AI agents")
-        print(f"✅ SUCCESS: Primary business value delivery mechanism is working")
-        print(f"✅ SUCCESS: This enables 90% of user interactions with the platform")
+        print(f" PASS:  BUSINESS SUCCESS: 'chat_message' type is recognized by MessageRouter")
+        print(f" PASS:  SUCCESS: Users can send chat messages to AI agents")
+        print(f" PASS:  SUCCESS: Primary business value delivery mechanism is working")
+        print(f" PASS:  SUCCESS: This enables 90% of user interactions with the platform")
     
     @pytest.mark.asyncio 
     async def test_chat_message_not_in_legacy_mapping_fails_critical(self):
@@ -115,15 +115,15 @@ class TestChatMessageBusinessValue:
         try:
             # This should properly map to USER_MESSAGE via LEGACY_MESSAGE_TYPE_MAP
             normalized_type = normalize_message_type("chat_message")
-            print(f"✅ NORMALIZATION SUCCESS: 'chat_message' maps to {normalized_type}")
-            print(f"✅ SOLUTION: Router recognizes type and processes normally")
+            print(f" PASS:  NORMALIZATION SUCCESS: 'chat_message' maps to {normalized_type}")
+            print(f" PASS:  SOLUTION: Router recognizes type and processes normally")
             
             # Validate it maps to the correct type
             assert normalized_type == MessageType.USER_MESSAGE, (
                 "chat_message should normalize to USER_MESSAGE"
             )
         except Exception as e:
-            print(f"❌ UNEXPECTED ERROR: {e}")
+            print(f" FAIL:  UNEXPECTED ERROR: {e}")
         
         # Test the router's unknown message detection directly
         router = MessageRouter()
@@ -135,8 +135,8 @@ class TestChatMessageBusinessValue:
             "after the fix is applied to LEGACY_MESSAGE_TYPE_MAP"
         )
         
-        print(f"✅ CONFIRMED: 'chat_message' is recognized as valid message type")
-        print(f"✅ CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue")
+        print(f" PASS:  CONFIRMED: 'chat_message' is recognized as valid message type")
+        print(f" PASS:  CONFIRMED: Presence in LEGACY_MESSAGE_TYPE_MAP resolves the issue")
     
     @pytest.mark.asyncio
     async def test_chat_message_frontend_compatibility_broken(self):
@@ -202,9 +202,9 @@ class TestChatMessageBusinessValue:
             "Acknowledgment should indicate 'chat_message' was received but unknown"
         )
         
-        print(f"🔌 FRONTEND IMPACT: Chat UI sends 'chat_message' but gets unknown type response")
-        print(f"🔌 FRONTEND IMPACT: This breaks the expected chat message → AI response flow")
-        print(f"🔌 FRONTEND IMPACT: Users see chat interface but no AI responses")
+        print(f"[U+1F50C] FRONTEND IMPACT: Chat UI sends 'chat_message' but gets unknown type response")
+        print(f"[U+1F50C] FRONTEND IMPACT: This breaks the expected chat message  ->  AI response flow")
+        print(f"[U+1F50C] FRONTEND IMPACT: Users see chat interface but no AI responses")
     
     @pytest.mark.asyncio
     async def test_chat_message_agent_workflow_blocked(self):
@@ -257,10 +257,10 @@ class TestChatMessageBusinessValue:
             "Message should be unhandled, not routed to agent workflow"
         )
         
-        print(f"🤖 AGENT IMPACT: 'chat_message' prevents agent workflow initiation")
-        print(f"🤖 AGENT IMPACT: Multi-agent collaboration requests are not processed")
-        print(f"🤖 AGENT IMPACT: Users request AI help but get acknowledgment only")
-        print(f"🤖 BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat")
+        print(f"[U+1F916] AGENT IMPACT: 'chat_message' prevents agent workflow initiation")
+        print(f"[U+1F916] AGENT IMPACT: Multi-agent collaboration requests are not processed")
+        print(f"[U+1F916] AGENT IMPACT: Users request AI help but get acknowledgment only")
+        print(f"[U+1F916] BUSINESS VALUE LOST: Core AI functionality is inaccessible via chat")
 
 
 class TestChatMessageTechnicalValidation:
@@ -305,7 +305,7 @@ class TestChatMessageTechnicalValidation:
         
         assert direct_enum_works == False, "Step 2: 'chat_message' not a direct MessageType enum value"
         
-        print(f"✅ TECHNICAL ROOT CAUSE CONFIRMED:")
+        print(f" PASS:  TECHNICAL ROOT CAUSE CONFIRMED:")
         print(f"   - 'chat_message' not in LEGACY_MESSAGE_TYPE_MAP: {not in_legacy_map}")
         print(f"   - 'chat_message' not a direct MessageType enum: {not direct_enum_works}")
         print(f"   - Result: _is_unknown_message_type returns True")
@@ -351,7 +351,7 @@ class TestChatMessageTechnicalValidation:
         from netra_backend.app.websocket_core.types import normalize_message_type
         normalized = normalize_message_type("chat_message")  # This defaults to USER_MESSAGE
         
-        print(f"📋 NORMALIZATION BYPASS CONFIRMED:")
+        print(f"[U+1F4CB] NORMALIZATION BYPASS CONFIRMED:")
         print(f"   - Unknown check happens first: {is_unknown}")
         print(f"   - Normalization result (if it ran): {normalized}")
         print(f"   - But normalization is bypassed for unknown types")
@@ -400,7 +400,7 @@ class TestChatMessageTechnicalValidation:
         assert "timestamp" in ack_response, "Should include timestamp"
         
         # Verify the acknowledgment indicates unknown type handling
-        print(f"📨 ACKNOWLEDGMENT FORMAT VALIDATION:")
+        print(f"[U+1F4E8] ACKNOWLEDGMENT FORMAT VALIDATION:")
         print(f"   - Type: {ack_response.get('type')}")
         print(f"   - Received Type: {ack_response.get('received_type')}")
         print(f"   - Status: {ack_response.get('status')}")
@@ -494,7 +494,7 @@ class TestChatMessageRouterIntegration:
         user_handler_stats = handler_stats.get("UserMessageHandler", {})
         processed_count = user_handler_stats.get("processed", 0)
         
-        print(f"🔄 INTEGRATION PIPELINE RESULTS:")
+        print(f" CYCLE:  INTEGRATION PIPELINE RESULTS:")
         print(f"   - Unknown type detected: {is_unknown}")
         print(f"   - Routing result: {routing_result}")
         print(f"   - Messages routed: {stats['messages_routed']}")
@@ -556,7 +556,7 @@ class TestChatMessageRouterIntegration:
             "Unhandled message count should increase"
         )
         
-        print(f"🎯 HANDLER BYPASS VALIDATION:")
+        print(f" TARGET:  HANDLER BYPASS VALIDATION:")
         print(f"   - UserMessageHandler processed count unchanged: {user_handler_final == user_handler_initial}")
         print(f"   - Unknown acknowledgment sent: {mock_websocket.send_json.called}")
         print(f"   - Unhandled message count increased: {final_stats['unhandled_messages'] > initial_stats['unhandled_messages']}")
@@ -566,8 +566,8 @@ class TestChatMessageRouterIntegration:
 if __name__ == "__main__":
     # Run the failing tests to demonstrate the 'chat_message' issue
     import sys
-    print("🔥 Running Mission Critical Tests for 'chat_message' Unknown Type Issue")
-    print("🔥 These tests MUST FAIL initially to demonstrate the business impact")
-    print("🔥 After implementing the fix in LEGACY_MESSAGE_TYPE_MAP, these should pass")
+    print(" FIRE:  Running Mission Critical Tests for 'chat_message' Unknown Type Issue")
+    print(" FIRE:  These tests MUST FAIL initially to demonstrate the business impact")
+    print(" FIRE:  After implementing the fix in LEGACY_MESSAGE_TYPE_MAP, these should pass")
     
     pytest.main([__file__, "-v", "--tb=short", "-x"])

@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
 """
@@ -22,7 +23,7 @@ from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 from dev_launcher.utils import wait_for_service, check_dependencies, check_project_structure
 
 
-class TestDevLauncher(unittest.TestCase):
+class TestDevLauncher(SSotBaseTestCase):
     """Test the main launcher functionality."""
     
     def setUp(self):
@@ -126,7 +127,7 @@ class TestDevLauncher(unittest.TestCase):
         self.assertIsNone(streamer)
 
 
-class TestFullIntegration(unittest.TestCase):
+class TestFullIntegration(SSotBaseTestCase):
     """Integration tests for complete launch cycles."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -203,7 +204,7 @@ class TestFullIntegration(unittest.TestCase):
         mock_start_frontend.assert_called_once()
 
 
-class TestRollingRestart(unittest.TestCase):
+class TestRollingRestart(SSotBaseTestCase):
     """Test rolling restart scenarios."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -262,7 +263,7 @@ class TestRollingRestart(unittest.TestCase):
         self.assertTrue(launcher.process_manager.is_running("Backend"))
 
 
-class TestMultiEnvironment(unittest.TestCase):
+class TestMultiEnvironment(SSotBaseTestCase):
     """Test multi-environment support."""
     
     def test_dev_to_prod_configuration_switch(self):
@@ -304,7 +305,7 @@ class TestMultiEnvironment(unittest.TestCase):
             self.assertIsNotNone(config)
 
 
-class TestFileManagement(unittest.TestCase):
+class TestFileManagement(SSotBaseTestCase):
     """Test file and resource management."""
     
     def test_file_handle_management(self):

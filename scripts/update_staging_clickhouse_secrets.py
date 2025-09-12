@@ -36,19 +36,19 @@ class StagingClickHouseSecretsUpdater:
         
     def setup_client(self) -> bool:
         """Setup GCP Secret Manager client."""
-        print("🔐 Setting up GCP Secret Manager client...")
+        print("[U+1F510] Setting up GCP Secret Manager client...")
         
         # Ensure authentication is set up
         if not GCPAuthConfig.ensure_authentication():
-            print("❌ Failed to set up GCP authentication")
+            print(" FAIL:  Failed to set up GCP authentication")
             return False
         
         try:
             self.client = secretmanager.SecretManagerServiceClient()
-            print("✅ Secret Manager client initialized")
+            print(" PASS:  Secret Manager client initialized")
             return True
         except Exception as e:
-            print(f"❌ Failed to create Secret Manager client: {e}")
+            print(f" FAIL:  Failed to create Secret Manager client: {e}")
             return False
     
     def create_or_update_secret(self, secret_id: str, secret_value: str) -> bool:
@@ -61,10 +61,10 @@ class StagingClickHouseSecretsUpdater:
             try:
                 self.client.get_secret(request={"name": secret_path})
                 secret_exists = True
-                print(f"  📝 Secret '{secret_id}' exists, will update")
+                print(f"  [U+1F4DD] Secret '{secret_id}' exists, will update")
             except Exception:
                 secret_exists = False
-                print(f"  ➕ Secret '{secret_id}' does not exist, will create")
+                print(f"  [U+2795] Secret '{secret_id}' does not exist, will create")
             
             if not secret_exists:
                 # Create the secret
@@ -74,7 +74,7 @@ class StagingClickHouseSecretsUpdater:
                     "secret": {"replication": {"automatic": {}}}
                 }
                 self.client.create_secret(request=request)
-                print(f"  ✅ Created secret '{secret_id}'")
+                print(f"   PASS:  Created secret '{secret_id}'")
             
             # Add a new version with the value
             request = {
@@ -82,7 +82,7 @@ class StagingClickHouseSecretsUpdater:
                 "payload": {"data": secret_value.encode("UTF-8")}
             }
             version = self.client.add_secret_version(request=request)
-            print(f"  ✅ Updated secret '{secret_id}' with new value")
+            print(f"   PASS:  Updated secret '{secret_id}' with new value")
             
             # Destroy old versions to prevent confusion
             self._destroy_old_versions(secret_path, version.name)
@@ -90,7 +90,7 @@ class StagingClickHouseSecretsUpdater:
             return True
             
         except Exception as e:
-            print(f"  ❌ Failed to update secret '{secret_id}': {e}")
+            print(f"   FAIL:  Failed to update secret '{secret_id}': {e}")
             return False
     
     def _destroy_old_versions(self, secret_path: str, current_version_name: str) -> None:
@@ -107,16 +107,16 @@ class StagingClickHouseSecretsUpdater:
                 # Destroy old version
                 try:
                     self.client.destroy_secret_version(request={"name": version.name})
-                    print(f"    🗑️ Destroyed old version: {version.name.split('/')[-1]}")
+                    print(f"    [U+1F5D1][U+FE0F] Destroyed old version: {version.name.split('/')[-1]}")
                 except Exception as e:
-                    print(f"    ⚠️ Could not destroy version {version.name.split('/')[-1]}: {e}")
+                    print(f"     WARNING: [U+FE0F] Could not destroy version {version.name.split('/')[-1]}: {e}")
                     
         except Exception as e:
-            print(f"  ⚠️ Could not cleanup old versions: {e}")
+            print(f"   WARNING: [U+FE0F] Could not cleanup old versions: {e}")
     
     def update_clickhouse_secrets(self) -> bool:
         """Update all ClickHouse-related secrets."""
-        print("\n📦 Updating ClickHouse secrets for staging...")
+        print("\n[U+1F4E6] Updating ClickHouse secrets for staging...")
         
         # Define the correct ClickHouse configuration
         # Using only the canonical staging secret names as defined in secret_mappings.py
@@ -133,23 +133,23 @@ class StagingClickHouseSecretsUpdater:
         failed_count = 0
         
         for secret_id, secret_value in clickhouse_secrets.items():
-            print(f"\n🔄 Updating secret: {secret_id}")
+            print(f"\n CYCLE:  Updating secret: {secret_id}")
             if self.create_or_update_secret(secret_id, secret_value):
                 updated_count += 1
             else:
                 failed_count += 1
                 success = False
         
-        print(f"\n📊 Summary:")
-        print(f"  ✅ Successfully updated: {updated_count} secrets")
+        print(f"\n CHART:  Summary:")
+        print(f"   PASS:  Successfully updated: {updated_count} secrets")
         if failed_count > 0:
-            print(f"  ❌ Failed to update: {failed_count} secrets")
+            print(f"   FAIL:  Failed to update: {failed_count} secrets")
         
         return success
     
     def verify_secrets(self) -> bool:
         """Verify that secrets were correctly updated."""
-        print("\n🔍 Verifying ClickHouse secrets...")
+        print("\n SEARCH:  Verifying ClickHouse secrets...")
         
         expected_values = {
             "clickhouse-host-staging": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
@@ -168,13 +168,13 @@ class StagingClickHouseSecretsUpdater:
                 actual_value = response.payload.data.decode("UTF-8")
                 
                 if actual_value == expected_value:
-                    print(f"  ✅ {secret_id}: Correct")
+                    print(f"   PASS:  {secret_id}: Correct")
                 else:
-                    print(f"  ❌ {secret_id}: Incorrect (expected '{expected_value}', got '{actual_value}')")
+                    print(f"   FAIL:  {secret_id}: Incorrect (expected '{expected_value}', got '{actual_value}')")
                     all_correct = False
                     
             except Exception as e:
-                print(f"  ❌ {secret_id}: Failed to verify - {e}")
+                print(f"   FAIL:  {secret_id}: Failed to verify - {e}")
                 all_correct = False
         
         return all_correct
@@ -182,7 +182,7 @@ class StagingClickHouseSecretsUpdater:
     def run(self) -> bool:
         """Main execution flow."""
         print("=" * 60)
-        print("🚀 ClickHouse Staging Secrets Updater")
+        print("[U+1F680] ClickHouse Staging Secrets Updater")
         print("=" * 60)
         
         # Setup client
@@ -191,19 +191,19 @@ class StagingClickHouseSecretsUpdater:
         
         # Update secrets
         if not self.update_clickhouse_secrets():
-            print("\n❌ Some secrets failed to update")
+            print("\n FAIL:  Some secrets failed to update")
             return False
         
         # Verify secrets
         if not self.verify_secrets():
-            print("\n⚠️ Verification found issues")
+            print("\n WARNING: [U+FE0F] Verification found issues")
             return False
         
         print("\n" + "=" * 60)
-        print("✅ ClickHouse staging secrets successfully updated!")
+        print(" PASS:  ClickHouse staging secrets successfully updated!")
         print("=" * 60)
         
-        print("\n📝 Next steps:")
+        print("\n[U+1F4DD] Next steps:")
         print("1. Restart staging services to pick up new secrets")
         print("2. Test ClickHouse connectivity with: python scripts/test_staging_clickhouse.py")
         print("3. Monitor staging logs for any connection issues")

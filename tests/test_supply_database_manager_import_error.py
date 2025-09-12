@@ -66,21 +66,21 @@ from shared.isolated_environment import IsolatedEnvironment
 
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: test_supply_database_manager_import_error()
-            # REMOVED_SYNTAX_ERROR: print("✗ Test should have caught ImportError but didn"t!")
+            # REMOVED_SYNTAX_ERROR: print("[U+2717] Test should have caught ImportError but didn"t!")
             # REMOVED_SYNTAX_ERROR: except AssertionError:
-                # REMOVED_SYNTAX_ERROR: print("✓ Test correctly identified missing SupplyDatabaseManager import")
+                # REMOVED_SYNTAX_ERROR: print("[U+2713] Test correctly identified missing SupplyDatabaseManager import")
 
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: test_database_manager_only_has_base_class()
-                    # REMOVED_SYNTAX_ERROR: print("✓ Confirmed database_manager.py only has DatabaseManager class")
+                    # REMOVED_SYNTAX_ERROR: print("[U+2713] Confirmed database_manager.py only has DatabaseManager class")
                     # REMOVED_SYNTAX_ERROR: except AssertionError as e:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                         # REMOVED_SYNTAX_ERROR: try:
                             # REMOVED_SYNTAX_ERROR: test_supply_researcher_agent_import_fails()
-                            # REMOVED_SYNTAX_ERROR: print("✓ Confirmed supply_researcher agent fails to import")
+                            # REMOVED_SYNTAX_ERROR: print("[U+2713] Confirmed supply_researcher agent fails to import")
                             # REMOVED_SYNTAX_ERROR: except AssertionError:
-                                # REMOVED_SYNTAX_ERROR: print("✗ Supply researcher agent import didn"t fail as expected")
+                                # REMOVED_SYNTAX_ERROR: print("[U+2717] Supply researcher agent import didn"t fail as expected")
 
                                 # REMOVED_SYNTAX_ERROR: print(" )
                                 # REMOVED_SYNTAX_ERROR: Conclusion: SupplyDatabaseManager class is missing and needs to be implemented.")

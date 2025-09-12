@@ -172,7 +172,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
                 cycle_details.append(f"Cycle {i+1}: {' -> '.join(cycle)}")
             
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Circular dependencies detected in logging infrastructure
+             ALERT:  EXPECTED FAILURE (Issue #368): Circular dependencies detected in logging infrastructure
             
             Number of Cycles: {len(logging_cycles)}
             Cycle Details:
@@ -244,7 +244,7 @@ class TestLoggingCircularDependencyPrevention(SSotBaseTestCase):
             if "Circular import detected" in str(e):
                 # EXPECTED FAILURE: Document runtime cycles
                 self.fail(f"""
-                🚨 EXPECTED FAILURE (Issue #368): Runtime circular import detected
+                 ALERT:  EXPECTED FAILURE (Issue #368): Runtime circular import detected
                 
                 Import Error: {str(e)}
                 Import Stack at Failure: {import_stack}

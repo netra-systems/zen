@@ -67,7 +67,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
             self.websocket_url = "ws://localhost:8000/ws"
             self.backend_url = "http://localhost:8000"
         
-        print(f"🔐 E2E Auth Setup Complete:")
+        print(f"[U+1F510] E2E Auth Setup Complete:")
         print(f"   Primary User: {self.primary_user.user_id}")
         print(f"   Secondary User: {self.secondary_user.user_id}")
         print(f"   Environment: {test_environment}")
@@ -76,7 +76,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
         yield
         
         # E2E cleanup
-        print(f"🧹 E2E test cleanup complete")
+        print(f"[U+1F9F9] E2E test cleanup complete")
     
     @pytest.mark.asyncio
     async def test_authenticated_websocket_gcp_timeout_import_scope_failure(self):
@@ -112,7 +112,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
             }
             
             try:
-                print(f"🔬 Testing GCP scenario: {constraint['scenario']} (timeout: {constraint['timeout']}s)")
+                print(f"[U+1F52C] Testing GCP scenario: {constraint['scenario']} (timeout: {constraint['timeout']}s)")
                 
                 # Create authenticated WebSocket connection with GCP timing constraints
                 connection_future = websockets.connect(
@@ -170,7 +170,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(ws_error) and "not defined" in str(ws_error):
                     scenario_result["import_scope_error"] = True
                     import_scope_failures.append(scenario_result)
-                    print(f"✅ GCP WEBSOCKET IMPORT SCOPE BUG: {ws_error}")
+                    print(f" PASS:  GCP WEBSOCKET IMPORT SCOPE BUG: {ws_error}")
                     
             except asyncio.TimeoutError as timeout_error:
                 scenario_result["timeout_error"] = str(timeout_error)
@@ -178,7 +178,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(timeout_error):
                     scenario_result["import_scope_error"] = True
                     import_scope_failures.append(scenario_result)
-                    print(f"✅ GCP TIMEOUT IMPORT SCOPE BUG: {timeout_error}")
+                    print(f" PASS:  GCP TIMEOUT IMPORT SCOPE BUG: {timeout_error}")
                     
             except Exception as general_error:
                 scenario_result["general_error"] = str(general_error)
@@ -186,7 +186,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(general_error) and "not defined" in str(general_error):
                     scenario_result["import_scope_error"] = True
                     import_scope_failures.append(scenario_result)
-                    print(f"✅ GCP GENERAL IMPORT SCOPE BUG: {general_error}")
+                    print(f" PASS:  GCP GENERAL IMPORT SCOPE BUG: {general_error}")
             finally:
                 scenario_result["duration_ms"] = (time.time() - scenario_result["start_time"]) * 1000
                 gcp_timeout_scenarios.append(scenario_result)
@@ -244,7 +244,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 auth_headers = self.auth_helper.get_websocket_headers(user.jwt_token)
                 auth_subprotocols = self.auth_helper.get_websocket_subprotocols(user.jwt_token)
                 
-                print(f"🔐 Concurrent connection {conn_index} for user {user.user_id}")
+                print(f"[U+1F510] Concurrent connection {conn_index} for user {user.user_id}")
                 
                 # Create concurrent authenticated connection with race condition timing
                 websocket = await asyncio.wait_for(
@@ -287,7 +287,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(concurrent_error) and "not defined" in str(concurrent_error):
                     connection_result["race_condition_import_scope"] = True
                     race_condition_import_failures.append(connection_result)
-                    print(f"✅ CONCURRENT RACE CONDITION IMPORT SCOPE BUG: {concurrent_error}")
+                    print(f" PASS:  CONCURRENT RACE CONDITION IMPORT SCOPE BUG: {concurrent_error}")
                     
             finally:
                 connection_result["duration_ms"] = (time.time() - connection_result["start_time"]) * 1000
@@ -301,7 +301,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 for i, user in enumerate(authenticated_users)
             ]
             
-            print(f"🚀 Starting {len(concurrent_tasks)} concurrent authenticated WebSocket connections")
+            print(f"[U+1F680] Starting {len(concurrent_tasks)} concurrent authenticated WebSocket connections")
             
             # Execute all connections concurrently to maximize race conditions
             results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
@@ -311,7 +311,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if isinstance(result, dict):
                     concurrent_connection_results.append(result)
                     if result.get("race_condition_import_scope"):
-                        print(f"✅ Race condition import scope detected: {result}")
+                        print(f" PASS:  Race condition import scope detected: {result}")
                 elif isinstance(result, Exception):
                     if "get_connection_state_machine" in str(result) and "not defined" in str(result):
                         race_condition_import_failures.append({
@@ -319,7 +319,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                             "exception_type": type(result).__name__,
                             "race_condition_import_scope": True
                         })
-                        print(f"✅ EXCEPTION RACE CONDITION IMPORT SCOPE BUG: {result}")
+                        print(f" PASS:  EXCEPTION RACE CONDITION IMPORT SCOPE BUG: {result}")
             
             if race_condition_import_failures:
                 failure_summary = json.dumps(race_condition_import_failures, indent=2)
@@ -340,7 +340,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
         except Exception as e:
             # Any other exception might indicate race condition import scope issues
             if "get_connection_state_machine" in str(e) and "not defined" in str(e):
-                print(f"✅ CONCURRENT EXECUTION IMPORT SCOPE BUG: {e}")
+                print(f" PASS:  CONCURRENT EXECUTION IMPORT SCOPE BUG: {e}")
                 raise AssertionError(f"CONCURRENT EXECUTION IMPORT SCOPE BUG CONFIRMED: {e}")
             else:
                 raise
@@ -387,7 +387,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
             }
             
             try:
-                print(f"🤖 Testing authenticated agent execution: {scenario['agent_type']}")
+                print(f"[U+1F916] Testing authenticated agent execution: {scenario['agent_type']}")
                 
                 # Create authenticated WebSocket for agent execution
                 websocket = await asyncio.wait_for(
@@ -462,7 +462,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(agent_error) and "not defined" in str(agent_error):
                     scenario_result["agent_execution_import_scope_error"] = True
                     agent_import_scope_failures.append(scenario_result)
-                    print(f"✅ AGENT EXECUTION IMPORT SCOPE BUG: {agent_error}")
+                    print(f" PASS:  AGENT EXECUTION IMPORT SCOPE BUG: {agent_error}")
             finally:
                 scenario_result["total_duration_ms"] = (time.time() - scenario_result["start_time"]) * 1000
         
@@ -509,7 +509,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
             }
             
             try:
-                print(f"🔧 Testing authenticated error recovery: {scenario['error_type']}")
+                print(f"[U+1F527] Testing authenticated error recovery: {scenario['error_type']}")
                 
                 # Create authenticated connection for error recovery testing
                 websocket = await asyncio.wait_for(
@@ -572,7 +572,7 @@ class TestWebSocketGCPTimingScenarios(SSotBaseTestCase):
                 if "get_connection_state_machine" in str(error_scenario_exception) and "not defined" in str(error_scenario_exception):
                     scenario_result["error_recovery_import_scope_error"] = True
                     error_recovery_import_failures.append(scenario_result)
-                    print(f"✅ ERROR RECOVERY IMPORT SCOPE BUG: {error_scenario_exception}")
+                    print(f" PASS:  ERROR RECOVERY IMPORT SCOPE BUG: {error_scenario_exception}")
             finally:
                 scenario_result["duration_ms"] = (time.time() - scenario_result["start_time"]) * 1000
         

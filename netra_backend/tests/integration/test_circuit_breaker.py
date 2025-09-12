@@ -251,7 +251,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         assert cb_stats["failure_count"] >= 3  # Should have recorded failures
         assert cb_stats["circuit_opened_count"] >= 1  # Should have blocked executions
         
-        logger.info(f"✅ Circuit breaker failure detection test passed - {len(circuit_blocked_attempts)} blocked attempts")
+        logger.info(f" PASS:  Circuit breaker failure detection test passed - {len(circuit_blocked_attempts)} blocked attempts")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -324,7 +324,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         # Final circuit breaker state should show improvement
         final_stats = recovery_agent.get_circuit_breaker_stats()
         
-        logger.info(f"✅ Circuit breaker recovery test passed - final state: {final_stats['circuit_state']}")
+        logger.info(f" PASS:  Circuit breaker recovery test passed - final state: {final_stats['circuit_state']}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -384,7 +384,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         # Either execution succeeds or fails due to circuit breaker (both indicate persistence)
         assert persistence_test_success
         
-        logger.info("✅ Circuit breaker Redis state persistence test passed")
+        logger.info(" PASS:  Circuit breaker Redis state persistence test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -454,7 +454,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         assert reliable_stats["failure_count"] == 0  # No failures recorded
         assert reliable_stats["circuit_state"] != "open"  # Circuit should be closed/healthy
         
-        logger.info("✅ Multi-agent circuit breaker isolation test passed")
+        logger.info(" PASS:  Multi-agent circuit breaker isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -513,7 +513,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         assert performance_overhead < 0.2  # Less than 20% overhead
         assert avg_with_cb_time < 0.1  # Absolute time should still be reasonable
         
-        logger.info(f"✅ Circuit breaker performance test passed - {performance_overhead:.2%} overhead")
+        logger.info(f" PASS:  Circuit breaker performance test passed - {performance_overhead:.2%} overhead")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -578,7 +578,7 @@ class TestCircuitBreaker(BaseIntegrationTest):
         # Validate final circuit breaker state
         final_stats = concurrent_agent.get_circuit_breaker_stats()
         
-        logger.info(f"✅ Concurrent circuit breaker test passed - {len(successful_executions)}/6 successful, {len(circuit_blocked)} blocked")
+        logger.info(f" PASS:  Concurrent circuit breaker test passed - {len(successful_executions)}/6 successful, {len(circuit_blocked)} blocked")
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ the SessionInfo from schemas.auth_types with additional fields required for
 comprehensive session lifecycle management.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Provide robust session management for auth infrastructure
 - Value Impact: Enable secure, scalable session handling
 - Revenue Impact: Support auth system reliability

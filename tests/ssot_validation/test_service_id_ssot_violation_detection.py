@@ -14,7 +14,7 @@ Expected Behavior:
 - FAIL: With current mixed hardcoded vs environment patterns
 - PASS: After SSOT remediation with single constant source
 
-CRITICAL: This test protects the Golden Path: users login → get AI responses
+CRITICAL: This test protects the Golden Path: users login  ->  get AI responses
 """
 
 import os

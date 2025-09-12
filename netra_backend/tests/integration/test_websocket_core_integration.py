@@ -709,7 +709,7 @@ class TestWebSocketCoreIntegration(BaseIntegrationTest):
         total_events_delivered = sum(ws.business_metrics["events_delivered"] for ws in websockets)
         assert total_events_delivered == total_events
         
-        print(f"✅ Enterprise scale test: {total_events} events across {concurrent_users} users in {total_time:.2f}s ({events_per_second:.2f} events/sec)")
+        print(f" PASS:  Enterprise scale test: {total_events} events across {concurrent_users} users in {total_time:.2f}s ({events_per_second:.2f} events/sec)")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1041,6 +1041,6 @@ class TestWebSocketCoreIntegration(BaseIntegrationTest):
         assert tool_completed_event["data"]["insights"]["suppliers_analyzed"] == 847
         assert tool_completed_event["data"]["insights"]["cost_opportunities_identified"] == 23
         
-        print(f"✅ Complete business scenario: $187M savings identified from $2.5B spend (7.48% reduction)")
-        print(f"✅ Business value delivered: {websocket.business_metrics['user_engagement_score']} engagement points")
-        print(f"✅ Revenue impact events: {websocket.business_metrics['revenue_impact_events']} critical deliverables")
+        print(f" PASS:  Complete business scenario: $187M savings identified from $2.5B spend (7.48% reduction)")
+        print(f" PASS:  Business value delivered: {websocket.business_metrics['user_engagement_score']} engagement points")
+        print(f" PASS:  Revenue impact events: {websocket.business_metrics['revenue_impact_events']} critical deliverables")

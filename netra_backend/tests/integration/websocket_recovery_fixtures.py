@@ -10,7 +10,7 @@ WebSocket Recovery Test Fixtures and Utilities
 Shared fixtures, mock classes, and utilities for WebSocket state recovery testing.
 Centralizes common testing patterns to ensure consistency and reduce maintenance overhead.
 
-All functions ≤8 lines per CLAUDE.md requirements.
+All functions  <= 8 lines per CLAUDE.md requirements.
 """
 
 from datetime import datetime, timezone

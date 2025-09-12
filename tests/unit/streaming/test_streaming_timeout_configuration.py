@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL ISSUE #341:
 Current problem: 60s timeout constraints causing failures for complex analytical workflows
-Target solution: 60s→300s timeout progression hierarchy
+Target solution: 60s -> 300s timeout progression hierarchy
 Test Strategy: Initially FAIL to prove current 60s limitation, then validate fix
 
 REQUIREMENTS:
@@ -89,7 +89,7 @@ class TestStreamingTimeoutConfiguration(SSotBaseTestCase):
         """
         Test WebSocket recv timeout progression for streaming scenarios.
         
-        ISSUE #341: Need 60s→300s timeout progression
+        ISSUE #341: Need 60s -> 300s timeout progression
         This test should INITIALLY FAIL showing current progression is insufficient.
         """
         self.set_env_var("ENVIRONMENT", "testing")

@@ -2,7 +2,7 @@
 AI Supply Chain Failover Test Helpers
 
 BVJ: Protects $75K+ MRR from LLM provider outages by ensuring robust failover mechanisms.
-Architecture: Functions ≤8 lines, modular provider simulation utilities.
+Architecture: Functions  <= 8 lines, modular provider simulation utilities.
 """
 
 import asyncio

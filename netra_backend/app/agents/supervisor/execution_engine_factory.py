@@ -91,12 +91,12 @@ class ExecutionEngineFactory:
         # COMPATIBILITY FIX: Make websocket_bridge optional for test environments
         if not websocket_bridge:
             logger.warning(
-                "⚠️ COMPATIBILITY MODE: ExecutionEngineFactory initialized without websocket_bridge. "
+                " WARNING: [U+FE0F] COMPATIBILITY MODE: ExecutionEngineFactory initialized without websocket_bridge. "
                 "WebSocket events will be disabled. This is acceptable for test environments but "
                 "not recommended for production deployment where chat functionality requires WebSocket events."
             )
         else:
-            logger.info(f"✅ ExecutionEngineFactory initialized with WebSocket bridge: {type(websocket_bridge).__name__}")
+            logger.info(f" PASS:  ExecutionEngineFactory initialized with WebSocket bridge: {type(websocket_bridge).__name__}")
         
         # Store websocket bridge (can be None in test mode)
         self._websocket_bridge = websocket_bridge
@@ -215,7 +215,7 @@ class ExecutionEngineFactory:
                     self._cleanup_task = asyncio.create_task(self._cleanup_loop())
                 
                 creation_time = (time.time() - start_time) * 1000
-                logger.info(f"✅ Created UserExecutionEngine {engine.engine_id} "
+                logger.info(f" PASS:  Created UserExecutionEngine {engine.engine_id} "
                            f"in {creation_time:.1f}ms (user: {validated_context.user_id})")
                 
                 return engine
@@ -270,7 +270,7 @@ class ExecutionEngineFactory:
             
             if not websocket_bridge:
                 logger.warning(
-                    f"⚠️ Creating UserWebSocketEmitter for user {context.user_id} without WebSocket bridge. "
+                    f" WARNING: [U+FE0F] Creating UserWebSocketEmitter for user {context.user_id} without WebSocket bridge. "
                     f"WebSocket events will be disabled (test/degraded mode)."
                 )
             
@@ -333,7 +333,7 @@ class ExecutionEngineFactory:
                     await self.cleanup_engine(engine)
                     
                     total_time = (time.time() - start_time) * 1000
-                    logger.info(f"✅ Completed user execution scope for user {context.user_id} "
+                    logger.info(f" PASS:  Completed user execution scope for user {context.user_id} "
                                f"in {total_time:.1f}ms")
                                
                 except Exception as e:
@@ -370,7 +370,7 @@ class ExecutionEngineFactory:
                     self._factory_metrics['total_engines_cleaned'] += 1
                     self._factory_metrics['active_engines_count'] = len(self._active_engines)
                 
-                logger.info(f"✅ Cleaned up UserExecutionEngine {engine.engine_id}")
+                logger.info(f" PASS:  Cleaned up UserExecutionEngine {engine.engine_id}")
             
         except Exception as e:
             self._factory_metrics['cleanup_errors'] += 1
@@ -604,7 +604,7 @@ class ExecutionEngineFactory:
             self._factory_metrics['active_engines_count'] = 0
             self._factory_metrics['total_engines_cleaned'] = self._factory_metrics.get('total_engines_created', 0)
             
-            logger.info("✅ ExecutionEngineFactory shutdown complete")
+            logger.info(" PASS:  ExecutionEngineFactory shutdown complete")
             
         except Exception as e:
             logger.error(f"Error during ExecutionEngineFactory shutdown: {e}")
@@ -689,7 +689,7 @@ async def configure_execution_engine_factory(
             database_session_manager=database_session_manager,
             redis_manager=redis_manager
         )
-        logger.info(f"✅ ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers")
+        logger.info(f" PASS:  ExecutionEngineFactory configured with WebSocket bridge and infrastructure managers")
         
         return _factory_instance
 

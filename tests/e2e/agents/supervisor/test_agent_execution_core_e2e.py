@@ -501,7 +501,7 @@ class TestAgentExecutionCoreE2E(BaseE2ETest):
             assert run_id in event_run_ids
         
         # Should have at least 2 events per execution (started + completed/thinking)
-        assert len(all_websocket_events) >= 6  # 3 executions × 2 events minimum
+        assert len(all_websocket_events) >= 6  # 3 executions  x  2 events minimum
     
     @pytest.mark.e2e
     @pytest.mark.real_services

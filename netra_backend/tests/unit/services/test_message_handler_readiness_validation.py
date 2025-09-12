@@ -53,7 +53,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: This exposes the race condition vulnerability.
         """
-        logger.info("🔬 Testing message handler validation during startup race condition")
+        logger.info("[U+1F52C] Testing message handler validation during startup race condition")
         
         # REPRODUCE ISSUE: Simulate startup race condition
         # Handler service is initialized but dependent services aren't ready
@@ -71,7 +71,7 @@ class TestMessageHandlerReadinessValidation:
                 await self.handler_service.handle_message("test-user", test_message)
         
         # FAILURE EXPECTED: This test reproduces the actual issue
-        logger.error("❌ Race condition reproduced: Message handler accepts messages during startup")
+        logger.error(" FAIL:  Race condition reproduced: Message handler accepts messages during startup")
         assert False, "RACE CONDITION REPRODUCED: Message handler validation fails during startup"
     
     @pytest.mark.asyncio 
@@ -83,7 +83,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: Exposes websocket manager availability issues.
         """
-        logger.info("🔬 Testing WebSocket manager unavailability during startup")
+        logger.info("[U+1F52C] Testing WebSocket manager unavailability during startup")
         
         # REPRODUCE: WebSocket manager creation fails during startup
         with patch('netra_backend.app.websocket_core.create_websocket_manager') as mock_create:
@@ -100,7 +100,7 @@ class TestMessageHandlerReadinessValidation:
                 await self.handler_service.handle_message("test-user", test_message)
         
         # FAILURE EXPECTED: Reproduces WebSocket manager startup issue
-        logger.error("❌ WebSocket manager startup issue reproduced")
+        logger.error(" FAIL:  WebSocket manager startup issue reproduced")
         assert False, "WEBSOCKET MANAGER STARTUP ISSUE: Core not initialized during early message handling"
     
     @pytest.mark.asyncio
@@ -112,7 +112,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: Database readiness validation missing.
         """
-        logger.info("🔬 Testing database session readiness for message handlers")
+        logger.info("[U+1F52C] Testing database session readiness for message handlers")
         
         # REPRODUCE: Database session factory not ready
         with patch('netra_backend.app.services.database.unit_of_work.get_unit_of_work') as mock_uow:
@@ -131,7 +131,7 @@ class TestMessageHandlerReadinessValidation:
                 await handler.handle("test-user", test_message.get("payload", {}))
         
         # FAILURE EXPECTED: Database readiness issue reproduced
-        logger.error("❌ Database readiness issue reproduced during message handling")
+        logger.error(" FAIL:  Database readiness issue reproduced during message handling")
         assert False, "DATABASE READINESS ISSUE: Connection pool not ready during message handler startup"
     
     @pytest.mark.asyncio
@@ -143,7 +143,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: Circuit breaker configuration issues.
         """
-        logger.info("🔬 Testing circuit breaker behavior during startup")
+        logger.info("[U+1F52C] Testing circuit breaker behavior during startup")
         
         # REPRODUCE: Circuit breaker triggering during legitimate startup operations
         with patch.object(self.handler_service, 'handlers') as mock_handlers:
@@ -163,7 +163,7 @@ class TestMessageHandlerReadinessValidation:
                 await self.handler_service.handle_message("test-user", test_message)
         
         # FAILURE EXPECTED: Circuit breaker too aggressive during startup
-        logger.error("❌ Circuit breaker blocking legitimate startup operations")
+        logger.error(" FAIL:  Circuit breaker blocking legitimate startup operations")
         assert False, "CIRCUIT BREAKER ISSUE: Blocking legitimate message processing during startup"
     
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: No readiness validation in message queue.
         """
-        logger.info("🔬 Testing message queue readiness validation")
+        logger.info("[U+1F52C] Testing message queue readiness validation")
         
         # Create real message queue to test
         message_queue = MessageQueue()
@@ -201,7 +201,7 @@ class TestMessageHandlerReadinessValidation:
             assert result is True
         
         # FAILURE EXPECTED: No readiness validation in message queue
-        logger.error("❌ Message queue accepts messages without service readiness validation")
+        logger.error(" FAIL:  Message queue accepts messages without service readiness validation")
         assert False, "MESSAGE QUEUE READINESS ISSUE: No validation of downstream service readiness"
     
     @pytest.mark.asyncio
@@ -213,7 +213,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: Handler registration timing issues.
         """
-        logger.info("🔬 Testing handler registration timing race condition")
+        logger.info("[U+1F52C] Testing handler registration timing race condition")
         
         # REPRODUCE: Message arrives before handler is fully registered
         partial_service = MessageHandlerService(
@@ -235,7 +235,7 @@ class TestMessageHandlerReadinessValidation:
             await partial_service.handle_message("test-user", test_message)
         
         # FAILURE EXPECTED: Handler registration race condition
-        logger.error("❌ Handler registration race condition reproduced")
+        logger.error(" FAIL:  Handler registration race condition reproduced")
         assert False, "HANDLER REGISTRATION RACE: Messages processed before handlers fully registered"
     
     @pytest.mark.asyncio
@@ -247,7 +247,7 @@ class TestMessageHandlerReadinessValidation:
         
         EXPECTED TO FAIL: Supervisor readiness validation missing.
         """
-        logger.info("🔬 Testing supervisor readiness for agent handlers")
+        logger.info("[U+1F52C] Testing supervisor readiness for agent handlers")
         
         # REPRODUCE: Supervisor not ready during handler validation
         mock_supervisor = MagicMock()
@@ -262,7 +262,7 @@ class TestMessageHandlerReadinessValidation:
             await handler.handle("test-user", test_payload)
         
         # FAILURE EXPECTED: Supervisor readiness issue reproduced
-        logger.error("❌ Supervisor readiness issue reproduced")
+        logger.error(" FAIL:  Supervisor readiness issue reproduced")
         assert False, "SUPERVISOR READINESS ISSUE: LLM provider not ready during agent handler startup"
 
 
@@ -287,7 +287,7 @@ class TestMessageHandlerValidationLogic:
         
         EXPECTED TO FAIL: Validation logic gaps.
         """
-        logger.info("🔬 Testing message format validation with malformed payloads")
+        logger.info("[U+1F52C] Testing message format validation with malformed payloads")
         
         # Test cases that should be rejected but might not be
         malformed_messages = [
@@ -312,7 +312,7 @@ class TestMessageHandlerValidationLogic:
         
         # FAILURE EXPECTED: Some malformed messages might not be rejected
         if validation_failures:
-            logger.error(f"❌ Validation failures: {validation_failures}")
+            logger.error(f" FAIL:  Validation failures: {validation_failures}")
             assert False, f"MESSAGE VALIDATION GAPS: {len(validation_failures)} malformed messages not rejected"
     
     @pytest.mark.asyncio
@@ -324,7 +324,7 @@ class TestMessageHandlerValidationLogic:
         
         EXPECTED TO FAIL: Concurrent validation issues.
         """
-        logger.info("🔬 Testing concurrent message validation race conditions")
+        logger.info("[U+1F52C] Testing concurrent message validation race conditions")
         
         # Create multiple messages to process simultaneously
         messages = [
@@ -349,11 +349,11 @@ class TestMessageHandlerValidationLogic:
         ]
         
         if race_condition_errors:
-            logger.error(f"❌ Race condition errors detected: {len(race_condition_errors)}")
+            logger.error(f" FAIL:  Race condition errors detected: {len(race_condition_errors)}")
             assert False, f"CONCURRENT VALIDATION RACE: {len(race_condition_errors)} race condition errors"
         
         # Even if no explicit race errors, concurrent processing issues are common
-        logger.error("❌ Concurrent validation race conditions likely exist")
+        logger.error(" FAIL:  Concurrent validation race conditions likely exist")
         assert False, "CONCURRENT VALIDATION ISSUE: Race conditions expected in validation logic"
 
 
@@ -369,7 +369,7 @@ class TestMessageHandlerBackgroundTaskTiming:
         
         EXPECTED TO FAIL: Background task startup timing issues.
         """
-        logger.info("🔬 Testing background task startup timing")
+        logger.info("[U+1F52C] Testing background task startup timing")
         
         # Create message queue to test background task timing
         message_queue = MessageQueue()
@@ -389,7 +389,7 @@ class TestMessageHandlerBackgroundTaskTiming:
                     await message_queue._process_message(test_message)
         
         # FAILURE EXPECTED: Background task timing issue
-        logger.error("❌ Background task timing issue reproduced")
+        logger.error(" FAIL:  Background task timing issue reproduced")
         assert False, "BACKGROUND TASK TIMING: Processing starts before handlers ready"
     
     @pytest.mark.asyncio
@@ -401,7 +401,7 @@ class TestMessageHandlerBackgroundTaskTiming:
         
         EXPECTED TO FAIL: Worker startup race conditions.
         """
-        logger.info("🔬 Testing worker startup race conditions")
+        logger.info("[U+1F52C] Testing worker startup race conditions")
         
         message_queue = MessageQueue()
         
@@ -415,5 +415,5 @@ class TestMessageHandlerBackgroundTaskTiming:
                 await message_queue._get_next_message()
         
         # FAILURE EXPECTED: Worker startup race condition
-        logger.error("❌ Worker startup race condition reproduced")
+        logger.error(" FAIL:  Worker startup race condition reproduced")
         assert False, "WORKER STARTUP RACE: Workers start before Redis ready"

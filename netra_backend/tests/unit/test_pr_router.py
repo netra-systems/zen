@@ -7,7 +7,7 @@ This file was refactored to meet the 450-line limit by splitting into:
 - test_pr_router_security.py - security and validation tests (15 tests)
 - test_pr_router_utils.py - utility and helper function tests (19 tests)
 
-All functions are ≤8 lines using proper test patterns.
+All functions are  <= 8 lines using proper test patterns.
 Tests ALL 22 functions from pr_router.py with success and error cases.
 Each function has AT LEAST 2 dedicated tests as required.
 

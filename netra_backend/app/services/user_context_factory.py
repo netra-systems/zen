@@ -5,7 +5,7 @@ This module provides SSOT import compatibility by aliasing the existing
 UserContextFactory implementation from the user execution context module.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure proper user request isolation and context management
 - Value Impact: Prevents data leakage between concurrent user requests
 - Strategic Impact: Critical for multi-user system reliability and data security

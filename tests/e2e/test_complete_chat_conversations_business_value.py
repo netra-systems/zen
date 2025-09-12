@@ -78,8 +78,8 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Starting multi-turn cost optimization conversation")
-        print(f"👤 User: {user_data['email']}")
+        print(f"[U+1F680] Starting multi-turn cost optimization conversation")
+        print(f"[U+1F464] User: {user_data['email']}")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -122,7 +122,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                print(f"✅ WebSocket connected for multi-turn conversation")
+                print(f" PASS:  WebSocket connected for multi-turn conversation")
                 
                 for turn_data in conversation_turns:
                     turn_num = turn_data["turn"]
@@ -130,7 +130,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                     expected_themes = turn_data["expected_response_themes"]
                     business_value = turn_data["business_value"]
                     
-                    print(f"\n💬 TURN {turn_num}: {message}")
+                    print(f"\n[U+1F4AC] TURN {turn_num}: {message}")
                     
                     # Send message
                     request = {
@@ -146,7 +146,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                     }
                     
                     await websocket.send(json.dumps(request))
-                    print(f"📤 Sent turn {turn_num} message")
+                    print(f"[U+1F4E4] Sent turn {turn_num} message")
                     
                     # Collect response events
                     turn_events = []
@@ -159,15 +159,15 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                             event = json.loads(message_raw)
                             turn_events.append(event)
                             
-                            print(f"📨 Turn {turn_num} event: {event['type']}")
+                            print(f"[U+1F4E8] Turn {turn_num} event: {event['type']}")
                             
                             if event['type'] == 'agent_completed':
                                 response_content = event['data']['result']
-                                print(f"✅ Turn {turn_num} completed")
+                                print(f" PASS:  Turn {turn_num} completed")
                                 break
                                 
                         except asyncio.TimeoutError:
-                            print(f"⏰ Turn {turn_num} timeout waiting for events")
+                            print(f"[U+23F0] Turn {turn_num} timeout waiting for events")
                             continue
                         except json.JSONDecodeError:
                             continue
@@ -199,7 +199,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                         "completion_time": time.time() - start_time
                     })
                     
-                    print(f"✅ Turn {turn_num} validated - themes found: {found_themes}")
+                    print(f" PASS:  Turn {turn_num} validated - themes found: {found_themes}")
                     
                     # Brief pause between turns (realistic conversation pacing)
                     await asyncio.sleep(1)
@@ -211,7 +211,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         assert len(conversation_history) == len(conversation_turns), \
             f"Incomplete conversation: {len(conversation_history)}/{len(conversation_turns)} turns"
         
-        print(f"\n📊 CONVERSATION ANALYSIS:")
+        print(f"\n CHART:  CONVERSATION ANALYSIS:")
         
         # Validate conversation progression (each turn should build on previous)
         total_response_length = 0
@@ -257,12 +257,12 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         
         assert final_actionable_count >= 2, f"Final response lacks actionable guidance: {final_actionable_count}"
         
-        print(f"✅ MULTI-TURN CONVERSATION SUCCESS!")
-        print(f"   ✓ All {len(conversation_turns)} turns completed")
-        print(f"   ✓ Context preserved across conversation")
-        print(f"   ✓ Progressive business value delivery")
-        print(f"   ✓ Actionable final recommendations")
-        print(f"   ✓ All WebSocket events delivered")
+        print(f" PASS:  MULTI-TURN CONVERSATION SUCCESS!")
+        print(f"   [U+2713] All {len(conversation_turns)} turns completed")
+        print(f"   [U+2713] Context preserved across conversation")
+        print(f"   [U+2713] Progressive business value delivery")
+        print(f"   [U+2713] Actionable final recommendations")
+        print(f"   [U+2713] All WebSocket events delivered")
 
 
     @pytest.mark.e2e
@@ -283,7 +283,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Starting complex multi-agent conversation")
+        print(f"[U+1F680] Starting complex multi-agent conversation")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -304,13 +304,13 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"📋 Complex request: Multi-model, multi-region optimization")
-        print(f"💰 Current spend: $45,000/month, 500k+ requests/day")
+        print(f"[U+1F4CB] Complex request: Multi-model, multi-region optimization")
+        print(f"[U+1F4B0] Current spend: $45,000/month, 500k+ requests/day")
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                 await websocket.send(json.dumps(complex_request))
-                print(f"📤 Sent complex multi-agent request")
+                print(f"[U+1F4E4] Sent complex multi-agent request")
                 
                 all_events = []
                 start_time = time.time()
@@ -323,21 +323,21 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                         event = json.loads(message)
                         all_events.append(event)
                         
-                        print(f"📨 Event: {event['type']}")
+                        print(f"[U+1F4E8] Event: {event['type']}")
                         
                         # Look for agent handoff indicators
                         if event['type'] == 'agent_thinking':
                             thinking_content = event.get('data', {}).get('content', '')
                             if any(agent in thinking_content.lower() for agent in ['data', 'optimization', 'triage']):
-                                print(f"🔄 Agent coordination detected: {thinking_content[:100]}...")
+                                print(f" CYCLE:  Agent coordination detected: {thinking_content[:100]}...")
                         
                         if event['type'] == 'agent_completed':
                             completion_time = time.time() - start_time
-                            print(f"✅ Multi-agent workflow completed in {completion_time:.1f}s")
+                            print(f" PASS:  Multi-agent workflow completed in {completion_time:.1f}s")
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f"⏰ Waiting for multi-agent completion...")
+                        print(f"[U+23F0] Waiting for multi-agent completion...")
                         continue
                     except json.JSONDecodeError:
                         continue
@@ -349,7 +349,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         assert len(all_events) > 0, "No events received from multi-agent workflow"
         
         event_types = [e['type'] for e in all_events]
-        print(f"📊 Total events: {len(all_events)}, Types: {set(event_types)}")
+        print(f" CHART:  Total events: {len(all_events)}, Types: {set(event_types)}")
         
         # Validate critical events
         required_events = ['agent_started', 'agent_thinking', 'agent_completed']
@@ -387,12 +387,12 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         business_value_count = sum(business_value_elements)
         assert business_value_count >= 3, f"Insufficient business value elements: {business_value_count}/4"
         
-        print(f"✅ COMPLEX MULTI-AGENT CONVERSATION SUCCESS!")
-        print(f"   ✓ {len(all_events)} events processed")
-        print(f"   ✓ {len(thinking_events)} agent coordination events")
-        print(f"   ✓ Enterprise indicators found: {found_indicators}")
-        print(f"   ✓ Business value elements: {business_value_count}/4")
-        print(f"   ✓ Comprehensive solution delivered")
+        print(f" PASS:  COMPLEX MULTI-AGENT CONVERSATION SUCCESS!")
+        print(f"   [U+2713] {len(all_events)} events processed")
+        print(f"   [U+2713] {len(thinking_events)} agent coordination events")
+        print(f"   [U+2713] Enterprise indicators found: {found_indicators}")
+        print(f"   [U+2713] Business value elements: {business_value_count}/4")
+        print(f"   [U+2713] Comprehensive solution delivered")
 
 
     @pytest.mark.e2e
@@ -413,7 +413,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Starting conversational error recovery test")
+        print(f"[U+1F680] Starting conversational error recovery test")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -447,7 +447,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                 conversation_events = []
                 
                 for i, step in enumerate(conversation_sequence):
-                    print(f"\n🔄 Step {i+1} ({step['type']}): {step['message'][:50]}...")
+                    print(f"\n CYCLE:  Step {i+1} ({step['type']}): {step['message'][:50]}...")
                     
                     request = {
                         "type": "agent_request",
@@ -466,7 +466,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                         try:
                             await websocket.send(step["message"])  # Send raw malformed message
                         except:
-                            print(f"✅ Problematic request rejected as expected")
+                            print(f" PASS:  Problematic request rejected as expected")
                             continue
                     else:
                         await websocket.send(json.dumps(request))
@@ -484,7 +484,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                             if event['type'] == 'agent_completed':
                                 break
                             elif event['type'] == 'error':
-                                print(f"🔧 Error event received: {event.get('data', {}).get('message', 'Unknown error')}")
+                                print(f"[U+1F527] Error event received: {event.get('data', {}).get('message', 'Unknown error')}")
                                 break
                                 
                         except asyncio.TimeoutError:
@@ -512,16 +512,16 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                                 assert "recommendation" in result_text or "strategy" in result_text, \
                                     "Followup should provide actionable content"
                             
-                            print(f"✅ Step {i+1} completed successfully")
+                            print(f" PASS:  Step {i+1} completed successfully")
                         else:
-                            print(f"⚠️ Step {i+1} no completion event")
+                            print(f" WARNING: [U+FE0F] Step {i+1} no completion event")
                 
                 # Validate overall error recovery
                 total_events = len(conversation_events)
                 completion_events = [e for e in conversation_events if e['type'] == 'agent_completed']
                 error_events = [e for e in conversation_events if e['type'] == 'error']
                 
-                print(f"📊 Conversation summary:")
+                print(f" CHART:  Conversation summary:")
                 print(f"   Total events: {total_events}")
                 print(f"   Completions: {len(completion_events)}")
                 print(f"   Errors: {len(error_events)}")
@@ -541,11 +541,11 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                     
                     assert len(found_business) >= 1, f"Final response lacks business value: {found_business}"
                 
-                print(f"✅ CONVERSATIONAL ERROR RECOVERY SUCCESS!")
-                print(f"   ✓ Handled problematic requests gracefully")
-                print(f"   ✓ Maintained conversation context through recovery")
-                print(f"   ✓ Delivered business value despite errors")
-                print(f"   ✓ {len(completion_events)} successful completions")
+                print(f" PASS:  CONVERSATIONAL ERROR RECOVERY SUCCESS!")
+                print(f"   [U+2713] Handled problematic requests gracefully")
+                print(f"   [U+2713] Maintained conversation context through recovery")
+                print(f"   [U+2713] Delivered business value despite errors")
+                print(f"   [U+2713] {len(completion_events)} successful completions")
         
         except Exception as e:
             pytest.fail(f"Conversational error recovery test failed: {e}")
@@ -569,7 +569,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Starting business value measurement conversation")
+        print(f"[U+1F680] Starting business value measurement conversation")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -588,8 +588,8 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"💼 Business case request: ROI justification for CFO")
-        print(f"💰 Current spend: $25,000/month")
+        print(f"[U+1F4BC] Business case request: ROI justification for CFO")
+        print(f"[U+1F4B0] Current spend: $25,000/month")
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
@@ -642,11 +642,11 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                 
                 assert len(quantified_elements) >= 2, f"Insufficient quantification: {quantified_elements}"
                 
-                print(f"✅ BUSINESS VALUE MEASUREMENT SUCCESS!")
-                print(f"   ✓ Business metrics score: {business_score}/5")
-                print(f"   ✓ Quantified elements: {quantified_elements}")
-                print(f"   ✓ CFO-ready business case provided")
-                print(f"   ✓ ROI justification delivered")
+                print(f" PASS:  BUSINESS VALUE MEASUREMENT SUCCESS!")
+                print(f"   [U+2713] Business metrics score: {business_score}/5")
+                print(f"   [U+2713] Quantified elements: {quantified_elements}")
+                print(f"   [U+2713] CFO-ready business case provided")
+                print(f"   [U+2713] ROI justification delivered")
         
         except Exception as e:
             pytest.fail(f"Business value measurement conversation failed: {e}")
@@ -670,7 +670,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Starting conversation context persistence test")
+        print(f"[U+1F680] Starting conversation context persistence test")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -703,7 +703,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                 
                 for i, turn in enumerate(context_turns):
-                    print(f"\n💬 Turn {i+1}: {turn['message'][:60]}...")
+                    print(f"\n[U+1F4AC] Turn {i+1}: {turn['message'][:60]}...")
                     
                     request = {
                         "type": "agent_request",
@@ -752,7 +752,7 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                             assert context_preservation_rate >= 0.5, \
                                 f"Turn {i+1} poor context preservation: {context_preservation_rate:.1%}, found: {found_context}"
                             
-                            print(f"✅ Turn {i+1} context preserved: {found_context}")
+                            print(f" PASS:  Turn {i+1} context preserved: {found_context}")
                         
                         conversation_results.append({
                             "turn": i+1,
@@ -779,11 +779,11 @@ class TestCompleteChatConversationsBusinessValue(SSotBaseTestCase):
                 final_context_rate = len(final_context_found) / len(key_context_elements)
                 assert final_context_rate >= 0.6, f"Final response lacks context: {final_context_rate:.1%}"
                 
-                print(f"✅ CONVERSATION CONTEXT PERSISTENCE SUCCESS!")
-                print(f"   ✓ All {len(context_turns)} turns completed")
-                print(f"   ✓ Context references resolved correctly")
-                print(f"   ✓ Final context preservation: {final_context_rate:.1%}")
-                print(f"   ✓ Long-term memory demonstrated")
+                print(f" PASS:  CONVERSATION CONTEXT PERSISTENCE SUCCESS!")
+                print(f"   [U+2713] All {len(context_turns)} turns completed")
+                print(f"   [U+2713] Context references resolved correctly")
+                print(f"   [U+2713] Final context preservation: {final_context_rate:.1%}")
+                print(f"   [U+2713] Long-term memory demonstrated")
         
         except Exception as e:
             pytest.fail(f"Conversation context persistence test failed: {e}")

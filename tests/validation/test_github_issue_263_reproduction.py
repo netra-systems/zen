@@ -10,7 +10,7 @@ This test file reproduces the specific failing behavior described in GitHub issu
 These tests MUST FAIL before the fix and PASS after the fix is applied.
 
 Business Value: Platform/Internal - Validates test infrastructure reliability
-Critical Path: Test discovery → Test execution → Issue reproduction → Fix validation
+Critical Path: Test discovery  ->  Test execution  ->  Issue reproduction  ->  Fix validation
 """
 
 import asyncio
@@ -168,21 +168,6 @@ class TestIssue263BrokenPatternsSimulation:
     This class demonstrates what the failing tests looked like BEFORE the fix.
     These patterns should NOT be used in real tests - they are for demonstration only.
     """
-    
-    def setUp(self):
-        """
-        BROKEN PATTERN: Uses setUp() instead of setup_method().
-        
-        This will cause issues with SSOT base classes that expect setup_method().
-        """
-        # This would fail because SSotAsyncTestCase expects setup_method()
-        self.golden_user_context = UserExecutionContext(
-            user_id="broken_user",
-            thread_id="broken_thread",
-            run_id="broken_run", 
-            request_id="broken_request",
-            websocket_client_id="broken_ws"
-        )
     
     def test_broken_execution_result_old_pattern(self):
         """

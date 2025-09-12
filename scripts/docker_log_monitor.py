@@ -367,10 +367,10 @@ class DockerLogMonitor:
                 
                 if success:
                     issue.status = "fixed"
-                    print(f"  ✓ Issue {issue.id} fixed successfully")
+                    print(f"  [U+2713] Issue {issue.id} fixed successfully")
                 else:
                     issue.status = "failed"
-                    print(f"  ✗ Failed to fix issue {issue.id}")
+                    print(f"  [U+2717] Failed to fix issue {issue.id}")
             else:
                 issue.status = "needs_manual"
                 print(f"  ! Issue {issue.id} requires manual intervention")
@@ -514,13 +514,13 @@ class DockerLogMonitor:
 """
             
             if issue.status == "fixed":
-                issue_section += "✅ **FIXED** - Issue has been automatically resolved\n"
+                issue_section += " PASS:  **FIXED** - Issue has been automatically resolved\n"
             elif issue.status == "failed":
-                issue_section += "❌ **FAILED** - Automatic fix failed, manual intervention required\n"
+                issue_section += " FAIL:  **FAILED** - Automatic fix failed, manual intervention required\n"
             elif issue.status == "needs_manual":
-                issue_section += "⚠️ **MANUAL** - Requires manual intervention\n"
+                issue_section += " WARNING: [U+FE0F] **MANUAL** - Requires manual intervention\n"
             else:
-                issue_section += "🔄 **IN PROGRESS** - Fix in progress\n"
+                issue_section += " CYCLE:  **IN PROGRESS** - Fix in progress\n"
             
             issue_section += "\n---\n"
             

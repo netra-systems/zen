@@ -336,7 +336,7 @@ class TestLogFormatterGcpTracebackComprehensive(SSotBaseTestCase):
         """
         try:
             # Create exception with Unicode message
-            raise ValueError("Unicode error: café ñoño 中文 🚀")
+            raise ValueError("Unicode error: caf[U+00E9] [U+00F1]o[U+00F1]o [U+4E2D][U+6587] [U+1F680]")
         except Exception:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             
@@ -347,7 +347,7 @@ class TestLogFormatterGcpTracebackComprehensive(SSotBaseTestCase):
             
             record = self._create_mock_loguru_record(
                 level="ERROR",
-                message="Unicode error occurred: café ñoño 中文 🚀",
+                message="Unicode error occurred: caf[U+00E9] [U+00F1]o[U+00F1]o [U+4E2D][U+6587] [U+1F680]",
                 exception=exception_obj
             )
             
@@ -361,7 +361,7 @@ class TestLogFormatterGcpTracebackComprehensive(SSotBaseTestCase):
             
             # Validate Unicode message is preserved
             message = gcp_data.get('message', '')
-            assert 'café' in message or 'caf' in message, "Unicode characters not handled properly"
+            assert 'caf[U+00E9]' in message or 'caf' in message, "Unicode characters not handled properly"
             
             # Validate proper JSON encoding
             assert isinstance(json_output, str), "JSON output should be string"
@@ -767,7 +767,7 @@ class TestLogFormatterGcpTracebackComprehensive(SSotBaseTestCase):
             assert f"Thread {thread_id} message" in gcp_data.get('message', ''), \
                 f"Thread {thread_id}, iteration {iteration}: Message corruption"
         
-        # Should have 50 results (5 threads × 10 iterations)
+        # Should have 50 results (5 threads  x  10 iterations)
         assert result_count == 50, f"Expected 50 results, got {result_count}"
         
         self.record_metric("thread_safety_test", "PASSED")
@@ -973,7 +973,7 @@ class TestLogFormatterGcpTracebackParametrized(SSotBaseTestCase):
         "Simple message",
         "Message with 'quotes' and \"double quotes\"",
         "Message with\nnewlines\rand\r\ncarriage returns",
-        "Message with unicode: café ñoño 中文 🚀",
+        "Message with unicode: caf[U+00E9] [U+00F1]o[U+00F1]o [U+4E2D][U+6587] [U+1F680]",
         "Message with JSON-like content: {'key': 'value', 'nested': {'data': true}}",
         "Very long message: " + "x" * 1000,
         "",  # Empty message

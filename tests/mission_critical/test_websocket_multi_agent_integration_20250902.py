@@ -552,7 +552,7 @@
             # Removed problematic line: async def test_multiple_agents_per_user_sharing_factory(self):
                 # REMOVED_SYNTAX_ERROR: """Test 1: Multiple agents per user sharing the same factory with isolation."""
                 # REMOVED_SYNTAX_ERROR: pass
-                # REMOVED_SYNTAX_ERROR: print("🧪 TEST 1: Multiple agents per user sharing factory")
+                # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 1: Multiple agents per user sharing factory")
 
                 # Create multiple users, each with multiple agents
                 # REMOVED_SYNTAX_ERROR: user_scenarios = [ )
@@ -620,7 +620,7 @@
                         # REMOVED_SYNTAX_ERROR: @pytest.fixture
                         # Removed problematic line: async def test_agent_hierarchy_per_user_with_factory_isolation(self):
                             # REMOVED_SYNTAX_ERROR: """Test 2: Agent hierarchy per user with factory pattern isolation."""
-                            # REMOVED_SYNTAX_ERROR: print("🧪 TEST 2: Agent hierarchy per user with factory isolation")
+                            # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 2: Agent hierarchy per user with factory isolation")
 
                             # Create users with hierarchical agent patterns
                             # REMOVED_SYNTAX_ERROR: hierarchical_users = []
@@ -673,7 +673,7 @@
                                             # Removed problematic line: async def test_concurrent_multi_agent_event_ordering_per_user(self):
                                                 # REMOVED_SYNTAX_ERROR: """Test 3: Event ordering across concurrent agents with user isolation."""
                                                 # REMOVED_SYNTAX_ERROR: pass
-                                                # REMOVED_SYNTAX_ERROR: print("🧪 TEST 3: Event ordering across concurrent agents per user")
+                                                # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 3: Event ordering across concurrent agents per user")
 
                                                 # Create users with different agent timing patterns
                                                 # REMOVED_SYNTAX_ERROR: timing_scenarios = [ )
@@ -759,7 +759,7 @@
                 # REMOVED_SYNTAX_ERROR: @pytest.fixture
                 # Removed problematic line: async def test_factory_state_consistency_under_multi_user_load(self):
                     # REMOVED_SYNTAX_ERROR: """Test 4: Factory state consistency with concurrent multi-user operations."""
-                    # REMOVED_SYNTAX_ERROR: print("🧪 TEST 4: Factory state consistency under multi-user load")
+                    # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 4: Factory state consistency under multi-user load")
 
                     # Create high concurrency scenario with many users and agents
                     # REMOVED_SYNTAX_ERROR: num_concurrent_users = 8
@@ -832,7 +832,7 @@
                                         # Removed problematic line: async def test_cleanup_with_mixed_success_failure_per_user(self):
                                             # REMOVED_SYNTAX_ERROR: """Test 5: Cleanup when agents complete or fail per user."""
                                             # REMOVED_SYNTAX_ERROR: pass
-                                            # REMOVED_SYNTAX_ERROR: print("🧪 TEST 5: Cleanup with mixed success/failure per user")
+                                            # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 5: Cleanup with mixed success/failure per user")
 
                                             # Create scenarios with mixed success/failure patterns
                                             # REMOVED_SYNTAX_ERROR: mixed_scenarios = [ )
@@ -894,14 +894,14 @@
                                                                 # REMOVED_SYNTAX_ERROR: assert len(error_events) >= len(failure_agents) * 0.5, \
                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                                                # REMOVED_SYNTAX_ERROR: print("✅ TEST 5 PASSED: Mixed success/failure scenarios handled with proper user isolation")
+                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  TEST 5 PASSED: Mixed success/failure scenarios handled with proper user isolation")
 
                                                                 # Removed problematic line: @pytest.mark.asyncio
                                                                 # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
                                                                 # REMOVED_SYNTAX_ERROR: @pytest.fixture
                                                                 # Removed problematic line: async def test_event_collision_handling_with_user_isolation(self):
                                                                     # REMOVED_SYNTAX_ERROR: """Test 6: Event collision handling with user isolation."""
-                                                                    # REMOVED_SYNTAX_ERROR: print("🧪 TEST 6: Event collision handling with user isolation")
+                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 6: Event collision handling with user isolation")
 
                                                                     # Create collision scenarios - agents that emit at same time
                                                                     # REMOVED_SYNTAX_ERROR: collision_users = []
@@ -963,7 +963,7 @@
                                                                                         # Removed problematic line: async def test_extreme_stress_multi_user_resource_contention(self):
                                                                                             # REMOVED_SYNTAX_ERROR: """Test 7: Extreme stress test with multi-user resource contention."""
                                                                                             # REMOVED_SYNTAX_ERROR: pass
-                                                                                            # REMOVED_SYNTAX_ERROR: print("🧪 TEST 7: Extreme stress test with multi-user resource contention")
+                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] TEST 7: Extreme stress test with multi-user resource contention")
 
                                                                                             # Create extreme stress scenario
                                                                                             # REMOVED_SYNTAX_ERROR: stress_users = 12
@@ -1038,7 +1038,7 @@
                                                                                                                     # REMOVED_SYNTAX_ERROR: """Test 8: Comprehensive multi-agent factory integration suite."""
                                                                                                                     # REMOVED_SYNTAX_ERROR: print(" )
                                                                                                                     # REMOVED_SYNTAX_ERROR: " + "=" * 100)
-                                                                                                                    # REMOVED_SYNTAX_ERROR: print("🚀 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION SUITE")
+                                                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F680] COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION SUITE")
                                                                                                                     # REMOVED_SYNTAX_ERROR: print("=" * 100)
 
                                                                                                                     # Ultimate comprehensive scenario combining all patterns
@@ -1132,16 +1132,16 @@
 
                                                                                                                         # Generate comprehensive report
                                                                                                                         # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                        # REMOVED_SYNTAX_ERROR: 🎉 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION COMPLETED")
+                                                                                                                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION COMPLETED")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                                                                                                        # REMOVED_SYNTAX_ERROR: print(f"✅ User Isolation: PERFECT - No violations detected")
+                                                                                                                        # REMOVED_SYNTAX_ERROR: print(f" PASS:  User Isolation: PERFECT - No violations detected")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("=" * 100)
 
-                                                                                                                        # REMOVED_SYNTAX_ERROR: print("🏆 COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION PASSED!")
+                                                                                                                        # REMOVED_SYNTAX_ERROR: print(" TROPHY:  COMPREHENSIVE MULTI-AGENT FACTORY INTEGRATION PASSED!")
 
 
                                                                                                                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

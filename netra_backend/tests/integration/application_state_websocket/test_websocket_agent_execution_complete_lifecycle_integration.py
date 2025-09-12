@@ -524,7 +524,7 @@ class TestWebSocketAgentExecutionCompleteLifecycleIntegration(BaseIntegrationTes
                 assert execution_record["business_value_delivered"] is True
         
         self.logger.info(
-            f"✅ Complete agent execution lifecycle test PASSED - "
+            f" PASS:  Complete agent execution lifecycle test PASSED - "
             f"{validation['total_events']} events in {execution_time:.3f}s, "
             f"${cost_opt['potential_monthly_savings']:,} monthly savings identified"
         )
@@ -653,7 +653,7 @@ class TestWebSocketAgentExecutionCompleteLifecycleIntegration(BaseIntegrationTes
             assert persistent_state["success"] is True
             
         self.logger.info(
-            f"✅ WebSocket events application state synchronization test PASSED - "
+            f" PASS:  WebSocket events application state synchronization test PASSED - "
             f"State: {application_state['agent_status']}, Progress: {application_state['progress_percentage']}%"
         )
 

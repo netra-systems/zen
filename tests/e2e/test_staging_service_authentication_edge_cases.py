@@ -604,7 +604,7 @@ async def test_authentication_state_corruption_detection():
         
     print(f"[EXPECTED FAILURE] Authentication state corruption detected:")
     for check in state_checks:
-        auth_status = "✓" if check.get("authenticated", False) else "✗"
+        auth_status = "[U+2713]" if check.get("authenticated", False) else "[U+2717]"
         print(f"  {auth_status} {check['service']}: {check.get('response_code', 'error')}")
 
 

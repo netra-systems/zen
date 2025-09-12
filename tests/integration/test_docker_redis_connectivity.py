@@ -21,7 +21,7 @@ import pytest
 import os
 import subprocess
 import time
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import json
 import socket
 from typing import Dict, Any, List, Optional, Tuple
@@ -117,9 +117,10 @@ class DockerRedisTestManager:
     def _test_redis_ping(self, host: str, port: int) -> bool:
         """Test Redis connectivity with ping."""
         try:
-            redis_client = redis.Redis(host=host, port=port, socket_timeout=5, socket_connect_timeout=5)
-            redis_client.ping()
-            redis_client.close()
+            # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, socket_timeout=5, socket_connect_timeout=5)
+            await redis_client.ping()
+            await redis_client.close()
             return True
         except Exception:
             return False
@@ -209,31 +210,31 @@ class TestDockerRedisConnectivity:
             redis_client = redis.from_url(redis_url, socket_timeout=5, socket_connect_timeout=5)
             
             # Test ping
-            pong = redis_client.ping()
+            pong = await redis_client.ping()
             assert pong is True, "Redis ping should return True"
             
             # Test basic operations
             test_key = f"docker_connectivity_test_{int(time.time())}"
             
             # Set a value
-            redis_client.set(test_key, "docker_test_value", ex=60)
+            await redis_client.set(test_key, "docker_test_value", ex=60)
             
             # Get the value
-            retrieved_value = redis_client.get(test_key)
+            retrieved_value = await redis_client.get(test_key)
             assert retrieved_value is not None, "Should retrieve the set value"
             assert retrieved_value.decode() == "docker_test_value"
             
             # Test Redis info
-            info = redis_client.info()
+            info = await redis_client.info()
             assert isinstance(info, dict), "Redis info should return a dictionary"
             assert "redis_version" in info, "Redis info should contain version"
             
             # Test database selection
-            redis_client.select(0)  # Ensure we're on database 0
+            await redis_client.select(0)  # Ensure we're on database 0
             
             # Cleanup
-            redis_client.delete(test_key)
-            redis_client.close()
+            await redis_client.delete(test_key)
+            await redis_client.close()
             
         except redis.ConnectionError as e:
             pytest.fail(f"Redis connection failed: {e}")
@@ -263,7 +264,8 @@ class TestDockerRedisConnectivity:
             # Create multiple clients using the same pool
             clients = []
             for i in range(3):
-                client = redis.Redis(connection_pool=pool)
+                # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+                client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
                 clients.append(client)
             
             # Test that all clients can perform operations
@@ -356,20 +358,20 @@ class TestDockerRedisConnectivity:
             redis_client = redis.from_url(redis_url, socket_timeout=5, retry_on_timeout=True)
             
             # Test normal operation
-            redis_client.set("error_test_key", "test_value", ex=60)
-            assert redis_client.get("error_test_key").decode() == "test_value"
+            await redis_client.set("error_test_key", "test_value", ex=60)
+            assert await redis_client.get("error_test_key").decode() == "test_value"
             
             # Test invalid operations that should handle gracefully
             try:
                 # Invalid command should raise an error
-                redis_client.execute_command("INVALID_COMMAND")
+                await redis_client.execute_command("INVALID_COMMAND")
                 pytest.fail("Invalid command should raise an error")
             except redis.ResponseError:
                 pass  # Expected
             
             # Connection should still work after error
-            redis_client.set("recovery_test_key", "recovery_value", ex=60)
-            assert redis_client.get("recovery_test_key").decode() == "recovery_value"
+            await redis_client.set("recovery_test_key", "recovery_value", ex=60)
+            assert await redis_client.get("recovery_test_key").decode() == "recovery_value"
             
             # Test connection timeout handling
             try:
@@ -385,11 +387,11 @@ class TestDockerRedisConnectivity:
                 pass  # Expected with very short timeout
             
             # Original connection should still work
-            redis_client.ping()
+            await redis_client.ping()
             
             # Cleanup
-            redis_client.delete("error_test_key", "recovery_test_key")
-            redis_client.close()
+            await redis_client.delete("error_test_key", "recovery_test_key")
+            await redis_client.close()
             
         except Exception as e:
             pytest.fail(f"Redis error handling test failed: {e}")
@@ -409,14 +411,16 @@ class TestDockerRedisConnectivity:
         
         try:
             # Test different databases
-            redis_db0 = redis.Redis(
+            # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+            redis_db0 = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=backend_env.get_redis_host(),
                 port=backend_env.get_redis_port(),
                 db=0,
                 socket_timeout=5
             )
             
-            redis_db1 = redis.Redis(
+            # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+            redis_db1 = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=backend_env.get_redis_host(),
                 port=backend_env.get_redis_port(),
                 db=1,
@@ -561,20 +565,21 @@ class TestRedisDockerHealthChecks:
             assert startup_time < 30, f"Redis should start within 30 seconds, took {startup_time:.2f}s"
             
             # Test that Redis is immediately usable after health check passes
-            redis_client = redis.Redis(host="localhost", port=6381, socket_timeout=5)
+            # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=6381, socket_timeout=5)
             
             operation_start = time.time()
-            redis_client.ping()
-            redis_client.set("startup_test", "ready", ex=30)
-            retrieved = redis_client.get("startup_test")
+            await redis_client.ping()
+            await redis_client.set("startup_test", "ready", ex=30)
+            retrieved = await redis_client.get("startup_test")
             operation_time = time.time() - operation_start
             
             assert retrieved.decode() == "ready"
             assert operation_time < 1, f"Redis operations should be fast after startup, took {operation_time:.2f}s"
             
             # Cleanup
-            redis_client.delete("startup_test")
-            redis_client.close()
+            await redis_client.delete("startup_test")
+            await redis_client.close()
             
         finally:
             self.docker_manager.stop_test_redis()
@@ -753,38 +758,38 @@ class TestRedisDockerIntegrationEnd2End:
             redis_client = redis.from_url(redis_url, socket_timeout=5)
             
             # Basic connectivity
-            redis_client.ping()
+            await redis_client.ping()
             
             # Simulate application data operations
             session_key = f"session:{int(time.time())}"
             user_data = {"user_id": "test_user", "session_start": time.time()}
             
             # Store session data
-            redis_client.hset(session_key, mapping=user_data)
-            redis_client.expire(session_key, 300)  # 5 minute expiry
+            await redis_client.hset(session_key, mapping=user_data)
+            await redis_client.expire(session_key, 300)  # 5 minute expiry
             
             # Retrieve session data
-            stored_data = redis_client.hgetall(session_key)
+            stored_data = await redis_client.hgetall(session_key)
             assert stored_data[b'user_id'].decode() == "test_user"
             
             # Test cache operations
             cache_key = f"cache:test_data:{int(time.time())}"
             cache_data = json.dumps({"result": "success", "timestamp": time.time()})
             
-            redis_client.setex(cache_key, 60, cache_data)
-            cached_result = redis_client.get(cache_key)
+            await redis_client.setex(cache_key, 60, cache_data)
+            cached_result = await redis_client.get(cache_key)
             assert cached_result is not None
             
             parsed_cache = json.loads(cached_result.decode())
             assert parsed_cache["result"] == "success"
             
             # Test pub/sub (basic test)
-            pubsub = redis_client.pubsub()
+            pubsub = await redis_client.pubsub()
             test_channel = f"test_channel_{int(time.time())}"
             pubsub.subscribe(test_channel)
             
             # Publish a message
-            redis_client.publish(test_channel, "test_message")
+            await redis_client.publish(test_channel, "test_message")
             
             # Check for message (with timeout)
             message = pubsub.get_message(timeout=5)
@@ -797,9 +802,9 @@ class TestRedisDockerIntegrationEnd2End:
                 assert message['data'].decode() == "test_message"
             
             # Cleanup
-            redis_client.delete(session_key, cache_key)
+            await redis_client.delete(session_key, cache_key)
             pubsub.close()
-            redis_client.close()
+            await redis_client.close()
             
         finally:
             env.reset_to_original()
@@ -832,14 +837,14 @@ class TestRedisDockerIntegrationEnd2End:
             )
             
             # Establish connection
-            redis_client.ping()
+            await redis_client.ping()
             
             # Set persistent data
             persistence_key = f"persistence_test_{int(time.time())}"
-            redis_client.set(persistence_key, "should_survive", ex=300)
+            await redis_client.set(persistence_key, "should_survive", ex=300)
             
             # Simulate brief disconnection by creating new client
-            redis_client.close()
+            await redis_client.close()
             
             # Reconnect (simulating recovery)
             redis_client_recovered = redis.from_url(redis_url, socket_timeout=5)

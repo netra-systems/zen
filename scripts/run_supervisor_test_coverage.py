@@ -65,7 +65,7 @@ class SupervisorTestRunner:
     def run_unit_tests(self) -> bool:
         """Run unit tests with coverage."""
         print("\n" + "="*80)
-        print("🔧 RUNNING UNIT TESTS")
+        print("[U+1F527] RUNNING UNIT TESTS")
         print("="*80)
         
         cmd = [
@@ -84,16 +84,16 @@ class SupervisorTestRunner:
         print(result.stdout)
         
         if result.returncode != 0:
-            print(f"❌ Unit tests failed:\n{result.stderr}")
+            print(f" FAIL:  Unit tests failed:\n{result.stderr}")
             return False
         
-        print("✅ Unit tests passed!")
+        print(" PASS:  Unit tests passed!")
         return True
     
     def run_integration_tests(self) -> bool:
         """Run integration tests."""
         print("\n" + "="*80)
-        print("🔗 RUNNING INTEGRATION TESTS")
+        print("[U+1F517] RUNNING INTEGRATION TESTS")
         print("="*80)
         
         cmd = [
@@ -108,21 +108,21 @@ class SupervisorTestRunner:
         print(result.stdout)
         
         if result.returncode != 0:
-            print(f"❌ Integration tests failed:\n{result.stderr}")
+            print(f" FAIL:  Integration tests failed:\n{result.stderr}")
             return False
         
-        print("✅ Integration tests passed!")
+        print(" PASS:  Integration tests passed!")
         return True
     
     def run_e2e_tests(self) -> bool:
         """Run end-to-end tests."""
         print("\n" + "="*80)
-        print("🌍 RUNNING END-TO-END TESTS")
+        print("[U+1F30D] RUNNING END-TO-END TESTS")
         print("="*80)
         
         # Check if services are available
         if not self.check_services():
-            print("⚠️  Services not available, skipping E2E tests")
+            print(" WARNING: [U+FE0F]  Services not available, skipping E2E tests")
             return True  # Don't fail if services aren't running
         
         cmd = [
@@ -137,16 +137,16 @@ class SupervisorTestRunner:
         print(result.stdout)
         
         if result.returncode != 0:
-            print(f"⚠️  E2E tests failed (may need services):\n{result.stderr}")
+            print(f" WARNING: [U+FE0F]  E2E tests failed (may need services):\n{result.stderr}")
             return True  # Don't fail build for E2E
         
-        print("✅ E2E tests passed!")
+        print(" PASS:  E2E tests passed!")
         return True
     
     def run_stress_tests(self) -> bool:
         """Run stress tests."""
         print("\n" + "="*80)
-        print("💪 RUNNING STRESS TESTS")
+        print("[U+1F4AA] RUNNING STRESS TESTS")
         print("="*80)
         
         cmd = [
@@ -162,16 +162,16 @@ class SupervisorTestRunner:
         print(result.stdout)
         
         if result.returncode != 0:
-            print(f"❌ Stress tests failed:\n{result.stderr}")
+            print(f" FAIL:  Stress tests failed:\n{result.stderr}")
             return False
         
-        print("✅ Stress tests passed!")
+        print(" PASS:  Stress tests passed!")
         return True
     
     def run_mission_critical_tests(self) -> bool:
         """Run mission-critical WebSocket validation tests."""
         print("\n" + "="*80)
-        print("🚨 RUNNING MISSION-CRITICAL TESTS")
+        print(" ALERT:  RUNNING MISSION-CRITICAL TESTS")
         print("="*80)
         
         cmd = [
@@ -186,16 +186,16 @@ class SupervisorTestRunner:
         print(result.stdout)
         
         if result.returncode != 0:
-            print(f"❌ CRITICAL: WebSocket validation failed:\n{result.stderr}")
+            print(f" FAIL:  CRITICAL: WebSocket validation failed:\n{result.stderr}")
             return False
         
-        print("✅ Mission-critical tests passed!")
+        print(" PASS:  Mission-critical tests passed!")
         return True
     
     def run_full_coverage_analysis(self) -> bool:
         """Run all tests with full coverage analysis."""
         print("\n" + "="*80)
-        print("📊 RUNNING FULL COVERAGE ANALYSIS")
+        print(" CHART:  RUNNING FULL COVERAGE ANALYSIS")
         print("="*80)
         
         cmd = [
@@ -222,17 +222,17 @@ class SupervisorTestRunner:
                 total_coverage = coverage_data.get("totals", {}).get("percent_covered", 0)
                 self.results["coverage_percentage"] = total_coverage
                 
-                print(f"\n📈 Total Coverage: {total_coverage:.2f}%")
+                print(f"\n[U+1F4C8] Total Coverage: {total_coverage:.2f}%")
                 
                 if total_coverage < 90:
-                    print(f"❌ Coverage below 90% threshold!")
+                    print(f" FAIL:  Coverage below 90% threshold!")
                     return False
         
         if result.returncode != 0:
-            print(f"⚠️  Some tests failed during coverage analysis")
+            print(f" WARNING: [U+FE0F]  Some tests failed during coverage analysis")
             return False
         
-        print("✅ Coverage analysis complete!")
+        print(" PASS:  Coverage analysis complete!")
         return True
     
     def check_services(self) -> bool:
@@ -253,7 +253,7 @@ class SupervisorTestRunner:
     def generate_report(self):
         """Generate comprehensive test report."""
         print("\n" + "="*80)
-        print("📋 TEST EXECUTION REPORT")
+        print("[U+1F4CB] TEST EXECUTION REPORT")
         print("="*80)
         
         # Collect test results from JSON reports
@@ -285,40 +285,40 @@ class SupervisorTestRunner:
         self.results["tests_failed"] = total_failed
         
         print(f"""
-📊 Test Summary:
+ CHART:  Test Summary:
    Total Tests Run: {total_tests}
    Tests Passed: {total_passed}
    Tests Failed: {total_failed}
    Pass Rate: {(total_passed/total_tests*100 if total_tests > 0 else 0):.2f}%
    
-📈 Coverage Summary:
+[U+1F4C8] Coverage Summary:
    Overall Coverage: {self.results['coverage_percentage']:.2f}%
    HTML Report: htmlcov_supervisor/index.html
    
-⏱️  Execution Time: {self.results['execution_time']:.2f} seconds
+[U+23F1][U+FE0F]  Execution Time: {self.results['execution_time']:.2f} seconds
         """)
         
         if self.results['coverage_percentage'] >= 100:
-            print("🎉 PERFECT! 100% test coverage achieved!")
+            print(" CELEBRATION:  PERFECT! 100% test coverage achieved!")
         elif self.results['coverage_percentage'] >= 95:
-            print("🎯 EXCELLENT! >95% test coverage achieved!")
+            print(" TARGET:  EXCELLENT! >95% test coverage achieved!")
         elif self.results['coverage_percentage'] >= 90:
-            print("✅ GOOD! >90% test coverage achieved!")
+            print(" PASS:  GOOD! >90% test coverage achieved!")
         else:
-            print("⚠️  Coverage needs improvement")
+            print(" WARNING: [U+FE0F]  Coverage needs improvement")
         
         # Save detailed report
         with open("supervisor_test_report.json", "w") as f:
             json.dump(self.results, f, indent=2)
         
-        print(f"\n📁 Detailed report saved to: supervisor_test_report.json")
+        print(f"\n[U+1F4C1] Detailed report saved to: supervisor_test_report.json")
     
     def run_all_tests(self):
         """Run complete test suite."""
         start_time = time.time()
         
         print("\n" + "="*80)
-        print("🚀 SUPERVISOR AGENT TEST SUITE - BULLETPROOF EDITION")
+        print("[U+1F680] SUPERVISOR AGENT TEST SUITE - BULLETPROOF EDITION")
         print("="*80)
         print("Running comprehensive test suite for 100% coverage...")
         
@@ -357,12 +357,12 @@ class SupervisorTestRunner:
         
         if all_required_passed:
             print("\n" + "="*80)
-            print("✅ SUCCESS: Supervisor Agent is BULLETPROOF!")
+            print(" PASS:  SUCCESS: Supervisor Agent is BULLETPROOF!")
             print("="*80)
             return 0
         else:
             print("\n" + "="*80)
-            print("❌ FAILURE: Some critical tests failed")
+            print(" FAIL:  FAILURE: Some critical tests failed")
             print("="*80)
             for name, passed in results:
                 if not passed and name in required_tests:

@@ -14,7 +14,7 @@ Follows the Factory pattern architecture from USER_CONTEXT_ARCHITECTURE.md:
 - Complete user isolation at the database client level
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Database-level user isolation for enterprise security
 - Value Impact: Zero risk of cross-user data contamination, enterprise compliance
 - Revenue Impact: Enables Enterprise tier with proper data governance ($50K+ ARR)

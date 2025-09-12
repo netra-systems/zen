@@ -165,7 +165,7 @@ class TestPresenceDetectionCritical:
         is_online = await critical_heartbeat_manager.check_connection_health(conn_id)
         assert is_online, "CRITICAL: User shown offline immediately after chat"
         
-        logger.info(f"✓ CRITICAL TEST PASSED: User remained online during {messages_sent} messages")
+        logger.info(f"[U+2713] CRITICAL TEST PASSED: User remained online during {messages_sent} messages")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -192,7 +192,7 @@ class TestPresenceDetectionCritical:
         # Subsequent pings should work
         assert await critical_heartbeat_manager.send_ping(conn_id, ws)
         
-        logger.info("✓ CRITICAL TEST PASSED: Recovered from heartbeat failure")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Recovered from heartbeat failure")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -223,7 +223,7 @@ class TestPresenceDetectionCritical:
         await critical_heartbeat_manager.record_activity(conn_id)
         assert critical_heartbeat_manager.connection_heartbeats[conn_id].is_alive
         
-        logger.info("✓ CRITICAL TEST PASSED: No false resurrections")
+        logger.info("[U+2713] CRITICAL TEST PASSED: No false resurrections")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -247,7 +247,7 @@ class TestPresenceDetectionCritical:
             assert config.max_missed_heartbeats <= 3, \
                 f"CRITICAL: {env_name} takes too long to detect failures"
             
-            logger.info(f"✓ {env_name} config validated: "
+            logger.info(f"[U+2713] {env_name} config validated: "
                        f"timeout={config.heartbeat_timeout_seconds}s, "
                        f"cleanup={config.cleanup_interval_seconds}s")
     
@@ -291,7 +291,7 @@ class TestPresenceDetectionCritical:
         assert await critical_heartbeat_manager.check_connection_health(connections["bob"])
         assert await critical_heartbeat_manager.check_connection_health(connections["charlie"])
         
-        logger.info("✓ CRITICAL TEST PASSED: User presence integrity maintained")
+        logger.info("[U+2713] CRITICAL TEST PASSED: User presence integrity maintained")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -335,7 +335,7 @@ class TestPresenceDetectionCritical:
         sent_messages = [m for m in message_log if m["sent"]]
         assert len(sent_messages) == 3, f"CRITICAL: Messages lost! Log: {message_log}"
         
-        logger.info("✓ CRITICAL TEST PASSED: Zero message loss during transitions")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Zero message loss during transitions")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -363,7 +363,7 @@ class TestPresenceDetectionCritical:
         # Wait for heartbeat to complete
         await heartbeat_task
         
-        logger.info("✓ CRITICAL TEST PASSED: Heartbeats don't block chat")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Heartbeats don't block chat")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -402,7 +402,7 @@ class TestPresenceDetectionCritical:
             conn_id = f"conn_{user}"
             assert conn_id not in critical_heartbeat_manager.connection_heartbeats
         
-        logger.info("✓ CRITICAL TEST PASSED: Cleanup preserves active users")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Cleanup preserves active users")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -432,7 +432,7 @@ class TestPresenceDetectionCritical:
         assert not await hb_manager.check_connection_health(connection_id), \
             "CRITICAL: Disconnected user still showing as online"
         
-        logger.info("✓ CRITICAL TEST PASSED: WebSocket manager integration")
+        logger.info("[U+2713] CRITICAL TEST PASSED: WebSocket manager integration")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -463,7 +463,7 @@ class TestPresenceDetectionCritical:
         assert new_status["last_activity"] >= status["last_activity"], \
             "CRITICAL: Activity not reflected in status"
         
-        logger.info("✓ CRITICAL TEST PASSED: UI presence accuracy")
+        logger.info("[U+2713] CRITICAL TEST PASSED: UI presence accuracy")
 
 
 class TestPresenceFailureRecovery:
@@ -487,7 +487,7 @@ class TestPresenceFailureRecovery:
             is_healthy = await critical_heartbeat_manager.check_connection_health(conn_id)
             assert is_healthy, "CRITICAL: Database failure broke presence detection"
         
-        logger.info("✓ CRITICAL TEST PASSED: Survived database failure")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Survived database failure")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -518,7 +518,7 @@ class TestPresenceFailureRecovery:
             assert await critical_heartbeat_manager.check_connection_health(conn_id), \
                 f"CRITICAL: Active connection {conn_id} unhealthy after cleanup"
         
-        logger.info("✓ CRITICAL TEST PASSED: Survived memory pressure")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Survived memory pressure")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -563,4 +563,4 @@ class TestPresenceFailureRecovery:
         # No errors should occur
         assert len(errors) == 0, f"CRITICAL: Thread safety errors: {errors}"
         
-        logger.info("✓ CRITICAL TEST PASSED: Thread-safe under load")
+        logger.info("[U+2713] CRITICAL TEST PASSED: Thread-safe under load")

@@ -1,10 +1,48 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Test Golden Path Preservation in Staging - PHASE 3: E2E VALIDATION
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Complete customer journey
+- Segment: ALL (Free  ->  Enterprise) - Complete customer journey
 - Business Goal: Revenue Protection - Prove $500K+ ARR Golden Path works end-to-end
-- Value Impact: Validate complete user journey from login → AI response with consolidated emitters
+- Value Impact: Validate complete user journey from login  ->  AI response with consolidated emitters
 - Strategic Impact: E2E proof that consolidation preserves business value in real environment
 
 CRITICAL: This test MUST PASS in GCP staging environment to prove:
@@ -33,6 +71,7 @@ import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # E2E testing imports for staging environment
 try:
@@ -76,6 +115,15 @@ class StagingEnvironmentConfig:
 @pytest.mark.mission_critical
 @pytest.mark.websocket_emitter_consolidation
 class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E tests in GCP staging validating Golden Path preservation after consolidation.
     
@@ -229,7 +277,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         response_quality = journey_result.get("response_quality_score", 0)
         assert response_quality >= 85.0, (
             f"Enterprise response quality insufficient! "
-            f"Quality score: {response_quality:.1f}% (required: ≥85%). "
+            f"Quality score: {response_quality:.1f}% (required:  >= 85%). "
             f"Enterprise customers require high-quality, actionable insights."
         )
         
@@ -256,7 +304,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         business_value_score = journey_result.get("business_value_score", 0)
         assert business_value_score >= 90.0, (
             f"Insufficient business value for enterprise customer! "
-            f"Value score: {business_value_score:.1f}% (required: ≥90%). "
+            f"Value score: {business_value_score:.1f}% (required:  >= 90%). "
             f"Enterprise workflows must deliver substantial value."
         )
 
@@ -305,7 +353,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         overall_success_rate = (successful_journeys / len(results) * 100) if results else 0
         assert overall_success_rate >= 95.0, (
             f"Overall Golden Path success rate insufficient! "
-            f"Success rate: {overall_success_rate:.1f}% (required: ≥95%). "
+            f"Success rate: {overall_success_rate:.1f}% (required:  >= 95%). "
             f"Consolidation must maintain high reliability across all segments."
         )
         
@@ -321,7 +369,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         mid_tier_success_rate = segment_analysis["mid"]["success_rate"]
         assert mid_tier_success_rate >= 90.0, (
             f"Mid-tier segment success rate low! "
-            f"Success rate: {mid_tier_success_rate:.1f}% (required: ≥90%). "
+            f"Success rate: {mid_tier_success_rate:.1f}% (required:  >= 90%). "
             f"Growth segment must have reliable experience."
         )
         
@@ -408,7 +456,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
             assert value_analysis["value_score"] >= scenario_config["minimum_value_score"], (
                 f"Business value score insufficient for {scenario_config['scenario']}! "
                 f"Score: {value_analysis['value_score']:.1f}% "
-                f"(required: ≥{scenario_config['minimum_value_score']}%). "
+                f"(required:  >= {scenario_config['minimum_value_score']}%). "
                 f"Response must provide actionable business value."
             )
             
@@ -426,7 +474,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         # ASSERTION: High substantive response rate
         assert substantive_rate >= 90.0, (
             f"Substantive response rate insufficient! "
-            f"Rate: {substantive_rate:.1f}% (required: ≥90%). "
+            f"Rate: {substantive_rate:.1f}% (required:  >= 90%). "
             f"Chat interactions must consistently deliver business value."
         )
 
@@ -494,7 +542,7 @@ class TestGoldenPathPreservationStaging(SSotAsyncTestCase):
         delivery_reliability = overall_analysis["delivery_reliability_percentage"]
         assert delivery_reliability >= 99.9, (
             f"WebSocket delivery reliability insufficient! "
-            f"Reliability: {delivery_reliability:.2f}% (required: ≥99.9%). "
+            f"Reliability: {delivery_reliability:.2f}% (required:  >= 99.9%). "
             f"WebSocket infrastructure must be highly reliable."
         )
         

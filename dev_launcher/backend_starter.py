@@ -71,7 +71,7 @@ class BackendStarter:
                 service_modes.append(f"{name}:disabled")
         
         mode_str = ", ".join(service_modes) if service_modes else "default configuration"
-        self._print("🚀", "BACKEND", f"Starting backend server ({mode_str})...")
+        self._print("[U+1F680]", "BACKEND", f"Starting backend server ({mode_str})...")
         
         port = self._determine_backend_port()
         server_script = self._find_server_script()
@@ -229,12 +229,12 @@ class BackendStarter:
             return None, None
         
         # Wait for backend to fully initialize before health check
-        self._print("⏳", "WAIT", f"Waiting for backend initialization on port {port}...")
+        self._print("[U+23F3]", "WAIT", f"Waiting for backend initialization on port {port}...")
         ready, details = self._wait_for_backend_ready(process, port)
         
         if not ready:
             logger.error(f"Backend readiness check failed on port {port}: {details}")
-            self._print("❌", "ERROR", f"Backend not ready: {details}")
+            self._print(" FAIL: ", "ERROR", f"Backend not ready: {details}")
             return None, None
             
         self._finalize_backend_startup(port, process)
@@ -314,19 +314,19 @@ class BackendStarter:
     def _handle_backend_startup_exception(self, e: Exception):
         """Handle backend startup exception."""
         logger.error(f"Failed to start backend: {e}")
-        self._print("❌", "ERROR", f"Backend startup failed: {str(e)[:100]}")
+        self._print(" FAIL: ", "ERROR", f"Backend startup failed: {str(e)[:100]}")
     
     def _handle_backend_startup_failure(self, process: subprocess.Popen):
         """Handle backend startup failure with enhanced error capture and recovery."""
         exit_code = process.poll()
-        self._print("❌", "ERROR", f"Backend failed to start (exit code: {exit_code})")
+        self._print(" FAIL: ", "ERROR", f"Backend failed to start (exit code: {exit_code})")
         
         # Capture detailed error information
         detailed_errors = self._capture_backend_runtime_errors(process, exit_code)
         if detailed_errors:
-            self._print("📋", "DETAILS", "Backend runtime errors:")
+            self._print("[U+1F4CB]", "DETAILS", "Backend runtime errors:")
             for error in detailed_errors[:5]:  # Show max 5 most relevant errors
-                print(f"  → {error}")
+                print(f"   ->  {error}")
         
         # Suggest recovery actions based on exit code
         self._suggest_recovery_actions(exit_code)
@@ -440,41 +440,41 @@ class BackendStarter:
         if not exit_code:
             return
         
-        self._print("💡", "RECOVERY", "Suggested recovery actions:")
+        self._print(" IDEA: ", "RECOVERY", "Suggested recovery actions:")
         
         if exit_code == 1:
-            print("  → Check Python syntax in backend files")
-            print("  → Verify all required modules are installed: pip install -r requirements.txt")
-            print("  → Check environment variables are properly set")
-            print("  → Review database connection settings")
+            print("   ->  Check Python syntax in backend files")
+            print("   ->  Verify all required modules are installed: pip install -r requirements.txt")
+            print("   ->  Check environment variables are properly set")
+            print("   ->  Review database connection settings")
         elif exit_code == 126:
-            print("  → Fix file permissions: chmod +x scripts/run_server.py")
-            print("  → Check if running as appropriate user")
+            print("   ->  Fix file permissions: chmod +x scripts/run_server.py")
+            print("   ->  Check if running as appropriate user")
         elif exit_code == 127:
-            print("  → Verify Python is installed and in PATH")
-            print("  → Check if uvicorn is installed: pip install uvicorn")
+            print("   ->  Verify Python is installed and in PATH")
+            print("   ->  Check if uvicorn is installed: pip install uvicorn")
         elif exit_code == 130:
-            print("  → Process was interrupted - this is usually intentional")
+            print("   ->  Process was interrupted - this is usually intentional")
         elif exit_code in [139, 134]:
-            print("  → Memory issue detected - restart system if problem persists")
-            print("  → Check for corrupted Python installation")
+            print("   ->  Memory issue detected - restart system if problem persists")
+            print("   ->  Check for corrupted Python installation")
         else:
-            print(f"  → Exit code {exit_code} indicates an application-specific error")
-            print("  → Check backend logs for detailed error information")
-            print("  → Verify all dependencies are properly installed")
+            print(f"   ->  Exit code {exit_code} indicates an application-specific error")
+            print("   ->  Check backend logs for detailed error information")
+            print("   ->  Verify all dependencies are properly installed")
     
     def _print_backend_troubleshooting(self):
         """Print backend troubleshooting tips."""
         print("\nPossible causes:")
-        print("  • Port already in use (try --dynamic flag)")
-        print("  • Python dependencies missing (check requirements.txt)")
-        print("  • Invalid Python syntax in netra_backend/app/main.py")
-        print("  • Database connection issues (check config)")
+        print("  [U+2022] Port already in use (try --dynamic flag)")
+        print("  [U+2022] Python dependencies missing (check requirements.txt)")
+        print("  [U+2022] Invalid Python syntax in netra_backend/app/main.py")
+        print("  [U+2022] Database connection issues (check config)")
     
     def _finalize_backend_startup(self, port: int, process: subprocess.Popen):
         """Finalize backend startup."""
         self.service_discovery.write_backend_info(port)
-        self._print("✅", "OK", f"Backend started on port {port}")
+        self._print(" PASS: ", "OK", f"Backend started on port {port}")
         self._log_backend_urls(port)
         self.backend_health_info = {"port": port, "process": process}
     

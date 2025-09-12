@@ -5,6 +5,7 @@ These tests ensure that the launcher correctly validates the actual project
 structure and fails appropriately when directories are missing.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import shutil
 import sys
 import tempfile
@@ -18,7 +19,7 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 
 
-class TestPathValidationIntegration(unittest.TestCase):
+class TestPathValidationIntegration(SSotBaseTestCase):
     """Integration tests for path validation."""
     
     def test_real_project_structure_validation(self):

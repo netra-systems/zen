@@ -1,7 +1,7 @@
 """
 State Validation Utilities for E2E Agent Testing
 Provides focused validation for DeepAgentState transitions and artifacts.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from typing import Any, Dict, Optional, Type
@@ -48,7 +48,7 @@ class StateTransitionValidator:
             assert data_result.confidence_score >= 0.0, "Confidence score should be valid"
     
     def validate_triage_to_data_transition(self, state: DeepAgentState) -> None:
-        """Validate complete triage→data transition."""
+        """Validate complete triage -> data transition."""
         self.validate_triage_completion(state)
         self.validate_data_completion(state)
         assert state.triage_result is not None, "Triage result should be preserved"
@@ -162,7 +162,7 @@ class StateIntegrityChecker:
     
     def check_triage_to_data_handoff_integrity(self, state: DeepAgentState,
                                              original_triage: TriageResult) -> None:
-        """Check complete triage→data handoff integrity."""
+        """Check complete triage -> data handoff integrity."""
         self.check_data_completion_integrity(state)
         self.artifact_validator.validate_data_used_triage_artifacts(state, original_triage)
         self.transition_validator.validate_triage_to_data_transition(state)

@@ -1,7 +1,7 @@
 """
 Redis Manager Consolidation Unit Test - CRITICAL for GitHub Issue #190
 
-This test validates that the 4→1 Redis manager consolidation works correctly,
+This test validates that the 4 -> 1 Redis manager consolidation works correctly,
 ensuring single Redis manager handles all operations and preventing the chaos
 of 76 files importing different Redis managers.
 
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
     """
-    Critical unit test validating 4→1 Redis manager consolidation.
+    Critical unit test validating 4 -> 1 Redis manager consolidation.
     
     This test MUST pass for deployment - validates single Redis manager
     can handle all operations previously distributed across 4 managers.
@@ -93,14 +93,14 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         Validates the primary Redis manager can handle all operations
         previously distributed across multiple managers.
         """
-        logger.info("🔍 TESTING: Single Redis manager exists and is comprehensive")
+        logger.info(" SEARCH:  TESTING: Single Redis manager exists and is comprehensive")
         
         project_root = Path(__file__).parent.parent.parent.parent
         primary_path = project_root / self.primary_ssot_path
         
         # Primary manager must exist
         assert primary_path.exists(), (
-            f"🚨 MISSING SSOT: Primary Redis manager not found at {primary_path}. "
+            f" ALERT:  MISSING SSOT: Primary Redis manager not found at {primary_path}. "
             f"This is CRITICAL for consolidation."
         )
         
@@ -115,17 +115,17 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         missing_operations = set(self.required_operations) - set(manager_info["operation_methods"])
         
         assert len(missing_operations) == 0, (
-            f"🚨 INCOMPLETE SSOT: Primary Redis manager missing operations: {missing_operations}. "
+            f" ALERT:  INCOMPLETE SSOT: Primary Redis manager missing operations: {missing_operations}. "
             f"SSOT manager must handle ALL Redis operations. Found: {manager_info['operation_methods']}"
         )
         
         # Manager must be substantial enough to replace others
         assert len(manager_info["methods"]) >= 10, (
-            f"🚨 INSUFFICIENT SSOT: Primary manager has only {len(manager_info['methods'])} methods. "
+            f" ALERT:  INSUFFICIENT SSOT: Primary manager has only {len(manager_info['methods'])} methods. "
             f"Expected at least 10 methods to replace multiple managers."
         )
         
-        logger.info(f"✅ Primary Redis manager validated: {len(manager_info['methods'])} methods, "
+        logger.info(f" PASS:  Primary Redis manager validated: {len(manager_info['methods'])} methods, "
                    f"{len(manager_info['operation_methods'])} Redis operations")
     
     def test_duplicate_managers_still_exist(self):
@@ -135,7 +135,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         This test documents current violations and will pass once consolidation
         eliminates the duplicate managers.
         """
-        logger.info("🚨 TESTING: Duplicate Redis managers exist (Expected violations)")
+        logger.info(" ALERT:  TESTING: Duplicate Redis managers exist (Expected violations)")
         
         project_root = Path(__file__).parent.parent.parent.parent
         violations_found = []
@@ -151,7 +151,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         
         # This should FAIL until consolidation is complete
         assert len(violations_found) == 0, (
-            f"🚨 SSOT VIOLATION: Found {len(violations_found)} duplicate Redis managers. "
+            f" ALERT:  SSOT VIOLATION: Found {len(violations_found)} duplicate Redis managers. "
             f"ONLY the primary SSOT manager should exist. "
             f"Duplicates found: {violations_found}"
         )
@@ -165,7 +165,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         Validates the SSOT manager can provide connection sharing across
         components to reduce memory usage vs multiple managers.
         """
-        logger.info("🔍 TESTING: Connection pool sharing capability")
+        logger.info(" SEARCH:  TESTING: Connection pool sharing capability")
         
         project_root = Path(__file__).parent.parent.parent.parent
         primary_path = project_root / self.primary_ssot_path
@@ -180,17 +180,17 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         
         # Manager must support connection pooling
         assert pool_capabilities["has_connection_pool"], (
-            f"🚨 NO CONNECTION POOLING: SSOT manager must support connection pooling "
+            f" ALERT:  NO CONNECTION POOLING: SSOT manager must support connection pooling "
             f"to replace multiple managers efficiently."
         )
         
         # Must support shared access patterns
         assert pool_capabilities["has_client_sharing"], (
-            f"🚨 NO CLIENT SHARING: SSOT manager must support client sharing "
+            f" ALERT:  NO CLIENT SHARING: SSOT manager must support client sharing "
             f"to reduce memory vs multiple managers."
         )
         
-        logger.info(f"✅ Connection pool sharing validated: {pool_capabilities}")
+        logger.info(f" PASS:  Connection pool sharing validated: {pool_capabilities}")
     
     def test_configuration_consistency_support(self):
         """
@@ -199,7 +199,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         Validates the SSOT manager uses consistent configuration patterns
         that can replace the various config approaches in duplicate managers.
         """
-        logger.info("🔍 TESTING: Configuration consistency support")
+        logger.info(" SEARCH:  TESTING: Configuration consistency support")
         
         project_root = Path(__file__).parent.parent.parent.parent
         primary_path = project_root / self.primary_ssot_path
@@ -214,17 +214,17 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         
         # Must use environment-based configuration (SSOT pattern)
         assert config_info["uses_environment_config"], (
-            f"🚨 NO ENVIRONMENT CONFIG: SSOT manager must use environment-based "
+            f" ALERT:  NO ENVIRONMENT CONFIG: SSOT manager must use environment-based "
             f"configuration for consistency across services."
         )
         
         # Must support health checks
         assert config_info["supports_health_checks"], (
-            f"🚨 NO HEALTH CHECKS: SSOT manager must support health monitoring "
+            f" ALERT:  NO HEALTH CHECKS: SSOT manager must support health monitoring "
             f"to replace health check logic in duplicate managers."
         )
         
-        logger.info(f"✅ Configuration consistency validated: {config_info}")
+        logger.info(f" PASS:  Configuration consistency validated: {config_info}")
     
     def test_memory_usage_optimization(self):
         """
@@ -233,7 +233,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         Validates that single manager approach will use less memory
         than multiple managers with separate connection pools.
         """
-        logger.info("🔍 TESTING: Memory usage optimization potential")
+        logger.info(" SEARCH:  TESTING: Memory usage optimization potential")
         
         # Simulate memory usage comparison
         current_managers = len(self.violation_managers) + 1  # Include primary
@@ -251,12 +251,12 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         
         # Should provide significant memory reduction
         assert memory_reduction > 0.5, (
-            f"🚨 INSUFFICIENT OPTIMIZATION: Expected >50% memory reduction, "
+            f" ALERT:  INSUFFICIENT OPTIMIZATION: Expected >50% memory reduction, "
             f"got {memory_reduction:.2%}. Single manager must provide significant optimization."
         )
         
-        logger.info(f"✅ Memory optimization validated: {memory_reduction:.2%} reduction expected "
-                   f"({estimated_connections_current} → {estimated_connections_optimized} connections)")
+        logger.info(f" PASS:  Memory optimization validated: {memory_reduction:.2%} reduction expected "
+                   f"({estimated_connections_current}  ->  {estimated_connections_optimized} connections)")
     
     def test_user_isolation_factory_support(self):
         """
@@ -265,7 +265,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         Critical for multi-user system - validates SSOT manager can provide
         user isolation without compromising on single connection pool benefits.
         """
-        logger.info("🔍 TESTING: User isolation factory support")
+        logger.info(" SEARCH:  TESTING: User isolation factory support")
         
         project_root = Path(__file__).parent.parent.parent.parent
         primary_path = project_root / self.primary_ssot_path
@@ -288,12 +288,12 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         isolation_score = sum(factory_indicators) / len(factory_indicators)
         
         assert isolation_score >= 0.67, (
-            f"🚨 INSUFFICIENT ISOLATION: SSOT manager isolation score {isolation_score:.2%} "
+            f" ALERT:  INSUFFICIENT ISOLATION: SSOT manager isolation score {isolation_score:.2%} "
             f"below required 67%. Multi-user system requires proper isolation. "
             f"Patterns found: {isolation_info}"
         )
         
-        logger.info(f"✅ User isolation validated: {isolation_score:.2%} isolation score")
+        logger.info(f" PASS:  User isolation validated: {isolation_score:.2%} isolation score")
     
     def _analyze_redis_manager_capabilities(self, manager_path: Path) -> Dict[str, Any]:
         """Analyze Redis manager capabilities from source code."""
@@ -493,7 +493,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
         violations = self.metrics.get_custom("violations_found", 0)
         primary_methods = self.metrics.get_custom("primary_manager_methods", 0)
         
-        logger.info(f"🚨 Redis Manager Consolidation Test Complete:")
+        logger.info(f" ALERT:  Redis Manager Consolidation Test Complete:")
         logger.info(f"   - Violations found: {violations} (expected: 3)")
         logger.info(f"   - Primary manager methods: {primary_methods}")
         
@@ -501,7 +501,7 @@ class RedisManagerConsolidationUnitTest(SSotBaseTestCase):
             logger.error(f"DEPLOYMENT BLOCKER: {violations} duplicate Redis managers found. "
                         f"GitHub Issue #190 consolidation incomplete.")
         else:
-            logger.info("✅ Redis manager consolidation appears complete")
+            logger.info(" PASS:  Redis manager consolidation appears complete")
         
         super().tearDown()
 

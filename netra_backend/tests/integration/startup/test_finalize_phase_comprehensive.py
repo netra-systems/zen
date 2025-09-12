@@ -137,7 +137,7 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
             f"Startup took {total_startup_time:.2f}s, exceeding limit of {max_startup_time}s"
         )
         
-        logger.info(f"✅ Startup completed in {total_startup_time:.2f}s")
+        logger.info(f" PASS:  Startup completed in {total_startup_time:.2f}s")
         return total_startup_time
     
     def validate_critical_services_ready(self, app: 'FastAPI'):
@@ -171,7 +171,7 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
             f"Critical chat services are None: {none_services}"
         )
         
-        logger.info("✅ All critical chat services validated")
+        logger.info(" PASS:  All critical chat services validated")
     
     def validate_phase_completion(self, app: 'FastAPI'):
         """Validate all startup phases completed successfully."""
@@ -183,7 +183,7 @@ class FinalizePhaseIntegrationTest(BaseIntegrationTest):
             missing_phases = [phase for phase in expected_phases if phase not in completed_phases]
             assert not missing_phases, f"Startup phases not completed: {missing_phases}"
             
-            logger.info(f"✅ All {len(completed_phases)} startup phases completed")
+            logger.info(f" PASS:  All {len(completed_phases)} startup phases completed")
         
         # Check no failed phases
         if hasattr(app.state, 'startup_failed_phases'):
@@ -218,7 +218,7 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
         self.validate_phase_completion(app)
         
         # Business value assertion
-        logger.info("✅ System ready for chat operations - primary business value enabled")
+        logger.info(" PASS:  System ready for chat operations - primary business value enabled")
         
         # Store metrics for reporting
         self.startup_metrics['total_time'] = startup_time
@@ -250,10 +250,10 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
         
         # Log health summary
         healthy_count = sum(1 for r in results if r.status == ServiceStatus.HEALTHY)
-        logger.info(f"✅ {healthy_count}/{len(results)} services healthy")
+        logger.info(f" PASS:  {healthy_count}/{len(results)} services healthy")
         
         # Business value: System health enables reliable chat
-        logger.info("✅ Health checks passed - chat operations reliable")
+        logger.info(" PASS:  Health checks passed - chat operations reliable")
 
     @pytest.mark.asyncio
     async def test_critical_path_validation_chat_ready(self):
@@ -288,7 +288,7 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
             # during startup. This is expected and correct.
             logger.info(f"WebSocket bridge health: {health}")
         
-        logger.info("✅ Critical chat communication paths validated")
+        logger.info(" PASS:  Critical chat communication paths validated")
 
     @pytest.mark.asyncio
     async def test_application_state_consistency_validation(self):
@@ -331,7 +331,7 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
             if hasattr(supervisor, 'llm_manager'):
                 assert supervisor.llm_manager is not None, "Supervisor missing LLM manager dependency"
         
-        logger.info("✅ Application state consistency validated")
+        logger.info(" PASS:  Application state consistency validated")
 
     @pytest.mark.asyncio
     async def test_resource_allocation_validation(self):
@@ -350,11 +350,11 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
                     from sqlalchemy import text
                     result = await session.execute(text("SELECT 1"))
                     assert result.scalar() == 1, "Database connection test failed"
-                logger.info("✅ Database connection validated")
+                logger.info(" PASS:  Database connection validated")
             except Exception as e:
                 logger.warning(f"Database connection test failed (service available but connection issue): {e}")
         elif not _postgresql_available:
-            logger.info("ℹ️ PostgreSQL not available - skipping database connection test")
+            logger.info("[U+2139][U+FE0F] PostgreSQL not available - skipping database connection test")
         
         # Test Redis connection availability (only if Redis is available)
         if _redis_available and hasattr(app.state, 'redis_manager') and app.state.redis_manager:
@@ -363,11 +363,11 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
             if hasattr(redis_manager, 'redis_client') and redis_manager.redis_client:
                 try:
                     await redis_manager.redis_client.ping()
-                    logger.info("✅ Redis connection validated")
+                    logger.info(" PASS:  Redis connection validated")
                 except Exception as e:
                     logger.warning(f"Redis ping failed (service available but connection issue): {e}")
         elif not _redis_available:
-            logger.info("ℹ️ Redis not available - skipping Redis connection test")
+            logger.info("[U+2139][U+FE0F] Redis not available - skipping Redis connection test")
         
         # Test LLM manager resource allocation
         if hasattr(app.state, 'llm_manager') and app.state.llm_manager:
@@ -376,9 +376,9 @@ class TestFinalizePhaseSystemValidation(FinalizePhaseIntegrationTest):
             
             # Should have at least one LLM configuration available
             if hasattr(llm_manager, 'llm_configs') and llm_manager.llm_configs:
-                logger.info(f"✅ {len(llm_manager.llm_configs)} LLM configurations available")
+                logger.info(f" PASS:  {len(llm_manager.llm_configs)} LLM configurations available")
         
-        logger.info("✅ Resource allocation validated for chat operations")
+        logger.info(" PASS:  Resource allocation validated for chat operations")
 
 
 class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
@@ -412,7 +412,7 @@ class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
         self.startup_metrics['memory_mb'] = memory_mb
         self.startup_metrics['cpu_percent'] = cpu_percent
         
-        logger.info(f"✅ Performance baseline: {memory_mb:.1f}MB RAM, {cpu_percent:.1f}% CPU")
+        logger.info(f" PASS:  Performance baseline: {memory_mb:.1f}MB RAM, {cpu_percent:.1f}% CPU")
 
     @pytest.mark.asyncio
     async def test_startup_metrics_monitoring_setup(self):
@@ -426,25 +426,25 @@ class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
         # Test performance monitor setup
         performance_monitor = getattr(app.state, 'performance_monitor', None)
         if performance_monitor:
-            logger.info("✅ Performance monitoring initialized")
+            logger.info(" PASS:  Performance monitoring initialized")
         
         # Test health service setup
         health_service = getattr(app.state, 'health_service', None)
         if health_service:
-            logger.info("✅ Health service monitoring initialized")
+            logger.info(" PASS:  Health service monitoring initialized")
         
         # Test background task manager for monitoring
         bg_manager = getattr(app.state, 'background_task_manager', None)
         if bg_manager:
-            logger.info("✅ Background task manager ready for monitoring tasks")
+            logger.info(" PASS:  Background task manager ready for monitoring tasks")
         
         # Test startup timing data available
         if hasattr(app.state, 'startup_phase_timings'):
             phase_timings = app.state.startup_phase_timings
             total_phases = len(phase_timings)
-            logger.info(f"✅ Startup timing data: {total_phases} phases tracked")
+            logger.info(f" PASS:  Startup timing data: {total_phases} phases tracked")
         
-        logger.info("✅ Monitoring infrastructure ready for chat operations")
+        logger.info(" PASS:  Monitoring infrastructure ready for chat operations")
 
     @pytest.mark.asyncio
     async def test_startup_completion_timing_validation(self):
@@ -487,7 +487,7 @@ class TestFinalizePhasePerformanceValidation(FinalizePhaseIntegrationTest):
             if slowest_phase:
                 logger.info(f"Slowest phase: {slowest_phase} ({slowest_time:.2f}s)")
         
-        logger.info(f"✅ Startup timing validated: {total_time:.2f}s in {environment}")
+        logger.info(f" PASS:  Startup timing validated: {total_time:.2f}s in {environment}")
         
         # Store for reporting
         self.startup_metrics['environment'] = environment
@@ -522,7 +522,7 @@ class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
             assert isinstance(failed_phases, list), "Failed phases should be list"
             assert len(failed_phases) == 0, f"Should have no failed phases, got: {failed_phases}"
         
-        logger.info("✅ Error aggregation and reporting validated")
+        logger.info(" PASS:  Error aggregation and reporting validated")
 
     @pytest.mark.asyncio
     async def test_graceful_degradation_validation(self):
@@ -541,7 +541,7 @@ class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
                 service_value = getattr(app.state, service)
                 # Optional services can be None/False without breaking chat
                 if service_value is None or service_value is False:
-                    logger.info(f"ℹ️ Optional service {service} degraded - chat still operational")
+                    logger.info(f"[U+2139][U+FE0F] Optional service {service} degraded - chat still operational")
         
         # Validate core chat services are never degraded
         core_services = ['agent_supervisor', 'thread_service', 'llm_manager']
@@ -551,7 +551,7 @@ class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
                 service_value = getattr(app.state, service)
                 assert service_value is not None, f"Core chat service {service} cannot be None"
         
-        logger.info("✅ Graceful degradation validated - core chat protected")
+        logger.info(" PASS:  Graceful degradation validated - core chat protected")
 
     @pytest.mark.asyncio
     async def test_system_recovery_readiness_validation(self):
@@ -574,17 +574,17 @@ class TestFinalizePhaseErrorHandlingValidation(FinalizePhaseIntegrationTest):
         
         # Log recovery readiness
         if unhealthy_services:
-            logger.warning(f"⚠️ {len(unhealthy_services)} unhealthy services for recovery monitoring")
+            logger.warning(f" WARNING: [U+FE0F] {len(unhealthy_services)} unhealthy services for recovery monitoring")
         
         if degraded_services:
-            logger.info(f"ℹ️ {len(degraded_services)} degraded services under recovery monitoring")
+            logger.info(f"[U+2139][U+FE0F] {len(degraded_services)} degraded services under recovery monitoring")
         
         # Test background task manager ready for recovery tasks
         bg_manager = getattr(app.state, 'background_task_manager', None)
         if bg_manager:
-            logger.info("✅ Background task manager ready for recovery operations")
+            logger.info(" PASS:  Background task manager ready for recovery operations")
         
-        logger.info("✅ System recovery readiness validated")
+        logger.info(" PASS:  System recovery readiness validated")
 
 
 class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
@@ -626,7 +626,7 @@ class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
         if hasattr(supervisor, 'websocket_bridge'):
             assert supervisor.websocket_bridge is not None, "Supervisor missing WebSocket integration for chat"
         
-        logger.info("✅ End-to-end chat functionality ready - primary business value enabled")
+        logger.info(" PASS:  End-to-end chat functionality ready - primary business value enabled")
 
     @pytest.mark.asyncio
     async def test_production_readiness_checks(self):
@@ -670,7 +670,7 @@ class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
         # Production readiness requires all critical services healthy
         assert critical_issues == 0, f"{critical_issues} critical services unhealthy - not production ready"
         
-        logger.info("✅ Production readiness validated - business value delivery assured")
+        logger.info(" PASS:  Production readiness validated - business value delivery assured")
 
     @pytest.mark.asyncio
     async def test_scalability_configuration_validation(self):
@@ -684,25 +684,25 @@ class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
         # Test database connection pooling ready (only if PostgreSQL available)
         if _postgresql_available and hasattr(app.state, 'db_session_factory') and app.state.db_session_factory:
             # Database session factory enables connection pooling
-            logger.info("✅ Database connection pooling ready for scale")
+            logger.info(" PASS:  Database connection pooling ready for scale")
         elif not _postgresql_available:
-            logger.info("ℹ️ PostgreSQL not available - database pooling test skipped")
+            logger.info("[U+2139][U+FE0F] PostgreSQL not available - database pooling test skipped")
         
         # Test Redis caching ready (only if Redis available)
         if _redis_available and hasattr(app.state, 'redis_manager') and app.state.redis_manager:
-            logger.info("✅ Redis caching ready for performance scaling")
+            logger.info(" PASS:  Redis caching ready for performance scaling")
         elif not _redis_available:
-            logger.info("ℹ️ Redis not available - caching test skipped")
+            logger.info("[U+2139][U+FE0F] Redis not available - caching test skipped")
         
         # Test background task management for scale
         if hasattr(app.state, 'background_task_manager') and app.state.background_task_manager:
-            logger.info("✅ Background task management ready for concurrent operations")
+            logger.info(" PASS:  Background task management ready for concurrent operations")
         
         # Test WebSocket bridge ready for concurrent connections
         websocket_bridge = getattr(app.state, 'agent_websocket_bridge', None)
         if websocket_bridge:
             # Modern per-request WebSocket architecture supports scaling
-            logger.info("✅ WebSocket infrastructure ready for concurrent chat sessions")
+            logger.info(" PASS:  WebSocket infrastructure ready for concurrent chat sessions")
         
         # Test factory patterns for user isolation (scalability requirement)
         factory_components = ['execution_engine_factory', 'websocket_bridge_factory', 'agent_instance_factory']
@@ -713,9 +713,9 @@ class TestFinalizePhaseBusinessValueValidation(FinalizePhaseIntegrationTest):
                 factories_ready += 1
         
         if factories_ready > 0:
-            logger.info(f"✅ {factories_ready}/{len(factory_components)} factory patterns ready for user isolation scaling")
+            logger.info(f" PASS:  {factories_ready}/{len(factory_components)} factory patterns ready for user isolation scaling")
         
-        logger.info("✅ Scalability configuration validated for business growth")
+        logger.info(" PASS:  Scalability configuration validated for business growth")
 
 
 @pytest.mark.asyncio
@@ -750,12 +750,12 @@ async def test_finalize_phase_integration_comprehensive():
         assert app.state.startup_failed is False, "Startup marked as failed"
         
         # Final business value assertion
-        logger.info("🎯 COMPREHENSIVE FINALIZE PHASE VALIDATION PASSED")
-        logger.info("✅ System ready for full business value delivery through chat")
-        logger.info("✅ All critical services operational")
-        logger.info("✅ Performance within acceptable limits")
-        logger.info("✅ Health monitoring active")
-        logger.info("✅ Production readiness confirmed")
+        logger.info(" TARGET:  COMPREHENSIVE FINALIZE PHASE VALIDATION PASSED")
+        logger.info(" PASS:  System ready for full business value delivery through chat")
+        logger.info(" PASS:  All critical services operational")
+        logger.info(" PASS:  Performance within acceptable limits")
+        logger.info(" PASS:  Health monitoring active")
+        logger.info(" PASS:  Production readiness confirmed")
         
         return True
         

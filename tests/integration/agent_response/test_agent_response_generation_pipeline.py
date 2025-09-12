@@ -99,7 +99,7 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
                     assert response_data, "Response dictionary must not be empty"
                     self.record_metric("response_fields", len(response_data))
                     
-                logger.info(f"✅ Agent generated valuable response in {execution_time:.2f}s")
+                logger.info(f" PASS:  Agent generated valuable response in {execution_time:.2f}s")
             
     async def test_agent_response_with_context_preservation(self):
         """
@@ -135,7 +135,7 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
                 assert "previous_query" in execution_context, "Previous context must be preserved"
                 assert execution_context["user_industry"] == "SaaS", "User industry context must be maintained"
                 
-                logger.info("✅ Agent response preserved user context successfully")
+                logger.info(" PASS:  Agent response preserved user context successfully")
                 
     async def test_agent_response_error_handling_maintains_user_experience(self):
         """
@@ -164,10 +164,10 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
                 if not result.success:
                     assert result.error is not None, "Error must be captured and reported"
                     assert len(result.error) > 0, "Error message must be informative"
-                    logger.info(f"✅ Agent handled error gracefully: {result.error}")
+                    logger.info(f" PASS:  Agent handled error gracefully: {result.error}")
                 else:
                     # If agent handles None input gracefully, that's also valid
-                    logger.info("✅ Agent handled invalid input gracefully")
+                    logger.info(" PASS:  Agent handled invalid input gracefully")
             else:
                 # Even if result is not TypedAgentResult, it shouldn't be None for error cases
                 assert result is not None, "Agent should return some result even in error cases"
@@ -220,7 +220,7 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
         assert user_1_result["context"]["user_segment"] != user_2_result["context"]["user_segment"], \
             "User contexts must be isolated"
         
-        logger.info("✅ Concurrent agent responses maintained proper user isolation")
+        logger.info(" PASS:  Concurrent agent responses maintained proper user isolation")
         
     async def test_agent_response_execution_tracking_for_observability(self):
         """
@@ -262,7 +262,7 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
             assert execution_info is not None, "Execution must be tracked"
             assert execution_info.state == ExecutionState.COMPLETED, "Execution state must be updated"
             
-            logger.info(f"✅ Agent response execution tracked successfully: {execution_id}")
+            logger.info(f" PASS:  Agent response execution tracked successfully: {execution_id}")
             
     async def test_agent_response_performance_meets_sla_requirements(self):
         """
@@ -299,9 +299,9 @@ class TestAgentResponseGenerationPipeline(BaseIntegrationTest):
             self.record_metric("sla_max_met", 1 if response_time < MAX_RESPONSE_TIME else 0)
             
             if response_time < TARGET_RESPONSE_TIME:
-                logger.info(f"✅ Agent response met target performance: {response_time:.2f}s")
+                logger.info(f" PASS:  Agent response met target performance: {response_time:.2f}s")
             else:
-                logger.warning(f"⚠️ Agent response exceeded target but within SLA: {response_time:.2f}s")
+                logger.warning(f" WARNING: [U+FE0F] Agent response exceeded target but within SLA: {response_time:.2f}s")
                 
             # Validate response quality wasn't sacrificed for speed
             assert result is not None, "Fast response must still be substantive"

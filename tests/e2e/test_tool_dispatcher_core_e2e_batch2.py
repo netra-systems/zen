@@ -126,7 +126,7 @@ class TestToolDispatcherCoreE2E(SSotAsyncTestCase):
         websocket_bridge.notify_tool_executing = AsyncMock(side_effect=track_tool_executing)
         websocket_bridge.notify_tool_completed = AsyncMock(side_effect=track_tool_completed)
         
-        # Act - Complete workflow: Factory → Creation → Execution
+        # Act - Complete workflow: Factory  ->  Creation  ->  Execution
         
         # Step 1: Factory creation with authentication context
         dispatcher = await ToolDispatcher.create_request_scoped_dispatcher(

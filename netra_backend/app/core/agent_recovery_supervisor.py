@@ -1,7 +1,7 @@
-"""Supervisor agent recovery strategy with ≤8 line functions.
+"""Supervisor agent recovery strategy with  <= 8 line functions.
 
 Recovery strategy implementation for supervisor agent operations with 
-aggressive function decomposition. All functions ≤8 lines.
+aggressive function decomposition. All functions  <= 8 lines.
 """
 
 import asyncio

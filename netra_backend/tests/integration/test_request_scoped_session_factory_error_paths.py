@@ -104,17 +104,17 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
             except Exception as e:
                 # The original OperationalError should be wrapped or handled
                 # But we expect an AttributeError due to the SSOT bug in error logging
-                print(f"\n🐛 CAPTURED ERROR: {type(e).__name__}: {e}")
+                print(f"\n[U+1F41B] CAPTURED ERROR: {type(e).__name__}: {e}")
                 
                 # Check if this is the SSOT bug or the original database error
                 if "has no attribute" in str(e) and ("last_activity" in str(e) or "operations_count" in str(e) or "errors" in str(e)):
-                    print("✅ SSOT BUG REPRODUCED: AttributeError in error handling")
+                    print(" PASS:  SSOT BUG REPRODUCED: AttributeError in error handling")
                     print("This proves the SessionMetrics field access bug exists")
                     
                     # This is expected - the SSOT bug causes additional errors
                     assert True, "Successfully reproduced SSOT bug in error handling"
                 else:
-                    print("⚠️ Original database error (SSOT bug may be fixed or not triggered)")
+                    print(" WARNING: [U+FE0F] Original database error (SSOT bug may be fixed or not triggered)")
                     # Still validate we get proper error handling
                     assert isinstance(e, (OperationalError, SQLAlchemyError)), f"Expected database error, got {type(e)}"
     
@@ -143,18 +143,18 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                     pytest.fail("Expected SQLTimeoutError due to timeout")
                     
             except Exception as e:
-                print(f"\n⏱️ TIMEOUT ERROR: {type(e).__name__}: {e}")
+                print(f"\n[U+23F1][U+FE0F] TIMEOUT ERROR: {type(e).__name__}: {e}")
                 
                 # Look for SSOT bug in error handling
                 if "has no attribute" in str(e):
-                    print("✅ SSOT BUG TRIGGERED: Timeout error handling failed due to field access")
+                    print(" PASS:  SSOT BUG TRIGGERED: Timeout error handling failed due to field access")
                     # Verify it's the specific fields we know are missing
                     assert any(field in str(e) for field in ["last_activity", "operations_count", "errors"]), \
                         f"Expected SSOT bug related to known missing fields, got: {e}"
                 else:
                     # Timeout was handled correctly (bug might be fixed)
                     assert "timeout" in str(e).lower() or isinstance(e, SQLTimeoutError)
-                    print("⚠️ Timeout handled without SSOT bug (possibly fixed)")
+                    print(" WARNING: [U+FE0F] Timeout handled without SSOT bug (possibly fixed)")
     
     async def test_session_factory_pool_exhaustion_error(self):
         """
@@ -194,16 +194,16 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
                     error_msg = str(result)
-                    print(f"\n🔍 SESSION {i} ERROR: {type(result).__name__}: {error_msg}")
+                    print(f"\n SEARCH:  SESSION {i} ERROR: {type(result).__name__}: {error_msg}")
                     
                     if "has no attribute" in error_msg and any(field in error_msg for field in ["last_activity", "operations_count", "errors"]):
                         ssot_bugs_found += 1
-                        print(f"  ✅ SSOT BUG FOUND in session {i}")
+                        print(f"   PASS:  SSOT BUG FOUND in session {i}")
                     elif "pool" in error_msg.lower() or "connection" in error_msg.lower():
                         pool_errors_found += 1
-                        print(f"  💡 Pool exhaustion error in session {i}")
+                        print(f"   IDEA:  Pool exhaustion error in session {i}")
             
-            print(f"\n📊 ERROR ANALYSIS:")
+            print(f"\n CHART:  ERROR ANALYSIS:")
             print(f"  SSOT bugs found: {ssot_bugs_found}")
             print(f"  Pool errors found: {pool_errors_found}")
             print(f"  Total sessions: {len(results)}")
@@ -213,7 +213,7 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                 "Expected either SSOT bugs or pool exhaustion errors"
             
             if ssot_bugs_found > 0:
-                print("✅ SSOT BUG REPRODUCED under pool exhaustion conditions")
+                print(" PASS:  SSOT BUG REPRODUCED under pool exhaustion conditions")
                 
         finally:
             # Restore original pool size
@@ -268,7 +268,7 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                     session_metrics = factory_metrics.get(session_key)
                 
                 if session_metrics:
-                    print(f"\n📊 SESSION METRICS FOUND:")
+                    print(f"\n CHART:  SESSION METRICS FOUND:")
                     print(f"  Type: {type(session_metrics).__name__}")
                     print(f"  Session ID: {getattr(session_metrics, 'session_id', 'N/A')}")
                     print(f"  Created: {getattr(session_metrics, 'created_at', 'N/A')}")
@@ -276,28 +276,28 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                     # Try to access the problematic fields directly
                     self._test_session_metrics_field_access(session_metrics)
                 else:
-                    print("⚠️ No session metrics found - may not be instrumented")
+                    print(" WARNING: [U+FE0F] No session metrics found - may not be instrumented")
                 
                 # Force an error during session usage to trigger error logging
                 await self._force_session_error_with_logging(session, session_metrics)
                 
         except Exception as e:
-            print(f"\n🔥 SESSION ERROR: {type(e).__name__}: {e}")
+            print(f"\n FIRE:  SESSION ERROR: {type(e).__name__}: {e}")
             
             # Check if this is our target SSOT bug
             if "has no attribute" in str(e):
                 expected_fields = ["last_activity", "operations_count", "errors"]
                 if any(field in str(e) for field in expected_fields):
-                    print("✅ SSOT BUG CONFIRMED: Error logging failed due to missing SessionMetrics fields")
+                    print(" PASS:  SSOT BUG CONFIRMED: Error logging failed due to missing SessionMetrics fields")
                     assert True, "Successfully reproduced SSOT bug in session error logging"
                 else:
-                    print("❓ Unexpected attribute error:", str(e))
+                    print("[U+2753] Unexpected attribute error:", str(e))
             else:
-                print("⚠️ Different error occurred - SSOT bug may not be triggered")
+                print(" WARNING: [U+FE0F] Different error occurred - SSOT bug may not be triggered")
     
     def _test_session_metrics_field_access(self, session_metrics: SessionMetrics) -> None:
         """Test direct field access on SessionMetrics to expose SSOT bug."""
-        print("\n🔍 TESTING SESSIONMETRICS FIELD ACCESS:")
+        print("\n SEARCH:  TESTING SESSIONMETRICS FIELD ACCESS:")
         
         # Test each problematic field access
         problematic_fields = {
@@ -309,9 +309,9 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
         for field_name, correct_name in problematic_fields.items():
             try:
                 value = getattr(session_metrics, field_name)
-                print(f"  ❌ UNEXPECTED: {field_name} exists with value {value}")
+                print(f"   FAIL:  UNEXPECTED: {field_name} exists with value {value}")
             except AttributeError as e:
-                print(f"  ✅ CONFIRMED: {field_name} missing -> {correct_name}")
+                print(f"   PASS:  CONFIRMED: {field_name} missing -> {correct_name}")
                 print(f"    AttributeError: {e}")
         
         # Test correct field names
@@ -321,7 +321,7 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
             'query_count': lambda m: getattr(m, 'query_count', 0)
         }
         
-        print("\n✅ CORRECT FIELD ACCESS:")
+        print("\n PASS:  CORRECT FIELD ACCESS:")
         for field_name, accessor in correct_fields.items():
             try:
                 value = accessor(session_metrics)
@@ -335,7 +335,7 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
         try:
             await session.execute("SELECT * FROM non_existent_table_12345")
         except Exception as db_error:
-            print(f"\n💥 FORCED DATABASE ERROR: {db_error}")
+            print(f"\n[U+1F4A5] FORCED DATABASE ERROR: {db_error}")
             
             # This simulates the error logging code from lines 383-385
             # in request_scoped_session_factory.py that contains the SSOT bug
@@ -350,11 +350,11 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                         "errors": session_metrics.errors
                     }
                 }
-                print("❌ UNEXPECTED: Error context created without AttributeError")
+                print(" FAIL:  UNEXPECTED: Error context created without AttributeError")
                 print(f"Context: {error_context}")
                 
             except AttributeError as attr_error:
-                print(f"✅ SSOT BUG REPRODUCED in error logging: {attr_error}")
+                print(f" PASS:  SSOT BUG REPRODUCED in error logging: {attr_error}")
                 raise attr_error  # Re-raise to be caught by test
     
     async def test_concurrent_session_errors_ssot_impact(self):
@@ -392,7 +392,7 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
                 else:
                     database_errors.append((i, result))
         
-        print(f"\n📊 CONCURRENT ERROR ANALYSIS:")
+        print(f"\n CHART:  CONCURRENT ERROR ANALYSIS:")
         print(f"  Total requests: {num_concurrent}")
         print(f"  SSOT errors: {len(ssot_errors)}")
         print(f"  Database errors: {len(database_errors)}")
@@ -403,10 +403,10 @@ class TestRequestScopedSessionFactoryErrorPaths(SSotBaseTestCase):
         
         # We expect at least some SSOT errors if the bug exists
         if len(ssot_errors) > 0:
-            print("✅ SSOT BUG CONFIRMED: Multiple concurrent requests trigger AttributeError")
+            print(" PASS:  SSOT BUG CONFIRMED: Multiple concurrent requests trigger AttributeError")
             assert True, f"Found {len(ssot_errors)} SSOT bugs in concurrent error handling"
         else:
-            print("⚠️ No SSOT bugs found - may be fixed or not triggered in this test")
+            print(" WARNING: [U+FE0F] No SSOT bugs found - may be fixed or not triggered in this test")
             # Still verify we got some database errors
             assert len(database_errors) > 0, "Expected some database errors from concurrent requests"
     

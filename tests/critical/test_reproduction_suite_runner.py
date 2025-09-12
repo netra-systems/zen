@@ -273,10 +273,10 @@ class P1CriticalReproductionRunner:
         # Validate environment first
         environment_validation = self.validate_environment()
         if not environment_validation["platform_compatible"]:
-            print("⚠️ ENVIRONMENT ISSUES DETECTED:")
+            print(" WARNING: [U+FE0F] ENVIRONMENT ISSUES DETECTED:")
             for issue in environment_validation["issues"]:
                 print(f"  - {issue}")
-            print("\n📋 RECOMMENDATIONS:")
+            print("\n[U+1F4CB] RECOMMENDATIONS:")
             for rec in environment_validation["recommendations"]:
                 print(f"  - {rec}")
             print()
@@ -292,20 +292,20 @@ class P1CriticalReproductionRunner:
             
             if result["status"] == "reproduction_successful":
                 successful_reproductions += 1
-                print(f"✅ {failure_name}: REPRODUCTION SUCCESSFUL")
+                print(f" PASS:  {failure_name}: REPRODUCTION SUCCESSFUL")
                 print(f"   {result['reason']}")
                 
             elif result["status"] == "reproduction_failed":
                 failed_reproductions += 1
-                print(f"❌ {failure_name}: REPRODUCTION FAILED") 
+                print(f" FAIL:  {failure_name}: REPRODUCTION FAILED") 
                 print(f"   {result['reason']}")
                 
             elif result["status"] == "skipped":
-                print(f"⏭️ {failure_name}: SKIPPED")
+                print(f"[U+23ED][U+FE0F] {failure_name}: SKIPPED")
                 print(f"   {result['reason']}")
                 
             else:
-                print(f"🔍 {failure_name}: {result['status'].upper()}")
+                print(f" SEARCH:  {failure_name}: {result['status'].upper()}")
                 print(f"   {result.get('reason', 'Unknown')}")
         
         total_duration = time.time() - self.start_time
@@ -409,24 +409,24 @@ class P1CriticalReproductionRunner:
         print(f"Total Duration: {summary['total_duration']:.1f}s")
         print(f"Platform: {summary['platform']}")
         
-        print(f"\n📊 BUSINESS IMPACT ANALYSIS:")
+        print(f"\n CHART:  BUSINESS IMPACT ANALYSIS:")
         print(f"MRR at Risk: ${business['total_mrr_at_risk']}K+ / $120K+ total")
         print(f"Risk Percentage: {business['percentage_mrr_at_risk']:.1f}%")
         print(f"Recommendation: {business['recommendation']}")
         
         if business["issues_reproduced"]:
-            print(f"\n🚨 CRITICAL ISSUES REPRODUCED ({len(business['issues_reproduced'])}):")
+            print(f"\n ALERT:  CRITICAL ISSUES REPRODUCED ({len(business['issues_reproduced'])}):")
             for issue in business["issues_reproduced"]:
                 print(f"  - {issue['failure']}: ${issue['mrr_impact']}K+ MRR")
                 print(f"    {issue['description']}")
         
         if business["issues_potentially_fixed"]:
-            print(f"\n✅ POTENTIALLY FIXED ISSUES ({len(business['issues_potentially_fixed'])}):")
+            print(f"\n PASS:  POTENTIALLY FIXED ISSUES ({len(business['issues_potentially_fixed'])}):")
             for issue in business["issues_potentially_fixed"]:
                 print(f"  - {issue['failure']}: ${issue['mrr_impact']}K+ MRR")
                 print(f"    {issue['description']}")
         
-        print(f"\n🎯 NEXT STEPS:")
+        print(f"\n TARGET:  NEXT STEPS:")
         if summary['successful_reproductions'] > 0:
             print("1. Apply targeted fixes for reproduced failures")
             print("2. Rerun reproduction tests to validate fixes")
@@ -452,16 +452,16 @@ async def main():
     with open(report_file, "w") as f:
         json.dump(report, f, indent=2)
     
-    print(f"\n📄 Detailed report saved to: {report_file}")
+    print(f"\n[U+1F4C4] Detailed report saved to: {report_file}")
     
     # Return appropriate exit code
     successful_reproductions = report["summary"]["successful_reproductions"]
     
     if successful_reproductions > 0:
-        print(f"\n🚨 CRITICAL: {successful_reproductions} failures reproduced - fixes needed before deployment")
+        print(f"\n ALERT:  CRITICAL: {successful_reproductions} failures reproduced - fixes needed before deployment")
         return 1  # Exit code indicates critical issues found
     else:
-        print(f"\n✅ SUCCESS: No critical failures reproduced - deployment may be safe")
+        print(f"\n PASS:  SUCCESS: No critical failures reproduced - deployment may be safe")
         return 0  # Exit code indicates no critical issues
 
 
@@ -470,10 +470,10 @@ if __name__ == "__main__":
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        print("\n🛑 Reproduction suite interrupted by user")
+        print("\n[U+1F6D1] Reproduction suite interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n❌ Reproduction suite failed: {e}")
+        print(f"\n FAIL:  Reproduction suite failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -175,7 +175,7 @@ def main():
         f.write(snippet)
     print(f"\nDockerfile snippet written to {snippet_file}")
     
-    print("\n✅ Requirements split successfully!")
+    print("\n PASS:  Requirements split successfully!")
     print(f"Files created in {output_dir}/")
     
     return 0

@@ -297,7 +297,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
         assert status["metrics"]["failed_calls"] >= enterprise_circuit_config.failure_threshold, \
             "Enterprise monitoring requires accurate failure tracking"
         
-        logger.info("✅ Enterprise cascade failure prevention validated - $150K+ MRR protected")
+        logger.info(" PASS:  Enterprise cascade failure prevention validated - $150K+ MRR protected")
 
     @pytest.mark.asyncio
     async def test_real_service_recovery_validation(self, real_circuit_breaker_with_health_monitoring):
@@ -370,7 +370,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
             assert hasattr(circuit_breaker.last_health_check, 'status'), \
                 "Health check result must be real HealthCheckResult object - NO MOCKS"
         
-        logger.info("✅ Real service recovery validation complete - Enterprise workflows protected")
+        logger.info(" PASS:  Real service recovery validation complete - Enterprise workflows protected")
 
     @pytest.mark.asyncio
     async def test_multi_user_isolation_under_circuit_breaker_conditions(self, enterprise_circuit_config):
@@ -441,7 +441,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
         assert user2_status["metrics"]["failed_calls"] == 0, \
             "User 2 should have no failures - perfect isolation required"
         
-        logger.info("✅ Multi-user isolation validated under circuit breaker conditions - Enterprise customers protected")
+        logger.info(" PASS:  Multi-user isolation validated under circuit breaker conditions - Enterprise customers protected")
 
     @pytest.mark.asyncio 
     async def test_circuit_breaker_failure_when_real_conditions_not_met(self, enterprise_circuit_config):
@@ -502,7 +502,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
         assert monitoring_available, \
             "Real circuit breaker monitoring must be available - NO FAKE MONITORING ALLOWED"
         
-        logger.info("✅ Circuit breaker monitoring validation passed - real conditions confirmed")
+        logger.info(" PASS:  Circuit breaker monitoring validation passed - real conditions confirmed")
 
     @pytest.mark.asyncio
     async def test_enterprise_sla_compliance_under_circuit_breaker_activation(self, enterprise_circuit_config):
@@ -569,7 +569,7 @@ class TestCircuitBreakerEdgeCases(SSotAsyncTestCase):
             # Circuit still open - acceptable for Enterprise protection
             logger.info("Circuit breaker remains open for continued Enterprise protection")
         
-        logger.info("✅ Enterprise SLA compliance validated under circuit breaker conditions")
+        logger.info(" PASS:  Enterprise SLA compliance validated under circuit breaker conditions")
 
 
 @pytest.mark.integration
@@ -646,4 +646,4 @@ class TestCircuitBreakerBusinessImpact(SSotAsyncTestCase):
         assert circuit_breaker.is_open or circuit_breaker.is_half_open, \
             "Circuit breaker must activate to protect revenue and customer experience"
         
-        logger.info("✅ Revenue protection metrics validated - business impact analysis enabled")
+        logger.info(" PASS:  Revenue protection metrics validated - business impact analysis enabled")

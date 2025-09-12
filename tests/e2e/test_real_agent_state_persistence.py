@@ -584,7 +584,7 @@ class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
                 f"Long-term value multiplier too low: {self.metrics.long_term_value_multiplier}x"
             )
             
-        logger.success("✓ Comprehensive state persistence flow validated")
+        logger.success("[U+2713] Comprehensive state persistence flow validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -631,7 +631,7 @@ class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
                     f"Cross-session turn {turn['turn']} has low coherence: {coherence}"
                 )
             
-        logger.success("✓ Cross-session state persistence validated")
+        logger.success("[U+2713] Cross-session state persistence validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -699,7 +699,7 @@ class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
                 f"Enterprise relationship building score too low: {self.metrics.relationship_building_score}"
             )
             
-        logger.success("✓ Business value progression through state persistence validated")
+        logger.success("[U+2713] Business value progression through state persistence validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -770,7 +770,7 @@ class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
                 f"User {result['user_id']} didn't complete enough turns: {result['turns_completed']}"
             )
         
-        logger.success("✓ Concurrent state isolation validated")
+        logger.success("[U+2713] Concurrent state isolation validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -830,7 +830,7 @@ class TestRealAgentStatePersistence(RealAgentStatePersistenceE2ETest):
                 f"Conversation continuity degraded: {self.metrics.conversation_continuity_score}"
             )
             
-        logger.success("✓ State persistence performance optimization validated")
+        logger.success("[U+2713] State persistence performance optimization validated")
 
 
 if __name__ == "__main__":
@@ -851,10 +851,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_state_persistence_flow(mock_services)
-            logger.success("✓ All agent state persistence tests passed")
+            logger.success("[U+2713] All agent state persistence tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Agent state persistence tests failed: {e}")
+            logger.error(f"[U+2717] Agent state persistence tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

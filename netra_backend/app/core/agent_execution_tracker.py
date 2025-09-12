@@ -341,7 +341,7 @@ class AgentExecutionTracker:
         self._total_executions += 1
         
         logger.info(
-            f"🎆 EXECUTION_CREATED: New agent execution tracking initiated. "
+            f"[U+1F386] EXECUTION_CREATED: New agent execution tracking initiated. "
             f"Execution_id: {execution_id}, Agent: {agent_name}, "
             f"User: {user_id[:8]}..., Thread: {thread_id}, "
             f"Timeout: {timeout_seconds or 25}s, State: {ExecutionState.PENDING.value}, "
@@ -397,7 +397,7 @@ class AgentExecutionTracker:
             if isinstance(state, dict):
                 # Specific error for the exact Issue #305 pattern
                 raise ValueError(
-                    f"🚨 Issue #305 CRITICAL: Dict object passed as ExecutionState: {state}. "
+                    f" ALERT:  Issue #305 CRITICAL: Dict object passed as ExecutionState: {state}. "
                     f"This was causing \"'dict' object has no attribute 'value'\" errors. "
                     f"Use ExecutionState enum instead: ExecutionState.COMPLETED, ExecutionState.FAILED, etc. "
                     f"Agent execution ID: {execution_id}"
@@ -469,7 +469,7 @@ class AgentExecutionTracker:
         # Enhanced logging for execution state changes with business context
         if state == ExecutionState.COMPLETED:
             logger.info(
-                f"✅ EXECUTION_COMPLETED: Agent execution finished successfully. "
+                f" PASS:  EXECUTION_COMPLETED: Agent execution finished successfully. "
                 f"Execution_id: {execution_id}, Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
                 f"Agent: {record.agent_name}, User: {record.user_id[:8]}..., "
                 f"State_transition: {old_state.value} -> {state.value}, "
@@ -477,7 +477,7 @@ class AgentExecutionTracker:
             )
         elif state == ExecutionState.FAILED:
             logger.error(
-                f"🚨 EXECUTION_FAILED: Agent execution failed - user experience degraded. "
+                f" ALERT:  EXECUTION_FAILED: Agent execution failed - user experience degraded. "
                 f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
                 f"User: {record.user_id[:8]}..., Error: {error or 'Unknown'}, "
                 f"Duration: {(record.updated_at - record.started_at).total_seconds():.3f}s, "
@@ -486,7 +486,7 @@ class AgentExecutionTracker:
             )
         elif state == ExecutionState.TIMEOUT:
             logger.error(
-                f"⏰ EXECUTION_TIMEOUT: Agent execution exceeded time limit. "
+                f"[U+23F0] EXECUTION_TIMEOUT: Agent execution exceeded time limit. "
                 f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
                 f"User: {record.user_id[:8]}..., Timeout_limit: {record.timeout_seconds}s, "
                 f"State_transition: {old_state.value} -> {state.value}, "
@@ -494,14 +494,14 @@ class AgentExecutionTracker:
             )
         elif state == ExecutionState.DEAD:
             logger.critical(
-                f"💀 EXECUTION_DEAD: Agent stopped responding - critical failure detected. "
+                f"[U+1F480] EXECUTION_DEAD: Agent stopped responding - critical failure detected. "
                 f"Execution_id: {execution_id}, Agent: {record.agent_name}, "
                 f"User: {record.user_id[:8]}..., Last_heartbeat: {record.time_since_heartbeat.total_seconds():.1f}s ago, "
                 f"State_transition: {old_state.value} -> {state.value}, "
                 f"Business_impact: Silent failure prevented, user notified of system issue"
             )
         else:
-            logger.info(f"🔄 EXECUTION_STATE_UPDATED: {execution_id} -> {state.value}")
+            logger.info(f" CYCLE:  EXECUTION_STATE_UPDATED: {execution_id} -> {state.value}")
         return True
     
     def get_execution_state(self, execution_id: str) -> Optional[ExecutionState]:
@@ -579,7 +579,7 @@ class AgentExecutionTracker:
             if record.is_dead(self.heartbeat_timeout):
                 dead_executions.append(record)
                 logger.critical(
-                    f"💀 DEAD_EXECUTION_DETECTED: Agent stopped responding - automatic recovery initiated. "
+                    f"[U+1F480] DEAD_EXECUTION_DETECTED: Agent stopped responding - automatic recovery initiated. "
                     f"Execution_id: {exec_id}, Agent: {record.agent_name}, "
                     f"User: {record.user_id[:8]}..., Heartbeat_gap: {record.time_since_heartbeat.total_seconds():.1f}s, "
                     f"Business_impact: Silent failure prevented, user will be notified, "
@@ -588,7 +588,7 @@ class AgentExecutionTracker:
             elif record.is_timed_out():
                 dead_executions.append(record)
                 logger.error(
-                    f"⏰ TIMEOUT_EXECUTION_DETECTED: Agent execution exceeded time limit - automatic cleanup. "
+                    f"[U+23F0] TIMEOUT_EXECUTION_DETECTED: Agent execution exceeded time limit - automatic cleanup. "
                     f"Execution_id: {exec_id}, Agent: {record.agent_name}, "
                     f"User: {record.user_id[:8]}..., Runtime: {record.duration.total_seconds():.1f}s if record.duration else 'unknown', "
                     f"Timeout_limit: {record.timeout_seconds}s, "
@@ -828,7 +828,7 @@ class AgentExecutionTracker:
                 websocket_event_sent = True
             except Exception as e:
                 logger.error(
-                    f"🚨 WEBSOCKET_EVENT_FAILED: Critical failure sending phase transition to user. "
+                    f" ALERT:  WEBSOCKET_EVENT_FAILED: Critical failure sending phase transition to user. "
                     f"Event: agent_phase_transition, User: {record.user_id[:8]}..., "
                     f"Phase: {new_phase.value}, Agent: {record.agent_name}, "
                     f"Error: {e}, Error_type: {type(e).__name__}, "

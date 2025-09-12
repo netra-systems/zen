@@ -290,7 +290,7 @@ class GitCommitGardenerMonitor:
                 logger.error(f"Failed to create commit: {result.stderr}")
                 return False
             
-            logger.info(f"✅ Atomic commit created successfully")
+            logger.info(f" PASS:  Atomic commit created successfully")
             self.commits_created += 1
             return True
             
@@ -330,7 +330,7 @@ class GitCommitGardenerMonitor:
         
         # Claude attribution footer (mandatory)
         footer = """
-🤖 Generated with Claude Code
+[U+1F916] Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>"""
         
         return f"{header}\n\n" + "\n".join(body_parts) + footer
@@ -418,7 +418,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     
     def run_continuous_monitoring(self):
         """Main monitoring loop - runs for specified duration"""
-        logger.info("🚀 Starting GitCommitGardener Continuous Monitoring")
+        logger.info("[U+1F680] Starting GitCommitGardener Continuous Monitoring")
         logger.info(f"Monitoring will run until: {self.end_time}")
         
         try:
@@ -427,7 +427,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 elapsed = current_time - self.start_time
                 remaining = self.end_time - current_time
                 
-                logger.info(f"📊 Monitoring Status - Elapsed: {elapsed}, Remaining: {remaining}")
+                logger.info(f" CHART:  Monitoring Status - Elapsed: {elapsed}, Remaining: {remaining}")
                 
                 # Execute monitoring cycle
                 cycle_success = self.monitoring_cycle()
@@ -438,25 +438,25 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                         break
                 
                 # Sleep until next cycle
-                logger.info(f"💤 Sleeping for {self.check_interval} seconds until next check")
+                logger.info(f"[U+1F4A4] Sleeping for {self.check_interval} seconds until next check")
                 time.sleep(self.check_interval)
             
             # Final status report
             total_duration = datetime.now() - self.start_time
-            logger.info("🏁 GitCommitGardener Monitoring Complete")
+            logger.info("[U+1F3C1] GitCommitGardener Monitoring Complete")
             logger.info(f"Total duration: {total_duration}")
             logger.info(f"Cycles completed: {self.cycles_completed}")
             logger.info(f"Commits created: {self.commits_created}")
             
             if self.emergency_stop:
-                logger.warning("⚠️ Monitoring stopped due to emergency condition")
+                logger.warning(" WARNING: [U+FE0F] Monitoring stopped due to emergency condition")
             else:
-                logger.info("✅ Monitoring completed successfully")
+                logger.info(" PASS:  Monitoring completed successfully")
                 
         except KeyboardInterrupt:
-            logger.info("🛑 Monitoring stopped by user interrupt")
+            logger.info("[U+1F6D1] Monitoring stopped by user interrupt")
         except Exception as e:
-            logger.error(f"❌ Monitoring failed with critical error: {e}")
+            logger.error(f" FAIL:  Monitoring failed with critical error: {e}")
 
 
 def main():

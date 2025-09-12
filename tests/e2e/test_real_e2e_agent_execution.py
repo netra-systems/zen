@@ -550,9 +550,9 @@ class RealAgentExecutionTester(BaseE2ETest):
         if agent_type == "cost_optimizer" and "min_savings_threshold" in agent_config:
             min_threshold = agent_config["min_savings_threshold"]
             if validation.cost_savings_identified and validation.cost_savings_identified >= min_threshold:
-                logger.info(f"✓ Cost optimizer exceeded minimum savings threshold")
+                logger.info(f"[U+2713] Cost optimizer exceeded minimum savings threshold")
             else:
-                logger.warning(f"⚠ Cost optimizer below minimum savings threshold")
+                logger.warning(f" WARNING:  Cost optimizer below minimum savings threshold")
                 
         elif agent_type == "performance_analyzer" and "min_improvement_threshold" in agent_config:
             min_improvement = agent_config["min_improvement_threshold"]
@@ -562,7 +562,7 @@ class RealAgentExecutionTester(BaseE2ETest):
                     if isinstance(imp, dict) and "percentage" in imp and imp["percentage"] >= min_improvement
                 ]
                 if improvements_with_metrics:
-                    logger.info(f"✓ Performance analyzer found improvements >= {min_improvement}%")
+                    logger.info(f"[U+2713] Performance analyzer found improvements >= {min_improvement}%")
                     
         return validation
     
@@ -625,7 +625,7 @@ class RealAgentExecutionTester(BaseE2ETest):
         # Check if agent handled error gracefully
         if validation.final_response and "error" in validation.final_response.lower():
             validation.error_recovery_successful = True
-            logger.info("✓ Agent handled error gracefully with informative response")
+            logger.info("[U+2713] Agent handled error gracefully with informative response")
         elif validation.errors_encountered:
             # Check if errors were properly communicated to user
             user_facing_errors = [
@@ -665,7 +665,7 @@ class RealAgentExecutionTester(BaseE2ETest):
         for validation in self.validations:
             missing_events = self.REQUIRED_WEBSOCKET_EVENTS - validation.event_types_seen
             if missing_events:
-                report.append(f"  ⚠ {validation.agent_type}: Missing {missing_events}")
+                report.append(f"   WARNING:  {validation.agent_type}: Missing {missing_events}")
                 
         report.append("")
         
@@ -826,7 +826,7 @@ class RealAgentExecutionTester(BaseE2ETest):
             violation_summary = "\n".join(f"  - {v}" for v in isolation_violations)
             pytest.fail(f"CRITICAL: User isolation violations detected:\n{violation_summary}")
             
-        logger.info(f"✓ User isolation validated for {len(user_ids)} users")
+        logger.info(f"[U+2713] User isolation validated for {len(user_ids)} users")
 
 
 # ============================================================================
@@ -880,13 +880,13 @@ class TestRealAgentExecution(BaseE2ETest):
         assert validation.total_execution_time < 60.0, "Execution must complete within 60s"
         assert not validation.errors_encountered, f"No errors allowed: {validation.errors_encountered}"
         
-        logger.info(f"✓ Cost optimizer delivered business value in {validation.total_execution_time:.2f}s")
+        logger.info(f"[U+2713] Cost optimizer delivered business value in {validation.total_execution_time:.2f}s")
         
         # CLAUDE.md COMPLIANCE: Validate actual business value delivery
         if validation.cost_savings_identified:
             assert validation.cost_savings_identified > Decimal("10.00"), \
                 f"Cost savings too low: ${validation.cost_savings_identified} (minimum $10.00)"
-            logger.info(f"✓ Quantified cost savings: ${validation.cost_savings_identified}")
+            logger.info(f"[U+2713] Quantified cost savings: ${validation.cost_savings_identified}")
             
         if validation.optimization_recommendations:
             actionable_recs = [
@@ -894,7 +894,7 @@ class TestRealAgentExecution(BaseE2ETest):
                 if isinstance(rec, dict) and rec.get("action") and rec.get("impact")
             ]
             assert len(actionable_recs) > 0, "Must provide actionable optimization recommendations"
-            logger.info(f"✓ Provided {len(actionable_recs)} actionable recommendations")
+            logger.info(f"[U+2713] Provided {len(actionable_recs)} actionable recommendations")
     
     async def test_performance_analyzer_agent_insights(self, agent_tester):
         """Test performance analyzer agent provides actionable performance insights."""
@@ -923,7 +923,7 @@ class TestRealAgentExecution(BaseE2ETest):
         assert validation.tool_usage_logical, \
             "Tool usage must be logical and return results"
             
-        logger.info(f"✓ Performance analyzer provided insights with {len(validation.tools_executed)} tools")
+        logger.info(f"[U+2713] Performance analyzer provided insights with {len(validation.tools_executed)} tools")
         
         # CLAUDE.md COMPLIANCE: Validate performance improvement insights
         performance_improvements = validation.performance_improvements
@@ -935,7 +935,7 @@ class TestRealAgentExecution(BaseE2ETest):
             if quantified_improvements:
                 avg_improvement = sum(imp["percentage"] for imp in quantified_improvements) / len(quantified_improvements)
                 assert avg_improvement >= 2.0, f"Performance improvement too low: {avg_improvement}% (minimum 2%)"
-                logger.info(f"✓ Average performance improvement: {avg_improvement:.1f}%")
+                logger.info(f"[U+2713] Average performance improvement: {avg_improvement:.1f}%")
     
     async def test_triage_agent_routing_logic(self, agent_tester):
         """Test triage agent properly routes requests and classifies priorities."""
@@ -971,7 +971,7 @@ class TestRealAgentExecution(BaseE2ETest):
         assert routing_evidence or reasoning_evidence, \
             "Triage agent must demonstrate routing/classification logic"
             
-        logger.info(f"✓ Triage agent showed routing logic with {len(validation.reasoning_steps)} reasoning steps")
+        logger.info(f"[U+2713] Triage agent showed routing logic with {len(validation.reasoning_steps)} reasoning steps")
         
         # CLAUDE.md COMPLIANCE: Validate triage routing quality
         routing_quality_indicators = [
@@ -983,7 +983,7 @@ class TestRealAgentExecution(BaseE2ETest):
         ]
         quality_score = sum(routing_quality_indicators) / len(routing_quality_indicators)
         assert quality_score >= 0.6, f"Triage quality score too low: {quality_score:.1f} (minimum 0.6)"
-        logger.info(f"✓ Triage quality score: {quality_score:.1f}")
+        logger.info(f"[U+2713] Triage quality score: {quality_score:.1f}")
     
     async def test_parallel_multi_user_agent_execution(self, agent_tester):
         """Test multiple agents executing in parallel for different users (user isolation)."""
@@ -1027,8 +1027,8 @@ class TestRealAgentExecution(BaseE2ETest):
                 assert other_thread not in (validation.final_response or ""), \
                     f"Thread leakage: {other_thread} found in {validation.user_id}'s response"
                     
-        logger.info(f"✓ Parallel execution successful with {len(user_ids)} isolated users")
-        logger.info(f"✓ Multi-user isolation validated - no data leakage detected")
+        logger.info(f"[U+2713] Parallel execution successful with {len(user_ids)} isolated users")
+        logger.info(f"[U+2713] Multi-user isolation validated - no data leakage detected")
     
     async def test_agent_tool_execution_integration(self, agent_tester):
         """Test agent tool execution and results integration."""
@@ -1061,7 +1061,7 @@ class TestRealAgentExecution(BaseE2ETest):
             assert validation.has_actionable_insights, \
                 "Tool results must contribute to actionable insights"
                 
-        logger.info(f"✓ Tool integration validated with {len(validation.tools_executed)} tools executed")
+        logger.info(f"[U+2713] Tool integration validated with {len(validation.tools_executed)} tools executed")
     
     async def test_agent_reasoning_quality(self, agent_tester):
         """Test agent reasoning and decision-making quality."""
@@ -1104,7 +1104,7 @@ class TestRealAgentExecution(BaseE2ETest):
             assert response_length >= 300, \
                 f"Complex problem requires comprehensive response, got {response_length} chars"
                 
-        logger.info(f"✓ Reasoning quality validated with {len(validation.reasoning_steps)} reasoning steps")
+        logger.info(f"[U+2713] Reasoning quality validated with {len(validation.reasoning_steps)} reasoning steps")
     
     async def test_agent_error_handling_and_recovery(self, agent_tester):
         """Test agent error handling and graceful recovery."""
@@ -1128,7 +1128,7 @@ class TestRealAgentExecution(BaseE2ETest):
         if validation.errors_encountered:
             logger.info(f"Errors handled: {validation.errors_encountered}")
             
-        logger.info(f"✓ Error handling validated with recovery: {validation.error_recovery_successful}")
+        logger.info(f"[U+2713] Error handling validated with recovery: {validation.error_recovery_successful}")
     
     async def test_agent_performance_monitoring(self, agent_tester):
         """Test agent performance monitoring and metrics collection."""
@@ -1165,7 +1165,7 @@ class TestRealAgentExecution(BaseE2ETest):
         successful_executions = [v for v in performance_validations if v.has_actionable_insights]
         assert len(successful_executions) == 3, "All executions should provide value"
         
-        logger.info(f"✓ Performance monitoring validated: avg={avg_time:.2f}s, range={min_time:.2f}-{max_time:.2f}s")
+        logger.info(f"[U+2713] Performance monitoring validated: avg={avg_time:.2f}s, range={min_time:.2f}-{max_time:.2f}s")
     
     async def test_comprehensive_agent_workflow_validation(self, agent_tester):
         """Comprehensive test validating complete agent workflows end-to-end."""
@@ -1201,8 +1201,8 @@ class TestRealAgentExecution(BaseE2ETest):
         success_rate = len(successful_executions) / total_executions
         business_value_rate = len(business_value_executions) / total_executions
         
-        assert success_rate >= 0.7, f"Success rate {success_rate:.1%} too low (need ≥70%)"
-        assert business_value_rate >= 0.5, f"Business value rate {business_value_rate:.1%} too low (need ≥50%)"
+        assert success_rate >= 0.7, f"Success rate {success_rate:.1%} too low (need  >= 70%)"
+        assert business_value_rate >= 0.5, f"Business value rate {business_value_rate:.1%} too low (need  >= 50%)"
         
         # Generate comprehensive report
         report = agent_tester.generate_comprehensive_report()
@@ -1215,7 +1215,7 @@ class TestRealAgentExecution(BaseE2ETest):
             f.write(f"\n\nGenerated at: {datetime.now().isoformat()}\n")
             
         logger.info(f"Comprehensive report saved to: {report_file}")
-        logger.info(f"✓ Comprehensive validation complete: {success_rate:.1%} success, {business_value_rate:.1%} business value")
+        logger.info(f"[U+2713] Comprehensive validation complete: {success_rate:.1%} success, {business_value_rate:.1%} business value")
         
         # CLAUDE.md COMPLIANCE: Generate compliance report
         compliance_results = agent_tester.validate_business_value_compliance()
@@ -1235,7 +1235,7 @@ class TestRealAgentExecution(BaseE2ETest):
                 logger.error(f"CRITICAL FAILURE: {failure}")
             pytest.fail(f"Critical failures detected: {compliance_results['critical_failures']}")
             
-        logger.info(f"✓ CLAUDE.md compliance validated: {compliance_results['compliance_score']:.2f} score")
+        logger.info(f"[U+2713] CLAUDE.md compliance validated: {compliance_results['compliance_score']:.2f} score")
         
         # Log key findings
         logger.info("KEY FINDINGS:")
@@ -1265,7 +1265,7 @@ def validate_test_framework_imports():
         assert TEST_PORTS["backend"] == 8000, "Backend port configuration incorrect"
         assert TEST_PORTS["postgresql"] == 5434, "PostgreSQL test port configuration incorrect"
         
-        logger.info("✓ All test framework imports validated")
+        logger.info("[U+2713] All test framework imports validated")
         return True
     except Exception as e:
         logger.error(f"Test framework import validation failed: {e}")

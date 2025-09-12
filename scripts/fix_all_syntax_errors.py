@@ -239,7 +239,7 @@ def main():
     print(f"  Total: {len(results)}")
     
     if failed_count == 0:
-        print("✓ All syntax errors fixed!")
+        print("[U+2713] All syntax errors fixed!")
         sys.exit(0)
     else:
         print("X Some fixes failed")

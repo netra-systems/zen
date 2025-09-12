@@ -222,7 +222,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         assert captured_event_types.index("agent_started") < captured_event_types.index("agent_completed")
         assert captured_event_types.index("tool_executing") < captured_event_types.index("tool_completed")
         
-        logger.info(f"✅ All 5 critical WebSocket events validated: {captured_event_types}")
+        logger.info(f" PASS:  All 5 critical WebSocket events validated: {captured_event_types}")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -288,7 +288,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
             assert isinstance(event["timestamp"], datetime)
             assert event["timestamp"] is not None
         
-        logger.info("✅ Event data integrity and format validation passed")
+        logger.info(" PASS:  Event data integrity and format validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -346,7 +346,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         tool_completed_idx = event_types.index("tool_completed")
         assert tool_executing_idx < tool_completed_idx
         
-        logger.info(f"✅ Event ordering validation passed: {event_types}")
+        logger.info(f" PASS:  Event ordering validation passed: {event_types}")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -436,7 +436,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
             assert event["user_id"] == user2_id
             assert "user2" in str(event["data"])
         
-        logger.info("✅ Multi-user event isolation validation passed")
+        logger.info(" PASS:  Multi-user event isolation validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -497,7 +497,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         expected_order = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
         assert event_types == expected_order, f"Event order incorrect: {event_types}"
         
-        logger.info(f"✅ Event performance validation passed: {total_time:.4f}s for 5 events")
+        logger.info(f" PASS:  Event performance validation passed: {total_time:.4f}s for 5 events")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -567,7 +567,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         expected_types = ["agent_started", "agent_thinking", "tool_executing", "agent_completed"]
         assert captured_types == expected_types
         
-        logger.info("✅ Event error handling and resilience validation passed")
+        logger.info(" PASS:  Event error handling and resilience validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -669,7 +669,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         for expected_type in expected_bridge_types:
             assert expected_type in event_types, f"Missing bridge event type: {expected_type}. Got: {event_types}"
         
-        logger.info("✅ WebSocket bridge agent integration validation passed")
+        logger.info(" PASS:  WebSocket bridge agent integration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -759,7 +759,7 @@ class TestWebSocketEventValidationComprehensive(SSotAsyncTestCase):
         # Verify reasonable size progression
         assert small_payload < medium_payload < large_payload, "Payload sizes should increase with data complexity"
         
-        logger.info(f"✅ Event payload size validation passed: {payload_sizes} bytes")
+        logger.info(f" PASS:  Event payload size validation passed: {payload_sizes} bytes")
 
     def teardown_method(self, method):
         """Cleanup after tests."""

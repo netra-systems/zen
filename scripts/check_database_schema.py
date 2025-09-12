@@ -113,7 +113,7 @@ async def check_schema_consistency():
         logger.info("  python netra_backend/app/alembic/run_migrations.py")
         return False
     else:
-        logger.info("✓ Database schema is consistent with models")
+        logger.info("[U+2713] Database schema is consistent with models")
         return True
 
 async def create_missing_columns():
@@ -138,7 +138,7 @@ async def create_missing_columns():
                     ALTER TABLE threads 
                     ADD COLUMN deleted_at TIMESTAMP WITHOUT TIME ZONE
                 """))
-                logger.info("✓ Added deleted_at column to threads table")
+                logger.info("[U+2713] Added deleted_at column to threads table")
             
         await engine.dispose()
         return True

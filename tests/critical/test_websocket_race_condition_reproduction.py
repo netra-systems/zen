@@ -76,7 +76,7 @@ class WebSocketRaceConditionReproduction:
         user_id = "race-test-user-123"
         num_concurrent_connections = 5
         
-        logger.info(f"🧪 RACE TEST: Creating {num_concurrent_connections} competing state machines for user {user_id}")
+        logger.info(f"[U+1F9EA] RACE TEST: Creating {num_concurrent_connections} competing state machines for user {user_id}")
         
         # Create multiple state machines simultaneously (this SHOULD fail)
         race_results = []
@@ -105,10 +105,10 @@ class WebSocketRaceConditionReproduction:
                     'error': str(result),
                     'error_type': type(result).__name__
                 })
-                logger.warning(f"❌ State machine {i} failed as expected: {result}")
+                logger.warning(f" FAIL:  State machine {i} failed as expected: {result}")
             else:
                 successful_machines.append(result)
-                logger.error(f"⚠️ State machine {i} succeeded unexpectedly: {result}")
+                logger.error(f" WARNING: [U+FE0F] State machine {i} succeeded unexpectedly: {result}")
         
         # CRITICAL ASSERTION: This test MUST FAIL with current implementation
         # Multiple state machines should NOT all succeed due to race conditions
@@ -127,13 +127,13 @@ class WebSocketRaceConditionReproduction:
             f"got {race_error_types}"
         )
         
-        logger.info(f"✅ RACE CONDITION CONFIRMED: {len(failed_machines)} machines failed as expected")
+        logger.info(f" PASS:  RACE CONDITION CONFIRMED: {len(failed_machines)} machines failed as expected")
 
     @pytest.mark.race_condition
     @pytest.mark.xfail(reason="MUST FAIL: Invalid state transition sequence")
     async def test_invalid_state_transition_connecting_to_services_ready(self):
         """
-        Reproduces: Invalid state transition CONNECTING → SERVICES_READY
+        Reproduces: Invalid state transition CONNECTING  ->  SERVICES_READY
         that skips required intermediate states (ACCEPTED, AUTHENTICATED).
         
         ROOT CAUSE: No coordination enforcing proper state sequence.
@@ -143,7 +143,7 @@ class WebSocketRaceConditionReproduction:
         connection_id = "invalid_transition_test"
         user_id = "test-user-invalid-transition"
         
-        logger.info(f"🧪 INVALID TRANSITION TEST: Attempting CONNECTING → SERVICES_READY")
+        logger.info(f"[U+1F9EA] INVALID TRANSITION TEST: Attempting CONNECTING  ->  SERVICES_READY")
         
         # Create state machine in CONNECTING state
         state_machine = ApplicationConnectionStateMachine(connection_id, user_id)
@@ -160,7 +160,7 @@ class WebSocketRaceConditionReproduction:
             
             # If we reach here, the transition succeeded when it shouldn't have
             pytest.fail(
-                f"RACE CONDITION NOT DETECTED: Invalid transition CONNECTING → SERVICES_READY "
+                f"RACE CONDITION NOT DETECTED: Invalid transition CONNECTING  ->  SERVICES_READY "
                 f"succeeded when it should have failed. Result: {transition_result}"
             )
         
@@ -170,7 +170,7 @@ class WebSocketRaceConditionReproduction:
             'invalid transition', 'invalid state', 'transition not allowed'
         ]), f"Expected invalid transition error, got: {error_message}"
         
-        logger.info(f"✅ INVALID TRANSITION BLOCKED: {exc_info.value}")
+        logger.info(f" PASS:  INVALID TRANSITION BLOCKED: {exc_info.value}")
 
     @pytest.mark.race_condition
     @pytest.mark.xfail(reason="MUST FAIL: Phase overlap race condition")
@@ -183,7 +183,7 @@ class WebSocketRaceConditionReproduction:
         
         EXPECTED FAILURE MODE: RuntimeError or state inconsistency when phases overlap.
         """
-        logger.info(f"🧪 PHASE OVERLAP TEST: Starting Phase 1 and Phase 4 simultaneously")
+        logger.info(f"[U+1F9EA] PHASE OVERLAP TEST: Starting Phase 1 and Phase 4 simultaneously")
         
         # Mock WebSocket in CONNECTING state
         websocket_mock = MagicMock()
@@ -207,7 +207,7 @@ class WebSocketRaceConditionReproduction:
             )
         except asyncio.TimeoutError:
             # Timeout is acceptable - indicates race condition deadlock
-            logger.info("✅ PHASE OVERLAP RACE: Timeout detected (possible deadlock)")
+            logger.info(" PASS:  PHASE OVERLAP RACE: Timeout detected (possible deadlock)")
             pytest.fail("Phase overlap caused timeout - race condition confirmed")
         
         # Analyze results
@@ -222,7 +222,7 @@ class WebSocketRaceConditionReproduction:
             f"Expected at least one failure due to overlap race condition."
         )
         
-        logger.info(f"✅ PHASE OVERLAP RACE CONFIRMED: {len(failures)} phase(s) failed")
+        logger.info(f" PASS:  PHASE OVERLAP RACE CONFIRMED: {len(failures)} phase(s) failed")
 
     @pytest.mark.race_condition
     @pytest.mark.xfail(reason="MUST FAIL: Message processing before accept complete")
@@ -234,7 +234,7 @@ class WebSocketRaceConditionReproduction:
         
         EXPECTED FAILURE MODE: RuntimeError with "accept first" message.
         """
-        logger.info(f"🧪 ACCEPT RACE TEST: Processing message before accept() complete")
+        logger.info(f"[U+1F9EA] ACCEPT RACE TEST: Processing message before accept() complete")
         
         # Mock WebSocket in CONNECTING state (accept not completed)
         websocket_mock = MagicMock()
@@ -259,7 +259,7 @@ class WebSocketRaceConditionReproduction:
             f"Expected 'accept' error message, got: {error_message}"
         )
         
-        logger.info(f"✅ ACCEPT RACE CONFIRMED: {exc_info.value}")
+        logger.info(f" PASS:  ACCEPT RACE CONFIRMED: {exc_info.value}")
 
     @pytest.mark.race_condition
     @pytest.mark.xfail(reason="MUST FAIL: Concurrent user context creation")
@@ -275,7 +275,7 @@ class WebSocketRaceConditionReproduction:
         user_id = "context-race-user"
         num_contexts = 3
         
-        logger.info(f"🧪 CONTEXT RACE TEST: Creating {num_contexts} concurrent contexts for {user_id}")
+        logger.info(f"[U+1F9EA] CONTEXT RACE TEST: Creating {num_contexts} concurrent contexts for {user_id}")
         
         # Attempt to create multiple contexts simultaneously
         context_creation_tasks = []
@@ -313,7 +313,7 @@ class WebSocketRaceConditionReproduction:
             f"created successfully without coordination failures."
         )
         
-        logger.info(f"✅ CONTEXT RACE CONFIRMED: {len(failed_contexts)} failures detected")
+        logger.info(f" PASS:  CONTEXT RACE CONFIRMED: {len(failed_contexts)} failures detected")
 
     # Helper methods for race condition simulation
 
@@ -328,17 +328,17 @@ class WebSocketRaceConditionReproduction:
             # Attempt rapid state transitions
             transitions = []
             
-            # Transition 1: CONNECTING → ACCEPTED
+            # Transition 1: CONNECTING  ->  ACCEPTED
             if state_machine.transition_to(ApplicationConnectionState.ACCEPTED):
                 transitions.append("ACCEPTED")
                 await asyncio.sleep(0.001)  # Minimal delay to allow race
             
-            # Transition 2: ACCEPTED → AUTHENTICATED  
+            # Transition 2: ACCEPTED  ->  AUTHENTICATED  
             if state_machine.transition_to(ApplicationConnectionState.AUTHENTICATED):
                 transitions.append("AUTHENTICATED")
                 await asyncio.sleep(0.001)
             
-            # Transition 3: AUTHENTICATED → SERVICES_READY
+            # Transition 3: AUTHENTICATED  ->  SERVICES_READY
             if state_machine.transition_to(ApplicationConnectionState.SERVICES_READY):
                 transitions.append("SERVICES_READY")
             

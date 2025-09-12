@@ -95,7 +95,7 @@ class StartupOrchestrator:
         }
         
         # Log phase transition
-        self.logger.info(f"🔄 PHASE TRANSITION → {phase.value.upper()}")
+        self.logger.info(f" CYCLE:  PHASE TRANSITION  ->  {phase.value.upper()}")
         self.logger.info(f"   Started at: {phase_start:.3f}s elapsed")
     
     def _complete_phase(self, phase: StartupPhase) -> None:
@@ -112,7 +112,7 @@ class StartupOrchestrator:
                 p.value: timings for p, timings in self.phase_timings.items()
             }
             
-            self.logger.info(f"✅ PHASE COMPLETED: {phase.value.upper()} ({duration:.3f}s)")
+            self.logger.info(f" PASS:  PHASE COMPLETED: {phase.value.upper()} ({duration:.3f}s)")
         
     def _fail_phase(self, phase: StartupPhase, error: Exception) -> None:
         """Mark a phase as failed and update error tracking."""
@@ -128,7 +128,7 @@ class StartupOrchestrator:
         self.app.state.startup_failed = True
         self.app.state.startup_error = f"Phase {phase.value} failed: {str(error)}"
         
-        self.logger.error(f"❌ PHASE FAILED: {phase.value.upper()} - {error}")
+        self.logger.error(f" FAIL:  PHASE FAILED: {phase.value.upper()} - {error}")
         
     async def initialize_system(self) -> None:
         """
@@ -183,18 +183,18 @@ class StartupOrchestrator:
         self.logger.info("PHASE 1: INIT - Foundation")
         
         # Step 1: Logging already initialized (we're using it)
-        self.logger.info("  ✓ Step 1: Logging initialized")
+        self.logger.info("  [U+2713] Step 1: Logging initialized")
         
         # Step 2: Environment validation
         self._validate_environment()
-        self.logger.info("  ✓ Step 2: Environment validated")
+        self.logger.info("  [U+2713] Step 2: Environment validated")
         
         # Step 3: Database migrations (non-critical)
         try:
             await self._run_migrations()
-            self.logger.info("  ✓ Step 3: Migrations completed")
+            self.logger.info("  [U+2713] Step 3: Migrations completed")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 3: Migrations skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 3: Migrations skipped: {e}")
     
     async def _phase2_core_services(self) -> None:
         """Phase 2: DEPENDENCIES - Core service managers and keys."""
@@ -202,23 +202,23 @@ class StartupOrchestrator:
         
         # Step 4: SSOT Auth Validation (CRITICAL - Must be first)
         await self._validate_auth_configuration()
-        self.logger.info("  ✓ Step 4: Auth configuration validated")
+        self.logger.info("  [U+2713] Step 4: Auth configuration validated")
         
         # Step 5: Key Manager (CRITICAL)
         self._initialize_key_manager()
         if not hasattr(self.app.state, 'key_manager') or self.app.state.key_manager is None:
             raise DeterministicStartupError("Key manager initialization failed")
-        self.logger.info("  ✓ Step 5: Key manager initialized")
+        self.logger.info("  [U+2713] Step 5: Key manager initialized")
         
         # Step 6: LLM Manager (CRITICAL)
         self._initialize_llm_manager()
         if not hasattr(self.app.state, 'llm_manager') or self.app.state.llm_manager is None:
             raise DeterministicStartupError("LLM manager initialization failed")
-        self.logger.info("  ✓ Step 6: LLM manager initialized")
+        self.logger.info("  [U+2713] Step 6: LLM manager initialized")
         
         # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
-        self.logger.info("  ✓ Step 7: Startup fixes applied")
+        self.logger.info("  [U+2713] Step 7: Startup fixes applied")
     
     async def _phase3_database_setup(self) -> None:
         """Phase 3: DATABASE - Database connections and schema."""
@@ -228,11 +228,11 @@ class StartupOrchestrator:
         await self._initialize_database()
         if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
             raise DeterministicStartupError("Database initialization failed - db_session_factory is None")
-        self.logger.info("  ✓ Step 7: Database connected")
+        self.logger.info("  [U+2713] Step 7: Database connected")
         
         # Step 8: Database schema validation (CRITICAL)
         await self._validate_database_schema()
-        self.logger.info("  ✓ Step 8: Database schema validated")
+        self.logger.info("  [U+2713] Step 8: Database schema validated")
     
     async def _phase4_cache_setup(self) -> None:
         """Phase 4: CACHE - Redis and caching systems."""
@@ -242,7 +242,7 @@ class StartupOrchestrator:
         await self._initialize_redis()
         if not hasattr(self.app.state, 'redis_manager') or self.app.state.redis_manager is None:
             raise DeterministicStartupError("Redis initialization failed - redis_manager is None")
-        self.logger.info("  ✓ Step 9: Redis connected")
+        self.logger.info("  [U+2713] Step 9: Redis connected")
     
     async def _phase5_services_setup(self) -> None:
         """Phase 5: SERVICES - Chat Pipeline and critical services."""
@@ -255,7 +255,7 @@ class StartupOrchestrator:
         await self._initialize_agent_websocket_bridge_basic()
         if not hasattr(self.app.state, 'agent_websocket_bridge') or self.app.state.agent_websocket_bridge is None:
             raise DeterministicStartupError("AgentWebSocketBridge is None - creation failed")
-        self.logger.info("  ✓ Step 10: AgentWebSocketBridge created")
+        self.logger.info("  [U+2713] Step 10: AgentWebSocketBridge created")
         
         # Step 11: Tool Registry (CRITICAL - Now can use the pre-created bridge)
         self._initialize_tool_registry()
@@ -263,7 +263,7 @@ class StartupOrchestrator:
         # Check that tool classes are configured instead
         if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
             raise DeterministicStartupError("Tool classes configuration failed")
-        self.logger.info("  ✓ Step 11: Tool registry configured for UserContext-based creation")
+        self.logger.info("  [U+2713] Step 11: Tool registry configured for UserContext-based creation")
         
         # Step 12: Agent Supervisor (CRITICAL - Create with bridge for proper WebSocket integration)
         await self._initialize_agent_supervisor()
@@ -271,23 +271,23 @@ class StartupOrchestrator:
             raise DeterministicStartupError("Agent supervisor is None - chat is broken")
         if not hasattr(self.app.state, 'thread_service') or self.app.state.thread_service is None:
             raise DeterministicStartupError("Thread service is None - chat is broken")
-        self.logger.info("  ✓ Step 12: Agent supervisor created with bridge")
+        self.logger.info("  [U+2713] Step 12: Agent supervisor created with bridge")
         
         # Step 13: Background Task Manager (CRITICAL)
         self._initialize_background_tasks()
         if not hasattr(self.app.state, 'background_task_manager') or self.app.state.background_task_manager is None:
             raise DeterministicStartupError("Background task manager initialization failed")
-        self.logger.info("  ✓ Step 13: Background task manager initialized")
+        self.logger.info("  [U+2713] Step 13: Background task manager initialized")
         
         # Step 14: Health Service Registry (CRITICAL)
         await self._initialize_health_service()
         if not hasattr(self.app.state, 'health_service') or self.app.state.health_service is None:
             raise DeterministicStartupError("Health service initialization failed")
-        self.logger.info("  ✓ Step 14: Health service initialized")
+        self.logger.info("  [U+2713] Step 14: Health service initialized")
         
         # Step 15: Factory Pattern Initialization (CRITICAL for singleton removal)
         await self._initialize_factory_patterns()
-        self.logger.info("  ✓ Step 15: Factory patterns initialized")
+        self.logger.info("  [U+2713] Step 15: Factory patterns initialized")
     
     async def _phase6_websocket_setup(self) -> None:
         """Phase 6: WEBSOCKET - WebSocket integration and real-time communication."""
@@ -295,37 +295,37 @@ class StartupOrchestrator:
         
         # Step 16: WebSocket Manager (CRITICAL - Initialize before integrations)
         await self._initialize_websocket()
-        self.logger.info("  ✓ Step 16: WebSocket manager initialized")
+        self.logger.info("  [U+2713] Step 16: WebSocket manager initialized")
         
         # Step 17: Complete bridge integration with all dependencies
         await self._perform_complete_bridge_integration()
-        self.logger.info("  ✓ Step 17: Bridge integration completed")
+        self.logger.info("  [U+2713] Step 17: Bridge integration completed")
         
         # CRITICAL FIX: Create app.state.websocket_bridge alias for supervisor_factory compatibility
         # This ensures supervisor_factory.py can find the bridge at the expected location
         if hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge:
             self.app.state.websocket_bridge = self.app.state.agent_websocket_bridge
-            self.logger.info("  ✓ Step 17a: WebSocket bridge alias created for supervisor factory compatibility")
+            self.logger.info("  [U+2713] Step 17a: WebSocket bridge alias created for supervisor factory compatibility")
         
         # Step 18: Verify tool dispatcher has WebSocket support
         await self._verify_tool_dispatcher_websocket_support()
-        self.logger.info("  ✓ Step 18: Tool dispatcher WebSocket support verified")
+        self.logger.info("  [U+2713] Step 18: Tool dispatcher WebSocket support verified")
         
         # Step 19: Message handler registration
         self._register_message_handlers()
-        self.logger.info("  ✓ Step 19: Message handlers registered")
+        self.logger.info("  [U+2713] Step 19: Message handlers registered")
         
         # Step 20: Verify AgentWebSocketBridge health
         await self._verify_bridge_health()
-        self.logger.info("  ✓ Step 20: AgentWebSocketBridge health verified")
+        self.logger.info("  [U+2713] Step 20: AgentWebSocketBridge health verified")
         
         # Step 21: Verify WebSocket events can actually be sent
         await self._verify_websocket_events()
-        self.logger.info("  ✓ Step 21: WebSocket event delivery verified")
+        self.logger.info("  [U+2713] Step 21: WebSocket event delivery verified")
         
         # Step 22: GCP WebSocket Readiness Validation (CRITICAL for GCP Cloud Run)
         await self._validate_gcp_websocket_readiness()
-        self.logger.info("  ✓ Step 22: GCP WebSocket readiness validated")
+        self.logger.info("  [U+2713] Step 22: GCP WebSocket readiness validated")
     
     async def _phase7_finalize(self) -> None:
         """Phase 7: FINALIZE - Final validation and optional services."""
@@ -333,52 +333,52 @@ class StartupOrchestrator:
         
         # Step 23: Connection monitoring (CRITICAL)
         await self._start_connection_monitoring()
-        self.logger.info("  ✓ Step 23: Connection monitoring started")
+        self.logger.info("  [U+2713] Step 23: Connection monitoring started")
         
         # Step 24a: REMOVED - Legacy startup validation fixes eliminated
-        self.logger.info("  ✓ Step 24a: Skipped legacy startup validation fixes (eliminated)")
+        self.logger.info("  [U+2713] Step 24a: Skipped legacy startup validation fixes (eliminated)")
         
         # Step 24b: Run comprehensive startup health checks (CRITICAL)
         from netra_backend.app.startup_health_checks import validate_startup_health
-        self.logger.info("  🏥 Running comprehensive startup health checks...")
+        self.logger.info("  [U+1F3E5] Running comprehensive startup health checks...")
         try:
             health_ok = await validate_startup_health(self.app, fail_on_critical=True)
             if health_ok:
-                self.logger.info("  ✓ Step 24b: All critical services passed health checks")
+                self.logger.info("  [U+2713] Step 24b: All critical services passed health checks")
             else:
-                self.logger.warning("  ⚠️ Step 24b: Some optional services are degraded but continuing")
+                self.logger.warning("   WARNING: [U+FE0F] Step 24b: Some optional services are degraded but continuing")
         except RuntimeError as e:
-            self.logger.error(f"  ❌ Step 24b: Critical services failed health checks: {e}")
+            self.logger.error(f"   FAIL:  Step 24b: Critical services failed health checks: {e}")
             raise DeterministicStartupError(f"Health check validation failed: {e}")
         
         # Step 24c: Comprehensive startup validation
         await self._run_comprehensive_validation()
-        self.logger.info("  ✓ Step 24c: Comprehensive validation completed")
+        self.logger.info("  [U+2713] Step 24c: Comprehensive validation completed")
         
         # Step 25: Critical path validation (CHAT FUNCTIONALITY)
         await self._run_critical_path_validation()
-        self.logger.info("  ✓ Step 25: Critical path validation completed")
+        self.logger.info("  [U+2713] Step 25: Critical path validation completed")
         
         # Step 26: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 26: ClickHouse initialized")
+            self.logger.info("  [U+2713] Step 26: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 26: ClickHouse skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 26: ClickHouse skipped: {e}")
         
         # Step 27: Performance Manager (optional)
         try:
             await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 27: Performance manager initialized")
+            self.logger.info("  [U+2713] Step 27: Performance manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 27: Performance manager skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 27: Performance manager skipped: {e}")
         
         # Step 28: Advanced Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 28: Advanced monitoring started")
+            self.logger.info("  [U+2713] Step 28: Advanced monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 28: Advanced monitoring skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 28: Advanced monitoring skipped: {e}")
     
     # DEPRECATED METHODS - keeping temporarily for reference during transition
     async def _phase4_integration_enhancement(self) -> None:
@@ -387,15 +387,15 @@ class StartupOrchestrator:
         
         # Step 13: Complete bridge integration with supervisor and registry
         await self._perform_complete_bridge_integration()
-        self.logger.info("  ✓ Step 13: Bridge integration completed")
+        self.logger.info("  [U+2713] Step 13: Bridge integration completed")
         
         # Step 14: Verify tool dispatcher has WebSocket support
         await self._verify_tool_dispatcher_websocket_support()
-        self.logger.info("  ✓ Step 14: Tool dispatcher WebSocket support verified")
+        self.logger.info("  [U+2713] Step 14: Tool dispatcher WebSocket support verified")
         
         # Step 15: Message handler registration
         self._register_message_handlers()
-        self.logger.info("  ✓ Step 15: Message handlers registered")
+        self.logger.info("  [U+2713] Step 15: Message handlers registered")
     
     async def _perform_complete_bridge_integration(self) -> None:
         """Complete AgentWebSocketBridge integration with all dependencies."""
@@ -436,8 +436,8 @@ class StartupOrchestrator:
             raise DeterministicStartupError(f"AgentWebSocketBridge unhealthy after integration: {health_status.state}")
         
         self.logger.info(f"    - Integration state: {health_status.state.value}")
-        self.logger.info(f"    - WebSocket Manager: {'✓' if health_status.websocket_manager_healthy else '✗'}")
-        self.logger.info(f"    - Registry: {'✓' if health_status.registry_healthy else '✗'}")
+        self.logger.info(f"    - WebSocket Manager: {'[U+2713]' if health_status.websocket_manager_healthy else '[U+2717]'}")
+        self.logger.info(f"    - Registry: {'[U+2713]' if health_status.registry_healthy else '[U+2717]'}")
     
     async def _verify_tool_dispatcher_websocket_support(self) -> None:
         """Verify tool dispatcher configuration for UserContext-based creation."""
@@ -495,21 +495,21 @@ class StartupOrchestrator:
         # Step 16: Background Task Manager (CRITICAL)
         try:
             self._initialize_background_tasks()
-            self.logger.info("  ✓ Step 16: Background task manager initialized")
+            self.logger.info("  [U+2713] Step 16: Background task manager initialized")
         except Exception as e:
             raise DeterministicStartupError(f"Background task manager initialization failed: {e}")
         
         # Step 17: Connection Monitoring (CRITICAL)
         try:
             await self._start_connection_monitoring()
-            self.logger.info("  ✓ Step 17: Connection monitoring started")
+            self.logger.info("  [U+2713] Step 17: Connection monitoring started")
         except Exception as e:
             raise DeterministicStartupError(f"Connection monitoring initialization failed: {e}")
         
         # Step 18: Health Service Registry (CRITICAL)
         try:
             await self._initialize_health_service()
-            self.logger.info("  ✓ Step 18: Health service initialized")
+            self.logger.info("  [U+2713] Step 18: Health service initialized")
         except Exception as e:
             raise DeterministicStartupError(f"Health service initialization failed: {e}")
     
@@ -535,15 +535,15 @@ class StartupOrchestrator:
         failed_checks = []
         for check, name in critical_checks:
             if check:
-                self.logger.info(f"  ✓ {name}: OK")
+                self.logger.info(f"  [U+2713] {name}: OK")
             else:
-                self.logger.error(f"  ✗ {name}: FAILED")
+                self.logger.error(f"  [U+2717] {name}: FAILED")
                 failed_checks.append(name)
         
         if failed_checks:
             raise DeterministicStartupError(f"Critical services failed validation: {', '.join(failed_checks)}")
         
-        self.logger.info("  ✓ Step 19: All critical services validated")
+        self.logger.info("  [U+2713] Step 19: All critical services validated")
         
         # Step 20: Verify AgentWebSocketBridge health
         await self._verify_bridge_health()
@@ -559,7 +559,7 @@ class StartupOrchestrator:
         
         # Step 24: Schema validation (CRITICAL)
         await self._validate_database_schema()
-        self.logger.info("  ✓ Step 24: Database schema validated")
+        self.logger.info("  [U+2713] Step 24: Database schema validated")
     
     def _validate_critical_services_exist(self) -> None:
         """Validate that all critical services exist and are not None."""
@@ -602,11 +602,11 @@ class StartupOrchestrator:
             if not hasattr(self.app.state, config_name):
                 # websocket_bridge_factory might be initialized later, so only warn
                 if config_name == 'websocket_bridge_factory':
-                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                    self.logger.warning(f"     WARNING:  {config_name} not yet initialized - will be created in factory pattern phase")
                 elif config_name == 'execution_engine_factory':
-                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                    self.logger.warning(f"     WARNING:  {config_name} not yet initialized - will be created in factory pattern phase")
                 elif config_name == 'websocket_connection_pool':
-                    self.logger.warning(f"    ⚠ {config_name} not yet initialized - will be created in factory pattern phase")
+                    self.logger.warning(f"     WARNING:  {config_name} not yet initialized - will be created in factory pattern phase")
                 else:
                     missing_configs.append(f"{config_name} ({description})")
             else:
@@ -628,7 +628,7 @@ class StartupOrchestrator:
                 error_msg += f"  None UserContext configs: {', '.join(none_configs)}\n"
             raise DeterministicStartupError(error_msg)
         
-        self.logger.info("    ✓ All critical services validated (factories will be initialized in next phase)")
+        self.logger.info("    [U+2713] All critical services validated (factories will be initialized in next phase)")
     
     async def _run_comprehensive_validation(self) -> None:
         """Run comprehensive startup validation."""
@@ -653,7 +653,7 @@ class StartupOrchestrator:
                 
                 # Log zero count warnings prominently
                 if zero_count_warnings:
-                    self.logger.warning("    ⚠️ COMPONENTS WITH ZERO COUNTS DETECTED:")
+                    self.logger.warning("     WARNING: [U+FE0F] COMPONENTS WITH ZERO COUNTS DETECTED:")
                     for warning in zero_count_warnings:
                         self.logger.warning(f"      - {warning}")
             
@@ -662,11 +662,11 @@ class StartupOrchestrator:
                 critical_failures = report.get('critical_failures', 0)
                 if critical_failures > 0:
                     # Log detailed failure information
-                    self.logger.error("🚨 CRITICAL STARTUP VALIDATION FAILURES DETECTED:")
+                    self.logger.error(" ALERT:  CRITICAL STARTUP VALIDATION FAILURES DETECTED:")
                     for category, components in report.get('categories', {}).items():
                         for component in components:
                             if component['critical'] and component['status'] in ['critical', 'failed']:
-                                self.logger.error(f"  ❌ {component['name']} ({category}): {component['message']}")
+                                self.logger.error(f"   FAIL:  {component['name']} ({category}): {component['message']}")
                     
                     # CLOUD RUN FIX: Allow bypass for staging/production remediation work
                     bypass_validation = get_env('BYPASS_STARTUP_VALIDATION', '').lower() == 'true'
@@ -676,7 +676,7 @@ class StartupOrchestrator:
                     if bypass_validation or (environment == 'staging' and critical_failures <= 2):
                         bypass_reason = "BYPASS_STARTUP_VALIDATION=true" if bypass_validation else f"staging environment with {critical_failures} minor failures"
                         self.logger.warning(
-                            f"⚠️ BYPASSING STARTUP VALIDATION FOR {environment.upper()} - "
+                            f" WARNING: [U+FE0F] BYPASSING STARTUP VALIDATION FOR {environment.upper()} - "
                             f"{critical_failures} critical failures ignored. Reason: {bypass_reason}"
                         )
                     else:
@@ -689,19 +689,19 @@ class StartupOrchestrator:
                         )
             
             # Log summary
-            self.logger.info(f"  ✓ Step 22: Startup validation complete")
+            self.logger.info(f"  [U+2713] Step 22: Startup validation complete")
             self.logger.info(f"    Summary: {report['status_counts']['healthy']} healthy, "
                            f"{report['status_counts']['warning']} warnings, "
                            f"{report['status_counts']['critical']} critical")
             
         except ImportError:
-            self.logger.warning("  ⚠ Step 22: Startup validation module not found - skipping comprehensive validation")
+            self.logger.warning("   WARNING:  Step 22: Startup validation module not found - skipping comprehensive validation")
         except DeterministicStartupError:
             # Re-raise deterministic errors
             raise
         except Exception as e:
             # Log but don't fail on non-critical validation errors
-            self.logger.error(f"  ⚠ Step 22: Startup validation error: {e}")
+            self.logger.error(f"   WARNING:  Step 22: Startup validation error: {e}")
     
     async def _run_critical_path_validation(self) -> None:
         """Run critical communication path validation."""
@@ -717,10 +717,10 @@ class StartupOrchestrator:
             
             if chat_breaking_count > 0:
                 # Log all chat-breaking failures
-                self.logger.error("    🚨 CHAT-BREAKING FAILURES DETECTED:")
+                self.logger.error("     ALERT:  CHAT-BREAKING FAILURES DETECTED:")
                 for validation in critical_validations:
                     if not validation.passed and validation.criticality.value == "chat_breaking":
-                        self.logger.error(f"      ❌ {validation.component}")
+                        self.logger.error(f"       FAIL:  {validation.component}")
                         self.logger.error(f"         Reason: {validation.failure_reason}")
                         if validation.remediation:
                             self.logger.error(f"         Fix: {validation.remediation}")
@@ -734,7 +734,7 @@ class StartupOrchestrator:
                 if bypass_validation or (environment == 'staging' and chat_breaking_count <= 1):
                     bypass_reason = "BYPASS_STARTUP_VALIDATION=true" if bypass_validation else f"staging environment with {chat_breaking_count} minor chat failure"
                     self.logger.warning(
-                        f"⚠️ BYPASSING CRITICAL PATH VALIDATION FOR {environment.upper()} - "
+                        f" WARNING: [U+FE0F] BYPASSING CRITICAL PATH VALIDATION FOR {environment.upper()} - "
                         f"{chat_breaking_count} chat-breaking failures ignored. Reason: {bypass_reason}"
                     )
                 else:
@@ -748,12 +748,12 @@ class StartupOrchestrator:
             degraded_count = sum(1 for v in critical_validations 
                                if not v.passed and v.criticality.value == "degraded")
             if degraded_count > 0:
-                self.logger.warning(f"    ⚠️ {degraded_count} degraded communication paths detected")
+                self.logger.warning(f"     WARNING: [U+FE0F] {degraded_count} degraded communication paths detected")
             
-            self.logger.info("  ✓ Step 23: Critical communication paths validated")
+            self.logger.info("  [U+2713] Step 23: Critical communication paths validated")
             
         except ImportError:
-            self.logger.warning("  ⚠ Step 23: Critical path validator not found - skipping")
+            self.logger.warning("   WARNING:  Step 23: Critical path validator not found - skipping")
         except DeterministicStartupError:
             # Re-raise deterministic errors
             raise
@@ -768,23 +768,23 @@ class StartupOrchestrator:
         # Step 25: ClickHouse (optional)
         try:
             await self._initialize_clickhouse()
-            self.logger.info("  ✓ Step 25: ClickHouse initialized")
+            self.logger.info("  [U+2713] Step 25: ClickHouse initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 25: ClickHouse skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 25: ClickHouse skipped: {e}")
         
         # Step 26: Performance Manager (optional)
         try:
             await self._initialize_performance_manager()
-            self.logger.info("  ✓ Step 26: Performance manager initialized")
+            self.logger.info("  [U+2713] Step 26: Performance manager initialized")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 26: Performance manager skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 26: Performance manager skipped: {e}")
         
         # Step 27: Advanced Monitoring (optional)
         try:
             await self._initialize_monitoring()
-            self.logger.info("  ✓ Step 27: Advanced monitoring started")
+            self.logger.info("  [U+2713] Step 27: Advanced monitoring started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Step 27: Advanced monitoring skipped: {e}")
+            self.logger.warning(f"   WARNING:  Step 27: Advanced monitoring skipped: {e}")
     
     async def _verify_bridge_health(self) -> None:
         """Verify AgentWebSocketBridge is healthy and operational - CRITICAL."""
@@ -817,7 +817,7 @@ class StartupOrchestrator:
                 raise DeterministicStartupError(f"Bridge has {health.consecutive_failures} consecutive failures")
             
             # Log detailed bridge status
-            self.logger.info(f"  ✓ Step 20: AgentWebSocketBridge health verified")
+            self.logger.info(f"  [U+2713] Step 20: AgentWebSocketBridge health verified")
             self.logger.info(f"    - State: {health.state.value}")
             self.logger.info(f"    - Health Checks: {status['metrics']['health_checks_performed']}")
             self.logger.info(f"    - Success Rate: {status['metrics']['success_rate']:.2%}")
@@ -867,20 +867,20 @@ class StartupOrchestrator:
         try:
             from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
             
-            self.logger.info("  🔐 Running SSOT auth validation...")
+            self.logger.info("  [U+1F510] Running SSOT auth validation...")
             await validate_auth_at_startup()
-            self.logger.info("  ✅ SSOT auth validation passed - auth system is secure")
+            self.logger.info("   PASS:  SSOT auth validation passed - auth system is secure")
             
         except ImportError as e:
             # Missing auth validator is CRITICAL
-            self.logger.error(f"  ❌ Failed to import auth validator: {e}")
+            self.logger.error(f"   FAIL:  Failed to import auth validator: {e}")
             raise DeterministicStartupError(
                 "Auth validator module not found - cannot verify auth security"
             ) from e
             
         except Exception as e:
             # Any auth validation failure is CRITICAL
-            self.logger.error(f"  ❌ CRITICAL AUTH VALIDATION FAILURE: {e}")
+            self.logger.error(f"   FAIL:  CRITICAL AUTH VALIDATION FAILURE: {e}")
             raise DeterministicStartupError(
                 f"Auth validation failed - system cannot start: {e}"
             ) from e
@@ -929,7 +929,7 @@ class StartupOrchestrator:
             
             self.logger.debug(f"Starting table setup with {table_setup_timeout}s timeout (graceful_mode={graceful_mode})...")
             if is_staging:
-                self.logger.info("🚨 STAGING MODE: Using graceful startup to prevent 503 errors during migration issues")
+                self.logger.info(" ALERT:  STAGING MODE: Using graceful startup to prevent 503 errors during migration issues")
             
             await asyncio.wait_for(
                 _ensure_database_tables_exist(self.logger, graceful_startup=graceful_mode),
@@ -998,7 +998,7 @@ class StartupOrchestrator:
         websocket_bridge = self.app.state.agent_websocket_bridge
         self.logger.info("    - Using pre-created AgentWebSocketBridge for tool dispatcher")
         
-        # 🚀 REVOLUTIONARY CHANGE: NO MORE GLOBAL REGISTRIES OR SINGLETONS
+        # [U+1F680] REVOLUTIONARY CHANGE: NO MORE GLOBAL REGISTRIES OR SINGLETONS
         # Store tool factory configuration for per-user registry creation
         # Each UserExecutionContext will get its own isolated registry instance
         
@@ -1010,18 +1010,18 @@ class StartupOrchestrator:
             SandboxedInterpreterTool
         ]
         
-        self.logger.info(f"    - ✅ Configured {len(available_tool_classes)} tool classes for per-user registry creation")
+        self.logger.info(f"    -  PASS:  Configured {len(available_tool_classes)} tool classes for per-user registry creation")
         
         # Store tool factory configuration (NOT instances) for UserContext-based creation
         self.app.state.tool_classes = available_tool_classes
         # websocket_bridge_factory will be properly initialized in _initialize_factory_patterns
         
-        # 🔥 NO MORE GLOBAL TOOL DISPATCHER OR REGISTRY
+        #  FIRE:  NO MORE GLOBAL TOOL DISPATCHER OR REGISTRY
         # These will be created per-user via UserExecutionContext
         self.app.state.tool_dispatcher = None  # Signals: use UserContext-based creation
         self.app.state.tool_registry = None   # Signals: use UserContext-based creation
         
-        self.logger.info("    - 🎯 Configured UserContext-based tool system (no global singletons)")
+        self.logger.info("    -  TARGET:  Configured UserContext-based tool system (no global singletons)")
         
         # Validate UserContext-based configuration
         if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
@@ -1033,15 +1033,15 @@ class StartupOrchestrator:
         # websocket_bridge_factory will be initialized later in _initialize_factory_patterns
         # It's not needed at this early stage
         
-        self.logger.info("    - ✅ UserContext-based tool system validated and ready")
-        self.logger.info("    - 🔧 Tool dispatchers will be created per-user with isolated registries")
-        self.logger.info("    - 🌐 WebSocket bridges will be created per-user with isolated events")
+        self.logger.info("    -  PASS:  UserContext-based tool system validated and ready")
+        self.logger.info("    - [U+1F527] Tool dispatchers will be created per-user with isolated registries")
+        self.logger.info("    - [U+1F310] WebSocket bridges will be created per-user with isolated events")
     
     async def _initialize_websocket(self) -> None:
         """Initialize WebSocket components - CRITICAL."""
         # WebSocket manager will be created per-request in UserExecutionContext pattern
         # No global initialization needed during startup
-        self.logger.info("    ✓ WebSocket manager configured for per-request creation")
+        self.logger.info("    [U+2713] WebSocket manager configured for per-request creation")
     
     async def _initialize_agent_class_registry(self) -> None:
         """Initialize the global agent class registry with all agent types - CRITICAL."""
@@ -1061,13 +1061,13 @@ class StartupOrchestrator:
             
             # Store reference for health checks
             self.app.state.agent_class_registry = registry
-            self.logger.info(f"  ✓ Step 9.5: AgentClassRegistry initialized with {agent_count} agent classes")
+            self.logger.info(f"  [U+2713] Step 9.5: AgentClassRegistry initialized with {agent_count} agent classes")
             
         except ImportError as e:
-            self.logger.error(f"  ❌ Failed to import agent class initialization: {e}")
+            self.logger.error(f"   FAIL:  Failed to import agent class initialization: {e}")
             raise DeterministicStartupError(f"Agent class initialization import failed: {e}")
         except Exception as e:
-            self.logger.error(f"  ❌ Agent class registry initialization failed: {e}")
+            self.logger.error(f"   FAIL:  Agent class registry initialization failed: {e}")
             raise DeterministicStartupError(f"Agent class registry initialization failed: {e}")
     
     async def _initialize_agent_websocket_bridge_basic(self) -> None:
@@ -1079,7 +1079,7 @@ class StartupOrchestrator:
             self.logger.info("  Creating AgentWebSocketBridge instance...")
             bridge = AgentWebSocketBridge()
             if bridge is None:
-                self.logger.error("  ❌ AgentWebSocketBridge() returned None")
+                self.logger.error("   FAIL:  AgentWebSocketBridge() returned None")
                 raise DeterministicStartupError("Failed to create AgentWebSocketBridge instance")
             
             # Store bridge in app state for later integration
@@ -1089,13 +1089,13 @@ class StartupOrchestrator:
             required_methods = ['notify_agent_started', 'notify_agent_completed', 'notify_tool_executing']
             missing_methods = [m for m in required_methods if not hasattr(bridge, m)]
             if missing_methods:
-                self.logger.error(f"  ❌ AgentWebSocketBridge missing methods: {missing_methods}")
+                self.logger.error(f"   FAIL:  AgentWebSocketBridge missing methods: {missing_methods}")
                 raise DeterministicStartupError(f"AgentWebSocketBridge missing required methods: {missing_methods}")
             
-            self.logger.info(f"  ✓ AgentWebSocketBridge instance created with all required methods (integration pending)")
+            self.logger.info(f"  [U+2713] AgentWebSocketBridge instance created with all required methods (integration pending)")
             
         except Exception as e:
-            self.logger.error(f"  ❌ Failed to initialize AgentWebSocketBridge: {e}")
+            self.logger.error(f"   FAIL:  Failed to initialize AgentWebSocketBridge: {e}")
             self.logger.error(f"  Exception type: {type(e).__name__}")
             if hasattr(e, '__traceback__'):
                 import traceback
@@ -1115,7 +1115,7 @@ class StartupOrchestrator:
         try:
             execution_tracker = await initialize_tracker()
             self.app.state.execution_tracker = execution_tracker
-            self.logger.info("      ✓ Agent execution tracker initialized")
+            self.logger.info("      [U+2713] Agent execution tracker initialized")
         except Exception as e:
             raise DeterministicStartupError(f"Failed to initialize execution tracker: {e}")
         
@@ -1158,7 +1158,7 @@ class StartupOrchestrator:
                     f"This violates deterministic startup requirements."
                 )
         
-        self.logger.info("    ✓ All critical services validated as non-None")
+        self.logger.info("    [U+2713] All critical services validated as non-None")
     
     def _register_message_handlers(self) -> None:
         """Register WebSocket message handlers - CRITICAL."""
@@ -1178,28 +1178,28 @@ class StartupOrchestrator:
         
         # WebSocket manager will be created per-request in UserExecutionContext pattern
         # Event delivery will be validated at runtime, not during startup
-        self.logger.info("    ✓ WebSocket manager configured for per-request creation")
+        self.logger.info("    [U+2713] WebSocket manager configured for per-request creation")
         
         try:
             # Verify tool configuration for UserContext-based creation
             if hasattr(self.app.state, 'tool_dispatcher') and self.app.state.tool_dispatcher:
                 # Legacy path - if tool_dispatcher exists, verify it has basic structure
                 main_dispatcher = self.app.state.tool_dispatcher
-                self.logger.info("    ✓ Main tool dispatcher available")
+                self.logger.info("    [U+2713] Main tool dispatcher available")
             else:
                 # UserContext-based path - verify configuration for per-user creation
                 if not hasattr(self.app.state, 'tool_classes') or not self.app.state.tool_classes:
                     raise DeterministicStartupError("Tool classes configuration not found for UserContext-based creation")
                 
-                self.logger.info("    ✓ Tool configuration verified for UserContext-based creation")
+                self.logger.info("    [U+2713] Tool configuration verified for UserContext-based creation")
             
             # Verify supervisor registry exists (if present)
             if hasattr(self.app.state, 'agent_supervisor'):
                 supervisor = self.app.state.agent_supervisor
                 if hasattr(supervisor, 'registry'):
-                    self.logger.info("    ✓ Supervisor registry available")
+                    self.logger.info("    [U+2713] Supervisor registry available")
             
-            self.logger.info("  ✓ Step 21: WebSocket configuration verified")
+            self.logger.info("  [U+2713] Step 21: WebSocket configuration verified")
             
         except DeterministicStartupError:
             raise
@@ -1239,7 +1239,7 @@ class StartupOrchestrator:
                 )
                 
                 # Log detailed failure information for debugging
-                self.logger.error(f"    ❌ GCP WebSocket readiness FAILED:")
+                self.logger.error(f"     FAIL:  GCP WebSocket readiness FAILED:")
                 self.logger.error(f"       State: {result.state.value}")
                 self.logger.error(f"       Failed services: {failed_services_str}")
                 self.logger.error(f"       Warnings: {', '.join(result.warnings) if result.warnings else 'none'}")
@@ -1252,7 +1252,7 @@ class StartupOrchestrator:
                 if bypass_validation or environment == 'staging':
                     bypass_reason = "BYPASS_STARTUP_VALIDATION=true" if bypass_validation else "staging environment"
                     self.logger.warning(
-                        f"⚠️ BYPASSING GCP WebSocket readiness validation for {environment.upper()} - "
+                        f" WARNING: [U+FE0F] BYPASSING GCP WebSocket readiness validation for {environment.upper()} - "
                         f"WebSocket issues logged but allowing app to start. Reason: {bypass_reason}. "
                         f"TODO: Fix failed services: {failed_services_str}"
                     )
@@ -1260,7 +1260,7 @@ class StartupOrchestrator:
                     raise DeterministicStartupError(error_msg)
             
             # Success - log detailed readiness confirmation
-            self.logger.info(f"    ✅ GCP WebSocket readiness VALIDATED")
+            self.logger.info(f"     PASS:  GCP WebSocket readiness VALIDATED")
             self.logger.info(f"       State: {result.state.value}")
             self.logger.info(f"       Validation time: {result.elapsed_time:.2f}s")
             self.logger.info(f"       Environment: {result.details.get('environment', 'unknown')}")
@@ -1272,8 +1272,8 @@ class StartupOrchestrator:
             
         except ImportError as e:
             # GCP validator not available - log warning but don't fail
-            self.logger.warning(f"    ⚠️  GCP WebSocket validator not available: {e}")
-            self.logger.warning("    ⚠️  Proceeding without GCP-specific validation")
+            self.logger.warning(f"     WARNING: [U+FE0F]  GCP WebSocket validator not available: {e}")
+            self.logger.warning("     WARNING: [U+FE0F]  Proceeding without GCP-specific validation")
             self.app.state.gcp_websocket_ready = False
             
         except DeterministicStartupError:
@@ -1282,7 +1282,7 @@ class StartupOrchestrator:
             
         except Exception as e:
             # Unexpected error in GCP validation
-            self.logger.error(f"    ❌ Unexpected error in GCP WebSocket validation: {e}")
+            self.logger.error(f"     FAIL:  Unexpected error in GCP WebSocket validation: {e}")
             
             # Check if we're in a GCP environment
             environment = get_env('ENVIRONMENT', '').lower()
@@ -1293,7 +1293,7 @@ class StartupOrchestrator:
                 raise DeterministicStartupError(f"GCP WebSocket readiness validation system error: {e}")
             else:
                 # In non-GCP environments, log warning and continue
-                self.logger.warning(f"    ⚠️  Non-critical GCP validation error in {environment} environment")
+                self.logger.warning(f"     WARNING: [U+FE0F]  Non-critical GCP validation error in {environment} environment")
                 self.app.state.gcp_websocket_ready = False
     
     async def _initialize_clickhouse(self) -> None:
@@ -1312,23 +1312,23 @@ class StartupOrchestrator:
             
             # Handle the result based on status
             if result["status"] == "connected":
-                self.logger.info("  ✓ ClickHouse connected successfully")
+                self.logger.info("  [U+2713] ClickHouse connected successfully")
                 # Store success indicator in app state
                 self.app.state.clickhouse_available = True
                 self.app.state.clickhouse_connection_status = "connected"
             elif result["status"] == "skipped":
-                self.logger.info("  ⚠ ClickHouse skipped (optional in this environment)")
+                self.logger.info("   WARNING:  ClickHouse skipped (optional in this environment)")
                 self.app.state.clickhouse_available = False
                 self.app.state.clickhouse_connection_status = "skipped"
             elif result["status"] == "failed":
                 if result["required"]:
                     # Required but failed - this should have raised an exception already
                     # but log additional context for deterministic startup
-                    self.logger.error(f"  ❌ ClickHouse required but failed: {result['error']}")
+                    self.logger.error(f"   FAIL:  ClickHouse required but failed: {result['error']}")
                     raise DeterministicStartupError(f"ClickHouse initialization failed: {result['error']}")
                 else:
                     # Optional and failed - log and continue
-                    self.logger.info(f"  ⚠ ClickHouse unavailable (optional): {result['error']}")
+                    self.logger.info(f"   WARNING:  ClickHouse unavailable (optional): {result['error']}")
                     self.app.state.clickhouse_available = False
                     self.app.state.clickhouse_connection_status = "failed"
             
@@ -1340,7 +1340,7 @@ class StartupOrchestrator:
             raise
         except Exception as e:
             # Handle unexpected errors in the initialization process
-            self.logger.error(f"  ❌ Unexpected error in ClickHouse initialization: {e}")
+            self.logger.error(f"   FAIL:  Unexpected error in ClickHouse initialization: {e}")
             # Check if ClickHouse is required for this environment
             from shared.isolated_environment import get_env
             config = get_config()
@@ -1373,9 +1373,9 @@ class StartupOrchestrator:
             from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
             await chat_event_monitor.start_monitoring()
             self.app.state.chat_event_monitor = chat_event_monitor
-            self.logger.info("  ✓ Chat event monitor started")
+            self.logger.info("  [U+2713] Chat event monitor started")
         except Exception as e:
-            self.logger.warning(f"  ⚠ Chat event monitor failed to start: {e}")
+            self.logger.warning(f"   WARNING:  Chat event monitor failed to start: {e}")
         
         # PHASE 3: Initialize monitoring integration between ChatEventMonitor and AgentWebSocketBridge
         try:
@@ -1383,15 +1383,15 @@ class StartupOrchestrator:
             integration_success = await initialize_monitoring_integration()
             
             if integration_success:
-                self.logger.info("  ✓ Monitoring integration established - cross-system validation enabled")
+                self.logger.info("  [U+2713] Monitoring integration established - cross-system validation enabled")
                 # Store integration success on app state for health checks
                 self.app.state.monitoring_integration_enabled = True
             else:
-                self.logger.info("  ⚠ Monitoring integration failed - components operating independently")
+                self.logger.info("   WARNING:  Monitoring integration failed - components operating independently")
                 self.app.state.monitoring_integration_enabled = False
                 
         except Exception as e:
-            self.logger.warning(f"  ⚠ Monitoring integration error: {e} - components operating independently")
+            self.logger.warning(f"   WARNING:  Monitoring integration error: {e} - components operating independently")
             self.app.state.monitoring_integration_enabled = False
     
     def _initialize_background_tasks(self) -> None:
@@ -1423,11 +1423,11 @@ class StartupOrchestrator:
             
             # Log successful fixes
             if fix_results.get('successful_fixes'):
-                self.logger.info(f"✅ Successful fixes: {', '.join(fix_results['successful_fixes'])}")
+                self.logger.info(f" PASS:  Successful fixes: {', '.join(fix_results['successful_fixes'])}")
             
             # Log failed fixes with details
             if fix_results.get('failed_fixes'):
-                self.logger.warning(f"❌ Failed fixes: {', '.join(fix_results['failed_fixes'])}")
+                self.logger.warning(f" FAIL:  Failed fixes: {', '.join(fix_results['failed_fixes'])}")
                 for fix_name in fix_results['failed_fixes']:
                     fix_detail = fix_results.get('fix_details', {}).get(fix_name, {})
                     error = fix_detail.get('error', 'Unknown error')
@@ -1435,7 +1435,7 @@ class StartupOrchestrator:
             
             # Log skipped fixes with reasons
             if fix_results.get('skipped_fixes'):
-                self.logger.info(f"⏭️ Skipped fixes: {', '.join(fix_results['skipped_fixes'])}")
+                self.logger.info(f"[U+23ED][U+FE0F] Skipped fixes: {', '.join(fix_results['skipped_fixes'])}")
                 for fix_name in fix_results['skipped_fixes']:
                     fix_detail = fix_results.get('fix_details', {}).get(fix_name, {})
                     error = fix_detail.get('error', 'Unknown reason')
@@ -1443,7 +1443,7 @@ class StartupOrchestrator:
             
             # Log retry information if any retries were needed
             if fix_results.get('retry_summary'):
-                self.logger.info(f"🔄 Fixes requiring retries: {fix_results['retry_summary']}")
+                self.logger.info(f" CYCLE:  Fixes requiring retries: {fix_results['retry_summary']}")
             
             # Validate critical fixes are applied
             validation_result = await startup_fixes_validator.validate_all_fixes_applied(
@@ -1467,11 +1467,11 @@ class StartupOrchestrator:
             
             # Success case
             if successful_fixes == 5:
-                self.logger.info("✅ All 5 startup fixes successfully applied and validated")
+                self.logger.info(" PASS:  All 5 startup fixes successfully applied and validated")
             elif successful_fixes >= 4:
-                self.logger.info(f"✅ {successful_fixes}/5 startup fixes applied with {skipped_fixes} optional fixes skipped")
+                self.logger.info(f" PASS:  {successful_fixes}/5 startup fixes applied with {skipped_fixes} optional fixes skipped")
             else:
-                self.logger.warning(f"⚠️ Only {successful_fixes}/5 startup fixes applied - some functionality may be degraded")
+                self.logger.warning(f" WARNING: [U+FE0F] Only {successful_fixes}/5 startup fixes applied - some functionality may be degraded")
             
             # Log total duration
             total_duration = fix_results.get('total_duration', 0)
@@ -1544,14 +1544,14 @@ class StartupOrchestrator:
             # Configuration will be done later after WebSocket bridge is available
             # We store the class reference directly for later configuration and use
             self.app.state.execution_engine_factory = UnifiedExecutionEngineFactory
-            self.logger.info("    ✓ UnifiedExecutionEngineFactory assigned (will be configured after WebSocket bridge)")
+            self.logger.info("    [U+2713] UnifiedExecutionEngineFactory assigned (will be configured after WebSocket bridge)")
             
             
             # 2. Initialize WebSocketConnectionPool first (required by factory)
             from netra_backend.app.services.websocket_connection_pool import get_websocket_connection_pool
             connection_pool = get_websocket_connection_pool()
             self.app.state.websocket_connection_pool = connection_pool
-            self.logger.info("    ✓ WebSocketConnectionPool initialized")
+            self.logger.info("    [U+2713] WebSocketConnectionPool initialized")
             
             # 3. Initialize WebSocketBridgeFactory
             # CRITICAL FIX: Always initialize websocket_factory to prevent "not associated with a value" error
@@ -1573,7 +1573,7 @@ class StartupOrchestrator:
                     health_monitor=health_monitor
                 )
             self.app.state.websocket_bridge_factory = websocket_factory
-            self.logger.info("    ✓ WebSocketBridgeFactory configured with connection pool")
+            self.logger.info("    [U+2713] WebSocketBridgeFactory configured with connection pool")
             
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
@@ -1583,12 +1583,12 @@ class StartupOrchestrator:
                 tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )
             self.app.state.agent_instance_factory = agent_instance_factory
-            self.logger.info("    ✓ AgentInstanceFactory configured")
+            self.logger.info("    [U+2713] AgentInstanceFactory configured")
             
             # 5. Configure UnifiedExecutionEngineFactory with WebSocket bridge (MIGRATION COMPLETE)
             # Configure class with WebSocket bridge for compatibility (configure is a class method)
             UnifiedExecutionEngineFactory.configure(websocket_bridge=self.app.state.agent_websocket_bridge)
-            self.logger.info("    ✓ UnifiedExecutionEngineFactory configured with WebSocket bridge")
+            self.logger.info("    [U+2713] UnifiedExecutionEngineFactory configured with WebSocket bridge")
             
             # 6. Initialize FactoryAdapter for backward compatibility
             adapter_config = AdapterConfig.from_env()
@@ -1601,7 +1601,7 @@ class StartupOrchestrator:
             # Configure legacy components for fallback
             if hasattr(self.app.state, 'agent_supervisor'):
                 factory_adapter._legacy_websocket_bridge = self.app.state.agent_websocket_bridge
-                self.logger.info("    ✓ FactoryAdapter configured with legacy fallback")
+                self.logger.info("    [U+2713] FactoryAdapter configured with legacy fallback")
             
             self.app.state.factory_adapter = factory_adapter
             
@@ -1615,11 +1615,11 @@ class StartupOrchestrator:
             
             for route in critical_routes:
                 await factory_adapter.enable_factory_for_route(route)
-                self.logger.info(f"    ✓ Factory pattern enabled for route: {route}")
+                self.logger.info(f"    [U+2713] Factory pattern enabled for route: {route}")
             
             # Log factory initialization summary
             status = factory_adapter.get_migration_status()
-            self.logger.info("    📊 Factory Pattern Migration Status:")
+            self.logger.info("     CHART:  Factory Pattern Migration Status:")
             self.logger.info(f"      Migration Mode: {status['migration_mode']}")
             self.logger.info(f"      Routes Enabled: {len(status['route_flags'])}")
             self.logger.info(f"      Legacy Fallback: {'Enabled' if status['config']['legacy_fallback_enabled'] else 'Disabled'}")
@@ -1669,27 +1669,27 @@ class StartupOrchestrator:
         
         # Log comprehensive completion summary
         self.logger.info("=" * 80)
-        self.logger.info("🚀 DETERMINISTIC STARTUP SEQUENCE COMPLETED SUCCESSFULLY")
+        self.logger.info("[U+1F680] DETERMINISTIC STARTUP SEQUENCE COMPLETED SUCCESSFULLY")
         self.logger.info("=" * 80)
-        self.logger.info(f"✅ Total Time: {elapsed:.3f}s")
-        self.logger.info(f"✅ Phases Completed: {len(self.completed_phases)}/7")
+        self.logger.info(f" PASS:  Total Time: {elapsed:.3f}s")
+        self.logger.info(f" PASS:  Phases Completed: {len(self.completed_phases)}/7")
         
         # Log individual phase timings
-        self.logger.info("📊 PHASE TIMING BREAKDOWN:")
+        self.logger.info(" CHART:  PHASE TIMING BREAKDOWN:")
         for phase in StartupPhase:
             if phase in self.phase_timings:
                 duration = self.phase_timings[phase]['duration']
                 percentage = (duration / elapsed) * 100 if elapsed > 0 else 0
                 self.logger.info(f"   {phase.value.upper():<12}: {duration:.3f}s ({percentage:.1f}%)")
         
-        self.logger.info("🎯 CRITICAL SYSTEMS STATUS:")
-        self.logger.info("   Database:     ✅ Connected & Validated")
-        self.logger.info("   Redis:        ✅ Connected & Available")
-        self.logger.info("   LLM Manager:  ✅ Initialized & Ready")
-        self.logger.info("   Chat Pipeline:✅ Operational & WebSocket-Enabled")
-        self.logger.info("   Agent Bridge: ✅ Integrated & Health Verified")
+        self.logger.info(" TARGET:  CRITICAL SYSTEMS STATUS:")
+        self.logger.info("   Database:      PASS:  Connected & Validated")
+        self.logger.info("   Redis:         PASS:  Connected & Available")
+        self.logger.info("   LLM Manager:   PASS:  Initialized & Ready")
+        self.logger.info("   Chat Pipeline: PASS:  Operational & WebSocket-Enabled")
+        self.logger.info("   Agent Bridge:  PASS:  Integrated & Health Verified")
         self.logger.info("=" * 80)
-        self.logger.info("🟢 CHAT FUNCTIONALITY: FULLY OPERATIONAL")
+        self.logger.info("[U+1F7E2] CHAT FUNCTIONALITY: FULLY OPERATIONAL")
         self.logger.info("=" * 80)
     
     def _handle_startup_failure(self, error: Exception) -> None:
@@ -1705,34 +1705,34 @@ class StartupOrchestrator:
         
         # Log comprehensive failure details
         self.logger.critical("=" * 80)
-        self.logger.critical("💥 DETERMINISTIC STARTUP SEQUENCE FAILED")
+        self.logger.critical("[U+1F4A5] DETERMINISTIC STARTUP SEQUENCE FAILED")
         self.logger.critical("=" * 80)
-        self.logger.critical(f"❌ Failed at Phase: {self.current_phase.value.upper() if self.current_phase else 'UNKNOWN'}")
-        self.logger.critical(f"❌ Time Elapsed: {elapsed:.3f}s")
-        self.logger.critical(f"❌ Error: {error}")
+        self.logger.critical(f" FAIL:  Failed at Phase: {self.current_phase.value.upper() if self.current_phase else 'UNKNOWN'}")
+        self.logger.critical(f" FAIL:  Time Elapsed: {elapsed:.3f}s")
+        self.logger.critical(f" FAIL:  Error: {error}")
         
         # Log phase completion status
         if self.completed_phases:
             completed_names = [p.value for p in self.completed_phases]
-            self.logger.critical(f"✅ Completed Phases: {completed_names}")
+            self.logger.critical(f" PASS:  Completed Phases: {completed_names}")
         else:
-            self.logger.critical("❌ No phases completed")
+            self.logger.critical(" FAIL:  No phases completed")
             
         if self.failed_phases:
             failed_names = [p.value for p in self.failed_phases]
-            self.logger.critical(f"❌ Failed Phases: {failed_names}")
+            self.logger.critical(f" FAIL:  Failed Phases: {failed_names}")
         
         # Log phase timings for completed phases
         if self.phase_timings:
-            self.logger.critical("📊 PARTIAL PHASE TIMINGS:")
+            self.logger.critical(" CHART:  PARTIAL PHASE TIMINGS:")
             for phase, timing in self.phase_timings.items():
                 duration = timing.get('duration', 0.0)
-                status = "✅" if phase in self.completed_phases else "❌"
+                status = " PASS: " if phase in self.completed_phases else " FAIL: "
                 self.logger.critical(f"   {status} {phase.value.upper():<12}: {duration:.3f}s")
         
         self.logger.critical("=" * 80)
-        self.logger.critical("🔴 CRITICAL: CHAT FUNCTIONALITY IS BROKEN")
-        self.logger.critical("🔴 SERVICE CANNOT START - DETERMINISTIC FAILURE")
+        self.logger.critical("[U+1F534] CRITICAL: CHAT FUNCTIONALITY IS BROKEN")
+        self.logger.critical("[U+1F534] SERVICE CANNOT START - DETERMINISTIC FAILURE")
         self.logger.critical("=" * 80)
 
 

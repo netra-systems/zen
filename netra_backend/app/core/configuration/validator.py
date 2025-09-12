@@ -5,7 +5,7 @@
 Main configuration validator that orchestrates all validation modules.
 Business Value: Prevents $12K MRR loss from configuration errors.
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import os

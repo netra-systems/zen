@@ -42,23 +42,23 @@ def run_command(command, description, expect_failure=False):
         # Determine success based on expectations
         if expect_failure:
             if result.returncode != 0:
-                print("✅ EXPECTED FAILURE - This confirms the deployment gap exists")
+                print(" PASS:  EXPECTED FAILURE - This confirms the deployment gap exists")
                 return True  # Expected failure = success for our test plan
             else:
-                print("❌ UNEXPECTED SUCCESS - This suggests deployment may already be active")
+                print(" FAIL:  UNEXPECTED SUCCESS - This suggests deployment may already be active")
                 return False
         else:
             if result.returncode == 0:
-                print("✅ SUCCESS - Test passed as expected")
+                print(" PASS:  SUCCESS - Test passed as expected")
                 return True
             else:
-                print("❌ FAILURE - Test failed unexpectedly") 
+                print(" FAIL:  FAILURE - Test failed unexpectedly") 
                 return False
                 
     except Exception as e:
         duration = time.time() - start_time
         print(f"Duration: {duration:.2f}s")
-        print(f"❌ ERROR running command: {e}")
+        print(f" FAIL:  ERROR running command: {e}")
         return False
 
 def run_phase_1_pre_deployment():

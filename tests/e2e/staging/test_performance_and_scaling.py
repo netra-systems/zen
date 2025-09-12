@@ -17,7 +17,7 @@ This test suite validates performance and scaling characteristics:
 6. Connection pool and resource exhaustion testing
 7. Error rate and reliability under stress
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 - ALL tests use REAL authentication and staging services
 - Real concurrent load generation and measurement
 - Performance metrics collection and validation
@@ -142,7 +142,7 @@ class TestPerformanceAndScaling(BaseE2ETest):
             )
             self.test_users.append(user_context)
         
-        self.logger.info(f"✅ Performance testing environment setup complete - {len(self.test_users)} test users")
+        self.logger.info(f" PASS:  Performance testing environment setup complete - {len(self.test_users)} test users")
         
     async def test_concurrent_websocket_connection_scaling(self):
         """
@@ -265,11 +265,11 @@ class TestPerformanceAndScaling(BaseE2ETest):
         if memory_increase_mb > max_expected_memory:
             self.logger.warning(f"High memory usage during connection scaling: {memory_increase_mb:.1f}MB")
         
-        self.logger.info(f"✅ Concurrent WebSocket connection scaling completed")
-        self.logger.info(f"🔌 Successful connections: {len(successful_connections)}/{len(connection_results)}")
-        self.logger.info(f"⏱️ Average connection time: {avg_connection_time:.1f}s")
-        self.logger.info(f"📊 Message success rate: {overall_message_success_rate:.1%}")
-        self.logger.info(f"🧠 Memory increase: {memory_increase_mb:.1f}MB")
+        self.logger.info(f" PASS:  Concurrent WebSocket connection scaling completed")
+        self.logger.info(f"[U+1F50C] Successful connections: {len(successful_connections)}/{len(connection_results)}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average connection time: {avg_connection_time:.1f}s")
+        self.logger.info(f" CHART:  Message success rate: {overall_message_success_rate:.1%}")
+        self.logger.info(f"[U+1F9E0] Memory increase: {memory_increase_mb:.1f}MB")
         
     async def test_concurrent_agent_execution_performance(self):
         """
@@ -413,11 +413,11 @@ class TestPerformanceAndScaling(BaseE2ETest):
         # Should handle reasonable throughput
         assert requests_per_second >= 0.1, f"Agent execution throughput too low: {requests_per_second:.2f} req/s"
         
-        self.logger.info(f"✅ Concurrent agent execution performance completed")
-        self.logger.info(f"🤖 Successful executions: {len(successful_executions)}/{len(execution_results)}")
-        self.logger.info(f"⏱️ Average execution time: {avg_execution_time if execution_times else 0:.1f}s")
-        self.logger.info(f"📊 Events per execution: {avg_events_per_execution:.1f}")
-        self.logger.info(f"🔄 Throughput: {requests_per_second:.2f} req/s")
+        self.logger.info(f" PASS:  Concurrent agent execution performance completed")
+        self.logger.info(f"[U+1F916] Successful executions: {len(successful_executions)}/{len(execution_results)}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average execution time: {avg_execution_time if execution_times else 0:.1f}s")
+        self.logger.info(f" CHART:  Events per execution: {avg_events_per_execution:.1f}")
+        self.logger.info(f" CYCLE:  Throughput: {requests_per_second:.2f} req/s")
         
     async def test_api_endpoint_performance_under_load(self):
         """
@@ -543,13 +543,13 @@ class TestPerformanceAndScaling(BaseE2ETest):
         
         for endpoint, times in endpoint_stats.items():
             avg_time = sum(times) / len(times) if times else 0
-            self.logger.info(f"  📊 {endpoint}: {len(times)} requests, avg {avg_time:.2f}s")
+            self.logger.info(f"   CHART:  {endpoint}: {len(times)} requests, avg {avg_time:.2f}s")
         
-        self.logger.info(f"✅ API endpoint performance under load completed")
-        self.logger.info(f"🔗 Total API requests: {len(all_requests)}")
-        self.logger.info(f"📊 Success rate: {overall_success_rate:.1%}")
-        self.logger.info(f"⏱️ Average response time: {avg_response_time if response_times else 0:.2f}s")
-        self.logger.info(f"🔄 Throughput: {throughput:.2f} req/s")
+        self.logger.info(f" PASS:  API endpoint performance under load completed")
+        self.logger.info(f"[U+1F517] Total API requests: {len(all_requests)}")
+        self.logger.info(f" CHART:  Success rate: {overall_success_rate:.1%}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average response time: {avg_response_time if response_times else 0:.2f}s")
+        self.logger.info(f" CYCLE:  Throughput: {throughput:.2f} req/s")
         
     async def test_memory_and_resource_usage_under_load(self):
         """
@@ -694,11 +694,11 @@ class TestPerformanceAndScaling(BaseE2ETest):
         if avg_cpu > 80.0:
             self.logger.warning(f"High average CPU usage during load: {avg_cpu:.1f}%")
         
-        self.logger.info(f"✅ Memory and resource usage testing completed")
-        self.logger.info(f"🧠 Memory increase: {memory_increase:.1f}MB")
-        self.logger.info(f"⚡ Peak CPU: {peak_cpu:.1f}%, Average CPU: {avg_cpu:.1f}%")
-        self.logger.info(f"🔄 Total operations completed: {total_operations}")
-        self.logger.info(f"📊 Resource samples: {len(resource_metrics['memory_samples'])} memory, {len(resource_metrics['cpu_samples'])} CPU")
+        self.logger.info(f" PASS:  Memory and resource usage testing completed")
+        self.logger.info(f"[U+1F9E0] Memory increase: {memory_increase:.1f}MB")
+        self.logger.info(f" LIGHTNING:  Peak CPU: {peak_cpu:.1f}%, Average CPU: {avg_cpu:.1f}%")
+        self.logger.info(f" CYCLE:  Total operations completed: {total_operations}")
+        self.logger.info(f" CHART:  Resource samples: {len(resource_metrics['memory_samples'])} memory, {len(resource_metrics['cpu_samples'])} CPU")
         
     async def test_error_rate_and_reliability_under_stress(self):
         """
@@ -848,12 +848,12 @@ class TestPerformanceAndScaling(BaseE2ETest):
         error_summary = dict(stress_metrics["error_types"])
         most_common_error = max(error_summary, key=error_summary.get) if error_summary else "None"
         
-        self.logger.info(f"✅ Error rate and reliability under stress testing completed")
-        self.logger.info(f"📊 Total operations: {total_ops}")
-        self.logger.info(f"✅ Success rate: {overall_success_rate:.1%}")
-        self.logger.info(f"❌ Error rate: {overall_error_rate:.1%}")
-        self.logger.info(f"🔧 Most common error: {most_common_error}")
-        self.logger.info(f"⏱️ Avg response time: {avg_response_time if stress_metrics['response_times'] else 0:.1f}s")
+        self.logger.info(f" PASS:  Error rate and reliability under stress testing completed")
+        self.logger.info(f" CHART:  Total operations: {total_ops}")
+        self.logger.info(f" PASS:  Success rate: {overall_success_rate:.1%}")
+        self.logger.info(f" FAIL:  Error rate: {overall_error_rate:.1%}")
+        self.logger.info(f"[U+1F527] Most common error: {most_common_error}")
+        self.logger.info(f"[U+23F1][U+FE0F] Avg response time: {avg_response_time if stress_metrics['response_times'] else 0:.1f}s")
 
 
 # Integration with pytest for automated test discovery

@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 WebSocket v2 Critical Services Migration Script
 
@@ -6,7 +44,7 @@ This script migrates critical production services from the deprecated singleton
 `get_websocket_manager()` pattern to the new factory pattern `create_websocket_manager(user_context)`.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Eliminate critical WebSocket isolation vulnerabilities 
 - Value Impact: Prevents user data cross-contamination and connection hijacking
 - Revenue Impact: Prevents catastrophic security breaches that could destroy business trust
@@ -158,7 +196,7 @@ class MigrationReport:
             report += f"**Backup Directory:** {self.backup_directory}\n\n"
             
         if self.critical_issues_found:
-            report += "## 🚨 Critical Issues Found\n\n"
+            report += "##  ALERT:  Critical Issues Found\n\n"
             for issue in self.critical_issues_found:
                 report += f"- {issue}\n"
             report += "\n"
@@ -170,7 +208,7 @@ class MigrationReport:
             report += f"### {service_name}\n\n"
             
             if analysis.has_deprecated_usage:
-                report += "**Status:** ⚠️ Needs Migration\n\n"
+                report += "**Status:**  WARNING: [U+FE0F] Needs Migration\n\n"
                 
                 if analysis.deprecated_imports:
                     report += "**Deprecated Imports:**\n"
@@ -190,7 +228,7 @@ class MigrationReport:
                         report += f"- {source}\n"
                     report += "\n"
                 else:
-                    report += "**⚠️ No User Context Found - Manual intervention required**\n\n"
+                    report += "** WARNING: [U+FE0F] No User Context Found - Manual intervention required**\n\n"
                 
                 report += f"**Complexity Score:** {analysis.complexity_score}/5\n\n"
                 
@@ -203,10 +241,10 @@ class MigrationReport:
                 if self.dry_run:
                     report += "**Status:** Will be migrated in live run\n\n"
                 else:
-                    status = "✅ Successfully Migrated" if analysis.migration_successful else "❌ Migration Failed"
+                    status = " PASS:  Successfully Migrated" if analysis.migration_successful else " FAIL:  Migration Failed"
                     report += f"**Status:** {status}\n\n"
             else:
-                report += "**Status:** ✅ No migration needed\n\n"
+                report += "**Status:**  PASS:  No migration needed\n\n"
                 
         return report
 
@@ -316,26 +354,26 @@ class WebSocketV2Migrator:
         notes = []
         
         if not analysis.user_context_available:
-            notes.append("⚠️ No UserExecutionContext found - manual context creation required")
+            notes.append(" WARNING: [U+FE0F] No UserExecutionContext found - manual context creation required")
             
             # Check if it's a message handler that might have context in methods
             if "message_handler" in str(analysis.file_path).lower():
-                notes.append("💡 Message handlers typically receive context in handle_* methods")
+                notes.append(" IDEA:  Message handlers typically receive context in handle_* methods")
             
             # Check if it's a service that might have context injected
             if any(pattern in content for pattern in ["def __init__", "class.*Service"]):
-                notes.append("💡 Consider adding user_context parameter to constructor")
+                notes.append(" IDEA:  Consider adding user_context parameter to constructor")
         
         if len(analysis.deprecated_calls) > 3:
-            notes.append(f"⚠️ High usage count ({len(analysis.deprecated_calls)} calls) - requires careful review")
+            notes.append(f" WARNING: [U+FE0F] High usage count ({len(analysis.deprecated_calls)} calls) - requires careful review")
         
         # Check for WebSocket event emission patterns
         if re.search(r"emit_|send_.*event|websocket.*emit", content, re.IGNORECASE):
-            notes.append("🎯 Service emits WebSocket events - ensure isolated manager is used")
+            notes.append(" TARGET:  Service emits WebSocket events - ensure isolated manager is used")
         
         # Check for threading or async concerns
         if re.search(r"threading|asyncio\.create_task|concurrent\.futures", content):
-            notes.append("⚠️ Threading/async usage detected - verify user context propagation")
+            notes.append(" WARNING: [U+FE0F] Threading/async usage detected - verify user context propagation")
         
         return notes
     
@@ -347,11 +385,11 @@ class WebSocketV2Migrator:
             backup_path.parent.mkdir(parents=True, exist_ok=True)
             
             shutil.copy2(file_path, backup_path)
-            logger.info(f"✅ Backup created: {backup_path}")
+            logger.info(f" PASS:  Backup created: {backup_path}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to create backup for {file_path}: {e}")
+            logger.error(f" FAIL:  Failed to create backup for {file_path}: {e}")
             return False
     
     def migrate_service_file(self, analysis: ServiceAnalysis, dry_run: bool = False) -> bool:
@@ -410,7 +448,7 @@ class WebSocketV2Migrator:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(content)
                 
-                logger.info(f"✅ Migration completed for {file_path.name}")
+                logger.info(f" PASS:  Migration completed for {file_path.name}")
                 analysis.migration_successful = True
                 return True
             elif dry_run:
@@ -421,11 +459,11 @@ class WebSocketV2Migrator:
                     self._show_diff_preview(original_content, content, file_path)
                 return True
             else:
-                logger.info(f"ℹ️ No changes needed for {file_path.name}")
+                logger.info(f"[U+2139][U+FE0F] No changes needed for {file_path.name}")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Migration failed for {file_path}: {e}")
+            logger.error(f" FAIL:  Migration failed for {file_path}: {e}")
             analysis.migration_notes.append(f"Migration error: {e}")
             return False
     
@@ -558,14 +596,14 @@ class WebSocketV2Migrator:
         """Run the complete migration process."""
         self.report.dry_run = dry_run or validate_only
         
-        logger.info(f"🚀 Starting WebSocket v2 Migration ({'DRY RUN' if dry_run else 'VALIDATION ONLY' if validate_only else 'LIVE MIGRATION'})")
+        logger.info(f"[U+1F680] Starting WebSocket v2 Migration ({'DRY RUN' if dry_run else 'VALIDATION ONLY' if validate_only else 'LIVE MIGRATION'})")
         logger.info(f"Backup directory: {self.backup_dir}")
         
         # Find critical services
         critical_services = self.find_critical_services()
         
         if not critical_services:
-            logger.error("❌ No critical services found to migrate")
+            logger.error(" FAIL:  No critical services found to migrate")
             self.report.critical_issues_found.append("No critical services found")
             self.report.end_time = datetime.now()
             return self.report
@@ -591,13 +629,13 @@ class WebSocketV2Migrator:
                             self.report.services_failed_migration += 1
                     
             except Exception as e:
-                logger.error(f"❌ Error processing {service_path}: {e}")
+                logger.error(f" FAIL:  Error processing {service_path}: {e}")
                 self.report.critical_issues_found.append(f"Error processing {service_path}: {e}")
         
         self.report.end_time = datetime.now()
         
         # Summary
-        logger.info(f"\n🎯 Migration Summary:")
+        logger.info(f"\n TARGET:  Migration Summary:")
         logger.info(f"   Total Services: {self.report.total_services_analyzed}")
         logger.info(f"   Need Migration: {self.report.services_with_deprecated_usage}")
         
@@ -621,7 +659,7 @@ class WebSocketV2Migrator:
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_content)
             
-        logger.info(f"📊 Migration report saved: {report_path}")
+        logger.info(f" CHART:  Migration report saved: {report_path}")
         return report_path
 
 def main():
@@ -682,13 +720,13 @@ Examples:
     
     # Validate arguments
     if not args.dry_run and not args.force and not args.validate_only:
-        print("❌ Error: Must specify --dry-run, --validate-only, or --force")
+        print(" FAIL:  Error: Must specify --dry-run, --validate-only, or --force")
         print("   Use --dry-run first to see what would be changed")
         sys.exit(1)
     
     # Validate we're in the right directory
     if not Path("netra_backend/app/services").exists():
-        print("❌ Error: Must run from project root directory")
+        print(" FAIL:  Error: Must run from project root directory")
         print("   Expected to find: netra_backend/app/services")
         sys.exit(1)
     
@@ -708,13 +746,13 @@ Examples:
         
         # Exit with appropriate code
         if report.critical_issues_found or report.services_failed_migration > 0:
-            logger.error(f"❌ Migration completed with issues")
+            logger.error(f" FAIL:  Migration completed with issues")
             if not args.dry_run and not args.validate_only:
                 logger.error(f"   Check report at: {report_path}")
                 logger.error(f"   Backups available at: {migrator.backup_dir}")
             sys.exit(1)
         else:
-            logger.info(f"✅ Migration completed successfully")
+            logger.info(f" PASS:  Migration completed successfully")
             if args.dry_run:
                 logger.info("   Use --force to perform actual migration")
             elif args.validate_only:
@@ -724,10 +762,10 @@ Examples:
                 logger.info(f"   Backups: {migrator.backup_dir}")
             
     except KeyboardInterrupt:
-        print("\n❌ Migration interrupted by user")
+        print("\n FAIL:  Migration interrupted by user")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"❌ Unexpected error: {e}")
+        logger.error(f" FAIL:  Unexpected error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

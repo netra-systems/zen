@@ -16,6 +16,7 @@ Target Violation: Direct UnifiedStateManager() instantiation bypassing StateMana
 PURPOSE: Detect and prevent SSOT violations that compromise user isolation.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import ast
 import os
@@ -25,7 +26,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Set
 
 
-class TestSSotFactoryPatternViolationDetection(unittest.TestCase):
+class TestSSotFactoryPatternViolationDetection(SSotAsyncTestCase):
     """Tests that detect SSOT factory pattern violations in codebase."""
     
     def __init__(self, *args, **kwargs):
@@ -315,7 +316,7 @@ class TestSSotFactoryPatternViolationDetection(unittest.TestCase):
         return len(line_numbers) > 0
 
 
-class TestSSotFactoryPatternRegressionPrevention(unittest.TestCase):
+class TestSSotFactoryPatternRegressionPrevention(SSotAsyncTestCase):
     """Tests that prevent regression of factory pattern violations."""
     
     def __init__(self, *args, **kwargs):

@@ -1,7 +1,45 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """Test WorkflowOrchestrator Golden Path - P0 Failing E2E Tests.
 
 This test module validates the complete golden path user flow: 
-login → agent execution → AI response delivery with SSOT compliance.
+login  ->  agent execution  ->  AI response delivery with SSOT compliance.
 
 EXPECTED BEHAVIOR (BEFORE REMEDIATION):
 - These tests should FAIL because interface fragmentation breaks golden path
@@ -215,7 +253,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         return mock_emitter
         
     async def test_golden_path_login_to_ai_response_complete_flow(self):
-        """Test complete golden path: login → agent execution → AI response delivery.
+        """Test complete golden path: login  ->  agent execution  ->  AI response delivery.
         
         EXPECTED: This test should FAIL before remediation (golden path broken).
         AFTER REMEDIATION: Should PASS when SSOT compliance enables golden path.

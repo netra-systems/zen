@@ -2,7 +2,7 @@
 Connection-scoped WebSocket handler with zero event leakage between users.
 
 Business Value Justification:
-- Segment: All (Free → Enterprise) 
+- Segment: All (Free  ->  Enterprise) 
 - Business Goal: User Isolation & Chat Value Delivery
 - Value Impact: Eliminates cross-user event leakage that destroys user trust
 - Strategic Impact: CRITICAL - Core chat functionality requires isolated events
@@ -108,7 +108,7 @@ class ConnectionContext:
         if self._is_cleaned:
             return
         
-        logger.info(f"🧹 Cleaning up ConnectionContext for user {self.user_id} connection {self.connection_id}")
+        logger.info(f"[U+1F9F9] Cleaning up ConnectionContext for user {self.user_id} connection {self.connection_id}")
         # Clear any remaining buffered events
         if self._event_buffer:
             logger.warning(f"Discarding {len(self._event_buffer)} unbuffered events for {self.connection_id}")
@@ -162,7 +162,7 @@ class ConnectionHandler:
         ConnectionHandler._active_handlers.add(self.connection_id)
         ConnectionHandler._total_created += 1
         
-        logger.info(f"🔌 ConnectionHandler created for user {user_id[:8]}... "
+        logger.info(f"[U+1F50C] ConnectionHandler created for user {user_id[:8]}... "
                    f"connection {self.connection_id}")
     
     async def authenticate(self, thread_id: Optional[str] = None, session_id: Optional[str] = None) -> bool:
@@ -195,13 +195,13 @@ class ConnectionHandler:
                 connection_id=self.connection_id
             )
             
-            logger.info(f"✅ ConnectionHandler authenticated for user {self.context.user_id[:8]}... "
+            logger.info(f" PASS:  ConnectionHandler authenticated for user {self.context.user_id[:8]}... "
                        f"thread_id: {thread_id}")
             
             # SECURITY FIX: Flush any buffered events that arrived before thread association
             buffered_events = self.context.get_buffered_events()
             if buffered_events:
-                logger.info(f"🔄 Flushing {len(buffered_events)} buffered events for connection {self.connection_id}")
+                logger.info(f" CYCLE:  Flushing {len(buffered_events)} buffered events for connection {self.connection_id}")
                 for event in buffered_events:
                     try:
                         await self.emitter.send_event(event)
@@ -212,7 +212,7 @@ class ConnectionHandler:
             return True
             
         except Exception as e:
-            logger.error(f"❌ Authentication failed for connection {self.connection_id}: {e}")
+            logger.error(f" FAIL:  Authentication failed for connection {self.connection_id}: {e}")
             return False
     
     async def handle_incoming_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -225,7 +225,7 @@ class ConnectionHandler:
             Optional response message or None
         """
         if not self.context.is_authenticated:
-            logger.warning(f"🚫 Rejecting message from unauthenticated connection {self.connection_id}")
+            logger.warning(f"[U+1F6AB] Rejecting message from unauthenticated connection {self.connection_id}")
             return {"type": "error", "message": "Connection not authenticated"}
         
         await self.context.update_activity()
@@ -234,20 +234,20 @@ class ConnectionHandler:
         # CRITICAL: Validate message is for this user
         message_user_id = message.get("user_id")
         if message_user_id and message_user_id != self.allowed_user_id:
-            logger.error(f"🚨 SECURITY VIOLATION: Message for user {message_user_id} "
+            logger.error(f" ALERT:  SECURITY VIOLATION: Message for user {message_user_id} "
                         f"sent to connection for user {self.allowed_user_id}")
             self.context.events_filtered += 1
             return {"type": "error", "message": "Message user mismatch"}
         
         # Process valid message
         message_type = message.get("type", "unknown")
-        logger.debug(f"📨 Processing {message_type} message for user {self.context.user_id[:8]}...")
+        logger.debug(f"[U+1F4E8] Processing {message_type} message for user {self.context.user_id[:8]}...")
         
         # Handle thread association
         if message_type == "join_thread" and "thread_id" in message:
             thread_id = message["thread_id"]
             self.context.thread_id = thread_id
-            logger.info(f"🔗 Connection {self.connection_id} joined thread {thread_id}")
+            logger.info(f"[U+1F517] Connection {self.connection_id} joined thread {thread_id}")
             
             return {
                 "type": "thread_joined", 
@@ -272,16 +272,16 @@ class ConnectionHandler:
             if (self.context.user_id and 
                 event.get("user_id") == self.context.user_id and 
                 self.context.add_to_buffer(event)):
-                logger.debug(f"📦 Buffered event for connection {self.connection_id} "
+                logger.debug(f"[U+1F4E6] Buffered event for connection {self.connection_id} "
                            f"waiting for authentication")
                 return True
             else:
-                logger.warning(f"🚫 Cannot buffer event for unauthenticated connection {self.connection_id}")
+                logger.warning(f"[U+1F6AB] Cannot buffer event for unauthenticated connection {self.connection_id}")
                 return False
         
         # Check if emitter is available
         if not self.emitter:
-            logger.warning(f"🚫 No emitter available for connection {self.connection_id}")
+            logger.warning(f"[U+1F6AB] No emitter available for connection {self.connection_id}")
             return False
         
         # CRITICAL: Validate event is for this user
@@ -290,7 +290,7 @@ class ConnectionHandler:
         
         # Block events for different users
         if event_user_id and event_user_id != self.allowed_user_id:
-            logger.error(f"🚨 BLOCKED: Event for user {event_user_id} blocked from "
+            logger.error(f" ALERT:  BLOCKED: Event for user {event_user_id} blocked from "
                         f"user {self.allowed_user_id} connection {self.connection_id}")
             self.context.events_filtered += 1
             return False
@@ -298,7 +298,7 @@ class ConnectionHandler:
         # Block events for different threads (if thread filtering enabled)
         if (self.context.thread_id and event_thread_id and 
             event_thread_id != self.context.thread_id):
-            logger.debug(f"🚫 Event for thread {event_thread_id} blocked from "
+            logger.debug(f"[U+1F6AB] Event for thread {event_thread_id} blocked from "
                         f"connection on thread {self.context.thread_id}")
             self.context.events_filtered += 1
             return False
@@ -317,12 +317,12 @@ class ConnectionHandler:
             self.context.events_sent += 1
             await self.context.update_activity()
             
-            logger.debug(f"✅ Sent {event.get('type', 'unknown')} event to "
+            logger.debug(f" PASS:  Sent {event.get('type', 'unknown')} event to "
                         f"user {self.context.user_id[:8]}... connection {self.connection_id}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to send event to connection {self.connection_id}: {e}")
+            logger.error(f" FAIL:  Failed to send event to connection {self.connection_id}: {e}")
             return False
     
     async def get_stats(self) -> Dict[str, Any]:
@@ -342,7 +342,7 @@ class ConnectionHandler:
     
     async def cleanup(self):
         """Clean up connection resources."""
-        logger.info(f"🧹 Cleaning up ConnectionHandler for user {self.context.user_id} "
+        logger.info(f"[U+1F9F9] Cleaning up ConnectionHandler for user {self.context.user_id} "
                    f"connection {self.connection_id}")
         
         try:
@@ -359,10 +359,10 @@ class ConnectionHandler:
             # Remove from global tracking
             ConnectionHandler._active_handlers.discard(self.connection_id)
             
-            logger.info(f"✅ ConnectionHandler cleanup completed for {self.connection_id}")
+            logger.info(f" PASS:  ConnectionHandler cleanup completed for {self.connection_id}")
             
         except Exception as e:
-            logger.error(f"❌ Error during ConnectionHandler cleanup: {e}")
+            logger.error(f" FAIL:  Error during ConnectionHandler cleanup: {e}")
     
     @classmethod
     def get_global_stats(cls) -> Dict[str, Any]:

@@ -125,7 +125,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
             assert len(handshake_errors) == 0, f"Handshake race condition errors detected: {handshake_errors}"
             
             # All messages should be processed (possibly queued during handshake)
-            logger.info(f"✅ Handshake completion test passed - {len(received_responses)} responses received")
+            logger.info(f" PASS:  Handshake completion test passed - {len(received_responses)} responses received")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -190,7 +190,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
                             "response_type": response_data.get("type", "unknown")
                         })
                         
-                        logger.info(f"✅ Cloud Run simulation successful for {delay}s delay")
+                        logger.info(f" PASS:  Cloud Run simulation successful for {delay}s delay")
                         
                     except asyncio.TimeoutError:
                         # Connection established but no response - partial success
@@ -200,10 +200,10 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
                             "response_received": False,
                             "response_type": None
                         })
-                        logger.warning(f"⚠️ Cloud Run simulation: connection OK but no response for {delay}s delay")
+                        logger.warning(f" WARNING: [U+FE0F] Cloud Run simulation: connection OK but no response for {delay}s delay")
                         
             except Exception as e:
-                logger.error(f"❌ Cloud Run simulation failed for {delay}s delay: {e}")
+                logger.error(f" FAIL:  Cloud Run simulation failed for {delay}s delay: {e}")
                 # Record failure for analysis
                 if "1011" in str(e):
                     pytest.fail(f"WebSocket 1011 error in Cloud Run simulation (delay: {delay}s): {e}")
@@ -212,7 +212,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         success_rate = len(successful_connections) / len(delay_scenarios)
         assert success_rate >= 0.8, f"Cloud Run simulation success rate too low: {success_rate:.2%}"
         
-        logger.info(f"✅ Cloud Run progressive delay test passed - {len(successful_connections)}/{len(delay_scenarios)} scenarios successful")
+        logger.info(f" PASS:  Cloud Run progressive delay test passed - {len(successful_connections)}/{len(delay_scenarios)} scenarios successful")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -267,7 +267,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
                     error_msg = response_data.get("message", "")
                     assert "state" not in error_msg.lower(), f"Connection state error: {error_msg}"
                 
-                logger.info(f"✅ Connection state validation successful: {response_data.get('type')}")
+                logger.info(f" PASS:  Connection state validation successful: {response_data.get('type')}")
                 
             except asyncio.TimeoutError:
                 pytest.fail("Connection state validation timeout - may indicate handshake race condition")
@@ -279,7 +279,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         for expected_state in expected_states:
             assert expected_state in connection_states, f"Missing connection state: {expected_state}"
         
-        logger.info(f"✅ Connection state validation test passed - states: {connection_states}")
+        logger.info(f" PASS:  Connection state validation test passed - states: {connection_states}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -352,10 +352,10 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
                             "response_type": response_data.get("type")
                         })
                         
-                        logger.info(f"✅ Auth flow successful for {user_id} in {auth_duration:.3f}s")
+                        logger.info(f" PASS:  Auth flow successful for {user_id} in {auth_duration:.3f}s")
                         
                     except asyncio.TimeoutError:
-                        logger.warning(f"⚠️ Auth validation timeout for {user_id}")
+                        logger.warning(f" WARNING: [U+FE0F] Auth validation timeout for {user_id}")
                         # Record as partial success if connection established
                         successful_auth_flows.append({
                             "user_id": user_id,
@@ -371,7 +371,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
                 elif "1011" in error_msg:
                     pytest.fail(f"WebSocket 1011 error during auth handshake for {user_id}: {e}")
                 else:
-                    logger.error(f"❌ Unexpected error during auth handshake for {user_id}: {e}")
+                    logger.error(f" FAIL:  Unexpected error during auth handshake for {user_id}: {e}")
         
         # Validate that all authentication flows succeeded
         auth_success_rate = len(successful_auth_flows) / len(auth_scenarios)
@@ -382,7 +382,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         avg_auth_duration = sum(auth_durations) / len(auth_durations)
         assert avg_auth_duration < 10.0, f"Average auth duration too slow: {avg_auth_duration:.3f}s"
         
-        logger.info(f"✅ Authentication flow during handshake test passed - {len(successful_auth_flows)} successful flows")
+        logger.info(f" PASS:  Authentication flow during handshake test passed - {len(successful_auth_flows)} successful flows")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -528,7 +528,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         # Success rate should be high for a fixed system
         assert success_rate >= 0.9, f"Success rate too low for race condition test: {success_rate:.2%}"
         
-        logger.info(f"✅ Race condition reproduction test passed - no race conditions detected")
+        logger.info(f" PASS:  Race condition reproduction test passed - no race conditions detected")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -639,7 +639,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         reasonable_timeout_success = len([r for r in successful_connections if r["timeout"] >= 5.0])
         assert reasonable_timeout_success > 0, "At least one reasonable timeout scenario should succeed"
         
-        logger.info(f"✅ Handshake timeout handling test passed - {len(successful_connections)} successful connections")
+        logger.info(f" PASS:  Handshake timeout handling test passed - {len(successful_connections)} successful connections")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -786,7 +786,7 @@ class TestWebSocketHandshakeRaceConditions(BaseIntegrationTest):
         assert total_duration < (avg_connection_time * num_concurrent_users * 0.8), \
             "Connections do not appear to be concurrent - may indicate serialization"
         
-        logger.info(f"✅ Concurrent connection attempts test passed - {len(successful_connections)} successful connections")
+        logger.info(f" PASS:  Concurrent connection attempts test passed - {len(successful_connections)} successful connections")
 
 
 class TestWebSocketHandshakeAdvancedScenarios(BaseIntegrationTest):
@@ -870,16 +870,16 @@ class TestWebSocketHandshakeAdvancedScenarios(BaseIntegrationTest):
                 
                 # If it should fail and did fail, that's correct
                 if should_fail:
-                    logger.info(f"✅ Correctly rejected malformed headers for {scenario_name}: {type(e).__name__}")
+                    logger.info(f" PASS:  Correctly rejected malformed headers for {scenario_name}: {type(e).__name__}")
                 else:
-                    logger.error(f"❌ Unexpected failure for {scenario_name}: {e}")
+                    logger.error(f" FAIL:  Unexpected failure for {scenario_name}: {e}")
         
         # Validate that all malformed header scenarios failed as expected
         for result in handshake_validation_results:
             if result["expected_failure"]:
                 assert not result["success"], f"Scenario {result['scenario']} should have failed but succeeded"
         
-        logger.info(f"✅ Malformed headers test passed - all invalid scenarios properly rejected")
+        logger.info(f" PASS:  Malformed headers test passed - all invalid scenarios properly rejected")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -993,7 +993,7 @@ class TestWebSocketHandshakeAdvancedScenarios(BaseIntegrationTest):
         recovery_success = recovery_attempt[0]["success"]
         assert recovery_success, f"Recovery after interruption failed: {recovery_attempt[0].get('error')}"
         
-        logger.info(f"✅ Handshake interruption recovery test passed")
+        logger.info(f" PASS:  Handshake interruption recovery test passed")
         logger.info(f"Recovery results: {[r['stage'] for r in interruption_recovery_results]}")
 
 
@@ -1062,10 +1062,10 @@ class TestWebSocketHandshakeServiceDependencies(BaseIntegrationTest):
                         else:
                             logger.info(f"Non-service error (acceptable): {error_msg}")
                     
-                    logger.info(f"✅ Service health check during handshake completed: {response_data.get('type')}")
+                    logger.info(f" PASS:  Service health check during handshake completed: {response_data.get('type')}")
                     
                 except asyncio.TimeoutError:
-                    logger.info("✅ Service health check timeout (acceptable if services available)")
+                    logger.info(" PASS:  Service health check timeout (acceptable if services available)")
                     
         except Exception as e:
             error_msg = str(e)
@@ -1076,4 +1076,4 @@ class TestWebSocketHandshakeServiceDependencies(BaseIntegrationTest):
             else:
                 logger.warning(f"Non-service error during handshake (may be acceptable): {e}")
         
-        logger.info(f"✅ WebSocket handshake service dependency test completed")
+        logger.info(f" PASS:  WebSocket handshake service dependency test completed")

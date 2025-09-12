@@ -64,11 +64,11 @@ def test_docker_environment_acquisition():
                     result = sock.connect_ex(('localhost', port))
                     sock.close()
                     if result == 0:
-                        print(f"   ✅ {service}: Port {port} is open")
+                        print(f"    PASS:  {service}: Port {port} is open")
                     else:
-                        print(f"   ❌ {service}: Port {port} is closed")
+                        print(f"    FAIL:  {service}: Port {port} is closed")
                 except Exception as e:
-                    print(f"   ❌ {service}: Error testing port {port}: {e}")
+                    print(f"    FAIL:  {service}: Error testing port {port}: {e}")
                     
     except Exception as e:
         print(f"   ERROR: Failed to acquire environment: {e}")

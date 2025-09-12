@@ -1,7 +1,7 @@
 """Database repository test fixtures and helpers.
 
 This module provides reusable fixtures and helper functions for testing
-database repositories with mocked behavior. All functions are ≤8 lines.
+database repositories with mocked behavior. All functions are  <= 8 lines.
 """
 
 from datetime import datetime, timedelta

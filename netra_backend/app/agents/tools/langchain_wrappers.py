@@ -82,7 +82,7 @@ class DataHelperTool(BaseTool):
         """Get or create the DataHelper instance."""
         if self._tool is None:
             if self.llm_manager is None:
-                logger.warning("🚨 DataHelperTool: No LLM manager provided, creating fallback with no user context")
+                logger.warning(" ALERT:  DataHelperTool: No LLM manager provided, creating fallback with no user context")
                 from netra_backend.app.llm.llm_manager import create_llm_manager
                 self.llm_manager = create_llm_manager(None)  # Fallback for tools without user context
             self._tool = DataHelper(self.llm_manager)
@@ -90,7 +90,7 @@ class DataHelperTool(BaseTool):
     
     def _run(self, user_request: str, triage_result: str = "", previous_results: str = "") -> str:
         """Synchronous execution of DataHelper."""
-        logger.info(f"🔧 DataHelperTool executed for user request: {user_request[:100]}")
+        logger.info(f"[U+1F527] DataHelperTool executed for user request: {user_request[:100]}")
         
         try:
             # Parse previous results if provided
@@ -120,7 +120,7 @@ class DataHelperTool(BaseTool):
             
             return json.dumps(result)
         except Exception as e:
-            logger.error(f"❌ DataHelperTool error: {e}")
+            logger.error(f" FAIL:  DataHelperTool error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -134,7 +134,7 @@ class DataHelperTool(BaseTool):
     
     async def _arun(self, user_request: str, triage_result: str = "", previous_results: str = "") -> str:
         """Asynchronous execution of DataHelper."""
-        logger.info(f"🔧 DataHelperTool async executed for user request: {user_request[:100]}")
+        logger.info(f"[U+1F527] DataHelperTool async executed for user request: {user_request[:100]}")
         
         try:
             # Parse previous results if provided
@@ -161,7 +161,7 @@ class DataHelperTool(BaseTool):
             
             return json.dumps(result)
         except Exception as e:
-            logger.error(f"❌ DataHelperTool async error: {e}")
+            logger.error(f" FAIL:  DataHelperTool async error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -197,7 +197,7 @@ class DeepResearchTool(BaseTool):
     def _run(self, query: str, source_types: List[str] = None, max_results: int = 10,
              require_dates: bool = False, domains: List[str] = None) -> str:
         """Synchronous execution of DeepResearch."""
-        logger.info(f"🔍 DeepResearchTool executed for query: {query[:100]}")
+        logger.info(f" SEARCH:  DeepResearchTool executed for query: {query[:100]}")
         
         try:
             params = {
@@ -218,7 +218,7 @@ class DeepResearchTool(BaseTool):
                 "result_count": len(results)
             })
         except Exception as e:
-            logger.error(f"❌ DeepResearchTool error: {e}")
+            logger.error(f" FAIL:  DeepResearchTool error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -229,7 +229,7 @@ class DeepResearchTool(BaseTool):
     async def _arun(self, query: str, source_types: List[str] = None, max_results: int = 10,
                     require_dates: bool = False, domains: List[str] = None) -> str:
         """Asynchronous execution of DeepResearch."""
-        logger.info(f"🔍 DeepResearchTool async executed for query: {query[:100]}")
+        logger.info(f" SEARCH:  DeepResearchTool async executed for query: {query[:100]}")
         
         try:
             params = {
@@ -249,7 +249,7 @@ class DeepResearchTool(BaseTool):
                 "result_count": len(results)
             })
         except Exception as e:
-            logger.error(f"❌ DeepResearchTool async error: {e}")
+            logger.error(f" FAIL:  DeepResearchTool async error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -279,7 +279,7 @@ class ReliabilityScorerTool(BaseTool):
     
     def _run(self, results: str) -> str:
         """Synchronous execution of ReliabilityScorer."""
-        logger.info(f"📊 ReliabilityScorerTool executed for scoring results")
+        logger.info(f" CHART:  ReliabilityScorerTool executed for scoring results")
         
         try:
             # Parse results string
@@ -319,7 +319,7 @@ class ReliabilityScorerTool(BaseTool):
                 "result_count": len(scored_results)
             })
         except Exception as e:
-            logger.error(f"❌ ReliabilityScorerTool error: {e}")
+            logger.error(f" FAIL:  ReliabilityScorerTool error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -357,7 +357,7 @@ class SandboxedInterpreterTool(BaseTool):
     
     def _run(self, code: str, timeout_ms: int = 10000) -> str:
         """Synchronous execution of SandboxedInterpreter."""
-        logger.info(f"💻 SandboxedInterpreterTool executed for code execution")
+        logger.info(f"[U+1F4BB] SandboxedInterpreterTool executed for code execution")
         
         try:
             # Run async method in sync context
@@ -367,7 +367,7 @@ class SandboxedInterpreterTool(BaseTool):
             
             return json.dumps(result)
         except Exception as e:
-            logger.error(f"❌ SandboxedInterpreterTool error: {e}")
+            logger.error(f" FAIL:  SandboxedInterpreterTool error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -376,13 +376,13 @@ class SandboxedInterpreterTool(BaseTool):
     
     async def _arun(self, code: str, timeout_ms: int = 10000) -> str:
         """Asynchronous execution of SandboxedInterpreter."""
-        logger.info(f"💻 SandboxedInterpreterTool async executed for code execution")
+        logger.info(f"[U+1F4BB] SandboxedInterpreterTool async executed for code execution")
         
         try:
             result = await self._get_tool().execute(code, timeout_ms)
             return json.dumps(result)
         except Exception as e:
-            logger.error(f"❌ SandboxedInterpreterTool async error: {e}")
+            logger.error(f" FAIL:  SandboxedInterpreterTool async error: {e}")
             return json.dumps({
                 "status": "error",
                 "error": str(e),
@@ -411,7 +411,7 @@ def create_langchain_tools(
     Returns:
         List of configured LangChain tools
     """
-    logger.info("🛠️ Creating LangChain-wrapped tools")
+    logger.info("[U+1F6E0][U+FE0F] Creating LangChain-wrapped tools")
     
     tools = [
         DataHelperTool(llm_manager=llm_manager),
@@ -423,7 +423,7 @@ def create_langchain_tools(
         SandboxedInterpreterTool(docker_image=sandbox_docker_image)
     ]
     
-    logger.info(f"✅ Created {len(tools)} LangChain tools: {[tool.name for tool in tools]}")
+    logger.info(f" PASS:  Created {len(tools)} LangChain tools: {[tool.name for tool in tools]}")
     return tools
 
 
@@ -451,7 +451,7 @@ def get_tool_by_name(
     
     tool_class = tool_mapping.get(name)
     if tool_class is None:
-        logger.warning(f"⚠️ Tool '{name}' not found in LangChain wrappers")
+        logger.warning(f" WARNING: [U+FE0F] Tool '{name}' not found in LangChain wrappers")
         return None
     
     # Create tool with appropriate parameters

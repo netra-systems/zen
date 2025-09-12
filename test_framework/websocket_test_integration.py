@@ -185,11 +185,11 @@ class WebSocketTestClient:
                 event_type = message.get("type") or message.get("event")
                 if event_type in critical_events:
                     received_events[event_type] = True
-                    logger.info(f"✅ Received critical event: {event_type}")
+                    logger.info(f" PASS:  Received critical event: {event_type}")
                 
                 # Check if all events received
                 if all(received_events.values()):
-                    logger.info("✅ All critical events received!")
+                    logger.info(" PASS:  All critical events received!")
                     break
         
         return received_events
@@ -252,7 +252,7 @@ class WebSocketIntegrationTestSuite:
                 if success:
                     response = await client.receive_message(timeout=2.0)
                     if response and response.get("type") == "pong":
-                        logger.info("✅ WebSocket connection test passed")
+                        logger.info(" PASS:  WebSocket connection test passed")
                         await client.disconnect()
                         return True
             
@@ -288,9 +288,9 @@ class WebSocketIntegrationTestSuite:
             # Log results
             missing_events = [event for event, received in received_events.items() if not received]
             if missing_events:
-                logger.error(f"❌ Missing critical events: {missing_events}")
+                logger.error(f" FAIL:  Missing critical events: {missing_events}")
             else:
-                logger.info("✅ All critical events received successfully")
+                logger.info(" PASS:  All critical events received successfully")
             
             return received_events
             
@@ -307,7 +307,7 @@ class WebSocketIntegrationTestSuite:
         try:
             # For embedded server, authentication is not required
             if self.embedded_server:
-                logger.info("✅ Authentication test skipped for embedded server")
+                logger.info(" PASS:  Authentication test skipped for embedded server")
                 return True
             
             # For external servers, test authentication
@@ -323,14 +323,14 @@ class WebSocketIntegrationTestSuite:
                     data = json.loads(response)
                     
                     if data.get("type") == "connection_established":
-                        logger.info("✅ WebSocket authentication test passed")
+                        logger.info(" PASS:  WebSocket authentication test passed")
                         return True
                     elif data.get("type") == "error":
-                        logger.error(f"❌ WebSocket authentication failed: {data.get('message')}")
+                        logger.error(f" FAIL:  WebSocket authentication failed: {data.get('message')}")
                         return False
                         
                 except asyncio.TimeoutError:
-                    logger.error("❌ WebSocket authentication timeout")
+                    logger.error(" FAIL:  WebSocket authentication timeout")
                     return False
             
         except Exception as e:
@@ -368,12 +368,12 @@ class WebSocketIntegrationTestSuite:
                 if success:
                     response = await client.receive_message(timeout=3.0)
                     if response:
-                        logger.info(f"✅ Message routing test passed for {test_msg['type']}: {response.get('type')}")
+                        logger.info(f" PASS:  Message routing test passed for {test_msg['type']}: {response.get('type')}")
                     else:
-                        logger.warning(f"⚠️ No response for message type: {test_msg['type']}")
+                        logger.warning(f" WARNING: [U+FE0F] No response for message type: {test_msg['type']}")
                         all_successful = False
                 else:
-                    logger.error(f"❌ Failed to send message type: {test_msg['type']}")
+                    logger.error(f" FAIL:  Failed to send message type: {test_msg['type']}")
                     all_successful = False
             
             await client.disconnect()
@@ -399,9 +399,9 @@ class WebSocketIntegrationTestSuite:
                 
                 if connected:
                     clients.append(client)
-                    logger.info(f"✅ Connection {i+1} established")
+                    logger.info(f" PASS:  Connection {i+1} established")
                 else:
-                    logger.error(f"❌ Connection {i+1} failed")
+                    logger.error(f" FAIL:  Connection {i+1} failed")
             
             if len(clients) != connection_count:
                 logger.error(f"Only {len(clients)}/{connection_count} connections established")
@@ -421,12 +421,12 @@ class WebSocketIntegrationTestSuite:
                 if success:
                     response = await client.receive_message(timeout=2.0)
                     if response and response.get("type") == "pong":
-                        logger.info(f"✅ Client {i} message test passed")
+                        logger.info(f" PASS:  Client {i} message test passed")
                     else:
-                        logger.error(f"❌ Client {i} did not receive pong")
+                        logger.error(f" FAIL:  Client {i} did not receive pong")
                         all_successful = False
                 else:
-                    logger.error(f"❌ Client {i} failed to send message")
+                    logger.error(f" FAIL:  Client {i} failed to send message")
                     all_successful = False
             
             # Cleanup connections
@@ -434,9 +434,9 @@ class WebSocketIntegrationTestSuite:
                 await client.disconnect()
             
             if all_successful:
-                logger.info(f"✅ Concurrent connections test passed ({connection_count} clients)")
+                logger.info(f" PASS:  Concurrent connections test passed ({connection_count} clients)")
             else:
-                logger.error(f"❌ Concurrent connections test failed")
+                logger.error(f" FAIL:  Concurrent connections test failed")
             
             return all_successful
             
@@ -448,42 +448,42 @@ class WebSocketIntegrationTestSuite:
         """Run comprehensive WebSocket test suite."""
         url = websocket_url or self.websocket_url
         
-        logger.info("🧪 Starting comprehensive WebSocket test suite")
+        logger.info("[U+1F9EA] Starting comprehensive WebSocket test suite")
         
         test_results = {}
         
         # Test 1: Basic connection
-        logger.info("1️⃣ Testing basic WebSocket connection...")
+        logger.info("1[U+FE0F][U+20E3] Testing basic WebSocket connection...")
         test_results["connection"] = await self.test_websocket_connection(url)
         
         # Test 2: Critical events (MOST IMPORTANT)
-        logger.info("2️⃣ Testing critical events emission...")
+        logger.info("2[U+FE0F][U+20E3] Testing critical events emission...")
         critical_events = await self.test_critical_events_emission(url)
         test_results["critical_events"] = all(critical_events.values())
         test_results["critical_events_detail"] = critical_events
         
         # Test 3: Authentication (if applicable)
-        logger.info("3️⃣ Testing WebSocket authentication...")
+        logger.info("3[U+FE0F][U+20E3] Testing WebSocket authentication...")
         test_results["authentication"] = await self.test_websocket_authentication(url)
         
         # Test 4: Message routing
-        logger.info("4️⃣ Testing message routing...")
+        logger.info("4[U+FE0F][U+20E3] Testing message routing...")
         test_results["message_routing"] = await self.test_message_routing(url)
         
         # Test 5: Concurrent connections
-        logger.info("5️⃣ Testing concurrent connections...")
+        logger.info("5[U+FE0F][U+20E3] Testing concurrent connections...")
         test_results["concurrent_connections"] = await self.test_concurrent_connections(url, 3)
         
         # Summary
         passed_tests = sum(1 for result in test_results.values() if isinstance(result, bool) and result)
         total_tests = sum(1 for result in test_results.values() if isinstance(result, bool))
         
-        logger.info(f"🏁 Test suite completed: {passed_tests}/{total_tests} tests passed")
+        logger.info(f"[U+1F3C1] Test suite completed: {passed_tests}/{total_tests} tests passed")
         
         if passed_tests == total_tests:
-            logger.info("✅ All WebSocket tests passed!")
+            logger.info(" PASS:  All WebSocket tests passed!")
         else:
-            logger.error("❌ Some WebSocket tests failed")
+            logger.error(" FAIL:  Some WebSocket tests failed")
             for test_name, result in test_results.items():
                 if isinstance(result, bool) and not result:
                     logger.error(f"   Failed: {test_name}")
@@ -539,10 +539,10 @@ async def validate_websocket_events_for_chat(websocket_url: str) -> bool:
     missing_events = [event for event, received in critical_events.items() if not received]
     
     if missing_events:
-        logger.error(f"❌ CHAT BUSINESS VALUE FAILURE: Missing events {missing_events}")
+        logger.error(f" FAIL:  CHAT BUSINESS VALUE FAILURE: Missing events {missing_events}")
         return False
     else:
-        logger.info("✅ CHAT BUSINESS VALUE VALIDATED: All critical events working")
+        logger.info(" PASS:  CHAT BUSINESS VALUE VALIDATED: All critical events working")
         return True
 
 
@@ -558,14 +558,14 @@ async def quick_websocket_health_check(websocket_url: str) -> bool:
         connected = await suite.test_websocket_connection()
         
         if connected:
-            logger.info("✅ WebSocket health check passed")
+            logger.info(" PASS:  WebSocket health check passed")
             return True
         else:
-            logger.error("❌ WebSocket health check failed")
+            logger.error(" FAIL:  WebSocket health check failed")
             return False
             
     except Exception as e:
-        logger.error(f"❌ WebSocket health check error: {e}")
+        logger.error(f" FAIL:  WebSocket health check error: {e}")
         return False
 
 

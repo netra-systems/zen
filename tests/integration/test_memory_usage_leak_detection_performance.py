@@ -195,7 +195,7 @@ class TestMemoryUsageLeakDetection(BaseIntegrationTest):
         assert not result.leak_detected or result.leak_severity in ["none", "minor"], f"Memory leak detected: {result.leak_severity} - {result.recommendations}"
         assert object_cleanup_rate > 80, f"Object cleanup rate {object_cleanup_rate:.1f}% below 80% threshold"
         
-        print(f"✅ User Context Memory Test Results:")
+        print(f" PASS:  User Context Memory Test Results:")
         print(f"   Contexts created: {context_count}")
         print(f"   Initial memory: {initial_snapshot.rss_mb:.1f}MB")
         print(f"   Peak memory: {peak_memory.rss_mb:.1f}MB")
@@ -281,7 +281,7 @@ class TestMemoryUsageLeakDetection(BaseIntegrationTest):
         assert fd_growth <= 2, f"File descriptor growth {fd_growth} indicates FD leak"
         assert not result.leak_detected or result.leak_severity == "minor", f"Significant memory leak detected: {result.leak_severity}"
         
-        print(f"✅ WebSocket Connection Memory Test Results:")
+        print(f" PASS:  WebSocket Connection Memory Test Results:")
         print(f"   Connection cycles: {connection_count}")
         print(f"   Initial memory: {initial_snapshot.rss_mb:.1f}MB")
         print(f"   Peak memory: {peak_memory.rss_mb:.1f}MB")
@@ -384,7 +384,7 @@ class TestMemoryUsageLeakDetection(BaseIntegrationTest):
         
         assert memory_volatility < 5.0, f"Memory volatility {memory_volatility:.1f}MB indicates instability"
         
-        print(f"✅ Sustained Operation Memory Stability Results:")
+        print(f" PASS:  Sustained Operation Memory Stability Results:")
         print(f"   Test duration: {test_duration}s")
         print(f"   Total operations: {operation_count}")
         print(f"   Initial memory: {initial_snapshot.rss_mb:.1f}MB")
@@ -498,7 +498,7 @@ class TestMemoryUsageLeakDetection(BaseIntegrationTest):
         assert successful_operations >= concurrent_operations * 0.95, f"Operation success rate {successful_operations/concurrent_operations:.1%} too low"
         assert memory_cleanup_efficiency > 70, f"Memory cleanup efficiency {memory_cleanup_efficiency:.1f}% below 70% threshold"
         
-        print(f"✅ Concurrent Operations Memory Efficiency Results:")
+        print(f" PASS:  Concurrent Operations Memory Efficiency Results:")
         print(f"   Concurrent operations: {concurrent_operations}")
         print(f"   Successful operations: {successful_operations}")
         print(f"   Failed operations: {failed_operations}")

@@ -79,8 +79,8 @@ async def execute_and_persist(
     run_id = run.id if run else user_id
     thread_id = thread.id if thread else user_id
     
-    logger.info(f"🔧 execute_and_persist called for user={user_id}, thread={thread_id}, run={run_id}")
-    logger.info(f"🔍 db_session type: {type(db_session)}, is None: {db_session is None}")
+    logger.info(f"[U+1F527] execute_and_persist called for user={user_id}, thread={thread_id}, run={run_id}")
+    logger.info(f" SEARCH:  db_session type: {type(db_session)}, is None: {db_session is None}")
     
     # CRITICAL: Register run-thread mapping for WebSocket routing
     # This ensures all agent events reach the correct user
@@ -103,13 +103,13 @@ async def execute_and_persist(
         # This fixes the issue where all bridge events fail due to missing _websocket_manager
         bridge._websocket_manager = websocket_manager
         
-        logger.info(f"✅ Bridge created with WebSocket manager for user isolation - run_id={run_id} → thread_id={thread_id}")
+        logger.info(f" PASS:  Bridge created with WebSocket manager for user isolation - run_id={run_id}  ->  thread_id={thread_id}")
         
         # Store bridge for later use with UserExecutionContext
         bridge_for_emitter = bridge
             
     except Exception as e:
-        logger.error(f"🚨 Error creating WebSocket bridge with manager: {e}")
+        logger.error(f" ALERT:  Error creating WebSocket bridge with manager: {e}")
         # Continue execution even if registration fails
         bridge_for_emitter = None
     
@@ -127,7 +127,7 @@ async def execute_and_persist(
                 "timestamp": run.created_at if run else None
             }
         )
-        logger.info(f"✅ Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
+        logger.info(f" PASS:  Created UserExecutionContext for user={user_id}, thread={thread_id}, run={run_id}")
         
         # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
         if bridge_for_emitter is not None:
@@ -136,46 +136,46 @@ async def execute_and_persist(
                 # This ensures the supervisor can emit all 5 required WebSocket events
                 if hasattr(supervisor, 'websocket_bridge'):
                     supervisor.websocket_bridge = bridge_for_emitter
-                    logger.info(f"✅ Set WebSocket bridge on supervisor for real-time events - run_id={run_id}")
+                    logger.info(f" PASS:  Set WebSocket bridge on supervisor for real-time events - run_id={run_id}")
                     
                     # Also try to create user emitter for advanced usage
                     try:
                         user_emitter = await bridge_for_emitter.create_user_emitter(context)
                         if hasattr(supervisor, 'set_websocket_emitter'):
                             supervisor.set_websocket_emitter(user_emitter)
-                            logger.info(f"✅ Also set user-specific WebSocket emitter on supervisor for run_id={run_id}")
+                            logger.info(f" PASS:  Also set user-specific WebSocket emitter on supervisor for run_id={run_id}")
                     except Exception as emitter_error:
-                        logger.warning(f"⚠️ Could not create user emitter (will use bridge directly): {emitter_error}")
+                        logger.warning(f" WARNING: [U+FE0F] Could not create user emitter (will use bridge directly): {emitter_error}")
                         
                 elif hasattr(supervisor, 'set_websocket_bridge'):
                     # Backward compatibility: use bridge if emitter method not available
                     supervisor.set_websocket_bridge(bridge_for_emitter, run_id)
-                    logger.info(f"✅ Set WebSocket bridge on supervisor using legacy method - run_id={run_id}")
+                    logger.info(f" PASS:  Set WebSocket bridge on supervisor using legacy method - run_id={run_id}")
                 else:
-                    logger.warning(f"⚠️ Supervisor doesn't have WebSocket bridge property or methods")
+                    logger.warning(f" WARNING: [U+FE0F] Supervisor doesn't have WebSocket bridge property or methods")
                     
             except Exception as emitter_error:
-                logger.error(f"🚨 Failed to create user emitter: {emitter_error}")
+                logger.error(f" ALERT:  Failed to create user emitter: {emitter_error}")
                 # Continue execution without WebSocket events rather than failing completely
         
         # Check if supervisor has execute method
         if not hasattr(supervisor, 'execute'):
-            logger.error(f"🚨 CRITICAL: SupervisorAgent does not have 'execute' method!")
-            logger.error(f"🚨 Available methods: {[m for m in dir(supervisor) if not m.startswith('_')]}")
+            logger.error(f" ALERT:  CRITICAL: SupervisorAgent does not have 'execute' method!")
+            logger.error(f" ALERT:  Available methods: {[m for m in dir(supervisor) if not m.startswith('_')]}")
             # Fall back to old run method if available
             if hasattr(supervisor, 'run'):
-                logger.warning(f"⚠️ Falling back to supervisor.run() method")
+                logger.warning(f" WARNING: [U+FE0F] Falling back to supervisor.run() method")
                 response = await supervisor.run(text, thread_id, user_id, run_id)
             else:
                 raise AttributeError("SupervisorAgent missing both execute and run methods")
         else:
             # Execute the supervisor with the new UserExecutionContext pattern
-            logger.info(f"🚀 Calling supervisor.execute() with context for run_id={run_id}")
+            logger.info(f"[U+1F680] Calling supervisor.execute() with context for run_id={run_id}")
             response = await supervisor.execute(context, stream_updates=True)
-            logger.info(f"✅ SupervisorAgent executed successfully for run_id={run_id}")
+            logger.info(f" PASS:  SupervisorAgent executed successfully for run_id={run_id}")
         
     except Exception as e:
-        logger.error(f"❌ Error executing supervisor: {e}", exc_info=True)
+        logger.error(f" FAIL:  Error executing supervisor: {e}", exc_info=True)
         raise
     
     if db_session and response and thread:

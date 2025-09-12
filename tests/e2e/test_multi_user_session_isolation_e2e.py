@@ -122,13 +122,13 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             }
         ]
         
-        print(f"🏢 Testing Enterprise multi-user isolation for {len(enterprise_users)} organizations")
+        print(f"[U+1F3E2] Testing Enterprise multi-user isolation for {len(enterprise_users)} organizations")
         
         # Step 1: Create isolated authentication contexts for each enterprise user
         authenticated_users = []
         
         for user_config in enterprise_users:
-            print(f"🔐 Authenticating {user_config['role']} from {user_config['organization']}")
+            print(f"[U+1F510] Authenticating {user_config['role']} from {user_config['organization']}")
             
             # Create OAuth authentication for enterprise user
             access_token = await self.auth_helper.get_staging_token_async(
@@ -170,7 +170,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             config = user_data["config"] 
             access_token = user_data["access_token"]
             
-            print(f"🔌 Connecting WebSocket for {config['role']} at {config['organization']}")
+            print(f"[U+1F50C] Connecting WebSocket for {config['role']} at {config['organization']}")
             
             # Create isolated WebSocket auth helper for this user
             user_ws_helper = E2EWebSocketAuthHelper(
@@ -189,10 +189,10 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                     "connection_success": True
                 })
                 
-                print(f"✅ WebSocket connected for {config['role']} at {config['organization']}")
+                print(f" PASS:  WebSocket connected for {config['role']} at {config['organization']}")
                 
             except Exception as e:
-                print(f"❌ WebSocket connection failed for {config['role']}: {e}")
+                print(f" FAIL:  WebSocket connection failed for {config['role']}: {e}")
                 websocket_connections.append({
                     "user_data": user_data,
                     "websocket": None,
@@ -275,10 +275,10 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                 f"{result.get('error', 'unknown error')}"
             )
         
-        print(f"📤 Sent {len(message_results)} enterprise isolation test messages")
+        print(f"[U+1F4E4] Sent {len(message_results)} enterprise isolation test messages")
         
         # Step 4: Verify isolation by checking that responses (if any) are properly isolated
-        print("🔍 Verifying enterprise data isolation...")
+        print(" SEARCH:  Verifying enterprise data isolation...")
         
         response_isolation_results = []
         
@@ -339,7 +339,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                     )
         
         # Step 5: Close all WebSocket connections and verify clean isolation
-        print("🔐 Closing WebSocket connections and verifying clean isolation...")
+        print("[U+1F510] Closing WebSocket connections and verifying clean isolation...")
         
         connection_close_results = []
         
@@ -371,12 +371,12 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             f"got {close_success_rate:.1%} ({successful_closes}/{len(connection_close_results)})"
         )
         
-        print(f"✅ Enterprise multi-user isolation E2E test complete:")
-        print(f"   🔐 {len(authenticated_users)} enterprise users authenticated")
-        print(f"   🔌 {len(successful_connections)} WebSocket connections established")
-        print(f"   📤 {len(message_results)} enterprise messages sent")
-        print(f"   🔒 {successful_closes} connections closed cleanly")
-        print(f"   🏢 Organizations: {', '.join(set(u['organization'] for u in enterprise_users))}")
+        print(f" PASS:  Enterprise multi-user isolation E2E test complete:")
+        print(f"   [U+1F510] {len(authenticated_users)} enterprise users authenticated")
+        print(f"   [U+1F50C] {len(successful_connections)} WebSocket connections established")
+        print(f"   [U+1F4E4] {len(message_results)} enterprise messages sent")
+        print(f"   [U+1F512] {successful_closes} connections closed cleanly")
+        print(f"   [U+1F3E2] Organizations: {', '.join(set(u['organization'] for u in enterprise_users))}")
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -438,7 +438,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             }
         ]
         
-        print(f"🏛️ Testing cross-organization data isolation for {len(competing_orgs)} competing enterprises")
+        print(f"[U+1F3DB][U+FE0F] Testing cross-organization data isolation for {len(competing_orgs)} competing enterprises")
         
         # Create authenticated contexts for all enterprise users
         all_enterprise_contexts = []
@@ -447,7 +447,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             org_name = org["organization"]
             industry = org["industry"]
             
-            print(f"🏢 Setting up {org_name} ({industry}) enterprise users...")
+            print(f"[U+1F3E2] Setting up {org_name} ({industry}) enterprise users...")
             
             for user_config in org["users"]:
                 # Create OAuth authentication
@@ -487,7 +487,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                 })
         
         # Step 1: Verify JWT tokens contain only organization-specific data
-        print("🔍 Step 1: Verifying JWT isolation across organizations...")
+        print(" SEARCH:  Step 1: Verifying JWT isolation across organizations...")
         
         jwt_isolation_results = []
         
@@ -524,10 +524,10 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                             f"JWT permission '{permission}' for user at {user_org} must not reference other organization {other_org}"
                         )
             
-            print(f"✅ JWT isolation verified for {result['role']} at {user_org}")
+            print(f" PASS:  JWT isolation verified for {result['role']} at {user_org}")
         
         # Step 2: Test API calls maintain complete organization isolation
-        print("🌐 Step 2: Testing API access maintains organization boundaries...")
+        print("[U+1F310] Step 2: Testing API access maintains organization boundaries...")
         
         api_isolation_tasks = []
         
@@ -575,7 +575,7 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
             )
         
         # Step 3: Test WebSocket connections maintain organization boundaries
-        print("🔌 Step 3: Testing WebSocket organization isolation...")
+        print("[U+1F50C] Step 3: Testing WebSocket organization isolation...")
         
         # Connect limited number of WebSockets to avoid overwhelming staging
         websocket_test_contexts = all_enterprise_contexts[:2]  # Test first 2 users
@@ -601,10 +601,10 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                     "connected": True
                 })
                 
-                print(f"✅ WebSocket connected for {user_config['role']} at {org_config['organization']}")
+                print(f" PASS:  WebSocket connected for {user_config['role']} at {org_config['organization']}")
                 
             except Exception as e:
-                print(f"⚠️ WebSocket connection failed for {user_config['role']}: {e}")
+                print(f" WARNING: [U+FE0F] WebSocket connection failed for {user_config['role']}: {e}")
                 websocket_connections.append({
                     "enterprise_context": enterprise_context,
                     "websocket": None,
@@ -636,9 +636,9 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                 
                 try:
                     await conn["websocket"].send(json.dumps(org_message))
-                    print(f"📤 Sent organization boundary test for {org_config['organization']}")
+                    print(f"[U+1F4E4] Sent organization boundary test for {org_config['organization']}")
                 except Exception as e:
-                    print(f"❌ Failed to send org message for {org_config['organization']}: {e}")
+                    print(f" FAIL:  Failed to send org message for {org_config['organization']}: {e}")
         
         # Close WebSocket connections
         for conn in websocket_connections:
@@ -646,10 +646,10 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
                 try:
                     await conn["websocket"].close()
                 except Exception as e:
-                    print(f"⚠️ Error closing WebSocket: {e}")
+                    print(f" WARNING: [U+FE0F] Error closing WebSocket: {e}")
         
         # Final verification: Ensure context isolation IDs are completely separate
-        print("🔐 Final verification: Context isolation across organizations...")
+        print("[U+1F510] Final verification: Context isolation across organizations...")
         
         all_thread_ids = []
         all_run_ids = []
@@ -682,12 +682,12 @@ class TestMultiUserSessionIsolationE2E(SSotAsyncTestCase):
         assert len(set(all_request_ids)) == len(all_request_ids), "All request_ids must be unique across organizations"
         assert len(set(all_websocket_ids)) == len(all_websocket_ids), "All websocket_ids must be unique across organizations"
         
-        print(f"🎉 Enterprise cross-organization isolation E2E test PASSED:")
-        print(f"   🏢 {len(organizations)} competing organizations tested")
-        print(f"   👥 {len(all_enterprise_contexts)} enterprise users isolated")
-        print(f"   🔐 {len(set(all_thread_ids))} unique context IDs generated")
-        print(f"   🌐 {len([r for r in api_results if not isinstance(r, Exception) and r['api_success']])} API calls succeeded with isolation")
-        print(f"   🔌 {len([c for c in websocket_connections if c['connected']])} WebSocket connections maintained boundaries")
+        print(f" CELEBRATION:  Enterprise cross-organization isolation E2E test PASSED:")
+        print(f"   [U+1F3E2] {len(organizations)} competing organizations tested")
+        print(f"   [U+1F465] {len(all_enterprise_contexts)} enterprise users isolated")
+        print(f"   [U+1F510] {len(set(all_thread_ids))} unique context IDs generated")
+        print(f"   [U+1F310] {len([r for r in api_results if not isinstance(r, Exception) and r['api_success']])} API calls succeeded with isolation")
+        print(f"   [U+1F50C] {len([c for c in websocket_connections if c['connected']])} WebSocket connections maintained boundaries")
         
         # CRITICAL ASSERTION: This test MUST pass for Enterprise sales
         total_isolation_points = len(all_thread_ids) + len(all_run_ids) + len(all_request_ids) + len(all_websocket_ids)

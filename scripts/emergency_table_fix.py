@@ -12,7 +12,7 @@ from netra_backend.app.db.database_manager import DatabaseManager
 async def fix_staging_tables():
     """Create missing tables directly using existing database manager."""
     try:
-        print("🚀 Starting emergency table creation for staging...")
+        print("[U+1F680] Starting emergency table creation for staging...")
         
         # Initialize database manager
         db_manager = DatabaseManager()
@@ -21,10 +21,10 @@ async def fix_staging_tables():
         engine = db_manager.get_async_engine()
         
         async with engine.begin() as conn:
-            print("✅ Connected to database")
+            print(" PASS:  Connected to database")
             
             # Create agent_executions table
-            print("🔧 Creating agent_executions table...")
+            print("[U+1F527] Creating agent_executions table...")
             await conn.execute_raw("""
                 CREATE TABLE IF NOT EXISTS agent_executions (
                     id VARCHAR(50) PRIMARY KEY,
@@ -60,7 +60,7 @@ async def fix_staging_tables():
                 await conn.execute_raw(index_sql)
             
             # Create credit_transactions table
-            print("🔧 Creating credit_transactions table...")
+            print("[U+1F527] Creating credit_transactions table...")
             await conn.execute_raw("""
                 CREATE TABLE IF NOT EXISTS credit_transactions (
                     id SERIAL PRIMARY KEY,
@@ -73,7 +73,7 @@ async def fix_staging_tables():
             """)
             
             # Create subscriptions table
-            print("🔧 Creating subscriptions table...")
+            print("[U+1F527] Creating subscriptions table...")
             await conn.execute_raw("""
                 CREATE TABLE IF NOT EXISTS subscriptions (
                     id SERIAL PRIMARY KEY,
@@ -86,7 +86,7 @@ async def fix_staging_tables():
             """)
             
             # Verify tables exist
-            print("✅ Verifying table creation...")
+            print(" PASS:  Verifying table creation...")
             result = await conn.execute_raw("""
                 SELECT table_name 
                 FROM information_schema.tables 
@@ -95,21 +95,21 @@ async def fix_staging_tables():
                 ORDER BY table_name;
             """)
             tables = await result.fetchall() if hasattr(result, 'fetchall') else []
-            print(f"📋 Created tables: {[t[0] if hasattr(t, '__getitem__') else str(t) for t in tables]}")
+            print(f"[U+1F4CB] Created tables: {[t[0] if hasattr(t, '__getitem__') else str(t) for t in tables]}")
             
             # Update alembic version
             try:
                 await conn.execute_raw("CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) PRIMARY KEY);")
                 await conn.execute_raw("INSERT INTO alembic_version (version_num) VALUES ('882759db46ce') ON CONFLICT (version_num) DO NOTHING;")
-                print("✅ Updated alembic version")
+                print(" PASS:  Updated alembic version")
             except Exception as e:
-                print(f"⚠️  Could not update alembic version: {e}")
+                print(f" WARNING: [U+FE0F]  Could not update alembic version: {e}")
         
-        print("🎉 Emergency table creation completed successfully!")
-        print("🔄 Backend services should now start properly!")
+        print(" CELEBRATION:  Emergency table creation completed successfully!")
+        print(" CYCLE:  Backend services should now start properly!")
         
     except Exception as e:
-        print(f"❌ Emergency fix failed: {e}")
+        print(f" FAIL:  Emergency fix failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

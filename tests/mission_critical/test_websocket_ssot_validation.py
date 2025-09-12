@@ -154,7 +154,7 @@
     # Removed problematic line: @pytest.mark.asyncio
     # Removed problematic line: async def test_user_isolation_25_concurrent_sessions(self):
         # REMOVED_SYNTAX_ERROR: """Test user isolation with 25+ concurrent sessions."""
-        # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing user isolation with 25+ concurrent sessions")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing user isolation with 25+ concurrent sessions")
 
         # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
         # REMOVED_SYNTAX_ERROR: users_count = 25
@@ -247,13 +247,13 @@
                                         # REMOVED_SYNTAX_ERROR: assert len(websocket.sent_messages) == 0, \
                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ User isolation with 25+ concurrent sessions PASSED")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  User isolation with 25+ concurrent sessions PASSED")
 
                                         # Removed problematic line: @pytest.mark.asyncio
                                         # Removed problematic line: async def test_no_data_leakage_between_users(self):
                                             # REMOVED_SYNTAX_ERROR: """Test that sensitive data doesn't leak between users."""
                                             # REMOVED_SYNTAX_ERROR: pass
-                                            # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing no data leakage between users")
+                                            # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing no data leakage between users")
 
                                             # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -301,12 +301,12 @@
                                             # REMOVED_SYNTAX_ERROR: assert received_b['api_key'] == 'secret_key_user_b_67890'
                                             # REMOVED_SYNTAX_ERROR: assert 'secret_key_user_a_12345' not in str(received_b)
 
-                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ No data leakage between users PASSED")
+                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  No data leakage between users PASSED")
 
                                             # Removed problematic line: @pytest.mark.asyncio
                                             # Removed problematic line: async def test_message_routing_accuracy(self):
                                                 # REMOVED_SYNTAX_ERROR: """Test accurate message routing to correct users and threads."""
-                                                # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing message routing accuracy")
+                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing message routing accuracy")
 
                                                 # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -356,13 +356,13 @@
                                                                 # REMOVED_SYNTAX_ERROR: assert len(websocket.sent_messages) == 0, \
                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Message routing accuracy PASSED")
+                                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Message routing accuracy PASSED")
 
                                                                 # Removed problematic line: @pytest.mark.asyncio
                                                                 # Removed problematic line: async def test_connection_limits_enforcement(self):
                                                                     # REMOVED_SYNTAX_ERROR: """Test connection limits per user and total."""
                                                                     # REMOVED_SYNTAX_ERROR: pass
-                                                                    # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing connection limits enforcement")
+                                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing connection limits enforcement")
 
                                                                     # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -389,12 +389,12 @@
                                                                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                                                         # REMOVED_SYNTAX_ERROR: assert total_connections <= manager.MAX_TOTAL_CONNECTIONS
 
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Connection limits enforcement PASSED")
+                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Connection limits enforcement PASSED")
 
                                                                         # Removed problematic line: @pytest.mark.asyncio
                                                                         # Removed problematic line: async def test_performance_response_time(self):
                                                                             # REMOVED_SYNTAX_ERROR: """Test response time < 2 seconds for 10 concurrent users."""
-                                                                            # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing performance response time < 2 seconds")
+                                                                            # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing performance response time < 2 seconds")
 
                                                                             # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -453,7 +453,7 @@
                                                                                         # Removed problematic line: async def test_websocket_event_flow_validation(self):
                                                                                             # REMOVED_SYNTAX_ERROR: """Test all 5 required WebSocket events are sent correctly."""
                                                                                             # REMOVED_SYNTAX_ERROR: pass
-                                                                                            # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing WebSocket event flow validation")
+                                                                                            # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing WebSocket event flow validation")
 
                                                                                             # Create factory and test user emitter
                                                                                             # REMOVED_SYNTAX_ERROR: factory = self.create_test_factory()
@@ -506,12 +506,12 @@
 
                                                                                             # REMOVED_SYNTAX_ERROR: assert total_events >= 5, "formatted_string"
 
-                                                                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket event flow validation PASSED")
+                                                                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket event flow validation PASSED")
 
                                                                                             # Removed problematic line: @pytest.mark.asyncio
                                                                                             # Removed problematic line: async def test_cleanup_stale_connections(self):
                                                                                                 # REMOVED_SYNTAX_ERROR: """Test cleanup of stale connections."""
-                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing cleanup of stale connections")
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing cleanup of stale connections")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -534,13 +534,13 @@
                                                                                                 # REMOVED_SYNTAX_ERROR: assert conn_id not in manager.connections
                                                                                                 # REMOVED_SYNTAX_ERROR: assert user_id not in manager.user_connections or len(manager.user_connections[user_id]) == 0
 
-                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Cleanup of stale connections PASSED")
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Cleanup of stale connections PASSED")
 
                                                                                                 # Removed problematic line: @pytest.mark.asyncio
                                                                                                 # Removed problematic line: async def test_memory_usage_stability(self):
                                                                                                     # REMOVED_SYNTAX_ERROR: """Test memory usage stays stable with many connections."""
                                                                                                     # REMOVED_SYNTAX_ERROR: pass
-                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing memory usage stability")
+                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing memory usage stability")
 
                                                                                                     # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -581,12 +581,12 @@
                                                                                                                     # REMOVED_SYNTAX_ERROR: final_memory_cleanups = final_stats.get('memory_cleanups', 0)
                                                                                                                     # REMOVED_SYNTAX_ERROR: assert final_memory_cleanups > initial_memory_cleanups
 
-                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Memory usage stability PASSED")
+                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Memory usage stability PASSED")
 
                                                                                                                     # Removed problematic line: @pytest.mark.asyncio
                                                                                                                     # Removed problematic line: async def test_heartbeat_performance(self):
                                                                                                                         # REMOVED_SYNTAX_ERROR: """Test heartbeat performance with enhanced features."""
-                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing heartbeat performance")
+                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing heartbeat performance")
 
                                                                                                                         # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -625,13 +625,13 @@
                                                                                                                                 # REMOVED_SYNTAX_ERROR: assert 'pings_sent' in health_stats
                                                                                                                                 # REMOVED_SYNTAX_ERROR: assert health_stats['pings_sent'] >= 0
 
-                                                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Heartbeat performance PASSED")
+                                                                                                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Heartbeat performance PASSED")
 
                                                                                                                                 # Removed problematic line: @pytest.mark.asyncio
                                                                                                                                 # Removed problematic line: async def test_thread_isolation(self):
                                                                                                                                     # REMOVED_SYNTAX_ERROR: """Test thread-based message isolation."""
                                                                                                                                     # REMOVED_SYNTAX_ERROR: pass
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing thread-based message isolation")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing thread-based message isolation")
 
                                                                                                                                     # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
 
@@ -666,12 +666,12 @@
                                                                                                                                     # REMOVED_SYNTAX_ERROR: stats = await manager.get_stats()
                                                                                                                                     # REMOVED_SYNTAX_ERROR: assert stats['messages_sent'] >= 1
 
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Thread-based message isolation PASSED")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Thread-based message isolation PASSED")
 
                                                                                                                                     # Removed problematic line: @pytest.mark.asyncio
                                                                                                                                     # Removed problematic line: async def test_factory_based_isolation_pattern(self):
                                                                                                                                         # REMOVED_SYNTAX_ERROR: """Test factory-based isolation pattern validation."""
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing factory-based isolation pattern")
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing factory-based isolation pattern")
 
                                                                                                                                         # REMOVED_SYNTAX_ERROR: factory = self.create_test_factory()
 
@@ -704,13 +704,13 @@
                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics['emitters_created'] >= 2
                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics['emitters_active'] >= 2
 
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Factory-based isolation pattern PASSED")
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Factory-based isolation pattern PASSED")
 
                                                                                                                                         # Removed problematic line: @pytest.mark.asyncio
                                                                                                                                         # Removed problematic line: async def test_comprehensive_integration(self):
                                                                                                                                             # REMOVED_SYNTAX_ERROR: """Comprehensive integration test combining all features."""
                                                                                                                                             # REMOVED_SYNTAX_ERROR: pass
-                                                                                                                                            # REMOVED_SYNTAX_ERROR: logger.info("🧪 Running comprehensive integration test")
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Running comprehensive integration test")
 
                                                                                                                                             # REMOVED_SYNTAX_ERROR: manager = self.create_test_manager()
                                                                                                                                             # REMOVED_SYNTAX_ERROR: factory = self.create_test_factory()
@@ -804,7 +804,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_websocket_manager_singleton_isolation(self):
     # REMOVED_SYNTAX_ERROR: """Test WebSocket manager singleton doesn't cause isolation issues."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing WebSocket manager singleton isolation")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing WebSocket manager singleton isolation")
 
     # Get multiple manager instances
     # REMOVED_SYNTAX_ERROR: manager1 = get_websocket_manager()
@@ -819,7 +819,7 @@
     # REMOVED_SYNTAX_ERROR: assert isinstance(manager1.user_connections, dict)
     # REMOVED_SYNTAX_ERROR: assert isinstance(manager1.connections, dict)
 
-    # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket manager singleton isolation PASSED")
+    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket manager singleton isolation PASSED")
 
 
     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

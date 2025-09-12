@@ -60,7 +60,7 @@ class TestRealAuthStartupValidation:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for startup validation testing."""
-        print("🐳 Starting Docker services for auth startup validation tests...")
+        print("[U+1F433] Starting Docker services for auth startup validation tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -72,13 +72,13 @@ class TestRealAuthStartupValidation:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for startup validation tests")
+            print(" PASS:  Docker services ready for startup validation tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for startup validation tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for startup validation tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after startup validation tests...")
+            print("[U+1F9F9] Cleaning up Docker services after startup validation tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -204,15 +204,15 @@ class TestRealAuthStartupValidation:
                 dependencies = step_info["dependencies"]
                 is_critical = step_info["critical"]
                 
-                print(f"🚀 Step {step_num}: {description}")
+                print(f"[U+1F680] Step {step_num}: {description}")
                 
                 # Check dependencies are completed
                 for dep in dependencies:
                     if dep not in startup_results or not startup_results[dep]["success"]:
                         if is_critical:
-                            pytest.fail(f"❌ Critical step {step_name} failed - dependency {dep} not ready")
+                            pytest.fail(f" FAIL:  Critical step {step_name} failed - dependency {dep} not ready")
                         else:
-                            print(f"⚠️ Non-critical step {step_name} skipped - dependency {dep} not ready")
+                            print(f" WARNING: [U+FE0F] Non-critical step {step_name} skipped - dependency {dep} not ready")
                             continue
                 
                 # Execute initialization step
@@ -220,25 +220,25 @@ class TestRealAuthStartupValidation:
                 startup_results[step_name] = step_result
                 
                 if step_result["success"]:
-                    print(f"✅ Step {step_num} ({step_name}) completed successfully")
+                    print(f" PASS:  Step {step_num} ({step_name}) completed successfully")
                 else:
                     if is_critical:
-                        pytest.fail(f"❌ Critical initialization step failed: {step_name} - {step_result.get('error')}")
+                        pytest.fail(f" FAIL:  Critical initialization step failed: {step_name} - {step_result.get('error')}")
                     else:
-                        print(f"⚠️ Non-critical step failed: {step_name} - {step_result.get('error')}")
+                        print(f" WARNING: [U+FE0F] Non-critical step failed: {step_name} - {step_result.get('error')}")
             
             # Verify final system state
             critical_steps = [s for s in initialization_steps if s["critical"]]
             critical_results = [startup_results.get(s["name"], {}).get("success", False) for s in critical_steps]
             
             if all(critical_results):
-                print("✅ Authentication system initialization completed successfully")
+                print(" PASS:  Authentication system initialization completed successfully")
             else:
                 failed_critical = [s["name"] for s in critical_steps if not startup_results.get(s["name"], {}).get("success", False)]
-                pytest.fail(f"❌ Critical initialization steps failed: {failed_critical}")
+                pytest.fail(f" FAIL:  Critical initialization steps failed: {failed_critical}")
         
         except Exception as e:
-            pytest.fail(f"❌ Authentication system initialization failed: {e}")
+            pytest.fail(f" FAIL:  Authentication system initialization failed: {e}")
 
     async def execute_initialization_step(self, step_name: str, db_session: AsyncSession, client: AsyncClient) -> Dict[str, Any]:
         """Execute individual initialization step and return result."""
@@ -616,7 +616,7 @@ class TestRealAuthStartupValidation:
             dep_type = dep_config["type"]
             is_required = dep_config["required"]
             
-            print(f"🔍 Validating dependency: {dep_name} ({dep_type})")
+            print(f" SEARCH:  Validating dependency: {dep_name} ({dep_type})")
             
             try:
                 if dep_type == "configuration":
@@ -633,28 +633,28 @@ class TestRealAuthStartupValidation:
                 dependency_results[dep_name] = result
                 
                 if result["available"]:
-                    print(f"✅ Dependency {dep_name} is available")
+                    print(f" PASS:  Dependency {dep_name} is available")
                 else:
                     if is_required:
-                        print(f"❌ Required dependency {dep_name} is not available: {result.get('error')}")
+                        print(f" FAIL:  Required dependency {dep_name} is not available: {result.get('error')}")
                     else:
-                        print(f"⚠️ Optional dependency {dep_name} is not available: {result.get('error')}")
+                        print(f" WARNING: [U+FE0F] Optional dependency {dep_name} is not available: {result.get('error')}")
             
             except Exception as e:
                 dependency_results[dep_name] = {"available": False, "error": str(e)}
                 if is_required:
-                    print(f"❌ Required dependency {dep_name} validation failed: {e}")
+                    print(f" FAIL:  Required dependency {dep_name} validation failed: {e}")
                 else:
-                    print(f"⚠️ Optional dependency {dep_name} validation failed: {e}")
+                    print(f" WARNING: [U+FE0F] Optional dependency {dep_name} validation failed: {e}")
         
         # Check if all required dependencies are available
         required_deps = [name for name, config in dependencies.items() if config["required"]]
         missing_required = [name for name in required_deps if not dependency_results.get(name, {}).get("available", False)]
         
         if missing_required:
-            pytest.fail(f"❌ Required startup dependencies not available: {missing_required}")
+            pytest.fail(f" FAIL:  Required startup dependencies not available: {missing_required}")
         
-        print("✅ Startup dependency validation completed successfully")
+        print(" PASS:  Startup dependency validation completed successfully")
 
     async def validate_configuration_dependency(self, dep_name: str, dep_config: Dict[str, Any]) -> Dict[str, Any]:
         """Validate configuration dependency."""

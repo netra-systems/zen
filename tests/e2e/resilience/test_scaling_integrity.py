@@ -1,7 +1,7 @@
 """
 Scaling Workflow Integrity Tests
 Tests integrity of complete scaling analysis workflows.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

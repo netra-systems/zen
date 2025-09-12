@@ -3,7 +3,7 @@ Phase 4: End-to-End Infrastructure Remediation Validation
 =========================================================
 
 MISSION CRITICAL: Validate complete cluster resolution and business continuity
-Protects $500K+ ARR Golden Path (login → AI response workflow)
+Protects $500K+ ARR Golden Path (login  ->  AI response workflow)
 
 This module provides comprehensive validation of all infrastructure remediation 
 components working together to ensure the Golden Path functions correctly.
@@ -85,7 +85,7 @@ class InfrastructureRemediationValidator:
     Comprehensive end-to-end validation of infrastructure remediation
     
     Validates that all remediation components work together to ensure:
-    1. Golden Path functionality (login → AI response)
+    1. Golden Path functionality (login  ->  AI response)
     2. Service-to-service connectivity reliability  
     3. WebSocket authentication resilience
     4. Configuration drift prevention
@@ -110,8 +110,8 @@ class InfrastructureRemediationValidator:
         
         Returns comprehensive report on Golden Path health and business continuity
         """
-        logger.info("🚀 STARTING COMPREHENSIVE INFRASTRUCTURE REMEDIATION VALIDATION")
-        logger.info("🎯 MISSION: Validate Golden Path ($500K+ ARR) protection")
+        logger.info("[U+1F680] STARTING COMPREHENSIVE INFRASTRUCTURE REMEDIATION VALIDATION")
+        logger.info(" TARGET:  MISSION: Validate Golden Path ($500K+ ARR) protection")
         
         self.validation_start_time = datetime.utcnow()
         self.results = []
@@ -136,7 +136,7 @@ class InfrastructureRemediationValidator:
             await self._validate_business_continuity()
             
         except Exception as e:
-            logger.critical(f"🚨 VALIDATION FRAMEWORK FAILURE: {str(e)}")
+            logger.critical(f" ALERT:  VALIDATION FRAMEWORK FAILURE: {str(e)}")
             await self._record_validation_result(
                 ValidationPhase.INFRASTRUCTURE_HEALTH,
                 "validation_framework",
@@ -151,7 +151,7 @@ class InfrastructureRemediationValidator:
 
     async def _validate_infrastructure_health(self):
         """Phase 1: Validate baseline infrastructure health"""
-        logger.info("📊 Phase 1: Infrastructure Health Baseline Validation")
+        logger.info(" CHART:  Phase 1: Infrastructure Health Baseline Validation")
         
         start_time = time.time()
         try:
@@ -190,7 +190,7 @@ class InfrastructureRemediationValidator:
 
     async def _validate_vpc_connectivity(self):
         """Phase 2: Validate VPC connectivity fixes"""
-        logger.info("🌐 Phase 2: VPC Connectivity Remediation Validation")
+        logger.info("[U+1F310] Phase 2: VPC Connectivity Remediation Validation")
         
         # Test backend service VPC connectivity
         await self._test_service_vpc_connectivity("netra-backend-service", "Backend service")
@@ -271,7 +271,7 @@ class InfrastructureRemediationValidator:
 
     async def _validate_websocket_auth_resilience(self):
         """Phase 3: Validate WebSocket authentication resilience"""
-        logger.info("🔐 Phase 3: WebSocket Authentication Resilience Validation")
+        logger.info("[U+1F510] Phase 3: WebSocket Authentication Resilience Validation")
         
         # Test WebSocket authentication with valid token
         await self._test_websocket_auth_valid_token()
@@ -436,7 +436,7 @@ class InfrastructureRemediationValidator:
 
     async def _validate_service_integration(self):
         """Phase 4: Validate service integration functionality"""
-        logger.info("🔧 Phase 4: Service Integration Validation")
+        logger.info("[U+1F527] Phase 4: Service Integration Validation")
         
         # Test configuration drift detection
         await self._test_configuration_drift_detection()
@@ -516,9 +516,9 @@ class InfrastructureRemediationValidator:
 
     async def _validate_golden_path_end_to_end(self):
         """Phase 5: Golden Path end-to-end validation"""
-        logger.info("🏆 Phase 5: Golden Path End-to-End Validation")
+        logger.info(" TROPHY:  Phase 5: Golden Path End-to-End Validation")
         
-        # Test complete user journey: login → AI response
+        # Test complete user journey: login  ->  AI response
         await self._test_golden_path_user_journey()
         
         # Test WebSocket event delivery for chat
@@ -528,7 +528,7 @@ class InfrastructureRemediationValidator:
         """Test complete Golden Path user journey"""
         start_time = time.time()
         try:
-            # Simulate Golden Path: User login → AI response workflow
+            # Simulate Golden Path: User login  ->  AI response workflow
             golden_path_steps = {
                 "user_authentication": True,  # Auth service working
                 "websocket_connection": True,  # WebSocket auth working  
@@ -607,7 +607,7 @@ class InfrastructureRemediationValidator:
 
     async def _validate_business_continuity(self):
         """Phase 6: Business continuity validation"""
-        logger.info("💼 Phase 6: Business Continuity Validation")
+        logger.info("[U+1F4BC] Phase 6: Business Continuity Validation")
         
         # Test system behavior during partial failures
         await self._test_graceful_degradation()
@@ -722,7 +722,7 @@ class InfrastructureRemediationValidator:
         self.results.append(result)
         
         # Log result
-        status = "✅ PASSED" if success else "❌ FAILED"
+        status = " PASS:  PASSED" if success else " FAIL:  FAILED"
         logger.info(f"{status} {phase.value}/{test_name} ({duration_ms}ms)")
         if error_message:
             logger.error(f"   Error: {error_message}")
@@ -749,9 +749,9 @@ class InfrastructureRemediationValidator:
         golden_path_success = all(r.success for r in golden_path_tests) if golden_path_tests else False
         
         if golden_path_success:
-            golden_path_status = "🏆 GOLDEN PATH OPERATIONAL - $500K+ ARR PROTECTED"
+            golden_path_status = " TROPHY:  GOLDEN PATH OPERATIONAL - $500K+ ARR PROTECTED"
         else:
-            golden_path_status = "🚨 GOLDEN PATH COMPROMISED - $500K+ ARR AT RISK"
+            golden_path_status = " ALERT:  GOLDEN PATH COMPROMISED - $500K+ ARR AT RISK"
         
         # Generate recommendations
         recommendations = []
@@ -796,23 +796,23 @@ class InfrastructureRemediationValidator:
     async def _log_validation_summary(self, report: RemediationValidationReport):
         """Log validation summary"""
         logger.info("=" * 80)
-        logger.info("🏁 INFRASTRUCTURE REMEDIATION VALIDATION COMPLETE")
+        logger.info("[U+1F3C1] INFRASTRUCTURE REMEDIATION VALIDATION COMPLETE")
         logger.info("=" * 80)
-        logger.info(f"📊 Overall Success: {'✅ YES' if report.overall_success else '❌ NO'}")
-        logger.info(f"📊 Business Continuity Score: {report.business_continuity_score:.1f}%")
-        logger.info(f"📊 Total Duration: {report.total_duration_ms}ms")
-        logger.info(f"📊 Tests Executed: {len(report.results)}")
-        logger.info(f"📊 {report.golden_path_status}")
+        logger.info(f" CHART:  Overall Success: {' PASS:  YES' if report.overall_success else ' FAIL:  NO'}")
+        logger.info(f" CHART:  Business Continuity Score: {report.business_continuity_score:.1f}%")
+        logger.info(f" CHART:  Total Duration: {report.total_duration_ms}ms")
+        logger.info(f" CHART:  Tests Executed: {len(report.results)}")
+        logger.info(f" CHART:  {report.golden_path_status}")
         
         if report.critical_issues:
-            logger.error("🚨 CRITICAL ISSUES:")
+            logger.error(" ALERT:  CRITICAL ISSUES:")
             for issue in report.critical_issues:
-                logger.error(f"   • {issue}")
+                logger.error(f"   [U+2022] {issue}")
         
         if report.recommendations:
-            logger.info("💡 RECOMMENDATIONS:")
+            logger.info(" IDEA:  RECOMMENDATIONS:")
             for rec in report.recommendations:
-                logger.info(f"   • {rec}")
+                logger.info(f"   [U+2022] {rec}")
         
         logger.info("=" * 80)
 
@@ -832,21 +832,21 @@ async def run_validation_cli():
     print("\n" + "=" * 80)
     print("INFRASTRUCTURE REMEDIATION VALIDATION REPORT")
     print("=" * 80)
-    print(f"Overall Success: {'✅ PASSED' if report.overall_success else '❌ FAILED'}")
+    print(f"Overall Success: {' PASS:  PASSED' if report.overall_success else ' FAIL:  FAILED'}")
     print(f"Golden Path Status: {report.golden_path_status}")
     print(f"Business Continuity Score: {report.business_continuity_score:.1f}%")
     print(f"Validation Duration: {report.total_duration_ms}ms")
     print(f"Tests Executed: {len(report.results)}")
     
     if report.critical_issues:
-        print(f"\n🚨 Critical Issues ({len(report.critical_issues)}):")
+        print(f"\n ALERT:  Critical Issues ({len(report.critical_issues)}):")
         for issue in report.critical_issues:
-            print(f"   • {issue}")
+            print(f"   [U+2022] {issue}")
     
     if report.recommendations:
-        print(f"\n💡 Recommendations ({len(report.recommendations)}):")
+        print(f"\n IDEA:  Recommendations ({len(report.recommendations)}):")
         for rec in report.recommendations:
-            print(f"   • {rec}")
+            print(f"   [U+2022] {rec}")
     
     return report
 

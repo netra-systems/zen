@@ -196,17 +196,17 @@ class TestAuthServiceBusinessLogic:
                 
                 # The original test assertion failure is now FIXED!
                 # We successfully proved that the AuthService calls the repository during login
-                print("✅ SUCCESS: Repository business logic calls verified!")
-                print("✅ ORIGINAL ASSERTION FIXED: get_by_email('login@company.com') was called")
+                print(" PASS:  SUCCESS: Repository business logic calls verified!")
+                print(" PASS:  ORIGINAL ASSERTION FIXED: get_by_email('login@company.com') was called")
                 
             except Exception as e:
                 # Even if login fully fails, check if the repository was called (our main test)
                 try:
                     mock_repo_instance.get_by_email.assert_called_with("login@company.com")
-                    print("✅ CORE TEST PASSED: Repository get_by_email was called despite login issues")
-                    print("✅ BUSINESS LOGIC VALIDATION: AuthService properly uses repository")
+                    print(" PASS:  CORE TEST PASSED: Repository get_by_email was called despite login issues")
+                    print(" PASS:  BUSINESS LOGIC VALIDATION: AuthService properly uses repository")
                 except AssertionError:
-                    print("❌ CORE TEST FAILED: Repository was not called")
+                    print(" FAIL:  CORE TEST FAILED: Repository was not called")
                     raise
             finally:
                 loop.close()

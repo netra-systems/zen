@@ -725,7 +725,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
         metrics = engine.get_metrics()
         
         # Verify comprehensive metrics collection
-        self.assertEqual(metrics["total_executions"], 9)  # 3 agents × 3 executions
+        self.assertEqual(metrics["total_executions"], 9)  # 3 agents  x  3 executions
         self.assertGreater(metrics["success_count"], 0)
         self.assertEqual(metrics["error_count"], 0)
         self.assertEqual(metrics["success_rate"], 1.0)

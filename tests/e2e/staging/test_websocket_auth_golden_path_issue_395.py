@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 E2E Tests for Complete Golden Path with Authentication on Staging GCP
 
@@ -25,6 +63,7 @@ import os
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper
 from tests.e2e.staging_config import StagingTestConfig
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +79,15 @@ pytestmark = [
 
 
 class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E test suite for Golden Path with WebSocket authentication on staging GCP.
     
@@ -106,7 +154,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         5. Real-time agent events via WebSocket
         6. AI response delivery
         """
-        logger.info("🧪 E2E TEST: Complete Golden Path user journey on staging")
+        logger.info("[U+1F9EA] E2E TEST: Complete Golden Path user journey on staging")
         
         # Step 1: Authenticate user for staging environment
         try:
@@ -114,7 +162,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if not auth_result.success:
                 self.fail(f"GOLDEN PATH AUTH BUG: User authentication failed: {auth_result.error_message}")
                 
-            logger.info(f"✅ Step 1: User authenticated successfully (user: {auth_result.user_id[:8]}...)")
+            logger.info(f" PASS:  Step 1: User authenticated successfully (user: {auth_result.user_id[:8]}...)")
             
         except Exception as e:
             self.fail(f"GOLDEN PATH AUTH BUG: Authentication error: {e}")
@@ -129,7 +177,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if not websocket_client.is_connected():
                 self.fail("GOLDEN PATH WEBSOCKET BUG: WebSocket connection failed")
                 
-            logger.info("✅ Step 2: WebSocket connection established successfully")
+            logger.info(" PASS:  Step 2: WebSocket connection established successfully")
             
         except Exception as e:
             self.fail(f"GOLDEN PATH WEBSOCKET BUG: WebSocket connection error: {e}")
@@ -155,7 +203,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if response.get("type") != "handshake_acknowledged":
                 self.fail(f"GOLDEN PATH HANDSHAKE BUG: Unexpected handshake response: {response}")
                 
-            logger.info("✅ Step 3: Chat interface handshake completed successfully")
+            logger.info(" PASS:  Step 3: Chat interface handshake completed successfully")
             
         except asyncio.TimeoutError:
             self.fail("GOLDEN PATH HANDSHAKE BUG: Handshake timeout - no response from server")
@@ -173,7 +221,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             }
             
             await websocket_client.send_json(agent_request)
-            logger.info("✅ Step 4: Agent request submitted successfully")
+            logger.info(" PASS:  Step 4: Agent request submitted successfully")
             
         except Exception as e:
             self.fail(f"GOLDEN PATH AGENT REQUEST BUG: Agent request error: {e}")
@@ -196,7 +244,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
                     events_collected.append(event)
                     event_type = event.get("type", "unknown")
                     
-                    logger.info(f"📨 Received WebSocket event: {event_type}")
+                    logger.info(f"[U+1F4E8] Received WebSocket event: {event_type}")
                     
                     # Check if we've received all required events
                     received_event_types = [e.get("type") for e in events_collected]
@@ -204,7 +252,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
                         break
                         
                 except asyncio.TimeoutError:
-                    logger.warning("⏰ Event collection timeout - continuing to wait for remaining events")
+                    logger.warning("[U+23F0] Event collection timeout - continuing to wait for remaining events")
                     continue
                     
             # Validate required events were received
@@ -214,7 +262,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if missing_events:
                 self.fail(f"GOLDEN PATH WEBSOCKET EVENTS BUG: Missing required events: {missing_events}")
                 
-            logger.info("✅ Step 5: All required WebSocket events received successfully")
+            logger.info(" PASS:  Step 5: All required WebSocket events received successfully")
             
         except Exception as e:
             self.fail(f"GOLDEN PATH WEBSOCKET EVENTS BUG: Event collection error: {e}")
@@ -240,9 +288,9 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             
             # Validate AI response contains meaningful content
             if isinstance(ai_response, str) and len(ai_response.strip()) > 0:
-                logger.info("✅ Step 6: AI response delivered successfully")
+                logger.info(" PASS:  Step 6: AI response delivered successfully")
             elif isinstance(ai_response, dict) and ai_response.get("content"):
-                logger.info("✅ Step 6: AI response delivered successfully (structured)")
+                logger.info(" PASS:  Step 6: AI response delivered successfully (structured)")
             else:
                 self.fail(f"GOLDEN PATH AI RESPONSE BUG: Invalid AI response format: {ai_response}")
                 
@@ -253,11 +301,11 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             # Clean up WebSocket connection
             try:
                 await websocket_client.close()
-                logger.info("🧹 WebSocket connection closed successfully")
+                logger.info("[U+1F9F9] WebSocket connection closed successfully")
             except Exception as e:
-                logger.warning(f"⚠️ Error closing WebSocket connection: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Error closing WebSocket connection: {e}")
         
-        logger.info("🎉 GOLDEN PATH SUCCESS: Complete user journey validated successfully!")
+        logger.info(" CELEBRATION:  GOLDEN PATH SUCCESS: Complete user journey validated successfully!")
 
     @pytest.mark.timeout(120)  # 2 minute timeout
     async def test_websocket_authentication_staging_gcp(self):
@@ -267,7 +315,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         Issue #395: Tests WebSocket authentication specifically in GCP Cloud Run environment.
         This test should FAIL initially if GCP authentication is broken.
         """
-        logger.info("🧪 E2E TEST: WebSocket authentication in staging GCP")
+        logger.info("[U+1F9EA] E2E TEST: WebSocket authentication in staging GCP")
         
         # Test authentication in GCP staging environment
         try:
@@ -310,7 +358,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if pong_response.get("type") != "pong":
                 self.fail(f"STAGING WEBSOCKET AUTH BUG: Expected pong, got: {pong_response}")
             
-            logger.info("✅ WebSocket authentication in staging GCP validated successfully")
+            logger.info(" PASS:  WebSocket authentication in staging GCP validated successfully")
             
         except Exception as e:
             self.fail(f"STAGING WEBSOCKET AUTH BUG: Authentication error: {e}")
@@ -329,7 +377,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         Issue #395: Tests that E2E environment detection works correctly in staging.
         This test should FAIL initially if environment detection is broken.
         """
-        logger.info("🧪 E2E TEST: E2E environment detection in staging")
+        logger.info("[U+1F9EA] E2E TEST: E2E environment detection in staging")
         
         # Test environment detection in staging context
         try:
@@ -361,14 +409,14 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
                 if staging_has_e2e_vars:
                     self.fail("STAGING E2E DETECTION BUG: E2E variables set but context not detected")
                 else:
-                    logger.info("✅ E2E context correctly not detected (no E2E variables)")
+                    logger.info(" PASS:  E2E context correctly not detected (no E2E variables)")
             else:
                 # Validate context structure if detected
                 self.assertIsInstance(e2e_context, dict, "E2E context should be dictionary")
                 self.assertIn("is_e2e_testing", e2e_context, "Missing is_e2e_testing field")
                 self.assertIn("environment", e2e_context, "Missing environment field")
                 
-                logger.info(f"✅ E2E context detected successfully: {e2e_context.get('environment')}")
+                logger.info(f" PASS:  E2E context detected successfully: {e2e_context.get('environment')}")
                 
         except Exception as e:
             self.fail(f"STAGING E2E DETECTION BUG: Environment detection error: {e}")
@@ -381,7 +429,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         Issue #395: Tests that Golden Path can recover from authentication errors.
         This test validates error handling and recovery mechanisms.
         """
-        logger.info("🧪 E2E TEST: Golden Path error recovery scenarios")
+        logger.info("[U+1F9EA] E2E TEST: Golden Path error recovery scenarios")
         
         # Test 1: Recovery from initial authentication failure
         try:
@@ -391,7 +439,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if invalid_auth_result.success:
                 self.fail("ERROR RECOVERY BUG: Invalid token authentication should fail")
             
-            logger.info("✅ Invalid token correctly rejected")
+            logger.info(" PASS:  Invalid token correctly rejected")
             
             # Second attempt with valid authentication (should succeed)
             valid_auth_result = await self.e2e_auth_helper.authenticate_test_user_staging()
@@ -399,7 +447,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if not valid_auth_result.success:
                 self.fail(f"ERROR RECOVERY BUG: Valid authentication failed after invalid attempt: {valid_auth_result.error_message}")
             
-            logger.info("✅ Valid authentication succeeded after invalid attempt")
+            logger.info(" PASS:  Valid authentication succeeded after invalid attempt")
             
         except Exception as e:
             self.fail(f"ERROR RECOVERY BUG: Authentication recovery error: {e}")
@@ -414,7 +462,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
                     self.fail("ERROR RECOVERY BUG: Invalid WebSocket config should not connect")
             except Exception:
                 # Expected failure - this is good
-                logger.info("✅ Invalid WebSocket config correctly rejected")
+                logger.info(" PASS:  Invalid WebSocket config correctly rejected")
             
             # Attempt connection with valid configuration (should succeed)
             valid_auth_result = await self.e2e_auth_helper.authenticate_test_user_staging()
@@ -426,7 +474,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if not valid_ws_client.is_connected():
                 self.fail("ERROR RECOVERY BUG: Valid WebSocket connection failed after invalid attempt")
             
-            logger.info("✅ Valid WebSocket connection succeeded after invalid attempt")
+            logger.info(" PASS:  Valid WebSocket connection succeeded after invalid attempt")
             
             # Clean up
             await valid_ws_client.close()
@@ -441,7 +489,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         Issue #395: Tests that Golden Path performs within acceptable limits.
         This test validates that authentication fixes don't impact performance.
         """
-        logger.info("🧪 E2E TEST: Golden Path performance validation")
+        logger.info("[U+1F9EA] E2E TEST: Golden Path performance validation")
         
         # Performance benchmarks for Golden Path
         max_auth_time = 5.0  # 5 seconds max for authentication
@@ -460,7 +508,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if auth_time > max_auth_time:
                 self.fail(f"GOLDEN PATH PERFORMANCE BUG: Authentication too slow: {auth_time:.2f}s > {max_auth_time}s")
             
-            logger.info(f"✅ Authentication performance: {auth_time:.2f}s")
+            logger.info(f" PASS:  Authentication performance: {auth_time:.2f}s")
             
             # Benchmark WebSocket connection time
             ws_start = time.time()
@@ -476,7 +524,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if ws_time > max_websocket_connect_time:
                 self.fail(f"GOLDEN PATH PERFORMANCE BUG: WebSocket connection too slow: {ws_time:.2f}s > {max_websocket_connect_time}s")
             
-            logger.info(f"✅ WebSocket connection performance: {ws_time:.2f}s")
+            logger.info(f" PASS:  WebSocket connection performance: {ws_time:.2f}s")
             
             # Benchmark agent response time
             agent_start = time.time()
@@ -512,7 +560,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
             if agent_time > max_agent_response_time:
                 self.fail(f"GOLDEN PATH PERFORMANCE BUG: Agent response too slow: {agent_time:.2f}s > {max_agent_response_time}s")
             
-            logger.info(f"✅ Agent response performance: {agent_time:.2f}s")
+            logger.info(f" PASS:  Agent response performance: {agent_time:.2f}s")
             
             # Clean up
             await websocket_client.close()
@@ -520,7 +568,7 @@ class TestWebSocketAuthGoldenPathIssue395(SSotAsyncTestCase):
         except Exception as e:
             self.fail(f"GOLDEN PATH PERFORMANCE BUG: Performance test error: {e}")
         
-        logger.info("🎯 Golden Path performance validation completed successfully")
+        logger.info(" TARGET:  Golden Path performance validation completed successfully")
 
 
 if __name__ == '__main__':

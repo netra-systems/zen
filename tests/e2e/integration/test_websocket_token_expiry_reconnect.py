@@ -286,7 +286,7 @@ class TestWebSocketTokenExpiryReconnect:
     @pytest.mark.e2e
     async def test_automatic_reconnection_on_token_expiry(self, reconnection_tester, test_user_id):
         """
-        Primary Test: Token expires during chat → Auto-reconnect with refreshed token → Chat continues
+        Primary Test: Token expires during chat  ->  Auto-reconnect with refreshed token  ->  Chat continues
         
         This is the core user experience test: ensuring users don't lose their chat
         conversation when tokens expire during active usage.

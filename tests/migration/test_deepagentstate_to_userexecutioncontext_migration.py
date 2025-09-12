@@ -525,7 +525,7 @@ class TestBusinessContinuityValidation:
     async def test_golden_path_user_flow_preserved(self):
         """Test that the Golden Path user flow is preserved after migration."""
         
-        # Simulate complete user flow: WebSocket → Agent Execution → Response
+        # Simulate complete user flow: WebSocket  ->  Agent Execution  ->  Response
         connection_executor = ConnectionExecutor()
         
         user_request = {

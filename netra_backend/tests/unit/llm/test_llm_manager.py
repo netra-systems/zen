@@ -1761,13 +1761,13 @@ class TestLLMManager(BaseIntegrationTest):
         assert operational_health is True
         
         # SUCCESS: All business value aspects validated
-        print("✅ BUSINESS VALUE VALIDATION COMPLETE")
+        print(" PASS:  BUSINESS VALUE VALIDATION COMPLETE")
         # Count unique cache instances using identity comparison instead of set (dict not hashable)
         cache_instances = [enterprise_manager._cache, competitor_manager._cache]
         unique_caches = len([cache for i, cache in enumerate(cache_instances) 
                            if not any(cache is other for other in cache_instances[:i])])
-        print(f"✅ Multi-user security: PROTECTED ({unique_caches} isolated caches)")
-        print(f"✅ Agent intelligence: ENABLED ({len(self.mock_unified_config.llm_configs)} configurations)")
-        print(f"✅ Performance caching: OPTIMIZED (100% cache hit rate on repeat)")
-        print(f"✅ Structured decisions: SUPPORTED (confidence: {decision.confidence_score})")
-        print(f"✅ Operational monitoring: HEALTHY ({health_status['status']})")
+        print(f" PASS:  Multi-user security: PROTECTED ({unique_caches} isolated caches)")
+        print(f" PASS:  Agent intelligence: ENABLED ({len(self.mock_unified_config.llm_configs)} configurations)")
+        print(f" PASS:  Performance caching: OPTIMIZED (100% cache hit rate on repeat)")
+        print(f" PASS:  Structured decisions: SUPPORTED (confidence: {decision.confidence_score})")
+        print(f" PASS:  Operational monitoring: HEALTHY ({health_status['status']})")

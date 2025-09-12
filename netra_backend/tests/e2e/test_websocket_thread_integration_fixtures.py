@@ -1,7 +1,7 @@
 """WebSocket Thread Integration E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Thread management critical for chat persistence
+- Segment: All (Free  ->  Enterprise) - Thread management critical for chat persistence
 - Business Goal: Validate WebSocket thread integration preserves chat history and context
 - Value Impact: Thread failures lose customer conversation history and context
 - Strategic Impact: Thread isolation prevents cross-customer data leaks in multi-tenant chat
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 CRITICAL MISSION: This test suite validates that WebSocket thread integration enables
 proper conversation persistence and multi-user thread isolation for chat functionality.
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
 THREAD INTEGRATION TESTS:

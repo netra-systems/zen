@@ -144,7 +144,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         assert len(set(user2_sessions)) == 3, "User 2 should have 3 unique sessions"
         assert set(user1_sessions).isdisjoint(set(user2_sessions)), "Sessions must be isolated between users"
         
-        logger.info("✅ Database session isolation verified for concurrent users")
+        logger.info(" PASS:  Database session isolation verified for concurrent users")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -208,7 +208,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         assert "failed_2" in results, "Operation 2 should have failed"
         assert "success_0" in results, "Other operations should succeed independently"
         
-        logger.info("✅ Transaction boundary management verified across agent operations")
+        logger.info(" PASS:  Transaction boundary management verified across agent operations")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -265,7 +265,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         health_check = await manager.health_check()
         assert health_check["status"] == "healthy", "Connection pool should remain healthy"
         
-        logger.info("✅ Session cleanup and resource management verified")
+        logger.info(" PASS:  Session cleanup and resource management verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -319,7 +319,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         unique_connections = len(set([m.split('_conn_')[1] for m in connection_metrics if '_conn_' in m]))
         logger.info(f"Used {unique_connections} unique connections for {len(connection_metrics)} operations")
         
-        logger.info("✅ Connection pool management verified under concurrent load")
+        logger.info(" PASS:  Connection pool management verified under concurrent load")
 
     # ========== CONFIGURATION INTEGRATION TESTS ==========
 
@@ -377,7 +377,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         # Verify different environments produce different URLs
         assert url_results["development"] != url_results["test"], "Different environments should produce different URLs"
         
-        logger.info(f"✅ Database URL parsing verified for environments: {list(url_results.keys())}")
+        logger.info(f" PASS:  Database URL parsing verified for environments: {list(url_results.keys())}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -427,7 +427,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             assert "override_host" in constructed_url, "Manager should respect environment overrides"
             assert "9999" in constructed_url, "Manager should use override port"
         
-        logger.info("✅ Database environment variable priority resolution verified")
+        logger.info(" PASS:  Database environment variable priority resolution verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -464,7 +464,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         # Cleanup application engine
         await app_engine.dispose()
         
-        logger.info("✅ Database health monitoring configuration integration verified")
+        logger.info(" PASS:  Database health monitoring configuration integration verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -514,7 +514,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
                 
                 self.created_managers.append(manager)
         
-        logger.info("✅ Connection pool configuration from environment variables verified")
+        logger.info(" PASS:  Connection pool configuration from environment variables verified")
 
     # ========== MULTI-USER TRANSACTION SAFETY TESTS ==========
 
@@ -584,7 +584,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             assert not any(other_id in user_results for other_id in other_user_ids), \
                 f"User {user_context.user_id} should not see other users' data"
         
-        logger.info("✅ User data isolation verified in concurrent database operations")
+        logger.info(" PASS:  User data isolation verified in concurrent database operations")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -647,7 +647,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             "User 2 should not be affected by User 1 rollback"
         assert len(transaction_results["user2"]) == 3, "User 2 should complete all operations"
         
-        logger.info("✅ Transaction rollback isolation verified between users")
+        logger.info(" PASS:  Transaction rollback isolation verified between users")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -713,7 +713,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         assert success_count >= 1, "At least one operation should succeed"
         assert success_count + error_count == 2, "Should have exactly 2 operation results"
         
-        logger.info(f"✅ Deadlock prevention verified: {success_count} successes, {error_count} handled errors")
+        logger.info(f" PASS:  Deadlock prevention verified: {success_count} successes, {error_count} handled errors")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -767,7 +767,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             expected_result = f"operation_{i}_extra_{i}"
             assert expected_result in schema_results, f"Operation {i} should have correct extra value"
         
-        logger.info("✅ Concurrent schema operations isolation verified")
+        logger.info(" PASS:  Concurrent schema operations isolation verified")
 
     # ========== AGENT INTEGRATION TESTS ==========
 
@@ -849,7 +849,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         for phase in expected_phases:
             assert phase in agent_session_lifecycle, f"Agent lifecycle should include {phase}"
         
-        logger.info("✅ Database session lifecycle verified with agent operations")
+        logger.info(" PASS:  Database session lifecycle verified with agent operations")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -928,7 +928,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             assert not any(other_agent in agent_data for other_agent in other_agents), \
                 f"Agent {agent_name} should not see other agents' data"
         
-        logger.info("✅ Agent-specific database context isolation verified")
+        logger.info(" PASS:  Agent-specific database context isolation verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -995,7 +995,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         assert "processed_raw_data_collected" in data_values[1], "Processing agent should use data agent output"
         assert "optimized_processed_raw_data_collected" in data_values[2], "Optimization agent should use processing agent output"
         
-        logger.info("✅ Database session sharing verified across agent workflow")
+        logger.info(" PASS:  Database session sharing verified across agent workflow")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1055,7 +1055,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         health_check = await manager.health_check()
         assert health_check["status"] == "healthy", "Database should remain healthy after agent failures"
         
-        logger.info("✅ Database cleanup verified during agent failure scenarios")
+        logger.info(" PASS:  Database cleanup verified during agent failure scenarios")
 
     # ========== SYSTEM INTEGRATION TESTS ==========
 
@@ -1102,7 +1102,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
             # This is also acceptable - validation error
             pass
         
-        logger.info("✅ Database health monitoring and circuit breaker integration verified")
+        logger.info(" PASS:  Database health monitoring and circuit breaker integration verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1138,7 +1138,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         health_check = await manager.health_check()
         assert health_check["status"] == "healthy", "Database should be healthy after initialization"
         
-        logger.info("✅ Database migration coordination verified with service startup")
+        logger.info(" PASS:  Database migration coordination verified with service startup")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1188,7 +1188,7 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         health_check = await manager.health_check()
         assert health_check["status"] == "healthy", "Recreated engine should be healthy"
         
-        logger.info("✅ Connection retry and recovery patterns verified")
+        logger.info(" PASS:  Connection retry and recovery patterns verified")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1261,5 +1261,5 @@ class TestDatabaseManagerInterplay(BaseIntegrationTest):
         assert monitoring_data["sessions_created"] >= 0, "Should track session creation"
         assert monitoring_data["health_checks"] >= 1, "Should track health checks"
         
-        logger.info(f"✅ Database event logging verified: {len(logged_events)} events captured")
-        logger.info(f"✅ Monitoring data collected: {monitoring_data}")
+        logger.info(f" PASS:  Database event logging verified: {len(logged_events)} events captured")
+        logger.info(f" PASS:  Monitoring data collected: {monitoring_data}")

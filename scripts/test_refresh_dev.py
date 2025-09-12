@@ -21,33 +21,33 @@ logger = logging.getLogger(__name__)
 
 def test_refresh_dev_import():
     """Test that refresh_dev can be imported correctly."""
-    logger.info("🧪 Testing refresh_dev imports...")
+    logger.info("[U+1F9EA] Testing refresh_dev imports...")
     
     try:
         # Test script import
         from scripts.refresh_dev import DevEnvironmentRefresher
-        logger.info("   ✅ DevEnvironmentRefresher imported successfully")
+        logger.info("    PASS:  DevEnvironmentRefresher imported successfully")
         
         # Test UnifiedDockerManager integration
         from test_framework.unified_docker_manager import refresh_dev
-        logger.info("   ✅ refresh_dev function imported successfully")
+        logger.info("    PASS:  refresh_dev function imported successfully")
         
         # Test class instantiation
         refresher = DevEnvironmentRefresher()
-        logger.info("   ✅ DevEnvironmentRefresher created successfully")
+        logger.info("    PASS:  DevEnvironmentRefresher created successfully")
         
         return True
         
     except ImportError as e:
-        logger.error(f"   ❌ Import failed: {e}")
+        logger.error(f"    FAIL:  Import failed: {e}")
         return False
     except Exception as e:
-        logger.error(f"   ❌ Unexpected error: {e}")
+        logger.error(f"    FAIL:  Unexpected error: {e}")
         return False
 
 def test_refresh_dev_help():
     """Test that refresh_dev shows help correctly."""
-    logger.info("🧪 Testing refresh_dev help...")
+    logger.info("[U+1F9EA] Testing refresh_dev help...")
     
     try:
         import subprocess
@@ -60,33 +60,33 @@ def test_refresh_dev_help():
         ], capture_output=True, text=True, timeout=10)
         
         if result.returncode == 0:
-            logger.info("   ✅ Help command executed successfully")
+            logger.info("    PASS:  Help command executed successfully")
             
             # Check for key help content
             help_text = result.stdout.lower()
             if "refresh local development environment" in help_text:
-                logger.info("   ✅ Help content looks correct")
+                logger.info("    PASS:  Help content looks correct")
                 return True
             else:
-                logger.error("   ❌ Help content missing key phrases")
+                logger.error("    FAIL:  Help content missing key phrases")
                 return False
         else:
-            logger.error(f"   ❌ Help command failed: {result.stderr}")
+            logger.error(f"    FAIL:  Help command failed: {result.stderr}")
             return False
             
     except Exception as e:
-        logger.error(f"   ❌ Help test failed: {e}")
+        logger.error(f"    FAIL:  Help test failed: {e}")
         return False
 
 def test_docker_compose_file():
     """Test that docker-compose.yml exists and is readable."""
-    logger.info("🧪 Testing docker-compose.yml accessibility...")
+    logger.info("[U+1F9EA] Testing docker-compose.yml accessibility...")
     
     try:
         compose_file = project_root / "docker-compose.yml"
         
         if not compose_file.exists():
-            logger.error("   ❌ docker-compose.yml not found")
+            logger.error("    FAIL:  docker-compose.yml not found")
             return False
         
         # Try to read the file
@@ -94,19 +94,19 @@ def test_docker_compose_file():
             content = f.read()
             
         if "dev-backend" in content and "dev-auth" in content:
-            logger.info("   ✅ docker-compose.yml contains development services")
+            logger.info("    PASS:  docker-compose.yml contains development services")
             return True
         else:
-            logger.error("   ❌ docker-compose.yml missing expected development services")
+            logger.error("    FAIL:  docker-compose.yml missing expected development services")
             return False
             
     except Exception as e:
-        logger.error(f"   ❌ Docker compose file test failed: {e}")
+        logger.error(f"    FAIL:  Docker compose file test failed: {e}")
         return False
 
 def test_service_validation():
     """Test service name validation."""
-    logger.info("🧪 Testing service validation...")
+    logger.info("[U+1F9EA] Testing service validation...")
     
     try:
         from scripts.refresh_dev import DevEnvironmentRefresher
@@ -114,19 +114,19 @@ def test_service_validation():
         
         # Test with valid services
         valid_services = ["backend", "auth", "frontend"]
-        logger.info(f"   ✅ Valid services recognized: {valid_services}")
+        logger.info(f"    PASS:  Valid services recognized: {valid_services}")
         
         # Test dry-run functionality (just initialization)
-        logger.info("   ✅ Service validation working")
+        logger.info("    PASS:  Service validation working")
         return True
         
     except Exception as e:
-        logger.error(f"   ❌ Service validation test failed: {e}")
+        logger.error(f"    FAIL:  Service validation test failed: {e}")
         return False
 
 def main():
     """Run all refresh_dev tests."""
-    logger.info("🔬 Running refresh_dev functionality tests...")
+    logger.info("[U+1F52C] Running refresh_dev functionality tests...")
     logger.info(f"   Project root: {project_root}")
     
     tests = [
@@ -138,27 +138,27 @@ def main():
     
     results = []
     for test_name, test_func in tests:
-        logger.info(f"\n📋 Running {test_name}...")
+        logger.info(f"\n[U+1F4CB] Running {test_name}...")
         result = test_func()
         results.append((test_name, result))
     
     # Summary
-    logger.info("\n📊 Test Results:")
+    logger.info("\n CHART:  Test Results:")
     passed = 0
     for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = " PASS:  PASS" if result else " FAIL:  FAIL"
         logger.info(f"   {test_name:25}: {status}")
         if result:
             passed += 1
     
-    logger.info(f"\n🎯 Overall: {passed}/{len(tests)} tests passed")
+    logger.info(f"\n TARGET:  Overall: {passed}/{len(tests)} tests passed")
     
     if passed == len(tests):
-        logger.info("🎉 All tests passed! refresh_dev is ready to use")
+        logger.info(" CELEBRATION:  All tests passed! refresh_dev is ready to use")
         logger.info("   Try: python scripts/refresh_dev.py --help")
         return 0
     else:
-        logger.error("💥 Some tests failed - check implementation")
+        logger.error("[U+1F4A5] Some tests failed - check implementation")
         return 1
 
 if __name__ == "__main__":

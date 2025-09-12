@@ -176,7 +176,7 @@ class StartupFixesValidator:
     
     def _log_validation_summary(self, result: ValidationResult) -> None:
         """Log detailed validation summary."""
-        status = "✅ PASSED" if result.success else "❌ FAILED"
+        status = " PASS:  PASSED" if result.success else " FAIL:  FAILED"
         logger.info(f"Startup Fixes Validation {status}")
         logger.info(f"  Duration: {result.duration:.2f}s")
         logger.info(f"  Total Fixes: {result.total_fixes}/5")

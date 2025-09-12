@@ -572,7 +572,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
     # REMOVED_SYNTAX_ERROR: """Run all WebSocket reconnection tests."""
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-    # REMOVED_SYNTAX_ERROR: print("🔌 WebSocket Reconnection Integration Tests")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F50C] WebSocket Reconnection Integration Tests")
     # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
     # REMOVED_SYNTAX_ERROR: tests = [ )
@@ -596,7 +596,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
                 # Print summary
                 # REMOVED_SYNTAX_ERROR: print(" )
                 # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                # REMOVED_SYNTAX_ERROR: print("📊 TEST RESULTS SUMMARY")
+                # REMOVED_SYNTAX_ERROR: print(" CHART:  TEST RESULTS SUMMARY")
                 # REMOVED_SYNTAX_ERROR: print("=" * 60)
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -604,7 +604,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
                 # REMOVED_SYNTAX_ERROR: if self.test_results.get('reconnection_times'):
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: 📈 RECONNECTION METRICS:")
+                    # REMOVED_SYNTAX_ERROR: [U+1F4C8] RECONNECTION METRICS:")
                     # REMOVED_SYNTAX_ERROR: metrics = self.test_results['reconnection_times']
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -613,7 +613,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
                     # Determine overall status
                     # REMOVED_SYNTAX_ERROR: if self.test_results['failed'] == 0:
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: ✅ ALL TESTS PASSED - WebSocket reconnection is robust!")
+                        # REMOVED_SYNTAX_ERROR:  PASS:  ALL TESTS PASSED - WebSocket reconnection is robust!")
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

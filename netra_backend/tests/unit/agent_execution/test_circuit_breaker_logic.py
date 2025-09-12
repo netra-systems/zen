@@ -2,7 +2,7 @@
 Unit Tests for Agent Execution Circuit Breaker Logic
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) with focus on system stability
+- Segment: ALL (Free  ->  Enterprise) with focus on system stability
 - Business Goal: Platform reliability and graceful degradation during outages  
 - Value Impact: Prevents cascade failures and protects $500K+ ARR from service disruptions
 - Strategic Impact: System resilience enables sustainable growth and customer confidence

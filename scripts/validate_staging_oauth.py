@@ -40,16 +40,16 @@ class OAuthStagingValidator:
     def log_issue(self, issue: str, severity: str = "ERROR"):
         """Log an issue found during validation."""
         self.issues_found.append(f"[{severity}] {issue}")
-        print(f"❌ {severity}: {issue}")
+        print(f" FAIL:  {severity}: {issue}")
         
     def log_fix(self, fix: str):
         """Log a fix that was applied."""
         self.fixes_applied.append(fix)
-        print(f"✅ FIXED: {fix}")
+        print(f" PASS:  FIXED: {fix}")
         
     def check_local_env_file(self) -> bool:
         """Check if .env.staging has proper OAuth credentials."""
-        print("\n🔍 Checking local .env.staging file...")
+        print("\n SEARCH:  Checking local .env.staging file...")
         
         env_file = project_root / ".env.staging"
         if not env_file.exists():
@@ -70,7 +70,7 @@ class OAuthStagingValidator:
                 self.log_issue(issue)
             
             # Offer to fix with development credentials for testing
-            print("\n⚠️  OAuth credentials are not configured for staging.")
+            print("\n WARNING: [U+FE0F]  OAuth credentials are not configured for staging.")
             print("Options:")
             print("1. Use development OAuth credentials (for testing only)")
             print("2. Configure production OAuth credentials (recommended)")
@@ -104,7 +104,7 @@ class OAuthStagingValidator:
                             else:
                                 f.write(line)
                     
-                    print("\n⚠️  Using development OAuth credentials for staging.")
+                    print("\n WARNING: [U+FE0F]  Using development OAuth credentials for staging.")
                     print("Note: Redirect URIs must be configured in Google Console for:")
                     print("  - https://app.staging.netrasystems.ai/auth/callback")
                     print("  - https://auth.staging.netrasystems.ai/auth/callback")
@@ -121,12 +121,12 @@ class OAuthStagingValidator:
                 return False
                 
         else:
-            print("✅ OAuth credentials are configured in .env.staging")
+            print(" PASS:  OAuth credentials are configured in .env.staging")
             return True
             
     def check_gcp_secrets(self) -> bool:
         """Check if OAuth secrets exist in GCP Secret Manager."""
-        print("\n🔍 Checking GCP Secret Manager...")
+        print("\n SEARCH:  Checking GCP Secret Manager...")
         
         secrets_to_check = [
             "google-oauth-client-id-staging",
@@ -141,7 +141,7 @@ class OAuthStagingValidator:
                     "--project", self.project_id
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-                print(f"✅ Secret exists: {secret_name}")
+                print(f" PASS:  Secret exists: {secret_name}")
                 
                 # Get the secret value to check if it's a placeholder
                 cmd_value = [
@@ -198,7 +198,7 @@ class OAuthStagingValidator:
             
     def sync_secrets_to_gcp(self) -> bool:
         """Sync OAuth credentials from .env.staging to GCP Secret Manager."""
-        print("\n🔄 Syncing OAuth credentials to GCP Secret Manager...")
+        print("\n CYCLE:  Syncing OAuth credentials to GCP Secret Manager...")
         
         env_file = project_root / ".env.staging"
         if not env_file.exists():
@@ -229,7 +229,7 @@ class OAuthStagingValidator:
         
     def validate_redirect_uris(self) -> bool:
         """Validate that OAuth redirect URIs are configured correctly."""
-        print("\n🔍 Validating OAuth redirect URIs...")
+        print("\n SEARCH:  Validating OAuth redirect URIs...")
         
         required_uris = [
             "https://app.staging.netrasystems.ai/auth/callback",
@@ -237,11 +237,11 @@ class OAuthStagingValidator:
             "https://api.staging.netrasystems.ai/auth/callback"
         ]
         
-        print("\n📋 Required redirect URIs for staging:")
+        print("\n[U+1F4CB] Required redirect URIs for staging:")
         for uri in required_uris:
             print(f"  - {uri}")
             
-        print("\n⚠️  Manual Action Required:")
+        print("\n WARNING: [U+FE0F]  Manual Action Required:")
         print("1. Go to https://console.cloud.google.com/apis/credentials")
         print("2. Select your OAuth 2.0 Client ID")
         print("3. Ensure all redirect URIs above are added")
@@ -257,7 +257,7 @@ class OAuthStagingValidator:
         
     async def test_oauth_flow(self) -> bool:
         """Test the OAuth flow with actual credentials."""
-        print("\n🧪 Testing OAuth flow...")
+        print("\n[U+1F9EA] Testing OAuth flow...")
         
         # Load credentials
         env_file = project_root / ".env.staging"
@@ -288,10 +288,10 @@ class OAuthStagingValidator:
         
         auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(auth_params)}"
         
-        print(f"\n🔗 OAuth Authorization URL:")
+        print(f"\n[U+1F517] OAuth Authorization URL:")
         print(f"   {auth_url}")
         
-        print("\n✅ OAuth URL generated successfully")
+        print("\n PASS:  OAuth URL generated successfully")
         print("   Test the URL in a browser to verify the flow")
         
         return True
@@ -299,18 +299,18 @@ class OAuthStagingValidator:
     def generate_summary_report(self) -> None:
         """Generate a summary report of the validation."""
         print("\n" + "="*60)
-        print("📊 OAUTH STAGING VALIDATION SUMMARY")
+        print(" CHART:  OAUTH STAGING VALIDATION SUMMARY")
         print("="*60)
         
         if self.issues_found:
-            print(f"\n❌ Issues Found ({len(self.issues_found)}):")
+            print(f"\n FAIL:  Issues Found ({len(self.issues_found)}):")
             for issue in self.issues_found:
                 print(f"  {issue}")
         else:
-            print("\n✅ No issues found!")
+            print("\n PASS:  No issues found!")
             
         if self.fixes_applied:
-            print(f"\n✅ Fixes Applied ({len(self.fixes_applied)}):")
+            print(f"\n PASS:  Fixes Applied ({len(self.fixes_applied)}):")
             for fix in self.fixes_applied:
                 print(f"  {fix}")
                 
@@ -344,12 +344,12 @@ class OAuthStagingValidator:
             f.write("3. Sync secrets to GCP Secret Manager\n")
             f.write("4. Deploy services with updated configuration\n")
             
-        print(f"\n📄 Report saved to: {report_path}")
+        print(f"\n[U+1F4C4] Report saved to: {report_path}")
         
 
 async def main():
     """Main validation flow."""
-    print("🚀 Starting OAuth Staging Validation\n")
+    print("[U+1F680] Starting OAuth Staging Validation\n")
     
     validator = OAuthStagingValidator()
     
@@ -363,11 +363,11 @@ async def main():
     # If local env is configured, sync to GCP
     if steps[0][1]:  # Local env check passed
         if not steps[1][1]:  # GCP secrets need updating
-            print("\n🔄 Syncing credentials to GCP...")
+            print("\n CYCLE:  Syncing credentials to GCP...")
             if validator.sync_secrets_to_gcp():
-                print("✅ Secrets synced to GCP successfully")
+                print(" PASS:  Secrets synced to GCP successfully")
             else:
-                print("❌ Failed to sync secrets to GCP")
+                print(" FAIL:  Failed to sync secrets to GCP")
     
     # Test OAuth flow
     await validator.test_oauth_flow()
@@ -384,10 +384,10 @@ if __name__ == "__main__":
         success = asyncio.run(main())
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        print("\n\n⚠️  Validation interrupted by user")
+        print("\n\n WARNING: [U+FE0F]  Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Validation failed with error: {e}")
+        print(f"\n FAIL:  Validation failed with error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

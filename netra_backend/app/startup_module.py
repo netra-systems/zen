@@ -133,31 +133,31 @@ async def _verify_required_database_tables_exist(logger: logging.Logger, gracefu
                 if critical_missing:
                     error_msg = f"CRITICAL STARTUP FAILURE: Missing CRITICAL database tables: {critical_missing}"
                     logger.error(error_msg)
-                    logger.error("🚨 CRITICAL: Core chat functionality requires these tables")
-                    logger.error("🔧 SOLUTION: Run the migration service to create critical tables")
-                    logger.error("⚠️  Backend CANNOT function without critical tables")
+                    logger.error(" ALERT:  CRITICAL: Core chat functionality requires these tables")
+                    logger.error("[U+1F527] SOLUTION: Run the migration service to create critical tables")
+                    logger.error(" WARNING: [U+FE0F]  Backend CANNOT function without critical tables")
                     
                     # Critical tables missing = HARD FAILURE regardless of graceful_startup
                     raise RuntimeError(f"Missing critical database tables: {critical_missing}. Run migration service first.")
                 
                 if non_critical_missing:
                     logger.warning(f"ARCHITECTURE NOTICE: Missing non-critical database tables: {non_critical_missing}")
-                    logger.warning("🔧 These tables should be created by migration service for full functionality")
-                    logger.warning("⚠️  Some features may be degraded until tables are created")
+                    logger.warning("[U+1F527] These tables should be created by migration service for full functionality")
+                    logger.warning(" WARNING: [U+FE0F]  Some features may be degraded until tables are created")
                     
                     # CRITICAL FIX: Non-critical tables should NEVER block startup in ANY mode
                     # The entire point of "non-critical" is that the system can function without them
                     # Strict mode only enforces CRITICAL table requirements, not non-critical ones
-                    logger.info("✅ Continuing with degraded functionality - core chat will work")
-                    logger.info("ℹ️  Non-critical tables don't block startup in any mode (strict or graceful)")
+                    logger.info(" PASS:  Continuing with degraded functionality - core chat will work")
+                    logger.info("[U+2139][U+FE0F]  Non-critical tables don't block startup in any mode (strict or graceful)")
                     
                     if not graceful_startup:
                         # In strict mode, log more details about what features may be affected
-                        logger.warning("🚨 STRICT MODE: Missing non-critical tables logged for operations team")
-                        logger.warning("📊 Features affected may include: advanced analytics, credit tracking, agent execution history")
-                        logger.warning("🎯 These tables should be prioritized for next migration run")
+                        logger.warning(" ALERT:  STRICT MODE: Missing non-critical tables logged for operations team")
+                        logger.warning(" CHART:  Features affected may include: advanced analytics, credit tracking, agent execution history")
+                        logger.warning(" TARGET:  These tables should be prioritized for next migration run")
             else:
-                logger.debug(f"✅ All {len(expected_tables)} required database tables are present")
+                logger.debug(f" PASS:  All {len(expected_tables)} required database tables are present")
         
         # Log final pool status before disposal
         logger.debug(f"Database table verification complete")
@@ -540,9 +540,9 @@ async def setup_database_connections(app: FastAPI) -> None:
                 manager.initialize(),
                 timeout=initialization_timeout
             )
-            logger.info("✅ DatabaseManager initialized successfully during startup")
+            logger.info(" PASS:  DatabaseManager initialized successfully during startup")
         else:
-            logger.debug("✅ DatabaseManager already initialized")
+            logger.debug(" PASS:  DatabaseManager already initialized")
             
         # Verify database connectivity with the manager
         health_result = await asyncio.wait_for(
@@ -551,9 +551,9 @@ async def setup_database_connections(app: FastAPI) -> None:
         )
         
         if health_result['status'] == 'healthy':
-            logger.info("✅ DatabaseManager health check passed")
+            logger.info(" PASS:  DatabaseManager health check passed")
         else:
-            logger.warning(f"⚠️ DatabaseManager health check warning: {health_result}")
+            logger.warning(f" WARNING: [U+FE0F] DatabaseManager health check warning: {health_result}")
             if not graceful_startup:
                 raise RuntimeError(f"DatabaseManager health check failed: {health_result}")
             
@@ -723,8 +723,8 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
     # CRITICAL FIX: Make ClickHouse optional in development and staging when not explicitly required
     if config.environment in ["development", "staging"] and not clickhouse_required:
         result["status"] = "skipped"
-        logger.info(f"ℹ️ ClickHouse not required in {config.environment} environment - skipping initialization")
-        logger.info("ℹ️ System continuing without analytics")
+        logger.info(f"[U+2139][U+FE0F] ClickHouse not required in {config.environment} environment - skipping initialization")
+        logger.info("[U+2139][U+FE0F] System continuing without analytics")
         return result
     
     # CRITICAL FIX: Check if conditions prevent connection attempt
@@ -738,11 +738,11 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
             error_msg = f"ClickHouse required but skipped due to {skip_reason}"
             result["status"] = "failed"
             result["error"] = error_msg
-            logger.error(f"❌ CRITICAL: {error_msg}")
+            logger.error(f" FAIL:  CRITICAL: {error_msg}")
             raise RuntimeError(f"ClickHouse initialization failed: {error_msg}. Cannot skip required service.")
         else:
             _log_clickhouse_skip(logger, clickhouse_mode)
-            logger.info(f"ℹ️ ClickHouse skipped (optional) due to {skip_reason}")
+            logger.info(f"[U+2139][U+FE0F] ClickHouse skipped (optional) due to {skip_reason}")
     else:
         # Attempt actual connection
         try:
@@ -755,7 +755,7 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
                 timeout=timeout
             )
             result["status"] = "connected"
-            logger.info("✅ ClickHouse initialized successfully")
+            logger.info(" PASS:  ClickHouse initialized successfully")
             
         except asyncio.TimeoutError:
             timeout_msg = f"ClickHouse initialization timed out after {timeout} seconds"
@@ -763,11 +763,11 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
             result["error"] = timeout_msg
             
             if clickhouse_required:
-                logger.error(f"❌ CRITICAL: ClickHouse required but timed out: {timeout_msg}")
+                logger.error(f" FAIL:  CRITICAL: ClickHouse required but timed out: {timeout_msg}")
                 raise RuntimeError(f"{timeout_msg}. ClickHouse is required in {config.environment} mode.")
             else:
-                logger.info(f"ℹ️ ClickHouse unavailable (optional): {timeout_msg}")
-                logger.info("ℹ️ System continuing without analytics")
+                logger.info(f"[U+2139][U+FE0F] ClickHouse unavailable (optional): {timeout_msg}")
+                logger.info("[U+2139][U+FE0F] System continuing without analytics")
                 
         except Exception as e:
             result["status"] = "failed"
@@ -780,11 +780,11 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
             ])
             
             if clickhouse_required:
-                logger.error(f"❌ CRITICAL: ClickHouse required but failed: {e}")
+                logger.error(f" FAIL:  CRITICAL: ClickHouse required but failed: {e}")
                 raise RuntimeError(f"ClickHouse initialization failed in {config.environment}: {e}. ClickHouse is required in {config.environment} mode.") from e
             else:
-                logger.info(f"ℹ️ ClickHouse unavailable (optional): {e}")
-                logger.info("ℹ️ System continuing without analytics")
+                logger.info(f"[U+2139][U+FE0F] ClickHouse unavailable (optional): {e}")
+                logger.info("[U+2139][U+FE0F] System continuing without analytics")
     
     return result
 
@@ -806,7 +806,7 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
         init_timeout = 8.0 if environment in ["staging", "development"] else 20.0
         
         # First try the new table initializer for mandatory tables
-        logger.info("🚀 Ensuring ClickHouse critical tables exist...")
+        logger.info("[U+1F680] Ensuring ClickHouse critical tables exist...")
         from netra_backend.app.db.clickhouse_table_initializer import ensure_clickhouse_tables
         
         # Get ClickHouse connection details from environment
@@ -825,11 +825,11 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
             )
             
             if tables_ok:
-                logger.info("✅ All critical ClickHouse tables verified")
+                logger.info(" PASS:  All critical ClickHouse tables verified")
             else:
-                logger.warning("⚠️ Some ClickHouse tables could not be created - proceeding with legacy init")
+                logger.warning(" WARNING: [U+FE0F] Some ClickHouse tables could not be created - proceeding with legacy init")
         except Exception as table_error:
-            logger.warning(f"⚠️ Table initializer encountered issue: {table_error} - trying legacy method")
+            logger.warning(f" WARNING: [U+FE0F] Table initializer encountered issue: {table_error} - trying legacy method")
         
         # Also run legacy initialization for backward compatibility
         from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
@@ -906,10 +906,10 @@ def _create_tool_dispatcher(tool_registry):
         stacklevel=2
     )
     
-    logger.warning("🚨 DEPRECATED: Creating global ToolDispatcher in startup module")
-    logger.warning("⚠️ This creates security risks and user isolation issues")
-    logger.warning("📋 MIGRATION: Remove global dispatcher, use request-scoped patterns")
-    logger.warning("📅 REMOVAL: Global startup dispatcher will be removed in v3.0.0")
+    logger.warning(" ALERT:  DEPRECATED: Creating global ToolDispatcher in startup module")
+    logger.warning(" WARNING: [U+FE0F] This creates security risks and user isolation issues")
+    logger.warning("[U+1F4CB] MIGRATION: Remove global dispatcher, use request-scoped patterns")
+    logger.warning("[U+1F4C5] REMOVAL: Global startup dispatcher will be removed in v3.0.0")
     
     return ToolDispatcher(tool_registry.get_tools([]))
 
@@ -958,7 +958,7 @@ async def _initialize_supervisor_with_retry(app: FastAPI, logger) -> bool:
                 raise RuntimeError("Supervisor creation returned None")
             
             _setup_agent_state(app, supervisor)
-            logger.info("✅ Supervisor initialized successfully")
+            logger.info(" PASS:  Supervisor initialized successfully")
             return True
             
         except Exception as e:
@@ -979,7 +979,7 @@ async def _validate_staging_readiness(app: FastAPI, logger) -> None:
     if env.get("ENVIRONMENT", "").lower() != "staging":
         return  # Only run in staging
     
-    logger.info("🔍 STAGING VALIDATION: Checking agent execution readiness")
+    logger.info(" SEARCH:  STAGING VALIDATION: Checking agent execution readiness")
     
     # Check required environment variables for staging
     required_env_vars = [
@@ -991,10 +991,10 @@ async def _validate_staging_readiness(app: FastAPI, logger) -> None:
     
     missing_vars = [var for var in required_env_vars if not env.get(var)]
     if missing_vars:
-        logger.error(f"🚨 STAGING MISSING ENV VARS: {missing_vars}")
+        logger.error(f" ALERT:  STAGING MISSING ENV VARS: {missing_vars}")
         raise RuntimeError(f"Staging missing required environment variables: {missing_vars}")
     
-    logger.info("✅ STAGING VALIDATION: Environment variables verified")
+    logger.info(" PASS:  STAGING VALIDATION: Environment variables verified")
 
 
 def _create_agent_supervisor(app: FastAPI) -> None:
@@ -1008,8 +1008,8 @@ def _create_agent_supervisor(app: FastAPI) -> None:
     
     try:
         # Log detailed environment information for staging diagnosis
-        logger.info(f"🔍 SUPERVISOR INIT DEBUG - Environment: {environment}")
-        logger.info(f"🔍 App state attributes: {[attr for attr in dir(app.state) if not attr.startswith('_')]}")
+        logger.info(f" SEARCH:  SUPERVISOR INIT DEBUG - Environment: {environment}")
+        logger.info(f" SEARCH:  App state attributes: {[attr for attr in dir(app.state) if not attr.startswith('_')]}")
         
         # Check each dependency individually with detailed logging
         deps_status = {}
@@ -1024,7 +1024,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             'type': type(getattr(app.state, 'llm_manager', None)).__name__
         }
         # Tool dispatcher is now created per-request, not stored globally
-        logger.info(f"🔍 DEPENDENCY STATUS: {deps_status}")
+        logger.info(f" SEARCH:  DEPENDENCY STATUS: {deps_status}")
         
         # Validate staging environment readiness
         asyncio.create_task(_validate_staging_readiness(app, logger))
@@ -1037,16 +1037,16 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         # CRITICAL: Validate WebSocket infrastructure for agent events
         supervisor = app.state.agent_supervisor
         if hasattr(supervisor, 'websocket_bridge') and supervisor.websocket_bridge:
-            logger.info("✅ SupervisorAgent has WebSocket bridge - agent events will be enabled")
+            logger.info(" PASS:  SupervisorAgent has WebSocket bridge - agent events will be enabled")
             
             # Validate WebSocket bridge has required method
             required_methods = ['emit_agent_event']
             missing_methods = [method for method in required_methods if not hasattr(supervisor.websocket_bridge, method)]
             if missing_methods:
-                logger.error(f"🚨 WebSocket bridge missing required methods: {missing_methods}")
+                logger.error(f" ALERT:  WebSocket bridge missing required methods: {missing_methods}")
                 raise RuntimeError(f"WebSocket bridge incomplete - missing methods: {missing_methods}")
         else:
-            logger.error("🚨 CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
+            logger.error(" ALERT:  CRITICAL: SupervisorAgent missing WebSocket bridge - agent events will be broken!")
             raise RuntimeError("SupervisorAgent must have WebSocket bridge for agent event notifications")
         
         # Validate WebSocket manager is available as SSOT import
@@ -1055,12 +1055,12 @@ def _create_agent_supervisor(app: FastAPI) -> None:
         try:
             # Verify the class is available - no factory needed for validation
             if not WebSocketManager:
-                logger.error("🚨 CRITICAL: WebSocketManager class not available - per-request tool dispatcher enhancement will fail!")
+                logger.error(" ALERT:  CRITICAL: WebSocketManager class not available - per-request tool dispatcher enhancement will fail!")
                 raise RuntimeError("WebSocketManager class must be available for tool dispatcher enhancement")
-            logger.info("✅ SSOT COMPLIANCE: WebSocketManager direct import verified - factory pattern eliminated")
-            logger.debug("✅ WebSocketManager class available for per-request creation")
+            logger.info(" PASS:  SSOT COMPLIANCE: WebSocketManager direct import verified - factory pattern eliminated")
+            logger.debug(" PASS:  WebSocketManager class available for per-request creation")
         except Exception as e:
-            logger.error(f"🚨 CRITICAL: Failed to import WebSocketManager: {e}")
+            logger.error(f" ALERT:  CRITICAL: Failed to import WebSocketManager: {e}")
             raise RuntimeError(f"WebSocketManager import failed: {e}")
         
         # Final verification
@@ -1082,17 +1082,17 @@ def _create_agent_supervisor(app: FastAPI) -> None:
             'app_state_attrs': [attr for attr in dir(app.state) if not attr.startswith('_')],
             'dependency_status': deps_status if 'deps_status' in locals() else 'not_checked'
         }
-        logger.error(f"🚨 SUPERVISOR FAILURE CONTEXT: {error_context}")
+        logger.error(f" ALERT:  SUPERVISOR FAILURE CONTEXT: {error_context}")
         
         # CRITICAL FIX: Always fail fast in staging/production
         # Don't set supervisor to None - this causes silent failures
         if environment in ["staging", "production"]:
             logger.critical(f"CRITICAL: Agent supervisor failed in {environment} - failing startup immediately")
-            logger.critical("🚨 BUSINESS IMPACT: Chat functionality completely broken - users cannot get AI responses")
+            logger.critical(" ALERT:  BUSINESS IMPACT: Chat functionality completely broken - users cannot get AI responses")
             raise RuntimeError(f"Agent supervisor initialization failed in {environment} - startup aborted") from e
         else:
             # In development, log extensively but continue for debugging
-            logger.warning(f"🚨 Setting supervisor to None in {environment} for debugging")
+            logger.warning(f" ALERT:  Setting supervisor to None in {environment} for debugging")
             app.state.agent_supervisor = None
             app.state.thread_service = None
 
@@ -1164,7 +1164,7 @@ async def initialize_websocket_components(logger: logging.Logger) -> None:
         if not WebSocketManager:
             raise RuntimeError("WebSocketManager class not available")
         
-        logger.info("✅ SSOT COMPLIANCE: WebSocket components use direct SSOT import - factory pattern eliminated")
+        logger.info(" PASS:  SSOT COMPLIANCE: WebSocket components use direct SSOT import - factory pattern eliminated")
         logger.debug("WebSocketManager class available for per-request creation")
         
         logger.debug("WebSocket components initialized")
@@ -1334,7 +1334,7 @@ async def _start_performance_monitoring(app: FastAPI) -> None:
 def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
     """Log startup completion with timing."""
     elapsed_time = time.time() - start_time
-    logger.info(f"✓ Netra Backend Ready ({elapsed_time:.2f}s)")
+    logger.info(f"[U+2713] Netra Backend Ready ({elapsed_time:.2f}s)")
 
 
 async def initialize_monitoring_integration(handlers: dict = None) -> bool:
@@ -1366,7 +1366,7 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
         
         if handler_count == 0:
-            logger.warning("⚠️ Monitoring initialized with zero handlers - may indicate registration timing issue")
+            logger.warning(" WARNING: [U+FE0F] Monitoring initialized with zero handlers - may indicate registration timing issue")
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor
@@ -1378,8 +1378,8 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
         # CRITICAL FIX: The AgentWebSocketBridge is now per-request, not singleton
         # The legacy singleton pattern is deprecated, so we should not try to initialize it
         # Instead, mark the component as healthy by default since per-request bridges work independently
-        logger.info("ℹ️ AgentWebSocketBridge uses per-request architecture - no global initialization needed")
-        logger.info("ℹ️ WebSocket events work via per-user emitters created on-demand")
+        logger.info("[U+2139][U+FE0F] AgentWebSocketBridge uses per-request architecture - no global initialization needed")
+        logger.info("[U+2139][U+FE0F] WebSocket events work via per-user emitters created on-demand")
         
         # Register the bridge component as healthy since it's always available on-demand
         try:
@@ -1393,24 +1393,24 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
                     "last_check": time.time(),
                     "component_type": "bridge"
                 }
-                logger.info("✅ Marked agent_websocket_bridge as healthy (per-request architecture)")
+                logger.info(" PASS:  Marked agent_websocket_bridge as healthy (per-request architecture)")
             else:
                 logger.debug("Health checker doesn't track component health directly - this is expected")
         except Exception as health_error:
             logger.warning(f"Could not update health status for agent_websocket_bridge: {health_error}")
-            logger.info("ℹ️ AgentWebSocketBridge using per-request pattern - this is expected")
+            logger.info("[U+2139][U+FE0F] AgentWebSocketBridge using per-request pattern - this is expected")
         
         # CRITICAL FIX: Removed legacy bridge registration code
         # The AgentWebSocketBridge is now per-request, not singleton
         # There's no global 'bridge' instance to register with the monitor
         # Each request creates its own bridge instance as needed
-        logger.info("✅ Monitoring integration complete - per-request bridges work independently")
+        logger.info(" PASS:  Monitoring integration complete - per-request bridges work independently")
         
         return True
     
     except Exception as e:
         logger.error(
-            f"⚠️ Monitoring integration initialization failed: {e}. "
+            f" WARNING: [U+FE0F] Monitoring integration initialization failed: {e}. "
             f"Components will operate independently without cross-system validation."
         )
         return False

@@ -681,7 +681,7 @@
         # REMOVED_SYNTAX_ERROR: assert frequency.get('agent_completed', 0) >= 1
 
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: ✅ MISSION CRITICAL: All WebSocket events validated successfully!")
+        # REMOVED_SYNTAX_ERROR:  PASS:  MISSION CRITICAL: All WebSocket events validated successfully!")
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

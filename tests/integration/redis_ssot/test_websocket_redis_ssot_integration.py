@@ -13,7 +13,7 @@ BUSINESS IMPACT: MISSION CRITICAL - $500K+ ARR Golden Path Protection
 - Validates connection stability during WebSocket handshake
 
 GOLDEN PATH INTEGRATION:
-- Users login → WebSocket connection → Redis state → Agent execution → AI responses
+- Users login  ->  WebSocket connection  ->  Redis state  ->  Agent execution  ->  AI responses
 - This test validates the Redis layer doesn't break the critical user journey
 - Agent state persistence MUST work through SSOT Redis manager
 - WebSocket event delivery MUST be reliable with consolidated Redis
@@ -97,7 +97,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         Validates the consolidated Redis manager can handle all operations
         required for WebSocket event delivery and agent state management.
         """
-        logger.info("🔍 TESTING: SSOT Redis supports WebSocket operations")
+        logger.info(" SEARCH:  TESTING: SSOT Redis supports WebSocket operations")
         
         # Import SSOT Redis manager
         try:
@@ -121,17 +121,17 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         self.metrics.record_custom("websocket_operations_supported", len(websocket_operations))
         
         assert connection_stable, (
-            f"🚨 UNSTABLE CONNECTION: SSOT Redis manager connection unstable. "
+            f" ALERT:  UNSTABLE CONNECTION: SSOT Redis manager connection unstable. "
             f"This will cause 1011 WebSocket errors. Connection must be reliable."
         )
         
         missing_operations = set(self.required_redis_operations) - set(websocket_operations.keys())
         assert len(missing_operations) == 0, (
-            f"🚨 MISSING WEBSOCKET SUPPORT: SSOT Redis missing operations: {missing_operations}. "
+            f" ALERT:  MISSING WEBSOCKET SUPPORT: SSOT Redis missing operations: {missing_operations}. "
             f"Required for WebSocket/Agent integration."
         )
         
-        logger.info(f"✅ SSOT Redis supports {len(websocket_operations)} WebSocket operations")
+        logger.info(f" PASS:  SSOT Redis supports {len(websocket_operations)} WebSocket operations")
     
     async def test_agent_state_persistence_through_ssot(self):
         """
@@ -140,7 +140,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         Validates that agent execution state can be persisted and retrieved
         through the consolidated Redis manager without corruption or loss.
         """
-        logger.info("🔍 TESTING: Agent state persistence through SSOT Redis")
+        logger.info(" SEARCH:  TESTING: Agent state persistence through SSOT Redis")
         
         # Mock agent state data (realistic structure)
         agent_state = {
@@ -170,18 +170,18 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         failed_ops = [op for op in critical_ops if not persistence_results.get(op, {}).get("success", False)]
         
         assert len(failed_ops) == 0, (
-            f"🚨 AGENT STATE PERSISTENCE FAILED: Operations failed: {failed_ops}. "
+            f" ALERT:  AGENT STATE PERSISTENCE FAILED: Operations failed: {failed_ops}. "
             f"This will cause agent execution failures and WebSocket errors."
         )
         
         # State integrity must be maintained
         state_integrity = persistence_results.get("state_integrity", {})
         assert state_integrity.get("data_consistent", False), (
-            f"🚨 STATE CORRUPTION: Agent state corrupted during persistence. "
+            f" ALERT:  STATE CORRUPTION: Agent state corrupted during persistence. "
             f"This will cause unpredictable agent behavior."
         )
         
-        logger.info("✅ Agent state persistence validated through SSOT Redis")
+        logger.info(" PASS:  Agent state persistence validated through SSOT Redis")
     
     async def test_websocket_event_delivery_with_ssot_redis(self):
         """
@@ -190,7 +190,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         Validates that all 5 critical WebSocket events can be delivered
         reliably when using the consolidated Redis manager.
         """
-        logger.info("🔍 TESTING: WebSocket event delivery with SSOT Redis")
+        logger.info(" SEARCH:  TESTING: WebSocket event delivery with SSOT Redis")
         
         # Mock WebSocket connection context
         websocket_context = {
@@ -227,7 +227,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         ]
         
         assert len(failed_events) == 0, (
-            f"🚨 WEBSOCKET EVENT DELIVERY FAILED: Events failed: {failed_events}. "
+            f" ALERT:  WEBSOCKET EVENT DELIVERY FAILED: Events failed: {failed_events}. "
             f"This breaks real-time chat functionality for users."
         )
         
@@ -238,11 +238,11 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         ]
         
         assert len(slow_events) <= 1, (
-            f"🚨 SLOW EVENT DELIVERY: Events too slow: {slow_events}. "
+            f" ALERT:  SLOW EVENT DELIVERY: Events too slow: {slow_events}. "
             f"Real-time UX requires <1s delivery for most events."
         )
         
-        logger.info(f"✅ All {len(self.critical_websocket_events)} WebSocket events deliverable")
+        logger.info(f" PASS:  All {len(self.critical_websocket_events)} WebSocket events deliverable")
     
     async def test_connection_stability_during_handshake(self):
         """
@@ -251,7 +251,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         This specifically addresses the 1011 WebSocket handshake errors by
         validating Redis operations remain stable during connection establishment.
         """
-        logger.info("🔍 TESTING: Connection stability during WebSocket handshake")
+        logger.info(" SEARCH:  TESTING: Connection stability during WebSocket handshake")
         
         handshake_scenarios = [
             "normal_handshake",
@@ -286,7 +286,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         ]
         
         assert len(failed_critical) == 0, (
-            f"🚨 HANDSHAKE FAILURES: Critical scenarios failed: {failed_critical}. "
+            f" ALERT:  HANDSHAKE FAILURES: Critical scenarios failed: {failed_critical}. "
             f"This will cause 1011 WebSocket errors blocking user chat."
         )
         
@@ -297,11 +297,11 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         ]
         
         assert len(unstable_redis) <= 1, (
-            f"🚨 REDIS INSTABILITY: Redis unstable during: {unstable_redis}. "
+            f" ALERT:  REDIS INSTABILITY: Redis unstable during: {unstable_redis}. "
             f"Instability causes connection race conditions and 1011 errors."
         )
         
-        logger.info(f"✅ Connection stability validated for {len(handshake_scenarios)} scenarios")
+        logger.info(f" PASS:  Connection stability validated for {len(handshake_scenarios)} scenarios")
     
     async def test_user_isolation_with_ssot_redis(self):
         """
@@ -310,7 +310,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         Validates that the factory pattern provides proper user isolation
         while using the consolidated Redis manager for efficiency.
         """
-        logger.info("🔍 TESTING: User isolation with SSOT Redis")
+        logger.info(" SEARCH:  TESTING: User isolation with SSOT Redis")
         
         # Create multiple user contexts to test isolation
         user_contexts = [
@@ -354,18 +354,18 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         
         # User isolation is CRITICAL for multi-user system
         assert len(failed_isolations) == 0, (
-            f"🚨 USER ISOLATION FAILURE: {len(failed_isolations)} users experienced isolation failures. "
+            f" ALERT:  USER ISOLATION FAILURE: {len(failed_isolations)} users experienced isolation failures. "
             f"This causes data leakage between users. Failures: {failed_isolations}"
         )
         
         # Check for cross-user data contamination
         contamination_detected = self._check_cross_user_contamination(successful_isolations)
         assert not contamination_detected.get("has_contamination", False), (
-            f"🚨 DATA CONTAMINATION: Cross-user data leakage detected: {contamination_detected}. "
+            f" ALERT:  DATA CONTAMINATION: Cross-user data leakage detected: {contamination_detected}. "
             f"SSOT Redis manager must maintain user isolation."
         )
         
-        logger.info(f"✅ User isolation validated for {len(user_contexts)} concurrent users")
+        logger.info(f" PASS:  User isolation validated for {len(user_contexts)} concurrent users")
     
     async def test_memory_leak_prevention_with_ssot(self):
         """
@@ -374,7 +374,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         Validates that using single Redis manager prevents the memory
         accumulation that occurs with multiple competing managers.
         """
-        logger.info("🔍 TESTING: Memory leak prevention with SSOT")
+        logger.info(" SEARCH:  TESTING: Memory leak prevention with SSOT")
         
         # Simulate operations that previously caused memory leaks
         leak_test_operations = [
@@ -408,11 +408,11 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         ]
         
         assert len(unstable_operations) <= 1, (
-            f"🚨 MEMORY LEAKS DETECTED: Operations with unstable memory: {unstable_operations}. "
+            f" ALERT:  MEMORY LEAKS DETECTED: Operations with unstable memory: {unstable_operations}. "
             f"SSOT Redis must prevent memory leaks from connection pooling."
         )
         
-        logger.info(f"✅ Memory leak prevention validated for {len(leak_test_operations)} operations")
+        logger.info(f" PASS:  Memory leak prevention validated for {len(leak_test_operations)} operations")
     
     async def _test_redis_connection_stability(self, redis_manager) -> None:
         """Test basic Redis connection stability."""
@@ -1173,7 +1173,7 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
         self.metrics.end_timing()
         
         # Log comprehensive test results
-        logger.info("🚨 WebSocket-Redis SSOT Integration Test Complete:")
+        logger.info(" ALERT:  WebSocket-Redis SSOT Integration Test Complete:")
         
         # Connection stability
         connection_stable = self.metrics.get_custom("connection_stable", False)
@@ -1206,12 +1206,12 @@ class WebSocketRedisSSotIntegrationTest(SSotAsyncTestCase):
             critical_failures.append(f"User isolation failures ({failed_isolations})")
         
         if critical_failures:
-            logger.error(f"🚨 DEPLOYMENT BLOCKER: Critical failures detected:")
+            logger.error(f" ALERT:  DEPLOYMENT BLOCKER: Critical failures detected:")
             for failure in critical_failures:
                 logger.error(f"   - {failure}")
             logger.error("These failures will cause 1011 WebSocket errors and break Golden Path user flow.")
         else:
-            logger.info("✅ WebSocket-Redis SSOT integration validated for Golden Path protection")
+            logger.info(" PASS:  WebSocket-Redis SSOT integration validated for Golden Path protection")
         
         await super().tearDown()
 

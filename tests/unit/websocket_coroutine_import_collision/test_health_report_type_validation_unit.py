@@ -71,7 +71,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
         
         CRITICAL: This test MUST FAIL if coroutine is returned instead of dict.
         """
-        self.logger.info("🧪 UNIT TEST: Validating health_report is dict, not coroutine")
+        self.logger.info("[U+1F9EA] UNIT TEST: Validating health_report is dict, not coroutine")
         
         # Call the function that should return a dict
         health_report = validate_websocket_component_health(self.test_user_context)
@@ -93,7 +93,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
             component_health = health_report.get("summary", "Component health check failed")
             self.assertIsInstance(component_health, str, "component_health must be string")
             
-            self.logger.info("✅ UNIT SUCCESS: health_report.get() calls work correctly")
+            self.logger.info(" PASS:  UNIT SUCCESS: health_report.get() calls work correctly")
             
         except AttributeError as e:
             if "'coroutine' object has no attribute 'get'" in str(e):
@@ -112,7 +112,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
         This validates the expected dictionary structure that WebSocket error
         handlers depend on. Missing fields or wrong types cause downstream failures.
         """
-        self.logger.info("🧪 UNIT TEST: Validating health_report dictionary structure")
+        self.logger.info("[U+1F9EA] UNIT TEST: Validating health_report dictionary structure")
         
         health_report = validate_websocket_component_health(self.test_user_context)
         
@@ -139,7 +139,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
                 f"health_report['{field_name}'] must be {expected_type.__name__}, got {type(field_value)}"
             )
         
-        self.logger.info("✅ UNIT SUCCESS: health_report has all required dictionary fields")
+        self.logger.info(" PASS:  UNIT SUCCESS: health_report has all required dictionary fields")
     
     def test_async_health_check_collision_simulation(self):
         """
@@ -151,7 +151,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR: Test should FAIL if async/sync collision is not handled properly.
         """
-        self.logger.info("🧪 UNIT TEST: Simulating async/sync health check collision")
+        self.logger.info("[U+1F9EA] UNIT TEST: Simulating async/sync health check collision")
         
         # Mock an async health check function that returns coroutine instead of dict
         async def mock_async_health_check():
@@ -185,7 +185,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
                 "health_report.get() must work without AttributeError"
             )
         
-        self.logger.info("✅ UNIT SUCCESS: Async collision simulation handled properly")
+        self.logger.info(" PASS:  UNIT SUCCESS: Async collision simulation handled properly")
     
     def test_websocket_error_handler_dict_operations(self):
         """
@@ -194,7 +194,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
         This reproduces the exact code patterns from the WebSocket error handler
         that cause the "'coroutine' object has no attribute 'get'" error.
         """
-        self.logger.info("🧪 UNIT TEST: Simulating exact websocket.py error handler operations")
+        self.logger.info("[U+1F9EA] UNIT TEST: Simulating exact websocket.py error handler operations")
         
         health_report = validate_websocket_component_health(self.test_user_context)
         
@@ -216,7 +216,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
             self.assertIsInstance(failed_components, list)
             self.assertIsInstance(healthy_status, bool)
             
-            self.logger.info("✅ UNIT SUCCESS: All websocket.py dict operations work correctly")
+            self.logger.info(" PASS:  UNIT SUCCESS: All websocket.py dict operations work correctly")
             
         except AttributeError as e:
             if "coroutine" in str(e) and "get" in str(e):
@@ -235,7 +235,7 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
         This test ensures that regardless of configuration, environment, or
         async context, health_report is always a dictionary type.
         """
-        self.logger.info("🧪 UNIT TEST: Enforcing health_report type safety")
+        self.logger.info("[U+1F9EA] UNIT TEST: Enforcing health_report type safety")
         
         # Test with different user context scenarios
         test_scenarios = [
@@ -268,11 +268,11 @@ class TestHealthReportTypeValidationUnit(SSotBaseTestCase):
                     f"Scenario '{scenario_name}': .get() method must work correctly"
                 )
         
-        self.logger.info("✅ UNIT SUCCESS: Type safety enforced across all scenarios")
+        self.logger.info(" PASS:  UNIT SUCCESS: Type safety enforced across all scenarios")
     
     def tearDown(self):
         super().tearDown()
-        self.logger.info("🏁 UNIT TEST COMPLETE: Health report type validation finished")
+        self.logger.info("[U+1F3C1] UNIT TEST COMPLETE: Health report type validation finished")
 
 
 if __name__ == '__main__':

@@ -5,7 +5,7 @@ USER_CONTEXT_ARCHITECTURE.md. Validates that 10+ concurrent users have complete 
 with no shared state contamination.
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Critical platform foundation
+- Segment: All (Free  ->  Enterprise) - Critical platform foundation
 - Business Goal: Enable safe concurrent multi-user operations without data leakage
 - Value Impact: Validates $500K+ ARR foundation by ensuring chat UX works for 10+ users
 - Strategic Impact: Core architecture validation for production multi-tenant deployment
@@ -156,7 +156,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
             websocket_ids = [c.websocket_client_id for c in contexts]
             assert len(set(websocket_ids)) == len(websocket_ids)
         
-        logger.info(f"✅ UserExecutionContext factory isolation verified for {len(contexts)} users")
+        logger.info(f" PASS:  UserExecutionContext factory isolation verified for {len(contexts)} users")
 
 
     @pytest.mark.integration
@@ -283,7 +283,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
         expected_user_ids = [c.user_id for c in contexts[:len(engines)]]
         assert set(result_user_ids) == set(expected_user_ids)
         
-        logger.info(f"✅ ExecutionEngineFactory isolation verified for {len(engines)} concurrent users")
+        logger.info(f" PASS:  ExecutionEngineFactory isolation verified for {len(engines)} concurrent users")
 
 
     @pytest.mark.integration
@@ -414,7 +414,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
             other_user_events = [event for event in emitter.events_sent if event["user_id"] != user_id]
             assert len(other_user_events) == 0, f"User {user_id} emitter contaminated with {len(other_user_events)} events from other users"
         
-        logger.info(f"✅ WebSocket factory isolation verified for {len(emitters)} concurrent users")
+        logger.info(f" PASS:  WebSocket factory isolation verified for {len(emitters)} concurrent users")
 
 
     @pytest.mark.integration
@@ -542,7 +542,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
         expected_user_ids = [c.user_id for c in user_contexts[:len(dispatchers)]]
         assert set(user_ids_from_dispatchers) == set(expected_user_ids), "Dispatcher user contexts contaminated"
         
-        logger.info(f"✅ Tool dispatcher factory isolation verified for {len(dispatchers)} concurrent users")
+        logger.info(f" PASS:  Tool dispatcher factory isolation verified for {len(dispatchers)} concurrent users")
 
 
     @pytest.mark.integration
@@ -716,7 +716,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
             update_key = f"session_update_{session['context'].user_id}"
             await real_redis_fixture.delete(update_key)
         
-        logger.info(f"✅ Comprehensive session isolation verified for {num_users} concurrent users")
+        logger.info(f" PASS:  Comprehensive session isolation verified for {num_users} concurrent users")
 
 
     @pytest.mark.integration  
@@ -831,7 +831,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
         del memory_test_contexts
         gc.collect()
         
-        logger.info(f"✅ Memory isolation verified for {len(memory_test_contexts)} users (memory increase: {memory_increase:.2f}MB)")
+        logger.info(f" PASS:  Memory isolation verified for {len(memory_test_contexts)} users (memory increase: {memory_increase:.2f}MB)")
 
 
     @pytest.mark.integration
@@ -949,7 +949,7 @@ class TestFactoryIsolationPatterns(BaseIntegrationTest):
         remaining_active_engines = [e for e in created_resources["engines"] if e.is_active()]
         assert len(remaining_active_engines) == 0, f"Resource leak: {len(remaining_active_engines)} engines still active after cleanup"
         
-        logger.info(f"✅ Factory cleanup verified: {sum(cleanup_results.values())} resources cleaned up successfully")
+        logger.info(f" PASS:  Factory cleanup verified: {sum(cleanup_results.values())} resources cleaned up successfully")
 
 
     async def teardown_method(self):

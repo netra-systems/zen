@@ -107,12 +107,12 @@ def generate_summary(test_files: List[str], exit_code: int):
     
     # Test categories covered
     print("\nTest Coverage Areas:")
-    print("✓ Authentication & Login (Tests 1-20)")
-    print("✓ First-Time User Experience (Tests 21-30)")
-    print("✓ Chat Interface Interactions (Tests 31-45)")
-    print("✓ WebSocket Reliability (Tests 46-60)")
-    print("✓ Performance & Load Testing (Tests 61-70)")
-    print("✓ Error Handling & Security (Tests 71-90)")
+    print("[U+2713] Authentication & Login (Tests 1-20)")
+    print("[U+2713] First-Time User Experience (Tests 21-30)")
+    print("[U+2713] Chat Interface Interactions (Tests 31-45)")
+    print("[U+2713] WebSocket Reliability (Tests 46-60)")
+    print("[U+2713] Performance & Load Testing (Tests 61-70)")
+    print("[U+2713] Error Handling & Security (Tests 71-90)")
     
     # Exit code interpretation
     print(f"\nTest Result: {'PASSED' if exit_code == 0 else 'FAILED'}")

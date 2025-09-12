@@ -76,7 +76,7 @@ async def test_response_time_monitoring_endpoints():
                                     f"{service_name}: Performance endpoint missing metrics: {missing_metrics}"
                                 )
                             else:
-                                print(f"✅ {service_name}: Comprehensive performance monitoring available")
+                                print(f" PASS:  {service_name}: Comprehensive performance monitoring available")
                             break
                             
                 except Exception:
@@ -92,13 +92,13 @@ async def test_response_time_monitoring_endpoints():
     
     # Report findings
     if monitoring_gaps:
-        print("🔍 PERFORMANCE MONITORING GAPS:")
+        print(" SEARCH:  PERFORMANCE MONITORING GAPS:")
         for gap in monitoring_gaps:
             print(f"  - {gap}")
         
         pytest.skip("Performance monitoring not implemented - coverage gap identified")
     else:
-        print("✅ Performance monitoring properly implemented")
+        print(" PASS:  Performance monitoring properly implemented")
 
 
 async def _test_timing_headers(session: aiohttp.ClientSession, base_url: str, service_name: str) -> Optional[str]:
@@ -116,7 +116,7 @@ async def _test_timing_headers(session: aiohttp.ClientSession, base_url: str, se
             if not has_timing:
                 return f"{service_name}: No timing information in response headers"
             else:
-                print(f"✅ {service_name}: Includes timing information in responses")
+                print(f" PASS:  {service_name}: Includes timing information in responses")
                 return None
     except Exception:
         return f"{service_name}: Unable to test timing headers"
@@ -185,7 +185,7 @@ async def test_throughput_monitoring_capabilities():
                                     f"{service_name}: Missing throughput metrics: {missing_throughput}"
                                 )
                             else:
-                                print(f"✅ {service_name}: Complete throughput monitoring")
+                                print(f" PASS:  {service_name}: Complete throughput monitoring")
                             break
                             
                 except Exception:
@@ -201,13 +201,13 @@ async def test_throughput_monitoring_capabilities():
     
     # Report findings
     if throughput_gaps:
-        print("🔍 THROUGHPUT MONITORING GAPS:")
+        print(" SEARCH:  THROUGHPUT MONITORING GAPS:")
         for gap in throughput_gaps:
             print(f"  - {gap}")
         
         pytest.skip("Throughput monitoring not implemented - coverage gap identified")
     else:
-        print("✅ Throughput monitoring properly implemented")
+        print(" PASS:  Throughput monitoring properly implemented")
 
 
 async def _test_concurrent_request_tracking(session: aiohttp.ClientSession, base_url: str, service_name: str) -> Optional[str]:
@@ -233,7 +233,7 @@ async def _test_concurrent_request_tracking(session: aiohttp.ClientSession, base
                 ]
                 if any(header in response.headers for header in concurrency_headers):
                     has_concurrency_info = True
-                    print(f"✅ {service_name}: Includes concurrency information")
+                    print(f" PASS:  {service_name}: Includes concurrency information")
                 response.close()
         
         if not has_concurrency_info:
@@ -304,7 +304,7 @@ async def test_resource_usage_monitoring():
                                     f"{service_name}: Missing resource metrics: {missing_resources}"
                                 )
                             else:
-                                print(f"✅ {service_name}: Complete resource monitoring")
+                                print(f" PASS:  {service_name}: Complete resource monitoring")
                             break
                             
                 except Exception:
@@ -315,13 +315,13 @@ async def test_resource_usage_monitoring():
     
     # Report findings
     if resource_monitoring_gaps:
-        print("🔍 RESOURCE MONITORING GAPS:")
+        print(" SEARCH:  RESOURCE MONITORING GAPS:")
         for gap in resource_monitoring_gaps:
             print(f"  - {gap}")
         
         pytest.skip("Resource monitoring not implemented - coverage gap identified")
     else:
-        print("✅ Resource monitoring properly implemented")
+        print(" PASS:  Resource monitoring properly implemented")
 
 
 @pytest.mark.asyncio
@@ -374,7 +374,7 @@ async def test_sla_compliance_tracking():
                         if missing_sla:
                             sla_gaps.append(f"SLA endpoint missing metrics: {missing_sla}")
                         else:
-                            print("✅ Complete SLA compliance tracking available")
+                            print(" PASS:  Complete SLA compliance tracking available")
                         break
                         
             except Exception:
@@ -402,19 +402,19 @@ async def test_sla_compliance_tracking():
                     if not has_sla_info:
                         sla_gaps.append("Health endpoint doesn't include SLA-relevant information")
                     else:
-                        print("✅ Health endpoint includes some SLA-relevant information")
+                        print(" PASS:  Health endpoint includes some SLA-relevant information")
         except Exception:
             sla_gaps.append("Unable to check health endpoint for SLA information")
     
     # Report findings
     if sla_gaps:
-        print("🔍 SLA COMPLIANCE TRACKING GAPS:")
+        print(" SEARCH:  SLA COMPLIANCE TRACKING GAPS:")
         for gap in sla_gaps:
             print(f"  - {gap}")
         
         pytest.skip("SLA compliance tracking not implemented - coverage gap identified")
     else:
-        print("✅ SLA compliance tracking properly implemented")
+        print(" PASS:  SLA compliance tracking properly implemented")
 
 
 if __name__ == "__main__":

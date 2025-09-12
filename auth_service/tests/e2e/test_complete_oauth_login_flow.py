@@ -54,7 +54,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
     async def setup_real_services(self):
         """Set up real Docker services for E2E testing."""
-        self.logger.info("🔧 Setting up real Docker services for OAuth E2E testing")
+        self.logger.info("[U+1F527] Setting up real Docker services for OAuth E2E testing")
         
         # Initialize Docker manager with Alpine containers for performance
         self.docker_manager = UnifiedDockerManager()
@@ -74,7 +74,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         self.postgres_port = env_info.get('postgres_port', 5434)
         self.redis_port = env_info.get('redis_port', 6381)
         
-        self.logger.info(f"✅ Real services started - Auth: {self.auth_service_url}")
+        self.logger.info(f" PASS:  Real services started - Auth: {self.auth_service_url}")
         
         # Wait for services to be fully ready
         await self.wait_for_service_ready(self.auth_service_url + "/health", timeout=60)
@@ -87,9 +87,9 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         if self.docker_manager:
             try:
                 await self.docker_manager.release_environment("test")
-                self.logger.info("✅ Docker services cleaned up successfully")
+                self.logger.info(" PASS:  Docker services cleaned up successfully")
             except Exception as e:
-                self.logger.error(f"❌ Error cleaning up Docker services: {e}")
+                self.logger.error(f" FAIL:  Error cleaning up Docker services: {e}")
     
     async def wait_for_service_ready(self, health_url: str, timeout: float = 30.0):
         """Wait for service to be ready with health check."""
@@ -111,7 +111,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         ):
             raise RuntimeError(f"Service not ready at {health_url} within {timeout}s")
         
-        self.logger.info(f"✅ Service ready: {health_url}")
+        self.logger.info(f" PASS:  Service ready: {health_url}")
 
     async def create_test_user_session(self) -> Dict[str, Any]:
         """Create a test user session for authentication testing."""
@@ -135,7 +135,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔐 Testing OAuth authorization flow with real auth service")
+        self.logger.info("[U+1F510] Testing OAuth authorization flow with real auth service")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Step 1: Get OAuth status to ensure providers are configured
@@ -173,14 +173,14 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             # In a real implementation, state would be stored in Redis/database
             assert len(oauth_state) >= 32, "OAuth state should be sufficiently random"
             
-            self.logger.info(f"✅ OAuth authorization URL generated successfully: {authorization_url[:100]}...")
-            self.logger.info(f"✅ OAuth state parameter: {oauth_state}")
+            self.logger.info(f" PASS:  OAuth authorization URL generated successfully: {authorization_url[:100]}...")
+            self.logger.info(f" PASS:  OAuth state parameter: {oauth_state}")
         
         # Validate test timing (must not be 0-second execution)
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.1, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ OAuth authorization flow test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  OAuth authorization flow test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -191,7 +191,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔐 Testing OAuth callback processing with real services")
+        self.logger.info("[U+1F510] Testing OAuth callback processing with real services")
         
         # Create test user data
         user_data = await self.create_test_user_session()
@@ -262,13 +262,13 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             new_access_token = refresh_data["access_token"]
             assert new_access_token != access_token, "Refreshed token should be different"
             
-            self.logger.info("✅ OAuth callback processing completed with valid tokens")
+            self.logger.info(" PASS:  OAuth callback processing completed with valid tokens")
         
         # Validate test timing (must not be 0-second execution)
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.1, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ OAuth callback test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  OAuth callback test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -279,7 +279,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔐 Testing OAuth session persistence with real database")
+        self.logger.info("[U+1F510] Testing OAuth session persistence with real database")
         
         # Create test user
         user_data = await self.create_test_user_session()
@@ -346,13 +346,13 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             no_auth_response = await client.post(f"{self.auth_service_url}/auth/validate")
             assert no_auth_response.status_code == 401, "Missing authorization should be rejected"
             
-            self.logger.info("✅ OAuth session persistence and security validation completed")
+            self.logger.info(" PASS:  OAuth session persistence and security validation completed")
         
         # Validate test timing (must not be 0-second execution)
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.1, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ OAuth session persistence test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  OAuth session persistence test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -363,7 +363,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔐 Testing OAuth error handling and recovery")
+        self.logger.info("[U+1F510] Testing OAuth error handling and recovery")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Step 1: Test invalid redirect URI
@@ -410,13 +410,13 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             oauth_status = oauth_status_response.json()
             assert "oauth_healthy" in oauth_status
             
-            self.logger.info("✅ OAuth error handling and recovery validation completed")
+            self.logger.info(" PASS:  OAuth error handling and recovery validation completed")
         
         # Validate test timing (must not be 0-second execution)  
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.1, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ OAuth error handling test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  OAuth error handling test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services 
@@ -427,14 +427,14 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔐 Testing complete OAuth user journey with business value validation")
+        self.logger.info("[U+1F510] Testing complete OAuth user journey with business value validation")
         
         # Create test user representing real user scenario
         user_data = await self.create_test_user_session()
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # JOURNEY STEP 1: User initiates login from frontend
-            self.logger.info("👤 Step 1: User initiates OAuth login")
+            self.logger.info("[U+1F464] Step 1: User initiates OAuth login")
             
             # Frontend requests OAuth authorization URL
             auth_url_response = await client.post(
@@ -447,10 +447,10 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             authorization_url = auth_data["authorization_url"]
             oauth_state = auth_data["state"]
             
-            self.logger.info(f"✅ Step 1 Complete: OAuth URL generated for user journey")
+            self.logger.info(f" PASS:  Step 1 Complete: OAuth URL generated for user journey")
             
             # JOURNEY STEP 2: User completes Google authentication (simulated)
-            self.logger.info("👤 Step 2: User completes Google OAuth authentication")
+            self.logger.info("[U+1F464] Step 2: User completes Google OAuth authentication")
             
             # Simulate successful Google OAuth callback
             callback_response = await client.post(
@@ -467,10 +467,10 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             access_token = callback_data["access_token"]
             refresh_token = callback_data["refresh_token"]
             
-            self.logger.info("✅ Step 2 Complete: User authenticated, tokens generated")
+            self.logger.info(" PASS:  Step 2 Complete: User authenticated, tokens generated")
             
             # JOURNEY STEP 3: User accesses protected platform resources
-            self.logger.info("👤 Step 3: User accesses protected platform resources")
+            self.logger.info("[U+1F464] Step 3: User accesses protected platform resources")
             
             # Validate token works for protected endpoints
             user_profile_response = await client.get(
@@ -490,10 +490,10 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
                 )
                 assert protected_response.status_code in [200, 405]  # 405 for wrong method but auth works
             
-            self.logger.info("✅ Step 3 Complete: User successfully accessing protected resources")
+            self.logger.info(" PASS:  Step 3 Complete: User successfully accessing protected resources")
             
             # JOURNEY STEP 4: Session renewal and long-term access
-            self.logger.info("👤 Step 4: Session renewal for continued platform access")
+            self.logger.info("[U+1F464] Step 4: Session renewal for continued platform access")
             
             # Simulate session renewal after some time
             await asyncio.sleep(0.1)  # Simulate time passage
@@ -517,10 +517,10 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             renewed_user_data = renewed_validation.json()
             assert renewed_user_data["user"]["email"] == user_data["email"]
             
-            self.logger.info("✅ Step 4 Complete: Session renewed, continued access enabled")
+            self.logger.info(" PASS:  Step 4 Complete: Session renewed, continued access enabled")
             
             # JOURNEY VALIDATION: Business value delivered
-            self.logger.info("💼 Validating business value delivery")
+            self.logger.info("[U+1F4BC] Validating business value delivery")
             
             # User can maintain authenticated session
             assert access_token != new_access_token, "Token renewal provides new credentials"
@@ -536,7 +536,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
             )
             assert validation_check.status_code == 200
             
-            self.logger.info("✅ BUSINESS VALUE DELIVERED: Complete OAuth user journey successful")
+            self.logger.info(" PASS:  BUSINESS VALUE DELIVERED: Complete OAuth user journey successful")
             self.logger.info(f"   - User authenticated: {user_data['email']}")
             self.logger.info(f"   - Platform access enabled via JWT tokens")
             self.logger.info(f"   - Session persistence and renewal working")
@@ -546,7 +546,7 @@ class TestCompleteOAuthLoginFlow(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Complete OAuth user journey test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Complete OAuth user journey test completed in {execution_time:.2f}s")
 
 # Additional fixtures and helpers for OAuth testing
 @pytest.fixture(scope="session")

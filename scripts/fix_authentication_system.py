@@ -51,7 +51,7 @@ class AuthenticationSystemFixer:
     def run(self):
         """Main execution method"""
         try:
-            logger.info("🔧 Starting Authentication System Fix...")
+            logger.info("[U+1F527] Starting Authentication System Fix...")
             
             # Step 1: Validate and fix environment configuration
             self.validate_and_fix_environment()
@@ -71,17 +71,17 @@ class AuthenticationSystemFixer:
             # Step 6: Test authentication flow
             self.test_authentication_flow()
             
-            logger.info("✅ Authentication System Fix completed successfully!")
+            logger.info(" PASS:  Authentication System Fix completed successfully!")
             logger.info("Authentication services are now properly configured and running.")
             
         except Exception as e:
-            logger.error(f"❌ Authentication System Fix failed: {e}")
+            logger.error(f" FAIL:  Authentication System Fix failed: {e}")
             self.cleanup()
             sys.exit(1)
             
     def validate_and_fix_environment(self):
         """Validate and fix environment configuration"""
-        logger.info("🔍 Validating and fixing environment configuration...")
+        logger.info(" SEARCH:  Validating and fixing environment configuration...")
         
         # Critical auth environment variables
         required_vars = {
@@ -98,7 +98,7 @@ class AuthenticationSystemFixer:
         for var, default_value in required_vars.items():
             current_value = self.env.get(var)
             if not current_value:
-                logger.info(f"🔧 Setting missing environment variable: {var}")
+                logger.info(f"[U+1F527] Setting missing environment variable: {var}")
                 self.env.set(var, default_value, source="auth_fix")
         
         # Ensure #removed-legacyis consistent across services
@@ -107,11 +107,11 @@ class AuthenticationSystemFixer:
             database_url = f"postgresql://{self.env.get('POSTGRES_USER', 'postgres')}:{self.env.get('POSTGRES_PASSWORD')}@{self.env.get('POSTGRES_HOST', 'localhost')}:{self.env.get('POSTGRES_PORT', '5433')}/{self.env.get('POSTGRES_DB', 'netra_dev')}"
             self.env.set('DATABASE_URL', database_url, source="auth_fix")
         
-        logger.info("✅ Environment configuration validated and fixed")
+        logger.info(" PASS:  Environment configuration validated and fixed")
         
     def cleanup_existing_processes(self):
         """Kill any existing auth or backend processes that might conflict"""
-        logger.info("🧹 Cleaning up existing processes...")
+        logger.info("[U+1F9F9] Cleaning up existing processes...")
         
         # Kill processes using auth service ports (8001, 8080, 8081)
         auth_ports = [8001, 8080, 8081]
@@ -123,7 +123,7 @@ class AuthenticationSystemFixer:
             try:
                 cmdline = proc.info.get('cmdline', [])
                 if cmdline and any('auth_service' in cmd for cmd in cmdline):
-                    logger.info(f"🔪 Killing existing auth service process (PID: {proc.info['pid']})")
+                    logger.info(f"[U+1F52A] Killing existing auth service process (PID: {proc.info['pid']})")
                     proc.kill()
                     proc.wait()
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
@@ -138,7 +138,7 @@ class AuthenticationSystemFixer:
                 try:
                     for conn in proc.connections(kind='inet'):
                         if conn.laddr.port == port:
-                            logger.info(f"🔪 Killing process on port {port} (PID: {proc.pid})")
+                            logger.info(f"[U+1F52A] Killing process on port {port} (PID: {proc.pid})")
                             proc.kill()
                             proc.wait()
                             return
@@ -149,7 +149,7 @@ class AuthenticationSystemFixer:
     
     def start_auth_service(self):
         """Start the auth service"""
-        logger.info("🚀 Starting auth service...")
+        logger.info("[U+1F680] Starting auth service...")
         
         # Find available port for auth service
         auth_port = self.find_available_port([8001, 8080, 8081])
@@ -193,21 +193,21 @@ class AuthenticationSystemFixer:
             )
             
             # Wait for auth service to start
-            logger.info(f"⏳ Waiting for auth service to start on port {auth_port}...")
+            logger.info(f"[U+23F3] Waiting for auth service to start on port {auth_port}...")
             time.sleep(5)
             
             # Check if process is still running
             if self.auth_process.poll() is not None:
                 # Process died, get output
                 stdout, _ = self.auth_process.communicate()
-                logger.error(f"❌ Auth service failed to start. Output:\n{stdout}")
+                logger.error(f" FAIL:  Auth service failed to start. Output:\n{stdout}")
                 raise RuntimeError("Auth service startup failed")
             
             self.services_started.append(('auth_service', self.auth_process))
-            logger.info(f"✅ Auth service started on port {auth_port}")
+            logger.info(f" PASS:  Auth service started on port {auth_port}")
             
         except Exception as e:
-            logger.error(f"❌ Failed to start auth service: {e}")
+            logger.error(f" FAIL:  Failed to start auth service: {e}")
             raise
     
     def find_available_port(self, preferred_ports: list) -> int:
@@ -234,7 +234,7 @@ class AuthenticationSystemFixer:
     
     async def validate_auth_service(self):
         """Validate that auth service is working correctly"""
-        logger.info("🔍 Validating auth service...")
+        logger.info(" SEARCH:  Validating auth service...")
         
         auth_service_url = self.env.get('AUTH_SERVICE_URL')
         
@@ -243,12 +243,12 @@ class AuthenticationSystemFixer:
             try:
                 response = await client.get(f"{auth_service_url}/health")
                 if response.status_code == 200:
-                    logger.info("✅ Auth service health check passed")
+                    logger.info(" PASS:  Auth service health check passed")
                 else:
                     raise RuntimeError(f"Auth service health check failed: {response.status_code}")
                     
             except httpx.RequestError as e:
-                logger.error(f"❌ Cannot connect to auth service: {e}")
+                logger.error(f" FAIL:  Cannot connect to auth service: {e}")
                 raise RuntimeError("Auth service is not accessible")
         
         # Test JWT token creation and validation
@@ -256,7 +256,7 @@ class AuthenticationSystemFixer:
         
     async def test_jwt_functionality(self):
         """Test JWT token creation and validation"""
-        logger.info("🔍 Testing JWT functionality...")
+        logger.info(" SEARCH:  Testing JWT functionality...")
         
         auth_service_url = self.env.get('AUTH_SERVICE_URL')
         
@@ -266,17 +266,17 @@ class AuthenticationSystemFixer:
                 # For now, just ensure the service is responding
                 response = await client.get(f"{auth_service_url}/docs")
                 if response.status_code == 200:
-                    logger.info("✅ Auth service API documentation accessible")
+                    logger.info(" PASS:  Auth service API documentation accessible")
                 else:
-                    logger.warning(f"⚠️ Auth service docs returned {response.status_code}")
+                    logger.warning(f" WARNING: [U+FE0F] Auth service docs returned {response.status_code}")
                     
             except httpx.RequestError as e:
-                logger.error(f"❌ Auth service API test failed: {e}")
+                logger.error(f" FAIL:  Auth service API test failed: {e}")
                 raise RuntimeError("Auth service API is not functional")
     
     def configure_backend_auth(self):
         """Configure backend to use the auth service"""
-        logger.info("🔧 Configuring backend authentication...")
+        logger.info("[U+1F527] Configuring backend authentication...")
         
         # Ensure backend configuration includes auth service URL
         auth_service_url = self.env.get('AUTH_SERVICE_URL')
@@ -285,11 +285,11 @@ class AuthenticationSystemFixer:
         self.env.set('AUTH_SERVICE_ENABLED', 'true', source="auth_fix")
         self.env.set('AUTH_SERVICE_URL', auth_service_url, source="auth_fix")
         
-        logger.info(f"✅ Backend configured to use auth service at {auth_service_url}")
+        logger.info(f" PASS:  Backend configured to use auth service at {auth_service_url}")
     
     async def test_authentication_flow(self):
         """Test the complete authentication flow"""
-        logger.info("🧪 Testing authentication flow...")
+        logger.info("[U+1F9EA] Testing authentication flow...")
         
         auth_service_url = self.env.get('AUTH_SERVICE_URL')
         
@@ -312,25 +312,25 @@ class AuthenticationSystemFixer:
                 end_time = time.time()
                 latency = end_time - start_time
                 
-                logger.info(f"⏱️ Auth request latency: {latency:.2f} seconds")
+                logger.info(f"[U+23F1][U+FE0F] Auth request latency: {latency:.2f} seconds")
                 
                 if latency > 2.0:
-                    logger.warning(f"⚠️ High authentication latency detected: {latency:.2f}s")
+                    logger.warning(f" WARNING: [U+FE0F] High authentication latency detected: {latency:.2f}s")
                 else:
-                    logger.info("✅ Authentication latency is acceptable")
+                    logger.info(" PASS:  Authentication latency is acceptable")
                 
                 if response.status_code in [200, 201, 404]:  # 404 is OK if endpoint doesn't exist yet
-                    logger.info("✅ Auth service is responding to requests")
+                    logger.info(" PASS:  Auth service is responding to requests")
                 else:
-                    logger.warning(f"⚠️ Auth service returned status {response.status_code}")
+                    logger.warning(f" WARNING: [U+FE0F] Auth service returned status {response.status_code}")
                     
             except httpx.RequestError as e:
-                logger.error(f"❌ Authentication flow test failed: {e}")
+                logger.error(f" FAIL:  Authentication flow test failed: {e}")
                 raise RuntimeError("Authentication flow is not working")
     
     def run_authentication_tests(self):
         """Run the specific authentication tests to validate fixes"""
-        logger.info("🧪 Running authentication validation tests...")
+        logger.info("[U+1F9EA] Running authentication validation tests...")
         
         test_commands = [
             # Frontend authentication test
@@ -352,7 +352,7 @@ class AuthenticationSystemFixer:
         test_results = []
         for cmd in test_commands:
             try:
-                logger.info(f"🏃 Running: {' '.join(cmd)}")
+                logger.info(f"[U+1F3C3] Running: {' '.join(cmd)}")
                 result = subprocess.run(
                     cmd,
                     cwd=str(self.project_root),
@@ -364,40 +364,40 @@ class AuthenticationSystemFixer:
                 test_results.append((cmd[-1], result.returncode == 0))
                 
                 if result.returncode == 0:
-                    logger.info(f"✅ Test passed: {cmd[-1]}")
+                    logger.info(f" PASS:  Test passed: {cmd[-1]}")
                 else:
-                    logger.warning(f"⚠️ Test failed: {cmd[-1]}")
+                    logger.warning(f" WARNING: [U+FE0F] Test failed: {cmd[-1]}")
                     if result.stdout:
                         logger.debug(f"STDOUT: {result.stdout}")
                     if result.stderr:
                         logger.debug(f"STDERR: {result.stderr}")
                         
             except subprocess.TimeoutExpired:
-                logger.warning(f"⏰ Test timed out: {cmd[-1]}")
+                logger.warning(f"[U+23F0] Test timed out: {cmd[-1]}")
                 test_results.append((cmd[-1], False))
             except Exception as e:
-                logger.error(f"❌ Test execution failed: {cmd[-1]} - {e}")
+                logger.error(f" FAIL:  Test execution failed: {cmd[-1]} - {e}")
                 test_results.append((cmd[-1], False))
         
         # Report results
         passed_tests = sum(1 for _, passed in test_results if passed)
         total_tests = len(test_results)
         
-        logger.info(f"📊 Test Results: {passed_tests}/{total_tests} tests passed")
+        logger.info(f" CHART:  Test Results: {passed_tests}/{total_tests} tests passed")
         
         for test_name, passed in test_results:
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             logger.info(f"  {status}: {test_name}")
         
         return passed_tests, total_tests
     
     def cleanup(self):
         """Clean up started processes"""
-        logger.info("🧹 Cleaning up processes...")
+        logger.info("[U+1F9F9] Cleaning up processes...")
         
         for service_name, process in self.services_started:
             if process and process.poll() is None:
-                logger.info(f"🛑 Stopping {service_name}...")
+                logger.info(f"[U+1F6D1] Stopping {service_name}...")
                 process.terminate()
                 try:
                     process.wait(timeout=5)
@@ -418,7 +418,7 @@ def main():
     fixer = AuthenticationSystemFixer()
     
     def signal_handler(sig, frame):
-        logger.info("🛑 Received interrupt signal, cleaning up...")
+        logger.info("[U+1F6D1] Received interrupt signal, cleaning up...")
         fixer.cleanup()
         sys.exit(1)
     
@@ -436,12 +436,12 @@ def main():
         passed, total = fixer.run_authentication_tests()
         
         if passed == total:
-            logger.info("🎉 All authentication tests passed! System is now working.")
+            logger.info(" CELEBRATION:  All authentication tests passed! System is now working.")
         else:
-            logger.warning(f"⚠️ {total - passed} tests still failing. Partial fix achieved.")
+            logger.warning(f" WARNING: [U+FE0F] {total - passed} tests still failing. Partial fix achieved.")
         
         # Keep services running for manual testing
-        logger.info("🔄 Services are running. Press Ctrl+C to stop.")
+        logger.info(" CYCLE:  Services are running. Press Ctrl+C to stop.")
         try:
             while True:
                 time.sleep(1)

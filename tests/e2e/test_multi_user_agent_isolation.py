@@ -126,7 +126,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         self.test_users.append(auth_user)
         self.active_connections.append(websocket_connection)
         
-        logger.info(f"✅ Created isolated session for user: {auth_user.email}")
+        logger.info(f" PASS:  Created isolated session for user: {auth_user.email}")
         
         return auth_user, websocket_connection, user_context
 
@@ -164,7 +164,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        logger.info(f"📤 [{auth_user.email}] Sending: {message[:50]}...")
+        logger.info(f"[U+1F4E4] [{auth_user.email}] Sending: {message[:50]}...")
         await WebSocketTestHelpers.send_test_message(websocket_connection, chat_message)
         
         # Collect events for this user
@@ -181,13 +181,13 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                 # Verify event belongs to this user
                 event_user_id = event.get("data", {}).get("user_id")
                 if event_user_id and event_user_id != auth_user.user_id:
-                    logger.error(f"🚨 DATA LEAKAGE DETECTED: User {auth_user.email} received event for user {event_user_id}")
+                    logger.error(f" ALERT:  DATA LEAKAGE DETECTED: User {auth_user.email} received event for user {event_user_id}")
                     raise AssertionError(f"CRITICAL: Data leakage - user {auth_user.email} received event for {event_user_id}")
                 
                 received_events.append(event)
                 
                 event_type = event.get("type", "unknown")
-                logger.info(f"📨 [{auth_user.email}] Received: {event_type}")
+                logger.info(f"[U+1F4E8] [{auth_user.email}] Received: {event_type}")
                 
                 # Stop on completion
                 if event_type == "agent_completed":
@@ -201,10 +201,10 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                         break
                     continue
                 else:
-                    logger.error(f"❌ [{auth_user.email}] Error receiving message: {e}")
+                    logger.error(f" FAIL:  [{auth_user.email}] Error receiving message: {e}")
                     break
         
-        logger.info(f"📊 [{auth_user.email}] Collected {len(received_events)} events")
+        logger.info(f" CHART:  [{auth_user.email}] Collected {len(received_events)} events")
         
         # Validate expected response content if provided
         if expected_response_indicators:
@@ -227,7 +227,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         This test validates that 2 users can execute agents concurrently without
         any data contamination or cross-user event delivery.
         """
-        logger.info("🚀 Starting basic concurrent user agent isolation test")
+        logger.info("[U+1F680] Starting basic concurrent user agent isolation test")
         
         # Create 2 isolated user sessions
         user1_email = "isolation_user1@example.com"
@@ -236,7 +236,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         user1_auth, user1_ws, user1_context = await self.create_isolated_user_session(user1_email)
         user2_auth, user2_ws, user2_context = await self.create_isolated_user_session(user2_email)
         
-        logger.info("✅ Created 2 isolated user sessions")
+        logger.info(" PASS:  Created 2 isolated user sessions")
         
         # Define different requests for each user to ensure isolation
         user1_message = "Please analyze AWS EC2 costs and provide optimization recommendations for development environments."
@@ -247,7 +247,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         user2_indicators = ["azure", "blob", "storage", "compliance"]
         
         # Execute agents concurrently
-        logger.info("🔀 Executing agents concurrently for both users")
+        logger.info("[U+1F500] Executing agents concurrently for both users")
         
         # Start both agent executions simultaneously
         user1_task = asyncio.create_task(
@@ -272,11 +272,11 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         
         # User 1 validation
         assert_websocket_events_sent(user1_events, required_events)
-        logger.info(f"✅ User 1 received all required events: {len(user1_events)}")
+        logger.info(f" PASS:  User 1 received all required events: {len(user1_events)}")
         
         # User 2 validation
         assert_websocket_events_sent(user2_events, required_events)
-        logger.info(f"✅ User 2 received all required events: {len(user2_events)}")
+        logger.info(f" PASS:  User 2 received all required events: {len(user2_events)}")
         
         # Validate complete isolation - no user ID cross-contamination
         for event in user1_events:
@@ -308,11 +308,11 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         assert len(user1_response) > 50, "User 1 response too short"
         assert len(user2_response) > 50, "User 2 response too short"
         
-        logger.info("🎉 CONCURRENT USER ISOLATION TEST PASSED")
-        logger.info(f"   👥 Users: {user1_email}, {user2_email}")
-        logger.info(f"   📨 Events: User1={len(user1_events)}, User2={len(user2_events)}")
-        logger.info(f"   🔒 Data Isolation: VERIFIED - No cross-contamination detected")
-        logger.info(f"   ✅ Enterprise-grade multi-user security validated")
+        logger.info(" CELEBRATION:  CONCURRENT USER ISOLATION TEST PASSED")
+        logger.info(f"   [U+1F465] Users: {user1_email}, {user2_email}")
+        logger.info(f"   [U+1F4E8] Events: User1={len(user1_events)}, User2={len(user2_events)}")
+        logger.info(f"   [U+1F512] Data Isolation: VERIFIED - No cross-contamination detected")
+        logger.info(f"    PASS:  Enterprise-grade multi-user security validated")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -323,7 +323,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         This test ensures that multiple users with similar conversation topics
         maintain complete thread isolation without context bleeding.
         """
-        logger.info("🚀 Starting multi-user thread isolation test")
+        logger.info("[U+1F680] Starting multi-user thread isolation test")
         
         # Create 3 users with overlapping but distinct requests
         users = []
@@ -337,7 +337,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
             connections.append(ws_conn)
             contexts.append(user_context)
         
-        logger.info("✅ Created 3 user sessions for thread isolation testing")
+        logger.info(" PASS:  Created 3 user sessions for thread isolation testing")
         
         # Define similar but distinct conversation contexts
         messages = [
@@ -386,7 +386,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                     assert event_thread_id == str(contexts[i].thread_id), \
                         f"User {i+1} received event with wrong thread_id: {event_thread_id}"
             
-            logger.info(f"✅ User {i+1} thread isolation validated: {len(events)} events")
+            logger.info(f" PASS:  User {i+1} thread isolation validated: {len(events)} events")
         
         # Validate response differentiation
         responses = []
@@ -405,10 +405,10 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                 assert indicator.lower() in response.lower(), \
                     f"User {i+1} response missing expected indicator '{indicator}'"
         
-        logger.info("🎉 MULTI-USER THREAD ISOLATION TEST PASSED")
-        logger.info(f"   👥 Users: 3 concurrent sessions")
-        logger.info(f"   🧵 Thread Isolation: VERIFIED")
-        logger.info(f"   📨 Total Events: {sum(len(events) for events in all_user_events)}")
+        logger.info(" CELEBRATION:  MULTI-USER THREAD ISOLATION TEST PASSED")
+        logger.info(f"   [U+1F465] Users: 3 concurrent sessions")
+        logger.info(f"   [U+1F9F5] Thread Isolation: VERIFIED")
+        logger.info(f"   [U+1F4E8] Total Events: {sum(len(events) for events in all_user_events)}")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -417,7 +417,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         Test that users with different permission levels maintain proper isolation
         and only receive data appropriate for their permission level.
         """
-        logger.info("🚀 Starting user permission isolation test")
+        logger.info("[U+1F680] Starting user permission isolation test")
         
         # Create users with different permission levels
         admin_user, admin_ws, admin_context = await self.create_isolated_user_session(
@@ -430,7 +430,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
             permissions=["read", "agent_execute"]
         )
         
-        logger.info("✅ Created admin and basic user sessions")
+        logger.info(" PASS:  Created admin and basic user sessions")
         
         # Both users ask for similar information
         message = "Please provide a security analysis of our current cloud infrastructure and identify any compliance issues."
@@ -464,10 +464,10 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                 user_permissions = event_data["permissions"]
                 assert "admin" not in user_permissions, "Basic user gained admin permissions in events"
         
-        logger.info("🎉 USER PERMISSION ISOLATION TEST PASSED")
-        logger.info(f"   🔐 Admin user maintained elevated permissions")
-        logger.info(f"   👤 Basic user maintained restricted permissions")
-        logger.info(f"   🔒 No permission escalation or contamination detected")
+        logger.info(" CELEBRATION:  USER PERMISSION ISOLATION TEST PASSED")
+        logger.info(f"   [U+1F510] Admin user maintained elevated permissions")
+        logger.info(f"   [U+1F464] Basic user maintained restricted permissions")
+        logger.info(f"   [U+1F512] No permission escalation or contamination detected")
 
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -478,14 +478,14 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         This test validates that the system properly manages resources when multiple
         users connect and disconnect, preventing memory leaks and connection exhaustion.
         """
-        logger.info("🚀 Starting concurrent user resource cleanup test")
+        logger.info("[U+1F680] Starting concurrent user resource cleanup test")
         
         # Create multiple short-lived user sessions
         num_users = 5
         all_events = []
         
         for batch in range(2):  # Test in batches to simulate real usage
-            logger.info(f"📦 Starting batch {batch + 1} with {num_users} users")
+            logger.info(f"[U+1F4E6] Starting batch {batch + 1} with {num_users} users")
             
             # Create batch of users
             batch_users = []
@@ -521,7 +521,7 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
                 if ws in self.active_connections:
                     self.active_connections.remove(ws)
             
-            logger.info(f"✅ Batch {batch + 1} completed and cleaned up")
+            logger.info(f" PASS:  Batch {batch + 1} completed and cleaned up")
             
             # Brief pause between batches
             await asyncio.sleep(1.0)
@@ -545,11 +545,11 @@ class TestMultiUserAgentIsolationE2E(BaseE2ETest):
         assert len(user_ids_seen) == expected_users, \
             f"Expected {expected_users} unique users, found {len(user_ids_seen)}"
         
-        logger.info("🎉 CONCURRENT USER RESOURCE CLEANUP TEST PASSED")
-        logger.info(f"   👥 Total Users Processed: {expected_users}")
-        logger.info(f"   📨 Total Events: {total_events}")
-        logger.info(f"   🧹 Resource Cleanup: VERIFIED")
-        logger.info(f"   💾 No Resource Leaks Detected")
+        logger.info(" CELEBRATION:  CONCURRENT USER RESOURCE CLEANUP TEST PASSED")
+        logger.info(f"   [U+1F465] Total Users Processed: {expected_users}")
+        logger.info(f"   [U+1F4E8] Total Events: {total_events}")
+        logger.info(f"   [U+1F9F9] Resource Cleanup: VERIFIED")
+        logger.info(f"   [U+1F4BE] No Resource Leaks Detected")
 
 
 if __name__ == "__main__":

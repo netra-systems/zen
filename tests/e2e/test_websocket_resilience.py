@@ -106,7 +106,7 @@ class TestWebSocketReconnectionWithStateRecovery:
 @pytest.mark.asyncio
 @pytest.mark.e2e
 class TestErrorMessageToUserNotificationRecovery:
-    """Test #6: Error Message → User Notification → Recovery."""
+    """Test #6: Error Message  ->  User Notification  ->  Recovery."""
     
     @pytest.fixture
     @pytest.mark.e2e
@@ -121,7 +121,7 @@ class TestErrorMessageToUserNotificationRecovery:
     
     @pytest.mark.e2e
     async def test_agent_failure_error_flow(self, test_core, error_simulator):
-        """Test complete error flow: agent failure → user notification → retry."""
+        """Test complete error flow: agent failure  ->  user notification  ->  retry."""
         user_id = TEST_USERS["early"].id
         
         try:

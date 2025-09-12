@@ -94,7 +94,7 @@ class TestWebSocketInfrastructureStaging:
                     assert response_data is not None, \
                         "No response received from staging WebSocket"
                     
-                    print(f"✅ Staging WebSocket connection successful: {response_data}")
+                    print(f" PASS:  Staging WebSocket connection successful: {response_data}")
                     
                 except asyncio.TimeoutError:
                     pytest.fail(
@@ -172,13 +172,13 @@ class TestWebSocketInfrastructureStaging:
                         if event_type in required_events:
                             received_events.add(event_type)
                             event_messages.append(event_data)
-                            print(f"✅ Received event: {event_type}")
+                            print(f" PASS:  Received event: {event_type}")
                             
                     except asyncio.TimeoutError:
                         # Continue waiting for more events
                         continue
                     except Exception as e:
-                        print(f"⚠️ Error receiving event: {e}")
+                        print(f" WARNING: [U+FE0F] Error receiving event: {e}")
                         continue
                 
                 # Validate event delivery
@@ -193,7 +193,7 @@ class TestWebSocketInfrastructureStaging:
                         f"and risking $500K+ ARR. Event messages: {event_messages}"
                     )
                 else:
-                    print(f"✅ All required agent events received in staging: {received_events}")
+                    print(f" PASS:  All required agent events received in staging: {received_events}")
                     
         except Exception as e:
             pytest.fail(
@@ -276,7 +276,7 @@ class TestWebSocketInfrastructureStaging:
                     f"multi-user chat functionality for enterprise customers."
                 )
             else:
-                print(f"✅ Staging concurrent connections successful: {success_rate:.1%} success rate")
+                print(f" PASS:  Staging concurrent connections successful: {success_rate:.1%} success rate")
                 
         except Exception as e:
             pytest.fail(
@@ -335,7 +335,7 @@ class TestWebSocketInfrastructureStaging:
                     assert ping_response is not None, \
                         "Connection dropped after error - poor error handling"
                     
-                    print(f"✅ Staging WebSocket error handling successful")
+                    print(f" PASS:  Staging WebSocket error handling successful")
                     
                 except asyncio.TimeoutError:
                     pytest.fail(
@@ -398,7 +398,7 @@ class TestWebSocketInfrastructureStaging:
             f"Staging enables {len(validation_capabilities)} critical validation capabilities " \
             f"for chat functionality that protects $500K+ ARR"
         
-        print(f"✅ Staging infrastructure provides fallback validation when local Docker fails")
+        print(f" PASS:  Staging infrastructure provides fallback validation when local Docker fails")
         print(f"   Local Docker Issues: {len(local_docker_issues)}")
         print(f"   Staging Advantages: {len(staging_advantages)}")
         print(f"   Validation Capabilities: {len(validation_capabilities)}")
@@ -442,7 +442,7 @@ async def test_staging_websocket_infrastructure_health_check():
             response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
             
             assert response is not None, "Staging WebSocket health check failed"
-            print(f"✅ Staging WebSocket infrastructure healthy and available for testing")
+            print(f" PASS:  Staging WebSocket infrastructure healthy and available for testing")
             
     except Exception as e:
         pytest.fail(

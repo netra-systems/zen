@@ -57,7 +57,7 @@ class IsolatedEnvironmentTestRunner:
         self.start_time = time.time()
         
         print("=" * 80)
-        print("🧪 NETRA ISOLATED ENVIRONMENT INTEGRATION TESTS")
+        print("[U+1F9EA] NETRA ISOLATED ENVIRONMENT INTEGRATION TESTS")
         print("=" * 80)
         print(f"Configuration: {config}")
         print(f"Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -90,7 +90,7 @@ class IsolatedEnvironmentTestRunner:
                 'error': str(e),
                 'duration': self.end_time - self.start_time if self.start_time else 0
             }
-            print(f"❌ Test execution failed: {e}")
+            print(f" FAIL:  Test execution failed: {e}")
             return error_report
     
     def _build_pytest_args(self, config: Dict[str, Any]) -> List[str]:
@@ -216,7 +216,7 @@ class IsolatedEnvironmentTestRunner:
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(html_content)
             
-        print(f"📊 Detailed HTML report saved: {report_file.absolute()}")
+        print(f" CHART:  Detailed HTML report saved: {report_file.absolute()}")
     
     def _generate_html_report(self, report: Dict[str, Any]) -> str:
         """Generate HTML report content."""
@@ -254,7 +254,7 @@ class IsolatedEnvironmentTestRunner:
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧪 IsolatedEnvironment Integration Test Report</h1>
+            <h1>[U+1F9EA] IsolatedEnvironment Integration Test Report</h1>
             <div class="status">{summary.get('overall_status', 'UNKNOWN')}</div>
             <div class="timestamp">Generated: {report.get('timestamp', 'Unknown')}</div>
         </div>
@@ -283,7 +283,7 @@ class IsolatedEnvironmentTestRunner:
         </div>
         
         <div class="section">
-            <div class="section-title">📋 Executive Summary</div>
+            <div class="section-title">[U+1F4CB] Executive Summary</div>
             <p>The IsolatedEnvironment integration test suite validates the critical SSOT environment 
             management module that serves as the foundation for ALL Netra services.</p>
             
@@ -298,7 +298,7 @@ class IsolatedEnvironmentTestRunner:
         {self._generate_performance_section(report.get('performance_metrics', {}))}
         
         <div class="section">
-            <div class="section-title">⚙️ Configuration</div>
+            <div class="section-title">[U+2699][U+FE0F] Configuration</div>
             <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;">
 {json.dumps(report.get('configuration', {}), indent=2)}
             </pre>
@@ -311,9 +311,9 @@ class IsolatedEnvironmentTestRunner:
     def _generate_issues_section(self, issues: List[str]) -> str:
         """Generate critical issues section."""
         if not issues:
-            return '<div class="section"><div class="section-title">✅ No Critical Issues</div><p>All tests passed successfully!</p></div>'
+            return '<div class="section"><div class="section-title"> PASS:  No Critical Issues</div><p>All tests passed successfully!</p></div>'
         
-        issues_html = '<div class="section"><div class="section-title">🚨 Critical Issues</div>'
+        issues_html = '<div class="section"><div class="section-title"> ALERT:  Critical Issues</div>'
         for issue in issues:
             issues_html += f'<div class="issue">{issue}</div>'
         issues_html += '</div>'
@@ -324,7 +324,7 @@ class IsolatedEnvironmentTestRunner:
         if not recommendations:
             return ''
         
-        rec_html = '<div class="section"><div class="section-title">💡 Recommendations</div>'
+        rec_html = '<div class="section"><div class="section-title"> IDEA:  Recommendations</div>'
         for rec in recommendations:
             rec_html += f'<div class="recommendation">{rec}</div>'
         rec_html += '</div>'
@@ -337,7 +337,7 @@ class IsolatedEnvironmentTestRunner:
         
         return f'''
         <div class="section">
-            <div class="section-title">📈 Code Coverage Analysis</div>
+            <div class="section-title">[U+1F4C8] Code Coverage Analysis</div>
             <p>Coverage analysis ensures comprehensive testing of the IsolatedEnvironment module.</p>
             <table>
                 <tr><th>Metric</th><th>Value</th></tr>
@@ -353,12 +353,12 @@ class IsolatedEnvironmentTestRunner:
         if not metrics:
             return ''
         
-        perf_html = '<div class="section"><div class="section-title">⚡ Performance Metrics</div>'
+        perf_html = '<div class="section"><div class="section-title"> LIGHTNING:  Performance Metrics</div>'
         perf_html += '<table><tr><th>Operation</th><th>Duration</th><th>Status</th></tr>'
         
         for operation, data in metrics.items():
             duration = data.get('duration', 0)
-            status = '✅ Success' if data.get('success', False) else '❌ Failed'
+            status = ' PASS:  Success' if data.get('success', False) else ' FAIL:  Failed'
             perf_html += f'<tr><td>{operation}</td><td>{duration:.3f}s</td><td>{status}</td></tr>'
         
         perf_html += '</table></div>'
@@ -414,7 +414,7 @@ def main():
     
     # Print final summary
     print("\n" + "=" * 80)
-    print("📊 TEST EXECUTION SUMMARY")
+    print(" CHART:  TEST EXECUTION SUMMARY")
     print("=" * 80)
     
     summary = report.get('summary', {})
@@ -426,12 +426,12 @@ def main():
         print(f"Coverage: {summary.get('coverage_percentage', 0):.1f}%")
     
     if summary.get('critical_issues'):
-        print("\n🚨 CRITICAL ISSUES:")
+        print("\n ALERT:  CRITICAL ISSUES:")
         for issue in summary['critical_issues']:
             print(f"  - {issue}")
     
     if summary.get('recommendations'):
-        print("\n💡 RECOMMENDATIONS:")
+        print("\n IDEA:  RECOMMENDATIONS:")
         for rec in summary['recommendations']:
             print(f"  - {rec}")
     

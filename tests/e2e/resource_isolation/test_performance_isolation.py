@@ -164,7 +164,7 @@ async def test_performance_isolation_under_load(resource_isolation_suite, tenant
         assert impact["message_rate_degradation_percent"] <= max_acceptable_impact, \
             f"Message rate degraded too much for {agent.tenant_id}: {impact['message_rate_degradation_percent']:.1f}%"
     
-    logger.info("✓ Performance isolation validated within acceptable limits")
+    logger.info("[U+2713] Performance isolation validated within acceptable limits")
     
     # Phase 5: Test recovery after stress
     logger.info("Phase 5: Testing performance recovery after stress")
@@ -231,7 +231,7 @@ async def test_performance_isolation_under_load(resource_isolation_suite, tenant
     logger.info("=== Performance Isolation Under Load Test PASSED ===")
     logger.info(f"Max cross-tenant impact: {isolation_report['isolation_effectiveness']['max_impact_observed']:.1f}%")
     logger.info(f"Isolation maintained: {isolation_report['isolation_effectiveness']['isolation_maintained']}")
-    logger.info(f"Recovery successful: All tenants recovered to ≥90% baseline performance")
+    logger.info(f"Recovery successful: All tenants recovered to  >= 90% baseline performance")
     
     # Final assertions
     assert isolation_report["isolation_effectiveness"]["isolation_maintained"], \

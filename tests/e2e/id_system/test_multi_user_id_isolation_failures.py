@@ -14,7 +14,7 @@ Business Value Justification:
 EXPECTED BEHAVIOR: TESTS SHOULD FAIL INITIALLY
 This demonstrates critical multi-user isolation problems that need immediate remediation.
 
-🚨 E2E AUTH REQUIREMENT: These tests MUST use real authentication per CLAUDE.md
+ ALERT:  E2E AUTH REQUIREMENT: These tests MUST use real authentication per CLAUDE.md
 """
 
 import pytest
@@ -49,7 +49,7 @@ class TestMultiUserIDIsolationFailures:
     These tests demonstrate real-world security violations where uuid.uuid4()
     approach cannot enforce proper user boundaries.
     
-    🚨 CRITICAL: These tests use REAL authentication per CLAUDE.md requirements.
+     ALERT:  CRITICAL: These tests use REAL authentication per CLAUDE.md requirements.
     """
     
     def setup_method(self):
@@ -72,7 +72,7 @@ class TestMultiUserIDIsolationFailures:
         
         EXPECTED: This test SHOULD FAIL, proving critical security failure.
         
-        🚨 USES REAL AUTH: Creates real authenticated users per CLAUDE.md
+         ALERT:  USES REAL AUTH: Creates real authenticated users per CLAUDE.md
         """
         # Create two real authenticated users
         user_a_auth = await create_test_user("user_a@test.com", "password123")
@@ -132,7 +132,7 @@ class TestMultiUserIDIsolationFailures:
         
         EXPECTED: This test SHOULD FAIL, proving thread contamination.
         
-        🚨 USES REAL AUTH: Tests with real authenticated user sessions.
+         ALERT:  USES REAL AUTH: Tests with real authenticated user sessions.
         """
         # Create authenticated users
         user_a_auth = await create_test_user("thread_user_a@test.com", "password123")
@@ -191,7 +191,7 @@ class TestMultiUserIDIsolationFailures:
         
         EXPECTED: This test SHOULD FAIL, proving execution contamination.
         
-        🚨 USES REAL AUTH: Tests real execution isolation.
+         ALERT:  USES REAL AUTH: Tests real execution isolation.
         """
         # Create authenticated users
         user_a_auth = await create_test_user("exec_user_a@test.com", "password123")
@@ -252,7 +252,7 @@ class TestMultiUserIDIsolationFailures:
         
         EXPECTED: This test SHOULD FAIL, proving WebSocket isolation failures.
         
-        🚨 USES REAL AUTH: Tests real WebSocket authentication isolation.
+         ALERT:  USES REAL AUTH: Tests real WebSocket authentication isolation.
         """
         # Create authenticated users
         user_a_auth = await create_test_user("ws_user_a@test.com", "password123")
@@ -394,7 +394,7 @@ class TestMultiUserIDScalabilityFailures:
         
         EXPECTED: This test MAY FAIL, proving scalability limitations.
         
-        🚨 USES REAL AUTH: Tests scalability with real authentication.
+         ALERT:  USES REAL AUTH: Tests scalability with real authentication.
         """
         # Simulate enterprise scenario with many users
         enterprise_users = []
@@ -453,7 +453,7 @@ class TestCriticalMultiUserIDFailures:
         
         EXPECTED: This test SHOULD FAIL COMPLETELY, proving fundamental inadequacy.
         
-        🚨 USES REAL AUTH: Ultimate test with real multi-user authentication.
+         ALERT:  USES REAL AUTH: Ultimate test with real multi-user authentication.
         """
         # Create multiple real authenticated users
         business_users = []

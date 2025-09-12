@@ -37,7 +37,7 @@ class WebSocketStreamingTimeoutReproduction:
         with pytest.raises(ValueError, match=r"Invalid user_id format"):
             ensure_user_id(self.google_oauth_user_id)
             
-        logger.info("✅ REPRODUCED: User ID validation failure")
+        logger.info(" PASS:  REPRODUCED: User ID validation failure")
         
     async def test_streaming_implementation_missing(self):
         """
@@ -58,7 +58,7 @@ class WebSocketStreamingTimeoutReproduction:
             # Simulate the failing code path
             raise AttributeError("stream_agent_execution method not implemented")
             
-        logger.info("✅ REPRODUCED: Missing streaming implementation")
+        logger.info(" PASS:  REPRODUCED: Missing streaming implementation")
         
     async def test_redis_dependency_timeout(self):
         """
@@ -76,7 +76,7 @@ class WebSocketStreamingTimeoutReproduction:
         with pytest.raises(asyncio.TimeoutError):
             await asyncio.wait_for(simulate_redis_validation(), timeout=30.0)
             
-        logger.info("✅ REPRODUCED: Redis dependency timeout")
+        logger.info(" PASS:  REPRODUCED: Redis dependency timeout")
         
     async def test_websocket_connection_tracking_failure(self):
         """
@@ -91,7 +91,7 @@ class WebSocketStreamingTimeoutReproduction:
         assert run_id in expected_thread_id, "Thread ID should contain run_id"
         assert expected_thread_id != actual_thread_id, "Thread ID mismatch reproduced"
         
-        logger.info("✅ REPRODUCED: Connection tracking mismatch")
+        logger.info(" PASS:  REPRODUCED: Connection tracking mismatch")
         
     async def test_full_websocket_streaming_timeout_scenario(self):
         """
@@ -133,7 +133,7 @@ class WebSocketStreamingTimeoutReproduction:
                     if auth_data.get("type") == "auth_success":
                         auth_successful = True
                 except asyncio.TimeoutError:
-                    logger.info("❌ Auth timeout - user ID validation likely failed")
+                    logger.info(" FAIL:  Auth timeout - user ID validation likely failed")
                 
                 # Attempt streaming request (should fail even if auth worked)
                 if auth_successful:
@@ -172,7 +172,7 @@ class WebSocketStreamingTimeoutReproduction:
         assert not streaming_successful, "BEFORE FIX: Streaming should timeout"
         assert len(events_received) == 0, "BEFORE FIX: No streaming events should be received"
         
-        logger.info("✅ REPRODUCED: Complete WebSocket streaming timeout scenario")
+        logger.info(" PASS:  REPRODUCED: Complete WebSocket streaming timeout scenario")
 
 
 @pytest.mark.asyncio
@@ -216,39 +216,39 @@ if __name__ == "__main__":
         """Run the complete reproduction test suite"""
         reproducer = WebSocketStreamingTimeoutReproduction()
         
-        print("🔍 REPRODUCING WEBSOCKET STREAMING TIMEOUT ISSUES...")
+        print(" SEARCH:  REPRODUCING WEBSOCKET STREAMING TIMEOUT ISSUES...")
         print("=" * 60)
         
         # Test 1: User ID validation
         try:
             await reproducer.test_user_id_validation_failure()
-            print("✅ User ID validation failure reproduced")
+            print(" PASS:  User ID validation failure reproduced")
         except Exception as e:
-            print(f"❌ Failed to reproduce user ID validation: {e}")
+            print(f" FAIL:  Failed to reproduce user ID validation: {e}")
             
         # Test 2: Missing streaming
         try:
             await reproducer.test_streaming_implementation_missing()
-            print("✅ Missing streaming implementation reproduced")
+            print(" PASS:  Missing streaming implementation reproduced")
         except Exception as e:
-            print(f"❌ Failed to reproduce streaming issue: {e}")
+            print(f" FAIL:  Failed to reproduce streaming issue: {e}")
             
         # Test 3: Redis timeout
         try:
             await reproducer.test_redis_dependency_timeout()
-            print("✅ Redis dependency timeout reproduced")
+            print(" PASS:  Redis dependency timeout reproduced")
         except Exception as e:
-            print(f"❌ Failed to reproduce Redis timeout: {e}")
+            print(f" FAIL:  Failed to reproduce Redis timeout: {e}")
             
         # Test 4: Connection tracking
         try:
             await reproducer.test_websocket_connection_tracking_failure()
-            print("✅ Connection tracking failure reproduced")
+            print(" PASS:  Connection tracking failure reproduced")
         except Exception as e:
-            print(f"❌ Failed to reproduce connection tracking: {e}")
+            print(f" FAIL:  Failed to reproduce connection tracking: {e}")
             
         print("=" * 60)
-        print("🎯 REPRODUCTION COMPLETE - Issues identified and documented")
+        print(" TARGET:  REPRODUCTION COMPLETE - Issues identified and documented")
         
     if len(sys.argv) > 1 and sys.argv[1] == "reproduce":
         asyncio.run(run_reproduction_suite())

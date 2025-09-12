@@ -11,7 +11,7 @@ Root Cause Context:
 - Frontend sends: subprotocols=['jwt-auth', 'jwt.{base64url_encoded_token}']
 - Backend extracts JWT from 'jwt.{token}' format via user_context_extractor.py
 - Backend responds with 'jwt-auth' in websocket.accept(subprotocol="jwt-auth")
-- Missing subprotocol parameter causes RFC 6455 violation → Error 1006
+- Missing subprotocol parameter causes RFC 6455 violation  ->  Error 1006
 
 Authentication Flow Tested:
 1. WebSocket connection with subprotocols
@@ -129,7 +129,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
         assert extracted_token == self.test_jwt_token, \
             f"Extracted token should match original. Got: {extracted_token[:50]}..."
         
-        logger.info(f"✅ JWT Extraction Success: {extracted_token[:50]}...")
+        logger.info(f" PASS:  JWT Extraction Success: {extracted_token[:50]}...")
         logger.info(f"   Original subprotocols: {self.frontend_subprotocols}")
         logger.info(f"   Extracted from: jwt.{self.encoded_jwt_token[:20]}...")
 
@@ -150,7 +150,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
         assert extracted_jwt is not None, "Unified JWT handler should extract token"
         assert extracted_jwt == self.test_jwt_token, "Extracted JWT should match original"
         
-        logger.info(f"✅ Unified JWT Handler Success: {extracted_jwt[:50]}...")
+        logger.info(f" PASS:  Unified JWT Handler Success: {extracted_jwt[:50]}...")
         
         # Validate the extraction source
         jwt_from_subprotocol = UnifiedJWTProtocolHandler._extract_from_subprotocol(websocket)
@@ -203,7 +203,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
             assert auth_result.auth_result.user_id == self.test_jwt_payload["user_id"], \
                 "User ID should match JWT payload"
             
-            logger.info(f"✅ Authentication Flow Success")
+            logger.info(f" PASS:  Authentication Flow Success")
             logger.info(f"   User ID: {auth_result.auth_result.user_id}")
             logger.info(f"   Email: {auth_result.auth_result.email}")
             logger.info(f"   Permissions: {auth_result.auth_result.permissions}")
@@ -254,7 +254,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
             # Assert: Authentication should succeed
             assert auth_result.success, "SSOT authentication should succeed"
             
-            logger.info(f"✅ SSOT Authentication Success")
+            logger.info(f" PASS:  SSOT Authentication Success")
             logger.info(f"   User: {auth_result.user_context.user_id if auth_result.user_context else 'None'}")
             
             # Now test the WebSocket accept scenario
@@ -271,17 +271,17 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
             subprotocol_param = call_args[1].get('subprotocol') if call_args[1] else None
             
             if subprotocol_param is None:
-                logger.error(f"🚨 RFC 6455 VIOLATION DEMONSTRATED:")
-                logger.error(f"   ✅ JWT extraction: SUCCESS")
-                logger.error(f"   ✅ Authentication: SUCCESS") 
-                logger.error(f"   ❌ WebSocket accept: NO SUBPROTOCOL PARAMETER")
+                logger.error(f" ALERT:  RFC 6455 VIOLATION DEMONSTRATED:")
+                logger.error(f"    PASS:  JWT extraction: SUCCESS")
+                logger.error(f"    PASS:  Authentication: SUCCESS") 
+                logger.error(f"    FAIL:  WebSocket accept: NO SUBPROTOCOL PARAMETER")
                 logger.error(f"   Expected: websocket.accept(subprotocol='jwt-auth')")
                 logger.error(f"   Actual: websocket.accept() (missing parameter)")
                 
                 # This is the expected failure that demonstrates the bug
                 assert True, "Expected RFC 6455 violation demonstrated"
             else:
-                logger.info(f"✅ WebSocket accept includes subprotocol: {subprotocol_param}")
+                logger.info(f" PASS:  WebSocket accept includes subprotocol: {subprotocol_param}")
                 assert subprotocol_param == "jwt-auth", "Subprotocol should be jwt-auth"
 
     async def test_multiple_subprotocol_formats(self):
@@ -333,11 +333,11 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
                 if test_case["should_extract"]:
                     assert extracted_jwt == self.test_jwt_token, \
                         f"Should extract JWT for case: {test_case['name']}"
-                    logger.info(f"✅ JWT extracted for: {test_case['name']}")
+                    logger.info(f" PASS:  JWT extracted for: {test_case['name']}")
                 else:
                     assert extracted_jwt is None, \
                         f"Should not extract JWT for case: {test_case['name']}"
-                    logger.info(f"⏭️ No JWT to extract for: {test_case['name']}")
+                    logger.info(f"[U+23ED][U+FE0F] No JWT to extract for: {test_case['name']}")
                 
                 # Document the expected subprotocol selection
                 if "jwt-auth" in test_case["subprotocols"]:
@@ -394,7 +394,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
                 assert extracted_jwt == test_jwt, \
                     f"JWT extraction should succeed for {scenario['name']}"
                 
-                logger.info(f"✅ JWT extracted for error scenario: {scenario['name']}")
+                logger.info(f" PASS:  JWT extracted for error scenario: {scenario['name']}")
                 logger.info(f"   JWT validation would fail: {scenario['expected_error']}")
                 logger.info(f"   But extraction from subprotocol works correctly")
 
@@ -429,13 +429,13 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
         assert protocol_header == expected_header, \
             f"Protocol header should match frontend format. Got: {protocol_header}"
         
-        logger.info(f"✅ Frontend-Backend Protocol Compatibility Validated")
+        logger.info(f" PASS:  Frontend-Backend Protocol Compatibility Validated")
         logger.info(f"   Frontend sends: {frontend_equivalent_subprotocols}")
         logger.info(f"   Backend extracts: {backend_extracted_jwt[:50]}...")
         logger.info(f"   Protocol header: {protocol_header[:100]}...")
         
         # Document the missing piece (RFC 6455 compliance)
-        logger.info(f"🔧 Missing: websocket.accept(subprotocol='jwt-auth') for RFC 6455 compliance")
+        logger.info(f"[U+1F527] Missing: websocket.accept(subprotocol='jwt-auth') for RFC 6455 compliance")
 
     def test_user_context_creation_from_jwt_auth(self):
         """
@@ -477,7 +477,7 @@ class JWTExtractionIntegrationTest(SSotAsyncTestCase):
         assert user_context.metadata["email"] == self.test_jwt_payload["email"], \
             "User context should include email from JWT"
         
-        logger.info(f"✅ UserExecutionContext created successfully")
+        logger.info(f" PASS:  UserExecutionContext created successfully")
         logger.info(f"   User ID: {user_context.user_id}")
         logger.info(f"   Thread ID: {user_context.thread_id}")
         logger.info(f"   Permissions: {user_context.permissions}")
@@ -498,7 +498,7 @@ if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(JWTExtractionIntegrationTest)
     runner = unittest.TextTestRunner(verbosity=2)
     
-    print("🔐 JWT Extraction from WebSocket Subprotocol Integration Test Suite")
+    print("[U+1F510] JWT Extraction from WebSocket Subprotocol Integration Test Suite")
     print("Issue #280: WebSocket authentication failure - P0 CRITICAL")
     print("Focus: Validate JWT extraction works, connection fails due to RFC 6455 violation")
     print("=" * 80)
@@ -506,8 +506,8 @@ if __name__ == "__main__":
     result = runner.run(suite)
     
     if result.failures or result.errors:
-        print("⚠️ Some tests failed - this may indicate JWT extraction issues")
-        print("🔍 Check test output for specific authentication problems")
+        print(" WARNING: [U+FE0F] Some tests failed - this may indicate JWT extraction issues")
+        print(" SEARCH:  Check test output for specific authentication problems")
     else:
-        print("✅ JWT extraction tests passed - authentication logic is working")
-        print("🎯 Issue is confirmed to be RFC 6455 subprotocol negotiation in websocket.accept()")
+        print(" PASS:  JWT extraction tests passed - authentication logic is working")
+        print(" TARGET:  Issue is confirmed to be RFC 6455 subprotocol negotiation in websocket.accept()")

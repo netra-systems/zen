@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 SSOT WebSocket Golden Path Helpers - Single Source of Truth for WebSocket Golden Path Testing
 
@@ -12,12 +50,12 @@ Business Value Justification (BVJ):
 
 GOLDEN PATH DEFINITION:
 The "golden path" is the optimal user experience flow:
-1. User sends message → WebSocket connection established with authentication
-2. Agent starts processing → agent_started event (user sees AI is working)
-3. Agent analyzes request → agent_thinking event (real-time progress visibility)
-4. Agent executes tools → tool_executing event (demonstrates problem-solving)
-5. Tools return results → tool_completed event (actionable insights delivered)
-6. Agent synthesizes response → agent_completed event (valuable response ready)
+1. User sends message  ->  WebSocket connection established with authentication
+2. Agent starts processing  ->  agent_started event (user sees AI is working)
+3. Agent analyzes request  ->  agent_thinking event (real-time progress visibility)
+4. Agent executes tools  ->  tool_executing event (demonstrates problem-solving)
+5. Tools return results  ->  tool_completed event (actionable insights delivered)
+6. Agent synthesizes response  ->  agent_completed event (valuable response ready)
 7. User receives complete AI response with insights and actions
 
 This flow represents the CORE VALUE PROPOSITION of the platform.

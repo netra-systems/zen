@@ -88,10 +88,10 @@ async def test_basic_components():
         context.state.user_request = "What is the TCO for GPT-4?"
         intent, confidence = await classifier.classify(context)
 
-        print(f"   ✅ Intent: {intent}, Confidence: {confidence}")
-        print(f"   ✅ Intent Classifier working properly")
+        print(f"    PASS:  Intent: {intent}, Confidence: {confidence}")
+        print(f"    PASS:  Intent Classifier working properly")
     except Exception as e:
-        print(f"   ❌ Intent Classifier failed: {e}")
+        print(f"    FAIL:  Intent Classifier failed: {e}")
 
     # Test 2: Reliability Scorer
     print("\n2. Testing Reliability Scorer...")
@@ -108,11 +108,11 @@ async def test_basic_components():
 
         for source in test_sources:
             score = scorer.score_source(source)
-            print(f"   ✅ {source['name']}: {score:.2f}")
+            print(f"    PASS:  {source['name']}: {score:.2f}")
     except Exception as e:
-        print(f"   ❌ Reliability Scorer failed: {e}")
+        print(f"    FAIL:  Reliability Scorer failed: {e}")
 
-    print(f"\n✅ Basic component testing completed")
+    print(f"\n PASS:  Basic component testing completed")
 
 
 async def test_orchestration_mock():
@@ -161,12 +161,12 @@ async def test_orchestration_mock():
         print(f"\nExecuting query: \"What is the TCO for GPT-4?\"")
         result = await orchestrator.execute_core_logic(context)
 
-        print(f"\n✅ Orchestration completed successfully!")
+        print(f"\n PASS:  Orchestration completed successfully!")
         print(f"Result type: {type(result)}")
         print(f"Result: {str(result)[:100]}...")
         
     except Exception as e:
-        print(f"❌ Orchestration test failed: {e}")
+        print(f" FAIL:  Orchestration test failed: {e}")
         import traceback
         traceback.print_exc()
 
@@ -174,10 +174,10 @@ async def test_orchestration_mock():
 def main():
     """Run all tests."""
     print('''
-╔══════════════════════════════════════════════════════════════╗
-║          NACIS - Netra's Agentic Customer Interaction       ║
-║                    System Testing Suite                      ║
-╚══════════════════════════════════════════════════════════════╝
+[U+2554][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2557]
+[U+2551]          NACIS - Netra's Agentic Customer Interaction       [U+2551]
+[U+2551]                    System Testing Suite                      [U+2551]
+[U+255A][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+255D]
     ''')
 
     # Run async tests
@@ -188,9 +188,9 @@ def main():
     print("SUMMARY")
     print("="*60)
     print('''
-✅ All basic components tested
-✅ Orchestration flow validated
-✅ NACIS system is functional
+ PASS:  All basic components tested
+ PASS:  Orchestration flow validated
+ PASS:  NACIS system is functional
 
 Next steps:
     1. Set OPENAI_API_KEY for real LLM testing

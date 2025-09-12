@@ -109,7 +109,7 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         
         # If we reach here, the SSOT migration has been completed successfully
         # This indicates AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker
-        print(f"✅ SSOT COMPLIANCE VERIFIED: AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker")
+        print(f" PASS:  SSOT COMPLIANCE VERIFIED: AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker")
 
     @pytest.mark.integration
     @pytest.mark.ssot_migration
@@ -156,7 +156,7 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         # The circuit behavior depends on the specific configuration
         # Main point is that delegation preserves the circuit breaker pattern
         # Verify delegation preserves circuit breaker functionality
-        print(f"✅ DELEGATION VERIFIED: Circuit breaker functionality preserved with {failures} failures handled")
+        print(f" PASS:  DELEGATION VERIFIED: Circuit breaker functionality preserved with {failures} failures handled")
 
     @pytest.mark.integration 
     @pytest.mark.ssot_migration
@@ -186,7 +186,7 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         assert breaker2.failure_count == 0
         
         # Verify reset delegation works correctly
-        print(f"✅ RESET DELEGATION VERIFIED: reset_all() properly delegates to UnifiedCircuitBreaker instances")
+        print(f" PASS:  RESET DELEGATION VERIFIED: reset_all() properly delegates to UnifiedCircuitBreaker instances")
 
     @pytest.mark.integration
     @pytest.mark.ssot_migration
@@ -218,4 +218,4 @@ class TestAuthCircuitBreakerSSOTMigration(SSotBaseTestCase):
         assert isinstance(created_breaker, UnifiedCircuitBreaker)
         
         # Verify call_with_breaker delegation works correctly
-        print(f"✅ CALL_WITH_BREAKER DELEGATION VERIFIED: Proper creation and delegation to UnifiedCircuitBreaker")
+        print(f" PASS:  CALL_WITH_BREAKER DELEGATION VERIFIED: Proper creation and delegation to UnifiedCircuitBreaker")

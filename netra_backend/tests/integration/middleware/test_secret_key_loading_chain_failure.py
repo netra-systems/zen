@@ -83,7 +83,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 )
             
             # If we get here, SECRET_KEY was loaded - test might need adjustment
-            print(f"⚠️  SECRET_KEY LOADED: {secret_key[:8]}... (length: {len(secret_key)})")
+            print(f" WARNING: [U+FE0F]  SECRET_KEY LOADED: {secret_key[:8]}... (length: {len(secret_key)})")
             
             # EXPECTED TO FAIL: Try to use this config with middleware
             app = FastAPI()
@@ -106,12 +106,12 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                     )
             
             # If we reach here, the test didn't reproduce the issue
-            print("⚠️  GCP STAGING SECRET_KEY LOADING: Working properly, issue not reproduced")
+            print(" WARNING: [U+FE0F]  GCP STAGING SECRET_KEY LOADING: Working properly, issue not reproduced")
             
         except (ValueError, RuntimeError, ImportError, AttributeError) as e:
             # EXPECTED: These errors reproduce the actual issue
             self._track_metric("secret_key_failures", "gcp_staging_config_error", 1)
-            print(f"✅ REPRODUCED: GCP staging SECRET_KEY failure - {str(e)}")
+            print(f" PASS:  REPRODUCED: GCP staging SECRET_KEY failure - {str(e)}")
             
             # Re-raise to make test fail as expected
             raise AssertionError(
@@ -184,7 +184,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                     response = client.get("/test")
                     
                     # If we get here, the scenario didn't fail as expected
-                    print(f"⚠️  SCENARIO NOT REPRODUCED: {scenario['name']} - Response: {response.status_code}")
+                    print(f" WARNING: [U+FE0F]  SCENARIO NOT REPRODUCED: {scenario['name']} - Response: {response.status_code}")
                     
             except Exception as e:
                 error_message = str(e)
@@ -196,9 +196,9 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                         "error": error_message,
                         "expected": scenario["expected_error"]
                     })
-                    print(f"✅ REPRODUCED: {scenario['name']} - {error_message}")
+                    print(f" PASS:  REPRODUCED: {scenario['name']} - {error_message}")
                 else:
-                    print(f"⚠️  DIFFERENT ERROR: {scenario['name']} - {error_message}")
+                    print(f" WARNING: [U+FE0F]  DIFFERENT ERROR: {scenario['name']} - {error_message}")
                     failed_scenarios.append({
                         "scenario": scenario["name"], 
                         "error": error_message,
@@ -222,7 +222,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 f"These failures reproduce the SessionMiddleware installation issues blocking $500K+ ARR."
             )
         else:
-            print("⚠️  NO FAILURES REPRODUCED: All scenarios passed unexpectedly")
+            print(" WARNING: [U+FE0F]  NO FAILURES REPRODUCED: All scenarios passed unexpectedly")
 
     def test_auth_context_middleware_session_access(self):
         """
@@ -307,7 +307,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
             # Check if we reproduced the session access timing issue
             if session_access_error:
                 self._track_metric("secret_key_failures", "auth_context_session_timing_error", 1)
-                print(f"✅ REPRODUCED: Auth context session access error - {session_access_error}")
+                print(f" PASS:  REPRODUCED: Auth context session access error - {session_access_error}")
                 
                 raise AssertionError(
                     f"AUTH CONTEXT SESSION ACCESS FAILURE: {session_access_error}. "
@@ -317,7 +317,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 
             elif auth_context_captured and not auth_context_captured.get("has_session", True):
                 self._track_metric("secret_key_failures", "auth_context_no_session_access", 1) 
-                print(f"✅ REPRODUCED: Auth context missing session access - {auth_context_captured}")
+                print(f" PASS:  REPRODUCED: Auth context missing session access - {auth_context_captured}")
                 
                 raise AssertionError(
                     f"AUTH CONTEXT SESSION MISSING: GCP middleware cannot access session data. "
@@ -325,8 +325,8 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 )
                 
             else:
-                print(f"⚠️  SESSION ACCESS WORKED: {data}")
-                print("⚠️  Auth context session access issue not reproduced")
+                print(f" WARNING: [U+FE0F]  SESSION ACCESS WORKED: {data}")
+                print(" WARNING: [U+FE0F]  Auth context session access issue not reproduced")
 
     def test_configuration_chain_secret_key_precedence(self):
         """
@@ -407,7 +407,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                         )
                 
                 # If we get here without error, scenario didn't fail as expected
-                print(f"⚠️  SCENARIO NOT REPRODUCED: {scenario['name']} - Key loaded: {actual_secret[:8] if actual_secret else None}...")
+                print(f" WARNING: [U+FE0F]  SCENARIO NOT REPRODUCED: {scenario['name']} - Key loaded: {actual_secret[:8] if actual_secret else None}...")
                 
             except Exception as e:
                 error_message = str(e)
@@ -417,7 +417,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                     "should_fail_on": scenario["should_fail_on"]
                 })
                 
-                print(f"✅ REPRODUCED: {scenario['name']} - {error_message}")
+                print(f" PASS:  REPRODUCED: {scenario['name']} - {error_message}")
         
         # Track metrics and fail test if issues were reproduced
         if configuration_failures:
@@ -434,7 +434,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 f"These configuration chain failures reproduce SECRET_KEY loading issues in production."
             )
         else:
-            print("⚠️  CONFIGURATION CHAIN: All scenarios passed, issues not reproduced")
+            print(" WARNING: [U+FE0F]  CONFIGURATION CHAIN: All scenarios passed, issues not reproduced")
 
     @pytest.mark.asyncio
     async def test_async_middleware_secret_key_loading_race(self):
@@ -498,7 +498,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
             self._track_metric("secret_key_failures", "async_middleware_race_conditions", len(initialization_errors))
             
             error_summary = "\n".join([f"- {error}" for error in initialization_errors[:3]])
-            print(f"✅ REPRODUCED: Async middleware race conditions - {len(initialization_errors)} errors")
+            print(f" PASS:  REPRODUCED: Async middleware race conditions - {len(initialization_errors)} errors")
             
             raise AssertionError(
                 f"ASYNC MIDDLEWARE RACE CONDITIONS REPRODUCED:\n"
@@ -507,7 +507,7 @@ class TestSecretKeyLoadingChainFailure(SSotAsyncTestCase):
                 f"These race conditions reproduce authentication failures under concurrent load."
             )
         else:
-            print(f"⚠️  RACE CONDITIONS NOT REPRODUCED: All {successful_initializations} initializations succeeded")
+            print(f" WARNING: [U+FE0F]  RACE CONDITIONS NOT REPRODUCED: All {successful_initializations} initializations succeeded")
 
 
 if __name__ == "__main__":

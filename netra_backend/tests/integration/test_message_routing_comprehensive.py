@@ -292,7 +292,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
             message_types_str = str(stats["message_types"])
             assert case["type"] in message_types_str.lower() or case["type"].upper() in message_types_str
         
-        logger.info("✅ Basic message routing test completed")
+        logger.info(" PASS:  Basic message routing test completed")
     
     @pytest.mark.integration
     async def test_message_router_multiple_handlers(self, isolated_env):
@@ -339,7 +339,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         assert len(handler1.handled) == 1, f"Handler1 (first added) should be called due to precedence among custom handlers, handler1: {len(handler1.handled)}, handler2: {len(handler2.handled)}"
         assert len(handler2.handled) == 0, f"Handler2 should not be called as handler1 has precedence, handler1: {len(handler1.handled)}, handler2: {len(handler2.handled)}"
         
-        logger.info("✅ Multiple handlers routing test completed")
+        logger.info(" PASS:  Multiple handlers routing test completed")
     
     @pytest.mark.integration
     async def test_message_router_handler_precedence_validation(self, isolated_env):
@@ -394,7 +394,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         builtin_stats = builtin_user_handler.get_stats()
         # Built-in stats won't show the message we just sent because custom handler intercepted it
         
-        logger.info("✅ Handler precedence validation test completed")
+        logger.info(" PASS:  Handler precedence validation test completed")
     
     @pytest.mark.integration
     async def test_message_router_handler_priority(self, isolated_env):
@@ -429,7 +429,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         assert call_order[0] == "high"
         assert len(call_order) == 1  # Only one handler called
         
-        logger.info("✅ Handler priority test completed")
+        logger.info(" PASS:  Handler priority test completed")
         
     @pytest.mark.integration
     async def test_message_router_unknown_message_types(self, isolated_env):
@@ -459,7 +459,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         stats = router.get_stats()
         assert stats["unhandled_messages"] == len(unknown_types)
         
-        logger.info("✅ Unknown message types test completed")
+        logger.info(" PASS:  Unknown message types test completed")
     
     @pytest.mark.integration 
     async def test_message_router_handler_failure_recovery(self, isolated_env):
@@ -490,7 +490,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         stats = router.get_stats()
         assert stats["handler_errors"] > 0
         
-        logger.info("✅ Handler failure recovery test completed")
+        logger.info(" PASS:  Handler failure recovery test completed")
     
     @pytest.mark.integration
     async def test_message_router_concurrent_routing(self, isolated_env):
@@ -528,7 +528,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         stats = router.get_stats()
         assert stats["messages_routed"] == 50  # 5 users * 10 messages
         
-        logger.info("✅ Concurrent routing test completed")
+        logger.info(" PASS:  Concurrent routing test completed")
     
     @pytest.mark.integration
     async def test_message_router_handler_registration(self, isolated_env):
@@ -564,7 +564,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         assert len(router.handlers) == initial_handler_count
         assert handler2 not in router.handlers
         
-        logger.info("✅ Handler registration test completed")
+        logger.info(" PASS:  Handler registration test completed")
     
     @pytest.mark.integration
     async def test_message_router_handler_deregistration(self, isolated_env):
@@ -598,7 +598,7 @@ class TestMessageRoutingCore(BaseIntegrationTest):
         # Should still succeed via fallback, but temp_handler not called
         assert temp_handler.call_count == 1  # No increase
         
-        logger.info("✅ Handler deregistration test completed")
+        logger.info(" PASS:  Handler deregistration test completed")
 
 
 class TestWebSocketMessageRouting(BaseIntegrationTest):
@@ -664,7 +664,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         assert websocket1.messages_sent[0]["content"] == "Response for user 1"
         assert websocket2.messages_sent[0]["content"] == "Response for user 2"
         
-        logger.info("✅ WebSocket message routing to user test completed")
+        logger.info(" PASS:  WebSocket message routing to user test completed")
     
     @pytest.mark.integration
     async def test_websocket_connection_isolation(self, isolated_env):
@@ -713,7 +713,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
                     has_connection = manager.is_connection_active(str(other_user_id))
                     assert not has_connection
         
-        logger.info("✅ WebSocket connection isolation test completed")
+        logger.info(" PASS:  WebSocket connection isolation test completed")
     
     @pytest.mark.integration
     async def test_websocket_message_queuing(self, isolated_env):
@@ -739,7 +739,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         assert stats["recovery_queue_size"] > 0
         assert stats["metrics"]["messages_failed_total"] > 0
         
-        logger.info("✅ WebSocket message queuing test completed")
+        logger.info(" PASS:  WebSocket message queuing test completed")
     
     @pytest.mark.integration
     async def test_websocket_connection_state_sync(self, isolated_env):
@@ -778,7 +778,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         stats = manager.get_manager_stats()
         assert stats["metrics"]["messages_failed_total"] > 0
         
-        logger.info("✅ WebSocket connection state sync test completed")
+        logger.info(" PASS:  WebSocket connection state sync test completed")
     
     @pytest.mark.integration
     async def test_websocket_routing_table_consistency(self, isolated_env, monkeypatch):
@@ -828,7 +828,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         factory_stats = factory.get_factory_stats()
         assert factory_stats["current_state"]["active_managers"] == 5
         
-        logger.info("✅ WebSocket routing table consistency test completed")
+        logger.info(" PASS:  WebSocket routing table consistency test completed")
     
     @pytest.mark.integration
     async def test_websocket_message_broadcasting(self, isolated_env):
@@ -868,7 +868,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
             assert len(websocket.messages_sent) == 1
             assert websocket.messages_sent[0]["content"] == "System maintenance in 5 minutes"
         
-        logger.info("✅ WebSocket message broadcasting test completed")
+        logger.info(" PASS:  WebSocket message broadcasting test completed")
     
     @pytest.mark.integration
     async def test_websocket_connection_cleanup(self, isolated_env):
@@ -910,7 +910,7 @@ class TestWebSocketMessageRouting(BaseIntegrationTest):
         stats = manager.get_manager_stats()
         assert stats["connections"]["total"] == 0
         
-        logger.info("✅ WebSocket connection cleanup test completed")
+        logger.info(" PASS:  WebSocket connection cleanup test completed")
 
 
 class TestMultiUserIsolation(BaseIntegrationTest):
@@ -981,7 +981,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
         assert websocket1.messages_sent[0]["sensitive"] != "user2_secret"
         assert websocket2.messages_sent[0]["sensitive"] != "user1_secret"
         
-        logger.info("✅ Multi-user message isolation test completed")
+        logger.info(" PASS:  Multi-user message isolation test completed")
     
     @pytest.mark.integration
     async def test_multi_user_connection_separation(self, isolated_env):
@@ -1031,7 +1031,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                     has_connection = manager.is_connection_active(str(other_user_id))
                     assert not has_connection
         
-        logger.info("✅ Multi-user connection separation test completed")
+        logger.info(" PASS:  Multi-user connection separation test completed")
     
     @pytest.mark.integration
     async def test_multi_user_concurrent_routing(self, isolated_env):
@@ -1095,7 +1095,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                 assert msg["user"] == str(user_id)
                 assert msg["message_id"].startswith(str(i))
         
-        logger.info("✅ Multi-user concurrent routing test completed")
+        logger.info(" PASS:  Multi-user concurrent routing test completed")
     
     @pytest.mark.integration
     async def test_multi_user_factory_isolation(self, isolated_env, monkeypatch):
@@ -1138,7 +1138,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
             assert str(user_id) in user_distribution
             assert user_distribution[str(user_id)] >= 1
         
-        logger.info("✅ Multi-user factory isolation test completed")
+        logger.info(" PASS:  Multi-user factory isolation test completed")
     
     @pytest.mark.integration
     async def test_multi_user_context_boundaries(self, isolated_env):
@@ -1183,7 +1183,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
                     other_health = manager.get_connection_health(other_context.user_id)
                     assert "error" in other_health  # Should indicate isolation violation
         
-        logger.info("✅ Multi-user context boundaries test completed")
+        logger.info(" PASS:  Multi-user context boundaries test completed")
     
     @pytest.mark.integration
     async def test_multi_user_state_consistency(self, isolated_env, monkeypatch):
@@ -1243,7 +1243,7 @@ class TestMultiUserIsolation(BaseIntegrationTest):
         assert factory_stats["current_state"]["active_managers"] >= 3
         assert factory_stats["current_state"]["users_with_managers"] >= 3
         
-        logger.info("✅ Multi-user state consistency test completed")
+        logger.info(" PASS:  Multi-user state consistency test completed")
 
 
 class TestAgentMessageIntegration(BaseIntegrationTest):
@@ -1304,7 +1304,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
         assert stats["messages_processed"] > 0
         assert stats["start_agent_requests"] > 0
         
-        logger.info("✅ Agent message handler integration test completed")
+        logger.info(" PASS:  Agent message handler integration test completed")
     
     @pytest.mark.integration
     async def test_agent_message_routing_to_websocket(self, isolated_env):
@@ -1350,7 +1350,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
         # Verify WebSocket received processed messages
         assert len(websocket.messages_sent) >= 3
         
-        logger.info("✅ Agent message routing to WebSocket test completed")
+        logger.info(" PASS:  Agent message routing to WebSocket test completed")
     
     @pytest.mark.integration
     async def test_agent_message_handler_error_recovery(self, isolated_env):
@@ -1383,7 +1383,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
         stats = agent_handler.processing_stats
         assert stats["errors"] > 0
         
-        logger.info("✅ Agent message error recovery test completed")
+        logger.info(" PASS:  Agent message error recovery test completed")
     
     @pytest.mark.integration  
     async def test_agent_message_type_validation(self, isolated_env):
@@ -1424,7 +1424,7 @@ class TestAgentMessageIntegration(BaseIntegrationTest):
         can_handle = agent_handler.can_handle(MessageType.PING)
         assert not can_handle
         
-        logger.info("✅ Agent message type validation test completed")
+        logger.info(" PASS:  Agent message type validation test completed")
 
 
 # Test execution fixture compatibility

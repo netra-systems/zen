@@ -156,7 +156,7 @@ class MessageHandlerTestRunner:
         test_path = self.project_root / suite_config["path"]
         
         if not test_path.exists():
-            logger.error(f"❌ Test file not found: {test_path}")
+            logger.error(f" FAIL:  Test file not found: {test_path}")
             return {
                 "status": "ERROR",
                 "error": f"Test file not found: {test_path}",
@@ -178,7 +178,7 @@ class MessageHandlerTestRunner:
         if suite_name in ["integration", "e2e", "race_conditions", "background_tasks"]:
             pytest_args.extend(["--real-services"])  # Use real services
         
-        logger.info(f"🔧 Running command: {' '.join(pytest_args)}")
+        logger.info(f"[U+1F527] Running command: {' '.join(pytest_args)}")
         
         # Run tests
         start_time = time.time()
@@ -201,7 +201,7 @@ class MessageHandlerTestRunner:
             
         except subprocess.TimeoutExpired:
             duration = time.time() - start_time
-            logger.error(f"⏰ Test suite {suite_name} timed out after {duration:.1f}s")
+            logger.error(f"[U+23F0] Test suite {suite_name} timed out after {duration:.1f}s")
             return {
                 "status": "TIMEOUT",
                 "error": f"Test suite timed out after {duration:.1f}s",
@@ -210,7 +210,7 @@ class MessageHandlerTestRunner:
             }
         except Exception as e:
             duration = time.time() - start_time
-            logger.error(f"💥 Error running test suite {suite_name}: {e}")
+            logger.error(f"[U+1F4A5] Error running test suite {suite_name}: {e}")
             return {
                 "status": "ERROR", 
                 "error": str(e),
@@ -231,13 +231,13 @@ class MessageHandlerTestRunner:
         stderr = result.stderr
         return_code = result.returncode
         
-        logger.info(f"📊 Test suite {suite_name} completed in {duration:.1f}s (exit code: {return_code})")
+        logger.info(f" CHART:  Test suite {suite_name} completed in {duration:.1f}s (exit code: {return_code})")
         
         # Log output for debugging
         if stdout:
-            logger.info(f"📝 STDOUT:\n{stdout}")
+            logger.info(f"[U+1F4DD] STDOUT:\n{stdout}")
         if stderr:
-            logger.info(f"📝 STDERR:\n{stderr}")
+            logger.info(f"[U+1F4DD] STDERR:\n{stderr}")
         
         # Parse failures
         detected_failures = self._extract_failure_patterns(
@@ -247,10 +247,10 @@ class MessageHandlerTestRunner:
         # Determine status
         if return_code == 0:
             status = "UNEXPECTED_SUCCESS"
-            logger.warning(f"⚠️ Test suite {suite_name} passed - this was unexpected!")
+            logger.warning(f" WARNING: [U+FE0F] Test suite {suite_name} passed - this was unexpected!")
         else:
             status = "EXPECTED_FAILURES"
-            logger.info(f"✅ Test suite {suite_name} failed as expected")
+            logger.info(f" PASS:  Test suite {suite_name} failed as expected")
         
         return {
             "status": status,
@@ -277,7 +277,7 @@ class MessageHandlerTestRunner:
         # Look for expected failure patterns
         for expected_failure in expected_failures:
             if expected_failure in combined_output:
-                logger.info(f"✅ Detected expected failure: {expected_failure}")
+                logger.info(f" PASS:  Detected expected failure: {expected_failure}")
                 detected_failures.append({
                     "pattern": expected_failure,
                     "suite": suite_name,
@@ -285,7 +285,7 @@ class MessageHandlerTestRunner:
                     "description": f"Expected failure pattern found in {suite_name} tests"
                 })
             else:
-                logger.warning(f"⚠️ Expected failure not detected: {expected_failure}")
+                logger.warning(f" WARNING: [U+FE0F] Expected failure not detected: {expected_failure}")
                 detected_failures.append({
                     "pattern": expected_failure,
                     "suite": suite_name,
@@ -324,12 +324,12 @@ class MessageHandlerTestRunner:
         
         report_path = self.project_root / "MESSAGE_HANDLER_READINESS_VALIDATION_TEST_REPORT.md"
         
-        logger.info(f"📋 Generating comprehensive failure analysis report: {report_path}")
+        logger.info(f"[U+1F4CB] Generating comprehensive failure analysis report: {report_path}")
         
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(self._build_report_content(total_duration))
         
-        logger.info(f"✅ Report generated: {report_path}")
+        logger.info(f" PASS:  Report generated: {report_path}")
         
         # Print summary to console
         self._print_summary()
@@ -407,7 +407,7 @@ improvements in the message handling system.
 - **Duration**: {duration:.1f}s
 - **Detected Issues**: {failure_count}
 - **Expected Result**: FAIL (to identify readiness issues)
-- **Actual Result**: {'✅ FAILED as expected' if status == 'EXPECTED_FAILURES' else '⚠️ Unexpected result'}
+- **Actual Result**: {' PASS:  FAILED as expected' if status == 'EXPECTED_FAILURES' else ' WARNING: [U+FE0F] Unexpected result'}
 """)
         
         return "\n".join(content)

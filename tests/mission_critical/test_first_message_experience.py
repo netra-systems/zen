@@ -254,7 +254,7 @@ class FirstMessageEventValidator:
             "FIRST MESSAGE EXPERIENCE VALIDATION REPORT",
             "=" * 80,
             f"Business Impact: User Activation & Conversion",
-            f"Status: {'✅ VALUE DELIVERED' if is_valid else '❌ NO VALUE - BROKEN'}",
+            f"Status: {' PASS:  VALUE DELIVERED' if is_valid else ' FAIL:  NO VALUE - BROKEN'}",
             "",
             f"Total Events: {len(self.events)}",
             f"Response Time: {self.event_timeline[-1][0] if self.event_timeline else 0:.2f}s",
@@ -275,7 +275,7 @@ class FirstMessageEventValidator:
             report.append("")
             report.append("CRITICAL FAILURES:")
             for failure in failures:
-                report.append(f"  ❌ {failure}")
+                report.append(f"   FAIL:  {failure}")
                 
         report.append("=" * 80)
         return "\n".join(report)
@@ -550,7 +550,7 @@ class TestFirstMessageExperience:
             assert is_valid, f"First message experience failed:\n" + "\n".join(failures)
             assert len(events_received) >= 5, f"Too few events received: {len(events_received)}"
         
-        logger.info("✅ First message test completed successfully!")
+        logger.info(" PASS:  First message test completed successfully!")
         
     @pytest.mark.asyncio
     @pytest.mark.timeout(180)  # Extended timeout for concurrent tests
@@ -662,14 +662,14 @@ class TestFirstMessageExperience:
                 is_valid, validator = result
                 if is_valid:
                     successful += 1
-                    logger.info(f"User {i}: ✅ Success")
+                    logger.info(f"User {i}:  PASS:  Success")
                 else:
-                    logger.error(f"User {i}: ❌ Failed")
+                    logger.error(f"User {i}:  FAIL:  Failed")
                     
         # More lenient success rate for staging environment
         min_success_rate = 0.6 if self.is_staging else 0.8
         assert successful >= num_users * min_success_rate, f"Only {successful}/{num_users} users succeeded (required: {min_success_rate * 100}%)"
-        logger.info(f"✅ Concurrent first messages: {successful}/{num_users} successful")
+        logger.info(f" PASS:  Concurrent first messages: {successful}/{num_users} successful")
         
     @pytest.mark.asyncio
     @pytest.mark.timeout(90)
@@ -748,7 +748,7 @@ class TestFirstMessageExperience:
         has_response = any(e.get("type") == "agent_completed" for e in validator.events)
         assert has_response, "No response delivered even with extended timeout"
         
-        logger.info("✅ First message handled gracefully despite service degradation")
+        logger.info(" PASS:  First message handled gracefully despite service degradation")
         
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
@@ -831,7 +831,7 @@ class TestFirstMessageExperience:
         message_received_count = sum(1 for e in all_events if e.get("type") == "message_received")
         assert message_received_count >= 2, f"Only {message_received_count}/3 messages acknowledged"
         
-        logger.info("✅ Rapid first messages handled successfully")
+        logger.info(" PASS:  Rapid first messages handled successfully")
         
     @pytest.mark.asyncio
     @pytest.mark.timeout(60)
@@ -845,7 +845,7 @@ class TestFirstMessageExperience:
             ("empty", ""),
             ("whitespace", "   \n\t   "),
             ("very_long", "optimize " * 1000),  # Very long message
-            ("special_chars", "Help with 你好 🚀 <script>alert('test')</script>"),
+            ("special_chars", "Help with [U+4F60][U+597D] [U+1F680] <script>alert('test')</script>"),
             ("json_attempt", '{"type": "hack", "admin": true}')
         ]
         
@@ -904,13 +904,13 @@ class TestFirstMessageExperience:
                     assert "message" in error_event, "Error missing user-friendly message"
                     assert "stack" not in str(error_event.get("message", "")).lower(), "Stack trace exposed to user"
                     
-                logger.info(f"  ✅ {case_name}: Handled gracefully")
+                logger.info(f"   PASS:  {case_name}: Handled gracefully")
                 
             finally:
                 if ws:
                     ws.close()
                     
-        logger.info("✅ All malformed messages handled appropriately")
+        logger.info(" PASS:  All malformed messages handled appropriately")
 
 
 class TestFirstMessageIntegration:
@@ -953,7 +953,7 @@ class TestFirstMessageIntegration:
                     assert ctx.thread_id != other_ctx.thread_id
                     assert id(ctx) != id(other_ctx)
                     
-        logger.info("✅ User contexts properly isolated")
+        logger.info(" PASS:  User contexts properly isolated")
         
     @pytest.mark.asyncio
     async def test_websocket_notifier_integration(self):
@@ -994,7 +994,7 @@ class TestFirstMessageIntegration:
         assert "tool_completed" in event_types
         assert "agent_completed" in event_types
         
-        logger.info(f"✅ WebSocketNotifier sent {len(sent_events)} events correctly")
+        logger.info(f" PASS:  WebSocketNotifier sent {len(sent_events)} events correctly")
         
     @pytest.mark.asyncio
     async def test_agent_registry_websocket_enhancement(self):
@@ -1026,7 +1026,7 @@ class TestFirstMessageIntegration:
         assert agent is not None
         # Tool dispatcher should be enhanced
         
-        logger.info("✅ AgentRegistry properly enhances with WebSocket support")
+        logger.info(" PASS:  AgentRegistry properly enhances with WebSocket support")
 
 
 class TestFirstMessagePerformance:
@@ -1144,7 +1144,7 @@ Load Test Results:
         assert success_rate >= 90, f"Success rate {success_rate}% below 90% SLO"
         assert p99_response <= 60, f"P99 response time {p99_response}s exceeds 60s SLO"
         
-        logger.info("✅ Load test passed: System handles 50+ concurrent first messages")
+        logger.info(" PASS:  Load test passed: System handles 50+ concurrent first messages")
 
 
 if __name__ == "__main__":

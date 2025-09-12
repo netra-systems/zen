@@ -99,7 +99,7 @@ class AgentCircuitBreaker:
         self.recovery_attempts = 0
         self.half_open_calls = 0
         
-        logger.info(f"🔌 Circuit breaker initialized for {agent_name}")
+        logger.info(f"[U+1F50C] Circuit breaker initialized for {agent_name}")
     
     def can_execute(self) -> bool:
         """Check if agent can execute based on circuit state."""
@@ -135,7 +135,7 @@ class AgentCircuitBreaker:
         if self.state == CircuitState.HALF_OPEN:
             if self.success_count >= self.config.success_threshold:
                 self._transition_to_closed()
-                logger.info(f"✅ Circuit breaker CLOSED for {self.agent_name} after {self.success_count} successes")
+                logger.info(f" PASS:  Circuit breaker CLOSED for {self.agent_name} after {self.success_count} successes")
         
         # Clean up old failure records
         self._cleanup_old_failures()
@@ -160,17 +160,17 @@ class AgentCircuitBreaker:
         # Count recent failures
         recent_failures = len(self.failure_records)
         
-        logger.warning(f"⚠️ Failure recorded for {self.agent_name}: {failure_type.value} - {error_message} (recent failures: {recent_failures})")
+        logger.warning(f" WARNING: [U+FE0F] Failure recorded for {self.agent_name}: {failure_type.value} - {error_message} (recent failures: {recent_failures})")
         
         # Check if we should trip the circuit
         if self.state == CircuitState.CLOSED and recent_failures >= self.config.failure_threshold:
             self._transition_to_open()
-            logger.error(f"🔴 Circuit breaker OPENED for {self.agent_name} after {recent_failures} failures")
+            logger.error(f"[U+1F534] Circuit breaker OPENED for {self.agent_name} after {recent_failures} failures")
         
         elif self.state == CircuitState.HALF_OPEN:
             # Any failure in half-open state reopens the circuit
             self._transition_to_open()
-            logger.error(f"🔴 Circuit breaker RE-OPENED for {self.agent_name} during recovery attempt")
+            logger.error(f"[U+1F534] Circuit breaker RE-OPENED for {self.agent_name} during recovery attempt")
     
     def _cleanup_old_failures(self) -> None:
         """Remove failures outside the failure window."""
@@ -190,7 +190,7 @@ class AgentCircuitBreaker:
         self.recovery_attempts += 1
         self.half_open_calls = 0
         self.success_count = 0
-        logger.info(f"🟡 Circuit breaker HALF-OPEN for {self.agent_name} (recovery attempt #{self.recovery_attempts})")
+        logger.info(f"[U+1F7E1] Circuit breaker HALF-OPEN for {self.agent_name} (recovery attempt #{self.recovery_attempts})")
     
     def _transition_to_closed(self) -> None:
         """Transition to closed state."""
@@ -216,7 +216,7 @@ class AgentCircuitBreaker:
     
     def force_reset(self) -> None:
         """Force reset the circuit breaker (emergency recovery)."""
-        logger.warning(f"🔧 Force resetting circuit breaker for {self.agent_name}")
+        logger.warning(f"[U+1F527] Force resetting circuit breaker for {self.agent_name}")
         self.state = CircuitState.CLOSED
         self.failure_records.clear()
         self.opened_at = None
@@ -256,7 +256,7 @@ class SystemCircuitBreaker:
         self.global_failure_count = 0
         self.system_degraded = False
         
-        logger.info(f"🔌 System circuit breaker initialized with default config: {self.default_config}")
+        logger.info(f"[U+1F50C] System circuit breaker initialized with default config: {self.default_config}")
     
     def get_or_create_breaker(self, agent_name: str, config: Optional[CircuitBreakerConfig] = None) -> AgentCircuitBreaker:
         """Get or create circuit breaker for an agent."""
@@ -282,10 +282,10 @@ class SystemCircuitBreaker:
         if fallback_agent:
             fallback_breaker = self.get_or_create_breaker(fallback_agent)
             if fallback_breaker.can_execute():
-                logger.info(f"🔄 Using fallback agent {fallback_agent} for failed {agent_name}")
+                logger.info(f" CYCLE:  Using fallback agent {fallback_agent} for failed {agent_name}")
                 return True, fallback_agent
         
-        logger.error(f"🚫 No available agents for {agent_name} (circuit open, no fallback)")
+        logger.error(f"[U+1F6AB] No available agents for {agent_name} (circuit open, no fallback)")
         return False, None
     
     async def record_execution_result(
@@ -302,7 +302,7 @@ class SystemCircuitBreaker:
         
         if success:
             breaker.record_success()
-            logger.debug(f"✅ Success recorded for {agent_name}")
+            logger.debug(f" PASS:  Success recorded for {agent_name}")
         else:
             breaker.record_failure(failure_type or FailureType.EXCEPTION, error_message, user_id, context)
             self.global_failure_count += 1
@@ -311,7 +311,7 @@ class SystemCircuitBreaker:
             open_breakers = sum(1 for b in self.agent_breakers.values() if b.state == CircuitState.OPEN)
             if open_breakers >= len(self.agent_breakers) * 0.5:  # 50% of agents failing
                 self.system_degraded = True
-                logger.critical(f"🚨 SYSTEM DEGRADED: {open_breakers}/{len(self.agent_breakers)} agents have circuit breakers open")
+                logger.critical(f" ALERT:  SYSTEM DEGRADED: {open_breakers}/{len(self.agent_breakers)} agents have circuit breakers open")
     
     async def get_system_status(self) -> Dict[str, Any]:
         """Get comprehensive system circuit breaker status."""
@@ -400,13 +400,13 @@ class SystemCircuitBreaker:
         """Force reset a specific agent's circuit breaker."""
         if agent_name in self.agent_breakers:
             self.agent_breakers[agent_name].force_reset()
-            logger.info(f"🔧 Force reset circuit breaker for {agent_name}")
+            logger.info(f"[U+1F527] Force reset circuit breaker for {agent_name}")
             return True
         return False
     
     async def force_reset_all_agents(self) -> int:
         """Emergency reset of all circuit breakers."""
-        logger.critical("🔧 EMERGENCY RESET: Resetting all circuit breakers")
+        logger.critical("[U+1F527] EMERGENCY RESET: Resetting all circuit breakers")
         
         reset_count = 0
         for breaker in self.agent_breakers.values():
@@ -416,19 +416,19 @@ class SystemCircuitBreaker:
         self.system_degraded = False
         self.global_failure_count = 0
         
-        logger.critical(f"🔧 Emergency reset completed: {reset_count} circuit breakers reset")
+        logger.critical(f"[U+1F527] Emergency reset completed: {reset_count} circuit breakers reset")
         return reset_count
     
     async def add_fallback_agent(self, primary_agent: str, fallback_agent: str) -> None:
         """Add or update a fallback agent mapping."""
         self.fallback_agents[primary_agent] = fallback_agent
-        logger.info(f"🔄 Added fallback mapping: {primary_agent} -> {fallback_agent}")
+        logger.info(f" CYCLE:  Added fallback mapping: {primary_agent} -> {fallback_agent}")
     
     async def remove_fallback_agent(self, primary_agent: str) -> bool:
         """Remove a fallback agent mapping."""
         if primary_agent in self.fallback_agents:
             del self.fallback_agents[primary_agent]
-            logger.info(f"🔄 Removed fallback mapping for {primary_agent}")
+            logger.info(f" CYCLE:  Removed fallback mapping for {primary_agent}")
             return True
         return False
     

@@ -107,10 +107,10 @@ class WebSocketTester:
                 
                 try:
                     async with websockets.connect(ws_url, extra_headers=headers) as websocket:
-                        logger.info(f"✓ Connected with origin: {origin}")
+                        logger.info(f"[U+2713] Connected with origin: {origin}")
                         await websocket.close()
                 except Exception as e:
-                    logger.warning(f"✗ Failed with origin {origin}: {e}")
+                    logger.warning(f"[U+2717] Failed with origin {origin}: {e}")
             
             return True
             
@@ -136,7 +136,7 @@ class WebSocketTester:
         
         # Check middleware order
         logger.info("\n3. Middleware Order:")
-        logger.info("   - Security middleware → Request middleware → Security response middleware")
+        logger.info("   - Security middleware  ->  Request middleware  ->  Security response middleware")
         logger.info("   - WebSocket CORS wrapping happens in setup_request_middleware")
         logger.info("   - Issue: WebSocket wrapping may not be effective due to FastAPI limitations")
         
@@ -161,29 +161,29 @@ class WebSocketTester:
         
         # Test basic connectivity
         if await self.test_health_check():
-            logger.info("✓ Backend is running\n")
+            logger.info("[U+2713] Backend is running\n")
         else:
-            logger.error("✗ Backend is not running. Please start the backend first.\n")
+            logger.error("[U+2717] Backend is not running. Please start the backend first.\n")
             return
         
         # Get WebSocket config
         config = await self.test_ws_config_endpoint()
         if config:
-            logger.info("✓ WebSocket config endpoint accessible\n")
+            logger.info("[U+2713] WebSocket config endpoint accessible\n")
         else:
-            logger.warning("✗ WebSocket config endpoint not accessible\n")
+            logger.warning("[U+2717] WebSocket config endpoint not accessible\n")
         
         # Test WebSocket connectivity
         if await self.test_websocket_test_endpoint():
-            logger.info("✓ Test WebSocket endpoint works\n")
+            logger.info("[U+2713] Test WebSocket endpoint works\n")
         else:
-            logger.error("✗ Test WebSocket endpoint failed\n")
+            logger.error("[U+2717] Test WebSocket endpoint failed\n")
         
         # Test CORS
         if await self.test_websocket_with_cors_headers():
-            logger.info("✓ CORS headers handled\n")
+            logger.info("[U+2713] CORS headers handled\n")
         else:
-            logger.warning("✗ CORS issues detected\n")
+            logger.warning("[U+2717] CORS issues detected\n")
         
         # Analyze middleware configuration
         await self.check_middleware_order()

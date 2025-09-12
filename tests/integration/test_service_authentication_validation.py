@@ -61,7 +61,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         self.service_id = self.env.get("SERVICE_ID", "netra-backend")
         self.service_secret = self.env.get("SERVICE_SECRET", "test_service_secret_32chars_long")
         
-        logger.info(f"🔍 SERVICE AUTH TEST: {method.__name__}")
+        logger.info(f" SEARCH:  SERVICE AUTH TEST: {method.__name__}")
         logger.info(f"Environment: {self.environment}")
         logger.info(f"Service ID: {self.service_id}")
         logger.info(f"Service Secret: {'***' + self.service_secret[-4:] if self.service_secret else 'NOT_SET'}")
@@ -75,7 +75,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS after service auth implementation
         VALIDATES: Service authentication headers enable system user operations
         """
-        logger.info("✅ VALIDATION: Testing system user with service auth headers")
+        logger.info(" PASS:  VALIDATION: Testing system user with service auth headers")
         
         async with aiohttp.ClientSession() as session:
             # Test system user operation with proper service authentication
@@ -94,7 +94,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                     
                     # Should succeed with proper service authentication
                     if response.status == 200:
-                        logger.info("✅ VALIDATION SUCCESS: System user authenticated with service headers")
+                        logger.info(" PASS:  VALIDATION SUCCESS: System user authenticated with service headers")
                         logger.info(f"Success response: {response_text}")
                         return
                     elif response.status in [401, 403]:
@@ -120,7 +120,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS after service auth implementation
         VALIDATES: Core dependencies.py function works with service authentication
         """
-        logger.info("✅ VALIDATION: Testing get_request_scoped_db_session with service auth")
+        logger.info(" PASS:  VALIDATION: Testing get_request_scoped_db_session with service auth")
         
         async with aiohttp.ClientSession() as session:
             # Test the specific function that was failing in dependencies.py
@@ -145,7 +145,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                     
                     # Should succeed with service authentication
                     if response.status == 200:
-                        logger.info("✅ VALIDATION SUCCESS: Database session created with service auth")
+                        logger.info(" PASS:  VALIDATION SUCCESS: Database session created with service auth")
                         logger.info(f"Session creation success: {response_text}")
                         return
                     elif response.status in [401, 403]:
@@ -171,7 +171,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS after service auth implementation
         VALIDATES: Middleware recognizes and validates service-to-service authentication
         """
-        logger.info("✅ VALIDATION: Testing middleware accepts authenticated service requests")
+        logger.info(" PASS:  VALIDATION: Testing middleware accepts authenticated service requests")
         
         async with aiohttp.ClientSession() as session:
             # Test authenticated endpoint with proper service credentials
@@ -190,7 +190,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                     
                     # Middleware should accept service-authenticated requests
                     if response.status == 200:
-                        logger.info("✅ VALIDATION SUCCESS: Middleware accepted service-authenticated request")
+                        logger.info(" PASS:  VALIDATION SUCCESS: Middleware accepted service-authenticated request")
                         logger.info(f"Middleware success: {response_text}")
                         return
                     elif response.status in [401, 403]:
@@ -216,7 +216,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS after service auth implementation
         VALIDATES: Session factory works with proper service authentication context
         """
-        logger.info("✅ VALIDATION: Testing session factory accepts service-authenticated system user")
+        logger.info(" PASS:  VALIDATION: Testing session factory accepts service-authenticated system user")
         
         async with aiohttp.ClientSession() as session:
             # Test session creation with service-authenticated system user
@@ -241,7 +241,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                     
                     # Session factory should succeed with service authentication
                     if response.status == 200:
-                        logger.info("✅ VALIDATION SUCCESS: Session factory accepted service-authenticated system user")
+                        logger.info(" PASS:  VALIDATION SUCCESS: Session factory accepted service-authenticated system user")
                         logger.info(f"Session factory success: {response_text}")
                         return
                     elif response.status in [401, 403]:
@@ -267,7 +267,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS with proper error handling
         VALIDATES: Service auth properly validates headers and gives clear error messages
         """
-        logger.info("✅ VALIDATION: Testing service auth header validation edge cases")
+        logger.info(" PASS:  VALIDATION: Testing service auth header validation edge cases")
         
         # Test cases for different authentication scenarios
         test_cases = [
@@ -316,7 +316,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                         if response.status in test_case["expected_status"]:
                             # Verify error message contains relevant keywords
                             if any(keyword in response_text.lower() for keyword in test_case["error_keywords"]):
-                                logger.info(f"✅ Edge case {test_case['name']}: Proper error handling")
+                                logger.info(f" PASS:  Edge case {test_case['name']}: Proper error handling")
                                 continue
                             else:
                                 pytest.fail(
@@ -334,7 +334,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                 except Exception as e:
                     pytest.fail(f"VALIDATION FAILED: Error testing edge case {test_case['name']}: {e}")
                     
-        logger.info("✅ VALIDATION SUCCESS: All service auth edge cases handled properly")
+        logger.info(" PASS:  VALIDATION SUCCESS: All service auth edge cases handled properly")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -345,7 +345,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
         EXPECTED: This test should PASS after service auth implementation
         VALIDATES: Complete golden path functionality restored with service authentication
         """
-        logger.info("✅ VALIDATION: Testing golden path works with service authentication")
+        logger.info(" PASS:  VALIDATION: Testing golden path works with service authentication")
         
         # Create authenticated user for golden path test
         auth_result = await create_test_user_with_auth(
@@ -377,7 +377,7 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
                     
                     # Golden path should succeed with fixed service authentication
                     if response.status == 200:
-                        logger.info("✅ VALIDATION SUCCESS: Golden path working with service authentication")
+                        logger.info(" PASS:  VALIDATION SUCCESS: Golden path working with service authentication")
                         logger.info(f"Golden path success: {response_text[:200]}...")
                         return
                     elif response.status in [500, 503]:
@@ -419,5 +419,5 @@ class TestServiceAuthenticationValidation(SSotBaseTestCase):
 
     def teardown_method(self, method):
         """Clean up after test."""
-        logger.info(f"🏁 SERVICE AUTH VALIDATION TEST COMPLETE: {method.__name__}")
+        logger.info(f"[U+1F3C1] SERVICE AUTH VALIDATION TEST COMPLETE: {method.__name__}")
         super().teardown_method(method)

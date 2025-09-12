@@ -55,7 +55,7 @@ def cleanup_remaining_mocks():
         file_path = base_dir / file_rel
         
         if not file_path.exists():
-            print(f"⏭️  Skipping {file_rel} - file doesn't exist")
+            print(f"[U+23ED][U+FE0F]  Skipping {file_rel} - file doesn't exist")
             continue
             
         try:
@@ -78,15 +78,15 @@ def cleanup_remaining_mocks():
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(content)
-                print(f"✅ Cleaned {file_rel}")
+                print(f" PASS:  Cleaned {file_rel}")
                 cleaned_count += 1
             else:
-                print(f"⏭️  No changes needed for {file_rel}")
+                print(f"[U+23ED][U+FE0F]  No changes needed for {file_rel}")
                 
         except Exception as e:
-            print(f"❌ Error processing {file_rel}: {e}")
+            print(f" FAIL:  Error processing {file_rel}: {e}")
             
-    print(f"\n🎯 Cleaned {cleaned_count} additional files")
+    print(f"\n TARGET:  Cleaned {cleaned_count} additional files")
 
 if __name__ == "__main__":
     cleanup_remaining_mocks()

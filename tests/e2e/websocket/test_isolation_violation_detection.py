@@ -77,7 +77,7 @@ class TestIsolationViolationDetection:
         # Verify violation is recorded
         assert len(client.isolation_violations) == 1
         
-        logger.info("✅ Client correctly detected user ID mismatch violation")
+        logger.info(" PASS:  Client correctly detected user ID mismatch violation")
     
     @pytest.mark.asyncio
     async def test_client_allows_matching_user_id(self):
@@ -103,7 +103,7 @@ class TestIsolationViolationDetection:
         # No violations should be recorded
         assert len(client.isolation_violations) == 0
         
-        logger.info("✅ Client correctly allowed matching user ID")
+        logger.info(" PASS:  Client correctly allowed matching user ID")
     
     @pytest.mark.asyncio
     async def test_assert_no_violations_fails_when_violations_exist(self):
@@ -125,7 +125,7 @@ class TestIsolationViolationDetection:
         assert "USER ISOLATION VIOLATIONS DETECTED" in str(exc_info.value)
         assert violation in str(exc_info.value)
         
-        logger.info("✅ Client correctly failed assertion when violations exist")
+        logger.info(" PASS:  Client correctly failed assertion when violations exist")
     
     @pytest.mark.asyncio
     async def test_assert_events_received_fails_when_missing(self):
@@ -158,7 +158,7 @@ class TestIsolationViolationDetection:
         assert "Missing expected WebSocket events" in str(exc_info.value)
         assert "agent_completed" in str(exc_info.value)
         
-        logger.info("✅ Client correctly failed assertion when events missing")
+        logger.info(" PASS:  Client correctly failed assertion when events missing")
     
     @pytest.mark.asyncio
     async def test_connection_manager_detects_violations(self):
@@ -195,7 +195,7 @@ class TestIsolationViolationDetection:
         
         assert "ISOLATION VIOLATIONS DETECTED" in str(exc_info.value)
         
-        logger.info("✅ Connection manager correctly detected violations")
+        logger.info(" PASS:  Connection manager correctly detected violations")
     
     @pytest.mark.asyncio
     async def test_security_error_raised_on_critical_violations(self):
@@ -206,7 +206,7 @@ class TestIsolationViolationDetection:
             raise SecurityError("Critical security violation detected")
         except SecurityError as e:
             assert "Critical security violation detected" in str(e)
-            logger.info("✅ SecurityError correctly raised and caught")
+            logger.info(" PASS:  SecurityError correctly raised and caught")
         
         # Verify it's a proper exception
         assert issubclass(SecurityError, Exception)
@@ -237,7 +237,7 @@ class TestIsolationViolationDetection:
         assert len(failed_result.violation_details) == 3
         assert "User A received User B's data" in failed_result.violation_details
         
-        logger.info("✅ IsolationTestResult correctly indicates failure")
+        logger.info(" PASS:  IsolationTestResult correctly indicates failure")
     
     @pytest.mark.asyncio
     async def test_websocket_events_isolation_function_detects_violations(self):
@@ -288,7 +288,7 @@ class TestIsolationViolationDetection:
         
         assert "WebSocket isolation test FAILED" in str(exc_info.value)
         
-        logger.info("✅ test_websocket_events_isolation correctly detected violations")
+        logger.info(" PASS:  test_websocket_events_isolation correctly detected violations")
 
 
 class TestIsolationViolationScenarios:
@@ -323,7 +323,7 @@ class TestIsolationViolationScenarios:
         with pytest.raises(SecurityError):
             client._validate_user_isolation(contaminated_event)
         
-        logger.info("✅ Event data contamination correctly detected")
+        logger.info(" PASS:  Event data contamination correctly detected")
     
     @pytest.mark.asyncio
     async def test_empty_user_context_handling(self):
@@ -348,7 +348,7 @@ class TestIsolationViolationScenarios:
         
         assert len(client.isolation_violations) == 0
         
-        logger.info("✅ Empty user context correctly handled")
+        logger.info(" PASS:  Empty user context correctly handled")
     
     @pytest.mark.asyncio 
     async def test_partial_user_id_in_data_only(self):
@@ -372,7 +372,7 @@ class TestIsolationViolationScenarios:
         with pytest.raises(SecurityError):
             client._validate_user_isolation(data_violation_event)
         
-        logger.info("✅ User ID in data field violation correctly detected")
+        logger.info(" PASS:  User ID in data field violation correctly detected")
 
 
 if __name__ == "__main__":

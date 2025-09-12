@@ -1,5 +1,5 @@
 """
-Helper functions for triage sub agent tests to ensure functions are ≤8 lines
+Helper functions for triage sub agent tests to ensure functions are  <= 8 lines
 """
 
 import asyncio

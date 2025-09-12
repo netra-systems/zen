@@ -11,11 +11,11 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tests the event system that differentiates our chat from competitors
 
 TEST COVERAGE:
-✅ Agent event generation during chat workflows
-✅ WebSocket event delivery with authentication
-✅ Agent lifecycle events (started, thinking, tool_executing, tool_completed, completed)
-✅ Event timing and sequence validation
-✅ Business value event content validation
+ PASS:  Agent event generation during chat workflows
+ PASS:  WebSocket event delivery with authentication
+ PASS:  Agent lifecycle events (started, thinking, tool_executing, tool_completed, completed)
+ PASS:  Event timing and sequence validation
+ PASS:  Business value event content validation
 
 COMPLIANCE:
 @compliance CLAUDE.md - WebSocket events enable substantive chat (Section 6)
@@ -203,7 +203,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         
         Business Value: Ensures agents generate events that inform users.
         """
-        print("\n🧪 Testing agent event generation integration...")
+        print("\n[U+1F9EA] Testing agent event generation integration...")
         
         # STEP 1: Create authenticated agent context
         user_context, agent_name = await self._create_authenticated_agent_context(
@@ -226,7 +226,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
             self.event_validator.record_event(event)
             self.captured_events.append(event)
             
-            print(f"📊 Generated event: {event.event_type}")
+            print(f" CHART:  Generated event: {event.event_type}")
         
         # STEP 5: Validate complete event sequence
         validation_result = self.event_validator.perform_full_validation()
@@ -243,7 +243,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         assert "tool_completed" in event_types, "tool_completed event should be generated"
         assert "agent_completed" in event_types, "agent_completed event should be generated"
         
-        print("✅ Agent event generation integration successful")
+        print(" PASS:  Agent event generation integration successful")
     
     @pytest.mark.asyncio
     async def test_websocket_event_delivery_integration(self):
@@ -255,7 +255,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         
         Business Value: Ensures users receive real-time agent updates.
         """
-        print("\n🧪 Testing WebSocket event delivery integration...")
+        print("\n[U+1F9EA] Testing WebSocket event delivery integration...")
         
         # STEP 1: Create authenticated agent context
         user_context, agent_name = await self._create_authenticated_agent_context(
@@ -283,14 +283,14 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
                 
                 # Track successful delivery attempts
                 delivered_events.append(event_data)
-                print(f"📡 Delivered event: {event_data['type']}")
+                print(f"[U+1F4E1] Delivered event: {event_data['type']}")
                 
             except Exception as e:
                 # Expected if no actual WebSocket connection
                 if "websocket" in str(e).lower() or "connection" in str(e).lower():
                     # Still counts as successful routing logic test
                     delivered_events.append(event_data)
-                    print(f"📡 Event routing logic validated: {event_data['type']}")
+                    print(f"[U+1F4E1] Event routing logic validated: {event_data['type']}")
                 else:
                     raise
         
@@ -304,7 +304,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
             assert "timestamp" in event_data, "Event should have timestamp"
             assert event_data["user_id"] == str(user_context.user_id), "Event should match user"
         
-        print("✅ WebSocket event delivery integration successful")
+        print(" PASS:  WebSocket event delivery integration successful")
     
     @pytest.mark.asyncio
     async def test_agent_lifecycle_events_sequence(self):
@@ -316,7 +316,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         
         Business Value: Ensures coherent user experience during agent execution.
         """
-        print("\n🧪 Testing agent lifecycle event sequence...")
+        print("\n[U+1F9EA] Testing agent lifecycle event sequence...")
         
         # STEP 1: Create authenticated agent context
         user_context, agent_name = await self._create_authenticated_agent_context(
@@ -393,7 +393,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         expected_sequence = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
         assert event_types_sequence == expected_sequence, f"Event sequence mismatch: {event_types_sequence}"
         
-        print("✅ Agent lifecycle event sequence validation successful")
+        print(" PASS:  Agent lifecycle event sequence validation successful")
     
     @pytest.mark.asyncio
     async def test_business_value_event_content(self):
@@ -405,7 +405,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         
         Business Value: Ensures events deliver actual value to users.
         """
-        print("\n🧪 Testing business value event content...")
+        print("\n[U+1F9EA] Testing business value event content...")
         
         # STEP 1: Create authenticated agent context
         user_context, agent_name = await self._create_authenticated_agent_context(
@@ -498,7 +498,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         found_keywords = [keyword for keyword in value_keywords if keyword in all_messages.lower()]
         assert len(found_keywords) >= 4, f"Events should use business value language: {found_keywords}"
         
-        print("✅ Business value event content validation successful")
+        print(" PASS:  Business value event content validation successful")
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_events_isolation(self):
@@ -510,7 +510,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         
         Business Value: Ensures multi-user agent execution with security.
         """
-        print("\n🧪 Testing concurrent agent events with isolation...")
+        print("\n[U+1F9EA] Testing concurrent agent events with isolation...")
         
         # STEP 1: Create multiple authenticated agent contexts
         user1_context, agent1_name = await self._create_authenticated_agent_context(
@@ -559,7 +559,7 @@ class TestChatWorkflowAgentEventsIntegration(SSotBaseTestCase):
         assert len(user2_event_user_ids) == 1, "User 2 events should only have user 2 ID"
         assert user1_event_user_ids != user2_event_user_ids, "Users should have different IDs"
         
-        print("✅ Concurrent agent events isolation successful")
+        print(" PASS:  Concurrent agent events isolation successful")
 
 
 if __name__ == "__main__":

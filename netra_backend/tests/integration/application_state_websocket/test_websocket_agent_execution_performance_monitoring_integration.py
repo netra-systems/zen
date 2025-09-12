@@ -783,7 +783,7 @@ class TestWebSocketAgentExecutionPerformanceMonitoringIntegration(BaseIntegratio
             f"Invalid response time category: {response_category}"
             
         self.logger.info(
-            f"✅ Performance monitoring test PASSED - "
+            f" PASS:  Performance monitoring test PASSED - "
             f"Score: {performance_score:.1f}, "
             f"SLA: {sla_compliance.get('compliance_rate', 0):.1f}%, "
             f"Events: {timing_analysis['total_events']}, "
@@ -872,7 +872,7 @@ class TestWebSocketAgentExecutionPerformanceMonitoringIntegration(BaseIntegratio
             
         # Log SLA compliance results
         self.logger.info(
-            f"✅ SLA validation test PASSED - "
+            f" PASS:  SLA validation test PASSED - "
             f"Overall compliance: {sla_validation['overall_compliance']}, "
             f"Violations: {len(sla_validation['violations'])}, "
             f"Total time: {timing_analysis['total_execution_time_ms']:.1f}ms"
@@ -993,7 +993,7 @@ class TestWebSocketAgentExecutionPerformanceMonitoringIntegration(BaseIntegratio
             assert len(warning_events) > 0, "Performance degradation should be reported in WebSocket events"
             
         self.logger.info(
-            f"✅ Performance degradation detection test PASSED - "
+            f" PASS:  Performance degradation detection test PASSED - "
             f"Degradation detected: {performance_analysis.get('degradation_detected', False)}, "
             f"Performance score: {performance_analysis.get('performance_score', 0):.1f}"
         )

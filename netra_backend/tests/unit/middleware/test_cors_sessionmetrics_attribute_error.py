@@ -29,7 +29,7 @@ class TestSessionMetricsAttributeErrorFix:
         # This SHOULD PASS - the compatibility layer provides last_activity
         assert hasattr(metrics, 'last_activity')
         assert metrics.last_activity is not None
-        print("✅ SessionMetrics now HAS last_activity attribute")
+        print(" PASS:  SessionMetrics now HAS last_activity attribute")
 
     def test_database_sessionmetrics_has_backward_compatibility(self):
         """CRITICAL: Proves DatabaseSessionMetrics has backward compatibility with both attributes."""
@@ -48,7 +48,7 @@ class TestSessionMetricsAttributeErrorFix:
         # This SHOULD ALSO WORK - proves the backward compatibility property exists
         assert hasattr(metrics, 'last_activity')
         assert metrics.last_activity is not None
-        print("✅ DatabaseSessionMetrics has both last_activity and last_activity_at")
+        print(" PASS:  DatabaseSessionMetrics has both last_activity and last_activity_at")
 
     def test_middleware_code_now_works_with_sessionmetrics(self):
         """CRITICAL: Validates real middleware code now works with fixed SessionMetrics."""
@@ -63,7 +63,7 @@ class TestSessionMetricsAttributeErrorFix:
         # This SHOULD WORK now with the compatibility layer
         last_activity = middleware_function(metrics)
         assert last_activity is not None
-        print("✅ Middleware code now works with SessionMetrics last_activity")
+        print(" PASS:  Middleware code now works with SessionMetrics last_activity")
 
     def test_websocket_handler_now_works_with_database_sessionmetrics(self):
         """CRITICAL: Validates WebSocket handler now works with fixed DatabaseSessionMetrics."""
@@ -86,7 +86,7 @@ class TestSessionMetricsAttributeErrorFix:
         # This SHOULD WORK now with the backward compatibility property
         last_activity = websocket_handler(metrics)
         assert last_activity is not None
-        print("✅ WebSocket handler now works with DatabaseSessionMetrics last_activity")
+        print(" PASS:  WebSocket handler now works with DatabaseSessionMetrics last_activity")
 
 
 class TestUnifiedImportScenarios:
@@ -108,7 +108,7 @@ class TestUnifiedImportScenarios:
         metrics3 = SessionMetrics(total_sessions=5, active_sessions=2)
         assert hasattr(metrics3, 'last_activity')
         
-        print("✅ SessionMetrics compatibility layer handles all constructor patterns")
+        print(" PASS:  SessionMetrics compatibility layer handles all constructor patterns")
     
     def test_specific_metric_types_work_correctly(self):
         """CRITICAL: Tests that specific metric types work as expected."""
@@ -127,7 +127,7 @@ class TestUnifiedImportScenarios:
         assert hasattr(database_metrics, 'last_activity')
         assert hasattr(database_metrics, 'last_activity_at')
         
-        print("✅ All specific SessionMetrics types have required attributes")
+        print(" PASS:  All specific SessionMetrics types have required attributes")
 
     def test_real_metrics_now_work_without_mocking(self):
         """CRITICAL: Shows that real SessionMetrics work without needing mocks."""
@@ -149,7 +149,7 @@ class TestUnifiedImportScenarios:
         assert hasattr(db_metrics, 'last_activity')
         assert hasattr(db_metrics, 'last_activity_at')
         
-        print("✅ Real SessionMetrics work without mocking - SSOT violation fixed")
+        print(" PASS:  Real SessionMetrics work without mocking - SSOT violation fixed")
 
 
 class TestSessionMetricsSSOTViolationFixed:
@@ -167,7 +167,7 @@ class TestSessionMetricsSSOTViolationFixed:
         # Should have access to common session metrics properties
         assert hasattr(metrics, 'to_dict')
         
-        print("✅ Unified SessionMetrics compatibility layer exists and works")
+        print(" PASS:  Unified SessionMetrics compatibility layer exists and works")
         
     def test_ssot_classes_have_clear_names_and_purposes(self):
         """CRITICAL: Proves SSOT classes have clear, non-conflicting names."""
@@ -186,7 +186,7 @@ class TestSessionMetricsSSOTViolationFixed:
         assert hasattr(db_metrics, 'last_activity')  # Backward compatibility
         assert hasattr(db_metrics, 'last_activity_at')  # Original attribute
         
-        print("✅ SSOT classes have clear names and non-conflicting purposes")
+        print(" PASS:  SSOT classes have clear names and non-conflicting purposes")
 
     def test_sessionmetrics_interfaces_are_now_consistent(self):
         """CRITICAL: Proves the interfaces are now consistent through compatibility layer."""
@@ -204,7 +204,7 @@ class TestSessionMetricsSSOTViolationFixed:
         assert hasattr(system_compat, 'last_activity')
         assert hasattr(user_compat, 'last_activity')
         
-        print("✅ SessionMetrics interfaces are now consistent through compatibility layer")
+        print(" PASS:  SessionMetrics interfaces are now consistent through compatibility layer")
 
     def test_to_dict_method_now_works_consistently(self):
         """CRITICAL: Proves to_dict methods now work consistently across all SessionMetrics."""
@@ -231,7 +231,7 @@ class TestSessionMetricsSSOTViolationFixed:
         # All should have the critical field that was missing
         assert 'last_activity' in compat_dict or 'timestamp' in compat_dict
         
-        print("✅ to_dict methods now work consistently across all SessionMetrics")
+        print(" PASS:  to_dict methods now work consistently across all SessionMetrics")
 
 
 class TestRealWorldScenarioFixes:
@@ -264,7 +264,7 @@ class TestRealWorldScenarioFixes:
         result = websocket_cleanup_stale_connections(db_metrics)
         assert isinstance(result, bool)
         
-        print("✅ WebSocket manager can now access last_activity on all SessionMetrics types")
+        print(" PASS:  WebSocket manager can now access last_activity on all SessionMetrics types")
 
     def test_cors_middleware_session_tracking_now_works(self):
         """CRITICAL: Validates CORS middleware can now track session activity correctly."""
@@ -293,7 +293,7 @@ class TestRealWorldScenarioFixes:
         assert 'session_active' in result
         assert 'last_activity_time' in result
         
-        print("✅ CORS middleware can now track session activity on all SessionMetrics types")
+        print(" PASS:  CORS middleware can now track session activity on all SessionMetrics types")
 
     def test_session_metrics_serialization_now_works(self):
         """CRITICAL: Tests that serialization now works due to unified interface."""
@@ -326,7 +326,7 @@ class TestRealWorldScenarioFixes:
         assert 'metrics_data' in result
         assert 'last_activity' in result
         
-        print("✅ Session metrics serialization now works with unified interface")
+        print(" PASS:  Session metrics serialization now works with unified interface")
 
 
 if __name__ == "__main__":

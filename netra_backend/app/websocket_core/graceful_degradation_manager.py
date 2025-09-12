@@ -299,7 +299,7 @@ class GracefulDegradationManager:
         Returns:
             DegradationContext: Current system degradation state
         """
-        self.logger.info("🔍 Assessing service availability for graceful degradation...")
+        self.logger.info(" SEARCH:  Assessing service availability for graceful degradation...")
         
         # Check critical services
         critical_services = {
@@ -340,7 +340,7 @@ class GracefulDegradationManager:
         )
         
         self.current_degradation = degradation_context
-        self.logger.info(f"✅ Service assessment complete: {degradation_level.value} degradation, {len(available_services)}/{len(critical_services)} services available")
+        self.logger.info(f" PASS:  Service assessment complete: {degradation_level.value} degradation, {len(available_services)}/{len(critical_services)} services available")
         
         return degradation_context
     
@@ -463,7 +463,7 @@ class GracefulDegradationManager:
             self.websocket
         )
         
-        self.logger.info(f"✅ Created fallback handler for {self.current_degradation.level.value} degradation")
+        self.logger.info(f" PASS:  Created fallback handler for {self.current_degradation.level.value} degradation")
         return self.fallback_handler
     
     async def notify_user_of_degradation(self):
@@ -482,14 +482,14 @@ class GracefulDegradationManager:
         )
         
         await safe_websocket_send(self.websocket, notification.model_dump())
-        self.logger.info(f"📢 Notified user of {self.current_degradation.level.value} service degradation")
+        self.logger.info(f"[U+1F4E2] Notified user of {self.current_degradation.level.value} service degradation")
     
     async def start_recovery_monitoring(self):
         """Start background task to monitor for service recovery."""
         if self.monitoring_task is not None:
             return  # Already monitoring
         
-        self.logger.info("🔄 Starting service recovery monitoring...")
+        self.logger.info(" CYCLE:  Starting service recovery monitoring...")
         self.monitoring_task = asyncio.create_task(self._recovery_monitoring_loop())
     
     async def _recovery_monitoring_loop(self):
@@ -507,7 +507,7 @@ class GracefulDegradationManager:
                     new_degradation.level != previous_degradation.level and
                     self._is_degradation_improved(previous_degradation.level, new_degradation.level)):
                     
-                    self.logger.info(f"🎉 Service recovery detected: {previous_degradation.level.value} -> {new_degradation.level.value}")
+                    self.logger.info(f" CELEBRATION:  Service recovery detected: {previous_degradation.level.value} -> {new_degradation.level.value}")
                     
                     # Wait for stabilization
                     await asyncio.sleep(self.recovery_stabilization_time)
@@ -540,7 +540,7 @@ class GracefulDegradationManager:
     
     async def _handle_service_recovery(self, old_degradation: DegradationContext, new_degradation: DegradationContext):
         """Handle transition from degraded to recovered state."""
-        self.logger.info(f"✅ Service recovery confirmed: {old_degradation.level.value} -> {new_degradation.level.value}")
+        self.logger.info(f" PASS:  Service recovery confirmed: {old_degradation.level.value} -> {new_degradation.level.value}")
         
         # Notify user of recovery
         recovery_notification = create_server_message(
@@ -565,7 +565,7 @@ class GracefulDegradationManager:
         
         # If fully recovered, update fallback handler
         if new_degradation.level == DegradationLevel.NONE:
-            self.logger.info("🎉 Full service recovery - stopping degradation monitoring")
+            self.logger.info(" CELEBRATION:  Full service recovery - stopping degradation monitoring")
             self.fallback_handler = None
             if self.monitoring_task:
                 self.monitoring_task.cancel()

@@ -25,7 +25,7 @@ Consolidates 7+ competing implementations:
 6. agents/utils_json_validators.py (error recovery)
 7. Various other scattered JSON utilities
 
-Each function ≤25 lines, total module split across classes for maintainability.
+Each function  <= 25 lines, total module split across classes for maintainability.
 """
 
 import json

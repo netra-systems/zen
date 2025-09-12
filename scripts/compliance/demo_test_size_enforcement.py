@@ -42,7 +42,7 @@ def demo_test_size_validator():
             for violation in analysis.violations:
                 print(f"    - {violation.function_name}: {violation.description}")
         else:
-            print("  ✓ File is compliant with size limits!")
+            print("  [U+2713] File is compliant with size limits!")
         
         if analysis.splitting_suggestions:
             print("\n  Splitting suggestions:")
@@ -122,8 +122,8 @@ def demo_test_runner_integration():
         args = MockArgs()
         
         # This would normally scan all tests - we'll just show it works
-        print("  ✓ Pre-run validation function is available")
-        print("  ✓ Integration with test runner is complete")
+        print("  [U+2713] Pre-run validation function is available")
+        print("  [U+2713] Integration with test runner is complete")
         print("\n  Usage:")
         print("    python unified_test_runner.py --strict-size")
         print("    python unified_test_runner.py --skip-size-validation")
@@ -156,12 +156,12 @@ def demo_compliant_examples():
         print(f"  Test functions: {len(test_functions)}")
         
         print("\n  Examples demonstrated:")
-        print("    ✓ Functions under 8 lines")
-        print("    ✓ Helper method extraction")
-        print("    ✓ Parametrized tests")
-        print("    ✓ Proper fixture usage")
-        print("    ✓ File splitting strategies")
-        print("    ✓ Anti-patterns to avoid")
+        print("    [U+2713] Functions under 8 lines")
+        print("    [U+2713] Helper method extraction")
+        print("    [U+2713] Parametrized tests")
+        print("    [U+2713] Proper fixture usage")
+        print("    [U+2713] File splitting strategies")
+        print("    [U+2713] Anti-patterns to avoid")
         
     else:
         print("Example file not found!")
@@ -217,10 +217,10 @@ def main():
         print("\n" + "=" * 80)
         print("DEMONSTRATION COMPLETE")
         print("=" * 80)
-        print("✓ All components are implemented and working")
-        print("✓ Test size limits enforcement is fully functional")
-        print("✓ Integration with test runner is complete") 
-        print("✓ Examples and documentation provided")
+        print("[U+2713] All components are implemented and working")
+        print("[U+2713] Test size limits enforcement is fully functional")
+        print("[U+2713] Integration with test runner is complete") 
+        print("[U+2713] Examples and documentation provided")
         
     except Exception as e:
         print(f"\nDemo failed with error: {e}")

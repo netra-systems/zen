@@ -448,7 +448,7 @@ class TestDatabaseTransactionRecovery(BaseIntegrationTest):
         assert tx_history[0]["state"] == "rolled_back"
         assert len(tx_history[0]["operations"]) >= 2  # At least the operations attempted
         
-        logger.info("✅ Transaction rollback on constraint violation test passed")
+        logger.info(" PASS:  Transaction rollback on constraint violation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -564,7 +564,7 @@ class TestDatabaseTransactionRecovery(BaseIntegrationTest):
         assert tx_history[0]["state"] == "committed"
         assert tx_history[0]["operations_count"] == 5  # All operations completed
         
-        logger.info("✅ Distributed transaction coordination test passed")
+        logger.info(" PASS:  Distributed transaction coordination test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -736,7 +736,7 @@ class TestDatabaseTransactionRecovery(BaseIntegrationTest):
         committed_transactions = [tx for tx in retry_transactions if tx["state"] == "committed"]
         assert len(committed_transactions) >= 1, "No transactions committed after deadlock recovery"
         
-        logger.info("✅ Deadlock detection and recovery test passed")
+        logger.info(" PASS:  Deadlock detection and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -856,7 +856,7 @@ class TestDatabaseTransactionRecovery(BaseIntegrationTest):
         assert compensation_tx is not None
         assert compensation_tx["state"] == "committed"
         
-        logger.info("✅ Compensation transaction execution test passed")
+        logger.info(" PASS:  Compensation transaction execution test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1000,7 +1000,7 @@ class TestDatabaseTransactionRecovery(BaseIntegrationTest):
             VALUES ('isolation_test_summary', 'isolation_level_comparison', $1, true)
         """, json.dumps(isolation_results))
         
-        logger.info("✅ Concurrent transaction isolation test passed")
+        logger.info(" PASS:  Concurrent transaction isolation test passed")
 
 
 if __name__ == "__main__":

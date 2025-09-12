@@ -18,6 +18,7 @@ SPEC Requirements Enforced:
 6. Fix System Under Test first, not tests
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import json
 import os
@@ -150,7 +151,7 @@ class RealTestRequirementsEnforcer:
             content = file_path.read_text(encoding='utf-8')
             
             # Python test indicators
-            python_indicators = ['def test_', 'class Test', '@pytest.', 'unittest.TestCase']
+            python_indicators = ['def test_', 'class Test', '@pytest.', 'SSotBaseTestCase']
             
             # JavaScript test indicators  
             js_indicators = ['it(', 'describe(', 'test(', 'expect(']
@@ -502,7 +503,7 @@ class RealTestRequirementsEnforcer:
         # Business impact
         if critical > 0:
             report.extend([
-                f"🔥 **{critical} CRITICAL violations** found:",
+                f" FIRE:  **{critical} CRITICAL violations** found:",
                 "- Mock component implementations in test files violate real test requirements",
                 "- Integration tests with mocks defeat the purpose of integration testing", 
                 "- Risk of false positive test results hiding real bugs",
@@ -510,7 +511,7 @@ class RealTestRequirementsEnforcer:
             ])
             
         # Top violations by type
-        report.extend(["## 📋 Violations by Category", ""])
+        report.extend(["## [U+1F4CB] Violations by Category", ""])
         
         type_priority = ["mock_component_class", "mock_component_function", "js_mock_component", 
                         "excessive_mocking", "js_excessive_mocking", "function_size", "file_size"]
@@ -522,12 +523,12 @@ class RealTestRequirementsEnforcer:
                 report.append("")
                 
                 for violation in violations[:5]:  # Show first 5
-                    severity_emoji = {"critical": "🔥", "major": "⚠️", "minor": "ℹ️"}[violation.severity]
+                    severity_emoji = {"critical": " FIRE: ", "major": " WARNING: [U+FE0F]", "minor": "[U+2139][U+FE0F]"}[violation.severity]
                     report.append(f"{severity_emoji} **{violation.file_path}:{violation.line_number}**")
                     report.append(f"   {violation.description}")
                     
                     if violation.suggestion:
-                        report.append(f"   💡 *{violation.suggestion}*")
+                        report.append(f"    IDEA:  *{violation.suggestion}*")
                     
                     if violation.code_snippet:
                         report.append("   ```")
@@ -543,12 +544,12 @@ class RealTestRequirementsEnforcer:
         worst_files = sorted(by_file.items(), key=lambda x: len(x[1]), reverse=True)[:10]
         
         if worst_files:
-            report.extend(["## 🎯 Priority Fix List", ""])
+            report.extend(["##  TARGET:  Priority Fix List", ""])
             for file_path, file_violations in worst_files:
                 critical_count = sum(1 for v in file_violations if v.severity == "critical")
                 major_count = sum(1 for v in file_violations if v.severity == "major")
                 
-                priority = "🔥 HIGH" if critical_count > 0 else "⚠️ MEDIUM" 
+                priority = " FIRE:  HIGH" if critical_count > 0 else " WARNING: [U+FE0F] MEDIUM" 
                 report.append(f"{priority} **{file_path}** ({len(file_violations)} violations)")
                 
                 if critical_count:
@@ -559,7 +560,7 @@ class RealTestRequirementsEnforcer:
         
         # Actionable next steps
         report.extend([
-            "## 🛠️ Recommended Actions",
+            "## [U+1F6E0][U+FE0F] Recommended Actions",
             "",
             "1. **Fix Critical Violations First** - Address mock component implementations",
             "2. **Extract Shared Utilities** - Move common mocks to test/fixtures directory", 
@@ -567,7 +568,7 @@ class RealTestRequirementsEnforcer:
             "4. **Mock External APIs Only** - Keep mocking limited to HTTP clients, databases", 
             "5. **Split Large Functions** - Break down oversized test functions",
             "",
-            f"📈 **Success Metric:** Reduce violations from {total} to <10 within 2 sprints",
+            f"[U+1F4C8] **Success Metric:** Reduce violations from {total} to <10 within 2 sprints",
             ""
         ])
         
@@ -597,18 +598,18 @@ def main():
     json_path.parent.mkdir(exist_ok=True)
     json_path.write_text(json_output)
     
-    print(f"\n📄 JSON report saved to: {json_path}")
+    print(f"\n[U+1F4C4] JSON report saved to: {json_path}")
     
     # Return appropriate exit code
     critical_violations = [v for v in violations if v.severity == "critical"]
     if critical_violations:
-        print(f"\n❌ Exiting with error: {len(critical_violations)} critical violations found")
+        print(f"\n FAIL:  Exiting with error: {len(critical_violations)} critical violations found")
         return 1
     elif violations:
-        print(f"\n⚠️ Warning: {len(violations)} non-critical violations found")
+        print(f"\n WARNING: [U+FE0F] Warning: {len(violations)} non-critical violations found")
         return 0
     else:
-        print("\n✅ All tests comply with real test requirements!")
+        print("\n PASS:  All tests comply with real test requirements!")
         return 0
 
 

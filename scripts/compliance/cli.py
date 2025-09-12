@@ -118,15 +118,15 @@ class OutputHandler:
         """Print test splitting suggestions"""
         suggestions = enforcer.generate_test_splitting_suggestions()
         if not suggestions:
-            print("\n✅ No test splitting suggestions needed.")
+            print("\n PASS:  No test splitting suggestions needed.")
             return
         
         print("\n" + "="*80)
-        print("🔧 TEST SPLITTING SUGGESTIONS")
+        print("[U+1F527] TEST SPLITTING SUGGESTIONS")
         print("="*80)
         
         for identifier, suggestion_list in suggestions.items():
-            print(f"\n📁 {identifier}")
+            print(f"\n[U+1F4C1] {identifier}")
             print("-" * 60)
             for suggestion in suggestion_list:
                 print(f"  {suggestion}")

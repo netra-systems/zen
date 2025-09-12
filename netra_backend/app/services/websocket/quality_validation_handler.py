@@ -87,7 +87,7 @@ class QualityValidationHandler(BaseMessageHandler):
     async def _send_validation_result(self, user_id: str, result) -> None:
         """Send validation result to user."""
         message = self._build_validation_message(result)
-        # ✅ CORRECT - Maintains session continuity
+        #  PASS:  CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=None,  # Let session manager handle missing IDs
@@ -108,7 +108,7 @@ class QualityValidationHandler(BaseMessageHandler):
         logger.error(f"Error validating content: {str(error)}")
         error_message = f"Failed to validate content: {str(error)}"
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs

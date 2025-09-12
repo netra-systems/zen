@@ -1,7 +1,7 @@
 """Integration Test for Message Queue Context Creation Regression - CRITICAL Business Impact
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Message queues are critical infrastructure for chat reliability  
+- Segment: ALL (Free  ->  Enterprise) - Message queues are critical infrastructure for chat reliability  
 - Business Goal: Maintain conversation continuity across async message queue processing
 - Value Impact: CRITICAL - Prevents conversation history loss in queued message processing
 - Strategic/Revenue Impact: $750K+ ARR at risk - Queue processing breaks conversation threads

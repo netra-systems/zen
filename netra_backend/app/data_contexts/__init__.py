@@ -6,7 +6,7 @@ operations with proper user isolation. Each context ensures that all operations
 are automatically namespaced by user_id to prevent data leakage.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Data-level user isolation for security and compliance
 - Value Impact: Complete elimination of cross-user data contamination
 - Revenue Impact: Enables enterprise deployment with strict data governance

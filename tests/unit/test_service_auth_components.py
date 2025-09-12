@@ -17,6 +17,7 @@ This test suite follows CLAUDE.md requirements:
 - Validates service authentication header generation and validation logic
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import unittest
 from unittest.mock import patch, MagicMock
@@ -28,7 +29,7 @@ from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
-class TestServiceAuthComponents(unittest.TestCase):
+class TestServiceAuthComponents(SSotBaseTestCase):
     """
     Unit Tests: Service authentication component logic for Issue #115.
     
@@ -49,7 +50,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         self.test_service_id = "netra-backend" 
         self.test_service_secret = "test_service_secret_32chars_long"
         
-        logger.info(f"🧪 UNIT TEST: {self._testMethodName}")
+        logger.info(f"[U+1F9EA] UNIT TEST: {self._testMethodName}")
 
     def test_service_auth_header_generation_valid_credentials(self):
         """
@@ -57,7 +58,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Service authentication headers are generated correctly
         """
-        logger.info("🔧 UNIT: Testing service auth header generation with valid credentials")
+        logger.info("[U+1F527] UNIT: Testing service auth header generation with valid credentials")
         
         # Mock environment variables
         with patch.dict(os.environ, {
@@ -86,7 +87,7 @@ class TestServiceAuthComponents(unittest.TestCase):
             self.assertIn('X-Service-ID', headers)
             self.assertIn('X-Service-Secret', headers)
             
-            logger.info("✅ UNIT SUCCESS: Service auth headers generated correctly")
+            logger.info(" PASS:  UNIT SUCCESS: Service auth headers generated correctly")
 
     def test_service_auth_header_generation_missing_service_id(self):
         """
@@ -94,7 +95,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Proper error handling for missing SERVICE_ID
         """
-        logger.info("🔧 UNIT: Testing service auth header generation with missing SERVICE_ID")
+        logger.info("[U+1F527] UNIT: Testing service auth header generation with missing SERVICE_ID")
         
         # Mock environment with missing SERVICE_ID
         with patch.dict(os.environ, {
@@ -116,7 +117,7 @@ class TestServiceAuthComponents(unittest.TestCase):
                     if not service_id:
                         raise RuntimeError("SERVICE_ID is required for service authentication")
                         
-            logger.info("✅ UNIT SUCCESS: Missing SERVICE_ID properly handled")
+            logger.info(" PASS:  UNIT SUCCESS: Missing SERVICE_ID properly handled")
 
     def test_service_auth_header_generation_missing_service_secret(self):
         """
@@ -124,7 +125,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Proper error handling for missing SERVICE_SECRET
         """
-        logger.info("🔧 UNIT: Testing service auth header generation with missing SERVICE_SECRET")
+        logger.info("[U+1F527] UNIT: Testing service auth header generation with missing SERVICE_SECRET")
         
         # Mock environment with missing SERVICE_SECRET
         with patch.dict(os.environ, {
@@ -146,7 +147,7 @@ class TestServiceAuthComponents(unittest.TestCase):
                     if not service_secret:
                         raise RuntimeError("SERVICE_SECRET is required for service authentication")
                         
-            logger.info("✅ UNIT SUCCESS: Missing SERVICE_SECRET properly handled")
+            logger.info(" PASS:  UNIT SUCCESS: Missing SERVICE_SECRET properly handled")
 
     def test_service_auth_header_validation_logic(self):
         """
@@ -154,7 +155,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Service auth header validation works correctly
         """
-        logger.info("🔧 UNIT: Testing service auth header validation logic")
+        logger.info("[U+1F527] UNIT: Testing service auth header validation logic")
         
         # Test cases for header validation
         test_cases = [
@@ -203,9 +204,9 @@ class TestServiceAuthComponents(unittest.TestCase):
                 self.assertEqual(is_valid, expected_valid, 
                                f"Header validation failed for {test_case['name']}")
                 
-                logger.info(f"✅ UNIT: {test_case['name']} validation: {is_valid} (expected: {expected_valid})")
+                logger.info(f" PASS:  UNIT: {test_case['name']} validation: {is_valid} (expected: {expected_valid})")
         
-        logger.info("✅ UNIT SUCCESS: All service auth header validation test cases passed")
+        logger.info(" PASS:  UNIT SUCCESS: All service auth header validation test cases passed")
 
     def test_system_user_with_service_headers_logic(self):
         """
@@ -213,7 +214,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: System user requests include proper service authentication
         """
-        logger.info("🔧 UNIT: Testing system user with service headers logic")
+        logger.info("[U+1F527] UNIT: Testing system user with service headers logic")
         
         # Simulate the logic that should be added to dependencies.py
         user_id = "system"
@@ -249,7 +250,7 @@ class TestServiceAuthComponents(unittest.TestCase):
             self.assertIn('X-Service-ID', headers)
             self.assertIn('X-Service-Secret', headers)
             
-            logger.info("✅ UNIT SUCCESS: System user request headers include service authentication")
+            logger.info(" PASS:  UNIT SUCCESS: System user request headers include service authentication")
 
     def test_service_auth_error_message_generation(self):
         """
@@ -257,7 +258,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Clear error messages for different service auth failure modes
         """
-        logger.info("🔧 UNIT: Testing service auth error message generation")
+        logger.info("[U+1F527] UNIT: Testing service auth error message generation")
         
         def generate_service_auth_error_message(missing_credential: str) -> str:
             """Generate appropriate error message for missing service credentials."""
@@ -279,9 +280,9 @@ class TestServiceAuthComponents(unittest.TestCase):
             error_message = generate_service_auth_error_message(missing_credential)
             self.assertIn(expected_text, error_message)
             self.assertIn('service', error_message.lower())
-            logger.info(f"✅ UNIT: Error message for {missing_credential}: {error_message}")
+            logger.info(f" PASS:  UNIT: Error message for {missing_credential}: {error_message}")
         
-        logger.info("✅ UNIT SUCCESS: Service auth error messages generated correctly")
+        logger.info(" PASS:  UNIT SUCCESS: Service auth error messages generated correctly")
 
     def test_dependencies_system_user_service_auth_integration(self):
         """
@@ -289,7 +290,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Logic to fix the exact issue in dependencies.py:184
         """
-        logger.info("🔧 UNIT: Testing dependencies.py system user service auth integration logic")
+        logger.info("[U+1F527] UNIT: Testing dependencies.py system user service auth integration logic")
         
         # Mock the dependencies.py scenario
         user_id = "system"  # This is the hardcoded value from dependencies.py:184
@@ -339,14 +340,14 @@ class TestServiceAuthComponents(unittest.TestCase):
             self.assertIn('X-Service-ID', context['auth_headers'])
             self.assertIn('X-Service-Secret', context['auth_headers'])
             
-            logger.info("✅ UNIT SUCCESS: Dependencies system user service auth integration logic works")
+            logger.info(" PASS:  UNIT SUCCESS: Dependencies system user service auth integration logic works")
         
         # Test with missing service credentials
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(RuntimeError):
                 create_service_authenticated_system_user_context()
             
-            logger.info("✅ UNIT SUCCESS: Missing service credentials properly raise errors")
+            logger.info(" PASS:  UNIT SUCCESS: Missing service credentials properly raise errors")
 
     def test_service_auth_environment_variable_handling(self):
         """
@@ -354,7 +355,7 @@ class TestServiceAuthComponents(unittest.TestCase):
         
         VALIDATES: Proper handling of SERVICE_ID and SERVICE_SECRET environment variables
         """
-        logger.info("🔧 UNIT: Testing service auth environment variable handling")
+        logger.info("[U+1F527] UNIT: Testing service auth environment variable handling")
         
         def get_service_auth_config():
             """Get service authentication configuration from environment."""
@@ -380,7 +381,7 @@ class TestServiceAuthComponents(unittest.TestCase):
             self.assertEqual(config['service_secret'], self.test_service_secret)
             self.assertTrue(config['is_configured'])
             
-            logger.info("✅ UNIT: Service auth config with both credentials works")
+            logger.info(" PASS:  UNIT: Service auth config with both credentials works")
         
         # Test with missing credentials
         with patch.dict(os.environ, {}, clear=True):
@@ -390,13 +391,13 @@ class TestServiceAuthComponents(unittest.TestCase):
             self.assertIsNone(config['service_secret'])
             self.assertFalse(config['is_configured'])
             
-            logger.info("✅ UNIT: Service auth config with missing credentials handled correctly")
+            logger.info(" PASS:  UNIT: Service auth config with missing credentials handled correctly")
         
-        logger.info("✅ UNIT SUCCESS: Service auth environment variable handling works correctly")
+        logger.info(" PASS:  UNIT SUCCESS: Service auth environment variable handling works correctly")
 
     def tearDown(self):
         """Clean up after test."""
-        logger.info(f"🏁 UNIT TEST COMPLETE: {self._testMethodName}")
+        logger.info(f"[U+1F3C1] UNIT TEST COMPLETE: {self._testMethodName}")
         
 if __name__ == '__main__':
     unittest.main()

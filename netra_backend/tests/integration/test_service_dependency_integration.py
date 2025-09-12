@@ -238,15 +238,15 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                         assert "database" in response_data.get("message", "").lower() or \
                                "service" in response_data.get("message", "").lower(), \
                                "Error should indicate service dependency issue"
-                        logger.info("✅ Graceful error handling during database failure")
+                        logger.info(" PASS:  Graceful error handling during database failure")
                     else:
-                        logger.info("✅ WebSocket continues functioning during database failure")
+                        logger.info(" PASS:  WebSocket continues functioning during database failure")
                         
                 except asyncio.TimeoutError:
                     # No response is also acceptable - system may be designed to fail silently
-                    logger.info("✅ WebSocket connection stable during database failure (no response required)")
+                    logger.info(" PASS:  WebSocket connection stable during database failure (no response required)")
                 
-                logger.info(f"✅ WebSocket remained functional during database failure ({connection_time:.2f}s)")
+                logger.info(f" PASS:  WebSocket remained functional during database failure ({connection_time:.2f}s)")
                 
             except asyncio.TimeoutError:
                 pytest.fail(f"WebSocket connection failed during database outage after {time.time() - start_time:.2f}s")
@@ -316,15 +316,15 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                         error_msg = response_data.get("message", "").lower()
                         assert "cache" in error_msg or "redis" in error_msg or "service" in error_msg, \
                                "Error should indicate cache service issue"
-                        logger.info("✅ Graceful cache failure handling")
+                        logger.info(" PASS:  Graceful cache failure handling")
                     else:
-                        logger.info("✅ WebSocket functions without Redis cache")
+                        logger.info(" PASS:  WebSocket functions without Redis cache")
                         
                 except asyncio.TimeoutError:
                     # Longer timeout acceptable during cache failure
-                    logger.info("✅ WebSocket connection stable during Redis failure (degraded performance expected)")
+                    logger.info(" PASS:  WebSocket connection stable during Redis failure (degraded performance expected)")
                 
-                logger.info(f"✅ WebSocket functional during Redis failure ({connection_time:.2f}s)")
+                logger.info(f" PASS:  WebSocket functional during Redis failure ({connection_time:.2f}s)")
                 
             except asyncio.TimeoutError:
                 pytest.fail(f"WebSocket connection failed during Redis outage after {time.time() - start_time:.2f}s")
@@ -395,15 +395,15 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                         has_degradation_info = any(keyword in response_text for keyword in degradation_keywords)
                         
                         if has_degradation_info:
-                            logger.info("✅ System communicates degraded mode status")
+                            logger.info(" PASS:  System communicates degraded mode status")
                         else:
-                            logger.info("✅ System continues basic operation in degraded mode")
+                            logger.info(" PASS:  System continues basic operation in degraded mode")
                             
                     except asyncio.TimeoutError:
                         # No response in degraded mode is acceptable
-                        logger.info("✅ Connection maintained in degraded mode (minimal functionality)")
+                        logger.info(" PASS:  Connection maintained in degraded mode (minimal functionality)")
                     
-                    logger.info(f"✅ Multi-service failure handled gracefully ({connection_time:.2f}s)")
+                    logger.info(f" PASS:  Multi-service failure handled gracefully ({connection_time:.2f}s)")
                     
                 except asyncio.TimeoutError:
                     # Total failure during multi-service outage may be acceptable
@@ -450,7 +450,7 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
         
         try:
             normal_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-            logger.info("✅ Normal operation baseline established")
+            logger.info(" PASS:  Normal operation baseline established")
         except asyncio.TimeoutError:
             logger.info("Baseline response timeout (acceptable)")
         
@@ -469,9 +469,9 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                 failure_data = json.loads(failure_response)
                 
                 if failure_data.get("type") == "error":
-                    logger.info("✅ Service failure detected and communicated")
+                    logger.info(" PASS:  Service failure detected and communicated")
                 else:
-                    logger.info("✅ Service continues functioning during failure")
+                    logger.info(" PASS:  Service continues functioning during failure")
             except asyncio.TimeoutError:
                 logger.info("No response during failure (acceptable)")
         
@@ -494,10 +494,10 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
             assert "type" in recovery_data, "Should receive response after service recovery"
             
             if recovery_data.get("type") != "error":
-                logger.info("✅ Service recovery detected - full functionality restored")
+                logger.info(" PASS:  Service recovery detected - full functionality restored")
             else:
                 # Recovery may take time - this is also acceptable
-                logger.info("✅ Service recovery in progress")
+                logger.info(" PASS:  Service recovery in progress")
                 
         except asyncio.TimeoutError:
             logger.info("Recovery response timeout - may need more time for full restoration")
@@ -560,11 +560,11 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                         service_keywords = [service_name, "service", "unavailable", "failure", "degraded"]
                         if any(keyword in error_msg for keyword in service_keywords):
                             notification_received = True
-                            logger.info(f"✅ Appropriate notification for {service_name} failure: {response_data.get('message', '')[:100]}")
+                            logger.info(f" PASS:  Appropriate notification for {service_name} failure: {response_data.get('message', '')[:100]}")
                         else:
-                            logger.info(f"✅ Generic error notification during {service_name} failure")
+                            logger.info(f" PASS:  Generic error notification during {service_name} failure")
                     else:
-                        logger.info(f"✅ System continues functioning despite {service_name} failure")
+                        logger.info(f" PASS:  System continues functioning despite {service_name} failure")
                         
                 except asyncio.TimeoutError:
                     # No notification may be acceptable depending on design
@@ -639,7 +639,7 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                 except Exception as e:
                     logger.warning(f"WebSocket {i} failed during database outage: {e}")
             
-            logger.info(f"✅ Isolation test: {successful_pings}/{len(websockets_list)} WebSocket connections responded during database failure")
+            logger.info(f" PASS:  Isolation test: {successful_pings}/{len(websockets_list)} WebSocket connections responded during database failure")
             
             # At least basic connectivity should be maintained
             assert active_connections >= len(websockets_list) * 0.8, \
@@ -696,9 +696,9 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
             found_indicators = [indicator for indicator in health_indicators if indicator in response_text]
             
             if found_indicators:
-                logger.info(f"✅ Health monitoring active - indicators found: {found_indicators}")
+                logger.info(f" PASS:  Health monitoring active - indicators found: {found_indicators}")
             else:
-                logger.info("✅ Health check responded (may use different format)")
+                logger.info(" PASS:  Health check responded (may use different format)")
             
             # Test health monitoring during simulated failure
             async with self.simulate_service_failure("database"):
@@ -723,9 +723,9 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                     has_failure_info = any(keyword in failure_text for keyword in failure_keywords)
                     
                     if has_failure_info:
-                        logger.info("✅ Health monitor detects and reports service failures")
+                        logger.info(" PASS:  Health monitor detects and reports service failures")
                     else:
-                        logger.info("✅ Health monitoring continues during failures")
+                        logger.info(" PASS:  Health monitoring continues during failures")
                         
                 except asyncio.TimeoutError:
                     logger.info("Health monitoring may be impacted during service failures (acceptable)")
@@ -796,20 +796,20 @@ class TestServiceDependencyIntegration(BaseIntegrationTest):
                     
                     response_data = json.loads(response)
                     if response_data.get("type") == "error" and "timeout" in response_data.get("message", "").lower():
-                        logger.info(f"✅ Timeout properly handled for {operation['type']}")
+                        logger.info(f" PASS:  Timeout properly handled for {operation['type']}")
                     else:
-                        logger.info(f"✅ Operation {operation['type']} completed in {operation_time:.2f}s")
+                        logger.info(f" PASS:  Operation {operation['type']} completed in {operation_time:.2f}s")
                         
                 except asyncio.TimeoutError:
                     operation_time = time.time() - operation_start
                     # Timeout should occur within reasonable bounds
                     assert operation_time >= 9.5, f"Timeout occurred too quickly ({operation_time:.2f}s)"
-                    logger.info(f"✅ Operation {operation['type']} timed out appropriately after {operation_time:.2f}s")
+                    logger.info(f" PASS:  Operation {operation['type']} timed out appropriately after {operation_time:.2f}s")
                 
                 # Small delay between operations
                 await asyncio.sleep(0.2)
             
-            logger.info(f"✅ All timeout handling tests completed (total connection time: {connection_time:.2f}s)")
+            logger.info(f" PASS:  All timeout handling tests completed (total connection time: {connection_time:.2f}s)")
             
         except asyncio.TimeoutError:
             total_time = time.time() - start_time

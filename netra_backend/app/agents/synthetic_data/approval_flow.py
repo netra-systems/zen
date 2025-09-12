@@ -58,7 +58,7 @@ class ApprovalMessageBuilder:
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+        return f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
 
 
 class ApprovalResultBuilder:

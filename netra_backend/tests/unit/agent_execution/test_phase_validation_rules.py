@@ -2,7 +2,7 @@
 Unit Tests for Agent Execution Phase Validation Rules
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - execution phase tracking for all users
+- Segment: ALL (Free  ->  Enterprise) - execution phase tracking for all users
 - Business Goal: User experience transparency and debugging capability  
 - Value Impact: Provides detailed execution progress for WebSocket events and error diagnostics
 - Strategic Impact: Enables granular monitoring of agent execution for operational excellence
@@ -130,7 +130,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for from_phase, to_phase in valid_transitions:
             is_valid = phase_validator.is_valid_transition(from_phase, to_phase)
             self.assertTrue(is_valid, 
-                          f"Should allow transition {from_phase} → {to_phase}")
+                          f"Should allow transition {from_phase}  ->  {to_phase}")
     
     def test_valid_phase_transitions_execution_flow(self):
         """Test valid phase transitions during execution."""
@@ -149,7 +149,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for from_phase, to_phase in execution_transitions:
             is_valid = phase_validator.is_valid_transition(from_phase, to_phase)
             self.assertTrue(is_valid,
-                          f"Should allow execution transition {from_phase} → {to_phase}")
+                          f"Should allow execution transition {from_phase}  ->  {to_phase}")
     
     def test_valid_phase_transitions_to_completion(self):
         """Test valid phase transitions to completion phases."""
@@ -167,13 +167,13 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for phase in execution_phases:
             is_valid = phase_validator.is_valid_transition(phase, AgentExecutionPhase.COMPLETING)
             self.assertTrue(is_valid,
-                          f"Should allow {phase} → COMPLETING transition")
+                          f"Should allow {phase}  ->  COMPLETING transition")
         
         # COMPLETING should go to COMPLETED
         is_valid = phase_validator.is_valid_transition(
             AgentExecutionPhase.COMPLETING, AgentExecutionPhase.COMPLETED
         )
-        self.assertTrue(is_valid, "Should allow COMPLETING → COMPLETED transition")
+        self.assertTrue(is_valid, "Should allow COMPLETING  ->  COMPLETED transition")
     
     def test_valid_phase_transitions_to_error_states(self):
         """Test valid phase transitions to error states."""
@@ -193,7 +193,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
                 if from_phase != error_phase:
                     is_valid = phase_validator.is_valid_transition(from_phase, error_phase)
                     self.assertTrue(is_valid,
-                                  f"Should allow {from_phase} → {error_phase} transition")
+                                  f"Should allow {from_phase}  ->  {error_phase} transition")
     
     def test_invalid_phase_transitions_backward_flow(self):
         """Test invalid backward phase transitions."""
@@ -211,7 +211,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for from_phase, to_phase in invalid_backward_transitions:
             is_valid = phase_validator.is_valid_transition(from_phase, to_phase)
             self.assertFalse(is_valid,
-                           f"Should reject backward transition {from_phase} → {to_phase}")
+                           f"Should reject backward transition {from_phase}  ->  {to_phase}")
     
     def test_invalid_phase_transitions_skip_critical_phases(self):
         """Test invalid transitions that skip critical phases."""
@@ -228,7 +228,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for from_phase, to_phase in invalid_skip_transitions:
             is_valid = phase_validator.is_valid_transition(from_phase, to_phase)
             self.assertFalse(is_valid,
-                           f"Should reject skipping transition {from_phase} → {to_phase}")
+                           f"Should reject skipping transition {from_phase}  ->  {to_phase}")
     
     def test_phase_transition_recording_with_metadata(self):
         """Test PhaseTransition recording with metadata."""
@@ -283,7 +283,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
             )
             self.assertTrue(is_reasonable,
                           f"Timing {reasonable_timing}ms should be reasonable for "
-                          f"{from_phase} → {to_phase}")
+                          f"{from_phase}  ->  {to_phase}")
             
             # Test with excessive timing
             excessive_timing = max_ms * 3
@@ -292,7 +292,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
             )
             self.assertFalse(is_reasonable,
                            f"Timing {excessive_timing}ms should be excessive for "
-                           f"{from_phase} → {to_phase}")
+                           f"{from_phase}  ->  {to_phase}")
     
     def test_phase_websocket_event_mapping(self):
         """Test mapping of phases to WebSocket events for real-time updates."""
@@ -333,7 +333,7 @@ class TestPhaseValidationRules(SSotBaseTestCase):
         for from_phase, error_phase in error_recovery_scenarios:
             is_valid = phase_validator.is_valid_transition(from_phase, error_phase)
             self.assertTrue(is_valid,
-                          f"Should allow error transition {from_phase} → {error_phase}")
+                          f"Should allow error transition {from_phase}  ->  {error_phase}")
     
     def test_phase_validation_business_rule_enforcement(self):
         """Test that phase validation enforces business rules."""

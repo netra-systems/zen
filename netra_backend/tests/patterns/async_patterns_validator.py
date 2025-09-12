@@ -1,7 +1,7 @@
 """
 Comprehensive Async Test Patterns Validator - Main Module
 Validates all async testing patterns follow best practices
-Maximum 300 lines, functions ≤8 lines
+Maximum 300 lines, functions  <= 8 lines
 """
 
 import ast

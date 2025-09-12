@@ -8,7 +8,7 @@ Business Value Justification:
 - Strategic Impact: DRY principle, consistent utility functions
 
 Consolidated utility functions from scattered WebSocket implementation files.
-All functions ≤25 lines as per CLAUDE.md requirements.
+All functions  <= 25 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
@@ -221,7 +221,7 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         
         # Environment-specific error handling
         if environment in ["staging", "production"]:
-            logger.warning(f"🚨 WebSocket state check failed in {environment}: {error_context['error_type']} - {error_context['error_message']}")
+            logger.warning(f" ALERT:  WebSocket state check failed in {environment}: {error_context['error_type']} - {error_context['error_message']}")
             logger.debug(f"WebSocket state check error context: {error_context}")
             # In cloud environments, connection check failures indicate real issues
             return False

@@ -130,7 +130,7 @@ class MultiUserIsolationValidator:
                     "severity": "CRITICAL"
                 }
                 self.contamination_violations.append(contamination)
-                logger.error(f"🚨 CRITICAL ISOLATION VIOLATION: {contamination}")
+                logger.error(f" ALERT:  CRITICAL ISOLATION VIOLATION: {contamination}")
             
     def get_isolation_report(self) -> Dict[str, Any]:
         """Generate comprehensive isolation validation report."""
@@ -375,7 +375,7 @@ class TestMultiUserAgentIsolation:
         validator = MultiUserIsolationValidator(max_users=user_count)
         agent_tester = RealAgentExecutionIsolationTest(validator)
         
-        logger.info(f"🚀 Starting {user_count}-user perfect isolation test")
+        logger.info(f"[U+1F680] Starting {user_count}-user perfect isolation test")
         
         async def isolated_user_agent_execution(user_index: int) -> Dict[str, Any]:
             """Execute isolated agent workflows for a single user."""
@@ -432,7 +432,7 @@ class TestMultiUserAgentIsolation:
         
         # CRITICAL ASSERTIONS - ZERO TOLERANCE FOR CONTAMINATION
         assert isolation_report["contamination_violations"] == 0, \
-            f"🚨 CRITICAL: Cross-user contamination detected! Violations: {isolation_report['contamination_violations']}\n" \
+            f" ALERT:  CRITICAL: Cross-user contamination detected! Violations: {isolation_report['contamination_violations']}\n" \
             f"Details: {isolation_report['contamination_details'][:3]}"
         
         assert len(successful_users) >= user_count * 0.95, \
@@ -451,7 +451,7 @@ class TestMultiUserAgentIsolation:
         assert users_with_events >= total_workflows * 0.9, \
             f"Insufficient users with events: {users_with_events}/{total_workflows} (required 90%+)"
         
-        logger.info("✅ MISSION CRITICAL: 50-User Perfect Agent Isolation VALIDATED")
+        logger.info(" PASS:  MISSION CRITICAL: 50-User Perfect Agent Isolation VALIDATED")
         logger.info(f"  Users: {len(successful_users)}/{user_count} successful")
         logger.info(f"  Workflows: {total_workflows} executed")
         logger.info(f"  Events: {total_events} captured")
@@ -473,7 +473,7 @@ class TestMultiUserAgentIsolation:
         validator = MultiUserIsolationValidator(max_users=user_count)
         agent_tester = RealAgentExecutionIsolationTest(validator)
         
-        logger.info("🚀 Starting rapid workflow switching isolation test")
+        logger.info("[U+1F680] Starting rapid workflow switching isolation test")
         
         async def rapid_switching_user(user_index: int) -> Dict[str, Any]:
             """User with rapid workflow switching."""
@@ -508,12 +508,12 @@ class TestMultiUserAgentIsolation:
         
         # CRITICAL: Zero contamination during rapid switching
         assert isolation_report["contamination_violations"] == 0, \
-            f"🚨 CONTAMINATION during rapid switching: {isolation_report['contamination_details']}"
+            f" ALERT:  CONTAMINATION during rapid switching: {isolation_report['contamination_details']}"
         
         successful_rapid = [r for r in rapid_results if isinstance(r, dict)]
         total_rapid_workflows = sum(len(r["results"]) for r in successful_rapid)
         
-        logger.info("✅ Rapid workflow switching isolation VALIDATED")
+        logger.info(" PASS:  Rapid workflow switching isolation VALIDATED")
         logger.info(f"  Users: {len(successful_rapid)}/{user_count}")
         logger.info(f"  Rapid workflows: {total_rapid_workflows}")
         logger.info(f"  Isolation: PERFECT (0 contamination)")
@@ -531,7 +531,7 @@ class TestMultiUserAgentIsolation:
         
         validator = MultiUserIsolationValidator(max_users=concurrent_users)
         
-        logger.info("🚀 Starting concurrent agent event isolation stress test")
+        logger.info("[U+1F680] Starting concurrent agent event isolation stress test")
         
         async def high_volume_event_user(user_index: int) -> Dict[str, Any]:
             """User generating high volume of agent events."""
@@ -580,7 +580,7 @@ class TestMultiUserAgentIsolation:
         
         # CRITICAL: Perfect isolation under high stress
         assert isolation_report["contamination_violations"] == 0, \
-            f"🚨 STRESS TEST CONTAMINATION: {isolation_report['contamination_details']}"
+            f" ALERT:  STRESS TEST CONTAMINATION: {isolation_report['contamination_details']}"
         
         successful_stress = [r for r in stress_results if isinstance(r, dict)]
         total_stress_events = sum(r["events_generated"] for r in successful_stress)
@@ -588,7 +588,7 @@ class TestMultiUserAgentIsolation:
         assert total_stress_events > concurrent_users * events_per_user * 4, \
             f"Insufficient stress events generated: {total_stress_events}"
         
-        logger.info("✅ Concurrent agent event isolation stress VALIDATED")
+        logger.info(" PASS:  Concurrent agent event isolation stress VALIDATED")
         logger.info(f"  Users: {len(successful_stress)}/{concurrent_users}")
         logger.info(f"  Stress events: {total_stress_events}")
         logger.info(f"  Isolation: PERFECT under maximum stress")
@@ -604,7 +604,7 @@ class TestMultiUserAgentIsolation:
         test_users = 20
         validator = MultiUserIsolationValidator(max_users=test_users)
         
-        logger.info("🚀 Starting agent context cross-contamination detection test")
+        logger.info("[U+1F680] Starting agent context cross-contamination detection test")
         
         # Create isolated contexts for each user
         user_contexts = {}
@@ -675,7 +675,7 @@ class TestMultiUserAgentIsolation:
         
         # CRITICAL: Zero contamination detected
         assert isolation_report["contamination_violations"] == 0, \
-            f"🚨 CONTAMINATION DETECTED: {isolation_report['contamination_details']}"
+            f" ALERT:  CONTAMINATION DETECTED: {isolation_report['contamination_details']}"
         
         successful_detections = [r for r in detection_results if isinstance(r, dict)]
         
@@ -684,7 +684,7 @@ class TestMultiUserAgentIsolation:
         assert len(result_signatures) == len(successful_detections), \
             "Context signature uniqueness compromised"
         
-        logger.info("✅ Agent context cross-contamination detection VALIDATED")
+        logger.info(" PASS:  Agent context cross-contamination detection VALIDATED")
         logger.info(f"  Users tested: {len(successful_detections)}")
         logger.info(f"  Unique signatures: {len(result_signatures)}")
         logger.info(f"  Contamination: NONE DETECTED (Perfect isolation)")

@@ -251,7 +251,7 @@ class TestMultiUserDatabaseIsolation(BaseIntegrationTest):
             )
             messages = all_user_messages.scalars().all()
             
-            # Should have exactly 4 messages (2 threads × 2 messages each)
+            # Should have exactly 4 messages (2 threads  x  2 messages each)
             assert len(messages) == 4, \
                 f"User {auth_user.user_id} should have 4 messages, got {len(messages)}"
             

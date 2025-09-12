@@ -705,8 +705,8 @@ class TestConfigurationValidatorErrorHandling:
         # Set up configuration with Unicode characters
         self.env.set("TESTING", "1", "test")
         self.env.set("ENVIRONMENT", "testing", "test")
-        self.env.set("JWT_SECRET_KEY", "test-jwt-secret-with-unicode-测试-key", "test")
-        self.env.set("SERVICE_SECRET", "test-service-secret-with-émojis-🚀", "test")
+        self.env.set("JWT_SECRET_KEY", "test-jwt-secret-with-unicode-[U+6D4B][U+8BD5]-key", "test")
+        self.env.set("SERVICE_SECRET", "test-service-secret-with-[U+00E9]mojis-[U+1F680]", "test")
         
         # Validate environment
         is_valid, errors = self.validator.validate_test_environment()

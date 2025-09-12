@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-14T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: CLAUDE.md compliance - Split synthetic data agent into modules ≤300 lines
+# Context: CLAUDE.md compliance - Split synthetic data agent into modules  <= 300 lines
 # Git: anthony-aug-13-2 | modified
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: claude-md-compliance | Seq: 1

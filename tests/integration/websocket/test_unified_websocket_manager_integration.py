@@ -726,7 +726,7 @@ class TestUnifiedWebSocketManagerIntegration(SSotBaseTestCase):
         Test complete Golden Path user flow with all WebSocket events.
         
         BUSINESS VALUE: This is the PRIMARY revenue-generating flow protecting $500K+ ARR.
-        User login → Agent execution → WebSocket events → AI response delivery.
+        User login  ->  Agent execution  ->  WebSocket events  ->  AI response delivery.
         """
         manager = self.create_websocket_manager()
         

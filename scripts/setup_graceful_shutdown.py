@@ -21,7 +21,7 @@ class GracefulShutdownSetup:
         main_py_path = os.path.join(self.project_root, "auth_service", "auth_core", "main.py")
         
         if not os.path.exists(main_py_path):
-            print(f"❌ Auth service main.py not found at {main_py_path}")
+            print(f" FAIL:  Auth service main.py not found at {main_py_path}")
             return False
         
         with open(main_py_path, 'r') as f:
@@ -29,7 +29,7 @@ class GracefulShutdownSetup:
         
         # Check if graceful shutdown is already implemented
         if 'signal.signal' in content and 'SIGTERM' in content:
-            print("✅ Auth service already has graceful shutdown")
+            print(" PASS:  Auth service already has graceful shutdown")
             return True
         
         # Add graceful shutdown code
@@ -53,26 +53,26 @@ class GracefulShutdownSetup:
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             """Application lifespan management"""
-            logger.info("🚀 Auth service starting up...")
+            logger.info("[U+1F680] Auth service starting up...")
             
             # Startup
             yield
             
             # Shutdown
-            logger.info("🛑 Auth service shutting down...")
+            logger.info("[U+1F6D1] Auth service shutting down...")
             
             # Close database connections
             try:
                 from auth_service.auth_core.database.connection import auth_db
                 await auth_db.close()
-                logger.info("✅ Database connections closed")
+                logger.info(" PASS:  Database connections closed")
             except Exception as e:
-                logger.error(f"❌ Error closing database: {e}")
+                logger.error(f" FAIL:  Error closing database: {e}")
             
             # Wait a moment for any final operations
             await asyncio.sleep(0.1)
             
-            logger.info("✅ Auth service shutdown complete")
+            logger.info(" PASS:  Auth service shutdown complete")
         ''')
         
         # Insert imports at the top
@@ -104,7 +104,7 @@ class GracefulShutdownSetup:
         with open(main_py_path, 'w') as f:
             f.write(content)
         
-        print("✅ Added graceful shutdown to auth service")
+        print(" PASS:  Added graceful shutdown to auth service")
         return True
     
     def setup_backend_shutdown(self):
@@ -112,7 +112,7 @@ class GracefulShutdownSetup:
         main_py_path = os.path.join(self.project_root, "netra_backend", "app", "main.py")
         
         if not os.path.exists(main_py_path):
-            print(f"❌ Backend main.py not found at {main_py_path}")
+            print(f" FAIL:  Backend main.py not found at {main_py_path}")
             return False
         
         with open(main_py_path, 'r') as f:
@@ -120,7 +120,7 @@ class GracefulShutdownSetup:
         
         # Check if graceful shutdown is already implemented
         if 'signal.signal' in content and 'SIGTERM' in content:
-            print("✅ Backend already has graceful shutdown")
+            print(" PASS:  Backend already has graceful shutdown")
             return True
         
         # Add graceful shutdown code (similar to auth service but with backend-specific cleanup)
@@ -144,33 +144,33 @@ class GracefulShutdownSetup:
         @asynccontextmanager
         async def lifespan(app: FastAPI):
             """Application lifespan management"""
-            logger.info("🚀 Netra backend starting up...")
+            logger.info("[U+1F680] Netra backend starting up...")
             
             # Startup
             yield
             
             # Shutdown
-            logger.info("🛑 Netra backend shutting down...")
+            logger.info("[U+1F6D1] Netra backend shutting down...")
             
             # Close WebSocket connections gracefully
             try:
                 # Note: Actual WebSocket manager cleanup would go here
-                logger.info("✅ WebSocket connections closed")
+                logger.info(" PASS:  WebSocket connections closed")
             except Exception as e:
-                logger.error(f"❌ Error closing WebSockets: {e}")
+                logger.error(f" FAIL:  Error closing WebSockets: {e}")
             
             # Close database connections
             try:
                 from netra_backend.app.db.connection import close_all_connections
                 await close_all_connections()
-                logger.info("✅ Database connections closed")
+                logger.info(" PASS:  Database connections closed")
             except Exception as e:
-                logger.error(f"❌ Error closing database: {e}")
+                logger.error(f" FAIL:  Error closing database: {e}")
             
             # Wait a moment for any final operations
             await asyncio.sleep(0.1)
             
-            logger.info("✅ Backend shutdown complete")
+            logger.info(" PASS:  Backend shutdown complete")
         ''')
         
         # Similar implementation as auth service
@@ -201,7 +201,7 @@ class GracefulShutdownSetup:
         with open(main_py_path, 'w') as f:
             f.write(content)
         
-        print("✅ Added graceful shutdown to backend")
+        print(" PASS:  Added graceful shutdown to backend")
         return True
     
     def create_dockerfile_optimizations(self):
@@ -214,7 +214,7 @@ class GracefulShutdownSetup:
         for dockerfile_path, service_name in dockerfiles:
             full_path = os.path.join(self.project_root, dockerfile_path)
             if not os.path.exists(full_path):
-                print(f"❌ {service_name} Dockerfile not found")
+                print(f" FAIL:  {service_name} Dockerfile not found")
                 continue
             
             with open(full_path, 'r') as f:
@@ -222,7 +222,7 @@ class GracefulShutdownSetup:
             
             # Check if optimizations already exist
             if 'STOPSIGNAL' in content and 'healthcheck' in content.lower():
-                print(f"✅ {service_name} Dockerfile already optimized")
+                print(f" PASS:  {service_name} Dockerfile already optimized")
                 continue
             
             # Add Cloud Run optimizations
@@ -250,11 +250,11 @@ class GracefulShutdownSetup:
             with open(full_path, 'w') as f:
                 f.write(content)
             
-            print(f"✅ Added Cloud Run optimizations to {service_name} Dockerfile")
+            print(f" PASS:  Added Cloud Run optimizations to {service_name} Dockerfile")
     
     def setup_all(self):
         """Setup all graceful shutdown components"""
-        print("🔧 Setting up graceful shutdown for Cloud Run...")
+        print("[U+1F527] Setting up graceful shutdown for Cloud Run...")
         
         success_count = 0
         total_tasks = 3
@@ -268,17 +268,17 @@ class GracefulShutdownSetup:
         self.create_dockerfile_optimizations()
         success_count += 1  # Dockerfile optimization always succeeds
         
-        print(f"\n📊 Setup complete: {success_count}/{total_tasks} tasks successful")
+        print(f"\n CHART:  Setup complete: {success_count}/{total_tasks} tasks successful")
         
         if success_count == total_tasks:
-            print("🎉 All graceful shutdown components setup successfully!")
-            print("\n📝 Next steps:")
+            print(" CELEBRATION:  All graceful shutdown components setup successfully!")
+            print("\n[U+1F4DD] Next steps:")
             print("1. Test locally to ensure shutdown works correctly")
             print("2. Deploy to staging and verify Cloud Run signal handling")
             print("3. Monitor logs for graceful shutdown messages")
             return True
         else:
-            print("⚠️  Some components failed to setup. Check logs above.")
+            print(" WARNING: [U+FE0F]  Some components failed to setup. Check logs above.")
             return False
 
 

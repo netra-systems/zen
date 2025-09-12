@@ -4,7 +4,7 @@ This test suite validates the complete 3-tier persistence architecture:
 - Redis as PRIMARY storage for active states
 - PostgreSQL for critical recovery checkpoints
 - ClickHouse for analytics migration of completed runs
-- Failover chain: Redis → PostgreSQL → ClickHouse → Legacy
+- Failover chain: Redis  ->  PostgreSQL  ->  ClickHouse  ->  Legacy
 
 Business Value Justification (BVJ):
 - Segment: Enterprise, Mid ($25K+ MRR workloads)
@@ -219,7 +219,7 @@ class Test3TierPersistenceIntegration:
         ttl = await redis_client.ttl(f"agent_state:{run_id}")
         assert ttl > 0, "TTL must be set to prevent Redis memory exhaustion"
         
-        print(f"✓ Redis PRIMARY storage validated for run {run_id}")
+        print(f"[U+2713] Redis PRIMARY storage validated for run {run_id}")
 
     @pytest.mark.integration
     @pytest.mark.database
@@ -296,7 +296,7 @@ class Test3TierPersistenceIntegration:
         # Recovery would now fall back to PostgreSQL checkpoint
         # (Implementation would handle this automatically)
         
-        print(f"✓ PostgreSQL checkpoint created and validated for run {run_id}")
+        print(f"[U+2713] PostgreSQL checkpoint created and validated for run {run_id}")
 
     @pytest.mark.integration
     @pytest.mark.database
@@ -369,12 +369,12 @@ class Test3TierPersistenceIntegration:
         
         assert migration_success, "ClickHouse migration must be schedulable"
         
-        print(f"✓ ClickHouse migration scheduled for completed run {run_id}")
+        print(f"[U+2713] ClickHouse migration scheduled for completed run {run_id}")
 
     @pytest.mark.integration
     @pytest.mark.resilience
     async def test_failover_chain_recovery(self):
-        """Test complete failover chain: Redis → PostgreSQL → ClickHouse → Legacy.
+        """Test complete failover chain: Redis  ->  PostgreSQL  ->  ClickHouse  ->  Legacy.
         
         Business Context: Zero-downtime recovery is critical for Enterprise SLAs
         and customer trust (churn prevention for high-value accounts).
@@ -448,7 +448,7 @@ class Test3TierPersistenceIntegration:
         assert recovery_metrics["recovery_source"] == "redis"  # Would be "postgres" in real failover
         assert recovery_metrics["state_integrity"] is True
         
-        print(f"✓ Failover chain validated for run {run_id}")
+        print(f"[U+2713] Failover chain validated for run {run_id}")
 
     @pytest.mark.integration
     async def test_cross_database_consistency_validation(self):
@@ -524,7 +524,7 @@ class Test3TierPersistenceIntegration:
         assert consistency_check["data_integrity_score"] == 1.0, "Full consistency required"
         assert len(consistency_check["inconsistencies"]) == 0, "No inconsistencies allowed"
         
-        print(f"✓ Cross-database consistency validated for run {run_id}")
+        print(f"[U+2713] Cross-database consistency validated for run {run_id}")
 
     @pytest.mark.integration
     @pytest.mark.database
@@ -602,7 +602,7 @@ class Test3TierPersistenceIntegration:
         else:
             assert final_state.run_id == run_id, "State integrity must be maintained"
         
-        print(f"✓ Atomic transaction guarantees validated for run {run_id}")
+        print(f"[U+2713] Atomic transaction guarantees validated for run {run_id}")
 
     @pytest.mark.integration
     @pytest.mark.performance
@@ -677,7 +677,7 @@ class Test3TierPersistenceIntegration:
         
         assert version_conflicts == 0, "No version tracking conflicts allowed"
         
-        print(f"✓ Concurrent persistence validated: {successful_operations}/10 success, "
+        print(f"[U+2713] Concurrent persistence validated: {successful_operations}/10 success, "
               f"{ops_per_second:.2f} ops/sec")
 
     @pytest.mark.integration
@@ -802,7 +802,7 @@ class Test3TierPersistenceIntegration:
         completion_success = await state_cache_manager.mark_state_completed(run_id)
         assert completion_success, "24-hour run completion must succeed"
         
-        print(f"✓ 24-hour persistence lifecycle validated: "
+        print(f"[U+2713] 24-hour persistence lifecycle validated: "
               f"{lifecycle_results['checkpoints_created']} checkpoints, "
               f"{lifecycle_results['redis_operations']} Redis ops, "
               f"{lifecycle_results['postgres_backups']} PostgreSQL backups, "
@@ -893,7 +893,7 @@ class Test3TierPersistenceIntegration:
                             business_validation_results["data_integrity_scores"].append(1.0)
                         else:
                             business_validation_results["data_integrity_scores"].append(0.8)
-                            print(f"⚠ Scenario {scenario_name} had discrepancies: {validation_result['discrepancies']}")
+                            print(f" WARNING:  Scenario {scenario_name} had discrepancies: {validation_result['discrepancies']}")
                     else:
                         business_validation_results["data_integrity_scores"].append(1.0)
                 
@@ -902,7 +902,7 @@ class Test3TierPersistenceIntegration:
                     "error": str(e),
                     "success": False
                 }
-                print(f"❌ Scenario {scenario_name} failed: {e}")
+                print(f" FAIL:  Scenario {scenario_name} failed: {e}")
         
         # Validate business value requirements
         success_rate = business_validation_results["scenarios_passed"] / business_validation_results["total_scenarios"]
@@ -920,7 +920,7 @@ class Test3TierPersistenceIntegration:
         
         business_validation_results["business_value_validated"] = True
         
-        print(f"✓ Enterprise workload validation: {success_rate:.1%} success rate, "
+        print(f"[U+2713] Enterprise workload validation: {success_rate:.1%} success rate, "
               f"{avg_integrity_score:.1%} integrity score, business value validated")
         
         assert business_validation_results["business_value_validated"], "Enterprise business value validation must pass"

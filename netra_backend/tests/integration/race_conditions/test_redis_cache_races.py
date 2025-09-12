@@ -9,7 +9,7 @@ This module tests critical race conditions in Redis cache operations that could 
 - Memory leaks and resource exhaustion in cache layer
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Cache reliability is critical for performance
+- Segment: All (Free  ->  Enterprise) - Cache reliability is critical for performance
 - Business Goal: Ensure cache consistency and prevent data corruption under concurrent load
 - Value Impact: Prevents performance degradation and data inconsistencies that impact user experience
 - Strategic Impact: CRITICAL - Cache layer reliability directly impacts platform responsiveness and scalability

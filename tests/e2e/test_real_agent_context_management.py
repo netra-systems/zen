@@ -503,18 +503,18 @@ class RealAgentContextManagementTester:
             
             # Context isolation results
             report.append("\nContext Isolation Validation:")
-            report.append(f"  ✓ All users isolated: {val.all_users_isolated}")
-            report.append(f"  ✓ Session integrity maintained: {val.session_integrity_maintained}")
-            report.append(f"  ✓ Agent state separated: {val.agent_state_separated}")
-            report.append(f"  ✓ Resource isolation verified: {val.resource_isolation_verified}")
-            report.append(f"  ✓ Context boundaries maintained: {val.context_boundaries_maintained}")
+            report.append(f"  [U+2713] All users isolated: {val.all_users_isolated}")
+            report.append(f"  [U+2713] Session integrity maintained: {val.session_integrity_maintained}")
+            report.append(f"  [U+2713] Agent state separated: {val.agent_state_separated}")
+            report.append(f"  [U+2713] Resource isolation verified: {val.resource_isolation_verified}")
+            report.append(f"  [U+2713] Context boundaries maintained: {val.context_boundaries_maintained}")
             
             # Data leakage analysis
             if val.data_leakage_detected:
-                report.append(f"\n⚠️ DATA LEAKAGE DETECTED!")
+                report.append(f"\n WARNING: [U+FE0F] DATA LEAKAGE DETECTED!")
                 report.append(f"Cross-contamination pairs: {val.cross_user_contamination}")
             else:
-                report.append("\n✓ No data leakage detected")
+                report.append("\n[U+2713] No data leakage detected")
                 
             # Performance metrics per user
             if val.concurrent_execution_times:
@@ -534,7 +534,7 @@ class RealAgentContextManagementTester:
                 
                 report.append(f"  - User {user_id[:8]}...: {event_types}")
                 if missing_events:
-                    report.append(f"    ⚠️ Missing: {missing_events}")
+                    report.append(f"     WARNING: [U+FE0F] Missing: {missing_events}")
                     
         # Overall isolation quality score
         if self.validations:

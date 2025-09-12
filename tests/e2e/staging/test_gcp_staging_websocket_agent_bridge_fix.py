@@ -40,7 +40,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             golden_path_steps["5_agent_execution"] = True
             golden_path_steps["6_agent_response_delivered"] = True
             
-            print("✅ STAGING GOLDEN PATH SUCCESS:")
+            print(" PASS:  STAGING GOLDEN PATH SUCCESS:")
             print(f"  Completed steps: {[k for k, v in golden_path_steps.items() if v]}")
             print(f"  Failed steps: {[k for k, v in golden_path_steps.items() if not v]}")
             
@@ -49,7 +49,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             assert golden_path_steps["5_agent_execution"], "Agent execution should succeed"
             assert golden_path_steps["6_agent_response_delivered"], "Agent response should succeed"
             
-            print("✅ BUSINESS IMPACT: $500K+ ARR Golden Path fully functional in staging")
+            print(" PASS:  BUSINESS IMPACT: $500K+ ARR Golden Path fully functional in staging")
             
         except ImportError as e:
             pytest.fail(f"Staging Golden Path should work with SSOT imports but failed: {e}")
@@ -71,12 +71,12 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
         
         # With working SSOT imports, events can be delivered
         try:
-            print("✅ Establishing WebSocket connection to staging...")
+            print(" PASS:  Establishing WebSocket connection to staging...")
             
             # Agent handler setup now works with SSOT imports
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             
-            print("✅ STAGING WEBSOCKET EVENTS SUCCESS:")
+            print(" PASS:  STAGING WEBSOCKET EVENTS SUCCESS:")
             print("  Agent handlers set up successfully with SSOT imports")
             print(f"  Available events: {critical_websocket_events}")
             print("  Event delivery capability: FUNCTIONAL")
@@ -84,7 +84,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             
             # Validate bridge creation function is available for event handling
             assert create_agent_websocket_bridge is not None
-            print("✅ IMPACT: Real-time user experience fully operational in staging")
+            print(" PASS:  IMPACT: Real-time user experience fully operational in staging")
             
         except ImportError as e:
             pytest.fail(f"Staging WebSocket events should work with SSOT imports but failed: {e}")
@@ -112,7 +112,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             expected_status_code = 200
             expected_success = "Agent handler setup succeeded"
             
-            print("✅ STAGING API ENDPOINT SUCCESS:")
+            print(" PASS:  STAGING API ENDPOINT SUCCESS:")
             print(f"  Endpoint: {api_endpoint}")
             print(f"  Expected status: {expected_status_code}")
             print(f"  Success type: {expected_success}")
@@ -122,7 +122,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             # Validate bridge creation is available for API success
             assert create_agent_websocket_bridge is not None
             
-            print("✅ STAGING LOG EVIDENCE:")
+            print(" PASS:  STAGING LOG EVIDENCE:")
             print("  'Agent handler setup succeeded with SSOT imports'")
             print("  HTTP 200 responses on agent execution requests")
             print("  WebSocket connection success with working agent setup")
@@ -155,7 +155,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             except ImportError:
                 failed_users.append(scenario["user_id"])
         
-        print("✅ STAGING CONCURRENT USER SUCCESS:")
+        print(" PASS:  STAGING CONCURRENT USER SUCCESS:")
         print(f"  Total users tested: {len(concurrent_user_scenarios)}")
         print(f"  Failed users: {len(failed_users)} ({failed_users})")
         print(f"  Successful users: {len(successful_users)} ({successful_users})")
@@ -164,7 +164,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
         assert len(failed_users) == 0, f"No users should fail, but {len(failed_users)} failed"
         assert len(successful_users) == len(concurrent_user_scenarios), "All users should succeed"
         
-        print("✅ SCALABILITY SUCCESS: Universal service restoration in staging")
+        print(" PASS:  SCALABILITY SUCCESS: Universal service restoration in staging")
 
     @pytest.mark.staging_validation
     async def test_staging_websocket_connection_persistence_with_working_agents(self):
@@ -178,15 +178,15 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
         actual_connection_drops = 0
         
         try:
-            print(f"✅ Testing WebSocket connection stability over {connection_test_duration} seconds...")
+            print(f" PASS:  Testing WebSocket connection stability over {connection_test_duration} seconds...")
             
             # Connection establishment works
-            print("✅ WebSocket connection established...")
+            print(" PASS:  WebSocket connection established...")
             
             # Agent handler setup now succeeds with SSOT imports
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             
-            print("✅ STAGING CONNECTION STABILITY SUCCESS:")
+            print(" PASS:  STAGING CONNECTION STABILITY SUCCESS:")
             print(f"  Test duration: {connection_test_duration} seconds")
             print(f"  Expected drops: {expected_connection_drops}")
             print(f"  Actual drops: {actual_connection_drops}")
@@ -214,7 +214,7 @@ class TestGCPStagingWebSocketAgentBridgeSuccess(SSotAsyncBaseTestCase):
             # Normal manager creation now works
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
             
-            print("✅ STAGING NORMAL OPERATION RESTORED:")
+            print(" PASS:  STAGING NORMAL OPERATION RESTORED:")
             print("  Normal WebSocket manager operational")
             print("  No emergency fallback required")
             print(f"  Success indicators: {normal_manager_indicators}")
@@ -244,7 +244,7 @@ class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
             assert callable(create_agent_websocket_bridge), "Bridge creation function must be callable"
             assert AgentWebSocketBridge is not None, "Bridge class must be available"
             
-            print("✅ STAGING REGRESSION PREVENTION SUCCESS:")
+            print(" PASS:  STAGING REGRESSION PREVENTION SUCCESS:")
             print("  SSOT import paths validated in staging context")
             print("  Function and class accessibility confirmed")
             print("  Import consistency maintained")
@@ -262,7 +262,7 @@ class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
         with pytest.raises(ModuleNotFoundError, match="No module named 'netra_backend.app.agents.agent_websocket_bridge'"):
             from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
             
-        print("✅ STAGING CONFUSION PREVENTION:")
+        print(" PASS:  STAGING CONFUSION PREVENTION:")
         print("  Broken import path correctly remains broken")
         print("  No risk of accidental usage of wrong import")
         print("  Clear distinction between broken and working paths")
@@ -288,7 +288,7 @@ class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
             except ImportError:
                 failed_dependencies.append(dependency)
         
-        print("✅ STAGING DEPENDENCY VALIDATION:")
+        print(" PASS:  STAGING DEPENDENCY VALIDATION:")
         print(f"  Total dependencies: {len(golden_path_dependencies)}")
         print(f"  Working dependencies: {len(working_dependencies)}")
         print(f"  Failed dependencies: {len(failed_dependencies)}")
@@ -320,7 +320,7 @@ class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
             # Verify event delivery capability is available
             assert create_agent_websocket_bridge is not None
             
-            print("✅ STAGING EVENT CAPABILITY VALIDATION:")
+            print(" PASS:  STAGING EVENT CAPABILITY VALIDATION:")
             print(f"  Critical events supported: {critical_events}")
             print("  Bridge infrastructure: FUNCTIONAL")
             print("  Event delivery capability: AVAILABLE")
@@ -348,7 +348,7 @@ class TestGCPStagingRegressionPrevention(SSotAsyncBaseTestCase):
             # Verify API integration capability
             assert create_agent_websocket_bridge is not None
             
-            print("✅ STAGING API INTEGRATION VALIDATION:")
+            print(" PASS:  STAGING API INTEGRATION VALIDATION:")
             print(f"  API endpoints: {api_endpoints}")
             print("  Bridge integration: AVAILABLE")
             print("  Agent execution pipeline: FUNCTIONAL") 

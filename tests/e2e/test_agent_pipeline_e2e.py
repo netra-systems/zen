@@ -12,7 +12,7 @@ Business Value Justification:
 
 This test suite validates:
 1. 15+ different agent types in the pipeline
-2. Complete agent execution pipeline (request → supervisor → agent → tools → response → billing)
+2. Complete agent execution pipeline (request  ->  supervisor  ->  agent  ->  tools  ->  response  ->  billing)
 3. Agent coordination (multi-agent workflows, handoffs, parallel execution)
 4. Agent compensation calculation and billing event generation
 5. WebSocket events for real-time chat experience
@@ -220,7 +220,7 @@ class AgentPipelineE2ETest:
         
     async def setup_infrastructure(self) -> None:
         """Setup real infrastructure components for testing."""
-        logger.info("🚀 Setting up agent pipeline infrastructure with REAL services...")
+        logger.info("[U+1F680] Setting up agent pipeline infrastructure with REAL services...")
         
         # Start Docker services
         await self._start_docker_services()
@@ -234,7 +234,7 @@ class AgentPipelineE2ETest:
         # Verify infrastructure health
         await self._verify_infrastructure_health()
         
-        logger.info("✅ Agent pipeline infrastructure ready")
+        logger.info(" PASS:  Agent pipeline infrastructure ready")
 
     async def _start_docker_services(self) -> None:
         """Start all required Docker services."""
@@ -253,7 +253,7 @@ class AgentPipelineE2ETest:
             if not status.get(service, {}).get('running'):
                 raise RuntimeError(f"Service {service} failed to start")
                 
-        logger.info("✅ All Docker services started and healthy")
+        logger.info(" PASS:  All Docker services started and healthy")
 
     async def _initialize_core_components(self) -> None:
         """Initialize core agent pipeline components."""
@@ -327,11 +327,11 @@ class AgentPipelineE2ETest:
         
         logger.info("Infrastructure health checks passed:")
         for check in health_checks:
-            logger.info(f"  ✅ {check}")
+            logger.info(f"   PASS:  {check}")
 
     async def test_complete_agent_pipeline(self) -> PipelineTestResult:
         """Test complete agent pipeline for all agent types."""
-        logger.info("🧪 Testing complete agent pipeline for all agent types...")
+        logger.info("[U+1F9EA] Testing complete agent pipeline for all agent types...")
         
         results = []
         websocket_events_coverage = {}
@@ -679,7 +679,7 @@ class AgentPipelineE2ETest:
 
     async def test_multi_agent_coordination(self) -> Dict[str, Any]:
         """Test multi-agent workflows, handoffs, and parallel execution."""
-        logger.info("🔄 Testing multi-agent coordination patterns...")
+        logger.info(" CYCLE:  Testing multi-agent coordination patterns...")
         
         coordination_results = {
             'sequential_workflow': await self._test_sequential_agent_workflow(),
@@ -691,7 +691,7 @@ class AgentPipelineE2ETest:
         return coordination_results
 
     async def _test_sequential_agent_workflow(self) -> Dict[str, Any]:
-        """Test sequential multi-agent workflow (triage → data → reporting)."""
+        """Test sequential multi-agent workflow (triage  ->  data  ->  reporting)."""
         user_id = f"seq_user_{uuid.uuid4().hex[:8]}"
         workflow_agents = ["triage", "data", "reporting"]
         
@@ -820,7 +820,7 @@ class AgentPipelineE2ETest:
         
         for from_agent, to_agent in handoff_chain:
             if from_agent in self.agent_registry.list_agents() and to_agent in self.agent_registry.list_agents():
-                logger.info(f"Testing handoff: {from_agent} → {to_agent}")
+                logger.info(f"Testing handoff: {from_agent}  ->  {to_agent}")
                 
                 # Execute first agent
                 from_result = await self._test_single_agent_pipeline(from_agent)
@@ -945,7 +945,7 @@ class AgentPipelineE2ETest:
 
     async def cleanup(self) -> None:
         """Cleanup test infrastructure and resources."""
-        logger.info("🧹 Cleaning up agent pipeline test infrastructure...")
+        logger.info("[U+1F9F9] Cleaning up agent pipeline test infrastructure...")
         
         # Close WebSocket clients
         for client in self.websocket_clients.values():
@@ -960,7 +960,7 @@ class AgentPipelineE2ETest:
         except Exception as e:
             logger.warning(f"Docker cleanup warning: {e}")
         
-        logger.info("✅ Cleanup complete")
+        logger.info(" PASS:  Cleanup complete")
 
 # Pytest fixtures and test functions
 
@@ -977,7 +977,7 @@ async def agent_pipeline_tester():
 @pytest.mark.real_services
 async def test_complete_agent_pipeline_all_types(agent_pipeline_tester: AgentPipelineE2ETest):
     """Test complete agent pipeline for all 15+ agent types."""
-    logger.info("🚀 Starting comprehensive agent pipeline test for all agent types...")
+    logger.info("[U+1F680] Starting comprehensive agent pipeline test for all agent types...")
     
     # Run complete pipeline test
     result = await agent_pipeline_tester.test_complete_agent_pipeline()
@@ -1001,14 +1001,14 @@ async def test_complete_agent_pipeline_all_types(agent_pipeline_tester: AgentPip
     missing_events = required_events - events_found
     assert len(missing_events) == 0, f"Missing required WebSocket events: {missing_events}"
     
-    logger.info(f"✅ Pipeline test passed: {result.successful_executions}/{result.total_agents_tested} agents, {result.reliability_score:.3f} reliability")
+    logger.info(f" PASS:  Pipeline test passed: {result.successful_executions}/{result.total_agents_tested} agents, {result.reliability_score:.3f} reliability")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e 
 @pytest.mark.real_services
 async def test_multi_agent_coordination_workflows(agent_pipeline_tester: AgentPipelineE2ETest):
     """Test multi-agent coordination patterns."""
-    logger.info("🔄 Starting multi-agent coordination tests...")
+    logger.info(" CYCLE:  Starting multi-agent coordination tests...")
     
     coordination_results = await agent_pipeline_tester.test_multi_agent_coordination()
     
@@ -1032,14 +1032,14 @@ async def test_multi_agent_coordination_workflows(agent_pipeline_tester: AgentPi
     assert aggregation['aggregation_success'], "Result aggregation failed"
     assert aggregation['data_consistency'], "Data consistency issues in aggregation"
     
-    logger.info("✅ Multi-agent coordination tests passed")
+    logger.info(" PASS:  Multi-agent coordination tests passed")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services  
 async def test_websocket_events_coverage(agent_pipeline_tester: AgentPipelineE2ETest):
     """Test WebSocket events coverage for real-time chat experience."""
-    logger.info("📡 Validating WebSocket events coverage...")
+    logger.info("[U+1F4E1] Validating WebSocket events coverage...")
     
     # Ensure some agents have been executed to generate events
     if not agent_pipeline_tester.websocket_events:
@@ -1058,14 +1058,14 @@ async def test_websocket_events_coverage(agent_pipeline_tester: AgentPipelineE2E
         count = validation_result['event_coverage'].get(event_type, 0)
         assert count > 0, f"Required WebSocket event '{event_type}' not found"
         
-    logger.info(f"✅ WebSocket events validation passed: {validation_result['events_with_coverage']}/{validation_result['required_events_count']} event types covered")
+    logger.info(f" PASS:  WebSocket events validation passed: {validation_result['events_with_coverage']}/{validation_result['required_events_count']} event types covered")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
 async def test_agent_compensation_billing_pipeline(agent_pipeline_tester: AgentPipelineE2ETest):
     """Test agent compensation calculation and billing event generation."""
-    logger.info("💰 Testing agent compensation and billing pipeline...")
+    logger.info("[U+1F4B0] Testing agent compensation and billing pipeline...")
     
     # Ensure billing events have been generated
     if not agent_pipeline_tester.billing_events:
@@ -1085,14 +1085,14 @@ async def test_agent_compensation_billing_pipeline(agent_pipeline_tester: AgentP
     for event_type in expected_event_types:
         assert events_by_type.get(event_type, 0) > 0, f"No billing events of type {event_type}"
     
-    logger.info(f"✅ Billing pipeline validation passed: {billing_validation['total_billing_events']} events, ${billing_validation['total_revenue']:.4f} revenue")
+    logger.info(f" PASS:  Billing pipeline validation passed: {billing_validation['total_billing_events']} events, ${billing_validation['total_revenue']:.4f} revenue")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
 @pytest.mark.real_services
 async def test_performance_reliability_targets(agent_pipeline_tester: AgentPipelineE2ETest):
     """Test performance requirements and reliability targets."""
-    logger.info("⚡ Validating performance and reliability targets...")
+    logger.info(" LIGHTNING:  Validating performance and reliability targets...")
     
     # Run pipeline test if not already done
     if not agent_pipeline_tester.execution_metrics:
@@ -1124,7 +1124,7 @@ async def test_performance_reliability_targets(agent_pipeline_tester: AgentPipel
         avg_tool = sum(m.tool_execution_time or 0 for m in successful_metrics) / len(successful_metrics)
         avg_total = sum(m.total_execution_time or 0 for m in successful_metrics) / len(successful_metrics)
         
-        logger.info(f"✅ Performance targets met: {reliability_score:.3f} reliability, {avg_init:.2f}s avg init, {avg_tool:.2f}s avg tools, {avg_total:.2f}s avg total")
+        logger.info(f" PASS:  Performance targets met: {reliability_score:.3f} reliability, {avg_init:.2f}s avg init, {avg_tool:.2f}s avg tools, {avg_total:.2f}s avg total")
     else:
         pytest.fail("No successful agent executions for performance validation")
 

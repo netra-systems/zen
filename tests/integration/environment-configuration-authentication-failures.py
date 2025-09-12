@@ -262,7 +262,7 @@ class TestEnvironmentConfigurationAuthenticationFailures:
             
             # Check for sanitization corruption
             if sanitized_value != original_value:
-                corruption_issues.append(f"{var_name}: '{original_value}' → '{sanitized_value}'")
+                corruption_issues.append(f"{var_name}: '{original_value}'  ->  '{sanitized_value}'")
             
             # Check for specific character corruption patterns
             if original_value and sanitized_value:

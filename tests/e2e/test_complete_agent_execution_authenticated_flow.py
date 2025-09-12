@@ -40,7 +40,7 @@ class TestCompleteAgentExecutionAuthenticatedFlow:
         
     @pytest.mark.asyncio
     async def test_complete_authenticated_agent_execution_flow(self, real_services_fixture):
-        """Test complete user journey: login → agent execution → results with WebSocket feedback."""
+        """Test complete user journey: login  ->  agent execution  ->  results with WebSocket feedback."""
         # Arrange - Create authenticated user session
         user_credentials = {
             "email": f"e2e-test-{uuid.uuid4()}@netra.test",

@@ -140,7 +140,7 @@ class ConnectionIDManager:
             if len(self._connections) > self._cleanup_threshold:
                 self._cleanup_inactive_connections()
             
-            logger.debug(f"✅ ISSUE #174 FIX: Created unified connection identity {connection_id}")
+            logger.debug(f" PASS:  ISSUE #174 FIX: Created unified connection identity {connection_id}")
             return identity
     
     def register_authenticated_connection(
@@ -168,7 +168,7 @@ class ConnectionIDManager:
         with self._lock:
             identity = self._connections.get(connection_id)
             if not identity:
-                logger.error(f"❌ ISSUE #174 ERROR: Connection {connection_id} not found for authentication")
+                logger.error(f" FAIL:  ISSUE #174 ERROR: Connection {connection_id} not found for authentication")
                 return False
             
             # Update identity with authentication information
@@ -188,7 +188,7 @@ class ConnectionIDManager:
                 self._user_connections[user_id] = set()
             self._user_connections[user_id].add(connection_id)
             
-            logger.info(f"✅ ISSUE #174 FIX: Connection {connection_id} authenticated for user {user_id}")
+            logger.info(f" PASS:  ISSUE #174 FIX: Connection {connection_id} authenticated for user {user_id}")
             return True
     
     def get_connection_identity(self, connection_id: str) -> Optional[ConnectionIdentity]:
@@ -230,13 +230,13 @@ class ConnectionIDManager:
         with self._lock:
             identity = self._connections.get(connection_id)
             if not identity:
-                logger.error(f"❌ ISSUE #174 ERROR: Cannot update state for unknown connection {connection_id}")
+                logger.error(f" FAIL:  ISSUE #174 ERROR: Cannot update state for unknown connection {connection_id}")
                 return False
             
             old_state = identity.state
             identity.update_state(new_state, metadata)
             
-            logger.debug(f"✅ ISSUE #174 FIX: Connection {connection_id} state: {old_state} → {new_state}")
+            logger.debug(f" PASS:  ISSUE #174 FIX: Connection {connection_id} state: {old_state}  ->  {new_state}")
             return True
     
     def validate_connection_identity(self, connection_id: str, expected_user_id: Optional[str] = None) -> bool:
@@ -256,20 +256,20 @@ class ConnectionIDManager:
         with self._lock:
             identity = self._connections.get(connection_id)
             if not identity:
-                logger.warning(f"⚠️ ISSUE #174 VALIDATION: Connection {connection_id} not found in SSOT registry")
+                logger.warning(f" WARNING: [U+FE0F] ISSUE #174 VALIDATION: Connection {connection_id} not found in SSOT registry")
                 return False
             
             # Validate user binding if expected
             if expected_user_id and identity.user_id != expected_user_id:
-                logger.error(f"❌ ISSUE #174 VALIDATION: Connection {connection_id} user mismatch. Expected: {expected_user_id}, Actual: {identity.user_id}")
+                logger.error(f" FAIL:  ISSUE #174 VALIDATION: Connection {connection_id} user mismatch. Expected: {expected_user_id}, Actual: {identity.user_id}")
                 return False
             
             # Validate connection is not in terminal state
             if identity.is_terminal_state():
-                logger.warning(f"⚠️ ISSUE #174 VALIDATION: Connection {connection_id} is in terminal state: {identity.state}")
+                logger.warning(f" WARNING: [U+FE0F] ISSUE #174 VALIDATION: Connection {connection_id} is in terminal state: {identity.state}")
                 return False
             
-            logger.debug(f"✅ ISSUE #174 VALIDATION: Connection {connection_id} identity validated")
+            logger.debug(f" PASS:  ISSUE #174 VALIDATION: Connection {connection_id} identity validated")
             return True
     
     def remove_connection(self, connection_id: str) -> bool:
@@ -288,7 +288,7 @@ class ConnectionIDManager:
         with self._lock:
             identity = self._connections.get(connection_id)
             if not identity:
-                logger.warning(f"⚠️ ISSUE #174 CLEANUP: Connection {connection_id} not found for removal")
+                logger.warning(f" WARNING: [U+FE0F] ISSUE #174 CLEANUP: Connection {connection_id} not found for removal")
                 return False
             
             # Remove from user tracking
@@ -300,7 +300,7 @@ class ConnectionIDManager:
             # Remove from main registry
             del self._connections[connection_id]
             
-            logger.info(f"✅ ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT registry")
+            logger.info(f" PASS:  ISSUE #174 CLEANUP: Connection {connection_id} removed from SSOT registry")
             return True
     
     def get_user_connections(self, user_id: str) -> Set[str]:
@@ -384,7 +384,7 @@ class ConnectionIDManager:
             self.remove_connection(connection_id)
         
         if to_remove:
-            logger.info(f"✅ ISSUE #174 CLEANUP: Removed {len(to_remove)} expired connections")
+            logger.info(f" PASS:  ISSUE #174 CLEANUP: Removed {len(to_remove)} expired connections")
 
 
 # SSOT Global Instance

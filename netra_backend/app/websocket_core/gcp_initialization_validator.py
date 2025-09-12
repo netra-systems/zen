@@ -13,23 +13,23 @@ PERFORMANCE OPTIMIZATION SUMMARY (2025-09-11):
 SIGNIFICANT TIMEOUT REDUCTIONS IMPLEMENTED:
 
 1. WEBSOCKET ROUTE TIMEOUTS:
-   - Environment-aware: 1.0s (local) → 3.0s (staging) → 5.0s (production)
+   - Environment-aware: 1.0s (local)  ->  3.0s (staging)  ->  5.0s (production)
    - Previous: Fixed 30s timeout causing performance regression
    - Improvement: Up to 97% faster connection times in local/dev environments
 
 2. SERVICE VALIDATION TIMEOUTS:
-   - Database: 8.0s/15.0s → 3.0s/5.0s (62-67% reduction)
-   - Redis: 3.0s/10.0s → 1.5s/3.0s (50-70% reduction)  
-   - Auth: 10.0s/20.0s → 2.0s/5.0s (75-80% reduction)
-   - Agent Supervisor: 8.0s/30.0s → 2.0s/8.0s (73-75% reduction)
-   - WebSocket Bridge: 2.0s/30.0s → 1.0s/3.0s (50-90% reduction)
-   - Integration: 4.0s/20.0s → 1.0s/5.0s (75-80% reduction)
+   - Database: 8.0s/15.0s  ->  3.0s/5.0s (62-67% reduction)
+   - Redis: 3.0s/10.0s  ->  1.5s/3.0s (50-70% reduction)  
+   - Auth: 10.0s/20.0s  ->  2.0s/5.0s (75-80% reduction)
+   - Agent Supervisor: 8.0s/30.0s  ->  2.0s/8.0s (73-75% reduction)
+   - WebSocket Bridge: 2.0s/30.0s  ->  1.0s/3.0s (50-90% reduction)
+   - Integration: 4.0s/20.0s  ->  1.0s/5.0s (75-80% reduction)
 
 3. VALIDATION PHASE TIMEOUTS:
-   - Startup Wait: 3.0s → 1.5s max (50% reduction)
-   - Dependencies Phase: 3.0s → 1.5s (50% reduction)
-   - Services Phase: 2.0s → 1.0s (50% reduction)
-   - Integration Phase: 1.0s → 0.5s (50% reduction)
+   - Startup Wait: 3.0s  ->  1.5s max (50% reduction)
+   - Dependencies Phase: 3.0s  ->  1.5s (50% reduction)
+   - Services Phase: 2.0s  ->  1.0s (50% reduction)
+   - Integration Phase: 1.0s  ->  0.5s (50% reduction)
 
 4. ENVIRONMENT-AWARE CONFIGURATION:
    - Production: Conservative (1.0x multiplier, 20% safety margin)
@@ -727,7 +727,7 @@ class GCPWebSocketInitializationValidator:
         optimized_timeout = self._get_optimized_timeout(timeout_seconds)
         
         self.logger.info(
-            f"🔍 GCP WebSocket readiness validation started "
+            f" SEARCH:  GCP WebSocket readiness validation started "
             f"(requested: {timeout_seconds}s, optimized: {optimized_timeout:.1f}s, "
             f"environment: {self.environment})"
         )
@@ -762,7 +762,7 @@ class GCPWebSocketInitializationValidator:
                 current_phase = getattr(self.app_state, 'startup_phase', 'unknown') if self.app_state else 'no_app_state'
                 
                 self.logger.error(
-                    f"🔴 RACE CONDITION DETECTED: Startup phase '{current_phase}' did not reach 'services' "
+                    f"[U+1F534] RACE CONDITION DETECTED: Startup phase '{current_phase}' did not reach 'services' "
                     f"within {wait_timeout:.1f}s - this would cause WebSocket 1011 errors"
                 )
                 
@@ -780,11 +780,11 @@ class GCPWebSocketInitializationValidator:
                     }
                 )
             
-            self.logger.info(f"✅ Startup phase requirement met - proceeding with service validation")
+            self.logger.info(f" PASS:  Startup phase requirement met - proceeding with service validation")
             
             # Phase 1: Validate Dependencies (Database, Redis, Auth) with GOLDEN PATH degradation
             # PERFORMANCE OPTIMIZATION: Reduced timeout from 3.0s to 1.5s for faster dependency validation
-            self.logger.info("📋 Phase 1: Validating dependencies (Database, Redis, Auth)...")
+            self.logger.info("[U+1F4CB] Phase 1: Validating dependencies (Database, Redis, Auth)...")
             dependencies_ready = await self._validate_service_group([
                 'database', 'redis', 'auth_validation'
             ], timeout_seconds=1.5)
@@ -795,7 +795,7 @@ class GCPWebSocketInitializationValidator:
                 # GOLDEN PATH GRACEFUL DEGRADATION: Allow basic functionality in staging
                 if self.is_gcp_environment and self.environment == 'staging' and 'redis' in dependencies_ready['failed']:
                     self.logger.warning(
-                        "⚠️ GOLDEN PATH DEGRADATION: Redis startup delay in staging - allowing basic WebSocket "
+                        " WARNING: [U+FE0F] GOLDEN PATH DEGRADATION: Redis startup delay in staging - allowing basic WebSocket "
                         "functionality to enable user chat value delivery"
                     )
                     warnings.append("Redis connection delayed - operating in degraded mode")
@@ -805,19 +805,19 @@ class GCPWebSocketInitializationValidator:
                     
                     if not dependencies_ready['failed']:  # Only Redis was failing
                         self.current_state = GCPReadinessState.DEPENDENCIES_READY
-                        self.logger.info("✅ Phase 1 Complete: Dependencies ready (degraded mode - Redis delayed)")
+                        self.logger.info(" PASS:  Phase 1 Complete: Dependencies ready (degraded mode - Redis delayed)")
                     else:
                         self.current_state = GCPReadinessState.FAILED
                 else:
                     self.current_state = GCPReadinessState.FAILED
             else:
                 self.current_state = GCPReadinessState.DEPENDENCIES_READY
-                self.logger.info("✅ Phase 1 Complete: Dependencies ready")
+                self.logger.info(" PASS:  Phase 1 Complete: Dependencies ready")
             
             # Phase 2: Validate Services (Agent Supervisor, WebSocket Bridge)
             if self.current_state != GCPReadinessState.FAILED:
                 # PERFORMANCE OPTIMIZATION: Reduced timeout from 2.0s to 1.0s for faster service validation
-                self.logger.info("📋 Phase 2: Validating services (Agent Supervisor, WebSocket Bridge)...")
+                self.logger.info("[U+1F4CB] Phase 2: Validating services (Agent Supervisor, WebSocket Bridge)...")
                 services_ready = await self._validate_service_group([
                     'agent_supervisor', 'websocket_bridge'
                 ], timeout_seconds=1.0)
@@ -827,12 +827,12 @@ class GCPWebSocketInitializationValidator:
                     self.current_state = GCPReadinessState.FAILED
                 else:
                     self.current_state = GCPReadinessState.SERVICES_READY
-                    self.logger.info("✅ Phase 2 Complete: Services ready")
+                    self.logger.info(" PASS:  Phase 2 Complete: Services ready")
             
             # Phase 3: Validate WebSocket Integration
             if self.current_state == GCPReadinessState.SERVICES_READY:
                 # PERFORMANCE OPTIMIZATION: Reduced timeout from 1.0s to 0.5s for faster integration validation
-                self.logger.info("📋 Phase 3: Validating WebSocket integration...")
+                self.logger.info("[U+1F4CB] Phase 3: Validating WebSocket integration...")
                 integration_ready = await self._validate_service_group([
                     'websocket_integration'
                 ], timeout_seconds=0.5)
@@ -842,7 +842,7 @@ class GCPWebSocketInitializationValidator:
                     self.current_state = GCPReadinessState.FAILED
                 else:
                     self.current_state = GCPReadinessState.WEBSOCKET_READY
-                    self.logger.info("✅ Phase 3 Complete: WebSocket integration ready")
+                    self.logger.info(" PASS:  Phase 3 Complete: WebSocket integration ready")
             
             # Build result
             elapsed_time = time.time() - self.validation_start_time
@@ -858,10 +858,10 @@ class GCPWebSocketInitializationValidator:
             }
             
             if ready:
-                self.logger.info(f"🟢 GCP WebSocket readiness validation SUCCESS ({elapsed_time:.2f}s)")
+                self.logger.info(f"[U+1F7E2] GCP WebSocket readiness validation SUCCESS ({elapsed_time:.2f}s)")
                 self.logger.info("   All critical services ready - WebSocket connections can be accepted")
             else:
-                self.logger.error(f"🔴 GCP WebSocket readiness validation FAILED ({elapsed_time:.2f}s)")
+                self.logger.error(f"[U+1F534] GCP WebSocket readiness validation FAILED ({elapsed_time:.2f}s)")
                 self.logger.error(f"   Failed services: {', '.join(failed_services)}")
                 self.logger.error("   WebSocket connections should be rejected to prevent 1011 errors")
             
@@ -876,7 +876,7 @@ class GCPWebSocketInitializationValidator:
             
         except asyncio.TimeoutError:
             elapsed_time = time.time() - self.validation_start_time
-            self.logger.error(f"🔴 GCP WebSocket readiness validation TIMEOUT ({elapsed_time:.2f}s)")
+            self.logger.error(f"[U+1F534] GCP WebSocket readiness validation TIMEOUT ({elapsed_time:.2f}s)")
             self.current_state = GCPReadinessState.FAILED
             
             return GCPReadinessResult(
@@ -890,7 +890,7 @@ class GCPWebSocketInitializationValidator:
             
         except Exception as e:
             elapsed_time = time.time() - self.validation_start_time
-            self.logger.error(f"🔴 GCP WebSocket readiness validation ERROR: {e} ({elapsed_time:.2f}s)")
+            self.logger.error(f"[U+1F534] GCP WebSocket readiness validation ERROR: {e} ({elapsed_time:.2f}s)")
             self.current_state = GCPReadinessState.FAILED
             
             return GCPReadinessResult(
@@ -922,13 +922,13 @@ class GCPWebSocketInitializationValidator:
             
             if service_ready:
                 success_count += 1
-                self.logger.info(f"   ✅ {service_name}: Ready ({check.description})")
+                self.logger.info(f"    PASS:  {service_name}: Ready ({check.description})")
             else:
                 if check.is_critical:
                     failed.append(service_name)
-                    self.logger.error(f"   ❌ {service_name}: Failed ({check.description})")
+                    self.logger.error(f"    FAIL:  {service_name}: Failed ({check.description})")
                 else:
-                    self.logger.warning(f"   ⚠️  {service_name}: Failed (non-critical)")
+                    self.logger.warning(f"    WARNING: [U+FE0F]  {service_name}: Failed (non-critical)")
         
         return {
             "success": len(failed) == 0,

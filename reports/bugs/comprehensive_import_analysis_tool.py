@@ -172,7 +172,7 @@ class ImportAnalyzer:
     def generate_report(self) -> str:
         """Generate comprehensive report of all import issues."""
         if not self.issues:
-            return "✅ No import issues found!"
+            return " PASS:  No import issues found!"
         
         # Group issues by type and file
         issues_by_type = defaultdict(list)
@@ -271,12 +271,12 @@ def main():
     with open(report_file, 'w') as f:
         f.write(report)
     
-    print(f"\n✅ Analysis complete. Report saved to: {report_file}")
+    print(f"\n PASS:  Analysis complete. Report saved to: {report_file}")
     print(f"Found {len(analyzer.issues)} import issues across all test files.")
     
     # Print summary to console
     if analyzer.issues:
-        print("\n⚠️  CRITICAL ISSUES FOUND:")
+        print("\n WARNING: [U+FE0F]  CRITICAL ISSUES FOUND:")
         error_types = defaultdict(int)
         for issue in analyzer.issues:
             error_types[issue.error_type] += 1

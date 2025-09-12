@@ -53,7 +53,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
     async def setup_real_services(self):
         """Set up real Docker services for business flow testing."""
-        self.logger.info("🔧 Setting up real Docker services for auth business flow testing")
+        self.logger.info("[U+1F527] Setting up real Docker services for auth business flow testing")
         
         # Initialize Docker manager with Alpine containers for performance
         self.docker_manager = UnifiedDockerManager()
@@ -73,7 +73,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         self.postgres_port = env_info.get('postgres_port', 5434)
         self.redis_port = env_info.get('redis_port', 6381)
         
-        self.logger.info(f"✅ Real services started - Auth: {self.auth_service_url}")
+        self.logger.info(f" PASS:  Real services started - Auth: {self.auth_service_url}")
         
         # Wait for services to be fully ready
         await self.wait_for_service_ready(self.auth_service_url + "/health", timeout=60)
@@ -94,9 +94,9 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         if self.docker_manager:
             try:
                 await self.docker_manager.release_environment("test")
-                self.logger.info("✅ Docker services and test data cleaned up successfully")
+                self.logger.info(" PASS:  Docker services and test data cleaned up successfully")
             except Exception as e:
-                self.logger.error(f"❌ Error cleaning up Docker services: {e}")
+                self.logger.error(f" FAIL:  Error cleaning up Docker services: {e}")
     
     async def wait_for_service_ready(self, health_url: str, timeout: float = 30.0):
         """Wait for service to be ready with health check."""
@@ -118,7 +118,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         ):
             raise RuntimeError(f"Service not ready at {health_url} within {timeout}s")
         
-        self.logger.info(f"✅ Service ready: {health_url}")
+        self.logger.info(f" PASS:  Service ready: {health_url}")
 
     async def create_business_test_user(self, tier: str = "free") -> Dict[str, Any]:
         """Create a business test user with specific tier."""
@@ -145,13 +145,13 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("👤 Testing new user signup and onboarding business flow")
+        self.logger.info("[U+1F464] Testing new user signup and onboarding business flow")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # BUSINESS FLOW: New user discovers Netra and wants to sign up
             
             # Step 1: User initiates signup from marketing page
-            self.logger.info("📝 Step 1: New user initiates signup process")
+            self.logger.info("[U+1F4DD] Step 1: New user initiates signup process")
             
             new_user_data = await self.create_business_test_user("free")
             
@@ -172,10 +172,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             # Validate signup-specific OAuth parameters
             assert "signup" in authorization_url or "select_account" in authorization_url
             
-            self.logger.info("✅ Step 1 Complete: Signup OAuth flow initiated")
+            self.logger.info(" PASS:  Step 1 Complete: Signup OAuth flow initiated")
             
             # Step 2: New user completes Google OAuth (first time)
-            self.logger.info("🔐 Step 2: New user completes Google authentication")
+            self.logger.info("[U+1F510] Step 2: New user completes Google authentication")
             
             callback_response = await client.post(
                 f"{self.auth_service_url}/oauth/google/callback",
@@ -203,10 +203,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert "user_id" in user_info
             assert user_info.get("business_tier") == "free"  # New users start free
             
-            self.logger.info("✅ Step 2 Complete: New user account created successfully")
+            self.logger.info(" PASS:  Step 2 Complete: New user account created successfully")
             
             # Step 3: New user onboarding and initial platform access
-            self.logger.info("🎯 Step 3: New user onboarding flow")
+            self.logger.info(" TARGET:  Step 3: New user onboarding flow")
             
             # Validate user can access basic platform features
             user_profile_response = await client.get(
@@ -224,7 +224,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert profile_data.get("onboarding_completed", False) in [False, True]
             
             # Step 4: Validate free tier access permissions
-            self.logger.info("🔓 Step 4: Validating free tier business permissions")
+            self.logger.info("[U+1F513] Step 4: Validating free tier business permissions")
             
             # Token validation should include business tier information
             token_validation = await client.post(
@@ -240,7 +240,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert user_auth_data["email"] == new_user_data["email"]
             # Business tier information should be available for access control
             
-            self.logger.info("✅ NEW USER ONBOARDING FLOW COMPLETE")
+            self.logger.info(" PASS:  NEW USER ONBOARDING FLOW COMPLETE")
             self.logger.info(f"   - User: {new_user_data['email']}")
             self.logger.info(f"   - Tier: free")
             self.logger.info(f"   - Platform access: enabled")
@@ -250,7 +250,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ New user signup flow test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  New user signup flow test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -261,7 +261,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🔄 Testing returning user login business experience")
+        self.logger.info(" CYCLE:  Testing returning user login business experience")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # SETUP: Create existing user (simulate user who signed up previously)
@@ -290,7 +290,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             # BUSINESS FLOW: Returning user login experience
             
             # Step 1: Returning user initiates login
-            self.logger.info("👤 Step 1: Returning user initiates login")
+            self.logger.info("[U+1F464] Step 1: Returning user initiates login")
             
             login_auth_response = await client.post(
                 f"{self.auth_service_url}/oauth/google/authorize",
@@ -308,10 +308,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             login_url = login_data["authorization_url"]
             assert existing_user["email"] in login_url or "login_hint" in login_url
             
-            self.logger.info("✅ Step 1 Complete: Returning user login optimized")
+            self.logger.info(" PASS:  Step 1 Complete: Returning user login optimized")
             
             # Step 2: User completes authentication (faster for returning user)
-            self.logger.info("⚡ Step 2: Fast authentication for returning user")
+            self.logger.info(" LIGHTNING:  Step 2: Fast authentication for returning user")
             
             returning_callback = await client.post(
                 f"{self.auth_service_url}/oauth/google/callback",
@@ -334,10 +334,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             # User information should be preserved from previous session
             assert returning_tokens["user"]["email"] == existing_user["email"]
             
-            self.logger.info("✅ Step 2 Complete: Fast authentication completed")
+            self.logger.info(" PASS:  Step 2 Complete: Fast authentication completed")
             
             # Step 3: Session restoration and preference loading
-            self.logger.info("📚 Step 3: Session restoration and user preferences")
+            self.logger.info("[U+1F4DA] Step 3: Session restoration and user preferences")
             
             # Returning user should have their profile immediately available
             profile_response = await client.get(
@@ -366,10 +366,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             user_context = validation_data["user"]
             assert user_context["email"] == existing_user["email"]
             
-            self.logger.info("✅ Step 3 Complete: Session restored with user preferences")
+            self.logger.info(" PASS:  Step 3 Complete: Session restored with user preferences")
             
             # Step 4: Multi-session and device management
-            self.logger.info("📱 Step 4: Multi-device session management")
+            self.logger.info("[U+1F4F1] Step 4: Multi-device session management")
             
             # Simulate user logging in from second device
             second_device_auth = await client.post(
@@ -412,7 +412,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert desktop_check.json()["user"]["email"] == existing_user["email"]
             assert mobile_check.json()["user"]["email"] == existing_user["email"]
             
-            self.logger.info("✅ RETURNING USER LOGIN EXPERIENCE COMPLETE")
+            self.logger.info(" PASS:  RETURNING USER LOGIN EXPERIENCE COMPLETE")
             self.logger.info(f"   - User: {existing_user['email']}")
             self.logger.info(f"   - Tier: early (preserved)")
             self.logger.info(f"   - Multi-device: supported")
@@ -422,7 +422,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Returning user login test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Returning user login test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -433,7 +433,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("⏱️ Testing session timeout and renewal business scenarios")
+        self.logger.info("[U+23F1][U+FE0F] Testing session timeout and renewal business scenarios")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Create business user
@@ -459,7 +459,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             refresh_token = tokens["refresh_token"]
             
             # BUSINESS SCENARIO 1: Active user working (session should stay alive)
-            self.logger.info("💼 Scenario 1: Active user session management")
+            self.logger.info("[U+1F4BC] Scenario 1: Active user session management")
             
             # Simulate active user making regular requests
             for i in range(3):
@@ -472,10 +472,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                 # Small delay between requests (simulating active usage)
                 await asyncio.sleep(0.1)
             
-            self.logger.info("✅ Scenario 1 Complete: Active user session maintained")
+            self.logger.info(" PASS:  Scenario 1 Complete: Active user session maintained")
             
             # BUSINESS SCENARIO 2: Token refresh for continued business operations
-            self.logger.info("🔄 Scenario 2: Seamless token refresh for business continuity")
+            self.logger.info(" CYCLE:  Scenario 2: Seamless token refresh for business continuity")
             
             # Business user needs token refresh (common scenario)
             refresh_response = await client.post(
@@ -500,10 +500,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             # Old token should eventually become invalid (security)
             # Note: Implementation may vary on immediate vs gradual invalidation
             
-            self.logger.info("✅ Scenario 2 Complete: Seamless token refresh working")
+            self.logger.info(" PASS:  Scenario 2 Complete: Seamless token refresh working")
             
             # BUSINESS SCENARIO 3: Multiple refresh attempts (resilience testing)
-            self.logger.info("🔄 Scenario 3: Multiple refresh resilience testing")
+            self.logger.info(" CYCLE:  Scenario 3: Multiple refresh resilience testing")
             
             current_refresh_token = refreshed_tokens.get("refresh_token", refresh_token)
             
@@ -530,10 +530,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                 
                 await asyncio.sleep(0.1)
             
-            self.logger.info("✅ Scenario 3 Complete: Multiple refresh resilience validated")
+            self.logger.info(" PASS:  Scenario 3 Complete: Multiple refresh resilience validated")
             
             # BUSINESS SCENARIO 4: Invalid token handling (security boundary)
-            self.logger.info("🔒 Scenario 4: Invalid token security handling")
+            self.logger.info("[U+1F512] Scenario 4: Invalid token security handling")
             
             # Test invalid token rejection (protects business operations)
             invalid_token_test = await client.post(
@@ -551,9 +551,9 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             
             assert invalid_refresh_test.status_code == 401
             
-            self.logger.info("✅ Scenario 4 Complete: Security boundaries properly enforced")
+            self.logger.info(" PASS:  Scenario 4 Complete: Security boundaries properly enforced")
             
-            self.logger.info("✅ SESSION TIMEOUT AND RENEWAL SCENARIOS COMPLETE")
+            self.logger.info(" PASS:  SESSION TIMEOUT AND RENEWAL SCENARIOS COMPLETE")
             self.logger.info(f"   - User: {business_user['email']}")
             self.logger.info(f"   - Active session: maintained")
             self.logger.info(f"   - Token refresh: seamless")
@@ -563,7 +563,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Session timeout and renewal test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Session timeout and renewal test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -574,7 +574,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("💼 Testing business tier access control flows")
+        self.logger.info("[U+1F4BC] Testing business tier access control flows")
         
         # Test multiple business tiers
         tiers_to_test = ["free", "early", "mid", "enterprise"]
@@ -582,7 +582,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Step 1: Create users for each business tier
-            self.logger.info("👥 Step 1: Creating users for all business tiers")
+            self.logger.info("[U+1F465] Step 1: Creating users for all business tiers")
             
             for tier in tiers_to_test:
                 tier_user = await self.create_business_test_user(tier)
@@ -609,10 +609,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                     "user": tier_user
                 }
                 
-                self.logger.info(f"✅ {tier.title()} tier user created and authenticated")
+                self.logger.info(f" PASS:  {tier.title()} tier user created and authenticated")
             
             # Step 2: Validate tier-specific authentication context
-            self.logger.info("🔍 Step 2: Validating tier-specific authentication context")
+            self.logger.info(" SEARCH:  Step 2: Validating tier-specific authentication context")
             
             for tier, token_data in tier_tokens.items():
                 validation_response = await client.post(
@@ -630,10 +630,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                 # Tier information should be encoded in the authentication context
                 # This enables business logic to enforce tier-based access control
                 
-                self.logger.info(f"✅ {tier.title()} tier authentication context validated")
+                self.logger.info(f" PASS:  {tier.title()} tier authentication context validated")
             
             # Step 3: Test tier-based business logic simulation
-            self.logger.info("💰 Step 3: Testing tier-based business access patterns")
+            self.logger.info("[U+1F4B0] Step 3: Testing tier-based business access patterns")
             
             # Simulate business tier access validation (what would happen in main backend)
             tier_capabilities = {
@@ -659,11 +659,11 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                 # - Billing calculations
                 
                 expected_capabilities = tier_capabilities[tier]
-                self.logger.info(f"✅ {tier.title()} tier: {expected_capabilities['api_calls_per_month']} calls/month, "
+                self.logger.info(f" PASS:  {tier.title()} tier: {expected_capabilities['api_calls_per_month']} calls/month, "
                                f"features: {expected_capabilities['features']}")
             
             # Step 4: Test cross-tier security (users can't access higher tiers)
-            self.logger.info("🔒 Step 4: Testing cross-tier security boundaries")
+            self.logger.info("[U+1F512] Step 4: Testing cross-tier security boundaries")
             
             # All tiers should authenticate successfully (no tier blocking at auth level)
             # Business logic enforcement happens in the main application, not auth service
@@ -687,10 +687,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                 profile_data = profile_check.json()
                 assert profile_data["email"] == tier_tokens[tier]["user"]["email"]
             
-            self.logger.info("✅ Cross-tier security validation completed")
+            self.logger.info(" PASS:  Cross-tier security validation completed")
             
             # Step 5: Test token refresh maintains tier context
-            self.logger.info("🔄 Step 5: Testing tier context preservation through token refresh")
+            self.logger.info(" CYCLE:  Step 5: Testing tier context preservation through token refresh")
             
             # Test refresh for enterprise tier (most critical)
             enterprise_token = tier_tokens["enterprise"]["access_token"]
@@ -709,9 +709,9 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             enterprise_user = tier_tokens["enterprise"]["user"]
             assert refresh_data["user"]["email"] == enterprise_user["email"]
             
-            self.logger.info("✅ Tier context preserved through token lifecycle")
+            self.logger.info(" PASS:  Tier context preserved through token lifecycle")
             
-            self.logger.info("✅ BUSINESS TIER ACCESS CONTROL FLOWS COMPLETE")
+            self.logger.info(" PASS:  BUSINESS TIER ACCESS CONTROL FLOWS COMPLETE")
             self.logger.info(f"   - Tiers tested: {len(tiers_to_test)}")
             self.logger.info(f"   - Authentication: tier-aware")
             self.logger.info(f"   - Security boundaries: enforced")
@@ -721,7 +721,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.3, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Business tier access control test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Business tier access control test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -732,13 +732,13 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         await self.setup_real_services()
         
-        self.logger.info("🎯 Testing complete business value user journey")
+        self.logger.info(" TARGET:  Testing complete business value user journey")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
-            # COMPLETE BUSINESS JOURNEY: Prospect → Free User → Paid Customer
+            # COMPLETE BUSINESS JOURNEY: Prospect  ->  Free User  ->  Paid Customer
             
             # Phase 1: Prospect discovers Netra and signs up (Free tier)
-            self.logger.info("🌟 Phase 1: Prospect signup (Free tier conversion)")
+            self.logger.info("[U+1F31F] Phase 1: Prospect signup (Free tier conversion)")
             
             prospect_user = await self.create_business_test_user("free")
             
@@ -769,10 +769,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert "access_token" in prospect_tokens
             prospect_token = prospect_tokens["access_token"]
             
-            self.logger.info("✅ Phase 1 Complete: Prospect converted to free user")
+            self.logger.info(" PASS:  Phase 1 Complete: Prospect converted to free user")
             
             # Phase 2: Free user explores platform (engagement phase)
-            self.logger.info("🔍 Phase 2: Free user platform engagement")
+            self.logger.info(" SEARCH:  Phase 2: Free user platform engagement")
             
             # User explores available features (authentication enables this)
             feature_exploration = []
@@ -793,10 +793,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             for exploration in feature_exploration:
                 assert exploration["user"]["email"] == prospect_user["email"]
             
-            self.logger.info("✅ Phase 2 Complete: Free user engaged with platform")
+            self.logger.info(" PASS:  Phase 2 Complete: Free user engaged with platform")
             
             # Phase 3: Upgrade to paid tier (business conversion)
-            self.logger.info("💰 Phase 3: Free-to-paid conversion")
+            self.logger.info("[U+1F4B0] Phase 3: Free-to-paid conversion")
             
             # Simulate user upgrade (would happen through billing system)
             # Auth system needs to handle user tier transition
@@ -836,10 +836,10 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             upgraded_auth_data = upgrade_validation.json()
             assert upgraded_auth_data["user"]["email"] == upgraded_user["email"]
             
-            self.logger.info("✅ Phase 3 Complete: User successfully upgraded to paid tier")
+            self.logger.info(" PASS:  Phase 3 Complete: User successfully upgraded to paid tier")
             
             # Phase 4: Long-term customer retention (ongoing value)
-            self.logger.info("🤝 Phase 4: Long-term customer value realization")
+            self.logger.info("[U+1F91D] Phase 4: Long-term customer value realization")
             
             # Simulate ongoing customer usage over time
             customer_sessions = []
@@ -864,7 +864,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
             assert len(customer_sessions) == 3
             
             # Phase 5: Token refresh for uninterrupted business operations
-            self.logger.info("🔄 Phase 5: Seamless session management for business continuity")
+            self.logger.info(" CYCLE:  Phase 5: Seamless session management for business continuity")
             
             # Customer's token needs refresh during active work session
             if "refresh_token" in upgraded_tokens:
@@ -887,13 +887,13 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
                     work_data = continued_work.json()
                     assert work_data["user"]["email"] == upgraded_user["email"]
                     
-                    self.logger.info("✅ Phase 5 Complete: Business continuity maintained")
+                    self.logger.info(" PASS:  Phase 5 Complete: Business continuity maintained")
             
             # BUSINESS VALUE SUMMARY
-            self.logger.info("📊 COMPLETE BUSINESS VALUE JOURNEY DELIVERED")
-            self.logger.info(f"   - Lead conversion: prospect → free user")
+            self.logger.info(" CHART:  COMPLETE BUSINESS VALUE JOURNEY DELIVERED")
+            self.logger.info(f"   - Lead conversion: prospect  ->  free user")
             self.logger.info(f"   - Platform engagement: {len(feature_exploration)} interactions")
-            self.logger.info(f"   - Revenue conversion: free → paid (early tier)")
+            self.logger.info(f"   - Revenue conversion: free  ->  paid (early tier)")
             self.logger.info(f"   - Customer retention: {len(customer_sessions)} sessions")
             self.logger.info(f"   - Business continuity: seamless authentication")
             self.logger.info(f"   - Total business value: MAXIMIZED")
@@ -902,7 +902,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.3, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Complete business value journey test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Complete business value journey test completed in {execution_time:.2f}s")
 
 
 if __name__ == "__main__":

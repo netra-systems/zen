@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚨 CI/CD SSOT Compliance Validator
+ ALERT:  CI/CD SSOT Compliance Validator
 
 CRITICAL MISSION: Integrate SSOT compliance validation into CI/CD pipeline
 Context: Automated deployment gate to prevent SSOT violations from reaching production
@@ -191,14 +191,14 @@ class CISSotComplianceValidator:
             return None
         
         try:
-            logger.info("🔍 Running SSOT compliance scan for CI/CD validation...")
+            logger.info(" SEARCH:  Running SSOT compliance scan for CI/CD validation...")
             
             # Choose scan scope based on mode
             websocket_only = self.config.mode in [ValidationMode.PR_VALIDATION, ValidationMode.BRANCH_PROTECTION]
             
             report = self.monitor.run_monitoring_scan(websocket_only=websocket_only)
             
-            logger.info(f"✅ SSOT scan completed")
+            logger.info(f" PASS:  SSOT scan completed")
             logger.info(f"   Files scanned: {report.total_files_scanned}")
             logger.info(f"   Total violations: {len(report.violations)}")
             logger.info(f"   Critical issues: {report.security_critical_count}")
@@ -212,7 +212,7 @@ class CISSotComplianceValidator:
     
     def run_mission_critical_tests(self) -> Tuple[int, List[str]]:
         """Run mission critical regression prevention tests."""
-        logger.info("🧪 Running mission critical SSOT regression tests...")
+        logger.info("[U+1F9EA] Running mission critical SSOT regression tests...")
         
         try:
             test_file = self.project_root / "tests" / "mission_critical" / "test_ssot_regression_prevention_monitor.py"
@@ -232,9 +232,9 @@ class CISSotComplianceValidator:
             
             messages = []
             if result.returncode == 0:
-                messages.append("✅ All mission critical tests passed")
+                messages.append(" PASS:  All mission critical tests passed")
             else:
-                messages.append(f"❌ Mission critical tests failed (exit code: {result.returncode})")
+                messages.append(f" FAIL:  Mission critical tests failed (exit code: {result.returncode})")
                 if result.stdout:
                     messages.append(f"STDOUT:\n{result.stdout}")
                 if result.stderr:
@@ -243,9 +243,9 @@ class CISSotComplianceValidator:
             return result.returncode, messages
             
         except subprocess.TimeoutExpired:
-            return 3, ["⏱️ Mission critical tests timed out"]
+            return 3, ["[U+23F1][U+FE0F] Mission critical tests timed out"]
         except Exception as e:
-            return 3, [f"❌ Mission critical test execution failed: {e}"]
+            return 3, [f" FAIL:  Mission critical test execution failed: {e}"]
     
     def determine_compliance_requirements(self) -> Dict[str, Any]:
         """Determine compliance requirements based on environment and mode."""
@@ -294,7 +294,7 @@ class CISSotComplianceValidator:
     
     def validate_compliance(self) -> ValidationResult:
         """Run complete CI/CD compliance validation."""
-        logger.info("🚀 Starting CI/CD SSOT compliance validation")
+        logger.info("[U+1F680] Starting CI/CD SSOT compliance validation")
         logger.info("=" * 60)
         logger.info(f"Mode: {self.config.mode.value}")
         logger.info(f"Compliance Level: {self.config.compliance_level.value}")
@@ -311,7 +311,7 @@ class CISSotComplianceValidator:
         
         # Determine compliance requirements
         requirements = self.determine_compliance_requirements()
-        logger.info(f"📋 Compliance requirements: {requirements}")
+        logger.info(f"[U+1F4CB] Compliance requirements: {requirements}")
         
         # 1. Run SSOT compliance monitoring scan
         monitoring_report = self.run_ssot_compliance_scan()
@@ -380,18 +380,18 @@ class CISSotComplianceValidator:
         
         # 4. Generate recommendations
         if critical_count > 0:
-            recommendations.append("🚨 IMMEDIATE ACTION: Fix critical security violations before deployment")
+            recommendations.append(" ALERT:  IMMEDIATE ACTION: Fix critical security violations before deployment")
             recommendations.append("Review resolved GitHub issues (e.g., Issue #300) to prevent regression")
         
         if error_count > 0:
-            recommendations.append("🔧 Fix SSOT violations by using UnifiedAuthInterface for auth operations")
+            recommendations.append("[U+1F527] Fix SSOT violations by using UnifiedAuthInterface for auth operations")
             recommendations.append("Remove direct JWT operations bypassing auth service")
         
         if warning_count > 0:
-            recommendations.append("📝 Review warning violations for architectural improvements")
+            recommendations.append("[U+1F4DD] Review warning violations for architectural improvements")
         
         if monitoring_report.regression_violations > 0:
-            recommendations.append("🔄 Address regression violations - these are newly introduced issues")
+            recommendations.append(" CYCLE:  Address regression violations - these are newly introduced issues")
         
         # Determine exit code
         if critical_count > 0:
@@ -454,17 +454,17 @@ class CISSotComplianceValidator:
         with open(report_file, 'w') as f:
             json.dump(report_data, f, indent=2)
         
-        logger.info(f"📄 CI validation report saved to {report_file}")
+        logger.info(f"[U+1F4C4] CI validation report saved to {report_file}")
         return report_file
     
     def print_validation_summary(self, result: ValidationResult):
         """Print formatted validation summary for CI logs."""
         print("\n" + "="*80)
-        print("🚨 CI/CD SSOT COMPLIANCE VALIDATION SUMMARY")
+        print(" ALERT:  CI/CD SSOT COMPLIANCE VALIDATION SUMMARY")
         print("="*80)
         
         # Overall status
-        status_icon = "✅" if result.passed else "❌"
+        status_icon = " PASS: " if result.passed else " FAIL: "
         print(f"\n{status_icon} VALIDATION STATUS: {'PASSED' if result.passed else 'FAILED'}")
         print(f"   Exit Code: {result.exit_code}")
         print(f"   Timestamp: {result.validation_timestamp}")
@@ -472,26 +472,26 @@ class CISSotComplianceValidator:
         print(f"   Environment: {result.config.environment}")
         
         # Violation summary
-        print(f"\n📊 VIOLATION SUMMARY:")
+        print(f"\n CHART:  VIOLATION SUMMARY:")
         print(f"   Files Checked: {result.total_files_checked}")
-        print(f"   🔴 Critical: {result.critical_violations}")
-        print(f"   🟡 Error: {result.error_violations}")  
-        print(f"   ⚪ Warning: {result.warning_violations}")
+        print(f"   [U+1F534] Critical: {result.critical_violations}")
+        print(f"   [U+1F7E1] Error: {result.error_violations}")  
+        print(f"   [U+26AA] Warning: {result.warning_violations}")
         print(f"   Total: {len(result.violations)}")
         
         # Blocking reasons
         if result.blocking_reasons:
-            print(f"\n🚫 DEPLOYMENT BLOCKED:")
+            print(f"\n[U+1F6AB] DEPLOYMENT BLOCKED:")
             for reason in result.blocking_reasons:
-                print(f"   • {reason}")
+                print(f"   [U+2022] {reason}")
         
         # Critical violations details
         critical_violations = [v for v in result.violations if v["severity"] == "CRITICAL"]
         if critical_violations:
-            print(f"\n🔴 CRITICAL SECURITY VIOLATIONS ({len(critical_violations)}):")
+            print(f"\n[U+1F534] CRITICAL SECURITY VIOLATIONS ({len(critical_violations)}):")
             print("   These MUST be fixed before deployment:")
             for v in critical_violations:
-                print(f"   • {v['description']}")
+                print(f"   [U+2022] {v['description']}")
                 print(f"     File: {v['file']}:{v['line']}")
                 print(f"     Fix: {v['suggestion']}")
                 if v.get('issue_reference'):
@@ -500,29 +500,29 @@ class CISSotComplianceValidator:
         
         # Recommendations
         if result.recommendations:
-            print(f"\n💡 RECOMMENDATIONS:")
+            print(f"\n IDEA:  RECOMMENDATIONS:")
             for rec in result.recommendations:
-                print(f"   • {rec}")
+                print(f"   [U+2022] {rec}")
         
         # Business impact
-        print(f"\n💰 BUSINESS IMPACT:")
+        print(f"\n[U+1F4B0] BUSINESS IMPACT:")
         if result.critical_violations > 0:
-            print("   🚨 HIGH RISK: Security vulnerabilities could compromise $500K+ ARR")
-            print("   🚨 WebSocket auth bypass could enable unauthorized access")
+            print("    ALERT:  HIGH RISK: Security vulnerabilities could compromise $500K+ ARR")
+            print("    ALERT:  WebSocket auth bypass could enable unauthorized access")
         elif result.error_violations > 0:
-            print("   ⚠️  MEDIUM RISK: SSOT violations could cause auth failures")
-            print("   ⚠️  System reliability at risk from architectural inconsistency")
+            print("    WARNING: [U+FE0F]  MEDIUM RISK: SSOT violations could cause auth failures")
+            print("    WARNING: [U+FE0F]  System reliability at risk from architectural inconsistency")
         else:
-            print("   ✅ LOW RISK: No significant compliance violations detected")
-            print("   ✅ $500K+ ARR protected from auth security vulnerabilities")
+            print("    PASS:  LOW RISK: No significant compliance violations detected")
+            print("    PASS:  $500K+ ARR protected from auth security vulnerabilities")
         
         # Final verdict
         print("\n" + "="*80)
         if result.passed:
-            print("✅ DEPLOYMENT APPROVED: All SSOT compliance checks passed")
+            print(" PASS:  DEPLOYMENT APPROVED: All SSOT compliance checks passed")
             print("   System maintains proper security and architectural integrity.")
         else:
-            print("❌ DEPLOYMENT BLOCKED: SSOT compliance violations detected")
+            print(" FAIL:  DEPLOYMENT BLOCKED: SSOT compliance violations detected")
             print("   Review and fix the violations listed above before deployment.")
             print("   Contact the development team if you need assistance.")
         
@@ -654,10 +654,10 @@ def main():
         sys.exit(result.exit_code)
         
     except KeyboardInterrupt:
-        logger.info("🛑 CI validation interrupted")
+        logger.info("[U+1F6D1] CI validation interrupted")
         sys.exit(3)
     except Exception as e:
-        logger.error(f"❌ CI validation failed: {e}")
+        logger.error(f" FAIL:  CI validation failed: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()

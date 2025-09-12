@@ -354,9 +354,9 @@ class RealAgentSupplyResearcherTester:
             # Check for REQUIRED WebSocket events
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             report.append("\nPerformance Metrics:")
@@ -367,10 +367,10 @@ class RealAgentSupplyResearcherTester:
             
             # Business logic validation
             report.append("\nResearch Quality Validation:")
-            report.append(f"  ✓ Research thoroughness: {val.research_thoroughness}")
-            report.append(f"  ✓ Analysis quality: {val.analysis_quality}")
-            report.append(f"  ✓ Actionable insights: {val.actionable_insights}")
-            report.append(f"  ✓ Data accuracy: {val.data_accuracy}")
+            report.append(f"  [U+2713] Research thoroughness: {val.research_thoroughness}")
+            report.append(f"  [U+2713] Analysis quality: {val.analysis_quality}")
+            report.append(f"  [U+2713] Actionable insights: {val.actionable_insights}")
+            report.append(f"  [U+2713] Data accuracy: {val.data_accuracy}")
             
             # Research details
             if val.research_steps:

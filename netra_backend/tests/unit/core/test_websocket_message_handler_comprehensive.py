@@ -763,10 +763,10 @@ class TestWebSocketMessageHandlerComprehensive(BaseIntegrationTest):
         # Message with special characters
         special_message = {
             "type": "test",
-            "content": "Message with unicode: 🚀 and special chars: <>&\"'"
+            "content": "Message with unicode: [U+1F680] and special chars: <>&\"'"
         }
         special_state = self.handler.create_message_state(special_message, "special-msg", True)
-        assert "🚀" in special_state.content["content"]
+        assert "[U+1F680]" in special_state.content["content"]
 
     @pytest.mark.unit
     async def test_json_serialization_error_handling(self, isolated_env):

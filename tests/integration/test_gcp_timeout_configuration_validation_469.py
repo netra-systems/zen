@@ -74,13 +74,13 @@ class TimeoutConfigurationValidator:
         if websocket_timeout < agent_timeout * 1.2:  # Less than 20% buffer
             validation_result['warnings'].append(
                 f"WebSocket-Agent timeout gap ({websocket_timeout - agent_timeout:.1f}s) is narrow, "
-                f"recommend ≥20% buffer"
+                f"recommend  >= 20% buffer"
             )
         
         if agent_timeout < auth_timeout * 2.0:  # Less than 100% buffer
             validation_result['warnings'].append(
                 f"Agent-Auth timeout gap ({agent_timeout - auth_timeout:.1f}s) is narrow, "
-                f"recommend ≥100% buffer"
+                f"recommend  >= 100% buffer"
             )
         
         # Recommendations for optimization
@@ -220,26 +220,26 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
             if 'min_websocket_timeout' in expectations:
                 websocket_timeout = base_config.websocket_recv_timeout
                 if websocket_timeout >= expectations['min_websocket_timeout']:
-                    validation_results.append(f"✓ WebSocket timeout {websocket_timeout}s meets minimum {expectations['min_websocket_timeout']}s for {environment}")
+                    validation_results.append(f"[U+2713] WebSocket timeout {websocket_timeout}s meets minimum {expectations['min_websocket_timeout']}s for {environment}")
                 else:
-                    validation_results.append(f"✗ WebSocket timeout {websocket_timeout}s below minimum {expectations['min_websocket_timeout']}s for {environment}")
+                    validation_results.append(f"[U+2717] WebSocket timeout {websocket_timeout}s below minimum {expectations['min_websocket_timeout']}s for {environment}")
             
             # Check maximum timeout requirements for development environments
             if 'max_websocket_timeout' in expectations:
                 websocket_timeout = base_config.websocket_recv_timeout
                 if websocket_timeout <= expectations['max_websocket_timeout']:
-                    validation_results.append(f"✓ WebSocket timeout {websocket_timeout}s within maximum {expectations['max_websocket_timeout']}s for {environment}")
+                    validation_results.append(f"[U+2713] WebSocket timeout {websocket_timeout}s within maximum {expectations['max_websocket_timeout']}s for {environment}")
                 else:
-                    validation_results.append(f"✗ WebSocket timeout {websocket_timeout}s exceeds maximum {expectations['max_websocket_timeout']}s for {environment}")
+                    validation_results.append(f"[U+2717] WebSocket timeout {websocket_timeout}s exceeds maximum {expectations['max_websocket_timeout']}s for {environment}")
             
             # Validate tier progression (Enterprise > Platform > Mid > Free)
             enterprise_config = tier_configs['enterprise']
             free_config = tier_configs['free']
             
             if enterprise_config.agent_execution_timeout > free_config.agent_execution_timeout:
-                validation_results.append(f"✓ Enterprise tier ({enterprise_config.agent_execution_timeout}s) > Free tier ({free_config.agent_execution_timeout}s)")
+                validation_results.append(f"[U+2713] Enterprise tier ({enterprise_config.agent_execution_timeout}s) > Free tier ({free_config.agent_execution_timeout}s)")
             else:
-                validation_results.append(f"✗ Enterprise tier timeout should exceed Free tier timeout")
+                validation_results.append(f"[U+2717] Enterprise tier timeout should exceed Free tier timeout")
             
             environment_results[environment] = {
                 'tier_configs': tier_configs,
@@ -366,7 +366,7 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
                         )
                     else:
                         test_result['validation_messages'].append(
-                            f"✓ Total timeout override successful: {actual_total}s"
+                            f"[U+2713] Total timeout override successful: {actual_total}s"
                         )
                 
                 if 'expected_read' in test_case:
@@ -377,7 +377,7 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
                         )
                     else:
                         test_result['validation_messages'].append(
-                            f"✓ Read timeout override successful: {timeouts.read}s"
+                            f"[U+2713] Read timeout override successful: {timeouts.read}s"
                         )
                 
                 override_results[test_case['name']] = test_result
@@ -487,12 +487,12 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
                 print(f"    System Hierarchy Valid: {tier_result['system_hierarchy_valid']}")
                 
                 if tier_result['hierarchy_validation']['violations']:
-                    print("    ❌ Violations:")
+                    print("     FAIL:  Violations:")
                     for violation in tier_result['hierarchy_validation']['violations']:
                         print(f"      - {violation}")
                 
                 if tier_result['hierarchy_validation']['warnings']:
-                    print("    ⚠️ Warnings:")
+                    print("     WARNING: [U+FE0F] Warnings:")
                     for warning in tier_result['hierarchy_validation']['warnings']:
                         print(f"      - {warning}")
                 
@@ -751,33 +751,33 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
             # Check WebSocket vs System configuration consistency
             if websocket_recv_timeout == system_config.websocket_recv_timeout:
                 consistency_validation['consistency_checks'].append(
-                    "✓ WebSocket timeout matches system configuration"
+                    "[U+2713] WebSocket timeout matches system configuration"
                 )
             else:
                 consistency_validation['inconsistencies'].append(
-                    f"✗ WebSocket timeout mismatch: direct={websocket_recv_timeout}s vs system={system_config.websocket_recv_timeout}s"
+                    f"[U+2717] WebSocket timeout mismatch: direct={websocket_recv_timeout}s vs system={system_config.websocket_recv_timeout}s"
                 )
                 consistency_validation['overall_consistent'] = False
             
             # Check Agent vs System configuration consistency
             if agent_execution_timeout == system_config.agent_execution_timeout:
                 consistency_validation['consistency_checks'].append(
-                    "✓ Agent timeout matches system configuration"
+                    "[U+2713] Agent timeout matches system configuration"
                 )
             else:
                 consistency_validation['inconsistencies'].append(
-                    f"✗ Agent timeout mismatch: direct={agent_execution_timeout}s vs system={system_config.agent_execution_timeout}s"
+                    f"[U+2717] Agent timeout mismatch: direct={agent_execution_timeout}s vs system={system_config.agent_execution_timeout}s"
                 )
                 consistency_validation['overall_consistent'] = False
             
             # Check timeout hierarchy consistency
             if websocket_recv_timeout > agent_execution_timeout > auth_total_timeout:
                 consistency_validation['consistency_checks'].append(
-                    "✓ Timeout hierarchy maintained across services (WebSocket > Agent > Auth)"
+                    "[U+2713] Timeout hierarchy maintained across services (WebSocket > Agent > Auth)"
                 )
             else:
                 consistency_validation['inconsistencies'].append(
-                    f"✗ Timeout hierarchy violation: WebSocket={websocket_recv_timeout}s, Agent={agent_execution_timeout}s, Auth={auth_total_timeout:.1f}s"
+                    f"[U+2717] Timeout hierarchy violation: WebSocket={websocket_recv_timeout}s, Agent={agent_execution_timeout}s, Auth={auth_total_timeout:.1f}s"
                 )
                 consistency_validation['overall_consistent'] = False
             
@@ -785,11 +785,11 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
             env_validation = self.config_validator.validate_environment_specific_timeouts(environment, system_config)
             if env_validation['environment_appropriate']:
                 consistency_validation['consistency_checks'].append(
-                    f"✓ Timeouts appropriate for {environment} environment"
+                    f"[U+2713] Timeouts appropriate for {environment} environment"
                 )
             else:
                 for issue in env_validation['issues']:
-                    consistency_validation['inconsistencies'].append(f"✗ Environment issue: {issue}")
+                    consistency_validation['inconsistencies'].append(f"[U+2717] Environment issue: {issue}")
                 consistency_validation['overall_consistent'] = False
             
             consistency_results[environment] = consistency_validation
@@ -823,7 +823,7 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
                 print(f"    {check}")
             
             if results['inconsistencies']:
-                print("\\n  ❌ Inconsistencies Found:")
+                print("\\n   FAIL:  Inconsistencies Found:")
                 for inconsistency in results['inconsistencies']:
                     print(f"    {inconsistency}")
         
@@ -863,33 +863,33 @@ class TestGCPTimeoutConfigurationValidation(SSotAsyncTestCase):
         print("ISSUE #469: TIMEOUT CONFIGURATION OPTIMIZATION RECOMMENDATIONS")
         print(f"{'='*70}")
         
-        print("\\n🎯 CONFIGURATION VALIDATION FINDINGS:")
-        print("   ✓ GCP environment detection correctly drives timeout selection")
-        print("   ✓ Environment variable overrides provide operational flexibility")
-        print("   ✓ Timeout hierarchy validation prevents premature failures")
-        print("   ✓ Invalid configuration detection enables graceful fallback")
-        print("   ✓ Cross-service timeout consistency maintained")
+        print("\\n TARGET:  CONFIGURATION VALIDATION FINDINGS:")
+        print("   [U+2713] GCP environment detection correctly drives timeout selection")
+        print("   [U+2713] Environment variable overrides provide operational flexibility")
+        print("   [U+2713] Timeout hierarchy validation prevents premature failures")
+        print("   [U+2713] Invalid configuration detection enables graceful fallback")
+        print("   [U+2713] Cross-service timeout consistency maintained")
         
-        print("\\n💡 CONFIGURATION OPTIMIZATION RECOMMENDATIONS:")
-        print("\\n   🔧 IMMEDIATE IMPROVEMENTS:")
+        print("\\n IDEA:  CONFIGURATION OPTIMIZATION RECOMMENDATIONS:")
+        print("\\n   [U+1F527] IMMEDIATE IMPROVEMENTS:")
         print("      - Implement dynamic timeout adjustment based on measured performance")
         print("      - Add timeout configuration validation in CI/CD pipeline")
         print("      - Create timeout configuration dashboards for operational visibility")
         print("      - Implement timeout regression detection and alerting")
         
-        print("\\n   📊 MONITORING ENHANCEMENTS:")
+        print("\\n    CHART:  MONITORING ENHANCEMENTS:")
         print("      - Add timeout utilization metrics to monitoring")
         print("      - Create alerts for timeout hierarchy violations")
         print("      - Implement timeout configuration drift detection")
         print("      - Add environment-specific timeout performance tracking")
         
-        print("\\n   🏗️ ARCHITECTURAL IMPROVEMENTS:")
+        print("\\n   [U+1F3D7][U+FE0F] ARCHITECTURAL IMPROVEMENTS:")
         print("      - Implement customer-tier specific timeout profiles")
         print("      - Add intelligent timeout caching and prediction")
         print("      - Create timeout optimization ML models")
         print("      - Implement real-time timeout adjustment based on load")
         
-        print("\\n🚀 OPERATIONAL EXCELLENCE:")
+        print("\\n[U+1F680] OPERATIONAL EXCELLENCE:")
         print("      - Configuration validation prevents production issues")
         print("      - Environment variable overrides enable rapid operational response")
         print("      - Timeout hierarchy validation ensures system stability")

@@ -101,7 +101,7 @@ class DockerWindowsHelper:
         # Check resources first
         resources = self.check_system_resources()
         if resources['available_memory_gb'] < 2:
-            print(f"⚠️  Warning: Low available memory ({resources['available_memory_gb']}GB)")
+            print(f" WARNING: [U+FE0F]  Warning: Low available memory ({resources['available_memory_gb']}GB)")
             print("Consider closing other applications.")
             response = input("Continue anyway? (y/n): ")
             if response.lower() != 'y':
@@ -117,10 +117,10 @@ class DockerWindowsHelper:
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode == 0:
-            print("✅ Development environment started successfully!")
+            print(" PASS:  Development environment started successfully!")
             self.show_container_status()
         else:
-            print(f"❌ Failed to start environment: {result.stderr}")
+            print(f" FAIL:  Failed to start environment: {result.stderr}")
     
     def show_container_status(self):
         """Show status of all containers"""
@@ -212,24 +212,24 @@ class DockerWindowsHelper:
         if result.stdout:
             for line in result.stdout.strip().split('\n'):
                 if "unhealthy" in line.lower():
-                    print(f"   ❌ {line}")
+                    print(f"    FAIL:  {line}")
                 elif "healthy" in line.lower():
-                    print(f"   ✅ {line}")
+                    print(f"    PASS:  {line}")
                 else:
-                    print(f"   ⚠️  {line}")
+                    print(f"    WARNING: [U+FE0F]  {line}")
         else:
             print("   No containers running")
         
         # 4. Recommendations
         print("\n4. Recommendations:")
         if docker_settings['memory_mb'] != 'unknown' and docker_settings['memory_mb'] < docker_settings['recommended_memory']:
-            print(f"   ⚠️  Increase Docker Desktop memory to {docker_settings['recommended_memory']} MB")
+            print(f"    WARNING: [U+FE0F]  Increase Docker Desktop memory to {docker_settings['recommended_memory']} MB")
         if sys_resources['memory_percent_used'] > 80:
-            print("   ⚠️  System memory usage is high. Consider closing other applications.")
+            print("    WARNING: [U+FE0F]  System memory usage is high. Consider closing other applications.")
         if sys_resources['available_memory_gb'] < 3:
-            print("   ⚠️  Low available memory. Docker may become unstable.")
+            print("    WARNING: [U+FE0F]  Low available memory. Docker may become unstable.")
         
-        print("\n✅ Health check complete!")
+        print("\n PASS:  Health check complete!")
 
 
 def main():

@@ -14,15 +14,16 @@ Business Value Justification (BVJ):
 - Strategic Impact: Prevents configuration cascade failures across services
 
 CRITICAL COMPLIANCE WITH CLAUDE.md REQUIREMENTS:
-✅ ABSOLUTE IMPORTS ONLY - from shared.secret_manager_builder import
-✅ NO MOCK ABUSE - Only infrastructure mocking, real business logic execution
-✅ FAIL HARD - Tests raise exceptions, no try/except swallowing
-✅ SSOT COMPLIANCE - Validates single source of truth principles
-✅ BUSINESS VALUE FOCUS - Tests real JWT configuration scenarios
+ PASS:  ABSOLUTE IMPORTS ONLY - from shared.secret_manager_builder import
+ PASS:  NO MOCK ABUSE - Only infrastructure mocking, real business logic execution
+ PASS:  FAIL HARD - Tests raise exceptions, no try/except swallowing
+ PASS:  SSOT COMPLIANCE - Validates single source of truth principles
+ PASS:  BUSINESS VALUE FOCUS - Tests real JWT configuration scenarios
 
 Total Coverage: 70+ comprehensive tests across all functionality areas.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import logging
 import threading
@@ -42,7 +43,7 @@ from shared.config_builder_base import ConfigBuilderBase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
+class TestSecretManagerBuilderRealFunctionality(SSotBaseTestCase):
     """
     Test real SecretManagerBuilder functionality without business logic mocks.
     Focuses on actual business scenarios with real environment integration.

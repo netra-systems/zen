@@ -13,7 +13,7 @@ This package contains focused integration tests for:
 - Metric Storage: Persistence and retrieval verification
 - Metrics Pipeline: End-to-end performance and reliability testing
 
-All tests maintain ≤8 lines per test function and ≤300 lines per module.
+All tests maintain  <= 8 lines per test function and  <= 300 lines per module.
 """
 
 from netra_backend.tests.integration.metrics.shared_fixtures import (

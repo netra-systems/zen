@@ -66,7 +66,7 @@ class DevEnvironmentManager:
     
     def quick_setup(self) -> bool:
         """Quick development environment setup."""
-        self.logger.info("🚀 Starting quick development environment setup...")
+        self.logger.info("[U+1F680] Starting quick development environment setup...")
         
         steps = [
             ("Validating project structure", self.validate_project_structure),
@@ -77,22 +77,22 @@ class DevEnvironmentManager:
         ]
         
         for step_name, step_func in steps:
-            self.logger.info(f"  → {step_name}...")
+            self.logger.info(f"   ->  {step_name}...")
             try:
                 if not step_func():
-                    self.logger.error(f"❌ Failed: {step_name}")
+                    self.logger.error(f" FAIL:  Failed: {step_name}")
                     return False
-                self.logger.info(f"  ✅ Completed: {step_name}")
+                self.logger.info(f"   PASS:  Completed: {step_name}")
             except Exception as e:
-                self.logger.error(f"❌ Error in {step_name}: {e}")
+                self.logger.error(f" FAIL:  Error in {step_name}: {e}")
                 return False
         
-        self.logger.info("🎉 Quick setup completed successfully!")
+        self.logger.info(" CELEBRATION:  Quick setup completed successfully!")
         return True
     
     def full_setup(self, validate: bool = True) -> bool:
         """Full development environment setup with validation."""
-        self.logger.info("🔧 Starting full development environment setup...")
+        self.logger.info("[U+1F527] Starting full development environment setup...")
         
         steps = [
             ("Validating system requirements", self.validate_system_requirements),
@@ -109,17 +109,17 @@ class DevEnvironmentManager:
             steps.append(("Comprehensive validation", self.comprehensive_validation))
         
         for step_name, step_func in steps:
-            self.logger.info(f"  → {step_name}...")
+            self.logger.info(f"   ->  {step_name}...")
             try:
                 if not step_func():
-                    self.logger.error(f"❌ Failed: {step_name}")
+                    self.logger.error(f" FAIL:  Failed: {step_name}")
                     return False
-                self.logger.info(f"  ✅ Completed: {step_name}")
+                self.logger.info(f"   PASS:  Completed: {step_name}")
             except Exception as e:
-                self.logger.error(f"❌ Error in {step_name}: {e}")
+                self.logger.error(f" FAIL:  Error in {step_name}: {e}")
                 return False
         
-        self.logger.info("🚀 Full setup completed successfully!")
+        self.logger.info("[U+1F680] Full setup completed successfully!")
         self.print_environment_info()
         return True
     
@@ -365,13 +365,13 @@ class DevEnvironmentManager:
         ]
         
         for validation_name, validation_func in validations:
-            self.logger.info(f"    → {validation_name}...")
+            self.logger.info(f"     ->  {validation_name}...")
             try:
                 if not validation_func():
-                    self.logger.error(f"❌ Validation failed: {validation_name}")
+                    self.logger.error(f" FAIL:  Validation failed: {validation_name}")
                     return False
             except Exception as e:
-                self.logger.error(f"❌ Validation error in {validation_name}: {e}")
+                self.logger.error(f" FAIL:  Validation error in {validation_name}: {e}")
                 return False
         
         return True
@@ -440,13 +440,13 @@ class DevEnvironmentManager:
     
     def health_check(self, verbose: bool = False) -> bool:
         """Comprehensive health check of development environment."""
-        self.logger.info("🏥 Running development environment health check...")
+        self.logger.info("[U+1F3E5] Running development environment health check...")
         
         services = self.get_service_status()
         
         if verbose:
             for service in services:
-                status = "✅ Healthy" if service.healthy else "⚠️ Issues" if service.running else "❌ Down"
+                status = " PASS:  Healthy" if service.healthy else " WARNING: [U+FE0F] Issues" if service.running else " FAIL:  Down"
                 self.logger.info(f"  {service.name}: {status}")
         
         healthy_count = sum(1 for s in services if s.healthy)
@@ -455,10 +455,10 @@ class DevEnvironmentManager:
         self.logger.info(f"Health Summary: {healthy_count}/{total_count} services healthy")
         
         if healthy_count == total_count:
-            self.logger.info("🎉 All services are healthy!")
+            self.logger.info(" CELEBRATION:  All services are healthy!")
             return True
         else:
-            self.logger.warning("⚠️ Some services need attention")
+            self.logger.warning(" WARNING: [U+FE0F] Some services need attention")
             return False
 
 

@@ -496,17 +496,17 @@ async def test_staging_websocket_helper():
         # Test connection
         connected = await helper.connect_with_auth()
         if not connected:
-            print("❌ Failed to connect to staging WebSocket")
+            print(" FAIL:  Failed to connect to staging WebSocket")
             return False
         
-        print(f"✅ Connected to staging WebSocket")
+        print(f" PASS:  Connected to staging WebSocket")
         
         # Register event handlers
         agent_events = []
         
         def handle_agent_event(data):
             agent_events.append(data)
-            print(f"  📨 Received: {data.get('type')}")
+            print(f"  [U+1F4E8] Received: {data.get('type')}")
         
         helper.on_event("agent_started", handle_agent_event)
         helper.on_event("agent_thinking", handle_agent_event)
@@ -520,13 +520,13 @@ async def test_staging_websocket_helper():
             "Test WebSocket agent flow", 
             thread_id=thread_id
         )
-        print(f"✅ Sent agent request: {success}")
+        print(f" PASS:  Sent agent request: {success}")
         
         if success:
             # Wait for agent flow to complete
             flow_result = await helper.wait_for_agent_flow(thread_id, timeout=45.0)
             
-            print(f"✅ Agent flow result:")
+            print(f" PASS:  Agent flow result:")
             print(f"  - Success: {flow_result['success']}")
             print(f"  - Duration: {flow_result['duration']:.2f}s") 
             print(f"  - Events: {flow_result['total_events']}")
@@ -537,7 +537,7 @@ async def test_staging_websocket_helper():
         
         # Get final stats
         stats = helper.get_event_stats()
-        print(f"✅ Final stats:")
+        print(f" PASS:  Final stats:")
         print(f"  - Total events: {stats['total_events']}")
         print(f"  - Event types: {stats['event_types']}")
         print(f"  - Unique threads: {stats['unique_threads']}")
@@ -546,7 +546,7 @@ async def test_staging_websocket_helper():
         return True
         
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f" FAIL:  Test failed: {e}")
         return False
         
     finally:

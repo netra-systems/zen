@@ -12,7 +12,7 @@ CRITICAL ISSUE: GitHub Issue #133
 CLAUDE.MD COMPLIANCE:
 - ALL e2e tests MUST use real authentication (JWT/OAuth) 
 - NO MOCKS in E2E tests - uses real services only
-- Tests complete chat business value (connection → agent response)
+- Tests complete chat business value (connection  ->  agent response)
 - Tests designed to FAIL HARD when coroutine regression occurs
 - Must prevent 0.00s execution times (indicates test bypassing)
 """

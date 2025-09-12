@@ -1,7 +1,7 @@
 """LLM Cache Core Operations Module.
 
 Handles core cache operations: get, set, clear cache entries.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import hashlib

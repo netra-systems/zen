@@ -430,9 +430,9 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
                 print(f"  - {violation_type}: {details}")
         
         if not self.cross_user_leakage and not self.isolation_violations:
-            print("✅ Perfect user isolation: No leakage or violations detected")
+            print(" PASS:  Perfect user isolation: No leakage or violations detected")
         else:
-            print(f"⚠️  Isolation issues found - SSOT consolidation needed")
+            print(f" WARNING: [U+FE0F]  Isolation issues found - SSOT consolidation needed")
             print("NOTE: Issues expected during transition, should be resolved after consolidation")
         
         print("=" * 50)
@@ -527,7 +527,7 @@ class TestGoldenPathConcurrency(SSotAsyncTestCase):
             if not golden_path_protected:
                 pytest.fail("GOLDEN PATH BROKEN: Concurrent users interfering with each other's AI responses")
             
-            print(f"✅ Golden Path Protected: {len(concurrent_sessions)} concurrent users isolated successfully")
+            print(f" PASS:  Golden Path Protected: {len(concurrent_sessions)} concurrent users isolated successfully")
             
         except Exception as e:
             pytest.fail(f"GOLDEN PATH FAILURE: Concurrent user isolation failed: {e}")

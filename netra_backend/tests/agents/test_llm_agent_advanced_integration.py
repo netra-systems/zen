@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 """
 Advanced LLM Agent Integration Tests
-Complex integration tests with ≤8 line functions for architectural compliance
+Complex integration tests with  <= 8 line functions for architectural compliance
 """""
 
 import sys

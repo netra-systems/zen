@@ -7,7 +7,7 @@ host resolution and connection pooling for staging and production environments.
 Business Value: Prevents cache and session failures costing $30K+ MRR
 Critical for session persistence and caching performance.
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import logging
@@ -122,7 +122,7 @@ class RedisConnectionHandler:
         """Get Redis client with proper connection configuration."""
         try:
             pool = self.create_connection_pool()
-            client = redis.Redis(connection_pool=pool, decode_responses=True)
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool, decode_responses=True)
             
             # Test connection
             client.ping()

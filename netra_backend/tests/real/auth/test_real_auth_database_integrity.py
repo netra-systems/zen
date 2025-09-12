@@ -61,7 +61,7 @@ class TestRealAuthDatabaseIntegrity:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for database integrity testing."""
-        print("🐳 Starting Docker services for database integrity tests...")
+        print("[U+1F433] Starting Docker services for database integrity tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -73,13 +73,13 @@ class TestRealAuthDatabaseIntegrity:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for database integrity tests")
+            print(" PASS:  Docker services ready for database integrity tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for database integrity tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for database integrity tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after database integrity tests...")
+            print("[U+1F9F9] Cleaning up Docker services after database integrity tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -149,7 +149,7 @@ class TestRealAuthDatabaseIntegrity:
                 created_user = result.fetchone()
                 
                 if created_user:
-                    print(f"✅ User {created_user[0]} created successfully in transaction")
+                    print(f" PASS:  User {created_user[0]} created successfully in transaction")
                     
                     # Create related session data in same transaction
                     session_data = self.create_test_session_data(created_user[0])
@@ -163,7 +163,7 @@ class TestRealAuthDatabaseIntegrity:
                     created_session = session_result.fetchone()
                     
                     if created_session:
-                        print(f"✅ Session {created_session[0]} created for user {created_user[0]}")
+                        print(f" PASS:  Session {created_session[0]} created for user {created_user[0]}")
                 
                 # Transaction will commit here
                 
@@ -177,10 +177,10 @@ class TestRealAuthDatabaseIntegrity:
             assert user_row is not None, "User should exist after transaction commit"
             assert user_row[1] == user_data["email"]
             
-            print("✅ Transaction integrity validated - Data persisted after commit")
+            print(" PASS:  Transaction integrity validated - Data persisted after commit")
             
         except Exception as e:
-            print(f"❌ Transaction failed as expected or encountered error: {e}")
+            print(f" FAIL:  Transaction failed as expected or encountered error: {e}")
             # Verify rollback worked - user should not exist
             verify_rollback = await real_db_session.execute(
                 text("SELECT id FROM users WHERE id = :user_id"),
@@ -188,7 +188,7 @@ class TestRealAuthDatabaseIntegrity:
             )
             rollback_result = verify_rollback.fetchone()
             if rollback_result is None:
-                print("✅ Transaction rollback verified - No data persisted after failure")
+                print(" PASS:  Transaction rollback verified - No data persisted after failure")
         
         finally:
             # Cleanup test data
@@ -225,7 +225,7 @@ class TestRealAuthDatabaseIntegrity:
             
             created_user = result.fetchone()
             assert created_user is not None
-            print(f"✅ User {created_user[0]} created for referential integrity test")
+            print(f" PASS:  User {created_user[0]} created for referential integrity test")
             
             # Test valid foreign key reference
             session_data = self.create_test_session_data(created_user[0])
@@ -239,7 +239,7 @@ class TestRealAuthDatabaseIntegrity:
             await real_db_session.commit()
             
             created_session = session_result.fetchone()
-            print(f"✅ Valid foreign key reference - Session created for existing user")
+            print(f" PASS:  Valid foreign key reference - Session created for existing user")
             
             # Test invalid foreign key reference (should fail)
             invalid_user_id = 999999  # Non-existent user
@@ -250,10 +250,10 @@ class TestRealAuthDatabaseIntegrity:
                 await real_db_session.commit()
                 
                 # If we get here, referential integrity is not enforced
-                pytest.fail("❌ Referential integrity constraint not enforced - invalid foreign key accepted")
+                pytest.fail(" FAIL:  Referential integrity constraint not enforced - invalid foreign key accepted")
                 
             except IntegrityError as e:
-                print("✅ Referential integrity constraint enforced - Invalid foreign key rejected")
+                print(" PASS:  Referential integrity constraint enforced - Invalid foreign key rejected")
                 await real_db_session.rollback()
             
             # Test cascade delete behavior
@@ -269,9 +269,9 @@ class TestRealAuthDatabaseIntegrity:
             
             orphan_result = orphaned_sessions.fetchone()
             if orphan_result is None:
-                print("✅ Cascade delete working - Related sessions deleted with user")
+                print(" PASS:  Cascade delete working - Related sessions deleted with user")
             else:
-                print("⚠️ Cascade delete not configured - Manual cleanup required")
+                print(" WARNING: [U+FE0F] Cascade delete not configured - Manual cleanup required")
                 # Manual cleanup
                 await real_db_session.execute(
                     text("DELETE FROM user_sessions WHERE user_id = :user_id"),
@@ -279,10 +279,10 @@ class TestRealAuthDatabaseIntegrity:
                 )
                 await real_db_session.commit()
             
-            print("✅ Referential integrity constraints validated")
+            print(" PASS:  Referential integrity constraints validated")
             
         except Exception as e:
-            print(f"❌ Referential integrity test encountered error: {e}")
+            print(f" FAIL:  Referential integrity test encountered error: {e}")
             await real_db_session.rollback()
         
         finally:
@@ -369,7 +369,7 @@ class TestRealAuthDatabaseIntegrity:
                     else:
                         failed_creations.append(result)
             
-            print(f"✅ Concurrent operations completed - {len(successful_creations)} successful, {len(failed_creations)} failed")
+            print(f" PASS:  Concurrent operations completed - {len(successful_creations)} successful, {len(failed_creations)} failed")
             
             # Verify data consistency
             for success in successful_creations:
@@ -392,7 +392,7 @@ class TestRealAuthDatabaseIntegrity:
                     assert session_row is not None, f"Session {success['session_id']} should exist"
                     assert session_row[1] == success["user_id"], "Session should belong to correct user"
             
-            print("✅ Concurrent operations integrity validated")
+            print(" PASS:  Concurrent operations integrity validated")
             
         finally:
             # Cleanup concurrent test data
@@ -441,7 +441,7 @@ class TestRealAuthDatabaseIntegrity:
                 created_users.append(created_user[0])
             
             await real_db_session.commit()
-            print(f"✅ Created {len(created_users)} users for uniqueness constraint testing")
+            print(f" PASS:  Created {len(created_users)} users for uniqueness constraint testing")
             
             # Test session token uniqueness
             duplicate_token = secrets.token_hex(32)
@@ -460,7 +460,7 @@ class TestRealAuthDatabaseIntegrity:
             created_session1 = result1.fetchone()
             await real_db_session.commit()
             
-            print(f"✅ First session created with token: {duplicate_token[:16]}...")
+            print(f" PASS:  First session created with token: {duplicate_token[:16]}...")
             
             # Try to create second session with same token (should fail if unique constraint exists)
             session2_data = self.create_test_session_data(created_users[1])
@@ -471,7 +471,7 @@ class TestRealAuthDatabaseIntegrity:
                 await real_db_session.commit()
                 
                 # If we get here, uniqueness constraint is not enforced
-                print("⚠️ Session token uniqueness constraint not enforced - duplicate tokens allowed")
+                print(" WARNING: [U+FE0F] Session token uniqueness constraint not enforced - duplicate tokens allowed")
                 
                 # Still test that both sessions exist with same token
                 verify_duplicates = await real_db_session.execute(
@@ -481,10 +481,10 @@ class TestRealAuthDatabaseIntegrity:
                 
                 duplicate_sessions = verify_duplicates.fetchall()
                 if len(duplicate_sessions) > 1:
-                    print(f"⚠️ Found {len(duplicate_sessions)} sessions with duplicate tokens")
+                    print(f" WARNING: [U+FE0F] Found {len(duplicate_sessions)} sessions with duplicate tokens")
                 
             except IntegrityError as e:
-                print("✅ Session token uniqueness constraint enforced - Duplicate token rejected")
+                print(" PASS:  Session token uniqueness constraint enforced - Duplicate token rejected")
                 await real_db_session.rollback()
             
             # Test refresh token uniqueness
@@ -504,13 +504,13 @@ class TestRealAuthDatabaseIntegrity:
             try:
                 await real_db_session.execute(session_query, session4_data)
                 await real_db_session.commit()
-                print("⚠️ Refresh token uniqueness constraint not enforced")
+                print(" WARNING: [U+FE0F] Refresh token uniqueness constraint not enforced")
                 
             except IntegrityError as e:
-                print("✅ Refresh token uniqueness constraint enforced")
+                print(" PASS:  Refresh token uniqueness constraint enforced")
                 await real_db_session.rollback()
             
-            print("✅ Token uniqueness constraints validated")
+            print(" PASS:  Token uniqueness constraints validated")
             
         finally:
             # Cleanup test data
@@ -549,13 +549,13 @@ class TestRealAuthDatabaseIntegrity:
             await real_db_session.commit()
             
             created_user = result.fetchone()
-            print(f"✅ Normal database operation successful - User {created_user[0]} created")
+            print(f" PASS:  Normal database operation successful - User {created_user[0]} created")
             
             # Test connection health check
             health_check = await real_db_session.execute(text("SELECT 1 as health_check"))
             health_result = health_check.fetchone()
             assert health_result[0] == 1, "Database health check should return 1"
-            print("✅ Database connection health check passed")
+            print(" PASS:  Database connection health check passed")
             
             # Test transaction recovery after error
             try:
@@ -572,7 +572,7 @@ class TestRealAuthDatabaseIntegrity:
                     )
                     
             except Exception as e:
-                print(f"✅ Transaction error handled gracefully: {type(e).__name__}")
+                print(f" PASS:  Transaction error handled gracefully: {type(e).__name__}")
                 # Transaction should have been rolled back
                 
                 # Verify rollback - last_login_at should still be None
@@ -583,19 +583,19 @@ class TestRealAuthDatabaseIntegrity:
                 
                 rollback_result = verify_rollback.fetchone()
                 if rollback_result[0] is None:
-                    print("✅ Transaction rollback successful - Changes reverted")
+                    print(" PASS:  Transaction rollback successful - Changes reverted")
                 else:
-                    print("⚠️ Transaction rollback may not have worked completely")
+                    print(" WARNING: [U+FE0F] Transaction rollback may not have worked completely")
             
             # Test connection recovery after rollback
             recovery_test = await real_db_session.execute(text("SELECT COUNT(*) FROM users WHERE id = :user_id"), {"user_id": created_user[0]})
             recovery_result = recovery_test.fetchone()
             assert recovery_result[0] == 1, "Should be able to query after failed transaction"
-            print("✅ Database connection recovered after failed transaction")
+            print(" PASS:  Database connection recovered after failed transaction")
             
             # Test deadlock detection and resolution simulation
             # Note: Real deadlock testing would require multiple concurrent transactions
-            print("✅ Database resilience patterns validated")
+            print(" PASS:  Database resilience patterns validated")
             
         finally:
             # Cleanup test data

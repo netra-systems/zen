@@ -185,20 +185,20 @@ class CORSValidator:
         for route_method, results in routes_tested.items():
             passed = sum(1 for r in results if r.success)
             total = len(results)
-            status = "✅ PASS" if passed == total else "❌ FAIL"
+            status = " PASS:  PASS" if passed == total else " FAIL:  FAIL"
             print(f"{status} {route_method}: {passed}/{total}")
             
             # Show failures
             failures = [r for r in results if not r.success]
             for failure in failures:
-                print(f"  ❌ {failure.details}")
+                print(f"   FAIL:  {failure.details}")
         
         print("=" * 60)
         
         if success_count == total_count:
-            print("🎉 All CORS tests passed! The implementation is working correctly.")
+            print(" CELEBRATION:  All CORS tests passed! The implementation is working correctly.")
         else:
-            print("⚠️  Some CORS tests failed. Check the implementation.")
+            print(" WARNING: [U+FE0F]  Some CORS tests failed. Check the implementation.")
             
     def export_results(self, filename: str = "cors_test_results.json"):
         """Export detailed results to JSON file."""
@@ -224,7 +224,7 @@ class CORSValidator:
         with open(filename, 'w') as f:
             json.dump(export_data, f, indent=2)
         
-        print(f"📄 Detailed results exported to {filename}")
+        print(f"[U+1F4C4] Detailed results exported to {filename}")
 
 
 async def main():
@@ -234,7 +234,7 @@ async def main():
     if len(sys.argv) > 1:
         base_url = sys.argv[1]
     
-    print("🧪 CORS Implementation Validator")
+    print("[U+1F9EA] CORS Implementation Validator")
     print(f"Target URL: {base_url}")
     print(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -250,10 +250,10 @@ async def main():
         sys.exit(0 if failed_count == 0 else 1)
         
     except KeyboardInterrupt:
-        print("\n⏹️  Test interrupted by user")
+        print("\n[U+23F9][U+FE0F]  Test interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n💥 Test execution failed: {str(e)}")
+        print(f"\n[U+1F4A5] Test execution failed: {str(e)}")
         sys.exit(1)
 
 

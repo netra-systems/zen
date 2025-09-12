@@ -501,7 +501,7 @@ class TestStateManager(BaseIntegrationTest):
         assert "detail_level" in user_preferences  # Should have learned from "detailed analysis"
         assert "interests" in user_preferences  # Should have learned from "cost optimization"
         
-        logger.info("✅ State persistence across requests test passed")
+        logger.info(" PASS:  State persistence across requests test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -541,7 +541,7 @@ class TestStateManager(BaseIntegrationTest):
         assert result2["state_management"]["conversation_continuity"] is True
         assert result2["state_management"]["cross_session_capable"] is True
         
-        logger.info("✅ Cross-session state recovery test passed")
+        logger.info(" PASS:  Cross-session state recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -601,7 +601,7 @@ class TestStateManager(BaseIntegrationTest):
         assert "user2_data" not in result1_str
         assert "user1_data" not in result2_str
         
-        logger.info("✅ Concurrent user state isolation test passed")
+        logger.info(" PASS:  Concurrent user state isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -649,7 +649,7 @@ class TestStateManager(BaseIntegrationTest):
         assert cache_stats["cache_hit_rate"] >= 0.3  # Should have reasonable hit rate
         assert cache_stats["in_memory_entries"] >= 1  # Should have cached entries
         
-        logger.info(f"✅ State caching performance test passed - hit rate: {cache_stats['cache_hit_rate']:.2f}")
+        logger.info(f" PASS:  State caching performance test passed - hit rate: {cache_stats['cache_hit_rate']:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -696,7 +696,7 @@ class TestStateManager(BaseIntegrationTest):
             interests_overlap = set(prefs1["interests"]) & set(prefs2["interests"])
             assert len(interests_overlap) > 0
         
-        logger.info("✅ State synchronization consistency test passed")
+        logger.info(" PASS:  State synchronization consistency test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -737,7 +737,7 @@ class TestStateManager(BaseIntegrationTest):
         assert recovery_result["state_management"]["state_loaded"] is True
         assert recovery_result["state_management"]["state_persisted"] is True
         
-        logger.info("✅ State recovery after failure test passed")
+        logger.info(" PASS:  State recovery after failure test passed")
 
 
 if __name__ == "__main__":

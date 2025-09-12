@@ -119,7 +119,7 @@ async def test_reproduce_websocket_no_token_error():
     - If configuration is NOT fixed: Test should reproduce "NO_TOKEN" error
     - If configuration IS fixed: Test should pass or show different error
     """
-    logger.info("🔍 REPRODUCING WEBSOCKET NO_TOKEN PERSISTENT ISSUE")
+    logger.info(" SEARCH:  REPRODUCING WEBSOCKET NO_TOKEN PERSISTENT ISSUE")
     
     # Create mock WebSocket that reproduces exact failure scenario
     mock_websocket = MockWebSocketForReproduction(simulate_no_token=True)
@@ -148,22 +148,22 @@ async def test_reproduce_websocket_no_token_error():
         )
         
         # Log detailed authentication result
-        logger.error(f"🚨 AUTHENTICATION RESULT: {auth_result.to_dict()}")
+        logger.error(f" ALERT:  AUTHENTICATION RESULT: {auth_result.to_dict()}")
         
         # CRITICAL ASSERTION: This should reproduce the NO_TOKEN error
         assert not auth_result.success, "Authentication should fail due to missing JWT token"
         
         # Check if we get the specific NO_TOKEN error (if config not fixed)
         if auth_result.error_code == "NO_TOKEN":
-            logger.critical("🚨 NO_TOKEN ERROR REPRODUCED - Configuration fix not implemented!")
+            logger.critical(" ALERT:  NO_TOKEN ERROR REPRODUCED - Configuration fix not implemented!")
             assert "No JWT" in auth_result.error_message or "NO_TOKEN" in auth_result.error_message
             
         elif auth_result.error_code in ["TOKEN_VALIDATION_FAILED", "INVALID_E2E_BYPASS"]:
-            logger.info("✅ ERROR TYPE CHANGED - May indicate partial fix implementation")
+            logger.info(" PASS:  ERROR TYPE CHANGED - May indicate partial fix implementation")
             # Different error suggests some progress in configuration
             
         else:
-            logger.warning(f"⚠️ UNEXPECTED ERROR TYPE: {auth_result.error_code}")
+            logger.warning(f" WARNING: [U+FE0F] UNEXPECTED ERROR TYPE: {auth_result.error_code}")
             # Log for analysis
         
         # Validate the failure metadata contains expected context
@@ -187,7 +187,7 @@ async def test_validate_e2e_configuration_fix():
     - If fixes implemented: E2E authentication should work
     - If fixes not implemented: Should show specific configuration errors
     """
-    logger.info("🔧 VALIDATING E2E CONFIGURATION FIXES")
+    logger.info("[U+1F527] VALIDATING E2E CONFIGURATION FIXES")
     
     # Initialize E2E auth helper
     e2e_helper = E2EAuthHelper()
@@ -212,7 +212,7 @@ async def test_validate_e2e_configuration_fix():
             logger.info(f"E2E AUTH RESULT: {auth_result}")
             
             if auth_result and "token" in auth_result:
-                logger.info("✅ E2E OAUTH SIMULATION SUCCESS - Configuration likely fixed!")
+                logger.info(" PASS:  E2E OAUTH SIMULATION SUCCESS - Configuration likely fixed!")
                 
                 # Validate token format
                 token = auth_result["token"]
@@ -223,7 +223,7 @@ async def test_validate_e2e_configuration_fix():
                 await test_websocket_auth_with_valid_token(token)
                 
             else:
-                logger.error("❌ E2E OAUTH SIMULATION FAILED - Configuration not fixed")
+                logger.error(" FAIL:  E2E OAUTH SIMULATION FAILED - Configuration not fixed")
                 
                 # Check specific configuration issues
                 env = get_env()
@@ -236,13 +236,13 @@ async def test_validate_e2e_configuration_fix():
                 pytest.fail("E2E configuration validation failed - fixes not implemented")
                 
         except Exception as e:
-            logger.error(f"🔥 E2E CONFIGURATION VALIDATION EXCEPTION: {e}", exc_info=True)
+            logger.error(f" FIRE:  E2E CONFIGURATION VALIDATION EXCEPTION: {e}", exc_info=True)
             pytest.fail(f"E2E configuration validation failed with exception: {e}")
 
 
 async def test_websocket_auth_with_valid_token(token: str):
     """Test WebSocket authentication with a valid E2E token."""
-    logger.info("🔐 TESTING WEBSOCKET AUTH WITH VALID E2E TOKEN")
+    logger.info("[U+1F510] TESTING WEBSOCKET AUTH WITH VALID E2E TOKEN")
     
     # Create WebSocket with proper JWT token in subprotocol
     import base64
@@ -264,11 +264,11 @@ async def test_websocket_auth_with_valid_token(token: str):
     logger.info(f"WEBSOCKET AUTH WITH VALID TOKEN: {auth_result.to_dict()}")
     
     if auth_result.success:
-        logger.info("✅ WEBSOCKET AUTHENTICATION WITH VALID TOKEN SUCCESSFUL")
+        logger.info(" PASS:  WEBSOCKET AUTHENTICATION WITH VALID TOKEN SUCCESSFUL")
         assert auth_result.user_context is not None
         assert auth_result.auth_result is not None
     else:
-        logger.warning(f"⚠️ WEBSOCKET AUTH FAILED EVEN WITH VALID TOKEN: {auth_result.error_message}")
+        logger.warning(f" WARNING: [U+FE0F] WEBSOCKET AUTH FAILED EVEN WITH VALID TOKEN: {auth_result.error_message}")
         # This might indicate other configuration issues
 
 
@@ -280,7 +280,7 @@ async def test_systematic_remediation_tracking():
     This test validates the organizational process improvements identified
     in the Five Whys analysis to prevent recurrence of this issue.
     """
-    logger.info("📊 TESTING SYSTEMATIC REMEDIATION TRACKING")
+    logger.info(" CHART:  TESTING SYSTEMATIC REMEDIATION TRACKING")
     
     # This test validates process improvements exist
     try:
@@ -288,27 +288,27 @@ async def test_systematic_remediation_tracking():
         try:
             from scripts.critical_remediation_tracker import CriticalRemediationTracker
             tracker = CriticalRemediationTracker()
-            logger.info("✅ CRITICAL REMEDIATION TRACKER EXISTS")
+            logger.info(" PASS:  CRITICAL REMEDIATION TRACKER EXISTS")
         except ImportError:
-            logger.warning("⚠️ CRITICAL REMEDIATION TRACKER NOT IMPLEMENTED")
+            logger.warning(" WARNING: [U+FE0F] CRITICAL REMEDIATION TRACKER NOT IMPLEMENTED")
             pytest.skip("Remediation tracker not yet implemented - organizational process gap")
         
         # Check if monitoring for WebSocket auth failures exists
         try:
             from netra_backend.app.monitoring.staging_health_monitor import check_websocket_auth_health
-            logger.info("✅ WEBSOCKET AUTH HEALTH MONITORING EXISTS")  
+            logger.info(" PASS:  WEBSOCKET AUTH HEALTH MONITORING EXISTS")  
         except ImportError:
-            logger.warning("⚠️ WEBSOCKET AUTH HEALTH MONITORING NOT IMPLEMENTED")
+            logger.warning(" WARNING: [U+FE0F] WEBSOCKET AUTH HEALTH MONITORING NOT IMPLEMENTED")
             
         # Check if configuration regression prevention exists
         try:
             from scripts.configuration_regression_prevention import validate_critical_config_changes
-            logger.info("✅ CONFIGURATION REGRESSION PREVENTION EXISTS")
+            logger.info(" PASS:  CONFIGURATION REGRESSION PREVENTION EXISTS")
         except ImportError:
-            logger.warning("⚠️ CONFIGURATION REGRESSION PREVENTION NOT IMPLEMENTED")
+            logger.warning(" WARNING: [U+FE0F] CONFIGURATION REGRESSION PREVENTION NOT IMPLEMENTED")
             
     except Exception as e:
-        logger.error(f"🔥 SYSTEMATIC REMEDIATION TRACKING TEST FAILED: {e}")
+        logger.error(f" FIRE:  SYSTEMATIC REMEDIATION TRACKING TEST FAILED: {e}")
         pytest.fail("Systematic remediation improvements not implemented")
 
 
@@ -323,35 +323,35 @@ if __name__ == "__main__":
     import asyncio
     
     async def main():
-        print("🔍 RUNNING WEBSOCKET NO_TOKEN PERSISTENT ISSUE REPRODUCTION")
+        print(" SEARCH:  RUNNING WEBSOCKET NO_TOKEN PERSISTENT ISSUE REPRODUCTION")
         print("=" * 80)
         
         # Test 1: Reproduce the NO_TOKEN error
         print("\n1. REPRODUCING NO_TOKEN ERROR...")
         try:
             result = await test_reproduce_websocket_no_token_error()
-            print(f"✅ NO_TOKEN REPRODUCTION: {result.error_code}")
+            print(f" PASS:  NO_TOKEN REPRODUCTION: {result.error_code}")
         except Exception as e:
-            print(f"❌ NO_TOKEN REPRODUCTION FAILED: {e}")
+            print(f" FAIL:  NO_TOKEN REPRODUCTION FAILED: {e}")
         
         # Test 2: Validate E2E configuration fixes
         print("\n2. VALIDATING E2E CONFIGURATION FIXES...")
         try:
             await test_validate_e2e_configuration_fix()
-            print("✅ E2E CONFIGURATION VALIDATION PASSED")
+            print(" PASS:  E2E CONFIGURATION VALIDATION PASSED")
         except Exception as e:
-            print(f"❌ E2E CONFIGURATION VALIDATION FAILED: {e}")
+            print(f" FAIL:  E2E CONFIGURATION VALIDATION FAILED: {e}")
         
         # Test 3: Check systematic remediation tracking
         print("\n3. CHECKING SYSTEMATIC REMEDIATION TRACKING...")
         try:
             await test_systematic_remediation_tracking()  
-            print("✅ REMEDIATION TRACKING VALIDATION PASSED")
+            print(" PASS:  REMEDIATION TRACKING VALIDATION PASSED")
         except Exception as e:
-            print(f"❌ REMEDIATION TRACKING VALIDATION FAILED: {e}")
+            print(f" FAIL:  REMEDIATION TRACKING VALIDATION FAILED: {e}")
         
         print("\n" + "=" * 80)
-        print("🏁 WEBSOCKET NO_TOKEN PERSISTENT ISSUE REPRODUCTION COMPLETE")
+        print("[U+1F3C1] WEBSOCKET NO_TOKEN PERSISTENT ISSUE REPRODUCTION COMPLETE")
         
     # Run the test
     asyncio.run(main())

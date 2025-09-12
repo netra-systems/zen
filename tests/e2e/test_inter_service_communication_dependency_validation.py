@@ -519,10 +519,10 @@ class InterServiceCommunicationTester:
         """Phase 4: Test basic inter-service communication patterns."""
         logger.info("Phase 4: Testing basic inter-service calls")
         
-        # Test auth service → backend communication
+        # Test auth service  ->  backend communication
         await self._test_auth_to_backend_calls()
         
-        # Test backend service → auth service communication  
+        # Test backend service  ->  auth service communication  
         await self._test_backend_to_auth_calls()
         
         # Test health check propagation
@@ -559,16 +559,16 @@ class InterServiceCommunicationTester:
                     
                     if response.status_code == 200:
                         self.metrics.successful_calls[call_key] += 1
-                        logger.debug(f"Auth→Backend call {i+1} successful ({call_time:.3f}s)")
+                        logger.debug(f"Auth -> Backend call {i+1} successful ({call_time:.3f}s)")
                     else:
                         self.metrics.failed_calls[call_key] += 1
-                        logger.warning(f"Auth→Backend call {i+1} failed with status {response.status_code}")
+                        logger.warning(f"Auth -> Backend call {i+1} failed with status {response.status_code}")
                 
                 except Exception as e:
                     call_time = time.time() - start_time
                     self.metrics.failed_calls[call_key] += 1
                     self.metrics.response_times[call_key].append(call_time)
-                    logger.warning(f"Auth→Backend call {i+1} exception: {e}")
+                    logger.warning(f"Auth -> Backend call {i+1} exception: {e}")
                 
                 # Small delay between calls
                 await asyncio.sleep(0.1)
@@ -576,7 +576,7 @@ class InterServiceCommunicationTester:
             success_rate = self.metrics.successful_calls[call_key] / self.metrics.inter_service_calls[call_key] * 100
             avg_time = sum(self.metrics.response_times[call_key]) / len(self.metrics.response_times[call_key])
             
-            logger.info(f"Auth→Backend: {success_rate:.1f}% success rate, {avg_time:.3f}s avg response")
+            logger.info(f"Auth -> Backend: {success_rate:.1f}% success rate, {avg_time:.3f}s avg response")
         
         except Exception as e:
             error_msg = f"Auth to backend communication test failed: {e}"
@@ -613,7 +613,7 @@ class InterServiceCommunicationTester:
                     
                     if response.status_code == 200:
                         self.metrics.successful_calls[call_key] += 1
-                        logger.debug(f"Backend→Auth call {i+1} successful ({call_time:.3f}s)")
+                        logger.debug(f"Backend -> Auth call {i+1} successful ({call_time:.3f}s)")
                     else:
                         self.metrics.failed_calls[call_key] += 1
                 
@@ -621,12 +621,12 @@ class InterServiceCommunicationTester:
                     call_time = time.time() - start_time
                     self.metrics.failed_calls[call_key] += 1
                     self.metrics.response_times[call_key].append(call_time)
-                    logger.warning(f"Backend→Auth call {i+1} exception: {e}")
+                    logger.warning(f"Backend -> Auth call {i+1} exception: {e}")
                 
                 await asyncio.sleep(0.1)
             
             success_rate = self.metrics.successful_calls[call_key] / self.metrics.inter_service_calls[call_key] * 100
-            logger.info(f"Backend→Auth: {success_rate:.1f}% success rate")
+            logger.info(f"Backend -> Auth: {success_rate:.1f}% success rate")
         
         except Exception as e:
             self.metrics.warnings.append(f"Backend to auth communication test failed: {e}")
@@ -817,7 +817,7 @@ class InterServiceCommunicationTester:
             # Validate dependency chain completeness
             if len(dependency_chain) >= 2:
                 self.metrics.cascade_failure_prevention += 1
-                logger.info(f"Health dependency chain validated: {' → '.join(dependency_chain)}")
+                logger.info(f"Health dependency chain validated: {'  ->  '.join(dependency_chain)}")
             
         except Exception as e:
             self.metrics.warnings.append(f"Health dependency chain test failed: {e}")

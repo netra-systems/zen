@@ -122,7 +122,7 @@ class TestBusinessValueProtection(BaseE2ETest):
             response_data = completion_event.get("data", {})
             response_content = response_data.get("response", "")
             
-            # ⚠️ CRITICAL FORTUNE 500 CEO FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] CRITICAL FORTUNE 500 CEO FAILING ASSERTION  WARNING: [U+FE0F]
             # CEO of $1.5M ARR customer must NEVER receive generic fallback responses
             
             fortune500_forbidden_responses = [
@@ -278,7 +278,7 @@ class TestBusinessValueProtection(BaseE2ETest):
             )
             
             if has_financial_data:
-                # ⚠️ CFO FINANCIAL DATA FAILING ASSERTION ⚠️
+                #  WARNING: [U+FE0F] CFO FINANCIAL DATA FAILING ASSERTION  WARNING: [U+FE0F]
                 # CFO cannot receive fabricated financial data - legal liability risk
                 
                 fabricated_financial_indicators = [
@@ -444,7 +444,7 @@ class TestBusinessValueProtection(BaseE2ETest):
             response_data = completion_event.get("data", {})
             response_content = response_data.get("response", "")
             
-            # ⚠️ CONTRACT RENEWAL RISK FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] CONTRACT RENEWAL RISK FAILING ASSERTION  WARNING: [U+FE0F]
             # Renewal customers must receive premium experience to prevent churn
             
             renewal_risk_responses = [
@@ -583,7 +583,7 @@ class TestBusinessValueProtection(BaseE2ETest):
             )
             
             if has_financial_metrics:
-                # ⚠️ PUBLIC COMPANY SEC COMPLIANCE FAILING ASSERTION ⚠️
+                #  WARNING: [U+FE0F] PUBLIC COMPANY SEC COMPLIANCE FAILING ASSERTION  WARNING: [U+FE0F]
                 # Public company data for SEC filings cannot be fabricated
                 
                 public_company_forbidden_data = [
@@ -734,7 +734,7 @@ class TestBusinessValueProtection(BaseE2ETest):
             response_data = completion_event.get("data", {})
             response_content = response_data.get("response", "")
             
-            # ⚠️ SALES CRITICAL DEMO FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] SALES CRITICAL DEMO FAILING ASSERTION  WARNING: [U+FE0F]
             # Enterprise prospects must never see fallback responses during demos
             
             demo_killing_responses = [

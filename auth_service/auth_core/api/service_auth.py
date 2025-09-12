@@ -1,6 +1,6 @@
 """
 Service-to-Service Authentication API - Phase 1 JWT SSOT Remediation
-Secure authentication mechanisms for backend → auth service calls
+Secure authentication mechanisms for backend  ->  auth service calls
 Handles service tokens, API keys, and request signing/verification
 """
 import hashlib

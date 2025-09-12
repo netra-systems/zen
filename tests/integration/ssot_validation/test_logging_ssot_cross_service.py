@@ -203,10 +203,10 @@ class TestLoggingSSotCrossService(SSotBaseTestCase):
             f"Cross-service violation rate: {violation_rate:.1f}%\n\n"
             f"CROSS-SERVICE ANALYSIS:\n{analysis}\n\n"
             f"SYSTEM-WIDE IMPACT: Inconsistent logging across services breaks:\n"
-            f"  • Centralized log aggregation\n"
-            f"  • Distributed tracing correlation\n"
-            f"  • Security audit trails\n"
-            f"  • Operational monitoring\n\n"
+            f"  [U+2022] Centralized log aggregation\n"
+            f"  [U+2022] Distributed tracing correlation\n"
+            f"  [U+2022] Security audit trails\n"
+            f"  [U+2022] Operational monitoring\n\n"
             f"REMEDIATION STRATEGY:\n"
             f"1. Fix shared modules first (if any violations)\n"
             f"2. Service-by-service SSOT migration\n"
@@ -316,7 +316,7 @@ class TestLoggingSSotCrossService(SSotBaseTestCase):
         formatted = []
         for violation in violations:
             formatted.append(
-                f"  • {violation.file_path}:{violation.line_number} - {violation.violation_type}"
+                f"  [U+2022] {violation.file_path}:{violation.line_number} - {violation.violation_type}"
             )
         
         return "\n".join(formatted)
@@ -328,7 +328,7 @@ class TestLoggingSSotCrossService(SSotBaseTestCase):
         analysis.append("SERVICE-BY-SERVICE BREAKDOWN:")
         for service_name, violations in all_violations.items():
             status = "VIOLATIONS FOUND" if violations else "COMPLIANT"
-            analysis.append(f"  • {service_name}: {len(violations)} violations ({status})")
+            analysis.append(f"  [U+2022] {service_name}: {len(violations)} violations ({status})")
         
         analysis.append("\nVIOLATION HOTSPOTS:")
         
@@ -342,7 +342,7 @@ class TestLoggingSSotCrossService(SSotBaseTestCase):
         # Sort by violation count and show top violators
         sorted_files = sorted(file_violation_counts.items(), key=lambda x: x[1], reverse=True)
         for file_path, count in sorted_files[:10]:  # Top 10 files
-            analysis.append(f"  • {file_path}: {count} violations")
+            analysis.append(f"  [U+2022] {file_path}: {count} violations")
         
         analysis.append("\nREMEDIATION PRIORITY:")
         analysis.append("  1. Fix critical golden path files first")

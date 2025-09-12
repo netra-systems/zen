@@ -767,7 +767,7 @@ class TestWebSocketMultiAgentConcurrentExecutionIsolation(BaseIntegrationTest):
                     assert concurrent_record["concurrent_safe"] is True
                     
         self.logger.info(
-            f"✅ Multi-agent concurrent execution test PASSED - "
+            f" PASS:  Multi-agent concurrent execution test PASSED - "
             f"{len(user_contexts)} users, "
             f"{concurrent_metrics['total_events']} events, "
             f"{isolation_analysis['isolation_success_rate']}% isolation, "
@@ -874,7 +874,7 @@ class TestWebSocketMultiAgentConcurrentExecutionIsolation(BaseIntegrationTest):
             f"Performance degraded under stress: {stress_performance['concurrent_efficiency']}"
             
         self.logger.info(
-            f"✅ Concurrent execution stress test PASSED - "
+            f" PASS:  Concurrent execution stress test PASSED - "
             f"{concurrent_users} users, "
             f"{successful_executions} successful, "
             f"{stress_isolation['isolation_score']:.1f}% isolation, "
@@ -967,7 +967,7 @@ class TestWebSocketMultiAgentConcurrentExecutionIsolation(BaseIntegrationTest):
             f"Event isolation violations: {isolation_analysis['isolation_violations']}"
             
         self.logger.info(
-            f"✅ WebSocket event ordering and consistency test PASSED - "
+            f" PASS:  WebSocket event ordering and consistency test PASSED - "
             f"{len(user_event_sequences)} users, "
             f"Total events: {sum(len(seq) for seq in user_event_sequences.values())}, "
             f"Isolation: {isolation_analysis['isolation_success_rate']}%"

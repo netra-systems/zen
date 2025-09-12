@@ -183,7 +183,7 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
             gc.collect()
             
         final_memory = self.stress_manager.get_system_memory_usage()
-        logger.info(f"✅ Resource exhaustion recovery test completed. Final memory: {final_memory}")
+        logger.info(f" PASS:  Resource exhaustion recovery test completed. Final memory: {final_memory}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -262,7 +262,7 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
         # PERFORMANCE ASSERTION: Recovery should be reasonably fast
         assert corruption_recovery_time < 5.0, f"Corruption recovery too slow: {corruption_recovery_time:.2f}s"
         
-        logger.info(f"✅ Factory state corruption recovery successful in {corruption_recovery_time:.2f}s")
+        logger.info(f" PASS:  Factory state corruption recovery successful in {corruption_recovery_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -373,7 +373,7 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
         critical_errors = [e for e in operation_errors if "timeout" not in e["error"].lower()]
         assert len(critical_errors) <= 2, f"Too many critical errors during reconfiguration: {critical_errors}"
         
-        logger.info(f"✅ Dynamic reconfiguration stability: {successful_operations}/{total_operations} ops successful ({success_rate:.1%}) in {reconfig_duration:.2f}s")
+        logger.info(f" PASS:  Dynamic reconfiguration stability: {successful_operations}/{total_operations} ops successful ({success_rate:.1%}) in {reconfig_duration:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -498,10 +498,10 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
         actual_success_rate = success_count / max(total_ops, 1)
         
         if actual_success_rate >= min_extreme_success_rate:
-            logger.info(f"✅ Factory showed good resilience under extreme memory pressure: {success_count}/{total_ops} operations successful")
+            logger.info(f" PASS:  Factory showed good resilience under extreme memory pressure: {success_count}/{total_ops} operations successful")
         else:
             # Even if success rate is low, system should not crash
-            logger.warning(f"⚠️ Factory struggled under extreme pressure: {success_count}/{total_ops} successful, but system remained stable")
+            logger.warning(f" WARNING: [U+FE0F] Factory struggled under extreme pressure: {success_count}/{total_ops} successful, but system remained stable")
         
         # CRITICAL: System should not crash - if we reach here, test passes
         assert True, "Factory survived extreme memory pressure without system crash"
@@ -655,7 +655,7 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
                 
                 assert validation_context is not None, f"Factory {factory_info['id']} corrupted after concurrent reconfiguration"
         
-        logger.info(f"✅ Concurrent factory reconfiguration isolation successful: {successful_reconfigurations}/{total_reconfigurations} reconfigurations in {concurrent_duration:.2f}s")
+        logger.info(f" PASS:  Concurrent factory reconfiguration isolation successful: {successful_reconfigurations}/{total_reconfigurations} reconfigurations in {concurrent_duration:.2f}s")
 
     async def _measure_factory_baseline_performance(self, context_factory, user_id: str, engine) -> Dict[str, float]:
         """Measure baseline factory performance for comparison."""
@@ -692,11 +692,11 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
             logger.info("Creating REAL cache corruption by restarting Redis service...")
             redis_restarted = docker_manager.restart_service("redis", force=True)
             if redis_restarted:
-                logger.info("✅ Redis service restarted - REAL cache corruption created")
+                logger.info(" PASS:  Redis service restarted - REAL cache corruption created")
                 # Wait for Redis to be back online
                 await asyncio.sleep(2)
             else:
-                logger.error("❌ Failed to restart Redis for real cache corruption")
+                logger.error(" FAIL:  Failed to restart Redis for real cache corruption")
                 raise Exception("Failed to create real cache corruption via Redis restart")
             
         elif corruption_type == "config":
@@ -704,19 +704,19 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
             logger.info("Creating REAL configuration corruption by restarting PostgreSQL service...")
             postgres_restarted = docker_manager.restart_service("postgres", force=True)
             if postgres_restarted:
-                logger.info("✅ PostgreSQL service restarted - REAL configuration corruption created")
+                logger.info(" PASS:  PostgreSQL service restarted - REAL configuration corruption created")
                 # Wait for PostgreSQL to be back online
                 await asyncio.sleep(5)  # PostgreSQL takes longer to restart
             else:
-                logger.error("❌ Failed to restart PostgreSQL for real configuration corruption")
+                logger.error(" FAIL:  Failed to restart PostgreSQL for real configuration corruption")
                 raise Exception("Failed to create real configuration corruption via PostgreSQL restart")
         
         # Verify services are back online after corruption
         services_healthy = docker_manager.wait_for_services(["postgres", "redis"], timeout=30)
         if not services_healthy:
-            logger.error("⚠️ Services not healthy after corruption - factory will be in degraded state")
+            logger.error(" WARNING: [U+FE0F] Services not healthy after corruption - factory will be in degraded state")
         else:
-            logger.info("✅ Services recovered after corruption - factory should handle degraded state gracefully")
+            logger.info(" PASS:  Services recovered after corruption - factory should handle degraded state gracefully")
     
     async def _apply_factory_configuration_change(self, context_factory, config_change: Dict[str, Any]):
         """Apply REAL factory configuration changes by modifying service behavior."""
@@ -753,7 +753,7 @@ class TestAdvancedFactoryResilience(BaseIntegrationTest):
         # Wait for services to be healthy after configuration change
         docker_manager.wait_for_services(["postgres", "redis", "backend"], timeout=15)
         
-        logger.info(f"✅ REAL factory configuration change applied: {config_change}")
+        logger.info(f" PASS:  REAL factory configuration change applied: {config_change}")
 
     def teardown_method(self):
         """Clean up after each test with resource reporting."""

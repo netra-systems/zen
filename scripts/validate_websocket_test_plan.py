@@ -50,7 +50,7 @@ class WebSocketTestPlanValidator:
         Returns:
             Comprehensive validation results
         """
-        logger.info("🔍 Validating WebSocket Handshake Test Plan")
+        logger.info(" SEARCH:  Validating WebSocket Handshake Test Plan")
         logger.info("=" * 50)
         
         results = {
@@ -91,7 +91,7 @@ class WebSocketTestPlanValidator:
     
     def _validate_file_structure(self) -> Dict[str, Any]:
         """Validate that all required files exist and are accessible."""
-        logger.info("📁 Validating file structure...")
+        logger.info("[U+1F4C1] Validating file structure...")
         
         files_to_check = {
             "test_plan": self.test_plan_path,
@@ -113,18 +113,18 @@ class WebSocketTestPlanValidator:
                     "size": file_path.stat().st_size,
                     "readable": file_path.is_file()
                 }
-                logger.debug(f"✅ {file_type}: {file_path.name} ({file_path.stat().st_size} bytes)")
+                logger.debug(f" PASS:  {file_type}: {file_path.name} ({file_path.stat().st_size} bytes)")
             else:
                 results["all_files_exist"] = False
                 results["missing_files"].append(str(file_path))
                 results["file_status"][file_type] = {"exists": False}
-                logger.error(f"❌ Missing {file_type}: {file_path}")
+                logger.error(f" FAIL:  Missing {file_type}: {file_path}")
         
         return results
     
     def _validate_syntax(self) -> Dict[str, Any]:
         """Validate Python syntax of all test files."""
-        logger.info("🐍 Validating Python syntax...")
+        logger.info("[U+1F40D] Validating Python syntax...")
         
         files_to_check = [
             self.test_plan_path,
@@ -153,7 +153,7 @@ class WebSocketTestPlanValidator:
                     "valid": True,
                     "lines": len(source_code.splitlines())
                 }
-                logger.debug(f"✅ Syntax valid: {file_path.name}")
+                logger.debug(f" PASS:  Syntax valid: {file_path.name}")
                 
             except SyntaxError as e:
                 results["all_syntax_valid"] = False
@@ -163,7 +163,7 @@ class WebSocketTestPlanValidator:
                     "valid": False,
                     "error": str(e)
                 }
-                logger.error(f"❌ Syntax error in {file_path.name}: {e}")
+                logger.error(f" FAIL:  Syntax error in {file_path.name}: {e}")
             except Exception as e:
                 results["all_syntax_valid"] = False
                 error_msg = f"{file_path.name}: {str(e)}"
@@ -172,13 +172,13 @@ class WebSocketTestPlanValidator:
                     "valid": False,
                     "error": str(e)
                 }
-                logger.error(f"❌ Error reading {file_path.name}: {e}")
+                logger.error(f" FAIL:  Error reading {file_path.name}: {e}")
         
         return results
     
     def _validate_imports(self) -> Dict[str, Any]:
         """Validate that critical imports are available."""
-        logger.info("📦 Validating imports...")
+        logger.info("[U+1F4E6] Validating imports...")
         
         critical_imports = [
             # Core testing framework
@@ -213,7 +213,7 @@ class WebSocketTestPlanValidator:
                     __import__(import_name)
                 
                 results["import_status"][import_name] = {"available": True}
-                logger.debug(f"✅ Import available: {import_name}")
+                logger.debug(f" PASS:  Import available: {import_name}")
                 
             except ImportError as e:
                 results["all_imports_available"] = False
@@ -222,19 +222,19 @@ class WebSocketTestPlanValidator:
                     "available": False,
                     "error": str(e)
                 }
-                logger.warning(f"⚠️ Import unavailable: {import_name} ({e})")
+                logger.warning(f" WARNING: [U+FE0F] Import unavailable: {import_name} ({e})")
             except Exception as e:
                 results["import_status"][import_name] = {
                     "available": False,
                     "error": str(e)
                 }
-                logger.warning(f"⚠️ Import error: {import_name} ({e})")
+                logger.warning(f" WARNING: [U+FE0F] Import error: {import_name} ({e})")
         
         return results
     
     def _validate_test_discovery(self) -> Dict[str, Any]:
         """Validate that tests can be discovered by pytest."""
-        logger.info("🔍 Validating test discovery...")
+        logger.info(" SEARCH:  Validating test discovery...")
         
         results = {
             "tests_discoverable": False,
@@ -274,11 +274,11 @@ class WebSocketTestPlanValidator:
             
             results["tests_discoverable"] = results["total_tests"] > 0
             
-            logger.info(f"📊 Discovered {len(results['test_classes_found'])} test classes")
-            logger.info(f"📊 Discovered {results['total_tests']} test methods")
+            logger.info(f" CHART:  Discovered {len(results['test_classes_found'])} test classes")
+            logger.info(f" CHART:  Discovered {results['total_tests']} test methods")
             
             for class_name in results["test_classes_found"]:
-                logger.debug(f"  📋 Test class: {class_name}")
+                logger.debug(f"  [U+1F4CB] Test class: {class_name}")
             
         except Exception as e:
             results["error"] = str(e)
@@ -288,7 +288,7 @@ class WebSocketTestPlanValidator:
     
     def _validate_business_value_coverage(self) -> Dict[str, Any]:
         """Validate that tests cover critical business value scenarios."""
-        logger.info("💰 Validating business value coverage...")
+        logger.info("[U+1F4B0] Validating business value coverage...")
         
         required_scenarios = [
             # Core business flows
@@ -329,17 +329,17 @@ class WebSocketTestPlanValidator:
                 if scenario in source_code:
                     results["scenario_coverage"][scenario] = True
                     covered_scenarios += 1
-                    logger.debug(f"✅ Scenario covered: {scenario}")
+                    logger.debug(f" PASS:  Scenario covered: {scenario}")
                 else:
                     results["scenario_coverage"][scenario] = False
                     results["missing_scenarios"].append(scenario)
-                    logger.warning(f"⚠️ Scenario missing: {scenario}")
+                    logger.warning(f" WARNING: [U+FE0F] Scenario missing: {scenario}")
             
             # Calculate coverage score
             results["coverage_score"] = (covered_scenarios / len(required_scenarios)) * 100
             results["business_value_covered"] = results["coverage_score"] >= 80  # 80% threshold
             
-            logger.info(f"📊 Business value coverage: {results['coverage_score']:.1f}%")
+            logger.info(f" CHART:  Business value coverage: {results['coverage_score']:.1f}%")
             
         except Exception as e:
             results["error"] = str(e)
@@ -367,59 +367,59 @@ class WebSocketTestPlanValidator:
     
     def print_validation_report(self, results: Dict[str, Any]):
         """Print a comprehensive validation report."""
-        logger.info("\n🎯 VALIDATION REPORT")
+        logger.info("\n TARGET:  VALIDATION REPORT")
         logger.info("=" * 50)
         
-        overall_status = "✅ VALID" if results["overall_valid"] else "❌ INVALID"
+        overall_status = " PASS:  VALID" if results["overall_valid"] else " FAIL:  INVALID"
         logger.info(f"Overall Status: {overall_status}")
         
         # File structure
         file_checks = results.get("file_checks", {})
-        logger.info(f"📁 File Structure: {'✅ PASS' if file_checks.get('all_files_exist') else '❌ FAIL'}")
+        logger.info(f"[U+1F4C1] File Structure: {' PASS:  PASS' if file_checks.get('all_files_exist') else ' FAIL:  FAIL'}")
         
         # Syntax validation
         syntax_checks = results.get("syntax_checks", {})
-        logger.info(f"🐍 Python Syntax: {'✅ PASS' if syntax_checks.get('all_syntax_valid') else '❌ FAIL'}")
+        logger.info(f"[U+1F40D] Python Syntax: {' PASS:  PASS' if syntax_checks.get('all_syntax_valid') else ' FAIL:  FAIL'}")
         
         # Import validation
         import_checks = results.get("import_checks", {})
         import_count = len([v for v in import_checks.get("import_status", {}).values() if v.get("available")])
         total_imports = len(import_checks.get("import_status", {}))
-        logger.info(f"📦 Import Availability: {import_count}/{total_imports} imports available")
+        logger.info(f"[U+1F4E6] Import Availability: {import_count}/{total_imports} imports available")
         
         # Test discovery
         test_discovery = results.get("test_discovery", {})
         test_count = test_discovery.get("total_tests", 0)
-        logger.info(f"🔍 Test Discovery: {test_count} tests discovered")
+        logger.info(f" SEARCH:  Test Discovery: {test_count} tests discovered")
         
         # Business value coverage
         bv_validation = results.get("business_value_validation", {})
         coverage_score = bv_validation.get("coverage_score", 0)
-        logger.info(f"💰 Business Value Coverage: {coverage_score:.1f}%")
+        logger.info(f"[U+1F4B0] Business Value Coverage: {coverage_score:.1f}%")
         
         # Errors and warnings
         if results.get("errors"):
-            logger.info(f"\n❌ ERRORS:")
+            logger.info(f"\n FAIL:  ERRORS:")
             for error in results["errors"]:
                 logger.info(f"  - {error}")
         
         if results.get("warnings"):
-            logger.info(f"\n⚠️ WARNINGS:")
+            logger.info(f"\n WARNING: [U+FE0F] WARNINGS:")
             for warning in results["warnings"]:
                 logger.info(f"  - {warning}")
         
         # Recommendations
-        logger.info(f"\n📋 RECOMMENDATIONS:")
+        logger.info(f"\n[U+1F4CB] RECOMMENDATIONS:")
         if results["overall_valid"]:
-            logger.info("  ✅ Test plan is ready for execution")
-            logger.info("  ✅ All critical components are in place")
-            logger.info("  ✅ Business value scenarios are covered")
-            logger.info("  🚀 Ready to validate WebSocket handshake fixes")
+            logger.info("   PASS:  Test plan is ready for execution")
+            logger.info("   PASS:  All critical components are in place")
+            logger.info("   PASS:  Business value scenarios are covered")
+            logger.info("  [U+1F680] Ready to validate WebSocket handshake fixes")
         else:
-            logger.info("  🔧 Fix file structure issues before testing")
-            logger.info("  🔧 Resolve syntax errors in Python files")
-            logger.info("  🔧 Ensure all critical imports are available") 
-            logger.info("  🔧 Add missing business value test scenarios")
+            logger.info("  [U+1F527] Fix file structure issues before testing")
+            logger.info("  [U+1F527] Resolve syntax errors in Python files")
+            logger.info("  [U+1F527] Ensure all critical imports are available") 
+            logger.info("  [U+1F527] Add missing business value test scenarios")
 
 
 def main():
@@ -435,12 +435,12 @@ def main():
         
         # Exit with appropriate code
         if results["overall_valid"]:
-            logger.info("\n✅ WebSocket handshake test plan validation successful!")
-            logger.info("🚀 Ready to execute comprehensive handshake testing")
+            logger.info("\n PASS:  WebSocket handshake test plan validation successful!")
+            logger.info("[U+1F680] Ready to execute comprehensive handshake testing")
             sys.exit(0)
         else:
-            logger.error("\n❌ WebSocket handshake test plan validation failed!")
-            logger.error("🔧 Fix validation issues before executing tests")
+            logger.error("\n FAIL:  WebSocket handshake test plan validation failed!")
+            logger.error("[U+1F527] Fix validation issues before executing tests")
             sys.exit(1)
             
     except Exception as e:

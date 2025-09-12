@@ -79,7 +79,7 @@ class TestPerformanceScaling:
             email=self.user_context.agent_context['user_email']
         )
         
-        logger.info(f"✅ Setup authenticated context for performance tests")
+        logger.info(f" PASS:  Setup authenticated context for performance tests")
         logger.info(f"User ID: {self.user_context.user_id}")
 
     async def _create_concurrent_user_session(self, user_index: int) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
@@ -131,7 +131,7 @@ class TestPerformanceScaling:
                 
                 performance_metrics["connection_time"] = time.time() - connection_start
                 
-                logger.info(f"👤 User {user_index}: Connected successfully")
+                logger.info(f"[U+1F464] User {user_index}: Connected successfully")
                 
                 # Execute multiple agent operations to simulate real user behavior
                 agent_operations = 3  # Each user performs 3 operations
@@ -178,7 +178,7 @@ class TestPerformanceScaling:
                             # Check for operation completion
                             if event_type in ["agent_completed", "operation_completed"]:
                                 operation_completed = True
-                                logger.info(f"👤 User {user_index}: Operation {op_index+1} completed")
+                                logger.info(f"[U+1F464] User {user_index}: Operation {op_index+1} completed")
                                 
                         except asyncio.TimeoutError:
                             # Continue waiting for completion
@@ -189,7 +189,7 @@ class TestPerformanceScaling:
                     
                     if not operation_completed:
                         performance_metrics["errors"].append(f"Operation {op_index} timeout")
-                        logger.warning(f"👤 User {user_index}: Operation {op_index+1} timed out")
+                        logger.warning(f"[U+1F464] User {user_index}: Operation {op_index+1} timed out")
                     
                     # Brief pause between operations
                     await asyncio.sleep(1.0)
@@ -198,7 +198,7 @@ class TestPerformanceScaling:
                 
         except Exception as e:
             performance_metrics["errors"].append(f"Session error: {str(e)}")
-            logger.error(f"👤 User {user_index}: Session error - {e}")
+            logger.error(f"[U+1F464] User {user_index}: Session error - {e}")
         
         # Calculate final metrics
         performance_metrics["total_session_time"] = time.time() - session_start_time
@@ -237,7 +237,7 @@ class TestPerformanceScaling:
             "business_context": "enterprise_concurrent_optimization"
         }
         
-        logger.info(f"🚀 Starting concurrent multi-user performance test with {load_config['concurrent_users']} users")
+        logger.info(f"[U+1F680] Starting concurrent multi-user performance test with {load_config['concurrent_users']} users")
         
         # Execute concurrent user sessions
         concurrent_session_tasks = []
@@ -253,7 +253,7 @@ class TestPerformanceScaling:
                 timeout=concurrent_timeout
             )
         except asyncio.TimeoutError:
-            logger.error("❌ Concurrent user test timed out - cancelling remaining tasks")
+            logger.error(" FAIL:  Concurrent user test timed out - cancelling remaining tasks")
             for task in concurrent_session_tasks:
                 if not task.done():
                     task.cancel()
@@ -336,7 +336,7 @@ class TestPerformanceScaling:
         business_operations_completed = sum(m["messages_received"] for m in performance_metrics)
         assert business_operations_completed >= 10, f"Too few business operations completed ({business_operations_completed}) under concurrent load"
         
-        logger.info(f"✅ PASS: Concurrent multi-user agent execution with performance monitoring - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Concurrent multi-user agent execution with performance monitoring - {test_duration:.2f}s")
         logger.info(f"Concurrent users: {load_config['concurrent_users']}")
         logger.info(f"Successful sessions: {successful_sessions}")
         logger.info(f"Error rate: {performance_stats.get('error_rate', 'N/A'):.2%}")
@@ -398,7 +398,7 @@ class TestPerformanceScaling:
                 open_timeout=20.0
             ) as websocket:
                 
-                logger.info(f"📈 Starting enterprise throughput optimization test")
+                logger.info(f"[U+1F4C8] Starting enterprise throughput optimization test")
                 logger.info(f"Target: {enterprise_load_config['batches_count']} batches of {enterprise_load_config['batch_size']} requests over {enterprise_load_config['test_duration']}s")
                 
                 # Start throughput monitoring task
@@ -423,13 +423,13 @@ class TestPerformanceScaling:
                     )
                     batch_tasks.append(batch_task)
                     
-                    logger.info(f"🏭 Started enterprise batch {batch_index + 1}/{enterprise_load_config['batches_count']}")
+                    logger.info(f"[U+1F3ED] Started enterprise batch {batch_index + 1}/{enterprise_load_config['batches_count']}")
                     
                     # Controlled spacing between batch starts
                     await asyncio.sleep(enterprise_load_config["test_duration"] / enterprise_load_config["batches_count"])
                 
                 # Wait for all batches to complete
-                logger.info("⏳ Waiting for all enterprise batches to complete...")
+                logger.info("[U+23F3] Waiting for all enterprise batches to complete...")
                 await asyncio.gather(*batch_tasks, return_exceptions=True)
                 
                 # Stop throughput monitoring
@@ -481,7 +481,7 @@ class TestPerformanceScaling:
         # Assert 6: WebSocket throughput scalability
         assert throughput_stats["total_websocket_events"] >= 50, f"Too few WebSocket events ({throughput_stats['total_websocket_events']}) for enterprise throughput test"
         
-        logger.info(f"✅ PASS: Throughput optimization under enterprise load - {total_test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Throughput optimization under enterprise load - {total_test_duration:.2f}s")
         logger.info(f"Requests sent: {throughput_metrics['requests_sent']}")
         logger.info(f"Requests completed: {throughput_metrics['requests_completed']}")
         logger.info(f"Request throughput: {throughput_stats['requests_per_second']:.2f} req/s")

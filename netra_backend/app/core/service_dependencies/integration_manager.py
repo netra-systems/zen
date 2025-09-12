@@ -70,12 +70,12 @@ class IntegrationManager:
                 
                 if service_integration["success"]:
                     integration_result["services_integrated"].append(service_type.value)
-                    self.logger.debug(f"✓ Integrated {service_type.value}")
+                    self.logger.debug(f"[U+2713] Integrated {service_type.value}")
                 else:
                     integration_result["integration_warnings"].append(
                         f"{service_type.value}: {service_integration['message']}"
                     )
-                    self.logger.warning(f"⚠️ Integration issue for {service_type.value}: {service_integration['message']}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Integration issue for {service_type.value}: {service_integration['message']}")
             
             # Validate cross-service integrations
             cross_service_result = await self._validate_cross_service_integration(app, services)

@@ -1,4 +1,4 @@
-"""Supervisor initialization helpers (≤300 lines).
+"""Supervisor initialization helpers ( <= 300 lines).
 
 Business Value: Modular initialization patterns for supervisor agent setup.
 Supports clean architecture and 25-line function compliance.

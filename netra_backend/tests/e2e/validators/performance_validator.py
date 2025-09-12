@@ -1,7 +1,7 @@
 """
 Performance Validation Framework for E2E Agent Testing
 Validates latency, throughput, resource usage, and performance regression.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 
 This module provides a unified interface for performance validation by importing
 components from the modular performance validation system.

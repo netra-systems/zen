@@ -2,7 +2,7 @@
 Shared fixtures and utilities for first-time user integration tests.
 
 BVJ (Business Value Justification):
-1. Segment: Free → Early → Paid (Primary revenue funnel)
+1. Segment: Free  ->  Early  ->  Paid (Primary revenue funnel)
 2. Business Goal: DRY shared test infrastructure for reliable onboarding tests
 3. Value Impact: Ensures consistent test setup across all first-time user flows
 4. Strategic Impact: Reduces test maintenance overhead while improving coverage

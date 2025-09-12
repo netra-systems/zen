@@ -91,7 +91,7 @@ class TestDeploymentPerformanceMonitoring(BaseTestCase):
         
         # Assert memory stability
         assert max_memory < self.alert_thresholds["memory_usage_mb"], f"Peak memory {max_memory:.1f}MB exceeded threshold"
-        assert memory_variance < 100, f"Memory variance {memory_variance:.1f}MB² too high, indicates instability"
+        assert memory_variance < 100, f"Memory variance {memory_variance:.1f}MB[U+00B2] too high, indicates instability"
         
         # Record metrics
         self.record_metric("memory_monitoring_avg_mb", avg_memory)

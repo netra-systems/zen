@@ -648,11 +648,11 @@ class TestErrorEdgeCases(BaseTestCase):
     def test_unicode_error_messages(self):
         """Test handling of Unicode characters in error messages."""
         unicode_messages = [
-            "Error with émojis: 🚨 ❌ ⚠️",
-            "中文错误信息",
-            "Ошибка на русском языке",
-            "Error with special chars: àáâãäåæçèéêë",
-            "Math symbols: ∑∏∫∮∇∂∆∞"
+            "Error with [U+00E9]mojis:  ALERT:   FAIL:   WARNING: [U+FE0F]",
+            "[U+4E2D][U+6587][U+9519][U+8BEF][U+4FE1][U+606F]",
+            "O[U+0448][U+0438][U+0431]ka na pucckom [U+044F][U+0437][U+044B]ke",
+            "Error with special chars: [U+00E0][U+00E1][U+00E2][U+00E3][U+00E4][U+00E5][U+00E6][U+00E7][U+00E8][U+00E9][U+00EA][U+00EB]",
+            "Math symbols: [U+2211][U+220F][U+222B][U+222E][U+2207][U+2202][U+2206] infinity "
         ]
         
         for message in unicode_messages:

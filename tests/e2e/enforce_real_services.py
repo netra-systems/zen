@@ -202,9 +202,9 @@ async def e2e_services():
     # Log service availability
     for service, available in results.items():
         if available:
-            logger.info(f"✓ {service} service available for E2E testing")
+            logger.info(f"[U+2713] {service} service available for E2E testing")
         else:
-            logger.warning(f"✗ {service} service not available")
+            logger.warning(f"[U+2717] {service} service not available")
     
     # Don't fail if some services are unavailable during test discovery
     # The actual tests will fail if they need those services

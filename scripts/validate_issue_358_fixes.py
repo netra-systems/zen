@@ -17,35 +17,35 @@ AUTH_URL = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
 
 def test_service_health() -> bool:
     """Test if services are healthy"""
-    print("🔍 Testing service health...")
+    print(" SEARCH:  Testing service health...")
     
     try:
         # Backend health
         response = requests.get(f"{BACKEND_URL}/health", timeout=10)
         if response.status_code != 200:
-            print(f"❌ Backend health check failed: {response.status_code}")
+            print(f" FAIL:  Backend health check failed: {response.status_code}")
             return False
         
         health_data = response.json()
-        print(f"✅ Backend healthy: {health_data.get('service', 'unknown')}")
+        print(f" PASS:  Backend healthy: {health_data.get('service', 'unknown')}")
         
         # Auth health
         response = requests.get(f"{AUTH_URL}/health", timeout=10)
         if response.status_code != 200:
-            print(f"❌ Auth health check failed: {response.status_code}")
+            print(f" FAIL:  Auth health check failed: {response.status_code}")
             return False
             
         auth_health = response.json()
-        print(f"✅ Auth healthy: {auth_health.get('service', 'unknown')}")
+        print(f" PASS:  Auth healthy: {auth_health.get('service', 'unknown')}")
         return True
         
     except Exception as e:
-        print(f"❌ Health check failed: {e}")
+        print(f" FAIL:  Health check failed: {e}")
         return False
 
 def test_websocket_connectivity() -> bool:
     """Test WebSocket connection establishment"""
-    print("🔍 Testing WebSocket connectivity...")
+    print(" SEARCH:  Testing WebSocket connectivity...")
     
     try:
         websocket_url = BACKEND_URL.replace("https://", "wss://") + "/ws"
@@ -57,7 +57,7 @@ def test_websocket_connectivity() -> bool:
             subprotocols=["jwt-auth"]  # Test with jwt-auth subprotocol
         )
         
-        print("✅ WebSocket connection established successfully")
+        print(" PASS:  WebSocket connection established successfully")
         
         # Send a basic test message
         test_message = {
@@ -65,18 +65,18 @@ def test_websocket_connectivity() -> bool:
             "message": "Issue #358 validation test"
         }
         ws.send(json.dumps(test_message))
-        print("✅ WebSocket message sent successfully")
+        print(" PASS:  WebSocket message sent successfully")
         
         ws.close()
         return True
         
     except Exception as e:
-        print(f"❌ WebSocket connection failed: {e}")
+        print(f" FAIL:  WebSocket connection failed: {e}")
         return False
 
 def test_api_endpoints() -> bool:
     """Test critical API endpoints"""
-    print("🔍 Testing API endpoints...")
+    print(" SEARCH:  Testing API endpoints...")
     
     endpoints = [
         {"path": "/docs", "method": "GET", "expected": [200]},
@@ -98,19 +98,19 @@ def test_api_endpoints() -> bool:
                 )
             
             if response.status_code in endpoint["expected"]:
-                print(f"✅ {endpoint['method']} {endpoint['path']}: {response.status_code}")
+                print(f" PASS:  {endpoint['method']} {endpoint['path']}: {response.status_code}")
                 success_count += 1
             else:
-                print(f"❌ {endpoint['method']} {endpoint['path']}: {response.status_code} (expected {endpoint['expected']})")
+                print(f" FAIL:  {endpoint['method']} {endpoint['path']}: {response.status_code} (expected {endpoint['expected']})")
                 
         except Exception as e:
-            print(f"❌ {endpoint['method']} {endpoint['path']}: Exception - {e}")
+            print(f" FAIL:  {endpoint['method']} {endpoint['path']}: Exception - {e}")
     
     return success_count == len(endpoints)
 
 def test_demo_mode_functionality() -> bool:
     """Test DEMO_MODE authentication bypass"""
-    print("🔍 Testing DEMO_MODE authentication bypass...")
+    print(" SEARCH:  Testing DEMO_MODE authentication bypass...")
     
     try:
         # Test agent execution endpoint with DEMO_MODE
@@ -129,29 +129,29 @@ def test_demo_mode_functionality() -> bool:
             timeout=15
         )
         
-        print(f"📊 Agent execute response: {response.status_code}")
+        print(f" CHART:  Agent execute response: {response.status_code}")
         
         if response.status_code < 500:  # Anything other than server error is progress
-            print("✅ Agent execution endpoint accessible (DEMO_MODE working)")
+            print(" PASS:  Agent execution endpoint accessible (DEMO_MODE working)")
             
             try:
                 response_data = response.json()
-                print(f"📄 Response: {json.dumps(response_data, indent=2)}")
+                print(f"[U+1F4C4] Response: {json.dumps(response_data, indent=2)}")
             except:
-                print("📄 Response is not JSON (possibly HTML)")
+                print("[U+1F4C4] Response is not JSON (possibly HTML)")
                 
             return True
         else:
-            print(f"❌ Agent execution failed with server error: {response.status_code}")
+            print(f" FAIL:  Agent execution failed with server error: {response.status_code}")
             return False
             
     except Exception as e:
-        print(f"❌ DEMO_MODE test failed: {e}")
+        print(f" FAIL:  DEMO_MODE test failed: {e}")
         return False
 
 def test_user_execution_context_fix() -> bool:
     """Test that UserExecutionContext fixes are deployed"""
-    print("🔍 Testing UserExecutionContext websocket_client_id parameter...")
+    print(" SEARCH:  Testing UserExecutionContext websocket_client_id parameter...")
     
     try:
         # Import the class to test
@@ -169,17 +169,17 @@ def test_user_execution_context_fix() -> bool:
             websocket_client_id="test-websocket-358"  # This was the missing parameter
         )
         
-        print("✅ UserExecutionContext.from_request with websocket_client_id works")
-        print(f"✅ Created context for user: {user_context.user_id}")
+        print(" PASS:  UserExecutionContext.from_request with websocket_client_id works")
+        print(f" PASS:  Created context for user: {user_context.user_id}")
         return True
         
     except Exception as e:
-        print(f"❌ UserExecutionContext test failed: {e}")
+        print(f" FAIL:  UserExecutionContext test failed: {e}")
         return False
 
 def test_ssot_imports() -> bool:
     """Test that SSOT imports are available"""
-    print("🔍 Testing SSOT imports...")
+    print(" SEARCH:  Testing SSOT imports...")
     
     imports_to_test = [
         ("WebSocket Bridge", "netra_backend.app.services.agent_websocket_bridge", "create_agent_websocket_bridge"),
@@ -192,16 +192,16 @@ def test_ssot_imports() -> bool:
     for name, module, item in imports_to_test:
         try:
             exec(f"from {module} import {item}")
-            print(f"✅ {name} import successful")
+            print(f" PASS:  {name} import successful")
             success_count += 1
         except Exception as e:
-            print(f"❌ {name} import failed: {e}")
+            print(f" FAIL:  {name} import failed: {e}")
     
     return success_count == len(imports_to_test)
 
 def main():
     """Run all validation tests"""
-    print("🚀 Starting Issue #358 Golden Path Validation")
+    print("[U+1F680] Starting Issue #358 Golden Path Validation")
     print("=" * 60)
     
     tests = [
@@ -216,35 +216,35 @@ def main():
     results = []
     
     for test_name, test_func in tests:
-        print(f"\n📋 {test_name}")
+        print(f"\n[U+1F4CB] {test_name}")
         print("-" * 40)
         
         try:
             result = test_func()
             results.append((test_name, result))
         except Exception as e:
-            print(f"❌ {test_name} crashed: {e}")
+            print(f" FAIL:  {test_name} crashed: {e}")
             results.append((test_name, False))
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 VALIDATION SUMMARY")
+    print(" CHART:  VALIDATION SUMMARY")
     print("=" * 60)
     
     passed = sum(1 for _, result in results if result)
     total = len(results)
     
     for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = " PASS:  PASS" if result else " FAIL:  FAIL"
         print(f"{status} {test_name}")
     
     print(f"\nOverall: {passed}/{total} tests passed ({(passed/total)*100:.1f}%)")
     
     if passed >= total * 0.8:  # 80% pass rate
-        print("🎉 Issue #358 remediation SUCCESSFUL - Golden Path fixes working!")
+        print(" CELEBRATION:  Issue #358 remediation SUCCESSFUL - Golden Path fixes working!")
         return 0
     else:
-        print("⚠️  Issue #358 remediation INCOMPLETE - More work needed")
+        print(" WARNING: [U+FE0F]  Issue #358 remediation INCOMPLETE - More work needed")
         return 1
 
 if __name__ == "__main__":

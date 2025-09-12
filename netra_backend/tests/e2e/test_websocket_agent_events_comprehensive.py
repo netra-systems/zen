@@ -412,7 +412,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
                 )
             
             self.logger.info(
-                f"✅ TIMING VALIDATION PASSED: Test executed in {test_execution_time:.3f}s "
+                f" PASS:  TIMING VALIDATION PASSED: Test executed in {test_execution_time:.3f}s "
                 f"with {len(events)} events, proving real service execution"
             )
     
@@ -825,7 +825,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
                     assert count >= 1, f"Required event {event_type} missing or insufficient count: {count}"
             
             self.logger.info(
-                f"✅ CHAT BUSINESS VALUE FULLY VALIDATED: "
+                f" PASS:  CHAT BUSINESS VALUE FULLY VALIDATED: "
                 f"Agent '{agent_name}' delivered {len(thinking_events)} reasoning updates, "
                 f"used {required_event_counts['tool_executing']} tools, "
                 f"provided {len(response)} char response with {len(business_matches)} business value indicators "
@@ -901,7 +901,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
                     assert scenario_time < 60.0, f"Scenario {i+1} took too long: {scenario_time:.1f}s"
                     
                     health_report.append(scenario_health)
-                    self.logger.info(f"✅ Scenario {i+1} HEALTHY: {len(events)} events in {scenario_time:.1f}s")
+                    self.logger.info(f" PASS:  Scenario {i+1} HEALTHY: {len(events)} events in {scenario_time:.1f}s")
                     
                 except Exception as e:
                     overall_health = False
@@ -914,7 +914,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
                         "success": False
                     }
                     health_report.append(failed_scenario)
-                    self.logger.error(f"❌ Scenario {i+1} FAILED: {e}")
+                    self.logger.error(f" FAIL:  Scenario {i+1} FAILED: {e}")
                     
                 # Small delay between scenarios
                 await asyncio.sleep(1.0)
@@ -957,7 +957,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
             )
             
             self.logger.info(
-                f"🎉 WEBSOCKET EVENT SYSTEM HEALTH: EXCELLENT "
+                f" CELEBRATION:  WEBSOCKET EVENT SYSTEM HEALTH: EXCELLENT "
                 f"({len(successful_scenarios)}/{len(test_scenarios)} scenarios passed, "
                 f"{sum(s.get('total_events', 0) for s in successful_scenarios)} total events)"
             )

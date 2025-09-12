@@ -135,17 +135,17 @@ from datetime import datetime'''
     def _print_results(self) -> None:
         """Print validation results"""
         if self.errors:
-            print("\\n❌ Validation Errors:")
+            print("\\n FAIL:  Validation Errors:")
             for error in self.errors:
                 print(f"  - {error}")
         
         if self.warnings:
-            print("\\n⚠️  Validation Warnings:")
+            print("\\n WARNING: [U+FE0F]  Validation Warnings:")
             for warning in self.warnings:
                 print(f"  - {warning}")
         
         if not self.errors and not self.warnings:
-            print("\\n✅ All files have valid metadata headers")'''
+            print("\\n PASS:  All files have valid metadata headers")'''
 
     def _get_main_function(self) -> str:
         """Get main function"""

@@ -374,4 +374,4 @@ class TestRedisTimeoutFixUnit(SSotAsyncTestCase):
         
         # SUCCESS: All GCP timeouts are now health-endpoint compatible
         self.record_metric("timeout_fix_verified", True)
-        print(f"✅ All GCP service timeouts are health-endpoint safe: {all_timeouts}")
+        print(f" PASS:  All GCP service timeouts are health-endpoint safe: {all_timeouts}")

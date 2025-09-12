@@ -1,5 +1,5 @@
 """
-🔴 MISSION CRITICAL: Token Refresh During Active Chat Test Suite
+[U+1F534] MISSION CRITICAL: Token Refresh During Active Chat Test Suite
 Tests seamless auth token rotation mid-conversation without disruption.
 
 CRITICAL REQUIREMENTS:

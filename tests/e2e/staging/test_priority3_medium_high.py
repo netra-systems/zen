@@ -48,7 +48,7 @@ class TestMediumHighOrchestration:
                     
                     if response.status_code == 200:
                         data = response.json()
-                        print(f"✓ Agent discovery endpoint found: {endpoint}")
+                        print(f"[U+2713] Agent discovery endpoint found: {endpoint}")
                         
                         # Try to extract agent information
                         if isinstance(data, dict):
@@ -63,9 +63,9 @@ class TestMediumHighOrchestration:
                             agents_found.extend(data)
                             
                     elif response.status_code in [401, 403]:
-                        print(f"• Agent endpoint requires auth: {endpoint}")
+                        print(f"[U+2022] Agent endpoint requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Agent endpoint not implemented: {endpoint}")
+                        print(f"[U+2022] Agent endpoint not implemented: {endpoint}")
                         
                 except Exception as e:
                     print(f"Agent endpoint {endpoint} error: {e}")
@@ -84,11 +84,11 @@ class TestMediumHighOrchestration:
                 )
                 
                 if response.status_code in [200, 201]:
-                    print("✓ Workflow creation endpoint available")
+                    print("[U+2713] Workflow creation endpoint available")
                 elif response.status_code in [401, 403]:
-                    print("• Workflow creation requires auth (expected)")
+                    print("[U+2022] Workflow creation requires auth (expected)")
                 elif response.status_code in [404, 405]:
-                    print("• Workflow creation not implemented")
+                    print("[U+2022] Workflow creation not implemented")
             except Exception as e:
                 print(f"Workflow creation test error: {e}")
         
@@ -142,7 +142,7 @@ class TestMediumHighOrchestration:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Agent handoff endpoint active: {endpoint}")
+                        print(f"[U+2713] Agent handoff endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "task_id" in data or "handoff_id" in data:
@@ -150,11 +150,11 @@ class TestMediumHighOrchestration:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Agent handoff requires auth: {endpoint}")
+                        print(f"[U+2022] Agent handoff requires auth: {endpoint}")
                     elif response.status_code in [404, 405]:
-                        print(f"• Agent handoff not implemented: {endpoint}")
+                        print(f"[U+2022] Agent handoff not implemented: {endpoint}")
                     elif response.status_code == 400:
-                        print(f"• Agent handoff validation active: {endpoint}")
+                        print(f"[U+2022] Agent handoff validation active: {endpoint}")
                         
                 except Exception as e:
                     handoff_results[endpoint] = {"error": str(e)[:100]}
@@ -223,7 +223,7 @@ class TestMediumHighOrchestration:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Parallel execution endpoint active: {endpoint}")
+                        print(f"[U+2713] Parallel execution endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "execution_id" in data or "job_id" in data:
@@ -231,11 +231,11 @@ class TestMediumHighOrchestration:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Parallel execution requires auth: {endpoint}")
+                        print(f"[U+2022] Parallel execution requires auth: {endpoint}")
                     elif response.status_code in [404, 405]:
-                        print(f"• Parallel execution not implemented: {endpoint}")
+                        print(f"[U+2022] Parallel execution not implemented: {endpoint}")
                     elif response.status_code == 400:
-                        print(f"• Parallel execution validation active: {endpoint}")
+                        print(f"[U+2022] Parallel execution validation active: {endpoint}")
                         
                 except Exception as e:
                     parallel_results[endpoint] = {"error": str(e)[:100]}
@@ -257,7 +257,7 @@ class TestMediumHighOrchestration:
                     "success_rate": concurrent_successful / len(concurrent_tasks)
                 }
                 
-                print(f"✓ Concurrent requests: {concurrent_successful}/{len(concurrent_tasks)} successful")
+                print(f"[U+2713] Concurrent requests: {concurrent_successful}/{len(concurrent_tasks)} successful")
                 
             except Exception as e:
                 parallel_results["concurrent_health_test"] = {"error": str(e)[:100]}
@@ -321,7 +321,7 @@ class TestMediumHighOrchestration:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Sequential pipeline endpoint active: {endpoint}")
+                        print(f"[U+2713] Sequential pipeline endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "pipeline_id" in data or "workflow_id" in data:
@@ -329,11 +329,11 @@ class TestMediumHighOrchestration:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Pipeline creation requires auth: {endpoint}")
+                        print(f"[U+2022] Pipeline creation requires auth: {endpoint}")
                     elif response.status_code in [404, 405]:
-                        print(f"• Pipeline creation not implemented: {endpoint}")
+                        print(f"[U+2022] Pipeline creation not implemented: {endpoint}")
                     elif response.status_code == 400:
-                        print(f"• Pipeline validation active: {endpoint}")
+                        print(f"[U+2022] Pipeline validation active: {endpoint}")
                         
                 except Exception as e:
                     pipeline_results[endpoint] = {"error": str(e)[:100]}
@@ -355,7 +355,7 @@ class TestMediumHighOrchestration:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Pipeline status endpoint available: {endpoint}")
+                        print(f"[U+2713] Pipeline status endpoint available: {endpoint}")
                         
                 except Exception as e:
                     pipeline_results[f"{endpoint}_status"] = {"error": str(e)[:50]}
@@ -412,7 +412,7 @@ class TestMediumHighOrchestration:
                     }
                     
                     if response.status_code in [200, 201]:
-                        print(f"✓ Dependency resolution endpoint active: {endpoint}")
+                        print(f"[U+2713] Dependency resolution endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "execution_order" in data or "resolved" in data:
@@ -422,11 +422,11 @@ class TestMediumHighOrchestration:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Dependency resolution requires auth: {endpoint}")
+                        print(f"[U+2022] Dependency resolution requires auth: {endpoint}")
                     elif response.status_code in [404, 405]:
-                        print(f"• Dependency resolution not implemented: {endpoint}")
+                        print(f"[U+2022] Dependency resolution not implemented: {endpoint}")
                     elif response.status_code == 400:
-                        print(f"• Dependency validation active: {endpoint}")
+                        print(f"[U+2022] Dependency validation active: {endpoint}")
                         
                 except Exception as e:
                     dependency_results[endpoint] = {"error": str(e)[:100]}
@@ -441,7 +441,7 @@ class TestMediumHighOrchestration:
                 }
                 
                 if response.status_code == 200:
-                    print("✓ Agent capabilities endpoint available")
+                    print("[U+2713] Agent capabilities endpoint available")
                     try:
                         data = response.json()
                         if isinstance(data, dict) and len(data) > 0:
@@ -686,7 +686,7 @@ class TestMediumHighResilience:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.2):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

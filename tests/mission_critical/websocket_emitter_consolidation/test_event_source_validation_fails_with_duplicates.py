@@ -234,7 +234,7 @@ class TestEventSourceValidationFailsWithDuplicates(SSotAsyncTestCase):
         assert actual_sources_detected == expected_sources_after_partial_fix, (
             f"PARTIAL SSOT PROGRESS CHECK: Expected exactly {expected_sources_after_partial_fix} sources after transparent_emitter fix, "
             f"but found {actual_sources_detected} sources: {self.source_metrics.sources_detected}. "
-            f"SSOT consolidation progress: 4 → 3 sources (transparent_emitter eliminated)"
+            f"SSOT consolidation progress: 4  ->  3 sources (transparent_emitter eliminated)"
         )
         
         # STILL FAILING: Multiple sources exist - further SSOT work needed
@@ -260,7 +260,7 @@ class TestEventSourceValidationFailsWithDuplicates(SSotAsyncTestCase):
         # This source is eliminated - transparent_websocket_events.py now imports UnifiedWebSocketEmitter
         # All emissions from this source now appear as "unified_emitter" in call stack
         
-        # PARTIAL SSOT PROGRESS: 4 sources → 3 sources (transparent_emitter eliminated)
+        # PARTIAL SSOT PROGRESS: 4 sources  ->  3 sources (transparent_emitter eliminated)
     
     async def _emit_from_source(self, source_name: str, source_file: str, source_line: int):
         """Simulate emitting events from a specific source."""

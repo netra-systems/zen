@@ -15,30 +15,30 @@ logger = logging.getLogger(__name__)
 
 async def demo_basic_e2e_flow():
     """Demonstrate basic E2E flow with service orchestration."""
-    print("🚀 Starting Unified E2E Demo")
+    print("[U+1F680] Starting Unified E2E Demo")
     
     async with create_e2e_harness().test_environment() as harness:
-        print("✅ Test environment started")
+        print(" PASS:  Test environment started")
         
         # Check environment status
         status = await harness.get_environment_status()
-        print(f"📊 Environment ready: {harness.is_environment_ready()}")
-        print(f"📊 Session ID: {status['session_id']}")
+        print(f" CHART:  Environment ready: {harness.is_environment_ready()}")
+        print(f" CHART:  Session ID: {status['session_id']}")
         
         # Create test user
         user = await harness.create_test_user(
             email="demo@example.com"
         )
-        print(f"👤 Created test user: {user.email}")
+        print(f"[U+1F464] Created test user: {user.email}")
         
         # Simulate user journey
         journey_result = await harness.simulate_user_journey(user)
-        print(f"🎯 User journey completed: {len(journey_result['steps_completed'])} steps")
+        print(f" TARGET:  User journey completed: {len(journey_result['steps_completed'])} steps")
         
         if journey_result['errors']:
-            print(f"⚠️  Journey errors: {journey_result['errors']}")
+            print(f" WARNING: [U+FE0F]  Journey errors: {journey_result['errors']}")
         else:
-            print("✅ Journey completed successfully")
+            print(" PASS:  Journey completed successfully")
         
         # Test concurrent users
         concurrent_results = await harness.run_concurrent_user_test(user_count=2)
@@ -46,15 +46,15 @@ async def demo_basic_e2e_flow():
             1 for result in concurrent_results 
             if isinstance(result, dict) and not result.get('errors')
         )
-        print(f"👥 Concurrent test: {successful_journeys}/2 users successful")
+        print(f"[U+1F465] Concurrent test: {successful_journeys}/2 users successful")
     
-    print("🧹 Test environment cleaned up")
-    print("✅ Demo completed successfully")
+    print("[U+1F9F9] Test environment cleaned up")
+    print(" PASS:  Demo completed successfully")
 
 
 async def demo_service_health_monitoring():
     """Demonstrate service health monitoring capabilities."""
-    print("🏥 Service Health Monitoring Demo")
+    print("[U+1F3E5] Service Health Monitoring Demo")
     
     harness = create_e2e_harness()
     
@@ -63,13 +63,13 @@ async def demo_service_health_monitoring():
         
         # Monitor service health
         status = await harness.get_environment_status()
-        print(f"📊 Services status: {list(status['services'].keys())}")
+        print(f" CHART:  Services status: {list(status['services'].keys())}")
         
         for service_name, service_status in status['services'].items():
-            health = "✅ Healthy" if service_status.get('ready') else "❌ Unhealthy"
+            health = " PASS:  Healthy" if service_status.get('ready') else " FAIL:  Unhealthy"
             print(f"  {service_name}: {health} (Port: {service_status.get('port')})")
         
-        print(f"🔗 Available service URLs:")
+        print(f"[U+1F517] Available service URLs:")
         auth_url = harness.get_service_url("auth")
         backend_url = harness.get_service_url("backend") 
         websocket_url = harness.get_websocket_url()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    print("🎭 Unified E2E Test Harness Demo")
+    print("[U+1F3AD] Unified E2E Test Harness Demo")
     print("=" * 50)
     
     try:
@@ -101,9 +101,9 @@ if __name__ == "__main__":
         asyncio.run(demo_service_health_monitoring())
         
     except KeyboardInterrupt:
-        print("\n🛑 Demo interrupted by user")
+        print("\n[U+1F6D1] Demo interrupted by user")
     except Exception as e:
-        print(f"\n❌ Demo failed: {e}")
+        print(f"\n FAIL:  Demo failed: {e}")
         logger.exception("Demo execution failed")
     
-    print("\n🏁 Demo session ended")
+    print("\n[U+1F3C1] Demo session ended")

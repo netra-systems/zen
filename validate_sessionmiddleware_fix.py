@@ -60,7 +60,7 @@ class SessionMiddlewareFixValidator:
                 if result['status'] == 'PASS':
                     print(f"PASS {name}: PASSED")
                     for detail in result.get('details', []):
-                        print(f"   • {detail}")
+                        print(f"   [U+2022] {detail}")
                 else:
                     print(f"FAIL {name}: FAILED")
                     overall_success = False
@@ -228,16 +228,16 @@ class SessionMiddlewareFixValidator:
                 
                 try:
                     result = middleware._safe_extract_session_data(mock_request)
-                    details.append(f"✅ Gracefully handled: {scenario['name']}")
+                    details.append(f" PASS:  Gracefully handled: {scenario['name']}")
                     
                     if not isinstance(result, dict):
                         errors.append(f"Error handling for {scenario['name']} returned non-dict")
                         
                 except Exception as e:
                     if type(e) == type(scenario['exception']):
-                        errors.append(f"❌ Failed to handle: {scenario['name']} - error still propagating")
+                        errors.append(f" FAIL:  Failed to handle: {scenario['name']} - error still propagating")
                     else:
-                        details.append(f"✅ Transformed error for: {scenario['name']}")
+                        details.append(f" PASS:  Transformed error for: {scenario['name']}")
         
         except Exception as e:
             errors.append(f"Error handling validation failed: {e}")
@@ -467,24 +467,24 @@ class SessionMiddlewareFixValidator:
                     session_data = middleware._safe_extract_session_data(mock_request)
                     
                     if isinstance(session_data, dict):
-                        details.append(f"✅ {scenario['name']}: Session data extracted successfully")
+                        details.append(f" PASS:  {scenario['name']}: Session data extracted successfully")
                         
                         # Verify business-critical data is available via fallbacks
                         if 'user_id' in session_data:
-                            details.append(f"  • User identification preserved")
+                            details.append(f"  [U+2022] User identification preserved")
                         else:
-                            errors.append(f"  ❌ User identification lost in {scenario['name']}")
+                            errors.append(f"   FAIL:  User identification lost in {scenario['name']}")
                             
                     else:
-                        errors.append(f"❌ {scenario['name']}: Invalid session data structure")
+                        errors.append(f" FAIL:  {scenario['name']}: Invalid session data structure")
                         
                 except Exception as e:
-                    errors.append(f"❌ {scenario['name']}: Business flow interrupted - {e}")
+                    errors.append(f" FAIL:  {scenario['name']}: Business flow interrupted - {e}")
             
             # Overall business impact assessment
             if not errors:
-                details.append("🎯 Golden Path business flows preserved")
-                details.append("💰 $500K+ ARR authentication reliability maintained")
+                details.append(" TARGET:  Golden Path business flows preserved")
+                details.append("[U+1F4B0] $500K+ ARR authentication reliability maintained")
         
         except Exception as e:
             errors.append(f"Business continuity validation failed: {e}")
@@ -498,51 +498,51 @@ class SessionMiddlewareFixValidator:
     def generate_final_report(self, overall_success):
         """Generate comprehensive validation report."""
         print("\n" + "=" * 65)
-        print("🎯 FINAL STABILITY VALIDATION REPORT")
+        print(" TARGET:  FINAL STABILITY VALIDATION REPORT")
         print("=" * 65)
         
         if overall_success:
-            print("✅ OVERALL STATUS: SYSTEM STABLE - NO BREAKING CHANGES")
+            print(" PASS:  OVERALL STATUS: SYSTEM STABLE - NO BREAKING CHANGES")
         else:
-            print("🚨 OVERALL STATUS: ISSUES DETECTED - REVIEW REQUIRED")
+            print(" ALERT:  OVERALL STATUS: ISSUES DETECTED - REVIEW REQUIRED")
             
-        print(f"\n📊 VALIDATION SUMMARY:")
+        print(f"\n CHART:  VALIDATION SUMMARY:")
         
         pass_count = sum(1 for r in self.validation_results.values() if r['status'] == 'PASS')
         fail_count = len(self.validation_results) - pass_count
         
-        print(f"   • Tests Passed: {pass_count}")
-        print(f"   • Tests Failed: {fail_count}")
-        print(f"   • Success Rate: {(pass_count/len(self.validation_results)*100):.1f}%")
+        print(f"   [U+2022] Tests Passed: {pass_count}")
+        print(f"   [U+2022] Tests Failed: {fail_count}")
+        print(f"   [U+2022] Success Rate: {(pass_count/len(self.validation_results)*100):.1f}%")
         
         if self.performance_metrics:
-            print(f"\n⚡ PERFORMANCE METRICS:")
+            print(f"\n LIGHTNING:  PERFORMANCE METRICS:")
             for metric, value in self.performance_metrics.items():
-                print(f"   • {metric}: {value:.3f}")
+                print(f"   [U+2022] {metric}: {value:.3f}")
                 
-        print(f"\n🔍 DETAILED RESULTS:")
+        print(f"\n SEARCH:  DETAILED RESULTS:")
         for name, result in self.validation_results.items():
-            status_icon = "✅" if result['status'] == 'PASS' else "❌"
+            status_icon = " PASS: " if result['status'] == 'PASS' else " FAIL: "
             print(f"   {status_icon} {name}: {result['status']}")
             
-        print(f"\n📋 STABILITY ASSESSMENT:")
+        print(f"\n[U+1F4CB] STABILITY ASSESSMENT:")
         
         if overall_success:
-            print("   ✅ Code changes maintain backward compatibility")
-            print("   ✅ Error handling improvements are robust")  
-            print("   ✅ Fallback mechanisms preserve functionality")
-            print("   ✅ Performance impact is negligible")
-            print("   ✅ Integration with middleware stack is preserved")
-            print("   ✅ Business continuity is maintained")
-            print("\n🎯 RECOMMENDATION: DEPLOY WITH CONFIDENCE")
-            print("   • Fix eliminates SessionMiddleware errors")
-            print("   • No regressions or breaking changes detected")
-            print("   • System stability is preserved")
+            print("    PASS:  Code changes maintain backward compatibility")
+            print("    PASS:  Error handling improvements are robust")  
+            print("    PASS:  Fallback mechanisms preserve functionality")
+            print("    PASS:  Performance impact is negligible")
+            print("    PASS:  Integration with middleware stack is preserved")
+            print("    PASS:  Business continuity is maintained")
+            print("\n TARGET:  RECOMMENDATION: DEPLOY WITH CONFIDENCE")
+            print("   [U+2022] Fix eliminates SessionMiddleware errors")
+            print("   [U+2022] No regressions or breaking changes detected")
+            print("   [U+2022] System stability is preserved")
             
         else:
-            print("   🚨 Some validation areas need attention")
-            print("   🔍 Review failed tests before deployment")
-            print("   ⚠️  Consider additional testing in staging environment")
+            print("    ALERT:  Some validation areas need attention")
+            print("    SEARCH:  Review failed tests before deployment")
+            print("    WARNING: [U+FE0F]  Consider additional testing in staging environment")
             
         return {
             'overall_success': overall_success,

@@ -9,11 +9,11 @@ Business Value Justification (BVJ):
 
 CRITICAL IMPORTANCE:
 These tests prevent the configuration cascade failures documented in MISSION_CRITICAL_NAMED_VALUES_INDEX.xml:
-- SERVICE_SECRET missing → Complete authentication failure, 100% user lockout
-- SERVICE_ID timestamp suffix → Recurring auth failures every 60 seconds
-- DATABASE_URL violations → Complete backend failure with no data access
-- Environment variable pollution → Test values leak to production, data corruption
-- Silent configuration failures → Systems appear healthy but are misconfigured
+- SERVICE_SECRET missing  ->  Complete authentication failure, 100% user lockout
+- SERVICE_ID timestamp suffix  ->  Recurring auth failures every 60 seconds
+- DATABASE_URL violations  ->  Complete backend failure with no data access
+- Environment variable pollution  ->  Test values leak to production, data corruption
+- Silent configuration failures  ->  Systems appear healthy but are misconfigured
 
 Testing Strategy:
 1. IsolatedEnvironment validation and access patterns

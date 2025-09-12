@@ -46,7 +46,7 @@ import gc
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Any, Set
 from unittest.mock import patch
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import psycopg2
 from psycopg2 import sql
 
@@ -155,11 +155,11 @@ class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
         """Cleanup test data from all ID management services"""
         # Clean up Redis sequences
         for sequence_name in self.test_sequences:
-            self.redis_client.delete(f"id_sequence:{sequence_name}")
+            self.await redis_client.delete(f"id_sequence:{sequence_name}")
         
         # Clean up Redis ID caches
         for generated_id in self.test_generated_ids:
-            self.redis_client.delete(f"id_cache:{generated_id}")
+            self.await redis_client.delete(f"id_cache:{generated_id}")
         
         # Clean up PostgreSQL data
         cursor = self.postgres_client.cursor()
@@ -799,13 +799,14 @@ class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
         # Get current sequence values from Redis
         initial_sequences = {}
         for sequence_name in ["user_id_seq", "thread_id_seq", "run_id_seq"]:
-            seq_value = self.redis_client.get(f"id_sequence:{sequence_name}")
+            seq_value = self.await redis_client.get(f"id_sequence:{sequence_name}")
             if seq_value:
                 initial_sequences[sequence_name] = int(seq_value)
         
         # Simulate Redis connection failure
         original_redis = self.id_manager.redis_client
-        self.id_manager.redis_client = redis.Redis(host='nonexistent-host', port=6379)
+        # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
+        self.id_manager.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='nonexistent-host', port=6379)
         
         # ID generation should still work (fallback to database sequences)
         fallback_ids = []
@@ -840,7 +841,7 @@ class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
         # Verify sequence continuity was maintained
         final_sequences = {}
         for sequence_name in ["user_id_seq", "thread_id_seq", "run_id_seq"]:
-            seq_value = self.redis_client.get(f"id_sequence:{sequence_name}")
+            seq_value = self.await redis_client.get(f"id_sequence:{sequence_name}")
             if seq_value:
                 final_sequences[sequence_name] = int(seq_value)
         

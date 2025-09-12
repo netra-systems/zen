@@ -376,7 +376,7 @@ class TestDeepAgentStateCrossContaminationPatterns(SSotAsyncTestCase):
         
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         assert not injection_attack_successful, (
-            f"🚨 CRITICAL SECURITY ATTACK PATTERN CONFIRMED: State injection attack successful! "
+            f" ALERT:  CRITICAL SECURITY ATTACK PATTERN CONFIRMED: State injection attack successful! "
             f"Attacker injected malicious payloads into CEO's ultra-sensitive state containing "
             f"$2.8B merger plans, insider trading information, and executive API credentials. "
             f"Injection vectors: {attack_evidence.get('injection_vectors_successful', [])}. "
@@ -574,7 +574,7 @@ class TestDeepAgentStateCrossContaminationPatterns(SSotAsyncTestCase):
         
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         assert not reference_chain_attack_successful, (
-            f"🚨 CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Memory reference chain attack successful! "
+            f" ALERT:  CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Memory reference chain attack successful! "
             f"Attacker traversed object reference chains to steal researcher's quantum breakthroughs "
             f"worth $10B+ in IP and CEO's $2.8B merger plans with insider trading intelligence. "
             f"Reference discoveries: {attack_evidence.get('reference_chain_discoveries', [])}. "
@@ -781,7 +781,7 @@ class TestDeepAgentStateCrossContaminationPatterns(SSotAsyncTestCase):
         
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         assert not timing_attack_successful, (
-            f"🚨 CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Race condition timing attack successful! "
+            f" ALERT:  CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Race condition timing attack successful! "
             f"Attacker exploited race conditions to steal CEO's insider trading intelligence "
             f"including earnings data, stock movement predictions, and board trading schemes. "
             f"Data captured: {race_condition_data_captured}. "
@@ -1070,7 +1070,7 @@ class TestDeepAgentStateCrossContaminationPatterns(SSotAsyncTestCase):
         
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         assert not serialization_attack_successful, (
-            f"🚨 CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Serialization boundary leakage attack successful! "
+            f" ALERT:  CRITICAL SECURITY ATTACK PATTERN CONFIRMED: Serialization boundary leakage attack successful! "
             f"Attacker exploited serialization boundaries to access CEO's regulatory violation details "
             f"($2.8B in fines, SEC investigations, insider trading schemes) and researcher's classified "
             f"government contracts (DARPA quantum, NSA cryptography, defense applications). "
@@ -1089,7 +1089,7 @@ class TestDeepAgentStateCrossContaminationPatterns(SSotAsyncTestCase):
         
         if total_attack_vectors > 0:
             self.test_logger.critical(
-                f"🚨 SOPHISTICATED ATTACK PATTERNS CONFIRMED: {total_attack_vectors} "
+                f" ALERT:  SOPHISTICATED ATTACK PATTERNS CONFIRMED: {total_attack_vectors} "
                 f"advanced multi-user attack vectors successfully exploited DeepAgentState vulnerabilities! "
                 f"Critical attacks: {len(critical_attacks)}. "
                 f"Attack types confirmed: {[av.attack_type for av in self.attack_vectors]}. "

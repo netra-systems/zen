@@ -349,20 +349,20 @@ class ServicesConfiguration:
         # Check for disabled services
         for service in [self.redis, self.clickhouse, self.postgres, self.llm]:
             if service.mode == ResourceMode.DISABLED:
-                warnings.append(f"⚠️  {service.name.upper()} is disabled - some features may not work")
+                warnings.append(f" WARNING: [U+FE0F]  {service.name.upper()} is disabled - some features may not work")
         
         # Check for local services that require installation (skip Docker-based)
         if self.redis.mode == ResourceMode.LOCAL and not self.redis.get_config().get('docker', False):
             if not self._check_redis_installed():
-                warnings.append("⚠️  Redis is set to LOCAL but doesn't appear to be installed")
+                warnings.append(" WARNING: [U+FE0F]  Redis is set to LOCAL but doesn't appear to be installed")
         
         if self.clickhouse.mode == ResourceMode.LOCAL and not self.clickhouse.get_config().get('docker', False):
             if not self._check_clickhouse_installed():
-                warnings.append("⚠️  ClickHouse is set to LOCAL but doesn't appear to be installed")
+                warnings.append(" WARNING: [U+FE0F]  ClickHouse is set to LOCAL but doesn't appear to be installed")
         
         if self.postgres.mode == ResourceMode.LOCAL and not self.postgres.get_config().get('docker', False):
             if not self._check_postgres_installed():
-                warnings.append("⚠️  PostgreSQL is set to LOCAL but doesn't appear to be installed")
+                warnings.append(" WARNING: [U+FE0F]  PostgreSQL is set to LOCAL but doesn't appear to be installed")
         
         # Check Docker availability for Docker mode services
         docker_services = []
@@ -377,7 +377,7 @@ class ServicesConfiguration:
             from dev_launcher.docker_services import check_docker_availability
             if not check_docker_availability():
                 services_str = ', '.join(docker_services)
-                warnings.append(f"⚠️  Docker not available but required for: {services_str}")
+                warnings.append(f" WARNING: [U+FE0F]  Docker not available but required for: {services_str}")
         
         return warnings
     
@@ -487,8 +487,8 @@ class ServiceConfigWizard:
         print("="*60)
         print("\nThis wizard will help you configure services for development.")
         print("You can choose between:")
-        print("  • SHARED: Use cloud-hosted development resources (recommended)")
-        print("  • LOCAL:  Use locally installed services")
+        print("  [U+2022] SHARED: Use cloud-hosted development resources (recommended)")
+        print("  [U+2022] LOCAL:  Use locally installed services")
         # Mock mode not shown - only for testing, not development
         print()
         
@@ -500,11 +500,11 @@ class ServiceConfigWizard:
         
         if use_defaults:
             safe_print(f"\n{get_emoji('check')} Using recommended configuration:")
-            print("  • Redis:      LOCAL  (Local Redis)")
-            print("  • ClickHouse: LOCAL  (Local ClickHouse)")
-            print("  • PostgreSQL: LOCAL  (Local PostgreSQL)")
-            print("  • LLM:        SHARED (API providers)")
-            print("  • Auth:       LOCAL  (Local auth service)")
+            print("  [U+2022] Redis:      LOCAL  (Local Redis)")
+            print("  [U+2022] ClickHouse: LOCAL  (Local ClickHouse)")
+            print("  [U+2022] PostgreSQL: LOCAL  (Local PostgreSQL)")
+            print("  [U+2022] LLM:        SHARED (API providers)")
+            print("  [U+2022] Auth:       LOCAL  (Local auth service)")
             return self.config
         
         # Custom configuration
@@ -548,7 +548,7 @@ class ServiceConfigWizard:
         # Validate configuration
         warnings = self.config.validate()
         if warnings:
-            print("\n⚠️  Configuration warnings:")
+            print("\n WARNING: [U+FE0F]  Configuration warnings:")
             for warning in warnings:
                 print(f"  {warning}")
         
@@ -557,13 +557,13 @@ class ServiceConfigWizard:
         if save_config:
             config_path = Path.cwd() / ".dev_services.json"
             self.config.save_to_file(config_path)
-            print(f"✅ Configuration saved to {config_path}")
+            print(f" PASS:  Configuration saved to {config_path}")
         
         return self.config
     
     def _configure_service(self, service: ServiceResource, description: str, recommended_mode: ResourceMode):
         """Configure a single service."""
-        print(f"\n📦 {service.name.upper()}: {description}")
+        print(f"\n[U+1F4E6] {service.name.upper()}: {description}")
         print(f"   Recommended: {recommended_mode.value.upper()}")
         
         # Show options
@@ -643,9 +643,9 @@ def load_or_create_config(interactive: bool = False) -> ServicesConfiguration:
     - Ensures smooth cold start experience
     
     Default configuration with smart detection:
-    - Redis: LOCAL (if available) → SHARED (if not)
-    - ClickHouse: LOCAL (if available) → SHARED (if not)  
-    - PostgreSQL: LOCAL (if available) → SHARED (if not)
+    - Redis: LOCAL (if available)  ->  SHARED (if not)
+    - ClickHouse: LOCAL (if available)  ->  SHARED (if not)  
+    - PostgreSQL: LOCAL (if available)  ->  SHARED (if not)
     - LLM: SHARED (API providers - requires valid API keys)
     - Auth Service: LOCAL
     
@@ -694,7 +694,7 @@ def load_or_create_config(interactive: bool = False) -> ServicesConfiguration:
                     print()
                     safe_print(f"{get_emoji('info')} Configuration adjustments made:")
                     for warning in warnings:
-                        print(f"  • {warning}")
+                        print(f"  [U+2022] {warning}")
                 
                 # Save the smart configuration
                 config.save_to_file(config_path)

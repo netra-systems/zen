@@ -127,9 +127,9 @@ class OAuthLogAnalyzer:
             ):
                 entries.append(self._parse_log_entry(entry))
                 
-            console.print(f"[green]✓ Fetched {len(entries)} OAuth-related log entries[/green]")
+            console.print(f"[green][U+2713] Fetched {len(entries)} OAuth-related log entries[/green]")
         except Exception as e:
-            console.print(f"[red]✗ Error fetching logs: {e}[/red]")
+            console.print(f"[red][U+2717] Error fetching logs: {e}[/red]")
             
         return entries
     
@@ -410,7 +410,7 @@ class OAuthLogAnalyzer:
     
     def generate_report(self, analysis: Dict) -> None:
         """Generate detailed OAuth audit report"""
-        console.print("\n[bold cyan]═══ OAuth Flow Audit Report ═══[/bold cyan]\n")
+        console.print("\n[bold cyan][U+2550][U+2550][U+2550] OAuth Flow Audit Report [U+2550][U+2550][U+2550][/bold cyan]\n")
         
         # Summary Panel
         summary = Panel(
@@ -426,10 +426,10 @@ class OAuthLogAnalyzer:
         
         # Configuration Issues
         if analysis['configuration_issues']:
-            console.print("\n[bold red]⚠ Configuration Issues Detected:[/bold red]")
+            console.print("\n[bold red] WARNING:  Configuration Issues Detected:[/bold red]")
             for issue in analysis['configuration_issues']:
                 severity_color = 'red' if issue['severity'] == 'critical' else 'yellow'
-                console.print(f"  [{severity_color}]• {issue['message']}[/{severity_color}]")
+                console.print(f"  [{severity_color}][U+2022] {issue['message']}[/{severity_color}]")
         
         # Common Errors
         if analysis['common_errors']:
@@ -447,7 +447,7 @@ class OAuthLogAnalyzer:
         if analysis['flow_breakpoints']:
             console.print("\n[bold yellow]Flow Breakpoints:[/bold yellow]")
             for breakpoint in analysis['flow_breakpoints'][:5]:  # Show top 5
-                console.print(f"  • Session broke at: [yellow]{breakpoint['broke_at']}[/yellow]")
+                console.print(f"  [U+2022] Session broke at: [yellow]{breakpoint['broke_at']}[/yellow]")
                 if breakpoint.get('reason'):
                     console.print(f"    Reason: {breakpoint['reason']}")
         
@@ -455,14 +455,14 @@ class OAuthLogAnalyzer:
         if analysis['token_issues']:
             console.print("\n[bold red]Token Generation Issues:[/bold red]")
             for issue in analysis['token_issues'][:5]:  # Show top 5
-                console.print(f"  • {issue['issue']} at stage: [yellow]{issue['stage']}[/yellow]")
+                console.print(f"  [U+2022] {issue['issue']} at stage: [yellow]{issue['stage']}[/yellow]")
         
         # Recommendations
         self._print_recommendations(analysis)
     
     def _print_recommendations(self, analysis: Dict) -> None:
         """Print recommendations based on analysis"""
-        console.print("\n[bold green]📋 Recommendations:[/bold green]")
+        console.print("\n[bold green][U+1F4CB] Recommendations:[/bold green]")
         
         recommendations = []
         
@@ -495,9 +495,9 @@ class OAuthLogAnalyzer:
         
         if recommendations:
             for rec in recommendations:
-                console.print(f"  [green]✓[/green] {rec}")
+                console.print(f"  [green][U+2713][/green] {rec}")
         else:
-            console.print("  [green]✓[/green] No critical issues detected")
+            console.print("  [green][U+2713][/green] No critical issues detected")
     
     def export_session_details(self, output_file: str) -> None:
         """Export detailed session information for debugging"""
@@ -530,7 +530,7 @@ class OAuthLogAnalyzer:
         with open(output_file, 'w') as f:
             json.dump(export_data, f, indent=2)
         
-        console.print(f"[green]✓ Session details exported to {output_file}[/green]")
+        console.print(f"[green][U+2713] Session details exported to {output_file}[/green]")
 
 
 @click.command()
@@ -550,7 +550,7 @@ def main(project: str, hours: int, export: Optional[str]):
         if os.path.exists(cred_path):
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = cred_path
         else:
-            console.print("[yellow]⚠ No GCP credentials found. Run 'gcloud auth application-default login'[/yellow]")
+            console.print("[yellow] WARNING:  No GCP credentials found. Run 'gcloud auth application-default login'[/yellow]")
     
     try:
         # Initialize analyzer

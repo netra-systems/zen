@@ -75,7 +75,7 @@ class WebSocketRaceConditionTester:
                 additional_headers=headers,
                 close_timeout=10
             ) as ws:
-                print(f"[SUCCESS] ✅ WebSocket connection established!")
+                print(f"[SUCCESS]  PASS:  WebSocket connection established!")
                 connection_successful = True
                 
                 # Test bidirectional communication
@@ -110,7 +110,7 @@ class WebSocketRaceConditionTester:
             
             if status_code == 1011:
                 websocket_1011_error = True
-                print(f"[ERROR] ❌ WebSocket 1011 error detected: {e}")
+                print(f"[ERROR]  FAIL:  WebSocket 1011 error detected: {e}")
                 print(f"[ERROR] This indicates the race condition fix did NOT work")
             elif status_code == 403:
                 auth_error = True
@@ -131,7 +131,7 @@ class WebSocketRaceConditionTester:
             error_msg = str(e).lower()
             if "1011" in error_msg:
                 websocket_1011_error = True
-                print(f"[ERROR] ❌ WebSocket 1011 error in exception: {e}")
+                print(f"[ERROR]  FAIL:  WebSocket 1011 error in exception: {e}")
             elif "403" in error_msg or "forbidden" in error_msg:
                 auth_error = True
                 print(f"[EXPECTED] Authentication blocked: {e}")
@@ -169,16 +169,16 @@ class WebSocketRaceConditionTester:
         print(f"  Duration: {duration:.3f}s")
         
         if websocket_1011_error:
-            print(f"[CRITICAL] ❌ Race condition fix FAILED - WebSocket 1011 errors still occurring")
+            print(f"[CRITICAL]  FAIL:  Race condition fix FAILED - WebSocket 1011 errors still occurring")
             return False
         elif connection_successful:
-            print(f"[SUCCESS] ✅ Race condition fix SUCCESSFUL - WebSocket connection established")
+            print(f"[SUCCESS]  PASS:  Race condition fix SUCCESSFUL - WebSocket connection established")
             return True
         elif auth_error:
-            print(f"[SUCCESS] ✅ Race condition fix appears SUCCESSFUL - auth working, no 1011 errors")
+            print(f"[SUCCESS]  PASS:  Race condition fix appears SUCCESSFUL - auth working, no 1011 errors")
             return True
         else:
-            print(f"[WARNING] ⚠️  Uncertain result - no 1011 errors but no clear success")
+            print(f"[WARNING]  WARNING: [U+FE0F]  Uncertain result - no 1011 errors but no clear success")
             return True  # No 1011 error is good news
 
     async def test_concurrent_websocket_connections(self):
@@ -284,10 +284,10 @@ class WebSocketRaceConditionTester:
         print(f"  Total test duration: {total_duration:.3f}s")
         
         if websocket_1011_errors > 0:
-            print(f"[CRITICAL] ❌ Race condition fix FAILED - {websocket_1011_errors} WebSocket 1011 errors under concurrent load")
+            print(f"[CRITICAL]  FAIL:  Race condition fix FAILED - {websocket_1011_errors} WebSocket 1011 errors under concurrent load")
             return False
         else:
-            print(f"[SUCCESS] ✅ Race condition fix SUCCESSFUL - No WebSocket 1011 errors under concurrent load")
+            print(f"[SUCCESS]  PASS:  Race condition fix SUCCESSFUL - No WebSocket 1011 errors under concurrent load")
             return True
 
     async def test_api_health_bypass_check(self):
@@ -336,10 +336,10 @@ class WebSocketRaceConditionTester:
         print(f"  Available endpoints: {available_endpoints}/{total_endpoints}")
         
         if available_endpoints > 0:
-            print(f"[SUCCESS] ✅ API endpoints are working despite health check issues")
+            print(f"[SUCCESS]  PASS:  API endpoints are working despite health check issues")
             return True
         else:
-            print(f"[WARNING] ⚠️  No API endpoints available")
+            print(f"[WARNING]  WARNING: [U+FE0F]  No API endpoints available")
             return False
 
     async def run_full_test_suite(self):

@@ -150,26 +150,26 @@ if __name__ == "__main__":
     
     try:
         test_suite.test_messages_root_endpoint_exists()
-        print("✅ Messages root endpoint validation passed")
+        print(" PASS:  Messages root endpoint validation passed")
     except Exception as e:
-        print(f"❌ Messages root endpoint validation failed: {e}")
+        print(f" FAIL:  Messages root endpoint validation failed: {e}")
     
     try:
         test_suite.test_agents_endpoints_exist()
-        print("✅ Agents endpoints validation passed")
+        print(" PASS:  Agents endpoints validation passed")
     except Exception as e:
-        print(f"❌ Agents endpoints validation failed: {e}")
+        print(f" FAIL:  Agents endpoints validation failed: {e}")
     
     try:
         test_suite.test_events_endpoints_exist()
-        print("✅ Events endpoints validation passed")
+        print(" PASS:  Events endpoints validation passed")
     except Exception as e:
-        print(f"❌ Events endpoints validation failed: {e}")
+        print(f" FAIL:  Events endpoints validation failed: {e}")
     
     try:
         test_suite.test_backwards_compatibility()
-        print("✅ Backwards compatibility validation passed")
+        print(" PASS:  Backwards compatibility validation passed")
     except Exception as e:
-        print(f"❌ Backwards compatibility validation failed: {e}")
+        print(f" FAIL:  Backwards compatibility validation failed: {e}")
     
     print("Route validation complete!")

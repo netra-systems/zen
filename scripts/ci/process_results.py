@@ -42,8 +42,8 @@ class TestResultProcessor:
     def _generate_status_badge(self, failed: int) -> str:
         """Generate status badge based on test results."""
         if failed == 0:
-            return "✅ **All tests passed!**"
-        return f"❌ **{failed} test(s) failed**"
+            return " PASS:  **All tests passed!**"
+        return f" FAIL:  **{failed} test(s) failed**"
     
     def _generate_summary_section(self, stats: Dict[str, Any]) -> List[str]:
         """Generate summary section of the report."""

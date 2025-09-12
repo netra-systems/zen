@@ -153,7 +153,7 @@ async def test_event_loop_blocking_intensive():
             # Track any delay > 2ms as potential blocking
             if actual_duration > 0.002:
                 blocks.append(actual_duration)
-                print(f"⚠️  Event loop delayed: {actual_duration*1000:.2f}ms")
+                print(f" WARNING: [U+FE0F]  Event loop delayed: {actual_duration*1000:.2f}ms")
     
     # Start precise monitoring
     monitor_task = asyncio.create_task(precise_monitor())
@@ -198,7 +198,7 @@ async def test_event_loop_blocking_intensive():
     
     # Analyze blocking
     if blocks:
-        print(f"\n📊 Event Loop Blocking Analysis:")
+        print(f"\n CHART:  Event Loop Blocking Analysis:")
         print(f"   Total blocking events: {len(blocks)}")
         print(f"   Maximum block duration: {max(blocks)*1000:.2f}ms")
         print(f"   Average block duration: {(sum(blocks)/len(blocks))*1000:.2f}ms")
@@ -209,22 +209,22 @@ async def test_event_loop_blocking_intensive():
         moderate_blocks = [b for b in blocks if 0.010 < b <= 0.050]  # 10-50ms
         minor_blocks = [b for b in blocks if 0.002 < b <= 0.010]  # 2-10ms
         
-        print(f"\n📈 Block Severity:")
+        print(f"\n[U+1F4C8] Block Severity:")
         print(f"   Severe (>50ms): {len(severe_blocks)}")
         print(f"   Moderate (10-50ms): {len(moderate_blocks)}")
         print(f"   Minor (2-10ms): {len(minor_blocks)}")
         
         if severe_blocks:
-            print(f"🔴 CRITICAL: Found {len(severe_blocks)} severe blocking events!")
+            print(f"[U+1F534] CRITICAL: Found {len(severe_blocks)} severe blocking events!")
             return True, max(blocks)
         elif moderate_blocks:
-            print(f"🟡 WARNING: Found {len(moderate_blocks)} moderate blocking events")
+            print(f"[U+1F7E1] WARNING: Found {len(moderate_blocks)} moderate blocking events")
             return True, max(blocks)
         else:
-            print(f"🟢 Only minor blocking detected")
+            print(f"[U+1F7E2] Only minor blocking detected")
             return len(blocks) > 0, max(blocks) if blocks else 0
     else:
-        print("🟢 No significant event loop blocking detected")
+        print("[U+1F7E2] No significant event loop blocking detected")
         return False, 0
 
 
@@ -336,34 +336,34 @@ async def main():
         print("="*60)
         
         if blocked:
-            print(f"🔴 Event loop blocking detected!")
+            print(f"[U+1F534] Event loop blocking detected!")
             print(f"   Maximum blocking: {max_duration*1000:.2f}ms")
             
             if max_duration > 0.100:  # > 100ms
-                print(f"🚨 CRITICAL ISSUE: Blocking > 100ms detected")
+                print(f" ALERT:  CRITICAL ISSUE: Blocking > 100ms detected")
                 print(f"   This will cause noticeable UI freezing")
                 print(f"   Async serialization implementation has issues")
             elif max_duration > 0.050:  # > 50ms
-                print(f"⚠️  MODERATE ISSUE: Blocking 50-100ms detected")
+                print(f" WARNING: [U+FE0F]  MODERATE ISSUE: Blocking 50-100ms detected")
                 print(f"   May cause minor UI stuttering")
             else:
-                print(f"ℹ️  MINOR ISSUE: Only small blocking detected")
+                print(f"[U+2139][U+FE0F]  MINOR ISSUE: Only small blocking detected")
         else:
-            print(f"🟢 No significant event loop blocking")
+            print(f"[U+1F7E2] No significant event loop blocking")
         
         # Check implementation status
         manager = WebSocketManager()
         if hasattr(manager, '_serialize_message_safely_async'):
-            print(f"✅ Async serialization method exists")
+            print(f" PASS:  Async serialization method exists")
             if hasattr(manager, '_serialization_executor'):
-                print(f"✅ ThreadPoolExecutor configured")
+                print(f" PASS:  ThreadPoolExecutor configured")
                 print(f"   Max workers: {manager._serialization_executor._max_workers}")
             else:
-                print(f"❌ ThreadPoolExecutor missing")
+                print(f" FAIL:  ThreadPoolExecutor missing")
         else:
-            print(f"❌ Async serialization method missing")
+            print(f" FAIL:  Async serialization method missing")
         
-        print(f"\n💡 Recommendations:")
+        print(f"\n IDEA:  Recommendations:")
         if max_duration > 0.050:
             print(f"   - Complex object serialization needs thread pool offloading")
             print(f"   - Consider implementing streaming serialization for large objects")

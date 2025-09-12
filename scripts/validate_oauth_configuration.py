@@ -88,21 +88,21 @@ class OAuthConfigurationValidator:
         prefix = "CRITICAL ERROR" if critical else "ERROR"
         error_msg = f"[{prefix}] {message}"
         self.errors.append(error_msg)
-        print(f"❌ {error_msg}")
+        print(f" FAIL:  {error_msg}")
 
     def log_warning(self, message: str):
         """Log validation warning"""
         warning_msg = f"[WARNING] {message}"
         self.warnings.append(warning_msg)
-        print(f"⚠️  {warning_msg}")
+        print(f" WARNING: [U+FE0F]  {warning_msg}")
 
     def log_success(self, message: str):
         """Log validation success"""
-        print(f"✅ {message}")
+        print(f" PASS:  {message}")
 
     def log_info(self, message: str):
         """Log validation info"""
-        print(f"ℹ️  {message}")
+        print(f"[U+2139][U+FE0F]  {message}")
 
     def validate_environment_urls(self) -> bool:
         """Validate auth service and frontend URLs for environment"""
@@ -546,15 +546,15 @@ class OAuthConfigurationValidator:
             self.log_success(f"All {total_validations} OAuth validations passed for {self.environment}!")
             
             # Display Google Console configuration
-            print(f"\n📋 GOOGLE OAUTH CONSOLE CONFIGURATION - {self.environment.upper()}")
+            print(f"\n[U+1F4CB] GOOGLE OAUTH CONSOLE CONFIGURATION - {self.environment.upper()}")
             print("=" * 50)
             print("Required Authorized Redirect URIs:")
             for uri in google_config["authorized_redirect_uris"]:
                 if uri:  # Skip empty URIs
-                    print(f"  ✅ {uri}")
+                    print(f"   PASS:  {uri}")
             print("\nProhibited URLs (DO NOT ADD):")
             for uri in google_config["prohibited_redirect_uris"]:
-                print(f"  ❌ {uri}")
+                print(f"   FAIL:  {uri}")
             print("=" * 50)
             
             return True
@@ -563,12 +563,12 @@ class OAuthConfigurationValidator:
             self.log_error(f"{failed_validations}/{total_validations} OAuth validations failed for {self.environment}")
             
             if self.errors:
-                print(f"\n🚨 ERRORS FOUND ({len(self.errors)}):")
+                print(f"\n ALERT:  ERRORS FOUND ({len(self.errors)}):")
                 for error in self.errors:
                     print(f"  {error}")
             
             if self.warnings:
-                print(f"\n⚠️  WARNINGS ({len(self.warnings)}):")
+                print(f"\n WARNING: [U+FE0F]  WARNINGS ({len(self.warnings)}):")
                 for warning in self.warnings:
                     print(f"  {warning}")
             
@@ -644,7 +644,7 @@ async def main():
     overall_success = True
     
     for env in environments_to_validate:
-        print(f"\n🔍 VALIDATING OAUTH CONFIGURATION - {env.upper()}")
+        print(f"\n SEARCH:  VALIDATING OAUTH CONFIGURATION - {env.upper()}")
         print("=" * 60)
         
         validator = OAuthConfigurationValidator(env, args.strict)
@@ -661,20 +661,20 @@ async def main():
     
     # Final summary
     if len(environments_to_validate) > 1:
-        print("🏁 OVERALL VALIDATION SUMMARY")
+        print("[U+1F3C1] OVERALL VALIDATION SUMMARY")
         print("=" * 40)
         if overall_success:
-            print("✅ All environments passed OAuth validation")
+            print(" PASS:  All environments passed OAuth validation")
         else:
-            print("❌ Some environments failed OAuth validation")
+            print(" FAIL:  Some environments failed OAuth validation")
         print("")
     
     # Exit with appropriate code
     if overall_success:
-        print("🎉 OAuth configuration validation completed successfully!")
+        print(" CELEBRATION:  OAuth configuration validation completed successfully!")
         sys.exit(0)
     else:
-        print("💥 OAuth configuration validation failed!")
+        print("[U+1F4A5] OAuth configuration validation failed!")
         print("   Fix the errors above before deploying to prevent authentication failures")
         sys.exit(1 if not args.strict else 2)
 
@@ -683,8 +683,8 @@ if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n⏹️  Validation cancelled by user")
+        print("\n[U+23F9][U+FE0F]  Validation cancelled by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n💥 Unexpected error during validation: {e}")
+        print(f"\n[U+1F4A5] Unexpected error during validation: {e}")
         sys.exit(2)

@@ -323,7 +323,7 @@
                                                                                                 # REMOVED_SYNTAX_ERROR: edge_metrics.response_times_ms.extend(conn.response_times)
 
                                                                                                 # Calculate burst handling score based on how many events were processed
-                                                                                                # REMOVED_SYNTAX_ERROR: expected_events_per_user = 50  # 10 messages × 5 events each
+                                                                                                # REMOVED_SYNTAX_ERROR: expected_events_per_user = 50  # 10 messages  x  5 events each
                                                                                                 # REMOVED_SYNTAX_ERROR: actual_events = len(conn.events_received)
                                                                                                 # REMOVED_SYNTAX_ERROR: user_score = actual_events / expected_events_per_user
                                                                                                 # REMOVED_SYNTAX_ERROR: edge_metrics.burst_handling_score += user_score
@@ -357,7 +357,7 @@
                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics.avg_response_time_ms <= 2000, "formatted_string"
                                                                                                         # REMOVED_SYNTAX_ERROR: assert not metrics.missing_required_events, "formatted_string"
 
-                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Exact acceptance criteria test PASSED")
+                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Exact acceptance criteria test PASSED")
                                                                                                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                                                                         # REMOVED_SYNTAX_ERROR: return metrics
 
@@ -385,7 +385,7 @@
                                                                                                                         # REMOVED_SYNTAX_ERROR: recovery_rate = metrics.reconnection_successes / (metrics.reconnection_successes + metrics.reconnection_failures)
                                                                                                                         # REMOVED_SYNTAX_ERROR: assert recovery_rate >= 0.8, "formatted_string"
 
-                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Recovery within 5 seconds test PASSED")
+                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Recovery within 5 seconds test PASSED")
                                                                                                                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                                                                                         # REMOVED_SYNTAX_ERROR: return metrics
 
@@ -407,7 +407,7 @@
                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics.burst_handling_score >= 0.9, "formatted_string"
                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics.avg_recovery_time_ms <= 1000, "formatted_string"
 
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Rapid connection stability test PASSED")
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Rapid connection stability test PASSED")
                                                                                                                                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                                                                                                         # REMOVED_SYNTAX_ERROR: return metrics
 
@@ -430,7 +430,7 @@
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics.burst_handling_score >= 0.8, "formatted_string"
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: assert metrics.avg_response_time_ms <= 3000, "formatted_string"
 
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Message burst resilience test PASSED")
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Message burst resilience test PASSED")
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: return metrics
 
@@ -487,7 +487,7 @@
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: logger.info(" )
-                # REMOVED_SYNTAX_ERROR: ✅ ALL EDGE CASE STRESS TESTS PASSED")
+                # REMOVED_SYNTAX_ERROR:  PASS:  ALL EDGE CASE STRESS TESTS PASSED")
                 # REMOVED_SYNTAX_ERROR: logger.info("="*80)
 
                 # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)

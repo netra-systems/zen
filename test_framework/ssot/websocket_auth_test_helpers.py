@@ -736,7 +736,7 @@ class WebSocketAuthenticationTester:
         security_violations = []
         
         try:
-            logger.info("🔄 Testing token lifecycle management...")
+            logger.info(" CYCLE:  Testing token lifecycle management...")
             
             # Step 1: Create user with short-lived token
             if not user_email:
@@ -783,11 +783,11 @@ class WebSocketAuthenticationTester:
             self.active_clients[user_id] = client
             token_state.active_connections.add(client.connection_id)
             
-            logger.info(f"✅ WebSocket connected with short-lived token (expires in {initial_expiry_minutes}m)")
+            logger.info(f" PASS:  WebSocket connected with short-lived token (expires in {initial_expiry_minutes}m)")
             
             # Step 3: Wait for token to expire (plus buffer)
             expiry_wait = (initial_expiry_minutes * 60) + 30  # 30 second buffer
-            logger.info(f"⏳ Waiting {expiry_wait}s for token expiry...")
+            logger.info(f"[U+23F3] Waiting {expiry_wait}s for token expiry...")
             await asyncio.sleep(expiry_wait)
             
             # Step 4: Validate expired token is rejected
@@ -798,9 +798,9 @@ class WebSocketAuthenticationTester:
                         "SECURITY VIOLATION: Expired token was still accepted as valid"
                     )
                 else:
-                    logger.info("✅ Expired token properly rejected")
+                    logger.info(" PASS:  Expired token properly rejected")
             except Exception as e:
-                logger.info(f"✅ Expired token validation failed as expected: {e}")
+                logger.info(f" PASS:  Expired token validation failed as expected: {e}")
             
             # Step 5: Test connection behavior with expired token
             try:
@@ -812,10 +812,10 @@ class WebSocketAuthenticationTester:
                     "SECURITY VIOLATION: WebSocket accepted event with expired token"
                 )
             except Exception as e:
-                logger.info(f"✅ WebSocket properly rejected expired token: {e}")
+                logger.info(f" PASS:  WebSocket properly rejected expired token: {e}")
             
             # Step 6: Test token refresh scenario
-            logger.info("🔄 Testing token refresh...")
+            logger.info(" CYCLE:  Testing token refresh...")
             new_token = await self._get_or_create_token(
                 user_id=user_id,
                 email=user_email,
@@ -835,7 +835,7 @@ class WebSocketAuthenticationTester:
                     "SECURITY VIOLATION: Valid refreshed token was rejected"
                 )
             else:
-                logger.info("✅ Refreshed token validation successful")
+                logger.info(" PASS:  Refreshed token validation successful")
             
             # Step 7: Validate connection isolation maintained
             await client.close()
@@ -858,7 +858,7 @@ class WebSocketAuthenticationTester:
                     f"Token lifecycle security violations detected: {security_violations}"
                 )
             
-            logger.info(f"✅ Token lifecycle management test passed ({response_time:.2f}s)")
+            logger.info(f" PASS:  Token lifecycle management test passed ({response_time:.2f}s)")
             return result
             
         except Exception as e:
@@ -875,7 +875,7 @@ class WebSocketAuthenticationTester:
                 actual_failure=True
             )
             
-            logger.error(f"❌ Token lifecycle management test failed: {error_message}")
+            logger.error(f" FAIL:  Token lifecycle management test failed: {error_message}")
             self.test_results.append(result)
             
             # Clean up
@@ -916,7 +916,7 @@ class WebSocketAuthenticationTester:
         security_violations = []
         
         try:
-            logger.info("🛡️ Testing session hijacking prevention...")
+            logger.info("[U+1F6E1][U+FE0F] Testing session hijacking prevention...")
             
             # Step 1: Create legitimate user and session
             if not legitimate_user_email:
@@ -945,10 +945,10 @@ class WebSocketAuthenticationTester:
             legitimate_client.expected_user_id = legitimate_user.user_id
             
             await legitimate_client.connect()
-            logger.info(f"✅ Legitimate user connected: {legitimate_user.user_id}")
+            logger.info(f" PASS:  Legitimate user connected: {legitimate_user.user_id}")
             
             # Step 4: Test token hijacking attempt
-            logger.info("🎯 Testing token hijacking attempt...")
+            logger.info(" TARGET:  Testing token hijacking attempt...")
             
             # Attacker tries to use legitimate user's token
             hijacker_client = RealWebSocketTestClient(
@@ -988,10 +988,10 @@ class WebSocketAuthenticationTester:
                 
             except Exception as e:
                 hijacking_detected = True
-                logger.info(f"✅ Token hijacking attempt blocked: {e}")
+                logger.info(f" PASS:  Token hijacking attempt blocked: {e}")
             
             # Step 6: Test session isolation
-            logger.info("🔒 Testing session isolation...")
+            logger.info("[U+1F512] Testing session isolation...")
             
             # Send sensitive data to legitimate user
             await legitimate_client.send_event("sensitive_data", {
@@ -1016,12 +1016,12 @@ class WebSocketAuthenticationTester:
                         )
                 
                 except asyncio.TimeoutError:
-                    logger.info("✅ Attacker could not intercept sensitive events")
+                    logger.info(" PASS:  Attacker could not intercept sensitive events")
                 except Exception as e:
-                    logger.info(f"✅ Attacker event interception blocked: {e}")
+                    logger.info(f" PASS:  Attacker event interception blocked: {e}")
             
             # Step 7: Test cross-session data leakage
-            logger.info("🚫 Testing cross-session data leakage prevention...")
+            logger.info("[U+1F6AB] Testing cross-session data leakage prevention...")
             
             # Create another legitimate session for the same user
             legitimate_client2 = await create_authenticated_websocket_client(
@@ -1057,7 +1057,7 @@ class WebSocketAuthenticationTester:
                         )
             
             except asyncio.TimeoutError:
-                logger.info("✅ Session isolation maintained - no cross-session leakage")
+                logger.info(" PASS:  Session isolation maintained - no cross-session leakage")
             
             # Clean up
             await legitimate_client.close()
@@ -1083,7 +1083,7 @@ class WebSocketAuthenticationTester:
                     f"Session hijacking prevention failures: {security_violations}"
                 )
             
-            logger.info(f"✅ Session hijacking prevention test passed ({response_time:.2f}s)")
+            logger.info(f" PASS:  Session hijacking prevention test passed ({response_time:.2f}s)")
             return result
             
         except Exception as e:
@@ -1100,7 +1100,7 @@ class WebSocketAuthenticationTester:
                 actual_failure=True
             )
             
-            logger.error(f"❌ Session hijacking prevention test failed: {error_message}")
+            logger.error(f" FAIL:  Session hijacking prevention test failed: {error_message}")
             return result
         finally:
             # Clean up any remaining clients
@@ -1139,7 +1139,7 @@ class WebSocketAuthenticationTester:
         security_violations = []
         
         try:
-            logger.info("🔐 Testing permission boundary enforcement...")
+            logger.info("[U+1F510] Testing permission boundary enforcement...")
             
             # Step 1: Create low privilege user
             if not low_privilege_user_email:
@@ -1168,10 +1168,10 @@ class WebSocketAuthenticationTester:
             low_priv_client.expected_user_id = low_priv_user.user_id
             
             await low_priv_client.connect()
-            logger.info(f"✅ Low privilege user connected: {low_priv_user.permissions}")
+            logger.info(f" PASS:  Low privilege user connected: {low_priv_user.permissions}")
             
             # Step 4: Test permission escalation attempts
-            logger.info("⚠️ Testing permission escalation attempts...")
+            logger.info(" WARNING: [U+FE0F] Testing permission escalation attempts...")
             
             escalation_attempts = [
                 {
@@ -1206,10 +1206,10 @@ class WebSocketAuthenticationTester:
                     )
                     
                 except Exception as e:
-                    logger.info(f"✅ Permission escalation blocked: {attempt['action']} - {e}")
+                    logger.info(f" PASS:  Permission escalation blocked: {attempt['action']} - {e}")
             
             # Step 5: Test cross-user permission violations
-            logger.info("🚫 Testing cross-user permission violations...")
+            logger.info("[U+1F6AB] Testing cross-user permission violations...")
             
             # Low privilege user tries to access high privilege user's data
             try:
@@ -1232,10 +1232,10 @@ class WebSocketAuthenticationTester:
                         )
                 
                 except asyncio.TimeoutError:
-                    logger.info("✅ Cross-user data access properly blocked")
+                    logger.info(" PASS:  Cross-user data access properly blocked")
                 
             except Exception as e:
-                logger.info(f"✅ Cross-user access attempt blocked: {e}")
+                logger.info(f" PASS:  Cross-user access attempt blocked: {e}")
             
             # Step 6: Connect high privilege user and verify proper access
             high_priv_client = RealWebSocketTestClient(
@@ -1246,19 +1246,19 @@ class WebSocketAuthenticationTester:
             high_priv_client.expected_user_id = high_priv_user.user_id
             
             await high_priv_client.connect()
-            logger.info(f"✅ High privilege user connected: {high_priv_user.permissions}")
+            logger.info(f" PASS:  High privilege user connected: {high_priv_user.permissions}")
             
             # Test that high privilege user CAN perform admin actions
             try:
                 await high_priv_client.send_event("admin_info_request", {
                     "info_type": "system_status"
                 })
-                logger.info("✅ High privilege user can perform admin actions")
+                logger.info(" PASS:  High privilege user can perform admin actions")
             except Exception as e:
                 logger.warning(f"High privilege user action blocked: {e}")
             
             # Step 7: Test permission isolation between users
-            logger.info("🔒 Testing permission isolation...")
+            logger.info("[U+1F512] Testing permission isolation...")
             
             # Both users should only see events for their permission level
             await low_priv_client.send_event("test_isolation", {
@@ -1285,7 +1285,7 @@ class WebSocketAuthenticationTester:
                     )
             
             except asyncio.TimeoutError:
-                logger.info("✅ Admin events properly isolated from low privilege user")
+                logger.info(" PASS:  Admin events properly isolated from low privilege user")
             
             # Clean up
             await low_priv_client.close()
@@ -1309,7 +1309,7 @@ class WebSocketAuthenticationTester:
                     f"Permission boundary enforcement failures: {security_violations}"
                 )
             
-            logger.info(f"✅ Permission boundary enforcement test passed ({response_time:.2f}s)")
+            logger.info(f" PASS:  Permission boundary enforcement test passed ({response_time:.2f}s)")
             return result
             
         except Exception as e:
@@ -1326,7 +1326,7 @@ class WebSocketAuthenticationTester:
                 actual_failure=True
             )
             
-            logger.error(f"❌ Permission boundary enforcement test failed: {error_message}")
+            logger.error(f" FAIL:  Permission boundary enforcement test failed: {error_message}")
             return result
     
     async def test_malformed_token_handling(self) -> AuthenticationTestResult:
@@ -1350,7 +1350,7 @@ class WebSocketAuthenticationTester:
         security_violations = []
         
         try:
-            logger.info("🔍 Testing malformed token handling...")
+            logger.info(" SEARCH:  Testing malformed token handling...")
             
             malformed_tokens = [
                 "",  # Empty token
@@ -1374,10 +1374,10 @@ class WebSocketAuthenticationTester:
                             f"'{malformed_token[:50]}...'"
                         )
                     else:
-                        logger.info(f"✅ Malformed token properly rejected: {validation_result.get('error', 'Unknown error')}")
+                        logger.info(f" PASS:  Malformed token properly rejected: {validation_result.get('error', 'Unknown error')}")
                 
                 except Exception as e:
-                    logger.info(f"✅ Malformed token validation failed as expected: {e}")
+                    logger.info(f" PASS:  Malformed token validation failed as expected: {e}")
                 
                 # Test WebSocket connection with malformed token
                 test_client = RealWebSocketTestClient(
@@ -1410,10 +1410,10 @@ class WebSocketAuthenticationTester:
                     await test_client.close()
                 
                 except Exception as e:
-                    logger.info(f"✅ WebSocket connection blocked with malformed token: {e}")
+                    logger.info(f" PASS:  WebSocket connection blocked with malformed token: {e}")
                 
                 if not connection_blocked:
-                    logger.error(f"❌ Malformed token was accepted: {malformed_token[:50]}...")
+                    logger.error(f" FAIL:  Malformed token was accepted: {malformed_token[:50]}...")
             
             response_time = time.time() - start_time
             
@@ -1433,7 +1433,7 @@ class WebSocketAuthenticationTester:
                     f"Malformed token handling failures: {security_violations}"
                 )
             
-            logger.info(f"✅ Malformed token handling test passed ({response_time:.2f}s)")
+            logger.info(f" PASS:  Malformed token handling test passed ({response_time:.2f}s)")
             return result
             
         except Exception as e:
@@ -1450,7 +1450,7 @@ class WebSocketAuthenticationTester:
                 actual_failure=True
             )
             
-            logger.error(f"❌ Malformed token handling test failed: {error_message}")
+            logger.error(f" FAIL:  Malformed token handling test failed: {error_message}")
             return result
     
     async def run_comprehensive_authentication_test_suite(
@@ -1475,7 +1475,7 @@ class WebSocketAuthenticationTester:
             SecurityError: If any critical security violations are detected
         """
         suite_start = time.time()
-        logger.info("🔒 Starting comprehensive WebSocket authentication test suite...")
+        logger.info("[U+1F512] Starting comprehensive WebSocket authentication test suite...")
         
         # Determine parallel execution strategy
         if use_parallel_execution is None:
@@ -1524,7 +1524,7 @@ class WebSocketAuthenticationTester:
         }
         
         if use_parallel_execution and self.enable_performance_optimizations:
-            logger.info("🚀 Using parallel execution for compatible test scenarios...")
+            logger.info("[U+1F680] Using parallel execution for compatible test scenarios...")
             
             # Group tests for parallel execution
             security_tests = [t for t in test_scenarios if t["is_security_test"]]
@@ -1536,7 +1536,7 @@ class WebSocketAuthenticationTester:
                 test_method = test_scenario["method"]
                 
                 try:
-                    logger.info(f"🔒 Running security test: {test_name}")
+                    logger.info(f"[U+1F512] Running security test: {test_name}")
                     
                     test_start = time.time()
                     result = await test_method()
@@ -1554,10 +1554,10 @@ class WebSocketAuthenticationTester:
                     
                     if result.success:
                         results["passed_tests"] += 1
-                        logger.info(f"✅ {test_name}: PASSED ({test_time:.2f}s)")
+                        logger.info(f" PASS:  {test_name}: PASSED ({test_time:.2f}s)")
                     else:
                         results["failed_tests"] += 1
-                        logger.error(f"❌ {test_name}: FAILED ({test_time:.2f}s)")
+                        logger.error(f" FAIL:  {test_name}: FAILED ({test_time:.2f}s)")
                         
                         if result.security_violations:
                             results["security_violations"].extend(result.security_violations)
@@ -1574,11 +1574,11 @@ class WebSocketAuthenticationTester:
                         "execution_time": 0.0,
                         "execution_mode": "sequential_security"
                     }
-                    logger.error(f"❌ {test_name}: ERROR - {e}")
+                    logger.error(f" FAIL:  {test_name}: ERROR - {e}")
             
             # Run parallel tests concurrently (if any exist in the future)
             if parallel_tests:
-                logger.info(f"⚡ Running {len(parallel_tests)} tests in parallel...")
+                logger.info(f" LIGHTNING:  Running {len(parallel_tests)} tests in parallel...")
                 
                 async def run_parallel_test(test_scenario):
                     test_name = test_scenario["name"]
@@ -1628,24 +1628,24 @@ class WebSocketAuthenticationTester:
                     
                     if test_result["success"]:
                         results["passed_tests"] += 1
-                        logger.info(f"✅ {test_name}: PASSED (parallel, {test_result['execution_time']:.2f}s)")
+                        logger.info(f" PASS:  {test_name}: PASSED (parallel, {test_result['execution_time']:.2f}s)")
                     else:
                         results["failed_tests"] += 1
-                        logger.error(f"❌ {test_name}: FAILED (parallel, {test_result['execution_time']:.2f}s)")
+                        logger.error(f" FAIL:  {test_name}: FAILED (parallel, {test_result['execution_time']:.2f}s)")
                         
                         if result_obj and result_obj.security_violations:
                             results["security_violations"].extend(result_obj.security_violations)
         
         else:
             # Sequential execution (legacy mode or optimizations disabled)
-            logger.info("🐌 Using sequential execution for all tests...")
+            logger.info("[U+1F40C] Using sequential execution for all tests...")
             
             for test_scenario in test_scenarios:
                 test_name = test_scenario["name"]
                 test_method = test_scenario["method"]
                 
                 try:
-                    logger.info(f"🧪 Running: {test_name}")
+                    logger.info(f"[U+1F9EA] Running: {test_name}")
                     
                     test_start = time.time()
                     result = await test_method()
@@ -1663,10 +1663,10 @@ class WebSocketAuthenticationTester:
                     
                     if result.success:
                         results["passed_tests"] += 1
-                        logger.info(f"✅ {test_name}: PASSED ({test_time:.2f}s)")
+                        logger.info(f" PASS:  {test_name}: PASSED ({test_time:.2f}s)")
                     else:
                         results["failed_tests"] += 1
-                        logger.error(f"❌ {test_name}: FAILED ({test_time:.2f}s)")
+                        logger.error(f" FAIL:  {test_name}: FAILED ({test_time:.2f}s)")
                         
                         if result.security_violations:
                             results["security_violations"].extend(result.security_violations)
@@ -1683,7 +1683,7 @@ class WebSocketAuthenticationTester:
                         "execution_time": 0.0,
                         "execution_mode": "sequential"
                     }
-                    logger.error(f"❌ {test_name}: ERROR - {e}")
+                    logger.error(f" FAIL:  {test_name}: ERROR - {e}")
         
         # Generate recommendations based on results
         if results["security_violations"]:
@@ -1730,10 +1730,10 @@ class WebSocketAuthenticationTester:
             if pool_hit_rate > 30:
                 results["recommendations"].append(f"Good connection pool utilization: {pool_hit_rate}% hit rate")
             
-            logger.info(f"⚡ Performance optimizations: Token cache {cache_hit_rate}% hit rate, Pool {pool_hit_rate}% hit rate")
+            logger.info(f" LIGHTNING:  Performance optimizations: Token cache {cache_hit_rate}% hit rate, Pool {pool_hit_rate}% hit rate")
         
         logger.info(
-            f"🏁 Authentication test suite completed: "
+            f"[U+1F3C1] Authentication test suite completed: "
             f"{results['passed_tests']}/{results['total_tests']} passed "
             f"({results['success_rate']:.1f}% success rate, {results['total_duration']:.2f}s total)"
         )
@@ -1771,7 +1771,7 @@ class WebSocketAuthenticationTester:
     
     async def cleanup(self) -> None:
         """Clean up test resources and performance optimization components."""
-        logger.info("🧹 Cleaning up WebSocket authentication test resources...")
+        logger.info("[U+1F9F9] Cleaning up WebSocket authentication test resources...")
         
         # Close all active clients
         for client_id, client in list(self.active_clients.items()):
@@ -1816,9 +1816,9 @@ class WebSocketAuthenticationTester:
             
             savings_ms = self._calculate_optimization_savings()
             if savings_ms > 0:
-                logger.info(f"⚡ Estimated performance savings: {savings_ms:.1f}ms")
+                logger.info(f" LIGHTNING:  Estimated performance savings: {savings_ms:.1f}ms")
         
-        logger.info("✅ WebSocket authentication test cleanup completed")
+        logger.info(" PASS:  WebSocket authentication test cleanup completed")
 
 
 # SSOT Helper Functions

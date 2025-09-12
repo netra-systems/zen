@@ -31,7 +31,7 @@ class ExecutionState(str, Enum):
     """
     DEPRECATED: Execution state enumeration with backward compatibility mapping.
     
-    ⚠️  This ExecutionState is now mapped to the SSOT implementation.
+     WARNING: [U+FE0F]  This ExecutionState is now mapped to the SSOT implementation.
         New code should import directly:
         from netra_backend.app.core.agent_execution_tracker import ExecutionState
     """
@@ -127,7 +127,7 @@ class ExecutionRegistry:
         # Start background cleanup task
         self._start_cleanup_task()
         
-        logger.info(f"✅ ExecutionRegistry initialized with cleanup every {cleanup_interval_seconds}s")
+        logger.info(f" PASS:  ExecutionRegistry initialized with cleanup every {cleanup_interval_seconds}s")
     
     def _init_valid_transitions(self) -> Dict[ExecutionState, List[ExecutionState]]:
         """Initialize valid state transitions."""
@@ -185,7 +185,7 @@ class ExecutionRegistry:
                 if r.state not in [ExecutionState.SUCCESS, ExecutionState.FAILED, ExecutionState.ABORTED]
             ])
         
-        logger.info(f"📝 Registered execution {execution_id} for {agent_name} (run_id: {run_id})")
+        logger.info(f"[U+1F4DD] Registered execution {execution_id} for {agent_name} (run_id: {run_id})")
         return record
     
     async def update_execution_state(
@@ -209,7 +209,7 @@ class ExecutionRegistry:
         """
         async with self._lock:
             if execution_id not in self._executions:
-                logger.warning(f"⚠️ Attempted to update non-existent execution: {execution_id}")
+                logger.warning(f" WARNING: [U+FE0F] Attempted to update non-existent execution: {execution_id}")
                 return False
             
             record = self._executions[execution_id]
@@ -242,7 +242,7 @@ class ExecutionRegistry:
                 if "retry_count" in metadata:
                     record.retry_count = metadata["retry_count"]
         
-        logger.debug(f"🔄 Updated execution {execution_id}: {current_state} -> {new_state}")
+        logger.debug(f" CYCLE:  Updated execution {execution_id}: {current_state} -> {new_state}")
         return True
     
     def _is_valid_transition(self, current: ExecutionState, new: ExecutionState) -> bool:
@@ -428,7 +428,7 @@ class ExecutionRegistry:
                 cleaned_count += 1
         
         if cleaned_count > 0:
-            logger.info(f"🧹 Cleaned up {cleaned_count} expired executions")
+            logger.info(f"[U+1F9F9] Cleaned up {cleaned_count} expired executions")
         
         return cleaned_count
     
@@ -493,7 +493,7 @@ class ExecutionRegistry:
             except asyncio.CancelledError:
                 pass
         
-        logger.info("🛑 ExecutionRegistry shutdown completed")
+        logger.info("[U+1F6D1] ExecutionRegistry shutdown completed")
     
     def __len__(self) -> int:
         """Return number of tracked executions."""

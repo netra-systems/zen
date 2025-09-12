@@ -2,7 +2,7 @@
 Real Agent Orchestration Integration Test - NO MOCKS
 
 Critical integration test for agent orchestration using REAL services only.
-Validates supervisor → triage → data → actions agent workflow with real execution.
+Validates supervisor  ->  triage  ->  data  ->  actions agent workflow with real execution.
 
 Business Value Justification (BVJ):
 1. Segment: Enterprise ($100K+ MRR protection)
@@ -42,6 +42,7 @@ from tests.clients.auth_client import AuthTestClient
 
 # Import schemas
 from netra_backend.app.schemas.user_plan import PlanTier
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class RealAgentOrchestrationCore:
@@ -258,6 +259,15 @@ class RealAgentOrchestrationCore:
 @pytest.mark.e2e
 @pytest.mark.integration
 class TestRealAgentOrchestration:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Real agent orchestration integration tests."""
     
     @pytest_asyncio.fixture
@@ -272,7 +282,7 @@ class TestRealAgentOrchestration:
         """
         CRITICAL: Test real supervisor agent orchestrating sub-agents.
         
-        Validates: Supervisor → Triage → Data → Actions orchestration with real execution.
+        Validates: Supervisor  ->  Triage  ->  Data  ->  Actions orchestration with real execution.
         """
         request_message = "Analyze my AI infrastructure costs and provide optimization recommendations with implementation plan"
         expected_agents = ["supervisor", "triage", "data", "actions"]
@@ -315,7 +325,7 @@ class TestRealAgentOrchestration:
         
         # Validate handoff with context preservation
         handoff_validation = await orchestration_core.validate_real_agent_handoff("supervisor", "triage")
-        assert handoff_validation["handoff_occurred"], "Real supervisor → triage handoff did not occur"
+        assert handoff_validation["handoff_occurred"], "Real supervisor  ->  triage handoff did not occur"
         assert handoff_validation["handoff_data_complete"], "Real handoff did not preserve context data"
         
         # Check for context keywords in events

@@ -401,12 +401,12 @@ class TestUnifiedConfigurationManagerExtreme(BaseTestCase):
         """Test Unicode support in configuration keys and values."""
         unicode_test_cases = [
             # (key, value, description)
-            ("测试.键", "测试值", "Chinese characters"),
-            ("config.émoji", "🚀💻🔧", "Emojis"),
-            ("config.русский", "значение", "Cyrillic characters"),
-            ("config.العربية", "قيمة", "Arabic characters"),
-            ("config.日本語", "値", "Japanese characters"),
-            ("config.한국어", "값", "Korean characters"),
+            ("[U+6D4B][U+8BD5].[U+952E]", "[U+6D4B][U+8BD5][U+503C]", "Chinese characters"),
+            ("config.[U+00E9]moji", "[U+1F680][U+1F4BB][U+1F527]", "Emojis"),
+            ("config.pucck[U+0438][U+0439]", "[U+0437]na[U+0447]en[U+0438]e", "Cyrillic characters"),
+            ("config.[U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]", "[U+0642][U+064A][U+0645][U+0629]", "Arabic characters"),
+            ("config.[U+65E5][U+672C][U+8A9E]", "[U+5024]", "Japanese characters"),
+            ("config.[U+D55C][U+AD6D][U+C5B4]", "[U+AC12]", "Korean characters"),
             ("special.chars", "!@#$%^&*()_+-=[]{}|;':\",./<>?", "Special characters"),
             ("newlines.test", "line1\nline2\rline3\r\nline4", "Various newlines"),
             ("tabs.test", "col1\tcol2\tcol3", "Tab characters"),

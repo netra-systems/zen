@@ -249,4 +249,4 @@ async def setup_execution_health_monitoring(health_service: UnifiedHealthService
     """
     integration = ExecutionHealthIntegration(health_service)
     await integration.register_health_checks()
-    logger.info("✅ Execution health monitoring setup complete")
+    logger.info(" PASS:  Execution health monitoring setup complete")

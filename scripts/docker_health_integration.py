@@ -67,7 +67,7 @@ class DockerHealthIntegration:
     
     def enhance_docker_compose(self) -> None:
         """Enhance Docker Compose with health monitoring capabilities."""
-        logger.info("🔧 Enhancing Docker Compose with health monitoring")
+        logger.info("[U+1F527] Enhancing Docker Compose with health monitoring")
         
         # Create enhanced Docker Compose for staging with health monitoring
         enhanced_compose = self._create_enhanced_compose()
@@ -76,7 +76,7 @@ class DockerHealthIntegration:
         enhanced_file = self.project_root / "docker-compose.staging-health.yml"
         self._save_enhanced_compose(enhanced_compose, enhanced_file)
         
-        logger.info(f"✅ Enhanced Docker Compose saved to {enhanced_file}")
+        logger.info(f" PASS:  Enhanced Docker Compose saved to {enhanced_file}")
     
     def _create_enhanced_compose(self) -> Dict[str, Any]:
         """Create enhanced Docker Compose configuration with health monitoring."""
@@ -400,7 +400,7 @@ class DockerHealthIntegration:
     
     def create_health_dockerfiles(self) -> None:
         """Create Dockerfiles for health monitoring services."""
-        logger.info("🐳 Creating Dockerfiles for health monitoring services")
+        logger.info("[U+1F433] Creating Dockerfiles for health monitoring services")
         
         docker_dir = self.project_root / "docker"
         docker_dir.mkdir(exist_ok=True)
@@ -415,7 +415,7 @@ class DockerHealthIntegration:
         with open(docker_dir / "health-dashboard.Dockerfile", 'w') as f:
             f.write(health_dashboard_dockerfile)
         
-        logger.info("✅ Health monitoring Dockerfiles created")
+        logger.info(" PASS:  Health monitoring Dockerfiles created")
     
     def _create_health_monitor_dockerfile(self) -> str:
         """Create Dockerfile for health monitor service."""
@@ -673,7 +673,7 @@ if __name__ == "__main__":
     
     def create_deployment_scripts(self) -> None:
         """Create deployment scripts for health-enhanced staging."""
-        logger.info("📋 Creating deployment scripts")
+        logger.info("[U+1F4CB] Creating deployment scripts")
         
         scripts_dir = self.project_root / "scripts"
         
@@ -691,7 +691,7 @@ if __name__ == "__main__":
             f.write(integration_script)
         integration_script_path.chmod(0o755)
         
-        logger.info("✅ Deployment scripts created")
+        logger.info(" PASS:  Deployment scripts created")
     
     def _create_deploy_staging_script(self) -> str:
         """Create deployment script for staging with health monitoring."""
@@ -726,42 +726,42 @@ def run_command(cmd, cwd=None):
 
 def main():
     """Main deployment function."""
-    logger.info("🚀 Starting staging deployment with health monitoring")
+    logger.info("[U+1F680] Starting staging deployment with health monitoring")
     
     # Step 1: Build health monitoring images
-    logger.info("📦 Building health monitoring Docker images...")
+    logger.info("[U+1F4E6] Building health monitoring Docker images...")
     if not run_command("docker-compose -f docker-compose.staging-health.yml build health-monitor health-dashboard"):
         logger.error("Failed to build health monitoring images")
         sys.exit(1)
     
     # Step 2: Start infrastructure services first
-    logger.info("🔧 Starting infrastructure services...")
+    logger.info("[U+1F527] Starting infrastructure services...")
     if not run_command("docker-compose -f docker-compose.staging-health.yml up -d staging-postgres staging-redis staging-clickhouse"):
         logger.error("Failed to start infrastructure services")
         sys.exit(1)
     
     # Wait for infrastructure to be ready
-    logger.info("⏳ Waiting for infrastructure services to be healthy...")
+    logger.info("[U+23F3] Waiting for infrastructure services to be healthy...")
     time.sleep(30)
     
     # Step 3: Start application services
-    logger.info("🎯 Starting application services...")
+    logger.info(" TARGET:  Starting application services...")
     if not run_command("docker-compose -f docker-compose.staging-health.yml up -d staging-auth staging-backend staging-frontend"):
         logger.error("Failed to start application services")
         sys.exit(1)
     
     # Wait for applications to be ready
-    logger.info("⏳ Waiting for application services to be healthy...")
+    logger.info("[U+23F3] Waiting for application services to be healthy...")
     time.sleep(45)
     
     # Step 4: Start health monitoring services
-    logger.info("📊 Starting health monitoring services...")
+    logger.info(" CHART:  Starting health monitoring services...")
     if not run_command("docker-compose -f docker-compose.staging-health.yml up -d health-monitor health-dashboard"):
         logger.error("Failed to start health monitoring services")
         sys.exit(1)
     
     # Step 5: Verify deployment
-    logger.info("🔍 Verifying deployment...")
+    logger.info(" SEARCH:  Verifying deployment...")
     time.sleep(15)
     
     # Check service status
@@ -769,14 +769,14 @@ def main():
         logger.warning("Could not verify service status")
     
     # Run health checks
-    logger.info("🏥 Running post-deployment health checks...")
+    logger.info("[U+1F3E5] Running post-deployment health checks...")
     if not run_command("python scripts/staging_health_checks.py post-deployment --deployment-id staging-$(date +%Y%m%d-%H%M%S)"):
         logger.warning("Post-deployment health checks had issues")
     
-    logger.info("✅ Staging deployment with health monitoring completed")
-    logger.info("📊 Health Dashboard: http://localhost:8080")
-    logger.info("🔍 Health API: http://localhost:9000")
-    logger.info("🎯 Backend API: http://localhost:8000")
+    logger.info(" PASS:  Staging deployment with health monitoring completed")
+    logger.info(" CHART:  Health Dashboard: http://localhost:8080")
+    logger.info(" SEARCH:  Health API: http://localhost:9000")
+    logger.info(" TARGET:  Backend API: http://localhost:8000")
 
 if __name__ == "__main__":
     main()
@@ -865,7 +865,7 @@ if __name__ == "__main__":
     
     def validate_integration(self) -> bool:
         """Validate Docker health integration setup."""
-        logger.info("🔍 Validating Docker health integration")
+        logger.info(" SEARCH:  Validating Docker health integration")
         
         validation_results = []
         
@@ -911,15 +911,15 @@ if __name__ == "__main__":
         # Print validation results
         all_passed = True
         for result in validation_results:
-            status = "✅ PASS" if result["passed"] else "❌ FAIL"
+            status = " PASS:  PASS" if result["passed"] else " FAIL:  FAIL"
             logger.info(f"{status} - {result['check']}: {result['path']}")
             if not result["passed"]:
                 all_passed = False
         
         if all_passed:
-            logger.info("✅ Docker health integration validation passed")
+            logger.info(" PASS:  Docker health integration validation passed")
         else:
-            logger.error("❌ Docker health integration validation failed")
+            logger.error(" FAIL:  Docker health integration validation failed")
         
         return all_passed
 
@@ -958,13 +958,13 @@ def main():
             # Validate the integration
             success = integration.validate_integration()
             if success:
-                logger.info("🎉 Docker health integration setup completed successfully!")
+                logger.info(" CELEBRATION:  Docker health integration setup completed successfully!")
                 logger.info("Next steps:")
                 logger.info("1. Review docker-compose.staging-health.yml")
                 logger.info("2. Set required environment variables")
                 logger.info("3. Run: python scripts/deploy_staging_with_health.py")
             else:
-                logger.error("❌ Integration setup completed with validation errors")
+                logger.error(" FAIL:  Integration setup completed with validation errors")
                 sys.exit(1)
     
     except Exception as e:

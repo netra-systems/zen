@@ -53,7 +53,7 @@ class TokenOptimizationIntegrationService:
         # Initialize service with configuration
         self._initialize_service()
         
-        logger.info("✅ Initialized TokenOptimizationIntegrationService with all SSOT components")
+        logger.info(" PASS:  Initialized TokenOptimizationIntegrationService with all SSOT components")
     
     def _initialize_service(self) -> None:
         """Initialize service with current configuration."""

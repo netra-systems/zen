@@ -94,7 +94,7 @@ class ChatValueAgent(BaseAgent):
         self.execution_count += 1
         
         if not stream_updates or not self.websocket_bridge:
-            logger.warning(f"⚠️ CRITICAL: {self.name} agent has no WebSocket bridge - chat value will be broken!")
+            logger.warning(f" WARNING: [U+FE0F] CRITICAL: {self.name} agent has no WebSocket bridge - chat value will be broken!")
             return {"success": False, "error": "No WebSocket bridge for chat updates"}
         
         # CRITICAL EVENT 1: agent_started - User sees agent began processing
@@ -506,7 +506,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         assert timing["total_duration_seconds"] < 2.0, "Event sequence should complete quickly"
         assert timing["events_per_second"] >= 2, "Should have reasonable event frequency"
         
-        logger.info(f"✅ All 5 required WebSocket events test passed - {validation['total_events']} events in {execution_time:.3f}s")
+        logger.info(f" PASS:  All 5 required WebSocket events test passed - {validation['total_events']} events in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -616,7 +616,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         assert user1_validation["validation_passed"] is True
         assert user2_validation["validation_passed"] is True
         
-        logger.info("✅ WebSocket event data integrity and user isolation test passed")
+        logger.info(" PASS:  WebSocket event data integrity and user isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -634,7 +634,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
             user_context=chat_user_context
         )
         
-        # Execute multi-agent workflow: triage → data_helper → optimization
+        # Execute multi-agent workflow: triage  ->  data_helper  ->  optimization
         workflow_agents = ["triage", "data_helper", "optimization"]
         workflow_results = []
         
@@ -703,7 +703,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         assert workflow_duration < 5.0  # Should complete efficiently
         assert workflow_duration > 0.5  # Should take reasonable time for 3 agents
         
-        logger.info(f"✅ Multi-agent workflow WebSocket coordination test passed - {len(all_workflow_events)} events")
+        logger.info(f" PASS:  Multi-agent workflow WebSocket coordination test passed - {len(all_workflow_events)} events")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -791,7 +791,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         assert error_event["data"]["agent_name"] == "failing_agent"
         assert "failure" in error_event["data"]["error"].lower()
         
-        logger.info("✅ WebSocket error event handling test passed")
+        logger.info(" PASS:  WebSocket error event handling test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -902,7 +902,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
         assert total_events >= concurrent_users * 5  # At least 5 events per user
         assert events_per_second >= 10  # Reasonable event throughput
         
-        logger.info(f"✅ WebSocket performance under concurrent load test passed - {concurrent_users} users, {total_events} events in {total_time:.3f}s")
+        logger.info(f" PASS:  WebSocket performance under concurrent load test passed - {concurrent_users} users, {total_events} events in {total_time:.3f}s")
 
 
 if __name__ == "__main__":

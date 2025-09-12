@@ -1,8 +1,46 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path SSOT Integration Test - WebSocket User Journey
 
 Business Value Justification:
-- Segment: All (Free → Enterprise) 
+- Segment: All (Free  ->  Enterprise) 
 - Business Goal: Revenue Protection ($500K+ ARR)
 - Value Impact: Validate complete user journey works via SSOT WebSocket
 - Strategic Impact: MISSION CRITICAL - Chat functionality is 90% of platform value
@@ -11,11 +49,11 @@ This test validates the complete Golden Path user journey works through
 SSOT WebSocket implementation:
 
 GOLDEN PATH FLOW:
-1. User login → JWT authentication 
-2. WebSocket connection → Secure handshake
-3. User message → Agent processing
-4. 5 Critical Events → Real-time progress
-5. AI response → Value delivered
+1. User login  ->  JWT authentication 
+2. WebSocket connection  ->  Secure handshake
+3. User message  ->  Agent processing
+4. 5 Critical Events  ->  Real-time progress
+5. AI response  ->  Value delivered
 
 CRITICAL EVENTS (ALL REQUIRED):
 - agent_started: User sees agent began processing
@@ -24,7 +62,7 @@ CRITICAL EVENTS (ALL REQUIRED):
 - tool_completed: Tool results display
 - agent_completed: User knows response is ready
 
-🚀 GOLDEN PATH REFERENCE:
+[U+1F680] GOLDEN PATH REFERENCE:
 Complete analysis in docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md
 Addresses $500K+ ARR dependency on reliable chat functionality.
 
@@ -46,11 +84,21 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
 
 class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Integration test for Golden Path user journey via SSOT WebSocket.
     
@@ -223,7 +271,7 @@ class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
         assert "response" in final_event
         assert "savings" in final_event["response"].lower()
         
-        logger.info("✅ Golden Path user journey validated successfully through SSOT WebSocket")
+        logger.info(" PASS:  Golden Path user journey validated successfully through SSOT WebSocket")
         
     async def test_ssot_websocket_handles_authentication_flow(self):
         """

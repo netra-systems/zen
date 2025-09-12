@@ -58,7 +58,7 @@ class WebSocketSecurityVerifier:
     
     async def run_all_tests(self):
         """Run all security verification tests."""
-        print("🔐 WEBSOCKET SECURITY VERIFICATION")
+        print("[U+1F510] WEBSOCKET SECURITY VERIFICATION")
         print("=" * 50)
         
         test_methods = [
@@ -71,18 +71,18 @@ class WebSocketSecurityVerifier:
         ]
         
         for test_name, test_method in test_methods:
-            print(f"\n🧪 Testing: {test_name}")
+            print(f"\n[U+1F9EA] Testing: {test_name}")
             try:
                 result = await test_method()
                 self.test_results[test_name] = result
-                status = "✅ PASSED" if result['passed'] else "❌ FAILED"
+                status = " PASS:  PASSED" if result['passed'] else " FAIL:  FAILED"
                 print(f"   {status}: {result['message']}")
                 
                 if not result['passed']:
                     self.overall_passed = False
                     
             except Exception as e:
-                print(f"   ❌ ERROR: {e}")
+                print(f"    FAIL:  ERROR: {e}")
                 self.test_results[test_name] = {'passed': False, 'message': f'Exception: {e}'}
                 self.overall_passed = False
         
@@ -256,24 +256,24 @@ class WebSocketSecurityVerifier:
     def print_final_report(self):
         """Print final security verification report."""
         print("\n" + "=" * 50)
-        print("🛡️  WEBSOCKET SECURITY VERIFICATION REPORT")
+        print("[U+1F6E1][U+FE0F]  WEBSOCKET SECURITY VERIFICATION REPORT")
         print("=" * 50)
         
         for test_name, result in self.test_results.items():
-            status = "✅ PASSED" if result['passed'] else "❌ FAILED"
+            status = " PASS:  PASSED" if result['passed'] else " FAIL:  FAILED"
             print(f"{status}: {test_name}")
             if not result['passed']:
                 print(f"    Issue: {result['message']}")
         
         print("\n" + "-" * 50)
         if self.overall_passed:
-            print("🎉 ALL WEBSOCKET SECURITY FIXES VERIFIED!")
-            print("✅ Authentication workflow deployment can proceed safely")
-            print("✅ $500K+ ARR business risk mitigated")
+            print(" CELEBRATION:  ALL WEBSOCKET SECURITY FIXES VERIFIED!")
+            print(" PASS:  Authentication workflow deployment can proceed safely")
+            print(" PASS:  $500K+ ARR business risk mitigated")
         else:
-            print("🚨 SECURITY VERIFICATION FAILED!")
-            print("❌ Authentication workflow deployment BLOCKED") 
-            print("❌ Business risk remains - immediate remediation required")
+            print(" ALERT:  SECURITY VERIFICATION FAILED!")
+            print(" FAIL:  Authentication workflow deployment BLOCKED") 
+            print(" FAIL:  Business risk remains - immediate remediation required")
         
         print("=" * 50)
 
@@ -284,10 +284,10 @@ async def main():
     success = await verifier.run_all_tests()
     
     if not success:
-        print("\n🚨 CRITICAL: Fix failing tests before deploying authentication workflows")
+        print("\n ALERT:  CRITICAL: Fix failing tests before deploying authentication workflows")
         sys.exit(1)
     else:
-        print("\n✅ SUCCESS: All WebSocket security fixes verified and working")
+        print("\n PASS:  SUCCESS: All WebSocket security fixes verified and working")
         sys.exit(0)
 
 

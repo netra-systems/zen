@@ -2,7 +2,7 @@
 CRITICAL E2E JWT Token Lifecycle Tests
 
 Business Value Justification (BVJ):
-1. Segment: All customer segments (Free → Enterprise) - Core security foundation
+1. Segment: All customer segments (Free  ->  Enterprise) - Core security foundation
 2. Business Goal: Protect $500K+ ARR through secure authentication flows 
 3. Value Impact: Prevents authentication failures that cost user trust and conversions
 4. Strategic Impact: JWT token security is foundation for all user interactions
@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 CRITICAL REQUIREMENTS:
 - Real authentication flows using real JWT tokens and services
 - NO mocks - uses real auth service, real database, real Redis
-- Tests complete JWT lifecycle: creation → validation → refresh → expiry
+- Tests complete JWT lifecycle: creation  ->  validation  ->  refresh  ->  expiry
 - Multi-user token isolation and security boundaries
 - Must complete in <5 seconds per test
 - Uses test_framework/ssot/e2e_auth_helper.py (SSOT for auth)

@@ -77,7 +77,7 @@ async def test_synchronous_serialization_blocking():
             # Any delay > 5ms indicates potential blocking
             if actual_time > 0.005:
                 blocks.append(actual_time)
-                print(f"⚠️  Event loop delayed: {actual_time*1000:.2f}ms")
+                print(f" WARNING: [U+FE0F]  Event loop delayed: {actual_time*1000:.2f}ms")
     
     # Start monitoring
     monitor_task = asyncio.create_task(event_loop_monitor())
@@ -122,14 +122,14 @@ async def test_synchronous_serialization_blocking():
         total_blocks = len(blocks)
         total_blocked_time = sum(blocks)
         
-        print(f"\n📊 Blocking Analysis:")
+        print(f"\n CHART:  Blocking Analysis:")
         print(f"   Total blocking events: {total_blocks}")
         print(f"   Maximum block: {max_block*1000:.2f}ms")
         print(f"   Total blocked time: {total_blocked_time*1000:.2f}ms")
         
         return max_block > 0.010  # Consider >10ms as significant blocking
     else:
-        print(f"\n✅ No significant blocking detected")
+        print(f"\n PASS:  No significant blocking detected")
         return False
 
 
@@ -210,16 +210,16 @@ async def test_send_to_user_vs_send_to_thread():
     print(f"   Event loop blocks during send_to_thread: {len(blocks_async)}")
     
     # Compare results
-    print(f"\n📊 Comparison Results:")
+    print(f"\n CHART:  Comparison Results:")
     print(f"   send_to_user blocks: {len(blocks_sync)}")
     print(f"   send_to_thread blocks: {len(blocks_async)}")
     
     if len(blocks_sync) > len(blocks_async):
-        print(f"🔴 send_to_user causes more blocking than send_to_thread")
+        print(f"[U+1F534] send_to_user causes more blocking than send_to_thread")
         print(f"   This confirms that synchronous serialization is the issue")
         return True
     else:
-        print(f"🟢 Both paths have similar blocking behavior")
+        print(f"[U+1F7E2] Both paths have similar blocking behavior")
         return False
 
 
@@ -247,7 +247,7 @@ async def test_concurrent_serialization_stress():
             duration = time.perf_counter() - start
             if duration > 0.010:  # >10ms indicates blocking
                 blocks.append(duration)
-                print(f"⚠️  Stress test blocking: {duration*1000:.2f}ms")
+                print(f" WARNING: [U+FE0F]  Stress test blocking: {duration*1000:.2f}ms")
     
     monitor_task = asyncio.create_task(stress_monitor())
     
@@ -297,19 +297,19 @@ async def test_concurrent_serialization_stress():
     severe_blocks = [b for b in blocks if b > 0.050]  # >50ms
     moderate_blocks = [b for b in blocks if 0.020 <= b <= 0.050]  # 20-50ms
     
-    print(f"\n📊 Stress Test Analysis:")
+    print(f"\n CHART:  Stress Test Analysis:")
     print(f"   Total blocking events: {len(blocks)}")
     print(f"   Severe blocks (>50ms): {len(severe_blocks)}")
     print(f"   Moderate blocks (20-50ms): {len(moderate_blocks)}")
     
     if severe_blocks:
-        print(f"🔴 CRITICAL: Severe blocking detected during stress test")
+        print(f"[U+1F534] CRITICAL: Severe blocking detected during stress test")
         return True
     elif moderate_blocks:
-        print(f"🟡 WARNING: Moderate blocking detected")
+        print(f"[U+1F7E1] WARNING: Moderate blocking detected")
         return True
     else:
-        print(f"🟢 Stress test completed without significant blocking")
+        print(f"[U+1F7E2] Stress test completed without significant blocking")
         return False
 
 
@@ -341,30 +341,30 @@ async def main():
         blocking_detected = any(results.values())
         
         if blocking_detected:
-            print("🔴 EVENT LOOP BLOCKING CONFIRMED")
+            print("[U+1F534] EVENT LOOP BLOCKING CONFIRMED")
             print("\nRoot Cause Analysis:")
             
             if results["sync_blocking"]:
-                print("   ❌ Synchronous serialization blocks event loop")
+                print("    FAIL:  Synchronous serialization blocks event loop")
             
             if results["path_comparison_blocking"]:
-                print("   ❌ send_to_user (sync path) blocks more than send_to_thread (async path)")
-                print("   💡 This confirms the fix should apply async serialization to send_to_user")
+                print("    FAIL:  send_to_user (sync path) blocks more than send_to_thread (async path)")
+                print("    IDEA:  This confirms the fix should apply async serialization to send_to_user")
             
             if results["stress_blocking"]:
-                print("   ❌ System cannot handle concurrent complex serialization")
+                print("    FAIL:  System cannot handle concurrent complex serialization")
             
-            print("\n🔧 SOLUTION REQUIRED:")
+            print("\n[U+1F527] SOLUTION REQUIRED:")
             print("   1. Update send_to_user to use _serialize_message_safely_async")
             print("   2. Update broadcast_to_room to use _serialize_message_safely_async")
             print("   3. Update broadcast_to_all to use _serialize_message_safely_async")
             print("   4. Replace synchronous serialization calls in _send_to_connection")
             
         else:
-            print("🟢 NO SIGNIFICANT BLOCKING DETECTED")
+            print("[U+1F7E2] NO SIGNIFICANT BLOCKING DETECTED")
             print("Current async serialization implementation appears sufficient")
         
-        print(f"\n📊 Test Summary:")
+        print(f"\n CHART:  Test Summary:")
         for test, blocked in results.items():
             status = "BLOCKED" if blocked else "OK"
             print(f"   {test}: {status}")

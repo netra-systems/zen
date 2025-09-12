@@ -837,7 +837,7 @@
             # REMOVED_SYNTAX_ERROR: for pattern in forbidden_patterns:
                 # REMOVED_SYNTAX_ERROR: assert pattern not in module_source, "formatted_string"
 
-                # REMOVED_SYNTAX_ERROR: print("✅ All SSOT compliance tests passed!")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  All SSOT compliance tests passed!")
 
 
                 # Additional edge case tests

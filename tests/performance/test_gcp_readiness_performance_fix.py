@@ -282,24 +282,24 @@ class TestGCPReadinessPerformanceFix(SSotBaseTestCase):
         print("GCP READINESS PERFORMANCE FIX RECOMMENDATIONS")
         print("="*60)
         
-        print("\n🚨 ROOT CAUSE: WebSocket connections blocked by GCP readiness validation")
+        print("\n ALERT:  ROOT CAUSE: WebSocket connections blocked by GCP readiness validation")
         print("   - Current timeout: 30s for validation")
         print("   - Startup phase wait: up to 20s")
         print("   - Service validation: up to 35s total")
         print("   - Total blocking time: up to 65s")
         
-        print("\n💡 RECOMMENDED FIXES:")
+        print("\n IDEA:  RECOMMENDED FIXES:")
         print("   1. Reduce WebSocket SSOT timeout from 30s to 5s")
         print("   2. Implement async readiness with connection queueing")
         print("   3. Cache readiness state to avoid repeated validation")
         print("   4. Use graceful degradation by default in staging")
         print("   5. Make startup phase wait non-blocking")
         
-        print("\n⚡ QUICK WIN: Reduce timeout in websocket_ssot.py line 349:")
+        print("\n LIGHTNING:  QUICK WIN: Reduce timeout in websocket_ssot.py line 349:")
         print("   BEFORE: async with gcp_websocket_readiness_guard(app_state, timeout=30.0)")
         print("   AFTER:  async with gcp_websocket_readiness_guard(app_state, timeout=5.0)")
         
-        print("\n🎯 TARGET: WebSocket connections under 5 seconds")
+        print("\n TARGET:  TARGET: WebSocket connections under 5 seconds")
         print("="*60)
 
 

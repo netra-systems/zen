@@ -61,7 +61,7 @@ class MockFailureSimulator:
         return [
             FailureScenario(
                 failure_type=FailureType.LLM_API_FAILURE,
-                trigger_pattern="🚨 SIMULATE_LLM_FAILURE 🚨",
+                trigger_pattern=" ALERT:  SIMULATE_LLM_FAILURE  ALERT: ",
                 expected_fallback="I apologize, but I encountered an error processing your request.",
                 business_impact="Users receive generic error instead of authentic AI response",
                 severity="high"
@@ -216,7 +216,7 @@ class MockFailureSimulator:
             Query designed to trigger failures in high-value scenarios
         """
         failure_triggers = [
-            "🚨 FORCE_FAILURE_SCENARIO 🚨",
+            " ALERT:  FORCE_FAILURE_SCENARIO  ALERT: ",
             "CRITICAL_SYSTEM_OVERLOAD",
             "ENTERPRISE_STRESS_TEST"
         ]

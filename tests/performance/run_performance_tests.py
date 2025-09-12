@@ -255,7 +255,7 @@ class PerformanceTestRunner:
         print()
         
         for result in self.test_results:
-            status_icon = "✅" if result.get('status') == 'PASSED' else "❌"
+            status_icon = " PASS: " if result.get('status') == 'PASSED' else " FAIL: "
             print(f"{status_icon} {result.get('test_suite', 'Unknown')}: {result.get('status', 'UNKNOWN')}")
         
         print("\n" + "="*80)
@@ -263,7 +263,7 @@ class PerformanceTestRunner:
         # Overall status
         overall_status = all(r.get('status') == 'PASSED' for r in self.test_results)
         status_message = "ALL TESTS PASSED" if overall_status else "SOME TESTS FAILED"
-        status_icon = "✅" if overall_status else "❌"
+        status_icon = " PASS: " if overall_status else " FAIL: "
         
         print(f"{status_icon} OVERALL STATUS: {status_message}")
         print("="*80)
@@ -342,24 +342,24 @@ def main():
             report = runner.generate_performance_report()
             report_file = runner.save_report(report, args.output_file)
             
-            print(f"\n📊 Detailed performance report generated: {report_file}")
+            print(f"\n CHART:  Detailed performance report generated: {report_file}")
             
             # Print key metrics
             summary = report['performance_test_summary']
-            print(f"📈 Test Duration: {summary['total_duration_seconds']:.2f}s")
-            print(f"📋 Suites: {summary['suites_passed']}/{summary['test_suites_run']} passed")
-            print(f"🎯 Overall Status: {summary['overall_status']}")
+            print(f"[U+1F4C8] Test Duration: {summary['total_duration_seconds']:.2f}s")
+            print(f"[U+1F4CB] Suites: {summary['suites_passed']}/{summary['test_suites_run']} passed")
+            print(f" TARGET:  Overall Status: {summary['overall_status']}")
         
         # Return appropriate exit code
         overall_success = all(r.get('status') == 'PASSED' for r in results)
         return 0 if overall_success else 1
         
     except KeyboardInterrupt:
-        print("\n⚠️  Performance tests interrupted by user")
+        print("\n WARNING: [U+FE0F]  Performance tests interrupted by user")
         return 130
     except Exception as e:
         logger.error(f"Error running performance tests: {e}")
-        print(f"❌ Error running performance tests: {e}")
+        print(f" FAIL:  Error running performance tests: {e}")
         return 1
 
 

@@ -4,7 +4,7 @@ from shared.isolated_environment import IsolatedEnvironment
 Frontend Authentication Complete Journey E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (Free → Enterprise)
+- Segment: All tiers (Free  ->  Enterprise)
 - Business Goal: Protect $2M+ ARR from authentication failures
 - Value Impact: Ensures 99.9% successful auth flow completion
 - Strategic Impact: Critical revenue protection through user activation

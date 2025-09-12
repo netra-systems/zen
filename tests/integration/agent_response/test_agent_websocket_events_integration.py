@@ -251,7 +251,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
                 assert "result" in completed_events[0].data, "agent_completed must include result"
                 assert "success" in completed_events[0].data, "agent_completed must indicate success status"
                 
-                logger.info(f"✅ WebSocket event sequence validated for user feedback ({len(user_events)} events)")
+                logger.info(f" PASS:  WebSocket event sequence validated for user feedback ({len(user_events)} events)")
                 
     async def test_websocket_events_user_isolation_prevents_cross_contamination(self):
         """
@@ -343,7 +343,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
                         assert "sensitive_user_1_data" not in str(event.data), \
                             "User 2 events must not contain User 1 sensitive data"
                     
-                    logger.info(f"✅ WebSocket event isolation validated (User 1: {len(user_1_events)} events, User 2: {len(user_2_events)} events)")
+                    logger.info(f" PASS:  WebSocket event isolation validated (User 1: {len(user_1_events)} events, User 2: {len(user_2_events)} events)")
                     
     async def test_websocket_events_error_handling_maintains_user_communication(self):
         """
@@ -438,7 +438,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
                 ]
                 assert len(error_recovery_events) > 0, "Error scenario should show recovery attempt in thinking events"
                 
-                logger.info(f"✅ Error scenario WebSocket communication validated ({len(user_events)} events)")
+                logger.info(f" PASS:  Error scenario WebSocket communication validated ({len(user_events)} events)")
                 
     async def test_websocket_events_performance_meets_realtime_requirements(self):
         """
@@ -523,7 +523,7 @@ class TestAgentWebSocketEventsIntegration(BaseIntegrationTest):
                 assert avg_latency < 0.05, f"Average latency {avg_latency:.3f}s too high for real-time experience"
                 assert max_latency < MAX_EVENT_LATENCY, f"Maximum latency {max_latency:.3f}s exceeds threshold"
                 
-                logger.info(f"✅ WebSocket events performance validated: "
+                logger.info(f" PASS:  WebSocket events performance validated: "
                            f"avg_latency={avg_latency:.3f}s, max_latency={max_latency:.3f}s, "
                            f"total_time={total_event_time:.3f}s, events={len(event_timings)}")
                            

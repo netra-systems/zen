@@ -1,7 +1,7 @@
 """Supervisor observability convenience functions for flow and TODO tracking.
 
 Provides global access functions for supervisor flow logging without requiring
-direct instance management. Each function must be ≤8 lines as per architecture requirements.
+direct instance management. Each function must be  <= 8 lines as per architecture requirements.
 """
 from typing import List, Optional
 

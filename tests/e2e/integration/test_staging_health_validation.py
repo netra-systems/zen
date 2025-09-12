@@ -231,7 +231,7 @@ async def test_staging_service_health():
                 assert result.response_time_ms < 10000, \
                     f"Service {result.name} response time too slow: {result.response_time_ms}ms"
                     
-        logger.info("✅ All staging services validated successfully")
+        logger.info(" PASS:  All staging services validated successfully")
         
     finally:
         await validator.teardown()
@@ -256,7 +256,7 @@ async def test_staging_backend_endpoints():
             assert resp.status in [200, 404, 422], \
                 f"API endpoint inaccessible: {resp.status}"
                 
-        logger.info("✅ Backend endpoints validated successfully")
+        logger.info(" PASS:  Backend endpoints validated successfully")
 
 
 @pytest.mark.asyncio 
@@ -273,7 +273,7 @@ async def test_staging_auth_endpoints():
         async with session.get(f"{auth_url}/health") as resp:
             assert resp.status in [200, 404], f"Health endpoint error: {resp.status}"
             
-        logger.info("✅ Auth service endpoints validated successfully")
+        logger.info(" PASS:  Auth service endpoints validated successfully")
 
 
 @pytest.mark.asyncio
@@ -299,7 +299,7 @@ async def test_staging_cors_configuration():
                 assert cors_origin in ['*', 'https://app.staging.netrasystems.ai'], \
                     f"Invalid CORS origin: {cors_origin}"
                     
-        logger.info("✅ CORS configuration validated successfully")
+        logger.info(" PASS:  CORS configuration validated successfully")
 
 
 @pytest.mark.asyncio
@@ -320,7 +320,7 @@ async def test_staging_performance_baseline():
                     
                 logger.info(f"Service {result.name} response time: {result.response_time_ms:.1f}ms")
                 
-        logger.info("✅ Staging performance baseline validated")
+        logger.info(" PASS:  Staging performance baseline validated")
         
     finally:
         await validator.teardown()
@@ -341,14 +341,14 @@ if __name__ == "__main__":
             print(json.dumps(summary, indent=2))
             
             if summary["overall_status"] == "healthy":
-                print("\n✅ ALL STAGING SERVICES ARE HEALTHY")
+                print("\n PASS:  ALL STAGING SERVICES ARE HEALTHY")
                 return 0
             else:
-                print(f"\n❌ STAGING ISSUES DETECTED: {summary['failed_services']} service(s) failed")
+                print(f"\n FAIL:  STAGING ISSUES DETECTED: {summary['failed_services']} service(s) failed")
                 return 1
                 
         except Exception as e:
-            print(f"\n❌ VALIDATION FAILED: {e}")
+            print(f"\n FAIL:  VALIDATION FAILED: {e}")
             return 1
             
         finally:

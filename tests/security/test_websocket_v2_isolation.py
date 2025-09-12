@@ -31,7 +31,7 @@
     # REMOVED_SYNTAX_ERROR: complete user isolation, preventing cross-user data leakage and security vulnerabilities.
 
     # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-        # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free → Enterprise)
+        # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free  ->  Enterprise)
         # REMOVED_SYNTAX_ERROR: - Business Goal: Validate WebSocket V2 migration eliminates security vulnerabilities
         # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures safe multi-user AI interactions without data leakage
         # REMOVED_SYNTAX_ERROR: - Revenue Impact: Prevents catastrophic security breaches that could destroy business

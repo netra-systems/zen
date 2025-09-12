@@ -1,7 +1,7 @@
 """
 Concurrent User Load Test Helpers
 Shared utilities for concurrent user load testing.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import asyncio

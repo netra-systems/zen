@@ -69,7 +69,7 @@ async def test_optional_service_should_fail_with_current_code():
     This test validates that optional ClickHouse service currently logs ERROR
     instead of WARNING, demonstrating the issue exists.
     """
-    print("\n🧪 Testing optional service behavior (should demonstrate the issue)...")
+    print("\n[U+1F9EA] Testing optional service behavior (should demonstrate the issue)...")
     
     # Configure staging environment with optional ClickHouse
     env = IsolatedEnvironment()
@@ -92,16 +92,16 @@ async def test_optional_service_should_fail_with_current_code():
                 try:
                     await service.initialize()
                     initialization_succeeded = True
-                    print("✓ Service initialization succeeded (good - optional service should continue)")
+                    print("[U+2713] Service initialization succeeded (good - optional service should continue)")
                 except Exception as e:
                     initialization_succeeded = False
-                    print(f"✗ Service initialization failed: {e} (bad - optional service should not fail)")
+                    print(f"[U+2717] Service initialization failed: {e} (bad - optional service should not fail)")
                 
                 # Analyze logs
                 log_output = log_capture.getvalue()
                 analysis = analyze_logs(log_output)
                 
-                print(f"\n📊 Log Analysis:")
+                print(f"\n CHART:  Log Analysis:")
                 print(f"   Total log lines: {analysis['total_lines']}")
                 print(f"   ERROR logs: {len(analysis['error_logs'])}")
                 print(f"   WARNING logs: {len(analysis['warning_logs'])}")
@@ -110,13 +110,13 @@ async def test_optional_service_should_fail_with_current_code():
                 
                 # Key test: Optional service should NOT log ERROR
                 if len(analysis['clickhouse_errors']) > 0:
-                    print(f"\n❌ ISSUE DEMONSTRATED: Optional service logged {len(analysis['clickhouse_errors'])} ERROR messages:")
+                    print(f"\n FAIL:  ISSUE DEMONSTRATED: Optional service logged {len(analysis['clickhouse_errors'])} ERROR messages:")
                     for error_log in analysis['clickhouse_errors']:
                         print(f"      {error_log}")
                     print("   This demonstrates the core issue - ERROR logs for optional services.")
                     return False  # Test "fails" as expected - demonstrates the issue
                 else:
-                    print(f"\n✅ ISSUE NOT FOUND: Optional service did not log ERROR messages.")
+                    print(f"\n PASS:  ISSUE NOT FOUND: Optional service did not log ERROR messages.")
                     if len(analysis['clickhouse_warnings']) > 0:
                         print("   Found appropriate WARNING logs instead:")
                         for warning_log in analysis['clickhouse_warnings']:
@@ -134,7 +134,7 @@ async def test_required_service_should_pass():
     
     This validates that required services correctly log ERROR.
     """
-    print("\n🧪 Testing required service behavior (should work correctly)...")
+    print("\n[U+1F9EA] Testing required service behavior (should work correctly)...")
     
     # Configure production environment with required ClickHouse
     env = IsolatedEnvironment()
@@ -157,28 +157,28 @@ async def test_required_service_should_pass():
                 try:
                     await service.initialize()
                     initialization_succeeded = True
-                    print("✗ Service initialization succeeded (bad - required service should fail)")
+                    print("[U+2717] Service initialization succeeded (bad - required service should fail)")
                 except Exception as e:
                     initialization_succeeded = False
-                    print("✓ Service initialization failed (good - required service should fail hard)")
+                    print("[U+2713] Service initialization failed (good - required service should fail hard)")
                 
                 # Analyze logs
                 log_output = log_capture.getvalue()
                 analysis = analyze_logs(log_output)
                 
-                print(f"\n📊 Log Analysis:")
+                print(f"\n CHART:  Log Analysis:")
                 print(f"   Total log lines: {analysis['total_lines']}")
                 print(f"   ERROR logs: {len(analysis['error_logs'])}")
                 print(f"   ClickHouse ERROR logs: {len(analysis['clickhouse_errors'])}")
                 
                 # Key test: Required service should log ERROR
                 if len(analysis['clickhouse_errors']) > 0:
-                    print(f"\n✅ CORRECT BEHAVIOR: Required service logged {len(analysis['clickhouse_errors'])} ERROR messages:")
+                    print(f"\n PASS:  CORRECT BEHAVIOR: Required service logged {len(analysis['clickhouse_errors'])} ERROR messages:")
                     for error_log in analysis['clickhouse_errors']:
                         print(f"      {error_log}")
                     return True  # Test passes - correct behavior
                 else:
-                    print(f"\n❌ MISSING ERROR LOGS: Required service should log ERROR but found none.")
+                    print(f"\n FAIL:  MISSING ERROR LOGS: Required service should log ERROR but found none.")
                     return False  # Test fails - missing expected errors
                 
     finally:
@@ -191,7 +191,7 @@ def test_error_handler_context_awareness():
     
     This should demonstrate that the error handler is not context-aware.
     """
-    print("\n🧪 Testing error handler context awareness...")
+    print("\n[U+1F9EA] Testing error handler context awareness...")
     
     # Test optional service scenario
     env = IsolatedEnvironment()
@@ -207,32 +207,32 @@ def test_error_handler_context_awareness():
             try:
                 _handle_connection_error(test_exception)
                 error_handler_raised = False
-                print("✓ Error handler did not raise (good for optional service)")
+                print("[U+2713] Error handler did not raise (good for optional service)")
             except ConnectionRefusedError:
                 error_handler_raised = True
-                print("✗ Error handler raised exception (bad for optional service)")
+                print("[U+2717] Error handler raised exception (bad for optional service)")
             
             # Analyze logs
             log_output = log_capture.getvalue()
             analysis = analyze_logs(log_output)
             
-            print(f"\n📊 Error Handler Log Analysis:")
+            print(f"\n CHART:  Error Handler Log Analysis:")
             print(f"   Total log lines: {analysis['total_lines']}")
             print(f"   ERROR logs: {len(analysis['error_logs'])}")
             print(f"   WARNING logs: {len(analysis['warning_logs'])}")
             
             # Check if error handler is context-aware
             if len(analysis['error_logs']) == 0 and len(analysis['warning_logs']) > 0:
-                print("✅ Error handler appears context-aware - uses WARNING for optional service")
+                print(" PASS:  Error handler appears context-aware - uses WARNING for optional service")
                 return True
             elif len(analysis['error_logs']) > 0:
-                print("❌ Error handler not context-aware - uses ERROR for optional service")
+                print(" FAIL:  Error handler not context-aware - uses ERROR for optional service")
                 print("   ERROR logs found:")
                 for error_log in analysis['error_logs']:
                     print(f"      {error_log}")
                 return False
             else:
-                print("⚠️  No clear logging pattern detected")
+                print(" WARNING: [U+FE0F]  No clear logging pattern detected")
                 return False
                 
     finally:
@@ -241,7 +241,7 @@ def test_error_handler_context_awareness():
 
 async def main():
     """Run validation tests."""
-    print("🚀 ClickHouse Logging Test Validation")
+    print("[U+1F680] ClickHouse Logging Test Validation")
     print("=====================================")
     print("This script validates that our failing tests correctly demonstrate the logging issue.")
     print()
@@ -256,23 +256,23 @@ async def main():
         
         # Summary
         print("\n" + "="*60)
-        print("📋 VALIDATION SUMMARY")
+        print("[U+1F4CB] VALIDATION SUMMARY")
         print("="*60)
         
         if not results['optional_service']:
-            print("✅ Optional service test FAILED as expected - demonstrates the issue exists")
+            print(" PASS:  Optional service test FAILED as expected - demonstrates the issue exists")
         else:
-            print("⚠️  Optional service test PASSED - issue may already be fixed")
+            print(" WARNING: [U+FE0F]  Optional service test PASSED - issue may already be fixed")
             
         if results['required_service']:
-            print("✅ Required service test PASSED as expected - correct ERROR behavior")
+            print(" PASS:  Required service test PASSED as expected - correct ERROR behavior")
         else:
-            print("❌ Required service test FAILED - unexpected behavior")
+            print(" FAIL:  Required service test FAILED - unexpected behavior")
             
         if not results['error_handler']:
-            print("✅ Error handler test shows lack of context awareness - demonstrates the issue")
+            print(" PASS:  Error handler test shows lack of context awareness - demonstrates the issue")
         else:
-            print("⚠️  Error handler test shows context awareness - fix may be implemented")
+            print(" WARNING: [U+FE0F]  Error handler test shows context awareness - fix may be implemented")
         
         # Overall assessment
         issues_demonstrated = sum(1 for result in [
@@ -281,17 +281,17 @@ async def main():
             not results['error_handler']      # Should fail to demonstrate issue
         ])
         
-        print(f"\n🎯 ASSESSMENT: {issues_demonstrated}/3 tests demonstrate expected behavior")
+        print(f"\n TARGET:  ASSESSMENT: {issues_demonstrated}/3 tests demonstrate expected behavior")
         
         if issues_demonstrated >= 2:
-            print("✅ Test suite successfully demonstrates the ClickHouse logging issue")
+            print(" PASS:  Test suite successfully demonstrates the ClickHouse logging issue")
             print("   Ready for fix implementation!")
         else:
-            print("⚠️  Test results suggest issue may already be partially addressed")
+            print(" WARNING: [U+FE0F]  Test results suggest issue may already be partially addressed")
             print("   Review current implementation before proceeding with fix")
             
     except Exception as e:
-        print(f"\n❌ VALIDATION ERROR: {e}")
+        print(f"\n FAIL:  VALIDATION ERROR: {e}")
         import traceback
         traceback.print_exc()
         return 1

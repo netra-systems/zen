@@ -94,7 +94,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         auth_service2 = get_unified_auth_service()
         assert auth_service is auth_service2  # Same instance
         
-        print("✅ SSOT COMPLIANCE: UnifiedAuthenticationService is properly configured as SSOT")
+        print(" PASS:  SSOT COMPLIANCE: UnifiedAuthenticationService is properly configured as SSOT")
     
     @pytest.mark.asyncio
     async def test_websocket_authenticator_uses_ssot(self):
@@ -111,7 +111,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         auth_service = get_unified_auth_service()
         assert ws_authenticator._auth_service is auth_service  # Same SSOT instance
         
-        print("✅ SSOT COMPLIANCE: WebSocket authenticator properly uses unified auth service")
+        print(" PASS:  SSOT COMPLIANCE: WebSocket authenticator properly uses unified auth service")
     
     @pytest.mark.asyncio 
     async def test_websocket_authentication_success_flow(self, mock_websocket):
@@ -149,7 +149,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             assert "read" in auth_data.permissions
             assert "write" in auth_data.permissions
             
-            print("✅ SSOT COMPLIANCE: WebSocket authentication success flow works correctly")
+            print(" PASS:  SSOT COMPLIANCE: WebSocket authentication success flow works correctly")
     
     @pytest.mark.asyncio
     async def test_websocket_authentication_failure_flow(self, mock_websocket_no_token):
@@ -172,7 +172,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         assert auth_data.success is False
         assert auth_data.error_code == "NO_TOKEN"
         
-        print("✅ SSOT COMPLIANCE: WebSocket authentication failure flow works correctly")
+        print(" PASS:  SSOT COMPLIANCE: WebSocket authentication failure flow works correctly")
     
     @pytest.mark.asyncio
     async def test_websocket_authentication_invalid_token(self, mock_websocket):
@@ -197,7 +197,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             assert auth_result.error_code == "VALIDATION_FAILED"
             assert "Invalid token signature" in auth_result.error_message
             
-            print("✅ SSOT COMPLIANCE: Invalid token handling works correctly")
+            print(" PASS:  SSOT COMPLIANCE: Invalid token handling works correctly")
     
     @pytest.mark.asyncio
     async def test_no_duplicate_authentication_paths_exist(self):
@@ -211,7 +211,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             # Check that old WebSocketAuthenticator is not being used
             if hasattr(old_auth_module, 'WebSocketAuthenticator'):
                 # This should not happen - old auth should be eliminated
-                pytest.fail("❌ SSOT VIOLATION: Old WebSocketAuthenticator still exists in websocket_core/auth.py")
+                pytest.fail(" FAIL:  SSOT VIOLATION: Old WebSocketAuthenticator still exists in websocket_core/auth.py")
                 
         except ImportError:
             # Good - old auth module eliminated
@@ -226,9 +226,9 @@ class TestSSOTWebSocketAuthenticationCompliance:
         # These methods should delegate to SSOT, not implement JWT validation directly
         if hasattr(extractor, '_legacy_jwt_validation'):
             # Legacy method should be removed
-            pytest.fail("❌ SSOT VIOLATION: Legacy JWT validation method still exists")
+            pytest.fail(" FAIL:  SSOT VIOLATION: Legacy JWT validation method still exists")
         
-        print("✅ SSOT COMPLIANCE: No duplicate authentication paths detected")
+        print(" PASS:  SSOT COMPLIANCE: No duplicate authentication paths detected")
     
     @pytest.mark.asyncio
     async def test_authentication_statistics_tracking(self):
@@ -249,7 +249,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         assert "ssot_compliance" in initial_ws_stats
         assert initial_ws_stats["ssot_compliance"]["ssot_compliant"] is True
         
-        print("✅ SSOT COMPLIANCE: Authentication statistics tracking works correctly")
+        print(" PASS:  SSOT COMPLIANCE: Authentication statistics tracking works correctly")
     
     @pytest.mark.asyncio
     async def test_unified_authentication_health_check(self):
@@ -267,7 +267,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
         assert "ssot_compliant" in health_status
         assert health_status["ssot_compliant"] is True
         
-        print("✅ SSOT COMPLIANCE: Unified authentication health check works correctly")
+        print(" PASS:  SSOT COMPLIANCE: Unified authentication health check works correctly")
     
     @pytest.mark.asyncio
     async def test_websocket_auth_context_tracking(self, mock_websocket):
@@ -299,7 +299,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             # WebSocket authentication count should have increased
             assert updated_websocket_count == initial_websocket_count + 1
             
-            print("✅ SSOT COMPLIANCE: WebSocket authentication context tracking works correctly")
+            print(" PASS:  SSOT COMPLIANCE: WebSocket authentication context tracking works correctly")
     
     @pytest.mark.asyncio 
     async def test_jwt_token_extraction_methods(self, auth_manager):
@@ -341,7 +341,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             auth_result = await ws_authenticator.authenticate_websocket_connection(websocket2)
             assert auth_result.success is True
         
-        print("✅ SSOT COMPLIANCE: JWT token extraction methods work correctly")
+        print(" PASS:  SSOT COMPLIANCE: JWT token extraction methods work correctly")
     
     def test_ssot_enforcement_imports(self):
         """Test that only SSOT-compliant imports are allowed."""
@@ -367,7 +367,7 @@ class TestSSOTWebSocketAuthenticationCompliance:
             # Good - old auth module eliminated completely
             pass
         
-        print("✅ SSOT COMPLIANCE: Import restrictions properly enforced")
+        print(" PASS:  SSOT COMPLIANCE: Import restrictions properly enforced")
 
 
 @pytest.mark.integration
@@ -400,10 +400,10 @@ class TestSSOTWebSocketAuthenticationEndToEnd:
             assert user_context.user_id == "integration-test-user"
             assert user_context.websocket_client_id.startswith("ws_integrat_")
             
-            print("✅ E2E SSOT COMPLIANCE: Full WebSocket authentication flow works with real services")
+            print(" PASS:  E2E SSOT COMPLIANCE: Full WebSocket authentication flow works with real services")
             
         except Exception as e:
-            pytest.fail(f"❌ E2E SSOT FAILURE: WebSocket authentication flow failed: {e}")
+            pytest.fail(f" FAIL:  E2E SSOT FAILURE: WebSocket authentication flow failed: {e}")
     
     @pytest.mark.asyncio
     async def test_ssot_authentication_prevents_chaos_regression(self):
@@ -445,7 +445,7 @@ class TestSSOTWebSocketAuthenticationEndToEnd:
             assert stats["statistics"]["total_attempts"] >= 5
             assert stats["context_distribution"]["websocket"] >= 5
             
-            print("✅ SSOT COMPLIANCE: Authentication consistency maintained - no chaos regression")
+            print(" PASS:  SSOT COMPLIANCE: Authentication consistency maintained - no chaos regression")
 
 
 if __name__ == "__main__":

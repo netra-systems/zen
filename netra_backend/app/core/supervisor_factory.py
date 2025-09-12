@@ -172,7 +172,7 @@ async def create_supervisor_core(
         supervisor._tool_classes = tool_classes  # Store for UserContext-based creation
         
         logger.info(
-            f"✅ Created isolated SupervisorAgent via core factory: "
+            f" PASS:  Created isolated SupervisorAgent via core factory: "
             f"user={user_id}, thread={thread_id}, run={run_id}"
         )
         return supervisor
@@ -317,7 +317,7 @@ async def create_streaming_supervisor(
                 )
                 
                 logger.info(
-                    f"✅ Created streaming supervisor for user {user_id[:8]}..., "
+                    f" PASS:  Created streaming supervisor for user {user_id[:8]}..., "
                     f"run {run_id[:8]}..."
                 )
                 return supervisor

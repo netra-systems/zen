@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for WebSocket Agent Handler (Golden Path SSOT)
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core agent execution bridge for all tiers
+- Segment: All (Free  ->  Enterprise) - Core agent execution bridge for all tiers
 - Business Goal: Agent Integration & Chat Value Delivery
 - Value Impact: Connects WebSocket infrastructure to agent execution (90% of platform value)
 - Revenue Impact: CRITICAL - Enables AI-powered interactions that drive $500K+ ARR
@@ -14,7 +14,7 @@ proper execution context isolation for multi-user environments.
 Test Coverage Focus:
 - Message-to-agent request conversion (ensures user intent reaches AI agents)
 - Multi-user execution context isolation (prevents cross-user context leakage)
-- Agent execution flow integration (validates end-to-end message→agent→response flow)
+- Agent execution flow integration (validates end-to-end message -> agent -> response flow)
 - Error handling and graceful degradation (prevents system failures from blocking users)
 - Performance validation (ensures low-latency message processing)
 

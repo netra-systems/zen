@@ -77,7 +77,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         assert validation_result.validation_passed["user_permissions"] is True
         assert validation_result.validation_passed["agent_type"] is True
         
-        print("✅ Agent execution request validation success test passed")
+        print(" PASS:  Agent execution request validation success test passed")
 
     def test_agent_execution_request_validation_failure_insufficient_permissions(self):
         """
@@ -115,7 +115,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         assert "permission" in validation_result.error_message.lower()
         assert validation_result.validation_passed["user_permissions"] is False
         
-        print("✅ Agent execution permission failure test passed")
+        print(" PASS:  Agent execution permission failure test passed")
 
     def test_agent_execution_context_creation_with_isolation(self):
         """
@@ -169,7 +169,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
             assert isinstance(permissions, list)
             assert len(permissions) > 0
         
-        print("✅ Agent execution context isolation test passed")
+        print(" PASS:  Agent execution context isolation test passed")
 
     def test_agent_execution_business_rule_validation(self):
         """
@@ -228,7 +228,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
                 for expected_feature in scenario["expected_features"]:
                     assert expected_feature in available_features
                     
-            print(f"✅ Business rule validation test passed for {scenario['user_tier']} tier")
+            print(f" PASS:  Business rule validation test passed for {scenario['user_tier']} tier")
 
     def test_agent_execution_input_sanitization_security(self):
         """
@@ -281,7 +281,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
                 # Legitimate input should pass through
                 assert sanitized_input == test_case["user_input"]
                 
-            print(f"✅ Input sanitization test passed for {test_case['name']}")
+            print(f" PASS:  Input sanitization test passed for {test_case['name']}")
 
     def test_agent_execution_result_structure_validation(self):
         """
@@ -344,7 +344,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         assert "execution_time" in metrics
         assert "improvement_estimate" in metrics
         
-        print("✅ Agent execution result structure validation test passed")
+        print(" PASS:  Agent execution result structure validation test passed")
 
     def test_agent_execution_timeout_business_requirements(self):
         """
@@ -375,7 +375,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
             assert calculated_timeout <= 300  # Max 5 minutes even for enterprise
             assert calculated_timeout >= 10   # Min 10 seconds for any operation
             
-            print(f"✅ Timeout validation test passed for {scenario['user_tier']} tier ({calculated_timeout}s)")
+            print(f" PASS:  Timeout validation test passed for {scenario['user_tier']} tier ({calculated_timeout}s)")
 
     def test_agent_execution_queue_prioritization_business_logic(self):
         """
@@ -430,7 +430,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         
         assert enterprise_priority > early_priority > free_priority
         
-        print("✅ Agent execution queue prioritization test passed")
+        print(" PASS:  Agent execution queue prioritization test passed")
 
     def test_agent_execution_resource_limits_per_tier(self):
         """
@@ -476,7 +476,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
             assert resource_limits["concurrent_execution_limit"] > 0
             assert resource_limits["memory_limit_mb"] >= 128  # Minimum for any operation
             
-            print(f"✅ Resource limits test passed for {scenario['user_tier']} tier")
+            print(f" PASS:  Resource limits test passed for {scenario['user_tier']} tier")
 
     def test_agent_execution_error_recovery_business_logic(self):
         """
@@ -529,7 +529,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
             for jargon in technical_jargon:
                 assert jargon not in user_message_lower
                 
-            print(f"✅ Error recovery test passed for {scenario['error_type']}")
+            print(f" PASS:  Error recovery test passed for {scenario['error_type']}")
 
     def test_agent_execution_audit_trail_compliance(self):
         """
@@ -576,7 +576,7 @@ class TestAgentExecutionValidationBusinessLogic(SSotBaseTestCase):
         assert len(audit_metadata["request_hash"]) > 0  # Request fingerprint
         assert audit_metadata["session_id"] is not None  # Session tracking
         
-        print("✅ Agent execution audit trail compliance test passed")
+        print(" PASS:  Agent execution audit trail compliance test passed")
 
 
 if __name__ == "__main__":

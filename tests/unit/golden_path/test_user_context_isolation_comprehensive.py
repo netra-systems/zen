@@ -167,7 +167,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
         unique_addresses = set(context_memory_addresses)
         assert len(unique_addresses) == len(contexts), "All contexts should have unique memory addresses"
         
-        logger.info(f"✅ User context creation and isolation validated: {len(contexts)} contexts")
+        logger.info(f" PASS:  User context creation and isolation validated: {len(contexts)} contexts")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -240,7 +240,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
             assert "timestamp" in event, "Audit event should contain timestamp"
             assert "security_level" in event, "Audit event should contain security_level"
         
-        logger.info("✅ UserContextManager security validation passed")
+        logger.info(" PASS:  UserContextManager security validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -343,7 +343,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
                     assert f"user_{i}" in user_i_data, f"User {i} data should contain user_{i}"
                     assert f"user_{j}" in user_j_data, f"User {j} data should contain user_{j}"
         
-        logger.info(f"✅ Concurrent user execution isolation validated: {num_concurrent_users} users, {operations_per_user} operations each")
+        logger.info(f" PASS:  Concurrent user execution isolation validated: {num_concurrent_users} users, {operations_per_user} operations each")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -431,7 +431,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
         # Should garbage collect at least 80% of contexts
         assert gc_efficiency >= 0.8, f"Garbage collection insufficient: {gc_efficiency:.2%} of contexts collected"
         
-        logger.info(f"✅ Memory isolation and garbage collection validated: {memory_efficiency:.2%} memory released, {gc_efficiency:.2%} contexts collected")
+        logger.info(f" PASS:  Memory isolation and garbage collection validated: {memory_efficiency:.2%} memory released, {gc_efficiency:.2%} contexts collected")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -559,7 +559,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
         final_count = operation_counter["count"]
         assert final_count == expected_total_operations, f"Counter mismatch: expected {expected_total_operations}, got {final_count}"
         
-        logger.info(f"✅ Thread safety validation passed: {successful_operations}/{total_operations} successful, {race_condition_rate:.3%} race conditions, {error_rate:.3%} errors")
+        logger.info(f" PASS:  Thread safety validation passed: {successful_operations}/{total_operations} successful, {race_condition_rate:.3%} race conditions, {error_rate:.3%} errors")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -640,7 +640,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
         assert not hasattr(context, '_db_session') or context._db_session is None, "Database session should be cleared"
         assert not hasattr(context, '_redis_client') or context._redis_client is None, "Redis client should be cleared"
         
-        logger.info("✅ Context lifecycle management and cleanup validation passed")
+        logger.info(" PASS:  Context lifecycle management and cleanup validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -754,7 +754,7 @@ class TestUserContextIsolationComprehensive(SSotAsyncTestCase):
                     other_data = other_result["execution_data"]
                     assert execution_data["user_data"] != other_data["user_data"], f"Data leak between results {i} and {j}"
         
-        logger.info(f"✅ ExecutionEngineFactory isolation integration validated: {num_users} users")
+        logger.info(f" PASS:  ExecutionEngineFactory isolation integration validated: {num_users} users")
 
     def _get_memory_usage(self) -> int:
         """Get current memory usage in bytes."""

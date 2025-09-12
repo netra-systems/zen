@@ -36,13 +36,13 @@ def test_defensive_auth_integration():
     try:
         health_response = requests.get(f"{base_url}/health", timeout=10)
         if health_response.status_code == 200:
-            print("   ✅ Service is healthy")
+            print("    PASS:  Service is healthy")
             results["health_check"] = True
         else:
-            print(f"   ❌ Service unhealthy: {health_response.status_code}")
+            print(f"    FAIL:  Service unhealthy: {health_response.status_code}")
             return results
     except Exception as e:
-        print(f"   ❌ Health check failed: {e}")
+        print(f"    FAIL:  Health check failed: {e}")
         return results
     
     # Test 2: Test defensive_auth ID validation locally (confirming deployed fix)
@@ -64,19 +64,19 @@ def test_defensive_auth_integration():
         all_passed = True
         for pattern in test_patterns:
             is_valid = is_valid_id_format(pattern)
-            status = "✅ VALID" if is_valid else "❌ INVALID"
+            status = " PASS:  VALID" if is_valid else " FAIL:  INVALID"
             print(f"     {status}: {pattern}")
             if not is_valid:
                 all_passed = False
         
         if all_passed:
-            print("   ✅ All defensive_auth patterns validated successfully")
+            print("    PASS:  All defensive_auth patterns validated successfully")
             results["id_validation"] = True
         else:
-            print("   ❌ Some defensive_auth patterns failed validation")
+            print("    FAIL:  Some defensive_auth patterns failed validation")
             return results
     except Exception as e:
-        print(f"   ❌ ID validation test failed: {e}")
+        print(f"    FAIL:  ID validation test failed: {e}")
         return results
     
     # Test 3: Verify no regression in existing patterns  
@@ -93,31 +93,31 @@ def test_defensive_auth_integration():
         no_regression = True
         for pattern in existing_patterns:
             is_valid = is_valid_id_format(pattern)
-            status = "✅ VALID" if is_valid else "❌ INVALID"
+            status = " PASS:  VALID" if is_valid else " FAIL:  INVALID"
             print(f"     {status}: {pattern}")
             if not is_valid:
                 no_regression = False
         
         if no_regression:
-            print("   ✅ No regression detected in existing patterns")
+            print("    PASS:  No regression detected in existing patterns")
             results["no_regression"] = True
         else:
-            print("   ❌ Regression detected in existing patterns")
+            print("    FAIL:  Regression detected in existing patterns")
             return results
     except Exception as e:
-        print(f"   ❌ Regression test failed: {e}")
+        print(f"    FAIL:  Regression test failed: {e}")
         return results
     
     # Overall assessment
     if results["health_check"] and results["id_validation"] and results["no_regression"]:
         results["overall_success"] = True
-        print("\n=== ✅ INTEGRATION TEST PASSED ===")
-        print("✅ Service healthy in staging")
-        print("✅ defensive_auth patterns now validate correctly")
-        print("✅ No regression in existing functionality")
-        print("✅ Issue #406 fix successfully deployed and validated")
+        print("\n===  PASS:  INTEGRATION TEST PASSED ===")
+        print(" PASS:  Service healthy in staging")
+        print(" PASS:  defensive_auth patterns now validate correctly")
+        print(" PASS:  No regression in existing functionality")
+        print(" PASS:  Issue #406 fix successfully deployed and validated")
     else:
-        print("\n=== ❌ INTEGRATION TEST FAILED ===")
+        print("\n===  FAIL:  INTEGRATION TEST FAILED ===")
     
     return results
 

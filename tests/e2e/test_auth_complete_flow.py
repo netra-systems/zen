@@ -163,7 +163,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: This test validates the complete OAuth authentication journey
         that enables users to access the AI optimization platform.
         """
-        logger.info("🔐 Starting complete OAuth flow test")
+        logger.info("[U+1F510] Starting complete OAuth flow test")
         
         for provider in ["google", "github"]:
             logger.info(f"Testing OAuth flow for {provider}")
@@ -197,7 +197,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
             profile = await self._validate_token(callback_result["access_token"])
             assert profile["email"] == user_data["email"], "Profile email should match OAuth email"
             
-            logger.info(f"✅ {provider} OAuth flow completed successfully")
+            logger.info(f" PASS:  {provider} OAuth flow completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -209,7 +209,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: JWT tokens are the foundation of API authentication
         across the entire platform.
         """
-        logger.info("🔑 Starting JWT authentication test")
+        logger.info("[U+1F511] Starting JWT authentication test")
         
         # Step 1: Create test user and get initial tokens
         user_email = f"jwt_test_{uuid.uuid4().hex[:8]}@example.com"
@@ -248,7 +248,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         
         logger.info("Note: Old token invalidation test skipped - focus on core auth flow")
         
-        logger.info("✅ JWT authentication test completed successfully")
+        logger.info(" PASS:  JWT authentication test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -260,7 +260,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: WebSocket authentication enables real-time agent interactions
         which deliver core business value through chat functionality.
         """
-        logger.info("🔌 Starting WebSocket authentication test")
+        logger.info("[U+1F50C] Starting WebSocket authentication test")
         
         # Step 1: Create authenticated user
         user_email = f"ws_test_{uuid.uuid4().hex[:8]}@example.com"
@@ -336,7 +336,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         except (ConnectionClosedError, WebSocketException) as e:
             pytest.fail(f"WebSocket connection failed: {e}")
         
-        logger.info("✅ WebSocket authentication test completed successfully")
+        logger.info(" PASS:  WebSocket authentication test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -348,7 +348,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: Security testing ensures the platform cannot be compromised
         by malicious authentication attempts.
         """
-        logger.info("🔒 Starting authentication security edge cases test")
+        logger.info("[U+1F512] Starting authentication security edge cases test")
         
         # Test 1: SQL Injection attempts in email field
         malicious_emails = [
@@ -400,7 +400,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         # Test 4: Rate limiting (if implemented)
         await self._test_rate_limiting(user_email)
         
-        logger.info("✅ Authentication security edge cases test completed successfully")
+        logger.info(" PASS:  Authentication security edge cases test completed successfully")
     
     async def _test_rate_limiting(self, user_email: str):
         """Test rate limiting on authentication endpoints."""
@@ -435,7 +435,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: Race condition testing ensures system stability under
         concurrent user authentication load.
         """
-        logger.info("🏁 Starting multi-user race condition test")
+        logger.info("[U+1F3C1] Starting multi-user race condition test")
         
         # Test concurrent user creation
         concurrent_users = 5
@@ -493,7 +493,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         
         assert len(websocket_results) >= 2, "At least 2 concurrent WebSocket connections should succeed"
         
-        logger.info("✅ Multi-user race condition test completed successfully")
+        logger.info(" PASS:  Multi-user race condition test completed successfully")
     
     async def _test_concurrent_websocket_connection(self, access_token: str, user_email: str) -> bool:
         """Test concurrent WebSocket connection for a user."""
@@ -539,7 +539,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: Token lifecycle testing ensures proper token management
         across the entire user session lifecycle.
         """
-        logger.info("🔄 Starting comprehensive token lifecycle test")
+        logger.info(" CYCLE:  Starting comprehensive token lifecycle test")
         
         # Step 1: Create user and get initial tokens
         user_email = f"token_lifecycle_{uuid.uuid4().hex[:8]}@example.com"
@@ -609,7 +609,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
             await self._refresh_tokens(current_refresh_token)
         assert exc_info.value.status == 401, "Refresh token should be invalid after logout"
         
-        logger.info("✅ Comprehensive token lifecycle test completed successfully")
+        logger.info(" PASS:  Comprehensive token lifecycle test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -621,7 +621,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: WebSocket authentication edge cases ensure reliable
         real-time communication under various failure scenarios.
         """
-        logger.info("🔌 Starting WebSocket authentication edge cases test")
+        logger.info("[U+1F50C] Starting WebSocket authentication edge cases test")
         
         # Create test user
         user_email = f"ws_edge_test_{uuid.uuid4().hex[:8]}@example.com"
@@ -708,7 +708,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         except Exception as e:
             logger.info(f"WebSocket edge case test handled connection failure as expected: {e}")
         
-        logger.info("✅ WebSocket authentication edge cases test completed successfully")
+        logger.info(" PASS:  WebSocket authentication edge cases test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -720,7 +720,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: Multi-user isolation is mandatory for security and data privacy
         in the AI optimization platform.
         """
-        logger.info("👥 Starting multi-user isolation test")
+        logger.info("[U+1F465] Starting multi-user isolation test")
         
         # Step 1: Create multiple test users
         users_data = []
@@ -799,7 +799,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
                 except Exception:
                     pass
         
-        logger.info("✅ Multi-user isolation test completed successfully")
+        logger.info(" PASS:  Multi-user isolation test completed successfully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -811,7 +811,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
         CRITICAL: Session management ensures secure, stateful authentication
         across the platform.
         """
-        logger.info("🕒 Starting session management test")
+        logger.info("[U+1F552] Starting session management test")
         
         # Step 1: Create test user and session
         user_email = f"session_test_{uuid.uuid4().hex[:8]}@example.com"
@@ -872,7 +872,7 @@ class TestAuthCompleteFlow(BaseE2ETest):
             await self._validate_token(access_token)
         assert exc_info.value.status == 401, "Token should be invalid after logout"
         
-        logger.info("✅ Session management test completed successfully")
+        logger.info(" PASS:  Session management test completed successfully")
     
     # Helper methods for test implementation
     

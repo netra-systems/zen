@@ -59,7 +59,7 @@ class TestInheritanceRefactorValidation:
         assert validation_bases[0] == BaseAgent, f"ValidationSubAgent should only inherit from BaseAgent, got {validation_bases[0]}"
     
     def test_mro_depth_acceptable(self, data_agent, validation_agent):
-        """Test that Method Resolution Order depth is now acceptable (≤ 3)."""
+        """Test that Method Resolution Order depth is now acceptable ( <=  3)."""
         for agent_name, agent in [("DataSubAgent", data_agent), ("ValidationSubAgent", validation_agent)]:
             mro = agent.__class__.__mro__
             

@@ -96,17 +96,17 @@ class StagingLoginTester:
                 response = self.session.get(url, timeout=10)
                 
                 if response.status_code == 200:
-                    print(f"  ✓ {name}: Success")
+                    print(f"  [U+2713] {name}: Success")
                     results["endpoints"][endpoint] = {"status": "success", "code": 200}
                 elif response.status_code == 401:
-                    print(f"  ⚠ {name}: Unauthorized (mock auth not enabled)")
+                    print(f"   WARNING:  {name}: Unauthorized (mock auth not enabled)")
                     results["endpoints"][endpoint] = {"status": "unauthorized", "code": 401}
                 else:
-                    print(f"  ✗ {name}: Failed ({response.status_code})")
+                    print(f"  [U+2717] {name}: Failed ({response.status_code})")
                     results["endpoints"][endpoint] = {"status": "failed", "code": response.status_code}
                     
             except Exception as e:
-                print(f"  ✗ {name}: Error - {e}")
+                print(f"  [U+2717] {name}: Error - {e}")
                 results["endpoints"][endpoint] = {"status": "error", "error": str(e)}
         
         return results
@@ -154,17 +154,17 @@ class StagingLoginTester:
                 response = self.session.get(url, timeout=10)
                 
                 if response.status_code == 200:
-                    print(f"  ✓ {name}: Available")
+                    print(f"  [U+2713] {name}: Available")
                     results["endpoints"][endpoint] = {
                         "status": "available",
                         "data": response.json() if response.headers.get("content-type", "").startswith("application/json") else response.text[:100]
                     }
                 else:
-                    print(f"  ✗ {name}: Status {response.status_code}")
+                    print(f"  [U+2717] {name}: Status {response.status_code}")
                     results["endpoints"][endpoint] = {"status": "unavailable", "code": response.status_code}
                     
             except Exception as e:
-                print(f"  ✗ {name}: {e}")
+                print(f"  [U+2717] {name}: {e}")
                 results["endpoints"][endpoint] = {"status": "error", "error": str(e)}
         
         return results
@@ -198,9 +198,9 @@ class StagingLoginTester:
                     try:
                         data = response.json()
                         status = data.get("status", "unknown")
-                        print(f"  ✓ {service_name}: {status}")
+                        print(f"  [U+2713] {service_name}: {status}")
                     except:
-                        print(f"  ✓ {service_name}: OK (non-JSON response)")
+                        print(f"  [U+2713] {service_name}: OK (non-JSON response)")
                         status = "ok"
                     
                     results["services"][service_name] = {
@@ -209,7 +209,7 @@ class StagingLoginTester:
                         "code": 200
                     }
                 else:
-                    print(f"  ✗ {service_name}: HTTP {response.status_code}")
+                    print(f"  [U+2717] {service_name}: HTTP {response.status_code}")
                     results["services"][service_name] = {
                         "url": url,
                         "status": "unhealthy",
@@ -217,14 +217,14 @@ class StagingLoginTester:
                     }
                     
             except requests.exceptions.Timeout:
-                print(f"  ✗ {service_name}: Timeout")
+                print(f"  [U+2717] {service_name}: Timeout")
                 results["services"][service_name] = {
                     "url": url,
                     "status": "timeout",
                     "error": "Request timed out"
                 }
             except Exception as e:
-                print(f"  ✗ {service_name}: Error - {e}")
+                print(f"  [U+2717] {service_name}: Error - {e}")
                 results["services"][service_name] = {
                     "url": url,
                     "status": "error",
@@ -264,32 +264,32 @@ class StagingLoginTester:
                     location = response.headers.get("Location", "")
                     
                     if provider == "google" and "accounts.google.com" in location:
-                        print(f"  ✓ Google OAuth: Redirects correctly")
+                        print(f"  [U+2713] Google OAuth: Redirects correctly")
                         results["providers"]["google"] = {
                             "status": "configured",
                             "redirect_url": location[:100] + "..."
                         }
                     elif provider == "github" and "github.com" in location:
-                        print(f"  ✓ GitHub OAuth: Redirects correctly")
+                        print(f"  [U+2713] GitHub OAuth: Redirects correctly")
                         results["providers"]["github"] = {
                             "status": "configured",
                             "redirect_url": location[:100] + "..."
                         }
                     else:
-                        print(f"  ⚠ {provider.capitalize()}: Unexpected redirect")
+                        print(f"   WARNING:  {provider.capitalize()}: Unexpected redirect")
                         results["providers"][provider] = {
                             "status": "misconfigured",
                             "redirect_url": location[:100] + "..."
                         }
                 else:
-                    print(f"  ✗ {provider.capitalize()}: No redirect ({response.status_code})")
+                    print(f"  [U+2717] {provider.capitalize()}: No redirect ({response.status_code})")
                     results["providers"][provider] = {
                         "status": "not_configured",
                         "code": response.status_code
                     }
                     
             except Exception as e:
-                print(f"  ✗ {provider.capitalize()}: Error - {e}")
+                print(f"  [U+2717] {provider.capitalize()}: Error - {e}")
                 results["providers"][provider] = {
                     "status": "error",
                     "error": str(e)
@@ -327,7 +327,7 @@ class StagingLoginTester:
                 all_results["tests"][test_name] = result
                 self.test_results.append(result)
             except Exception as e:
-                print(f"\n✗ Test '{test_name}' failed: {e}")
+                print(f"\n[U+2717] Test '{test_name}' failed: {e}")
                 all_results["tests"][test_name] = {"error": str(e)}
         
         # Generate summary
@@ -338,9 +338,9 @@ class StagingLoginTester:
         # Check service health
         health_test = all_results["tests"].get("health", {})
         if health_test.get("overall_health") == "healthy":
-            print("✓ All services are healthy")
+            print("[U+2713] All services are healthy")
         else:
-            print("⚠ Some services are degraded")
+            print(" WARNING:  Some services are degraded")
             for service, status in health_test.get("services", {}).items():
                 if status.get("status") not in ["healthy", "ok"]:
                     print(f"  - {service}: {status.get('status', 'unknown')}")
@@ -353,9 +353,9 @@ class StagingLoginTester:
         ]
         
         if configured_providers:
-            print(f"✓ OAuth configured for: {', '.join(configured_providers)}")
+            print(f"[U+2713] OAuth configured for: {', '.join(configured_providers)}")
         else:
-            print("✗ No OAuth providers configured")
+            print("[U+2717] No OAuth providers configured")
         
         # Provide recommendations
         print("\n" + "-" * 60)

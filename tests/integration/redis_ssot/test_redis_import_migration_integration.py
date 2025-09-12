@@ -10,7 +10,7 @@ BUSINESS IMPACT: CRITICAL - $500K+ ARR at risk
 - WebSocket 1011 errors from Redis connection race conditions
 - Memory leaks and connection pool conflicts
 
-CRITICAL MISSION: Validate import migration from 4 managers → 1 SSOT manager
+CRITICAL MISSION: Validate import migration from 4 managers  ->  1 SSOT manager
 - Primary SSOT: netra_backend.app.redis_manager.RedisManager
 - This test should FAIL until all 76 files migrate to SSOT imports
 - Validates NO files import from violation locations
@@ -99,7 +99,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         This test scans the entire codebase to catalog ALL Redis manager
         imports and identify which ones need migration to SSOT.
         """
-        logger.info("🔍 SCANNING: All Redis manager imports in codebase")
+        logger.info(" SEARCH:  SCANNING: All Redis manager imports in codebase")
         
         project_root = Path(__file__).parent.parent.parent.parent
         all_imports = self._scan_redis_imports_comprehensive(project_root)
@@ -113,7 +113,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         self.metrics.record_custom("violation_imports", violation_imports)
         self.metrics.record_custom("import_details", all_imports)
         
-        logger.info(f"📊 Redis Import Scan Results:")
+        logger.info(f" CHART:  Redis Import Scan Results:")
         logger.info(f"   - Total files with Redis imports: {total_files_with_redis}")
         logger.info(f"   - Files using SSOT: {ssot_imports}")
         logger.info(f"   - Files with violations: {violation_imports}")
@@ -128,7 +128,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         This test MUST FAIL until all files migrate from duplicate Redis
         managers to the single SSOT manager.
         """
-        logger.info("🚨 TESTING: No violation imports exist (Expected to FAIL)")
+        logger.info(" ALERT:  TESTING: No violation imports exist (Expected to FAIL)")
         
         if not hasattr(self, 'scan_results'):
             self.test_scan_all_redis_imports()  # Run scan if not already done
@@ -148,7 +148,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         
         # This should FAIL until migration is complete
         assert len(violation_files) == 0, (
-            f"🚨 IMPORT MIGRATION INCOMPLETE: {len(violation_files)} files still import "
+            f" ALERT:  IMPORT MIGRATION INCOMPLETE: {len(violation_files)} files still import "
             f"from duplicate Redis managers instead of SSOT. "
             f"Violation files: {violation_files[:10]}{'...' if len(violation_files) > 10 else ''}"
         )
@@ -162,7 +162,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         Validates files that need Redis functionality import ONLY from
         the primary SSOT manager location.
         """
-        logger.info("🔍 TESTING: All files use SSOT Redis imports")
+        logger.info(" SEARCH:  TESTING: All files use SSOT Redis imports")
         
         if not hasattr(self, 'scan_results'):
             self.test_scan_all_redis_imports()  # Run scan if not already done
@@ -185,11 +185,11 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         
         # Should approach 100% adoption (will fail during migration)
         assert ssot_adoption_rate >= 0.95, (
-            f"🚨 LOW SSOT ADOPTION: Only {ssot_adoption_rate:.1%} of files use SSOT imports. "
+            f" ALERT:  LOW SSOT ADOPTION: Only {ssot_adoption_rate:.1%} of files use SSOT imports. "
             f"Expected >95% adoption. Files needing migration: {len(files_needing_ssot)}"
         )
         
-        logger.info(f"✅ SSOT adoption rate: {ssot_adoption_rate:.1%} "
+        logger.info(f" PASS:  SSOT adoption rate: {ssot_adoption_rate:.1%} "
                    f"({len(files_using_ssot)} SSOT / {len(files_needing_ssot)} need migration)")
     
     def test_import_consistency_across_services(self):
@@ -199,7 +199,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         Validates that different services (backend, auth, analytics) all use
         the same SSOT import pattern for Redis functionality.
         """
-        logger.info("🔍 TESTING: Import consistency across services")
+        logger.info(" SEARCH:  TESTING: Import consistency across services")
         
         if not hasattr(self, 'scan_results'):
             self.test_scan_all_redis_imports()  # Run scan if not already done
@@ -214,12 +214,12 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         ]
         
         assert len(inconsistent_services) == 0, (
-            f"🚨 INCONSISTENT IMPORTS: {len(inconsistent_services)} services have inconsistent "
+            f" ALERT:  INCONSISTENT IMPORTS: {len(inconsistent_services)} services have inconsistent "
             f"Redis import patterns: {inconsistent_services}. "
             f"All services must use SSOT imports consistently."
         )
         
-        logger.info(f"✅ Import consistency validated across {len(service_consistency)} services")
+        logger.info(f" PASS:  Import consistency validated across {len(service_consistency)} services")
     
     def test_no_duplicate_redis_instantiations(self):
         """
@@ -228,7 +228,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         Validates that files using Redis create instances through proper
         factory patterns, not direct instantiation of multiple managers.
         """
-        logger.info("🔍 TESTING: No duplicate Redis instantiations")
+        logger.info(" SEARCH:  TESTING: No duplicate Redis instantiations")
         
         if not hasattr(self, 'scan_results'):
             self.test_scan_all_redis_imports()  # Run scan if not already done
@@ -239,12 +239,12 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         self.metrics.record_custom("violation_patterns", instantiation_violations)
         
         assert len(instantiation_violations) == 0, (
-            f"🚨 DUPLICATE INSTANTIATIONS: Found {len(instantiation_violations)} files with "
+            f" ALERT:  DUPLICATE INSTANTIATIONS: Found {len(instantiation_violations)} files with "
             f"duplicate Redis manager instantiations. Files must use single SSOT manager. "
             f"Violations: {list(instantiation_violations.keys())[:5]}"
         )
         
-        logger.info("✅ No duplicate Redis instantiations found")
+        logger.info(" PASS:  No duplicate Redis instantiations found")
     
     def test_expected_import_volume_realistic(self):
         """
@@ -253,7 +253,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         Validates the scope of import migration matches business expectations
         from GitHub issue analysis.
         """
-        logger.info("🔍 TESTING: Expected import volume matches reality")
+        logger.info(" SEARCH:  TESTING: Expected import volume matches reality")
         
         if not hasattr(self, 'scan_results'):
             self.test_scan_all_redis_imports()  # Run scan if not already done
@@ -270,12 +270,12 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         max_expected = int(expected_files * (1 + variance_threshold))
         
         assert min_expected <= total_redis_files <= max_expected, (
-            f"🚨 SCOPE MISMATCH: Found {total_redis_files} files with Redis imports, "
-            f"expected ~{expected_files} files (±{variance_threshold:.0%}). "
+            f" ALERT:  SCOPE MISMATCH: Found {total_redis_files} files with Redis imports, "
+            f"expected ~{expected_files} files ( +/- {variance_threshold:.0%}). "
             f"Import migration scope may be different than estimated."
         )
         
-        logger.info(f"✅ Import volume realistic: {total_redis_files} files "
+        logger.info(f" PASS:  Import volume realistic: {total_redis_files} files "
                    f"(expected ~{expected_files})")
     
     def _scan_redis_imports_comprehensive(self, project_root: Path) -> Dict[str, Dict[str, Any]]:
@@ -452,7 +452,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
         violations = self.metrics.get_custom("violation_imports", 0)
         ssot_adoption = self.metrics.get_custom("ssot_adoption_rate", 0.0)
         
-        logger.info(f"🚨 Redis Import Migration Test Complete:")
+        logger.info(f" ALERT:  Redis Import Migration Test Complete:")
         logger.info(f"   - Total files with Redis: {total_files}")
         logger.info(f"   - Files with violations: {violations}")
         logger.info(f"   - SSOT adoption rate: {ssot_adoption:.1%}")
@@ -461,7 +461,7 @@ class RedisImportMigrationIntegrationTest(SSotBaseTestCase):
             logger.error(f"DEPLOYMENT BLOCKER: {violations} files need import migration. "
                         f"GitHub Issue #190 import migration incomplete.")
         else:
-            logger.info("✅ Redis import migration appears complete")
+            logger.info(" PASS:  Redis import migration appears complete")
         
         super().tearDown()
 

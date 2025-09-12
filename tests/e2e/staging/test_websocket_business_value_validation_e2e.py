@@ -278,7 +278,7 @@ class TestStagingWebSocketBusinessValue:
                                 if indicator in results_text.lower())
             assert timeline_score >= 1, "Must provide implementation timeline guidance"
             
-            print(f"✅ Cost optimization business value validated")
+            print(f" PASS:  Cost optimization business value validated")
             print(f"   Events received: {len(business_value_events)}")
             print(f"   Cost savings identified: {len(cost_savings)}")
             print(f"   Recommendations provided: {len(recommendations)}")
@@ -433,7 +433,7 @@ class TestStagingWebSocketBusinessValue:
             business_value_assessment = validator.assess_business_value_score(roi_results)
             assert business_value_assessment["percentage"] >= 65, f"ROI analysis must score >= 65%, got {business_value_assessment['percentage']:.1f}%"
             
-            print(f"✅ Data optimization ROI validation completed")
+            print(f" PASS:  Data optimization ROI validation completed")
             print(f"   Analysis events: {len(roi_analysis_events)}")
             print(f"   ROI calculations found: {len(roi_calculations)}")
             print(f"   Data optimization indicators: {data_optimization_score}")
@@ -620,7 +620,7 @@ class TestStagingWebSocketBusinessValue:
             premium_score = sum(1 for indicator in premium_indicators if indicator in plan_text)
             assert premium_score >= 5, f"Must justify premium pricing with enterprise features, got {premium_score}"
             
-            print(f"✅ Enterprise strategic planning value validated")
+            print(f" PASS:  Enterprise strategic planning value validated")
             print(f"   Strategic events: {len(strategic_events)}")
             print(f"   Strategic components: {component_score}/10")
             print(f"   Executive insights: {executive_score}")

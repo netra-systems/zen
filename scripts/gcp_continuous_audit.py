@@ -64,13 +64,13 @@ class GCPContinuousAuditor:
                     conditions = svc_data.get('status', {}).get('conditions', [])
                     ready = any(c.get('type') == 'Ready' and c.get('status') == 'True' for c in conditions)
                     health_status[service] = 'healthy' if ready else 'unhealthy'
-                    print(f"  {service}: {'✓' if ready else '✗'} {health_status[service]}")
+                    print(f"  {service}: {'[U+2713]' if ready else '[U+2717]'} {health_status[service]}")
                 except:
                     health_status[service] = 'unknown'
                     print(f"  {service}: ? unknown")
             else:
                 health_status[service] = 'not_found'
-                print(f"  {service}: ✗ not found")
+                print(f"  {service}: [U+2717] not found")
         
         return health_status
     
@@ -194,14 +194,14 @@ class GCPContinuousAuditor:
             stdout, stderr, code = self.run_command(deploy_cmd, timeout=300)
             
             if code == 0:
-                print(f"    ✓ {service} deployed successfully")
+                print(f"    [U+2713] {service} deployed successfully")
                 self.fixes_applied.append({
                     'iteration': self.iteration,
                     'service': service,
                     'timestamp': datetime.now().isoformat()
                 })
             else:
-                print(f"    ✗ {service} deployment failed")
+                print(f"    [U+2717] {service} deployment failed")
     
     def run_iteration(self):
         """Run a single audit iteration"""
@@ -237,7 +237,7 @@ class GCPContinuousAuditor:
             print("\n  Waiting 60s for deployments to stabilize...")
             time.sleep(60)
         else:
-            print("\n✓ No errors requiring fixes")
+            print("\n[U+2713] No errors requiring fixes")
         
         # Step 5: Summary
         print(f"\n=== Iteration {self.iteration} Summary ===")
@@ -272,7 +272,7 @@ class GCPContinuousAuditor:
                     self.print_progress_report()
         
         except KeyboardInterrupt:
-            print("\n\n✗ Audit loop interrupted")
+            print("\n\n[U+2717] Audit loop interrupted")
         
         finally:
             self.print_final_report()

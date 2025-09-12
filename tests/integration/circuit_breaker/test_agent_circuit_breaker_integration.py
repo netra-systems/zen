@@ -5,7 +5,7 @@ This test suite validates that agent system circuit breakers work correctly
 with the unified circuit breaker system, ensuring that agent execution failures
 are properly handled and don't cascade due to compatibility layer issues.
 
-Test Philosophy: Integration tests that prove the agent → circuit breaker integration
+Test Philosophy: Integration tests that prove the agent  ->  circuit breaker integration
 works properly with the unified system, identifying any dependencies on missing
 resilience framework components.
 """

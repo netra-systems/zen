@@ -619,7 +619,7 @@ class GitHubIssueManager:
         body_sections = []
         
         # Header with automated notice
-        body_sections.append("## 🤖 Automated Issue Report")
+        body_sections.append("## [U+1F916] Automated Issue Report")
         body_sections.append("")
         body_sections.append(
             "This issue was automatically created from an error detected in the system. "
@@ -628,7 +628,7 @@ class GitHubIssueManager:
         body_sections.append("")
         
         # Error summary
-        body_sections.append("## 📋 Error Summary")
+        body_sections.append("## [U+1F4CB] Error Summary")
         body_sections.append("")
         body_sections.append(f"**Error Type:** `{error_context.error_type}`")
         body_sections.append(f"**Severity:** {categorization.severity.value.upper()}")
@@ -638,7 +638,7 @@ class GitHubIssueManager:
         body_sections.append("")
         
         # Error details
-        body_sections.append("## 🔍 Error Details")
+        body_sections.append("##  SEARCH:  Error Details")
         body_sections.append("")
         body_sections.append(f"**Message:** {error_context.error_message}")
         body_sections.append(f"**Timestamp:** {error_context.timestamp}")
@@ -646,7 +646,7 @@ class GitHubIssueManager:
         body_sections.append("")
         
         # Context information
-        body_sections.append("## 🌐 Context Information")
+        body_sections.append("## [U+1F310] Context Information")
         body_sections.append("")
         body_sections.append(f"**User ID:** `{error_context.user_id}`")
         
@@ -671,7 +671,7 @@ class GitHubIssueManager:
         
         # Stack trace
         if error_context.stack_trace:
-            body_sections.append("## 📊 Stack Trace")
+            body_sections.append("##  CHART:  Stack Trace")
             body_sections.append("")
             body_sections.append("```")
             body_sections.append(error_context.stack_trace)
@@ -679,7 +679,7 @@ class GitHubIssueManager:
             body_sections.append("")
         
         # Suggested actions
-        body_sections.append("## 🛠️ Suggested Actions")
+        body_sections.append("## [U+1F6E0][U+FE0F] Suggested Actions")
         body_sections.append("")
         suggested_actions = self._generate_suggested_actions(categorization, error_context)
         for action in suggested_actions:
@@ -687,7 +687,7 @@ class GitHubIssueManager:
         body_sections.append("")
         
         # Reproduction information
-        body_sections.append("## 🔄 Reproduction Information")
+        body_sections.append("##  CYCLE:  Reproduction Information")
         body_sections.append("")
         body_sections.append("To reproduce this error:")
         body_sections.append(f"1. User: `{error_context.user_id}`")
@@ -702,7 +702,7 @@ class GitHubIssueManager:
         body_sections.append("")
         
         # Labels and metadata
-        body_sections.append("## 🏷️ Issue Metadata")
+        body_sections.append("## [U+1F3F7][U+FE0F] Issue Metadata")
         body_sections.append("")
         body_sections.append(f"**Labels:** {', '.join(categorization.labels)}")
         body_sections.append(f"**Auto-assign:** {'Yes' if categorization.should_auto_assign else 'No'}")
@@ -763,9 +763,9 @@ class GitHubIssueManager:
         
         # Add severity-specific actions
         if categorization.severity == ErrorSeverity.CRITICAL:
-            actions.insert(0, "🚨 **CRITICAL**: Investigate immediately")
+            actions.insert(0, " ALERT:  **CRITICAL**: Investigate immediately")
         elif categorization.severity == ErrorSeverity.HIGH:
-            actions.insert(0, "⚡ **HIGH PRIORITY**: Address within 4 hours")
+            actions.insert(0, " LIGHTNING:  **HIGH PRIORITY**: Address within 4 hours")
         
         # Add general actions
         actions.extend([
@@ -844,7 +844,7 @@ class GitHubIssueManager:
         """
         # Build comment body
         comment_parts = [
-            f"## 🔄 Progress Update - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
+            f"##  CYCLE:  Progress Update - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
             "",
             progress_message
         ]
@@ -896,7 +896,7 @@ class GitHubIssueManager:
         """
         # Add resolution comment
         comment_parts = [
-            f"## ✅ Issue Resolved - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
+            f"##  PASS:  Issue Resolved - {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC",
             "",
             resolution_message
         ]

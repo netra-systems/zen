@@ -11,10 +11,10 @@ CRITICAL MISSING TEST SCENARIO:
 This addresses a CRITICAL gap identified in golden path analysis - WebSocket connection recovery
 after network partitions during active agent execution. Without this resilience, production
 failures cause:
-• Lost user context and agent execution state
-• Incomplete agent responses and business value loss  
-• Poor user experience during network issues
-• Enterprise SLA violations and customer churn
+[U+2022] Lost user context and agent execution state
+[U+2022] Incomplete agent responses and business value loss  
+[U+2022] Poor user experience during network issues
+[U+2022] Enterprise SLA violations and customer churn
 
 NETWORK PARTITION SCENARIOS TESTED:
 1. Connection drop during agent execution startup
@@ -99,7 +99,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         self.agent_executions_preserved = 0
         self.data_loss_incidents = 0
         
-        self.logger.info("🔌 Network Partition Recovery Test - Initialized")
+        self.logger.info("[U+1F50C] Network Partition Recovery Test - Initialized")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -113,7 +113,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         BUSINESS VALUE: Protects against lost agent startups during network issues.
         """
-        self.logger.info("\n🧪 CRITICAL TEST: Network partition during agent startup recovery")
+        self.logger.info("\n[U+1F9EA] CRITICAL TEST: Network partition during agent startup recovery")
         
         # STEP 1: Verify real services available
         assert real_services_fixture["database_available"], "Real PostgreSQL required"
@@ -153,7 +153,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         # STEP 5: Initial connection - simulate partition during startup
         try:
-            self.logger.info("🚀 Starting agent execution...")
+            self.logger.info("[U+1F680] Starting agent execution...")
             
             async with websockets.connect(
                 self.websocket_base_url,
@@ -174,7 +174,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         event = json.loads(message)
                         startup_events.append(event)
                         
-                        self.logger.info(f"📨 Startup event: {event.get('type', 'unknown')}")
+                        self.logger.info(f"[U+1F4E8] Startup event: {event.get('type', 'unknown')}")
                         
                         # Break on agent_thinking to simulate partition after startup
                         if event.get("type") == "agent_thinking":
@@ -184,7 +184,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         continue
                     
         except Exception as e:
-            self.logger.info(f"🔌 Network partition simulated during startup: {str(e)[:100]}")
+            self.logger.info(f"[U+1F50C] Network partition simulated during startup: {str(e)[:100]}")
         
         self.network_partitions_simulated += 1
         
@@ -192,18 +192,18 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         startup_event_types = [e.get("type") for e in startup_events]
         assert "agent_started" in startup_event_types, "Agent startup should have been captured before partition"
         
-        self.logger.info(f"✅ Captured {len(startup_events)} startup events before partition")
+        self.logger.info(f" PASS:  Captured {len(startup_events)} startup events before partition")
         
         # STEP 7: Simulate network recovery delay
         recovery_delay = 3.0
-        self.logger.info(f"⏳ Simulating {recovery_delay}s network recovery delay...")
+        self.logger.info(f"[U+23F3] Simulating {recovery_delay}s network recovery delay...")
         await asyncio.sleep(recovery_delay)
         
         # STEP 8: Attempt connection recovery and agent continuation
         recovery_events = []
         
         try:
-            self.logger.info("🔄 Attempting connection recovery...")
+            self.logger.info(" CYCLE:  Attempting connection recovery...")
             
             async with websockets.connect(
                 self.websocket_base_url,
@@ -234,7 +234,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         event = json.loads(message)
                         recovery_events.append(event)
                         
-                        self.logger.info(f"🔄 Recovery event: {event.get('type', 'unknown')}")
+                        self.logger.info(f" CYCLE:  Recovery event: {event.get('type', 'unknown')}")
                         
                         # Check for completion
                         if event.get("type") == "agent_completed":
@@ -245,7 +245,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         continue
                         
         except Exception as e:
-            self.logger.error(f"❌ Recovery failed: {str(e)[:200]}")
+            self.logger.error(f" FAIL:  Recovery failed: {str(e)[:200]}")
         
         # STEP 9: Validate successful partition recovery
         recovery_event_types = [e.get("type") for e in recovery_events]
@@ -262,7 +262,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
             for critical_event in critical_events:
                 assert critical_event in all_event_types, f"Critical event {critical_event} missing after partition recovery"
             
-            self.logger.info("✅ Network partition recovery successful - Agent execution preserved")
+            self.logger.info(" PASS:  Network partition recovery successful - Agent execution preserved")
             
             # Validate no data loss occurred
             final_event = recovery_events[-1] if recovery_events else None
@@ -270,7 +270,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                 response_content = final_event.get("data", {}).get("response", "")
                 assert len(response_content) > 50, "Agent response should contain substantial content after recovery"
                 
-                self.logger.info(f"📊 Agent response preserved: {len(response_content)} characters")
+                self.logger.info(f" CHART:  Agent response preserved: {len(response_content)} characters")
             
         else:
             self.data_loss_incidents += 1
@@ -288,7 +288,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         BUSINESS VALUE: Protects against lost tool execution work during network issues.
         """
-        self.logger.info("\n🧪 CRITICAL TEST: Network partition during tool execution recovery")
+        self.logger.info("\n[U+1F9EA] CRITICAL TEST: Network partition during tool execution recovery")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -347,12 +347,12 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         event = json.loads(message)
                         pre_partition_events.append(event)
                         
-                        self.logger.info(f"📨 Pre-partition event: {event.get('type', 'unknown')}")
+                        self.logger.info(f"[U+1F4E8] Pre-partition event: {event.get('type', 'unknown')}")
                         
                         # Simulate partition during tool execution
                         if event.get("type") == "tool_executing":
                             tool_execution_interrupted = True
-                            self.logger.info("🛠️ Tool execution detected - simulating partition")
+                            self.logger.info("[U+1F6E0][U+FE0F] Tool execution detected - simulating partition")
                             break
                             
                     except asyncio.TimeoutError:
@@ -360,7 +360,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         
         except Exception as e:
             if tool_execution_interrupted:
-                self.logger.info(f"🔌 Network partition during tool execution: {str(e)[:100]}")
+                self.logger.info(f"[U+1F50C] Network partition during tool execution: {str(e)[:100]}")
             else:
                 raise
         
@@ -377,7 +377,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         tool_recovery_successful = False
         
         try:
-            self.logger.info("🔄 Attempting tool execution recovery...")
+            self.logger.info(" CYCLE:  Attempting tool execution recovery...")
             
             async with websockets.connect(
                 self.websocket_base_url,
@@ -410,11 +410,11 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         recovery_events.append(event)
                         
                         event_type = event.get("type", "unknown")
-                        self.logger.info(f"🔄 Tool recovery event: {event_type}")
+                        self.logger.info(f" CYCLE:  Tool recovery event: {event_type}")
                         
                         # Check for successful tool completion after recovery
                         if event_type == "tool_completed":
-                            self.logger.info("🛠️ Tool execution completed after recovery")
+                            self.logger.info("[U+1F6E0][U+FE0F] Tool execution completed after recovery")
                         elif event_type == "agent_completed":
                             tool_recovery_successful = True
                             break
@@ -423,7 +423,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         continue
                         
         except Exception as e:
-            self.logger.error(f"❌ Tool recovery failed: {str(e)[:200]}")
+            self.logger.error(f" FAIL:  Tool recovery failed: {str(e)[:200]}")
         
         # STEP 7: Validate tool execution recovery
         recovery_event_types = [e.get("type") for e in recovery_events]
@@ -452,7 +452,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                 found_keywords = sum(1 for kw in analysis_keywords if kw.lower() in response_content.lower())
                 assert found_keywords >= 3, "Response should contain competitive analysis elements"
                 
-            self.logger.info("✅ Tool execution recovery successful - Work preserved")
+            self.logger.info(" PASS:  Tool execution recovery successful - Work preserved")
         else:
             self.data_loss_incidents += 1 
             pytest.fail("Tool execution recovery failed - Work lost during partition")
@@ -469,7 +469,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         BUSINESS VALUE: Validates multi-tenant isolation during network failures.
         """
-        self.logger.info("\n🧪 CRITICAL TEST: Multi-user network partition isolation recovery")
+        self.logger.info("\n[U+1F9EA] CRITICAL TEST: Multi-user network partition isolation recovery")
         
         # STEP 1: Create multiple authenticated users
         num_users = 3
@@ -537,7 +537,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         event = json.loads(message)
                         user_events[i].append(event)
                         
-                        self.logger.info(f"📨 User {i} event: {event.get('type', 'unknown')}")
+                        self.logger.info(f"[U+1F4E8] User {i} event: {event.get('type', 'unknown')}")
                         
                     except asyncio.TimeoutError:
                         continue
@@ -558,7 +558,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         for i in range(num_users):
             initial_types = [e.get("type") for e in user_events[i]]
             assert len(initial_types) > 0, f"User {i} should have captured initial events"
-            self.logger.info(f"👤 User {i}: {len(user_events[i])} events before partition")
+            self.logger.info(f"[U+1F464] User {i}: {len(user_events[i])} events before partition")
         
         # STEP 6: Recovery phase - staggered reconnections
         await asyncio.sleep(5.0)  # Network recovery delay
@@ -570,7 +570,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
             recovery_delay = i * 2.0  # Stagger by 2 seconds
             await asyncio.sleep(recovery_delay)
             
-            self.logger.info(f"🔄 Starting recovery for user {i} after {recovery_delay}s delay")
+            self.logger.info(f" CYCLE:  Starting recovery for user {i} after {recovery_delay}s delay")
             
             try:
                 headers = self.auth_helper.get_websocket_headers(
@@ -605,7 +605,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                             event = json.loads(message)
                             recovery_events.append(event)
                             
-                            self.logger.info(f"🔄 User {i} recovery: {event.get('type', 'unknown')}")
+                            self.logger.info(f" CYCLE:  User {i} recovery: {event.get('type', 'unknown')}")
                             
                             if event.get("type") == "agent_completed":
                                 break
@@ -637,7 +637,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                         self.agent_executions_preserved += 1
                     
             except Exception as e:
-                self.logger.error(f"❌ User {i} recovery failed: {str(e)[:200]}")
+                self.logger.error(f" FAIL:  User {i} recovery failed: {str(e)[:200]}")
                 recovery_results.append({
                     "user_index": i,
                     "recovery_successful": False,
@@ -650,9 +650,9 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         successful_recoveries = sum(1 for r in recovery_results if r["recovery_successful"])
         isolation_violations = sum(1 for r in recovery_results if not r["isolation_maintained"])
         
-        self.logger.info(f"📊 Multi-user recovery results:")
-        self.logger.info(f"   • Users recovered: {successful_recoveries}/{num_users}")
-        self.logger.info(f"   • Isolation violations: {isolation_violations}")
+        self.logger.info(f" CHART:  Multi-user recovery results:")
+        self.logger.info(f"   [U+2022] Users recovered: {successful_recoveries}/{num_users}")
+        self.logger.info(f"   [U+2022] Isolation violations: {isolation_violations}")
         
         # Critical validations
         assert successful_recoveries >= 2, f"At least 2/3 users should recover successfully, got {successful_recoveries}"
@@ -663,7 +663,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
             if result["recovery_successful"]:
                 assert result["isolation_maintained"], f"User {result['user_index']} isolation violated"
         
-        self.logger.info("✅ Multi-user network partition isolation recovery validated")
+        self.logger.info(" PASS:  Multi-user network partition isolation recovery validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -677,7 +677,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         BUSINESS VALUE: Validates enterprise-grade network resilience.
         """
-        self.logger.info("\n🧪 CRITICAL TEST: Comprehensive network resilience validation")
+        self.logger.info("\n[U+1F9EA] CRITICAL TEST: Comprehensive network resilience validation")
         
         # STEP 1: Create enterprise test user
         user_context = await create_authenticated_user_context(
@@ -722,7 +722,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         )
         
         for i, scenario in enumerate(resilience_scenarios):
-            self.logger.info(f"🔄 Resilience scenario {i+1}: {scenario['name']}")
+            self.logger.info(f" CYCLE:  Resilience scenario {i+1}: {scenario['name']}")
             
             scenario_start = time.time()
             scenario_success = False
@@ -737,7 +737,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                 reconnect_cycles = scenario.get("reconnect_cycles", 1)
                 
                 for cycle in range(reconnect_cycles):
-                    self.logger.info(f"   🔄 Cycle {cycle + 1}/{reconnect_cycles}")
+                    self.logger.info(f"    CYCLE:  Cycle {cycle + 1}/{reconnect_cycles}")
                     
                     # Connection phase
                     try:
@@ -780,7 +780,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                                     continue
                             
                     except Exception as e:
-                        self.logger.info(f"   🔌 Partition simulated: {str(e)[:100]}")
+                        self.logger.info(f"   [U+1F50C] Partition simulated: {str(e)[:100]}")
                     
                     # Partition delay
                     if not scenario_success:
@@ -788,7 +788,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                 
                 # Final recovery attempt if not completed
                 if not scenario_success:
-                    self.logger.info(f"   🔄 Final recovery attempt for scenario {i+1}")
+                    self.logger.info(f"    CYCLE:  Final recovery attempt for scenario {i+1}")
                     
                     try:
                         async with websockets.connect(
@@ -826,10 +826,10 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                                     continue
                                     
                     except Exception as e:
-                        self.logger.error(f"   ❌ Final recovery failed: {str(e)[:100]}")
+                        self.logger.error(f"    FAIL:  Final recovery failed: {str(e)[:100]}")
                 
             except Exception as e:
-                self.logger.error(f"❌ Scenario {i+1} failed: {str(e)[:200]}")
+                self.logger.error(f" FAIL:  Scenario {i+1} failed: {str(e)[:200]}")
             
             # Record scenario results
             scenario_time = time.time() - scenario_start
@@ -863,12 +863,12 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
                     found_keywords = sum(1 for kw in enterprise_keywords if kw.lower() in response_content.lower())
                     
                     if found_keywords >= 3:
-                        self.logger.info(f"   ✅ Scenario {i+1} SUCCESS: Enterprise content validated")
+                        self.logger.info(f"    PASS:  Scenario {i+1} SUCCESS: Enterprise content validated")
                     else:
-                        self.logger.warning(f"   ⚠️ Scenario {i+1}: Limited enterprise content after resilience test")
+                        self.logger.warning(f"    WARNING: [U+FE0F] Scenario {i+1}: Limited enterprise content after resilience test")
             else:
                 self.data_loss_incidents += 1
-                self.logger.error(f"   ❌ Scenario {i+1} FAILED")
+                self.logger.error(f"    FAIL:  Scenario {i+1} FAILED")
             
             # Brief recovery between scenarios
             await asyncio.sleep(3.0)
@@ -880,13 +880,13 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         
         avg_recovery_time = sum(r["duration"] for r in resilience_results) / len(resilience_results)
         
-        self.logger.info(f"🎉 Comprehensive network resilience summary:")
-        self.logger.info(f"   • Success rate: {overall_success_rate:.1f}%")
-        self.logger.info(f"   • Scenarios passed: {successful_scenarios}/{total_scenarios}")
-        self.logger.info(f"   • Average recovery time: {avg_recovery_time:.2f}s")
-        self.logger.info(f"   • Total partitions simulated: {self.network_partitions_simulated}")
-        self.logger.info(f"   • Successful recoveries: {self.successful_recoveries}")
-        self.logger.info(f"   • Data loss incidents: {self.data_loss_incidents}")
+        self.logger.info(f" CELEBRATION:  Comprehensive network resilience summary:")
+        self.logger.info(f"   [U+2022] Success rate: {overall_success_rate:.1f}%")
+        self.logger.info(f"   [U+2022] Scenarios passed: {successful_scenarios}/{total_scenarios}")
+        self.logger.info(f"   [U+2022] Average recovery time: {avg_recovery_time:.2f}s")
+        self.logger.info(f"   [U+2022] Total partitions simulated: {self.network_partitions_simulated}")
+        self.logger.info(f"   [U+2022] Successful recoveries: {self.successful_recoveries}")
+        self.logger.info(f"   [U+2022] Data loss incidents: {self.data_loss_incidents}")
         
         # Critical enterprise resilience validation
         assert overall_success_rate >= 70.0, f"Overall resilience success rate too low: {overall_success_rate:.1f}%"
@@ -894,8 +894,8 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         assert avg_recovery_time < 45.0, f"Average recovery time too slow: {avg_recovery_time:.2f}s"
         assert self.data_loss_incidents <= 1, f"Too many data loss incidents: {self.data_loss_incidents}"
         
-        self.logger.info("✅ Comprehensive network resilience validation PASSED")
-        self.logger.info("🏢 Enterprise-grade network resilience confirmed")
+        self.logger.info(" PASS:  Comprehensive network resilience validation PASSED")
+        self.logger.info("[U+1F3E2] Enterprise-grade network resilience confirmed")
     
     # Helper Methods
     
@@ -953,7 +953,7 @@ class TestWebSocketNetworkPartitionRecoveryIntegration(BaseIntegrationTest):
         # Store with 1 hour expiration
         await redis_client.setex(state_key, 3600, json.dumps(execution_state))
         
-        self.logger.info(f"💾 Execution state stored in Redis: {state_key}")
+        self.logger.info(f"[U+1F4BE] Execution state stored in Redis: {state_key}")
 
 
 if __name__ == "__main__":

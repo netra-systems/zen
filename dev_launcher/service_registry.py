@@ -225,7 +225,7 @@ class ServiceRegistry:
             
             logger.info(f"Registered service {service_name} with {len(endpoints)} endpoints")
             for endpoint in endpoints:
-                logger.debug(f"  → {endpoint.name}: {endpoint.url}")
+                logger.debug(f"   ->  {endpoint.name}: {endpoint.url}")
             
             return True
     
@@ -253,7 +253,7 @@ class ServiceRegistry:
             if self.enable_persistence:
                 await self._persist_service(service_name)
             
-            logger.info(f"Updated service {service_name} status: {old_status.value} → {status.value}")
+            logger.info(f"Updated service {service_name} status: {old_status.value}  ->  {status.value}")
             return True
     
     async def unregister_service(self, service_name: str) -> bool:

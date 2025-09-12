@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Code Review Analyzer
-ULTRA DEEP THINK: Module-based architecture - Main coordinator ≤300 lines
+ULTRA DEEP THINK: Module-based architecture - Main coordinator  <= 300 lines
 """
 
 from pathlib import Path

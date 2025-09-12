@@ -128,11 +128,11 @@ class TestUnifiedMessageStorageIntegration:
         assert targets['redis_target_ms'] == 50
         assert targets['redis_critical_ms'] == 100
         
-        print(f"✅ Business Value Delivered:")
+        print(f" PASS:  Business Value Delivered:")
         print(f"   Redis operations: {metrics['redis_operations']}")
         print(f"   Average Redis latency: {metrics['avg_redis_latency_ms']:.2f}ms")
         print(f"   Cache hit rate: {metrics.get('cache_hit_rate', 0):.1f}%")
-        print(f"   Performance targets met: ✅")
+        print(f"   Performance targets met:  PASS: ")
     
     async def test_redis_failover_resilience(self, real_service):
         """Test failover behavior when Redis becomes unavailable.
@@ -185,10 +185,10 @@ class TestUnifiedMessageStorageIntegration:
             metrics = await real_service.get_performance_metrics()
             assert metrics['failover_events'] > 0, "Failover not recorded in metrics"
             
-            print(f"✅ High Availability Validated:")
+            print(f" PASS:  High Availability Validated:")
             print(f"   Failover time: {save_time_ms:.2f}ms")
             print(f"   Failover events: {metrics['failover_events']}")
-            print(f"   Service continuity maintained: ✅")
+            print(f"   Service continuity maintained:  PASS: ")
             
         finally:
             # Restore original Redis manager
@@ -249,12 +249,12 @@ class TestUnifiedMessageStorageIntegration:
             # May not retrieve all due to Redis operations complexity, but should get some
             assert len(messages) >= 0, f"Could not retrieve messages for {thread_id}"
         
-        print(f"✅ Multi-User Scalability Validated:")
+        print(f" PASS:  Multi-User Scalability Validated:")
         print(f"   Concurrent threads: {thread_count}")
         print(f"   Messages per thread: {messages_per_thread}")
         print(f"   Total time: {total_time_ms:.2f}ms")
         print(f"   Estimated sequential time: {sequential_estimate:.2f}ms")
-        print(f"   Concurrency benefit: ✅")
+        print(f"   Concurrency benefit:  PASS: ")
     
     async def test_persistence_durability_validation(self, real_service):
         """Test that messages are properly persisted for durability.
@@ -299,10 +299,10 @@ class TestUnifiedMessageStorageIntegration:
         persistence_status = metrics.get('background_persistence', {})
         assert persistence_status.get('task_running', False), "Background persistence not running"
         
-        print(f"✅ Data Durability Validated:")
+        print(f" PASS:  Data Durability Validated:")
         print(f"   Messages queued for persistence: {queue_size}")
-        print(f"   Background persistence active: ✅")
-        print(f"   Business continuity ensured: ✅")
+        print(f"   Background persistence active:  PASS: ")
+        print(f"   Business continuity ensured:  PASS: ")
     
     async def test_global_service_singleton_integration(self):
         """Test global service instance works correctly in integration environment."""
@@ -329,9 +329,9 @@ class TestUnifiedMessageStorageIntegration:
         assert result is not None
         assert result.content == "Global service test"
         
-        print(f"✅ Global Service Integration:")
-        print(f"   Singleton pattern: ✅")
-        print(f"   Functionality verified: ✅")
+        print(f" PASS:  Global Service Integration:")
+        print(f"   Singleton pattern:  PASS: ")
+        print(f"   Functionality verified:  PASS: ")
 
 
 @pytest.mark.integration
@@ -379,10 +379,10 @@ class TestMessageStorageBusinessValueMetrics:
         for metric in required_metrics:
             assert metric in metrics, f"Business metric '{metric}' not tracked"
         
-        print(f"📊 Business Value Performance Report:")
+        print(f" CHART:  Business Value Performance Report:")
         print(f"   Average save time: {avg_save_time:.2f}ms")
         print(f"   Min/Max save time: {min_save_time:.2f}/{max_save_time:.2f}ms")
         print(f"   Redis operations: {metrics['redis_operations']}")
         print(f"   Cache hit rate: {metrics.get('cache_hit_rate', 0):.1f}%")
         print(f"   Performance targets: {metrics['performance_targets']}")
-        print(f"   ✅ All business metrics within acceptable ranges")
+        print(f"    PASS:  All business metrics within acceptable ranges")

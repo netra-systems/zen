@@ -174,7 +174,7 @@ class StagingWebSocketTestCore:
 
     async def setup_staging_services(self) -> Dict[str, Any]:
         """Setup real GCP staging service connections for testing."""
-        logger.info("🚀 Setting up GCP staging services for WebSocket testing")
+        logger.info("[U+1F680] Setting up GCP staging services for WebSocket testing")
         
         # Initialize staging auth helper
         config = E2EAuthConfig.for_staging()
@@ -190,7 +190,7 @@ class StagingWebSocketTestCore:
         if not self.test_user_token:
             raise Exception("Failed to get staging authentication token")
 
-        logger.info(f"✅ Staging services setup complete - Token: {self.test_user_token[:20]}...")
+        logger.info(f" PASS:  Staging services setup complete - Token: {self.test_user_token[:20]}...")
         
         return {
             "auth_helper": self.auth_helper,
@@ -209,8 +209,8 @@ class StagingWebSocketTestCore:
         websocket_url = self.staging_config.urls.websocket_url
         headers = self.auth_helper.get_websocket_headers(self.test_user_token)
         
-        logger.info(f"🔌 Connecting to staging WebSocket: {websocket_url}")
-        logger.info(f"🔑 Auth headers: {list(headers.keys())}")
+        logger.info(f"[U+1F50C] Connecting to staging WebSocket: {websocket_url}")
+        logger.info(f"[U+1F511] Auth headers: {list(headers.keys())}")
         
         try:
             websocket = await asyncio.wait_for(
@@ -228,11 +228,11 @@ class StagingWebSocketTestCore:
             
             # Check if connection was successful - just return the websocket
             # The connection succeeded if we get here without exception
-            logger.info("✅ Staging WebSocket connection established")
+            logger.info(" PASS:  Staging WebSocket connection established")
             return websocket
                 
         except Exception as e:
-            logger.error(f"❌ Staging WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  Staging WebSocket connection failed: {e}")
             raise
 
 
@@ -256,7 +256,7 @@ class TestWebSocketAgentEventsStaging:
         This test validates the core chat functionality that generates $500K+ ARR.
         Uses real staging WebSocket connections and agent execution validation.
         
-        Golden Path: User login → Send chat message → Receive agent response
+        Golden Path: User login  ->  Send chat message  ->  Receive agent response
         """
         services, core = staging_service_core
         validator = StagingWebSocketEventValidator()
@@ -284,7 +284,7 @@ class TestWebSocketAgentEventsStaging:
                                 
                                 # Stop if we get completion event
                                 if event.get("type") in ["agent_completed", "final_report"]:
-                                    logger.info("🏁 Received completion event - stopping capture")
+                                    logger.info("[U+1F3C1] Received completion event - stopping capture")
                                     break
                                     
                             except json.JSONDecodeError:
@@ -308,7 +308,7 @@ class TestWebSocketAgentEventsStaging:
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            logger.info(f"📤 Sending Golden Path test message: {chat_message['message']}")
+            logger.info(f"[U+1F4E4] Sending Golden Path test message: {chat_message['message']}")
             await websocket.send(json.dumps(chat_message))
 
             # Capture events from real staging agent execution
@@ -319,7 +319,7 @@ class TestWebSocketAgentEventsStaging:
 
             if not success:
                 # Log detailed failure information for debugging
-                logger.error("🚨 MISSION CRITICAL FAILURE - Golden Path broken!")
+                logger.error(" ALERT:  MISSION CRITICAL FAILURE - Golden Path broken!")
                 logger.error("Event timeline:")
                 for i, (timestamp, event_type, event_data) in enumerate(validator.event_timeline):
                     logger.error(f"  {i+1}. {timestamp:.2f}s - {event_type}")
@@ -331,7 +331,7 @@ class TestWebSocketAgentEventsStaging:
             assert len(validator.events) >= 3, f"Insufficient events for Golden Path: {len(validator.events)} < 3"
             assert validator.event_counts.get("agent_started", 0) >= 1, "No agent_started events - agent not triggered"
 
-            logger.info("✅ Golden Path WebSocket validation PASSED - $500K+ ARR protected")
+            logger.info(" PASS:  Golden Path WebSocket validation PASSED - $500K+ ARR protected")
 
         finally:
             await websocket.close()
@@ -361,14 +361,14 @@ class TestWebSocketAgentEventsStaging:
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     assert response is not None, f"No response for message {i+1}"
-                    logger.info(f"✅ Message {i+1} response received")
+                    logger.info(f" PASS:  Message {i+1} response received")
                 except asyncio.TimeoutError:
-                    logger.warning(f"⏰ Message {i+1} response timed out")
+                    logger.warning(f"[U+23F0] Message {i+1} response timed out")
 
                 # Short delay between messages
                 await asyncio.sleep(0.5)
 
-            logger.info("✅ Staging WebSocket connection stability validated")
+            logger.info(" PASS:  Staging WebSocket connection stability validated")
             
         finally:
             await websocket.close()
@@ -390,7 +390,7 @@ class TestWebSocketAgentEventsStaging:
         assert validation_result.get("user_id"), "Token missing user_id"
         assert validation_result.get("email"), "Token missing email"
         
-        logger.info("✅ Staging WebSocket authentication validated")
+        logger.info(" PASS:  Staging WebSocket authentication validated")
 
     async def test_staging_performance_requirements(self, staging_service_core):
         """
@@ -438,7 +438,7 @@ class TestWebSocketAgentEventsStaging:
             assert first_response is not None, "No agent response within timeout"
             assert response_time < 15.0, f"Response time {response_time:.2f}s exceeds 15s staging limit"
 
-            logger.info(f"✅ Staging performance validated - Response in {response_time:.2f}s")
+            logger.info(f" PASS:  Staging performance validated - Response in {response_time:.2f}s")
             
         finally:
             await websocket.close()

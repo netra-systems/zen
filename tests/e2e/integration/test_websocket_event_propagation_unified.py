@@ -1,7 +1,7 @@
 """WebSocket Event Propagation Unified Test
 
 CRITICAL P0 TEST - $75K+ MRR Impact
-BVJ: ALL tiers | Real-time UX | Missing events cause blank UI → 30% conversion loss
+BVJ: ALL tiers | Real-time UX | Missing events cause blank UI  ->  30% conversion loss
 
 SPEC: websocket_communication.xml - Tests missing events reach frontend UI layers  
 EVENTS: agent_thinking, partial_result, tool_executing, final_report

@@ -7,7 +7,7 @@ These tests SHOULD FAIL initially to prove the issue exists, then PASS after SSO
 Business Impact: 
 - $500K+ ARR Golden Path validation blocked
 - 4/5 Golden Path tests failing due to API incompatibility
-- Critical user flow (login → AI response) cannot be validated
+- Critical user flow (login  ->  AI response) cannot be validated
 
 EXPECTED BEHAVIOR:
 - BEFORE REMEDIATION: Tests fail with API incompatibility errors
@@ -92,7 +92,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
             # EXPECTED: Old API should fail to import or instantiate
             # This proves the breaking change exists
             self.assertIn("ExecutionResult", str(e))
-            print(f"✅ EXPECTED FAILURE: Old ExecutionResult API correctly fails: {e}")
+            print(f" PASS:  EXPECTED FAILURE: Old ExecutionResult API correctly fails: {e}")
 
     @pytest.mark.unit  
     def test_mixed_api_usage_exposes_incompatibility(self):
@@ -144,7 +144,7 @@ class TestExecutionResultAPICompatibility(SSotBaseTestCase):
             
         except AttributeError as e:
             # This indicates the API incompatibility exists
-            print(f"🚨 API INCOMPATIBILITY DETECTED: {e}")
+            print(f" ALERT:  API INCOMPATIBILITY DETECTED: {e}")
             raise
 
     @pytest.mark.unit

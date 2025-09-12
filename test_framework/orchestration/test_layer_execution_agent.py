@@ -358,7 +358,7 @@ if __name__ == "__main__":
         PASS src/components/Button.test.js
         PASS src/utils/helpers.test.js  
         FAIL src/api/client.test.js
-          ✕ should handle errors gracefully
+          [U+2715] should handle errors gracefully
         
         Test Suites: 2 failed, 8 passed, 10 total
         Tests:       3 failed, 47 passed, 50 total

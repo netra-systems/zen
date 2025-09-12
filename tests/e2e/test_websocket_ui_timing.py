@@ -99,7 +99,7 @@
                                         # REMOVED_SYNTAX_ERROR: latency = event_timing["latency_ms"]
                                         # REMOVED_SYNTAX_ERROR: event_type = event_timing["event_type"]
 
-                                        # Fast Layer requirement: ≤100ms
+                                        # Fast Layer requirement:  <= 100ms
                                         # REMOVED_SYNTAX_ERROR: assert latency <= 100.0, ( )
                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
                                         # REMOVED_SYNTAX_ERROR: f"This impacts immediate user feedback perception."
@@ -158,7 +158,7 @@
                                                                         # REMOVED_SYNTAX_ERROR: latency = event_timing["latency_ms"]
                                                                         # REMOVED_SYNTAX_ERROR: event_type = event_timing["event_type"]
 
-                                                                        # Medium Layer requirement: 100ms ≤ latency ≤ 1000ms
+                                                                        # Medium Layer requirement: 100ms  <=  latency  <=  1000ms
                                                                         # REMOVED_SYNTAX_ERROR: assert 100.0 <= latency <= 1000.0, ( )
                                                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                         # REMOVED_SYNTAX_ERROR: f"(expected 100-1000ms). This impacts progressive update perception."
@@ -204,17 +204,17 @@
                                                                                             # REMOVED_SYNTAX_ERROR: except (asyncio.TimeoutError, json.JSONDecodeError):
                                                                                                 # REMOVED_SYNTAX_ERROR: continue
 
-                                                                                                # Validate Slow Layer timing (≥1000ms)
+                                                                                                # Validate Slow Layer timing ( >= 1000ms)
                                                                                                 # REMOVED_SYNTAX_ERROR: assert len(slow_events_timing) > 0, "No slow layer events received for timing validation"
 
                                                                                                 # REMOVED_SYNTAX_ERROR: for event_timing in slow_events_timing:
                                                                                                     # REMOVED_SYNTAX_ERROR: latency = event_timing["latency_ms"]
                                                                                                     # REMOVED_SYNTAX_ERROR: event_type = event_timing["event_type"]
 
-                                                                                                    # Slow Layer requirement: ≥1000ms (indicates substantial work)
+                                                                                                    # Slow Layer requirement:  >= 1000ms (indicates substantial work)
                                                                                                     # REMOVED_SYNTAX_ERROR: assert latency >= 1000.0, ( )
                                                                                                     # REMOVED_SYNTAX_ERROR: "formatted_string"
-                                                                                                    # REMOVED_SYNTAX_ERROR: f"(expected ≥1000ms). This may indicate insufficient processing depth."
+                                                                                                    # REMOVED_SYNTAX_ERROR: f"(expected  >= 1000ms). This may indicate insufficient processing depth."
                                                                                                     
 
                                                                                                     # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
@@ -302,7 +302,7 @@
 
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
                                                                                                                                                 # Removed problematic line: async def test_progressive_timing_sequence(self, websocket_client):
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: """Test events follow progressive timing sequence (fast→medium→slow)."""
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: """Test events follow progressive timing sequence (fast -> medium -> slow)."""
                                                                                                                                                     # Trigger workflow with full timing spectrum
                                                                                                                                                     # Removed problematic line: await websocket_client.send_message({ ))
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: "type": "user_message",
@@ -408,7 +408,7 @@
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
                                                                                                                                                                                                                 
 
-                                                                                                                                                                                                                # Helper methods (each ≤8 lines)
+                                                                                                                                                                                                                # Helper methods (each  <= 8 lines)
 # REMOVED_SYNTAX_ERROR: def _classify_timing_layer(self, latency_ms: float) -> str:
     # REMOVED_SYNTAX_ERROR: """Classify latency into timing layer per spec."""
     # REMOVED_SYNTAX_ERROR: if latency_ms <= 100.0:

@@ -186,7 +186,7 @@ def generate_detailed_report(results: Dict[str, Any]) -> str:
                 if violation.get("source_location"):
                     report_lines.append(f"    - {violation['source_location']}")
                 for v_msg in violation["violations"]:
-                    report_lines.append(f"      • {v_msg}")
+                    report_lines.append(f"      [U+2022] {v_msg}")
             if len(violations) > 3:
                 report_lines.append(f"    ... and {len(violations) - 3} more")
             report_lines.append("")

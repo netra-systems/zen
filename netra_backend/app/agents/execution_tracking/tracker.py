@@ -111,7 +111,7 @@ class ExecutionTracker:
         self._failed_executions = 0
         self._recovered_executions = 0
         
-        logger.info("✅ ExecutionTracker initialized with comprehensive monitoring")
+        logger.info(" PASS:  ExecutionTracker initialized with comprehensive monitoring")
     
     def _setup_callbacks(self) -> None:
         """Setup callbacks between components."""
@@ -160,7 +160,7 @@ class ExecutionTracker:
         await self._send_execution_started_notification(execution_id, record, context)
         
         self._total_executions_started += 1
-        logger.info(f"🚀 Started execution tracking for {agent_name} (execution_id: {execution_id})")
+        logger.info(f"[U+1F680] Started execution tracking for {agent_name} (execution_id: {execution_id})")
         
         return execution_id
     
@@ -220,7 +220,7 @@ class ExecutionTracker:
         # Send WebSocket completion notification
         await self._send_execution_completed_notification(execution_id, result)
         
-        logger.info(f"✅ Completed execution tracking for {execution_id} (success: {result.success})")
+        logger.info(f" PASS:  Completed execution tracking for {execution_id} (success: {result.success})")
     
     async def handle_execution_failure(
         self, 
@@ -257,7 +257,7 @@ class ExecutionTracker:
         await self._consider_recovery(execution_id, record, error)
         
         self._failed_executions += 1
-        logger.error(f"❌ Execution failed: {execution_id} - {error}")
+        logger.error(f" FAIL:  Execution failed: {execution_id} - {error}")
     
     async def get_execution_status(self, execution_id: str) -> Optional[ExecutionStatus]:
         """Get comprehensive status of an execution.
@@ -306,7 +306,7 @@ class ExecutionTracker:
             execution_id: The execution ID with heartbeat failure
             heartbeat_status: Current heartbeat status
         """
-        logger.critical(f"💀 HEARTBEAT FAILURE DETECTED: {execution_id}")
+        logger.critical(f"[U+1F480] HEARTBEAT FAILURE DETECTED: {execution_id}")
         
         # Get execution record
         record = await self.registry.get_execution(execution_id)
@@ -334,7 +334,7 @@ class ExecutionTracker:
         await self._consider_recovery(execution_id, record, Exception("Agent death detected"))
         
         self._failed_executions += 1
-        logger.critical(f"💀 Agent death handled for: {execution_id}")
+        logger.critical(f"[U+1F480] Agent death handled for: {execution_id}")
     
     async def _handle_timeout(self, execution_id: str, timeout_info: TimeoutInfo) -> None:
         """Handle execution timeout.
@@ -343,7 +343,7 @@ class ExecutionTracker:
             execution_id: The execution ID that timed out
             timeout_info: Timeout information
         """
-        logger.error(f"⏰ TIMEOUT DETECTED: {execution_id} (after {timeout_info.timeout_seconds}s)")
+        logger.error(f"[U+23F0] TIMEOUT DETECTED: {execution_id} (after {timeout_info.timeout_seconds}s)")
         
         # Get execution record
         record = await self.registry.get_execution(execution_id)
@@ -371,7 +371,7 @@ class ExecutionTracker:
         await self._consider_recovery(execution_id, record, Exception(f"Timeout after {timeout_info.timeout_seconds}s"))
         
         self._failed_executions += 1
-        logger.error(f"⏰ Timeout handled for: {execution_id}")
+        logger.error(f"[U+23F0] Timeout handled for: {execution_id}")
     
     async def _consider_recovery(
         self, 
@@ -393,7 +393,7 @@ class ExecutionTracker:
         # - Circuit breaker pattern
         # - Dead letter queue
         
-        logger.info(f"🔄 Considering recovery for {execution_id} (agent: {record.agent_name})")
+        logger.info(f" CYCLE:  Considering recovery for {execution_id} (agent: {record.agent_name})")
         
         # Could implement recovery strategies here based on:
         # - Error type (timeout vs heartbeat failure vs exception)
@@ -623,11 +623,11 @@ class ExecutionTracker:
     
     async def shutdown(self) -> None:
         """Shutdown the execution tracker and all components."""
-        logger.info("🛑 Shutting down ExecutionTracker...")
+        logger.info("[U+1F6D1] Shutting down ExecutionTracker...")
         
         # Shutdown all components
         await self.heartbeat_monitor.shutdown()
         await self.timeout_manager.shutdown()
         await self.registry.shutdown()
         
-        logger.info("🛑 ExecutionTracker shutdown completed")
+        logger.info("[U+1F6D1] ExecutionTracker shutdown completed")

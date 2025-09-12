@@ -1,3 +1,4 @@
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 

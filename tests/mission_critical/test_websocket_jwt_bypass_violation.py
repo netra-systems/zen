@@ -1,5 +1,5 @@
 """
-🚨 MISSION CRITICAL: WebSocket JWT Bypass Violation Reproduction Test
+ ALERT:  MISSION CRITICAL: WebSocket JWT Bypass Violation Reproduction Test
 
 SSOT VIOLATION REPRODUCTION - Test #1 of 5
 This test EXPOSES the violation where WebSocket accepts invalid tokens due to verify_signature=False.
@@ -61,7 +61,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         
         This test proves the violation exists.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: Invalid JWT signature accepted")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: Invalid JWT signature accepted")
         
         # Create a JWT token with WRONG signature (should be rejected)
         fake_payload = {
@@ -77,7 +77,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         wrong_secret = "DEFINITELY_WRONG_SECRET_KEY_12345"
         invalid_token = jwt.encode(fake_payload, wrong_secret, algorithm="HS256")
         
-        logger.info(f"🔍 Created invalid token with wrong signature: {invalid_token[:50]}...")
+        logger.info(f" SEARCH:  Created invalid token with wrong signature: {invalid_token[:50]}...")
         
         # Test the WebSocket user context extractor directly
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
@@ -91,24 +91,24 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
             
             # If we get here, the violation exists (token was accepted)
             if user_context:
-                logger.error("🚨 SSOT VIOLATION CONFIRMED: Invalid JWT token was accepted!")
-                logger.error(f"🚨 Extracted user context: {user_context}")
+                logger.error(" ALERT:  SSOT VIOLATION CONFIRMED: Invalid JWT token was accepted!")
+                logger.error(f" ALERT:  Extracted user context: {user_context}")
                 
                 # Assertion that proves violation exists
                 assert user_context.get("sub") == "test_user_123", \
                     "SSOT VIOLATION: WebSocket accepted invalid JWT signature"
                     
                 # Log the violation for tracking
-                logger.critical("🚨 SECURITY VIOLATION: WebSocket bypassed JWT signature verification")
-                logger.critical("🚨 THIS TEST PASSES = VIOLATION EXISTS")
-                logger.critical("🚨 AFTER SSOT FIX: This test should FAIL")
+                logger.critical(" ALERT:  SECURITY VIOLATION: WebSocket bypassed JWT signature verification")
+                logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS")
+                logger.critical(" ALERT:  AFTER SSOT FIX: This test should FAIL")
                 
                 # Test passes = violation confirmed
                 return True
                 
         except Exception as e:
             # If token is rejected, violation might be fixed
-            logger.info(f"✅ Token properly rejected: {e}")
+            logger.info(f" PASS:  Token properly rejected: {e}")
             pytest.fail("VIOLATION NOT REPRODUCED: Invalid token was rejected (violation may be fixed)")
         
         # Shouldn't reach here
@@ -122,7 +122,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         
         This test proves that expired tokens are accepted due to JWT bypass logic.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: Expired JWT token accepted")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: Expired JWT token accepted")
         
         # Create an EXPIRED JWT token
         expired_payload = {
@@ -139,7 +139,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         jwt_secret = env.get("JWT_SECRET_KEY", "default-test-secret")
         expired_token = jwt.encode(expired_payload, jwt_secret, algorithm="HS256")
         
-        logger.info(f"🔍 Created expired token: {expired_token[:50]}...")
+        logger.info(f" SEARCH:  Created expired token: {expired_token[:50]}...")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         extractor = WebSocketUserContextExtractor()
@@ -149,20 +149,20 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
             user_context = await extractor.extract_user_context_from_token(expired_token)
             
             if user_context:
-                logger.error("🚨 SSOT VIOLATION CONFIRMED: Expired JWT token was accepted!")
-                logger.error(f"🚨 Extracted user context from expired token: {user_context}")
+                logger.error(" ALERT:  SSOT VIOLATION CONFIRMED: Expired JWT token was accepted!")
+                logger.error(f" ALERT:  Extracted user context from expired token: {user_context}")
                 
                 # Assertion that proves violation exists
                 assert user_context.get("sub") == "expired_user_456", \
                     "SSOT VIOLATION: WebSocket accepted expired JWT token"
                     
-                logger.critical("🚨 SECURITY VIOLATION: WebSocket accepted expired JWT token")
-                logger.critical("🚨 THIS TEST PASSES = VIOLATION EXISTS")
+                logger.critical(" ALERT:  SECURITY VIOLATION: WebSocket accepted expired JWT token")
+                logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS")
                 
                 return True
                 
         except Exception as e:
-            logger.info(f"✅ Expired token properly rejected: {e}")
+            logger.info(f" PASS:  Expired token properly rejected: {e}")
             pytest.fail("VIOLATION NOT REPRODUCED: Expired token was rejected")
     
     @pytest.mark.asyncio
@@ -174,7 +174,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         This test proves that even malformed/garbage tokens might be processed
         due to the bypass logic.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: Malformed JWT token handling")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: Malformed JWT token handling")
         
         # Test various malformed tokens
         malformed_tokens = [
@@ -191,22 +191,22 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         violation_detected = False
         
         for malformed_token in malformed_tokens:
-            logger.info(f"🔍 Testing malformed token: '{malformed_token}'")
+            logger.info(f" SEARCH:  Testing malformed token: '{malformed_token}'")
             
             try:
                 user_context = await extractor.extract_user_context_from_token(malformed_token)
                 
                 if user_context:
-                    logger.error(f"🚨 VIOLATION: Malformed token accepted: {malformed_token}")
-                    logger.error(f"🚨 Context extracted: {user_context}")
+                    logger.error(f" ALERT:  VIOLATION: Malformed token accepted: {malformed_token}")
+                    logger.error(f" ALERT:  Context extracted: {user_context}")
                     violation_detected = True
                     
             except Exception as e:
-                logger.info(f"✅ Malformed token rejected: {e}")
+                logger.info(f" PASS:  Malformed token rejected: {e}")
         
         if violation_detected:
-            logger.critical("🚨 SSOT VIOLATION CONFIRMED: Malformed tokens were accepted")
-            logger.critical("🚨 THIS TEST PASSES = VIOLATION EXISTS")
+            logger.critical(" ALERT:  SSOT VIOLATION CONFIRMED: Malformed tokens were accepted")
+            logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS")
             assert True, "SSOT VIOLATION: WebSocket accepted malformed JWT tokens"
         else:
             pytest.fail("VIOLATION NOT REPRODUCED: All malformed tokens were rejected")
@@ -223,7 +223,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         if NoDockerModeDetector.is_no_docker_mode():
             pytest.skip("Integration test requires services")
             
-        logger.info("🚨 TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass")
+        logger.info(" ALERT:  TESTING BUSINESS IMPACT: Unauthorized WebSocket access via JWT bypass")
         
         # Create fake user token that would normally be unauthorized
         fake_admin_payload = {
@@ -239,7 +239,7 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
         # Create token with wrong secret but proper structure
         fake_token = jwt.encode(fake_admin_payload, "MALICIOUS_SECRET", algorithm="HS256")
         
-        logger.info("🔍 Testing unauthorized access with fake admin token")
+        logger.info(" SEARCH:  Testing unauthorized access with fake admin token")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         extractor = WebSocketUserContextExtractor()
@@ -249,25 +249,25 @@ class TestWebSocketJwtBypassViolation(SSotAsyncTestCase):
             user_context = await extractor.extract_user_context_from_token(fake_token)
             
             if user_context and user_context.get("sub") == "fake_admin_999":
-                logger.error("🚨 CRITICAL SECURITY VIOLATION: Unauthorized admin access granted!")
-                logger.error(f"🚨 Fake admin context: {user_context}")
+                logger.error(" ALERT:  CRITICAL SECURITY VIOLATION: Unauthorized admin access granted!")
+                logger.error(f" ALERT:  Fake admin context: {user_context}")
                 
                 # Check if fake permissions were accepted
                 permissions = user_context.get("permissions", [])
                 if "admin" in permissions:
-                    logger.critical("🚨 FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")
+                    logger.critical(" ALERT:  FAKE ADMIN PERMISSIONS ACCEPTED - MASSIVE SECURITY BREACH")
                 
                 # Business impact assertion
                 assert True, "CRITICAL VIOLATION: JWT bypass enables unauthorized access to $500K+ ARR platform"
                 return True
                 
         except Exception as e:
-            logger.info(f"✅ Unauthorized access properly blocked: {e}")
+            logger.info(f" PASS:  Unauthorized access properly blocked: {e}")
             pytest.fail("VIOLATION NOT REPRODUCED: Unauthorized access was blocked")
 
     def tearDown(self):
         """Clean up test artifacts."""
-        logger.info("🧹 JWT bypass violation test cleanup complete")
+        logger.info("[U+1F9F9] JWT bypass violation test cleanup complete")
 
 
 if __name__ == "__main__":

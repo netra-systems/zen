@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 GOLDEN PATH COMPLETE E2E COMPREHENSIVE TEST SUITE - CRITICAL P0 BUSINESS VALUE VALIDATION
 =========================================================================================
@@ -10,15 +48,15 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents critical failures affecting 90% of user-delivered value through chat functionality
 
 COMPLETE GOLDEN PATH FLOW VALIDATION:
-1. User opens chat interface → Connection established
-2. JWT authentication → UserExecutionContext created  
-3. WebSocket ready → Welcome message sent
-4. User sends optimization request → Message routed to AgentHandler
-5. ExecutionEngineFactory creates isolated engine → SupervisorAgent orchestrates
-6. Agent Triage → Data Helper Agent → Optimization Agent → UVS/Reporting Agent
-7. All 5 WebSocket events sent → Tools executed → Results compiled
-8. Final response with business value → Conversation persisted to database
-9. User session maintained → Redis cache updated → Complete cleanup
+1. User opens chat interface  ->  Connection established
+2. JWT authentication  ->  UserExecutionContext created  
+3. WebSocket ready  ->  Welcome message sent
+4. User sends optimization request  ->  Message routed to AgentHandler
+5. ExecutionEngineFactory creates isolated engine  ->  SupervisorAgent orchestrates
+6. Agent Triage  ->  Data Helper Agent  ->  Optimization Agent  ->  UVS/Reporting Agent
+7. All 5 WebSocket events sent  ->  Tools executed  ->  Results compiled
+8. Final response with business value  ->  Conversation persisted to database
+9. User session maintained  ->  Redis cache updated  ->  Complete cleanup
 
 CRITICAL REQUIREMENTS:
 - All tests MUST use real services (PostgreSQL, Redis, WebSocket, Auth, Backend)
@@ -57,9 +95,11 @@ import aiohttp
 from loguru import logger
 
 # SSOT Framework Imports
-from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
-from test_framework.ssot.e2e_auth_helper import (
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import (
     E2EAuthHelper, 
     E2EWebSocketAuthHelper,
     AuthenticatedUser
@@ -68,7 +108,7 @@ from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # No-Docker fixtures for service-independent testing
-from test_framework.fixtures.no_docker_golden_path_fixtures import (
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
     no_docker_golden_path_services, 
     golden_path_services,
     mock_authenticated_user,
@@ -284,10 +324,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.add_cleanup(self._cleanup_websocket_connections)
         
         # Log test environment setup
-        logger.info(f"🌟 Golden Path test environment initialized")
-        logger.info(f"📡 Backend URL: {self.backend_base_url}")
-        logger.info(f"🔌 WebSocket URL: {self.websocket_base_url}")
-        logger.info(f"🌍 Environment: {self.env.get('TEST_ENV', 'test')}")
+        logger.info(f"[U+1F31F] Golden Path test environment initialized")
+        logger.info(f"[U+1F4E1] Backend URL: {self.backend_base_url}")
+        logger.info(f"[U+1F50C] WebSocket URL: {self.websocket_base_url}")
+        logger.info(f"[U+1F30D] Environment: {self.env.get('TEST_ENV', 'test')}")
         
         yield
         
@@ -366,7 +406,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         # Check if we should use mock services
         if services and services.get("service_type") == "mock":
-            logger.info(f"🔧 Using mock WebSocket connection for {context.test_id}")
+            logger.info(f"[U+1F527] Using mock WebSocket connection for {context.test_id}")
             self.using_mock_services = True
             
             # Create mock WebSocket connection
@@ -396,7 +436,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             # Mark connection established in context
             context.mark_connection_established()
             
-            logger.success(f"✅ Mock WebSocket connection established in {connection_time:.2f}s")
+            logger.success(f" PASS:  Mock WebSocket connection established in {connection_time:.2f}s")
             return mock_websocket
         
         # Try real WebSocket connection first
@@ -407,9 +447,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             )
             
             # Log connection attempt
-            logger.info(f"🔌 Establishing WebSocket connection for {context.test_id}")
-            logger.info(f"👤 User: {context.authenticated_user.email}")
-            logger.info(f"🎯 URL: {context.websocket_url}")
+            logger.info(f"[U+1F50C] Establishing WebSocket connection for {context.test_id}")
+            logger.info(f"[U+1F464] User: {context.authenticated_user.email}")
+            logger.info(f" TARGET:  URL: {context.websocket_url}")
             
             # Establish WebSocket connection with authentication
             websocket = await asyncio.wait_for(
@@ -434,7 +474,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             self.active_websockets.append(websocket)
             
             # Log successful connection
-            logger.success(f"✅ WebSocket connection established in {connection_time:.2f}s")
+            logger.success(f" PASS:  WebSocket connection established in {connection_time:.2f}s")
             
             return websocket
             
@@ -443,7 +483,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             
             # If we have mock services available, fall back to them
             if services and services.get("service_type") == "mock" and not self.using_mock_services:
-                logger.warning(f"⚠️ Real WebSocket connection failed ({e}), falling back to mock services")
+                logger.warning(f" WARNING: [U+FE0F] Real WebSocket connection failed ({e}), falling back to mock services")
                 # Force use of mock services by temporarily setting the flag
                 original_flag = getattr(self, 'using_mock_services', False)
                 self.using_mock_services = True
@@ -452,13 +492,13 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 finally:
                     self.using_mock_services = original_flag
             
-            error_msg = f"❌ WebSocket connection failed after {connection_time:.2f}s: {e}"
+            error_msg = f" FAIL:  WebSocket connection failed after {connection_time:.2f}s: {e}"
             logger.error(error_msg)
             raise ConnectionError(f"Golden Path WebSocket connection failed: {error_msg}")
             
         except Exception as e:
             connection_time = time.time() - connection_start  
-            error_msg = f"❌ WebSocket connection failed after {connection_time:.2f}s: {e}"
+            error_msg = f" FAIL:  WebSocket connection failed after {connection_time:.2f}s: {e}"
             logger.error(error_msg)
             raise ConnectionError(f"Golden Path WebSocket connection failed: {error_msg}")
     
@@ -535,7 +575,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         if self.using_mock_services:
             # For mock services, send the message to trigger agent execution
-            logger.info(f"📤 [MOCK] Golden Path message prepared: {scenario['message'][:100]}...")
+            logger.info(f"[U+1F4E4] [MOCK] Golden Path message prepared: {scenario['message'][:100]}...")
             await websocket.send(json.dumps(golden_path_message))
             message_time = 0.01  # Simulate minimal send time
         else:
@@ -547,10 +587,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         context.message_sent = True
         
         # Log message sent
-        logger.info(f"📤 Golden Path optimization request sent")
-        logger.info(f"🎯 Thread ID: {thread_id}")
-        logger.info(f"🚀 Run ID: {run_id}")
-        logger.info(f"💰 Scenario: {context.optimization_scenario}")
+        logger.info(f"[U+1F4E4] Golden Path optimization request sent")
+        logger.info(f" TARGET:  Thread ID: {thread_id}")
+        logger.info(f"[U+1F680] Run ID: {run_id}")
+        logger.info(f"[U+1F4B0] Scenario: {context.optimization_scenario}")
         
         return thread_id
     
@@ -589,7 +629,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         cost_optimizations = []
         final_response = None
         
-        logger.info(f"🎯 Monitoring Golden Path execution (timeout: {timeout}s)")
+        logger.info(f" TARGET:  Monitoring Golden Path execution (timeout: {timeout}s)")
         
         try:
             while time.time() - execution_start < timeout:
@@ -611,25 +651,25 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                         if event_type == "agent_started":
                             self.golden_path_metrics.agent_started_events += 1
                             context.agent_execution_started = True
-                            logger.success("🎯 Agent execution started")
+                            logger.success(" TARGET:  Agent execution started")
                             
                         elif event_type == "agent_thinking":
                             self.golden_path_metrics.agent_thinking_events += 1
-                            logger.info("🧠 Agent thinking event received")
+                            logger.info("[U+1F9E0] Agent thinking event received")
                             
                         elif event_type == "tool_executing":
                             self.golden_path_metrics.tool_executing_events += 1
                             tool_name = message_data.get("tool", "unknown")
-                            logger.info(f"🔧 Tool executing: {tool_name}")
+                            logger.info(f"[U+1F527] Tool executing: {tool_name}")
                             
                         elif event_type == "tool_completed":
                             self.golden_path_metrics.tool_completed_events += 1
                             tool_name = message_data.get("tool", "unknown")
-                            logger.info(f"✅ Tool completed: {tool_name}")
+                            logger.info(f" PASS:  Tool completed: {tool_name}")
                             
                         elif event_type == "agent_completed":
                             self.golden_path_metrics.agent_completed_events += 1
-                            logger.success("🎉 Agent execution completed")
+                            logger.success(" CELEBRATION:  Agent execution completed")
                     
                     # Process business value content
                     if event_type == "assistant_message":
@@ -654,26 +694,26 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                             })
                         
                         context.response_received = True
-                        logger.success("📝 Final response received")
+                        logger.success("[U+1F4DD] Final response received")
                         
                         # Check if we have complete response
                         if self._is_complete_response(message_data):
-                            logger.success("🏁 Complete Golden Path response received")
+                            logger.success("[U+1F3C1] Complete Golden Path response received")
                             break
                         
                         # For mock services, break after processing agent_completed
                         if self.using_mock_services and event_type == "agent_completed":
-                            logger.success("🏁 Mock Golden Path execution completed")
+                            logger.success("[U+1F3C1] Mock Golden Path execution completed")
                             break
                     
                     # Log event for debugging
-                    logger.debug(f"📊 Event: {event_type} | Total events: {len(context.received_events)}")
+                    logger.debug(f" CHART:  Event: {event_type} | Total events: {len(context.received_events)}")
                     
                 except asyncio.TimeoutError:
                     # Short timeout for message reception - continue monitoring
                     continue
                 except json.JSONDecodeError as e:
-                    logger.warning(f"⚠️ Invalid JSON received: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Invalid JSON received: {e}")
                     continue
             
             # Calculate final metrics
@@ -712,17 +752,17 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 "business_value_delivered": self.golden_path_metrics.delivers_business_value()
             }
             
-            logger.success(f"🎯 Golden Path monitoring complete")
-            logger.info(f"⏱️ Total execution: {execution_time:.2f}s")
-            logger.info(f"📊 Events received: {len(context.received_events)}")
-            logger.info(f"💰 Business insights: {len(business_insights)}")
-            logger.info(f"💡 Cost optimizations: {len(cost_optimizations)}")
+            logger.success(f" TARGET:  Golden Path monitoring complete")
+            logger.info(f"[U+23F1][U+FE0F] Total execution: {execution_time:.2f}s")
+            logger.info(f" CHART:  Events received: {len(context.received_events)}")
+            logger.info(f"[U+1F4B0] Business insights: {len(business_insights)}")
+            logger.info(f" IDEA:  Cost optimizations: {len(cost_optimizations)}")
             
             return results
             
         except Exception as e:
             execution_time = time.time() - execution_start
-            logger.error(f"❌ Golden Path monitoring failed after {execution_time:.2f}s: {e}")
+            logger.error(f" FAIL:  Golden Path monitoring failed after {execution_time:.2f}s: {e}")
             raise RuntimeError(f"Golden Path execution monitoring failed: {e}")
     
     def _extract_cost_value(self, content: str) -> float:
@@ -799,7 +839,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         try:
             # Handle mock services validation
             if self.using_mock_services and services:
-                logger.info("🔧 Validating persistence using mock services")
+                logger.info("[U+1F527] Validating persistence using mock services")
                 
                 # Check mock database state
                 database_manager = services.get("database_manager")
@@ -828,7 +868,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     persistence_results["cache_updated"] = True  # Assume cache updated
                     persistence_results["audit_trail_created"] = True  # Mock audit trail
                     
-                    logger.success(f"✅ Mock persistence validation completed")
+                    logger.success(f" PASS:  Mock persistence validation completed")
                     logger.info(f"   Thread persisted: {persistence_results['thread_persisted']}")
                     logger.info(f"   Messages persisted: {persistence_results['messages_persisted']}")
                     logger.info(f"   Run completed: {persistence_results['run_completed']}")
@@ -852,9 +892,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                                 persistence_results["messages_persisted"] = True
                                 self.golden_path_metrics.database_writes += len(messages)
                             
-                            logger.success(f"✅ Thread {context.thread_id} persistence validated")
+                            logger.success(f" PASS:  Thread {context.thread_id} persistence validated")
                         else:
-                            logger.warning(f"⚠️ Thread persistence check failed: {response.status}")
+                            logger.warning(f" WARNING: [U+FE0F] Thread persistence check failed: {response.status}")
             
             # Validate run completion
             if context.run_id:
@@ -868,9 +908,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                             run_status = run_data.get("status", "")
                             if run_status in ["completed", "success"]:
                                 persistence_results["run_completed"] = True
-                                logger.success(f"✅ Run {context.run_id} completion validated")
+                                logger.success(f" PASS:  Run {context.run_id} completion validated")
                         else:
-                            logger.warning(f"⚠️ Run persistence check failed: {response.status}")
+                            logger.warning(f" WARNING: [U+FE0F] Run persistence check failed: {response.status}")
             
             # Update metrics
             if persistence_results["thread_persisted"]:
@@ -881,7 +921,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             return persistence_results
             
         except Exception as e:
-            logger.error(f"❌ Persistence validation failed: {e}")
+            logger.error(f" FAIL:  Persistence validation failed: {e}")
             return persistence_results
 
     # ========================================================================
@@ -906,7 +946,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         through AI-powered cost optimization analysis to actionable business insights delivery.
         """
         
-        logger.info("🌟 Starting Test 1: Complete Golden Path Success Flow")
+        logger.info("[U+1F31F] Starting Test 1: Complete Golden Path Success Flow")
         
         # Create authenticated context for enterprise AI optimization scenario
         context = await self.create_authenticated_golden_path_context(
@@ -976,10 +1016,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("cost_savings_identified", self.golden_path_metrics.cost_optimization_value)
         self.record_metric("actionable_insights", self.golden_path_metrics.actionable_insights_count)
         
-        logger.success("✅ Test 1 Complete: Golden Path Success Flow validated")
-        logger.success(f"💰 Business Value: ${self.golden_path_metrics.cost_optimization_value:.2f} cost savings identified")
-        logger.success(f"💡 Insights: {self.golden_path_metrics.actionable_insights_count} actionable recommendations")
-        logger.success(f"⏱️ Performance: {self.golden_path_metrics.total_response_time:.2f}s total response time")
+        logger.success(" PASS:  Test 1 Complete: Golden Path Success Flow validated")
+        logger.success(f"[U+1F4B0] Business Value: ${self.golden_path_metrics.cost_optimization_value:.2f} cost savings identified")
+        logger.success(f" IDEA:  Insights: {self.golden_path_metrics.actionable_insights_count} actionable recommendations")
+        logger.success(f"[U+23F1][U+FE0F] Performance: {self.golden_path_metrics.total_response_time:.2f}s total response time")
 
     @pytest.mark.integration  
     @pytest.mark.golden_path
@@ -1000,7 +1040,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         ensuring proper user isolation and resource management at enterprise scale.
         """
         
-        logger.info("🌟 Starting Test 2: Multiple User Concurrent Golden Path")
+        logger.info("[U+1F31F] Starting Test 2: Multiple User Concurrent Golden Path")
         
         # Configure concurrent user scenarios  
         concurrent_users = 7  # Test with 7 concurrent users (enterprise scenario)
@@ -1009,7 +1049,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         try:
             # Step 1: Create multiple authenticated contexts simultaneously
-            logger.info(f"👥 Creating {concurrent_users} concurrent user contexts")
+            logger.info(f"[U+1F465] Creating {concurrent_users} concurrent user contexts")
             
             user_creation_tasks = []
             for i in range(concurrent_users):
@@ -1027,7 +1067,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             assert len(concurrent_contexts) == concurrent_users, f"Must create {concurrent_users} user contexts"
             
             # Step 2: Establish WebSocket connections concurrently
-            logger.info(f"🔌 Establishing {concurrent_users} WebSocket connections concurrently")
+            logger.info(f"[U+1F50C] Establishing {concurrent_users} WebSocket connections concurrently")
             
             connection_tasks = [
                 self.establish_authenticated_websocket_connection(context)
@@ -1042,7 +1082,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 assert context.connection_established, f"User {i+1} connection must be established"
             
             # Step 3: Send optimization requests concurrently
-            logger.info(f"📤 Sending {concurrent_users} optimization requests concurrently")
+            logger.info(f"[U+1F4E4] Sending {concurrent_users} optimization requests concurrently")
             
             request_tasks = [
                 self.send_golden_path_optimization_request(websocket, context)
@@ -1054,7 +1094,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             assert len(set(thread_ids)) == concurrent_users, "All thread IDs must be unique (user isolation)"
             
             # Step 4: Monitor all executions concurrently with proper timeout
-            logger.info(f"🎯 Monitoring {concurrent_users} Golden Path executions concurrently")
+            logger.info(f" TARGET:  Monitoring {concurrent_users} Golden Path executions concurrently")
             
             # Use longer timeout for concurrent execution
             concurrent_timeout = 150.0  # 2.5 minutes for concurrent processing
@@ -1079,14 +1119,14 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                         "context": context,
                         "error": str(result)
                     })
-                    logger.error(f"❌ User {i+1} execution failed: {result}")
+                    logger.error(f" FAIL:  User {i+1} execution failed: {result}")
                 else:
                     successful_executions.append({
                         "user": i+1,
                         "context": context,
                         "result": result
                     })
-                    logger.success(f"✅ User {i+1} execution successful")
+                    logger.success(f" PASS:  User {i+1} execution successful")
             
             # Step 6: Validate concurrent execution requirements
             success_rate = len(successful_executions) / concurrent_users
@@ -1113,7 +1153,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             )
             
             # Step 9: Clean up connections
-            logger.info(f"🧹 Cleaning up {len(concurrent_websockets)} WebSocket connections")
+            logger.info(f"[U+1F9F9] Cleaning up {len(concurrent_websockets)} WebSocket connections")
             
             cleanup_tasks = []
             for websocket in concurrent_websockets:
@@ -1132,14 +1172,14 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             self.record_metric("concurrent_business_value_rate", business_value_rate)
             self.record_metric("user_isolation_validated", len(unique_thread_ids) == concurrent_users)
             
-            logger.success("✅ Test 2 Complete: Multiple User Concurrent Golden Path validated")
-            logger.success(f"👥 Concurrent Users: {concurrent_users}")
-            logger.success(f"✅ Success Rate: {success_rate:.1%}")
-            logger.success(f"💰 Business Value Rate: {business_value_rate:.1%}")
-            logger.success(f"🔒 User Isolation: {len(unique_thread_ids)} unique thread IDs")
+            logger.success(" PASS:  Test 2 Complete: Multiple User Concurrent Golden Path validated")
+            logger.success(f"[U+1F465] Concurrent Users: {concurrent_users}")
+            logger.success(f" PASS:  Success Rate: {success_rate:.1%}")
+            logger.success(f"[U+1F4B0] Business Value Rate: {business_value_rate:.1%}")
+            logger.success(f"[U+1F512] User Isolation: {len(unique_thread_ids)} unique thread IDs")
             
         except Exception as e:
-            logger.error(f"❌ Concurrent Golden Path test failed: {e}")
+            logger.error(f" FAIL:  Concurrent Golden Path test failed: {e}")
             
             # Clean up any remaining connections
             for websocket in concurrent_websockets:
@@ -1170,7 +1210,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         and recover to deliver business value even under adverse conditions.
         """
         
-        logger.info("🌟 Starting Test 3: Golden Path with Service Interruptions")
+        logger.info("[U+1F31F] Starting Test 3: Golden Path with Service Interruptions")
         
         # Create authenticated context
         context = await self.create_authenticated_golden_path_context(
@@ -1187,7 +1227,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         assert thread_id is not None, "Thread ID must be generated before service interruption"
         
         # Step 3: Start monitoring execution with simulated service interruptions
-        logger.info("⚠️ Beginning execution with simulated service interruptions")
+        logger.info(" WARNING: [U+FE0F] Beginning execution with simulated service interruptions")
         
         execution_start = time.time()
         interruption_count = 0
@@ -1206,12 +1246,12 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 partial_results.append(message_data)
                 
                 event_type = message_data.get("type", "unknown")
-                logger.info(f"📊 Event received: {event_type}")
+                logger.info(f" CHART:  Event received: {event_type}")
                 
                 # Simulate service interruption at random intervals (20% chance)
                 if random.random() < 0.2 and interruption_count < 3:
                     interruption_count += 1
-                    logger.warning(f"⚠️ Simulating service interruption #{interruption_count}")
+                    logger.warning(f" WARNING: [U+FE0F] Simulating service interruption #{interruption_count}")
                     
                     # Simulate brief interruption by introducing delay
                     await asyncio.sleep(2.0)
@@ -1219,35 +1259,35 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     
                     # Test recovery capability
                     recovery_attempts += 1
-                    logger.info(f"🔄 Recovery attempt #{recovery_attempts}")
+                    logger.info(f" CYCLE:  Recovery attempt #{recovery_attempts}")
                 
                 # Check for completion
                 if event_type == "agent_completed" or event_type == "assistant_message":
-                    logger.success("🎉 Execution completed despite service interruptions")
+                    logger.success(" CELEBRATION:  Execution completed despite service interruptions")
                     break
                     
             except asyncio.TimeoutError:
                 # Timeout during message reception - simulate service unavailability
-                logger.warning("⏰ Message timeout - simulating service interruption")
+                logger.warning("[U+23F0] Message timeout - simulating service interruption")
                 
                 # Attempt recovery
                 if recovery_attempts < 5:
                     recovery_attempts += 1
                     self.golden_path_metrics.recovery_attempts += 1
                     
-                    logger.info(f"🔄 Attempting recovery #{recovery_attempts}")
+                    logger.info(f" CYCLE:  Attempting recovery #{recovery_attempts}")
                     await asyncio.sleep(1.0)  # Brief recovery delay
                     continue
                 else:
-                    logger.warning("⚠️ Maximum recovery attempts reached")
+                    logger.warning(" WARNING: [U+FE0F] Maximum recovery attempts reached")
                     break
                     
             except json.JSONDecodeError:
-                logger.warning("⚠️ Invalid message received - continuing")
+                logger.warning(" WARNING: [U+FE0F] Invalid message received - continuing")
                 self.golden_path_metrics.error_count += 1
                 continue
             except Exception as e:
-                logger.error(f"❌ Unexpected error during resilience test: {e}")
+                logger.error(f" FAIL:  Unexpected error during resilience test: {e}")
                 self.golden_path_metrics.error_count += 1
                 break
         
@@ -1299,11 +1339,11 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("resilience_execution_time", execution_time)
         self.record_metric("graceful_degradation_successful", len(context.received_events) > 0)
         
-        logger.success("✅ Test 3 Complete: Golden Path Service Interruption Resilience validated")
-        logger.success(f"⚠️ Interruptions: {interruption_count}")
-        logger.success(f"🔄 Recovery Attempts: {recovery_attempts}")
-        logger.success(f"📊 Events Received: {len(context.received_events)}")
-        logger.success(f"⏱️ Total Time: {execution_time:.2f}s")
+        logger.success(" PASS:  Test 3 Complete: Golden Path Service Interruption Resilience validated")
+        logger.success(f" WARNING: [U+FE0F] Interruptions: {interruption_count}")
+        logger.success(f" CYCLE:  Recovery Attempts: {recovery_attempts}")
+        logger.success(f" CHART:  Events Received: {len(context.received_events)}")
+        logger.success(f"[U+23F1][U+FE0F] Total Time: {execution_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.golden_path  
@@ -1324,7 +1364,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         under normal operating conditions, ensuring premium user experience delivery.
         """
         
-        logger.info("🌟 Starting Test 4: Golden Path Performance Validation")
+        logger.info("[U+1F31F] Starting Test 4: Golden Path Performance Validation")
         
         # Performance SLA requirements
         max_connection_time = 2.0      # 2 seconds max connection time
@@ -1348,7 +1388,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             f"Actual: {connection_time:.2f}s"
         )
         
-        logger.success(f"✅ Connection Performance: {connection_time:.2f}s (target: <{max_connection_time}s)")
+        logger.success(f" PASS:  Connection Performance: {connection_time:.2f}s (target: <{max_connection_time}s)")
         
         # Step 2: Measure message routing performance
         routing_start = time.time()
@@ -1357,7 +1397,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         
         assert routing_time <= 1.0, f"Message routing must complete within 1s. Actual: {routing_time:.2f}s"
         
-        logger.success(f"✅ Routing Performance: {routing_time:.2f}s (target: <1.0s)")
+        logger.success(f" PASS:  Routing Performance: {routing_time:.2f}s (target: <1.0s)")
         
         # Step 3: Measure comprehensive execution performance
         execution_start = time.time()
@@ -1367,7 +1407,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         first_event_time = None
         performance_events = []
         
-        logger.info(f"⏱️ Starting performance monitoring (target: <{max_total_response_time}s)")
+        logger.info(f"[U+23F1][U+FE0F] Starting performance monitoring (target: <{max_total_response_time}s)")
         
         while time.time() - execution_start < max_total_response_time + 10:  # 10s buffer for cleanup
             try:
@@ -1387,7 +1427,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                         f"Actual: {first_event_time:.2f}s"
                     )
                     
-                    logger.success(f"✅ First Event Performance: {first_event_time:.2f}s (target: <{max_first_event_time}s)")
+                    logger.success(f" PASS:  First Event Performance: {first_event_time:.2f}s (target: <{max_first_event_time}s)")
                 
                 # Record event with performance data
                 performance_event = {
@@ -1399,7 +1439,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 context.record_event(message_data)
                 
                 event_type = message_data.get("type", "unknown")
-                logger.info(f"📊 Performance Event: {event_type} at {relative_time:.2f}s")
+                logger.info(f" CHART:  Performance Event: {event_type} at {relative_time:.2f}s")
                 
                 # Check for completion
                 if event_type in ["agent_completed", "assistant_message"]:
@@ -1410,7 +1450,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                         f"Actual: {completion_time:.2f}s"
                     )
                     
-                    logger.success(f"✅ Completion Performance: {completion_time:.2f}s (target: <{max_total_response_time}s)")
+                    logger.success(f" PASS:  Completion Performance: {completion_time:.2f}s (target: <{max_total_response_time}s)")
                     break
                     
             except asyncio.TimeoutError:
@@ -1439,7 +1479,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 f"Actual: {events_per_second:.2f} events/second"
             )
             
-            logger.success(f"✅ Event Frequency Performance: {events_per_second:.2f} events/second")
+            logger.success(f" PASS:  Event Frequency Performance: {events_per_second:.2f} events/second")
         
         # Step 5: Validate overall performance metrics
         self.golden_path_metrics.websocket_connection_time = connection_time
@@ -1466,12 +1506,12 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("performance_sla_met", True)
         self.record_metric("events_received_count", len(performance_events))
         
-        logger.success("✅ Test 4 Complete: Golden Path Performance Validation successful")
-        logger.success(f"🔌 Connection: {connection_time:.2f}s")
-        logger.success(f"📡 Routing: {routing_time:.2f}s")
-        logger.success(f"⚡ First Event: {first_event_time or 0:.2f}s")
-        logger.success(f"🎯 Total Response: {total_execution_time:.2f}s")
-        logger.success(f"📊 Events: {len(performance_events)}")
+        logger.success(" PASS:  Test 4 Complete: Golden Path Performance Validation successful")
+        logger.success(f"[U+1F50C] Connection: {connection_time:.2f}s")
+        logger.success(f"[U+1F4E1] Routing: {routing_time:.2f}s")
+        logger.success(f" LIGHTNING:  First Event: {first_event_time or 0:.2f}s")
+        logger.success(f" TARGET:  Total Response: {total_execution_time:.2f}s")
+        logger.success(f" CHART:  Events: {len(performance_events)}")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -1492,7 +1532,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         in the form of cost optimizations, actionable insights, and quantifiable ROI.
         """
         
-        logger.info("🌟 Starting Test 5: Golden Path Business Value Validation")
+        logger.info("[U+1F31F] Starting Test 5: Golden Path Business Value Validation")
         
         # Define business value expectations
         target_cost_savings = 25000.0      # $25K target cost savings
@@ -1569,7 +1609,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         execution_start = time.time()
         context.start_time = execution_start
         
-        logger.info("💰 Monitoring for business value delivery (enterprise scenario)")
+        logger.info("[U+1F4B0] Monitoring for business value delivery (enterprise scenario)")
         
         while time.time() - execution_start < 120.0:  # 2 minute timeout for complex business analysis
             try:
@@ -1602,12 +1642,12 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     if alternatives:
                         vendor_alternatives.extend(alternatives)
                 
-                logger.info(f"💼 Business Event: {event_type}")
+                logger.info(f"[U+1F4BC] Business Event: {event_type}")
                 
                 # Check for completion of business analysis
                 if event_type == "assistant_message" and any(keyword in content.lower() for keyword in 
                     ["summary", "conclusion", "recommendations", "total savings", "final analysis"]):
-                    logger.success("📊 Business analysis completed")
+                    logger.success(" CHART:  Business analysis completed")
                     break
                     
             except asyncio.TimeoutError:
@@ -1673,12 +1713,12 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("vendor_alternatives_provided", vendor_alternatives_count)
         self.record_metric("enterprise_value_delivered", True)
         
-        logger.success("✅ Test 5 Complete: Golden Path Business Value Validation successful")
-        logger.success(f"💰 Cost Savings Identified: ${total_cost_savings:,.2f}")
-        logger.success(f"💡 Actionable Insights: {actionable_insights_count}")
-        logger.success(f"📈 ROI Ratio: {calculated_roi:.1f}:1")
-        logger.success(f"🎯 Business Areas Coverage: {coverage_ratio:.1%}")
-        logger.success(f"🔄 Vendor Alternatives: {vendor_alternatives_count}")
+        logger.success(" PASS:  Test 5 Complete: Golden Path Business Value Validation successful")
+        logger.success(f"[U+1F4B0] Cost Savings Identified: ${total_cost_savings:,.2f}")
+        logger.success(f" IDEA:  Actionable Insights: {actionable_insights_count}")
+        logger.success(f"[U+1F4C8] ROI Ratio: {calculated_roi:.1f}:1")
+        logger.success(f" TARGET:  Business Areas Coverage: {coverage_ratio:.1%}")
+        logger.success(f" CYCLE:  Vendor Alternatives: {vendor_alternatives_count}")
 
     def _extract_detailed_cost_savings(self, content: str) -> List[Dict[str, Any]]:
         """Extract detailed cost savings opportunities from content."""
@@ -1820,12 +1860,12 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         with platform-specific optimizations and compatibility handling.
         """
         
-        logger.info("🌟 Starting Test 6: Golden Path Cross-Platform Validation")
+        logger.info("[U+1F31F] Starting Test 6: Golden Path Cross-Platform Validation")
         
         # Detect current platform
         import platform
         current_platform = platform.system().lower()
-        logger.info(f"🖥️ Current platform: {current_platform}")
+        logger.info(f"[U+1F5A5][U+FE0F] Current platform: {current_platform}")
         
         # Create cross-platform test context
         context = await self.create_authenticated_golden_path_context(
@@ -1853,7 +1893,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         }
         
         config = platform_configs.get(current_platform, platform_configs["linux"])
-        logger.info(f"⚙️ Platform config: {config}")
+        logger.info(f"[U+2699][U+FE0F] Platform config: {config}")
         
         # Step 1: Test platform-specific WebSocket connection
         connection_attempts = 0
@@ -1862,22 +1902,22 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         for attempt in range(config["connection_retries"]):
             try:
                 connection_attempts += 1
-                logger.info(f"🔌 Connection attempt {connection_attempts} on {current_platform}")
+                logger.info(f"[U+1F50C] Connection attempt {connection_attempts} on {current_platform}")
                 
                 if config["use_asyncio_safe_patterns"]:
                     # Use Windows-safe asyncio patterns
-                    logger.info("🪟 Using Windows-safe asyncio patterns")
+                    logger.info("[U+1FA9F] Using Windows-safe asyncio patterns")
                     websocket = await self._establish_windows_safe_websocket_connection(context, config["websocket_timeout"], golden_path_services)
                 else:
                     # Use standard connection patterns
                     websocket = await self.establish_authenticated_websocket_connection(context, golden_path_services)
                 
                 if websocket:
-                    logger.success(f"✅ Platform connection successful on attempt {connection_attempts}")
+                    logger.success(f" PASS:  Platform connection successful on attempt {connection_attempts}")
                     break
                     
             except Exception as e:
-                logger.warning(f"⚠️ Connection attempt {connection_attempts} failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Connection attempt {connection_attempts} failed: {e}")
                 if attempt < config["connection_retries"] - 1:
                     await asyncio.sleep(2.0)  # Brief delay before retry
                 else:
@@ -1896,7 +1936,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         # Adjust timeout based on platform
         execution_timeout = config["websocket_timeout"] * 6  # 6x connection timeout for full execution
         
-        logger.info(f"⏱️ Monitoring Golden Path execution on {current_platform} (timeout: {execution_timeout}s)")
+        logger.info(f"[U+23F1][U+FE0F] Monitoring Golden Path execution on {current_platform} (timeout: {execution_timeout}s)")
         
         while time.time() - execution_start < execution_timeout:
             try:
@@ -1918,22 +1958,22 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 context.record_event(message_data)
                 
                 event_type = message_data.get("type", "unknown")
-                logger.info(f"📊 Platform Event ({current_platform}): {event_type}")
+                logger.info(f" CHART:  Platform Event ({current_platform}): {event_type}")
                 
                 # Check for completion
                 if event_type in ["agent_completed", "assistant_message"]:
-                    logger.success(f"🎉 Golden Path completed on {current_platform}")
+                    logger.success(f" CELEBRATION:  Golden Path completed on {current_platform}")
                     break
                     
             except asyncio.TimeoutError:
                 # Platform-specific timeout handling
                 current_time = time.time() - execution_start
                 if current_time > execution_timeout:
-                    logger.error(f"⏰ Execution timeout on {current_platform} after {current_time:.2f}s")
+                    logger.error(f"[U+23F0] Execution timeout on {current_platform} after {current_time:.2f}s")
                     break
                 continue
             except json.JSONDecodeError:
-                logger.warning(f"⚠️ Invalid JSON on {current_platform}")
+                logger.warning(f" WARNING: [U+FE0F] Invalid JSON on {current_platform}")
                 continue
         
         execution_time = time.time() - execution_start
@@ -1981,19 +2021,19 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("platform_critical_events", len(received_critical))
         self.record_metric("cross_platform_compatible", True)
         
-        logger.success("✅ Test 6 Complete: Golden Path Cross-Platform Validation successful")
-        logger.success(f"🖥️ Platform: {current_platform}")
-        logger.success(f"🔌 Connection Attempts: {connection_attempts}")
-        logger.success(f"⏱️ Execution Time: {execution_time:.2f}s")
-        logger.success(f"📊 Events Received: {len(platform_events)}")
-        logger.success(f"🎯 Critical Events: {len(received_critical)}")
+        logger.success(" PASS:  Test 6 Complete: Golden Path Cross-Platform Validation successful")
+        logger.success(f"[U+1F5A5][U+FE0F] Platform: {current_platform}")
+        logger.success(f"[U+1F50C] Connection Attempts: {connection_attempts}")
+        logger.success(f"[U+23F1][U+FE0F] Execution Time: {execution_time:.2f}s")
+        logger.success(f" CHART:  Events Received: {len(platform_events)}")
+        logger.success(f" TARGET:  Critical Events: {len(received_critical)}")
     
     async def _establish_windows_safe_websocket_connection(self, context: GoldenPathTestContext, timeout: float, services: Optional[Dict[str, Any]] = None):
         """Establish WebSocket connection using Windows-safe asyncio patterns."""
         try:
             # Check if we should use mock services (even in Windows mode)
             if services and services.get("service_type") == "mock":
-                logger.info("🪟🔧 Using mock WebSocket for Windows-safe connection")
+                logger.info("[U+1FA9F][U+1F527] Using mock WebSocket for Windows-safe connection")
                 return await self.establish_authenticated_websocket_connection(context, services)
             
             # Windows-specific connection handling
@@ -2021,7 +2061,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             return websocket
             
         except Exception as e:
-            logger.error(f"❌ Windows-safe WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  Windows-safe WebSocket connection failed: {e}")
             raise
 
     @pytest.mark.integration
@@ -2043,7 +2083,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         performance and reliability under high load conditions.
         """
         
-        logger.info("🌟 Starting Test 7: Golden Path Load Test Simulation")
+        logger.info("[U+1F31F] Starting Test 7: Golden Path Load Test Simulation")
         
         # Load test configuration
         concurrent_users = 12      # Enterprise peak load simulation
@@ -2068,9 +2108,9 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         user_results = []
         active_connections = []
         
-        logger.info(f"🚀 Starting load test with {concurrent_users} concurrent users")
-        logger.info(f"⏱️ Test duration: {test_duration}s")
-        logger.info(f"📈 Stagger delay: {stagger_delay}s")
+        logger.info(f"[U+1F680] Starting load test with {concurrent_users} concurrent users")
+        logger.info(f"[U+23F1][U+FE0F] Test duration: {test_duration}s")
+        logger.info(f"[U+1F4C8] Stagger delay: {stagger_delay}s")
         
         try:
             # Step 1: Create all user contexts concurrently
@@ -2091,7 +2131,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             user_contexts = await asyncio.gather(*context_tasks)
             context_creation_time = time.time() - context_creation_start
             
-            logger.success(f"✅ Created {len(user_contexts)} user contexts in {context_creation_time:.2f}s")
+            logger.success(f" PASS:  Created {len(user_contexts)} user contexts in {context_creation_time:.2f}s")
             
             # Step 2: Start users with staggered timing
             async def simulate_user_journey(user_index: int, context: GoldenPathTestContext):
@@ -2110,7 +2150,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     # Stagger user starts
                     await asyncio.sleep(user_index * stagger_delay)
                     
-                    logger.info(f"👤 User {user_index+1} starting Golden Path journey")
+                    logger.info(f"[U+1F464] User {user_index+1} starting Golden Path journey")
                     
                     # Establish connection
                     connection_start = time.time()
@@ -2154,10 +2194,10 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                     await websocket.close()
                     active_connections.remove(websocket)
                     
-                    logger.success(f"✅ User {user_index+1} completed in {user_execution_time:.2f}s")
+                    logger.success(f" PASS:  User {user_index+1} completed in {user_execution_time:.2f}s")
                     
                 except Exception as e:
-                    logger.error(f"❌ User {user_index+1} failed: {e}")
+                    logger.error(f" FAIL:  User {user_index+1} failed: {e}")
                     user_metrics["errors"].append(str(e))
                     
                     if "connection" in str(e).lower():
@@ -2168,7 +2208,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 return user_metrics
             
             # Step 3: Execute all user journeys concurrently
-            logger.info("🎯 Starting concurrent user journey execution")
+            logger.info(" TARGET:  Starting concurrent user journey execution")
             
             journey_tasks = [
                 simulate_user_journey(i, context) 
@@ -2231,16 +2271,16 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
             self.record_metric("load_test_average_response_time", load_test_metrics["average_response_time"])
             self.record_metric("load_test_total_events", load_test_metrics["total_events_received"])
             
-            logger.success("✅ Test 7 Complete: Golden Path Load Test Simulation successful")
-            logger.success(f"👥 Concurrent Users: {concurrent_users}")
-            logger.success(f"✅ Success Rate: {success_rate:.1%}")
-            logger.success(f"🔌 Connection Success: {connection_success_rate:.1%}")
-            logger.success(f"📈 Concurrent Peak: {load_test_metrics['concurrent_peak']}")
-            logger.success(f"⏱️ Average Response: {load_test_metrics['average_response_time']:.2f}s")
-            logger.success(f"📊 Total Events: {load_test_metrics['total_events_received']}")
+            logger.success(" PASS:  Test 7 Complete: Golden Path Load Test Simulation successful")
+            logger.success(f"[U+1F465] Concurrent Users: {concurrent_users}")
+            logger.success(f" PASS:  Success Rate: {success_rate:.1%}")
+            logger.success(f"[U+1F50C] Connection Success: {connection_success_rate:.1%}")
+            logger.success(f"[U+1F4C8] Concurrent Peak: {load_test_metrics['concurrent_peak']}")
+            logger.success(f"[U+23F1][U+FE0F] Average Response: {load_test_metrics['average_response_time']:.2f}s")
+            logger.success(f" CHART:  Total Events: {load_test_metrics['total_events_received']}")
             
         except Exception as e:
-            logger.error(f"❌ Load test failed: {e}")
+            logger.error(f" FAIL:  Load test failed: {e}")
             
             # Clean up connections on failure
             cleanup_tasks = []
@@ -2275,7 +2315,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         for all user interactions, data processing, and business decisions.
         """
         
-        logger.info("🌟 Starting Test 8: Golden Path Data Audit Trail")
+        logger.info("[U+1F31F] Starting Test 8: Golden Path Data Audit Trail")
         
         # Audit trail requirements
         required_audit_events = [
@@ -2308,7 +2348,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         }
         
         # Step 1: Establish connection with audit logging
-        logger.info("📋 Starting audit trail validation")
+        logger.info("[U+1F4CB] Starting audit trail validation")
         
         # Record authentication audit event
         audit_events.append({
@@ -2381,7 +2421,7 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         execution_start = time.time()
         context.start_time = execution_start
         
-        logger.info("🔍 Monitoring Golden Path execution with audit trail capture")
+        logger.info(" SEARCH:  Monitoring Golden Path execution with audit trail capture")
         
         while time.time() - execution_start < 120.0:  # 2 minute timeout
             try:
@@ -2467,11 +2507,11 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
                 
                 audit_events.append(audit_event)
                 
-                logger.info(f"📋 Audit Event: {event_type} logged")
+                logger.info(f"[U+1F4CB] Audit Event: {event_type} logged")
                 
                 # Check for completion
                 if event_type in ["agent_completed", "assistant_message"]:
-                    logger.success("🎉 Audit trail execution completed")
+                    logger.success(" CELEBRATION:  Audit trail execution completed")
                     break
                     
             except asyncio.TimeoutError:
@@ -2569,13 +2609,13 @@ class TestGoldenPathCompleteE2EComprehensive(SSotAsyncTestCase):
         self.record_metric("retention_events", compliance_metrics["retention_policy_applied"])
         self.record_metric("audit_trail_compliant", True)
         
-        logger.success("✅ Test 8 Complete: Golden Path Data Audit Trail validated")
-        logger.success(f"📋 Total Audit Events: {len(audit_events)}")
-        logger.success(f"📊 Audit Coverage: {audit_coverage:.1%}")
-        logger.success(f"🔐 PII Handling Events: {compliance_metrics['pii_handling_events']}")
-        logger.success(f"📄 Data Access Events: {compliance_metrics['data_access_logged']}")
-        logger.success(f"🛡️ Security Events: {compliance_metrics['security_events']}")
-        logger.success(f"⏳ Retention Events: {compliance_metrics['retention_policy_applied']}")
+        logger.success(" PASS:  Test 8 Complete: Golden Path Data Audit Trail validated")
+        logger.success(f"[U+1F4CB] Total Audit Events: {len(audit_events)}")
+        logger.success(f" CHART:  Audit Coverage: {audit_coverage:.1%}")
+        logger.success(f"[U+1F510] PII Handling Events: {compliance_metrics['pii_handling_events']}")
+        logger.success(f"[U+1F4C4] Data Access Events: {compliance_metrics['data_access_logged']}")
+        logger.success(f"[U+1F6E1][U+FE0F] Security Events: {compliance_metrics['security_events']}")
+        logger.success(f"[U+23F3] Retention Events: {compliance_metrics['retention_policy_applied']}")
 
 
 # ============================================================================

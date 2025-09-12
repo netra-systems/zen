@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: WebSocket events are infrastructure for 90% of business value (Chat)
 
 CRITICAL REQUIREMENTS:
-1. Test complete WebSocket event sequence: connection → authentication → agent_events → completion
+1. Test complete WebSocket event sequence: connection  ->  authentication  ->  agent_events  ->  completion
 2. Validate event ordering and timing for optimal user experience
 3. Test multi-user WebSocket isolation and message routing
 4. Test WebSocket reconnection and recovery scenarios  

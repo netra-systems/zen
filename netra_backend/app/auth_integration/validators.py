@@ -3,7 +3,7 @@ Auth Validation Utilities - Single Source of Truth
 Centralized validation logic for authentication models.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Consistent validation across platform
 - Value Impact: Reduce auth errors by 15-20%
 - Revenue Impact: +$2K MRR from better UX

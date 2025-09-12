@@ -379,7 +379,7 @@ class TestAgentSupervisorIsolation(DockerTestBase):
             assert result['result'] is not None, f"Result {i} should not be None"
             assert result['duration_ms'] > 0, f"Result {i} should have positive duration"
             
-        logger.info("✅ INTEGRATION TEST 9a PASSED: Single user isolation working correctly")
+        logger.info(" PASS:  INTEGRATION TEST 9a PASSED: Single user isolation working correctly")
         
     @pytest.mark.asyncio
     async def test_concurrent_multi_user_isolation(self):
@@ -424,8 +424,8 @@ class TestAgentSupervisorIsolation(DockerTestBase):
         assert analysis['state_leakages'] == 0, \
             f"State leakages detected: {analysis['leakage_details']}"
             
-        logger.info(f"✅ Concurrent execution successful: {len(results)} results from {len(results_by_user)} users")
-        logger.info("✅ INTEGRATION TEST 9b PASSED: Multi-user isolation working correctly")
+        logger.info(f" PASS:  Concurrent execution successful: {len(results)} results from {len(results_by_user)} users")
+        logger.info(" PASS:  INTEGRATION TEST 9b PASSED: Multi-user isolation working correctly")
         
     @pytest.mark.asyncio
     async def test_factory_pattern_memory_isolation(self):
@@ -465,8 +465,8 @@ class TestAgentSupervisorIsolation(DockerTestBase):
         assert len(set(memory_addresses)) == len(supervisors), \
             "All supervisors should have unique memory addresses"
             
-        logger.info(f"✅ Created {len(supervisors)} isolated supervisors with unique memory addresses")
-        logger.info("✅ INTEGRATION TEST 9c PASSED: Factory pattern memory isolation working")
+        logger.info(f" PASS:  Created {len(supervisors)} isolated supervisors with unique memory addresses")
+        logger.info(" PASS:  INTEGRATION TEST 9c PASSED: Factory pattern memory isolation working")
         
     @pytest.mark.asyncio
     async def test_database_session_isolation(self):
@@ -503,8 +503,8 @@ class TestAgentSupervisorIsolation(DockerTestBase):
                 assert session_user == expected_user, \
                     f"Session user tag mismatch: expected {expected_user}, got {session_user}"
                     
-        logger.info(f"✅ Validated {len(contexts)} isolated database sessions")
-        logger.info("✅ INTEGRATION TEST 9d PASSED: Database session isolation working")
+        logger.info(f" PASS:  Validated {len(contexts)} isolated database sessions")
+        logger.info(" PASS:  INTEGRATION TEST 9d PASSED: Database session isolation working")
         
     @pytest.mark.asyncio
     async def test_websocket_routing_isolation(self):
@@ -548,8 +548,8 @@ class TestAgentSupervisorIsolation(DockerTestBase):
             assert expected_user in context.websocket_connection_id, \
                 f"WebSocket connection ID should contain user ID for {expected_user}"
                 
-        logger.info(f"✅ Validated {len(websocket_contexts)} isolated WebSocket contexts")
-        logger.info("✅ INTEGRATION TEST 9e PASSED: WebSocket routing isolation working")
+        logger.info(f" PASS:  Validated {len(websocket_contexts)} isolated WebSocket contexts")
+        logger.info(" PASS:  INTEGRATION TEST 9e PASSED: WebSocket routing isolation working")
         
     def _generate_isolation_analysis_report(self):
         """Generate comprehensive isolation analysis report"""
@@ -566,7 +566,7 @@ class TestAgentSupervisorIsolation(DockerTestBase):
         if analysis['leakage_details']:
             logger.error("CRITICAL ISOLATION FAILURES:")
             for leakage in analysis['leakage_details']:
-                logger.error(f"  - {leakage['leakage_type']}: {leakage['from_user']} → {leakage['to_user']}")
+                logger.error(f"  - {leakage['leakage_type']}: {leakage['from_user']}  ->  {leakage['to_user']}")
                 logger.error(f"    Details: {leakage['details']}")
 
 

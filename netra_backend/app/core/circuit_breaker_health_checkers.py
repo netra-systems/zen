@@ -1,7 +1,7 @@
-"""Circuit breaker health checkers with ≤8 line functions.
+"""Circuit breaker health checkers with  <= 8 line functions.
 
 Health checking implementations for various system components with aggressive
-function decomposition. All functions ≤8 lines.
+function decomposition. All functions  <= 8 lines.
 """
 
 import asyncio

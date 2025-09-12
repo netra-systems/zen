@@ -153,7 +153,7 @@ class StagingDeploymentFixer:
                 )
                 return result.stdout.strip()
             except Exception as e:
-                print(f"  ⚠️  Failed to generate {secret.name}: {e}")
+                print(f"   WARNING: [U+FE0F]  Failed to generate {secret.name}: {e}")
                 return secret.placeholder_value
         return secret.placeholder_value
 
@@ -161,7 +161,7 @@ class StagingDeploymentFixer:
         """Create a secret in Secret Manager."""
         secret_value = self.generate_secret_value(secret)
         if not secret_value:
-            print(f"  ❌ No value available for {secret.name}")
+            print(f"   FAIL:  No value available for {secret.name}")
             return False
         
         # Create the secret
@@ -171,7 +171,7 @@ class StagingDeploymentFixer:
         ])
         
         if not success and "already exists" not in error:
-            print(f"  ❌ Failed to create {secret.name}: {error}")
+            print(f"   FAIL:  Failed to create {secret.name}: {error}")
             return False
         
         # Add secret version  
@@ -181,10 +181,10 @@ class StagingDeploymentFixer:
         ], input_data=secret_value)
         
         if success:
-            print(f"  ✅ Created {secret.name}")
+            print(f"   PASS:  Created {secret.name}")
             return True
         else:
-            print(f"  ❌ Failed to add version to {secret.name}: {error}")
+            print(f"   FAIL:  Failed to add version to {secret.name}: {error}")
             return False
 
     def fix_secrets(self) -> Dict[str, bool]:
@@ -196,10 +196,10 @@ class StagingDeploymentFixer:
             print(f"\nChecking {secret.name}...")
             
             if self.check_secret_exists(secret.name):
-                print(f"  ✅ {secret.name} already exists")
+                print(f"   PASS:  {secret.name} already exists")
                 results[secret.name] = True
             else:
-                print(f"  🔧 Creating {secret.name}...")
+                print(f"  [U+1F527] Creating {secret.name}...")
                 results[secret.name] = self.create_secret(secret)
                 
         return results
@@ -230,10 +230,10 @@ class StagingDeploymentFixer:
         
         success, _, error = self.run_command(cmd)
         if success:
-            print(f"  ✅ Updated secrets for {service_name}")
+            print(f"   PASS:  Updated secrets for {service_name}")
             return True
         else:
-            print(f"  ❌ Failed to update {service_name}: {error}")
+            print(f"   FAIL:  Failed to update {service_name}: {error}")
             return False
 
     def fix_service_configuration(self) -> Dict[str, bool]:
@@ -243,7 +243,7 @@ class StagingDeploymentFixer:
         results = {}
         
         # Update backend service with all required secrets
-        print("\n🔧 Updating backend service secrets...")
+        print("\n[U+1F527] Updating backend service secrets...")
         backend_secrets = {
             "DATABASE_URL": "database-url-staging",
             "JWT_SECRET_KEY": "jwt-secret-key-staging", 
@@ -254,7 +254,7 @@ class StagingDeploymentFixer:
         results["backend"] = self.update_service_secrets("netra-backend", backend_secrets)
         
         # Update auth service with required secrets
-        print("\n🔧 Updating auth service secrets...")
+        print("\n[U+1F527] Updating auth service secrets...")
         auth_secrets = {
             "DATABASE_URL": "database-url-staging",
             "JWT_SECRET_KEY": "jwt-secret-key-staging"
@@ -262,7 +262,7 @@ class StagingDeploymentFixer:
         results["auth"] = self.update_service_secrets("netra-auth", auth_secrets)
         
         # Update frontend with correct environment variables
-        print("\n🔧 Updating frontend service environment...")
+        print("\n[U+1F527] Updating frontend service environment...")
         backend_url = self.get_service_url("netra-backend") 
         auth_url = self.get_service_url("netra-auth")
         
@@ -280,18 +280,18 @@ class StagingDeploymentFixer:
             success, _, error = self.run_command(cmd)
             results["frontend"] = success
             if success:
-                print(f"  ✅ Updated frontend environment variables")
+                print(f"   PASS:  Updated frontend environment variables")
             else:
-                print(f"  ❌ Failed to update frontend: {error}")
+                print(f"   FAIL:  Failed to update frontend: {error}")
         else:
-            print(f"  ⚠️  Could not get service URLs - skipping frontend update")
+            print(f"   WARNING: [U+FE0F]  Could not get service URLs - skipping frontend update")
             results["frontend"] = False
             
         return results
 
     def validate_endpoint(self, endpoint: ServiceEndpoint) -> Dict:
         """Validate a single service endpoint."""
-        print(f"\n🔍 Testing {endpoint.name}...")
+        print(f"\n SEARCH:  Testing {endpoint.name}...")
         print(f"    URL: {endpoint.url}")
         print(f"    Expected: {endpoint.expected_status}")
         
@@ -312,14 +312,14 @@ class StagingDeploymentFixer:
             }
             
             if status_ok:
-                print(f"    ✅ Response: {response.status_code} ({response_time:.1f}ms)")
+                print(f"     PASS:  Response: {response.status_code} ({response_time:.1f}ms)")
             else:
-                print(f"    ❌ Response: {response.status_code} (expected {endpoint.expected_status})")
+                print(f"     FAIL:  Response: {response.status_code} (expected {endpoint.expected_status})")
                 
             return result
             
         except requests.exceptions.Timeout:
-            print(f"    ⏰ Timeout after {endpoint.timeout}s")
+            print(f"    [U+23F0] Timeout after {endpoint.timeout}s")
             return {
                 "endpoint": endpoint.name,
                 "url": endpoint.url, 
@@ -329,7 +329,7 @@ class StagingDeploymentFixer:
                 "error": "Timeout"
             }
         except Exception as e:
-            print(f"    ❌ Error: {e}")
+            print(f"     FAIL:  Error: {e}")
             return {
                 "endpoint": endpoint.name,
                 "url": endpoint.url,
@@ -351,7 +351,7 @@ class StagingDeploymentFixer:
 
     def wait_for_service_deployment(self, service_name: str, max_wait: int = 300) -> bool:
         """Wait for a service to be fully deployed and healthy."""
-        print(f"\n⏳ Waiting for {service_name} to be ready...")
+        print(f"\n[U+23F3] Waiting for {service_name} to be ready...")
         
         start_time = time.time()
         while time.time() - start_time < max_wait:
@@ -364,13 +364,13 @@ class StagingDeploymentFixer:
             ])
             
             if success and "True" in stdout:
-                print(f"  ✅ {service_name} is ready!")
+                print(f"   PASS:  {service_name} is ready!")
                 return True
                 
-            print(f"  ⏳ Still waiting... ({int(time.time() - start_time)}s)")
+            print(f"  [U+23F3] Still waiting... ({int(time.time() - start_time)}s)")
             time.sleep(10)
             
-        print(f"  ⚠️  {service_name} not ready after {max_wait}s")
+        print(f"   WARNING: [U+FE0F]  {service_name} not ready after {max_wait}s")
         return False
 
     def generate_validation_report(self, results: Dict) -> Dict:
@@ -400,7 +400,7 @@ class StagingDeploymentFixer:
 
     def run_complete_fix(self) -> Dict:
         """Run the complete staging deployment fix process."""
-        print("🚀 NETRA STAGING DEPLOYMENT FIX")
+        print("[U+1F680] NETRA STAGING DEPLOYMENT FIX")
         print("=" * 60)
         print("This script will fix all identified critical issues:")
         print("1. Create missing secrets in Secret Manager")
@@ -437,30 +437,30 @@ class StagingDeploymentFixer:
         print(f"Project: {self.project_id}")
         print(f"Timestamp: {report['timestamp']}")
         
-        print(f"\n📊 RESULTS SUMMARY:")
+        print(f"\n CHART:  RESULTS SUMMARY:")
         secrets_count = sum(1 for v in secrets_results.values() if v)
         services_count = sum(1 for v in services_results.values() if v)
         endpoints_count = sum(1 for v in endpoints_results.values() if v.get("success"))
         
-        print(f"  Secrets: {secrets_count}/{len(secrets_results)} ✅")
-        print(f"  Services: {services_count}/{len(services_results)} ✅") 
-        print(f"  Endpoints: {endpoints_count}/{len(endpoints_results)} ✅")
+        print(f"  Secrets: {secrets_count}/{len(secrets_results)}  PASS: ")
+        print(f"  Services: {services_count}/{len(services_results)}  PASS: ") 
+        print(f"  Endpoints: {endpoints_count}/{len(endpoints_results)}  PASS: ")
         
         if report["overall_health"] == "healthy":
-            print(f"\n🎉 STAGING DEPLOYMENT IS NOW HEALTHY!")
+            print(f"\n CELEBRATION:  STAGING DEPLOYMENT IS NOW HEALTHY!")
             print(f"   All services are running and accessible.")
         elif report["overall_health"] == "partially_healthy":
-            print(f"\n⚠️  STAGING DEPLOYMENT IS PARTIALLY HEALTHY")
+            print(f"\n WARNING: [U+FE0F]  STAGING DEPLOYMENT IS PARTIALLY HEALTHY")
             print(f"   Some endpoints may still have issues.")
         else:
-            print(f"\n❌ STAGING DEPLOYMENT STILL HAS ISSUES") 
+            print(f"\n FAIL:  STAGING DEPLOYMENT STILL HAS ISSUES") 
             print(f"   Please review the errors above.")
             
         # Save report to file
         report_path = "staging_fix_report.json"
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
-        print(f"\n📄 Full report saved to: {report_path}")
+        print(f"\n[U+1F4C4] Full report saved to: {report_path}")
         
         return final_results
 
@@ -484,10 +484,10 @@ def main():
         sys.exit(0 if overall_success else 1)
         
     except KeyboardInterrupt:
-        print("\n\n⚠️ Fix process interrupted by user")
+        print("\n\n WARNING: [U+FE0F] Fix process interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Fix process failed with error: {e}")
+        print(f"\n FAIL:  Fix process failed with error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

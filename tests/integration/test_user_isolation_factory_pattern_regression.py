@@ -1,7 +1,7 @@
 """User Isolation Factory Pattern Regression Test Suite
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Multi-user system foundation
+- Segment: ALL (Free  ->  Enterprise) - Multi-user system foundation
 - Business Goal: Guarantee complete user isolation in concurrent operations
 - Value Impact: Prevents critical data leakage between users and conversation contexts
 - Strategic Impact: CRITICAL - Factory pattern failures could expose confidential user data

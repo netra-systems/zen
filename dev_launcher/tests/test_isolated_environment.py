@@ -513,7 +513,7 @@ class TestIsolatedEnvironmentEdgeCases:
         env = IsolatedEnvironment()
         
         special_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~`"
-        unicode_chars = "🔥✨⚡️🚀"
+        unicode_chars = " FIRE: [U+2728] LIGHTNING: [U+FE0F][U+1F680]"
         mixed_value = f"Special: {special_chars} Unicode: {unicode_chars}"
         
         env.set("SPECIAL_VAR", mixed_value, "special_test")

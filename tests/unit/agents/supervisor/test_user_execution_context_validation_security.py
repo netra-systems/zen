@@ -94,7 +94,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         
         # Log security validation success
         self.logger.info(
-            f"✅ SECURITY VALIDATION SUCCESS: Mock object properly rejected with error: {error_message}"
+            f" PASS:  SECURITY VALIDATION SUCCESS: Mock object properly rejected with error: {error_message}"
         )
 
     def test_execute_agent_rejects_deep_agent_state_with_security_message(self):
@@ -116,7 +116,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         
         # Validate specific DeepAgentState security guidance
         error_message = str(exc_info.value)
-        self.assertIn("🚨 SECURITY VULNERABILITY", error_message)
+        self.assertIn(" ALERT:  SECURITY VULNERABILITY", error_message)
         self.assertIn("DeepAgentState is FORBIDDEN", error_message)
         self.assertIn("user isolation risks", error_message)
         self.assertIn("data leakage between users", error_message)
@@ -124,7 +124,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         
         # Log DeepAgentState-specific security message
         self.logger.info(
-            f"✅ DEEP_AGENT_STATE SECURITY: Specific guidance provided: {error_message[:100]}..."
+            f" PASS:  DEEP_AGENT_STATE SECURITY: Specific guidance provided: {error_message[:100]}..."
         )
 
     def test_execute_agent_accepts_real_user_execution_context(self):
@@ -161,7 +161,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         
         # Log successful real context validation
         self.logger.info(
-            f"✅ REAL CONTEXT SUCCESS: UserExecutionContext validated successfully: "
+            f" PASS:  REAL CONTEXT SUCCESS: UserExecutionContext validated successfully: "
             f"user_id={validated_context.user_id}, thread_id={validated_context.thread_id}"
         )
 
@@ -228,7 +228,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
             self.assertIn("placeholder or test value detected", error_message)
             
             # Log placeholder detection
-            self.logger.debug(f"✅ Placeholder '{placeholder}' properly rejected")
+            self.logger.debug(f" PASS:  Placeholder '{placeholder}' properly rejected")
 
     async def test_execute_agent_end_to_end_with_real_context(self):
         """Integration test: Full execute_agent flow with real UserExecutionContext.
@@ -268,7 +268,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
             
             # Log successful end-to-end execution
             self.logger.info(
-                f"✅ END-TO-END SUCCESS: Agent execution completed with real context: "
+                f" PASS:  END-TO-END SUCCESS: Agent execution completed with real context: "
                 f"success={result.success}, agent={result.agent_name}"
             )
 
@@ -280,11 +280,11 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         """
         # ANTI-PATTERN: Mock objects (will be rejected)
         # mock_context = Mock()
-        # mock_context.user_id = "test"  # ❌ SECURITY RISK
+        # mock_context.user_id = "test"  #  FAIL:  SECURITY RISK
         
         # CORRECT PATTERN: Real UserExecutionContext
         real_context = UserExecutionContext(
-            user_id="migration_example_user",  # ✅ SECURE
+            user_id="migration_example_user",  #  PASS:  SECURE
             thread_id="migration_example_thread", 
             run_id="migration_example_run",
             agent_context={"migration": "example"},
@@ -302,7 +302,7 @@ class TestUserExecutionContextValidationSecurity(SSotAsyncTestCase):
         
         # Log migration pattern success
         self.logger.info(
-            "✅ MIGRATION PATTERN: Real UserExecutionContext pattern validated for migration guide"
+            " PASS:  MIGRATION PATTERN: Real UserExecutionContext pattern validated for migration guide"
         )
 
 

@@ -3,6 +3,7 @@ Integration test to verify message type determination works correctly.
 This test simulates the actual logic flow for both example prompts and message input.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from enum import Enum
 from shared.isolated_environment import IsolatedEnvironment
@@ -12,7 +13,7 @@ class WebSocketMessageType(Enum):
     START_AGENT = 'start_agent'
     USER_MESSAGE = 'user_message'
 
-class MessageTypeIntegrationTest(unittest.TestCase):
+class MessageTypeIntegrationTest(SSotBaseTestCase):
     """Test that message type determination is consistent between input methods."""
     
     def setUp(self):

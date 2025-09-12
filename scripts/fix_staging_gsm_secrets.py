@@ -63,7 +63,7 @@ def create_or_update_secret(secret_name: str, value: str, project: str) -> bool:
         )
         
         if result.returncode != 0 and "already exists" not in result.stderr:
-            print(f"❌ Failed to create {secret_name}: {result.stderr}")
+            print(f" FAIL:  Failed to create {secret_name}: {result.stderr}")
             return False
     
     # Add a new version with the value
@@ -77,10 +77,10 @@ def create_or_update_secret(secret_name: str, value: str, project: str) -> bool:
     )
     
     if result.returncode == 0:
-        print(f"✅ Set {secret_name}")
+        print(f" PASS:  Set {secret_name}")
         return True
     else:
-        print(f"❌ Failed to set {secret_name}: {result.stderr}")
+        print(f" FAIL:  Failed to set {secret_name}: {result.stderr}")
         return False
 
 
@@ -91,7 +91,7 @@ def main():
     parser.add_argument("--check-only", action="store_true", help="Only check, don't create")
     args = parser.parse_args()
     
-    print(f"\n🔍 Checking GSM secrets for {args.project}...\n")
+    print(f"\n SEARCH:  Checking GSM secrets for {args.project}...\n")
     
     # Define the REQUIRED secrets based on deployment/secrets_config.py
     required_secrets = {
@@ -138,31 +138,31 @@ def main():
         exists, current_value = check_secret_exists(secret_name, args.project)
         
         if not exists:
-            print(f"❌ MISSING: {secret_name}")
+            print(f" FAIL:  MISSING: {secret_name}")
             missing.append(secret_name)
         elif current_value and ("CHANGE_ME" in current_value or "YOUR_" in current_value):
-            print(f"⚠️  NEEDS UPDATE: {secret_name} (has placeholder value)")
+            print(f" WARNING: [U+FE0F]  NEEDS UPDATE: {secret_name} (has placeholder value)")
             needs_update.append(secret_name)
         elif current_value:
-            print(f"✅ EXISTS: {secret_name}")
+            print(f" PASS:  EXISTS: {secret_name}")
             good.append(secret_name)
         else:
-            print(f"⚠️  EMPTY: {secret_name}")
+            print(f" WARNING: [U+FE0F]  EMPTY: {secret_name}")
             needs_update.append(secret_name)
     
-    print(f"\n📊 Summary:")
-    print(f"  ✅ Good: {len(good)}")
-    print(f"  ❌ Missing: {len(missing)}")
-    print(f"  ⚠️  Needs update: {len(needs_update)}")
+    print(f"\n CHART:  Summary:")
+    print(f"   PASS:  Good: {len(good)}")
+    print(f"   FAIL:  Missing: {len(missing)}")
+    print(f"   WARNING: [U+FE0F]  Needs update: {len(needs_update)}")
     
     if args.create and (missing or needs_update):
-        print(f"\n🔧 Creating/updating secrets...\n")
+        print(f"\n[U+1F527] Creating/updating secrets...\n")
         
         for secret_name in missing:
             default_value = required_secrets[secret_name]
             create_or_update_secret(secret_name, default_value, args.project)
         
-        print(f"\n⚠️  CRITICAL: Update these secrets with real values:")
+        print(f"\n WARNING: [U+FE0F]  CRITICAL: Update these secrets with real values:")
         print(f"  1. postgres-password-staging: Your Cloud SQL password")
         print(f"  2. redis-host-staging: Your Memorystore IP address")
         print(f"  3. JWT/SECRET keys: Generate secure random values")
@@ -173,11 +173,11 @@ def main():
         print(f'echo "10.x.x.x" | gcloud secrets versions add redis-host-staging --data-file=- --project={args.project}')
         
     elif not args.create and missing:
-        print(f"\n❌ Missing secrets found! Run with --create to create them:")
+        print(f"\n FAIL:  Missing secrets found! Run with --create to create them:")
         print(f"  python scripts/fix_staging_gsm_secrets.py --project {args.project} --create")
     
     if not missing and not needs_update:
-        print(f"\n🎉 All secrets are properly configured!")
+        print(f"\n CELEBRATION:  All secrets are properly configured!")
         print(f"\nYou can now deploy:")
         print(f"  python scripts/deploy_to_gcp.py --project {args.project} --build-local")
 

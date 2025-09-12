@@ -492,7 +492,7 @@ class TestUniversalRegistryToolDispatch:
             print(f"  Execution Time: {result.execution_time_ms:.1f}ms")
             print(f"  Registry Used: {result.registry_used}")
             print(f"  WebSocket Events: {result.websocket_events_sent}")
-            print(f"  User Isolation: {'✓' if result.user_isolation_verified else '✗'}")
+            print(f"  User Isolation: {'[U+2713]' if result.user_isolation_verified else '[U+2717]'}")
             if result.errors:
                 print(f"  Errors: {result.errors}")
         
@@ -515,17 +515,17 @@ if __name__ == "__main__":
         try:
             await test_case.test_universal_registry_as_single_source()
         except AssertionError as e:
-            print(f"✅ Expected SSOT violation detected: {e}")
+            print(f" PASS:  Expected SSOT violation detected: {e}")
         
         try:
             await test_case.test_factory_pattern_enforcement_integration()
         except AssertionError as e:
-            print(f"⚠️  Factory pattern issue: {e}")
+            print(f" WARNING: [U+FE0F]  Factory pattern issue: {e}")
         
         try:
             await test_case.test_tool_execution_through_registry_only()
         except AssertionError as e:
-            print(f"⚠️  Registry execution issue: {e}")
+            print(f" WARNING: [U+FE0F]  Registry execution issue: {e}")
         
         # Generate report
         success_rate = await test_case.test_generate_integration_test_report()

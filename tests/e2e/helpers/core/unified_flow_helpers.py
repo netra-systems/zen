@@ -2,12 +2,12 @@
 Unified Flow Helper Functions
 
 BVJ (Business Value Justification):
-- Segment: ALL segments (Free → Enterprise)  
+- Segment: ALL segments (Free  ->  Enterprise)  
 - Business Goal: Protect $100K+ MRR through complete user journey validation
 - Value Impact: Prevents integration failures that cause 100% user loss
 - Strategic Impact: Each working user journey = $99-999/month recurring revenue
 
-Helper functions for unified signup → login → chat flow testing.
+Helper functions for unified signup  ->  login  ->  chat flow testing.
 Extracted from test_real_unified_signup_login_chat.py for modularity.
 SSOT compliant with real auth service integration.
 """

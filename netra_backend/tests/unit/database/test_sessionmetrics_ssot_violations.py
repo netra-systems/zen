@@ -38,7 +38,7 @@ class TestSSOTViolationRemediation:
         
         # No naming collision - different concepts have different names
         assert SystemSessionMetrics is not DatabaseSessionMetrics
-        print("✅ SSOT VIOLATION FIXED: No more SessionMetrics naming collision")
+        print(" PASS:  SSOT VIOLATION FIXED: No more SessionMetrics naming collision")
 
     def test_database_metrics_has_correct_fields(self):
         """CRITICAL: Validate DatabaseSessionMetrics has all required fields for database session tracking."""
@@ -62,7 +62,7 @@ class TestSSOTViolationRemediation:
         assert hasattr(db_metrics, 'operations_count')  # Property for compatibility  
         assert hasattr(db_metrics, 'errors')  # Property for compatibility
         
-        print("✅ DatabaseSessionMetrics has all required fields and backward compatibility")
+        print(" PASS:  DatabaseSessionMetrics has all required fields and backward compatibility")
 
     def test_system_metrics_has_correct_fields(self):
         """CRITICAL: Validate SystemSessionMetrics has all required fields for system-wide tracking."""
@@ -83,7 +83,7 @@ class TestSSOTViolationRemediation:
         assert hasattr(sys_metrics, 'record_session_reuse')
         assert hasattr(sys_metrics, 'record_session_cleanup')
         
-        print("✅ SystemSessionMetrics has all required fields and SSOT methods")
+        print(" PASS:  SystemSessionMetrics has all required fields and SSOT methods")
     
     def test_critical_attributeerror_bug_fixed(self):
         """CRITICAL: Validate the AttributeError bug in lines 383-385 has been completely fixed."""
@@ -105,7 +105,7 @@ class TestSSOTViolationRemediation:
             compat_operations = db_metrics.operations_count
             compat_errors = db_metrics.errors
             
-            print("✅ CRITICAL BUG FIXED: All field accesses work without AttributeError")
+            print(" PASS:  CRITICAL BUG FIXED: All field accesses work without AttributeError")
             print(f"   last_activity_at: {last_activity_iso}")
             print(f"   query_count: {operations_count}")
             print(f"   error_count: {errors_count}")
@@ -123,7 +123,7 @@ class TestSSOTViolationRemediation:
         assert type(metrics).__name__ == "SystemSessionMetrics"
         assert metrics.__class__.__module__ == "shared.metrics.session_metrics"
         
-        print("✅ UserSessionManager successfully uses SSOT SystemSessionMetrics")
+        print(" PASS:  UserSessionManager successfully uses SSOT SystemSessionMetrics")
 
     def test_ssot_methods_work_correctly(self):
         """Validate all SSOT methods function correctly without errors."""
@@ -161,7 +161,7 @@ class TestSSOTViolationRemediation:
         assert sys_metrics.memory_usage_mb == 25.5
         assert sys_metrics.average_session_duration_minutes == 30.2
         
-        print("✅ All SSOT methods function correctly")
+        print(" PASS:  All SSOT methods function correctly")
 
 
 if __name__ == "__main__":

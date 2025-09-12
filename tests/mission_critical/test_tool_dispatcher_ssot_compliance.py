@@ -503,12 +503,12 @@ if __name__ == "__main__":
     try:
         test_case.test_single_tool_dispatcher_implementation()
     except AssertionError as e:
-        print(f"✅ Expected failure: {e}")
+        print(f" PASS:  Expected failure: {e}")
     
     try:
         test_case.test_no_direct_tool_dispatcher_imports()
     except AssertionError as e:
-        print(f"✅ Expected failure: {e}")
+        print(f" PASS:  Expected failure: {e}")
     
     # Generate report
     report = test_case.test_generate_ssot_compliance_report()

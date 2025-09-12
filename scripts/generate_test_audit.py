@@ -268,12 +268,12 @@ def main():
     with open(output_file, 'w') as f:
         f.write(report)
     
-    print(f"✅ Test audit report generated: {output_file}")
+    print(f" PASS:  Test audit report generated: {output_file}")
     
     # Also print summary
     counts = count_test_files()
     total = sum(counts.values())
-    print(f"\n📊 Summary:")
+    print(f"\n CHART:  Summary:")
     print(f"  - Total test files: {total} (excluding dependencies)")
     print(f"  - Test locations: {len(counts)}")
     

@@ -2375,9 +2375,9 @@ class TestRaceConditionReproduction:
             # Verify that the system recovered from race conditions
             # (The final result should still be successful if recovery logic works)
             if result['success']:
-                print("✅ Race conditions detected but system recovered successfully")
+                print(" PASS:  Race conditions detected but system recovered successfully")
             else:
-                print("❌ Race conditions detected and system failed to recover")
+                print(" FAIL:  Race conditions detected and system failed to recover")
         
         # Verify that the critical WebSocket events were delivered
         events_step = next((step for step in result['steps'] if step['step'] == 'websocket_events'), None)

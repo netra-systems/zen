@@ -138,11 +138,11 @@
             # Check health while agent is alive
             # REMOVED_SYNTAX_ERROR: health_result = await health_integration.check_agent_execution_health()
             # REMOVED_SYNTAX_ERROR: assert health_result['status'] == HealthStatus.HEALTHY.value
-            # REMOVED_SYNTAX_ERROR: print("✅ Health check shows HEALTHY while agent alive")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Health check shows HEALTHY while agent alive")
 
             # Simulate agent death (stop heartbeats)
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: 🔴 SIMULATING AGENT DEATH - stopping heartbeats...")
+            # REMOVED_SYNTAX_ERROR: [U+1F534] SIMULATING AGENT DEATH - stopping heartbeats...")
             # REMOVED_SYNTAX_ERROR: await asyncio.sleep(12)  # Wait for death detection
 
             # Check if death was detected
@@ -156,7 +156,7 @@
             # REMOVED_SYNTAX_ERROR: assert health_result['status'] == HealthStatus.UNHEALTHY.value
             # REMOVED_SYNTAX_ERROR: assert 'dead_agents' in health_result
             # REMOVED_SYNTAX_ERROR: assert len(health_result['dead_agents']) == 1
-            # REMOVED_SYNTAX_ERROR: print("✅ Health check shows UNHEALTHY after agent death")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Health check shows UNHEALTHY after agent death")
 
             # Verify dead agent details
             # REMOVED_SYNTAX_ERROR: dead_agent = health_result['dead_agents'][0]
@@ -216,16 +216,16 @@
                         # Test request validation
                         # REMOVED_SYNTAX_ERROR: request_valid = await security_manager.validate_request('user_123', 'triage_agent')
                         # REMOVED_SYNTAX_ERROR: assert request_valid, "First request should be valid"
-                        # REMOVED_SYNTAX_ERROR: print("✅ Security validation passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Security validation passed")
 
                         # Test resource acquisition
                         # REMOVED_SYNTAX_ERROR: resources = await security_manager.acquire_resources('user_123')
                         # REMOVED_SYNTAX_ERROR: assert resources is not None, "Resources should be acquired"
-                        # REMOVED_SYNTAX_ERROR: print("✅ Resources acquired successfully")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Resources acquired successfully")
 
                         # Test execution recording
                         # REMOVED_SYNTAX_ERROR: await security_manager.record_execution('user_123', 'triage_agent', success=False)
-                        # REMOVED_SYNTAX_ERROR: print("✅ Execution failure recorded")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Execution failure recorded")
 
                         # Test circuit breaker after failures
                         # REMOVED_SYNTAX_ERROR: for i in range(2):
@@ -234,7 +234,7 @@
                             # Circuit should be open after 3 failures
                             # REMOVED_SYNTAX_ERROR: circuit_open = circuit_breaker.is_open('triage_agent')
                             # REMOVED_SYNTAX_ERROR: assert circuit_open, "Circuit breaker should be open after 3 failures"
-                            # REMOVED_SYNTAX_ERROR: print("✅ Circuit breaker triggered after repeated failures")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Circuit breaker triggered after repeated failures")
 
                             # Removed problematic line: @pytest.mark.asyncio
                             # Removed problematic line: async def test_websocket_death_notification(self):
@@ -279,7 +279,7 @@
 
         # Stop heartbeats to simulate death
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: 🔴 Simulating agent death...")
+        # REMOVED_SYNTAX_ERROR: [U+1F534] Simulating agent death...")
 
         # Register death callback
         # REMOVED_SYNTAX_ERROR: tracker.registry.on_state_change = death_callback
@@ -357,7 +357,7 @@
 
                                         # Verify health shows unhealthy
                                         # REMOVED_SYNTAX_ERROR: assert health_result['status'] == HealthStatus.UNHEALTHY.value
-                                        # REMOVED_SYNTAX_ERROR: print("✅ Health status correctly shows UNHEALTHY")
+                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Health status correctly shows UNHEALTHY")
 
                                         # Removed problematic line: @pytest.mark.asyncio
                                         # Removed problematic line: async def test_recovery_after_agent_death(self):
@@ -383,7 +383,7 @@
                                             # REMOVED_SYNTAX_ERROR: await asyncio.sleep(6)
                                             # REMOVED_SYNTAX_ERROR: record1 = tracker.get_execution(exec_id1)
                                             # REMOVED_SYNTAX_ERROR: assert record1.is_timed_out(), "First agent should be timed out"
-                                            # REMOVED_SYNTAX_ERROR: print("🔴 First agent timed out")
+                                            # REMOVED_SYNTAX_ERROR: print("[U+1F534] First agent timed out")
 
                                             # Mark as failed
                                             # REMOVED_SYNTAX_ERROR: tracker.update_execution_state(exec_id1, ExecutionState.FAILED, error="Timeout")
@@ -411,13 +411,13 @@
                                                 # REMOVED_SYNTAX_ERROR: record2 = tracker.get_execution(exec_id2)
                                                 # REMOVED_SYNTAX_ERROR: assert record2.state == ExecutionState.SUCCESS
                                                 # REMOVED_SYNTAX_ERROR: assert record2.result.get('recovered') == True
-                                                # REMOVED_SYNTAX_ERROR: print("✅ Recovery agent completed successfully")
+                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  Recovery agent completed successfully")
 
                                                 # Check system health after recovery
                                                 # REMOVED_SYNTAX_ERROR: health_integration = ExecutionHealthIntegration()
                                                 # REMOVED_SYNTAX_ERROR: health_result = await health_integration.check_agent_execution_health()
                                                 # REMOVED_SYNTAX_ERROR: assert health_result['status'] == HealthStatus.HEALTHY.value
-                                                # REMOVED_SYNTAX_ERROR: print("✅ System health restored after recovery")
+                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  System health restored after recovery")
 
 
 # REMOVED_SYNTAX_ERROR: class TestBaseAgentInheritanceDeathScenarios:
@@ -500,7 +500,7 @@
 
             # REMOVED_SYNTAX_ERROR: record = tracker.get_execution(exec_id_death)
             # REMOVED_SYNTAX_ERROR: assert record.state == ExecutionState.FAILED
-            # REMOVED_SYNTAX_ERROR: print("✅ BaseAgent death detection working through inheritance")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  BaseAgent death detection working through inheritance")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_baseagent_state_consistency_during_death(self):
@@ -560,7 +560,7 @@
             # State should be FAILED after death
             # REMOVED_SYNTAX_ERROR: death_state = agent.get_state()
             # REMOVED_SYNTAX_ERROR: assert death_state == SubAgentLifecycle.FAILED
-            # REMOVED_SYNTAX_ERROR: print("✅ BaseAgent state consistency maintained during death")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  BaseAgent state consistency maintained during death")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_baseagent_websocket_notifications_on_death(self):
@@ -623,7 +623,7 @@
             # REMOVED_SYNTAX_ERROR: assert "agent_started" in websocket_notifications
             # REMOVED_SYNTAX_ERROR: assert "thinking" in websocket_notifications
             # REMOVED_SYNTAX_ERROR: assert "agent_completed" not in websocket_notifications
-            # REMOVED_SYNTAX_ERROR: print("✅ BaseAgent WebSocket notifications work during death scenarios")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  BaseAgent WebSocket notifications work during death scenarios")
 
 
 # REMOVED_SYNTAX_ERROR: class TestExecuteCorePatternDeathScenarios:
@@ -702,7 +702,7 @@
                         # REMOVED_SYNTAX_ERROR: await agent.execute_core_logic(death_context)
 
                         # REMOVED_SYNTAX_ERROR: assert agent.last_heartbeat is None  # Heartbeat stopped on death
-                        # REMOVED_SYNTAX_ERROR: print("✅ Execute core pattern handles death detection properly")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Execute core pattern handles death detection properly")
 
                         # Removed problematic line: @pytest.mark.asyncio
                         # Removed problematic line: async def test_execute_core_timeout_death_scenarios(self):
@@ -776,7 +776,7 @@
             # REMOVED_SYNTAX_ERROR: await timeout_agent.execute_core_logic(timeout_context)
 
             # REMOVED_SYNTAX_ERROR: assert timeout_agent.timeout_detected is True
-            # REMOVED_SYNTAX_ERROR: print("✅ Execute core pattern handles timeout death scenarios")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Execute core pattern handles timeout death scenarios")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_execute_core_resource_cleanup_on_death(self):
@@ -856,7 +856,7 @@
             # REMOVED_SYNTAX_ERROR: assert death_agent.resources_acquired == 3
             # REMOVED_SYNTAX_ERROR: assert death_agent.resources_released == 3
             # REMOVED_SYNTAX_ERROR: assert len(death_agent.active_resources) == 0
-            # REMOVED_SYNTAX_ERROR: print("✅ Execute core pattern cleans up resources on death")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Execute core pattern cleans up resources on death")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_execute_core_death_propagation_patterns(self):
@@ -943,7 +943,7 @@
         # REMOVED_SYNTAX_ERROR: assert signal["agent_name"] == "PropagationDeath"
         # REMOVED_SYNTAX_ERROR: assert signal["error_type"] == "RuntimeError"
         # REMOVED_SYNTAX_ERROR: assert "Nested execution death" in signal["error_message"]
-        # REMOVED_SYNTAX_ERROR: print("✅ Execute core pattern properly propagates death signals")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  Execute core pattern properly propagates death signals")
 
 
 # REMOVED_SYNTAX_ERROR: class TestErrorRecoveryDeathScenarios:
@@ -1058,7 +1058,7 @@
 
             # Agent should be in FAILED state
             # REMOVED_SYNTAX_ERROR: assert fatal_agent.get_state() == SubAgentLifecycle.FAILED
-            # REMOVED_SYNTAX_ERROR: print("✅ Error recovery mechanisms work after agent death")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Error recovery mechanisms work after agent death")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_error_recovery_timeout_scenarios(self):
@@ -1158,7 +1158,7 @@
         # REMOVED_SYNTAX_ERROR: await very_slow_agent.execute_core_logic(very_slow_context)
 
         # REMOVED_SYNTAX_ERROR: assert very_slow_agent.timeout_count > 1
-        # REMOVED_SYNTAX_ERROR: print("✅ Error recovery works in timeout scenarios")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  Error recovery works in timeout scenarios")
 
         # Removed problematic line: @pytest.mark.asyncio
         # Removed problematic line: async def test_error_recovery_cascading_failures(self):
@@ -1239,7 +1239,7 @@
     # REMOVED_SYNTAX_ERROR: assert failure_cascade[1]["level"] == 2
     # REMOVED_SYNTAX_ERROR: assert failure_cascade[2]["level"] == 3
 
-    # REMOVED_SYNTAX_ERROR: print("✅ Error recovery handles cascading failures")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Error recovery handles cascading failures")
 
     # Removed problematic line: @pytest.mark.asyncio
     # Removed problematic line: async def test_error_recovery_resource_exhaustion_death(self):
@@ -1334,7 +1334,7 @@
             # REMOVED_SYNTAX_ERROR: else:
                 # REMOVED_SYNTAX_ERROR: pytest.fail("Should have died from repeated resource exhaustion")
 
-                # REMOVED_SYNTAX_ERROR: print("✅ Error recovery handles resource exhaustion scenarios")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Error recovery handles resource exhaustion scenarios")
 
                 # Removed problematic line: async def test_agent_death_memory_cleanup(self):
                     # REMOVED_SYNTAX_ERROR: """Test 18: Verify memory is properly cleaned up after agent death."""
@@ -1356,7 +1356,7 @@
                                 # REMOVED_SYNTAX_ERROR: final_memory = len(gc.get_objects())
                                 # REMOVED_SYNTAX_ERROR: memory_growth = final_memory - initial_memory
                                 # REMOVED_SYNTAX_ERROR: assert memory_growth < 1000, "formatted_string"
-                                # REMOVED_SYNTAX_ERROR: print("✅ Memory properly cleaned up after agent death")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  Memory properly cleaned up after agent death")
 
                                 # Removed problematic line: async def test_agent_death_websocket_cleanup(self):
                                     # REMOVED_SYNTAX_ERROR: """Test 19: Verify WebSocket connections are cleaned up after death."""
@@ -1374,7 +1374,7 @@
                                                 # Verify WebSocket was cleaned up
                                                 # REMOVED_SYNTAX_ERROR: if hasattr(mock_websocket, 'close'):
                                                     # REMOVED_SYNTAX_ERROR: mock_websocket.close.assert_called()
-                                                    # REMOVED_SYNTAX_ERROR: print("✅ WebSocket connections cleaned up after agent death")
+                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket connections cleaned up after agent death")
 
                                                     # Removed problematic line: async def test_agent_death_thread_cleanup(self):
                                                         # REMOVED_SYNTAX_ERROR: """Test 20: Verify threads are properly terminated after agent death."""
@@ -1404,7 +1404,7 @@
                 # Verify threads cleaned up
                 # REMOVED_SYNTAX_ERROR: final_threads = threading.active_count()
                 # REMOVED_SYNTAX_ERROR: assert final_threads <= initial_threads + 1, "Threads not cleaned up"
-                # REMOVED_SYNTAX_ERROR: print("✅ Threads properly terminated after agent death")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Threads properly terminated after agent death")
 
                 # Removed problematic line: async def test_agent_death_circuit_breaker_activation(self):
                     # REMOVED_SYNTAX_ERROR: """Test 21: Verify circuit breaker activates on repeated deaths."""
@@ -1430,7 +1430,7 @@
 
                 # Circuit breaker should limit attempts
                 # REMOVED_SYNTAX_ERROR: assert death_count <= 3, f"Circuit breaker didn"t activate: {death_count} deaths"
-                # REMOVED_SYNTAX_ERROR: print("✅ Circuit breaker activated on repeated deaths")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Circuit breaker activated on repeated deaths")
 
                 # Removed problematic line: async def test_agent_death_graceful_degradation(self):
                     # REMOVED_SYNTAX_ERROR: """Test 22: Verify system degrades gracefully on agent death."""
@@ -1452,7 +1452,7 @@
     
 
     # REMOVED_SYNTAX_ERROR: assert fallback_called, "Fallback not called on death"
-    # REMOVED_SYNTAX_ERROR: print("✅ System degrades gracefully on agent death")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  System degrades gracefully on agent death")
 
     # Removed problematic line: async def test_agent_death_logging_completeness(self):
         # REMOVED_SYNTAX_ERROR: """Test 23: Verify comprehensive logging on agent death."""
@@ -1471,7 +1471,7 @@
 
                         # Verify logging occurred
                         # REMOVED_SYNTAX_ERROR: assert logger_instance.error.called, "Death not logged"
-                        # REMOVED_SYNTAX_ERROR: print("✅ Agent death properly logged")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Agent death properly logged")
 
                         # Removed problematic line: async def test_agent_death_metric_collection(self):
                             # REMOVED_SYNTAX_ERROR: """Test 24: Verify metrics are collected on agent death."""
@@ -1491,13 +1491,13 @@
             # REMOVED_SYNTAX_ERROR: pass
 
             # REMOVED_SYNTAX_ERROR: assert metrics["deaths"] > 0, "Death metrics not collected"
-            # REMOVED_SYNTAX_ERROR: print("✅ Metrics collected on agent death")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Metrics collected on agent death")
 
             # Removed problematic line: async def test_agent_death_final_comprehensive_validation(self):
                 # REMOVED_SYNTAX_ERROR: """Test 25: Final comprehensive validation of all death handling."""
                 # REMOVED_SYNTAX_ERROR: pass
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: 🎯 Running final comprehensive death handling validation...")
+                # REMOVED_SYNTAX_ERROR:  TARGET:  Running final comprehensive death handling validation...")
 
                 # Test all critical death scenarios
                 # REMOVED_SYNTAX_ERROR: scenarios = [ )
@@ -1522,8 +1522,8 @@
                                 # REMOVED_SYNTAX_ERROR: assert all(r == "handled" or r == "recovered" for r in results.values()), \
                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                # REMOVED_SYNTAX_ERROR: print("✅ FINAL VALIDATION: All death scenarios properly handled")
-                                # REMOVED_SYNTAX_ERROR: print("🎉 AGENT DEATH FIX COMPLETE AND VERIFIED!")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  FINAL VALIDATION: All death scenarios properly handled")
+                                # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  AGENT DEATH FIX COMPLETE AND VERIFIED!")
 
 
                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

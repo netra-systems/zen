@@ -1,12 +1,12 @@
 """
 Example Prompts E2E Testing - Validation Functions
 Contains all validation functions for example prompt testing.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from typing import Dict
 
-# Validation functions for each prompt type (≤8 lines each)
+# Validation functions for each prompt type ( <= 8 lines each)
 def validate_cost_optimization_result(result: Dict, setup: Dict):
     """Validate cost optimization workflow results."""
     assert result['success'], f"Workflow failed: {result.get('error')}"

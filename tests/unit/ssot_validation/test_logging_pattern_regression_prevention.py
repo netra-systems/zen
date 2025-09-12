@@ -86,7 +86,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
             f"to maintain correlation tracking for $500K+ ARR customer debugging support."
         )
         
-        print(f"✅ REGRESSION PROTECTION: All {len(self.critical_golden_path_files)} critical Golden Path files use SSOT logging")
+        print(f" PASS:  REGRESSION PROTECTION: All {len(self.critical_golden_path_files)} critical Golden Path files use SSOT logging")
         
     def test_no_new_legacy_logging_introduced(self):
         """
@@ -130,7 +130,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
             f"to maintain unified correlation tracking."
         )
         
-        print("✅ NO NEW LEGACY LOGGING: All Golden Path files use approved SSOT patterns")
+        print(" PASS:  NO NEW LEGACY LOGGING: All Golden Path files use approved SSOT patterns")
         
     def test_import_statement_integrity(self):
         """
@@ -177,7 +177,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
             f"for Golden Path correlation tracking integrity."
         )
         
-        print("✅ IMPORT INTEGRITY: All critical files have correct SSOT logging imports")
+        print(" PASS:  IMPORT INTEGRITY: All critical files have correct SSOT logging imports")
         
     def test_logger_variable_consistency_maintained(self):
         """
@@ -230,7 +230,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
             f"for consistency in Golden Path correlation tracking."
         )
         
-        print("✅ NAMING CONSISTENCY: All critical files use standard logger variable naming")
+        print(" PASS:  NAMING CONSISTENCY: All critical files use standard logger variable naming")
         
     def test_logging_call_patterns_remain_consistent(self):
         """
@@ -270,7 +270,7 @@ class TestLoggingPatternRegressionPrevention(SSotBaseTestCase):
             f"for unified Golden Path correlation tracking."
         )
         
-        print("✅ CALL PATTERN CONSISTENCY: All critical files use consistent logging call patterns")
+        print(" PASS:  CALL PATTERN CONSISTENCY: All critical files use consistent logging call patterns")
         
     def _check_file_ssot_compliance(self, file_path: Path, relative_path: str) -> List[str]:
         """Check if file complies with SSOT logging requirements."""
@@ -329,7 +329,7 @@ if __name__ == '__main__':
     
     result = runner.run(suite)
     if result.failures or result.errors:
-        print("\n🚨 REGRESSION DETECTED: Some logging patterns need attention")
+        print("\n ALERT:  REGRESSION DETECTED: Some logging patterns need attention")
         print("Review failures above and ensure all Golden Path files use SSOT logging")
     else:
-        print("\n✅ REGRESSION PROTECTION PASSED: All Golden Path files maintain SSOT logging compliance")
+        print("\n PASS:  REGRESSION PROTECTION PASSED: All Golden Path files maintain SSOT logging compliance")

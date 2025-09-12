@@ -755,14 +755,14 @@ class TestSingleEmitterPerformanceValidation(SSotAsyncTestCase):
                          self.performance_metrics.peak_cpu_percent <= 200)    # Allow higher CPU for performance tests
         
         print(f"\nPerformance Benchmarks:")
-        print(f"✅ Throughput (≥400/sec): {meets_throughput}")
-        print(f"✅ Latency (≤250ms avg): {meets_latency}")
-        print(f"✅ Resource usage: {meets_resource}")
+        print(f" PASS:  Throughput ( >= 400/sec): {meets_throughput}")
+        print(f" PASS:  Latency ( <= 250ms avg): {meets_latency}")
+        print(f" PASS:  Resource usage: {meets_resource}")
         
         if meets_throughput and meets_latency and meets_resource:
-            print("🎉 ALL PERFORMANCE BENCHMARKS MET - Single emitter optimization successful!")
+            print(" CELEBRATION:  ALL PERFORMANCE BENCHMARKS MET - Single emitter optimization successful!")
         else:
-            print("⚠️  Some performance benchmarks not met - optimization needed")
+            print(" WARNING: [U+FE0F]  Some performance benchmarks not met - optimization needed")
         
         print("===============================================\n")
         

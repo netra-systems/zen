@@ -189,7 +189,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
         if contamination_detected:
             contamination_details = self._format_contamination_evidence()
             assert False, (
-                f"🚨 CRITICAL SECURITY VULNERABILITY: Cross-user data contamination detected "
+                f" ALERT:  CRITICAL SECURITY VULNERABILITY: Cross-user data contamination detected "
                 f"in concurrent ReportingSubAgent execution. {contamination_details}. "
                 f"DeepAgentState shared state creates race condition vulnerabilities. "
                 f"Migration to UserExecutionContext required."
@@ -414,7 +414,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
         # AFTER migration: Should detect no violations (test passes)
         if memory_violations:
             assert False, (
-                f"🚨 MEMORY ISOLATION VIOLATIONS: {memory_violations}. "
+                f" ALERT:  MEMORY ISOLATION VIOLATIONS: {memory_violations}. "
                 f"Shared memory references between users create contamination risks. "
                 f"UserExecutionContext migration required for proper isolation."
             )
@@ -518,7 +518,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
         # AFTER migration: Should detect no race conditions (test passes)
         if race_condition_detected:
             assert False, (
-                f"🚨 RACE CONDITION VULNERABILITY: Data contamination detected under "
+                f" ALERT:  RACE CONDITION VULNERABILITY: Data contamination detected under "
                 f"concurrent execution race conditions. Shared state creates timing "
                 f"vulnerabilities. UserExecutionContext migration required."
             )
@@ -596,7 +596,7 @@ class TestReportingAgentMultiUserConcurrencySecurity(SSotAsyncTestCase):
         # AFTER migration: Should detect no contamination (test passes)
         if websocket_contamination_detected:
             assert False, (
-                f"🚨 WEBSOCKET ISOLATION VIOLATION: WebSocket events contain cross-user "
+                f" ALERT:  WEBSOCKET ISOLATION VIOLATION: WebSocket events contain cross-user "
                 f"contamination under concurrent execution. Event routing isolation required."
             )
 

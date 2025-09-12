@@ -2,7 +2,7 @@
 Comprehensive Multi-User Isolation Routing Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure complete user isolation in multi-user chat system  
 - Value Impact: Prevents catastrophic cross-user message contamination that would destroy business
 - Strategic Impact: CRITICAL - User isolation failures are existential security vulnerabilities

@@ -41,7 +41,7 @@ async def test_clickhouse_connection():
         print("Initializing ClickHouse manager...")
         manager = get_clickhouse_manager()
         await manager.initialize()
-        print("✓ ClickHouse manager initialized")
+        print("[U+2713] ClickHouse manager initialized")
         
         # Test health check
         print("\nTesting ClickHouse health check...")
@@ -49,11 +49,11 @@ async def test_clickhouse_connection():
         health = await checker.check_health()
         
         if health["status"] == "healthy":
-            print(f"✓ ClickHouse is healthy")
+            print(f"[U+2713] ClickHouse is healthy")
             print(f"  - Latency: {health.get('latency_ms', 'N/A'):.2f}ms")
             print(f"  - Connection pool size: {health.get('pool_size', 'N/A')}")
         else:
-            print(f"✗ ClickHouse is unhealthy: {health.get('error', 'Unknown error')}")
+            print(f"[U+2717] ClickHouse is unhealthy: {health.get('error', 'Unknown error')}")
             return False
         
         # Test a simple query
@@ -62,7 +62,7 @@ async def test_clickhouse_connection():
             result = await asyncio.to_thread(
                 lambda: client.execute("SELECT version()")
             )
-            print(f"✓ Query successful - ClickHouse version: {result[0][0]}")
+            print(f"[U+2713] Query successful - ClickHouse version: {result[0][0]}")
         
         # Test table creation
         print("\nTesting table operations...")
@@ -77,16 +77,16 @@ async def test_clickhouse_connection():
         """
         
         await manager.execute_command(create_table_sql)
-        print("✓ Test table created/verified")
+        print("[U+2713] Test table created/verified")
         
         # Get table info
         table_info = await manager.get_table_info("test_events")
-        print(f"✓ Table has {table_info['total_columns']} columns")
+        print(f"[U+2713] Table has {table_info['total_columns']} columns")
         
         return True
         
     except Exception as e:
-        print(f"✗ ClickHouse test failed: {e}")
+        print(f"[U+2717] ClickHouse test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -110,7 +110,7 @@ async def test_redis_connection():
         print("Initializing Redis manager...")
         manager = get_redis_manager()
         await manager.initialize()
-        print("✓ Redis manager initialized")
+        print("[U+2713] Redis manager initialized")
         
         # Test health check
         print("\nTesting Redis health check...")
@@ -118,10 +118,10 @@ async def test_redis_connection():
         health = await checker.check_health()
         
         if health["status"] == "healthy":
-            print(f"✓ Redis is healthy")
+            print(f"[U+2713] Redis is healthy")
             print(f"  - Latency: {health.get('latency_ms', 'N/A'):.2f}ms")
         else:
-            print(f"✗ Redis is unhealthy: {health.get('error', 'Unknown error')}")
+            print(f"[U+2717] Redis is unhealthy: {health.get('error', 'Unknown error')}")
             return False
         
         # Test basic operations
@@ -131,24 +131,24 @@ async def test_redis_connection():
         
         # Set a value
         await manager.set(test_key, test_value, ttl=60)
-        print(f"✓ Set test key: {test_key}")
+        print(f"[U+2713] Set test key: {test_key}")
         
         # Get the value
         retrieved = await manager.get(test_key)
         if retrieved == test_value:
-            print(f"✓ Retrieved correct value: {retrieved}")
+            print(f"[U+2713] Retrieved correct value: {retrieved}")
         else:
-            print(f"✗ Retrieved incorrect value: {retrieved}")
+            print(f"[U+2717] Retrieved incorrect value: {retrieved}")
             return False
         
         # Clean up
         await manager.delete(test_key)
-        print("✓ Cleaned up test key")
+        print("[U+2713] Cleaned up test key")
         
         return True
         
     except Exception as e:
-        print(f"✗ Redis test failed: {e}")
+        print(f"[U+2717] Redis test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -171,13 +171,13 @@ async def main():
     print("=" * 60)
     
     if clickhouse_ok and redis_ok:
-        print("✓ All connections successful!")
+        print("[U+2713] All connections successful!")
         print("\nThe Analytics Service can now properly connect to:")
         print("  - ClickHouse on native protocol (port 9000)")
         print("  - Redis for caching")
         return 0
     else:
-        print("✗ Some connections failed")
+        print("[U+2717] Some connections failed")
         if not clickhouse_ok:
             print("  - ClickHouse connection FAILED")
             print("    Check that CLICKHOUSE_PORT=9000 (not 8123)")

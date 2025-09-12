@@ -656,7 +656,7 @@ class TestWebSocketBusinessEvents(EnhancedBaseIntegrationTest):
                 # Step 5: Executive summary synthesis
                 await client.send_message(WebSocketEventType.STATUS_UPDATE, {
                     "transition": "Synthesizing insights into executive summary",
-                    "narrative_arc": "Cost reduction → Performance improvement → Competitive advantage",
+                    "narrative_arc": "Cost reduction  ->  Performance improvement  ->  Competitive advantage",
                     "progress_indicator": "Step 4 of 4 - creating executive summary"
                 })
                 

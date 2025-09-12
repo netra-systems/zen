@@ -21,7 +21,7 @@ sys.path.insert(0, str(project_root))
 
 # REMOVED_SYNTAX_ERROR: def test_auth_service_uses_central_validator_for_jwt():
     # REMOVED_SYNTAX_ERROR: """Test auth service delegates JWT secret to central validator."""
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing auth service central validator integration for JWT...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing auth service central validator integration for JWT...")
 
     # Import auth service
     # REMOVED_SYNTAX_ERROR: from auth_service.auth_core.secret_loader import AuthSecretLoader
@@ -41,7 +41,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: raise AssertionError("Expected ValueError for missing JWT_SECRET_STAGING")
         # REMOVED_SYNTAX_ERROR: except ValueError as e:
             # REMOVED_SYNTAX_ERROR: assert "JWT_SECRET_STAGING required in staging environment" in str(e)
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Auth service properly uses central validator hard requirements")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Auth service properly uses central validator hard requirements")
             # REMOVED_SYNTAX_ERROR: finally:
                 # Restore environment
                 # REMOVED_SYNTAX_ERROR: if original_env:
@@ -53,7 +53,7 @@ sys.path.insert(0, str(project_root))
 # REMOVED_SYNTAX_ERROR: def test_backend_service_uses_central_validator_for_jwt():
     # REMOVED_SYNTAX_ERROR: """Test backend service delegates JWT secret to central validator."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing backend service central validator integration for JWT...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing backend service central validator integration for JWT...")
 
     # Import backend service
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
@@ -75,7 +75,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: raise AssertionError("Expected ValueError for missing JWT_SECRET_PRODUCTION")
         # REMOVED_SYNTAX_ERROR: except ValueError as e:
             # REMOVED_SYNTAX_ERROR: assert "JWT_SECRET_PRODUCTION required in production environment" in str(e)
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Backend service properly uses central validator hard requirements")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Backend service properly uses central validator hard requirements")
             # REMOVED_SYNTAX_ERROR: finally:
                 # Restore environment
                 # REMOVED_SYNTAX_ERROR: if original_env:
@@ -86,7 +86,7 @@ sys.path.insert(0, str(project_root))
 
 # REMOVED_SYNTAX_ERROR: def test_backend_service_uses_central_validator_for_database():
     # REMOVED_SYNTAX_ERROR: """Test backend service delegates database credentials to central validator."""
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing backend service central validator integration for database...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing backend service central validator integration for database...")
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
@@ -106,7 +106,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: raise AssertionError("Expected ValueError for missing database configuration")
         # REMOVED_SYNTAX_ERROR: except ValueError as e:
             # REMOVED_SYNTAX_ERROR: assert ("DATABASE_HOST" in str(e) or "DATABASE_PASSWORD" in str(e))
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Backend service properly uses central validator for database credentials")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Backend service properly uses central validator for database credentials")
             # REMOVED_SYNTAX_ERROR: finally:
                 # Restore environment
                 # REMOVED_SYNTAX_ERROR: if original_env:
@@ -118,7 +118,7 @@ sys.path.insert(0, str(project_root))
 # REMOVED_SYNTAX_ERROR: def test_backend_service_uses_central_validator_for_redis():
     # REMOVED_SYNTAX_ERROR: """Test backend service delegates Redis credentials to central validator."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing backend service central validator integration for Redis...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing backend service central validator integration for Redis...")
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
@@ -138,7 +138,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: raise AssertionError("Expected ValueError for missing Redis configuration")
         # REMOVED_SYNTAX_ERROR: except ValueError as e:
             # REMOVED_SYNTAX_ERROR: assert ("REDIS_HOST" in str(e) or "REDIS_PASSWORD" in str(e))
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Backend service properly uses central validator for Redis credentials")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Backend service properly uses central validator for Redis credentials")
             # REMOVED_SYNTAX_ERROR: finally:
                 # Restore environment
                 # REMOVED_SYNTAX_ERROR: if original_env:
@@ -149,7 +149,7 @@ sys.path.insert(0, str(project_root))
 
 # REMOVED_SYNTAX_ERROR: def test_backend_service_uses_central_validator_for_llm():
     # REMOVED_SYNTAX_ERROR: """Test backend service delegates LLM credentials to central validator."""
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing backend service central validator integration for LLM...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing backend service central validator integration for LLM...")
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
@@ -172,7 +172,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: raise AssertionError("Expected ValueError for missing LLM API keys")
         # REMOVED_SYNTAX_ERROR: except ValueError as e:
             # REMOVED_SYNTAX_ERROR: assert "LLM API key required" in str(e) or "API_KEY" in str(e)
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Backend service properly uses central validator for LLM credentials")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Backend service properly uses central validator for LLM credentials")
             # REMOVED_SYNTAX_ERROR: finally:
                 # Restore environment
                 # REMOVED_SYNTAX_ERROR: if original_env:
@@ -184,7 +184,7 @@ sys.path.insert(0, str(project_root))
 # REMOVED_SYNTAX_ERROR: def test_central_validator_eliminates_dangerous_defaults():
     # REMOVED_SYNTAX_ERROR: """Test that central validator eliminates dangerous empty string defaults."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing central validator eliminates dangerous empty string defaults...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing central validator eliminates dangerous empty string defaults...")
 
     # REMOVED_SYNTAX_ERROR: from shared.configuration import get_central_validator
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
@@ -210,14 +210,14 @@ sys.path.insert(0, str(project_root))
             # REMOVED_SYNTAX_ERROR: assert "JWT_SECRET_STAGING" in error_msg
             # REMOVED_SYNTAX_ERROR: assert "DATABASE_PASSWORD" in error_msg
             # REMOVED_SYNTAX_ERROR: assert "REDIS_PASSWORD" in error_msg
-            # REMOVED_SYNTAX_ERROR: print("  ✅ Central validator properly rejects missing critical secrets")
+            # REMOVED_SYNTAX_ERROR: print("   PASS:  Central validator properly rejects missing critical secrets")
             # REMOVED_SYNTAX_ERROR: finally:
                 # REMOVED_SYNTAX_ERROR: validator.env_getter = original_getter
 
 
 # REMOVED_SYNTAX_ERROR: def test_development_environment_allows_defaults():
     # REMOVED_SYNTAX_ERROR: """Test that development environment still allows reasonable defaults."""
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing development environment allows reasonable defaults...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing development environment allows reasonable defaults...")
 
     # REMOVED_SYNTAX_ERROR: from shared.configuration import get_central_validator
 
@@ -238,7 +238,7 @@ sys.path.insert(0, str(project_root))
                     # REMOVED_SYNTAX_ERROR: validator.validate_all_requirements()
                     # REMOVED_SYNTAX_ERROR: jwt_secret = validator.get_jwt_secret()
                     # REMOVED_SYNTAX_ERROR: assert jwt_secret == "development-jwt-secret-32-characters-long-12345"
-                    # REMOVED_SYNTAX_ERROR: print("  ✅ Development environment properly allows reasonable defaults")
+                    # REMOVED_SYNTAX_ERROR: print("   PASS:  Development environment properly allows reasonable defaults")
                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                         # REMOVED_SYNTAX_ERROR: raise AssertionError("formatted_string")
 
@@ -246,7 +246,7 @@ sys.path.insert(0, str(project_root))
 # REMOVED_SYNTAX_ERROR: def test_services_use_same_central_validator():
     # REMOVED_SYNTAX_ERROR: """Test that both services use the same central validator instance."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: print("✅ Testing services use the same central validator...")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  Testing services use the same central validator...")
 
     # REMOVED_SYNTAX_ERROR: from shared.configuration import get_central_validator
 
@@ -256,12 +256,12 @@ sys.path.insert(0, str(project_root))
 
     # Should be the same singleton instance
     # REMOVED_SYNTAX_ERROR: assert validator1 is validator2
-    # REMOVED_SYNTAX_ERROR: print("  ✅ Central validator is properly used as singleton SSOT")
+    # REMOVED_SYNTAX_ERROR: print("   PASS:  Central validator is properly used as singleton SSOT")
 
 
 # REMOVED_SYNTAX_ERROR: def run_all_tests():
     # REMOVED_SYNTAX_ERROR: """Run all central validator integration tests."""
-    # REMOVED_SYNTAX_ERROR: print("🚨 Central Configuration Validator Integration Test Suite")
+    # REMOVED_SYNTAX_ERROR: print(" ALERT:  Central Configuration Validator Integration Test Suite")
     # REMOVED_SYNTAX_ERROR: print("=" * 70)
 
     # REMOVED_SYNTAX_ERROR: tests = [ )
@@ -289,11 +289,11 @@ sys.path.insert(0, str(project_root))
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: if failed == 0:
-                    # REMOVED_SYNTAX_ERROR: print("✅ All central validator integration tests PASSED")
-                    # REMOVED_SYNTAX_ERROR: print("🎉 Central configuration validator successfully integrated across all services")
+                    # REMOVED_SYNTAX_ERROR: print(" PASS:  All central validator integration tests PASSED")
+                    # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  Central configuration validator successfully integrated across all services")
                     # REMOVED_SYNTAX_ERROR: return True
                     # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: print("❌ Some central validator integration tests FAILED")
+                        # REMOVED_SYNTAX_ERROR: print(" FAIL:  Some central validator integration tests FAILED")
                         # REMOVED_SYNTAX_ERROR: return False
 
 

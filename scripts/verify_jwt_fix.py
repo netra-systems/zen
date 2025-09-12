@@ -37,7 +37,7 @@ def main():
     
     # Get JWT secret
     secret = get_unified_jwt_secret()
-    print(f"   ✓ Got JWT secret from IsolatedEnvironment: {secret[:20]}...")
+    print(f"   [U+2713] Got JWT secret from IsolatedEnvironment: {secret[:20]}...")
     
     # Test 2: Verify no os.environ bypass
     print("\n2. Checking for os.environ bypass...")
@@ -51,10 +51,10 @@ def main():
     secret = get_unified_jwt_secret()
     
     if 'WRONG-VALUE' in secret:
-        print("   ✗ ERROR: JWT manager is bypassing IsolatedEnvironment!")
+        print("   [U+2717] ERROR: JWT manager is bypassing IsolatedEnvironment!")
         return 1
     else:
-        print("   ✓ JWT manager correctly uses IsolatedEnvironment (not os.environ)")
+        print("   [U+2713] JWT manager correctly uses IsolatedEnvironment (not os.environ)")
     
     # Test 3: Verify proper error for missing staging secret
     print("\n3. Testing error handling for missing staging secret...")
@@ -64,13 +64,13 @@ def main():
     
     try:
         secret = get_unified_jwt_secret()
-        print(f"   ✗ ERROR: Should have failed but got: {secret[:20]}...")
+        print(f"   [U+2717] ERROR: Should have failed but got: {secret[:20]}...")
         return 1
     except ValueError as e:
         if 'staging' in str(e).lower():
-            print(f"   ✓ Properly failed for staging without secret")
+            print(f"   [U+2713] Properly failed for staging without secret")
         else:
-            print(f"   ✗ ERROR: Wrong error message: {e}")
+            print(f"   [U+2717] ERROR: Wrong error message: {e}")
             return 1
     
     # Test 4: Verify development fallback works
@@ -80,13 +80,13 @@ def main():
     
     secret = get_unified_jwt_secret()
     if secret and len(secret) >= 32:
-        print(f"   ✓ Development fallback works: {secret[:20]}...")
+        print(f"   [U+2713] Development fallback works: {secret[:20]}...")
     else:
-        print(f"   ✗ ERROR: Development fallback failed")
+        print(f"   [U+2717] ERROR: Development fallback failed")
         return 1
     
     print("\n" + "=" * 60)
-    print("✅ All JWT Secret Manager SSOT compliance tests passed!")
+    print(" PASS:  All JWT Secret Manager SSOT compliance tests passed!")
     print("\nThe fix successfully:")
     print("  - Removed os.environ bypass")
     print("  - Uses IsolatedEnvironment exclusively")

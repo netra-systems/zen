@@ -30,7 +30,7 @@ class AgentOrchestrationRecoveryTest:
             if response.status_code != 200:
                 print(f"ERROR: Backend unhealthy: {response.status_code}")
                 return False
-            print(f"✅ Backend healthy: {response.json()}")
+            print(f" PASS:  Backend healthy: {response.json()}")
         except Exception as e:
             print(f"ERROR: Backend connection failed: {e}")
             return False
@@ -41,7 +41,7 @@ class AgentOrchestrationRecoveryTest:
             if response.status_code != 200:
                 print(f"ERROR: Auth service unhealthy: {response.status_code}")
                 return False
-            print(f"✅ Auth service healthy: {response.json()}")
+            print(f" PASS:  Auth service healthy: {response.json()}")
         except Exception as e:
             print(f"ERROR: Auth service connection failed: {e}")
             return False
@@ -50,7 +50,7 @@ class AgentOrchestrationRecoveryTest:
         
     def test_triage_agent_timeout_handling(self) -> Dict[str, Any]:
         """Test triage agent timeout graceful handling"""
-        print("\n🧪 Testing: Triage Agent Timeout Handling")
+        print("\n[U+1F9EA] Testing: Triage Agent Timeout Handling")
         
         test_result = {
             "test_name": "triage_agent_timeout_handling",
@@ -70,7 +70,7 @@ class AgentOrchestrationRecoveryTest:
             endpoint_found = False
             for endpoint in agent_endpoints:
                 try:
-                    print(f"  🔍 Checking endpoint: {endpoint}")
+                    print(f"   SEARCH:  Checking endpoint: {endpoint}")
                     response = requests.get(endpoint, timeout=5)
                     print(f"    Status: {response.status_code}")
                     if response.status_code in [200, 405, 422]:  # 405=method not allowed, 422=validation error are expected for GET
@@ -78,7 +78,7 @@ class AgentOrchestrationRecoveryTest:
                         test_result["details"]["working_endpoint"] = endpoint
                         break
                 except requests.exceptions.Timeout:
-                    print(f"    ⏰ Timeout (expected for timeout test)")
+                    print(f"    [U+23F0] Timeout (expected for timeout test)")
                     endpoint_found = True
                     test_result["details"]["timeout_endpoint"] = endpoint
                     break
@@ -86,7 +86,7 @@ class AgentOrchestrationRecoveryTest:
                     print(f"    ERROR: Connection refused")
                     continue
                 except Exception as e:
-                    print(f"    ⚠️ Error: {e}")
+                    print(f"     WARNING: [U+FE0F] Error: {e}")
                     continue
             
             if endpoint_found:
@@ -104,7 +104,7 @@ class AgentOrchestrationRecoveryTest:
         
     def test_data_agent_fallback(self) -> Dict[str, Any]:
         """Test data agent failure with fallback mechanism"""
-        print("\n🧪 Testing: Data Agent Fallback")
+        print("\n[U+1F9EA] Testing: Data Agent Fallback")
         
         test_result = {
             "test_name": "data_agent_fallback", 
@@ -124,7 +124,7 @@ class AgentOrchestrationRecoveryTest:
             endpoint_responses = []
             for endpoint in data_endpoints:
                 try:
-                    print(f"  🔍 Checking data endpoint: {endpoint}")
+                    print(f"   SEARCH:  Checking data endpoint: {endpoint}")
                     response = requests.get(endpoint, timeout=5)
                     print(f"    Status: {response.status_code}")
                     endpoint_responses.append({
@@ -133,7 +133,7 @@ class AgentOrchestrationRecoveryTest:
                         "response_time": response.elapsed.total_seconds()
                     })
                 except Exception as e:
-                    print(f"    ⚠️ Error: {e}")
+                    print(f"     WARNING: [U+FE0F] Error: {e}")
                     endpoint_responses.append({
                         "endpoint": endpoint,
                         "error": str(e)
@@ -162,7 +162,7 @@ class AgentOrchestrationRecoveryTest:
         
     def test_optimization_agent_retry(self) -> Dict[str, Any]:
         """Test optimization agent crash recovery with retry logic"""
-        print("\n🧪 Testing: Optimization Agent Retry Logic")
+        print("\n[U+1F9EA] Testing: Optimization Agent Retry Logic")
         
         test_result = {
             "test_name": "optimization_agent_retry",
@@ -181,7 +181,7 @@ class AgentOrchestrationRecoveryTest:
             
             retry_results = []
             for endpoint in opt_endpoints:
-                print(f"  🔍 Testing retry logic for: {endpoint}")
+                print(f"   SEARCH:  Testing retry logic for: {endpoint}")
                 
                 # Test multiple requests to simulate retry behavior
                 request_times = []
@@ -237,7 +237,7 @@ class AgentOrchestrationRecoveryTest:
         
     def test_circuit_breaker_activation(self) -> Dict[str, Any]:
         """Test circuit breaker activation after repeated failures"""
-        print("\n🧪 Testing: Circuit Breaker Activation")
+        print("\n[U+1F9EA] Testing: Circuit Breaker Activation")
         
         test_result = {
             "test_name": "circuit_breaker_activation",
@@ -250,7 +250,7 @@ class AgentOrchestrationRecoveryTest:
             # Test circuit breaker by making rapid requests
             test_endpoint = f"{self.backend_url}/api/agents/test-circuit-breaker"
             
-            print(f"  🔍 Testing circuit breaker with rapid requests to: {test_endpoint}")
+            print(f"   SEARCH:  Testing circuit breaker with rapid requests to: {test_endpoint}")
             
             failure_responses = []
             for i in range(6):  # Make 6 rapid requests to trigger circuit breaker
@@ -303,7 +303,7 @@ class AgentOrchestrationRecoveryTest:
         
     def run_all_tests(self) -> List[Dict[str, Any]]:
         """Run all agent orchestration recovery tests"""
-        print("🚀 Starting Agent Orchestration Recovery Tests")
+        print("[U+1F680] Starting Agent Orchestration Recovery Tests")
         print("=" * 60)
         
         if not self.setup():
@@ -338,7 +338,7 @@ class AgentOrchestrationRecoveryTest:
     def print_summary(self):
         """Print test summary"""
         print("\n" + "=" * 60)
-        print("🔍 TEST SUMMARY")
+        print(" SEARCH:  TEST SUMMARY")
         print("=" * 60)
         
         total = len(self.test_results)
@@ -347,12 +347,12 @@ class AgentOrchestrationRecoveryTest:
         errors = len([r for r in self.test_results if r["status"] == "error"])
         
         print(f"Total Tests: {total}")
-        print(f"✅ Passed: {passed}")
+        print(f" PASS:  Passed: {passed}")
         print(f"ERROR: Failed: {failed}")
-        print(f"⚠️  Errors: {errors}")
+        print(f" WARNING: [U+FE0F]  Errors: {errors}")
         
         if failed > 0 or errors > 0:
-            print(f"\n🔍 DETAILED FAILURES/ERRORS:")
+            print(f"\n SEARCH:  DETAILED FAILURES/ERRORS:")
             for result in self.test_results:
                 if result["status"] in ["fail", "error"]:
                     print(f"\nERROR: {result['test_name']}:")

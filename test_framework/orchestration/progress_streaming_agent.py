@@ -615,7 +615,7 @@ class ProgressStreamingAgent:
         
         # Print header
         duration = timedelta(seconds=status["overall"]["duration"])
-        print(f"\n{self.colors['BOLD']}📊 Test Execution Progress{self.colors['RESET']} "
+        print(f"\n{self.colors['BOLD']} CHART:  Test Execution Progress{self.colors['RESET']} "
               f"({self._format_duration(duration)} elapsed)")
         print("=" * 80)
         
@@ -625,7 +625,7 @@ class ProgressStreamingAgent:
         
         # Print background tasks if any
         if status["background_tasks"] and self.config.show_background_tasks:
-            print(f"\n{self.colors['PURPLE']}🔄 Background Tasks:{self.colors['RESET']}")
+            print(f"\n{self.colors['PURPLE']} CYCLE:  Background Tasks:{self.colors['RESET']}")
             for task in status["background_tasks"]:
                 self._print_background_task(task)
         
@@ -639,19 +639,19 @@ class ProgressStreamingAgent:
         
         # Status icon and color
         if status == "completed":
-            icon = "✅"
+            icon = " PASS: "
             color = self.colors['GREEN']
         elif status == "running":
-            icon = "🔄"
+            icon = " CYCLE: "
             color = self.colors['BLUE']
         elif status == "failed":
-            icon = "❌"
+            icon = " FAIL: "
             color = self.colors['RED']
         elif status == "skipped":
-            icon = "⏭️"
+            icon = "[U+23ED][U+FE0F]"
             color = self.colors['YELLOW']
         else:
-            icon = "⏳"
+            icon = "[U+23F3]"
             color = self.colors['WHITE']
         
         # Duration and ETA
@@ -694,15 +694,15 @@ class ProgressStreamingAgent:
         
         # Status icon
         if status == "completed":
-            icon = "✅"
+            icon = " PASS: "
         elif status == "running":
-            icon = "🔄"
+            icon = " CYCLE: "
         elif status == "failed":
-            icon = "❌"
+            icon = " FAIL: "
         elif status == "skipped":
-            icon = "⏭️"
+            icon = "[U+23ED][U+FE0F]"
         else:
-            icon = "⏳"
+            icon = "[U+23F3]"
         
         # Duration
         duration_str = self._format_duration(timedelta(seconds=category["duration"]))
@@ -736,7 +736,7 @@ class ProgressStreamingAgent:
         progress = task.get("progress", 0.0)
         duration = timedelta(seconds=task["duration"])
         
-        icon = "🔄" if status == "running" else "✅" if status == "completed" else "❌"
+        icon = " CYCLE: " if status == "running" else " PASS: " if status == "completed" else " FAIL: "
         progress_bar = self._create_progress_bar(progress, 20) if status == "running" else ""
         
         print(f"  {icon} {task_id} {progress_bar} ({self._format_duration(duration)})")
@@ -744,7 +744,7 @@ class ProgressStreamingAgent:
     def _create_progress_bar(self, progress: float, width: int = 40) -> str:
         """Create ASCII progress bar"""
         filled = int(width * progress / 100)
-        bar = '█' * filled + '░' * (width - filled)
+        bar = '[U+2588]' * filled + '[U+2591]' * (width - filled)
         return f"[{bar}]"
     
     def _format_duration(self, duration: timedelta) -> str:
@@ -954,13 +954,13 @@ class ProgressStreamingAgent:
         
         # Header
         if success:
-            print(f"{self.colors['GREEN']}{self.colors['BOLD']}✅ TEST EXECUTION COMPLETED SUCCESSFULLY{self.colors['RESET']}")
+            print(f"{self.colors['GREEN']}{self.colors['BOLD']} PASS:  TEST EXECUTION COMPLETED SUCCESSFULLY{self.colors['RESET']}")
         else:
-            print(f"{self.colors['RED']}{self.colors['BOLD']}❌ TEST EXECUTION FAILED{self.colors['RESET']}")
+            print(f"{self.colors['RED']}{self.colors['BOLD']} FAIL:  TEST EXECUTION FAILED{self.colors['RESET']}")
         
         # Overall stats
         duration = self._format_duration(timedelta(seconds=summary["total_duration"]))
-        print(f"\n📊 Overall Statistics:")
+        print(f"\n CHART:  Overall Statistics:")
         print(f"   Duration: {duration}")
         print(f"   Layers: {summary['layers_count']}")
         print(f"   Background Tasks: {summary['background_tasks_count']}")
@@ -969,7 +969,7 @@ class ProgressStreamingAgent:
         tc = summary["overall_test_counts"]
         if tc["total"] > 0:
             success_rate = summary["overall_success_rate"] * 100
-            print(f"\n🧪 Test Results:")
+            print(f"\n[U+1F9EA] Test Results:")
             print(f"   Total Tests: {tc['total']}")
             print(f"   Passed: {self.colors['GREEN']}{tc['passed']}{self.colors['RESET']}")
             print(f"   Failed: {self.colors['RED']}{tc['failed']}{self.colors['RESET']}")
@@ -978,9 +978,9 @@ class ProgressStreamingAgent:
         
         # Layer summary
         if summary["layers"]:
-            print(f"\n📋 Layer Summary:")
+            print(f"\n[U+1F4CB] Layer Summary:")
             for layer in summary["layers"]:
-                status_icon = "✅" if layer["status"] == "completed" else "❌" if layer["status"] == "failed" else "⏭️"
+                status_icon = " PASS: " if layer["status"] == "completed" else " FAIL: " if layer["status"] == "failed" else "[U+23ED][U+FE0F]"
                 layer_duration = self._format_duration(timedelta(seconds=layer["duration"]))
                 print(f"   {status_icon} {layer['name']}: {layer_duration}, "
                       f"{layer['categories_completed']}/{layer['categories_total']} categories")

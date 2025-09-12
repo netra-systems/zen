@@ -86,8 +86,8 @@ def demonstrate_protocol_bug():
     # Analysis
     print("BUG ANALYSIS:")
     print("-" * 50)
-    print("✅ CORRECT format ['jwt-auth', 'jwt.token'] -> Token extracted successfully")
-    print("❌ BUG format ['jwt', 'token'] -> Token extraction FAILS")
+    print(" PASS:  CORRECT format ['jwt-auth', 'jwt.token'] -> Token extracted successfully")
+    print(" FAIL:  BUG format ['jwt', 'token'] -> Token extraction FAILS")
     print()
     print("IMPACT:")
     print("- Frontend sends incorrect protocol format")
@@ -102,9 +102,9 @@ def demonstrate_protocol_bug():
     print("BACKEND PROTOCOL PARSING LOGIC:")
     print("-" * 50)
     print("Backend expects: protocol.startswith('jwt.')")
-    print("- 'jwt.eyJ0eXAi...' ✅ MATCHES -> Extract token after 'jwt.'")
-    print("- 'jwt' ❌ NO MATCH -> No token extraction")
-    print("- 'eyJ0eXAi...' ❌ NO MATCH -> No token extraction")
+    print("- 'jwt.eyJ0eXAi...'  PASS:  MATCHES -> Extract token after 'jwt.'")
+    print("- 'jwt'  FAIL:  NO MATCH -> No token extraction")
+    print("- 'eyJ0eXAi...'  FAIL:  NO MATCH -> No token extraction")
     print()
     
     return {
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         print("DEMONSTRATION RESULTS:")
         print("-" * 50)
         for key, value in results.items():
-            status = "✅" if value else "❌"
+            status = " PASS: " if value else " FAIL: "
             print(f"{status} {key}: {value}")
         
         print()

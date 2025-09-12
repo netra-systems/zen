@@ -173,7 +173,7 @@ def clear_test_databases():
         
     # Clear Redis test data
     try:
-        r = redis.Redis(host='localhost', port=6379, decode_responses=True, db=1)  # Use db=1 for tests
+        r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, decode_responses=True, db=1)  # Use db=1 for tests
         r.flushdb()
     except Exception:
         pass

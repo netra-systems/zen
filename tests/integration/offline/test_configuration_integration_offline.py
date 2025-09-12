@@ -539,7 +539,7 @@ VALID_VAR3=value3
         # Test Case 3: Invalid character handling
         unicode_config = """
 # Unicode and special characters test
-UNICODE_VAR=café_résumé_naïve_🚀
+UNICODE_VAR=caf[U+00E9]_r[U+00E9]sum[U+00E9]_na[U+00EF]ve_[U+1F680]
 NEWLINE_VAR=value_with\\nnewline
 TAB_VAR=value_with\\ttab
 QUOTES_VAR="quoted value with spaces"
@@ -554,7 +554,7 @@ SINGLE_QUOTES=''single quoted''
         # Unicode should be preserved
         unicode_value = self.get_env_var("UNICODE_VAR")
         assert unicode_value is not None, "Unicode value should be loaded"
-        assert "café" in unicode_value or "cafe" in unicode_value, "Unicode should be preserved or normalized"
+        assert "caf[U+00E9]" in unicode_value or "cafe" in unicode_value, "Unicode should be preserved or normalized"
         
         # Test Case 4: Large configuration handling
         large_config_vars = {}

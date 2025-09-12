@@ -54,7 +54,7 @@ class DatabaseManager:
             return
         
         init_start_time = time.time()
-        logger.info("🔗 Starting DatabaseManager initialization...")
+        logger.info("[U+1F517] Starting DatabaseManager initialization...")
         
         try:
             # Get database URL using DatabaseURLBuilder as SSOT
@@ -66,7 +66,7 @@ class DatabaseManager:
             pool_size = getattr(self.config, 'database_pool_size', 5)
             max_overflow = getattr(self.config, 'database_max_overflow', 10)
             
-            logger.info(f"🔧 Database configuration: echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}")
+            logger.info(f"[U+1F527] Database configuration: echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}")
             
             # Use appropriate pool class for async engines
             engine_kwargs = {
@@ -79,11 +79,11 @@ class DatabaseManager:
             if pool_size <= 0 or "sqlite" in database_url.lower():
                 # Use NullPool for SQLite or disabled pooling
                 engine_kwargs["poolclass"] = NullPool
-                logger.info("🏊 Using NullPool for SQLite or disabled pooling")
+                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling")
             else:
                 # Use StaticPool for async engines - it doesn't support pool_size/max_overflow
                 engine_kwargs["poolclass"] = StaticPool
-                logger.info("🏊 Using StaticPool for async engine connection pooling")
+                logger.info("[U+1F3CA] Using StaticPool for async engine connection pooling")
             
             logger.debug("Creating async database engine...")
             primary_engine = create_async_engine(
@@ -100,11 +100,11 @@ class DatabaseManager:
             self._initialized = True
             
             init_duration = time.time() - init_start_time
-            logger.info(f"✅ DatabaseManager initialized successfully in {init_duration:.3f}s")
+            logger.info(f" PASS:  DatabaseManager initialized successfully in {init_duration:.3f}s")
             
         except Exception as e:
             init_duration = time.time() - init_start_time
-            logger.critical(f"💥 CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
+            logger.critical(f"[U+1F4A5] CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
             logger.error(f"Database connection failure details: {type(e).__name__}: {str(e)}")
             logger.error(f"This will prevent all database operations including user data persistence")
             raise
@@ -159,18 +159,18 @@ class DatabaseManager:
         session_start_time = time.time()
         session_id = f"sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
         
-        logger.debug(f"🔄 Starting database session {session_id} for {operation_type} (user: {user_id or 'system'})")
+        logger.debug(f" CYCLE:  Starting database session {session_id} for {operation_type} (user: {user_id or 'system'})")
         
         # CRITICAL FIX: Enhanced initialization safety
         if not self._initialized:
-            logger.info(f"🔧 Auto-initializing DatabaseManager for session access (operation: {operation_type})")
+            logger.info(f"[U+1F527] Auto-initializing DatabaseManager for session access (operation: {operation_type})")
             await self.initialize()
         
         engine = self.get_engine(engine_name)
         async with AsyncSession(engine) as session:
             original_exception = None
             transaction_start_time = time.time()
-            logger.debug(f"📝 Transaction started for session {session_id}")
+            logger.debug(f"[U+1F4DD] Transaction started for session {session_id}")
             
             try:
                 yield session
@@ -181,28 +181,28 @@ class DatabaseManager:
                 commit_duration = time.time() - commit_start_time
                 session_duration = time.time() - session_start_time
                 
-                logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
+                logger.info(f" PASS:  Session {session_id} committed successfully - Operation: {operation_type}, "
                            f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
                 
             except Exception as e:
                 original_exception = e
                 rollback_start_time = time.time()
                 
-                logger.critical(f"💥 TRANSACTION FAILURE in session {session_id}")
+                logger.critical(f"[U+1F4A5] TRANSACTION FAILURE in session {session_id}")
                 logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {type(e).__name__}: {str(e)}")
                 
                 try:
                     await session.rollback()
                     rollback_duration = time.time() - rollback_start_time
-                    logger.warning(f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                    logger.warning(f" CYCLE:  Rollback completed for session {session_id} in {rollback_duration:.3f}s")
                 except Exception as rollback_error:
                     rollback_duration = time.time() - rollback_start_time
-                    logger.critical(f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"[U+1F4A5] ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
                     logger.critical(f"DATABASE INTEGRITY AT RISK - Manual intervention may be required")
                     # Continue with original exception
                 
                 session_duration = time.time() - session_start_time
-                logger.error(f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
+                logger.error(f" FAIL:  Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
                 raise original_exception
                 
             finally:
@@ -210,10 +210,10 @@ class DatabaseManager:
                 try:
                     await session.close()
                     close_duration = time.time() - close_start_time
-                    logger.debug(f"🔒 Session {session_id} closed in {close_duration:.3f}s")
+                    logger.debug(f"[U+1F512] Session {session_id} closed in {close_duration:.3f}s")
                 except Exception as close_error:
                     close_duration = time.time() - close_start_time
-                    logger.error(f"⚠️ Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
+                    logger.error(f" WARNING: [U+FE0F] Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
                     # Don't raise close errors - they shouldn't prevent completion
     
     async def health_check(self, engine_name: str = 'primary') -> Dict[str, Any]:
@@ -223,12 +223,12 @@ class DatabaseManager:
         Enhanced with detailed health monitoring for Golden Path operations.
         """
         health_check_start = time.time()
-        logger.debug(f"🏥 Starting database health check for engine: {engine_name}")
+        logger.debug(f"[U+1F3E5] Starting database health check for engine: {engine_name}")
         
         try:
             # CRITICAL FIX: Ensure initialization before health check
             if not self._initialized:
-                logger.info(f"🔧 Initializing DatabaseManager for health check (engine: {engine_name})")
+                logger.info(f"[U+1F527] Initializing DatabaseManager for health check (engine: {engine_name})")
                 await self.initialize()
             
             engine = self.get_engine(engine_name)
@@ -242,7 +242,7 @@ class DatabaseManager:
             query_duration = time.time() - query_start
             total_duration = time.time() - health_check_start
             
-            logger.info(f"✅ Database health check PASSED for {engine_name} - "
+            logger.info(f" PASS:  Database health check PASSED for {engine_name} - "
                        f"Query: {query_duration:.3f}s, Total: {total_duration:.3f}s")
             
             return {
@@ -256,7 +256,7 @@ class DatabaseManager:
             
         except Exception as e:
             total_duration = time.time() - health_check_start
-            logger.critical(f"💥 Database health check FAILED for {engine_name} after {total_duration:.3f}s")
+            logger.critical(f"[U+1F4A5] Database health check FAILED for {engine_name} after {total_duration:.3f}s")
             logger.error(f"Health check error details: {type(e).__name__}: {str(e)}")
             logger.error(f"This indicates database connectivity issues that will affect user operations")
             
@@ -275,23 +275,23 @@ class DatabaseManager:
             logger.debug("No database engines to close")
             return
             
-        logger.info(f"🔒 Closing {len(self._engines)} database engines...")
+        logger.info(f"[U+1F512] Closing {len(self._engines)} database engines...")
         
         for name, engine in self._engines.items():
             close_start = time.time()
             try:
                 await engine.dispose()
                 close_duration = time.time() - close_start
-                logger.info(f"✅ Closed database engine '{name}' in {close_duration:.3f}s")
+                logger.info(f" PASS:  Closed database engine '{name}' in {close_duration:.3f}s")
             except Exception as e:
                 close_duration = time.time() - close_start
-                logger.error(f"❌ Error closing engine '{name}' after {close_duration:.3f}s: {e}")
+                logger.error(f" FAIL:  Error closing engine '{name}' after {close_duration:.3f}s: {e}")
                 logger.warning(f"Engine '{name}' may have active connections that were forcibly closed")
         
         engines_count = len(self._engines)
         self._engines.clear()
         self._initialized = False
-        logger.info(f"🔒 DatabaseManager shutdown complete - {engines_count} engines closed")
+        logger.info(f"[U+1F512] DatabaseManager shutdown complete - {engines_count} engines closed")
     
     def _get_database_url(self) -> str:
         """Get database URL using DatabaseURLBuilder as SSOT.
@@ -374,12 +374,12 @@ class DatabaseManager:
             - netra_backend.app.database.get_db() for dependency injection
             - instance.get_session() for direct usage
         """
-        logger.debug(f"📞 Legacy database session access: {operation_type} (user: {user_id or 'system'})")
+        logger.debug(f"[U+1F4DE] Legacy database session access: {operation_type} (user: {user_id or 'system'})")
         
         manager = get_database_manager()
         # CRITICAL FIX: Ensure initialization - manager should auto-initialize, but double-check
         if not manager._initialized:
-            logger.info(f"🔧 Ensuring DatabaseManager initialization for class method access ({operation_type})")
+            logger.info(f"[U+1F527] Ensuring DatabaseManager initialization for class method access ({operation_type})")
             await manager.initialize()
         
         async with manager.get_session(name, user_id=user_id, operation_type=operation_type) as session:

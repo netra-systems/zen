@@ -125,7 +125,7 @@ class RetryMechanism:
                 
                 if attempt > 0:
                     self.logger.info(
-                        f"✓ {operation_name} succeeded for {service_type.value} "
+                        f"[U+2713] {operation_name} succeeded for {service_type.value} "
                         f"after {attempt} retries"
                     )
                 
@@ -135,7 +135,7 @@ class RetryMechanism:
                 last_exception = e
                 retry_context.last_error = f"Timeout after {config.timeout_seconds}s"
                 self.logger.warning(
-                    f"⏱️ {operation_name} timeout for {service_type.value} "
+                    f"[U+23F1][U+FE0F] {operation_name} timeout for {service_type.value} "
                     f"(attempt {attempt + 1}/{config.max_retries + 1})"
                 )
                 
@@ -143,7 +143,7 @@ class RetryMechanism:
                 last_exception = e
                 retry_context.last_error = str(e)
                 self.logger.warning(
-                    f"❌ {operation_name} failed for {service_type.value} "
+                    f" FAIL:  {operation_name} failed for {service_type.value} "
                     f"(attempt {attempt + 1}/{config.max_retries + 1}): {str(e)}"
                 )
             
@@ -170,7 +170,7 @@ class RetryMechanism:
                 # Check circuit breaker again before retry
                 if not self._can_execute(circuit_breaker):
                     self.logger.error(
-                        f"🔥 Circuit breaker opened during retry for {service_type.value}"
+                        f" FIRE:  Circuit breaker opened during retry for {service_type.value}"
                     )
                     break
         
@@ -178,7 +178,7 @@ class RetryMechanism:
         self._update_retry_stats(service_type, "failure", config.max_retries)
         
         self.logger.error(
-            f"🚫 All retry attempts exhausted for {operation_name} on {service_type.value} "
+            f"[U+1F6AB] All retry attempts exhausted for {operation_name} on {service_type.value} "
             f"(total delay: {retry_context.accumulated_delay:.2f}s)"
         )
         
@@ -282,7 +282,7 @@ class RetryMechanism:
         if config.retry_strategy == RetryStrategy.EXPONENTIAL_BACKOFF:
             # Exponential backoff with jitter
             delay = base_delay * (2 ** attempt)
-            # Add jitter (±25% of delay)
+            # Add jitter ( +/- 25% of delay)
             jitter = delay * 0.25 * (2 * random.random() - 1)
             delay = max(0.1, delay + jitter)  # Minimum 100ms delay
             

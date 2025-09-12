@@ -65,7 +65,7 @@ class TestRealOAuthFlow:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for OAuth testing."""
-        print("🐳 Starting Docker services for OAuth flow tests...")
+        print("[U+1F433] Starting Docker services for OAuth flow tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -77,13 +77,13 @@ class TestRealOAuthFlow:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for OAuth flow tests")
+            print(" PASS:  Docker services ready for OAuth flow tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for OAuth tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for OAuth tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after OAuth flow tests...")
+            print("[U+1F9F9] Cleaning up Docker services after OAuth flow tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -112,10 +112,10 @@ class TestRealOAuthFlow:
         
         # Validate credentials are environment-appropriate
         if "test" in google_client_id.lower() and not env.is_test_environment():
-            pytest.fail("❌ TEST OAuth credentials detected in non-test environment!")
+            pytest.fail(" FAIL:  TEST OAuth credentials detected in non-test environment!")
             
         if "staging" in google_client_id.lower() and not env.is_staging_environment():
-            pytest.fail("❌ STAGING OAuth credentials detected in non-staging environment!")
+            pytest.fail(" FAIL:  STAGING OAuth credentials detected in non-staging environment!")
             
         return {
             "client_id": google_client_id,
@@ -168,7 +168,7 @@ class TestRealOAuthFlow:
         assert state in auth_url
         assert code_challenge in auth_url
         
-        print("✅ OAuth authorization URL generated successfully")
+        print(" PASS:  OAuth authorization URL generated successfully")
 
     @pytest.mark.asyncio
     async def test_oauth_state_validation_and_storage(self, real_db_session, oauth_credentials: Dict[str, str]):
@@ -197,7 +197,7 @@ class TestRealOAuthFlow:
         assert stored_state["state"] == state
         assert stored_state["expires_at"] > stored_state["created_at"]
         
-        print("✅ OAuth state validation and storage tested successfully")
+        print(" PASS:  OAuth state validation and storage tested successfully")
 
     @pytest.mark.asyncio
     async def test_oauth_pkce_flow_security(self, oauth_credentials: Dict[str, str]):
@@ -223,7 +223,7 @@ class TestRealOAuthFlow:
         # Note: This is a simplified test - real PKCE validation is more complex
         assert len(expected_challenge) > 0, "PKCE challenge generation should produce output"
         
-        print("✅ OAuth PKCE flow security validated")
+        print(" PASS:  OAuth PKCE flow security validated")
 
     @pytest.mark.asyncio
     async def test_oauth_callback_handling(self, async_client: AsyncClient, oauth_credentials: Dict[str, str]):
@@ -242,20 +242,20 @@ class TestRealOAuthFlow:
             # Test callback endpoint (may not be implemented yet)
             response = await async_client.get(OAuthConstants.OAUTH_CALLBACK_PATH, params=callback_params)
             
-            print(f"✅ OAuth callback handling - Status: {response.status_code}")
+            print(f" PASS:  OAuth callback handling - Status: {response.status_code}")
             
             # Validate callback response structure
             if response.status_code == 200:
                 # Success response should handle the auth code
-                print("✅ OAuth callback successfully processed")
+                print(" PASS:  OAuth callback successfully processed")
             elif response.status_code == 404:
                 # Endpoint not implemented yet - this is acceptable in test
-                print("⚠️ OAuth callback endpoint not implemented (acceptable in test)")
+                print(" WARNING: [U+FE0F] OAuth callback endpoint not implemented (acceptable in test)")
             else:
-                print(f"⚠️ OAuth callback unexpected status: {response.status_code}")
+                print(f" WARNING: [U+FE0F] OAuth callback unexpected status: {response.status_code}")
                 
         except Exception as e:
-            print(f"⚠️ OAuth callback test encountered error: {e}")
+            print(f" WARNING: [U+FE0F] OAuth callback test encountered error: {e}")
 
     @pytest.mark.asyncio
     async def test_oauth_token_exchange_simulation(self, oauth_credentials: Dict[str, str], oauth_redirect_uri: str):
@@ -296,7 +296,7 @@ class TestRealOAuthFlow:
         assert JWTConstants.TOKEN_TYPE in mock_token_response
         assert mock_token_response[JWTConstants.EXPIRES_IN] > 0
         
-        print("✅ OAuth token exchange structure validated")
+        print(" PASS:  OAuth token exchange structure validated")
 
     @pytest.mark.asyncio
     async def test_oauth_user_profile_fetching(self, oauth_credentials: Dict[str, str]):
@@ -345,7 +345,7 @@ class TestRealOAuthFlow:
         assert internal_user["email"] == mock_profile_response["email"]
         assert internal_user["oauth_provider"] == OAuthConstants.GOOGLE
         
-        print("✅ OAuth user profile fetching and mapping validated")
+        print(" PASS:  OAuth user profile fetching and mapping validated")
 
     @pytest.mark.asyncio
     async def test_oauth_session_creation_and_management(self, real_db_session, oauth_credentials: Dict[str, str]):
@@ -381,7 +381,7 @@ class TestRealOAuthFlow:
         assert user_session["expires_at"] > user_session["created_at"]
         assert user_session["is_active"] is True
         
-        print("✅ OAuth session creation and management validated")
+        print(" PASS:  OAuth session creation and management validated")
 
     @pytest.mark.asyncio
     async def test_oauth_error_handling_scenarios(self, async_client: AsyncClient):
@@ -406,14 +406,14 @@ class TestRealOAuthFlow:
                 # Test OAuth error callback
                 response = await async_client.get(OAuthConstants.OAUTH_CALLBACK_PATH, params=scenario)
                 
-                print(f"✅ OAuth error scenario '{scenario['error']}' - Status: {response.status_code}")
+                print(f" PASS:  OAuth error scenario '{scenario['error']}' - Status: {response.status_code}")
                 
                 # Error responses should be handled gracefully
                 if response.status_code in [400, 401, 403, 404]:
-                    print(f"✅ OAuth error '{scenario['error']}' handled appropriately")
+                    print(f" PASS:  OAuth error '{scenario['error']}' handled appropriately")
                 
             except Exception as e:
-                print(f"⚠️ OAuth error scenario '{scenario['error']}' encountered: {e}")
+                print(f" WARNING: [U+FE0F] OAuth error scenario '{scenario['error']}' encountered: {e}")
 
     @pytest.mark.asyncio
     async def test_oauth_token_refresh_flow(self, oauth_credentials: Dict[str, str]):
@@ -447,7 +447,7 @@ class TestRealOAuthFlow:
         assert mock_refresh_response[JWTConstants.TOKEN_TYPE] == "Bearer"
         assert mock_refresh_response[JWTConstants.EXPIRES_IN] > 0
         
-        print("✅ OAuth token refresh flow validated")
+        print(" PASS:  OAuth token refresh flow validated")
 
     @pytest.mark.asyncio  
     async def test_oauth_environment_configuration_validation(self, oauth_credentials: Dict[str, str]):
@@ -486,7 +486,7 @@ class TestRealOAuthFlow:
             assert "localhost" not in oauth_callback and "127.0.0.1" not in oauth_callback, \
                 "PRODUCTION environment must not use localhost callback URLs"
         
-        print(f"✅ OAuth environment configuration validated for {current_env}")
+        print(f" PASS:  OAuth environment configuration validated for {current_env}")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

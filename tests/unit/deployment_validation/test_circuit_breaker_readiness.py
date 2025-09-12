@@ -30,7 +30,7 @@ class TestCircuitBreakerReadiness:
             assert circuit_breaker.config.max_retry_attempts == 5, "Max retry attempts not configured correctly"
             assert circuit_breaker.config.timeout == 10.0, "Timeout not configured correctly"
             
-            print("✅ Circuit breaker staging configuration validated")
+            print(" PASS:  Circuit breaker staging configuration validated")
             
         except ImportError as e:
             pytest.fail(f"Circuit breaker implementation not available: {e}")
@@ -53,7 +53,7 @@ class TestCircuitBreakerReadiness:
             
             # Verify delays increase exponentially (until max_delay cap)
             assert delays[0] < delays[1] < delays[2], f"Delays not increasing exponentially: {delays}"
-            print(f"✅ Backoff delays: {delays}")
+            print(f" PASS:  Backoff delays: {delays}")
             
         except ImportError as e:
             pytest.fail(f"Circuit breaker implementation not available: {e}")
@@ -79,7 +79,7 @@ class TestCircuitBreakerReadiness:
             circuit_breaker._last_failure_time = time.time() - 10  # 10s ago
             assert circuit_breaker.can_attempt_request(), "Circuit should allow recovery attempt"
             
-            print("✅ Circuit breaker state transitions working correctly")
+            print(" PASS:  Circuit breaker state transitions working correctly")
             
         except ImportError as e:
             pytest.fail(f"Circuit breaker implementation not available: {e}")
@@ -110,7 +110,7 @@ class TestCircuitBreakerReadiness:
             assert elapsed < 1.0, "Circuit breaker operations should be fast"
             assert circuit_breaker.is_open(), "Circuit should open after WebSocket timeout failures"
             
-            print("✅ Circuit breaker integrates properly with WebSocket timeout patterns")
+            print(" PASS:  Circuit breaker integrates properly with WebSocket timeout patterns")
             
         except ImportError as e:
             pytest.fail(f"Circuit breaker implementation not available: {e}")

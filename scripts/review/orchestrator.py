@@ -52,7 +52,7 @@ class CodeReviewer:
             return True
         all_passed = self.smoke_tester.run_all_smoke_tests(self.review_data)
         if not all_passed and self.config.is_quick_mode():
-            print("\n❌ Critical smoke tests failed. Stopping review.")
+            print("\n FAIL:  Critical smoke tests failed. Stopping review.")
             print("   Fix critical issues before continuing.")
             return False
         return True

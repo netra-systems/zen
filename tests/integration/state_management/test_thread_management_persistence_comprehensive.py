@@ -2,7 +2,7 @@
 Test Thread Management and Persistence - State Management & Context Swimlane
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core conversation continuity functionality
+- Segment: All (Free  ->  Enterprise) - Core conversation continuity functionality
 - Business Goal: Enable reliable multi-turn AI conversations with persistent thread state
 - Value Impact: Delivers 90% of platform value through reliable conversation continuity across sessions
 - Strategic Impact: CRITICAL - Thread persistence enables the core chat experience that drives user engagement
@@ -275,7 +275,7 @@ class TestThreadManagementPersistence(BaseIntegrationTest):
         """, thread_id)
         
         # Validate message count and order
-        assert len(all_messages) == 6  # 3 sessions × 2 messages each
+        assert len(all_messages) == 6  # 3 sessions  x  2 messages each
         assert len(sessions) == 3
         
         # Verify message continuity

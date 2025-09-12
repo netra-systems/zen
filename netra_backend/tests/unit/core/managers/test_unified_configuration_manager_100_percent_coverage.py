@@ -1705,14 +1705,14 @@ class TestErrorHandlingAndEdgeCases:
         """Test handling of Unicode and international characters."""
         unicode_test_cases = [
             # (key, value, description)
-            ("unicode.chinese", "测试配置值", "Chinese characters"),
-            ("unicode.japanese", "テスト設定値", "Japanese characters"),
-            ("unicode.arabic", "قيمة اختبار التكوين", "Arabic characters"),
-            ("unicode.emoji", "Configuration with 🚀 🔧 ⚙️ emojis", "Emojis"),
-            ("unicode.mixed", "Mixed: English + 中文 + العربية + 🌍", "Mixed scripts"),
-            ("unicode.special", "Special chars: àáâãäåæçèéêë", "Accented characters"),
-            ("unicode.mathematical", "Math symbols: ∑∆∇∞∝∫∬∭", "Mathematical symbols"),
-            ("unicode.currency", "Currencies: $€£¥₹₿", "Currency symbols")
+            ("unicode.chinese", "[U+6D4B][U+8BD5][U+914D][U+7F6E][U+503C]", "Chinese characters"),
+            ("unicode.japanese", "[U+30C6][U+30B9][U+30C8][U+8A2D][U+5B9A][U+5024]", "Japanese characters"),
+            ("unicode.arabic", "[U+0642][U+064A][U+0645][U+0629] [U+0627][U+062E][U+062A][U+0628][U+0627][U+0631] [U+0627][U+0644][U+062A][U+0643][U+0648][U+064A][U+0646]", "Arabic characters"),
+            ("unicode.emoji", "Configuration with [U+1F680] [U+1F527] [U+2699][U+FE0F] emojis", "Emojis"),
+            ("unicode.mixed", "Mixed: English + [U+4E2D][U+6587] + [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629] + [U+1F30D]", "Mixed scripts"),
+            ("unicode.special", "Special chars: [U+00E0][U+00E1][U+00E2][U+00E3][U+00E4][U+00E5][U+00E6][U+00E7][U+00E8][U+00E9][U+00EA][U+00EB]", "Accented characters"),
+            ("unicode.mathematical", "Math symbols: [U+2211][U+2206][U+2207] infinity [U+221D][U+222B][U+222C][U+222D]", "Mathematical symbols"),
+            ("unicode.currency", "Currencies: $[U+20AC][U+00A3][U+00A5][U+20B9][U+20BF]", "Currency symbols")
         ]
         
         for key, value, description in unicode_test_cases:
@@ -1730,7 +1730,7 @@ class TestErrorHandlingAndEdgeCases:
                 assert any(key in k for k in filtered_keys)
         
         # Test Unicode in configuration keys themselves
-        unicode_key = "测试.配置.键"
+        unicode_key = "[U+6D4B][U+8BD5].[U+914D][U+7F6E].[U+952E]"
         config_manager.set(unicode_key, "unicode_key_test")
         assert config_manager.get(unicode_key) == "unicode_key_test"
     

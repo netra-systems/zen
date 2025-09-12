@@ -57,7 +57,7 @@ class TestMessageTypeNormalizationUnit:
         # Show what 'chat_message' would map to if it were in the map
         expected_mapping = MessageType.USER_MESSAGE  # Logical mapping for chat messages
         
-        print(f"🔍 LEGACY MAPPING ANALYSIS:")
+        print(f" SEARCH:  LEGACY MAPPING ANALYSIS:")
         print(f"   - 'chat_message' in map: {'chat_message' in LEGACY_MESSAGE_TYPE_MAP}")
         print(f"   - 'chat' maps to: {LEGACY_MESSAGE_TYPE_MAP.get('chat')}")
         print(f"   - 'user_message' maps to: {LEGACY_MESSAGE_TYPE_MAP.get('user_message')}")
@@ -97,7 +97,7 @@ class TestMessageTypeNormalizationUnit:
         assert unknown_type_1 == MessageType.USER_MESSAGE, "All unknown types default to USER_MESSAGE"
         assert unknown_type_2 == MessageType.USER_MESSAGE, "All unknown types default to USER_MESSAGE"
         
-        print(f"📏 NORMALIZATION BEHAVIOR:")
+        print(f"[U+1F4CF] NORMALIZATION BEHAVIOR:")
         print(f"   - 'chat_message' normalizes to: {normalized_type}")
         print(f"   - 'chat' normalizes to: {normalized_chat}")  
         print(f"   - 'user_message' normalizes to: {normalized_user}")
@@ -115,7 +115,7 @@ class TestMessageTypeNormalizationUnit:
         with pytest.raises(ValueError):
             MessageType("chat_message")
         
-        print(f"✅ CONFIRMED: MessageType('chat_message') raises ValueError")
+        print(f" PASS:  CONFIRMED: MessageType('chat_message') raises ValueError")
         
         # Test direct enum conversion for valid types
         assert MessageType("user_message") == MessageType.USER_MESSAGE
@@ -132,7 +132,7 @@ class TestMessageTypeNormalizationUnit:
             "'chat_message' should not be a direct MessageType enum value"
         )
         
-        print(f"📋 ENUM CONVERSION ANALYSIS:")
+        print(f"[U+1F4CB] ENUM CONVERSION ANALYSIS:")
         print(f"   - Valid MessageType values: {len(valid_enum_values)}")
         print(f"   - 'chat_message' is valid enum: False")
         print(f"   - Similar valid enums: {[v for v in valid_enum_values if 'chat' in v or 'message' in v]}")
@@ -164,7 +164,7 @@ class TestMessageTypeNormalizationUnit:
         assert router._is_unknown_message_type("totally_unknown") == True, "Completely unknown types should be True"
         assert router._is_unknown_message_type("fake_type") == True, "Fake types should be True"
         
-        print(f"🔎 UNKNOWN TYPE DETECTION:")
+        print(f"[U+1F50E] UNKNOWN TYPE DETECTION:")
         print(f"   - 'chat_message' is unknown: {is_chat_message_unknown}")
         print(f"   - 'chat' is unknown: {router._is_unknown_message_type('chat')}")
         print(f"   - 'user_message' is unknown: {router._is_unknown_message_type('user_message')}")
@@ -202,7 +202,7 @@ class TestMessageTypeNormalizationUnit:
             "'chat_message' should be in the list of missing chat-related types"
         )
         
-        print(f"📊 LEGACY MAP COVERAGE ANALYSIS:")
+        print(f" CHART:  LEGACY MAP COVERAGE ANALYSIS:")
         print(f"   - Chat/message keys in map: {chat_related_keys}")
         print(f"   - Potential frontend types: {potential_frontend_types}")
         print(f"   - Missing types: {missing_types}")
@@ -258,7 +258,7 @@ class TestMessageTypeBusinessLogicUnit:
                 if MessageType.USER_MESSAGE in handler.supported_types:
                     user_message_handlers.append(handler.__class__.__name__)
         
-        print(f"🏢 BUSINESS CLASSIFICATION ANALYSIS:")
+        print(f"[U+1F3E2] BUSINESS CLASSIFICATION ANALYSIS:")
         print(f"   - CHAT type supported by handlers: {chat_handlers}")
         print(f"   - USER_MESSAGE type supported by handlers: {user_message_handlers}")
         
@@ -311,17 +311,17 @@ class TestMessageTypeBusinessLogicUnit:
         assert "chat" in [t[0] for t in mapped_types], "Frontend 'chat' type should be mapped"
         assert "user_message" in [t[0] for t in mapped_types], "Frontend 'user_message' type should be mapped"
         
-        print(f"🖥️ FRONTEND COMPATIBILITY ANALYSIS:")
+        print(f"[U+1F5A5][U+FE0F] FRONTEND COMPATIBILITY ANALYSIS:")
         print(f"   - Frontend likely types: {len(frontend_likely_types)}")
         print(f"   - Properly mapped types: {len(mapped_types)}")
         print(f"   - Unmapped types: {unmapped_types}")
         print(f"   - Critical gap: 'chat_message' unmapped")
         
         for msg_type, mapping in mapped_types:
-            print(f"     ✅ {msg_type} -> {mapping}")
+            print(f"      PASS:  {msg_type} -> {mapping}")
         
         for msg_type in unmapped_types:
-            print(f"     ❌ {msg_type} -> NOT MAPPED")
+            print(f"      FAIL:  {msg_type} -> NOT MAPPED")
     
     def test_get_frontend_message_type_unit(self):
         """
@@ -348,7 +348,7 @@ class TestMessageTypeBusinessLogicUnit:
             "get_frontend_message_type('chat_message') should normalize to 'user_message'"
         )
         
-        print(f"🔄 FRONTEND TYPE CONVERSION:")
+        print(f" CYCLE:  FRONTEND TYPE CONVERSION:")
         print(f"   - 'chat_message' -> '{chat_message_frontend}'")
         print(f"   - This works for frontend, but router rejects 'chat_message' as unknown first")
         print(f"   - Problem: Unknown check happens before normalization gets a chance")
@@ -379,7 +379,7 @@ class TestChatMessageMappingSolution:
             "SOLUTION VALIDATION: 'chat_message' should be None (missing) before fix is applied"
         )
         
-        print(f"🔧 SOLUTION SPECIFICATION:")
+        print(f"[U+1F527] SOLUTION SPECIFICATION:")
         print(f"   - Current 'chat_message' mapping: {current_mapping}")
         print(f"   - Expected 'chat_message' mapping: {expected_mapping}")
         print(f"   - Required change: Add 'chat_message': MessageType.USER_MESSAGE to LEGACY_MESSAGE_TYPE_MAP")
@@ -429,7 +429,7 @@ class TestChatMessageMappingSolution:
                 "After fix: 'chat_message' should behave like 'user_message'"
             )
             
-            print(f"✅ SOLUTION IMPACT VERIFICATION:")
+            print(f" PASS:  SOLUTION IMPACT VERIFICATION:")
             print(f"   - 'chat_message' unknown after fix: {is_unknown_after_fix}")
             print(f"   - 'chat_message' normalizes to: {normalized}")
             print(f"   - Solution successfully resolves the issue")
@@ -448,8 +448,8 @@ class TestChatMessageMappingSolution:
 if __name__ == "__main__":
     # Run the unit tests to validate message type normalization issues
     import sys
-    print("🔬 Running Unit Tests for Message Type Normalization")
-    print("🔬 Focus: 'chat_message' unknown type technical root cause")
-    print("🔬 These tests validate the technical functions causing the issue")
+    print("[U+1F52C] Running Unit Tests for Message Type Normalization")
+    print("[U+1F52C] Focus: 'chat_message' unknown type technical root cause")
+    print("[U+1F52C] These tests validate the technical functions causing the issue")
     
     pytest.main([__file__, "-v", "--tb=short"])

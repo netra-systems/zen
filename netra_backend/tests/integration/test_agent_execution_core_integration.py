@@ -2,7 +2,7 @@
 Agent Execution Core Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure agent execution pipeline delivers consistent value and user insights
 - Value Impact: Agents must execute reliably to provide meaningful AI-powered responses
 - Strategic Impact: Core platform functionality - agent execution is the backbone of user value delivery

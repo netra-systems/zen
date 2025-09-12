@@ -82,7 +82,7 @@ class TestErrorScenarioer:
             {"type": "missing_required_fields"},
             {"type": "oversized_request", "data": "x" * 100000},  # Very large payload
             {"type": "null_values", "data": None, "user": None},
-            {"type": "special_characters", "data": "Special chars: ñáéíóú中文🚀"},
+            {"type": "special_characters", "data": "Special chars: [U+00F1][U+00E1][U+00E9][U+00ED][U+00F3][U+00FA][U+4E2D][U+6587][U+1F680]"},
             {"type": "injection_attempt", "data": "'; DROP TABLE users; --"}
         ]
         
@@ -463,7 +463,7 @@ class TestErrorScenariosComprehensiveE2E:
         edge_cases = [
             {"name": "empty_string", "value": ""},
             {"name": "very_long_string", "value": "x" * 10000},
-            {"name": "unicode_characters", "value": "🚀🌟💡🔥⚡️🎯🌈"},
+            {"name": "unicode_characters", "value": "[U+1F680][U+1F31F] IDEA:  FIRE:  LIGHTNING: [U+FE0F] TARGET: [U+1F308]"},
             {"name": "null_value", "value": None},
             {"name": "boolean_true", "value": True},
             {"name": "boolean_false", "value": False},

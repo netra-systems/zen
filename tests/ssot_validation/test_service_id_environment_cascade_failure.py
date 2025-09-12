@@ -15,7 +15,7 @@ Expected Behavior:
 - FAIL: With current environment configuration reproduces 60s auth failures
 - PASS: After SSOT remediation eliminates environment-dependent failures
 
-CRITICAL: This test protects the Golden Path: users login → get AI responses
+CRITICAL: This test protects the Golden Path: users login  ->  get AI responses
 """
 
 import asyncio
@@ -120,7 +120,7 @@ class TestServiceIdEnvironmentCascadeFailure(SSotAsyncTestCase):
             f"ENVIRONMENT AUTH LOOP DETECTED: User login failed due to SERVICE_ID mismatch. "
             f"Auth loop detected: {login_result['auth_loop_detected']}, "
             f"Loop iterations: {login_result.get('loop_iterations', 0)}. "
-            f"This blocks the Golden Path: users login → get AI responses."
+            f"This blocks the Golden Path: users login  ->  get AI responses."
         )
     
     @pytest.mark.asyncio

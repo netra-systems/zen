@@ -2,13 +2,13 @@
 CRITICAL E2E Payment Upgrade Flow Tests - Revenue Protection Test Suite
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion (100% of new revenue generation)
+1. Segment: Free  ->  Paid conversion (100% of new revenue generation)
 2. Business Goal: Protect complete payment and tier upgrade pipeline
 3. Value Impact: Validates $99-999/month per user conversion flow
 4. Revenue Impact: Each test failure caught prevents $10K+ MRR loss
 
 REQUIREMENTS:
-- Complete user journey: signup → payment → tier upgrade
+- Complete user journey: signup  ->  payment  ->  tier upgrade
 - Real authentication and JWT operations
 - Mock payment provider integration (Stripe simulation)
 - Billing record creation in ClickHouse
@@ -33,7 +33,7 @@ from tests.e2e.integration.payment_upgrade_flow_tester import PaymentUpgradeFlow
 @pytest.mark.e2e
 async def test_complete_payment_upgrade_flow_pro_tier():
     """
-    Test #1: Complete User Signup → Payment → Pro Tier Upgrade Flow
+    Test #1: Complete User Signup  ->  Payment  ->  Pro Tier Upgrade Flow
     
     BVJ: Protects $29/month Pro tier conversions ($348/year per user)
     - User signs up (free tier)
@@ -96,7 +96,7 @@ async def test_complete_payment_upgrade_flow_pro_tier():
 @pytest.mark.e2e
 async def test_complete_payment_upgrade_flow_enterprise_tier():
     """
-    Test #2: Complete User Signup → Payment → Enterprise Tier Upgrade Flow
+    Test #2: Complete User Signup  ->  Payment  ->  Enterprise Tier Upgrade Flow
     
     BVJ: Protects $299/month Enterprise tier conversions ($3,588/year per user)
     - User signs up (free tier)

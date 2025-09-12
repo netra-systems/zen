@@ -819,10 +819,10 @@
 
     # REMOVED_SYNTAX_ERROR: print("Running Mission Critical Orchestration Infrastructure Tests...")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
-    # REMOVED_SYNTAX_ERROR: print("🏗️ INFRASTRUCTURE MODE: Testing 100+ container orchestration")
-    # REMOVED_SYNTAX_ERROR: print("🌐 Multi-service coordination, service discovery, load balancing")
-    # REMOVED_SYNTAX_ERROR: print("🔄 Zero-downtime deployments, chaos engineering, observability")
-    # REMOVED_SYNTAX_ERROR: print("🛡️ Circuit breakers, health propagation, disaster recovery")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F3D7][U+FE0F] INFRASTRUCTURE MODE: Testing 100+ container orchestration")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F310] Multi-service coordination, service discovery, load balancing")
+    # REMOVED_SYNTAX_ERROR: print(" CYCLE:  Zero-downtime deployments, chaos engineering, observability")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F] Circuit breakers, health propagation, disaster recovery")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
     # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
@@ -830,16 +830,16 @@
     # REMOVED_SYNTAX_ERROR: if result == 0:
         # REMOVED_SYNTAX_ERROR: print(" )
         # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-        # REMOVED_SYNTAX_ERROR: print("✅ ALL MISSION CRITICAL INFRASTRUCTURE TESTS PASSED")
-        # REMOVED_SYNTAX_ERROR: print("🚀 Orchestration system ready for ENTERPRISE SCALE deployment")
-        # REMOVED_SYNTAX_ERROR: print("📊 System validated for 100+ containers, 99.9% uptime SLA")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL MISSION CRITICAL INFRASTRUCTURE TESTS PASSED")
+        # REMOVED_SYNTAX_ERROR: print("[U+1F680] Orchestration system ready for ENTERPRISE SCALE deployment")
+        # REMOVED_SYNTAX_ERROR: print(" CHART:  System validated for 100+ containers, 99.9% uptime SLA")
         # REMOVED_SYNTAX_ERROR: print("=" * 80)
         # REMOVED_SYNTAX_ERROR: else:
             # REMOVED_SYNTAX_ERROR: print(" )
             # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-            # REMOVED_SYNTAX_ERROR: print("❌ MISSION CRITICAL INFRASTRUCTURE TESTS FAILED")
-            # REMOVED_SYNTAX_ERROR: print("🚨 Orchestration system NOT ready for production scale")
-            # REMOVED_SYNTAX_ERROR: print("⚠️ Infrastructure resilience requirements not met")
+            # REMOVED_SYNTAX_ERROR: print(" FAIL:  MISSION CRITICAL INFRASTRUCTURE TESTS FAILED")
+            # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration system NOT ready for production scale")
+            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F] Infrastructure resilience requirements not met")
             # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
             # REMOVED_SYNTAX_ERROR: return result

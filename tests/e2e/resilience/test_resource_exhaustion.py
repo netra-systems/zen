@@ -1,7 +1,7 @@
 """
 Resource Pool Exhaustion Tests
 Tests handling of resource pool exhaustion scenarios.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

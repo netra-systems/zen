@@ -291,7 +291,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         self._validate_tool_execution_events()
         self._validate_event_sequence_and_timing()
         
-        logger.info("✅ INTEGRATION TEST 6 PASSED: Agent workflow with tool notifications working correctly")
+        logger.info(" PASS:  INTEGRATION TEST 6 PASSED: Agent workflow with tool notifications working correctly")
     
     def _validate_agent_execution_result(self, result: Dict[str, Any], execution_time: float):
         """Validate the agent execution result"""
@@ -305,7 +305,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         assert execution_time > 2.0, f"Execution too fast ({execution_time:.2f}s) - likely not using real tools"
         assert execution_time < 300.0, f"Execution too slow ({execution_time:.2f}s) - potential timeout issue"
         
-        logger.info(f"✅ Agent execution completed in {execution_time:.2f}s with valid response")
+        logger.info(f" PASS:  Agent execution completed in {execution_time:.2f}s with valid response")
     
     def _validate_websocket_events(self):
         """Validate all required WebSocket events were emitted"""
@@ -321,7 +321,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         # Must have tool execution events
         assert events_summary['tool_executions_count'] > 0, "No tool execution events received"
         
-        logger.info(f"✅ WebSocket validation passed: {events_summary['total_events']} events, "
+        logger.info(f" PASS:  WebSocket validation passed: {events_summary['total_events']} events, "
                    f"{len(events_summary['event_types'])} event types")
     
     def _validate_tool_execution_events(self):
@@ -350,7 +350,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         assert len(executing_events) == len(completed_events), \
             f"Mismatched tool events: {len(executing_events)} executing, {len(completed_events)} completed"
             
-        logger.info(f"✅ Tool execution validation passed: {len(tool_events)} tool events")
+        logger.info(f" PASS:  Tool execution validation passed: {len(tool_events)} tool events")
     
     def _validate_event_sequence_and_timing(self):
         """Validate WebSocket events arrive in correct sequence with reasonable timing"""
@@ -385,7 +385,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         
         assert total_duration_ms > 1000, f"Events too clustered ({total_duration_ms}ms) - likely not real processing"
         
-        logger.info(f"✅ Event sequence validation passed: {total_duration_ms}ms total duration")
+        logger.info(f" PASS:  Event sequence validation passed: {total_duration_ms}ms total duration")
     
     @pytest.mark.asyncio
     async def test_websocket_reconnection_during_agent_execution(self):
@@ -436,7 +436,7 @@ class TestAgentWorkflowToolNotifications(DockerTestBase):
         events_summary = self.event_capture.get_events_summary()
         assert events_summary['total_events'] > 0, "No events received after reconnection"
         
-        logger.info("✅ INTEGRATION TEST 6b PASSED: WebSocket reconnection resilience working")
+        logger.info(" PASS:  INTEGRATION TEST 6b PASSED: WebSocket reconnection resilience working")
 
 
 if __name__ == "__main__":

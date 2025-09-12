@@ -252,7 +252,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
                 "automation"
             )
             
-            logger.info(f"✅ Test 1 PASSED: All 5 critical WebSocket events delivered for user {user_id}")
+            logger.info(f" PASS:  Test 1 PASSED: All 5 critical WebSocket events delivered for user {user_id}")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -330,7 +330,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
                 completed_idx = event_types.index("agent_completed")
                 assert started_idx < completed_idx, "agent_started must come before agent_completed"
             
-            logger.info(f"✅ Test 2 PASSED: Real-time notifications delivered with first event latency {first_event_latency:.3f}s")
+            logger.info(f" PASS:  Test 2 PASSED: Real-time notifications delivered with first event latency {first_event_latency:.3f}s")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -408,7 +408,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
             assert len(user1_events) > 0, "User 1 received no events"
             assert len(user2_events) > 0, "User 2 received no events"
             
-            logger.info(f"✅ Test 3 PASSED: Multi-user isolation validated - User1: {len(user1_events)} events, User2: {len(user2_events)} events")
+            logger.info(f" PASS:  Test 3 PASSED: Multi-user isolation validated - User1: {len(user1_events)} events, User2: {len(user2_events)} events")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(ws1)
@@ -493,7 +493,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
                 assert event.get("user_id") == user_id, "Recovery events violated user isolation"
                 assert event.get("thread_id") == recovery_thread_id or event.get("thread_id") is None, "Recovery events have wrong thread_id"
             
-            logger.info(f"✅ Test 4 PASSED: WebSocket error recovery validated - {len(error_responses)} errors handled, {len(recovery_events)} recovery events")
+            logger.info(f" PASS:  Test 4 PASSED: WebSocket error recovery validated - {len(error_responses)} errors handled, {len(recovery_events)} recovery events")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -569,7 +569,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
             assert all(receive_timestamps[i] <= receive_timestamps[i+1] for i in range(len(receive_timestamps)-1)), \
                 "Events received out of chronological order"
             
-            logger.info(f"✅ Test 5 PASSED: Event ordering validated - Sequence: {event_sequence}")
+            logger.info(f" PASS:  Test 5 PASSED: Event ordering validated - Sequence: {event_sequence}")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -636,7 +636,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
                 assert isinstance(event, dict), "Bridge corrupted event structure"
                 assert "type" in event, "Bridge removed required event type"
             
-            logger.info(f"✅ Test 6 PASSED: WebSocket Agent Bridge integration validated - {len(bridge_events)} events processed")
+            logger.info(f" PASS:  Test 6 PASSED: WebSocket Agent Bridge integration validated - {len(bridge_events)} events processed")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -728,7 +728,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
             # This test validates that the system respects token permissions
             # Implementation may vary based on WebSocket endpoint permission checking
             
-            logger.info(f"✅ Test 7 PASSED: WebSocket authentication validated - Valid: {len(auth_events)} events, Invalid scenarios: {len(invalid_scenarios)} tested")
+            logger.info(f" PASS:  Test 7 PASSED: WebSocket authentication validated - Valid: {len(auth_events)} events, Invalid scenarios: {len(invalid_scenarios)} tested")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(valid_websocket)
@@ -840,7 +840,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
                           for rt in agent_response_types), \
                     "Agent request should trigger agent events"
             
-            logger.info(f"✅ Test 8 PASSED: WebSocket message types validated - {len(message_types_to_test)} types tested")
+            logger.info(f" PASS:  Test 8 PASSED: WebSocket message types validated - {len(message_types_to_test)} types tested")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)
@@ -968,7 +968,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
             # Phase 5: Graceful closure (handled in finally block)
             connection_duration = time.time() - connection_established_time
             
-            logger.info(f"✅ Test 9 PASSED: Connection lifecycle validated - Duration: {connection_duration:.3f}s, Operations: {len(operations)}, Total responses: {total_responses}")
+            logger.info(f" PASS:  Test 9 PASSED: Connection lifecycle validated - Duration: {connection_duration:.3f}s, Operations: {len(operations)}, Total responses: {total_responses}")
             
         finally:
             # Phase 5: Graceful closure
@@ -1130,7 +1130,7 @@ class WebSocketIntegrationTestSuite(WebSocketIntegrationTest):
             
             self.assert_business_value_delivered(business_value_data, "insights")
             
-            logger.info(f"✅ Test 10 PASSED: WebSocket business value delivery validated - {total_interactions} interactions, {valuable_events} valuable events, {session_duration:.1f}s duration")
+            logger.info(f" PASS:  Test 10 PASSED: WebSocket business value delivery validated - {total_interactions} interactions, {valuable_events} valuable events, {session_duration:.1f}s duration")
             
         finally:
             await WebSocketTestHelpers.close_test_connection(websocket)

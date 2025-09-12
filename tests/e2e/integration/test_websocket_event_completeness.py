@@ -255,5 +255,5 @@ class TestWebSocketEventCompleteness:
         assert success_score >= 3, f"WebSocket events test failed. Score: {success_score}/6. Events: {list(received_events)}"
         assert test_duration < 12.0, f"Test took too long: {test_duration:.1f}s (limit: 12s)"
         
-        logger.info(f"✓ WebSocket Events Test PASSED (Score: {success_score}/6)")
+        logger.info(f"[U+2713] WebSocket Events Test PASSED (Score: {success_score}/6)")
         await client.close()

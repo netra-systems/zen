@@ -88,7 +88,7 @@ class TransactionEventCoordinator:
     """Coordinates WebSocket events with database transaction boundaries.
     
     Business Value Justification (BVJ):
-    - Segment: ALL (Free → Enterprise) - Foundation for all real-time features
+    - Segment: ALL (Free  ->  Enterprise) - Foundation for all real-time features
     - Business Goal: Prevent WebSocket events being sent before database commits
     - Value Impact: Eliminates data inconsistency in chat functionality
     - Strategic Impact: CRITICAL - Protects $500K+ ARR Golden Path reliability
@@ -109,12 +109,12 @@ class TransactionEventCoordinator:
         self.coordination_metrics: Dict[str, Any] = defaultdict(int)
         self._lock = asyncio.Lock()
         
-        logger.info("🔗 TransactionEventCoordinator initialized - ensuring WebSocket/DB coordination")
+        logger.info("[U+1F517] TransactionEventCoordinator initialized - ensuring WebSocket/DB coordination")
         
     def set_websocket_manager(self, websocket_manager):
         """Set or update the WebSocket manager reference."""
         self.websocket_manager = websocket_manager
-        logger.debug("🔄 WebSocket manager linked to TransactionEventCoordinator")
+        logger.debug(" CYCLE:  WebSocket manager linked to TransactionEventCoordinator")
         
     async def add_pending_event(self, transaction_id: str, event_type: str, event_data: Dict[str, Any], 
                                connection_id: Optional[str] = None, user_id: Optional[str] = None,
@@ -143,7 +143,7 @@ class TransactionEventCoordinator:
             self.pending_events[transaction_id].append(event)
             self.coordination_metrics["events_queued"] += 1
             
-            logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+            logger.debug(f"[U+1F4E4] Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
                         f"(user: {user_id}, priority: {priority})")
             
     async def on_transaction_commit(self, transaction_id: str) -> int:
@@ -159,7 +159,7 @@ class TransactionEventCoordinator:
             events = self.pending_events.pop(transaction_id, [])
             
         if not events:
-            logger.debug(f"🔄 No pending events for committed transaction {transaction_id[:8]}...")
+            logger.debug(f" CYCLE:  No pending events for committed transaction {transaction_id[:8]}...")
             return 0
             
         # Sort events by priority (highest first), then by creation time
@@ -168,7 +168,7 @@ class TransactionEventCoordinator:
         sent_count = 0
         failed_count = 0
         
-        logger.info(f"📤 Sending {len(events)} queued WebSocket events after transaction commit {transaction_id[:8]}...")
+        logger.info(f"[U+1F4E4] Sending {len(events)} queued WebSocket events after transaction commit {transaction_id[:8]}...")
         
         for event in events:
             try:
@@ -180,16 +180,16 @@ class TransactionEventCoordinator:
                     
             except Exception as e:
                 failed_count += 1
-                logger.error(f"❌ Failed to send WebSocket event '{event.event_type}' after commit: {e}")
+                logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}' after commit: {e}")
                 
         self.coordination_metrics["events_sent_after_commit"] += sent_count
         self.coordination_metrics["events_failed_after_commit"] += failed_count
         
         if failed_count > 0:
-            logger.warning(f"⚠️ Transaction {transaction_id[:8]}... commit coordination: "
+            logger.warning(f" WARNING: [U+FE0F] Transaction {transaction_id[:8]}... commit coordination: "
                           f"{sent_count} events sent, {failed_count} failed")
         else:
-            logger.info(f"✅ Transaction {transaction_id[:8]}... commit coordination successful: "
+            logger.info(f" PASS:  Transaction {transaction_id[:8]}... commit coordination successful: "
                        f"{sent_count} events sent")
             
         return sent_count
@@ -222,14 +222,14 @@ class TransactionEventCoordinator:
         self.coordination_metrics["rollbacks_handled"] += 1
         self.coordination_metrics["events_cleared_on_rollback"] += len(events)
         
-        logger.warning(f"🔄 Transaction {transaction_id[:8]}... rolled back - cleared {len(events)} pending WebSocket events")
-        logger.info(f"📝 Rollback affected {len(affected_users)} users and event types: {affected_event_types}")
+        logger.warning(f" CYCLE:  Transaction {transaction_id[:8]}... rolled back - cleared {len(events)} pending WebSocket events")
+        logger.info(f"[U+1F4DD] Rollback affected {len(affected_users)} users and event types: {affected_event_types}")
         
         # Send rollback notification to affected users
         try:
             await self._send_rollback_notification(rollback_notification, affected_users)
         except Exception as e:
-            logger.error(f"❌ Failed to send rollback notification: {e}")
+            logger.error(f" FAIL:  Failed to send rollback notification: {e}")
             
         return rollback_notification
         
@@ -243,7 +243,7 @@ class TransactionEventCoordinator:
             True if sent successfully, False otherwise
         """
         if not self.websocket_manager:
-            logger.warning(f"⚠️ No WebSocket manager configured - cannot send event '{event.event_type}'")
+            logger.warning(f" WARNING: [U+FE0F] No WebSocket manager configured - cannot send event '{event.event_type}'")
             return False
             
         try:
@@ -264,14 +264,14 @@ class TransactionEventCoordinator:
                     event.event_type, event.event_data
                 )
             else:
-                logger.warning(f"⚠️ WebSocket manager missing compatible send methods for event '{event.event_type}'")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket manager missing compatible send methods for event '{event.event_type}'")
                 return False
                 
-            logger.debug(f"📤 Successfully sent WebSocket event '{event.event_type}' (user: {event.user_id})")
+            logger.debug(f"[U+1F4E4] Successfully sent WebSocket event '{event.event_type}' (user: {event.user_id})")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Failed to send WebSocket event '{event.event_type}': {type(e).__name__}: {e}")
+            logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}': {type(e).__name__}: {e}")
             return False
             
     async def _send_rollback_notification(self, notification: RollbackNotification, affected_users: List[str]):
@@ -299,9 +299,9 @@ class TransactionEventCoordinator:
                     await self.websocket_manager.send_to_user(
                         user_id, "transaction_rollback", rollback_event_data
                     )
-                logger.debug(f"📤 Sent rollback notification to user {user_id}")
+                logger.debug(f"[U+1F4E4] Sent rollback notification to user {user_id}")
             except Exception as e:
-                logger.error(f"❌ Failed to send rollback notification to user {user_id}: {e}")
+                logger.error(f" FAIL:  Failed to send rollback notification to user {user_id}: {e}")
                 
     def get_coordination_metrics(self) -> Dict[str, Any]:
         """Get current coordination metrics for monitoring.
@@ -339,7 +339,7 @@ class TransactionEventCoordinator:
                 self.coordination_metrics["stale_events_cleared"] += len(events)
                 
         if stale_transactions:
-            logger.warning(f"🧹 Cleaned up {len(stale_transactions)} stale transactions with pending events")
+            logger.warning(f"[U+1F9F9] Cleaned up {len(stale_transactions)} stale transactions with pending events")
             
         return len(stale_transactions)
 
@@ -363,7 +363,7 @@ class DatabaseManager:
         
         # Initialize transaction event coordinator for WebSocket coordination
         self.transaction_coordinator = TransactionEventCoordinator()
-        logger.debug("🔗 DatabaseManager initialized with TransactionEventCoordinator")
+        logger.debug("[U+1F517] DatabaseManager initialized with TransactionEventCoordinator")
         
         # ISSUE #414 FIX: Enhanced session tracking and pool management
         self._active_sessions: Dict[str, Dict[str, Any]] = {}  # Track active sessions per user
@@ -383,7 +383,7 @@ class DatabaseManager:
             return
         
         init_start_time = time.time()
-        logger.info("🔗 Starting DatabaseManager initialization...")
+        logger.info("[U+1F517] Starting DatabaseManager initialization...")
         
         try:
             # Get database URL using DatabaseURLBuilder as SSOT
@@ -397,7 +397,7 @@ class DatabaseManager:
             max_overflow = getattr(self.config, 'database_max_overflow', 50)  # Increased from 10 to 50
             pool_timeout = getattr(self.config, 'database_pool_timeout', 30)  # 30 second timeout
             
-            logger.info(f"🔧 Enhanced database configuration (Issue #414): echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}, timeout={pool_timeout}s")
+            logger.info(f"[U+1F527] Enhanced database configuration (Issue #414): echo={echo}, pool_size={pool_size}, max_overflow={max_overflow}, timeout={pool_timeout}s")
             
             # Use appropriate pool class for async engines with enhanced configuration
             engine_kwargs = {
@@ -417,13 +417,13 @@ class DatabaseManager:
             if pool_size <= 0 or "sqlite" in database_url.lower():
                 # Use NullPool for SQLite or disabled pooling
                 engine_kwargs["poolclass"] = NullPool
-                logger.info("🏊 Using NullPool for SQLite or disabled pooling")
+                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling")
             else:
                 # Use QueuePool for better concurrent handling
                 engine_kwargs["poolclass"] = QueuePool
                 engine_kwargs["pool_size"] = pool_size
                 engine_kwargs["max_overflow"] = max_overflow
-                logger.info(f"🏊 Using QueuePool for enhanced concurrency: pool_size={pool_size}, max_overflow={max_overflow}")
+                logger.info(f"[U+1F3CA] Using QueuePool for enhanced concurrency: pool_size={pool_size}, max_overflow={max_overflow}")
             
             logger.debug("Creating async database engine...")
             primary_engine = create_async_engine(
@@ -440,11 +440,11 @@ class DatabaseManager:
             self._initialized = True
             
             init_duration = time.time() - init_start_time
-            logger.info(f"✅ DatabaseManager initialized successfully in {init_duration:.3f}s")
+            logger.info(f" PASS:  DatabaseManager initialized successfully in {init_duration:.3f}s")
             
         except Exception as e:
             init_duration = time.time() - init_start_time
-            logger.critical(f"💥 CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
+            logger.critical(f"[U+1F4A5] CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
             logger.error(f"Database connection failure details: {type(e).__name__}: {str(e)}")
             logger.error(f"This will prevent all database operations including user data persistence")
             raise
@@ -535,14 +535,14 @@ class DatabaseManager:
         total_capacity = pool_size + max_overflow
         
         if current_active >= total_capacity * 0.9:  # Warn at 90% capacity
-            logger.warning(f"🚨 Database pool near exhaustion: {current_active}/{total_capacity} sessions active")
+            logger.warning(f" ALERT:  Database pool near exhaustion: {current_active}/{total_capacity} sessions active")
             self._pool_stats['pool_exhaustion_warnings'] += 1
         
-        logger.debug(f"🔄 Starting database session {session_id} for {operation_type} (user: {user_id or 'system'}, valid_context: {context_valid})")
+        logger.debug(f" CYCLE:  Starting database session {session_id} for {operation_type} (user: {user_id or 'system'}, valid_context: {context_valid})")
         
         # CRITICAL FIX: Enhanced initialization safety
         if not self._initialized:
-            logger.info(f"🔧 Auto-initializing DatabaseManager for session access (operation: {operation_type})")
+            logger.info(f"[U+1F527] Auto-initializing DatabaseManager for session access (operation: {operation_type})")
             await self.initialize()
         
         # ISSUE #414 FIX: Track active session for pool management
@@ -564,7 +564,7 @@ class DatabaseManager:
         async with AsyncSession(engine) as session:
             original_exception = None
             transaction_start_time = time.time()
-            logger.debug(f"📝 Transaction started for session {session_id}")
+            logger.debug(f"[U+1F4DD] Transaction started for session {session_id}")
             
             try:
                 yield session
@@ -575,7 +575,7 @@ class DatabaseManager:
                 commit_duration = time.time() - commit_start_time
                 session_duration = time.time() - session_start_time
                 
-                logger.info(f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
+                logger.info(f" PASS:  Session {session_id} committed successfully - Operation: {operation_type}, "
                            f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s")
                 
             except (DeadlockError, ConnectionError) as e:
@@ -583,20 +583,20 @@ class DatabaseManager:
                 original_exception = classify_error(e)
                 rollback_start_time = time.time()
                 
-                logger.critical(f"💥 SPECIFIC TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
+                logger.critical(f"[U+1F4A5] SPECIFIC TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
                 logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {str(original_exception)}")
                 
                 try:
                     await session.rollback()
                     rollback_duration = time.time() - rollback_start_time
-                    logger.warning(f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                    logger.warning(f" CYCLE:  Rollback completed for session {session_id} in {rollback_duration:.3f}s")
                 except Exception as rollback_error:
                     rollback_duration = time.time() - rollback_start_time
-                    logger.critical(f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"[U+1F4A5] ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
                     logger.critical(f"DATABASE INTEGRITY AT RISK - Manual intervention may be required")
                 
                 session_duration = time.time() - session_start_time
-                logger.error(f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
+                logger.error(f" FAIL:  Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
                 raise original_exception
                 
             except Exception as e:
@@ -604,21 +604,21 @@ class DatabaseManager:
                 original_exception = classify_error(e)
                 rollback_start_time = time.time()
                 
-                logger.critical(f"💥 TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
+                logger.critical(f"[U+1F4A5] TRANSACTION FAILURE ({type(original_exception).__name__}) in session {session_id}")
                 logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, Error: {str(original_exception)}")
                 
                 try:
                     await session.rollback()
                     rollback_duration = time.time() - rollback_start_time
-                    logger.warning(f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                    logger.warning(f" CYCLE:  Rollback completed for session {session_id} in {rollback_duration:.3f}s")
                 except Exception as rollback_error:
                     rollback_duration = time.time() - rollback_start_time
-                    logger.critical(f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
+                    logger.critical(f"[U+1F4A5] ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}")
                     logger.critical(f"DATABASE INTEGRITY AT RISK - Manual intervention may be required")
                     # Continue with original exception
                 
                 session_duration = time.time() - session_start_time
-                logger.error(f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
+                logger.error(f" FAIL:  Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}")
                 raise original_exception
                 
             finally:
@@ -628,10 +628,10 @@ class DatabaseManager:
                 try:
                     await session.close()
                     close_duration = time.time() - close_start_time
-                    logger.debug(f"🔒 Session {session_id} closed in {close_duration:.3f}s")
+                    logger.debug(f"[U+1F512] Session {session_id} closed in {close_duration:.3f}s")
                 except Exception as close_error:
                     close_duration = time.time() - close_start_time
-                    logger.error(f"⚠️ Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
+                    logger.error(f" WARNING: [U+FE0F] Session close failed for {session_id} after {close_duration:.3f}s: {close_error}")
                     # Don't raise close errors - they shouldn't prevent completion
                 
                 # ISSUE #414 FIX: Remove session from active tracking and update stats
@@ -652,7 +652,7 @@ class DatabaseManager:
                                 logger.warning(f"Session lifecycle callback failed: {callback_error}")
                         
                         total_session_time = time.time() - session_start_time
-                        logger.debug(f"🧹 Session {session_id} cleanup complete - Total time: {total_session_time:.3f}s, "
+                        logger.debug(f"[U+1F9F9] Session {session_id} cleanup complete - Total time: {total_session_time:.3f}s, "
                                    f"User: {user_id or 'system'}, Active sessions: {self._pool_stats['active_sessions_count']}")
                     
                 except Exception as cleanup_error:
@@ -667,7 +667,7 @@ class DatabaseManager:
             websocket_manager: WebSocket manager instance for event coordination
         """
         self.transaction_coordinator.set_websocket_manager(websocket_manager)
-        logger.info("🔗 WebSocket manager linked to DatabaseManager transaction coordinator")
+        logger.info("[U+1F517] WebSocket manager linked to DatabaseManager transaction coordinator")
         
     @asynccontextmanager
     async def get_coordinated_session(self, engine_name: str = 'primary', user_id: Optional[str] = None, 
@@ -691,12 +691,12 @@ class DatabaseManager:
         session_start_time = time.time()
         session_id = f"coord_sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
         
-        logger.info(f"🔗 Starting coordinated database session {session_id} for {operation_type} "
+        logger.info(f"[U+1F517] Starting coordinated database session {session_id} for {operation_type} "
                    f"(user: {user_id or 'system'}, transaction: {transaction_id[:8]}...)")
         
         # CRITICAL FIX: Enhanced initialization safety
         if not self._initialized:
-            logger.info(f"🔧 Auto-initializing DatabaseManager for coordinated session (operation: {operation_type})")
+            logger.info(f"[U+1F527] Auto-initializing DatabaseManager for coordinated session (operation: {operation_type})")
             await self.initialize()
         
         engine = self.get_engine(engine_name)
@@ -716,7 +716,7 @@ class DatabaseManager:
                         priority=event.get('priority', 0)
                     )
                     
-            logger.debug(f"📝 Coordinated transaction started for session {session_id} (transaction: {transaction_id[:8]}...)")
+            logger.debug(f"[U+1F4DD] Coordinated transaction started for session {session_id} (transaction: {transaction_id[:8]}...)")
             
             try:
                 yield session, transaction_id
@@ -726,13 +726,13 @@ class DatabaseManager:
                 await session.commit()
                 commit_duration = time.time() - commit_start_time
                 
-                logger.debug(f"✅ Database commit successful for transaction {transaction_id[:8]}... in {commit_duration:.3f}s")
+                logger.debug(f" PASS:  Database commit successful for transaction {transaction_id[:8]}... in {commit_duration:.3f}s")
                 
                 # Send queued WebSocket events after successful commit
                 events_sent = await self.transaction_coordinator.on_transaction_commit(transaction_id)
                 
                 session_duration = time.time() - session_start_time
-                logger.info(f"✅ Coordinated session {session_id} completed successfully - "
+                logger.info(f" PASS:  Coordinated session {session_id} completed successfully - "
                            f"Operation: {operation_type}, User: {user_id or 'system'}, "
                            f"Duration: {session_duration:.3f}s, Events sent: {events_sent}")
                 
@@ -740,31 +740,31 @@ class DatabaseManager:
                 original_exception = e
                 rollback_start_time = time.time()
                 
-                logger.critical(f"💥 COORDINATED TRANSACTION FAILURE in session {session_id}")
+                logger.critical(f"[U+1F4A5] COORDINATED TRANSACTION FAILURE in session {session_id}")
                 logger.error(f"Operation: {operation_type}, User: {user_id or 'system'}, "
                            f"Transaction: {transaction_id[:8]}..., Error: {type(e).__name__}: {str(e)}")
                 
                 try:
                     await session.rollback()
                     rollback_duration = time.time() - rollback_start_time
-                    logger.warning(f"🔄 Database rollback completed for session {session_id} in {rollback_duration:.3f}s")
+                    logger.warning(f" CYCLE:  Database rollback completed for session {session_id} in {rollback_duration:.3f}s")
                     
                     # Handle rollback coordination and send notifications
                     rollback_notification = await self.transaction_coordinator.on_transaction_rollback(
                         transaction_id, str(e)
                     )
                     
-                    logger.info(f"📤 Rollback notification sent for transaction {transaction_id[:8]}... "
+                    logger.info(f"[U+1F4E4] Rollback notification sent for transaction {transaction_id[:8]}... "
                                f"affecting {len(rollback_notification.affected_layers)} layers")
                     
                 except Exception as rollback_error:
                     rollback_duration = time.time() - rollback_start_time
-                    logger.critical(f"💥 COORDINATED ROLLBACK FAILED for session {session_id} "
+                    logger.critical(f"[U+1F4A5] COORDINATED ROLLBACK FAILED for session {session_id} "
                                   f"after {rollback_duration:.3f}s: {rollback_error}")
                     logger.critical(f"DATABASE AND WEBSOCKET COORDINATION INTEGRITY AT RISK")
                 
                 session_duration = time.time() - session_start_time
-                logger.error(f"❌ Coordinated session {session_id} failed after {session_duration:.3f}s")
+                logger.error(f" FAIL:  Coordinated session {session_id} failed after {session_duration:.3f}s")
                 raise original_exception
                 
             finally:
@@ -772,10 +772,10 @@ class DatabaseManager:
                 try:
                     await session.close()
                     close_duration = time.time() - close_start_time
-                    logger.debug(f"🔒 Coordinated session {session_id} closed in {close_duration:.3f}s")
+                    logger.debug(f"[U+1F512] Coordinated session {session_id} closed in {close_duration:.3f}s")
                 except Exception as close_error:
                     close_duration = time.time() - close_start_time
-                    logger.error(f"⚠️ Coordinated session close failed for {session_id} "
+                    logger.error(f" WARNING: [U+FE0F] Coordinated session close failed for {session_id} "
                                f"after {close_duration:.3f}s: {close_error}")
                     
     async def queue_websocket_event(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
@@ -802,7 +802,7 @@ class DatabaseManager:
             priority=priority
         )
         
-        logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+        logger.debug(f"[U+1F4E4] Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
                     f"(user: {user_id}, priority: {priority})")
         
     def get_coordination_metrics(self) -> Dict[str, Any]:
@@ -831,12 +831,12 @@ class DatabaseManager:
         Enhanced with detailed health monitoring for Golden Path operations.
         """
         health_check_start = time.time()
-        logger.debug(f"🏥 Starting database health check for engine: {engine_name}")
+        logger.debug(f"[U+1F3E5] Starting database health check for engine: {engine_name}")
         
         try:
             # CRITICAL FIX: Ensure initialization before health check
             if not self._initialized:
-                logger.info(f"🔧 Initializing DatabaseManager for health check (engine: {engine_name})")
+                logger.info(f"[U+1F527] Initializing DatabaseManager for health check (engine: {engine_name})")
                 await self.initialize()
             
             engine = self.get_engine(engine_name)
@@ -850,7 +850,7 @@ class DatabaseManager:
             query_duration = time.time() - query_start
             total_duration = time.time() - health_check_start
             
-            logger.info(f"✅ Database health check PASSED for {engine_name} - "
+            logger.info(f" PASS:  Database health check PASSED for {engine_name} - "
                        f"Query: {query_duration:.3f}s, Total: {total_duration:.3f}s")
             
             return {
@@ -864,7 +864,7 @@ class DatabaseManager:
             
         except Exception as e:
             total_duration = time.time() - health_check_start
-            logger.critical(f"💥 Database health check FAILED for {engine_name} after {total_duration:.3f}s")
+            logger.critical(f"[U+1F4A5] Database health check FAILED for {engine_name} after {total_duration:.3f}s")
             logger.error(f"Health check error details: {type(e).__name__}: {str(e)}")
             logger.error(f"This indicates database connectivity issues that will affect user operations")
             
@@ -894,7 +894,7 @@ class DatabaseManager:
                 expired_sessions.append(session_id)
         
         if expired_sessions:
-            logger.warning(f"🧹 Cleaning up {len(expired_sessions)} expired database sessions (Issue #414 fix)")
+            logger.warning(f"[U+1F9F9] Cleaning up {len(expired_sessions)} expired database sessions (Issue #414 fix)")
             
             for session_id in expired_sessions:
                 try:
@@ -902,7 +902,7 @@ class DatabaseManager:
                     self._pool_stats['active_sessions_count'] -= 1
                     self._pool_stats['sessions_cleaned_up'] += 1
                     
-                    logger.info(f"🧹 Cleaned up expired session {session_id} for user {session_meta.get('user_id', 'unknown')}")
+                    logger.info(f"[U+1F9F9] Cleaned up expired session {session_id} for user {session_meta.get('user_id', 'unknown')}")
                 except Exception as e:
                     logger.error(f"Failed to cleanup expired session {session_id}: {e}")
     
@@ -956,7 +956,7 @@ class DatabaseManager:
         ]
         
         if user_sessions:
-            logger.info(f"🧹 Force cleaning up {len(user_sessions)} sessions for user {user_id} (Issue #414 isolation)")
+            logger.info(f"[U+1F9F9] Force cleaning up {len(user_sessions)} sessions for user {user_id} (Issue #414 isolation)")
             
             for session_id in user_sessions:
                 try:
@@ -983,23 +983,23 @@ class DatabaseManager:
             logger.debug("No database engines to close")
             return
             
-        logger.info(f"🔒 Closing {len(self._engines)} database engines...")
+        logger.info(f"[U+1F512] Closing {len(self._engines)} database engines...")
         
         for name, engine in self._engines.items():
             close_start = time.time()
             try:
                 await engine.dispose()
                 close_duration = time.time() - close_start
-                logger.info(f"✅ Closed database engine '{name}' in {close_duration:.3f}s")
+                logger.info(f" PASS:  Closed database engine '{name}' in {close_duration:.3f}s")
             except Exception as e:
                 close_duration = time.time() - close_start
-                logger.error(f"❌ Error closing engine '{name}' after {close_duration:.3f}s: {e}")
+                logger.error(f" FAIL:  Error closing engine '{name}' after {close_duration:.3f}s: {e}")
                 logger.warning(f"Engine '{name}' may have active connections that were forcibly closed")
         
         engines_count = len(self._engines)
         self._engines.clear()
         self._initialized = False
-        logger.info(f"🔒 DatabaseManager shutdown complete - {engines_count} engines closed")
+        logger.info(f"[U+1F512] DatabaseManager shutdown complete - {engines_count} engines closed")
     
     def _get_database_url(self) -> str:
         """Get database URL using DatabaseURLBuilder as SSOT.
@@ -1082,12 +1082,12 @@ class DatabaseManager:
             - netra_backend.app.database.get_db() for dependency injection
             - instance.get_session() for direct usage
         """
-        logger.debug(f"📞 Legacy database session access: {operation_type} (user: {user_id or 'system'})")
+        logger.debug(f"[U+1F4DE] Legacy database session access: {operation_type} (user: {user_id or 'system'})")
         
         manager = get_database_manager()
         # CRITICAL FIX: Ensure initialization - manager should auto-initialize, but double-check
         if not manager._initialized:
-            logger.info(f"🔧 Ensuring DatabaseManager initialization for class method access ({operation_type})")
+            logger.info(f"[U+1F527] Ensuring DatabaseManager initialization for class method access ({operation_type})")
             await manager.initialize()
         
         async with manager.get_session(name, user_id=user_id, operation_type=operation_type) as session:

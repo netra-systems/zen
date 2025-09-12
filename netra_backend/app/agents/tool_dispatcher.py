@@ -10,10 +10,10 @@ Architecture:
 - Clean separation: Registry, Execution, Events, Permissions
 
 Migration from legacy:
-- tool_dispatcher_core.py → Merged into UnifiedToolDispatcher
-- tool_dispatcher_unified.py → Refactored as netra_backend.app.core.tools.unified_tool_dispatcher
-- admin_tool_dispatcher/* (24 files) → netra_backend.app.admin.tools.unified_admin_dispatcher
-- request_scoped patterns → Built into factory
+- tool_dispatcher_core.py  ->  Merged into UnifiedToolDispatcher
+- tool_dispatcher_unified.py  ->  Refactored as netra_backend.app.core.tools.unified_tool_dispatcher
+- admin_tool_dispatcher/* (24 files)  ->  netra_backend.app.admin.tools.unified_admin_dispatcher
+- request_scoped patterns  ->  Built into factory
 
 USAGE:
 - NEW CODE: Use UnifiedToolDispatcherFactory.create_for_request()
@@ -131,7 +131,7 @@ def _emit_migration_notice():
     import logging
     logger = logging.getLogger(__name__)
     logger.info(
-        "✅ Tool dispatcher consolidation complete. "
+        " PASS:  Tool dispatcher consolidation complete. "
         "Using netra_backend.app.core.tools.unified_tool_dispatcher as SSOT. "
         "Admin tools in netra_backend.app.admin.tools.unified_admin_dispatcher. "
         "Legacy patterns emit deprecation warnings."

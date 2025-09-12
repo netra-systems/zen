@@ -139,7 +139,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertIsNotNone(cors_builder.websocket, "WebSocket builder should be initialized")
         self.assertIsNotNone(cors_builder.static, "Static assets builder should be initialized")
         
-        print("✓ CORSConfigurationBuilder initialization validated")
+        print("[U+2713] CORSConfigurationBuilder initialization validated")
     
     def test_cors_origins_builder_allowed_origins(self):
         """
@@ -170,7 +170,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
             found_origin = any(expected_origin in origin for origin in allowed_origins)
             self.assertTrue(found_origin, f"Development should include {expected_origin}")
         
-        print(f"✓ CORS origins validated - {len(allowed_origins)} origins configured")
+        print(f"[U+2713] CORS origins validated - {len(allowed_origins)} origins configured")
     
     def test_cors_origins_builder_is_allowed_validation(self):
         """
@@ -200,7 +200,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         service_allowed = cors_builder.origins.is_allowed('https://external.com', service_to_service=True)
         self.assertTrue(service_allowed, "Service-to-service should bypass CORS restrictions")
         
-        print("✓ CORS origin validation logic tested")
+        print("[U+2713] CORS origin validation logic tested")
     
     def test_cors_origins_builder_environment_specific_origins(self):
         """
@@ -229,7 +229,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
                         if env_name == 'development':
                             self.assertTrue(found_match, f"{env_name} should include origins with {pattern}")
                     
-                    print(f"✓ Environment-specific origins validated for {env_name}")
+                    print(f"[U+2713] Environment-specific origins validated for {env_name}")
     
     def test_cors_headers_builder_configuration(self):
         """
@@ -272,7 +272,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertTrue(cors_builder.headers.is_method_allowed('POST'), 
                        "Should allow POST method")
         
-        print(f"✓ CORS headers configuration validated - {len(allowed_headers)} headers, {len(allowed_methods)} methods")
+        print(f"[U+2713] CORS headers configuration validated - {len(allowed_headers)} headers, {len(allowed_methods)} methods")
     
     def test_cors_security_builder_content_type_validation(self):
         """
@@ -313,7 +313,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         is_valid_with_charset = cors_builder.security.validate_content_type('application/json; charset=utf-8')
         self.assertTrue(is_valid_with_charset, "Should allow content type with charset")
         
-        print("✓ Content type validation tested")
+        print("[U+2713] Content type validation tested")
     
     def test_cors_security_builder_event_logging(self):
         """
@@ -347,7 +347,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertEqual(event.request_id, "test-123", "Request ID should match")
         self.assertIn("user_agent", event.details, "Additional info should be included")
         
-        print("✓ Security event logging validated")
+        print("[U+2713] Security event logging validated")
     
     def test_cors_service_detector_internal_request_detection(self):
         """
@@ -381,7 +381,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertEqual(should_bypass, expected_bypass, 
                         f"CORS bypass should be {expected_bypass} in {cors_builder.environment}")
         
-        print("✓ Service detector internal request detection validated")
+        print("[U+2713] Service detector internal request detection validated")
     
     def test_cors_fastapi_builder_middleware_config(self):
         """
@@ -416,7 +416,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertTrue(middleware_config['allow_credentials'], 
                        "Should allow credentials for authenticated requests")
         
-        print("✓ FastAPI middleware configuration validated")
+        print("[U+2713] FastAPI middleware configuration validated")
     
     def test_cors_websocket_builder_configuration(self):
         """
@@ -441,7 +441,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         is_allowed = cors_builder.websocket.is_origin_allowed('http://localhost:3000')
         self.assertTrue(is_allowed, "Should allow localhost for WebSocket in development")
         
-        print(f"✓ WebSocket CORS configuration validated - {len(websocket_origins)} origins")
+        print(f"[U+2713] WebSocket CORS configuration validated - {len(websocket_origins)} origins")
     
     def test_cors_static_assets_builder_configuration(self):
         """
@@ -468,7 +468,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertEqual(cdn_config['allow_origins'], ['*'], "CDN should allow all origins")
         self.assertEqual(cdn_config['allow_credentials'], False, "CDN should not require credentials")
         
-        print("✓ Static assets CORS configuration validated")
+        print("[U+2713] Static assets CORS configuration validated")
     
     def test_cors_health_builder_configuration_info(self):
         """
@@ -504,7 +504,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertIn('configuration', debug_info, "Debug info should include configuration")
         self.assertIn('validation', debug_info, "Debug info should include validation")
         
-        print("✓ CORS health configuration info validated")
+        print("[U+2713] CORS health configuration info validated")
     
     # === BACKWARD COMPATIBILITY TESTS ===
     
@@ -558,7 +558,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         fastapi_config = get_fastapi_cors_config('development')
         self.assertIsInstance(fastapi_config, dict, "FastAPI config should be dictionary")
         
-        print("✓ Backward compatibility functions validated")
+        print("[U+2713] Backward compatibility functions validated")
     
     # === ENVIRONMENT-SPECIFIC TESTS ===
     
@@ -592,7 +592,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
                         self.assertNotIn('*', allowed_origins, 
                                        "Production should not allow wildcard origins")
                     
-                    print(f"✓ CORS configuration validated for environment: {env_name}")
+                    print(f"[U+2713] CORS configuration validated for environment: {env_name}")
     
     def test_cors_configuration_custom_origins_override(self):
         """
@@ -624,7 +624,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
             is_allowed_other = cors_builder.origins.is_allowed('https://other.example.com')
             self.assertFalse(is_allowed_other, "Should not allow non-custom origin")
         
-        print("✓ Custom origins override validated")
+        print("[U+2713] Custom origins override validated")
     
     # === ERROR HANDLING TESTS ===
     
@@ -651,7 +651,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
             middleware_config = cors_builder.fastapi.get_middleware_config()
             self.assertIsInstance(middleware_config, dict, "Should provide valid middleware config")
         
-        print("✓ Invalid environment handling validated")
+        print("[U+2713] Invalid environment handling validated")
     
     def test_cors_configuration_missing_security_origins_handling(self):
         """
@@ -671,7 +671,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
             # Should still provide some origins (even if just fallback localhost)
             self.assertIsInstance(allowed_origins, list, "Should provide origins list")
         
-        print("✓ Missing security origins handling validated")
+        print("[U+2713] Missing security origins handling validated")
     
     # === PERFORMANCE TESTS ===
     
@@ -710,7 +710,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         self.assertLess(validation_time, 0.1, "1000 origin validations should complete in under 100ms")
         self.assertLess(middleware_time, 0.1, "100 middleware configs should complete in under 100ms")
         
-        print(f"✓ CORS configuration performance validated - Origins: {origins_time:.3f}s, "
+        print(f"[U+2713] CORS configuration performance validated - Origins: {origins_time:.3f}s, "
               f"Validation: {validation_time:.3f}s, Middleware: {middleware_time:.3f}s")
     
     # === BUSINESS VALUE VALIDATION ===
@@ -720,7 +720,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         Test CORS configuration meets golden path user flow requirements.
         
         BVJ: Golden path requirements ensure CORS configuration supports
-        the critical user flow from login → AI responses without CORS errors.
+        the critical user flow from login  ->  AI responses without CORS errors.
         """
         cors_builder = CORSConfigurationBuilder()
         
@@ -755,7 +755,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
         for field in required_fields:
             self.assertIn(field, middleware_config, f"Middleware requires {field}")
         
-        print("✓ Golden path CORS requirements validated")
+        print("[U+2713] Golden path CORS requirements validated")
     
     def test_cors_business_value_metrics(self):
         """
@@ -825,7 +825,7 @@ class TestCORSConfigurationComprehensive(SSotBaseTestCase):
             'cors_security_validation_reliability': f"{security_reliability:.1%}"
         }
         
-        print(f"✓ CORS configuration business value metrics: {metrics}")
+        print(f"[U+2713] CORS configuration business value metrics: {metrics}")
 
 
 if __name__ == '__main__':

@@ -175,7 +175,7 @@ class SyntheticDataSubAgent(BaseAgent):
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        approval_message = f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+        approval_message = f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
         
         # Store in context metadata
         context.metadata['approval_message'] = approval_message
@@ -202,7 +202,7 @@ class SyntheticDataSubAgent(BaseAgent):
         if stream_updates:
             records_count = result.generation_status.records_generated
             duration = int((time.time() - start_time) * 1000)
-            message = f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+            message = f" PASS:  Successfully generated {records_count:,} synthetic records in {duration}ms"
             await self.communicator.send_completion_update(context.run_id, message, result)
 
     # Legacy support methods

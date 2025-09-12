@@ -182,15 +182,15 @@ class ServiceDependencyChecker:
                     failed_services = [r.service_name for r in phase_results if not r.validation_success]
                     phase_error = f"Phase {phase.value} validation failed for services: {failed_services}"
                     result.critical_failures.append(phase_error)
-                    self.logger.error(f"❌ {phase_error}")
+                    self.logger.error(f" FAIL:  {phase_error}")
                     
                     # For critical phases, stop validation
                     if phase in [DependencyPhase.PHASE_1_CORE, DependencyPhase.PHASE_2_AUTH]:
                         result.overall_success = False
-                        self.logger.error(f"🚨 CRITICAL PHASE FAILURE - Stopping validation")
+                        self.logger.error(f" ALERT:  CRITICAL PHASE FAILURE - Stopping validation")
                         break
                 else:
-                    self.logger.info(f"✓ Phase {phase.value} validation successful")
+                    self.logger.info(f"[U+2713] Phase {phase.value} validation successful")
             
             # Calculate final statistics
             result.services_healthy = sum(1 for r in result.service_results 
@@ -211,9 +211,9 @@ class ServiceDependencyChecker:
                         f"Golden path validation failed: {failure}" 
                         for failure in golden_path_result.business_impact_failures
                     ])
-                    self.logger.error("❌ Golden path validation failed - business functionality at risk")
+                    self.logger.error(" FAIL:  Golden path validation failed - business functionality at risk")
                 else:
-                    self.logger.info("✓ Golden path validation successful - business functionality protected")
+                    self.logger.info("[U+2713] Golden path validation successful - business functionality protected")
             
             # Final success determination
             if result.critical_failures:
@@ -296,14 +296,14 @@ class ServiceDependencyChecker:
             }
             
             if validation_result.validation_success:
-                self.logger.info(f"✓ {service_name}: Healthy ({health_result.response_time_ms:.1f}ms)")
+                self.logger.info(f"[U+2713] {service_name}: Healthy ({health_result.response_time_ms:.1f}ms)")
             else:
-                self.logger.warning(f"⚠️ {service_name}: Failed - {health_result.error_message}")
+                self.logger.warning(f" WARNING: [U+FE0F] {service_name}: Failed - {health_result.error_message}")
                 
             return validation_result
             
         except Exception as e:
-            self.logger.error(f"❌ {service_name}: Validation exception - {e}")
+            self.logger.error(f" FAIL:  {service_name}: Validation exception - {e}")
             return ServiceValidationResult(
                 service_type=service_type,
                 service_name=service_name,
@@ -343,7 +343,7 @@ class ServiceDependencyChecker:
         self.logger.info("=" * 80)
         
         # Overall status
-        status_emoji = "✅" if result.overall_success else "❌"
+        status_emoji = " PASS: " if result.overall_success else " FAIL: "
         self.logger.info(f"Overall Status: {status_emoji} {'SUCCESS' if result.overall_success else 'FAILED'}")
         
         # Statistics
@@ -357,12 +357,12 @@ class ServiceDependencyChecker:
         if result.phase_results:
             self.logger.info("\nPhase Results:")
             for phase, success in result.phase_results.items():
-                phase_emoji = "✓" if success else "❌"
+                phase_emoji = "[U+2713]" if success else " FAIL: "
                 self.logger.info(f"  {phase_emoji} {phase.value}: {'PASSED' if success else 'FAILED'}")
         
         # Critical failures
         if result.critical_failures:
-            self.logger.error(f"\n🚨 CRITICAL FAILURES ({len(result.critical_failures)}):")
+            self.logger.error(f"\n ALERT:  CRITICAL FAILURES ({len(result.critical_failures)}):")
             for i, failure in enumerate(result.critical_failures, 1):
                 self.logger.error(f"  {i}. {failure}")
         
@@ -371,11 +371,11 @@ class ServiceDependencyChecker:
             self.logger.info("\nService Details:")
             for service_result in result.service_results:
                 if service_result.health_check_result:
-                    status = "✓" if service_result.validation_success else "❌"
+                    status = "[U+2713]" if service_result.validation_success else " FAIL: "
                     response_time = service_result.health_check_result.response_time_ms
                     self.logger.info(f"  {status} {service_result.service_name}: {response_time:.1f}ms")
                 else:
-                    self.logger.info(f"  ❌ {service_result.service_name}: No health check result")
+                    self.logger.info(f"   FAIL:  {service_result.service_name}: No health check result")
         
         self.logger.info("=" * 80)
     

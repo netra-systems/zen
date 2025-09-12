@@ -30,6 +30,7 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @dataclass
@@ -276,6 +277,15 @@ class MultiAgentOrchestrator:
 
 @pytest.mark.integration
 class TestMultiAgentOrchestrationStateManagement(BaseIntegrationTest):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test multi-agent orchestration with state management."""
 
     def setup_method(self):

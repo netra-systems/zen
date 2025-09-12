@@ -372,7 +372,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
         self.assertLess(memory_increase, 100,
                        f"SSOT framework excessive memory usage: {memory_increase:.1f}MB")
         
-        logger.info(f"✓ SSOT Framework isolation test: {num_users} users, "
+        logger.info(f"[U+2713] SSOT Framework isolation test: {num_users} users, "
                    f"{execution_time:.2f}s, {memory_increase:.1f}MB increase")
     
     def test_database_session_per_user_ssot_operations(self):
@@ -468,7 +468,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
             self.assertEqual(len(set(user_transaction_ids)), len(session_data),
                             "CRITICAL: Database transaction IDs leaked between users")
             
-            logger.info(f"✓ Database session isolation: {len(session_data)} unique sessions")
+            logger.info(f"[U+2713] Database session isolation: {len(session_data)} unique sessions")
     
     def test_websocket_channel_isolation_ssot_framework(self):
         """
@@ -571,7 +571,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
                     self.assertIn(f"user_{user_id}", event,
                                 f"Event not properly namespaced: {event}")
             
-            logger.info(f"✓ WebSocket channel isolation: {len(channel_data)} unique channels")
+            logger.info(f"[U+2713] WebSocket channel isolation: {len(channel_data)} unique channels")
     
     def test_race_condition_prevention_ssot_framework(self):
         """
@@ -670,7 +670,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
         self.assertEqual(counter_values, expected_sequence,
                         f"Counter sequence broken (race condition): {counter_values[:10]}...")
         
-        logger.info(f"✓ Race condition prevention: {num_threads} threads, {expected_operations} operations")
+        logger.info(f"[U+2713] Race condition prevention: {num_threads} threads, {expected_operations} operations")
     
     def test_security_boundary_enforcement_ssot_framework(self):
         """
@@ -798,7 +798,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
                 self.assertEqual(len(set(mock_ids)), len(mock_objects),
                                 "SECURITY: Mock objects shared between users")
         
-        logger.info(f"✓ Security boundary enforcement: {len(user_resources)} isolated users")
+        logger.info(f"[U+2713] Security boundary enforcement: {len(user_resources)} isolated users")
     
     def test_performance_monitoring_ssot_concurrent_load(self):
         """
@@ -909,7 +909,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
             if throughputs:
                 self.assertGreater(avg_throughput, 0.5, f"Average throughput too low: {avg_throughput:.2f} ops/sec")
         
-        logger.info(f"✓ Performance monitoring: {num_users} users, "
+        logger.info(f"[U+2713] Performance monitoring: {num_users} users, "
                    f"avg: {avg_time:.2f}s, max: {max_time:.2f}s, "
                    f"memory: {total_memory_increase:.1f}MB")
     
@@ -1015,7 +1015,7 @@ class TestSSotFrameworkWithIsolation(BaseTestCase):
             self.assertLess(max_compliance_time, 3.0,
                            f"Max compliance check too slow: {max_compliance_time:.2f}s")
         
-        logger.info(f"✓ SSOT compliance validation: {num_concurrent_checks} concurrent checks, "
+        logger.info(f"[U+2713] SSOT compliance validation: {num_concurrent_checks} concurrent checks, "
                    f"avg: {avg_compliance_time:.2f}s")
 
 

@@ -302,7 +302,7 @@ class TestDatabasePerformanceIntegration(BaseIntegrationTest):
             sla = report["sla_compliance"]
             assert sla["enterprise_tier"], f"{query_name} fails Enterprise SLA"
             
-            print(f"✓ {query_name}: {report['avg_duration_ms']:.2f}ms avg, "
+            print(f"[U+2713] {query_name}: {report['avg_duration_ms']:.2f}ms avg, "
                   f"Grade: {report['performance_grade']}")
                   
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class TestDatabasePerformanceIntegration(BaseIntegrationTest):
                 f"Redis {operation} throughput too low: {report['avg_throughput']:.2f} ops/sec"
             )
             
-            print(f"✓ Redis {operation}: {report['avg_duration_ms']:.2f}ms avg, "
+            print(f"[U+2713] Redis {operation}: {report['avg_duration_ms']:.2f}ms avg, "
                   f"{report['avg_throughput']:.0f} ops/sec")
                   
     @pytest.mark.asyncio
@@ -441,7 +441,7 @@ class TestDatabasePerformanceIntegration(BaseIntegrationTest):
                 f"Throughput too low at {concurrency} concurrency: {report['avg_throughput']:.2f}"
             )
             
-            print(f"✓ {concurrency} concurrent: {report['avg_duration_ms']:.2f}ms avg, "
+            print(f"[U+2713] {concurrency} concurrent: {report['avg_duration_ms']:.2f}ms avg, "
                   f"degradation: {degradation_factor:.1f}x")
 
 
@@ -523,7 +523,7 @@ class TestWebSocketPerformanceIntegration(BaseIntegrationTest):
                 f"{avg_latency_per_message:.2f}ms per message"
             )
             
-            print(f"✓ WebSocket {size_name}: {actual_throughput:.0f} msg/sec, "
+            print(f"[U+2713] WebSocket {size_name}: {actual_throughput:.0f} msg/sec, "
                   f"{avg_latency_per_message:.2f}ms per msg")
                   
     @pytest.mark.asyncio
@@ -581,7 +581,7 @@ class TestWebSocketPerformanceIntegration(BaseIntegrationTest):
                 f"for {connection_count} connections"
             )
             
-            print(f"✓ {connection_count} concurrent WebSocket connections: "
+            print(f"[U+2713] {connection_count} concurrent WebSocket connections: "
                   f"{report['avg_duration_ms']:.2f}ms avg, "
                   f"{report['success_rate']:.2%} success rate")
 
@@ -677,7 +677,7 @@ class TestAgentExecutionPerformanceIntegration(BaseIntegrationTest):
             sla = report["sla_compliance"]
             assert sla["mid_tier"], f"Agent {agent_type} fails Mid-tier SLA"
             
-            print(f"✓ Agent {agent_type}: {report['avg_duration_ms']:.2f}ms execution, "
+            print(f"[U+2713] Agent {agent_type}: {report['avg_duration_ms']:.2f}ms execution, "
                   f"Grade: {report['performance_grade']}")
                   
     @pytest.mark.asyncio
@@ -739,7 +739,7 @@ class TestAgentExecutionPerformanceIntegration(BaseIntegrationTest):
             f"Per-agent coordination time too high: {per_agent_time:.2f}ms"
         )
         
-        print(f"✓ Multi-agent coordination: {report['avg_duration_ms']:.2f}ms total, "
+        print(f"[U+2713] Multi-agent coordination: {report['avg_duration_ms']:.2f}ms total, "
               f"{per_agent_time:.2f}ms per agent")
 
 
@@ -832,7 +832,7 @@ class TestSystemResourcePerformanceIntegration(BaseIntegrationTest):
                 f"{report['avg_memory_usage_mb']:.2f}MB"
             )
             
-            print(f"✓ Memory {scenario_name}: {report['avg_memory_usage_mb']:.2f}MB used")
+            print(f"[U+2713] Memory {scenario_name}: {report['avg_memory_usage_mb']:.2f}MB used")
             
     @pytest.mark.asyncio  
     async def test_performance_degradation_detection(self, real_services_fixture, profiler):
@@ -894,7 +894,7 @@ class TestSystemResourcePerformanceIntegration(BaseIntegrationTest):
             f"Degraded performance grade should be poor: {degraded_report['performance_grade']}"
         )
         
-        print(f"✓ Performance degradation detected: {degradation_factor:.1f}x slower "
+        print(f"[U+2713] Performance degradation detected: {degradation_factor:.1f}x slower "
               f"(baseline: {baseline_report['performance_grade']}, "
               f"degraded: {degraded_report['performance_grade']})")
 

@@ -76,7 +76,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
             # Step 1: Test factory configuration
             try:
                 execution_factory.configure()
-                logger.info("✓ ExecutionEngineFactory configuration succeeded")
+                logger.info("[U+2713] ExecutionEngineFactory configuration succeeded")
             except Exception as e:
                 delegation_failures.append(f"Factory configuration failed: {e}")
                 pytest.fail(
@@ -93,7 +93,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                     "Factory delegation failure: create_execution_engine returned None"
                 )
                 
-                logger.info("✓ User-specific ExecutionEngine created via factory")
+                logger.info("[U+2713] User-specific ExecutionEngine created via factory")
                 
             except Exception as e:
                 delegation_failures.append(f"create_execution_engine failed: {e}")
@@ -126,7 +126,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                         websocket_integration = getattr(user_execution_engine, attr_name)
                         if websocket_integration is not None:
                             websocket_integration_found = True
-                            logger.info(f"✓ WebSocket integration found: {attr_name}")
+                            logger.info(f"[U+2713] WebSocket integration found: {attr_name}")
                             break
                 
                 if not websocket_integration_found:
@@ -155,7 +155,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                         user_emitter = getattr(websocket_integration, attr_name)
                         if user_emitter is not None:
                             user_emitter_found = True
-                            logger.info(f"✓ User emitter found: {attr_name}")
+                            logger.info(f"[U+2713] User emitter found: {attr_name}")
                             break
                 
                 if not user_emitter_found:
@@ -240,7 +240,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                 if missing_events:
                     delegation_failures.append(f"Missing required events: {missing_events}")
                 
-                logger.info(f"✓ Agent execution successful, events: {event_types}")
+                logger.info(f"[U+2713] Agent execution successful, events: {event_types}")
                 
             except Exception as e:
                 delegation_failures.append(f"Agent execution through factory failed: {e}")
@@ -299,7 +299,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
             # Method 1: Direct ExecutionEngine creation (legacy pattern)
             try:
                 direct_execution_engine = ExecutionEngine()
-                logger.info("✓ Direct ExecutionEngine creation succeeded")
+                logger.info("[U+2713] Direct ExecutionEngine creation succeeded")
                 direct_creation_success = True
             except Exception as e:
                 logger.error(f"Direct ExecutionEngine creation failed: {e}")
@@ -312,7 +312,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                 execution_factory = ExecutionEngineFactory()
                 execution_factory.configure()
                 factory_execution_engine = execution_factory.create_execution_engine(user_context)
-                logger.info("✓ Factory ExecutionEngine creation succeeded")
+                logger.info("[U+2713] Factory ExecutionEngine creation succeeded")
                 factory_creation_success = True
             except Exception as e:
                 logger.error(f"Factory ExecutionEngine creation failed: {e}")
@@ -511,11 +511,11 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                 try:
                     factory.configure()
                     configuration_results[factory_name] = True
-                    logger.info(f"✓ {factory_name} configuration succeeded")
+                    logger.info(f"[U+2713] {factory_name} configuration succeeded")
                 except Exception as e:
                     configuration_results[factory_name] = False
                     cascade_failures.append(f"{factory_name} configuration failed: {e}")
-                    logger.error(f"✗ {factory_name} configuration failed: {e}")
+                    logger.error(f"[U+2717] {factory_name} configuration failed: {e}")
             
             successful_configs = sum(configuration_results.values())
             total_configs = len(configuration_results)
@@ -540,7 +540,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                 if configuration_results["execution_factory1"]:
                     execution_engine = execution_factory1.create_execution_engine(user_context)
                     assert execution_engine is not None, "ExecutionEngine creation returned None"
-                    logger.info("✓ ExecutionEngine created from factory")
+                    logger.info("[U+2713] ExecutionEngine created from factory")
                 
                 # Create WebSocket emitter from websocket factory
                 if configuration_results["websocket_factory"]:
@@ -549,7 +549,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                         websocket_client_id=str(user_context.websocket_client_id)
                     )
                     assert user_emitter is not None, "User emitter creation returned None"
-                    logger.info("✓ User emitter created from factory")
+                    logger.info("[U+2713] User emitter created from factory")
                 
                 # CRITICAL TEST: Verify cross-factory integration
                 # ExecutionEngine should be able to use WebSocket emitter from different factory
@@ -561,13 +561,13 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                         # Try to inject WebSocket emitter into ExecutionEngine
                         if hasattr(execution_engine, 'set_websocket_emitter'):
                             execution_engine.set_websocket_emitter(user_emitter)
-                            logger.info("✓ Cross-factory WebSocket integration succeeded")
+                            logger.info("[U+2713] Cross-factory WebSocket integration succeeded")
                         elif hasattr(execution_engine, '_websocket_bridge'):
                             # Try to set emitter on WebSocket bridge
                             websocket_bridge = execution_engine._websocket_bridge
                             if websocket_bridge and hasattr(websocket_bridge, 'set_user_emitter'):
                                 websocket_bridge.set_user_emitter(user_emitter)
-                                logger.info("✓ Cross-factory bridge integration succeeded")
+                                logger.info("[U+2713] Cross-factory bridge integration succeeded")
                             else:
                                 cascade_failures.append("ExecutionEngine WebSocket bridge not compatible with external emitter")
                         else:
@@ -601,7 +601,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                     if missing_attrs:
                         cascade_failures.append(f"Factory instances creating engines with different attributes: {missing_attrs}")
                     
-                    logger.info("✓ Factory instance isolation verified")
+                    logger.info("[U+2713] Factory instance isolation verified")
                 
             except Exception as e:
                 cascade_failures.append(f"Factory instance isolation testing failed: {e}")
@@ -628,7 +628,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
                             except Exception as e:
                                 cascade_failures.append(f"{factory_name} operation {i} failed: {e}")
                 
-                logger.info("✓ Factory configuration persistence verified")
+                logger.info("[U+2713] Factory configuration persistence verified")
                 
             except Exception as e:
                 cascade_failures.append(f"Configuration persistence testing failed: {e}")

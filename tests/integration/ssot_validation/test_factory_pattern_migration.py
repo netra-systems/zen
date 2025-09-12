@@ -6,7 +6,7 @@ UserExecutionEngine instances and maintains SSOT compliance during the
 consolidation from 7 duplicate engines to UserExecutionEngine.
 
 Business Value: Ensures factory-created engines maintain Golden Path reliability
-(users login → get AI responses) while eliminating execution engine duplication.
+(users login  ->  get AI responses) while eliminating execution engine duplication.
 
 CRITICAL: This test validates factory pattern SSOT compliance and consistency.
 """
@@ -433,7 +433,7 @@ class TestFactoryPatternMigration(SSotAsyncTestCase):
             pytest.fail(f"Factory SSOT compliance test failed: {e}")
     
     async def test_factory_golden_path_protection(self):
-        """GOLDEN PATH: Verify factory-created engines protect user login → AI response flow."""
+        """GOLDEN PATH: Verify factory-created engines protect user login  ->  AI response flow."""
         self.record_metric("test_name", "factory_golden_path_protection")
         
         try:
@@ -489,10 +489,10 @@ class TestFactoryPatternMigration(SSotAsyncTestCase):
             await engine.cleanup()
             
             if not golden_path_functional:
-                pytest.fail("GOLDEN PATH BROKEN: Factory-created engines cannot support user login → AI response workflow")
+                pytest.fail("GOLDEN PATH BROKEN: Factory-created engines cannot support user login  ->  AI response workflow")
             
             self.record_metric("golden_path_factory_protected", True)
-            print("✅ Golden Path Protected: Factory creates functional engines for user AI workflows")
+            print(" PASS:  Golden Path Protected: Factory creates functional engines for user AI workflows")
             
         except Exception as e:
             pytest.fail(f"GOLDEN PATH FAILURE: Factory pattern broke user workflow: {e}")
@@ -531,10 +531,10 @@ class TestFactoryPatternMigration(SSotAsyncTestCase):
             print(f"  {metric}: {value}")
         
         if not self.factory_violations and not self.instance_consistency_issues:
-            print("✅ Factory Pattern SSOT Compliant: All tests passed")
+            print(" PASS:  Factory Pattern SSOT Compliant: All tests passed")
         else:
             total_issues = len(self.factory_violations) + len(self.instance_consistency_issues)
-            print(f"⚠️  Factory Pattern Issues: {total_issues} violations found")
+            print(f" WARNING: [U+FE0F]  Factory Pattern Issues: {total_issues} violations found")
             print("NOTE: Issues expected during SSOT migration, should be resolved after consolidation")
         
         print("=" * 55)

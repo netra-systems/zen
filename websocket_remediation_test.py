@@ -84,7 +84,7 @@ class WebSocketRemediationValidator:
     
     async def validate_websocket_connection_attempt(self) -> bool:
         """Attempt WebSocket connection to validate service endpoint."""
-        print("🔍 Step 3: Attempting WebSocket connection...")
+        print(" SEARCH:  Step 3: Attempting WebSocket connection...")
         
         try:
             # Try to connect to WebSocket endpoint
@@ -93,7 +93,7 @@ class WebSocketRemediationValidator:
                 timeout=5,
                 extra_headers={"Authorization": "Bearer test-token"}
             ) as websocket:
-                print("  ✓ WebSocket connection successful!")
+                print("  [U+2713] WebSocket connection successful!")
                 
                 # Send test message
                 test_message = {
@@ -105,22 +105,22 @@ class WebSocketRemediationValidator:
                 # Try to receive response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=2)
-                    print(f"  ✓ Received WebSocket response: {response}")
+                    print(f"  [U+2713] Received WebSocket response: {response}")
                     self.websocket_events_received.append(json.loads(response))
                 except asyncio.TimeoutError:
-                    print("  ⚠ No immediate response (expected for test message)")
+                    print("   WARNING:  No immediate response (expected for test message)")
                 
                 self.test_results['websocket_connection'] = 'PASS'
                 return True
                 
         except Exception as e:
-            print(f"  📋 EXPECTED: WebSocket connection failed - {e}")
+            print(f"  [U+1F4CB] EXPECTED: WebSocket connection failed - {e}")
             self.test_results['websocket_connection'] = f'EXPECTED_FAIL: {e}'
             return False
     
     async def validate_auth_integration(self) -> bool:
         """Validate authentication integration with WebSocket."""
-        print("🔍 Step 4: Validating auth integration...")
+        print(" SEARCH:  Step 4: Validating auth integration...")
         
         try:
             # Create a test JWT token
@@ -131,7 +131,7 @@ class WebSocketRemediationValidator:
                 "exp": datetime.utcnow() + timedelta(minutes=30)
             }
             token = jwt.encode(payload, secret, algorithm="HS256")
-            print(f"  ✓ Created test auth token")
+            print(f"  [U+2713] Created test auth token")
             
             # Test WebSocket connection with auth
             headers = {"Authorization": f"Bearer {token}"}
@@ -143,22 +143,22 @@ class WebSocketRemediationValidator:
                     timeout=3,
                     extra_headers=headers
                 ) as websocket:
-                    print("  ✓ Authenticated WebSocket connection successful!")
+                    print("  [U+2713] Authenticated WebSocket connection successful!")
                     self.test_results['auth_integration'] = 'PASS'
                     return True
             except Exception as e:
-                print(f"  📋 EXPECTED: Auth integration test failed - {e}")
+                print(f"  [U+1F4CB] EXPECTED: Auth integration test failed - {e}")
                 self.test_results['auth_integration'] = f'EXPECTED_FAIL: {e}'
                 return False
                 
         except Exception as e:
-            print(f"  ✗ Auth integration validation failed: {e}")
+            print(f"  [U+2717] Auth integration validation failed: {e}")
             self.test_results['auth_integration'] = f'FAIL: {e}'
             return False
     
     async def validate_error_event_delivery(self) -> bool:
         """Validate error event delivery mechanism."""
-        print("🔍 Step 5: Validating error event delivery mechanism...")
+        print(" SEARCH:  Step 5: Validating error event delivery mechanism...")
         
         # Since we can't connect to actual WebSocket, validate the code patterns
         try:
@@ -170,29 +170,29 @@ class WebSocketRemediationValidator:
                     if "websocket" in file.lower() and file.endswith(".py"):
                         websocket_files.append(os.path.join(root, file))
             
-            print(f"  ✓ Found {len(websocket_files)} WebSocket-related files")
+            print(f"  [U+2713] Found {len(websocket_files)} WebSocket-related files")
             for file in websocket_files[:3]:  # Show first few
                 print(f"    - {file}")
             
             # Check for error handling patterns
             error_patterns_found = len(websocket_files) > 0
             if error_patterns_found:
-                print("  ✓ WebSocket infrastructure exists in codebase")
+                print("  [U+2713] WebSocket infrastructure exists in codebase")
                 self.test_results['error_event_delivery'] = 'PASS: Infrastructure exists'
                 return True
             else:
-                print("  ✗ No WebSocket infrastructure found")
+                print("  [U+2717] No WebSocket infrastructure found")
                 self.test_results['error_event_delivery'] = 'FAIL: No infrastructure'
                 return False
                 
         except Exception as e:
-            print(f"  ✗ Error event delivery validation failed: {e}")
+            print(f"  [U+2717] Error event delivery validation failed: {e}")
             self.test_results['error_event_delivery'] = f'FAIL: {e}'
             return False
     
     def generate_remediation_report(self) -> str:
         """Generate comprehensive remediation report."""
-        print("\n🔧 WEBSOCKET REMEDIATION VALIDATION REPORT")
+        print("\n[U+1F527] WEBSOCKET REMEDIATION VALIDATION REPORT")
         print("=" * 60)
         
         passed_tests = sum(1 for result in self.test_results.values() if result == 'PASS' or result.startswith('PASS:'))
@@ -204,7 +204,7 @@ class WebSocketRemediationValidator:
         
         print("Detailed Results:")
         for test_name, result in self.test_results.items():
-            status_icon = "✓" if result.startswith('PASS') else ("📋" if "EXPECTED" in result else "✗")
+            status_icon = "[U+2713]" if result.startswith('PASS') else ("[U+1F4CB]" if "EXPECTED" in result else "[U+2717]")
             print(f"  {status_icon} {test_name}: {result}")
         
         print()
@@ -213,14 +213,14 @@ class WebSocketRemediationValidator:
             print(f"  - {event}")
         
         print()
-        print("🎯 REMEDIATION PLAN VALIDATION:")
-        print("1. ✓ Infrastructure services (postgres, redis, auth) are running")
-        print("2. 📋 Backend service needs to be started (expected)")
-        print("3. 📋 WebSocket endpoint unavailable without backend (expected)")  
-        print("4. ✓ WebSocket infrastructure code exists in codebase")
-        print("5. ✓ Auth integration patterns are testable")
+        print(" TARGET:  REMEDIATION PLAN VALIDATION:")
+        print("1. [U+2713] Infrastructure services (postgres, redis, auth) are running")
+        print("2. [U+1F4CB] Backend service needs to be started (expected)")
+        print("3. [U+1F4CB] WebSocket endpoint unavailable without backend (expected)")  
+        print("4. [U+2713] WebSocket infrastructure code exists in codebase")
+        print("5. [U+2713] Auth integration patterns are testable")
         print()
-        print("🔄 NEXT STEPS:")
+        print(" CYCLE:  NEXT STEPS:")
         print("1. Fix Alpine lz4 dependency issue in backend Docker image")
         print("2. Start backend service on port 8000")
         print("3. Validate WebSocket service responds on port 8000/ws")
@@ -232,7 +232,7 @@ class WebSocketRemediationValidator:
 
 async def main():
     """Run WebSocket service remediation validation."""
-    print("🚀 Starting WebSocket Service Remediation Validation")
+    print("[U+1F680] Starting WebSocket Service Remediation Validation")
     print("=" * 60)
     
     validator = WebSocketRemediationValidator()
@@ -246,7 +246,7 @@ async def main():
     
     # Generate report
     result = validator.generate_remediation_report()
-    print(f"\n🎉 {result}")
+    print(f"\n CELEBRATION:  {result}")
 
 
 if __name__ == "__main__":

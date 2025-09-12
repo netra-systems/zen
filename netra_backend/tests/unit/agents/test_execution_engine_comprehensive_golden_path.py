@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Comprehensive Unit Tests for ExecutionEngine Golden Path SSOT Class
 
@@ -8,7 +46,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Protects $500K+ ARR from execution failures, ensures <2s response times
 
 Critical Golden Path Scenarios Tested:
-1. Agent pipeline execution: ExecutionEngine → Agent execution → Results
+1. Agent pipeline execution: ExecutionEngine  ->  Agent execution  ->  Results
 2. Multi-user isolation: User execution contexts completely isolated
 3. WebSocket event delivery: All 5 critical events during agent execution
 4. Concurrency control: Semaphore-based execution limiting for 5+ users
@@ -176,7 +214,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         Test the golden path agent pipeline execution.
         
         BVJ: Validates core agent execution pipeline (foundation of AI chat)
-        Critical Path: ExecutionEngine → Agent execution → Success result
+        Critical Path: ExecutionEngine  ->  Agent execution  ->  Success result
         """
         # Arrange: Create ExecutionEngine with real business logic
         execution_engine = ExecutionEngine(
@@ -220,7 +258,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         Test that agent execution is properly isolated between different users.
         
         BVJ: Enterprise security requirement - prevents execution data mixing
-        Critical Path: User1 execution ∥ User2 execution (no cross-contamination)
+        Critical Path: User1 execution [U+2225] User2 execution (no cross-contamination)
         """
         # Arrange: Create two execution engines for different users
         engine1 = ExecutionEngine(
@@ -323,7 +361,7 @@ class TestExecutionEngineComprehensiveGoldenPath(SSotAsyncTestCase):
         assert completed_event['args'][0] == "exec_run_001"
         assert completed_event['args'][1] == "test_agent"
         
-        # Verify event sequence (started → thinking → completed)
+        # Verify event sequence (started  ->  thinking  ->  completed)
         event_timestamps = [(e['event_type'], e['timestamp']) for e in self.captured_websocket_events]
         event_timestamps.sort(key=lambda x: x[1])  # Sort by timestamp
         

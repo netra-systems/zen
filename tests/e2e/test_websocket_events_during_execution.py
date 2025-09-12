@@ -1,7 +1,7 @@
 """E2E tests for WebSocket events during execution.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Real-Time Agent Execution Feedback & Chat Business Value
 - Value Impact: Validates $500K+ ARR WebSocket chat functionality works end-to-end
 - Strategic Impact: Ensures critical real-time user feedback during agent execution

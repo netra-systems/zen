@@ -114,7 +114,7 @@ class AgentExecutionPrerequisites:
         self._cache_ttl_seconds = 30.0  # Cache validation results for 30 seconds
         
         logger.info(
-            f"🔍 PREREQUISITES_INIT: AgentExecutionPrerequisites initialized. "
+            f" SEARCH:  PREREQUISITES_INIT: AgentExecutionPrerequisites initialized. "
             f"Validation_level: {validation_level.value}, "
             f"Cache_TTL: {self._cache_ttl_seconds}s. "
             f"Ready for comprehensive prerequisite validation."
@@ -148,11 +148,11 @@ class AgentExecutionPrerequisites:
         cache_key = self._get_cache_key(execution_context, user_context)
         cached_result = self._get_cached_result(cache_key)
         if cached_result:
-            logger.debug(f"🔍 CACHE_HIT: Prerequisites validation cache hit for {cache_key}")
+            logger.debug(f" SEARCH:  CACHE_HIT: Prerequisites validation cache hit for {cache_key}")
             return cached_result
         
         logger.info(
-            f"🔍 PREREQUISITES_START: Starting comprehensive validation. "
+            f" SEARCH:  PREREQUISITES_START: Starting comprehensive validation. "
             f"Agent: {execution_context.agent_name}, "
             f"Run_ID: {execution_context.run_id}, "
             f"User_ID: {user_context.user_id}, "
@@ -193,7 +193,7 @@ class AgentExecutionPrerequisites:
             self._cache_result(cache_key, result, time.time())
         
         logger.info(
-            f"🔍 PREREQUISITES_COMPLETE: Validation completed. "
+            f" SEARCH:  PREREQUISITES_COMPLETE: Validation completed. "
             f"Status: {'PASSED' if result.is_valid else 'FAILED'}, "
             f"Failed_count: {len(result.failed_prerequisites)}, "
             f"Time: {validation_time_ms:.1f}ms"
@@ -242,7 +242,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 USER_CONTEXT_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  USER_CONTEXT_ERROR: {str(e)}")
             result.failed_prerequisites.append("user_context_validation_error")
             result.category_results[category] = False
     
@@ -313,7 +313,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 RESOURCE_LIMITS_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  RESOURCE_LIMITS_ERROR: {str(e)}")
             result.failed_prerequisites.append("resource_limits_validation_error")
             result.category_results[category] = False
     
@@ -373,7 +373,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 WEBSOCKET_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  WEBSOCKET_ERROR: {str(e)}")
             result.failed_prerequisites.append("websocket_validation_error")
             result.category_results[category] = False
     
@@ -438,7 +438,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 AGENT_REGISTRY_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  AGENT_REGISTRY_ERROR: {str(e)}")
             result.failed_prerequisites.append("agent_registry_validation_error")
             result.category_results[category] = False
     
@@ -492,7 +492,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 DATABASE_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  DATABASE_ERROR: {str(e)}")
             result.failed_prerequisites.append("database_validation_error")
             result.category_results[category] = False
     
@@ -551,7 +551,7 @@ class AgentExecutionPrerequisites:
             }
             
         except Exception as e:
-            logger.error(f"🔍 EXTERNAL_SERVICES_ERROR: {str(e)}")
+            logger.error(f" SEARCH:  EXTERNAL_SERVICES_ERROR: {str(e)}")
             result.failed_prerequisites.append("external_services_validation_error")
             result.category_results[category] = False
     

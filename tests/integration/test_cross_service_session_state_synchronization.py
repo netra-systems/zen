@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: $15K MRR - Session reliability drives user retention
 
 This test validates session state synchronization across all services:
-Auth Service → Main Backend → WebSocket Manager → Redis State
+Auth Service  ->  Main Backend  ->  WebSocket Manager  ->  Redis State
 
 CRITICAL: Tests real cross-service communication and state persistence.
 """
@@ -22,8 +22,7 @@ from typing import Any, Dict, List, Optional, Set
 from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
-import redis
-
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 from test_framework.base_integration_test import BaseIntegrationTest
 # Removed mock import - using real service testing per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services

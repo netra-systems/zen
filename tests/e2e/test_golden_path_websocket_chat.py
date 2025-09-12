@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path WebSocket Chat Tests - CRITICAL Business Value Validation
 
@@ -12,7 +50,7 @@ These tests validate the complete Golden Path user flow as defined in
 GOLDEN_PATH_USER_FLOW_COMPLETE.md - the core business value delivery mechanism.
 
 Golden Path Components Tested:
-1. User sends message → receives agent response (core chat functionality)
+1. User sends message  ->  receives agent response (core chat functionality)
 2. Agent execution with WebSocket events (real-time progress)
 3. Tool execution WebSocket notifications (transparency) 
 4. Complete chat session persistence (session management)
@@ -38,9 +76,19 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, AuthenticatedUser
 from tests.e2e.staging_config import StagingTestConfig
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathWebSocketChat(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     CRITICAL Golden Path Tests for WebSocket-Based Chat Functionality
     
@@ -71,7 +119,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
     async def test_user_sends_message_receives_agent_response(self):
         """
-        CRITICAL: Test core chat functionality - user message → agent response.
+        CRITICAL: Test core chat functionality - user message  ->  agent response.
         
         This is the fundamental Golden Path business value: users send messages
         and receive substantive AI-powered responses through WebSocket connections.
@@ -84,9 +132,9 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
         websocket_headers = self.e2e_helper.get_websocket_headers(golden_path_user.jwt_token)
         
-        print(f"💬 CRITICAL TEST: Golden Path chat functionality")
-        print(f"👤 User: {golden_path_user.email}")
-        print(f"🌐 WebSocket URL: {self.websocket_url}")
+        print(f"[U+1F4AC] CRITICAL TEST: Golden Path chat functionality")
+        print(f"[U+1F464] User: {golden_path_user.email}")
+        print(f"[U+1F310] WebSocket URL: {self.websocket_url}")
         
         # Act & Assert - Complete chat interaction
         chat_successful = False
@@ -95,7 +143,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
         try:
             async with self._connect_websocket(websocket_headers) as websocket:
-                print(f"✅ WebSocket connection established for Golden Path chat")
+                print(f" PASS:  WebSocket connection established for Golden Path chat")
                 
                 # Send Golden Path chat message
                 golden_path_message = {
@@ -111,7 +159,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 
                 await websocket.send(json.dumps(golden_path_message))
                 chat_successful = True
-                print(f"📤 Golden Path message sent successfully")
+                print(f"[U+1F4E4] Golden Path message sent successfully")
                 
                 # Wait for agent response indicating business value delivery
                 response_received = False
@@ -123,7 +171,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         response_data = json.loads(message)
                         response_type = response_data.get("type", "unknown")
                         
-                        print(f"📥 Received: {response_type}")
+                        print(f"[U+1F4E5] Received: {response_type}")
                         
                         # Track different types of responses that indicate Golden Path functionality
                         if response_type in [
@@ -139,21 +187,21 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                                 "response", "result", "analysis", "recommendation", "solution"
                             ]):
                                 business_value_delivered = True
-                                print(f"✅ Business value indicator found in response")
+                                print(f" PASS:  Business value indicator found in response")
                         
                         # Stop after receiving meaningful response
                         if response_received and agent_events_count >= 1:
                             break
                             
                     except json.JSONDecodeError:
-                        print(f"⚠️ Non-JSON response received: {message[:100]}...")
+                        print(f" WARNING: [U+FE0F] Non-JSON response received: {message[:100]}...")
                         continue
                 
                 agent_response_received = response_received
-                print(f"📊 Agent events received: {agent_events_count}")
+                print(f" CHART:  Agent events received: {agent_events_count}")
                 
         except Exception as e:
-            print(f"❌ Golden Path chat test failed: {e}")
+            print(f" FAIL:  Golden Path chat test failed: {e}")
             # Check if failure is due to service availability
             if self._is_service_unavailable_error(e):
                 import pytest
@@ -175,7 +223,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             f"Revenue impact: $120K+ MRR at risk."
         )
         
-        print(f"🌟 GOLDEN PATH CHAT SUCCESS: Core business value delivery validated")
+        print(f"[U+1F31F] GOLDEN PATH CHAT SUCCESS: Core business value delivery validated")
     
     async def test_agent_execution_with_websocket_events(self):
         """
@@ -192,7 +240,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
         websocket_headers = self.e2e_helper.get_websocket_headers(agent_user.jwt_token)
         
-        print(f"🤖 CRITICAL TEST: Agent execution with WebSocket events")
+        print(f"[U+1F916] CRITICAL TEST: Agent execution with WebSocket events")
         
         # Expected WebSocket event sequence for agent execution
         expected_agent_events = [
@@ -219,7 +267,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(agent_request))
-                print(f"📤 Agent execution request sent")
+                print(f"[U+1F4E4] Agent execution request sent")
                 
                 # Monitor for agent execution events
                 async for message in self._listen_for_responses(websocket, self.golden_path_timeout):
@@ -229,25 +277,25 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         
                         if event_type in expected_agent_events:
                             received_events.append(event_type)
-                            print(f"📥 Agent event: {event_type}")
+                            print(f"[U+1F4E5] Agent event: {event_type}")
                         
                         # Check for agent completion
                         if event_type in ["agent_completed", "execution_complete", "agent_response"]:
                             agent_execution_successful = True
-                            print(f"✅ Agent execution completed")
+                            print(f" PASS:  Agent execution completed")
                             break
                             
                         # Stop if we've seen reasonable agent activity
                         if len(received_events) >= 2:
                             agent_execution_successful = True
-                            print(f"✅ Agent execution events validated")
+                            print(f" PASS:  Agent execution events validated")
                             break
                             
                     except json.JSONDecodeError:
                         continue
                         
         except Exception as e:
-            print(f"❌ Agent execution test failed: {e}")
+            print(f" FAIL:  Agent execution test failed: {e}")
             if self._is_service_unavailable_error(e):
                 import pytest
                 pytest.skip(f"Agent execution service unavailable: {e}")
@@ -269,7 +317,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             f"Events expected: {expected_agent_events}, received: {received_events}"
         )
         
-        print(f"🤖 AGENT EXECUTION SUCCESS: Real-time updates validated")
+        print(f"[U+1F916] AGENT EXECUTION SUCCESS: Real-time updates validated")
     
     async def test_tool_execution_websocket_notifications(self):
         """
@@ -286,7 +334,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
         websocket_headers = self.e2e_helper.get_websocket_headers(tool_user.jwt_token)
         
-        print(f"🔧 CRITICAL TEST: Tool execution transparency")
+        print(f"[U+1F527] CRITICAL TEST: Tool execution transparency")
         
         tool_events_received = []
         tool_transparency_successful = False
@@ -304,7 +352,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(tool_request))
-                print(f"📤 Tool execution request sent")
+                print(f"[U+1F4E4] Tool execution request sent")
                 
                 # Monitor for tool execution transparency events
                 tool_related_events = [
@@ -319,12 +367,12 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         
                         if any(tool_event in event_type for tool_event in tool_related_events):
                             tool_events_received.append(event_type)
-                            print(f"🔧 Tool event: {event_type}")
+                            print(f"[U+1F527] Tool event: {event_type}")
                             
                             # Check for tool transparency information
                             if any(key in event_data for key in ["tool_name", "tool_result", "tool_status"]):
                                 tool_transparency_successful = True
-                                print(f"✅ Tool transparency information provided")
+                                print(f" PASS:  Tool transparency information provided")
                         
                         # Consider any meaningful response as tool activity
                         if event_type in ["agent_response", "response", "completed"]:
@@ -333,14 +381,14 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                                 # No explicit tool events but got response - still success
                                 tool_transparency_successful = True
                                 tool_events_received.append("implicit_tool_usage")
-                                print(f"✅ Tool execution pathway successful (implicit)")
+                                print(f" PASS:  Tool execution pathway successful (implicit)")
                             break
                             
                     except json.JSONDecodeError:
                         continue
                         
         except Exception as e:
-            print(f"❌ Tool execution transparency test failed: {e}")
+            print(f" FAIL:  Tool execution transparency test failed: {e}")
             if self._is_service_unavailable_error(e):
                 import pytest
                 pytest.skip(f"Tool execution service unavailable: {e}")
@@ -354,7 +402,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             f"Tool events received: {tool_events_received}"
         )
         
-        print(f"🔧 TOOL TRANSPARENCY SUCCESS: Users can see AI tool usage")
+        print(f"[U+1F527] TOOL TRANSPARENCY SUCCESS: Users can see AI tool usage")
     
     async def test_complete_chat_session_persistence(self):
         """
@@ -372,8 +420,8 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         websocket_headers = self.e2e_helper.get_websocket_headers(session_user.jwt_token)
         session_id = f"golden_path_session_{int(time.time())}"
         
-        print(f"💾 CRITICAL TEST: Chat session persistence")
-        print(f"🆔 Session ID: {session_id}")
+        print(f"[U+1F4BE] CRITICAL TEST: Chat session persistence")
+        print(f"[U+1F194] Session ID: {session_id}")
         
         session_interactions = []
         session_persistence_successful = False
@@ -392,7 +440,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(initial_message))
-                print(f"📤 Session interaction 1 sent")
+                print(f"[U+1F4E4] Session interaction 1 sent")
                 
                 # Wait for initial response
                 initial_response_received = False
@@ -402,7 +450,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         if response_data.get("type") in ["response", "agent_response", "session_started"]:
                             session_interactions.append("initial_response")
                             initial_response_received = True
-                            print(f"📥 Initial session response received")
+                            print(f"[U+1F4E5] Initial session response received")
                             break
                     except json.JSONDecodeError:
                         continue
@@ -420,7 +468,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(followup_message))
-                print(f"📤 Session interaction 2 sent")
+                print(f"[U+1F4E4] Session interaction 2 sent")
                 
                 # Wait for follow-up response
                 async for message in self._listen_for_responses(websocket, 10.0):
@@ -429,13 +477,13 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         if response_data.get("type") in ["response", "agent_response", "session_continued"]:
                             session_interactions.append("followup_response")
                             session_persistence_successful = True
-                            print(f"📥 Session continuity response received")
+                            print(f"[U+1F4E5] Session continuity response received")
                             break
                     except json.JSONDecodeError:
                         continue
                         
         except Exception as e:
-            print(f"❌ Session persistence test failed: {e}")
+            print(f" FAIL:  Session persistence test failed: {e}")
             if self._is_service_unavailable_error(e):
                 import pytest
                 pytest.skip(f"Session persistence service unavailable: {e}")
@@ -456,7 +504,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             f"Interactions: {session_interactions}"
         )
         
-        print(f"💾 SESSION PERSISTENCE SUCCESS: Chat continuity validated")
+        print(f"[U+1F4BE] SESSION PERSISTENCE SUCCESS: Chat continuity validated")
     
     async def test_websocket_agent_thinking_events(self):
         """
@@ -473,7 +521,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
         
         websocket_headers = self.e2e_helper.get_websocket_headers(thinking_user.jwt_token)
         
-        print(f"🧠 CRITICAL TEST: Agent thinking events for user engagement")
+        print(f"[U+1F9E0] CRITICAL TEST: Agent thinking events for user engagement")
         
         thinking_events_received = []
         user_engagement_successful = False
@@ -492,7 +540,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(complex_request))
-                print(f"📤 Complex analysis request sent")
+                print(f"[U+1F4E4] Complex analysis request sent")
                 
                 # Monitor for thinking and engagement events
                 engagement_events = [
@@ -509,7 +557,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                         if any(thinking_word in event_type for thinking_word in engagement_events):
                             thinking_events_received.append(event_type)
                             user_engagement_successful = True
-                            print(f"🧠 Thinking event: {event_type}")
+                            print(f"[U+1F9E0] Thinking event: {event_type}")
                         
                         # Check event content for engagement indicators
                         if any(indicator in event_data for indicator in [
@@ -518,18 +566,18 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
                             if event_type not in thinking_events_received:
                                 thinking_events_received.append(f"engagement_{event_type}")
                                 user_engagement_successful = True
-                                print(f"💭 Engagement indicator found")
+                                print(f"[U+1F4AD] Engagement indicator found")
                         
                         # Stop after receiving meaningful engagement feedback
                         if user_engagement_successful and len(thinking_events_received) >= 1:
-                            print(f"✅ User engagement validated")
+                            print(f" PASS:  User engagement validated")
                             break
                             
                     except json.JSONDecodeError:
                         continue
                         
         except Exception as e:
-            print(f"❌ Agent thinking events test failed: {e}")
+            print(f" FAIL:  Agent thinking events test failed: {e}")
             if self._is_service_unavailable_error(e):
                 import pytest
                 pytest.skip(f"Thinking events service unavailable: {e}")
@@ -543,7 +591,7 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
             f"Engagement events received: {thinking_events_received}"
         )
         
-        print(f"🧠 THINKING EVENTS SUCCESS: User engagement during processing validated")
+        print(f"[U+1F9E0] THINKING EVENTS SUCCESS: User engagement during processing validated")
     
     # Helper methods for WebSocket testing
     
@@ -590,6 +638,15 @@ class TestGoldenPathWebSocketChat(SSotBaseTestCase):
 
 
 class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Resilience tests for Golden Path WebSocket chat functionality.
     
@@ -626,7 +683,7 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
         
         websocket_headers = self.e2e_helper.get_websocket_headers(recovery_user.jwt_token)
         
-        print(f"🔄 Testing Golden Path recovery after connection issues")
+        print(f" CYCLE:  Testing Golden Path recovery after connection issues")
         
         recovery_attempts = []
         business_continuity_maintained = False
@@ -634,7 +691,7 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
         # Act - Test multiple connection attempts (simulating recovery)
         for attempt in range(2):
             try:
-                print(f"🔄 Recovery attempt {attempt + 1}")
+                print(f" CYCLE:  Recovery attempt {attempt + 1}")
                 
                 async with self._connect_websocket(websocket_headers) as websocket:
                     # Send recovery test message
@@ -654,7 +711,7 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
                     
                     recovery_attempts.append(f"attempt_{attempt + 1}_success")
                     business_continuity_maintained = True
-                    print(f"✅ Recovery attempt {attempt + 1} successful")
+                    print(f" PASS:  Recovery attempt {attempt + 1} successful")
                     
                     # Brief pause between attempts
                     if attempt < 1:
@@ -662,7 +719,7 @@ class TestGoldenPathWebSocketChatResilience(SSotBaseTestCase):
                     
             except Exception as e:
                 recovery_attempts.append(f"attempt_{attempt + 1}_failed: {str(e)}")
-                print(f"❌ Recovery attempt {attempt + 1} failed: {e}")
+                print(f" FAIL:  Recovery attempt {attempt + 1} failed: {e}")
                 
                 # Check if failure is due to service unavailability
                 if self._is_service_unavailable_error(e):

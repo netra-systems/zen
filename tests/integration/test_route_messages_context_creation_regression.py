@@ -1,7 +1,7 @@
 """Integration Test for Route Messages Context Creation Regression Prevention.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Critical for multi-user chat system integrity
+- Segment: ALL (Free  ->  Enterprise) - Critical for multi-user chat system integrity
 - Business Goal: Prevent conversation continuity breakage in HTTP route message handling
 - Value Impact: Ensures HTTP message routes maintain session continuity across different route types
 - Strategic/Revenue Impact: CRITICAL - Message routing context failures destroy chat experience
@@ -184,7 +184,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         self._setup_route_test_scenarios()
         self._initialize_metrics_tracking()
         
-        logger.info("✅ RouteMessageContextCreationRegressionTest setup complete")
+        logger.info(" PASS:  RouteMessageContextCreationRegressionTest setup complete")
         
     def fail(self, msg):
         """Override fail method for compatibility."""
@@ -270,7 +270,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             ),
         ])
         
-        logger.info(f"✅ Configured {len(self.test_scenarios)} route message test scenarios")
+        logger.info(f" PASS:  Configured {len(self.test_scenarios)} route message test scenarios")
     
     def _initialize_metrics_tracking(self):
         """Initialize metrics tracking for each route."""
@@ -285,7 +285,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         This test validates that different HTTP route types properly preserve
         conversation context when processing messages.
         """
-        logger.info("🧪 STARTING: Comprehensive route message context preservation test")
+        logger.info("[U+1F9EA] STARTING: Comprehensive route message context preservation test")
         
         # Create authenticated client
         token = self.auth_helper.create_test_jwt_token(
@@ -300,7 +300,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             thread_id = self.id_generator.generate_thread_id()
             run_id = self.id_generator.generate_run_id()
             
-            logger.info(f"📋 Testing with thread_id: {thread_id}, run_id: {run_id}")
+            logger.info(f"[U+1F4CB] Testing with thread_id: {thread_id}, run_id: {run_id}")
             
             # Test each route scenario
             for i, scenario in enumerate(self.test_scenarios):
@@ -315,7 +315,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         # Validate overall metrics
         await self._validate_route_context_metrics()
         
-        logger.info("✅ PASSED: Comprehensive route message context preservation test")
+        logger.info(" PASS:  PASSED: Comprehensive route message context preservation test")
     
     async def _test_route_scenario_context_preservation(
         self,
@@ -329,7 +329,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         route_key = f"{scenario.http_method}:{scenario.route_path}"
         metrics = self.route_metrics[route_key]
         
-        logger.info(f"🔍 Testing route scenario: {scenario.description}")
+        logger.info(f" SEARCH:  Testing route scenario: {scenario.description}")
         
         try:
             # Create request payload
@@ -353,7 +353,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             # Validate response
             if response.status_code not in [200, 201]:
                 logger.warning(
-                    f"⚠️ Route {route_key} returned {response.status_code}: {response.text[:200]}"
+                    f" WARNING: [U+FE0F] Route {route_key} returned {response.status_code}: {response.text[:200]}"
                 )
                 # Don't fail test for non-critical routes, but track the issue
                 metrics.context_consistency_violations += 1
@@ -373,10 +373,10 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
                 expected_run_id=run_id
             )
             
-            logger.info(f"✅ Route scenario validated: {scenario.description}")
+            logger.info(f" PASS:  Route scenario validated: {scenario.description}")
             
         except Exception as e:
-            logger.error(f"❌ Route scenario failed: {scenario.description} - {e}")
+            logger.error(f" FAIL:  Route scenario failed: {scenario.description} - {e}")
             metrics.context_consistency_violations += 1
             # Don't fail the entire test for individual route failures
     
@@ -408,7 +408,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             # CRITICAL: Routes should typically reuse existing sessions for ongoing conversations
             if scenario.expected_context_method == "get" and sessions_created > 0:
                 logger.warning(
-                    f"⚠️ Route {route_key} created {sessions_created} new sessions "
+                    f" WARNING: [U+FE0F] Route {route_key} created {sessions_created} new sessions "
                     f"when it should reuse existing context"
                 )
                 metrics.context_consistency_violations += 1
@@ -421,7 +421,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             )
             if response_thread_id and response_thread_id != expected_thread_id:
                 logger.warning(
-                    f"⚠️ Route {route_key} returned different thread_id: "
+                    f" WARNING: [U+FE0F] Route {route_key} returned different thread_id: "
                     f"expected {expected_thread_id}, got {response_thread_id}"
                 )
                 metrics.thread_id_mismatches += 1
@@ -435,7 +435,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             )
             if response_run_id and response_run_id != expected_run_id:
                 logger.warning(
-                    f"⚠️ Route {route_key} returned different run_id: "
+                    f" WARNING: [U+FE0F] Route {route_key} returned different run_id: "
                     f"expected {expected_run_id}, got {response_run_id}"
                 )
                 metrics.run_id_mismatches += 1
@@ -453,7 +453,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         Simulates a realistic conversation flow that spans different HTTP routes
         and validates that context is properly maintained throughout.
         """
-        logger.info("🧪 STARTING: Multi-route conversation flow continuity test")
+        logger.info("[U+1F9EA] STARTING: Multi-route conversation flow continuity test")
         
         # Create authenticated client
         token = self.auth_helper.create_test_jwt_token(
@@ -518,7 +518,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             # Execute conversation flow
             step_responses = []
             for step_config in conversation_steps:
-                logger.info(f"🔄 Executing conversation step: {step_config['step']}")
+                logger.info(f" CYCLE:  Executing conversation step: {step_config['step']}")
                 
                 # Monitor session state
                 initial_sessions = await self._get_session_count()
@@ -548,7 +548,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
                 # Validate step success
                 if response.status_code >= 400:
                     logger.warning(
-                        f"⚠️ Conversation step {step_config['step']} failed: "
+                        f" WARNING: [U+FE0F] Conversation step {step_config['step']} failed: "
                         f"{response.status_code} - {response.text[:200]}"
                     )
             
@@ -559,7 +559,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
                 step_responses=step_responses
             )
         
-        logger.info("✅ PASSED: Multi-route conversation flow continuity test")
+        logger.info(" PASS:  PASSED: Multi-route conversation flow continuity test")
     
     async def _validate_conversation_continuity(
         self,
@@ -574,7 +574,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         
         if total_sessions_created > 2:  # Allow some new sessions, but not excessive
             logger.warning(
-                f"⚠️ Conversation flow created {total_sessions_created} new sessions - "
+                f" WARNING: [U+FE0F] Conversation flow created {total_sessions_created} new sessions - "
                 f"this indicates poor context reuse"
             )
         
@@ -596,10 +596,10 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         failed_steps = [step for step in step_responses if step["status_code"] >= 400]
         if len(failed_steps) > len(step_responses) // 2:  # Allow some failures, but not majority
             logger.warning(
-                f"⚠️ {len(failed_steps)} out of {len(step_responses)} conversation steps failed"
+                f" WARNING: [U+FE0F] {len(failed_steps)} out of {len(step_responses)} conversation steps failed"
             )
         
-        logger.info(f"✅ Conversation continuity validated across {len(step_responses)} steps")
+        logger.info(f" PASS:  Conversation continuity validated across {len(step_responses)} steps")
     
     async def test_route_context_isolation_multi_user(self):
         """
@@ -608,7 +608,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         Validates that context is properly isolated when multiple users
         access message routes simultaneously.
         """
-        logger.info("🧪 STARTING: Route context isolation multi-user test")
+        logger.info("[U+1F9EA] STARTING: Route context isolation multi-user test")
         
         # Create multiple authenticated users
         users = []
@@ -682,7 +682,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         # Validate isolation
         await self._validate_multi_user_isolation(users, user_results)
         
-        logger.info("✅ PASSED: Route context isolation multi-user test")
+        logger.info(" PASS:  PASSED: Route context isolation multi-user test")
     
     async def _validate_multi_user_isolation(
         self,
@@ -696,7 +696,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         # Check that all users got their own results
         for user, result in zip(users, valid_results):
             if isinstance(result, Exception):
-                logger.warning(f"⚠️ User {user['user_id']} operations failed: {result}")
+                logger.warning(f" WARNING: [U+FE0F] User {user['user_id']} operations failed: {result}")
                 continue
             
             # Validate thread_id consistency
@@ -723,7 +723,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         if len(all_thread_ids) != len([r for r in valid_results if not isinstance(r, Exception)]):
             self.fail("CRITICAL: Thread ID cross-contamination detected in multi-user test")
         
-        logger.info(f"✅ Multi-user isolation validated for {len(valid_results)} users")
+        logger.info(f" PASS:  Multi-user isolation validated for {len(valid_results)} users")
     
     async def test_route_context_performance_monitoring(self):
         """
@@ -732,7 +732,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         This test measures the performance impact of context management
         across different route types to detect regression.
         """
-        logger.info("🧪 STARTING: Route context performance monitoring test")
+        logger.info("[U+1F9EA] STARTING: Route context performance monitoring test")
         
         # Create authenticated client
         token = self.auth_helper.create_test_jwt_token(
@@ -749,7 +749,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             for scenario in self.test_scenarios[:5]:  # Test subset for performance
                 route_key = f"{scenario.http_method}:{scenario.route_path}"
                 
-                logger.info(f"⏱️ Performance testing route: {route_key}")
+                logger.info(f"[U+23F1][U+FE0F] Performance testing route: {route_key}")
                 
                 # Warm-up requests
                 thread_id = self.id_generator.generate_thread_id()
@@ -794,14 +794,14 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
                     }
                     
                     logger.info(
-                        f"📊 Route {route_key} performance: "
+                        f" CHART:  Route {route_key} performance: "
                         f"avg={avg_time:.3f}s, max={max_time:.3f}s, min={min_time:.3f}s"
                     )
         
         # Validate performance
         await self._validate_route_performance(performance_results)
         
-        logger.info("✅ PASSED: Route context performance monitoring test")
+        logger.info(" PASS:  PASSED: Route context performance monitoring test")
     
     async def _validate_route_performance(self, performance_results: Dict[str, Any]):
         """Validate route performance meets acceptable thresholds."""
@@ -827,16 +827,16 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         
         if performance_violations:
             logger.warning(
-                f"⚠️ Performance violations detected:\n" + 
+                f" WARNING: [U+FE0F] Performance violations detected:\n" + 
                 "\n".join(f"  - {v}" for v in performance_violations)
             )
         
-        logger.info(f"📊 Performance validation complete for {len(performance_results)} routes")
+        logger.info(f" CHART:  Performance validation complete for {len(performance_results)} routes")
     
     async def _validate_route_context_metrics(self):
         """Validate overall route context creation metrics."""
         
-        logger.info("📊 ANALYZING: Route context creation metrics")
+        logger.info(" CHART:  ANALYZING: Route context creation metrics")
         
         total_violations = 0
         total_requests = 0
@@ -847,7 +847,7 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
             
             if metrics.total_requests > 0:
                 logger.info(
-                    f"📋 Route {route_key}: "
+                    f"[U+1F4CB] Route {route_key}: "
                     f"requests={metrics.total_requests}, "
                     f"context_reuse_ratio={metrics.context_reuse_ratio:.2f}, "
                     f"session_reuse_ratio={metrics.session_reuse_ratio:.2f}, "
@@ -861,12 +861,12 @@ class RouteMessageContextCreationRegressionTest(unittest.TestCase):
         violation_rate = total_violations / total_requests
         if violation_rate > 0.1:  # More than 10% violations
             logger.warning(
-                f"⚠️ High context violation rate: {violation_rate:.2f} "
+                f" WARNING: [U+FE0F] High context violation rate: {violation_rate:.2f} "
                 f"({total_violations}/{total_requests})"
             )
         
         logger.info(
-            f"✅ Route context metrics analysis complete: "
+            f" PASS:  Route context metrics analysis complete: "
             f"{total_requests} total requests, {total_violations} violations"
         )
     

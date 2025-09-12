@@ -129,14 +129,14 @@ class TestBasicAuthFlow(BaseE2ETest):
         """Test 1: Basic login creates valid JWT token using REAL authentication.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks - real JWT validation
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard error raising on failures
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks - real JWT validation
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard error raising on failures
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL JWT creation and validation")
+        logger.info("[U+1F680] Testing REAL JWT creation and validation")
         
         # Create authenticated user using SSOT patterns - NO MOCKS
         user_data = await self.auth_helper.create_authenticated_user(
@@ -166,8 +166,8 @@ class TestBasicAuthFlow(BaseE2ETest):
         execution_time = time.time() - start_time
         assert execution_time >= 0.1, f"Test executed too quickly ({execution_time:.3f}s) - likely using mocks"
         
-        logger.info(f"✅ REAL JWT creation test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   📊 User: {user_data.user_id}, Email: {user_data.email}")
+        logger.info(f" PASS:  REAL JWT creation test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"    CHART:  User: {user_data.user_id}, Email: {user_data.email}")
     
     @pytest.mark.e2e
     @pytest.mark.timeout(30)
@@ -175,14 +175,14 @@ class TestBasicAuthFlow(BaseE2ETest):
         """Test 2: JWT token contains all required claims using REAL authentication.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks - validates real JWT structure
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard error raising for missing claims
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks - validates real JWT structure
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard error raising for missing claims
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL JWT claims validation")
+        logger.info("[U+1F680] Testing REAL JWT claims validation")
         
         # Create authenticated user with specific permissions - REAL AUTH
         user_data = await self.auth_helper.create_authenticated_user(
@@ -224,8 +224,8 @@ class TestBasicAuthFlow(BaseE2ETest):
         execution_time = time.time() - start_time
         assert execution_time >= 0.1, f"Test executed too quickly ({execution_time:.3f}s) - likely using mocks"
         
-        logger.info(f"✅ REAL JWT claims validation PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   📊 Claims validated: {len(required_claims)}, Permissions: {len(payload['permissions'])}")
+        logger.info(f" PASS:  REAL JWT claims validation PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"    CHART:  Claims validated: {len(required_claims)}, Permissions: {len(payload['permissions'])}")
     
     @pytest.mark.e2e
     @pytest.mark.timeout(30)
@@ -233,14 +233,14 @@ class TestBasicAuthFlow(BaseE2ETest):
         """Test 3: Expired JWT token is rejected by REAL authentication service.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses REAL JWT expiration validation
-        ✅ NO mocks - tests actual auth service behavior
-        ✅ Execution time validation >= 0.1s
-        ✅ Hard error raising for security violations
+         PASS:  Uses REAL JWT expiration validation
+         PASS:  NO mocks - tests actual auth service behavior
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Hard error raising for security violations
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL expired token rejection")
+        logger.info("[U+1F680] Testing REAL expired token rejection")
         
         # Get REAL auth service configuration
         jwt_secret = AuthConfig.get_jwt_secret()
@@ -272,14 +272,14 @@ class TestBasicAuthFlow(BaseE2ETest):
             assert False, f"SECURITY VIOLATION: Expired token was accepted: {result}"
         except Exception as e:
             # Expected - expired token should be rejected
-            logger.info(f"✓ Expired token properly rejected by auth service: {type(e).__name__}")
+            logger.info(f"[U+2713] Expired token properly rejected by auth service: {type(e).__name__}")
         
         # Validate execution timing
         execution_time = time.time() - start_time
         assert execution_time >= 0.1, f"Test executed too quickly ({execution_time:.3f}s) - likely using mocks"
         
-        logger.info(f"✅ REAL expired token rejection test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   🔒 Security validation: Expired tokens properly rejected")
+        logger.info(f" PASS:  REAL expired token rejection test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"   [U+1F512] Security validation: Expired tokens properly rejected")
 
 
 if __name__ == "__main__":

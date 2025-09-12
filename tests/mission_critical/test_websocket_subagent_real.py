@@ -53,7 +53,7 @@ class RealWebSocketEventValidator:
         """Record WebSocket event."""
         timestamp = time.time() - self.start_time
         self.events.append(event)
-        logger.info(f"📡 Event: {event.get('type', 'unknown')} at {timestamp:.2f}s")
+        logger.info(f"[U+1F4E1] Event: {event.get('type', 'unknown')} at {timestamp:.2f}s")
         
     def validate_basic_flow(self) -> tuple[bool, List[str]]:
         """Validate basic WebSocket event flow."""
@@ -76,13 +76,13 @@ class RealWebSocketEventValidator:
         is_valid, errors = self.validate_basic_flow()
         event_types = [event.get("type") for event in self.events]
         
-        status = "✅ PASSED" if is_valid else "❌ FAILED"
+        status = " PASS:  PASSED" if is_valid else " FAIL:  FAILED"
         return f"""
 === WebSocket Event Validation ===
 Status: {status}
 Events: {len(self.events)}
 Types: {list(set(event_types))}
-Sequence: {' → '.join(event_types)}
+Sequence: {'  ->  '.join(event_types)}
 {"Errors: " + ", ".join(errors) if errors else "All validations passed"}
 """
 
@@ -169,7 +169,7 @@ class TestRealWebSocketSubAgent:
         assert "tool_completed" in event_types
         assert "agent_completed" in event_types
         
-        logger.info("✅ Real WebSocket sub-agent events test PASSED!")
+        logger.info(" PASS:  Real WebSocket sub-agent events test PASSED!")
 
     @pytest.mark.asyncio
     async def test_websocket_manager_connection_real(self):
@@ -216,7 +216,7 @@ class TestRealWebSocketSubAgent:
         assert events_received[0]["type"] == "test_message"
         assert events_received[0]["content"] == "Hello from real WebSocket manager"
         
-        logger.info("✅ WebSocket manager real connection test PASSED!")
+        logger.info(" PASS:  WebSocket manager real connection test PASSED!")
 
 
 if __name__ == "__main__":

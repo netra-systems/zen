@@ -31,51 +31,51 @@ logger = logging.getLogger(__name__)
 
 async def test_websocket_solution():
     """Test the complete WebSocket solution."""
-    logger.info("🚀 Starting WebSocket solution validation...")
+    logger.info("[U+1F680] Starting WebSocket solution validation...")
     
     try:
         # Start embedded WebSocket server
         async with embedded_websocket_server() as websocket_url:
-            logger.info(f"✅ Embedded WebSocket server started: {websocket_url}")
+            logger.info(f" PASS:  Embedded WebSocket server started: {websocket_url}")
             
             # Test 1: Basic connection
-            logger.info("🧪 Test 1: Basic WebSocket connection")
+            logger.info("[U+1F9EA] Test 1: Basic WebSocket connection")
             client = WebSocketTestClient(websocket_url)
             connected = await client.connect()
             
             if connected:
-                logger.info("✅ WebSocket connection established")
+                logger.info(" PASS:  WebSocket connection established")
                 
                 # Test ping/pong
                 success = await client.send_message({"type": "ping"})
                 if success:
                     response = await client.receive_message(timeout=3.0)
                     if response and response.get("type") == "pong":
-                        logger.info("✅ Ping/pong test passed")
+                        logger.info(" PASS:  Ping/pong test passed")
                     else:
-                        logger.error("❌ Ping/pong test failed")
+                        logger.error(" FAIL:  Ping/pong test failed")
                         return False
                 else:
-                    logger.error("❌ Failed to send ping message")
+                    logger.error(" FAIL:  Failed to send ping message")
                     return False
                 
                 await client.disconnect()
             else:
-                logger.error("❌ Failed to establish WebSocket connection")
+                logger.error(" FAIL:  Failed to establish WebSocket connection")
                 return False
             
             # Test 2: Critical events for chat business value
-            logger.info("🧪 Test 2: Critical WebSocket events validation")
+            logger.info("[U+1F9EA] Test 2: Critical WebSocket events validation")
             chat_events_valid = await validate_websocket_events_for_chat(websocket_url)
             
             if chat_events_valid:
-                logger.info("✅ All critical WebSocket events validated")
+                logger.info(" PASS:  All critical WebSocket events validated")
             else:
-                logger.error("❌ Critical WebSocket events validation failed")
+                logger.error(" FAIL:  Critical WebSocket events validation failed")
                 return False
             
             # Test 3: Chat message flow
-            logger.info("🧪 Test 3: Chat message flow")
+            logger.info("[U+1F9EA] Test 3: Chat message flow")
             client = WebSocketTestClient(websocket_url)
             connected = await client.connect()
             
@@ -89,23 +89,23 @@ async def test_websocket_solution():
                 all_received = all(received_events.get(event, False) for event in expected_events)
                 
                 if all_received:
-                    logger.info("✅ Chat message flow test passed")
+                    logger.info(" PASS:  Chat message flow test passed")
                     logger.info(f"   Received events: {list(received_events.keys())}")
                 else:
                     missing = [e for e in expected_events if not received_events.get(e, False)]
-                    logger.error(f"❌ Chat message flow test failed - missing: {missing}")
+                    logger.error(f" FAIL:  Chat message flow test failed - missing: {missing}")
                     return False
                 
                 await client.disconnect()
             else:
-                logger.error("❌ Failed to connect for chat message test")
+                logger.error(" FAIL:  Failed to connect for chat message test")
                 return False
             
-            logger.info("🎉 ALL WEBSOCKET TESTS PASSED!")
+            logger.info(" CELEBRATION:  ALL WEBSOCKET TESTS PASSED!")
             return True
     
     except Exception as e:
-        logger.error(f"❌ WebSocket solution test failed: {e}")
+        logger.error(f" FAIL:  WebSocket solution test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -113,22 +113,22 @@ async def test_websocket_solution():
 
 async def main():
     """Main test function."""
-    logger.info("🔍 WebSocket Integration Testing Solution")
+    logger.info(" SEARCH:  WebSocket Integration Testing Solution")
     logger.info("=" * 50)
     
     success = await test_websocket_solution()
     
     if success:
         logger.info("=" * 50)
-        logger.info("✅ SOLUTION VALIDATION SUCCESSFUL")
-        logger.info("✅ WebSocket testing works without Docker dependencies")
-        logger.info("✅ All 5 critical WebSocket events are emitted correctly")
-        logger.info("✅ Chat business value is preserved and validated")
+        logger.info(" PASS:  SOLUTION VALIDATION SUCCESSFUL")
+        logger.info(" PASS:  WebSocket testing works without Docker dependencies")
+        logger.info(" PASS:  All 5 critical WebSocket events are emitted correctly")
+        logger.info(" PASS:  Chat business value is preserved and validated")
         return 0
     else:
         logger.error("=" * 50)
-        logger.error("❌ SOLUTION VALIDATION FAILED")
-        logger.error("❌ WebSocket testing needs additional fixes")
+        logger.error(" FAIL:  SOLUTION VALIDATION FAILED")
+        logger.error(" FAIL:  WebSocket testing needs additional fixes")
         return 1
 
 

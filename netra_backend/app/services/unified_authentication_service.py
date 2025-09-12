@@ -289,7 +289,7 @@ class UnifiedAuthenticationService:
                 }
                 
                 logger.warning(f"UNIFIED AUTH: Invalid token format in {context.value}")
-                logger.error(f"🔧 TOKEN FORMAT DEBUG: {json.dumps(token_analysis, indent=2)}")
+                logger.error(f"[U+1F527] TOKEN FORMAT DEBUG: {json.dumps(token_analysis, indent=2)}")
                 self._auth_failures += 1
                 return AuthResult(
                     success=False,
@@ -325,7 +325,7 @@ class UnifiedAuthenticationService:
                 }
                 
                 logger.warning(f"UNIFIED AUTH: Token validation failed in {context.value}: {error_msg}")
-                logger.error(f"🔧 VALIDATION_FAILED DEBUG: {json.dumps(failure_debug, indent=2)}")
+                logger.error(f"[U+1F527] VALIDATION_FAILED DEBUG: {json.dumps(failure_debug, indent=2)}")
                 self._auth_failures += 1
                 
                 return AuthResult(
@@ -358,7 +358,7 @@ class UnifiedAuthenticationService:
             }
             
             logger.info(f"UNIFIED AUTH: Successfully authenticated user {user_id[:8] if user_id else '[NO_USER_ID]'}... in {context.value}")
-            logger.debug(f"🎉 AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
+            logger.debug(f" CELEBRATION:  AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._auth_successes += 1
             
             return AuthResult(
@@ -387,7 +387,7 @@ class UnifiedAuthenticationService:
             }
             
             logger.error(f"UNIFIED AUTH: Auth service error in {context.value}: {e}")
-            logger.error(f"🔧 AUTH_SERVICE_ERROR DEBUG: {json.dumps(service_error_debug, indent=2)}")
+            logger.error(f"[U+1F527] AUTH_SERVICE_ERROR DEBUG: {json.dumps(service_error_debug, indent=2)}")
             self._auth_failures += 1
             
             return AuthResult(
@@ -414,7 +414,7 @@ class UnifiedAuthenticationService:
             }
             
             logger.error(f"UNIFIED AUTH: Unexpected error in {context.value}: {e}", exc_info=True)
-            logger.error(f"🔧 UNEXPECTED_ERROR DEBUG: {json.dumps(unexpected_error_debug, indent=2)}")
+            logger.error(f"[U+1F527] UNEXPECTED_ERROR DEBUG: {json.dumps(unexpected_error_debug, indent=2)}")
             self._auth_failures += 1
             
             return AuthResult(
@@ -457,7 +457,7 @@ class UnifiedAuthenticationService:
         }
         
         logger.info("UNIFIED AUTH: WebSocket authentication request")
-        logger.debug(f"🔌 WEBSOCKET DEBUG: {json.dumps(websocket_debug, indent=2)}")
+        logger.debug(f"[U+1F50C] WEBSOCKET DEBUG: {json.dumps(websocket_debug, indent=2)}")
         
         try:
             # Extract JWT token from WebSocket using standardized method
@@ -477,7 +477,7 @@ class UnifiedAuthenticationService:
                 }
                 
                 logger.warning("UNIFIED AUTH: No JWT token found in WebSocket connection")
-                logger.error(f"🔍 NO_TOKEN DEBUG: {json.dumps(no_token_debug, indent=2)}")
+                logger.error(f" SEARCH:  NO_TOKEN DEBUG: {json.dumps(no_token_debug, indent=2)}")
                 return (
                     AuthResult(
                         success=False,
@@ -527,7 +527,7 @@ class UnifiedAuthenticationService:
             }
             
             logger.error(f"UNIFIED AUTH: WebSocket authentication error: {e}", exc_info=True)
-            logger.error(f"🔥 WEBSOCKET_AUTH_ERROR DEBUG: {json.dumps(websocket_error_debug, indent=2)}")
+            logger.error(f" FIRE:  WEBSOCKET_AUTH_ERROR DEBUG: {json.dumps(websocket_error_debug, indent=2)}")
             return (
                 AuthResult(
                     success=False,
@@ -739,12 +739,12 @@ class UnifiedAuthenticationService:
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
-                logger.debug(f"🔄 AUTH ATTEMPT {attempt + 1}/{max_retries + 1}: {json.dumps(attempt_debug, indent=2)}")
+                logger.debug(f" CYCLE:  AUTH ATTEMPT {attempt + 1}/{max_retries + 1}: {json.dumps(attempt_debug, indent=2)}")
                 
                 # Check circuit breaker status
                 circuit_status = await self._check_circuit_breaker_status()
                 if circuit_status["open"] and attempt == 0:
-                    logger.warning(f"🚨 CIRCUIT BREAKER OPEN: {circuit_status['reason']} - Attempting validation anyway")
+                    logger.warning(f" ALERT:  CIRCUIT BREAKER OPEN: {circuit_status['reason']} - Attempting validation anyway")
                 
                 # Perform validation
                 validation_result = await self._auth_client.validate_token(token)
@@ -761,7 +761,7 @@ class UnifiedAuthenticationService:
                 
                 if validation_result is not None:
                     # Success or definitive failure
-                    logger.debug(f"✅ AUTH ATTEMPT SUCCESS: {json.dumps(attempt_result, indent=2)}")
+                    logger.debug(f" PASS:  AUTH ATTEMPT SUCCESS: {json.dumps(attempt_result, indent=2)}")
                     
                     # Add resilience metadata to result
                     if isinstance(validation_result, dict):
@@ -776,7 +776,7 @@ class UnifiedAuthenticationService:
                     return validation_result
                 
                 # None result - could be a transient issue
-                logger.warning(f"⚠️ AUTH ATTEMPT {attempt + 1} RETURNED NONE - May retry")
+                logger.warning(f" WARNING: [U+FE0F] AUTH ATTEMPT {attempt + 1} RETURNED NONE - May retry")
                 
             except Exception as e:
                 attempt_duration = time.time() - attempt_start
@@ -796,17 +796,17 @@ class UnifiedAuthenticationService:
                 }
                 validation_attempts.append(attempt_result)
                 
-                logger.warning(f"❌ AUTH ATTEMPT {attempt + 1} FAILED: {json.dumps(attempt_result, indent=2)}")
+                logger.warning(f" FAIL:  AUTH ATTEMPT {attempt + 1} FAILED: {json.dumps(attempt_result, indent=2)}")
                 
                 # Don't retry if error is not retryable
                 if not error_classification["retryable"]:
-                    logger.error(f"🛑 NON-RETRYABLE ERROR: {error_classification['reason']} - Stopping attempts")
+                    logger.error(f"[U+1F6D1] NON-RETRYABLE ERROR: {error_classification['reason']} - Stopping attempts")
                     break
             
             # Calculate delay before next attempt (if not last attempt)
             if attempt < max_retries:
                 delay = min(base_delay * (2 ** attempt), max_delay)
-                logger.debug(f"⏳ RETRYING IN {delay}s (attempt {attempt + 1}/{max_retries + 1})")
+                logger.debug(f"[U+23F3] RETRYING IN {delay}s (attempt {attempt + 1}/{max_retries + 1})")
                 await asyncio.sleep(delay)
         
         # All attempts failed
@@ -822,7 +822,7 @@ class UnifiedAuthenticationService:
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        logger.error(f"💥 ALL AUTH ATTEMPTS FAILED: {json.dumps(final_failure_debug, indent=2)}")
+        logger.error(f"[U+1F4A5] ALL AUTH ATTEMPTS FAILED: {json.dumps(final_failure_debug, indent=2)}")
         
         # Return a structured failure result
         return {

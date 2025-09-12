@@ -102,7 +102,7 @@ from shared.isolated_environment import IsolatedEnvironment
         # REMOVED_SYNTAX_ERROR: await self._validate_service_responsiveness()
 
         # REMOVED_SYNTAX_ERROR: self.test_results.independence_validated = True
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ Service independence validation PASSED")
+        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Service independence validation PASSED")
 
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -164,7 +164,7 @@ from shared.isolated_environment import IsolatedEnvironment
                     # REMOVED_SYNTAX_ERROR: if not services_ready:
                         # REMOVED_SYNTAX_ERROR: raise TimeoutError("Services did not become ready within timeout")
 
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Services are ready")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Services are ready")
 
 # REMOVED_SYNTAX_ERROR: async def _discover_running_services(self):
     # REMOVED_SYNTAX_ERROR: """Discover and catalog all running services."""
@@ -458,7 +458,7 @@ from shared.isolated_environment import IsolatedEnvironment
                 # REMOVED_SYNTAX_ERROR: for service_name, service_before in result.services_before_termination.items():
                     # REMOVED_SYNTAX_ERROR: service_after = result.services_after_termination.get(service_name)
                     # REMOVED_SYNTAX_ERROR: if service_after:
-                        # REMOVED_SYNTAX_ERROR: status = "✅ INDEPENDENT" if service_after.independent else "❌ DEPENDENT"
+                        # REMOVED_SYNTAX_ERROR: status = " PASS:  INDEPENDENT" if service_after.independent else " FAIL:  DEPENDENT"
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -476,7 +476,7 @@ from shared.isolated_environment import IsolatedEnvironment
                             # REMOVED_SYNTAX_ERROR: "formatted_string"
                             
 
-                            # REMOVED_SYNTAX_ERROR: print("✅ SERVICE INDEPENDENCE VALIDATION PASSED")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  SERVICE INDEPENDENCE VALIDATION PASSED")
                             # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                             # REMOVED_SYNTAX_ERROR: return result
 
@@ -503,7 +503,7 @@ from shared.isolated_environment import IsolatedEnvironment
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: zombie_count = len([item for item in []])
         # REMOVED_SYNTAX_ERROR: assert zombie_count == 0, "formatted_string"
-        # REMOVED_SYNTAX_ERROR: print("✅ No zombie processes detected")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  No zombie processes detected")
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
@@ -515,7 +515,7 @@ from shared.isolated_environment import IsolatedEnvironment
                     # REMOVED_SYNTAX_ERROR: except psutil.NoSuchProcess:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-                        # REMOVED_SYNTAX_ERROR: print("✅ FINAL SYSTEM STATE VALIDATION PASSED")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  FINAL SYSTEM STATE VALIDATION PASSED")
 
 
                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

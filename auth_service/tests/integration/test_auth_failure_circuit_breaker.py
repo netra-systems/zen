@@ -191,7 +191,7 @@ class TestAuthFailureCircuitBreaker(SSotBaseTestCase):
         self.record_metric("circuit_closure", "working")
         self.record_metric("permanent_failure_prevention", "working")
         
-        logger.info("✅ Circuit breaker permanent failure state prevention working")
+        logger.info(" PASS:  Circuit breaker permanent failure state prevention working")
     
     async def _trigger_authentication_failure(
         self, auth_manager: IntegrationAuthServiceManager, scenario: str
@@ -457,7 +457,7 @@ class TestAuthFailureCircuitBreaker(SSotBaseTestCase):
             self.record_metric(f"cascade_prevention_{scenario_name}", "working")
         
         self.record_metric("authentication_cascade_prevention", "working")
-        logger.info(f"✅ Authentication cascade failure prevention working ({len(degradation_scenarios)} scenarios tested)")
+        logger.info(f" PASS:  Authentication cascade failure prevention working ({len(degradation_scenarios)} scenarios tested)")
     
     async def _test_cascade_prevention(
         self, 
@@ -610,7 +610,7 @@ class TestAuthFailureCircuitBreaker(SSotBaseTestCase):
             self.record_metric(f"error_pattern_detection_{pattern_name}", "working")
         
         self.record_metric("error_behind_error_detection", "working")
-        logger.info(f"✅ Error behind error detection patterns working ({len(error_patterns)} patterns tested)")
+        logger.info(f" PASS:  Error behind error detection patterns working ({len(error_patterns)} patterns tested)")
     
     async def _test_error_behind_error_detection(
         self,

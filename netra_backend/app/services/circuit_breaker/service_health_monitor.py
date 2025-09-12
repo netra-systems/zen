@@ -114,7 +114,7 @@ class ServiceHealthMonitor:
             service_info = self._services.get(service_name)
             
             if not health_check or not service_info:
-                self._logger.warning(f"🚨 SERVICE DEPENDENCY: No health check registered for {service_name}")
+                self._logger.warning(f" ALERT:  SERVICE DEPENDENCY: No health check registered for {service_name}")
                 return None
         
         start_time = time.time()
@@ -214,7 +214,7 @@ class ServiceHealthMonitor:
         dependent_services = [svc for svc, deps in self._service_dependencies.items() if service_name in deps]
         
         self._logger.info(
-            f"🔍 SERVICE HEALTH CHECK: Starting health check for {service_name} "
+            f" SEARCH:  SERVICE HEALTH CHECK: Starting health check for {service_name} "
             f"(endpoint: {service_info.endpoint or 'N/A'}, "
             f"depends_on: {dependencies}, "
             f"dependents: {dependent_services})"
@@ -223,7 +223,7 @@ class ServiceHealthMonitor:
     def _log_service_health_success(self, service_name: str, response_time: float, service_info: ServiceHealthInfo) -> None:
         """Log successful service health check."""
         self._logger.info(
-            f"✅ SERVICE HEALTHY: {service_name} responded successfully "
+            f" PASS:  SERVICE HEALTHY: {service_name} responded successfully "
             f"(response_time: {response_time:.2f}ms, "
             f"success_rate: {service_info.metrics.success_rate_percent:.1f}%, "
             f"consecutive_successes: {service_info.metrics.consecutive_successes})"
@@ -236,7 +236,7 @@ class ServiceHealthMonitor:
         golden_path_impact = self._assess_golden_path_impact(service_name, dependent_services)
         
         self._logger.critical(
-            f"🚨 SERVICE FAILURE: {service_name} health check failed ({failure_type}) "
+            f" ALERT:  SERVICE FAILURE: {service_name} health check failed ({failure_type}) "
             f"(response_time: {response_time:.2f}ms, "
             f"consecutive_failures: {service_info.metrics.consecutive_failures}, "
             f"error_rate: {service_info.metrics.error_rate_percent:.1f}%, "
@@ -251,7 +251,7 @@ class ServiceHealthMonitor:
         dependent_services = [svc for svc, deps in self._service_dependencies.items() if service_name in deps]
         
         self._logger.warning(
-            f"⚠️ SERVICE DEGRADED: {service_name} performance degraded "
+            f" WARNING: [U+FE0F] SERVICE DEGRADED: {service_name} performance degraded "
             f"(response_time: {response_time:.2f}ms, "
             f"status: {service_info.status.value}, "
             f"potentially_affected: {dependent_services}, "
@@ -264,7 +264,7 @@ class ServiceHealthMonitor:
         golden_path_impact = self._assess_golden_path_impact(service_name, dependent_services)
         
         self._logger.critical(
-            f"🚨 SERVICE TIMEOUT: {service_name} health check timed out after 30s "
+            f" ALERT:  SERVICE TIMEOUT: {service_name} health check timed out after 30s "
             f"(actual_time: {response_time:.2f}ms, "
             f"consecutive_failures: {service_info.metrics.consecutive_failures}, "
             f"golden_path_impact: {golden_path_impact}, "
@@ -279,7 +279,7 @@ class ServiceHealthMonitor:
         golden_path_impact = self._assess_golden_path_impact(service_name, dependent_services)
         
         self._logger.critical(
-            f"🚨 SERVICE EXCEPTION: {service_name} health check failed with exception "
+            f" ALERT:  SERVICE EXCEPTION: {service_name} health check failed with exception "
             f"(exception_type: {type(exception).__name__}, "
             f"exception_message: {str(exception)}, "
             f"response_time: {response_time:.2f}ms, "
@@ -336,13 +336,13 @@ class ServiceHealthMonitor:
         # Log dependency check results
         if all_healthy:
             self._logger.info(
-                f"✅ SERVICE DEPENDENCIES: All dependencies healthy for {service_name} "
+                f" PASS:  SERVICE DEPENDENCIES: All dependencies healthy for {service_name} "
                 f"(dependencies: {dependencies})"
             )
         else:
             unhealthy_deps = [dep for dep, status in dependency_status.items() if not status["healthy"]]
             self._logger.critical(
-                f"🚨 SERVICE DEPENDENCIES: Failed dependencies for {service_name} "
+                f" ALERT:  SERVICE DEPENDENCIES: Failed dependencies for {service_name} "
                 f"(failed: {unhealthy_deps}, "
                 f"total_dependencies: {len(dependencies)}, "
                 f"impact: Service may not function properly)"

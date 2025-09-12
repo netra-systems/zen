@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 SSOT Golden Path Logging End-to-End Tests
 
@@ -11,8 +49,8 @@ This test suite validates SSOT logging for the complete Golden Path user journey
 Tests MUST FAIL initially to prove Golden Path logging fragmentation exists.
 
 Golden Path E2E Coverage:
-1. User login → WebSocket connection with unified logging
-2. Agent execution → AI response with complete log correlation
+1. User login  ->  WebSocket connection with unified logging
+2. Agent execution  ->  AI response with complete log correlation
 3. Real-time progress updates with consistent log correlation
 4. Error scenarios with unified error logging
 5. Multi-user concurrent sessions with isolated log correlation
@@ -40,11 +78,21 @@ from contextlib import asynccontextmanager
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @pytest.mark.e2e
 @pytest.mark.staging_only
 class TestGoldenPathLoggingSSOTE2E(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E tests for SSOT Golden Path logging in staging environment.
     
@@ -166,7 +214,7 @@ class TestGoldenPathLoggingSSOTE2E(SSotAsyncTestCase):
         
         EXPECTED TO FAIL: Fragmented logging prevents complete Golden Path correlation
         
-        Flow: Login → WebSocket → Agent Execution → Response → Logging Validation
+        Flow: Login  ->  WebSocket  ->  Agent Execution  ->  Response  ->  Logging Validation
         """
         golden_path_start = datetime.utcnow()
         
@@ -231,7 +279,7 @@ SSOT VIOLATIONS DETECTED:
 
 REMEDIATION REQUIRED:
 1. Implement unified SSOT logging across complete Golden Path
-2. Ensure consistent correlation ID propagation from auth → response
+2. Ensure consistent correlation ID propagation from auth  ->  response
 3. Implement unified WebSocket event logging correlation
 4. Create consistent agent execution logging across all phases
 5. Standardize Golden Path performance monitoring logging

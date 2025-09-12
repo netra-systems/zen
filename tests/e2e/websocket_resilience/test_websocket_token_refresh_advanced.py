@@ -128,7 +128,7 @@ async def test_concurrent_refresh_attempts_race_conditions(jwt_generator, audit_
         
         await new_client.disconnect()
     
-    logger.info(f"✓ Concurrent refresh: {concurrent_attempts} attempts in {total_time:.2f}s, {len(successful_refreshes)} succeeded")
+    logger.info(f"[U+2713] Concurrent refresh: {concurrent_attempts} attempts in {total_time:.2f}s, {len(successful_refreshes)} succeeded")
 
 
 @pytest.mark.asyncio
@@ -232,7 +232,7 @@ async def test_refresh_token_error_handling_and_fallback(jwt_generator, audit_lo
     successful_scenarios = [r for r in error_results if r["success"]]
     assert len(recent_events) >= len(successful_scenarios), "Successful refreshes should be logged"
     
-    logger.info(f"✓ Error handling: {len(error_scenarios)} scenarios tested, avg {avg_error_time:.3f}s handling time")
+    logger.info(f"[U+2713] Error handling: {len(error_scenarios)} scenarios tested, avg {avg_error_time:.3f}s handling time")
 
 
 @pytest.mark.asyncio
@@ -347,7 +347,7 @@ async def test_refresh_token_performance_under_load(jwt_generator, audit_logger,
     logging_success_rate = len(recent_refresh_events) / len(successful_refreshes)
     assert logging_success_rate >= 0.9, f"Logging success rate {logging_success_rate:.2%} too low under load"
     
-    logger.info(f"✓ Load test: {total_refreshes} refreshes in {total_load_time:.2f}s ({throughput:.1f} refreshes/s)")
+    logger.info(f"[U+2713] Load test: {total_refreshes} refreshes in {total_load_time:.2f}s ({throughput:.1f} refreshes/s)")
     logger.info(f"   Success rate: {success_rate:.2%}, avg time: {avg_refresh_time:.3f}s, p95: {p95_refresh_time:.3f}s")
     logger.info(f"   Logging rate: {logging_success_rate:.2%}")
 
@@ -460,7 +460,7 @@ async def test_refresh_token_timeout_and_retry_logic(jwt_generator, audit_logger
     successful_scenarios = [r for r in test_results if r["success"]]
     assert len(recent_events) >= len(successful_scenarios), "Successful refreshes should be logged despite timeouts"
     
-    logger.info(f"✓ Timeout handling: {len(timeout_scenarios)} scenarios tested, avg {avg_timeout_time:.3f}s handling")
+    logger.info(f"[U+2713] Timeout handling: {len(timeout_scenarios)} scenarios tested, avg {avg_timeout_time:.3f}s handling")
 
 
 if __name__ == "__main__":

@@ -66,42 +66,42 @@ async def test_websocket_health_validation():
         
         if response.status_code == 200:
             stats_data = response.json()
-            print("✅ Statistics endpoint responding")
+            print(" PASS:  Statistics endpoint responding")
             print(f"   Active connections: {stats_data.get('websocket', {}).get('active_connections', 0)}")
             print(f"   Total connections: {stats_data.get('websocket', {}).get('total_connections', 0)}")
             print(f"   Error rate: {stats_data.get('websocket', {}).get('error_rate', 0)}")
         else:
-            print(f"⚠️  Statistics endpoint returned status {response.status_code} (may be expected)")
+            print(f" WARNING: [U+FE0F]  Statistics endpoint returned status {response.status_code} (may be expected)")
     except Exception as e:
-        print(f"⚠️  Statistics endpoint test failed: {e} (may be expected)")
+        print(f" WARNING: [U+FE0F]  Statistics endpoint test failed: {e} (may be expected)")
     
     # Test 4: Backend main health check
-    print("\n📋 TEST 4: Backend Service Health Validation")
+    print("\n[U+1F4CB] TEST 4: Backend Service Health Validation")
     try:
         backend_health_url = "https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health/ready"
         response = requests.get(backend_health_url, timeout=10)
         
         if response.status_code == 200:
-            print("✅ Backend service health check passed")
+            print(" PASS:  Backend service health check passed")
         else:
-            print(f"❌ Backend health check failed with status {response.status_code}")
+            print(f" FAIL:  Backend health check failed with status {response.status_code}")
     except Exception as e:
-        print(f"❌ Backend health check failed: {e}")
+        print(f" FAIL:  Backend health check failed: {e}")
         return False
     
-    print("\n🎯 VALIDATION RESULTS")
+    print("\n TARGET:  VALIDATION RESULTS")
     print("=" * 70)
-    print("✅ WebSocket SSOT authentication fixes deployed successfully")
-    print("✅ Service endpoints are responding correctly") 
-    print("✅ No 1008 policy violations detected in recent logs")
-    print("✅ Authentication configuration is properly set")
+    print(" PASS:  WebSocket SSOT authentication fixes deployed successfully")
+    print(" PASS:  Service endpoints are responding correctly") 
+    print(" PASS:  No 1008 policy violations detected in recent logs")
+    print(" PASS:  Authentication configuration is properly set")
     
-    print("\n🚀 GOLDEN PATH STATUS")
+    print("\n[U+1F680] GOLDEN PATH STATUS")
     print("=" * 70)
-    print("✅ Backend service deployed to staging")
-    print("✅ WebSocket endpoints are healthy and accessible") 
-    print("✅ Authentication system is configured correctly")
-    print("✅ Service ready for WebSocket connection testing")
+    print(" PASS:  Backend service deployed to staging")
+    print(" PASS:  WebSocket endpoints are healthy and accessible") 
+    print(" PASS:  Authentication system is configured correctly")
+    print(" PASS:  Service ready for WebSocket connection testing")
     
     return True
 
@@ -110,11 +110,11 @@ async def main():
     success = await test_websocket_health_validation()
     
     if success:
-        print("\n🎉 DEPLOYMENT VALIDATION SUCCESSFUL")
+        print("\n CELEBRATION:  DEPLOYMENT VALIDATION SUCCESSFUL")
         print("   WebSocket SSOT authentication fixes are live on staging")
         print("   Ready for end-to-end testing and validation")
     else:
-        print("\n❌ DEPLOYMENT VALIDATION FAILED")
+        print("\n FAIL:  DEPLOYMENT VALIDATION FAILED")
         print("   Issues detected - review logs and service status")
     
     return 0 if success else 1

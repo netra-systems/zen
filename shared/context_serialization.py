@@ -4,7 +4,7 @@ SECURITY CRITICAL: This module provides secure serialization and deserialization
 of UserExecutionContext for background task queuing while maintaining user isolation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Enable secure context propagation in async/background tasks
 - Value Impact: Prevents user data mixing in queued operations
 - Revenue Impact: Maintains security compliance and user trust

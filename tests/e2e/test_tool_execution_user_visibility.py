@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains user trust in AI system reliability and real-time feedback
 
 Mission: End-to-end tests validating that users can reliably see tool execution progress
-through the complete flow: tool execution → WebSocket events → user interface updates.
+through the complete flow: tool execution  ->  WebSocket events  ->  user interface updates.
 
 CRITICAL: These E2E tests can run on staging GCP or local with real services.
 They are EXPECTED TO FAIL initially, demonstrating the missing confirmation system.

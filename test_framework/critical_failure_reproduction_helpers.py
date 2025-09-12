@@ -187,10 +187,10 @@ class CriticalFailureReproducer:
             self.logger.setLevel(logging.INFO)
     
     async def __aenter__(self):
-        self.logger.info(f"🔍 Starting reproduction of {self.context.expected_failure_type}")
-        self.logger.info(f"🔍 Platform: {self.context.platform_info.system} {self.context.platform_info.version}")
-        self.logger.info(f"🔍 Asyncio: {self.context.platform_info.asyncio_loop_type}")
-        self.logger.info(f"🔍 Windows IOCP: {self.context.platform_info.is_windows_iocp()}")
+        self.logger.info(f" SEARCH:  Starting reproduction of {self.context.expected_failure_type}")
+        self.logger.info(f" SEARCH:  Platform: {self.context.platform_info.system} {self.context.platform_info.version}")
+        self.logger.info(f" SEARCH:  Asyncio: {self.context.platform_info.asyncio_loop_type}")
+        self.logger.info(f" SEARCH:  Windows IOCP: {self.context.platform_info.is_windows_iocp()}")
         
         self.context.mark_progress("reproduction_started", {
             "platform": self.context.platform_info.system,
@@ -208,7 +208,7 @@ class CriticalFailureReproducer:
                 "progress_markers": len(self.context.progress_markers),
                 "platform": self.context.platform_info.system
             }
-            self.logger.info("✅ Timeout occurred - analyzing reproduction success...")
+            self.logger.info(" PASS:  Timeout occurred - analyzing reproduction success...")
             
         elif exc_type is not None:
             self.context.actual_failure_type = exc_type.__name__
@@ -217,22 +217,22 @@ class CriticalFailureReproducer:
                 "traceback": traceback.format_exc(),
                 "duration": self.context.elapsed_time
             }
-            self.logger.info(f"🔍 Exception occurred: {exc_type.__name__}")
+            self.logger.info(f" SEARCH:  Exception occurred: {exc_type.__name__}")
             
         self._log_reproduction_analysis()
     
     def mark_progress(self, stage: str, details: Optional[Dict[str, Any]] = None):
         """Mark progress through reproduction attempt"""
         self.context.mark_progress(stage, details)
-        self.logger.info(f"🔍 Progress: {stage} (elapsed: {self.context.elapsed_time:.1f}s)")
+        self.logger.info(f" SEARCH:  Progress: {stage} (elapsed: {self.context.elapsed_time:.1f}s)")
     
     def record_error(self, error: Union[str, Exception], context: Optional[str] = None):
         """Record error encountered during reproduction"""
         self.context.record_error(error, context)
         if isinstance(error, Exception):
-            self.logger.error(f"❌ Error in {context or 'reproduction'}: {error}")
+            self.logger.error(f" FAIL:  Error in {context or 'reproduction'}: {error}")
         else:
-            self.logger.error(f"❌ {context or 'Error'}: {error}")
+            self.logger.error(f" FAIL:  {context or 'Error'}: {error}")
     
     def is_windows_deadlock_pattern(self) -> bool:
         """
@@ -286,15 +286,15 @@ class CriticalFailureReproducer:
         
         # Platform-specific analysis
         if self.is_windows_deadlock_pattern():
-            self.logger.info("✅ WINDOWS DEADLOCK PATTERN CONFIRMED")
-            self.logger.info("✅ Matches SESSION5 asyncio deadlock indicators")
+            self.logger.info(" PASS:  WINDOWS DEADLOCK PATTERN CONFIRMED")
+            self.logger.info(" PASS:  Matches SESSION5 asyncio deadlock indicators")
             
         elif self.is_sessionmiddleware_pattern():
-            self.logger.info("✅ SESSIONMIDDLEWARE PATTERN CONFIRMED") 
-            self.logger.info("✅ Matches SESSION5 WebSocket internal error indicators")
+            self.logger.info(" PASS:  SESSIONMIDDLEWARE PATTERN CONFIRMED") 
+            self.logger.info(" PASS:  Matches SESSION5 WebSocket internal error indicators")
             
         else:
-            self.logger.info("🔍 Pattern analysis:")
+            self.logger.info(" SEARCH:  Pattern analysis:")
             self.logger.info(f"  Windows IOCP: {self.context.platform_info.is_windows_iocp()}")
             self.logger.info(f"  Timeout: {self.context.actual_failure_type == 'asyncio_timeout'}")
             self.logger.info(f"  Duration: {self.context.elapsed_time:.1f}s")
@@ -305,11 +305,11 @@ class CriticalFailureReproducer:
                               self.is_sessionmiddleware_pattern()
                               
         if reproduction_success:
-            self.logger.info("✅ REPRODUCTION SUCCESSFUL")
-            self.logger.info("✅ Critical failure pattern reproduced accurately")
+            self.logger.info(" PASS:  REPRODUCTION SUCCESSFUL")
+            self.logger.info(" PASS:  Critical failure pattern reproduced accurately")
         else:
-            self.logger.info("❌ REPRODUCTION FAILED") 
-            self.logger.info("❌ Could not reproduce expected failure pattern")
+            self.logger.info(" FAIL:  REPRODUCTION FAILED") 
+            self.logger.info(" FAIL:  Could not reproduce expected failure pattern")
 
 
 class WindowsAsyncioMonitor:
@@ -339,8 +339,8 @@ class WindowsAsyncioMonitor:
         
         try:
             if self.concurrent_operations > 3:
-                print(f"⚠️ WARNING: {self.concurrent_operations} concurrent asyncio operations on Windows IOCP")
-                print("⚠️ This may trigger GetQueuedCompletionStatus deadlock")
+                print(f" WARNING: [U+FE0F] WARNING: {self.concurrent_operations} concurrent asyncio operations on Windows IOCP")
+                print(" WARNING: [U+FE0F] This may trigger GetQueuedCompletionStatus deadlock")
                 
             yield
             
@@ -355,7 +355,7 @@ class WindowsAsyncioMonitor:
                     "concurrent_ops": self.concurrent_operations + 1,
                     "timestamp": time.time()
                 })
-                print(f"🔍 Long operation detected: {operation_name} took {operation_duration:.1f}s")
+                print(f" SEARCH:  Long operation detected: {operation_name} took {operation_duration:.1f}s")
     
     def get_deadlock_risk_assessment(self) -> Dict[str, Any]:
         """Assess risk of Windows asyncio deadlock based on monitoring"""
@@ -445,7 +445,7 @@ def validate_reproduction_test_requirements(test_name: str, duration: float, min
     """
     if duration < minimum:
         raise AssertionError(
-            f"🚨 INVALID REPRODUCTION TEST: {test_name} completed in {duration:.3f}s "
+            f" ALERT:  INVALID REPRODUCTION TEST: {test_name} completed in {duration:.3f}s "
             f"(minimum: {minimum}s). Reproduction tests must make real network calls "
             f"and allow sufficient time for failures to manifest!"
         )
@@ -454,11 +454,11 @@ def validate_reproduction_test_requirements(test_name: str, duration: float, min
     
     # Validate platform-specific requirements
     if "windows" in test_name.lower() and not platform_info.is_windows:
-        print(f"⚠️ WARNING: Windows-specific test {test_name} running on {platform_info.system}")
-        print("⚠️ May not reproduce Windows-specific failure patterns")
+        print(f" WARNING: [U+FE0F] WARNING: Windows-specific test {test_name} running on {platform_info.system}")
+        print(" WARNING: [U+FE0F] May not reproduce Windows-specific failure patterns")
         
     elif "asyncio" in test_name.lower() and not platform_info.asyncio_loop_type:
-        print(f"⚠️ WARNING: Asyncio test {test_name} but no asyncio loop detected")
+        print(f" WARNING: [U+FE0F] WARNING: Asyncio test {test_name} but no asyncio loop detected")
         
     return True
 

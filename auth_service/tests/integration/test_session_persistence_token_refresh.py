@@ -191,7 +191,7 @@ class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
         assert token_validation.get("valid", False), "Access token should validate successfully"
         
         self.record_metric("session_token_linkage", "working")
-        logger.info(f"✅ Session persistence working (session_id: {session_id[:8]}...)")
+        logger.info(f" PASS:  Session persistence working (session_id: {session_id[:8]}...)")
     
     async def _create_user_session(
         self, 
@@ -337,7 +337,7 @@ class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
                 new_refresh_token = second_refresh_result["refresh_token"]
                 self.record_metric("refresh_token_rotation", "working")
         
-        logger.info("✅ Token refresh mechanism working correctly")
+        logger.info(" PASS:  Token refresh mechanism working correctly")
     
     async def _test_token_refresh(
         self,
@@ -440,7 +440,7 @@ class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
         assert retrieved_session is None, "Expired session should not be retrievable"
         
         self.record_metric("expired_session_blocking", "working")
-        logger.info("✅ Session expiration and cleanup working correctly")
+        logger.info(" PASS:  Session expiration and cleanup working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -524,7 +524,7 @@ class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
         self.record_metric("concurrent_refresh_prevention", "working")
         
         logger.info(
-            f"✅ Concurrent token refresh prevention working "
+            f" PASS:  Concurrent token refresh prevention working "
             f"(successful: {len(successful_refreshes)}, failed: {len(failed_refreshes)})"
         )
     
@@ -585,7 +585,7 @@ class TestSessionPersistenceTokenRefresh(SSotBaseTestCase):
         
         self.record_metric("session_invalidation", "working")
         self.record_metric("post_invalidation_security", "working")
-        logger.info("✅ Session invalidation security working correctly")
+        logger.info(" PASS:  Session invalidation security working correctly")
     
     async def _invalidate_session(
         self,

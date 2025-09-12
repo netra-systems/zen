@@ -639,7 +639,7 @@
             # REMOVED_SYNTAX_ERROR: 7. Error rates remain below acceptable thresholds
             # REMOVED_SYNTAX_ERROR: '''
             # REMOVED_SYNTAX_ERROR: pass
-            # REMOVED_SYNTAX_ERROR: logger.info("=== INTEGRATION TEST 10: Realistic Load Simulation (10 Users × 5 Messages) ===")
+            # REMOVED_SYNTAX_ERROR: logger.info("=== INTEGRATION TEST 10: Realistic Load Simulation (10 Users  x  5 Messages) ===")
 
             # Create simulated users
             # REMOVED_SYNTAX_ERROR: users = self._create_simulated_users()
@@ -667,7 +667,7 @@
             # REMOVED_SYNTAX_ERROR: assert analysis['total_messages'] >= self.total_expected_messages * 0.8, \
             # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-            # REMOVED_SYNTAX_ERROR: logger.info("✅ INTEGRATION TEST 10 PASSED: Realistic load simulation successful")
+            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  INTEGRATION TEST 10 PASSED: Realistic load simulation successful")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_gradual_load_ramp_up(self):
@@ -726,7 +726,7 @@
                                 # REMOVED_SYNTAX_ERROR: assert curr_avg_time <= max_allowed_time, \
                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ INTEGRATION TEST 10b PASSED: Gradual load ramp-up successful")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  INTEGRATION TEST 10b PASSED: Gradual load ramp-up successful")
 
                                 # Removed problematic line: @pytest.mark.asyncio
                                 # Removed problematic line: async def test_burst_load_resilience(self):
@@ -769,7 +769,7 @@
                                         # REMOVED_SYNTAX_ERROR: assert successful_users >= len(burst_users) * 0.6, \
                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ INTEGRATION TEST 10c PASSED: Burst load resilience validated")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  INTEGRATION TEST 10c PASSED: Burst load resilience validated")
 
 
                                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

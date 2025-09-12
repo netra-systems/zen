@@ -1,5 +1,5 @@
 """
-Critical OAuth E2E Test - Login → Dashboard → Chat History
+Critical OAuth E2E Test - Login  ->  Dashboard  ->  Chat History
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
 1. **Segment**: Enterprise & Growth - OAuth validation for enterprise deals
@@ -8,9 +8,9 @@ Critical OAuth E2E Test - Login → Dashboard → Chat History
 4. **Revenue Impact**: Protects enterprise conversion pipeline and prevents churn
 
 **CRITICAL E2E FLOW:**
-- OAuth provider callback → Real Auth service user creation
-- Real profile sync to Backend service → Real database persistence  
-- Real dashboard load with chat history → <5 second execution
+- OAuth provider callback  ->  Real Auth service user creation
+- Real profile sync to Backend service  ->  Real database persistence  
+- Real dashboard load with chat history  ->  <5 second execution
 - NO internal service mocking - only external OAuth provider mocked
 
 **ARCHITECTURE:** 450-line limit, 25-line functions, real service integration
@@ -236,14 +236,14 @@ async def oauth_e2e_runner():
 
 @pytest.mark.e2e
 class TestOAuthCompleteE2EFlow:
-    """Critical E2E test: OAuth Login → Dashboard → Chat History"""
+    """Critical E2E test: OAuth Login  ->  Dashboard  ->  Chat History"""
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(5)  # 5-second execution requirement
     @pytest.mark.e2e
     async def test_oauth_login_dashboard_chat_history(self, oauth_e2e_runner):
         """
-        CRITICAL E2E TEST: OAuth Login → Profile Sync → Dashboard → Chat History
+        CRITICAL E2E TEST: OAuth Login  ->  Profile Sync  ->  Dashboard  ->  Chat History
         
         Business Value: Validates complete user journey for enterprise customers
         Revenue Impact: Prevents OAuth failures that block $1M+ ARR deals

@@ -16,7 +16,7 @@
     # REMOVED_SYNTAX_ERROR: - Configuration drift detection
 
     # REMOVED_SYNTAX_ERROR: AUTHENTICATION FLOW VALIDATION:
-        # REMOVED_SYNTAX_ERROR: - Complete signup → login → chat flow across environments
+        # REMOVED_SYNTAX_ERROR: - Complete signup  ->  login  ->  chat flow across environments
         # REMOVED_SYNTAX_ERROR: - JWT token generation and validation
         # REMOVED_SYNTAX_ERROR: - Token refresh during deployment
         # REMOVED_SYNTAX_ERROR: - Cross-service authentication
@@ -334,10 +334,10 @@
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                             # REMOVED_SYNTAX_ERROR: if metrics.success:
-                                # REMOVED_SYNTAX_ERROR: print(f"✓ ZERO-DOWNTIME DEPLOYMENT SUCCESSFUL")
+                                # REMOVED_SYNTAX_ERROR: print(f"[U+2713] ZERO-DOWNTIME DEPLOYMENT SUCCESSFUL")
                                 # REMOVED_SYNTAX_ERROR: self._calculate_deployment_revenue_impact(metrics, "neutral")
                                 # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: print(f"✗ ZERO-DOWNTIME DEPLOYMENT FAILED")
+                                    # REMOVED_SYNTAX_ERROR: print(f"[U+2717] ZERO-DOWNTIME DEPLOYMENT FAILED")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: for error in deployment_errors:
@@ -520,11 +520,11 @@
 
                     # REMOVED_SYNTAX_ERROR: if metrics.success:
                         # REMOVED_SYNTAX_ERROR: print(f" )
-                        # REMOVED_SYNTAX_ERROR: ✓ DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")
+                        # REMOVED_SYNTAX_ERROR: [U+2713] DEPLOYMENT ROLLBACK AUTHENTICATION PASSED")
                         # REMOVED_SYNTAX_ERROR: self._calculate_deployment_revenue_impact(metrics, "neutral")
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: print(f" )
-                            # REMOVED_SYNTAX_ERROR: ✗ DEPLOYMENT ROLLBACK AUTHENTICATION FAILED")
+                            # REMOVED_SYNTAX_ERROR: [U+2717] DEPLOYMENT ROLLBACK AUTHENTICATION FAILED")
                             # REMOVED_SYNTAX_ERROR: self._calculate_deployment_revenue_impact(metrics, "negative")
 
                             # REMOVED_SYNTAX_ERROR: return metrics.success
@@ -1273,13 +1273,13 @@
 
                             # REMOVED_SYNTAX_ERROR: if overall_success_rate >= 0.8:
                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                # REMOVED_SYNTAX_ERROR: ✓ COMPREHENSIVE DEPLOYMENT TEST SUITE: SUCCESS")
+                                # REMOVED_SYNTAX_ERROR: [U+2713] COMPREHENSIVE DEPLOYMENT TEST SUITE: SUCCESS")
                                 # REMOVED_SYNTAX_ERROR: print("  All critical deployment phases validated successfully")
                                 # REMOVED_SYNTAX_ERROR: print("  Ready for production deployment")
                                 # REMOVED_SYNTAX_ERROR: return True
                                 # REMOVED_SYNTAX_ERROR: else:
                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                    # REMOVED_SYNTAX_ERROR: ✗ COMPREHENSIVE DEPLOYMENT TEST SUITE: ISSUES DETECTED")
+                                    # REMOVED_SYNTAX_ERROR: [U+2717] COMPREHENSIVE DEPLOYMENT TEST SUITE: ISSUES DETECTED")
                                     # REMOVED_SYNTAX_ERROR: print("  Critical deployment issues found - address before proceeding")
                                     # REMOVED_SYNTAX_ERROR: print("  Review failed tests and fix issues")
                                     # REMOVED_SYNTAX_ERROR: return False

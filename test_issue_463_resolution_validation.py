@@ -39,7 +39,7 @@ class Issue463ResolutionValidator:
         
     async def validate_websocket_authentication(self) -> Dict[str, Any]:
         """Test WebSocket connection establishment and authentication."""
-        logger.info("🔍 Testing WebSocket authentication resolution...")
+        logger.info(" SEARCH:  Testing WebSocket authentication resolution...")
         
         test_results = {
             "test_name": "websocket_authentication",
@@ -64,7 +64,7 @@ class Issue463ResolutionValidator:
                     extra_headers=headers,
                     timeout=30
                 ) as websocket:
-                    logger.info("✅ WebSocket connection established successfully")
+                    logger.info(" PASS:  WebSocket connection established successfully")
                     
                     # Send a test message
                     test_message = {
@@ -74,12 +74,12 @@ class Issue463ResolutionValidator:
                     }
                     
                     await websocket.send(json.dumps(test_message))
-                    logger.info("✅ Test message sent successfully")
+                    logger.info(" PASS:  Test message sent successfully")
                     
                     # Wait for response (with timeout)
                     try:
                         response = await asyncio.wait_for(websocket.recv(), timeout=10)
-                        logger.info(f"✅ Received response: {response[:100]}...")
+                        logger.info(f" PASS:  Received response: {response[:100]}...")
                         
                         test_results.update({
                             "status": "PASS",
@@ -92,7 +92,7 @@ class Issue463ResolutionValidator:
                         })
                         
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ No response received within timeout")
+                        logger.warning(" WARNING: [U+FE0F] No response received within timeout")
                         test_results.update({
                             "status": "PARTIAL",
                             "details": {
@@ -105,14 +105,14 @@ class Issue463ResolutionValidator:
                         
             except websockets.exceptions.WebSocketException as e:
                 if "403" in str(e) or "Forbidden" in str(e):
-                    logger.error(f"❌ WebSocket authentication still failing: {e}")
+                    logger.error(f" FAIL:  WebSocket authentication still failing: {e}")
                     test_results.update({
                         "status": "FAIL",
                         "details": {"auth_error": str(e)},
                         "errors": ["WebSocket authentication failure - Issue #463 NOT resolved"]
                     })
                 else:
-                    logger.error(f"❌ WebSocket connection error: {e}")
+                    logger.error(f" FAIL:  WebSocket connection error: {e}")
                     test_results.update({
                         "status": "FAIL", 
                         "details": {"connection_error": str(e)},
@@ -120,7 +120,7 @@ class Issue463ResolutionValidator:
                     })
                     
         except Exception as e:
-            logger.error(f"❌ Unexpected error during WebSocket test: {e}")
+            logger.error(f" FAIL:  Unexpected error during WebSocket test: {e}")
             test_results.update({
                 "status": "ERROR",
                 "details": {"unexpected_error": str(e)},
@@ -131,7 +131,7 @@ class Issue463ResolutionValidator:
         
     def validate_service_health(self) -> Dict[str, Any]:
         """Test service health endpoints."""
-        logger.info("🔍 Testing service health and connectivity...")
+        logger.info(" SEARCH:  Testing service health and connectivity...")
         
         test_results = {
             "test_name": "service_health", 
@@ -149,7 +149,7 @@ class Issue463ResolutionValidator:
             
             if response.status_code == 200:
                 health_data = response.json()
-                logger.info("✅ Backend service healthy")
+                logger.info(" PASS:  Backend service healthy")
                 
                 test_results.update({
                     "status": "PASS",
@@ -160,7 +160,7 @@ class Issue463ResolutionValidator:
                     }
                 })
             else:
-                logger.error(f"❌ Backend health check failed: {response.status_code}")
+                logger.error(f" FAIL:  Backend health check failed: {response.status_code}")
                 test_results.update({
                     "status": "FAIL",
                     "details": {
@@ -172,7 +172,7 @@ class Issue463ResolutionValidator:
                 })
                 
         except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Service health check failed: {e}")
+            logger.error(f" FAIL:  Service health check failed: {e}")
             test_results.update({
                 "status": "ERROR",
                 "details": {"request_error": str(e)},
@@ -183,7 +183,7 @@ class Issue463ResolutionValidator:
         
     def validate_environment_variables(self) -> Dict[str, Any]:
         """Validate that required environment variables are properly configured."""
-        logger.info("🔍 Testing environment variable configuration...")
+        logger.info(" SEARCH:  Testing environment variable configuration...")
         
         test_results = {
             "test_name": "environment_variables",
@@ -199,7 +199,7 @@ class Issue463ResolutionValidator:
             response = requests.get(config_url, timeout=15)
             
             if response.status_code == 200:
-                logger.info("✅ Configuration endpoint accessible")
+                logger.info(" PASS:  Configuration endpoint accessible")
                 test_results.update({
                     "status": "PASS",
                     "details": {
@@ -209,7 +209,7 @@ class Issue463ResolutionValidator:
                 })
             elif response.status_code == 404:
                 # Endpoint doesn't exist, but service is responding
-                logger.info("⚠️ Config endpoint not found, but service responding")
+                logger.info(" WARNING: [U+FE0F] Config endpoint not found, but service responding")
                 test_results.update({
                     "status": "PARTIAL",
                     "details": {
@@ -219,7 +219,7 @@ class Issue463ResolutionValidator:
                     }
                 })
             else:
-                logger.warning(f"⚠️ Config endpoint returned: {response.status_code}")
+                logger.warning(f" WARNING: [U+FE0F] Config endpoint returned: {response.status_code}")
                 test_results.update({
                     "status": "PARTIAL",
                     "details": {
@@ -229,7 +229,7 @@ class Issue463ResolutionValidator:
                 })
                 
         except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Environment validation error: {e}")
+            logger.error(f" FAIL:  Environment validation error: {e}")
             test_results.update({
                 "status": "ERROR", 
                 "details": {"request_error": str(e)},
@@ -240,7 +240,7 @@ class Issue463ResolutionValidator:
         
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run all validation tests and compile results."""
-        logger.info("🚀 Starting comprehensive Issue #463 resolution validation...")
+        logger.info("[U+1F680] Starting comprehensive Issue #463 resolution validation...")
         
         start_time = time.time()
         
@@ -366,24 +366,24 @@ async def main():
         
         for test in results["test_results"]:
             status_emoji = {
-                "PASS": "✅",
-                "PARTIAL": "⚠️", 
-                "FAIL": "❌",
-                "ERROR": "🔥"
-            }.get(test["status"], "❓")
+                "PASS": " PASS: ",
+                "PARTIAL": " WARNING: [U+FE0F]", 
+                "FAIL": " FAIL: ",
+                "ERROR": " FIRE: "
+            }.get(test["status"], "[U+2753]")
             
             print(f"{test['test_name']:<60} {status_emoji} {test['status']:<15}")
             
             if test.get("errors"):
                 for error in test["errors"]:
-                    print(f"  ↳ {error}")
+                    print(f"   ->  {error}")
                     
         conclusion = results["conclusion"]
         print(f"\n{'CONCLUSION':<80}")
         print("-" * 80)
-        print(f"Issue Resolved: {'✅ YES' if conclusion['issue_resolved'] else '❌ NO'}")
-        print(f"System Stable: {'✅ YES' if conclusion['system_stable'] else '❌ NO'}")
-        print(f"Chat Functional: {'✅ YES' if conclusion['chat_functional'] else '❌ NO'}")
+        print(f"Issue Resolved: {' PASS:  YES' if conclusion['issue_resolved'] else ' FAIL:  NO'}")
+        print(f"System Stable: {' PASS:  YES' if conclusion['system_stable'] else ' FAIL:  NO'}")
+        print(f"Chat Functional: {' PASS:  YES' if conclusion['chat_functional'] else ' FAIL:  NO'}")
         
         if conclusion.get("summary"):
             print(f"\nSummary: {conclusion['summary']}")
@@ -391,14 +391,14 @@ async def main():
         if conclusion.get("recommendations"):
             print(f"\nRecommendations:")
             for rec in conclusion["recommendations"]:
-                print(f"  • {rec}")
+                print(f"  [U+2022] {rec}")
                 
         print("\n" + "="*80)
         
         return results
         
     except Exception as e:
-        print(f"❌ Validation execution failed: {e}")
+        print(f" FAIL:  Validation execution failed: {e}")
         logger.exception("Validation execution error")
         return None
 

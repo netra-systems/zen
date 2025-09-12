@@ -80,12 +80,12 @@ class SupervisorAgent(BaseAgent):
         # Initialize workflow executor for workflow orchestration
         from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
         self.workflow_executor = SupervisorWorkflowExecutor(self)
-        logger.info("✅ SSOT SupervisorAgent workflow_executor initialized")
+        logger.info(" PASS:  SSOT SupervisorAgent workflow_executor initialized")
         
         # Validate no session storage (SSOT requirement)
         validate_agent_session_isolation(self)
         
-        logger.info("✅ SSOT SupervisorAgent initialized using factory and execution engine patterns")
+        logger.info(" PASS:  SSOT SupervisorAgent initialized using factory and execution engine patterns")
 
     def _create_supervisor_execution_context(self, 
                                            user_context: UserExecutionContext, 
@@ -148,7 +148,7 @@ class SupervisorAgent(BaseAgent):
         """
         # Validate context using SSOT validation
         context = validate_user_context(context)
-        logger.info(f"🚀 SSOT SupervisorAgent.execute() for user={context.user_id}, run_id={context.run_id}")
+        logger.info(f"[U+1F680] SSOT SupervisorAgent.execute() for user={context.user_id}, run_id={context.run_id}")
         
         if not context.db_session:
             raise ValueError("UserExecutionContext must contain a database session")
@@ -164,7 +164,7 @@ class SupervisorAgent(BaseAgent):
                     "Supervisor",
                     context={"status": "starting", "isolated": True}
                 )
-                logger.info(f"📡 Emitted agent_started event for run {context.run_id}")
+                logger.info(f"[U+1F4E1] Emitted agent_started event for run {context.run_id}")
             
             # CRITICAL FIX: Emit agent_thinking event
             if self.websocket_bridge:
@@ -174,7 +174,7 @@ class SupervisorAgent(BaseAgent):
                     reasoning="Analyzing your request and selecting appropriate agents...",
                     step_number=1
                 )
-                logger.info(f"📡 Emitted agent_thinking event for run {context.run_id}")
+                logger.info(f"[U+1F4E1] Emitted agent_thinking event for run {context.run_id}")
             
             # Execute orchestration workflow directly (no circular dependency)
             result = await self._execute_orchestration_workflow(
@@ -197,9 +197,9 @@ class SupervisorAgent(BaseAgent):
                     },
                     execution_time_ms=0  # TODO: Add proper timing
                 )
-                logger.info(f"📡 Emitted agent_completed event for run {context.run_id}")
+                logger.info(f"[U+1F4E1] Emitted agent_completed event for run {context.run_id}")
             
-            logger.info(f"✅ SSOT SupervisorAgent execution completed for user {context.user_id}")
+            logger.info(f" PASS:  SSOT SupervisorAgent execution completed for user {context.user_id}")
             
             # Return SSOT ExecutionResult format
             orchestration_successful = result.success if hasattr(result, 'success') else True
@@ -225,7 +225,7 @@ class SupervisorAgent(BaseAgent):
                     error=f"Supervisor execution failed: {str(e)}",
                     error_context={"error_type": type(e).__name__}
                 )
-                logger.error(f"📡 Emitted agent_error event for run {context.run_id}: {e}")
+                logger.error(f"[U+1F4E1] Emitted agent_error event for run {context.run_id}: {e}")
             
             # Return SSOT ExecutionResult for error cases
             return ExecutionResult(
@@ -293,7 +293,7 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Agent execution result
         """
-        logger.info(f"🔄 Legacy run() method - delegating to SSOT execute() for user {user_id}")
+        logger.info(f" CYCLE:  Legacy run() method - delegating to SSOT execute() for user {user_id}")
         
         # Create UserExecutionContext using SSOT factory method
         from shared.id_generation import UnifiedIdGenerator
@@ -334,7 +334,7 @@ class SupervisorAgent(BaseAgent):
             websocket_bridge=websocket_bridge
         )
         
-        logger.info("✅ Created SSOT SupervisorAgent using factory pattern")
+        logger.info(" PASS:  Created SSOT SupervisorAgent using factory pattern")
         return supervisor
 
     async def _execute_orchestration_workflow(self, 
@@ -356,7 +356,7 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Orchestration workflow result
         """
-        logger.info(f"🎭 Starting orchestration workflow for user {context.user_id}")
+        logger.info(f"[U+1F3AD] Starting orchestration workflow for user {context.user_id}")
         
         try:
             # Step 1: Triage the user request
@@ -421,11 +421,11 @@ class SupervisorAgent(BaseAgent):
                 "user_request": user_request
             }
             
-            logger.info(f"✅ Orchestration workflow completed for user {context.user_id}")
+            logger.info(f" PASS:  Orchestration workflow completed for user {context.user_id}")
             return orchestration_result
             
         except Exception as e:
-            logger.error(f"❌ Orchestration workflow failed for user {context.user_id}: {e}")
+            logger.error(f" FAIL:  Orchestration workflow failed for user {context.user_id}: {e}")
             return {
                 "workflow_completed": False,
                 "error": str(e),

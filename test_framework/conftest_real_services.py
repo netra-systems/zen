@@ -165,7 +165,7 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
     1. Mark with @pytest.mark.integration or @pytest.mark.e2e
     2. Or explicitly request this fixture
     """
-    logger.info("🚀 Starting E2E Service Orchestration for test session...")
+    logger.info("[U+1F680] Starting E2E Service Orchestration for test session...")
     
     # Check if real services should be used
     env_manager = get_test_env_manager()
@@ -193,13 +193,13 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
         try:
             # For staging, just check service availability
             await manager.ensure_all_services_available()
-            logger.info("✅ All staging services are healthy and ready")
+            logger.info(" PASS:  All staging services are healthy and ready")
             yield manager
         except ServiceUnavailableError as e:
-            logger.error(f"❌ Staging services not available: {e}")
+            logger.error(f" FAIL:  Staging services not available: {e}")
             pytest.skip(f"Staging services unavailable: {e}")
         except Exception as e:
-            logger.error(f"❌ Failed to initialize staging services: {e}")
+            logger.error(f" FAIL:  Failed to initialize staging services: {e}")
             raise
         finally:
             await manager.close_all()
@@ -224,7 +224,7 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
         
         try:
             # Phase 1: Orchestrate services (start + health check)
-            logger.info("🔄 Orchestrating E2E services...")
+            logger.info(" CYCLE:  Orchestrating E2E services...")
             success, health_report = await orchestrator.orchestrate_services()
             
             if not success:
@@ -232,13 +232,13 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
                 logger.error(error_report)
                 pytest.skip(f"E2E Service orchestration failed - services not healthy")
             
-            logger.info("✅ E2E Service orchestration completed successfully")
+            logger.info(" PASS:  E2E Service orchestration completed successfully")
             logger.info(orchestrator.get_health_report())
             
             # Phase 2: Initialize real services manager with orchestrated services
             manager = get_real_services()
             await manager.ensure_all_services_available()
-            logger.info("✅ All real services are healthy and ready")
+            logger.info(" PASS:  All real services are healthy and ready")
             
             # Phase 3: Load initial test fixtures
             fixture_dir = os.path.join(os.path.dirname(__file__), "fixtures", "test_data")
@@ -248,10 +248,10 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
             yield manager
             
         except ServiceUnavailableError as e:
-            logger.error(f"❌ Real services not available after orchestration: {e}")
+            logger.error(f" FAIL:  Real services not available after orchestration: {e}")
             pytest.skip(f"Real services unavailable: {e}")
         except Exception as e:
-            logger.error(f"❌ E2E Service orchestration failed: {e}")
+            logger.error(f" FAIL:  E2E Service orchestration failed: {e}")
             raise
         finally:
             # Cleanup session resources
@@ -260,10 +260,10 @@ async def real_services_function() -> AsyncIterator[RealServicesManager]:
             
             # Optional: Cleanup orchestrated services (only if we started them)
             if orchestrator.started_services:
-                logger.info("🧹 Cleaning up orchestrated services...")
+                logger.info("[U+1F9F9] Cleaning up orchestrated services...")
                 await orchestrator.cleanup_services()
             
-            logger.info("✅ E2E Service orchestration cleanup completed")
+            logger.info(" PASS:  E2E Service orchestration cleanup completed")
 
 
 # =============================================================================

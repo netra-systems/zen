@@ -5,7 +5,7 @@ This module tests critical database model functionality including validation rul
 relationship integrity, and business logic constraints.
 
 Business Value: Database models represent core business entities and ensure data integrity
-across all customer segments (Free → Enterprise), protecting business-critical data.
+across all customer segments (Free  ->  Enterprise), protecting business-critical data.
 """
 
 import pytest

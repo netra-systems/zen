@@ -31,9 +31,19 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.config import get_config
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.user_plan import PlanTier
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestableSubAgent(BaseAgent):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Concrete implementation of BaseAgent for testing."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
@@ -129,6 +139,15 @@ class ProductionAgentOrchestrator:
 
 @pytest.mark.e2e
 class TestAgentOrchestrationProduction:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Production agent orchestration tests."""
     
     @pytest.fixture
@@ -258,7 +277,7 @@ class TestAgentOrchestrationProduction:
         avg_time = sum(execution_times) / len(execution_times)
         assert avg_time < 5.0, f"Average execution time too high: {avg_time:.2f}s"
     
-    # Helper methods (≤8 lines each per CLAUDE.md)
+    # Helper methods ( <= 8 lines each per CLAUDE.md)
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
@@ -301,6 +320,15 @@ class TestAgentOrchestrationProduction:
 @pytest.mark.production
 @pytest.mark.e2e
 class TestEnterpriseAgentScenarios:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Enterprise-specific agent scenarios."""
     
     @pytest.mark.asyncio

@@ -1,7 +1,7 @@
 """
 Agent Fixtures Usage Examples
 Demonstrates how to use the comprehensive agent fixtures module
-≤300 lines, ≤8 lines per function - ARCHITECTURAL COMPLIANCE
+ <= 300 lines,  <= 8 lines per function - ARCHITECTURAL COMPLIANCE
 """
 
 import asyncio

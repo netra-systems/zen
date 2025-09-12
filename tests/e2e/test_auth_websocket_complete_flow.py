@@ -1,5 +1,5 @@
 """
-🌟 E2E TEST SUITE: Complete Authentication WebSocket Flow
+[U+1F31F] E2E TEST SUITE: Complete Authentication WebSocket Flow
 
 Tests the complete end-to-end authentication + WebSocket flow that delivers chat value.
 This validates the CRITICAL path from authentication to successful agent interactions.
@@ -191,7 +191,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
         
         BUSINESS VALUE: This IS our core product - the complete user value journey.
         """
-        logger.info("🎯 E2E: Testing complete auth-to-agent-response flow")
+        logger.info(" TARGET:  E2E: Testing complete auth-to-agent-response flow")
         
         # Generate unique user for this complete flow
         timestamp = int(time.time())
@@ -208,7 +208,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
         
         try:
             # STEP 1: User Authentication
-            logger.info("🔐 STEP 1: User Authentication")
+            logger.info("[U+1F510] STEP 1: User Authentication")
             self.validator.record_flow_step("authentication_started", "in_progress")
             
             # Create authenticated user with all necessary permissions
@@ -248,7 +248,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 pytest.fail(f"AUTHENTICATION FLOW FAILURE: Token validation failed - {str(e)}")
             
             # STEP 2: WebSocket Connection with Authentication  
-            logger.info("📡 STEP 2: WebSocket Connection with Auth")
+            logger.info("[U+1F4E1] STEP 2: WebSocket Connection with Auth")
             self.validator.record_flow_step("websocket_connection_started", "in_progress")
             
             websocket_url = f"{self.ws_auth_helper.config.websocket_url}?token={auth_token}"
@@ -266,7 +266,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                     })
                     
                     # STEP 3: User Identity Verification
-                    logger.info("👤 STEP 3: User Identity Verification")
+                    logger.info("[U+1F464] STEP 3: User Identity Verification")
                     self.validator.record_flow_step("identity_verification_started", "in_progress")
                     
                     # Send identity verification message
@@ -299,7 +299,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                         self.validator.record_flow_step("identity_verification_completed", "timeout")
                     
                     # STEP 4: Agent Request Submission
-                    logger.info("🤖 STEP 4: Agent Request with Authentication")
+                    logger.info("[U+1F916] STEP 4: Agent Request with Authentication")
                     self.validator.record_flow_step("agent_request_started", "in_progress")
                     
                     thread_id = f"complete-flow-thread-{uuid.uuid4().hex[:8]}"
@@ -325,7 +325,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                     })
                     
                     # STEP 5: Agent Event Collection (THE CORE VALUE!)
-                    logger.info("⚡ STEP 5: Agent Event Collection (VALUE DELIVERY)")
+                    logger.info(" LIGHTNING:  STEP 5: Agent Event Collection (VALUE DELIVERY)")
                     self.validator.record_flow_step("agent_events_started", "in_progress")
                     
                     agent_events_received = 0
@@ -379,7 +379,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                     })
                     
                     # STEP 6: Flow Completion Validation
-                    logger.info("✅ STEP 6: Flow Completion Validation")
+                    logger.info(" PASS:  STEP 6: Flow Completion Validation")
                     
                     # Record completion
                     self.validator.record_flow_step("flow_completed", "success", {
@@ -421,7 +421,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
             if flow_duration > 45:
                 logger.warning(f"PERFORMANCE WARNING: Complete flow took {flow_duration:.1f}s - may impact user experience")
             
-            logger.info(f"🎉 COMPLETE AUTH-WEBSOCKET FLOW SUCCESS")
+            logger.info(f" CELEBRATION:  COMPLETE AUTH-WEBSOCKET FLOW SUCCESS")
             logger.info(f"   User: {user_email}")
             logger.info(f"   Duration: {flow_duration:.1f}s")
             logger.info(f"   Steps: {validation['flow_metrics']['total_steps']}")
@@ -438,7 +438,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
         
         BUSINESS VALUE: Ensures users don't see each other's data - critical for privacy.
         """
-        logger.info("👥 E2E: Testing multi-user auth-WebSocket isolation")
+        logger.info("[U+1F465] E2E: Testing multi-user auth-WebSocket isolation")
         
         user_count = 3
         user_flows = []
@@ -446,7 +446,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
         
         try:
             # STEP 1: Create multiple authenticated users
-            logger.info(f"👤 STEP 1: Creating {user_count} authenticated users")
+            logger.info(f"[U+1F464] STEP 1: Creating {user_count} authenticated users")
             
             for i in range(user_count):
                 timestamp = int(time.time())
@@ -468,7 +468,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 })
             
             # STEP 2: Connect all users via WebSocket
-            logger.info("🔗 STEP 2: WebSocket connections for all users")
+            logger.info("[U+1F517] STEP 2: WebSocket connections for all users")
             
             for i, user_flow in enumerate(user_flows):
                 user_flow["validator"].start_flow_tracking({
@@ -493,7 +493,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 })
             
             # STEP 3: Send different messages from each user
-            logger.info("💬 STEP 3: Send isolated messages from each user")
+            logger.info("[U+1F4AC] STEP 3: Send isolated messages from each user")
             
             for i, user_flow in enumerate(user_flows):
                 private_message = {
@@ -515,7 +515,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 await asyncio.sleep(0.5)
             
             # STEP 4: Collect responses and validate isolation
-            logger.info("📨 STEP 4: Validate user isolation in responses")
+            logger.info("[U+1F4E8] STEP 4: Validate user isolation in responses")
             
             isolation_violations = []
             
@@ -572,7 +572,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 if not user_validation["websocket_connected"]:
                     pytest.fail(f"USER {i} FLOW FAILURE: WebSocket connection failed")
             
-            logger.info(f"✅ Multi-user auth-WebSocket isolation validated")
+            logger.info(f" PASS:  Multi-user auth-WebSocket isolation validated")
             logger.info(f"   Users tested: {user_count}")
             logger.info(f"   Isolation violations: {len(isolation_violations)}")
             
@@ -590,7 +590,7 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
         
         BUSINESS VALUE: System recovers gracefully from auth/connection issues.
         """
-        logger.info("🔄 E2E: Testing auth-WebSocket error recovery")
+        logger.info(" CYCLE:  E2E: Testing auth-WebSocket error recovery")
         
         timestamp = int(time.time())
         user_id = f"error-recovery-{timestamp}"
@@ -624,21 +624,21 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                         
                         # Should get auth error
                         if "error" in response_data or "auth" in response_data.get("type", "").lower():
-                            logger.info("✅ Invalid token handled gracefully with error response")
+                            logger.info(" PASS:  Invalid token handled gracefully with error response")
                         else:
                             logger.warning("Invalid token was accepted - potential security issue")
                     
                     except asyncio.TimeoutError:
-                        logger.info("✅ Invalid token caused connection drop - secure behavior")
+                        logger.info(" PASS:  Invalid token caused connection drop - secure behavior")
                         
             except websockets.exceptions.ConnectionClosed:
-                logger.info("✅ Invalid token rejected at connection - secure behavior")
+                logger.info(" PASS:  Invalid token rejected at connection - secure behavior")
                 
         except Exception as e:
-            logger.info(f"✅ Invalid token connection failed as expected: {e}")
+            logger.info(f" PASS:  Invalid token connection failed as expected: {e}")
         
         # Test recovery with valid token
-        logger.info("🔑 Testing recovery with valid token")
+        logger.info("[U+1F511] Testing recovery with valid token")
         
         valid_token = self.auth_helper.create_test_jwt_token(
             user_id=user_id,
@@ -664,15 +664,15 @@ class TestAuthWebSocketCompleteFlow(BaseE2ETest):
                 
                 try:
                     recovery_response = await asyncio.wait_for(recovery_websocket.recv(), timeout=5.0)
-                    logger.info("✅ Recovery with valid token successful")
+                    logger.info(" PASS:  Recovery with valid token successful")
                     
                 except asyncio.TimeoutError:
-                    logger.info("✅ Valid token connection established (no immediate response expected)")
+                    logger.info(" PASS:  Valid token connection established (no immediate response expected)")
                     
         except Exception as e:
             pytest.fail(f"RECOVERY FAILURE: Valid token should work - {str(e)}")
         
-        logger.info("✅ Auth-WebSocket error recovery validated")
+        logger.info(" PASS:  Auth-WebSocket error recovery validated")
 
 
 @pytest.mark.e2e
@@ -687,7 +687,7 @@ class TestAuthWebSocketPerformance(BaseE2ETest):
         
         BUSINESS VALUE: System handles realistic user concurrency without degradation.
         """
-        logger.info("⚡ E2E: Testing auth-WebSocket concurrent load")
+        logger.info(" LIGHTNING:  E2E: Testing auth-WebSocket concurrent load")
         
         concurrent_users = 10  # Realistic load for testing
         auth_helper = E2EWebSocketAuthHelper()
@@ -773,7 +773,7 @@ class TestAuthWebSocketPerformance(BaseE2ETest):
         assert max_duration < 10.0, f"Max session time {max_duration:.2f}s unacceptable"
         assert response_rate >= 0.7, f"Response rate {response_rate:.1%} too low"
         
-        logger.info(f"✅ Concurrent load test successful")
+        logger.info(f" PASS:  Concurrent load test successful")
         logger.info(f"   Users: {concurrent_users}")
         logger.info(f"   Success rate: {len(successful_users)}/{concurrent_users}")
         logger.info(f"   Avg duration: {avg_duration:.2f}s")

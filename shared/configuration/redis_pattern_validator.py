@@ -389,12 +389,12 @@ def print_redis_compliance_report(project_root: Optional[Path] = None) -> None:
         
         print("DETAILED VIOLATIONS:")
         for violation in report['detailed_violations']:
-            print(f"  • {violation}")
+            print(f"  [U+2022] {violation}")
         print()
     
     print("RECOMMENDATIONS:")
     for rec in report['recommendations']:
-        print(f"  • {rec}")
+        print(f"  [U+2022] {rec}")
     print()
     print("=" * 60)
 

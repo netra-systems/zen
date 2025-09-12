@@ -311,7 +311,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         stats = await engine.get_execution_stats()
         assert stats["failed_executions"] > 0
         
-        logger.info(f"✅ Immediate exception recovery test passed in {execution_time:.3f}s")
+        logger.info(f" PASS:  Immediate exception recovery test passed in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -371,7 +371,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         stats = await engine.get_execution_stats()
         assert stats["timeout_executions"] > 0
         
-        logger.info(f"✅ Agent timeout handling test passed in {execution_time:.3f}s")
+        logger.info(f" PASS:  Agent timeout handling test passed in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -425,7 +425,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
                        if "silent" in str(e.get("data", {})).lower()]
         assert len(error_events) > 0 or len(death_events) > 0
         
-        logger.info("✅ Silent failure detection test passed")
+        logger.info(" PASS:  Silent failure detection test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -489,7 +489,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
                           if e["event_type"] == "agent_thinking"]
         assert len(thinking_events) >= 2  # Should have multiple thinking events
         
-        logger.info(f"✅ Retry logic with backoff test passed in {execution_time:.3f}s")
+        logger.info(f" PASS:  Retry logic with backoff test passed in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -568,7 +568,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
                            if e["event_type"] == "agent_completed"]
         assert len(completed_events) >= 2  # At least 2 completions (working agents)
         
-        logger.info("✅ Workflow compensation after failure test passed")
+        logger.info(" PASS:  Workflow compensation after failure test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -639,7 +639,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
         await engine.shutdown()
         assert len(engine.active_runs) == 0
         
-        logger.info("✅ Resource cleanup after failures test passed")
+        logger.info(" PASS:  Resource cleanup after failures test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -736,7 +736,7 @@ class TestAgentFailureRecoveryIntegration(BaseIntegrationTest):
                 assert stats["failed_executions"] > 0
                 assert stats["total_executions"] > 0
                 
-        logger.info("✅ Concurrent failure isolation test passed")
+        logger.info(" PASS:  Concurrent failure isolation test passed")
 
 
 if __name__ == "__main__":

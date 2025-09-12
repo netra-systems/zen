@@ -80,8 +80,8 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         try:
             # Get proper WebSocket headers with authentication
             ws_headers = config.get_websocket_headers()
-            print(f"🔍 Attempting WebSocket connection to: {config.websocket_url}")
-            print(f"🔍 Using headers: {list(ws_headers.keys()) if ws_headers else 'None'}")
+            print(f" SEARCH:  Attempting WebSocket connection to: {config.websocket_url}")
+            print(f" SEARCH:  Using headers: {list(ws_headers.keys()) if ws_headers else 'None'}")
             
             # Connect with authentication - this should succeed initially
             async with websockets.connect(
@@ -91,7 +91,7 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
             ) as ws:
                 error_details["connection_established"] = True
                 error_details["timestamps"]["connection_established"] = time.time()
-                print("✓ WebSocket connection established successfully")
+                print("[U+2713] WebSocket connection established successfully")
                 
                 # Connection handshake successful
                 error_details["handshake_successful"] = True
@@ -99,15 +99,15 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                 try:
                     # CRITICAL: This is where SessionMiddleware failure occurs
                     # Backend accepts connection but fails during session access
-                    print("🔍 Waiting for welcome message (this should trigger SessionMiddleware error)...")
+                    print(" SEARCH:  Waiting for welcome message (this should trigger SessionMiddleware error)...")
                     
                     welcome_response = await asyncio.wait_for(ws.recv(), timeout=15)
                     error_details["welcome_message_received"] = True
-                    print(f"📥 Welcome message received: {welcome_response[:100]}...")
+                    print(f"[U+1F4E5] Welcome message received: {welcome_response[:100]}...")
                     
                     # If we get here, the SessionMiddleware issue might be fixed
-                    print("⚠️ UNEXPECTED: Welcome message received without SessionMiddleware error")
-                    print("⚠️ This suggests the SessionMiddleware issue may be resolved")
+                    print(" WARNING: [U+FE0F] UNEXPECTED: Welcome message received without SessionMiddleware error")
+                    print(" WARNING: [U+FE0F] This suggests the SessionMiddleware issue may be resolved")
                     
                 except websockets.exceptions.ConnectionClosedError as e:
                     # EXPECTED: This is the exact failure pattern we want to reproduce
@@ -118,23 +118,23 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                     
                     if e.code == 1011:
                         error_details["internal_error_1011"] = True
-                        print(f"✓ REPRODUCED: WebSocket 1011 internal error: {e}")
+                        print(f"[U+2713] REPRODUCED: WebSocket 1011 internal error: {e}")
                         
                         # Check if this is the SessionMiddleware error pattern
                         if "internal error" in str(e).lower():
                             error_details["session_middleware_error"] = True
-                            print("✓ REPRODUCED: SessionMiddleware failure pattern detected")
+                            print("[U+2713] REPRODUCED: SessionMiddleware failure pattern detected")
                     else:
-                        print(f"🔍 Different error pattern: {e.code} - {e}")
+                        print(f" SEARCH:  Different error pattern: {e.code} - {e}")
                         
                 except asyncio.TimeoutError:
                     error_details["timestamps"]["error_occurred"] = time.time()
-                    print("🔍 Timeout waiting for welcome message - connection hangs")
-                    print("🔍 This may indicate backend processing failure")
+                    print(" SEARCH:  Timeout waiting for welcome message - connection hangs")
+                    print(" SEARCH:  This may indicate backend processing failure")
                     
                     # Try to send a message to trigger the SessionMiddleware error
                     try:
-                        print("🔍 Attempting to send message to trigger SessionMiddleware error...")
+                        print(" SEARCH:  Attempting to send message to trigger SessionMiddleware error...")
                         test_message = {
                             "type": "test_message",
                             "content": "Test message to trigger SessionMiddleware error",
@@ -145,7 +145,7 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                         
                         # Try to receive response - this should trigger the SessionMiddleware error
                         response = await asyncio.wait_for(ws.recv(), timeout=10)
-                        print(f"🔍 Unexpected response received: {response[:100]}...")
+                        print(f" SEARCH:  Unexpected response received: {response[:100]}...")
                         
                     except websockets.exceptions.ConnectionClosedError as msg_error:
                         error_details["websocket_close_code"] = msg_error.code
@@ -155,24 +155,24 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                         if msg_error.code == 1011:
                             error_details["internal_error_1011"] = True
                             error_details["session_middleware_error"] = True
-                            print(f"✓ REPRODUCED: SessionMiddleware error on message send: {msg_error}")
+                            print(f"[U+2713] REPRODUCED: SessionMiddleware error on message send: {msg_error}")
                     
                     except Exception as msg_error:
-                        print(f"🔍 Message send error: {msg_error}")
+                        print(f" SEARCH:  Message send error: {msg_error}")
                 
                 error_details["timestamps"]["connection_closed"] = time.time()
                 
         except websockets.exceptions.InvalidStatus as e:
             # Connection rejected - might be auth issue
-            print(f"🔍 Connection rejected: {e}")
+            print(f" SEARCH:  Connection rejected: {e}")
             if e.status_code in [401, 403]:
-                print("🔍 Authentication rejected - expected in staging environment")
+                print(" SEARCH:  Authentication rejected - expected in staging environment")
             else:
-                print(f"🔍 Unexpected status code: {e.status_code}")
+                print(f" SEARCH:  Unexpected status code: {e.status_code}")
                 
         except Exception as e:
             error_details["exact_error_message"] = str(e)
-            print(f"🔍 Unexpected connection error: {e}")
+            print(f" SEARCH:  Unexpected connection error: {e}")
         
         duration = time.time() - start_time
         error_details["total_duration"] = duration
@@ -192,24 +192,24 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         
         # SUCCESS CRITERIA: We want to reproduce the SessionMiddleware failure
         if error_details["internal_error_1011"] and error_details["session_middleware_error"]:
-            print("\n✅ SUCCESS: Successfully reproduced SessionMiddleware failure!")
-            print("✅ WebSocket 1011 internal error reproduced")
-            print("✅ SessionMiddleware error pattern confirmed")
+            print("\n PASS:  SUCCESS: Successfully reproduced SessionMiddleware failure!")
+            print(" PASS:  WebSocket 1011 internal error reproduced")
+            print(" PASS:  SessionMiddleware error pattern confirmed")
             
             # This is actually success for a reproduction test
             assert True, "SessionMiddleware failure successfully reproduced"
             
         elif error_details["connection_established"] and not error_details["welcome_message_received"]:
-            print("\n⚠️ PARTIAL REPRODUCTION: Connection established but failed during processing")
-            print("⚠️ This suggests SessionMiddleware issue exists but may manifest differently")
+            print("\n WARNING: [U+FE0F] PARTIAL REPRODUCTION: Connection established but failed during processing")
+            print(" WARNING: [U+FE0F] This suggests SessionMiddleware issue exists but may manifest differently")
             
             # Still consider this a successful reproduction of the problem
             assert True, "SessionMiddleware processing failure reproduced"
             
         elif error_details["connection_established"] and error_details["welcome_message_received"]:
-            print("\n❌ REPRODUCTION FAILED: No SessionMiddleware error detected")
-            print("❌ This suggests the SessionMiddleware issue may be fixed")
-            print("❌ Or the test environment has different configuration")
+            print("\n FAIL:  REPRODUCTION FAILED: No SessionMiddleware error detected")
+            print(" FAIL:  This suggests the SessionMiddleware issue may be fixed")
+            print(" FAIL:  Or the test environment has different configuration")
             
             # For a reproduction test, this is actually a failure
             pytest.fail(
@@ -218,8 +218,8 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
             )
             
         else:
-            print("\n❌ REPRODUCTION FAILED: Could not establish WebSocket connection")
-            print("❌ Cannot reproduce SessionMiddleware error without connection")
+            print("\n FAIL:  REPRODUCTION FAILED: Could not establish WebSocket connection")
+            print(" FAIL:  Cannot reproduce SessionMiddleware error without connection")
             
             pytest.fail(
                 "Failed to establish WebSocket connection to reproduce SessionMiddleware error. "
@@ -242,15 +242,15 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         async with httpx.AsyncClient(timeout=30) as client:
             try:
                 health_response = await client.get(f"{config.backend_url}/health")
-                print(f"🔍 Backend health status: {health_response.status_code}")
+                print(f" SEARCH:  Backend health status: {health_response.status_code}")
                 
                 if health_response.status_code != 200:
-                    print(f"⚠️ Backend health check failed: {health_response.text}")
+                    print(f" WARNING: [U+FE0F] Backend health check failed: {health_response.text}")
                 else:
-                    print("✓ Backend is responding to HTTP requests")
+                    print("[U+2713] Backend is responding to HTTP requests")
                     
             except Exception as e:
-                print(f"❌ Backend health check failed: {e}")
+                print(f" FAIL:  Backend health check failed: {e}")
                 pytest.fail(f"Cannot test SessionMiddleware with unhealthy backend: {e}")
         
         # Test if specific endpoints that require session access fail
@@ -282,12 +282,12 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                                 "status": response.status_code,
                                 "error_text": response.text[:200]
                             })
-                            print(f"🔍 SessionMiddleware error detected on {endpoint}")
+                            print(f" SEARCH:  SessionMiddleware error detected on {endpoint}")
                     
                     await asyncio.sleep(0.1)  # Prevent overwhelming backend
                     
                 except Exception as e:
-                    print(f"🔍 Endpoint test error {endpoint}: {e}")
+                    print(f" SEARCH:  Endpoint test error {endpoint}: {e}")
         
         duration = time.time() - start_time
         
@@ -305,11 +305,11 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         
         # For reproduction purposes, we want to detect session middleware issues
         if session_errors_detected:
-            print("✅ SUCCESS: SessionMiddleware errors detected in HTTP endpoints")
-            print("✅ This supports the WebSocket SessionMiddleware failure hypothesis")
+            print(" PASS:  SUCCESS: SessionMiddleware errors detected in HTTP endpoints")
+            print(" PASS:  This supports the WebSocket SessionMiddleware failure hypothesis")
         else:
-            print("🔍 No obvious SessionMiddleware errors in HTTP endpoints")
-            print("🔍 SessionMiddleware issue may be specific to WebSocket processing")
+            print(" SEARCH:  No obvious SessionMiddleware errors in HTTP endpoints")
+            print(" SEARCH:  SessionMiddleware issue may be specific to WebSocket processing")
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(60) 
@@ -336,7 +336,7 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         }
         
         try:
-            print("🔍 Phase 1: TCP Connection")
+            print(" SEARCH:  Phase 1: TCP Connection")
             # Test raw WebSocket connection without auth first
             async with websockets.connect(
                 config.websocket_url.replace("wss://", "ws://") if config.websocket_url.startswith("wss://") else config.websocket_url,
@@ -344,18 +344,18 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
             ) as ws:
                 connection_phases["tcp_connection"] = True
                 connection_phases["websocket_handshake"] = True
-                print("✓ Phase 1 & 2: TCP Connection and WebSocket handshake successful")
+                print("[U+2713] Phase 1 & 2: TCP Connection and WebSocket handshake successful")
                 
                 # Close immediately to test just connection capability
                 
         except Exception as e:
             connection_phases["error_phase"] = "tcp_connection"
             connection_phases["error_details"] = str(e)
-            print(f"❌ Phase 1 failed: {e}")
+            print(f" FAIL:  Phase 1 failed: {e}")
         
         if connection_phases["tcp_connection"]:
             try:
-                print("🔍 Phase 3: Authentication")
+                print(" SEARCH:  Phase 3: Authentication")
                 ws_headers = config.get_websocket_headers()
                 
                 async with websockets.connect(
@@ -364,43 +364,43 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
                     timeout=10
                 ) as ws:
                     connection_phases["authentication"] = True
-                    print("✓ Phase 3: Authentication successful")
+                    print("[U+2713] Phase 3: Authentication successful")
                     
                     try:
-                        print("🔍 Phase 4: Session Access (welcome message)")
+                        print(" SEARCH:  Phase 4: Session Access (welcome message)")
                         # This is where SessionMiddleware error typically occurs
                         welcome_msg = await asyncio.wait_for(ws.recv(), timeout=5)
                         connection_phases["session_access"] = True
-                        print("✓ Phase 4: Session access successful")
+                        print("[U+2713] Phase 4: Session access successful")
                         
                         try:
-                            print("🔍 Phase 5: Message Processing")
+                            print(" SEARCH:  Phase 5: Message Processing")
                             test_msg = {"type": "test", "content": "test"}
                             await ws.send(json.dumps(test_msg))
                             
                             response = await asyncio.wait_for(ws.recv(), timeout=5)
                             connection_phases["message_processing"] = True
-                            print("✓ Phase 5: Message processing successful")
+                            print("[U+2713] Phase 5: Message processing successful")
                             
                         except Exception as e:
                             connection_phases["error_phase"] = "message_processing"
                             connection_phases["error_details"] = str(e)
-                            print(f"❌ Phase 5 failed: {e}")
+                            print(f" FAIL:  Phase 5 failed: {e}")
                             
                     except websockets.exceptions.ConnectionClosedError as e:
                         connection_phases["error_phase"] = "session_access"
                         connection_phases["error_details"] = f"Code {e.code}: {e.reason}"
-                        print(f"❌ Phase 4 failed - SessionMiddleware error likely: {e}")
+                        print(f" FAIL:  Phase 4 failed - SessionMiddleware error likely: {e}")
                         
                     except asyncio.TimeoutError:
                         connection_phases["error_phase"] = "session_access" 
                         connection_phases["error_details"] = "Timeout waiting for welcome message"
-                        print("❌ Phase 4 failed: Timeout - backend processing issue")
+                        print(" FAIL:  Phase 4 failed: Timeout - backend processing issue")
                         
             except Exception as e:
                 connection_phases["error_phase"] = "authentication"
                 connection_phases["error_details"] = str(e)
-                print(f"❌ Phase 3 failed: {e}")
+                print(f" FAIL:  Phase 3 failed: {e}")
         
         duration = time.time() - start_time
         
@@ -418,24 +418,24 @@ class TestWebSocketSessionMiddlewareFailureReproduction:
         
         # Analyze where the failure occurs for SessionMiddleware debugging
         if connection_phases["error_phase"] == "session_access":
-            print("\n✅ SUCCESS: SessionMiddleware failure reproduced at session access phase")
-            print("✅ Connection and auth work, but session access fails")
-            print("✅ This confirms the SessionMiddleware installation issue")
+            print("\n PASS:  SUCCESS: SessionMiddleware failure reproduced at session access phase")
+            print(" PASS:  Connection and auth work, but session access fails")
+            print(" PASS:  This confirms the SessionMiddleware installation issue")
             
         elif connection_phases["error_phase"] == "message_processing":
-            print("\n✅ SUCCESS: SessionMiddleware failure reproduced at message processing phase")
-            print("✅ Welcome message works, but message processing fails")
-            print("✅ This suggests SessionMiddleware works partially")
+            print("\n PASS:  SUCCESS: SessionMiddleware failure reproduced at message processing phase")
+            print(" PASS:  Welcome message works, but message processing fails")
+            print(" PASS:  This suggests SessionMiddleware works partially")
             
         elif connection_phases["error_phase"] is None:
-            print("\n❌ REPRODUCTION FAILED: All phases successful")
-            print("❌ SessionMiddleware appears to be working correctly")
+            print("\n FAIL:  REPRODUCTION FAILED: All phases successful")
+            print(" FAIL:  SessionMiddleware appears to be working correctly")
             pytest.fail("Failed to reproduce SessionMiddleware failure - all connection phases successful")
             
         else:
-            print(f"\n🔍 DIFFERENT FAILURE: Error in {connection_phases['error_phase']} phase")
-            print(f"🔍 Error details: {connection_phases['error_details']}")
-            print("🔍 This may be a different issue than SessionMiddleware")
+            print(f"\n SEARCH:  DIFFERENT FAILURE: Error in {connection_phases['error_phase']} phase")
+            print(f" SEARCH:  Error details: {connection_phases['error_details']}")
+            print(" SEARCH:  This may be a different issue than SessionMiddleware")
 
 
 def verify_reproduction_test_timing(test_name: str, duration: float, minimum: float = 0.2):
@@ -446,7 +446,7 @@ def verify_reproduction_test_timing(test_name: str, duration: float, minimum: fl
     reproduce staging environment failures.
     """
     assert duration >= minimum, \
-        f"🚨 FAKE REPRODUCTION TEST: {test_name} completed in {duration:.3f}s " \
+        f" ALERT:  FAKE REPRODUCTION TEST: {test_name} completed in {duration:.3f}s " \
         f"(minimum: {minimum}s). Reproduction tests must make real network calls!"
 
 

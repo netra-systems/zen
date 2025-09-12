@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """Unit Tests for Golden Path SupervisorAgent Constructor Issues
 
 Business Value Justification (BVJ):
@@ -123,7 +161,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             
             self.assertIsNotNone(supervisor)
             self.assertEqual(supervisor.llm_manager, self.mock_llm_manager)
-            logger.info("✅ SupervisorAgent constructor with llm_manager succeeded")
+            logger.info(" PASS:  SupervisorAgent constructor with llm_manager succeeded")
             
         except TypeError as e:
             logger.error(f"SupervisorAgent constructor TypeError: {e}")
@@ -158,7 +196,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             
             self.assertIsNotNone(supervisor)
             self.assertEqual(supervisor.llm_manager, self.mock_llm_manager)
-            logger.info("✅ SupervisorAgent fallback constructor pattern succeeded")
+            logger.info(" PASS:  SupervisorAgent fallback constructor pattern succeeded")
             
         except Exception as e:
             logger.error(f"SupervisorAgent fallback constructor failed: {e}")
@@ -174,7 +212,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
                 try:
                     supervisor = pattern()
                     supervisor.llm_manager = self.mock_llm_manager
-                    logger.info(f"✅ Alternative constructor pattern {i+1} succeeded")
+                    logger.info(f" PASS:  Alternative constructor pattern {i+1} succeeded")
                     break
                 except Exception as alt_e:
                     logger.debug(f"Alternative pattern {i+1} failed: {alt_e}")
@@ -218,7 +256,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             )
             
             self.assertIsNotNone(result, "SupervisorAgent execution should return result")
-            logger.info("✅ SupervisorAgent execution after construction succeeded")
+            logger.info(" PASS:  SupervisorAgent execution after construction succeeded")
             
         except ImportError as e:
             pytest.skip(f"SupervisorAgent not available: {e}")
@@ -240,7 +278,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             try:
                 supervisor1 = SupervisorAgent(llm_manager=self.mock_llm_manager)
                 self.assertEqual(supervisor1.llm_manager, self.mock_llm_manager)
-                logger.info("✅ Constructor injection pattern works")
+                logger.info(" PASS:  Constructor injection pattern works")
             except TypeError:
                 logger.info("Constructor injection pattern not supported")
                 supervisor1 = None
@@ -249,18 +287,18 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
             supervisor2 = SupervisorAgent()
             supervisor2.llm_manager = self.mock_llm_manager
             self.assertEqual(supervisor2.llm_manager, self.mock_llm_manager)
-            logger.info("✅ Property injection pattern works")
+            logger.info(" PASS:  Property injection pattern works")
             
             # Pattern 3: Method injection (if available)
             supervisor3 = SupervisorAgent()
             if hasattr(supervisor3, 'set_llm_manager'):
                 supervisor3.set_llm_manager(self.mock_llm_manager)
                 self.assertEqual(supervisor3.llm_manager, self.mock_llm_manager)
-                logger.info("✅ Method injection pattern works")
+                logger.info(" PASS:  Method injection pattern works")
             else:
                 # Fallback to property injection
                 supervisor3.llm_manager = self.mock_llm_manager
-                logger.info("✅ Fallback to property injection for pattern 3")
+                logger.info(" PASS:  Fallback to property injection for pattern 3")
             
             # Verify all patterns create working supervisors
             working_supervisors = [s for s in [supervisor1, supervisor2, supervisor3] if s is not None]
@@ -324,7 +362,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
                         'supervisor': supervisor,
                         'error': None
                     }
-                    logger.info(f"✅ Constructor pattern '{pattern['name']}' succeeded")
+                    logger.info(f" PASS:  Constructor pattern '{pattern['name']}' succeeded")
                     
                 except Exception as e:
                     results[pattern['name']] = {
@@ -332,7 +370,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
                         'supervisor': None,
                         'error': str(e)
                     }
-                    logger.info(f"❌ Constructor pattern '{pattern['name']}' failed: {e}")
+                    logger.info(f" FAIL:  Constructor pattern '{pattern['name']}' failed: {e}")
             
             # Analyze results
             successful_patterns = [name for name, result in results.items() if result['success']]
@@ -379,7 +417,7 @@ class TestSupervisorAgentConstructor(SSotAsyncTestCase):
         self.assertEqual(call_args.kwargs['context'], self.user_context)
         self.assertTrue(call_args.kwargs['stream_updates'])
         
-        logger.info("✅ Mock SupervisorAgent pattern for Golden Path tests validated")
+        logger.info(" PASS:  Mock SupervisorAgent pattern for Golden Path tests validated")
 
     def teardown_method(self, method):
         """Clean up test environment."""

@@ -20,8 +20,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 INFRASTRUCTURE TEST FLOW:
 ```
-GCP Staging Connection → Load Balancer Request → Header Forwarding Check →
-Backend Header Validation → WebSocket Authentication → Success/Failure Analysis
+GCP Staging Connection  ->  Load Balancer Request  ->  Header Forwarding Check  -> 
+Backend Header Validation  ->  WebSocket Authentication  ->  Success/Failure Analysis
 ```
 
 This reproduces the issue where GCP Load Balancer strips authentication headers,

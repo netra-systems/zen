@@ -41,7 +41,7 @@ class DirectWorkflowTester:
         # Mock the agent execution to return test results
         self.orchestrator._execute_workflow_step = AsyncMock(side_effect=self._mock_execute_step)
         
-        print("✓ Workflow orchestrator initialized")
+        print("[U+2713] Workflow orchestrator initialized")
         
     async def _mock_execute_step(self, context, step):
         """Mock execution of a workflow step."""
@@ -120,8 +120,8 @@ class DirectWorkflowTester:
             # Analyze results
             agent_sequence = [r.agent_name for r in results if r]
             
-            print(f"✓ Workflow executed successfully")
-            print(f"  Agent sequence: {' → '.join(agent_sequence)}")
+            print(f"[U+2713] Workflow executed successfully")
+            print(f"  Agent sequence: {'  ->  '.join(agent_sequence)}")
             
             # Check if the workflow matches expected pattern
             if expected_sufficiency == "sufficient":
@@ -133,16 +133,16 @@ class DirectWorkflowTester:
             
             # Verify the workflow followed the expected path
             if agent_sequence[:len(expected_agents)] == expected_agents:
-                print(f"✓ Workflow followed expected path for {expected_sufficiency} data")
+                print(f"[U+2713] Workflow followed expected path for {expected_sufficiency} data")
                 return True
             else:
-                print(f"✗ Unexpected workflow path")
+                print(f"[U+2717] Unexpected workflow path")
                 print(f"  Expected: {expected_agents}")
                 print(f"  Got: {agent_sequence}")
                 return False
                 
         except Exception as e:
-            print(f"✗ Error executing workflow: {e}")
+            print(f"[U+2717] Error executing workflow: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -195,7 +195,7 @@ class DirectWorkflowTester:
         print("="*70)
         
         for r in results:
-            status = "✓" if r["success"] else "✗"
+            status = "[U+2713]" if r["success"] else "[U+2717]"
             print(f"{status} {r['name']}")
         
         success_count = sum(1 for r in results if r["success"])

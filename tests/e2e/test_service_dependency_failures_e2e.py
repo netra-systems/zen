@@ -9,12 +9,12 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Protects customer experience during infrastructure issues
 
 CRITICAL E2E REQUIREMENTS (CLAUDE.md Compliance):
-✅ FEATURE FREEZE: Only validates existing resilience features work correctly
-✅ NO MOCKS ALLOWED: Real Docker services with simulated failures
-✅ MANDATORY E2E AUTH: All tests use create_authenticated_user_context()
-✅ MISSION CRITICAL EVENTS: All 5 WebSocket events validated even during degradation
-✅ COMPLETE WORK: Full business continuity validation under service failures
-✅ SYSTEM STABILITY: Proves system gracefully handles dependency failures
+ PASS:  FEATURE FREEZE: Only validates existing resilience features work correctly
+ PASS:  NO MOCKS ALLOWED: Real Docker services with simulated failures
+ PASS:  MANDATORY E2E AUTH: All tests use create_authenticated_user_context()
+ PASS:  MISSION CRITICAL EVENTS: All 5 WebSocket events validated even during degradation
+ PASS:  COMPLETE WORK: Full business continuity validation under service failures
+ PASS:  SYSTEM STABILITY: Proves system gracefully handles dependency failures
 
 ROOT CAUSE ADDRESSED:
 - Service dependency failures causing complete system breakdowns
@@ -146,13 +146,13 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 auth_ready = await self._check_auth_service_health()
                 
                 if all([postgres_ready, redis_ready, backend_ready, auth_ready]):
-                    print("✅ All services ready for dependency failure testing")
+                    print(" PASS:  All services ready for dependency failure testing")
                     return
                 
                 await asyncio.sleep(1.0)
                 
             except Exception as e:
-                print(f"⏳ Service readiness check failed: {e}, retrying...")
+                print(f"[U+23F3] Service readiness check failed: {e}, retrying...")
                 await asyncio.sleep(1.0)
         
         pytest.fail(f"Services not ready after {max_wait_time}s wait")
@@ -199,12 +199,12 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             matching_containers = [name for name in container_names if service_name in name and name.strip()]
             
             if not matching_containers:
-                print(f"⚠️ No container found for service: {service_name}")
+                print(f" WARNING: [U+FE0F] No container found for service: {service_name}")
                 yield
                 return
             
             service_container = matching_containers[0]
-            print(f"🔴 Stopping service container: {service_container}")
+            print(f"[U+1F534] Stopping service container: {service_container}")
             
             # Stop the container
             subprocess.run(
@@ -218,13 +218,13 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             yield service_container
             
         except Exception as e:
-            print(f"❌ Error simulating {service_name} failure: {e}")
+            print(f" FAIL:  Error simulating {service_name} failure: {e}")
             yield
         finally:
             # Always attempt to restart the service
             if service_container:
                 try:
-                    print(f"🔄 Restarting service container: {service_container}")
+                    print(f" CYCLE:  Restarting service container: {service_container}")
                     subprocess.run(
                         ['docker', 'start', service_container],
                         capture_output=True, timeout=30
@@ -232,10 +232,10 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                     
                     # Wait for service to recover
                     await asyncio.sleep(5.0)
-                    print(f"✅ Service {service_container} restarted")
+                    print(f" PASS:  Service {service_container} restarted")
                     
                 except Exception as e:
-                    print(f"❌ Error restarting {service_container}: {e}")
+                    print(f" FAIL:  Error restarting {service_container}: {e}")
 
     async def test_001_database_failure_graceful_degradation(self):
         """
@@ -280,7 +280,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             
             # Now test with database failure
             async with self._simulate_service_failure("postgres", failure_duration=15.0):
-                print("🔴 Database failed - testing degraded mode")
+                print("[U+1F534] Database failed - testing degraded mode")
                 
                 # Reconnect during database failure
                 websocket = await self.auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -322,10 +322,10 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             has_degradation_notice = any(indicator in response_content for indicator in degradation_indicators)
             
             if not has_degradation_notice:
-                print(f"⚠️ Warning: Degraded response may not indicate limitations: {response_content[:100]}...")
+                print(f" WARNING: [U+FE0F] Warning: Degraded response may not indicate limitations: {response_content[:100]}...")
             
-            print("✅ Database failure graceful degradation validated")
-            print(f"✅ Baseline events: {len(baseline_events)}, Degraded events: {len(degraded_events)}")
+            print(" PASS:  Database failure graceful degradation validated")
+            print(f" PASS:  Baseline events: {len(baseline_events)}, Degraded events: {len(degraded_events)}")
             
         finally:
             if websocket and not websocket.closed:
@@ -351,7 +351,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
         try:
             # Test with Redis cache failure
             async with self._simulate_service_failure("redis", failure_duration=12.0):
-                print("🔴 Redis cache failed - testing direct database fallback")
+                print("[U+1F534] Redis cache failed - testing direct database fallback")
                 
                 websocket = await self.auth_helper.connect_authenticated_websocket(timeout=15.0)
                 
@@ -386,8 +386,8 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 total_duration = max(event_timestamps) - min(event_timestamps)
                 assert total_duration < 20.0, f"Cache fallback too slow: {total_duration}s"
             
-            print("✅ Redis cache failure fallback validated")
-            print(f"✅ All {len(self.CRITICAL_WEBSOCKET_EVENTS)} critical events delivered without cache")
+            print(" PASS:  Redis cache failure fallback validated")
+            print(f" PASS:  All {len(self.CRITICAL_WEBSOCKET_EVENTS)} critical events delivered without cache")
             
         finally:
             if websocket and not websocket.closed:
@@ -431,7 +431,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             
             # Now simulate auth service failure
             async with self._simulate_service_failure("auth", failure_duration=10.0):
-                print("🔴 Auth service failed - testing session continuity")
+                print("[U+1F534] Auth service failed - testing session continuity")
                 
                 # Send message during auth service failure
                 auth_degraded_message = {
@@ -464,8 +464,8 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 assert event["user_id"] == str(user_context.user_id), \
                     f"User context lost during auth failure: {event}"
             
-            print("✅ Auth service degradation handled successfully")
-            print("✅ Existing session maintained continuity during auth service failure")
+            print(" PASS:  Auth service degradation handled successfully")
+            print(" PASS:  Existing session maintained continuity during auth service failure")
             
         finally:
             if websocket and not websocket.closed:
@@ -495,11 +495,11 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             # Test cascading service failures
             # NOTE: Careful not to fail too many services that would break basic connectivity
             async with self._simulate_service_failure("redis", failure_duration=15.0):
-                print("🔴 Redis failed")
+                print("[U+1F534] Redis failed")
                 await asyncio.sleep(2.0)
                 
                 # While Redis is down, add database pressure (but don't stop completely)
-                print("⚠️ Testing under multiple service degradation")
+                print(" WARNING: [U+FE0F] Testing under multiple service degradation")
                 
                 multi_failure_message = {
                     "type": "chat_message",
@@ -537,8 +537,8 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 assert "exception" not in error_message, f"Unhandled exception: {error_event}"
                 assert "traceback" not in error_message, f"Exposed traceback: {error_event}"
             
-            print("✅ Multiple service failure resilience validated")
-            print(f"✅ System maintained functionality under stress: {len(multi_failure_events)} events")
+            print(" PASS:  Multiple service failure resilience validated")
+            print(f" PASS:  System maintained functionality under stress: {len(multi_failure_events)} events")
             
         finally:
             if websocket and not websocket.closed:
@@ -566,7 +566,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             
             # Test service failure and recovery cycle
             async with self._simulate_service_failure("redis", failure_duration=8.0) as failed_service:
-                print(f"🔴 Service {failed_service} failed - testing during failure")
+                print(f"[U+1F534] Service {failed_service} failed - testing during failure")
                 
                 # Send message during failure
                 failure_message = {
@@ -582,7 +582,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 # Capture events during failure
                 await self._capture_events_for_duration(websocket, recovery_events, duration=5.0)
             
-            print("🔄 Service recovering - testing recovery transition")
+            print(" CYCLE:  Service recovering - testing recovery transition")
             await asyncio.sleep(3.0)  # Allow recovery to stabilize
             
             # Send message after recovery
@@ -615,8 +615,8 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             recovery_phase_events = [e for e in recovery_events if e.get("recovery_phase") == "recovered"]
             
             if recovery_phase_events:
-                print(f"✅ Service recovery completed successfully")
-                print(f"✅ Business continuity maintained: {len(recovery_events)} total events")
+                print(f" PASS:  Service recovery completed successfully")
+                print(f" PASS:  Business continuity maintained: {len(recovery_events)} total events")
             
         finally:
             if websocket and not websocket.closed:
@@ -641,7 +641,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
         
         try:
             async with self._simulate_service_failure("redis", failure_duration=12.0):
-                print("🔴 Testing user value delivery in degraded mode")
+                print("[U+1F534] Testing user value delivery in degraded mode")
                 
                 websocket = await self.auth_helper.connect_authenticated_websocket(timeout=15.0)
                 
@@ -680,17 +680,17 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
             
             # May indicate limitations but should still try to help
             if not provides_value:
-                print(f"⚠️ Warning: Degraded response may lack business value: {response_content[:100]}...")
+                print(f" WARNING: [U+FE0F] Warning: Degraded response may lack business value: {response_content[:100]}...")
             
             # Should indicate degraded capabilities honestly
             degradation_notices = ["limited", "degraded", "reduced", "offline", "unavailable"]
             acknowledges_degradation = any(notice in response_content for notice in degradation_notices)
             
             if acknowledges_degradation:
-                print("✅ Degraded mode honestly communicates limitations to user")
+                print(" PASS:  Degraded mode honestly communicates limitations to user")
             
-            print("✅ User value delivery validated in degraded mode")
-            print(f"✅ Maintained {len(self.CRITICAL_WEBSOCKET_EVENTS)} critical events under degradation")
+            print(" PASS:  User value delivery validated in degraded mode")
+            print(f" PASS:  Maintained {len(self.CRITICAL_WEBSOCKET_EVENTS)} critical events under degradation")
             
         finally:
             if websocket and not websocket.closed:
@@ -716,7 +716,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 event_data["capture_timestamp"] = time.time()
                 event_list.append(event_data)
                 
-                print(f"📨 Captured event: {event_data.get('type', 'unknown')}")
+                print(f"[U+1F4E8] Captured event: {event_data.get('type', 'unknown')}")
                 
                 # Stop early if we get agent completion
                 if event_data.get("type") == "agent_completed":
@@ -747,7 +747,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
         
         try:
             async with self._simulate_service_failure("postgres", failure_duration=10.0):
-                print("🔴 Testing error reporting during database failure")
+                print("[U+1F534] Testing error reporting during database failure")
                 
                 websocket = await self.auth_helper.connect_authenticated_websocket(timeout=15.0)
                 
@@ -782,7 +782,7 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                 is_helpful = any(term in message for term in helpful_terms)
                 
                 if not is_helpful:
-                    print(f"⚠️ Warning: Error message may not be user-helpful: {message}")
+                    print(f" WARNING: [U+FE0F] Warning: Error message may not be user-helpful: {message}")
             
             # Should still attempt to provide value despite errors
             completion_events = [e for e in error_events if e.get("type") == "agent_completed"]
@@ -796,9 +796,9 @@ class TestServiceDependencyFailuresE2E(BaseE2ETest):
                                        for word in ["currently", "unable", "limited", "temporary"])
                 
                 if acknowledges_issue:
-                    print("✅ Error reporting acknowledges limitations appropriately")
+                    print(" PASS:  Error reporting acknowledges limitations appropriately")
             
-            print("✅ Error reporting quality validated during service failures")
+            print(" PASS:  Error reporting quality validated during service failures")
             
         finally:
             if websocket and not websocket.closed:

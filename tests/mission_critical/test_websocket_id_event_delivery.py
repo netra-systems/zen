@@ -160,7 +160,7 @@ class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
         assert event_timestamps == sorted(event_timestamps), \
             f"agent_started events delivered out of order: {event_timestamps}"
             
-        print(f"✅ Mission Critical: agent_started event ID consistency validated")
+        print(f" PASS:  Mission Critical: agent_started event ID consistency validated")
 
     def test_agent_thinking_event_stream_consistency_EXPECTED_FAILURE(self):
         """
@@ -238,7 +238,7 @@ class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
         except Exception as e:
             pytest.fail(f"Cannot reconstruct thinking stream from uuid.uuid4() message IDs: {e}")
             
-        print(f"✅ Mission Critical: agent_thinking stream consistency validated")
+        print(f" PASS:  Mission Critical: agent_thinking stream consistency validated")
 
     def test_tool_execution_event_lifecycle_EXPECTED_FAILURE(self):
         """
@@ -369,7 +369,7 @@ class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
         except Exception as e:
             pytest.fail(f"Cannot determine tool execution order from uuid.uuid4() IDs: {e}")
             
-        print(f"✅ Mission Critical: tool execution lifecycle consistency validated")
+        print(f" PASS:  Mission Critical: tool execution lifecycle consistency validated")
 
     def test_agent_completed_event_finalization_EXPECTED_FAILURE(self):
         """
@@ -519,7 +519,7 @@ class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
         except Exception as e:
             pytest.fail(f"Cannot reconstruct execution timeline with uuid.uuid4() IDs: {e}")
             
-        print(f"✅ Mission Critical: agent_completed finalization audit trail validated")
+        print(f" PASS:  Mission Critical: agent_completed finalization audit trail validated")
 
     def test_mission_critical_event_delivery_end_to_end_EXPECTED_FAILURE(self):
         """
@@ -660,7 +660,7 @@ class TestWebSocketIdEventDeliveryMissionCritical(BaseMissionCriticalTest):
         assert len(found_keywords) >= 3, \
             f"Mission critical events missing business value context: {found_keywords}"
             
-        print(f"✅ Mission Critical: End-to-end 5-event delivery sequence validated")
+        print(f" PASS:  Mission Critical: End-to-end 5-event delivery sequence validated")
         print(f"   Events delivered: {len(mission_critical_sequence)}")
         print(f"   WebSocket calls: {len(delivery_calls)}")
         print(f"   Business value keywords: {found_keywords}")

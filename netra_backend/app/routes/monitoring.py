@@ -24,10 +24,10 @@ try:
         monitoring_router as websocket_monitoring_router
     )
     WEBSOCKET_MONITORING_AVAILABLE = True
-    central_logger.get_logger(__name__).info("✅ WebSocket monitoring integration imported successfully")
+    central_logger.get_logger(__name__).info(" PASS:  WebSocket monitoring integration imported successfully")
 except ImportError as e:
     WEBSOCKET_MONITORING_AVAILABLE = False
-    central_logger.get_logger(__name__).warning(f"⚠️ WebSocket monitoring not available: {e}")
+    central_logger.get_logger(__name__).warning(f" WARNING: [U+FE0F] WebSocket monitoring not available: {e}")
 from netra_backend.app.services.database.connection_monitor import (
     connection_metrics,
     get_connection_status,
@@ -639,7 +639,7 @@ async def get_dashboard_config(
 # Include WebSocket monitoring endpoints when available
 if WEBSOCKET_MONITORING_AVAILABLE:
     router.include_router(websocket_monitoring_router, prefix="/websocket", tags=["websocket-monitoring"])
-    logger.info("✅ Phase 2: WebSocket monitoring endpoints included in main monitoring router")
+    logger.info(" PASS:  Phase 2: WebSocket monitoring endpoints included in main monitoring router")
 
 @router.get("/websocket/status")
 async def get_websocket_monitoring_status(

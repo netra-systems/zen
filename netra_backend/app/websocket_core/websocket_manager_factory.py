@@ -30,6 +30,12 @@ from shared.types.core_types import UserID, ensure_user_id
 
 logger = central_logger.get_logger(__name__)
 
+
+class WebSocketComponentError(Exception):
+    """Exception raised for WebSocket component validation errors."""
+    pass
+
+
 # Factory instance management (singleton pattern for compatibility)
 import threading
 _factory_instance: Optional['WebSocketManagerFactory'] = None

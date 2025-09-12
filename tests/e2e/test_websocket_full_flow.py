@@ -112,7 +112,7 @@ class WebSocketEventCapture:
         
         print(f"\n{Fore.GREEN}Events Captured:{Style.RESET_ALL}")
         for event_type, count in self.event_counts.items():
-            status = "✓" if count > 0 else "✗"
+            status = "[U+2713]" if count > 0 else "[U+2717]"
             color = Fore.GREEN if count > 0 else Fore.RED
             print(f"  {color}{status} {event_type}: {count} events{Style.RESET_ALL}")
             
@@ -124,10 +124,10 @@ class WebSocketEventCapture:
         # Check if all required events were received
         all_received = all(count > 0 for count in self.event_counts.values())
         if all_received:
-            print(f"\n{Fore.GREEN}✓ ALL REQUIRED EVENTS RECEIVED - CHAT FUNCTIONALITY WORKING!{Style.RESET_ALL}")
+            print(f"\n{Fore.GREEN}[U+2713] ALL REQUIRED EVENTS RECEIVED - CHAT FUNCTIONALITY WORKING!{Style.RESET_ALL}")
         else:
             missing = [event for event, count in self.event_counts.items() if count == 0]
-            print(f"\n{Fore.RED}✗ MISSING EVENTS: {', '.join(missing)}{Style.RESET_ALL}")
+            print(f"\n{Fore.RED}[U+2717] MISSING EVENTS: {', '.join(missing)}{Style.RESET_ALL}")
             
         print("="*80 + "\n")
 
@@ -144,7 +144,7 @@ async def authenticate(session: aiohttp.ClientSession) -> str:
     async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
         if resp.status == 200:
             data = await resp.json()
-            print(f"{Fore.GREEN}✓ Authentication successful{Style.RESET_ALL}\n")
+            print(f"{Fore.GREEN}[U+2713] Authentication successful{Style.RESET_ALL}\n")
             return data.get("access_token")
         
     # If login fails, try to register
@@ -152,7 +152,7 @@ async def authenticate(session: aiohttp.ClientSession) -> str:
     async with session.post(register_url, json=STAGING_CONFIG["test_user"]) as resp:
         if resp.status in [200, 201]:
             data = await resp.json()
-            print(f"{Fore.GREEN}✓ Registration successful{Style.RESET_ALL}\n")
+            print(f"{Fore.GREEN}[U+2713] Registration successful{Style.RESET_ALL}\n")
             # Now login
             async with session.post(login_url, json=STAGING_CONFIG["test_user"]) as resp:
                 if resp.status == 200:
@@ -179,7 +179,7 @@ async def run_agent_and_capture_events():
         
         # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
         async with websockets.connect(STAGING_CONFIG["ws_url"], extra_headers=headers) as websocket:
-            print(f"{Fore.GREEN}✓ WebSocket connected{Style.RESET_ALL}\n")
+            print(f"{Fore.GREEN}[U+2713] WebSocket connected{Style.RESET_ALL}\n")
             
             # Send initial message to trigger agent
             test_message = {
@@ -264,7 +264,7 @@ async def test_multiple_concurrent_users():
                                 other_user = uid
                                 break
                         if other_user is not None:
-                            print(f"{Fore.RED}⚠ ISOLATION VIOLATION: User {user_id} received data from User {other_user}!{Style.RESET_ALL}")
+                            print(f"{Fore.RED} WARNING:  ISOLATION VIOLATION: User {user_id} received data from User {other_user}!{Style.RESET_ALL}")
                             
                 print(f"{Fore.GREEN}User {user_id}: Received {len(events)} events{Style.RESET_ALL}")
                 return events
@@ -278,7 +278,7 @@ async def test_multiple_concurrent_users():
     print(f"\n{Fore.CYAN}Multi-User Test Summary:{Style.RESET_ALL}")
     print(f"  Total Events: {total_events}")
     print(f"  Average Events/User: {total_events/10:.1f}")
-    print(f"{Fore.GREEN}✓ Multi-user isolation test completed{Style.RESET_ALL}\n")
+    print(f"{Fore.GREEN}[U+2713] Multi-user isolation test completed{Style.RESET_ALL}\n")
 
 async def main():
     """Main test execution"""
@@ -306,10 +306,10 @@ async def main():
     )
     
     if all_events_captured:
-        print(f"{Fore.GREEN}{Style.BRIGHT}✓ SUCCESS: All WebSocket agent events working on staging!{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}{Style.BRIGHT}[U+2713] SUCCESS: All WebSocket agent events working on staging!{Style.RESET_ALL}")
         return 0
     else:
-        print(f"{Fore.RED}{Style.BRIGHT}✗ FAILURE: Some WebSocket events missing{Style.RESET_ALL}")
+        print(f"{Fore.RED}{Style.BRIGHT}[U+2717] FAILURE: Some WebSocket events missing{Style.RESET_ALL}")
         return 1
 
 if __name__ == "__main__":

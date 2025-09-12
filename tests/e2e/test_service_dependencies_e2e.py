@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents $200K+ loss from service orchestration failures
 
 Service Dependencies Tested:
-1. Complete user registration → login → agent execution flow
+1. Complete user registration  ->  login  ->  agent execution flow
 2. Multi-user concurrent service access and isolation
 3. Service failure recovery patterns through full stack
 4. Database and cache consistency across full system
@@ -107,7 +107,7 @@ class TestCompleteUserJourneyServiceDependencies:
         """
         Create user with complete service dependency validation through full stack.
         
-        This validates authentication → database → cache → WebSocket chain.
+        This validates authentication  ->  database  ->  cache  ->  WebSocket chain.
         """
         if user_suffix:
             email = f"e2e_service_test_{user_suffix}@netra.com"
@@ -234,10 +234,10 @@ class TestCompleteUserJourneyServiceDependencies:
     @pytest.mark.asyncio
     async def test_complete_user_registration_to_agent_execution_journey(self, real_services_fixture):
         """
-        MISSION CRITICAL E2E: Complete user registration → agent execution journey.
+        MISSION CRITICAL E2E: Complete user registration  ->  agent execution journey.
         
         This is the most critical service dependency test that validates the entire
-        user journey through all services: Auth → Database → Cache → WebSocket → Agent execution.
+        user journey through all services: Auth  ->  Database  ->  Cache  ->  WebSocket  ->  Agent execution.
         """
         self.e2e_metrics.total_user_journeys += 1
         journey_start_time = time.time()

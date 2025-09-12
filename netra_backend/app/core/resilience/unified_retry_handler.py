@@ -22,7 +22,7 @@ Key functionality:
 - Metrics integration for monitoring
 
 Replaces 10+ duplicate retry/timeout implementations with a single unified handler.
-Each function ≤25 lines, class ≤300 lines total.
+Each function  <= 25 lines, class  <= 300 lines total.
 """
 
 import asyncio

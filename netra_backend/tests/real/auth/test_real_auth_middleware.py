@@ -62,7 +62,7 @@ class TestRealAuthMiddleware:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for auth middleware testing."""
-        print("🐳 Starting Docker services for auth middleware tests...")
+        print("[U+1F433] Starting Docker services for auth middleware tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -74,13 +74,13 @@ class TestRealAuthMiddleware:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for auth middleware tests")
+            print(" PASS:  Docker services ready for auth middleware tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for middleware tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for middleware tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after auth middleware tests...")
+            print("[U+1F9F9] Cleaning up Docker services after auth middleware tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -123,7 +123,7 @@ class TestRealAuthMiddleware:
         # Middleware should process request (health endpoint may not require auth)
         assert response.status_code in [200, 401], "Middleware should intercept request"
         
-        print(f"✅ Middleware request interception - Status: {response.status_code}")
+        print(f" PASS:  Middleware request interception - Status: {response.status_code}")
 
     @pytest.mark.asyncio
     async def test_middleware_valid_token_processing(
@@ -149,10 +149,10 @@ class TestRealAuthMiddleware:
             response = await async_client.get("/health", headers=headers)
             
             # Middleware should allow valid token through
-            print(f"✅ Valid token processed by middleware - Status: {response.status_code}")
+            print(f" PASS:  Valid token processed by middleware - Status: {response.status_code}")
             
         except Exception as e:
-            print(f"⚠️ Valid token processing encountered: {e}")
+            print(f" WARNING: [U+FE0F] Valid token processing encountered: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_invalid_token_rejection(
@@ -182,10 +182,10 @@ class TestRealAuthMiddleware:
                 
                 # Middleware should reject invalid tokens
                 # Note: Response depends on endpoint auth requirements
-                print(f"✅ Invalid token '{invalid_token[:20]}...' handled - Status: {response.status_code}")
+                print(f" PASS:  Invalid token '{invalid_token[:20]}...' handled - Status: {response.status_code}")
                 
             except Exception as e:
-                print(f"⚠️ Invalid token processing: {e}")
+                print(f" WARNING: [U+FE0F] Invalid token processing: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_expired_token_handling(
@@ -216,10 +216,10 @@ class TestRealAuthMiddleware:
             response = await async_client.get("/health", headers=headers)
             
             # Middleware should handle expired token appropriately
-            print(f"✅ Expired token handled by middleware - Status: {response.status_code}")
+            print(f" PASS:  Expired token handled by middleware - Status: {response.status_code}")
             
         except Exception as e:
-            print(f"⚠️ Expired token handling: {e}")
+            print(f" WARNING: [U+FE0F] Expired token handling: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_missing_authorization_header(self, async_client: AsyncClient):
@@ -233,12 +233,12 @@ class TestRealAuthMiddleware:
         response = await async_client.get("/health", headers=headers)
         
         # Middleware should handle missing auth header
-        print(f"✅ Missing auth header handled - Status: {response.status_code}")
+        print(f" PASS:  Missing auth header handled - Status: {response.status_code}")
         
         # Test with completely empty headers
         response_no_headers = await async_client.get("/health")
         
-        print(f"✅ No headers handled - Status: {response_no_headers.status_code}")
+        print(f" PASS:  No headers handled - Status: {response_no_headers.status_code}")
 
     @pytest.mark.asyncio
     async def test_middleware_malformed_authorization_header(self, async_client: AsyncClient):
@@ -259,10 +259,10 @@ class TestRealAuthMiddleware:
                 response = await async_client.get("/health", headers=headers)
                 auth_header = headers.get("Authorization", "None")
                 
-                print(f"✅ Malformed header '{auth_header}' handled - Status: {response.status_code}")
+                print(f" PASS:  Malformed header '{auth_header}' handled - Status: {response.status_code}")
                 
             except Exception as e:
-                print(f"⚠️ Malformed header processing: {e}")
+                print(f" WARNING: [U+FE0F] Malformed header processing: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_user_context_extraction(
@@ -295,10 +295,10 @@ class TestRealAuthMiddleware:
             # Middleware should extract and validate user context
             # In real implementation, this would set request.state.user
             
-            print(f"✅ User context extraction - Status: {response.status_code}")
+            print(f" PASS:  User context extraction - Status: {response.status_code}")
             
         except Exception as e:
-            print(f"⚠️ User context extraction: {e}")
+            print(f" WARNING: [U+FE0F] User context extraction: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_performance_under_load(
@@ -364,14 +364,14 @@ class TestRealAuthMiddleware:
             assert successful_requests > 0, "At least some requests should succeed"
             assert avg_duration < 1.0, "Average request duration should be under 1 second"
             
-            print(f"✅ Middleware performance - {successful_requests}/{concurrent_requests} successful")
+            print(f" PASS:  Middleware performance - {successful_requests}/{concurrent_requests} successful")
             print(f"   Total time: {total_duration:.3f}s, Avg per request: {avg_duration:.3f}s")
             
             if failed_requests > 0:
-                print(f"⚠️ {failed_requests} requests failed (may be expected)")
+                print(f" WARNING: [U+FE0F] {failed_requests} requests failed (may be expected)")
             
         except Exception as e:
-            pytest.fail(f"❌ Middleware load test failed: {e}")
+            pytest.fail(f" FAIL:  Middleware load test failed: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_error_handling_and_responses(self, async_client: AsyncClient):
@@ -413,11 +413,11 @@ class TestRealAuthMiddleware:
                         # Non-JSON error response is also acceptable
                         pass
                 
-                print(f"✅ Error scenario handled - {scenario['expected_behavior']}")
+                print(f" PASS:  Error scenario handled - {scenario['expected_behavior']}")
                 print(f"   Status: {response.status_code}")
                 
             except Exception as e:
-                print(f"⚠️ Error scenario processing: {e}")
+                print(f" WARNING: [U+FE0F] Error scenario processing: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_security_headers_and_cors(self, async_client: AsyncClient):
@@ -434,15 +434,15 @@ class TestRealAuthMiddleware:
             # OPTIONS request for CORS preflight
             response = await async_client.options("/health", headers=cors_headers)
             
-            print(f"✅ CORS preflight handled - Status: {response.status_code}")
+            print(f" PASS:  CORS preflight handled - Status: {response.status_code}")
             
             # Check for CORS headers in response
             cors_response_headers = response.headers
             if "access-control-allow-origin" in cors_response_headers:
-                print(f"✅ CORS headers present: {cors_response_headers.get('access-control-allow-origin')}")
+                print(f" PASS:  CORS headers present: {cors_response_headers.get('access-control-allow-origin')}")
             
         except Exception as e:
-            print(f"⚠️ CORS testing: {e}")
+            print(f" WARNING: [U+FE0F] CORS testing: {e}")
         
         # Test regular request for security headers
         try:
@@ -461,12 +461,12 @@ class TestRealAuthMiddleware:
                     present_headers.append(header)
             
             if present_headers:
-                print(f"✅ Security headers present: {present_headers}")
+                print(f" PASS:  Security headers present: {present_headers}")
             else:
-                print("⚠️ No standard security headers detected (may be configured elsewhere)")
+                print(" WARNING: [U+FE0F] No standard security headers detected (may be configured elsewhere)")
             
         except Exception as e:
-            print(f"⚠️ Security headers testing: {e}")
+            print(f" WARNING: [U+FE0F] Security headers testing: {e}")
 
     @pytest.mark.asyncio
     async def test_middleware_request_logging_and_metrics(
@@ -507,7 +507,7 @@ class TestRealAuthMiddleware:
                     response = await async_client.post(path, headers=test_headers, json=json_data)
                 
                 # Middleware should log requests
-                print(f"✅ Request logged - {method} {path} - Status: {response.status_code}")
+                print(f" PASS:  Request logged - {method} {path} - Status: {response.status_code}")
                 
                 # In real implementation, middleware would:
                 # - Log request details
@@ -515,7 +515,7 @@ class TestRealAuthMiddleware:
                 # - Track authentication success/failure rates
                 
             except Exception as e:
-                print(f"⚠️ Request logging scenario: {e}")
+                print(f" WARNING: [U+FE0F] Request logging scenario: {e}")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

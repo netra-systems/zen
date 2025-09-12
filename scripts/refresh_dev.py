@@ -118,7 +118,7 @@ class DevEnvironmentRefresher:
             print("\n[CANCELLED] Refresh cancelled by user")
             return False
         except Exception as e:
-            logger.error(f"❌ Refresh failed: {e}")
+            logger.error(f" FAIL:  Refresh failed: {e}")
             return False
     
     def _stop_existing(self):

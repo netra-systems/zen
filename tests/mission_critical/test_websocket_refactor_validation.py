@@ -76,7 +76,7 @@
     # REMOVED_SYNTAX_ERROR: assert not hasattr(triage_agent, '_setup_websocket_context_for_legacy'), \
     # REMOVED_SYNTAX_ERROR: "TriageSubAgent still has dead method _setup_websocket_context_for_legacy"
 
-    # REMOVED_SYNTAX_ERROR: print("✅ All dead methods successfully removed")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  All dead methods successfully removed")
 
 
 # REMOVED_SYNTAX_ERROR: def test_websocket_enabled_bug_fixed():
@@ -115,7 +115,7 @@
     # REMOVED_SYNTAX_ERROR: assert agent.has_websocket_context(), \
     # REMOVED_SYNTAX_ERROR: "has_websocket_context() should return True when bridge is set"
 
-    # REMOVED_SYNTAX_ERROR: print("✅ WebSocket bridge integration working correctly")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket bridge integration working correctly")
 
 
     # Removed problematic line: async def test_websocket_event_emission():
@@ -136,7 +136,7 @@
         # REMOVED_SYNTAX_ERROR: await agent.emit_tool_executing("test_tool", {})
         # REMOVED_SYNTAX_ERROR: await agent.emit_progress("Test progress", is_complete=False)
 
-        # REMOVED_SYNTAX_ERROR: print("✅ WebSocket event emission methods working")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket event emission methods working")
 
 
 # REMOVED_SYNTAX_ERROR: def main():
@@ -157,7 +157,7 @@
 
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: " + "="*60)
-    # REMOVED_SYNTAX_ERROR: print("✅ ALL VALIDATION TESTS PASSED!")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL VALIDATION TESTS PASSED!")
     # REMOVED_SYNTAX_ERROR: print("="*60)
 
 

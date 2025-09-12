@@ -53,20 +53,20 @@ class AgentStartupTestRunner:
         try:
             # This will be a real test when Docker services are available
             # For now, it's a placeholder that shows the testing pattern
-            logger.info("🧪 Running cold start test...")
+            logger.info("[U+1F9EA] Running cold start test...")
             
             # Simulate startup delay
             await asyncio.sleep(1.0)
             
             test_result["status"] = "passed"
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.info(f"✅ Cold start test passed in {test_result['duration']:.2f}s")
+            logger.info(f" PASS:  Cold start test passed in {test_result['duration']:.2f}s")
             
         except Exception as e:
             test_result["status"] = "failed"
             test_result["error"] = str(e)
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.error(f"❌ Cold start test failed: {e}")
+            logger.error(f" FAIL:  Cold start test failed: {e}")
             
         return test_result
         
@@ -82,20 +82,20 @@ class AgentStartupTestRunner:
         }
         
         try:
-            logger.info("🧪 Running concurrent startup test...")
+            logger.info("[U+1F9EA] Running concurrent startup test...")
             
             # Simulate concurrent startup
             await asyncio.sleep(1.5)
             
             test_result["status"] = "passed"
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.info(f"✅ Concurrent startup test passed in {test_result['duration']:.2f}s")
+            logger.info(f" PASS:  Concurrent startup test passed in {test_result['duration']:.2f}s")
             
         except Exception as e:
             test_result["status"] = "failed"
             test_result["error"] = str(e)
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.error(f"❌ Concurrent startup test failed: {e}")
+            logger.error(f" FAIL:  Concurrent startup test failed: {e}")
             
         return test_result
         
@@ -111,20 +111,20 @@ class AgentStartupTestRunner:
         }
         
         try:
-            logger.info("🧪 Running user isolation test...")
+            logger.info("[U+1F9EA] Running user isolation test...")
             
             # Simulate isolation test
             await asyncio.sleep(1.0)
             
             test_result["status"] = "passed"
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.info(f"✅ User isolation test passed in {test_result['duration']:.2f}s")
+            logger.info(f" PASS:  User isolation test passed in {test_result['duration']:.2f}s")
             
         except Exception as e:
             test_result["status"] = "failed"
             test_result["error"] = str(e)
             test_result["duration"] = time.time() - test_result["start_time"]
-            logger.error(f"❌ User isolation test failed: {e}")
+            logger.error(f" FAIL:  User isolation test failed: {e}")
             
         return test_result
 
@@ -143,7 +143,7 @@ async def run_agent_startup_test_suite(real_llm: bool = False, parallel: bool = 
     runner = AgentStartupTestRunner()
     suite_start_time = time.time()
     
-    logger.info("🚀 Starting Agent Startup Test Suite")
+    logger.info("[U+1F680] Starting Agent Startup Test Suite")
     logger.info(f"Real LLM: {real_llm}, Parallel: {parallel}")
     
     # Run individual tests
@@ -185,7 +185,7 @@ async def run_agent_startup_test_suite(real_llm: bool = False, parallel: bool = 
         "timestamp": datetime.utcnow().isoformat()
     }
     
-    logger.info(f"🏁 Agent Startup Test Suite Complete: {passed_count}/{len(test_results)} passed in {total_duration:.2f}s")
+    logger.info(f"[U+1F3C1] Agent Startup Test Suite Complete: {passed_count}/{len(test_results)} passed in {total_duration:.2f}s")
     
     return summary
 
@@ -204,14 +204,14 @@ def print_startup_test_summary(results: Dict[str, Any]) -> None:
     print(f"Results: {summary.get('passed', 0)}/{summary.get('total', 0)} passed")
     
     if summary.get('failed', 0) > 0:
-        print(f"⚠️  {summary.get('failed', 0)} tests failed")
+        print(f" WARNING: [U+FE0F]  {summary.get('failed', 0)} tests failed")
         
         # Show failed test details
         for test_result in results.get("test_results", []):
             if isinstance(test_result, dict) and test_result.get("status") == "failed":
-                print(f"   ❌ {test_result.get('name')}: {test_result.get('error', 'Unknown error')}")
+                print(f"    FAIL:  {test_result.get('name')}: {test_result.get('error', 'Unknown error')}")
     else:
-        print("✅ All tests passed!")
+        print(" PASS:  All tests passed!")
     
     print("=" * 80)
 

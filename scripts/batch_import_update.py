@@ -57,25 +57,25 @@ def update_file_imports(filepath: str) -> bool:
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(updated_content)
         
-        print(f"✅ Updated: {filepath}")
+        print(f" PASS:  Updated: {filepath}")
         return True
         
     except Exception as e:
-        print(f"❌ Error updating {filepath}: {e}")
+        print(f" FAIL:  Error updating {filepath}: {e}")
         return False
 
 def batch_update_imports(root_dir: str) -> Dict[str, int]:
     """Batch update all supervisor imports to services imports."""
-    print("🔍 Searching for files with supervisor UserExecutionContext imports...")
+    print(" SEARCH:  Searching for files with supervisor UserExecutionContext imports...")
     
     files_to_update = find_files_with_supervisor_imports(root_dir)
     total_files = len(files_to_update)
     
     if total_files == 0:
-        print("✅ No files found with supervisor imports - all imports already updated!")
+        print(" PASS:  No files found with supervisor imports - all imports already updated!")
         return {'total': 0, 'updated': 0, 'failed': 0}
     
-    print(f"📁 Found {total_files} files to update")
+    print(f"[U+1F4C1] Found {total_files} files to update")
     
     # Process files in batches
     updated_count = 0
@@ -89,7 +89,7 @@ def batch_update_imports(root_dir: str) -> Dict[str, int]:
         else:
             failed_count += 1
     
-    print(f"\n🎯 Batch update completed:")
+    print(f"\n TARGET:  Batch update completed:")
     print(f"   Total files found: {total_files}")
     print(f"   Successfully updated: {updated_count}")
     print(f"   Failed to update: {failed_count}")
@@ -102,15 +102,15 @@ def batch_update_imports(root_dir: str) -> Dict[str, int]:
 
 def verify_no_supervisor_imports(root_dir: str) -> bool:
     """Verify that no supervisor imports remain."""
-    print("\n🔍 Verifying no supervisor imports remain...")
+    print("\n SEARCH:  Verifying no supervisor imports remain...")
     
     remaining_files = find_files_with_supervisor_imports(root_dir)
     
     if not remaining_files:
-        print("✅ SUCCESS: No supervisor UserExecutionContext imports found!")
+        print(" PASS:  SUCCESS: No supervisor UserExecutionContext imports found!")
         return True
     else:
-        print(f"❌ WARNING: {len(remaining_files)} files still have supervisor imports:")
+        print(f" FAIL:  WARNING: {len(remaining_files)} files still have supervisor imports:")
         for file in remaining_files[:10]:  # Show first 10
             print(f"   - {file}")
         if len(remaining_files) > 10:
@@ -119,7 +119,7 @@ def verify_no_supervisor_imports(root_dir: str) -> bool:
 
 def main():
     """Main function to execute the batch import update."""
-    print("🚀 Starting batch import consolidation to services SSOT...")
+    print("[U+1F680] Starting batch import consolidation to services SSOT...")
     
     # Set working directory
     root_dir = os.getcwd()
@@ -133,12 +133,12 @@ def main():
         verification_success = verify_no_supervisor_imports(root_dir)
         
         if verification_success:
-            print("\n🎉 IMPORT CONSOLIDATION COMPLETED SUCCESSFULLY!")
+            print("\n CELEBRATION:  IMPORT CONSOLIDATION COMPLETED SUCCESSFULLY!")
             print("   All files now import UserExecutionContext from services SSOT")
         else:
-            print("\n⚠️ PARTIAL SUCCESS: Some files may need manual review")
+            print("\n WARNING: [U+FE0F] PARTIAL SUCCESS: Some files may need manual review")
     else:
-        print("\n✅ No updates were needed - imports already consolidated")
+        print("\n PASS:  No updates were needed - imports already consolidated")
 
 if __name__ == "__main__":
     main()

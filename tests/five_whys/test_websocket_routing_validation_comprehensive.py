@@ -1,5 +1,5 @@
 """
-🚀 WEBSOCKET MESSAGE ROUTING VALIDATION SPECIALIST
+[U+1F680] WEBSOCKET MESSAGE ROUTING VALIDATION SPECIALIST
 
 Complete WebSocket message routing validation after FIVE WHYS fixes implementation.
 
@@ -14,7 +14,7 @@ after the FIVE WHYS analysis fixes have been implemented. Specifically validates
 
 1. WebSocket Connection Establishment Success
 2. Supervisor Creation Success with Fixed Parameters  
-3. Complete Message Routing Chain: WebSocket → Handler → Supervisor → Agent
+3. Complete Message Routing Chain: WebSocket  ->  Handler  ->  Supervisor  ->  Agent
 4. Multi-User Isolation Maintenance
 5. Real-Time Agent Communication 
 6. Original Error Scenario Resolution
@@ -54,7 +54,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
     """
-    🔌 PHASE 1: WebSocket Connection Establishment Validation
+    [U+1F50C] PHASE 1: WebSocket Connection Establishment Validation
     
     Validates that WebSocket connections are properly established with correct context
     creation and parameter standardization after the FIVE WHYS fixes.
@@ -93,8 +93,8 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
             # Connection should be established within reasonable time
             assert connection_time < 15.0, f"Connection took {connection_time:.2f}s, expected < 15s"
             
-            print(f"✅ WebSocket connection established successfully")
-            print(f"✅ Connection time: {connection_time:.2f}s")
+            print(f" PASS:  WebSocket connection established successfully")
+            print(f" PASS:  Connection time: {connection_time:.2f}s")
             
         finally:
             if websocket and not websocket.closed:
@@ -138,15 +138,15 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
             assert context.validate_for_message_processing()
             
             # Validate parameter naming consistency - connection_id should be available
-            # This is the key fix from websocket_connection_id → websocket_client_id
+            # This is the key fix from websocket_connection_id  ->  websocket_client_id
             connection_id = context.connection_id
             assert isinstance(connection_id, str)
             assert len(connection_id) > 0
             
-            print(f"✅ WebSocket context created successfully")
-            print(f"✅ User ID: {user_id}")
-            print(f"✅ Connection ID: {connection_id}")
-            print(f"✅ Context validation passed")
+            print(f" PASS:  WebSocket context created successfully")
+            print(f" PASS:  User ID: {user_id}")
+            print(f" PASS:  Connection ID: {connection_id}")
+            print(f" PASS:  Context validation passed")
             
         finally:
             if websocket and not websocket.closed:
@@ -207,9 +207,9 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
             connection_ids = [ctx.connection_id for _, ctx in connections_and_contexts]
             assert len(set(connection_ids)) == num_connections, "Connection IDs should be unique"
             
-            print(f"✅ Created {num_connections} concurrent WebSocket connections")
-            print(f"✅ Total connection time: {connection_time:.2f}s")
-            print(f"✅ All connection IDs unique: {len(set(connection_ids))} unique IDs")
+            print(f" PASS:  Created {num_connections} concurrent WebSocket connections")
+            print(f" PASS:  Total connection time: {connection_time:.2f}s")
+            print(f" PASS:  All connection IDs unique: {len(set(connection_ids))} unique IDs")
             
         finally:
             # Clean up all connections
@@ -220,7 +220,7 @@ class TestWebSocketConnectionEstablishment(SSotBaseTestCase):
 
 class TestSupervisorCreationSuccess(SSotBaseTestCase):
     """
-    👨‍💼 PHASE 2: Supervisor Creation Success Validation
+    [U+1F468][U+200D][U+1F4BC] PHASE 2: Supervisor Creation Success Validation
     
     Validates that supervisor creation works successfully with the corrected
     parameter interface (websocket_client_id vs websocket_connection_id).
@@ -296,9 +296,9 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
                     assert actual_value == expected_value, \
                         f"Parameter value mismatch: expected {expected_value}, got {actual_value}"
                     
-                    print(f"✅ WebSocket supervisor created successfully")
-                    print(f"✅ Creation time: {creation_time:.2f}s")
-                    print(f"✅ Correct parameter used: websocket_client_id = {actual_value}")
+                    print(f" PASS:  WebSocket supervisor created successfully")
+                    print(f" PASS:  Creation time: {creation_time:.2f}s")
+                    print(f" PASS:  Correct parameter used: websocket_client_id = {actual_value}")
                 break
         
         finally:
@@ -335,7 +335,7 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
                 assert user_context.thread_id == thread_id
                 assert user_context.websocket_client_id == websocket_client_id
                 
-                print(f"✅ UserExecutionContext accepts websocket_client_id parameter")
+                print(f" PASS:  UserExecutionContext accepts websocket_client_id parameter")
                 
             except Exception as e:
                 pytest.fail(f"UserExecutionContext should accept websocket_client_id: {e}")
@@ -349,7 +349,7 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
                     db_session=db_session
                 )
             
-            print(f"✅ UserExecutionContext properly rejects deprecated websocket_connection_id")
+            print(f" PASS:  UserExecutionContext properly rejects deprecated websocket_connection_id")
             break
     
     @pytest.mark.asyncio
@@ -390,7 +390,7 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
                         # Should contain helpful information
                         assert "Failed to create WebSocket supervisor" in error_str or "component" in error_str.lower()
                         
-                        print(f"✅ Improved error message: {error_str}")
+                        print(f" PASS:  Improved error message: {error_str}")
                 break
         
         finally:
@@ -400,9 +400,9 @@ class TestSupervisorCreationSuccess(SSotBaseTestCase):
 
 class TestCompleteMessageRoutingChain(SSotBaseTestCase):
     """
-    📨 PHASE 3: Complete Message Routing Chain Validation
+    [U+1F4E8] PHASE 3: Complete Message Routing Chain Validation
     
-    Validates the complete message routing: WebSocket → Handler → Supervisor → Agent
+    Validates the complete message routing: WebSocket  ->  Handler  ->  Supervisor  ->  Agent
     """
     
     @pytest.fixture(scope="class")
@@ -472,9 +472,9 @@ class TestCompleteMessageRoutingChain(SSotBaseTestCase):
                 assert context.thread_id == thread_id
                 assert context.run_id == run_id
                 
-                print(f"✅ Complete message routing chain validated")
-                print(f"✅ Message sent and context remains active")
-                print(f"✅ Supervisor successfully handles routing for user: {user_id}")
+                print(f" PASS:  Complete message routing chain validated")
+                print(f" PASS:  Message sent and context remains active")
+                print(f" PASS:  Supervisor successfully handles routing for user: {user_id}")
                 break
         
         finally:
@@ -528,10 +528,10 @@ class TestCompleteMessageRoutingChain(SSotBaseTestCase):
                 assert hasattr(supervisor, 'user_id') or hasattr(supervisor, '_user_context'), \
                     "Supervisor should have proper user context"
                 
-                print(f"✅ Original error scenario RESOLVED")
-                print(f"✅ User ID {user_id} supervisor creation successful")
-                print(f"✅ Creation time: {creation_time:.2f}s")
-                print(f"✅ Parameter mismatch error completely eliminated")
+                print(f" PASS:  Original error scenario RESOLVED")
+                print(f" PASS:  User ID {user_id} supervisor creation successful")
+                print(f" PASS:  Creation time: {creation_time:.2f}s")
+                print(f" PASS:  Parameter mismatch error completely eliminated")
                 break
         
         finally:
@@ -541,7 +541,7 @@ class TestCompleteMessageRoutingChain(SSotBaseTestCase):
 
 class TestMultiUserIsolationMaintenance(SSotBaseTestCase):
     """
-    👥 PHASE 4: Multi-User Isolation Maintenance Validation
+    [U+1F465] PHASE 4: Multi-User Isolation Maintenance Validation
     
     Validates that the parameter fixes maintain proper multi-user isolation
     and that WebSocket contexts are properly scoped per user.
@@ -616,10 +616,10 @@ class TestMultiUserIsolationMaintenance(SSotBaseTestCase):
                 assert all(s is not None for s in supervisor_instances), "All supervisors should be created"
                 assert len(set(id(s) for s in supervisor_instances)) == num_users, "Supervisors should be different instances"
                 
-                print(f"✅ Created {num_users} isolated supervisors successfully")
-                print(f"✅ Total creation time: {total_time:.2f}s")
-                print(f"✅ All connection IDs unique: {len(set(connection_ids))} unique IDs")
-                print(f"✅ Multi-user isolation maintained")
+                print(f" PASS:  Created {num_users} isolated supervisors successfully")
+                print(f" PASS:  Total creation time: {total_time:.2f}s")
+                print(f" PASS:  All connection IDs unique: {len(set(connection_ids))} unique IDs")
+                print(f" PASS:  Multi-user isolation maintained")
                 break
         
         finally:
@@ -631,7 +631,7 @@ class TestMultiUserIsolationMaintenance(SSotBaseTestCase):
 
 class TestRealTimeAgentCommunication(SSotBaseTestCase):
     """
-    🤖 PHASE 5: Real-Time Agent Communication Validation
+    [U+1F916] PHASE 5: Real-Time Agent Communication Validation
     
     Validates that WebSocket events and real-time agent communication
     work correctly after the parameter fixes.
@@ -693,9 +693,9 @@ class TestRealTimeAgentCommunication(SSotBaseTestCase):
                 assert not websocket.closed, "WebSocket should remain open for events"
                 assert context.is_active, "Context should remain active for events"
                 
-                print(f"✅ WebSocket event flow validated")
-                print(f"✅ Supervisor enables proper event handling")
-                print(f"✅ Real-time communication working after parameter fix")
+                print(f" PASS:  WebSocket event flow validated")
+                print(f" PASS:  Supervisor enables proper event handling")
+                print(f" PASS:  Real-time communication working after parameter fix")
                 break
         
         finally:
@@ -705,7 +705,7 @@ class TestRealTimeAgentCommunication(SSotBaseTestCase):
 
 class TestEndToEndValidationSummary(SSotBaseTestCase):
     """
-    🎯 PHASE 6: End-to-End Validation Summary
+     TARGET:  PHASE 6: End-to-End Validation Summary
     
     Comprehensive validation that all FIVE WHYS fixes work together
     to enable complete WebSocket message routing success.
@@ -828,23 +828,23 @@ class TestEndToEndValidationSummary(SSotBaseTestCase):
             assert supervisor_creation_time < 10.0, f"Supervisor creation {supervisor_creation_time:.2f}s should be < 10s"
             assert total_time < 25.0, f"Total test time {total_time:.2f}s should be < 25s"
             
-            print(f"\n🎉 COMPLETE WEBSOCKET ROUTING SUCCESS VALIDATION")
-            print(f"✅ All FIVE WHYS fixes successfully implemented and validated")
-            print(f"✅ Connection established in {connection_time:.2f}s")
-            print(f"✅ Supervisor created in {supervisor_creation_time:.2f}s") 
-            print(f"✅ Total validation time: {total_time:.2f}s")
-            print(f"✅ Parameter fix validated: websocket_client_id → {context.connection_id}")
-            print(f"✅ Message routing chain: WebSocket → Handler → Supervisor ✅")
-            print(f"✅ Multi-user isolation maintained ✅")
-            print(f"✅ Original error scenario completely resolved ✅")
-            print(f"\n🚀 WebSocket message routing is now 100% operational!")
+            print(f"\n CELEBRATION:  COMPLETE WEBSOCKET ROUTING SUCCESS VALIDATION")
+            print(f" PASS:  All FIVE WHYS fixes successfully implemented and validated")
+            print(f" PASS:  Connection established in {connection_time:.2f}s")
+            print(f" PASS:  Supervisor created in {supervisor_creation_time:.2f}s") 
+            print(f" PASS:  Total validation time: {total_time:.2f}s")
+            print(f" PASS:  Parameter fix validated: websocket_client_id  ->  {context.connection_id}")
+            print(f" PASS:  Message routing chain: WebSocket  ->  Handler  ->  Supervisor  PASS: ")
+            print(f" PASS:  Multi-user isolation maintained  PASS: ")
+            print(f" PASS:  Original error scenario completely resolved  PASS: ")
+            print(f"\n[U+1F680] WebSocket message routing is now 100% operational!")
             
             # Validation results summary
             for phase, result in validation_results.items():
-                print(f"   {phase.replace('_', ' ').title()}: {'✅' if result else '❌'}")
+                print(f"   {phase.replace('_', ' ').title()}: {' PASS: ' if result else ' FAIL: '}")
             
         except Exception as e:
-            print(f"\n❌ VALIDATION FAILURE: {e}")
+            print(f"\n FAIL:  VALIDATION FAILURE: {e}")
             print(f"Validation results: {validation_results}")
             raise
         

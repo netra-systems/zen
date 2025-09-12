@@ -73,7 +73,7 @@ class TestSSOTRefactoringComplete:
         # Verify WebSocket integration
         self._verify_factory_websocket_integration()
         
-        logger.success("✓ Factory consolidation complete!")
+        logger.success("[U+2713] Factory consolidation complete!")
         
     def test_agent_consolidation_complete(self):
         """Verify all 37 agents are consolidated with no duplicates."""
@@ -149,7 +149,7 @@ class TestSSOTRefactoringComplete:
         # Verify execution order
         self._verify_agent_execution_order()
         
-        logger.success("✓ Agent consolidation complete - all 37 agents verified!")
+        logger.success("[U+2713] Agent consolidation complete - all 37 agents verified!")
         
     def test_tool_execution_consolidation_complete(self):
         """Verify single tool dispatch path with proper request isolation."""
@@ -180,7 +180,7 @@ class TestSSOTRefactoringComplete:
         # Verify all tools working
         self._verify_all_tools_functional()
         
-        logger.success("✓ Tool execution consolidation complete!")
+        logger.success("[U+2713] Tool execution consolidation complete!")
         
     def test_infrastructure_consolidation_complete(self):
         """Verify infrastructure managers are consolidated."""
@@ -205,7 +205,7 @@ class TestSSOTRefactoringComplete:
         # Verify no session leaks
         self._verify_no_session_leaks()
         
-        logger.success("✓ Infrastructure consolidation complete!")
+        logger.success("[U+2713] Infrastructure consolidation complete!")
         
     def test_no_regressions(self):
         """Verify no regressions from baseline."""
@@ -218,7 +218,7 @@ class TestSSOTRefactoringComplete:
         assert regression_check['no_regressions'], \
             f"Regressions detected: {regression_check['regressions']}"
             
-        logger.success("✓ No regressions detected!")
+        logger.success("[U+2713] No regressions detected!")
         
     def test_all_legacy_files_removed(self):
         """Verify ALL legacy files have been removed."""
@@ -231,7 +231,7 @@ class TestSSOTRefactoringComplete:
         assert verification['all_removed'], \
             f"Legacy files still exist: {verification['remaining_files']}"
             
-        logger.success("✓ All legacy files removed!")
+        logger.success("[U+2713] All legacy files removed!")
         
     def test_no_legacy_imports(self):
         """Verify no legacy imports remain in codebase."""
@@ -243,7 +243,7 @@ class TestSSOTRefactoringComplete:
         
         assert is_clean, "Legacy imports still exist in codebase"
         
-        logger.success("✓ No legacy imports found!")
+        logger.success("[U+2713] No legacy imports found!")
         
     def test_mission_critical_websocket_events(self):
         """Verify mission critical WebSocket events are working."""
@@ -263,7 +263,7 @@ class TestSSOTRefactoringComplete:
         assert result.returncode == 0, \
             f"Mission critical WebSocket tests failed:\n{result.stdout}\n{result.stderr}"
             
-        logger.success("✓ Mission critical WebSocket events working!")
+        logger.success("[U+2713] Mission critical WebSocket events working!")
         
     def test_performance_maintained(self):
         """Verify performance metrics are maintained or improved."""
@@ -276,7 +276,7 @@ class TestSSOTRefactoringComplete:
         assert not perf_check['degradation_detected'], \
             "Performance degradation detected"
             
-        logger.success("✓ Performance maintained!")
+        logger.success("[U+2713] Performance maintained!")
         
     def test_500_plus_tests_passing(self):
         """Verify 500+ tests are passing."""
@@ -295,7 +295,7 @@ class TestSSOTRefactoringComplete:
         success_rate = test_results['success_rate']
         assert success_rate >= 95.0, f"Test success rate too low: {success_rate}%"
         
-        logger.success(f"✓ {passed_tests}/{total_tests} tests passing ({success_rate:.1f}%)")
+        logger.success(f"[U+2713] {passed_tests}/{total_tests} tests passing ({success_rate:.1f}%)")
         
     # Helper verification methods
     
@@ -357,30 +357,30 @@ def generate_final_validation_report():
     # Legacy removal
     legacy = report['legacy_removal_complete']
     if legacy['complete']:
-        logger.success(f"✓ Legacy Files: All {legacy['removed']} files removed")
+        logger.success(f"[U+2713] Legacy Files: All {legacy['removed']} files removed")
     else:
-        logger.error(f"✗ Legacy Files: {legacy['remaining']} files still exist")
+        logger.error(f"[U+2717] Legacy Files: {legacy['remaining']} files still exist")
         
     # Import validation
     imports = report['import_validation']
     if imports['complete']:
-        logger.success(f"✓ Imports: Clean (scanned {imports['files_scanned']} files)")
+        logger.success(f"[U+2713] Imports: Clean (scanned {imports['files_scanned']} files)")
     else:
-        logger.error(f"✗ Imports: {imports['violations_found']} violations found")
+        logger.error(f"[U+2717] Imports: {imports['violations_found']} violations found")
         
     # Regressions
     regressions = report['regression_analysis']
     if regressions['no_regressions']:
-        logger.success("✓ Regressions: None detected")
+        logger.success("[U+2713] Regressions: None detected")
     else:
-        logger.error(f"✗ Regressions: {regressions['regressions_found']} found")
+        logger.error(f"[U+2717] Regressions: {regressions['regressions_found']} found")
         
     # Performance
     perf = report['performance_comparison']
     if not perf['degradation_detected']:
-        logger.success("✓ Performance: Maintained or improved")
+        logger.success("[U+2713] Performance: Maintained or improved")
     else:
-        logger.error("✗ Performance: Degradation detected")
+        logger.error("[U+2717] Performance: Degradation detected")
         
     # Code metrics
     metrics = report['code_metrics_comparison']
@@ -389,7 +389,7 @@ def generate_final_validation_report():
     reduction = before_lines - after_lines
     
     if reduction > 0:
-        logger.success(f"✓ Code Reduction: {reduction} lines removed ({(reduction/before_lines)*100:.1f}%)")
+        logger.success(f"[U+2713] Code Reduction: {reduction} lines removed ({(reduction/before_lines)*100:.1f}%)")
     
     logger.info("="*80)
     

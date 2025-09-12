@@ -151,8 +151,8 @@
 
 # REMOVED_SYNTAX_ERROR: def run_comprehensive_test_suite(self) -> TestSuiteResults:
     # REMOVED_SYNTAX_ERROR: """Run all WebSocket failure tests and generate comprehensive results."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚨 STARTING COMPREHENSIVE WEBSOCKET FAILURE TEST SUITE")
-    # REMOVED_SYNTAX_ERROR: logger.info("⚠️  ALL TESTS ARE DESIGNED TO FAIL - EXPOSING REAL ISSUES!")
+    # REMOVED_SYNTAX_ERROR: logger.info(" ALERT:  STARTING COMPREHENSIVE WEBSOCKET FAILURE TEST SUITE")
+    # REMOVED_SYNTAX_ERROR: logger.info(" WARNING: [U+FE0F]  ALL TESTS ARE DESIGNED TO FAIL - EXPOSING REAL ISSUES!")
 
     # REMOVED_SYNTAX_ERROR: suite_start_time = time.time()
 
@@ -198,7 +198,7 @@
 
 # REMOVED_SYNTAX_ERROR: def _run_notification_failure_tests(self) -> List[Dict[str, Any]]:
     # REMOVED_SYNTAX_ERROR: """Run comprehensive notification failure tests."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔥 Running Notification Failure Tests...")
+    # REMOVED_SYNTAX_ERROR: logger.info(" FIRE:  Running Notification Failure Tests...")
 
     # REMOVED_SYNTAX_ERROR: test_results = []
 
@@ -282,7 +282,7 @@
 
 # REMOVED_SYNTAX_ERROR: def _run_bridge_initialization_tests(self) -> List[Dict[str, Any]]:
     # REMOVED_SYNTAX_ERROR: """Run bridge initialization failure tests."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🌉 Running Bridge Initialization Tests...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F309] Running Bridge Initialization Tests...")
 
     # REMOVED_SYNTAX_ERROR: test_results = []
 
@@ -338,7 +338,7 @@
 
 # REMOVED_SYNTAX_ERROR: def _run_security_violation_tests(self) -> List[Dict[str, Any]]:
     # REMOVED_SYNTAX_ERROR: """Run security violation tests."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔒 Running Security Violation Tests...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Running Security Violation Tests...")
 
     # REMOVED_SYNTAX_ERROR: test_results = []
 
@@ -394,7 +394,7 @@
 
 # REMOVED_SYNTAX_ERROR: def _run_performance_load_tests(self) -> List[Dict[str, Any]]:
     # REMOVED_SYNTAX_ERROR: """Run performance and load failure tests."""
-    # REMOVED_SYNTAX_ERROR: logger.info("⚡ Running Performance & Load Tests...")
+    # REMOVED_SYNTAX_ERROR: logger.info(" LIGHTNING:  Running Performance & Load Tests...")
 
     # REMOVED_SYNTAX_ERROR: test_results = []
 
@@ -450,7 +450,7 @@
 
 # REMOVED_SYNTAX_ERROR: def _run_reconnection_recovery_tests(self) -> List[Dict[str, Any]]:
     # REMOVED_SYNTAX_ERROR: """Run reconnection and recovery failure tests."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Running Reconnection & Recovery Tests...")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Running Reconnection & Recovery Tests...")
 
     # REMOVED_SYNTAX_ERROR: test_results = []
 
@@ -536,10 +536,10 @@
     # REMOVED_SYNTAX_ERROR: """Generate comprehensive failure report."""
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: logger.error("=" * 80)
-    # REMOVED_SYNTAX_ERROR: logger.error("🚨 WEBSOCKET NOTIFICATION FAILURE TEST RESULTS 🚨")
+    # REMOVED_SYNTAX_ERROR: logger.error(" ALERT:  WEBSOCKET NOTIFICATION FAILURE TEST RESULTS  ALERT: ")
     # REMOVED_SYNTAX_ERROR: logger.error("=" * 80)
 
-    # REMOVED_SYNTAX_ERROR: logger.error(f"📊 SUMMARY:")
+    # REMOVED_SYNTAX_ERROR: logger.error(f" CHART:  SUMMARY:")
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -547,7 +547,7 @@
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
 
     # REMOVED_SYNTAX_ERROR: logger.error(f" )
-    # REMOVED_SYNTAX_ERROR: 💰 BUSINESS IMPACT:")
+    # REMOVED_SYNTAX_ERROR: [U+1F4B0] BUSINESS IMPACT:")
     # REMOVED_SYNTAX_ERROR: impact = results.business_impact_summary
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -555,7 +555,7 @@
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
 
     # REMOVED_SYNTAX_ERROR: logger.error(f" )
-    # REMOVED_SYNTAX_ERROR: 🔥 CRITICAL FAILURES (MUST FIX IMMEDIATELY):")
+    # REMOVED_SYNTAX_ERROR:  FIRE:  CRITICAL FAILURES (MUST FIX IMMEDIATELY):")
     # REMOVED_SYNTAX_ERROR: for i, failure in enumerate(results.critical_failures[:10], 1):  # Top 10
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -563,7 +563,7 @@
     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
 
     # REMOVED_SYNTAX_ERROR: logger.error(f" )
-    # REMOVED_SYNTAX_ERROR: 📋 NEXT STEPS:")
+    # REMOVED_SYNTAX_ERROR: [U+1F4CB] NEXT STEPS:")
     # REMOVED_SYNTAX_ERROR: logger.error("   1. Review each critical failure in detail")
     # REMOVED_SYNTAX_ERROR: logger.error("   2. Fix underlying WebSocket notification issues")
     # REMOVED_SYNTAX_ERROR: logger.error("   3. Re-run tests to verify fixes")
@@ -613,7 +613,7 @@
         # REMOVED_SYNTAX_ERROR: assert security_violations > 0, "Expected to detect security violations"
 
         # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
-        # REMOVED_SYNTAX_ERROR: logger.error("🔧 Now fix these issues and re-run tests until they all pass!")
+        # REMOVED_SYNTAX_ERROR: logger.error("[U+1F527] Now fix these issues and re-run tests until they all pass!")
 
 
         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

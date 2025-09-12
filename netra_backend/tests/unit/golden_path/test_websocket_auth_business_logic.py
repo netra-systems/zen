@@ -162,7 +162,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert "premium" in result.permissions
         assert result.error_message is None
         
-        print("✅ Valid JWT token authentication test passed")
+        print(" PASS:  Valid JWT token authentication test passed")
 
     def test_expired_jwt_token_authentication_failure(self):
         """
@@ -202,7 +202,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert result.error_message is not None
         assert "expired" in result.error_message.lower()
         
-        print("✅ Expired JWT token authentication failure test passed")
+        print(" PASS:  Expired JWT token authentication failure test passed")
 
     def test_malformed_authorization_header_failure(self):
         """
@@ -232,7 +232,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
             assert result.error_message is not None
             assert any(keyword in result.error_message.lower() for keyword in ["authorization", "token", "header"])
             
-        print(f"✅ Malformed authorization header test passed for {len(malformed_headers_cases)} cases")
+        print(f" PASS:  Malformed authorization header test passed for {len(malformed_headers_cases)} cases")
 
     def test_websocket_auth_context_creation_success(self):
         """
@@ -265,7 +265,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert auth_context.session_data["tier"] == "enterprise"
         assert isinstance(auth_context.auth_timestamp, datetime)
         
-        print("✅ WebSocket auth context creation test passed")
+        print(" PASS:  WebSocket auth context creation test passed")
 
     def test_permission_validation_business_rules(self):
         """
@@ -311,7 +311,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
             has_premium_access = auth_validator.validate_premium_permission(case["permissions"])
             assert has_premium_access == case["expected_premium_features"]
             
-            print(f"✅ Permission validation test passed for {case['user_tier']} tier")
+            print(f" PASS:  Permission validation test passed for {case['user_tier']} tier")
 
     def test_e2e_test_mode_authentication_bypass(self):
         """
@@ -349,7 +349,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert "e2e_test" in result.permissions
         assert result.user_id is not None
         
-        print("✅ E2E test mode authentication bypass test passed")
+        print(" PASS:  E2E test mode authentication bypass test passed")
 
     def test_concurrent_websocket_connections_per_user(self):
         """
@@ -396,7 +396,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert len(user_ids) == 1  # Single user
         assert user_id in user_ids
         
-        print("✅ Concurrent WebSocket connections test passed")
+        print(" PASS:  Concurrent WebSocket connections test passed")
 
     def test_websocket_auth_error_handling_business_friendly(self):
         """
@@ -440,7 +440,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
             has_expected_keywords = any(keyword in error_lower for keyword in scenario["expected_keywords"])
             assert has_expected_keywords, f"Error message missing expected keywords for {scenario['scenario']}: {result.error_message}"
             
-            print(f"✅ Business-friendly error test passed for {scenario['scenario']}")
+            print(f" PASS:  Business-friendly error test passed for {scenario['scenario']}")
 
     def test_authentication_result_strongly_typed(self):
         """
@@ -482,7 +482,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert auth_result.user_id == websocket_auth.user_id  # Same user
         # Different ID types have different semantic meaning even if same runtime type
         
-        print("✅ Strongly typed authentication result test passed")
+        print(" PASS:  Strongly typed authentication result test passed")
 
     def test_jwt_secret_consistency_validation(self):
         """
@@ -508,7 +508,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         assert validator_secret == expected_secret
         assert manager_secret == validator_secret  # Consistency check
         
-        print("✅ JWT secret consistency validation test passed")
+        print(" PASS:  JWT secret consistency validation test passed")
 
     def test_authentication_performance_business_requirements(self):
         """
@@ -553,7 +553,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
         # Authentication should complete within 100ms for good user experience
         assert auth_duration < 0.1, f"Authentication took {auth_duration:.3f}s, exceeds 100ms threshold"
         
-        print(f"✅ Authentication performance test passed (completed in {auth_duration*1000:.1f}ms)")
+        print(f" PASS:  Authentication performance test passed (completed in {auth_duration*1000:.1f}ms)")
 
     def test_websocket_connection_cleanup_on_auth_failure(self):
         """
@@ -586,7 +586,7 @@ class TestWebSocketAuthBusinessLogic(SSotBaseTestCase):
             assert cleanup_reason is not None
             assert "authentication" in cleanup_reason.lower()
         
-        print("✅ WebSocket connection cleanup on auth failure test passed")
+        print(" PASS:  WebSocket connection cleanup on auth failure test passed")
 
 
 if __name__ == "__main__":

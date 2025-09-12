@@ -102,7 +102,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert hasattr(registry, 'tool_dispatcher')
         assert registry.tool_dispatcher is None  # Should be None for isolation
         
-        self.logger.info("✅ AgentRegistry initialization test passed")
+        self.logger.info(" PASS:  AgentRegistry initialization test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -140,7 +140,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
                            if name in agent_names]
         assert len(successful_agents) >= 5, f"Too few agents registered successfully: {successful_agents}"
         
-        self.logger.info(f"✅ Registered {len(agent_names)} default agents successfully")
+        self.logger.info(f" PASS:  Registered {len(agent_names)} default agents successfully")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -168,7 +168,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert health['hardened_isolation'] is True
         assert health['using_universal_registry'] is True
         
-        self.logger.info(f"✅ Discovered agents across categories: core={len(core_agents)}, auxiliary={len(auxiliary_agents)}")
+        self.logger.info(f" PASS:  Discovered agents across categories: core={len(core_agents)}, auxiliary={len(auxiliary_agents)}")
 
     # ===================== MULTI-USER AGENT ISOLATION =====================
 
@@ -206,7 +206,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert self.user1_context.user_id in registry._user_sessions
         assert self.user2_context.user_id in registry._user_sessions
         
-        self.logger.info("✅ User agent session isolation test passed")
+        self.logger.info(" PASS:  User agent session isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -250,7 +250,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert user2_agent_retrieval == user2_triage_agent
         assert user1_agent_retrieval is not user2_agent_retrieval
         
-        self.logger.info("✅ Multi-user agent creation isolation test passed")
+        self.logger.info(" PASS:  Multi-user agent creation isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -313,7 +313,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         # Verify registry state after concurrent operations
         monitoring_report = await registry.monitor_all_users()
         assert monitoring_report['total_users'] == 5
-        assert monitoring_report['total_agents'] == 10  # 2 agents per user × 5 users
+        assert monitoring_report['total_agents'] == 10  # 2 agents per user  x  5 users
         assert len(monitoring_report['global_issues']) == 0
         
         # Verify user isolation maintained during concurrency
@@ -324,7 +324,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
             assert 'triage' in user_session._agents
             assert 'data' in user_session._agents
         
-        self.logger.info(f"✅ Concurrent multi-user execution test passed: {len(successful_results)} users")
+        self.logger.info(f" PASS:  Concurrent multi-user execution test passed: {len(successful_results)} users")
 
     # ===================== WEBSOCKET INTEGRATION =====================
 
@@ -360,7 +360,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         # WebSocket health may be CRITICAL initially but should have user bridge
         assert websocket_diagnosis['users_with_websocket_bridges'] > 0 or len(websocket_diagnosis['critical_issues']) <= 2
         
-        self.logger.info("✅ WebSocket manager integration test passed")
+        self.logger.info(" PASS:  WebSocket manager integration test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -404,7 +404,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         agent_with_events = await registry.get_user_agent(self.user1_context.user_id, 'triage')
         assert agent_with_events == agent
         
-        self.logger.info("✅ WebSocket events during agent creation test passed")
+        self.logger.info(" PASS:  WebSocket events during agent creation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -468,7 +468,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert user1_details['agent_count'] == 1
         assert user2_details['agent_count'] == 1
         
-        self.logger.info("✅ Multi-user WebSocket isolation test passed")
+        self.logger.info(" PASS:  Multi-user WebSocket isolation test passed")
 
     # ===================== AGENT LIFECYCLE MANAGEMENT =====================
 
@@ -484,7 +484,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert initial_monitoring['total_users'] == 0
         assert initial_monitoring['total_agents'] == 0
         
-        # Register → Create agent
+        # Register  ->  Create agent
         agent = await registry.create_agent_for_user(
             self.user1_context.user_id,
             'triage',
@@ -506,7 +506,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         session_metrics = user_session.get_metrics()
         assert session_metrics['agent_count'] == 1
         
-        # Deregister → Remove specific agent
+        # Deregister  ->  Remove specific agent
         removed = await registry.remove_user_agent(self.user1_context.user_id, 'triage')
         assert removed is True
         
@@ -529,7 +529,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert final_monitoring['total_users'] == 0
         assert final_monitoring['total_agents'] == 0
         
-        self.logger.info("✅ Complete agent lifecycle test passed")
+        self.logger.info(" PASS:  Complete agent lifecycle test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -588,7 +588,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert final_monitoring['total_users'] == 0
         assert final_monitoring['total_agents'] == 0
         
-        self.logger.info("✅ Agent resource cleanup prevention test passed")
+        self.logger.info(" PASS:  Agent resource cleanup prevention test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -635,7 +635,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert new_agent is not None
         assert new_agent is not agent1  # Different instance
         
-        self.logger.info("✅ User session reset functionality test passed")
+        self.logger.info(" PASS:  User session reset functionality test passed")
 
     # ===================== UNIFIED TOOL DISPATCHER INTEGRATION =====================
 
@@ -670,7 +670,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         deprecated_dispatcher = registry.tool_dispatcher
         assert deprecated_dispatcher is None  # Should be None for isolation
         
-        self.logger.info("✅ Tool dispatcher factory integration test passed")
+        self.logger.info(" PASS:  Tool dispatcher factory integration test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -711,7 +711,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert user1_session._agents['triage'] == user1_triage
         assert user2_session._agents['triage'] == user2_triage
         
-        self.logger.info("✅ Agent tool dispatcher isolation test passed")
+        self.logger.info(" PASS:  Agent tool dispatcher isolation test passed")
 
     # ===================== BUSINESS-CRITICAL WORKFLOWS =====================
 
@@ -766,7 +766,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         loaded_health = registry.get_registry_health()
         assert loaded_health['status'] in ['healthy', 'warning']  # May warn under load
         
-        self.logger.info(f"✅ Health monitoring test passed: {monitoring_report['total_users']} users")
+        self.logger.info(f" PASS:  Health monitoring test passed: {monitoring_report['total_users']} users")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -828,7 +828,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         final_session = await registry.get_user_session(self.user1_context.user_id)
         assert len(final_session._agents) == 4  # triage, optimization, actions, data
         
-        self.logger.info("✅ Agent execution engine coordination test passed")
+        self.logger.info(" PASS:  Agent execution engine coordination test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -909,7 +909,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert cleanup_metrics['status'] == 'cleaned'
         assert cleanup_metrics['cleaned_agents'] >= 5
         
-        self.logger.info("✅ Production agent workflow patterns test passed")
+        self.logger.info(" PASS:  Production agent workflow patterns test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -965,7 +965,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert backend_monitoring['total_agents'] == 1
         assert auth_monitoring['total_agents'] == 1
         
-        self.logger.info("✅ Cross-service agent registry synchronization test passed")
+        self.logger.info(" PASS:  Cross-service agent registry synchronization test passed")
 
     # ===================== PERFORMANCE AND STRESS TESTING =====================
 
@@ -1036,7 +1036,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert cleanup_time < 3.0, f"Cleanup too slow: {cleanup_time:.2f}s"
         assert cleanup_report['users_cleaned'] == 25
         
-        self.logger.info(f"✅ Performance test passed: create={creation_time:.2f}s, retrieve={retrieval_time:.2f}s, monitor={monitoring_time:.2f}s, cleanup={cleanup_time:.2f}s")
+        self.logger.info(f" PASS:  Performance test passed: create={creation_time:.2f}s, retrieve={retrieval_time:.2f}s, monitor={monitoring_time:.2f}s, cleanup={cleanup_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1124,7 +1124,7 @@ class TestAgentRegistryComprehensive(BaseIntegrationTest):
         assert final_monitoring['total_users'] == 0  # All cleaned up
         assert final_monitoring['total_agents'] == 0
         
-        self.logger.info(f"✅ Thread safety validation passed: {len(successful_results)}/{concurrent_count} concurrent operations succeeded")
+        self.logger.info(f" PASS:  Thread safety validation passed: {len(successful_results)}/{concurrent_count} concurrent operations succeeded")
 
 
 # ===================== PERFORMANCE BENCHMARKING =====================
@@ -1195,4 +1195,4 @@ class TestAgentRegistryPerformanceBenchmarks(BaseIntegrationTest):
             assert metrics['monitor_time'] < 2.0, f"Monitoring too slow at {user_count} users: {metrics['monitor_time']:.3f}s"
             assert metrics['cleanup_time'] < 5.0, f"Cleanup too slow at {user_count} users: {metrics['cleanup_time']:.3f}s"
         
-        self.logger.info(f"✅ Scaling characteristics validated across {list(scaling_results.keys())} user loads")
+        self.logger.info(f" PASS:  Scaling characteristics validated across {list(scaling_results.keys())} user loads")

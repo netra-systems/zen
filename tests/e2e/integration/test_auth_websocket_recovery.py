@@ -103,9 +103,9 @@ class TestAuthWebSocketRecovery:
                 
                 # Message preservation is best-effort, log results for monitoring
                 if preservation_result["messages_preserved"]:
-                    print(f"✓ Message preservation successful: {preservation_result['received_count']} messages")
+                    print(f"[U+2713] Message preservation successful: {preservation_result['received_count']} messages")
                 else:
-                    print(f"⚠ Message preservation partial: missing {len(preservation_result['missing_message_ids'])} messages")
+                    print(f" WARNING:  Message preservation partial: missing {len(preservation_result['missing_message_ids'])} messages")
                 
                 await new_websocket.close()
             
@@ -166,7 +166,7 @@ class TestAuthWebSocketRecovery:
                 
                 # Performance assertions
                 assert success_rate >= 0.8, \
-                    f"Expected ≥80% reconnection success rate, got {success_rate:.1%}"
+                    f"Expected  >= 80% reconnection success rate, got {success_rate:.1%}"
                 
                 assert avg_reconnection_time < AuthTestConfig.RECONNECTION_TIME_LIMIT, \
                     f"Average reconnection time {avg_reconnection_time:.3f}s exceeds {AuthTestConfig.RECONNECTION_TIME_LIMIT}s"

@@ -207,7 +207,7 @@ class ServiceCoordinator:
             remaining_services = set(services) - set(ordered_services)
             ordered_services.extend(sorted(remaining_services))
             
-            logger.info(f"Resolved startup order: {' → '.join(ordered_services)}")
+            logger.info(f"Resolved startup order: {'  ->  '.join(ordered_services)}")
             return ordered_services
             
         except ValueError as e:

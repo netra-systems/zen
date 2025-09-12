@@ -1,7 +1,7 @@
 """LLM utilities module.
 
 Provides utility functions for logging, token extraction, and response processing.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 from typing import Any, Dict, Optional

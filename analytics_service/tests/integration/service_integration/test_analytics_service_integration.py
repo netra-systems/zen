@@ -423,10 +423,10 @@ class TestAnalyticsServiceIntegration(BaseIntegrationTest):
         # Verify service event counts match
         analytics_summary = await validator.generate_analytics_summary()
         
-        assert analytics_summary["total_events"] == 60  # 10 users × 6 events each
-        assert analytics_summary["events_by_service"]["auth_service"] == 20  # 10 users × 2 auth events
-        assert analytics_summary["events_by_service"]["frontend"] == 20   # 10 users × 2 frontend events
-        assert analytics_summary["events_by_service"]["backend"] == 20     # 10 users × 2 backend events
+        assert analytics_summary["total_events"] == 60  # 10 users  x  6 events each
+        assert analytics_summary["events_by_service"]["auth_service"] == 20  # 10 users  x  2 auth events
+        assert analytics_summary["events_by_service"]["frontend"] == 20   # 10 users  x  2 frontend events
+        assert analytics_summary["events_by_service"]["backend"] == 20     # 10 users  x  2 backend events
         assert analytics_summary["unique_users"] == 10
         assert analytics_summary["consistency_rate"] == 1.0  # 100% consistent
         

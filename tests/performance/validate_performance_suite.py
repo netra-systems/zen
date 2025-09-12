@@ -79,9 +79,9 @@ class PerformanceSuiteValidator:
             if exists:
                 # Check file size (should be substantial)
                 size_kb = full_path.stat().st_size / 1024
-                logger.info(f"✅ {file_path} exists ({size_kb:.1f}KB)")
+                logger.info(f" PASS:  {file_path} exists ({size_kb:.1f}KB)")
             else:
-                logger.error(f"❌ {file_path} missing")
+                logger.error(f" FAIL:  {file_path} missing")
         
         return file_status
     
@@ -109,15 +109,15 @@ class PerformanceSuiteValidator:
                 
                 compile(source_code, str(file_path), 'exec')
                 syntax_results[test_file] = (True, "Syntax valid")
-                logger.info(f"✅ {test_file} syntax valid")
+                logger.info(f" PASS:  {test_file} syntax valid")
                 
             except SyntaxError as e:
                 syntax_results[test_file] = (False, f"Syntax error: {e}")
-                logger.error(f"❌ {test_file} syntax error: {e}")
+                logger.error(f" FAIL:  {test_file} syntax error: {e}")
                 
             except Exception as e:
                 syntax_results[test_file] = (False, f"Error: {e}")
-                logger.error(f"❌ {test_file} validation error: {e}")
+                logger.error(f" FAIL:  {test_file} validation error: {e}")
         
         return syntax_results
     
@@ -148,11 +148,11 @@ class PerformanceSuiteValidator:
             try:
                 __import__(module_name)
                 dependency_status[module_name] = True
-                logger.debug(f"✅ {module_name} available")
+                logger.debug(f" PASS:  {module_name} available")
                 
             except ImportError:
                 dependency_status[module_name] = False
-                logger.error(f"❌ {module_name} not available")
+                logger.error(f" FAIL:  {module_name} not available")
         
         return dependency_status
     
@@ -187,14 +187,14 @@ class PerformanceSuiteValidator:
                 'creation_rate_per_sec': len(contexts) / (creation_time / 1000)
             }
             
-            logger.info(f"✅ Context creation validation: {len(contexts)} contexts in {creation_time:.1f}ms")
+            logger.info(f" PASS:  Context creation validation: {len(contexts)} contexts in {creation_time:.1f}ms")
             
         except Exception as e:
             validation_results['context_creation'] = {
                 'success': False,
                 'error': str(e)
             }
-            logger.error(f"❌ Context creation validation failed: {e}")
+            logger.error(f" FAIL:  Context creation validation failed: {e}")
         
         # Test 2: Memory profiling validation
         try:
@@ -224,14 +224,14 @@ class PerformanceSuiteValidator:
                 'memory_recovered_mb': peak_memory - end_memory
             }
             
-            logger.info(f"✅ Memory profiling validation: {start_memory:.1f}MB -> {peak_memory:.1f}MB -> {end_memory:.1f}MB")
+            logger.info(f" PASS:  Memory profiling validation: {start_memory:.1f}MB -> {peak_memory:.1f}MB -> {end_memory:.1f}MB")
             
         except Exception as e:
             validation_results['memory_profiling'] = {
                 'success': False,
                 'error': str(e)
             }
-            logger.error(f"❌ Memory profiling validation failed: {e}")
+            logger.error(f" FAIL:  Memory profiling validation failed: {e}")
         
         # Test 3: Async operation validation
         try:
@@ -254,14 +254,14 @@ class PerformanceSuiteValidator:
                 'operations_per_second': len(results) / (async_time / 1000)
             }
             
-            logger.info(f"✅ Async operations validation: {len(results)} operations in {async_time:.1f}ms")
+            logger.info(f" PASS:  Async operations validation: {len(results)} operations in {async_time:.1f}ms")
             
         except Exception as e:
             validation_results['async_operations'] = {
                 'success': False,
                 'error': str(e)
             }
-            logger.error(f"❌ Async operations validation failed: {e}")
+            logger.error(f" FAIL:  Async operations validation failed: {e}")
         
         return validation_results
     
@@ -303,7 +303,7 @@ class PerformanceSuiteValidator:
                         'output_lines': len(lines)
                     }
                     
-                    logger.info(f"✅ {test_file}: {test_count} tests discovered")
+                    logger.info(f" PASS:  {test_file}: {test_count} tests discovered")
                     
                 else:
                     dry_run_results[test_file] = {
@@ -312,7 +312,7 @@ class PerformanceSuiteValidator:
                         'exit_code': result.returncode
                     }
                     
-                    logger.error(f"❌ {test_file}: dry-run failed (exit code {result.returncode})")
+                    logger.error(f" FAIL:  {test_file}: dry-run failed (exit code {result.returncode})")
                     logger.error(f"Error output: {result.stderr}")
                 
             except Exception as e:
@@ -320,7 +320,7 @@ class PerformanceSuiteValidator:
                     'success': False,
                     'error': str(e)
                 }
-                logger.error(f"❌ {test_file}: dry-run exception: {e}")
+                logger.error(f" FAIL:  {test_file}: dry-run exception: {e}")
         
         return dry_run_results
     
@@ -428,47 +428,47 @@ class PerformanceSuiteValidator:
         
         summary = report['validation_summary']
         overall_status = summary['overall_status']
-        status_icon = "✅" if overall_status == 'VALID' else "❌"
+        status_icon = " PASS: " if overall_status == 'VALID' else " FAIL: "
         
         print(f"{status_icon} Overall Status: {overall_status}")
-        print(f"🕒 Validation Time: {summary['timestamp']}")
+        print(f"[U+1F552] Validation Time: {summary['timestamp']}")
         print()
         
         # Detailed validation results
         validation_checks = [
-            ('📁 Files Valid', summary['files_valid']),
-            ('🐍 Syntax Valid', summary['syntax_valid']),
-            ('📦 Dependencies Valid', summary['dependencies_valid']),
-            ('⚡ Quick Tests Valid', summary['quick_tests_valid']),
-            ('🔍 Dry Runs Valid', summary['dry_runs_valid'])
+            ('[U+1F4C1] Files Valid', summary['files_valid']),
+            ('[U+1F40D] Syntax Valid', summary['syntax_valid']),
+            ('[U+1F4E6] Dependencies Valid', summary['dependencies_valid']),
+            (' LIGHTNING:  Quick Tests Valid', summary['quick_tests_valid']),
+            (' SEARCH:  Dry Runs Valid', summary['dry_runs_valid'])
         ]
         
         for check_name, is_valid in validation_checks:
-            icon = "✅" if is_valid else "❌"
+            icon = " PASS: " if is_valid else " FAIL: "
             print(f"{icon} {check_name}")
         
         print()
         
         # File validation details
-        print("📁 File Validation Details:")
+        print("[U+1F4C1] File Validation Details:")
         for file_path, exists in report['file_validation'].items():
-            icon = "✅" if exists else "❌"
+            icon = " PASS: " if exists else " FAIL: "
             print(f"  {icon} {file_path}")
         
         print()
         
         # Syntax validation details
-        print("🐍 Syntax Validation Details:")
+        print("[U+1F40D] Syntax Validation Details:")
         for file_path, result in report['syntax_validation'].items():
-            icon = "✅" if result['valid'] else "❌"
+            icon = " PASS: " if result['valid'] else " FAIL: "
             print(f"  {icon} {file_path}: {result['message']}")
         
         print()
         
         # Quick test details
-        print("⚡ Quick Test Validation:")
+        print(" LIGHTNING:  Quick Test Validation:")
         for test_name, result in report['quick_performance_validation'].items():
-            icon = "✅" if result.get('success', False) else "❌"
+            icon = " PASS: " if result.get('success', False) else " FAIL: "
             print(f"  {icon} {test_name}")
             
             if result.get('success', False):
@@ -482,20 +482,20 @@ class PerformanceSuiteValidator:
         print()
         
         # Recommendations
-        print("💡 Recommendations:")
+        print(" IDEA:  Recommendations:")
         for rec in report['recommendations']:
-            priority_icons = {'HIGH': '🔥', 'MEDIUM': '⚠️', 'LOW': '💭', 'INFO': 'ℹ️', 'CRITICAL': '💀'}
-            icon = priority_icons.get(rec['priority'], '❓')
+            priority_icons = {'HIGH': ' FIRE: ', 'MEDIUM': ' WARNING: [U+FE0F]', 'LOW': '[U+1F4AD]', 'INFO': '[U+2139][U+FE0F]', 'CRITICAL': '[U+1F480]'}
+            icon = priority_icons.get(rec['priority'], '[U+2753]')
             print(f"  {icon} [{rec['priority']}] {rec['action']}")
         
         print("\n" + "="*80)
         
         if overall_status == 'VALID':
-            print("✅ Performance suite validation PASSED")
-            print("🚀 Ready to run full performance tests")
+            print(" PASS:  Performance suite validation PASSED")
+            print("[U+1F680] Ready to run full performance tests")
         else:
-            print("❌ Performance suite validation FAILED")
-            print("🔧 Please fix issues before running performance tests")
+            print(" FAIL:  Performance suite validation FAILED")
+            print("[U+1F527] Please fix issues before running performance tests")
         
         print("="*80)
 
@@ -533,8 +533,8 @@ def main():
     try:
         validator = PerformanceSuiteValidator()
         
-        print("🔍 Starting performance suite validation...")
-        print(f"🖥️  System: {validator.system_info['platform']} | "
+        print(" SEARCH:  Starting performance suite validation...")
+        print(f"[U+1F5A5][U+FE0F]  System: {validator.system_info['platform']} | "
               f"Python: {validator.system_info['python_version'].split()[0]} | "
               f"CPUs: {validator.system_info['cpu_count']} | "
               f"Memory: {validator.system_info['memory_total_gb']:.1f}GB")
@@ -549,21 +549,21 @@ def main():
         # Save report if requested
         if args.output_file or report['validation_summary']['overall_status'] == 'INVALID':
             report_file = validator.save_validation_report(report)
-            print(f"\n📊 Detailed validation report: {report_file}")
+            print(f"\n CHART:  Detailed validation report: {report_file}")
         
         # Return appropriate exit code
         if report['validation_summary']['overall_status'] == 'VALID':
-            print(f"\n🎉 Performance suite ready for testing!")
+            print(f"\n CELEBRATION:  Performance suite ready for testing!")
             print("Run tests with: python tests/performance/run_performance_tests.py --all")
             return 0
         else:
-            print(f"\n💥 Performance suite has validation issues")
+            print(f"\n[U+1F4A5] Performance suite has validation issues")
             print("Please review the validation report and fix issues")
             return 1
     
     except Exception as e:
         logger.error(f"Error during validation: {e}")
-        print(f"❌ Validation error: {e}")
+        print(f" FAIL:  Validation error: {e}")
         return 1
 
 

@@ -168,7 +168,7 @@ class TestResponseTimeSLACompliance(BaseIntegrationTest):
         assert metrics.mean_time <= sla.mean_threshold_ms, f"Mean response time {metrics.mean_time:.1f}ms exceeds SLA {sla.mean_threshold_ms}ms"
         assert success_rate >= sla.success_rate_threshold, f"Success rate {success_rate:.3f} below SLA {sla.success_rate_threshold}"
         
-        print(f"✅ Authentication Response Time SLA Results:")
+        print(f" PASS:  Authentication Response Time SLA Results:")
         print(f"   Samples: {metrics.sample_count}/{sample_count}")
         print(f"   Success rate: {success_rate:.3f} (SLA: {sla.success_rate_threshold})")
         print(f"   Mean: {metrics.mean_time:.1f}ms (SLA: {sla.mean_threshold_ms}ms)")
@@ -238,7 +238,7 @@ class TestResponseTimeSLACompliance(BaseIntegrationTest):
         assert metrics.mean_time <= sla.mean_threshold_ms, f"Mean response time {metrics.mean_time:.1f}ms exceeds SLA {sla.mean_threshold_ms}ms"
         assert success_rate >= sla.success_rate_threshold, f"Success rate {success_rate:.3f} below SLA {sla.success_rate_threshold}"
         
-        print(f"✅ User Context Creation SLA Results:")
+        print(f" PASS:  User Context Creation SLA Results:")
         print(f"   Samples: {metrics.sample_count}/{sample_count}")
         print(f"   Success rate: {success_rate:.3f} (SLA: {sla.success_rate_threshold})")
         print(f"   Mean: {metrics.mean_time:.1f}ms (SLA: {sla.mean_threshold_ms}ms)")
@@ -304,7 +304,7 @@ class TestResponseTimeSLACompliance(BaseIntegrationTest):
         assert metrics.mean_time <= sla.mean_threshold_ms, f"Mean response time {metrics.mean_time:.1f}ms exceeds SLA {sla.mean_threshold_ms}ms"
         assert success_rate >= sla.success_rate_threshold, f"Success rate {success_rate:.3f} below SLA {sla.success_rate_threshold}"
         
-        print(f"✅ Database Operations SLA Results:")
+        print(f" PASS:  Database Operations SLA Results:")
         print(f"   Samples: {metrics.sample_count}/{sample_count}")
         print(f"   Success rate: {success_rate:.3f} (SLA: {sla.success_rate_threshold})")
         print(f"   Mean: {metrics.mean_time:.1f}ms (SLA: {sla.mean_threshold_ms}ms)")
@@ -376,7 +376,7 @@ class TestResponseTimeSLACompliance(BaseIntegrationTest):
         assert metrics.mean_time <= sla.mean_threshold_ms, f"Mean response time {metrics.mean_time:.1f}ms exceeds SLA {sla.mean_threshold_ms}ms"
         assert success_rate >= sla.success_rate_threshold, f"Success rate {success_rate:.3f} below SLA {sla.success_rate_threshold}"
         
-        print(f"✅ Redis Operations SLA Results:")
+        print(f" PASS:  Redis Operations SLA Results:")
         print(f"   Samples: {metrics.sample_count}/{sample_count}")
         print(f"   Success rate: {success_rate:.3f} (SLA: {sla.success_rate_threshold})")
         print(f"   Mean: {metrics.mean_time:.1f}ms (SLA: {sla.mean_threshold_ms}ms)")
@@ -474,7 +474,7 @@ class TestResponseTimeSLACompliance(BaseIntegrationTest):
         assert metrics.mean_time <= 100, f"E2E mean response time {metrics.mean_time:.1f}ms exceeds 100ms SLA"
         assert success_rate >= 0.97, f"E2E success rate {success_rate:.3f} below 97% SLA"
         
-        print(f"✅ End-to-End Operation SLA Results:")
+        print(f" PASS:  End-to-End Operation SLA Results:")
         print(f"   Samples: {metrics.sample_count}/{sample_count}")
         print(f"   Success rate: {success_rate:.3f} (SLA: 97%)")
         print(f"   Mean: {metrics.mean_time:.1f}ms (SLA: 100ms)")

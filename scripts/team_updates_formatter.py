@@ -10,12 +10,12 @@ class HumanFormatter:
     def __init__(self):
         """Initialize formatter with emoji mappings."""
         self.status_emojis = {
-            "healthy": "✅", "minor_issues": "🎯", 
-            "degraded": "⚠️", "critical": "🚨"
+            "healthy": " PASS: ", "minor_issues": " TARGET: ", 
+            "degraded": " WARNING: [U+FE0F]", "critical": " ALERT: "
         }
         self.compliance_emojis = {
-            "fully_compliant": "✅", "mostly_compliant": "🎯",
-            "partially_compliant": "⚠️", "non_compliant": "❌"
+            "fully_compliant": " PASS: ", "mostly_compliant": " TARGET: ",
+            "partially_compliant": " WARNING: [U+FE0F]", "non_compliant": " FAIL: "
         }
     
     def format_full_report(
@@ -42,7 +42,7 @@ class HumanFormatter:
     def format_header(self, time_frame: str, report_id: str) -> str:
         """Format report header."""
         time_desc = time_frame.replace("_", " ").title()
-        return f"""# 📊 Team Update Report
+        return f"""#  CHART:  Team Update Report
 Generated: {datetime.now().strftime("%Y-%m-%d %H:%M")}
 Time Frame: {time_desc}
 Report ID: {report_id}"""
@@ -52,7 +52,7 @@ Report ID: {report_id}"""
         if not alerts:
             return ""
         
-        lines = ["## 🚨 Critical Issues (Action Required)"]
+        lines = ["##  ALERT:  Critical Issues (Action Required)"]
         for alert in alerts:
             lines.append(f"- **{alert['type'].upper()}**: {alert['message']}")
         
@@ -72,7 +72,7 @@ Report ID: {report_id}"""
         contributors = data.get("contributors", [])[:3]
         top_names = ", ".join([c["name"] for c in contributors])
         
-        return f"""## 📋 Executive Summary
+        return f"""## [U+1F4CB] Executive Summary
 In the {time_desc}, the team:
 - Completed **{features}** new features
 - Fixed **{bugs}** bugs
@@ -87,7 +87,7 @@ In the {time_desc}, the team:
         if not features:
             return ""
         
-        lines = ["## ✨ New Features & Improvements"]
+        lines = ["## [U+2728] New Features & Improvements"]
         
         for feat in features[:5]:
             lines.append(f"""
@@ -107,7 +107,7 @@ In the {time_desc}, the team:
         if not bugs:
             return ""
         
-        lines = ["## 🐛 Bug Fixes"]
+        lines = ["## [U+1F41B] Bug Fixes"]
         
         for bug in bugs[:5]:
             readable_desc = self._make_readable(bug['title'])
@@ -121,7 +121,7 @@ In the {time_desc}, the team:
     def format_test_health(self, data: Dict) -> str:
         """Format test health section."""
         status = data.get("test_status", "unknown")
-        emoji = self.status_emojis.get(status, "❓")
+        emoji = self.status_emojis.get(status, "[U+2753]")
         metrics = data.get("test_metrics", {})
         coverage = data.get("coverage_info", {})
         
@@ -131,16 +131,16 @@ In the {time_desc}, the team:
         coverage_current = coverage.get("current", 0)
         coverage_delta = coverage.get("delta", 0)
         
-        delta_symbol = "📈" if coverage_delta > 0 else "📉" if coverage_delta < 0 else "➡️"
+        delta_symbol = "[U+1F4C8]" if coverage_delta > 0 else "[U+1F4C9]" if coverage_delta < 0 else "[U+27A1][U+FE0F]"
         
-        lines = [f"""## 🧪 Test Health
+        lines = [f"""## [U+1F9EA] Test Health
 ### Overall Status: {emoji} {status.replace('_', ' ').title()}
 - **Pass Rate**: {pass_rate}% ({passed}/{total} tests)
 - **Coverage**: {coverage_current}% ({delta_symbol} {abs(coverage_delta)}%)"""]
         
         failures = data.get("test_failures", [])
         if failures:
-            lines.append("\n### ⚠️ Failing Tests")
+            lines.append("\n###  WARNING: [U+FE0F] Failing Tests")
             for fail in failures[:3]:
                 lines.append(f"- {fail['test']}: {fail['reason']}")
         
@@ -149,12 +149,12 @@ In the {time_desc}, the team:
     def format_code_quality(self, data: Dict) -> str:
         """Format code quality section."""
         compliance = data.get("compliance_status", "unknown")
-        emoji = self.compliance_emojis.get(compliance, "❓")
+        emoji = self.compliance_emojis.get(compliance, "[U+2753]")
         
         line_viols = data.get("line_violations", [])
         func_viols = data.get("function_violations", [])
         
-        lines = [f"""## 📏 Code Quality & Compliance
+        lines = [f"""## [U+1F4CF] Code Quality & Compliance
 ### Architecture Compliance: {emoji} {compliance.replace('_', ' ').title()}"""]
         
         if line_viols:
@@ -180,7 +180,7 @@ In the {time_desc}, the team:
         if not any([doc_changes, spec_updates, learnings]):
             return ""
         
-        lines = ["## 📚 Documentation Updates"]
+        lines = ["## [U+1F4DA] Documentation Updates"]
         
         if doc_changes:
             lines.append("\n### Updated Docs")
@@ -196,7 +196,7 @@ In the {time_desc}, the team:
     
     def format_action_items(self, data: Dict) -> str:
         """Extract and format actionable next steps."""
-        lines = ["## ✅ Action Items"]
+        lines = ["##  PASS:  Action Items"]
         
         # Generate action items based on data
         if data.get("test_failures"):

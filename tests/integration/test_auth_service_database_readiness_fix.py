@@ -229,7 +229,7 @@ class TestAuthServiceDatabaseReadinessFix:
         initialized = await auth_conn.initialize_with_timeout(timeout=30.0)
         init_time = time.time() - start_time
         
-        print(f"Database initialization: {'✅ SUCCESS' if initialized else '❌ FAILED'} ({init_time:.2f}s)")
+        print(f"Database initialization: {' PASS:  SUCCESS' if initialized else ' FAIL:  FAILED'} ({init_time:.2f}s)")
         
         assert initialized, (
             f"Auth database initialization with timeout failed. "
@@ -242,7 +242,7 @@ class TestAuthServiceDatabaseReadinessFix:
         is_ready = await auth_conn.is_ready_with_timeout(timeout=15.0)
         readiness_time = time.time() - start_time
         
-        print(f"Database readiness check: {'✅ SUCCESS' if is_ready else '❌ FAILED'} ({readiness_time:.2f}s)")
+        print(f"Database readiness check: {' PASS:  SUCCESS' if is_ready else ' FAIL:  FAILED'} ({readiness_time:.2f}s)")
         
         assert is_ready, (
             f"Auth database readiness check with timeout failed. "
@@ -259,7 +259,7 @@ class TestAuthServiceDatabaseReadinessFix:
         # Clean up
         await auth_conn.close_with_timeout(timeout=5.0)
         
-        print(f"✅ Auth database connection timeout fix working successfully")
+        print(f" PASS:  Auth database connection timeout fix working successfully")
     
     @pytest.mark.asyncio
     async def test_auth_service_health_check_simulation(self):
@@ -290,7 +290,7 @@ class TestAuthServiceDatabaseReadinessFix:
                 timeout=15.0
             )
             
-            print(f"Database readiness result: {'✅ READY' if db_ready else '❌ NOT READY'}")
+            print(f"Database readiness result: {' PASS:  READY' if db_ready else ' FAIL:  NOT READY'}")
             
             # Step 3: Simulate health response based on readiness
             if db_ready:
@@ -327,7 +327,7 @@ class TestAuthServiceDatabaseReadinessFix:
             # Clean up
             await auth_conn.close_with_timeout(timeout=5.0)
             
-            print("✅ Auth service health check simulation successful - no 503 errors")
+            print(" PASS:  Auth service health check simulation successful - no 503 errors")
             
         except asyncio.TimeoutError:
             pytest.fail(
@@ -418,7 +418,7 @@ class TestAuthServiceDatabaseReadinessFix:
                 f"This could cause service timeouts."
             )
         
-        print("✅ Concurrent database readiness checks working without blocking")
+        print(" PASS:  Concurrent database readiness checks working without blocking")
     
     @pytest.mark.asyncio 
     async def test_database_connection_retry_logic(self):
@@ -462,7 +462,7 @@ class TestAuthServiceDatabaseReadinessFix:
         success, attempts = await retry_database_readiness(max_retries=3, initial_delay=0.5)
         total_time = time.time() - start_time
         
-        print(f"Retry logic result: {'✅ SUCCESS' if success else '❌ FAILED'}")
+        print(f"Retry logic result: {' PASS:  SUCCESS' if success else ' FAIL:  FAILED'}")
         print(f"Attempts used: {attempts}")
         print(f"Total time: {total_time:.2f}s")
         
@@ -471,7 +471,7 @@ class TestAuthServiceDatabaseReadinessFix:
             f"This indicates persistent connectivity issues."
         )
         
-        print("✅ Database connection retry logic working")
+        print(" PASS:  Database connection retry logic working")
     
     def test_database_url_asyncpg_compatibility_fix(self):
         """
@@ -498,13 +498,13 @@ class TestAuthServiceDatabaseReadinessFix:
         
         # Check driver specification
         if "+asyncpg" in database_url:
-            print("✅ URL explicitly specifies asyncpg driver")
+            print(" PASS:  URL explicitly specifies asyncpg driver")
         else:
-            print("ℹ️  URL does not specify driver (asyncpg will be default)")
+            print("[U+2139][U+FE0F]  URL does not specify driver (asyncpg will be default)")
         
         print(f"Compatibility issues found: {len(compatibility_issues)}")
         for issue in compatibility_issues:
-            print(f"  ⚠️  {issue}")
+            print(f"   WARNING: [U+FE0F]  {issue}")
         
         # Assert no critical compatibility issues
         critical_issues = [issue for issue in compatibility_issues if "sslmode" in issue]
@@ -513,7 +513,7 @@ class TestAuthServiceDatabaseReadinessFix:
             f"These will cause 'unexpected keyword argument sslmode' errors."
         )
         
-        print("✅ Database URL is compatible with asyncpg")
+        print(" PASS:  Database URL is compatible with asyncpg")
 
 
 if __name__ == "__main__":
@@ -527,22 +527,22 @@ if __name__ == "__main__":
         # Test initialization
         print("Testing database initialization...")
         initialized = await auth_conn.initialize_with_timeout(timeout=30.0)
-        print(f"Initialization: {'✅ SUCCESS' if initialized else '❌ FAILED'}")
+        print(f"Initialization: {' PASS:  SUCCESS' if initialized else ' FAIL:  FAILED'}")
         
         if initialized:
             # Test readiness
             print("Testing database readiness...")
             is_ready = await auth_conn.is_ready_with_timeout(timeout=15.0)
-            print(f"Readiness: {'✅ SUCCESS' if is_ready else '❌ FAILED'}")
+            print(f"Readiness: {' PASS:  SUCCESS' if is_ready else ' FAIL:  FAILED'}")
             
             # Clean up
             await auth_conn.close_with_timeout(timeout=5.0)
             
             if is_ready:
-                print("✅ Auth service database readiness fix working!")
+                print(" PASS:  Auth service database readiness fix working!")
             else:
-                print("❌ Auth service database readiness fix needs more work")
+                print(" FAIL:  Auth service database readiness fix needs more work")
         else:
-            print("❌ Database initialization failed - check configuration")
+            print(" FAIL:  Database initialization failed - check configuration")
     
     asyncio.run(main())

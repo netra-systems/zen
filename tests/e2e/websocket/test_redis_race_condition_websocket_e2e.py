@@ -120,7 +120,7 @@ class TestRedisRaceConditionWebSocketE2E:
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 assert response is not None, "No WebSocket response received"
                 
-                print(f"✅ WebSocket E2E test successful - connection time: {connection_time:.3f}s")
+                print(f" PASS:  WebSocket E2E test successful - connection time: {connection_time:.3f}s")
                 
             except asyncio.TimeoutError:
                 pytest.fail(
@@ -211,7 +211,7 @@ class TestRedisRaceConditionWebSocketE2E:
                     assert result["connection_time"] >= 0.4, \
                         f"Connection {result['connection_id']} too fast: {result['connection_time']}s"
                 else:
-                    print(f"⚠️  Connection {result['connection_id']} failed: {result.get('error', 'Unknown error')}")
+                    print(f" WARNING: [U+FE0F]  Connection {result['connection_id']} failed: {result.get('error', 'Unknown error')}")
             
             # At least 2 out of 3 connections should succeed (allowing for some GCP timing issues)
             assert successful_connections >= 2, \
@@ -222,7 +222,7 @@ class TestRedisRaceConditionWebSocketE2E:
                 avg_time = total_connection_time / successful_connections
                 assert avg_time >= 0.4, f"Average connection time too fast: {avg_time}s"
             
-            print(f"✅ Concurrent WebSocket test: {successful_connections}/{concurrent_connections} succeeded")
+            print(f" PASS:  Concurrent WebSocket test: {successful_connections}/{concurrent_connections} succeeded")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -269,7 +269,7 @@ class TestRedisRaceConditionWebSocketE2E:
             # Reconnection should also include grace period
             assert reconnect_time >= 0.4, f"Reconnection too fast: {reconnect_time}s"
             
-            print(f"✅ WebSocket reconnection test successful - reconnect time: {reconnect_time:.3f}s")
+            print(f" PASS:  WebSocket reconnection test successful - reconnect time: {reconnect_time:.3f}s")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -299,7 +299,7 @@ class TestRedisRaceConditionWebSocketE2E:
             
             assert auth_success is True, "WebSocket authentication flow failed"
             
-            print("✅ WebSocket authentication flow test successful with Redis race condition fix")
+            print(" PASS:  WebSocket authentication flow test successful with Redis race condition fix")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -355,7 +355,7 @@ class TestRedisRaceConditionWebSocketE2E:
             # Average should be reasonable
             assert avg_connection_time <= 5.0, f"Average connection time too slow: {avg_connection_time}s"
             
-            print(f"✅ WebSocket performance test - avg: {avg_connection_time:.3f}s, "
+            print(f" PASS:  WebSocket performance test - avg: {avg_connection_time:.3f}s, "
                   f"min: {min_connection_time:.3f}s, max: {max_connection_time:.3f}s")
     
     @pytest.mark.e2e
@@ -403,13 +403,13 @@ class TestRedisRaceConditionWebSocketE2E:
                     response_data = json.loads(response)
                     # Response should indicate message was processed
                     assert "type" in response_data, "Invalid response format"
-                    print(f"✅ Chat message processed successfully: {response_data.get('type', 'unknown')}")
+                    print(f" PASS:  Chat message processed successfully: {response_data.get('type', 'unknown')}")
                     
                 except json.JSONDecodeError:
                     # Some responses might not be JSON, that's ok for this test
-                    print(f"✅ Chat message response received (non-JSON): {response[:100]}")
+                    print(f" PASS:  Chat message response received (non-JSON): {response[:100]}")
                 
-                print("✅ WebSocket business value test successful - chat functionality working")
+                print(" PASS:  WebSocket business value test successful - chat functionality working")
                 
             finally:
                 await ws.close()
@@ -457,15 +457,15 @@ class TestRedisRaceConditionWebSocketE2E:
                     assert connection_time >= 0.4, \
                         f"Recovery attempt {recovery_attempts} too fast: {connection_time}s"
                     
-                    print(f"✅ Recovery attempt {recovery_attempts} successful: {connection_time:.3f}s")
+                    print(f" PASS:  Recovery attempt {recovery_attempts} successful: {connection_time:.3f}s")
                     break
                     
                 except Exception as e:
                     if recovery_attempts >= max_attempts:
                         pytest.fail(f"All recovery attempts failed. Last error: {e}")
                     
-                    print(f"⚠️  Recovery attempt {recovery_attempts} failed: {e}, retrying...")
+                    print(f" WARNING: [U+FE0F]  Recovery attempt {recovery_attempts} failed: {e}, retrying...")
                     await asyncio.sleep(1.0)  # Wait before retry
             
             assert recovery_attempts <= max_attempts, "Too many recovery attempts needed"
-            print("✅ WebSocket error recovery test successful with Redis race condition fix")
+            print(" PASS:  WebSocket error recovery test successful with Redis race condition fix")

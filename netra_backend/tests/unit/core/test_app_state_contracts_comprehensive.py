@@ -664,7 +664,7 @@ class TestUtilityFunctions(BaseIntegrationTest):
         
         # Assert
         assert report is not None
-        assert "❌ FAILED" in report
+        assert " FAIL:  FAILED" in report
         assert "BUSINESS IMPACT ASSESSMENT:" in report
         assert "RECOMMENDED ACTIONS:" in report
         assert "smd.py" in report  # Troubleshooting guidance

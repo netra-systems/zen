@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Differentiating capability - competitors lack coordinated multi-agent workflows
 
 CRITICAL REQUIREMENTS:
-1. Test agent coordination: Triage → Data Helper → UVS Reporting → Final Synthesis
+1. Test agent coordination: Triage  ->  Data Helper  ->  UVS Reporting  ->  Final Synthesis
 2. Test agent handoffs with context preservation between agents
 3. Test workflow state progression across multiple agents
 4. Test WebSocket events for entire multi-agent workflow
@@ -310,7 +310,7 @@ class TestMultiAgentWorkflowCoordination(BaseIntegrationTest):
         """
         Test 1: Complete multi-agent workflow from start to finish.
         
-        Validates that a complete multi-agent workflow (Triage → Data → Analysis → Synthesis)
+        Validates that a complete multi-agent workflow (Triage  ->  Data  ->  Analysis  ->  Synthesis)
         executes successfully with proper agent coordination and context passing.
         """
         assert real_services_fixture["database_available"], "Real database required"

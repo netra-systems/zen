@@ -685,7 +685,7 @@ class TestDataHelperTriageIntegration(BaseIntegrationTest):
         assert completion_event["data"]["success"] is True
         assert completion_event["data"]["data_items_requested"] > 0
         
-        logger.info(f"✓ Verified {len(websocket_events)} WebSocket events for data request workflow")
+        logger.info(f"[U+2713] Verified {len(websocket_events)} WebSocket events for data request workflow")
 
     @pytest.mark.integration
     @pytest.mark.real_services

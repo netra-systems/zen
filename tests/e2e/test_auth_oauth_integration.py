@@ -382,9 +382,9 @@ class TestOAuthIntegration:
         
         assert token_validation["valid"], "Refreshed tokens should be valid across services"
         
-        logger.info("✅ OAuth token refresh integration PASSED")
-        logger.info("✅ Enterprise session continuity VALIDATED")
-        logger.info("✅ $75K+ MRR long-session support PROTECTED")
+        logger.info(" PASS:  OAuth token refresh integration PASSED")
+        logger.info(" PASS:  Enterprise session continuity VALIDATED")
+        logger.info(" PASS:  $75K+ MRR long-session support PROTECTED")
     
     @pytest.mark.e2e
     async def test_user_profile_sync_validation(self, oauth_integration_runner):
@@ -417,9 +417,9 @@ class TestOAuthIntegration:
         assert auth_profile.get("id"), "User ID should be present in profile"
         assert auth_profile.get("email"), "Email should be present in profile"
         
-        logger.info("✅ User profile sync validation PASSED")
-        logger.info("✅ Enterprise user data consistency VALIDATED")
-        logger.info("✅ $50K+ MRR profile management PROTECTED")
+        logger.info(" PASS:  User profile sync validation PASSED")
+        logger.info(" PASS:  Enterprise user data consistency VALIDATED")
+        logger.info(" PASS:  $50K+ MRR profile management PROTECTED")
     
     @pytest.mark.e2e
     async def test_existing_user_oauth_merge_scenario(self, oauth_integration_runner):
@@ -445,9 +445,9 @@ class TestOAuthIntegration:
         assert first_session["user_data"]["email"] == second_session["user_data"]["email"], \
             "Email should be consistent across sessions"
         
-        logger.info("✅ Existing user OAuth merge scenario PASSED")
-        logger.info("✅ Enterprise user account continuity VALIDATED")
-        logger.info("✅ $60K+ MRR user onboarding PROTECTED")
+        logger.info(" PASS:  Existing user OAuth merge scenario PASSED")
+        logger.info(" PASS:  Enterprise user account continuity VALIDATED")
+        logger.info(" PASS:  $60K+ MRR user onboarding PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_error_recovery(self, oauth_integration_runner):
@@ -474,9 +474,9 @@ class TestOAuthIntegration:
             assert scenario_result["error_detected"], \
                 f"Error scenario {scenario_name} should detect the error"
         
-        logger.info("✅ OAuth error recovery PASSED")
-        logger.info("✅ Enterprise OAuth resilience VALIDATED")
-        logger.info("✅ $40K+ MRR error handling PROTECTED")
+        logger.info(" PASS:  OAuth error recovery PASSED")
+        logger.info(" PASS:  Enterprise OAuth resilience VALIDATED")
+        logger.info(" PASS:  $40K+ MRR error handling PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_session_management(self, oauth_integration_runner):
@@ -492,7 +492,7 @@ class TestOAuthIntegration:
         session_result = await runner.test_oauth_session_management()
         
         assert session_result["total_sessions_attempted"] >= 3, "Should test multiple sessions"
-        assert session_result["success_rate"] >= 0.8, "Should have ≥80% session success rate"
+        assert session_result["success_rate"] >= 0.8, "Should have  >= 80% session success rate"
         assert session_result["session_management_robust"], "Session management should be robust"
         
         # Validate session consistency
@@ -504,9 +504,9 @@ class TestOAuthIntegration:
             assert session["tokens"], "Session should have tokens"
             assert session["user_data"], "Session should have user data"
         
-        logger.info(f"✅ OAuth session management PASSED: {session_result['success_rate']:.1%} success rate")
-        logger.info("✅ Enterprise session scalability VALIDATED")
-        logger.info("✅ $35K+ MRR concurrent sessions PROTECTED")
+        logger.info(f" PASS:  OAuth session management PASSED: {session_result['success_rate']:.1%} success rate")
+        logger.info(" PASS:  Enterprise session scalability VALIDATED")
+        logger.info(" PASS:  $35K+ MRR concurrent sessions PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_end_to_end_enterprise_flow(self, oauth_integration_runner):
@@ -547,9 +547,9 @@ class TestOAuthIntegration:
         total_time = time.time() - start_time
         assert total_time < 15.0, f"Enterprise flow took {total_time:.2f}s, should be <15s"
         
-        logger.info(f"✅ End-to-end Enterprise OAuth flow PASSED in {total_time:.2f}s")
-        logger.info("✅ Complete Enterprise SSO capability VALIDATED")
-        logger.info("✅ $100K+ MRR Enterprise readiness PROTECTED")
+        logger.info(f" PASS:  End-to-end Enterprise OAuth flow PASSED in {total_time:.2f}s")
+        logger.info(" PASS:  Complete Enterprise SSO capability VALIDATED")
+        logger.info(" PASS:  $100K+ MRR Enterprise readiness PROTECTED")
 
 
 # Business Impact Summary for OAuth Integration Tests

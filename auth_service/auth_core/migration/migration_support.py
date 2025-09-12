@@ -147,7 +147,7 @@ class MigrationManager:
             # Persist status
             self._save_migration_status()
             
-            logger.info(f"Migration phase changed: {old_phase.value} → {phase.value}")
+            logger.info(f"Migration phase changed: {old_phase.value}  ->  {phase.value}")
             
             return True
             
@@ -222,7 +222,7 @@ class MigrationManager:
             rollback_phase = self._get_rollback_phase(current_phase)
             
             if rollback_phase:
-                logger.warning(f"Rolling back migration: {current_phase.value} → {rollback_phase.value}, reason: {reason}")
+                logger.warning(f"Rolling back migration: {current_phase.value}  ->  {rollback_phase.value}, reason: {reason}")
                 
                 # Execute rollback handlers
                 if current_phase in self.rollback_handlers:

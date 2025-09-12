@@ -206,7 +206,7 @@ class TestWebSocketBridgeMinimal(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(events), 5)
         
         # Total events across all runs
-        self.assertEqual(len(bridge.events_captured), 15)  # 3 runs × 5 events each
+        self.assertEqual(len(bridge.events_captured), 15)  # 3 runs  x  5 events each
     
     async def test_no_bridge_graceful_handling(self):
         """CRITICAL: Agent must handle missing bridge gracefully."""

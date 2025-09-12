@@ -235,12 +235,12 @@ def main():
         
         if args.verbose:
             print("\n[SUMMARY] Summary of validated components:")
-            print("  • Service ports and port selection logic")
-            print("  • Host constants and helpers")
-            print("  • Database URL builders (PostgreSQL, Redis, ClickHouse)")
-            print("  • HTTP and WebSocket URL builders")
-            print("  • Service endpoint configurations")
-            print("  • Environment-based configuration logic")
+            print("  [U+2022] Service ports and port selection logic")
+            print("  [U+2022] Host constants and helpers")
+            print("  [U+2022] Database URL builders (PostgreSQL, Redis, ClickHouse)")
+            print("  [U+2022] HTTP and WebSocket URL builders")
+            print("  [U+2022] Service endpoint configurations")
+            print("  [U+2022] Environment-based configuration logic")
         
         return True
         

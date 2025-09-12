@@ -405,7 +405,7 @@ class TestCompleteUserWorkflowPerformance(BaseE2ETest):
             f"Performance grade unacceptable: {result.performance_grade}"
         )
         
-        print(f"✓ New user journey: {total_time_to_value:.2f}s total, "
+        print(f"[U+2713] New user journey: {total_time_to_value:.2f}s total, "
               f"Grade: {result.performance_grade}, "
               f"Cost: ${result.cost_impact_analysis['total_estimated_cost_usd']:.4f}")
               
@@ -528,7 +528,7 @@ class TestCompleteUserWorkflowPerformance(BaseE2ETest):
         # SLA compliance for mid-tier (concurrent users typically mid-tier+)
         assert result.sla_tier_compliance["mid_tier"], "Fails Mid-tier SLA under concurrent load"
         
-        print(f"✓ Concurrent {user_count} users: {result.avg_response_time_ms:.2f}ms avg, "
+        print(f"[U+2713] Concurrent {user_count} users: {result.avg_response_time_ms:.2f}ms avg, "
               f"{successful_user_count}/{user_count} succeeded, "
               f"Grade: {result.performance_grade}")
               
@@ -666,7 +666,7 @@ class TestCompleteUserWorkflowPerformance(BaseE2ETest):
             f"Optimization workflow too expensive: ${cost_per_optimization:.4f} per workflow"
         )
         
-        print(f"✓ Complete optimization: {total_workflow_time:.2f}s total, "
+        print(f"[U+2713] Complete optimization: {total_workflow_time:.2f}s total, "
               f"${cost_per_optimization:.4f} per workflow, "
               f"Grade: {result.performance_grade}")
 
@@ -820,7 +820,7 @@ class TestSystemScalabilityAndLoadE2E(BaseE2ETest):
             f"Sustained load throughput too low: {result.throughput_operations_per_second:.2f} ops/sec"
         )
         
-        print(f"✓ Sustained load ({concurrent_users} users, {load_duration:.1f}s): "
+        print(f"[U+2713] Sustained load ({concurrent_users} users, {load_duration:.1f}s): "
               f"{success_rate:.1%} success, {result.throughput_operations_per_second:.1f} ops/sec")
               
     @pytest.mark.asyncio

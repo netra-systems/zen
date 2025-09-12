@@ -67,9 +67,9 @@ class OptimizationTemplates:
     
     def _build_info_requirements(self) -> str:
         """Build information requirements list."""
-        return ("• Current performance metrics (latency, throughput)\n"
-                "• Resource constraints (memory, compute)\n"
-                "• Target improvements (e.g., 20% latency reduction)\n")
+        return ("[U+2022] Current performance metrics (latency, throughput)\n"
+                "[U+2022] Resource constraints (memory, compute)\n"
+                "[U+2022] Target improvements (e.g., 20% latency reduction)\n")
     
     def _get_context_template(self) -> str:
         """Get optimization context template."""
@@ -81,9 +81,9 @@ class OptimizationTemplates:
     
     def _build_context_requirements(self) -> str:
         """Build context requirements list."""
-        return ("• Baseline performance data\n"
-                "• System architecture details\n"
-                "• Specific bottlenecks you're experiencing\n")
+        return ("[U+2022] Baseline performance data\n"
+                "[U+2022] System architecture details\n"
+                "[U+2022] Specific bottlenecks you're experiencing\n")
     
     def _get_stepwise_template(self) -> str:
         """Get optimization stepwise template."""
@@ -95,10 +95,10 @@ class OptimizationTemplates:
     
     def _build_stepwise_steps(self) -> str:
         """Build stepwise optimization steps."""
-        return ("• Breaking the optimization into smaller, more focused tasks\n"
-                "• Providing a simplified version of your requirements\n"
-                "• Starting with basic performance profiling first\n"
-                "• Describing the most critical performance issue only\n")
+        return ("[U+2022] Breaking the optimization into smaller, more focused tasks\n"
+                "[U+2022] Providing a simplified version of your requirements\n"
+                "[U+2022] Starting with basic performance profiling first\n"
+                "[U+2022] Describing the most critical performance issue only\n")
     
     def _get_key_info_template(self) -> str:
         """Get optimization key info template."""
@@ -109,10 +109,10 @@ class OptimizationTemplates:
     
     def _build_key_requirements(self) -> str:
         """Build key information requirements."""
-        return ("• Model/system specifications\n"
-                "• Current configuration parameters\n"
-                "• Performance requirements\n"
-                "• Available resources\n")
+        return ("[U+2022] Model/system specifications\n"
+                "[U+2022] Current configuration parameters\n"
+                "[U+2022] Performance requirements\n"
+                "[U+2022] Available resources\n")
     
     def _get_setup_template(self) -> str:
         """Get optimization setup template."""
@@ -124,9 +124,9 @@ class OptimizationTemplates:
     
     def _build_setup_requirements(self) -> str:
         """Build setup requirements list."""
-        return ("• Current implementation details\n"
-                "• Performance metrics you're tracking\n"
-                "• Constraints or limitations\n")
+        return ("[U+2022] Current implementation details\n"
+                "[U+2022] Performance metrics you're tracking\n"
+                "[U+2022] Constraints or limitations\n")
     
     def _get_concrete_template(self) -> str:
         """Get concrete optimization template."""
@@ -152,6 +152,6 @@ class OptimizationTemplates:
     
     def _build_practical_steps(self) -> str:
         """Build practical optimization steps."""
-        return ("• **Quick win**: [Specific easy optimization]\n"
-                "• **Medium effort**: [Specific moderate optimization]\n"
-                "• **Major improvement**: [Specific significant optimization]\n")
+        return ("[U+2022] **Quick win**: [Specific easy optimization]\n"
+                "[U+2022] **Medium effort**: [Specific moderate optimization]\n"
+                "[U+2022] **Major improvement**: [Specific significant optimization]\n")

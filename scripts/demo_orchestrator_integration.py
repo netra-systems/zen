@@ -47,10 +47,10 @@ async def demo_orchestrator_basic():
         print(f"   Active: {status['active']}")
         print(f"   Background Tasks: {status['background_tasks']}")
         
-        print("\n✅ Basic functionality demo completed successfully!")
+        print("\n PASS:  Basic functionality demo completed successfully!")
         
     except Exception as e:
-        print(f"❌ Demo failed: {e}")
+        print(f" FAIL:  Demo failed: {e}")
         raise
         
     finally:
@@ -89,10 +89,10 @@ async def demo_orchestrator_execution_modes():
             layers = orchestrator._determine_layers(config)
             print(f"   Layers: {', '.join(layers)}")
             
-        print("\n✅ Execution modes demo completed successfully!")
+        print("\n PASS:  Execution modes demo completed successfully!")
         
     except Exception as e:
-        print(f"❌ Demo failed: {e}")
+        print(f" FAIL:  Demo failed: {e}")
         raise
         
     finally:
@@ -128,10 +128,10 @@ async def demo_agent_communication():
         )
         
         print("   Messages sent successfully!")
-        print("\n✅ Agent communication demo completed successfully!")
+        print("\n PASS:  Agent communication demo completed successfully!")
         
     except Exception as e:
-        print(f"❌ Demo failed: {e}")
+        print(f" FAIL:  Demo failed: {e}")
         raise
         
     finally:
@@ -140,7 +140,7 @@ async def demo_agent_communication():
 
 async def main():
     """Run all demonstrations"""
-    print("🚀 Starting Test Orchestrator Agent Integration Demos\n")
+    print("[U+1F680] Starting Test Orchestrator Agent Integration Demos\n")
     
     try:
         # Run basic functionality demo
@@ -153,7 +153,7 @@ async def main():
         await demo_agent_communication()
         
         print("\n" + "="*60)
-        print("🎉 ALL DEMOS COMPLETED SUCCESSFULLY!")
+        print(" CELEBRATION:  ALL DEMOS COMPLETED SUCCESSFULLY!")
         print("="*60)
         print("\nThe Test Orchestrator Agent is ready for production use.")
         print("\nUsage Examples:")
@@ -163,7 +163,7 @@ async def main():
         print("  python unified_test_runner.py --use-layers --background-e2e")
         
     except Exception as e:
-        print(f"\n❌ Demo suite failed: {e}")
+        print(f"\n FAIL:  Demo suite failed: {e}")
         import traceback
         traceback.print_exc()
         return 1

@@ -49,7 +49,7 @@ async def test_integration_auth_manager():
         
         # Test manager creation
         auth_manager = IntegrationAuthServiceManager()
-        logger.info("✅ IntegrationAuthServiceManager created successfully")
+        logger.info(" PASS:  IntegrationAuthServiceManager created successfully")
         
         # Test auth service startup
         logger.info("Starting auth service...")
@@ -59,9 +59,9 @@ async def test_integration_auth_manager():
         startup_time = time.time() - start_time
         
         if success:
-            logger.info(f"✅ Auth service started successfully in {startup_time:.2f}s")
+            logger.info(f" PASS:  Auth service started successfully in {startup_time:.2f}s")
         else:
-            logger.error("❌ Auth service failed to start")
+            logger.error(" FAIL:  Auth service failed to start")
             return False
         
         try:
@@ -73,9 +73,9 @@ async def test_integration_auth_manager():
             )
             
             if token:
-                logger.info(f"✅ Test token created: {token[:20]}...")
+                logger.info(f" PASS:  Test token created: {token[:20]}...")
             else:
-                logger.error("❌ Failed to create test token")
+                logger.error(" FAIL:  Failed to create test token")
                 return False
             
             # Test token validation
@@ -83,9 +83,9 @@ async def test_integration_auth_manager():
             validation_result = await auth_manager.validate_token(token)
             
             if validation_result and validation_result.get("valid"):
-                logger.info("✅ Token validation successful")
+                logger.info(" PASS:  Token validation successful")
             else:
-                logger.error("❌ Token validation failed")
+                logger.error(" FAIL:  Token validation failed")
                 return False
             
             # Test auth helper
@@ -98,9 +98,9 @@ async def test_integration_auth_manager():
             )
             
             if helper_token:
-                logger.info(f"✅ Auth helper token created: {helper_token[:20]}...")
+                logger.info(f" PASS:  Auth helper token created: {helper_token[:20]}...")
             else:
-                logger.error("❌ Auth helper token creation failed")
+                logger.error(" FAIL:  Auth helper token creation failed")
                 return False
             
             # Test header generation
@@ -108,22 +108,22 @@ async def test_integration_auth_manager():
             ws_headers = auth_helper.get_integration_websocket_headers()
             
             if "Authorization" in api_headers and "Authorization" in ws_headers:
-                logger.info("✅ Authentication headers generated successfully")
+                logger.info(" PASS:  Authentication headers generated successfully")
             else:
-                logger.error("❌ Authentication header generation failed")
+                logger.error(" FAIL:  Authentication header generation failed")
                 return False
             
-            logger.info("✅ All integration auth manager tests passed")
+            logger.info(" PASS:  All integration auth manager tests passed")
             return True
             
         finally:
             # Clean up
             logger.info("Stopping auth service...")
             await auth_manager.stop_auth_service()
-            logger.info("✅ Auth service stopped successfully")
+            logger.info(" PASS:  Auth service stopped successfully")
     
     except Exception as e:
-        logger.error(f"❌ Integration auth manager test failed: {e}")
+        logger.error(f" FAIL:  Integration auth manager test failed: {e}")
         return False
 
 
@@ -140,7 +140,7 @@ async def test_auth_fixtures():
             multi_user_tokens
         )
         
-        logger.info("✅ All authentication fixtures imported successfully")
+        logger.info(" PASS:  All authentication fixtures imported successfully")
         
         # Test fixture functions directly (without pytest)
         from test_framework.ssot.integration_auth_manager import get_integration_auth_manager
@@ -150,16 +150,16 @@ async def test_auth_fixtures():
         manager2 = await get_integration_auth_manager()
         
         if manager1 is manager2:
-            logger.info("✅ Singleton auth manager working correctly")
+            logger.info(" PASS:  Singleton auth manager working correctly")
         else:
-            logger.error("❌ Singleton auth manager not working")
+            logger.error(" FAIL:  Singleton auth manager not working")
             return False
         
-        logger.info("✅ All authentication fixture tests passed")
+        logger.info(" PASS:  All authentication fixture tests passed")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Authentication fixture test failed: {e}")
+        logger.error(f" FAIL:  Authentication fixture test failed: {e}")
         return False
 
 
@@ -172,7 +172,7 @@ async def test_circuit_breaker_behavior():
         
         # The circuit breaker should be in a working state initially
         # (assuming auth service is running from previous tests)
-        logger.info("✅ Circuit breaker behavior test placeholder passed")
+        logger.info(" PASS:  Circuit breaker behavior test placeholder passed")
         
         # Note: Full circuit breaker testing would require intentionally 
         # breaking the auth service, which is complex for this validation
@@ -180,7 +180,7 @@ async def test_circuit_breaker_behavior():
         return True
         
     except Exception as e:
-        logger.error(f"❌ Circuit breaker test failed: {e}")
+        logger.error(f" FAIL:  Circuit breaker test failed: {e}")
         return False
 
 
@@ -201,7 +201,7 @@ async def validate_websocket_auth_flow():
         )
         
         if not token:
-            logger.error("❌ Failed to create WebSocket test token")
+            logger.error(" FAIL:  Failed to create WebSocket test token")
             return False
         
         # Test token validation
@@ -209,7 +209,7 @@ async def validate_websocket_auth_flow():
         is_valid = await auth_helper.validate_integration_token(token)
         
         if not is_valid:
-            logger.error("❌ WebSocket token validation failed")
+            logger.error(" FAIL:  WebSocket token validation failed")
             # Try direct validation to see what's happening
             logger.info("Attempting direct token validation for debugging...")
             try:
@@ -225,20 +225,20 @@ async def validate_websocket_auth_flow():
         required_headers = ["Authorization", "X-User-ID", "X-Test-Mode"]
         for header in required_headers:
             if header not in ws_headers:
-                logger.error(f"❌ Missing required WebSocket header: {header}")
+                logger.error(f" FAIL:  Missing required WebSocket header: {header}")
                 return False
         
-        logger.info("✅ WebSocket authentication flow validation passed")
+        logger.info(" PASS:  WebSocket authentication flow validation passed")
         return True
         
     except Exception as e:
-        logger.error(f"❌ WebSocket authentication flow validation failed: {e}")
+        logger.error(f" FAIL:  WebSocket authentication flow validation failed: {e}")
         return False
 
 
 async def run_quick_validation():
     """Run quick validation tests."""
-    logger.info("🚀 Running WebSocket Integration Authentication Fix Validation (Quick)")
+    logger.info("[U+1F680] Running WebSocket Integration Authentication Fix Validation (Quick)")
     
     tests = [
         ("Integration Auth Manager", test_integration_auth_manager),
@@ -255,32 +255,32 @@ async def run_quick_validation():
             result = await test_func()
             if result:
                 passed += 1
-                logger.info(f"✅ {test_name}: PASSED")
+                logger.info(f" PASS:  {test_name}: PASSED")
             else:
-                logger.error(f"❌ {test_name}: FAILED")
+                logger.error(f" FAIL:  {test_name}: FAILED")
         except Exception as e:
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
-    logger.info(f"\n🎯 Quick Validation Results: {passed}/{total} tests passed")
+    logger.info(f"\n TARGET:  Quick Validation Results: {passed}/{total} tests passed")
     
     if passed == total:
-        logger.info("🎉 ALL QUICK VALIDATION TESTS PASSED!")
-        logger.info("✅ WebSocket integration authentication fixes are working correctly")
+        logger.info(" CELEBRATION:  ALL QUICK VALIDATION TESTS PASSED!")
+        logger.info(" PASS:  WebSocket integration authentication fixes are working correctly")
         return True
     else:
-        logger.error("❌ Some validation tests failed - authentication fixes need work")
+        logger.error(" FAIL:  Some validation tests failed - authentication fixes need work")
         return False
 
 
 async def run_full_validation():
     """Run full validation test suite."""
-    logger.info("🚀 Running WebSocket Integration Authentication Fix Validation (Full)")
+    logger.info("[U+1F680] Running WebSocket Integration Authentication Fix Validation (Full)")
     
     # Run quick tests first
     quick_passed = await run_quick_validation()
     
     if not quick_passed:
-        logger.error("❌ Quick validation failed - skipping full validation")
+        logger.error(" FAIL:  Quick validation failed - skipping full validation")
         return False
     
     # Additional full validation tests
@@ -299,20 +299,20 @@ async def run_full_validation():
             result = await test_func()
             if result:
                 passed += 1
-                logger.info(f"✅ {test_name}: PASSED")
+                logger.info(f" PASS:  {test_name}: PASSED")
             else:
-                logger.error(f"❌ {test_name}: FAILED")
+                logger.error(f" FAIL:  {test_name}: FAILED")
         except Exception as e:
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
-    logger.info(f"\n🎯 Full Validation Results: {passed}/{total} additional tests passed")
+    logger.info(f"\n TARGET:  Full Validation Results: {passed}/{total} additional tests passed")
     
     if passed == total:
-        logger.info("🎉 ALL FULL VALIDATION TESTS PASSED!")
-        logger.info("✅ WebSocket integration authentication fixes are fully validated")
+        logger.info(" CELEBRATION:  ALL FULL VALIDATION TESTS PASSED!")
+        logger.info(" PASS:  WebSocket integration authentication fixes are fully validated")
         return True
     else:
-        logger.error("❌ Some full validation tests failed")
+        logger.error(" FAIL:  Some full validation tests failed")
         return False
 
 
@@ -335,7 +335,7 @@ async def main():
     if not args.full:
         args.quick = True
     
-    logger.info("🔧 WebSocket Integration Authentication Fix Validation")
+    logger.info("[U+1F527] WebSocket Integration Authentication Fix Validation")
     logger.info("=" * 60)
     
     start_time = time.time()
@@ -349,20 +349,20 @@ async def main():
         duration = time.time() - start_time
         
         logger.info("=" * 60)
-        logger.info(f"⏱️  Total validation time: {duration:.2f}s")
+        logger.info(f"[U+23F1][U+FE0F]  Total validation time: {duration:.2f}s")
         
         if success:
-            logger.info("🎉 VALIDATION SUCCESSFUL!")
-            logger.info("✅ WebSocket integration authentication fixes are working")
-            logger.info("✅ Integration tests should now pass with proper authentication")
+            logger.info(" CELEBRATION:  VALIDATION SUCCESSFUL!")
+            logger.info(" PASS:  WebSocket integration authentication fixes are working")
+            logger.info(" PASS:  Integration tests should now pass with proper authentication")
             sys.exit(0)
         else:
-            logger.error("❌ VALIDATION FAILED!")
-            logger.error("❌ Authentication fixes need additional work")
+            logger.error(" FAIL:  VALIDATION FAILED!")
+            logger.error(" FAIL:  Authentication fixes need additional work")
             sys.exit(1)
             
     except Exception as e:
-        logger.error(f"💥 Validation script failed: {e}")
+        logger.error(f"[U+1F4A5] Validation script failed: {e}")
         sys.exit(1)
 
 

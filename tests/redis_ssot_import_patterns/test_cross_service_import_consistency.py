@@ -24,6 +24,7 @@ This test validates:
 5. Golden Path functionality works across service boundaries
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import asyncio
 import json
@@ -39,7 +40,7 @@ sys.path.insert(0, str(project_root))
 
 logger = logging.getLogger(__name__)
 
-class CrossServiceImportConsistencyTest(unittest.TestCase):
+class CrossServiceImportConsistencyTest(SSotAsyncTestCase):
     """Test Redis import consistency across all services."""
     
     @classmethod
@@ -98,9 +99,9 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             client = await self.ssot_redis.get_client()
             if client:
                 await client.ping()
-                logger.info("✅ SSOT Redis manager available for cross-service testing")
+                logger.info(" PASS:  SSOT Redis manager available for cross-service testing")
             else:
-                logger.warning("❌ SSOT Redis manager connection failed")
+                logger.warning(" FAIL:  SSOT Redis manager connection failed")
                 
         except Exception as e:
             logger.error(f"SSOT Redis setup failed: {e}")
@@ -129,7 +130,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             violation_report = self._format_cross_service_violation_report(service_violations)
             self.fail(f"Cross-service Redis import inconsistencies found:\n{violation_report}")
             
-        logger.info("✅ All services use consistent Redis import patterns")
+        logger.info(" PASS:  All services use consistent Redis import patterns")
 
     def test_no_service_bypasses_ssot_redis_manager(self):
         """Test that no service bypasses SSOT Redis manager with custom implementations."""
@@ -151,7 +152,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             bypass_report = self._format_bypass_violation_report(bypass_violations)
             self.fail(f"Services bypassing SSOT Redis manager found:\n{bypass_report}")
             
-        logger.info("✅ No services bypass SSOT Redis manager")
+        logger.info(" PASS:  No services bypass SSOT Redis manager")
 
     def test_critical_files_import_consistency(self):
         """Test critical files across services use consistent imports."""
@@ -180,7 +181,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             critical_report = self._format_critical_file_report(critical_file_violations)
             self.fail(f"Critical file import inconsistencies found:\n{critical_report}")
             
-        logger.info("✅ Critical files use consistent imports across services")
+        logger.info(" PASS:  Critical files use consistent imports across services")
 
     async def test_cross_service_redis_data_consistency(self):
         """Test cross-service Redis data consistency through SSOT manager."""
@@ -257,7 +258,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             self.fail(f"Cross-service data consistency violations:\n" + 
                      "\n".join(consistency_violations))
             
-        logger.info("✅ Cross-service Redis data consistency validated")
+        logger.info(" PASS:  Cross-service Redis data consistency validated")
 
     async def test_service_isolation_boundaries_respected(self):
         """Test service isolation boundaries are respected with shared Redis."""
@@ -324,7 +325,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
             self.fail(f"Service isolation boundary violations:\n" + 
                      "\n".join(isolation_violations))
             
-        logger.info("✅ Service isolation boundaries respected with shared Redis")
+        logger.info(" PASS:  Service isolation boundaries respected with shared Redis")
 
     # Helper methods
     
@@ -356,7 +357,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
         
         bypass_patterns = [
             "RedisManager()",  # Direct instantiation
-            "redis.Redis(",    # Direct Redis client creation
+            "await get_redis_client()  # MIGRATED: was redis.Redis(",    # Direct Redis client creation
             "redis.ConnectionPool(",  # Direct connection pool creation
             "class.*RedisManager",  # Custom Redis manager class
         ]
@@ -446,14 +447,14 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
         report.append("="*80)
         
         for service_name, violations in service_violations.items():
-            report.append(f"\n🔴 SERVICE: {service_name.upper()} ({len(violations)} violations)")
+            report.append(f"\n[U+1F534] SERVICE: {service_name.upper()} ({len(violations)} violations)")
             report.append("-" * 60)
             
             for violation in violations:
-                report.append(f"  📁 {violation['file']}")
-                report.append(f"  📍 Line {violation['line']}: {violation['violation_type']}")
-                report.append(f"  💻 Found: {violation['content']}")
-                report.append(f"  ✅ Expected: {violation['expected']}")
+                report.append(f"  [U+1F4C1] {violation['file']}")
+                report.append(f"   PIN:  Line {violation['line']}: {violation['violation_type']}")
+                report.append(f"  [U+1F4BB] Found: {violation['content']}")
+                report.append(f"   PASS:  Expected: {violation['expected']}")
                 report.append("")
                 
         return '\n'.join(report)
@@ -466,13 +467,13 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
         report.append("="*80)
         
         for service_name, bypasses in bypass_violations.items():
-            report.append(f"\n🔴 SERVICE: {service_name.upper()} ({len(bypasses)} bypasses)")
+            report.append(f"\n[U+1F534] SERVICE: {service_name.upper()} ({len(bypasses)} bypasses)")
             report.append("-" * 60)
             
             for bypass in bypasses:
-                report.append(f"  📁 {bypass['file']}")
-                report.append(f"  🚫 Bypass Pattern: {bypass['pattern']}")
-                report.append(f"  ⚠️ Type: {bypass['violation_type']}")
+                report.append(f"  [U+1F4C1] {bypass['file']}")
+                report.append(f"  [U+1F6AB] Bypass Pattern: {bypass['pattern']}")
+                report.append(f"   WARNING: [U+FE0F] Type: {bypass['violation_type']}")
                 report.append("")
                 
         return '\n'.join(report)
@@ -485,15 +486,15 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
         report.append("="*80)
         
         for service_name, file_violations in critical_violations.items():
-            report.append(f"\n🚨 SERVICE: {service_name.upper()}")
+            report.append(f"\n ALERT:  SERVICE: {service_name.upper()}")
             report.append("-" * 60)
             
             for file_name, violations in file_violations.items():
-                report.append(f"  📁 CRITICAL FILE: {file_name}")
+                report.append(f"  [U+1F4C1] CRITICAL FILE: {file_name}")
                 for violation in violations:
-                    report.append(f"    📍 Line {violation['line']}: {violation['violation_type']}")
-                    report.append(f"    💻 Found: {violation['content']}")
-                    report.append(f"    ✅ Expected: {violation['expected']}")
+                    report.append(f"     PIN:  Line {violation['line']}: {violation['violation_type']}")
+                    report.append(f"    [U+1F4BB] Found: {violation['content']}")
+                    report.append(f"     PASS:  Expected: {violation['expected']}")
                     report.append("")
                     
         return '\n'.join(report)

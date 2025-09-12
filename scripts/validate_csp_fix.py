@@ -26,49 +26,49 @@ def check_csp_headers(url: str) -> Tuple[bool, List[str]]:
         
         # Check for blob: in script-src
         if 'script-src' in csp_header and 'blob:' in csp_header:
-            successes.append("✅ blob: found in script-src")
+            successes.append(" PASS:  blob: found in script-src")
         else:
-            issues.append("❌ blob: not found in script-src")
+            issues.append(" FAIL:  blob: not found in script-src")
         
         # Check for worker-src directive
         if 'worker-src' in csp_header:
             if 'blob:' in csp_header.split('worker-src')[1].split(';')[0]:
-                successes.append("✅ worker-src includes blob:")
+                successes.append(" PASS:  worker-src includes blob:")
             else:
-                issues.append("❌ worker-src exists but doesn't include blob:")
+                issues.append(" FAIL:  worker-src exists but doesn't include blob:")
         else:
-            issues.append("⚠️  No explicit worker-src directive (will fallback to script-src)")
+            issues.append(" WARNING: [U+FE0F]  No explicit worker-src directive (will fallback to script-src)")
         
         # Check for external domains in connect-src
         connect_src_section = csp_header.split('connect-src')[1].split(';')[0] if 'connect-src' in csp_header else ''
         
         if 'featureassets.org' in connect_src_section:
-            successes.append("✅ featureassets.org in connect-src")
+            successes.append(" PASS:  featureassets.org in connect-src")
         else:
-            issues.append("❌ featureassets.org not in connect-src")
+            issues.append(" FAIL:  featureassets.org not in connect-src")
         
         if 'cloudflare-dns.com' in connect_src_section:
-            successes.append("✅ cloudflare-dns.com in connect-src")
+            successes.append(" PASS:  cloudflare-dns.com in connect-src")
         else:
-            issues.append("❌ cloudflare-dns.com not in connect-src")
+            issues.append(" FAIL:  cloudflare-dns.com not in connect-src")
         
         # Print results
-        print(f"\n🔍 CSP Validation for {url}")
+        print(f"\n SEARCH:  CSP Validation for {url}")
         print("=" * 60)
         
         if successes:
-            print("\n✅ Successful checks:")
+            print("\n PASS:  Successful checks:")
             for success in successes:
                 print(f"  {success}")
         
         if issues:
-            print("\n❌ Issues found:")
+            print("\n FAIL:  Issues found:")
             for issue in issues:
                 print(f"  {issue}")
         else:
-            print("\n🎉 All CSP checks passed!")
+            print("\n CELEBRATION:  All CSP checks passed!")
         
-        print("\n📋 Full CSP Header:")
+        print("\n[U+1F4CB] Full CSP Header:")
         print("-" * 60)
         # Pretty print the CSP header
         csp_parts = csp_header.split('; ')
@@ -95,13 +95,13 @@ def main():
     
     print("\n" + "=" * 60)
     if all_passed:
-        print("✅ CSP VALIDATION SUCCESSFUL - All environments configured correctly!")
+        print(" PASS:  CSP VALIDATION SUCCESSFUL - All environments configured correctly!")
         print("\nThe CSP fixes have been successfully applied:")
-        print("• Web Workers can now be created from blob: URLs")
-        print("• External API connections to featureassets.org and cloudflare-dns.com are allowed")
+        print("[U+2022] Web Workers can now be created from blob: URLs")
+        print("[U+2022] External API connections to featureassets.org and cloudflare-dns.com are allowed")
         return 0
     else:
-        print("❌ CSP VALIDATION FAILED - Some issues need attention")
+        print(" FAIL:  CSP VALIDATION FAILED - Some issues need attention")
         print("\nPlease review the issues above and update the CSP configuration.")
         return 1
 

@@ -28,6 +28,7 @@ CRITICAL ISOLATION REQUIREMENTS:
 - Error propagation respects isolation boundaries
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import uuid
 import asyncio
@@ -206,7 +207,7 @@ class UserContextFactory:
             raise ContextValidationError(f"Forbidden test user ID: {user_id}")
 
 
-class TestUserContextFactoryIsolation(unittest.TestCase):
+class TestUserContextFactoryIsolation(SSotBaseTestCase):
     """Test user context factory isolation patterns."""
     
     def setUp(self):
@@ -374,7 +375,7 @@ class TestUserContextFactoryIsolation(unittest.TestCase):
         self.assertEqual(len(violations), 0)
 
 
-class TestUserContextMemoryCleanup(unittest.TestCase):
+class TestUserContextMemoryCleanup(SSotBaseTestCase):
     """Test memory cleanup and resource management for user contexts."""
     
     def setUp(self):
@@ -450,7 +451,7 @@ class TestUserContextMemoryCleanup(unittest.TestCase):
                     request_id=RequestID(str(uuid.uuid4()))
                 )
         
-        # Should have 6 total contexts (3 users × 2 contexts)
+        # Should have 6 total contexts (3 users  x  2 contexts)
         total_contexts = sum(len(contexts) for contexts in self.factory.created_contexts.values())
         self.assertEqual(total_contexts, 6)
         
@@ -467,7 +468,7 @@ class TestUserContextMemoryCleanup(unittest.TestCase):
         self.assertEqual(len(violations), 0)
 
 
-class TestUserContextInheritancePatterns(unittest.TestCase):
+class TestUserContextInheritancePatterns(SSotBaseTestCase):
     """Test context inheritance patterns and validation."""
     
     def setUp(self):
@@ -505,7 +506,7 @@ class TestUserContextInheritancePatterns(unittest.TestCase):
     def test_multi_level_context_inheritance(self):
         """Test multi-level context inheritance maintains isolation."""
         
-        # Create parent → child → grandchild chain
+        # Create parent  ->  child  ->  grandchild chain
         parent = self.factory.create_context(
             user_id=self.user_id,
             thread_id=ThreadID(str(uuid.uuid4())),
@@ -549,7 +550,7 @@ class TestUserContextInheritancePatterns(unittest.TestCase):
             self.factory.create_child_context(parent, parent.request_id)
 
 
-class TestUserContextValidationErrors(unittest.TestCase):
+class TestUserContextValidationErrors(SSotBaseTestCase):
     """Test validation error handling in user context factory."""
     
     def setUp(self):

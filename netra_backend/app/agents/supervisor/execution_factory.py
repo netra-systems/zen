@@ -172,7 +172,7 @@ class ExecutionFactoryContext:
             logger.debug(f"UserExecutionContext already cleaned for user {self.user_id}")
             return
             
-        logger.info(f"🧹 Cleaning up UserExecutionContext for user {self.user_id}")
+        logger.info(f"[U+1F9F9] Cleaning up UserExecutionContext for user {self.user_id}")
         self.status = ExecutionStatus.COMPLETED  # SSOT: CLEANED -> COMPLETED
         
         try:
@@ -197,10 +197,10 @@ class ExecutionFactoryContext:
             self.cleanup_callbacks.clear()
             
             self._is_cleaned = True
-            logger.info(f"✅ UserExecutionContext cleanup completed for user {self.user_id}")
+            logger.info(f" PASS:  UserExecutionContext cleanup completed for user {self.user_id}")
             
         except Exception as e:
-            logger.error(f"❌ UserExecutionContext cleanup failed for user {self.user_id}: {e}")
+            logger.error(f" FAIL:  UserExecutionContext cleanup failed for user {self.user_id}: {e}")
             self._is_cleaned = True  # Mark as cleaned even if there were errors
     
     def get_status_summary(self) -> Dict[str, Any]:
@@ -306,9 +306,9 @@ class ExecutionEngineFactory:
         self._db_connection_pool = db_connection_pool
         
         if agent_registry:
-            logger.info("✅ ExecutionEngineFactory configured with agent registry")
+            logger.info(" PASS:  ExecutionEngineFactory configured with agent registry")
         else:
-            logger.info("✅ ExecutionEngineFactory configured (per-request registry pattern)")
+            logger.info(" PASS:  ExecutionEngineFactory configured (per-request registry pattern)")
         
     async def create_execution_engine(self, 
                                     user_context: UserExecutionContext) -> 'IsolatedExecutionEngine':
@@ -385,7 +385,7 @@ class ExecutionEngineFactory:
                     factory=self
                 )
                 
-                logger.info(f"✅ Created UserExecutionEngine (via wrapper) for user {user_context.user_id}")
+                logger.info(f" PASS:  Created UserExecutionEngine (via wrapper) for user {user_context.user_id}")
                 
             except Exception as e:
                 logger.warning(f"Failed to create UserExecutionEngine: {e}. Falling back to IsolatedExecutionEngine")
@@ -419,12 +419,12 @@ class ExecutionEngineFactory:
                     self._factory_metrics['concurrent_peak'] = current_active
             
             creation_time_ms = (time.time() - start_time) * 1000
-            logger.info(f"✅ IsolatedExecutionEngine created for user {user_context.user_id} in {creation_time_ms:.1f}ms")
+            logger.info(f" PASS:  IsolatedExecutionEngine created for user {user_context.user_id} in {creation_time_ms:.1f}ms")
             
             return engine
             
         except Exception as e:
-            logger.error(f"❌ Failed to create execution engine for user {user_context.user_id}: {e}")
+            logger.error(f" FAIL:  Failed to create execution engine for user {user_context.user_id}: {e}")
             raise RuntimeError(f"Execution engine creation failed: {e}")
             
     async def _enforce_resource_limits(self, user_id: str) -> None:
@@ -681,7 +681,7 @@ class IsolatedExecutionEngine:
                 execution_time_ms = (time.time() - start_time) * 1000
                 self.user_context.record_run_success(run_id, execution_time_ms)
                 
-                logger.info(f"✅ Agent {agent_name} completed for user {self.user_context.user_id} in {execution_time_ms:.1f}ms")
+                logger.info(f" PASS:  Agent {agent_name} completed for user {self.user_context.user_id} in {execution_time_ms:.1f}ms")
                 
                 return result
                 
@@ -764,10 +764,10 @@ class IsolatedExecutionEngine:
             # Notify factory of cleanup
             await self.factory.cleanup_context(self.user_context.request_id)
             
-            logger.info(f"✅ IsolatedExecutionEngine cleanup completed for user {self.user_context.user_id}")
+            logger.info(f" PASS:  IsolatedExecutionEngine cleanup completed for user {self.user_context.user_id}")
             
         except Exception as e:
-            logger.error(f"❌ IsolatedExecutionEngine cleanup failed for user {self.user_context.user_id}: {e}")
+            logger.error(f" FAIL:  IsolatedExecutionEngine cleanup failed for user {self.user_context.user_id}: {e}")
     
     def get_status(self) -> Dict[str, Any]:
         """Get execution engine status."""

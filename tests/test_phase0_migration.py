@@ -2,7 +2,7 @@
 # REMOVED_SYNTAX_ERROR: Comprehensive Phase 0 Migration Validation Test Suite
 
 # REMOVED_SYNTAX_ERROR: Business Value Justification:
-    # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free → Enterprise)
+    # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free  ->  Enterprise)
     # REMOVED_SYNTAX_ERROR: - Business Goal: Ensure Phase 0 migration is complete and secure
     # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents data leakage, ensures proper request isolation
     # REMOVED_SYNTAX_ERROR: - Strategic Impact: Critical for production deployment safety
@@ -806,10 +806,10 @@
                             # REMOVED_SYNTAX_ERROR: """Test context handles Unicode and special characters properly."""
 
                             # REMOVED_SYNTAX_ERROR: unicode_contexts = [ )
-                            # REMOVED_SYNTAX_ERROR: ("用户123", "线程456", "运行789", "请求012"),  # Chinese
-                            # REMOVED_SYNTAX_ERROR: ("مستخدم123", "موضوع456", "تشغيل789", "طلب012"),  # Arabic
-                            # REMOVED_SYNTAX_ERROR: ("пользователь123", "поток456", "запуск789", "запрос012"),  # Russian
-                            # REMOVED_SYNTAX_ERROR: ("👤user123", "🧵thread456", "🏃run789", "📝req012"),  # Emojis
+                            # REMOVED_SYNTAX_ERROR: ("[U+7528][U+6237]123", "[U+7EBF][U+7A0B]456", "[U+8FD0][U+884C]789", "[U+8BF7][U+6C42]012"),  # Chinese
+                            # REMOVED_SYNTAX_ERROR: ("[U+0645][U+0633][U+062A][U+062E][U+062F][U+0645]123", "[U+0645][U+0648][U+0636][U+0648][U+0639]456", "[U+062A][U+0634][U+063A][U+064A][U+0644]789", "[U+0637][U+0644][U+0628]012"),  # Arabic
+                            # REMOVED_SYNTAX_ERROR: ("[U+043F]o[U+043B][U+044C][U+0437]ovate[U+043B][U+044C]123", "[U+043F]otok456", "[U+0437]a[U+043F]uck789", "[U+0437]a[U+043F]poc012"),  # Russian
+                            # REMOVED_SYNTAX_ERROR: ("[U+1F464]user123", "[U+1F9F5]thread456", "[U+1F3C3]run789", "[U+1F4DD]req012"),  # Emojis
                             # REMOVED_SYNTAX_ERROR: ("user )
                             # REMOVED_SYNTAX_ERROR: 123", "thread\t456", "run\r789", "req\0012"),  # Control chars
                             # REMOVED_SYNTAX_ERROR: ('user'123', 'thread'456', 'run\\789', 'req/012'),  # Special chars

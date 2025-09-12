@@ -28,7 +28,7 @@
 
     # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
         # REMOVED_SYNTAX_ERROR: 1. Segment: Platform/Internal (Development velocity)
-        # REMOVED_SYNTAX_ERROR: 2. Business Goal: Validate Supervisor → SubAgent → Tool execution flow
+        # REMOVED_SYNTAX_ERROR: 2. Business Goal: Validate Supervisor  ->  SubAgent  ->  Tool execution flow
         # REMOVED_SYNTAX_ERROR: 3. Value Impact: Ensures multi-agent collaboration meets reliability standards
         # REMOVED_SYNTAX_ERROR: 4. Strategic Impact: $25K MRR protection via orchestration reliability
 
@@ -102,7 +102,7 @@
 
     # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
     # Removed problematic line: async def test_supervisor_to_subagent_flow(self, collaboration_setup):
-        # REMOVED_SYNTAX_ERROR: """Test complete Supervisor → SubAgent → Tool execution flow."""
+        # REMOVED_SYNTAX_ERROR: """Test complete Supervisor  ->  SubAgent  ->  Tool execution flow."""
         # REMOVED_SYNTAX_ERROR: pass
         # REMOVED_SYNTAX_ERROR: supervisor = collaboration_setup["supervisor"]
 

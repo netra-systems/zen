@@ -379,7 +379,7 @@ class TestMultiUserAgentExecutionIsolation(BaseE2ETest):
                             f"SECURITY VIOLATION: User {ctx.user_id} events contain " \
                             f"other user's sensitive data from user {other_ctx.user_id}"
             
-            self.logger.info("✅ CRITICAL SUCCESS: Complete multi-user workflow isolation validated")
+            self.logger.info(" PASS:  CRITICAL SUCCESS: Complete multi-user workflow isolation validated")
             self.logger.info(f"  - Users tested: {num_users}")
             self.logger.info(f"  - Unique user IDs: {len(all_user_ids)}")
             self.logger.info(f"  - Unique thread IDs: {len(all_thread_ids)}")
@@ -495,12 +495,12 @@ class TestMultiUserAgentExecutionIsolation(BaseE2ETest):
             assert len(all_run_ids) == num_concurrent_users, \
                 f"Not all run IDs unique under stress: {len(all_run_ids)} / {num_concurrent_users}"
             
-            self.logger.info(f"✅ STRESS SUCCESS: High concurrency isolation maintained")
+            self.logger.info(f" PASS:  STRESS SUCCESS: High concurrency isolation maintained")
             self.logger.info(f"  - Concurrent users: {num_concurrent_users}")
             self.logger.info(f"  - Total time: {total_time:.2f}s")
             self.logger.info(f"  - Average per user: {average_time_per_user:.2f}s")
             self.logger.info(f"  - Isolation violations: {isolation_violations} (REQUIRED: 0)")
-            self.logger.info(f"  - Unique identifiers maintained: ✅")
+            self.logger.info(f"  - Unique identifiers maintained:  PASS: ")
             
         finally:
             cleanup_tasks = [ctx.cleanup() for ctx in user_contexts]
@@ -604,7 +604,7 @@ class TestMultiUserAgentExecutionIsolation(BaseE2ETest):
             assert total_violations == 0, \
                 f"ENTERPRISE SECURITY FAILURE: {total_violations} isolation violations detected"
             
-            self.logger.info("✅ ENTERPRISE SUCCESS: Enterprise-grade security isolation validated")
+            self.logger.info(" PASS:  ENTERPRISE SUCCESS: Enterprise-grade security isolation validated")
             for ctx, report in zip(enterprise_contexts, isolation_reports):
                 self.logger.info(f"  - {ctx.user_id} ({ctx.sensitive_data['security_level']}): {report['total_events']} events, {len(report['isolation_violations'])} violations")
             

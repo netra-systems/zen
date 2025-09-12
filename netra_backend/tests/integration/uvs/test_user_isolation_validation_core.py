@@ -2,7 +2,7 @@
 Comprehensive UVS (User-specific Validation System) Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (supporting all user tiers Free → Enterprise)
+- Segment: Platform/Internal (supporting all user tiers Free  ->  Enterprise)
 - Business Goal: Ensure complete user isolation and validation flows for multi-user platform
 - Value Impact: Prevents data leakage, ensures proper user context validation, enables safe concurrent operations
 - Strategic Impact: Core infrastructure that supports $500K+ ARR by enabling secure multi-user chat functionality
@@ -472,7 +472,7 @@ class TestUserIsolationBetweenConcurrentRequests:
                 batch_contexts = future.result()
                 all_contexts.extend(batch_contexts)
         
-        # Verify all contexts created successfully (20 total: 4 batches × 5 contexts)
+        # Verify all contexts created successfully (20 total: 4 batches  x  5 contexts)
         assert len(all_contexts) == 20
         
         # Verify all contexts have unique identifiers (no collisions)

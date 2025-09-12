@@ -14,7 +14,7 @@ Business Value Justification:
 CRITICAL REQUIREMENTS PER CLAUDE.md:
 - ALL E2E tests MUST use real authentication (JWT/OAuth)
 - NO mocking allowed in E2E tests
-- Must validate GOLDEN PATH: login → message → response
+- Must validate GOLDEN PATH: login  ->  message  ->  response
 - Tests designed to FAIL HARD in every way
 - Use test_framework.ssot.e2e_auth_helper for authentication
 """
@@ -155,9 +155,9 @@ class TestStagingWebSocketAuthScopingE2E:
                 assert auth_result.auth_result.email == user_context["email"]
                 
                 # Step 4: Validate GOLDEN PATH requirements
-                # User can establish WebSocket connection ✓
-                # User authentication works ✓
-                # System ready for message exchange ✓
+                # User can establish WebSocket connection [U+2713]
+                # User authentication works [U+2713]
+                # System ready for message exchange [U+2713]
                 
                 golden_path_validation = {
                     "websocket_connection": True,
@@ -169,15 +169,15 @@ class TestStagingWebSocketAuthScopingE2E:
                 }
                 
                 # Log successful GOLDEN PATH completion
-                print(f"✅ GOLDEN PATH VALIDATED: {json.dumps(golden_path_validation, indent=2)}")
+                print(f" PASS:  GOLDEN PATH VALIDATED: {json.dumps(golden_path_validation, indent=2)}")
                 
             except UnboundLocalError as e:
                 if "is_production" in str(e):
-                    pytest.fail(f"🚨 GOLDEN PATH FAILURE: Variable scoping bug blocks user authentication in staging: {e}")
+                    pytest.fail(f" ALERT:  GOLDEN PATH FAILURE: Variable scoping bug blocks user authentication in staging: {e}")
                 else:
                     raise
             except Exception as e:
-                pytest.fail(f"🚨 GOLDEN PATH FAILURE: Unexpected error in staging WebSocket auth: {e}")
+                pytest.fail(f" ALERT:  GOLDEN PATH FAILURE: Unexpected error in staging WebSocket auth: {e}")
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -257,11 +257,11 @@ class TestStagingWebSocketAuthScopingE2E:
                 expected_types = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
                 assert sent_event_types == expected_types
                 
-                print("✅ AGENT EVENT FLOW VALIDATED in staging environment")
+                print(" PASS:  AGENT EVENT FLOW VALIDATED in staging environment")
                 
             except UnboundLocalError as e:
                 if "is_production" in str(e):
-                    pytest.fail(f"🚨 AGENT EVENT FLOW FAILURE: Scoping bug blocks agent events in staging: {e}")
+                    pytest.fail(f" ALERT:  AGENT EVENT FLOW FAILURE: Scoping bug blocks agent events in staging: {e}")
                 else:
                     raise
     
@@ -339,7 +339,7 @@ class TestStagingWebSocketAuthScopingE2E:
                     
                 except UnboundLocalError as e:
                     if "is_production" in str(e):
-                        pytest.fail(f"🚨 PERFORMANCE TEST FAILURE: Scoping bug in iteration {iteration}: {e}")
+                        pytest.fail(f" ALERT:  PERFORMANCE TEST FAILURE: Scoping bug in iteration {iteration}: {e}")
                     else:
                         raise
         
@@ -379,7 +379,7 @@ class TestStagingWebSocketAuthScopingE2E:
             }
         }
         
-        print(f"✅ PERFORMANCE VALIDATION PASSED: {json.dumps(performance_report, indent=2)}")
+        print(f" PASS:  PERFORMANCE VALIDATION PASSED: {json.dumps(performance_report, indent=2)}")
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -468,11 +468,11 @@ class TestStagingWebSocketAuthScopingE2E:
                     "authentication_success": auth_result.success
                 }
                 
-                print(f"✅ REAL GCP STAGING VALIDATION: {json.dumps(gcp_validation, indent=2)}")
+                print(f" PASS:  REAL GCP STAGING VALIDATION: {json.dumps(gcp_validation, indent=2)}")
                 
             except UnboundLocalError as e:
                 if "is_production" in str(e):
-                    pytest.fail(f"🚨 REAL GCP STAGING FAILURE: Variable scoping bug in real GCP environment: {e}")
+                    pytest.fail(f" ALERT:  REAL GCP STAGING FAILURE: Variable scoping bug in real GCP environment: {e}")
                 else:
                     raise
 
@@ -521,11 +521,11 @@ class TestStagingScopingEdgeCases:
                 # The environment should still be detected as staging
                 assert e2e_context["environment"] == "staging"
                 
-                print("✅ MIXED ENVIRONMENT EDGE CASE HANDLED CORRECTLY")
+                print(" PASS:  MIXED ENVIRONMENT EDGE CASE HANDLED CORRECTLY")
                 
             except UnboundLocalError as e:
                 if "is_production" in str(e):
-                    pytest.fail(f"🚨 MIXED ENVIRONMENT EDGE CASE FAILURE: {e}")
+                    pytest.fail(f" ALERT:  MIXED ENVIRONMENT EDGE CASE FAILURE: {e}")
                 else:
                     raise
     
@@ -594,16 +594,16 @@ class TestStagingScopingEdgeCases:
                 success_count += 1
             elif "SCOPING_BUG" in result:
                 scoping_bug_count += 1
-                pytest.fail(f"🚨 RACE CONDITION SCOPING BUG: Worker {worker_id}: {result}")
+                pytest.fail(f" ALERT:  RACE CONDITION SCOPING BUG: Worker {worker_id}: {result}")
             else:
                 error_count += 1
-                print(f"⚠️ Worker {worker_id} error: {result}")
+                print(f" WARNING: [U+FE0F] Worker {worker_id} error: {result}")
         
         # Validate that most concurrent attempts succeeded
         assert success_count >= 8, f"Too many concurrent failures: {success_count}/10 succeeded"
         assert scoping_bug_count == 0, f"Scoping bug in {scoping_bug_count} concurrent attempts"
         
-        print(f"✅ CONCURRENT RACE CONDITION TEST: {success_count}/10 succeeded, {scoping_bug_count} scoping bugs")
+        print(f" PASS:  CONCURRENT RACE CONDITION TEST: {success_count}/10 succeeded, {scoping_bug_count} scoping bugs")
 
 
 if __name__ == "__main__":

@@ -16,6 +16,7 @@ DESIGNED TO FAIL INITIALLY:
 - Guides Redis SSOT remediation strategy
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import os
 import unittest
@@ -23,7 +24,7 @@ from pathlib import Path
 from typing import List, Dict, Set, Tuple
 
 
-class TestRedisImportSourceValidation(unittest.TestCase):
+class TestRedisImportSourceValidation(SSotBaseTestCase):
     """Unit tests validating Redis import SSOT compliance.
     
     These tests are designed to FAIL initially, proving the existence

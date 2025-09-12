@@ -147,7 +147,7 @@ class TestIDMigrator:
             if modified:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.writelines(lines)
-                print(f"  ✓ File updated")
+                print(f"  [U+2713] File updated")
         else:
             for line_num, original, violation_type in violations:
                 print(f"  Line {line_num}: {violation_type}")

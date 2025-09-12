@@ -143,7 +143,7 @@ from auth_service.app.schemas.auth import UserCreate, UserLogin, TokenResponse  
 
 #### ✅ VERIFIED IMPORTS (Working):
 ```python
-# SSOT Test Infrastructure
+# SSOT Test Infrastructure (UPDATED 2025-09-11 - Issue #485 Resolution)
 from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 
@@ -153,6 +153,37 @@ from test_framework.database_test_utilities import DatabaseTestUtilities  # ✅ 
 # Shared Environment Access (VERIFIED 2025-09-11)
 from shared.isolated_environment import IsolatedEnvironment, get_env
 ```
+
+#### 🏆 COMPATIBILITY SOLUTION (Issue #485 - RESOLVED 2025-09-11):
+**PROBLEM SOLVED**: Golden Path tests using mixed setUp/setup_method patterns now work seamlessly.
+
+**BOTH PATTERNS SUPPORTED**:
+```python
+# PATTERN 1: Preferred pytest-style (setup_method/teardown_method)
+class MyTest(SSotAsyncTestCase):
+    def setup_method(self, method):
+        super().setup_method(method)
+        # Your setup code here
+
+# PATTERN 2: Legacy unittest-style (setUp/tearDown) - AUTOMATICALLY COMPATIBLE
+class MyTest(SSotAsyncTestCase, unittest.TestCase):
+    def setUp(self):
+        super().setUp()  # Automatically calls setup_method with compatibility layer
+        # Your setup code here
+```
+
+**BENEFITS ACHIEVED**:
+- ✅ **Golden Path Protection**: $500K+ ARR user flow tests now run reliably
+- ✅ **Zero Breaking Changes**: All existing tests continue working
+- ✅ **Unified SSOT**: Both patterns get identical environment isolation, metrics, and test context
+- ✅ **Test Infrastructure Consistency**: Eliminates setUp/setup_method compatibility issues
+- ✅ **Business Continuity**: Critical Golden Path tests protecting revenue can execute during SSOT consolidation
+
+**COMPATIBILITY LAYER IMPLEMENTATION**:
+- Automatic detection of test method from call stack
+- Direct forwarding of setUp() → setup_method() and tearDown() → teardown_method()
+- Identical SSOT functionality regardless of pattern used
+- Stack-based method resolution for proper test context
 
 #### ❌ BROKEN IMPORTS (Do Not Use):
 ```python

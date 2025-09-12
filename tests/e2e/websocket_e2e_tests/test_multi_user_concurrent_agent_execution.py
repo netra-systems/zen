@@ -245,7 +245,7 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
                 assert required_event in user_event_types, \
                     f"User {i} missing required event: {required_event}"
         
-        self.logger.info("✅ CRITICAL SUCCESS: Complete multi-user isolation validated for 3 concurrent users")
+        self.logger.info(" PASS:  CRITICAL SUCCESS: Complete multi-user isolation validated for 3 concurrent users")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -392,7 +392,7 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
             assert total_events >= num_concurrent_users * 3, \
                 f"Too few events delivered across all users: {total_events}"
             
-            self.logger.info(f"✅ HIGH CONCURRENCY SUCCESS:")
+            self.logger.info(f" PASS:  HIGH CONCURRENCY SUCCESS:")
             self.logger.info(f"  - {num_concurrent_users} users executed concurrently")
             self.logger.info(f"  - Total time: {total_time:.2f}s")
             self.logger.info(f"  - Average completion: {average_completion_time:.2f}s")
@@ -533,4 +533,4 @@ class TestMultiUserConcurrentAgentExecution(BaseE2ETest):
                     assert event.get('agent_name') == agent_name, \
                         f"Event has wrong agent_name: {event.get('agent_name')} != {agent_name}"
         
-        self.logger.info("✅ SUCCESS: Different agents executed concurrently with proper isolation")
+        self.logger.info(" PASS:  SUCCESS: Different agents executed concurrently with proper isolation")

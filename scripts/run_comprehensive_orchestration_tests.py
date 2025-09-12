@@ -50,16 +50,16 @@ class ComprehensiveTestRunner:
             os.environ["USE_REAL_LLM"] = "true"
             os.environ["TEST_USE_REAL_LLM"] = "true"
             os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
-            logger.info("🔧 Configured for real services testing")
+            logger.info("[U+1F527] Configured for real services testing")
             
             # Ensure services are available
-            logger.info("🔍 Checking service availability...")
+            logger.info(" SEARCH:  Checking service availability...")
             ensure_real_services_available()
-            logger.info("✅ All required services are available")
+            logger.info(" PASS:  All required services are available")
         else:
             os.environ["USE_REAL_SERVICES"] = "0"
             os.environ["USE_REAL_LLM"] = "false"
-            logger.info("🔧 Configured for mock services testing")
+            logger.info("[U+1F527] Configured for mock services testing")
     
     def run_single_test(self, test_name: str) -> int:
         """Run a single test method."""
@@ -69,7 +69,7 @@ class ComprehensiveTestRunner:
             "-v", "--tb=short", "--timeout=300"
         ]
         
-        logger.info(f"🚀 Running single test: {test_name}")
+        logger.info(f"[U+1F680] Running single test: {test_name}")
         start_time = time.time()
         
         try:
@@ -77,15 +77,15 @@ class ComprehensiveTestRunner:
             execution_time = time.time() - start_time
             
             if result.returncode == 0:
-                logger.info(f"✅ Test passed in {execution_time:.2f}s")
+                logger.info(f" PASS:  Test passed in {execution_time:.2f}s")
             else:
-                logger.error(f"❌ Test failed in {execution_time:.2f}s")
+                logger.error(f" FAIL:  Test failed in {execution_time:.2f}s")
                 logger.error(f"STDOUT: {result.stdout}")
                 logger.error(f"STDERR: {result.stderr}")
             
             return result.returncode
         except Exception as e:
-            logger.error(f"❌ Test execution failed: {e}")
+            logger.error(f" FAIL:  Test execution failed: {e}")
             return 1
     
     def run_test_class(self, class_name: str) -> int:
@@ -96,7 +96,7 @@ class ComprehensiveTestRunner:
             "-v", "--tb=short", "--timeout=300"
         ]
         
-        logger.info(f"🚀 Running test class: {class_name}")
+        logger.info(f"[U+1F680] Running test class: {class_name}")
         start_time = time.time()
         
         try:
@@ -108,17 +108,17 @@ class ComprehensiveTestRunner:
             self.results["execution_time"] = execution_time
             
             if result.returncode == 0:
-                logger.info(f"✅ Test class completed successfully in {execution_time:.2f}s")
+                logger.info(f" PASS:  Test class completed successfully in {execution_time:.2f}s")
                 self._print_results()
             else:
-                logger.error(f"❌ Test class failed in {execution_time:.2f}s")
+                logger.error(f" FAIL:  Test class failed in {execution_time:.2f}s")
                 logger.error(f"STDOUT: {result.stdout}")
                 logger.error(f"STDERR: {result.stderr}")
                 self._print_results()
             
             return result.returncode
         except Exception as e:
-            logger.error(f"❌ Test class execution failed: {e}")
+            logger.error(f" FAIL:  Test class execution failed: {e}")
             return 1
     
     def run_all_tests(self) -> int:
@@ -130,7 +130,7 @@ class ComprehensiveTestRunner:
             "--maxfail=3"  # Stop after 3 failures
         ]
         
-        logger.info("🚀 Running complete comprehensive test suite")
+        logger.info("[U+1F680] Running complete comprehensive test suite")
         start_time = time.time()
         
         try:
@@ -142,17 +142,17 @@ class ComprehensiveTestRunner:
             self.results["execution_time"] = execution_time
             
             if result.returncode == 0:
-                logger.info(f"✅ Full test suite completed successfully in {execution_time:.2f}s")
+                logger.info(f" PASS:  Full test suite completed successfully in {execution_time:.2f}s")
                 self._print_results()
             else:
-                logger.error(f"❌ Test suite failed in {execution_time:.2f}s")
+                logger.error(f" FAIL:  Test suite failed in {execution_time:.2f}s")
                 logger.error(f"STDOUT: {result.stdout}")
                 logger.error(f"STDERR: {result.stderr}")
                 self._print_results()
             
             return result.returncode
         except Exception as e:
-            logger.error(f"❌ Full test suite execution failed: {e}")
+            logger.error(f" FAIL:  Full test suite execution failed: {e}")
             return 1
     
     def run_performance_tests(self) -> int:
@@ -164,7 +164,7 @@ class ComprehensiveTestRunner:
             "-m", "performance"
         ]
         
-        logger.info("🚀 Running performance benchmark tests")
+        logger.info("[U+1F680] Running performance benchmark tests")
         start_time = time.time()
         
         try:
@@ -172,15 +172,15 @@ class ComprehensiveTestRunner:
             execution_time = time.time() - start_time
             
             if result.returncode == 0:
-                logger.info(f"✅ Performance tests completed in {execution_time:.2f}s")
+                logger.info(f" PASS:  Performance tests completed in {execution_time:.2f}s")
             else:
-                logger.error(f"❌ Performance tests failed in {execution_time:.2f}s")
+                logger.error(f" FAIL:  Performance tests failed in {execution_time:.2f}s")
                 logger.error(f"STDOUT: {result.stdout}")
                 logger.error(f"STDERR: {result.stderr}")
             
             return result.returncode
         except Exception as e:
-            logger.error(f"❌ Performance test execution failed: {e}")
+            logger.error(f" FAIL:  Performance test execution failed: {e}")
             return 1
     
     def _parse_pytest_output(self, output: str) -> None:
@@ -208,12 +208,12 @@ class ComprehensiveTestRunner:
     def _print_results(self) -> None:
         """Print test execution results."""
         print("\n" + "=" * 60)
-        print("🎯 COMPREHENSIVE ORCHESTRATION TEST RESULTS")
+        print(" TARGET:  COMPREHENSIVE ORCHESTRATION TEST RESULTS")
         print("=" * 60)
         print(f"Total Tests:    {self.results['total_tests']}")
-        print(f"Passed:         {self.results['passed']} ✅")
-        print(f"Failed:         {self.results['failed']} ❌")
-        print(f"Skipped:        {self.results['skipped']} ⏭️")
+        print(f"Passed:         {self.results['passed']}  PASS: ")
+        print(f"Failed:         {self.results['failed']}  FAIL: ")
+        print(f"Skipped:        {self.results['skipped']} [U+23ED][U+FE0F]")
         print(f"Execution Time: {self.results['execution_time']:.2f}s")
         
         if self.results["total_tests"] > 0:

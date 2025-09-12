@@ -430,7 +430,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
             assert agent.instance_execution_count == 1
             assert len(agent.execution_stats) == 1
             
-        logger.info(f"✅ Multiple concurrent agents single user test passed - {len(results)} agents in {execution_time:.3f}s")
+        logger.info(f" PASS:  Multiple concurrent agents single user test passed - {len(results)} agents in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -563,7 +563,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         assert concurrency_metrics["unique_users"] == concurrent_users
         assert concurrency_metrics["events_per_second"] >= 5  # Good event throughput
         
-        logger.info(f"✅ Multiple concurrent users test passed - {concurrent_users} users in {total_execution_time:.3f}s")
+        logger.info(f" PASS:  Multiple concurrent users test passed - {concurrent_users} users in {total_execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -666,7 +666,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         cpu_agent = concurrent_agents["cpu_intensive"]
         assert len(cpu_agent.execution_stats) >= success_rate * high_concurrency_count
         
-        logger.info(f"✅ Resource contention test passed - {len(successful_results)}/{high_concurrency_count} succeeded in {total_time:.3f}s")
+        logger.info(f" PASS:  Resource contention test passed - {len(successful_results)}/{high_concurrency_count} succeeded in {total_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -789,7 +789,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
             # Validate engine cleaned up properly
             assert len(engine.active_runs) == 0
             
-        logger.info(f"✅ Deadlock prevention and cleanup test passed - {total_successes}/{total_attempts} succeeded in {execution_time:.3f}s")
+        logger.info(f" PASS:  Deadlock prevention and cleanup test passed - {total_successes}/{total_attempts} succeeded in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -841,7 +841,7 @@ class TestConcurrentAgentExecutionIntegration(BaseIntegrationTest):
         assert concurrency_metrics["total_events"] >= len(successful_executions) * 3
         assert concurrency_metrics["unique_users"] >= 5  # Multiple users across patterns
         
-        logger.info(f"✅ Mixed workload patterns test passed - {len(successful_executions)}/{len(all_results)} succeeded in {total_execution_time:.3f}s")
+        logger.info(f" PASS:  Mixed workload patterns test passed - {len(successful_executions)}/{len(all_results)} succeeded in {total_execution_time:.3f}s")
         
     async def _execute_workload_pattern(self, pattern: Dict, pattern_index: int, 
                                        registry: Any, mock_llm_manager: Any) -> List[Dict]:

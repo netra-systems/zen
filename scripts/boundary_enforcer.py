@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-🔴 BOUNDARY ENFORCER 🔴
+[U+1F534] BOUNDARY ENFORCER [U+1F534]
 Modular Ultra Deep Thinking Approach to Growth Control
 
 CRITICAL MISSION: Stop unhealthy system growth permanently
 Enforces MANDATORY architectural boundaries from CLAUDE.md:
-- File lines ≤300 (HARD LIMIT)
-- Function lines ≤8 (HARD LIMIT)  
-- Module count ≤700 (SYSTEM LIMIT)
-- Total LOC ≤200,000 (CODEBASE LIMIT)
-- Complexity score ≤3 (MAINTAINABILITY LIMIT)
+- File lines  <= 300 (HARD LIMIT)
+- Function lines  <= 8 (HARD LIMIT)  
+- Module count  <= 700 (SYSTEM LIMIT)
+- Total LOC  <= 200,000 (CODEBASE LIMIT)
+- Complexity score  <= 3 (MAINTAINABILITY LIMIT)
 
 Refactored into focused modules for 300/8 compliance.
 """

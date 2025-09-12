@@ -126,7 +126,7 @@ async def lifespan(app: FastAPI):
     # CRITICAL OAUTH VALIDATION - FAIL FAST IF OAUTH IS BROKEN
     env = AuthConfig.get_environment()
     if env in ["staging", "production"]:
-        logger.info("🔐 VALIDATING CRITICAL OAUTH CONFIGURATION...")
+        logger.info("[U+1F510] VALIDATING CRITICAL OAUTH CONFIGURATION...")
         oauth_validation_errors = []
         
         # Check Google Client ID
@@ -134,27 +134,27 @@ async def lifespan(app: FastAPI):
         if not google_client_id:
             # TOMBSTONE: GOOGLE_CLIENT_ID variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_ID_* variables
             oauth_validation_errors.append("Google OAuth client ID is not configured")
-            logger.error("❌ CRITICAL: Google OAuth client ID is missing!")
+            logger.error(" FAIL:  CRITICAL: Google OAuth client ID is missing!")
         elif len(google_client_id) < 50:
             oauth_validation_errors.append(f"Google OAuth client ID appears too short: {google_client_id[:20]}...")
-            logger.error(f"❌ CRITICAL: Google OAuth client ID appears too short: {google_client_id[:20]}...")
+            logger.error(f" FAIL:  CRITICAL: Google OAuth client ID appears too short: {google_client_id[:20]}...")
         elif not google_client_id.endswith(".apps.googleusercontent.com"):
             oauth_validation_errors.append(f"Google OAuth client ID has invalid format (should end with .apps.googleusercontent.com): {google_client_id}")
-            logger.error(f"❌ CRITICAL: Google OAuth client ID has invalid format: {google_client_id}")
+            logger.error(f" FAIL:  CRITICAL: Google OAuth client ID has invalid format: {google_client_id}")
         else:
-            logger.info(f"✅ Google OAuth client ID configured: {google_client_id[:20]}...")
+            logger.info(f" PASS:  Google OAuth client ID configured: {google_client_id[:20]}...")
         
         # Check Google Client Secret
         google_client_secret = AuthConfig.get_google_client_secret()
         if not google_client_secret:
             # TOMBSTONE: GOOGLE_CLIENT_SECRET variable superseded by environment-specific GOOGLE_OAUTH_CLIENT_SECRET_* variables
             oauth_validation_errors.append("Google OAuth client secret is not configured")
-            logger.error("❌ CRITICAL: Google OAuth client secret is missing!")
+            logger.error(" FAIL:  CRITICAL: Google OAuth client secret is missing!")
         elif len(google_client_secret) < 20:
             oauth_validation_errors.append(f"Google OAuth client secret appears too short")
-            logger.error(f"❌ CRITICAL: Google OAuth client secret appears too short")
+            logger.error(f" FAIL:  CRITICAL: Google OAuth client secret appears too short")
         else:
-            logger.info("✅ Google OAuth client secret configured")
+            logger.info(" PASS:  Google OAuth client secret configured")
         
         # Check environment variables that were actually loaded
         env_manager = get_env()
@@ -165,7 +165,7 @@ async def lifespan(app: FastAPI):
             "ENVIRONMENT": env_manager.get("ENVIRONMENT")
         }
         
-        logger.info("🔍 OAuth Environment Variables Status:")
+        logger.info(" SEARCH:  OAuth Environment Variables Status:")
         for var_name, var_value in checked_env_vars.items():
             if var_value:
                 if "SECRET" in var_name:
@@ -178,7 +178,7 @@ async def lifespan(app: FastAPI):
         # FAIL FAST if OAuth is broken in staging/production
         if oauth_validation_errors:
             error_message = f"""
-🚨🚨🚨 CRITICAL OAUTH CONFIGURATION FAILURE 🚨🚨🚨
+ ALERT:  ALERT:  ALERT:  CRITICAL OAUTH CONFIGURATION FAILURE  ALERT:  ALERT:  ALERT: 
 
 Environment: {env}
 Auth Service CANNOT START due to missing/invalid OAuth configuration!
@@ -198,15 +198,15 @@ Required actions:
 3. Verify OAuth credentials are valid in Google Cloud Console
 
 Auth Service startup ABORTED.
-🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+ ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT:  ALERT: 
 """
             logger.error(error_message)
             raise RuntimeError(f"OAuth configuration validation failed in {env}: {', '.join(oauth_validation_errors)}")
         
-        logger.info("✅ OAuth configuration validation PASSED")
+        logger.info(" PASS:  OAuth configuration validation PASSED")
         
         # ADDITIONAL VALIDATION: Verify OAuth provider can initialize
-        logger.info("🔍 Verifying OAuth provider initialization...")
+        logger.info(" SEARCH:  Verifying OAuth provider initialization...")
         try:
             from auth_service.auth_core.oauth_manager import OAuthManager
             oauth_manager = OAuthManager()
@@ -230,15 +230,15 @@ Auth Service startup ABORTED.
                 test_url = google_provider.get_authorization_url("test-state-validation")
                 if not test_url or "accounts.google.com" not in test_url:
                     raise RuntimeError(f"Invalid authorization URL generated: {test_url[:50] if test_url else 'None'}")
-                logger.info("✅ OAuth provider can generate valid authorization URLs")
+                logger.info(" PASS:  OAuth provider can generate valid authorization URLs")
             except Exception as url_error:
                 raise RuntimeError(f"OAuth provider cannot generate authorization URLs: {url_error}")
             
-            logger.info(f"✅ OAuth provider initialization verified - {len(available_providers)} provider(s) available")
+            logger.info(f" PASS:  OAuth provider initialization verified - {len(available_providers)} provider(s) available")
             
         except Exception as provider_error:
             error_msg = f"OAuth provider validation failed: {provider_error}"
-            logger.error(f"❌ CRITICAL: {error_msg}")
+            logger.error(f" FAIL:  CRITICAL: {error_msg}")
             raise RuntimeError(f"OAuth provider initialization failed in {env}: {error_msg}")
             
     else:
@@ -275,31 +275,31 @@ Auth Service startup ABORTED.
     # Initialize auth database (builds URL from POSTGRES_* variables)
     try:
         await auth_db.initialize()
-        logger.info("🔌 AUTH DATABASE: Connection initialized")
+        logger.info("[U+1F50C] AUTH DATABASE: Connection initialized")
         
         # Verify database connectivity immediately
         db_ready = await auth_db.is_ready()
         if not db_ready:
             raise RuntimeError("Database initialization succeeded but connectivity test failed")
         
-        logger.info("✅ AUTH DATABASE: Connected and verified - User data persistence ENABLED")
+        logger.info(" PASS:  AUTH DATABASE: Connected and verified - User data persistence ENABLED")
         
     except Exception as e:
         error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
-        logger.error(f"❌ AUTH DATABASE: Connection FAILED - {error_msg}")
+        logger.error(f" FAIL:  AUTH DATABASE: Connection FAILED - {error_msg}")
         
         # FAIL FAST: Do not start service if database is unavailable
         # This prevents misleading "healthy" status when critical dependencies are down
         if env in ["staging", "production"]:
-            logger.critical(f"🚨 FATAL: Database required in {env.upper()} - Service cannot start!")
+            logger.critical(f" ALERT:  FATAL: Database required in {env.upper()} - Service cannot start!")
             raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
         elif env == "development":
             # Development can continue without database for basic testing
-            logger.warning(f"⚠️ AUTH DATABASE: Running in STATELESS mode (JWT validation only) - {error_msg}")
-            logger.warning(f"⚠️ AUTH DATABASE: User persistence DISABLED - OAuth login will not persist users")
+            logger.warning(f" WARNING: [U+FE0F] AUTH DATABASE: Running in STATELESS mode (JWT validation only) - {error_msg}")
+            logger.warning(f" WARNING: [U+FE0F] AUTH DATABASE: User persistence DISABLED - OAuth login will not persist users")
         else:
             # Unknown environment - be conservative and fail
-            logger.critical(f"🚨 FATAL: Database required in {env.upper()} - Service cannot start!")
+            logger.critical(f" ALERT:  FATAL: Database required in {env.upper()} - Service cannot start!")
             raise RuntimeError(f"Database initialization failed in {env}: {error_msg}")
     
     logger.info("Auth Service startup completed")

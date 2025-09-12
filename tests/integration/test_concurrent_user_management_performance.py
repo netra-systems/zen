@@ -164,7 +164,7 @@ class TestConcurrentUserManagementPerformance(BaseIntegrationTest):
         overall_avg = statistics.mean(avg_response_times)
         assert overall_avg < 0.1, f"Average response time {overall_avg:.3f}s exceeds 100ms SLA"
         
-        print(f"✅ Concurrent User Performance Test Results:")
+        print(f" PASS:  Concurrent User Performance Test Results:")
         print(f"   Users: {concurrent_users}")
         print(f"   Total time: {total_time:.2f}s")
         print(f"   Auth p95: {auth_p95:.3f}s")
@@ -236,7 +236,7 @@ class TestConcurrentUserManagementPerformance(BaseIntegrationTest):
         assert len(set(thread_ids)) == context_count, "Thread IDs are not unique across contexts"
         assert len(set(request_ids)) == context_count, "Request IDs are not unique across contexts"
         
-        print(f"✅ User Context Factory Performance:")
+        print(f" PASS:  User Context Factory Performance:")
         print(f"   Contexts created: {context_count}")
         print(f"   Max creation time: {max_creation_time:.3f}s")
         print(f"   Avg creation time: {avg_creation_time:.3f}s")
@@ -302,7 +302,7 @@ class TestConcurrentUserManagementPerformance(BaseIntegrationTest):
         assert max_validation_time < 0.005, f"Max token validation time {max_validation_time:.3f}s exceeds 5ms SLA"
         assert requests_per_second >= 40, f"Authentication throughput {requests_per_second:.1f} req/s below 40 req/s minimum"
         
-        print(f"✅ Concurrent Authentication Performance:")
+        print(f" PASS:  Concurrent Authentication Performance:")
         print(f"   Concurrent requests: {concurrent_requests}")
         print(f"   Total time: {total_time:.2f}s")
         print(f"   Throughput: {requests_per_second:.1f} req/s")

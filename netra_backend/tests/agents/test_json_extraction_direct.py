@@ -48,7 +48,7 @@ def test_triage_agent_extract_json():
 if __name__ == "__main__":
     # Run the tests directly
     test_extract_json_with_trailing_comma()
-    print("✓ extract_json_from_response test passed")
+    print("[U+2713] extract_json_from_response test passed")
     
     test_triage_agent_extract_json()
-    print("✓ TriageSubAgent._extract_and_validate_json test passed")
+    print("[U+2713] TriageSubAgent._extract_and_validate_json test passed")

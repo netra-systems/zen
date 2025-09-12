@@ -2,7 +2,7 @@
 LLM Test Fixtures - Core modular LLM testing infrastructure
 
 Consolidates 85+ duplicated AsyncMock LLM Manager setups into reusable fixtures.
-Each function is ≤8 lines. Imports specialized fixtures from sub-modules.
+Each function is  <= 8 lines. Imports specialized fixtures from sub-modules.
 
 Business Value Justification:
 - Segment: Engineering efficiency  

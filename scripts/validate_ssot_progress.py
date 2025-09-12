@@ -116,13 +116,13 @@ def check_canonical_import_availability() -> Dict[str, Any]:
         try:
             module = importlib.import_module(module_path)
             if hasattr(module, class_name):
-                results['import_paths_tested'].append(f"✅ {module_path}.{class_name}")
+                results['import_paths_tested'].append(f" PASS:  {module_path}.{class_name}")
                 successful_imports += 1
             else:
-                results['import_paths_tested'].append(f"❌ {module_path}.{class_name} (class not found)")
+                results['import_paths_tested'].append(f" FAIL:  {module_path}.{class_name} (class not found)")
         except ImportError as e:
             results['import_errors'].append(f"{module_path}: {e}")
-            results['import_paths_tested'].append(f"❌ {module_path}.{class_name} (import error)")
+            results['import_paths_tested'].append(f" FAIL:  {module_path}.{class_name} (import error)")
     
     results['canonical_imports_available'] = successful_imports == len(import_tests)
     results['import_success_rate'] = (successful_imports / len(import_tests)) * 100
@@ -131,44 +131,44 @@ def check_canonical_import_availability() -> Dict[str, Any]:
 
 def validate_ssot_progress() -> Dict[str, Any]:
     """Main validation function for SSOT progress."""
-    print("🔍 SSOT WebSocket Manager Interface Standardization - Progress Check")
+    print(" SEARCH:  SSOT WebSocket Manager Interface Standardization - Progress Check")
     print("=" * 70)
     
     # Check factory interface compliance
-    print("\n📦 WebSocket Manager Factory Interface Compliance:")
+    print("\n[U+1F4E6] WebSocket Manager Factory Interface Compliance:")
     factory_results = check_factory_interface_compliance()
     if factory_results['factory_available']:
-        print(f"✅ Factory Available: {factory_results['factory_available']}")
-        print(f"📊 Interface Score: {factory_results['interface_score']:.1f}%")
+        print(f" PASS:  Factory Available: {factory_results['factory_available']}")
+        print(f" CHART:  Interface Score: {factory_results['interface_score']:.1f}%")
         if factory_results['required_methods_present']:
-            print(f"✅ Methods Present: {', '.join(factory_results['required_methods_present'])}")
+            print(f" PASS:  Methods Present: {', '.join(factory_results['required_methods_present'])}")
         if factory_results['missing_methods']:
-            print(f"❌ Missing Methods: {', '.join(factory_results['missing_methods'])}")
+            print(f" FAIL:  Missing Methods: {', '.join(factory_results['missing_methods'])}")
     else:
-        print(f"❌ Factory Import Error: {factory_results.get('error', 'Unknown error')}")
+        print(f" FAIL:  Factory Import Error: {factory_results.get('error', 'Unknown error')}")
     
     # Check unified manager interface compliance  
-    print("\n🎯 Unified WebSocket Manager Interface Compliance:")
+    print("\n TARGET:  Unified WebSocket Manager Interface Compliance:")
     manager_results = check_unified_manager_interface_compliance()
     if manager_results['manager_available']:
-        print(f"✅ Manager Available: {manager_results['manager_available']}")
-        print(f"📊 Interface Score: {manager_results['interface_score']:.1f}%")
+        print(f" PASS:  Manager Available: {manager_results['manager_available']}")
+        print(f" CHART:  Interface Score: {manager_results['interface_score']:.1f}%")
         if manager_results['required_methods_present']:
-            print(f"✅ Methods Present: {', '.join(manager_results['required_methods_present'])}")
+            print(f" PASS:  Methods Present: {', '.join(manager_results['required_methods_present'])}")
         if manager_results['missing_methods']:
-            print(f"❌ Missing Methods: {', '.join(manager_results['missing_methods'])}")
+            print(f" FAIL:  Missing Methods: {', '.join(manager_results['missing_methods'])}")
     else:
-        print(f"❌ Manager Import Error: {manager_results.get('error', 'Unknown error')}")
+        print(f" FAIL:  Manager Import Error: {manager_results.get('error', 'Unknown error')}")
     
     # Check canonical imports
-    print("\n📋 Canonical Import Standardization:")
+    print("\n[U+1F4CB] Canonical Import Standardization:")
     import_results = check_canonical_import_availability()
-    print(f"✅ Canonical Imports Available: {import_results['canonical_imports_available']}")
-    print(f"📊 Import Success Rate: {import_results['import_success_rate']:.1f}%")
+    print(f" PASS:  Canonical Imports Available: {import_results['canonical_imports_available']}")
+    print(f" CHART:  Import Success Rate: {import_results['import_success_rate']:.1f}%")
     for import_test in import_results['import_paths_tested']:
         print(f"   {import_test}")
     if import_results['import_errors']:
-        print("❌ Import Errors:")
+        print(" FAIL:  Import Errors:")
         for error in import_results['import_errors']:
             print(f"   {error}")
     
@@ -179,27 +179,27 @@ def validate_ssot_progress() -> Dict[str, Any]:
     
     overall_score = (factory_score + manager_score + import_score) / 3
     
-    print("\n📈 OVERALL SSOT INTERFACE STANDARDIZATION PROGRESS:")
-    print(f"🎯 Overall Score: {overall_score:.1f}%")
+    print("\n[U+1F4C8] OVERALL SSOT INTERFACE STANDARDIZATION PROGRESS:")
+    print(f" TARGET:  Overall Score: {overall_score:.1f}%")
     
     if overall_score >= 90:
-        print("🎉 EXCELLENT: Interface standardization is nearly complete!")
+        print(" CELEBRATION:  EXCELLENT: Interface standardization is nearly complete!")
     elif overall_score >= 70:
-        print("✅ GOOD: Significant progress on interface standardization")
+        print(" PASS:  GOOD: Significant progress on interface standardization")
     elif overall_score >= 50:
-        print("⚠️  MODERATE: Interface standardization in progress")
+        print(" WARNING: [U+FE0F]  MODERATE: Interface standardization in progress")
     else:
-        print("❌ NEEDS WORK: Interface standardization requires more effort")
+        print(" FAIL:  NEEDS WORK: Interface standardization requires more effort")
     
     # Recommendations
-    print("\n🔧 RECOMMENDATIONS:")
+    print("\n[U+1F527] RECOMMENDATIONS:")
     total_missing = len(factory_results.get('missing_methods', [])) + len(manager_results.get('missing_methods', []))
     if total_missing == 0:
-        print("✅ All required interface methods are present")
-        print("🎯 Ready to move to Week 2: Protocol Compliance Testing")
+        print(" PASS:  All required interface methods are present")
+        print(" TARGET:  Ready to move to Week 2: Protocol Compliance Testing")
     else:
-        print(f"⚠️  {total_missing} interface methods still missing")
-        print("📋 Complete interface method implementation before proceeding")
+        print(f" WARNING: [U+FE0F]  {total_missing} interface methods still missing")
+        print("[U+1F4CB] Complete interface method implementation before proceeding")
     
     return {
         'factory_results': factory_results,
@@ -215,14 +215,14 @@ if __name__ == "__main__":
         
         # Exit with appropriate code
         if results['ready_for_week_2']:
-            print(f"\n🚀 SUCCESS: Ready for Week 2 of SSOT remediation!")
+            print(f"\n[U+1F680] SUCCESS: Ready for Week 2 of SSOT remediation!")
             sys.exit(0)
         else:
-            print(f"\n⚠️  IN PROGRESS: Continue with Week 1 interface standardization")
+            print(f"\n WARNING: [U+FE0F]  IN PROGRESS: Continue with Week 1 interface standardization")
             sys.exit(1)
             
     except Exception as e:
-        print(f"\n❌ VALIDATION ERROR: {e}")
+        print(f"\n FAIL:  VALIDATION ERROR: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(2)

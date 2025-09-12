@@ -214,9 +214,9 @@ class TestContextSecurityAttacks:
                     )
                     
                     if attack_successful:
-                        logger.error(f"🚨 SECURITY VULNERABILITY: {attack_type} attack succeeded!")
+                        logger.error(f" ALERT:  SECURITY VULNERABILITY: {attack_type} attack succeeded!")
                     else:
-                        logger.info(f"✅ {attack_type} attack properly blocked")
+                        logger.info(f" PASS:  {attack_type} attack properly blocked")
                 
                 except asyncio.TimeoutError:
                     # Timeout could indicate system hanging due to attack - bad sign
@@ -228,7 +228,7 @@ class TestContextSecurityAttacks:
                         "security_error": True,
                         "timeout": True
                     })
-                    logger.warning(f"⚠️ {attack_type} attack caused timeout - potential DoS vulnerability")
+                    logger.warning(f" WARNING: [U+FE0F] {attack_type} attack caused timeout - potential DoS vulnerability")
                 
                 await websocket.close()
                 
@@ -242,7 +242,7 @@ class TestContextSecurityAttacks:
                     "security_error": True,
                     "exception": str(e)
                 })
-                logger.info(f"✅ {attack_type} attack blocked by exception: {e}")
+                logger.info(f" PASS:  {attack_type} attack blocked by exception: {e}")
         
         # SECURITY ASSERTIONS: All injection attacks should be blocked
         successful_attacks = [r for r in injection_results if not r["attack_blocked"]]
@@ -251,7 +251,7 @@ class TestContextSecurityAttacks:
         assert len(successful_attacks) == 0, f"CRITICAL SECURITY VULNERABILITY: {len(successful_attacks)} injection attacks succeeded: {[a['attack_type'] for a in successful_attacks]}"
         assert len(blocked_attacks) == len(injection_types), f"Not all injection attacks were blocked: {len(blocked_attacks)}/{len(injection_types)}"
         
-        logger.info(f"✅ All injection attacks blocked: {len(blocked_attacks)}/{len(injection_types)}")
+        logger.info(f" PASS:  All injection attacks blocked: {len(blocked_attacks)}/{len(injection_types)}")
 
     @pytest.mark.security
     @pytest.mark.real_services
@@ -374,9 +374,9 @@ class TestContextSecurityAttacks:
                     })
                     
                     if data_leaked:
-                        logger.error(f"🚨 SECURITY BREACH: Tenant {attacker_id} accessed tenant {target_id} data via direct manipulation!")
+                        logger.error(f" ALERT:  SECURITY BREACH: Tenant {attacker_id} accessed tenant {target_id} data via direct manipulation!")
                     else:
-                        logger.info(f"✅ Direct access attack blocked: {attacker_id} -> {target_id}")
+                        logger.info(f" PASS:  Direct access attack blocked: {attacker_id} -> {target_id}")
                         
                 except Exception as e:
                     leakage_attempts.append({
@@ -417,9 +417,9 @@ class TestContextSecurityAttacks:
                     })
                     
                     if data_leaked:
-                        logger.error(f"🚨 SECURITY BREACH: Tenant {attacker_id} enumerated tenant {target_id} contexts!")
+                        logger.error(f" ALERT:  SECURITY BREACH: Tenant {attacker_id} enumerated tenant {target_id} contexts!")
                     else:
-                        logger.info(f"✅ Enumeration attack blocked: {attacker_id} -> {target_id}")
+                        logger.info(f" PASS:  Enumeration attack blocked: {attacker_id} -> {target_id}")
                         
                 except Exception as e:
                     leakage_attempts.append({
@@ -447,7 +447,7 @@ class TestContextSecurityAttacks:
             if context_info["websocket"]:
                 await context_info["websocket"].close()
         
-        logger.info(f"✅ Cross-tenant data leakage prevention successful: {len(blocked_leakage_attacks)}/{total_attempts} attacks blocked")
+        logger.info(f" PASS:  Cross-tenant data leakage prevention successful: {len(blocked_leakage_attacks)}/{total_attempts} attacks blocked")
 
     @pytest.mark.security
     @pytest.mark.real_services
@@ -526,9 +526,9 @@ class TestContextSecurityAttacks:
                 })
                 
                 if escalation_successful:
-                    logger.error(f"🚨 PRIVILEGE ESCALATION: {user['role']} user gained admin privileges!")
+                    logger.error(f" ALERT:  PRIVILEGE ESCALATION: {user['role']} user gained admin privileges!")
                 else:
-                    logger.info(f"✅ Permission escalation blocked for {user['role']} user")
+                    logger.info(f" PASS:  Permission escalation blocked for {user['role']} user")
                 
                 await websocket.close()
                 
@@ -578,7 +578,7 @@ class TestContextSecurityAttacks:
                     except Exception as auth_error:
                         # Connection failure with malicious JWT is EXPECTED and GOOD
                         jwt_escalation_successful = False
-                        logger.info(f"✅ Malicious JWT connection rejected: {auth_error}")
+                        logger.info(f" PASS:  Malicious JWT connection rejected: {auth_error}")
                     
                     escalation_attempts.append({
                         "user_role": user["role"],
@@ -590,9 +590,9 @@ class TestContextSecurityAttacks:
                     })
                     
                     if not jwt_escalation_successful:
-                        logger.info(f"✅ REAL malicious JWT attack blocked for {user['role']} user")
+                        logger.info(f" PASS:  REAL malicious JWT attack blocked for {user['role']} user")
                     else:
-                        logger.error(f"🚨 CRITICAL SECURITY BREACH: {user['role']} user bypassed JWT validation with malicious token!")
+                        logger.error(f" ALERT:  CRITICAL SECURITY BREACH: {user['role']} user bypassed JWT validation with malicious token!")
                         
                 except Exception as e:
                     escalation_attempts.append({
@@ -624,7 +624,7 @@ class TestContextSecurityAttacks:
             escalation_block_rate = len(blocked_escalations) / total_attempts
             assert escalation_block_rate == 1.0, f"Privilege escalation prevention not 100%: {escalation_block_rate:.1%}"
         
-        logger.info(f"✅ Privilege escalation prevention successful: {len(blocked_escalations)}/{total_attempts} attempts blocked")
+        logger.info(f" PASS:  Privilege escalation prevention successful: {len(blocked_escalations)}/{total_attempts} attempts blocked")
 
     @pytest.mark.security
     @pytest.mark.real_services
@@ -711,9 +711,9 @@ class TestContextSecurityAttacks:
             })
             
             if poisoning_successful:
-                logger.error(f"🚨 CONTEXT POISONING: Attacker successfully poisoned victim's context!")
+                logger.error(f" ALERT:  CONTEXT POISONING: Attacker successfully poisoned victim's context!")
             else:
-                logger.info("✅ Context poisoning attack blocked")
+                logger.info(" PASS:  Context poisoning attack blocked")
             
             await attacker_websocket.close()
             
@@ -770,9 +770,9 @@ class TestContextSecurityAttacks:
                 })
                 
                 if not hijacking_successful:
-                    logger.info("✅ REAL session hijacking attack blocked")
+                    logger.info(" PASS:  REAL session hijacking attack blocked")
                 else:
-                    logger.error(f"🚨 CRITICAL SECURITY BREACH: Attacker successfully hijacked victim's session!")
+                    logger.error(f" ALERT:  CRITICAL SECURITY BREACH: Attacker successfully hijacked victim's session!")
                     
             except asyncio.TimeoutError:
                 # Timeout suggests system rejected the hijacking attempt - GOOD
@@ -784,7 +784,7 @@ class TestContextSecurityAttacks:
                     "timeout": True,
                     "real_attack_executed": True
                 })
-                logger.info("✅ Session hijacking attack timed out - system likely blocked it")
+                logger.info(" PASS:  Session hijacking attack timed out - system likely blocked it")
             
             await attacker_websocket.close()
                 
@@ -844,9 +844,9 @@ class TestContextSecurityAttacks:
                 })
                 
                 if not corruption_successful:
-                    logger.info("✅ REAL metadata corruption attack blocked")
+                    logger.info(" PASS:  REAL metadata corruption attack blocked")
                 else:
-                    logger.error(f"🚨 CRITICAL SECURITY BREACH: Attacker successfully corrupted victim's metadata!")
+                    logger.error(f" ALERT:  CRITICAL SECURITY BREACH: Attacker successfully corrupted victim's metadata!")
                     
             except asyncio.TimeoutError:
                 # Timeout suggests system rejected the corruption attempt - GOOD
@@ -858,7 +858,7 @@ class TestContextSecurityAttacks:
                     "timeout": True,
                     "real_attack_executed": True
                 })
-                logger.info("✅ Metadata corruption attack timed out - system likely blocked it")
+                logger.info(" PASS:  Metadata corruption attack timed out - system likely blocked it")
             
             await corruption_websocket.close()
                 
@@ -900,7 +900,7 @@ class TestContextSecurityAttacks:
             manipulation_block_rate = len(blocked_manipulations) / total_attempts
             assert manipulation_block_rate == 1.0, f"Context manipulation resistance not 100%: {manipulation_block_rate:.1%}"
         
-        logger.info(f"✅ Malicious context manipulation resistance successful: {len(blocked_manipulations)}/{total_attempts} attempts blocked, context integrity maintained")
+        logger.info(f" PASS:  Malicious context manipulation resistance successful: {len(blocked_manipulations)}/{total_attempts} attempts blocked, context integrity maintained")
 
     def _detect_injection_success(self, response_data: Dict[str, Any], attack_type: str) -> bool:
         """Detect if injection attack was successful."""
@@ -1027,9 +1027,9 @@ class TestContextSecurityAttacks:
             logger.info(f"Security test summary: {successful_attacks}/{total_attacks} attacks succeeded")
             
             if successful_attacks > 0:
-                logger.error(f"🚨 SECURITY VULNERABILITIES DETECTED: {successful_attacks} attacks succeeded!")
+                logger.error(f" ALERT:  SECURITY VULNERABILITIES DETECTED: {successful_attacks} attacks succeeded!")
             else:
-                logger.info("✅ All security attacks blocked - system secure")
+                logger.info(" PASS:  All security attacks blocked - system secure")
         
         # Clear sensitive data
         self.attack_simulator.attack_history.clear()

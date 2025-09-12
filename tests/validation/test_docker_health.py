@@ -733,7 +733,7 @@ class TestGeneratedHealthCollection{i:03d}:
                         if availability >= 0.8]
         
         assert len(good_services) >= 1, (
-            f"At least one service should have good availability (≥80%). "
+            f"At least one service should have good availability ( >= 80%). "
             f"Availabilities: {service_availability}"
         )
 

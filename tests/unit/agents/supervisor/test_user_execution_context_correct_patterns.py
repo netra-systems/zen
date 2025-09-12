@@ -203,7 +203,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log successful pattern
         self.test_logger.info(
-            f"✅ BASIC PATTERN: UserExecutionContext created successfully: "
+            f" PASS:  BASIC PATTERN: UserExecutionContext created successfully: "
             f"user_id={context.user_id}, thread_id={context.thread_id}"
         )
 
@@ -240,7 +240,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log WebSocket pattern success
         self.test_logger.info(
-            f"✅ WEBSOCKET PATTERN: WebSocket context validated: "
+            f" PASS:  WEBSOCKET PATTERN: WebSocket context validated: "
             f"ws_client_id={validated_context.websocket_client_id}"
         )
 
@@ -284,7 +284,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log agent pattern success
         self.test_logger.info(
-            f"✅ AGENT PATTERN: Agent context validated: "
+            f" PASS:  AGENT PATTERN: Agent context validated: "
             f"agent={validated_context.agent_context['agent_name']}"
         )
 
@@ -317,7 +317,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log child context pattern success
         self.test_logger.info(
-            f"✅ CHILD PATTERN: Child context created: "
+            f" PASS:  CHILD PATTERN: Child context created: "
             f"parent_id={child_context.parent_request_id}, depth={child_context.operation_depth}"
         )
 
@@ -371,7 +371,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
             
             # Log execution pattern success
             self.test_logger.info(
-                f"✅ EXECUTION PATTERN: Agent executed successfully: "
+                f" PASS:  EXECUTION PATTERN: Agent executed successfully: "
                 f"success={result.success}, duration={result.duration:.3f}s"
             )
 
@@ -407,7 +407,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log isolation validation success
         self.test_logger.info(
-            f"✅ ISOLATION PATTERN: Context isolation validated: "
+            f" PASS:  ISOLATION PATTERN: Context isolation validated: "
             f"context1_user={context1.user_id}, context2_user={context2.user_id}"
         )
 
@@ -438,7 +438,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         self.assertIn("placeholder or test value detected", str(exc_info.value))
         
         # Log validation error pattern success
-        self.test_logger.info("✅ ERROR PATTERN: Context validation errors properly handled")
+        self.test_logger.info(" PASS:  ERROR PATTERN: Context validation errors properly handled")
 
     def test_migration_documentation_patterns(self):
         """Test that provides migration documentation for common patterns.
@@ -477,7 +477,7 @@ class TestUserExecutionContextCorrectPatterns(SSotAsyncTestCase):
         
         # Log migration patterns
         self.test_logger.info(
-            "✅ MIGRATION PATTERNS: All migration examples validated successfully"
+            " PASS:  MIGRATION PATTERNS: All migration examples validated successfully"
         )
 
 

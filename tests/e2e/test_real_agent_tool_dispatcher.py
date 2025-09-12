@@ -489,7 +489,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         # Validate WebSocket integration
         assert dispatcher.websocket_bridge is not None
         
-        print(f"✅ Successfully created UnifiedToolDispatcher for user {user_context.user_id}")
+        print(f" PASS:  Successfully created UnifiedToolDispatcher for user {user_context.user_id}")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -519,7 +519,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
             # Verify it's the same instance as registry's manager
             assert dispatcher.websocket_manager == self.websocket_manager
             
-        print(f"✅ AgentRegistry successfully enhanced dispatcher with WebSocket support")
+        print(f" PASS:  AgentRegistry successfully enhanced dispatcher with WebSocket support")
         
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -588,7 +588,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         assert "total_monthly_savings" in optimizer_data
         assert optimizer_data["total_monthly_savings"] > 0
         
-        print(f"✅ Tool execution delivered real business value results")
+        print(f" PASS:  Tool execution delivered real business value results")
         
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -654,7 +654,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
             "test_websocket_tool"
         )
         
-        print(f"✅ All required WebSocket events sent during tool execution")
+        print(f" PASS:  All required WebSocket events sent during tool execution")
         print(f"   - tool_executing events: {len(tool_events['tool_executing'])}")
         print(f"   - tool_completed events: {len(tool_events['tool_completed'])}")
         
@@ -811,7 +811,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
             tool_completed_idx = event_types_sequence.index("tool_completed")
             assert tool_executing_idx < tool_completed_idx, "tool_executing must come before tool_completed"
         
-        print(f"✅ MISSION CRITICAL: All 5 WebSocket events validated successfully")
+        print(f" PASS:  MISSION CRITICAL: All 5 WebSocket events validated successfully")
         print(f"   - agent_started: {len(all_events['agent_started'])} events")
         print(f"   - agent_thinking: {len(all_events['agent_thinking'])} events") 
         print(f"   - tool_executing: {len(all_events['tool_executing'])} events")
@@ -854,7 +854,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
             assert dispatcher.user_context == user_contexts[i]
             assert dispatcher.user_context != user_contexts[(i+1) % len(user_contexts)]
             
-        print(f"✅ Request-scoped isolation verified - {len(dispatchers)} unique dispatchers created")
+        print(f" PASS:  Request-scoped isolation verified - {len(dispatchers)} unique dispatchers created")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -933,7 +933,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
                 if other_user_data != user_data:
                     assert event.get("user_id") != other_user_data["user_context"].user_id
         
-        print(f"✅ User context isolation verified for {num_users} concurrent users")
+        print(f" PASS:  User context isolation verified for {num_users} concurrent users")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -990,7 +990,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         # Should have error events for failed executions
         assert len(error_events) >= 1, "Missing WebSocket events for tool errors"
         
-        print(f"✅ Error handling validated - {len(error_events)} error events captured")
+        print(f" PASS:  Error handling validated - {len(error_events)} error events captured")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -1066,7 +1066,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         # Allow some variance for test reliability
         assert actual_events >= expected_events * 0.9, f"Missing WebSocket events: {actual_events}/{expected_events}"
         
-        print(f"✅ Performance benchmarks passed:")
+        print(f" PASS:  Performance benchmarks passed:")
         print(f"   - {iterations} iterations completed")
         print(f"   - Average execution time: {avg_time:.3f}s")
         print(f"   - Min/Max time: {min_time:.3f}s / {max_time:.3f}s") 
@@ -1170,7 +1170,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
             assert event.get("user_id") == user_context.user_id
             assert "result" in event
             
-        print(f"✅ Business value delivery validated:")
+        print(f" PASS:  Business value delivery validated:")
         print(f"   - Total potential savings: ${business_value_metrics['total_potential_savings']:,.2f}/month")
         print(f"   - Insights generated: {business_value_metrics['insights_generated']}")
         print(f"   - Optimizations identified: {business_value_metrics['optimizations_identified']}")
@@ -1210,7 +1210,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         assert registry_dispatcher is not None
         assert registry_dispatcher.user_context == user_context
         
-        print(f"✅ Factory pattern compliance enforced and validated")
+        print(f" PASS:  Factory pattern compliance enforced and validated")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -1312,7 +1312,7 @@ class TestRealAgentToolDispatcher(BaseE2ETest):
         isolated_users = len(user_event_counts)
         assert isolated_users >= successful_users * 0.8, f"Event isolation failure: {isolated_users}/{successful_users}"
         
-        print(f"✅ Concurrent user isolation stress test passed:")
+        print(f" PASS:  Concurrent user isolation stress test passed:")
         print(f"   - Concurrent users: {num_concurrent_users}")
         print(f"   - Successful users: {successful_users}")
         print(f"   - Total operations: {total_operations}")

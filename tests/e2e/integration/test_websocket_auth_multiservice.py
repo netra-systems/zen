@@ -299,7 +299,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     jwt_token = user_result["token"]
     user_email = user_result["email"]
     
-    print(f"✓ User created via Auth service in {user_result['creation_time']:.3f}s")
+    print(f"[U+2713] User created via Auth service in {user_result['creation_time']:.3f}s")
     
     # Phase 2: Validate JWT token in Backend service with database lookup
     token_validation = await tester.validate_jwt_token_in_backend(jwt_token)
@@ -308,7 +308,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     assert token_validation["validation_time"] < 2.0, \
         f"Token validation took {token_validation['validation_time']:.3f}s, too slow"
     
-    print(f"✓ JWT token validated in Backend with DB lookup in {token_validation['validation_time']:.3f}s")
+    print(f"[U+2713] JWT token validated in Backend with DB lookup in {token_validation['validation_time']:.3f}s")
     
     # Phase 3: Connect WebSocket to Backend with JWT authentication
     ws_connection = await tester.connect_websocket_with_auth(jwt_token)
@@ -319,7 +319,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
     
     websocket = ws_connection["websocket"]
     
-    print(f"✓ WebSocket connected with auth in {ws_connection['connection_time']:.3f}s")
+    print(f"[U+2713] WebSocket connected with auth in {ws_connection['connection_time']:.3f}s")
     
     try:
         # Phase 4: Send authenticated message and verify user context
@@ -331,14 +331,14 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
         assert message_result["response_time"] < 15.0, \
             f"Message response took {message_result['response_time']:.3f}s, too slow"
         
-        print(f"✓ Authenticated message sent with user context in {message_result['response_time']:.3f}s")
+        print(f"[U+2713] Authenticated message sent with user context in {message_result['response_time']:.3f}s")
         
         # Phase 5: Verify message routing respects authentication
         if message_result["response"]:
             response = message_result["response"]
-            print(f"✓ Message response received: {response.get('type', 'unknown')}")
+            print(f"[U+2713] Message response received: {response.get('type', 'unknown')}")
         else:
-            print("ℹ No immediate response (acceptable for async processing)")
+            print("[U+2139] No immediate response (acceptable for async processing)")
             
     finally:
         await websocket.disconnect()
@@ -350,7 +350,7 @@ async def test_complete_multiservice_websocket_auth_flow(real_services):
         message_result["response_time"]
     )
     
-    print(f"✓ Complete multi-service WebSocket auth flow successful in {total_flow_time:.3f}s")
+    print(f"[U+2713] Complete multi-service WebSocket auth flow successful in {total_flow_time:.3f}s")
 
 @pytest.mark.asyncio
 @pytest.mark.e2e
@@ -371,9 +371,9 @@ async def test_websocket_reconnect_maintains_session_continuity(real_services):
     assert reconnect_result["session_continuity"], "Session continuity not maintained across reconnection"
     assert reconnect_result["reconnection_time"] < 15.0, f"Reconnection took {reconnect_result['reconnection_time']:.3f}s, too slow"
     
-    print(f"✓ WebSocket reconnection with session continuity in {reconnect_result['reconnection_time']:.3f}s")
-    print(f"✓ First message context: {reconnect_result['first_message_context']}")
-    print(f"✓ Second message context: {reconnect_result['second_message_context']}")
+    print(f"[U+2713] WebSocket reconnection with session continuity in {reconnect_result['reconnection_time']:.3f}s")
+    print(f"[U+2713] First message context: {reconnect_result['first_message_context']}")
+    print(f"[U+2713] Second message context: {reconnect_result['second_message_context']}")
 
 @pytest.mark.asyncio 
 @pytest.mark.e2e
@@ -390,7 +390,7 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
         assert user_result["user_created"], f"Failed to create user {i+1}: {user_result['error']}"
         user_results.append(user_result)
     
-    print(f"✓ Created {num_users} users via Auth service")
+    print(f"[U+2713] Created {num_users} users via Auth service")
     
     # Establish concurrent WebSocket connections
     connection_tasks = []
@@ -405,14 +405,14 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
     for i, result in enumerate(connection_results):
         if isinstance(result, dict) and result.get("connected"):
             successful_connections.append((i, result))
-            print(f"✓ User {i+1} connected successfully")
+            print(f"[U+2713] User {i+1} connected successfully")
 
             error = result.get("error") if isinstance(result, dict) else str(result)
-            print(f"⚠ User {i+1} connection failed: {error}")
+            print(f" WARNING:  User {i+1} connection failed: {error}")
     
     # Require at least 2 successful concurrent connections
     assert len(successful_connections) >= 2, \
-        f"Expected ≥2 concurrent connections, got {len(successful_connections)}"
+        f"Expected  >= 2 concurrent connections, got {len(successful_connections)}"
     
     try:
         # Send messages from each connected user
@@ -435,11 +435,11 @@ async def test_multiple_users_concurrent_websocket_auth(real_services):
                 if result.get("user_context_valid"):
                     successful_messages += 1
                     user_idx = successful_connections[i][0]
-                    print(f"✓ User {user_idx+1} sent message with valid context")
+                    print(f"[U+2713] User {user_idx+1} sent message with valid context")
         
-        assert successful_messages >= 2, f"Expected ≥2 successful messages with user context, got {successful_messages}"
+        assert successful_messages >= 2, f"Expected  >= 2 successful messages with user context, got {successful_messages}"
         
-        print(f"✓ {successful_messages} concurrent authenticated messages with user context")
+        print(f"[U+2713] {successful_messages} concurrent authenticated messages with user context")
         
     finally:
         # Cleanup all WebSocket connections
@@ -469,7 +469,7 @@ async def test_cross_service_token_consistency_validation(real_services):
     assert backend_validation["database_lookup_success"], \
         "Database lookup failed in Backend service"
     
-    print("✓ Token validated: Auth → Backend → Database")
+    print("[U+2713] Token validated: Auth  ->  Backend  ->  Database")
     
     # Test 2: WebSocket accepts same token validated by Backend
     ws_connection = await tester.connect_websocket_with_auth(jwt_token)
@@ -490,12 +490,12 @@ async def test_cross_service_token_consistency_validation(real_services):
         assert message_result["user_context_valid"], \
             "User context lost despite consistent token validation"
         
-        print("✓ User context maintained: Auth → Backend → WebSocket → Database")
+        print("[U+2713] User context maintained: Auth  ->  Backend  ->  WebSocket  ->  Database")
         
     finally:
         await websocket.disconnect()
     
-    print("✓ Token consistently validated across all service boundaries")
+    print("[U+2713] Token consistently validated across all service boundaries")
 
 # Business Impact Summary
 """

@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path E2E Database Flow Test Suite
 End-to-end tests for complete database flow in staging environment.
@@ -67,8 +105,8 @@ class TestGoldenPathDatabaseFlow:
         # Setup WebSocket auth helper
         self.websocket_helper = E2EWebSocketAuthHelper(environment=self.environment)
         
-        logger.info(f"🚀 E2E Golden Path setup completed for environment: {self.environment}")
-        logger.info(f"👤 Test user: {self.authenticated_user.email} (ID: {self.user_id})")
+        logger.info(f"[U+1F680] E2E Golden Path setup completed for environment: {self.environment}")
+        logger.info(f"[U+1F464] Test user: {self.authenticated_user.email} (ID: {self.user_id})")
     
     @pytest.fixture
     async def e2e_database_connection(self):
@@ -123,11 +161,11 @@ class TestGoldenPathDatabaseFlow:
                 result = await conn.execute(text("SELECT current_timestamp as connection_test"))
                 assert result.fetchone() is not None
                 
-            logger.info(f"✅ E2E database connection established for {self.environment}")
+            logger.info(f" PASS:  E2E database connection established for {self.environment}")
             yield engine
             
         except Exception as e:
-            logger.error(f"❌ E2E database connection failed for {self.environment}: {e}")
+            logger.error(f" FAIL:  E2E database connection failed for {self.environment}: {e}")
             pytest.skip(f"Database connection failed: {e}")
         finally:
             await engine.dispose()
@@ -160,10 +198,10 @@ class TestGoldenPathDatabaseFlow:
         
         try:
             await redis_conn.ping()
-            logger.info(f"✅ E2E Redis connection established: {redis_host}:{redis_port}")
+            logger.info(f" PASS:  E2E Redis connection established: {redis_host}:{redis_port}")
             yield redis_conn
         except Exception as e:
-            logger.error(f"❌ E2E Redis connection failed: {e}")
+            logger.error(f" FAIL:  E2E Redis connection failed: {e}")
             pytest.skip(f"Redis connection failed: {e}")
         finally:
             await redis_conn.aclose()
@@ -183,7 +221,7 @@ class TestGoldenPathDatabaseFlow:
         """
         # Step 1: Create authenticated user (already done in setup)
         test_user = self.authenticated_user
-        logger.info(f"🧪 Testing complete registration flow for: {test_user.email}")
+        logger.info(f"[U+1F9EA] Testing complete registration flow for: {test_user.email}")
         
         # Step 2: Simulate database user record creation
         user_record_data = {
@@ -239,7 +277,7 @@ class TestGoldenPathDatabaseFlow:
             assert db_user.email == test_user.email, "Email should match"
             assert db_user.is_active is True, "User should be active"
             
-            logger.info("✅ Database user record creation verified")
+            logger.info(" PASS:  Database user record creation verified")
         
         # Step 3: Store user session in Redis using correct API
         session_key = f"e2e:session:{self.user_id}:{int(time.time())}"
@@ -271,7 +309,7 @@ class TestGoldenPathDatabaseFlow:
         ttl = await e2e_redis_connection.ttl(session_key)
         assert 3500 <= ttl <= 3600, f"Session TTL should be around 3600s, got: {ttl}"
         
-        logger.info("✅ Redis session storage verified")
+        logger.info(" PASS:  Redis session storage verified")
         
         # Step 4: Test data consistency between database and Redis
         # Query database for user
@@ -290,7 +328,7 @@ class TestGoldenPathDatabaseFlow:
         # Cleanup
         await e2e_redis_connection.delete(session_key)
         
-        logger.info("✅ Complete user registration database flow validated")
+        logger.info(" PASS:  Complete user registration database flow validated")
     
     @pytest.mark.asyncio
     async def test_websocket_database_persistence_e2e(self, e2e_database_connection, e2e_redis_connection):
@@ -308,7 +346,7 @@ class TestGoldenPathDatabaseFlow:
         # Step 1: Establish authenticated WebSocket connection
         try:
             websocket = await self.websocket_helper.connect_authenticated_websocket(timeout=15.0)
-            logger.info("✅ Authenticated WebSocket connection established")
+            logger.info(" PASS:  Authenticated WebSocket connection established")
         except Exception as e:
             pytest.skip(f"WebSocket connection failed (may be environment-specific): {e}")
         
@@ -326,7 +364,7 @@ class TestGoldenPathDatabaseFlow:
             """)
             await conn.execute(create_messages_table)
             
-            logger.info("✅ Message storage table created")
+            logger.info(" PASS:  Message storage table created")
         
         # Step 3: Send test message via WebSocket
         test_message = {
@@ -339,7 +377,7 @@ class TestGoldenPathDatabaseFlow:
         
         try:
             await websocket.send(json.dumps(test_message))
-            logger.info("✅ Test message sent via WebSocket")
+            logger.info(" PASS:  Test message sent via WebSocket")
             
             # Step 4: Store message in database (simulating server-side processing)
             message_id = f"msg_{self.user_id}_{int(time.time())}"
@@ -366,7 +404,7 @@ class TestGoldenPathDatabaseFlow:
                 assert stored_message.content == test_message["content"], "Message content should match"
                 assert stored_message.user_id == str(self.user_id), "Message user ID should match"
                 
-                logger.info("✅ WebSocket message stored in database")
+                logger.info(" PASS:  WebSocket message stored in database")
             
             # Step 5: Store WebSocket session state in Redis
             ws_session_key = f"e2e:ws_session:{self.user_id}:{int(time.time())}"
@@ -393,7 +431,7 @@ class TestGoldenPathDatabaseFlow:
             assert stored_ws_data["user_id"] == str(self.user_id), "WebSocket session user ID should match"
             assert stored_ws_data["message_count"] == 1, "Message count should be tracked"
             
-            logger.info("✅ WebSocket session state stored in Redis")
+            logger.info(" PASS:  WebSocket session state stored in Redis")
             
             # Step 6: Test message retrieval flow
             async with e2e_database_connection.begin() as conn:
@@ -411,7 +449,7 @@ class TestGoldenPathDatabaseFlow:
                 assert len(messages) >= 1, "Should retrieve at least 1 message"
                 assert messages[0].content == test_message["content"], "Retrieved message should match sent message"
                 
-                logger.info(f"✅ Message retrieval verified: {len(messages)} messages found")
+                logger.info(f" PASS:  Message retrieval verified: {len(messages)} messages found")
             
             # Cleanup Redis
             await e2e_redis_connection.delete(ws_session_key)
@@ -420,9 +458,9 @@ class TestGoldenPathDatabaseFlow:
             # Close WebSocket connection
             if 'websocket' in locals():
                 await websocket.close()
-                logger.info("✅ WebSocket connection closed")
+                logger.info(" PASS:  WebSocket connection closed")
         
-        logger.info("✅ WebSocket database persistence E2E flow validated")
+        logger.info(" PASS:  WebSocket database persistence E2E flow validated")
     
     @pytest.mark.asyncio
     async def test_api_database_integration_e2e(self, e2e_database_connection, e2e_redis_connection):
@@ -461,7 +499,7 @@ class TestGoldenPathDatabaseFlow:
             """)
             await conn.execute(create_data_table)
             
-            logger.info("✅ API test data table created")
+            logger.info(" PASS:  API test data table created")
         
         # Step 3: Test data creation via API simulation
         test_data = {
@@ -490,7 +528,7 @@ class TestGoldenPathDatabaseFlow:
                 "data_value": json.dumps(test_data["data_value"])
             })
             
-            logger.info("✅ API data write operation simulated")
+            logger.info(" PASS:  API data write operation simulated")
         
         # Step 4: Cache data in Redis (API caching simulation)
         cache_key = f"e2e:api_cache:{self.user_id}:{test_data['data_key']}"
@@ -518,7 +556,7 @@ class TestGoldenPathDatabaseFlow:
         assert cached_obj["user_id"] == str(self.user_id), "Cached user ID should match"
         assert cached_obj["data_key"] == test_data["data_key"], "Cached data key should match"
         
-        logger.info("✅ API caching layer verified")
+        logger.info(" PASS:  API caching layer verified")
         
         # Step 5: Test data retrieval (API read simulation)
         # First check cache (cache hit scenario)
@@ -526,7 +564,7 @@ class TestGoldenPathDatabaseFlow:
         if cached_result:
             retrieved_from_cache = json.loads(cached_result)
             assert retrieved_from_cache["data_value"]["theme"] == "dark", "Cache should contain correct data"
-            logger.info("✅ API cache hit scenario verified")
+            logger.info(" PASS:  API cache hit scenario verified")
         
         # Test database fallback (cache miss scenario)
         # Clear cache and retrieve from database
@@ -551,7 +589,7 @@ class TestGoldenPathDatabaseFlow:
             assert db_data_value["theme"] == "dark", "Database should contain correct data"
             assert db_data_value["notifications"] is True, "Database should preserve boolean values"
             
-            logger.info("✅ API database fallback scenario verified")
+            logger.info(" PASS:  API database fallback scenario verified")
         
         # Step 6: Test data consistency across cache and database
         # Re-cache the data retrieved from database
@@ -579,7 +617,7 @@ class TestGoldenPathDatabaseFlow:
         # Cleanup
         await e2e_redis_connection.delete(cache_key)
         
-        logger.info("✅ API database integration E2E flow validated")
+        logger.info(" PASS:  API database integration E2E flow validated")
     
     @pytest.mark.asyncio
     async def test_cross_service_database_consistency_e2e(self, e2e_database_connection, e2e_redis_connection):
@@ -638,7 +676,7 @@ class TestGoldenPathDatabaseFlow:
             """)
             await conn.execute(create_preferences_table)
             
-            logger.info("✅ Cross-service tables created")
+            logger.info(" PASS:  Cross-service tables created")
         
         # Step 3: Execute cross-service operations with proper transaction handling
         for service_op in service_operations:
@@ -690,10 +728,10 @@ class TestGoldenPathDatabaseFlow:
                         prefs_cache_key = f"e2e:preferences:{self.user_id}"
                         await e2e_redis_connection.delete(prefs_cache_key)
                 
-                logger.info(f"✅ {service_name} operation completed successfully")
+                logger.info(f" PASS:  {service_name} operation completed successfully")
                 
             except Exception as e:
-                logger.error(f"❌ {service_name} operation failed: {e}")
+                logger.error(f" FAIL:  {service_name} operation failed: {e}")
                 pytest.fail(f"Cross-service operation should not fail: {e}")
         
         # Step 4: Verify data consistency across services
@@ -722,7 +760,7 @@ class TestGoldenPathDatabaseFlow:
             assert prefs_record.theme == "light", "Theme should be updated"
             assert prefs_record.updated_by_service == "backend_service", "Service attribution should be correct"
             
-            logger.info("✅ Cross-service data consistency verified")
+            logger.info(" PASS:  Cross-service data consistency verified")
         
         # Step 5: Test cache consistency after operations
         # Simulate cache refresh for both services
@@ -767,7 +805,7 @@ class TestGoldenPathDatabaseFlow:
         # Cleanup cache
         await e2e_redis_connection.delete(profile_cache_key, prefs_cache_key)
         
-        logger.info("✅ Cross-service database consistency E2E flow validated")
+        logger.info(" PASS:  Cross-service database consistency E2E flow validated")
     
     def test_e2e_golden_path_metadata(self):
         """
@@ -798,15 +836,15 @@ class TestGoldenPathDatabaseFlow:
         assert coverage_score == total_paths, \
             f"Golden Path coverage: {coverage_score}/{total_paths} critical paths covered"
         
-        logger.info(f"✅ Golden Path E2E coverage: {coverage_score}/{total_paths} critical user journeys")
-        logger.info("   ✅ User registration flow")
-        logger.info("   ✅ WebSocket + database persistence")
-        logger.info("   ✅ API database integration")
-        logger.info("   ✅ Cross-service consistency")
-        logger.info("   ✅ Authentication integration")
-        logger.info("   ✅ Cache invalidation patterns")
-        logger.info("   ✅ Transaction isolation")
-        logger.info("   ✅ Error recovery scenarios")
+        logger.info(f" PASS:  Golden Path E2E coverage: {coverage_score}/{total_paths} critical user journeys")
+        logger.info("    PASS:  User registration flow")
+        logger.info("    PASS:  WebSocket + database persistence")
+        logger.info("    PASS:  API database integration")
+        logger.info("    PASS:  Cross-service consistency")
+        logger.info("    PASS:  Authentication integration")
+        logger.info("    PASS:  Cache invalidation patterns")
+        logger.info("    PASS:  Transaction isolation")
+        logger.info("    PASS:  Error recovery scenarios")
         
         assert True, "Golden Path E2E test coverage is complete"
 

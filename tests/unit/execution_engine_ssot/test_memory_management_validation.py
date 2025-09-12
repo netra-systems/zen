@@ -117,7 +117,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         
     def test_basic_memory_cleanup(self):
         """Test that UserExecutionEngine cleans up memory properly"""
-        print("\n🔍 Testing basic memory cleanup in UserExecutionEngine...")
+        print("\n SEARCH:  Testing basic memory cleanup in UserExecutionEngine...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -175,7 +175,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if alive_engines > 2:  # Allow for some GC delay
             memory_violations.append(f"Memory leak: {alive_engines}/{len(engine_refs)} engines not garbage collected")
         else:
-            print(f"  ✅ {len(engine_refs) - alive_engines}/{len(engine_refs)} engines properly garbage collected")
+            print(f"   PASS:  {len(engine_refs) - alive_engines}/{len(engine_refs)} engines properly garbage collected")
         
         # Get memory statistics
         memory_stats = tracker.stop_tracking()
@@ -184,8 +184,8 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         memory_growth_mb = memory_stats['memory_growth'] / (1024 * 1024)
         process_growth_mb = memory_stats['process_memory_growth'] / (1024 * 1024)
         
-        print(f"  ✅ Memory growth: {memory_growth_mb:.2f}MB (tracemalloc)")
-        print(f"  ✅ Process memory growth: {process_growth_mb:.2f}MB")
+        print(f"   PASS:  Memory growth: {memory_growth_mb:.2f}MB (tracemalloc)")
+        print(f"   PASS:  Process memory growth: {process_growth_mb:.2f}MB")
         
         # Define reasonable thresholds
         if memory_growth_mb > 50:  # 50MB growth for 10 engines is excessive
@@ -198,11 +198,11 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if memory_violations:
             self.fail(f"Memory cleanup violations: {memory_violations}")
         
-        print(f"  ✅ Basic memory cleanup validated")
+        print(f"   PASS:  Basic memory cleanup validated")
     
     async def test_concurrent_memory_isolation(self):
         """Test memory isolation between concurrent UserExecutionEngine instances"""
-        print("\n🔍 Testing concurrent memory isolation...")
+        print("\n SEARCH:  Testing concurrent memory isolation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -290,9 +290,9 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
             avg_operation_cost = sum(operation_costs) / len(operation_costs) if operation_costs else 0
             avg_cleanup_recovery = sum(cleanup_recoveries) / len(cleanup_recoveries) if cleanup_recoveries else 0
             
-            print(f"  ✅ Average creation cost: {avg_creation_cost / 1024:.2f}KB per engine")
-            print(f"  ✅ Average operation cost: {avg_operation_cost / 1024:.2f}KB per engine")
-            print(f"  ✅ Average cleanup recovery: {avg_cleanup_recovery / 1024:.2f}KB per engine")
+            print(f"   PASS:  Average creation cost: {avg_creation_cost / 1024:.2f}KB per engine")
+            print(f"   PASS:  Average operation cost: {avg_operation_cost / 1024:.2f}KB per engine")
+            print(f"   PASS:  Average cleanup recovery: {avg_cleanup_recovery / 1024:.2f}KB per engine")
             
             # Check for memory consistency between users
             max_creation_cost = max(creation_costs) if creation_costs else 0
@@ -317,23 +317,23 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if success_count != num_concurrent:
             isolation_violations.append(f"Only {success_count}/{num_concurrent} concurrent users succeeded")
         
-        print(f"  ✅ {success_count}/{num_concurrent} concurrent users completed successfully")
+        print(f"   PASS:  {success_count}/{num_concurrent} concurrent users completed successfully")
         
         # Get overall memory statistics
         memory_stats = tracker.stop_tracking()
         total_growth_mb = memory_stats['memory_growth'] / (1024 * 1024)
         
-        print(f"  ✅ Total memory growth: {total_growth_mb:.2f}MB for {num_concurrent} concurrent users")
+        print(f"   PASS:  Total memory growth: {total_growth_mb:.2f}MB for {num_concurrent} concurrent users")
         
         # CRITICAL: Memory isolation prevents resource exhaustion
         if isolation_violations:
             self.fail(f"Concurrent memory isolation violations: {isolation_violations}")
         
-        print(f"  ✅ Concurrent memory isolation validated")
+        print(f"   PASS:  Concurrent memory isolation validated")
     
     def test_resource_cleanup_validation(self):
         """Test that UserExecutionEngine properly cleans up all resources"""
-        print("\n🔍 Testing resource cleanup validation...")
+        print("\n SEARCH:  Testing resource cleanup validation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -378,7 +378,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
                     # Test cleanup method
                     if hasattr(engine, 'cleanup'):
                         engine.cleanup()
-                        print(f"    ✅ Cleanup method called for engine {i}")
+                        print(f"     PASS:  Cleanup method called for engine {i}")
                     else:
                         cleanup_violations.append(f"Engine {i} missing cleanup method")
                 
@@ -407,7 +407,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if thread_growth > 2:  # Allow for some reasonable thread growth
             cleanup_violations.append(f"Thread leak detected: {thread_growth} extra threads")
         else:
-            print(f"  ✅ Thread count stable: {initial_thread_count} -> {final_thread_count}")
+            print(f"   PASS:  Thread count stable: {initial_thread_count} -> {final_thread_count}")
         
         # Check handle count if available
         if initial_handles is not None:
@@ -418,9 +418,9 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
                 if handle_growth > 10:  # Allow for some handle growth
                     cleanup_violations.append(f"Handle leak detected: {handle_growth} extra handles")
                 else:
-                    print(f"  ✅ Handle count stable: {initial_handles} -> {final_handles}")
+                    print(f"   PASS:  Handle count stable: {initial_handles} -> {final_handles}")
             except Exception:
-                print(f"  ⚠️  Handle count check failed (platform limitation)")
+                print(f"   WARNING: [U+FE0F]  Handle count check failed (platform limitation)")
         
         # Test cleanup method interface
         if engines_created:  # If any engines are still referenced
@@ -436,7 +436,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
                 try:
                     test_engine.cleanup()
                     test_engine.cleanup()  # Should not fail on second call
-                    print(f"  ✅ Cleanup method can be called multiple times safely")
+                    print(f"   PASS:  Cleanup method can be called multiple times safely")
                 except Exception as e:
                     cleanup_violations.append(f"Cleanup method failed on repeated calls: {e}")
         
@@ -444,11 +444,11 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if cleanup_violations:
             self.fail(f"Resource cleanup violations: {cleanup_violations}")
         
-        print(f"  ✅ Resource cleanup validation completed")
+        print(f"   PASS:  Resource cleanup validation completed")
     
     async def test_memory_stress_validation(self):
         """Test UserExecutionEngine under memory stress conditions"""
-        print("\n🔍 Testing memory stress validation...")
+        print("\n SEARCH:  Testing memory stress validation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -532,9 +532,9 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         final_growth_mb = memory_stats['memory_growth'] / (1024 * 1024)
         peak_growth_mb = (memory_stats['peak_memory'] - (memory_stats['initial_memory'] or 0)) / (1024 * 1024)
         
-        print(f"  ✅ Total events sent: {total_events_sent}")
-        print(f"  ✅ Final memory growth: {final_growth_mb:.2f}MB")
-        print(f"  ✅ Peak memory growth: {peak_growth_mb:.2f}MB")
+        print(f"   PASS:  Total events sent: {total_events_sent}")
+        print(f"   PASS:  Final memory growth: {final_growth_mb:.2f}MB")
+        print(f"   PASS:  Peak memory growth: {peak_growth_mb:.2f}MB")
         
         # Validate stress test results
         expected_events = (stress_iterations // concurrent_engines) * concurrent_engines * events_per_engine
@@ -552,7 +552,7 @@ class TestMemoryManagementValidation(SSotAsyncTestCase):
         if stress_violations:
             self.fail(f"Memory stress test violations: {stress_violations}")
         
-        print(f"  ✅ Memory stress validation completed successfully")
+        print(f"   PASS:  Memory stress validation completed successfully")
 
 
 if __name__ == '__main__':

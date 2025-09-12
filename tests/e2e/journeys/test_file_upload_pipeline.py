@@ -3,7 +3,7 @@ E2E Test #7: Complete File Upload Pipeline Validation
 Business Value: $45K MRR - Document analysis features for enterprise customers
 
 Tests real file upload through entire pipeline:
-Frontend → Backend → Agent → Storage → WebSocket Response
+Frontend  ->  Backend  ->  Agent  ->  Storage  ->  WebSocket Response
 
 NO MOCKING - Uses real file processing and agent analysis.
 Execution time: < 10 seconds for complete pipeline validation.
@@ -68,4 +68,4 @@ async def test_concurrent_file_uploads():
 if __name__ == "__main__":
     print("Running E2E File Upload Pipeline Test...")
     asyncio.run(test_complete_file_upload_pipeline())
-    print("✓ File upload pipeline test completed successfully")
+    print("[U+2713] File upload pipeline test completed successfully")

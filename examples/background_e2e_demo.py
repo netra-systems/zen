@@ -53,7 +53,7 @@ def demo_basic_functionality():
     try:
         print_section("1. Starting Background E2E Agent")
         agent.start()
-        print(f"✓ Agent started with ID: {agent.agent_id}")
+        print(f"[U+2713] Agent started with ID: {agent.agent_id}")
         
         # Initial queue status
         print_section("2. Initial Queue Status")
@@ -73,7 +73,7 @@ def demo_basic_functionality():
             priority=1  # High priority
         )
         task_id1 = agent.queue_e2e_test(E2ETestCategory.E2E_CRITICAL, critical_config)
-        print(f"✓ Queued E2E Critical test: {task_id1}")
+        print(f"[U+2713] Queued E2E Critical test: {task_id1}")
         
         # Queue a Cypress test (medium duration)
         cypress_config = BackgroundTaskConfig(
@@ -85,7 +85,7 @@ def demo_basic_functionality():
             env_vars={"CYPRESS_ENV": "demo"}
         )
         task_id2 = agent.queue_e2e_test(E2ETestCategory.CYPRESS, cypress_config)
-        print(f"✓ Queued Cypress test: {task_id2}")
+        print(f"[U+2713] Queued Cypress test: {task_id2}")
         
         # Queue a full E2E test (long duration)
         e2e_config = BackgroundTaskConfig(
@@ -95,7 +95,7 @@ def demo_basic_functionality():
             priority=3  # Lower priority
         )
         task_id3 = agent.queue_e2e_test(E2ETestCategory.E2E, e2e_config)
-        print(f"✓ Queued full E2E test: {task_id3}")
+        print(f"[U+2713] Queued full E2E test: {task_id3}")
         
         # Check updated queue status
         print_section("4. Updated Queue Status")
@@ -122,8 +122,8 @@ def demo_basic_functionality():
         
         # Simulate waiting for some processing
         print_section("6. Simulating Background Execution")
-        print("⏳ In a real scenario, tests would run in the background...")
-        print("⏳ You could continue development while E2E tests execute...")
+        print("[U+23F3] In a real scenario, tests would run in the background...")
+        print("[U+23F3] You could continue development while E2E tests execute...")
         
         # Show how to check recent results
         print_section("7. Recent Results (Demo)")
@@ -138,8 +138,8 @@ def demo_basic_functionality():
         # Demonstrate cancellation
         print_section("8. Task Cancellation Demo")
         # In a real scenario, you might cancel long-running tasks
-        print("✓ To cancel a task: agent.cancel_task(task_id)")
-        print("✓ To kill all background tasks: agent.stop()")
+        print("[U+2713] To cancel a task: agent.cancel_task(task_id)")
+        print("[U+2713] To kill all background tasks: agent.stop()")
         
         print_section("9. CLI Integration Examples")
         print("The BackgroundE2EAgent integrates with unified_test_runner.py:")
@@ -160,18 +160,18 @@ def demo_basic_functionality():
         # Clean shutdown
         print_section("10. Shutdown")
         agent.stop()
-        print("✓ Background E2E Agent stopped cleanly")
+        print("[U+2713] Background E2E Agent stopped cleanly")
         
         print_banner("DEMO COMPLETE")
         print("Key Benefits:")
-        print("• Non-blocking E2E test execution")
-        print("• Queue management with prioritization")  
-        print("• Persistent result storage")
-        print("• Real-time status monitoring")
-        print("• Graceful failure recovery")
-        print("• Resource management and limits")
-        print("• Service dependency coordination")
-        print("• CLI integration for easy usage")
+        print("[U+2022] Non-blocking E2E test execution")
+        print("[U+2022] Queue management with prioritization")  
+        print("[U+2022] Persistent result storage")
+        print("[U+2022] Real-time status monitoring")
+        print("[U+2022] Graceful failure recovery")
+        print("[U+2022] Resource management and limits")
+        print("[U+2022] Service dependency coordination")
+        print("[U+2022] CLI integration for easy usage")
 
 
 def demo_advanced_features():
@@ -214,7 +214,7 @@ def demo_advanced_features():
         
         # Queue the performance test
         perf_task_id = agent.queue_e2e_test(E2ETestCategory.PERFORMANCE, perf_config)
-        print(f"✓ Queued performance test: {perf_task_id}")
+        print(f"[U+2713] Queued performance test: {perf_task_id}")
         
         print_section("Context Manager Usage")
         print("The agent also supports context manager usage:")
@@ -240,15 +240,15 @@ async def demo_async_integration():
         # Simulate orchestrator communication
         if hasattr(agent, 'handle_message'):
             print_section("Message Handling Simulation")
-            print("✓ Agent supports orchestrator message handling")
-            print("✓ Can receive queue requests from other agents")
-            print("✓ Can report status updates to orchestrator")
+            print("[U+2713] Agent supports orchestrator message handling")
+            print("[U+2713] Can receive queue requests from other agents")
+            print("[U+2713] Can report status updates to orchestrator")
         
         print_section("Async Benefits")
-        print("• Non-blocking test execution")
-        print("• Concurrent task processing")
-        print("• Real-time progress updates")
-        print("• Efficient resource utilization")
+        print("[U+2022] Non-blocking test execution")
+        print("[U+2022] Concurrent task processing")
+        print("[U+2022] Real-time progress updates")
+        print("[U+2022] Efficient resource utilization")
         
     finally:
         agent.stop()
@@ -269,9 +269,9 @@ def main():
         print_banner("ALL DEMOS COMPLETED SUCCESSFULLY")
         
     except KeyboardInterrupt:
-        print("\n\n⚠️  Demo interrupted by user")
+        print("\n\n WARNING: [U+FE0F]  Demo interrupted by user")
     except Exception as e:
-        print(f"\n\n❌ Demo failed with error: {e}")
+        print(f"\n\n FAIL:  Demo failed with error: {e}")
         import traceback
         traceback.print_exc()
         return 1

@@ -87,7 +87,7 @@ class TestRealClickHouseConnection:
                 query_result = await client.execute("SELECT 1 as test_value")
                 assert query_result is not None, "Query should return result"
             
-            self.logger.info("✓ ClickHouse connection established and basic query executed")
+            self.logger.info("[U+2713] ClickHouse connection established and basic query executed")
             
         except Exception as e:
             if not connection_established:
@@ -125,7 +125,7 @@ class TestRealClickHouseConnection:
                 user1_tables = [t for t in result if f"user_{user1_id}" in str(t)]
                 assert len(user1_tables) == 0, "User 2 should not see User 1's temporary tables"
                 
-                self.logger.info("✓ User isolation verified - factory pattern working correctly")
+                self.logger.info("[U+2713] User isolation verified - factory pattern working correctly")
             except Exception as e:
                 self.logger.info(f"Temporary table test skipped: {e}")
     
@@ -172,7 +172,7 @@ class TestRealClickHouseConnection:
             duration = max(timestamps) - min(timestamps)
             assert duration < 5.0, f"Concurrent queries took too long: {duration}s"
         
-        self.logger.info(f"✓ Connection pooling test passed: {len(successful)}/{concurrent_count} queries succeeded")
+        self.logger.info(f"[U+2713] Connection pooling test passed: {len(successful)}/{concurrent_count} queries succeeded")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -203,7 +203,7 @@ class TestRealClickHouseConnection:
                         
             except Exception as e:
                 # Expected - connection should fail
-                self.logger.info(f"✓ Error handling working: {e}")
+                self.logger.info(f"[U+2713] Error handling working: {e}")
                 
         finally:
             # Restore original config
@@ -234,7 +234,7 @@ class TestRealClickHouseConnection:
             if not self._is_stub_or_noop(client):
                 assert health_status.get('is_healthy') is True, "Real ClickHouse should be healthy"
             
-            self.logger.info(f"✓ Health check passed: {health_status}")
+            self.logger.info(f"[U+2713] Health check passed: {health_status}")
         else:
             self.logger.info("Health check not supported by this ClickHouse client")
     
@@ -257,9 +257,9 @@ class TestRealClickHouseConnection:
         # Test configuration with Alpine environment detection
         is_alpine = env.get("USE_ALPINE", "false").lower() == "true"
         if is_alpine:
-            self.logger.info("✓ Running with Alpine containers (optimized)")
+            self.logger.info("[U+2713] Running with Alpine containers (optimized)")
         else:
-            self.logger.info("✓ Running with regular containers")
+            self.logger.info("[U+2713] Running with regular containers")
         
         # Verify configuration is properly isolated
         test_key = "CLICKHOUSE_TEST_KEY"
@@ -269,7 +269,7 @@ class TestRealClickHouseConnection:
         retrieved_value = env.get(test_key)
         assert retrieved_value == test_value, "Environment should maintain test values"
         
-        self.logger.info("✓ Configuration validation passed")
+        self.logger.info("[U+2713] Configuration validation passed")
     
     # Helper methods
     async def _get_clickhouse_client_for_user(self, user_id: str):

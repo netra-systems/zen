@@ -484,7 +484,7 @@ async def _create_authenticated_tenant(auth_helper: E2EWebSocketAuthHelper, tena
     if ack_data.get("type") != "tenant_init_ack":
         raise AssertionError(f"Tenant init failed for {tenant_id}: {ack_data}")
     
-    logger.info(f"✅ Created authenticated tenant {tenant_id} with real WebSocket connection")
+    logger.info(f" PASS:  Created authenticated tenant {tenant_id} with real WebSocket connection")
     
     return tenant_config
 

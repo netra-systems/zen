@@ -326,7 +326,7 @@ class TestRealDataHelperFlow(RealDataHelperE2ETest):
                 f"Analysis confidence too low: {self.metrics.confidence_score}"
             )
             
-        logger.success("✓ Comprehensive data analysis flow validated")
+        logger.success("[U+2713] Comprehensive data analysis flow validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -385,7 +385,7 @@ class TestRealDataHelperFlow(RealDataHelperE2ETest):
             ]
             assert len(utilization_insights) > 0, "Must identify utilization issues"
             
-        logger.success("✓ Cost optimization insights validated")
+        logger.success("[U+2713] Cost optimization insights validated")
     
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -438,7 +438,7 @@ class TestRealDataHelperFlow(RealDataHelperE2ETest):
             ]
             assert len(scaling_recs) > 0, "Must provide scaling recommendations"
             
-        logger.success("✓ Performance analysis validated")
+        logger.success("[U+2713] Performance analysis validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -492,7 +492,7 @@ class TestRealDataHelperFlow(RealDataHelperE2ETest):
             assert "agent_started" in event_types, f"User {user['user_id']} missing agent_started"
             assert "agent_completed" in event_types, f"User {user['user_id']} missing agent_completed"
             
-        logger.success("✓ Concurrent data analysis isolation validated")
+        logger.success("[U+2713] Concurrent data analysis isolation validated")
 
 
 if __name__ == "__main__":
@@ -513,10 +513,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_data_analysis_flow(mock_services)
-            logger.success("✓ All data helper flow tests passed")
+            logger.success("[U+2713] All data helper flow tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Data helper flow tests failed: {e}")
+            logger.error(f"[U+2717] Data helper flow tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

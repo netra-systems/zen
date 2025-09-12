@@ -364,7 +364,7 @@ except ImportError:
                                                                                         active_connection.transition_to_closed()
                                                                                         assert active_connection.can_be_cleaned_up()
 
-    # Helper methods (each ≤8 lines)
+    # Helper methods (each  <= 8 lines)
                                                                                         def _create_failed_connection(self, user_id="test-user", conn_id="failed-conn"):
                                                                                             """Helper to create failed connection."""
                                                                                             pass

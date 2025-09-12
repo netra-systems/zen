@@ -132,7 +132,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         instance_ids = [id(env1), id(env2), id(env3)]
         self.assertEqual(len(set(instance_ids)), 1, "All instances should have same ID")
         
-        print(f"✓ Singleton pattern validated - instance ID: {id(env1)}")
+        print(f"[U+2713] Singleton pattern validated - instance ID: {id(env1)}")
     
     def test_isolated_environment_thread_safe_singleton(self):
         """
@@ -175,7 +175,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         for i, instance in enumerate(completed_instances):
             self.assertIs(instance, first_instance, f"Instance {i} should be same as first")
         
-        print("✓ Thread-safe singleton pattern validated")
+        print("[U+2713] Thread-safe singleton pattern validated")
     
     # === ENVIRONMENT VARIABLE OPERATIONS TESTS ===
     
@@ -213,7 +213,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         after_delete = self.env.get('TEST_KEY')
         self.assertIsNone(after_delete, "Get should return None after delete")
         
-        print("✓ Basic environment operations validated")
+        print("[U+2713] Basic environment operations validated")
     
     def test_isolated_environment_update_operations(self):
         """
@@ -246,7 +246,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             self.assertIn(key, all_vars, f"All vars should include {key}")
             self.assertEqual(all_vars[key], expected_value, f"All vars value should match for {key}")
         
-        print(f"✓ Batch update operations validated - {len(test_vars)} variables")
+        print(f"[U+2713] Batch update operations validated - {len(test_vars)} variables")
     
     def test_isolated_environment_source_tracking(self):
         """
@@ -277,7 +277,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertIn('SOURCE_VAR1', sources['test_source'], "Should list variable under correct source")
         self.assertIn('SOURCE_VAR2', sources['config_file'], "Should list variable under correct source")
         
-        print("✓ Source tracking validated")
+        print("[U+2713] Source tracking validated")
     
     # === ISOLATION MODE TESTS ===
     
@@ -311,7 +311,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         # Re-enable for cleanup
         self.env.enable_isolation()
         
-        print("✓ Isolation mode functionality validated")
+        print("[U+2713] Isolation mode functionality validated")
     
     def test_isolated_environment_isolation_with_backup(self):
         """
@@ -343,7 +343,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         restored_value = self.env.get('BACKUP_VAR1')
         self.assertIsNotNone(restored_value, "Should have some value after restore")
         
-        print("✓ Isolation with backup validated")
+        print("[U+2713] Isolation with backup validated")
     
     # === ENVIRONMENT DETECTION TESTS ===
     
@@ -383,7 +383,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
                     self.assertEqual(self.env.is_test(), expected_test,
                                    f"is_test() incorrect for {env_name}")
                     
-                    print(f"✓ Environment detection validated for: {env_name}")
+                    print(f"[U+2713] Environment detection validated for: {env_name}")
     
     def test_isolated_environment_test_context_detection(self):
         """
@@ -412,7 +412,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             is_test = self.env._is_test_context()
             self.assertFalse(is_test, "Should not detect test context without indicators")
         
-        print("✓ Test context detection validated")
+        print("[U+2713] Test context detection validated")
     
     # === TEST DEFAULTS TESTS ===
     
@@ -452,7 +452,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             self.assertIsNotNone(database_url, "Should provide database URL test default")
             self.assertIn('test', database_url, "Database URL should be test database")
             
-            print("✓ Test environment defaults validated")
+            print("[U+2713] Test environment defaults validated")
     
     def test_isolated_environment_test_defaults_bypass(self):
         """
@@ -476,7 +476,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             oauth_client_id = self.env.get('GOOGLE_OAUTH_CLIENT_ID_TEST') 
             self.assertIsNotNone(oauth_client_id, "Should return test defaults when bypass disabled")
         
-        print("✓ Test defaults bypass functionality validated")
+        print("[U+2713] Test defaults bypass functionality validated")
     
     # === FILE LOADING TESTS ===
     
@@ -512,7 +512,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
                 self.assertEqual(self.env.get('FILE_VAR2'), 'file_value2', "Should load second variable")
                 self.assertEqual(self.env.get('FILE_VAR3'), 'quoted_value', "Should strip quotes")
         
-        print(f"✓ File loading validated - {loaded_count} variables loaded")
+        print(f"[U+2713] File loading validated - {loaded_count} variables loaded")
     
     def test_isolated_environment_file_loading_error_handling(self):
         """
@@ -547,7 +547,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
                 # Valid variables should be loaded
                 self.assertEqual(self.env.get('VALID_VAR'), 'valid_value', "Should load valid variable")
         
-        print("✓ File loading error handling validated")
+        print("[U+2713] File loading error handling validated")
     
     # === VALIDATION TESTS ===
     
@@ -573,7 +573,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         # With required variables set, validation should pass
         self.assertTrue(result.is_valid, f"Validation should pass with required variables: {result.errors}")
         
-        print(f"✓ Basic validation completed - valid: {result.is_valid}")
+        print(f"[U+2713] Basic validation completed - valid: {result.is_valid}")
     
     def test_isolated_environment_staging_database_validation(self):
         """
@@ -611,7 +611,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             self.assertFalse(result['valid'], "Should fail validation with invalid staging config")
             self.assertGreater(len(result['issues']), 0, "Should have validation issues")
         
-        print("✓ Staging database validation tested")
+        print("[U+2713] Staging database validation tested")
     
     # === THREAD SAFETY TESTS ===
     
@@ -659,7 +659,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertEqual(len(results['set']), 15, "All workers should successfully set variables")
         self.assertEqual(len(results['get']), 15, "All workers should successfully get variables")
         
-        print("✓ Concurrent operations thread safety validated")
+        print("[U+2713] Concurrent operations thread safety validated")
     
     # === PERFORMANCE TESTS ===
     
@@ -697,7 +697,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertLess(set_time, 0.5, "1000 set operations should complete in under 500ms") 
         self.assertLess(batch_time, 0.1, "100 batch operations should complete in under 100ms")
         
-        print(f"✓ Environment performance validated - Get: {get_time:.3f}s, "
+        print(f"[U+2713] Environment performance validated - Get: {get_time:.3f}s, "
               f"Set: {set_time:.3f}s, Batch: {batch_time:.3f}s")
     
     # === SECURITY TESTS ===
@@ -727,7 +727,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertNotIn('\n', sanitized_url, "Should remove control characters from database URL")
         self.assertIn('postgresql://', sanitized_url, "Should preserve URL structure")
         
-        print("✓ Value sanitization validated")
+        print("[U+2713] Value sanitization validated")
     
     def test_isolated_environment_sensitive_value_masking(self):
         """
@@ -754,7 +754,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         masked_non_sensitive = _mask_sensitive_value('PUBLIC_CONFIG', non_sensitive_value)
         self.assertEqual(masked_non_sensitive, non_sensitive_value, "Should not mask non-sensitive values")
         
-        print("✓ Sensitive value masking validated")
+        print("[U+2713] Sensitive value masking validated")
     
     # === UTILITY FUNCTIONS TESTS ===
     
@@ -783,7 +783,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertIsInstance(subprocess_env, dict, "Should return subprocess environment dict")
         self.assertIn('EXTRA_VAR', subprocess_env, "Should include additional variables")
         
-        print("✓ Utility functions validated")
+        print("[U+2713] Utility functions validated")
     
     def test_isolated_environment_debug_info(self):
         """
@@ -810,7 +810,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         self.assertIsInstance(debug_info['isolated_vars_count'], int, "isolated_vars_count should be integer") 
         self.assertIsInstance(debug_info['protected_vars'], list, "protected_vars should be list")
         
-        print(f"✓ Debug info validated - {len(debug_info)} fields")
+        print(f"[U+2713] Debug info validated - {len(debug_info)} fields")
     
     # === BUSINESS VALUE VALIDATION ===
     
@@ -819,7 +819,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         Test IsolatedEnvironment meets golden path user flow requirements.
         
         BVJ: Golden path requirements ensure environment management
-        supports the critical user flow from login → AI responses.
+        supports the critical user flow from login  ->  AI responses.
         """
         # Golden path requirement: Environment detection
         env_name = self.env.get_environment_name()
@@ -844,7 +844,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
         source = self.env.get_variable_source('GOLDEN_PATH_VAR')
         self.assertEqual(source, 'golden_path_test', "Should track variable sources")
         
-        print("✓ Golden path requirements validated")
+        print("[U+2713] Golden path requirements validated")
     
     def test_isolated_environment_business_value_metrics(self):
         """
@@ -923,7 +923,7 @@ class TestIsolatedEnvironmentComprehensive(SSotBaseTestCase):
             'isolation_mode_reliability': f"{isolation_reliability:.1%}"
         }
         
-        print(f"✓ Environment management business value metrics: {metrics}")
+        print(f"[U+2713] Environment management business value metrics: {metrics}")
 
 
 if __name__ == '__main__':

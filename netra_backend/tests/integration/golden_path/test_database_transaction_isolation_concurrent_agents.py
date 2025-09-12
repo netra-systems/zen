@@ -295,7 +295,7 @@ class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
         assert consistency_check["no_corruption"], "No data corruption should occur due to deadlock"
         
         self.transaction_metrics.deadlocks_detected += 1
-        self.logger.info("✅ Deadlock detection and resolution validated")
+        self.logger.info(" PASS:  Deadlock detection and resolution validated")
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -354,7 +354,7 @@ class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
         assert not partial_data_check["partial_data_found"], "No partial data should remain after rollback"
         
         self.transaction_metrics.rollbacks_performed += 1
-        self.logger.info("✅ Transaction rollback on failure validated")
+        self.logger.info(" PASS:  Transaction rollback on failure validated")
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -410,7 +410,7 @@ class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
         assert consistency_validation["no_stale_data"], "No stale data should exist in cache"
         assert consistency_validation["final_count"] == len(user_contexts), f"Final count should be {len(user_contexts)}"
         
-        self.logger.info("✅ Redis-database consistency during concurrent operations validated")
+        self.logger.info(" PASS:  Redis-database consistency during concurrent operations validated")
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -510,7 +510,7 @@ class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
         assert not phantom_read_analysis["phantom_reads_detected"], "No phantom reads should occur under SERIALIZABLE isolation"
         assert phantom_read_analysis["isolation_maintained"], "Transaction isolation must be maintained"
         
-        self.logger.info("✅ Phantom reads prevention under SERIALIZABLE isolation validated")
+        self.logger.info(" PASS:  Phantom reads prevention under SERIALIZABLE isolation validated")
         
     # Helper methods for transaction isolation testing
     
@@ -604,7 +604,7 @@ class TestDatabaseTransactionIsolationConcurrentAgents(BaseIntegrationTest):
         success_rate = self.transaction_metrics.successful_transactions / self.transaction_metrics.total_transactions
         assert success_rate >= 0.8, f"Success rate {success_rate:.2%} below minimum threshold of 80%"
         
-        self.logger.info(f"✅ Concurrent executions with {isolation_level} isolation validated")
+        self.logger.info(f" PASS:  Concurrent executions with {isolation_level} isolation validated")
         self.logger.info(f"   Success rate: {success_rate:.2%}")
         self.logger.info(f"   Isolation violations: {isolation_analysis['isolation_violations']}")
         

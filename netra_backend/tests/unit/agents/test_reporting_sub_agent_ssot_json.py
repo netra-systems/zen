@@ -15,6 +15,7 @@ EXPECTED BEHAVIOR:
 - Tests PASS after migrating to UnifiedJSONSerializer
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import json
@@ -27,7 +28,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
-class TestReportingSubAgentSSOTJSON(unittest.TestCase):
+class TestReportingSubAgentSSOTJSON(SSotBaseTestCase):
     """Unit tests for ReportingSubAgent SSOT JSON integration."""
     
     def setUp(self):

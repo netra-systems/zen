@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -60,7 +61,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestDeploymentConfigurationE2E(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestDeploymentConfigurationE2E(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """End-to-end tests for deployment configuration validation."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -280,7 +281,7 @@
         # REMOVED_SYNTAX_ERROR: self.assertIn('timeout', result.get('error', '').lower())
 
 
-# REMOVED_SYNTAX_ERROR: class TestDeploymentConfigCrossReferences(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestDeploymentConfigCrossReferences(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Test that all configuration documentation is properly cross-referenced."""
 
 # REMOVED_SYNTAX_ERROR: def test_incident_documentation_exists(self):
@@ -328,7 +329,7 @@
         # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class TestCloudRunProbeSimulation(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestCloudRunProbeSimulation(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Simulate Cloud Run probe failures from missing configuration."""
 
 # REMOVED_SYNTAX_ERROR: def test_tcp_probe_failure_simulation(self, mock_run):

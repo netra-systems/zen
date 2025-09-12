@@ -60,7 +60,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             permissions=["read", "write", "agent_execution", "websocket_access"]
         )
 
-    # 🚨 CRITICAL: The 5 mandatory WebSocket events for chat business value
+    #  ALERT:  CRITICAL: The 5 mandatory WebSocket events for chat business value
     MANDATORY_EVENTS = [
         'agent_started',      # User sees agent began processing
         'agent_thinking',     # Real-time reasoning visibility  
@@ -91,9 +91,9 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 MISSION CRITICAL: Testing all 5 mandatory WebSocket events")
-        print(f"👤 User: {user_data['email']}")
-        print(f"📋 Required events: {', '.join(self.MANDATORY_EVENTS)}")
+        print(f"[U+1F680] MISSION CRITICAL: Testing all 5 mandatory WebSocket events")
+        print(f"[U+1F464] User: {user_data['email']}")
+        print(f"[U+1F4CB] Required events: {', '.join(self.MANDATORY_EVENTS)}")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -118,11 +118,11 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                print(f"✅ WebSocket connected")
+                print(f" PASS:  WebSocket connected")
                 
                 # Send request that should trigger comprehensive agent workflow
                 await websocket.send(json.dumps(comprehensive_request))
-                print(f"📤 Sent comprehensive request")
+                print(f"[U+1F4E4] Sent comprehensive request")
                 
                 start_time = time.time()
                 timeout_duration = 90.0  # Generous timeout for comprehensive workflow
@@ -139,40 +139,40 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                         all_events.append(event)
                         event_timestamps[event_type] = event_timestamps.get(event_type, []) + [event_time - start_time]
                         
-                        print(f"📨 Event #{len(all_events)}: {event_type} (t={event_time - start_time:.2f}s)")
+                        print(f"[U+1F4E8] Event #{len(all_events)}: {event_type} (t={event_time - start_time:.2f}s)")
                         
                         # Log additional details for key events
                         if event_type == 'agent_thinking' and event.get('data'):
                             thinking_content = event['data'].get('content', '')[:100]
-                            print(f"   💭 Thinking: {thinking_content}...")
+                            print(f"   [U+1F4AD] Thinking: {thinking_content}...")
                         elif event_type == 'tool_executing' and event.get('data'):
                             tool_name = event['data'].get('tool_name', 'unknown')
-                            print(f"   🔧 Tool: {tool_name}")
+                            print(f"   [U+1F527] Tool: {tool_name}")
                         elif event_type == 'tool_completed' and event.get('data'):
                             tool_result = str(event['data'].get('result', ''))[:50]
-                            print(f"   ✅ Tool result: {tool_result}...")
+                            print(f"    PASS:  Tool result: {tool_result}...")
                         
                         # Stop when workflow complete
                         if event_type == 'agent_completed':
                             completion_time = event_time - start_time
-                            print(f"🏁 Workflow completed in {completion_time:.2f}s")
+                            print(f"[U+1F3C1] Workflow completed in {completion_time:.2f}s")
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f"⏰ Timeout waiting for events after {time.time() - start_time:.2f}s")
+                        print(f"[U+23F0] Timeout waiting for events after {time.time() - start_time:.2f}s")
                         break
                     except json.JSONDecodeError as e:
-                        print(f"❌ JSON decode error: {e}")
+                        print(f" FAIL:  JSON decode error: {e}")
                         continue
                     except Exception as e:
-                        print(f"❌ Event collection error: {e}")
+                        print(f" FAIL:  Event collection error: {e}")
                         continue
         
         except Exception as e:
             pytest.fail(f"WebSocket connection failed: {e}")
         
-        # 🚨 CRITICAL VALIDATION: All 5 mandatory events MUST be present
-        print(f"\n📊 EVENT ANALYSIS:")
+        #  ALERT:  CRITICAL VALIDATION: All 5 mandatory events MUST be present
+        print(f"\n CHART:  EVENT ANALYSIS:")
         print(f"   Total events received: {len(all_events)}")
         
         event_types = [e['type'] for e in all_events]
@@ -188,7 +188,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                 missing_events.append(mandatory_event)
         
         assert len(missing_events) == 0, f"CRITICAL FAILURE: Missing mandatory events: {missing_events}"
-        print(f"✅ All 5 mandatory events present!")
+        print(f" PASS:  All 5 mandatory events present!")
         
         # Validate event ordering makes logical sense
         event_order = [e['type'] for e in all_events]
@@ -209,7 +209,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                 next_completed = [idx for idx in tool_completed_indices if idx > exec_idx]
                 assert len(next_completed) > 0, f"tool_executing at index {exec_idx} has no subsequent tool_completed"
         
-        print(f"✅ Event ordering validated")
+        print(f" PASS:  Event ordering validated")
         
         # Validate event timing (reasonable intervals)
         event_intervals = []
@@ -227,7 +227,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         avg_interval = sum(event_intervals) / len(event_intervals) if event_intervals else 0
         assert avg_interval < 10, f"Average event interval too long: {avg_interval:.2f}s (max 10s)"
         
-        print(f"✅ Event timing validated (max: {max_interval:.2f}s, avg: {avg_interval:.2f}s)")
+        print(f" PASS:  Event timing validated (max: {max_interval:.2f}s, avg: {avg_interval:.2f}s)")
         
         # Validate event payloads contain business context
         business_context_found = False
@@ -242,17 +242,17 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                 
                 if len(found_indicators) >= 2:
                     business_context_found = True
-                    print(f"✅ Business context validated: {found_indicators}")
+                    print(f" PASS:  Business context validated: {found_indicators}")
                     break
         
         assert business_context_found, "Final result lacks business context"
         
-        print(f"🎉 MISSION CRITICAL TEST SUCCESS!")
-        print(f"   ✓ All 5 mandatory WebSocket events delivered")
-        print(f"   ✓ Logical event ordering maintained") 
-        print(f"   ✓ Reasonable event timing for UX")
-        print(f"   ✓ Business context in event payloads")
-        print(f"   ✓ Complete agent workflow tracked in real-time")
+        print(f" CELEBRATION:  MISSION CRITICAL TEST SUCCESS!")
+        print(f"   [U+2713] All 5 mandatory WebSocket events delivered")
+        print(f"   [U+2713] Logical event ordering maintained") 
+        print(f"   [U+2713] Reasonable event timing for UX")
+        print(f"   [U+2713] Business context in event payloads")
+        print(f"   [U+2713] Complete agent workflow tracked in real-time")
 
 
     @pytest.mark.e2e  
@@ -273,7 +273,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         - Concurrent WebSocket connections work properly
         - Each user receives complete event stream
         """
-        print(f"🚀 Testing WebSocket event isolation with multiple users")
+        print(f"[U+1F680] Testing WebSocket event isolation with multiple users")
         
         # Create 3 distinct users
         users = []
@@ -285,7 +285,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             )
             users.append((user_token, user_data))
         
-        print(f"✅ Created {len(users)} users for isolation test")
+        print(f" PASS:  Created {len(users)} users for isolation test")
         
         # Define distinct requests for each user
         user_requests = [
@@ -321,7 +321,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             
             try:
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                    print(f"🔌 User {user_index} WebSocket connected")
+                    print(f"[U+1F50C] User {user_index} WebSocket connected")
                     
                     # Send user-specific request
                     request = {
@@ -333,7 +333,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                     }
                     
                     await websocket.send(json.dumps(request))
-                    print(f"📤 User {user_index} sent request")
+                    print(f"[U+1F4E4] User {user_index} sent request")
                     
                     start_time = time.time()
                     
@@ -349,11 +349,11 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                             if event['type'] in self.MANDATORY_EVENTS:
                                 session_result["mandatory_events_count"] += 1
                             
-                            print(f"📨 User {user_index}: {event['type']}")
+                            print(f"[U+1F4E8] User {user_index}: {event['type']}")
                             
                             if event['type'] == 'agent_completed':
                                 session_result["completion_time"] = time.time() - start_time
-                                print(f"✅ User {user_index} completed")
+                                print(f" PASS:  User {user_index} completed")
                                 break
                                 
                         except asyncio.TimeoutError:
@@ -363,12 +363,12 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                             
             except Exception as e:
                 session_result["error"] = str(e)
-                print(f"❌ User {user_index} session error: {e}")
+                print(f" FAIL:  User {user_index} session error: {e}")
             
             return session_result
         
         # Execute all user sessions concurrently
-        print(f"🏃 Starting concurrent WebSocket sessions...")
+        print(f"[U+1F3C3] Starting concurrent WebSocket sessions...")
         
         tasks = []
         for i, ((user_token, user_data), request_data) in enumerate(zip(users, user_requests)):
@@ -389,14 +389,14 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                 successful_sessions.append(result)
         
         assert len(successful_sessions) == 3, f"Expected 3 successful sessions, got {len(successful_sessions)}"
-        print(f"✅ All {len(successful_sessions)} sessions completed")
+        print(f" PASS:  All {len(successful_sessions)} sessions completed")
         
-        # 🚨 CRITICAL: Validate event isolation - no cross-user contamination
+        #  ALERT:  CRITICAL: Validate event isolation - no cross-user contamination
         for i, session in enumerate(successful_sessions):
             user_events = session["events_received"]
             user_marker = user_requests[i]["context"]["user_marker"]
             
-            print(f"📊 User {i} ({session['user_email']}):")
+            print(f" CHART:  User {i} ({session['user_email']}):")
             print(f"   Events received: {len(user_events)}")
             print(f"   Mandatory events: {session['mandatory_events_count']}")
             print(f"   Completion time: {session['completion_time']:.2f}s" if session['completion_time'] else "   No completion")
@@ -430,13 +430,13 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                             assert contamination_ratio < 0.5, \
                                 f"User {i} over-contaminated with User {j} use case: {contamination_ratio:.2f}"
             
-            print(f"✅ User {i} isolation validated")
+            print(f" PASS:  User {i} isolation validated")
         
-        print(f"🎉 WEBSOCKET EVENT ISOLATION SUCCESS!")
-        print(f"   ✓ All users received events concurrently")
-        print(f"   ✓ No cross-user event contamination")
-        print(f"   ✓ Each user received complete event stream")
-        print(f"   ✓ Multi-tenant WebSocket security validated")
+        print(f" CELEBRATION:  WEBSOCKET EVENT ISOLATION SUCCESS!")
+        print(f"   [U+2713] All users received events concurrently")
+        print(f"   [U+2713] No cross-user event contamination")
+        print(f"   [U+2713] Each user received complete event stream")
+        print(f"   [U+2713] Multi-tenant WebSocket security validated")
 
 
     @pytest.mark.e2e
@@ -457,7 +457,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing WebSocket connection stability")
+        print(f"[U+1F680] Testing WebSocket connection stability")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -486,10 +486,10 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         try:
             # Test with potential reconnection scenario
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                print(f"✅ WebSocket connected for stability test")
+                print(f" PASS:  WebSocket connected for stability test")
                 
                 await websocket.send(json.dumps(stability_request))
-                print(f"📤 Sent long-running comprehensive request")
+                print(f"[U+1F4E4] Sent long-running comprehensive request")
                 
                 start_time = time.time()
                 last_event_time = start_time
@@ -506,20 +506,20 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                         connection_metrics["events_received"] += 1
                         last_event_time = current_time
                         
-                        print(f"📨 Event #{connection_metrics['events_received']}: {event['type']} " + 
+                        print(f"[U+1F4E8] Event #{connection_metrics['events_received']}: {event['type']} " + 
                               f"(gap: {event_gap:.1f}s)")
                         
                         if event['type'] == 'agent_completed':
                             connection_metrics["total_duration"] = current_time - start_time
-                            print(f"✅ Long-running operation completed")
+                            print(f" PASS:  Long-running operation completed")
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f"⏰ Event timeout - connection stable")
+                        print(f"[U+23F0] Event timeout - connection stable")
                         continue
                     except websockets.exceptions.ConnectionClosed:
                         connection_metrics["connection_drops"] += 1
-                        print(f"🔌 Connection dropped (#{connection_metrics['connection_drops']})")
+                        print(f"[U+1F50C] Connection dropped (#{connection_metrics['connection_drops']})")
                         break
                     except json.JSONDecodeError:
                         continue
@@ -528,7 +528,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             pytest.fail(f"WebSocket stability test failed: {e}")
         
         # Validate connection stability metrics
-        print(f"\n📊 CONNECTION STABILITY METRICS:")
+        print(f"\n CHART:  CONNECTION STABILITY METRICS:")
         print(f"   Events received: {connection_metrics['events_received']}")
         print(f"   Connection drops: {connection_metrics['connection_drops']}")
         print(f"   Max event gap: {connection_metrics['max_event_gap']:.1f}s")  
@@ -544,7 +544,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         assert connection_metrics["max_event_gap"] < 30, \
             f"Event gap too large: {connection_metrics['max_event_gap']:.1f}s (max 30s)"
         
-        print(f"✅ CONNECTION STABILITY VALIDATED!")
+        print(f" PASS:  CONNECTION STABILITY VALIDATED!")
 
 
     @pytest.mark.e2e
@@ -565,7 +565,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         """
         token, user_data = authenticated_user
         
-        print(f"🚀 Testing WebSocket event payload validation")
+        print(f"[U+1F680] Testing WebSocket event payload validation")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -588,7 +588,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                 await websocket.send(json.dumps(payload_request))
-                print(f"📤 Sent payload validation request")
+                print(f"[U+1F4E4] Sent payload validation request")
                 
                 start_time = time.time()
                 
@@ -598,7 +598,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                         event = json.loads(message)
                         collected_events.append(event)
                         
-                        print(f"📨 Collected event: {event['type']}")
+                        print(f"[U+1F4E8] Collected event: {event['type']}")
                         
                         if event['type'] == 'agent_completed':
                             break
@@ -613,7 +613,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         
         assert len(collected_events) > 0, "No events collected for payload validation"
         
-        print(f"📊 Validating {len(collected_events)} event payloads...")
+        print(f" CHART:  Validating {len(collected_events)} event payloads...")
         
         # Validate each event type's payload structure
         event_validation_results = {}
@@ -652,7 +652,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
                     result["business_context_found"] = True
         
         # Calculate averages and validate
-        print(f"\n📋 EVENT PAYLOAD VALIDATION RESULTS:")
+        print(f"\n[U+1F4CB] EVENT PAYLOAD VALIDATION RESULTS:")
         
         for event_type, results in event_validation_results.items():
             results["avg_payload_size"] = results["avg_payload_size"] / results["count"]
@@ -681,11 +681,11 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         found_mandatory = set(event_validation_results.keys()).intersection(set(self.MANDATORY_EVENTS))
         assert len(found_mandatory) >= 4, f"Missing mandatory events in payload validation: {found_mandatory}"
         
-        print(f"✅ EVENT PAYLOAD VALIDATION SUCCESS!")
-        print(f"   ✓ All event types have proper structure")
-        print(f"   ✓ Business context preserved in relevant events")
-        print(f"   ✓ Payload sizes within reasonable limits")
-        print(f"   ✓ {len(found_mandatory)} mandatory events validated")
+        print(f" PASS:  EVENT PAYLOAD VALIDATION SUCCESS!")
+        print(f"   [U+2713] All event types have proper structure")
+        print(f"   [U+2713] Business context preserved in relevant events")
+        print(f"   [U+2713] Payload sizes within reasonable limits")
+        print(f"   [U+2713] {len(found_mandatory)} mandatory events validated")
 
 
     @pytest.mark.e2e
@@ -704,7 +704,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
         - No event loss under pressure
         - Response time degradation limits
         """
-        print(f"🚀 Testing WebSocket performance under concurrent load")
+        print(f"[U+1F680] Testing WebSocket performance under concurrent load")
         
         # Create multiple users for load testing
         load_user_count = 5
@@ -718,7 +718,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             )
             load_users.append((user_token, user_data))
         
-        print(f"✅ Created {load_user_count} users for load testing")
+        print(f" PASS:  Created {load_user_count} users for load testing")
         
         # Load test WebSocket session
         async def load_test_session(user_index: int, user_token: str, user_data: Dict) -> Dict:
@@ -773,7 +773,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             return session_metrics
         
         # Execute load test
-        print(f"🏃 Executing load test with {load_user_count} concurrent WebSocket connections...")
+        print(f"[U+1F3C3] Executing load test with {load_user_count} concurrent WebSocket connections...")
         
         load_start_time = time.time()
         
@@ -797,7 +797,7 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             else:
                 successful_sessions.append(result)
         
-        print(f"📊 LOAD TEST RESULTS:")
+        print(f" CHART:  LOAD TEST RESULTS:")
         print(f"   Total load time: {total_load_time:.2f}s")
         print(f"   Successful sessions: {len(successful_sessions)}")
         print(f"   Failed sessions: {len(failed_sessions)}")
@@ -826,8 +826,8 @@ class TestWebSocketEventDeliveryRealTime(SSotBaseTestCase):
             assert max_response_time < 40, f"Max response time too slow under load: {max_response_time:.2f}s"
             assert avg_mandatory >= 3, f"Too few mandatory events under load: {avg_mandatory:.1f}"
         
-        print(f"✅ WEBSOCKET LOAD PERFORMANCE VALIDATED!")
-        print(f"   ✓ {success_rate:.1%} success rate under {load_user_count}-user load")
-        print(f"   ✓ Response times within acceptable limits")
-        print(f"   ✓ Event delivery maintained under pressure")
-        print(f"   ✓ WebSocket scalability demonstrated")
+        print(f" PASS:  WEBSOCKET LOAD PERFORMANCE VALIDATED!")
+        print(f"   [U+2713] {success_rate:.1%} success rate under {load_user_count}-user load")
+        print(f"   [U+2713] Response times within acceptable limits")
+        print(f"   [U+2713] Event delivery maintained under pressure")
+        print(f"   [U+2713] WebSocket scalability demonstrated")

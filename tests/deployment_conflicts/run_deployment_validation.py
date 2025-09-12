@@ -67,7 +67,7 @@ class DeploymentValidationOrchestrator:
         
     def run_full_validation(self) -> Dict:
         """Run complete deployment validation test suite."""
-        print("🚀 DEPLOYMENT CONFLICTS VALIDATION - COMPREHENSIVE TEST SUITE")
+        print("[U+1F680] DEPLOYMENT CONFLICTS VALIDATION - COMPREHENSIVE TEST SUITE")
         print("=" * 70)
         print(f"Timestamp: {datetime.now()}")
         print(f"Project: {self.project_root}")
@@ -95,7 +95,7 @@ class DeploymentValidationOrchestrator:
         if self.staging_safe:
             self._run_phase("staging_validation", self._run_staging_tests)
         else:
-            print("⚠️  SKIPPING staging tests (use --staging-safe to enable)")
+            print(" WARNING: [U+FE0F]  SKIPPING staging tests (use --staging-safe to enable)")
         
         # Generate comprehensive report
         self._generate_final_report()
@@ -104,7 +104,7 @@ class DeploymentValidationOrchestrator:
     
     def run_specific_phase(self, phase_name: str) -> Dict:
         """Run a specific validation phase."""
-        print(f"🎯 Running specific phase: {phase_name}")
+        print(f" TARGET:  Running specific phase: {phase_name}")
         
         phase_methods = {
             "environment_checks": self._validate_environment,
@@ -118,7 +118,7 @@ class DeploymentValidationOrchestrator:
         if phase_name in phase_methods:
             self._run_phase(phase_name, phase_methods[phase_name])
         else:
-            print(f"❌ Unknown phase: {phase_name}")
+            print(f" FAIL:  Unknown phase: {phase_name}")
             print(f"Available phases: {list(phase_methods.keys())}")
             return {"error": f"Unknown phase: {phase_name}"}
         
@@ -126,7 +126,7 @@ class DeploymentValidationOrchestrator:
     
     def generate_report_only(self) -> Dict:
         """Generate comprehensive report from existing results."""
-        print("📊 GENERATING DEPLOYMENT VALIDATION REPORT")
+        print(" CHART:  GENERATING DEPLOYMENT VALIDATION REPORT")
         
         # Load existing results if available
         existing_results = self._load_existing_results()
@@ -134,17 +134,17 @@ class DeploymentValidationOrchestrator:
             self.validation_results = existing_results
             self._generate_final_report()
         else:
-            print("⚠️  No existing results found. Run validation tests first.")
+            print(" WARNING: [U+FE0F]  No existing results found. Run validation tests first.")
             
         return self.validation_results
     
     def _run_phase(self, phase_name: str, phase_method) -> Dict:
         """Run a validation phase with error handling and reporting."""
-        print(f"\n📋 PHASE: {phase_name.upper()}")
+        print(f"\n[U+1F4CB] PHASE: {phase_name.upper()}")
         print("-" * 50)
         
         if self.dry_run:
-            print(f"🔍 DRY RUN: Would execute {phase_name}")
+            print(f" SEARCH:  DRY RUN: Would execute {phase_name}")
             self.validation_results["phases"][phase_name] = {
                 "status": "dry_run",
                 "message": "Execution skipped in dry-run mode"
@@ -164,10 +164,10 @@ class DeploymentValidationOrchestrator:
             }
             
             self.validation_results["phases"][phase_name] = phase_data
-            print(f"✅ Phase {phase_name} completed in {phase_data['duration']}s")
+            print(f" PASS:  Phase {phase_name} completed in {phase_data['duration']}s")
             
         except Exception as e:
-            print(f"❌ Phase {phase_name} failed: {str(e)}")
+            print(f" FAIL:  Phase {phase_name} failed: {str(e)}")
             self.validation_results["phases"][phase_name] = {
                 "status": "failed",
                 "error": str(e),
@@ -178,7 +178,7 @@ class DeploymentValidationOrchestrator:
     
     def _validate_environment(self) -> Dict:
         """Validate environment and dependencies."""
-        print("🔍 Validating environment and dependencies...")
+        print(" SEARCH:  Validating environment and dependencies...")
         
         checks = {
             "docker_available": self._check_docker_availability(),
@@ -189,7 +189,7 @@ class DeploymentValidationOrchestrator:
         
         # Report environment status
         for check_name, check_result in checks.items():
-            status = "✅" if check_result["success"] else "❌"
+            status = " PASS: " if check_result["success"] else " FAIL: "
             print(f"  {status} {check_name}: {check_result['message']}")
         
         # Determine if environment is ready
@@ -207,7 +207,7 @@ class DeploymentValidationOrchestrator:
     
     def _run_conflict_detection_tests(self) -> Dict:
         """Run deployment script conflict detection tests."""
-        print("🔍 Running deployment script conflict detection tests...")
+        print(" SEARCH:  Running deployment script conflict detection tests...")
         
         test_results = {}
         
@@ -245,7 +245,7 @@ class DeploymentValidationOrchestrator:
     
     def _run_ssot_validation_tests(self) -> Dict:
         """Run SSOT deployment consolidation validation tests."""
-        print("🎯 Running SSOT validation tests...")
+        print(" TARGET:  Running SSOT validation tests...")
         
         test_results = {}
         
@@ -263,7 +263,7 @@ class DeploymentValidationOrchestrator:
     
     def _run_integration_tests(self) -> Dict:
         """Run deployment pipeline integration tests."""
-        print("🔄 Running integration pipeline tests...")
+        print(" CYCLE:  Running integration pipeline tests...")
         
         test_results = {}
         
@@ -296,7 +296,7 @@ class DeploymentValidationOrchestrator:
     
     def _run_golden_path_tests(self) -> Dict:
         """Run Golden Path protection tests."""
-        print("🛡️ Running Golden Path protection tests...")
+        print("[U+1F6E1][U+FE0F] Running Golden Path protection tests...")
         
         test_results = {}
         
@@ -314,7 +314,7 @@ class DeploymentValidationOrchestrator:
     
     def _run_staging_tests(self) -> Dict:
         """Run staging environment validation tests."""
-        print("🧪 Running staging environment tests...")
+        print("[U+1F9EA] Running staging environment tests...")
         
         if not self.staging_safe:
             return {"skipped": "Staging tests not enabled (use --staging-safe)"}
@@ -322,16 +322,16 @@ class DeploymentValidationOrchestrator:
         test_results = {}
         
         # Pre-staging validation
-        print("  🔍 Pre-staging environment checks...")
+        print("   SEARCH:  Pre-staging environment checks...")
         pre_checks = self._validate_staging_prerequisites()
         test_results["pre_checks"] = pre_checks
         
         if not pre_checks.get("safe_to_proceed", False):
-            print("  ⚠️  Staging prerequisites not met, skipping deployment tests")
+            print("   WARNING: [U+FE0F]  Staging prerequisites not met, skipping deployment tests")
             return test_results
         
         # Staging deployment validation (if safe)
-        print("  🚀 Staging deployment validation...")
+        print("  [U+1F680] Staging deployment validation...")
         test_results["deployment_validation"] = self._validate_staging_deployment()
         
         return test_results
@@ -504,7 +504,7 @@ class DeploymentValidationOrchestrator:
     def _generate_final_report(self) -> None:
         """Generate comprehensive final report."""
         print("\n" + "=" * 70)
-        print("📊 DEPLOYMENT VALIDATION COMPREHENSIVE REPORT")
+        print(" CHART:  DEPLOYMENT VALIDATION COMPREHENSIVE REPORT")
         print("=" * 70)
         
         # Calculate summary statistics
@@ -521,7 +521,7 @@ class DeploymentValidationOrchestrator:
         # Phase-by-phase results
         print(f"\nPhase Results:")
         for phase_name, phase_data in self.validation_results["phases"].items():
-            status_icon = {"completed": "✅", "failed": "❌", "dry_run": "🔍"}.get(phase_data["status"], "❓")
+            status_icon = {"completed": " PASS: ", "failed": " FAIL: ", "dry_run": " SEARCH: "}.get(phase_data["status"], "[U+2753]")
             duration = f" ({phase_data.get('duration', 0)}s)" if phase_data.get('duration') else ""
             print(f"  {status_icon} {phase_name}{duration}")
             
@@ -532,7 +532,7 @@ class DeploymentValidationOrchestrator:
         self._generate_recommendations()
         
         if self.validation_results["recommendations"]:
-            print(f"\n🎯 Recommendations:")
+            print(f"\n TARGET:  Recommendations:")
             for i, rec in enumerate(self.validation_results["recommendations"], 1):
                 print(f"  {i}. {rec}")
         
@@ -541,7 +541,7 @@ class DeploymentValidationOrchestrator:
         with open(results_file, 'w') as f:
             json.dump(self.validation_results, f, indent=2)
         
-        print(f"\n📁 Detailed results saved to: {results_file}")
+        print(f"\n[U+1F4C1] Detailed results saved to: {results_file}")
         
         # Generate executive summary
         self._generate_executive_summary()
@@ -560,7 +560,7 @@ class DeploymentValidationOrchestrator:
                 elif phase_name == "ssot_validation":
                     recommendations.append("Implement SSOT consolidation for deployment scripts")
                 elif phase_name == "golden_path_protection":
-                    recommendations.append("Critical: Fix issues affecting user login → AI response flow")
+                    recommendations.append("Critical: Fix issues affecting user login  ->  AI response flow")
         
         # Add general recommendations
         if not recommendations:
@@ -585,7 +585,7 @@ class DeploymentValidationOrchestrator:
 ## Summary
 - **Validation Date:** {self.validation_results['timestamp']}
 - **Phases Completed:** {completed_phases}/{total_phases}
-- **Overall Status:** {'✅ PASSED' if completed_phases == total_phases else '⚠️ ISSUES FOUND'}
+- **Overall Status:** {' PASS:  PASSED' if completed_phases == total_phases else ' WARNING: [U+FE0F] ISSUES FOUND'}
 
 ## Business Impact
 - **Risk Level:** {'LOW' if completed_phases == total_phases else 'HIGH'}
@@ -617,7 +617,7 @@ class DeploymentValidationOrchestrator:
         with open(summary_file, 'w') as f:
             f.write(summary_content)
         
-        print(f"📄 Executive summary saved to: {summary_file}")
+        print(f"[U+1F4C4] Executive summary saved to: {summary_file}")
 
 
 def main():
@@ -684,10 +684,10 @@ def main():
         sys.exit(exit_code)
         
     except KeyboardInterrupt:
-        print("\n⚠️  Validation interrupted by user")
+        print("\n WARNING: [U+FE0F]  Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Validation failed with error: {str(e)}")
+        print(f"\n FAIL:  Validation failed with error: {str(e)}")
         sys.exit(1)
 
 

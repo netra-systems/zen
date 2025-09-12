@@ -109,7 +109,7 @@ class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
         )
         
         # Document the issue for fix implementation
-        print(f"\n❌ REPRODUCED ISSUE #265:")
+        print(f"\n FAIL:  REPRODUCED ISSUE #265:")
         print(f"   - Auth timeout: {auth_check.timeout_seconds}s (insufficient)")
         print(f"   - Staging needs: 8+ seconds for cold start")
         print(f"   - Result: Auth validation failed ({elapsed:.2f}s)")
@@ -142,7 +142,7 @@ class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
             # ASSERTION THAT SHOULD FAIL: Timeout is hardcoded to 5.0s for GCP
             if auth_check.timeout_seconds == 5.0:
                 hardcoded_timeout_detected = True
-                print(f"\n❌ HARDCODED TIMEOUT DETECTED:")
+                print(f"\n FAIL:  HARDCODED TIMEOUT DETECTED:")
                 print(f"   - Environment: {env_name}")
                 print(f"   - Timeout: {auth_check.timeout_seconds}s (hardcoded)")
                 print(f"   - Issue: {description}")
@@ -195,7 +195,7 @@ class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
         )
         
         # Document missing graceful degradation
-        print(f"\n❌ MISSING STAGING BYPASS DETECTED:")
+        print(f"\n FAIL:  MISSING STAGING BYPASS DETECTED:")
         print(f"   - Environment: staging") 
         print(f"   - Auth critical: {auth_check.is_critical}")
         print(f"   - Graceful degradation: NO (missing)")
@@ -228,7 +228,7 @@ class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
         total_retry_time = auth_check.retry_count * auth_check.retry_delay
         cumulative_timeout = max_timeout + total_retry_time
         
-        print(f"\n📊 AUTH TIMEOUT ANALYSIS:")
+        print(f"\n CHART:  AUTH TIMEOUT ANALYSIS:")
         print(f"   - Base timeout: {auth_check.timeout_seconds}s")
         print(f"   - Retry count: {auth_check.retry_count}")
         print(f"   - Retry delay: {auth_check.retry_delay}s each")
@@ -286,7 +286,7 @@ class TestAuthValidationTimeoutReproduction(SSotBaseTestCase):
         )
         
         # Document business impact
-        print(f"\n❌ WEBSOCKET READINESS BLOCKED:")
+        print(f"\n FAIL:  WEBSOCKET READINESS BLOCKED:")
         print(f"   - WebSocket ready: {result.ready}")
         print(f"   - Failed services: {result.failed_services}")
         print(f"   - Elapsed time: {elapsed:.2f}s")

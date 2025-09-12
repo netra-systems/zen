@@ -469,7 +469,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         user_connections = self.mock_connection_manager.get_user_connections(user_id)
         assert connection_id in user_connections
         
-        logger.info(f"✅ Connection establishment routing test passed for user {user_id}")
+        logger.info(f" PASS:  Connection establishment routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_authentication_routing_integration(self):
@@ -507,7 +507,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         # Check that authentication context was maintained
         assert websocket.headers["authorization"].startswith("Bearer ")
         
-        logger.info(f"✅ Authentication routing integration test passed for user {user_id}")
+        logger.info(f" PASS:  Authentication routing integration test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_multiple_connections_same_user(self):
@@ -544,7 +544,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         for i, (websocket, connection_id) in enumerate(connections):
             self.assert_websocket_routing_success(websocket, 1)
             
-        logger.info(f"✅ Multiple connections routing test passed for user {user_id}")
+        logger.info(f" PASS:  Multiple connections routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_connection_handoff_between_handlers(self):
@@ -578,7 +578,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         assert any(resp_type in response_types for resp_type in expected_responses), \
             f"Expected handler responses not found in {response_types}"
             
-        logger.info(f"✅ Connection handoff test passed for user {user_id}")
+        logger.info(f" PASS:  Connection handoff test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_connection_state_routing_consistency(self):
@@ -611,7 +611,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         assert websocket.client_state == WebSocketState.CONNECTED
         self.assert_websocket_routing_success(websocket, 5)
         
-        logger.info(f"✅ Connection state consistency test passed for user {user_id}")
+        logger.info(f" PASS:  Connection state consistency test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_connection_cleanup_routing_impact(self):
@@ -661,7 +661,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             # Expected - connection is closed
             pass
             
-        logger.info(f"✅ Connection cleanup routing test passed for user {user_id}")
+        logger.info(f" PASS:  Connection cleanup routing test passed for user {user_id}")
         
     # ==============================================
     # WebSocket Message Type Routing Tests (5 tests)
@@ -705,7 +705,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             assert "content" in msg["data"] or "status" in msg["data"], \
                 f"Chat response should contain content or status: {msg['data']}"
                 
-        logger.info(f"✅ Chat message routing test passed for user {user_id}")
+        logger.info(f" PASS:  Chat message routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_agent_event_routing(self):
@@ -733,7 +733,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         sent_messages = websocket.sent_messages
         assert len(sent_messages) > 0, "Agent events should generate some routing responses"
         
-        logger.info(f"✅ Agent event routing test passed for user {user_id}")
+        logger.info(f" PASS:  Agent event routing test passed for user {user_id}")
         
     @pytest.mark.integration 
     async def test_websocket_system_message_routing(self):
@@ -766,7 +766,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         # Verify system message handling
         self.assert_websocket_routing_success(websocket, 1)  # At least 1 response
         
-        logger.info(f"✅ System message routing test passed for user {user_id}")
+        logger.info(f" PASS:  System message routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_error_message_routing(self):
@@ -809,7 +809,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             for msg in sent_messages
         )
         
-        logger.info(f"✅ Error message routing test passed for user {user_id}")
+        logger.info(f" PASS:  Error message routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_heartbeat_message_routing(self):
@@ -846,7 +846,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         ]
         logger.info(f"Heartbeat-related responses: {len(heartbeat_related_messages)}")
         
-        logger.info(f"✅ Heartbeat message routing test passed for user {user_id}")
+        logger.info(f" PASS:  Heartbeat message routing test passed for user {user_id}")
         
     # ==============================================
     # WebSocket Event Broadcasting Tests (4 tests)
@@ -891,7 +891,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         success = await self.send_message_to_router(other_websocket, other_user_id, isolation_test_event)
         # This should either fail or be handled with proper user context
         
-        logger.info(f"✅ User-specific event routing test passed")
+        logger.info(f" PASS:  User-specific event routing test passed")
         
     @pytest.mark.integration
     async def test_websocket_broadcast_event_routing(self):
@@ -924,7 +924,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         sent_messages = primary_websocket.sent_messages
         assert len(sent_messages) > 0, "Broadcast should generate response"
         
-        logger.info(f"✅ Broadcast event routing test passed")
+        logger.info(f" PASS:  Broadcast event routing test passed")
         
     @pytest.mark.integration
     async def test_websocket_selective_event_routing(self):
@@ -959,7 +959,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         sent_messages = websocket.sent_messages
         assert len(sent_messages) >= 0, "Selective routing should handle events"
         
-        logger.info(f"✅ Selective event routing test passed for user {user_id}")
+        logger.info(f" PASS:  Selective event routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_event_filtering_routing(self):
@@ -993,7 +993,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         successful_routes = sum(1 for _, success in results if success)
         assert successful_routes >= 2, f"At least 2 events should route successfully, got {successful_routes}"
         
-        logger.info(f"✅ Event filtering routing test passed for user {user_id}")
+        logger.info(f" PASS:  Event filtering routing test passed for user {user_id}")
         
     # ==============================================
     # WebSocket State Management Tests (3 tests)
@@ -1039,7 +1039,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             # Expected if routing checks connection state
             pass
             
-        logger.info(f"✅ Connection state sync routing test passed for user {user_id}")
+        logger.info(f" PASS:  Connection state sync routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_disconnection_routing_cleanup(self):
@@ -1087,7 +1087,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         stats = self.mock_connection_manager.get_global_stats()
         assert stats["disconnections"] >= 1
         
-        logger.info(f"✅ Disconnection cleanup routing test passed for user {user_id}")
+        logger.info(f" PASS:  Disconnection cleanup routing test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_reconnection_routing_restoration(self):
@@ -1136,7 +1136,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         stats = self.mock_connection_manager.get_global_stats()
         assert stats["total_connections"] >= 2, "Should track both original and reconnection"
         
-        logger.info(f"✅ Reconnection routing restoration test passed for user {user_id}")
+        logger.info(f" PASS:  Reconnection routing restoration test passed for user {user_id}")
         
     # ==============================================
     # WebSocket Safety and Reliability Tests (2 tests)  
@@ -1164,7 +1164,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             },
             {
                 "type": "system_message",
-                "content": "Special characters: émojis 🚀 unicode ñ",
+                "content": "Special characters: [U+00E9]mojis [U+1F680] unicode [U+00F1]",
                 "user_id": user_id,
                 "timestamp": time.time()
             }
@@ -1200,7 +1200,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
             # Expected with disconnected WebSocket
             pass
             
-        logger.info(f"✅ Safe send routing integration test passed for user {user_id}")
+        logger.info(f" PASS:  Safe send routing integration test passed for user {user_id}")
         
     @pytest.mark.integration
     async def test_websocket_routing_error_recovery(self):
@@ -1260,7 +1260,7 @@ class TestWebSocketRoutingComprehensive(BaseIntegrationTest):
         success = await self.send_message_to_router(websocket, user_id, unknown_message)
         # Should succeed with fallback or fail gracefully
         
-        logger.info(f"✅ Routing error recovery test passed for user {user_id}")
+        logger.info(f" PASS:  Routing error recovery test passed for user {user_id}")
         
     def teardown_method(self):
         """Clean up after each test."""

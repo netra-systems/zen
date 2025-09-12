@@ -90,7 +90,7 @@ class ToolExecutorFactory:
             'last_creation_time': None
         }
         
-        logger.info(f"🏭 ToolExecutorFactory {self.factory_id} initialized")
+        logger.info(f"[U+1F3ED] ToolExecutorFactory {self.factory_id} initialized")
     
     async def create_tool_executor(
         self,
@@ -123,7 +123,7 @@ class ToolExecutorFactory:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolExecutorFactory.create_tool_executor() -> ToolDispatcherFactory.create_for_request() "
+            f" CYCLE:  DEPRECATED: ToolExecutorFactory.create_tool_executor() -> ToolDispatcherFactory.create_for_request() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
@@ -145,9 +145,9 @@ class ToolExecutorFactory:
                 # Create adapter for backward compatibility
                 from netra_backend.app.core.tools.unified_tool_dispatcher import WebSocketBridgeAdapter
                 websocket_bridge = WebSocketBridgeAdapter(websocket_emitter, user_context)
-                logger.debug(f"🔌 Created WebSocket bridge adapter for {user_context.get_correlation_id()}")
+                logger.debug(f"[U+1F50C] Created WebSocket bridge adapter for {user_context.get_correlation_id()}")
             else:
-                logger.warning(f"⚠️ No WebSocket manager available for {user_context.get_correlation_id()} - events will be disabled")
+                logger.warning(f" WARNING: [U+FE0F] No WebSocket manager available for {user_context.get_correlation_id()} - events will be disabled")
             
             # Create isolated tool executor
             executor = UnifiedToolExecutionEngine(websocket_bridge=websocket_bridge)
@@ -158,14 +158,14 @@ class ToolExecutorFactory:
             self._metrics['active_instances'] += 1
             self._metrics['last_creation_time'] = datetime.now(timezone.utc)
             
-            logger.info(f"🔧 DEPRECATED: Created UnifiedToolExecutionEngine for {user_context.get_correlation_id()} "
+            logger.info(f"[U+1F527] DEPRECATED: Created UnifiedToolExecutionEngine for {user_context.get_correlation_id()} "
                        f"in {creation_time_ms:.1f}ms (WebSocket: {'enabled' if websocket_bridge else 'disabled'})")
             
             return executor
             
         except Exception as e:
             self._metrics['failed_creations'] += 1
-            logger.error(f"🚨 Failed to create tool executor for {user_context.get_correlation_id()}: {e}")
+            logger.error(f" ALERT:  Failed to create tool executor for {user_context.get_correlation_id()}: {e}")
             raise ValueError(f"Failed to create tool executor: {e}")
     
     async def create_request_scoped_dispatcher(
@@ -201,7 +201,7 @@ class ToolExecutorFactory:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolExecutorFactory.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
+            f" CYCLE:  DEPRECATED: ToolExecutorFactory.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
@@ -220,9 +220,9 @@ class ToolExecutorFactory:
                 websocket_emitter = await WebSocketEventEmitterFactory.create_emitter(
                     user_context, ws_manager
                 )
-                logger.debug(f"🔌 Created WebSocket emitter for {user_context.get_correlation_id()}")
+                logger.debug(f"[U+1F50C] Created WebSocket emitter for {user_context.get_correlation_id()}")
             else:
-                logger.warning(f"⚠️ No WebSocket manager available for {user_context.get_correlation_id()} - events will be disabled")
+                logger.warning(f" WARNING: [U+FE0F] No WebSocket manager available for {user_context.get_correlation_id()} - events will be disabled")
             
             # Create request-scoped dispatcher
             dispatcher = RequestScopedToolDispatcher(
@@ -237,14 +237,14 @@ class ToolExecutorFactory:
             self._metrics['active_instances'] += 1
             self._metrics['last_creation_time'] = datetime.now(timezone.utc)
             
-            logger.info(f"📦 DEPRECATED: Created RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
+            logger.info(f"[U+1F4E6] DEPRECATED: Created RequestScopedToolDispatcher for {user_context.get_correlation_id()} "
                        f"in {creation_time_ms:.1f}ms (WebSocket: {'enabled' if websocket_emitter else 'disabled'})")
             
             return dispatcher
             
         except Exception as e:
             self._metrics['failed_creations'] += 1
-            logger.error(f"🚨 Failed to create request-scoped dispatcher for {user_context.get_correlation_id()}: {e}")
+            logger.error(f" ALERT:  Failed to create request-scoped dispatcher for {user_context.get_correlation_id()}: {e}")
             raise ValueError(f"Failed to create request-scoped dispatcher: {e}")
     
     @asynccontextmanager
@@ -273,13 +273,13 @@ class ToolExecutorFactory:
         executor = None
         try:
             executor = await self.create_tool_executor(user_context, websocket_manager)
-            logger.debug(f"📦 SCOPED EXECUTOR: {user_context.get_correlation_id()} created with auto-cleanup")
+            logger.debug(f"[U+1F4E6] SCOPED EXECUTOR: {user_context.get_correlation_id()} created with auto-cleanup")
             yield executor
         finally:
             if executor:
                 # Clean up any resources (currently UnifiedToolExecutionEngine doesn't need explicit cleanup)
                 self._metrics['active_instances'] -= 1
-                logger.debug(f"📦 SCOPED EXECUTOR: {user_context.get_correlation_id()} disposed")
+                logger.debug(f"[U+1F4E6] SCOPED EXECUTOR: {user_context.get_correlation_id()} disposed")
     
     @asynccontextmanager
     async def create_scoped_dispatcher(
@@ -311,13 +311,13 @@ class ToolExecutorFactory:
             dispatcher = await self.create_request_scoped_dispatcher(
                 user_context, tools, websocket_manager
             )
-            logger.debug(f"📦 SCOPED DISPATCHER: {user_context.get_correlation_id()} created with auto-cleanup")
+            logger.debug(f"[U+1F4E6] SCOPED DISPATCHER: {user_context.get_correlation_id()} created with auto-cleanup")
             yield dispatcher
         finally:
             if dispatcher:
                 await dispatcher.cleanup()
                 self._metrics['active_instances'] -= 1
-                logger.debug(f"📦 SCOPED DISPATCHER: {user_context.get_correlation_id()} disposed")
+                logger.debug(f"[U+1F4E6] SCOPED DISPATCHER: {user_context.get_correlation_id()} disposed")
     
     def set_websocket_manager(self, websocket_manager: 'WebSocketManager') -> None:
         """Set the default WebSocket manager for this factory.
@@ -326,7 +326,7 @@ class ToolExecutorFactory:
             websocket_manager: WebSocket manager to use as default
         """
         self.websocket_manager = websocket_manager
-        logger.info(f"🔌 Set WebSocket manager for ToolExecutorFactory {self.factory_id}")
+        logger.info(f"[U+1F50C] Set WebSocket manager for ToolExecutorFactory {self.factory_id}")
     
     def get_factory_metrics(self) -> Dict[str, Any]:
         """Get factory metrics for monitoring and debugging.
@@ -436,14 +436,14 @@ def get_tool_executor_factory() -> ToolExecutorFactory:
     )
     
     logger.warning(
-        "🔄 DEPRECATED: get_tool_executor_factory() called. "
+        " CYCLE:  DEPRECATED: get_tool_executor_factory() called. "
         "Use get_tool_dispatcher_factory() for SSOT compliance."
     )
     
     global _global_tool_executor_factory
     if _global_tool_executor_factory is None:
         _global_tool_executor_factory = ToolExecutorFactory()
-        logger.info("🏭 DEPRECATED: Created global ToolExecutorFactory instance")
+        logger.info("[U+1F3ED] DEPRECATED: Created global ToolExecutorFactory instance")
     return _global_tool_executor_factory
 
 
@@ -486,7 +486,7 @@ async def create_isolated_tool_executor(
     )
     
     logger.warning(
-        f"🔄 DEPRECATED: create_isolated_tool_executor() called for user {user_context.user_id}. "
+        f" CYCLE:  DEPRECATED: create_isolated_tool_executor() called for user {user_context.user_id}. "
         f"Use create_tool_dispatcher() for SSOT compliance."
     )
     

@@ -151,7 +151,7 @@ async def test_session_hijacking_prevention_with_expired_tokens(jwt_generator, a
     # Cleanup
     await legitimate_client.disconnect()
     
-    logger.info(f"✓ Session hijacking prevented: {len(attack_attempts)} attempts blocked, {alert_count} alerts triggered")
+    logger.info(f"[U+2713] Session hijacking prevented: {len(attack_attempts)} attempts blocked, {alert_count} alerts triggered")
 
 
 @pytest.mark.asyncio
@@ -235,7 +235,7 @@ async def test_multiple_rapid_expired_token_attempts_brute_force_protection(jwt_
     assert alert["severity"] == "CRITICAL", "Should escalate to critical"
     assert alert["attempt_count"] >= 5, "Should count multiple attempts"
     
-    logger.info(f"✓ Brute force protection: {attack_attempts} attempts blocked, avg {avg_response_time:.3f}s response")
+    logger.info(f"[U+2713] Brute force protection: {attack_attempts} attempts blocked, avg {avg_response_time:.3f}s response")
 
 
 @pytest.mark.asyncio
@@ -332,7 +332,7 @@ async def test_malformed_expired_token_handling(jwt_generator, audit_logger):
     # Should have some security events for malformed attempts
     assert len(recent_events) >= 1, "Malformed token attempts should generate security events"
     
-    logger.info(f"✓ Malformed token handling: {len(test_results)} scenarios tested, avg {avg_response_time:.3f}s")
+    logger.info(f"[U+2713] Malformed token handling: {len(test_results)} scenarios tested, avg {avg_response_time:.3f}s")
 
 
 @pytest.mark.asyncio
@@ -425,7 +425,7 @@ async def test_token_tampering_with_expired_timestamps(jwt_generator, audit_logg
     # Should have security events for tampering attempts
     assert len(recent_events) >= len(tampering_scenarios), "Tampering attempts should be logged"
     
-    logger.info(f"✓ Token tampering detection: {len(test_results)} scenarios, avg {avg_response_time:.3f}s detection")
+    logger.info(f"[U+2713] Token tampering detection: {len(test_results)} scenarios, avg {avg_response_time:.3f}s detection")
 
 
 if __name__ == "__main__":

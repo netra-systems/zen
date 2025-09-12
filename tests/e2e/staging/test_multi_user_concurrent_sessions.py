@@ -60,7 +60,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
     @pytest.mark.staging
     async def test_concurrent_users_different_agents(self, real_services, real_llm):
         """Test multiple users running different agents concurrently."""
-        self.logger.info("🚀 Starting Concurrent Users Different Agents E2E Test")
+        self.logger.info("[U+1F680] Starting Concurrent Users Different Agents E2E Test")
         
         # Create 3 different users
         users = await self.create_test_users(3)
@@ -87,7 +87,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         async def run_user_session(user_idx: int, token: str, user_data: Dict, request_config: Dict):
             """Run a single user session."""
             session_id = f"user-{user_idx}-{uuid.uuid4().hex[:6]}"
-            self.logger.info(f"🔄 Starting session {session_id} for {user_data['email']}")
+            self.logger.info(f" CYCLE:  Starting session {session_id} for {user_data['email']}")
             
             try:
                 # Connect WebSocket with user authentication
@@ -144,7 +144,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
                 final_event = next(e for e in reversed(events) if e["type"] == "agent_completed")
                 result = final_event["data"]["result"]
                 
-                self.logger.info(f"✅ Session {session_id} completed successfully")
+                self.logger.info(f" PASS:  Session {session_id} completed successfully")
                 
                 return {
                     "user_idx": user_idx,
@@ -157,7 +157,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
                 }
                 
             except Exception as e:
-                self.logger.error(f"❌ Session {session_id} failed: {e}")
+                self.logger.error(f" FAIL:  Session {session_id} failed: {e}")
                 raise
         
         # Run all user sessions concurrently
@@ -183,7 +183,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         agents_used = [r["agent"] for r in successful_results] 
         assert len(set(agents_used)) == 3, "Users should have used different agents"
         
-        self.logger.info("✅ Concurrent Users Different Agents E2E Test completed")
+        self.logger.info(" PASS:  Concurrent Users Different Agents E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -191,7 +191,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
     @pytest.mark.staging
     async def test_concurrent_users_same_agent(self, real_services, real_llm):
         """Test multiple users using the same agent type concurrently."""
-        self.logger.info("🚀 Starting Concurrent Users Same Agent E2E Test")
+        self.logger.info("[U+1F680] Starting Concurrent Users Same Agent E2E Test")
         
         # Create 3 users
         users = await self.create_test_users(3)
@@ -261,7 +261,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
                 }
                 
             except Exception as e:
-                self.logger.error(f"❌ Cost optimizer session for user {user_idx} failed: {e}")
+                self.logger.error(f" FAIL:  Cost optimizer session for user {user_idx} failed: {e}")
                 raise
         
         # Run concurrent sessions
@@ -278,7 +278,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         providers = [r["provider"] for r in successful_results]
         assert len(set(providers)) == 3, "Each user should have different provider context"
         
-        self.logger.info("✅ Concurrent Users Same Agent E2E Test completed")
+        self.logger.info(" PASS:  Concurrent Users Same Agent E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -286,7 +286,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
     @pytest.mark.staging
     async def test_user_isolation_boundary_enforcement(self, real_services, real_llm):
         """Test that users cannot access each other's data or sessions."""
-        self.logger.info("🚀 Starting User Isolation Boundary Enforcement E2E Test")
+        self.logger.info("[U+1F680] Starting User Isolation Boundary Enforcement E2E Test")
         
         # Create 2 users
         users = await self.create_test_users(2)
@@ -411,14 +411,14 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         # Validate isolation - different thread IDs
         assert thread_id_a != thread_id_b, "Users should have separate threads"
         
-        self.logger.info("✅ User Isolation Boundary Enforcement E2E Test completed")
+        self.logger.info(" PASS:  User Isolation Boundary Enforcement E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services  
     @pytest.mark.staging
     async def test_shared_resource_handling(self, real_services):
         """Test how shared resources (DB connections, Redis) handle concurrent users."""
-        self.logger.info("🚀 Starting Shared Resource Handling E2E Test")
+        self.logger.info("[U+1F680] Starting Shared Resource Handling E2E Test")
         
         # Create 4 users to stress shared resources
         users = await self.create_test_users(4)
@@ -467,7 +467,7 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
                 return {"user_idx": user_idx, "status": "success"}
                 
             except Exception as e:
-                self.logger.error(f"❌ User {user_idx} load test failed: {e}")
+                self.logger.error(f" FAIL:  User {user_idx} load test failed: {e}")
                 return {"user_idx": user_idx, "status": "error", "error": str(e)}
         
         # Run concurrent load from all users
@@ -480,14 +480,14 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         # At least 3 out of 4 users should succeed (allows for some resource contention)
         assert successful_users >= 3, f"Shared resource handling failed - only {successful_users}/4 users succeeded"
         
-        self.logger.info(f"✅ Shared Resource Handling Test - {successful_users}/4 users successful")
+        self.logger.info(f" PASS:  Shared Resource Handling Test - {successful_users}/4 users successful")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_websocket_connection_management(self, real_services):
         """Test WebSocket connection management with multiple concurrent users."""
-        self.logger.info("🚀 Starting WebSocket Connection Management E2E Test")
+        self.logger.info("[U+1F680] Starting WebSocket Connection Management E2E Test")
         
         # Create 5 users for WebSocket stress testing
         users = await self.create_test_users(5)
@@ -556,14 +556,14 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         total_connections = sum(r.get("connections", 0) for r in successful_connections)
         assert total_connections >= 8, "Should handle multiple connections per user"
         
-        self.logger.info(f"✅ WebSocket Connection Management - {len(successful_connections)}/5 users, {total_connections} total connections")
+        self.logger.info(f" PASS:  WebSocket Connection Management - {len(successful_connections)}/5 users, {total_connections} total connections")
     
     @pytest.mark.e2e 
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_user_session_lifecycle(self, real_services):
         """Test complete user session lifecycle with authentication."""
-        self.logger.info("🚀 Starting User Session Lifecycle E2E Test")
+        self.logger.info("[U+1F680] Starting User Session Lifecycle E2E Test")
         
         # Create a user for session testing
         token, user_data = await create_authenticated_user(
@@ -648,4 +648,4 @@ class TestMultiUserConcurrentSessions(BaseE2ETest):
         assert "agent_started" in followup_event_types, "Session continuation should work"
         assert "agent_completed" in followup_event_types, "Session should handle followup"
         
-        self.logger.info("✅ User Session Lifecycle E2E Test completed")
+        self.logger.info(" PASS:  User Session Lifecycle E2E Test completed")

@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Proper data modeling enables scalable user management and AI optimization features
 
 This test suite validates Database Models as the SINGLE SOURCE OF TRUTH for data structure.
-Critical for golden path: user accounts → conversation data → agent execution → business insights.
+Critical for golden path: user accounts  ->  conversation data  ->  agent execution  ->  business insights.
 
 SSOT Compliance:
 - Tests the ONLY definitions for core business data structures
@@ -55,7 +55,7 @@ class TestUserModelsSSO:
         """Test User model structure and field definitions.
         
         BVJ: Ensures user data structure supports all business requirements.
-        Golden Path: User registration → profile management → subscription handling.
+        Golden Path: User registration  ->  profile management  ->  subscription handling.
         """
         # Test User model field structure
         user_fields = User.__table__.columns.keys()
@@ -132,7 +132,7 @@ class TestUserModelsSSO:
         """Test User model authentication field handling for security.
         
         BVJ: Ensures authentication data is properly structured for security.
-        Golden Path: Authentication service integration → secure password handling.
+        Golden Path: Authentication service integration  ->  secure password handling.
         """
         # Test hashed_password field is optional (managed by auth service)
         hashed_password_column = User.__table__.columns['hashed_password']
@@ -149,7 +149,7 @@ class TestUserModelsSSO:
         """Test User model billing and subscription field structure.
         
         BVJ: Enables subscription management and revenue tracking.
-        Golden Path: User subscription → plan management → billing operations.
+        Golden Path: User subscription  ->  plan management  ->  billing operations.
         """
         user_table = User.__table__
         
@@ -180,7 +180,7 @@ class TestUserModelsSSO:
         """Test User model relationships with other entities.
         
         BVJ: Ensures proper data relationships for business operations.
-        Golden Path: User → secrets/transactions/subscriptions → business functionality.
+        Golden Path: User  ->  secrets/transactions/subscriptions  ->  business functionality.
         """
         # Test User model has expected relationships
         assert hasattr(User, 'secrets')
@@ -209,7 +209,7 @@ class TestSecretModelSSO:
         """Test Secret model structure for user secrets.
         
         BVJ: Enables secure storage of user API keys and sensitive data.
-        Golden Path: User secrets → encrypted storage → secure API access.
+        Golden Path: User secrets  ->  encrypted storage  ->  secure API access.
         """
         secret_fields = Secret.__table__.columns.keys()
         
@@ -232,7 +232,7 @@ class TestSecretModelSSO:
         """Test Secret model relationships with User.
         
         BVJ: Ensures proper relationship between users and their secrets.
-        Golden Path: User management → secret access → API integration.
+        Golden Path: User management  ->  secret access  ->  API integration.
         """
         # Test Secret has user relationship
         assert hasattr(Secret, 'user')
@@ -245,7 +245,7 @@ class TestSecretModelSSO:
         """Test Secret model security field handling.
         
         BVJ: Ensures secrets are stored securely with encryption.
-        Golden Path: Secret encryption → secure storage → protected user data.
+        Golden Path: Secret encryption  ->  secure storage  ->  protected user data.
         """
         # Verify encrypted_value field exists (should store encrypted data)
         encrypted_value_column = Secret.__table__.columns['encrypted_value']
@@ -266,7 +266,7 @@ class TestToolUsageLogModelSSO:
         """Test ToolUsageLog model structure for usage analytics.
         
         BVJ: Enables usage tracking for billing and optimization insights.
-        Golden Path: Tool usage → usage analytics → billing calculations.
+        Golden Path: Tool usage  ->  usage analytics  ->  billing calculations.
         """
         log_fields = ToolUsageLog.__table__.columns.keys()
         
@@ -289,7 +289,7 @@ class TestToolUsageLogModelSSO:
         """Test ToolUsageLog model indexing for performance.
         
         BVJ: Ensures fast queries for usage analytics and billing.
-        Golden Path: Usage data → fast aggregation → billing reports.
+        Golden Path: Usage data  ->  fast aggregation  ->  billing reports.
         """
         # Verify indexed fields for performance
         tool_name_column = ToolUsageLog.__table__.columns['tool_name']
@@ -309,7 +309,7 @@ class TestToolUsageLogModelSSO:
         """Test ToolUsageLog model data types for accurate analytics.
         
         BVJ: Ensures accurate usage tracking for business intelligence.
-        Golden Path: Accurate metrics → business insights → optimization decisions.
+        Golden Path: Accurate metrics  ->  business insights  ->  optimization decisions.
         """
         # Verify numeric fields have proper types
         execution_time_column = ToolUsageLog.__table__.columns['execution_time_ms']
@@ -340,7 +340,7 @@ class TestAgentModelsSSO:
         """Test Assistant model structure for AI assistants.
         
         BVJ: Enables AI assistant management for core platform functionality.
-        Golden Path: Assistant creation → configuration → user interactions.
+        Golden Path: Assistant creation  ->  configuration  ->  user interactions.
         """
         assistant_fields = Assistant.__table__.columns.keys()
         
@@ -361,7 +361,7 @@ class TestAgentModelsSSO:
         """Test Assistant model default values.
         
         BVJ: Ensures consistent assistant creation with proper defaults.
-        Golden Path: Assistant initialization → default configuration → ready for use.
+        Golden Path: Assistant initialization  ->  default configuration  ->  ready for use.
         """
         # Verify default values
         object_column = Assistant.__table__.columns['object']
@@ -378,7 +378,7 @@ class TestAgentModelsSSO:
         """Test Thread model structure for conversation threads.
         
         BVJ: Enables conversation management for chat functionality.
-        Golden Path: Thread creation → message storage → conversation history.
+        Golden Path: Thread creation  ->  message storage  ->  conversation history.
         """
         thread_fields = Thread.__table__.columns.keys()
         
@@ -398,7 +398,7 @@ class TestAgentModelsSSO:
         """Test Thread model relationships with messages and runs.
         
         BVJ: Ensures proper conversation data relationships.
-        Golden Path: Thread → messages → agent runs → complete conversation context.
+        Golden Path: Thread  ->  messages  ->  agent runs  ->  complete conversation context.
         """
         # Test Thread has expected relationships
         assert hasattr(Thread, 'messages')
@@ -415,7 +415,7 @@ class TestAgentModelsSSO:
         """Test Message model structure for conversation messages.
         
         BVJ: Enables message storage for chat functionality - 90% of platform value.
-        Golden Path: User message → message storage → agent response → conversation flow.
+        Golden Path: User message  ->  message storage  ->  agent response  ->  conversation flow.
         """
         message_fields = Message.__table__.columns.keys()
         
@@ -443,7 +443,7 @@ class TestAgentModelsSSO:
         """Test Message model foreign key relationships.
         
         BVJ: Ensures proper message relationships for data integrity.
-        Golden Path: Message → thread/assistant/run relationships → complete context.
+        Golden Path: Message  ->  thread/assistant/run relationships  ->  complete context.
         """
         # Verify foreign key relationships
         thread_id_column = Message.__table__.columns['thread_id']
@@ -466,7 +466,7 @@ class TestAgentModelsSSO:
         """Test Run model structure for agent execution runs.
         
         BVJ: Enables agent execution tracking for optimization and reliability.
-        Golden Path: Agent execution → run tracking → performance optimization.
+        Golden Path: Agent execution  ->  run tracking  ->  performance optimization.
         """
         run_fields = Run.__table__.columns.keys()
         
@@ -509,7 +509,7 @@ class TestAgentModelsSSO:
         """Test Run model relationships for complete execution context.
         
         BVJ: Ensures complete agent execution tracking and context.
-        Golden Path: Run → thread/assistant/messages/steps → complete execution visibility.
+        Golden Path: Run  ->  thread/assistant/messages/steps  ->  complete execution visibility.
         """
         # Test Run has expected relationships
         assert hasattr(Run, 'thread')
@@ -532,7 +532,7 @@ class TestAgentModelsSSO:
         """Test Step model structure for detailed execution steps.
         
         BVJ: Enables detailed agent execution tracking for debugging and optimization.
-        Golden Path: Agent steps → detailed tracking → performance insights.
+        Golden Path: Agent steps  ->  detailed tracking  ->  performance insights.
         """
         step_fields = Step.__table__.columns.keys()
         
@@ -568,7 +568,7 @@ class TestApexOptimizerModelsSSO:
         """Test ApexOptimizerAgentRun model structure.
         
         BVJ: Enables tracking of AI optimization runs for business value measurement.
-        Golden Path: Optimization execution → run tracking → business impact analysis.
+        Golden Path: Optimization execution  ->  run tracking  ->  business impact analysis.
         """
         run_fields = ApexOptimizerAgentRun.__table__.columns.keys()
         
@@ -590,7 +590,7 @@ class TestApexOptimizerModelsSSO:
         """Test ApexOptimizerAgentRunReport model structure.
         
         BVJ: Enables storage of optimization reports for business insights.
-        Golden Path: Optimization results → report generation → business recommendations.
+        Golden Path: Optimization results  ->  report generation  ->  business recommendations.
         """
         report_fields = ApexOptimizerAgentRunReport.__table__.columns.keys()
         
@@ -610,7 +610,7 @@ class TestApexOptimizerModelsSSO:
         """Test Apex Optimizer models data types for proper storage.
         
         BVJ: Ensures accurate optimization data storage for business analysis.
-        Golden Path: Optimization data → accurate storage → reliable business insights.
+        Golden Path: Optimization data  ->  accurate storage  ->  reliable business insights.
         """
         # Test ApexOptimizerAgentRun data types
         step_input_column = ApexOptimizerAgentRun.__table__.columns['step_input']
@@ -639,7 +639,7 @@ class TestModelBusinessScenarios:
         """Test user registration data model scenario.
         
         BVJ: Core business functionality - user onboarding drives platform growth.
-        Golden Path: User registration → profile creation → platform access.
+        Golden Path: User registration  ->  profile creation  ->  platform access.
         """
         # Create user instance for testing
         user = User(
@@ -669,7 +669,7 @@ class TestModelBusinessScenarios:
         """Test chat conversation data model scenario.
         
         BVJ: Chat conversations are 90% of platform value - must be reliable.
-        Golden Path: Thread creation → messages → agent responses → conversation history.
+        Golden Path: Thread creation  ->  messages  ->  agent responses  ->  conversation history.
         """
         # Create conversation entities
         assistant = Assistant(
@@ -722,7 +722,7 @@ class TestModelBusinessScenarios:
         """Test agent execution data model scenario.
         
         BVJ: Agent execution tracking enables optimization and reliability.
-        Golden Path: Agent run → execution tracking → performance optimization.
+        Golden Path: Agent run  ->  execution tracking  ->  performance optimization.
         """
         # Create agent execution entities
         run = Run(
@@ -763,7 +763,7 @@ class TestModelBusinessScenarios:
         """Test AI optimization tracking data model scenario.
         
         BVJ: Optimization tracking enables business value measurement and improvement.
-        Golden Path: Optimization execution → tracking → business impact analysis.
+        Golden Path: Optimization execution  ->  tracking  ->  business impact analysis.
         """
         # Create optimization tracking entities
         optimizer_run = ApexOptimizerAgentRun(
@@ -794,7 +794,7 @@ class TestModelBusinessScenarios:
         """Test user analytics and billing data model scenario.
         
         BVJ: Usage analytics enable billing accuracy and business optimization.
-        Golden Path: Tool usage → analytics tracking → billing calculations.
+        Golden Path: Tool usage  ->  analytics tracking  ->  billing calculations.
         """
         # Create analytics and billing entities
         usage_log = ToolUsageLog(
@@ -827,7 +827,7 @@ class TestModelBusinessScenarios:
         """Test data model relationships and referential integrity.
         
         BVJ: Ensures data consistency for reliable business operations.
-        Golden Path: Related data → referential integrity → consistent business state.
+        Golden Path: Related data  ->  referential integrity  ->  consistent business state.
         """
         # Test User-Secret relationship
         user = User(id="user_606", email="user@example.com")
@@ -890,7 +890,7 @@ class TestModelSSotIntegration:
         """Test model table creation with real database.
         
         BVJ: Validates models work with actual database constraints.
-        Golden Path: Models → database schema → production reliability.
+        Golden Path: Models  ->  database schema  ->  production reliability.
         """
         try:
             # Create in-memory SQLite database for testing
@@ -919,7 +919,7 @@ class TestModelSSotIntegration:
         """Test model CRUD operations with real database constraints.
         
         BVJ: Validates models handle real database operations correctly.
-        Golden Path: Model operations → database persistence → business data reliability.
+        Golden Path: Model operations  ->  database persistence  ->  business data reliability.
         """
         try:
             # Create in-memory SQLite database for testing

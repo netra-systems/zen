@@ -93,7 +93,7 @@ class TestOAuthSSOTMigration:
             assert client_id == self.test_oauth_credentials["client_id"], \
                 f"Individual OAuth client ID method should work. Got: {client_id}"
             
-            logger.info("✅ OAuth functionality preserved after SSOT migration")
+            logger.info(" PASS:  OAuth functionality preserved after SSOT migration")
             
         except Exception as e:
             pytest.fail(f"OAuth functionality broken after SSOT migration: {e}")
@@ -136,11 +136,11 @@ class TestOAuthSSOTMigration:
         # Test OAuth configuration validation
         try:
             validator.validate_all_requirements()
-            logger.info("✅ OAuth configuration validation passed with SSOT")
+            logger.info(" PASS:  OAuth configuration validation passed with SSOT")
         except Exception as e:
             pytest.fail(f"OAuth configuration validation failed with SSOT: {e}")
         
-        logger.info("✅ OAuth configuration consistency maintained with SSOT")
+        logger.info(" PASS:  OAuth configuration consistency maintained with SSOT")
     
     def test_oauth_error_messages_improved(self):
         """
@@ -186,7 +186,7 @@ class TestOAuthSSOTMigration:
         assert len(client_id_error) > 0, \
             "OAuth client ID error should provide meaningful message"
         
-        logger.info("✅ OAuth error messages are clear and actionable with SSOT")
+        logger.info(" PASS:  OAuth error messages are clear and actionable with SSOT")
     
     def test_oauth_validation_behavior_consistency(self):
         """
@@ -220,7 +220,7 @@ class TestOAuthSSOTMigration:
         assert actual_client_id == oauth_creds["client_id"], \
             f"Environment-specific OAuth loading should work. Expected var: {expected_client_id_var}"
         
-        logger.info("✅ OAuth validation behavior is consistent across scenarios")
+        logger.info(" PASS:  OAuth validation behavior is consistent across scenarios")
     
     def test_oauth_integration_compatibility(self):
         """
@@ -257,7 +257,7 @@ class TestOAuthSSOTMigration:
         assert oauth_creds2 == oauth_creds, \
             "Multiple validator instances should return consistent results"
         
-        logger.info("✅ OAuth SSOT integration is compatible with existing service patterns")
+        logger.info(" PASS:  OAuth SSOT integration is compatible with existing service patterns")
     
     def test_oauth_environment_migration_safety(self):
         """
@@ -297,7 +297,7 @@ class TestOAuthSSOTMigration:
         assert oauth_creds["client_secret"] == expected_client_secret, \
             f"OAuth client secret should use environment-specific variable"
         
-        logger.info("✅ OAuth environment variable migration is safe")
+        logger.info(" PASS:  OAuth environment variable migration is safe")
     
     def test_oauth_validation_performance_maintained(self):
         """
@@ -341,7 +341,7 @@ class TestOAuthSSOTMigration:
         assert individual_time < 1.0, \
             f"Individual OAuth method calls should be fast. Took: {individual_time}s"
         
-        logger.info(f"✅ OAuth validation performance maintained: {total_time}s for 10 calls")
+        logger.info(f" PASS:  OAuth validation performance maintained: {total_time}s for 10 calls")
 
 
 def test_oauth_migration_validation_capability():
@@ -365,7 +365,7 @@ def test_oauth_migration_validation_capability():
         environment = validator.get_environment()
         assert environment == Environment.TEST, "Test should detect TEST environment"
         
-        logger.info("✅ OAuth migration validation test capability verified")
+        logger.info(" PASS:  OAuth migration validation test capability verified")
         
     finally:
         test_instance.teardown_method()
@@ -374,4 +374,4 @@ def test_oauth_migration_validation_capability():
 if __name__ == "__main__":
     # Run the meta-test to verify capability
     test_oauth_migration_validation_capability()
-    print("✅ OAuth SSOT migration tests created and capability verified!")
+    print(" PASS:  OAuth SSOT migration tests created and capability verified!")

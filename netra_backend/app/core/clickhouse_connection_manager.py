@@ -189,11 +189,11 @@ class ClickHouseConnectionManager:
             success = await self._connect_with_retry()
             if success:
                 self.connection_health.state = ConnectionState.HEALTHY
-                logger.info("[ClickHouse Connection Manager] ✅ Initialization successful")
+                logger.info("[ClickHouse Connection Manager]  PASS:  Initialization successful")
                 return True
             else:
                 self.connection_health.state = ConnectionState.FAILED
-                logger.error("[ClickHouse Connection Manager] ❌ Initialization failed after all retries")
+                logger.error("[ClickHouse Connection Manager]  FAIL:  Initialization failed after all retries")
                 return False
                 
         except Exception as e:
@@ -227,7 +227,7 @@ class ClickHouseConnectionManager:
                     delay = min(base_delay, self.retry_config.max_delay)
                     
                     if self.retry_config.jitter:
-                        # Add random jitter (±20%)
+                        # Add random jitter ( +/- 20%)
                         jitter = delay * 0.2 * (2 * random.random() - 1)
                         delay += jitter
                     
@@ -250,7 +250,7 @@ class ClickHouseConnectionManager:
                     self.connection_health.last_error = None
                     self.metrics["successful_connections"] += 1
                     
-                    logger.info(f"[ClickHouse Connection Manager] ✅ Connection successful on attempt {attempt + 1}")
+                    logger.info(f"[ClickHouse Connection Manager]  PASS:  Connection successful on attempt {attempt + 1}")
                     return True
                 
             except asyncio.TimeoutError as e:
@@ -268,7 +268,7 @@ class ClickHouseConnectionManager:
         self.connection_health.state = ConnectionState.FAILED
         self.metrics["failed_connections"] += 1
         
-        logger.error(f"[ClickHouse Connection Manager] ❌ Connection failed after {self.retry_config.max_retries + 1} attempts")
+        logger.error(f"[ClickHouse Connection Manager]  FAIL:  Connection failed after {self.retry_config.max_retries + 1} attempts")
         return False
     
     def _record_connection_failure(self, error_msg: str):
@@ -710,23 +710,23 @@ async def initialize_clickhouse_with_retry() -> bool:
             # Validate service dependencies
             validation = await manager.validate_service_dependencies()
             if validation["overall_health"]:
-                logger.info("[ClickHouse Startup] ✅ Dependency validation successful")
+                logger.info("[ClickHouse Startup]  PASS:  Dependency validation successful")
                 
                 # Ensure analytics consistency
                 consistency = await manager.ensure_analytics_consistency()
                 if consistency["overall_consistent"]:
-                    logger.info("[ClickHouse Startup] ✅ Analytics consistency validated")
+                    logger.info("[ClickHouse Startup]  PASS:  Analytics consistency validated")
                 else:
-                    logger.warning(f"[ClickHouse Startup] ⚠ Analytics consistency issues: {consistency['errors']}")
+                    logger.warning(f"[ClickHouse Startup]  WARNING:  Analytics consistency issues: {consistency['errors']}")
                 
                 return True
             else:
-                logger.error(f"[ClickHouse Startup] ❌ Dependency validation failed: {validation['errors']}")
+                logger.error(f"[ClickHouse Startup]  FAIL:  Dependency validation failed: {validation['errors']}")
                 return False
         else:
-            logger.error("[ClickHouse Startup] ❌ Connection manager initialization failed")
+            logger.error("[ClickHouse Startup]  FAIL:  Connection manager initialization failed")
             return False
             
     except Exception as e:
-        logger.error(f"[ClickHouse Startup] ❌ Initialization error: {e}")
+        logger.error(f"[ClickHouse Startup]  FAIL:  Initialization error: {e}")
         return False

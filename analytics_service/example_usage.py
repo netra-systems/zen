@@ -136,7 +136,7 @@ async def process_sample_events(processor):
     
     for i, event in enumerate(events, 1):
         success = await processor.process_event(event)
-        logger.info(f"Event {i}/3 processed: {'✓' if success else '✗'}")
+        logger.info(f"Event {i}/3 processed: {'[U+2713]' if success else '[U+2717]'}")
     
     # Wait for batch processing
     await asyncio.sleep(2)

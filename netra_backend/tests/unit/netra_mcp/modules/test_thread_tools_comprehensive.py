@@ -531,7 +531,7 @@ class TestThreadToolsComprehensive(BaseTestCase):
         self.thread_tools.register_all(self.mock_server)
         
         # Verify tools are registered correctly each time
-        self.assertEqual(self.mock_mcp_instance.tool.call_count, 4)  # 2 tools × 2 registrations
+        self.assertEqual(self.mock_mcp_instance.tool.call_count, 4)  # 2 tools  x  2 registrations
     
     def test_thread_tools_with_different_mcp_instances(self):
         """Test ThreadTools with different MCP instances."""

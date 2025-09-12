@@ -319,7 +319,7 @@ class StartupFixesIntegration:
                         logger.info(f"Background task timeout properly configured: {timeout}s")
                         self.fixes_applied.add("background_task_timeout")
                     else:
-                        logger.warning(f"Background task timeout may be too high: {timeout}s (recommended: ≤120s)")
+                        logger.warning(f"Background task timeout may be too high: {timeout}s (recommended:  <= 120s)")
                         # Still consider it a success, but with warning
                         status["timeout_acceptable"] = True
                         self.fixes_applied.add("background_task_timeout")
@@ -899,7 +899,7 @@ class StartupFixesIntegration:
         status_lines = [
             f"Startup Fixes Status: {applied_count}/{total_fixes} applied",
             "",
-            "✅ Applied fixes:"
+            " PASS:  Applied fixes:"
         ]
         
         fix_descriptions = {
@@ -911,16 +911,16 @@ class StartupFixesIntegration:
         }
         
         for fix_key in self.fixes_applied:
-            status_lines.append(f"  • {fix_descriptions.get(fix_key, fix_key)}")
+            status_lines.append(f"  [U+2022] {fix_descriptions.get(fix_key, fix_key)}")
         
         missing_fixes = set(fix_descriptions.keys()) - self.fixes_applied
         if missing_fixes:
             status_lines.extend([
                 "",
-                "❌ Missing fixes:"
+                " FAIL:  Missing fixes:"
             ])
             for fix_key in missing_fixes:
-                status_lines.append(f"  • {fix_descriptions.get(fix_key, fix_key)}")
+                status_lines.append(f"  [U+2022] {fix_descriptions.get(fix_key, fix_key)}")
         
         return "\n".join(status_lines)
 

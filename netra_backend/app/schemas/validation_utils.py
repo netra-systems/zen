@@ -3,7 +3,7 @@ Validation utilities for schema operations.
 
 Provides common validation functions to ensure all schema validators
 follow the 25-line function limit while maintaining consistency.
-Maximum 300 lines per conventions.xml, each function ≤8 lines.
+Maximum 300 lines per conventions.xml, each function  <= 8 lines.
 """
 
 from datetime import UTC, datetime
@@ -156,7 +156,7 @@ def _find_missing_keys(value: Dict[str, Any], required_keys: List[str]) -> List[
     return [key for key in required_keys if key not in value]
 
 
-# Type conversion utilities (≤8 lines each)
+# Type conversion utilities ( <= 8 lines each)
 
 def safe_str_to_int(value: str, default: int = 0) -> int:
     """Safely convert string to integer."""
@@ -219,7 +219,7 @@ def _build_default_metadata_dict() -> Dict[str, Any]:
     return {'created_at': timestamp, 'version': '1.0', 'source': 'schema_validation'}
 
 
-# Collection utilities (≤8 lines each)
+# Collection utilities ( <= 8 lines each)
 
 def merge_dicts_safe(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
     """Safely merge two dictionaries."""

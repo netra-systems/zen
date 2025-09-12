@@ -1024,13 +1024,13 @@ class TestAgentRegistryWebSocketBridge(BaseIntegrationTest):
         
         print(f"\nCRITICAL GAPS REQUIRING IMMEDIATE ATTENTION: {len(critical_gaps)}")
         for gap in critical_gaps:
-            print(f"  🚨 {gap.component}: {gap.business_impact}")
+            print(f"   ALERT:  {gap.component}: {gap.business_impact}")
             print(f"     Gap: {gap.gap_type}")
             print(f"     Error: {gap.error_message}")
         
         print(f"\nHIGH SEVERITY GAPS: {len(high_severity_gaps)}")
         for gap in high_severity_gaps:
-            print(f"  ⚠️  {gap.component}: {gap.business_impact}")
+            print(f"   WARNING: [U+FE0F]  {gap.component}: {gap.business_impact}")
             print(f"     Gap: {gap.gap_type}")
         
         print(f"\nEXPECTED vs UNEXPECTED GAPS:")
@@ -1138,13 +1138,13 @@ if __name__ == "__main__":
             # Generate analysis report
             report = await test_instance.test_agent_registry_integration_gap_analysis()
             
-            print(f"✅ Agent Registry integration gap testing completed")
-            print(f"   → {report['total_gaps']} integration gaps captured")
-            print(f"   → {report['critical_gaps']} critical gaps requiring immediate attention")
-            print(f"   → {report['expected_gaps']} expected gaps successfully exposed")
+            print(f" PASS:  Agent Registry integration gap testing completed")
+            print(f"    ->  {report['total_gaps']} integration gaps captured")
+            print(f"    ->  {report['critical_gaps']} critical gaps requiring immediate attention")
+            print(f"    ->  {report['expected_gaps']} expected gaps successfully exposed")
             
         except Exception as e:
-            print(f"✗ Agent Registry integration gap testing encountered issues: {e}")
+            print(f"[U+2717] Agent Registry integration gap testing encountered issues: {e}")
             raise
     
     # Run tests if executed directly

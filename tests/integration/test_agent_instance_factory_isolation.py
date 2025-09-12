@@ -654,7 +654,7 @@
                                     # REMOVED_SYNTAX_ERROR: assert final_metrics['total_instances_created'] >= len(all_results)
                                     # REMOVED_SYNTAX_ERROR: assert final_metrics['total_contexts_cleaned'] >= len(all_results)
 
-                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ CONCURRENT ISOLATION TEST PASSED - Complete user isolation verified under load")
+                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  CONCURRENT ISOLATION TEST PASSED - Complete user isolation verified under load")
 
                                     # Removed problematic line: @pytest.mark.asyncio
                                     # Removed problematic line: async def test_database_session_isolation_under_load(self, configured_factory, session_factory):
@@ -712,7 +712,7 @@
             # REMOVED_SYNTAX_ERROR: for result in results:
                 # REMOVED_SYNTAX_ERROR: assert result['data_count'] == 1, "formatted_string"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ DATABASE SESSION ISOLATION VERIFIED under concurrent load")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  DATABASE SESSION ISOLATION VERIFIED under concurrent load")
 
 
 # REMOVED_SYNTAX_ERROR: class TestResourceCleanupPrevention:
@@ -751,7 +751,7 @@
                     # REMOVED_SYNTAX_ERROR: assert metrics_after_cleanup['active_contexts'] == initial_active_contexts
                     # REMOVED_SYNTAX_ERROR: assert metrics_after_cleanup['total_contexts_cleaned'] >= 10
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ MEMORY LEAK PREVENTION VERIFIED - All contexts properly cleaned up")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  MEMORY LEAK PREVENTION VERIFIED - All contexts properly cleaned up")
 
                     # Removed problematic line: @pytest.mark.asyncio
                     # Removed problematic line: async def test_inactive_context_cleanup(self, configured_factory, session_factory):
@@ -888,7 +888,7 @@
 
             # COMPREHENSIVE ISOLATION ANALYSIS
 
-            # REMOVED_SYNTAX_ERROR: logger.info("🔍 Analyzing isolation results...")
+            # REMOVED_SYNTAX_ERROR: logger.info(" SEARCH:  Analyzing isolation results...")
 
             # 1. Verify each user only accessed their own data
             # REMOVED_SYNTAX_ERROR: for result in results:
@@ -917,7 +917,7 @@
                 # Cleanup
                 # REMOVED_SYNTAX_ERROR: await engine.dispose()
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ COMPREHENSIVE END-TO-END ISOLATION TEST PASSED")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  COMPREHENSIVE END-TO-END ISOLATION TEST PASSED")
                 # REMOVED_SYNTAX_ERROR: logger.info("   - Database isolation verified")
                 # REMOVED_SYNTAX_ERROR: logger.info("   - Agent instance isolation verified")
                 # REMOVED_SYNTAX_ERROR: logger.info("   - WebSocket emitter isolation verified")
@@ -926,15 +926,15 @@
 
                 # REMOVED_SYNTAX_ERROR: print(" )
                 # REMOVED_SYNTAX_ERROR: " + "="*80)
-                # REMOVED_SYNTAX_ERROR: print("🎉 AGENT INSTANCE FACTORY ISOLATION VALIDATION COMPLETE 🎉")
+                # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  AGENT INSTANCE FACTORY ISOLATION VALIDATION COMPLETE  CELEBRATION: ")
                 # REMOVED_SYNTAX_ERROR: print("="*80)
-                # REMOVED_SYNTAX_ERROR: print("✅ UserExecutionContext provides complete per-request isolation")
-                # REMOVED_SYNTAX_ERROR: print("✅ AgentInstanceFactory creates properly isolated agent instances")
-                # REMOVED_SYNTAX_ERROR: print("✅ WebSocket emitters are bound to specific users")
-                # REMOVED_SYNTAX_ERROR: print("✅ Database sessions are completely isolated per request")
-                # REMOVED_SYNTAX_ERROR: print("✅ No shared state exists between concurrent users")
-                # REMOVED_SYNTAX_ERROR: print("✅ Resource cleanup prevents memory leaks")
-                # REMOVED_SYNTAX_ERROR: print("✅ System is ready for safe multi-user production deployment")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  UserExecutionContext provides complete per-request isolation")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  AgentInstanceFactory creates properly isolated agent instances")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket emitters are bound to specific users")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Database sessions are completely isolated per request")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  No shared state exists between concurrent users")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Resource cleanup prevents memory leaks")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  System is ready for safe multi-user production deployment")
                 # REMOVED_SYNTAX_ERROR: print("="*80)
 
 

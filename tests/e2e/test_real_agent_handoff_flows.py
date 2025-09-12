@@ -349,7 +349,7 @@ class RealAgentHandoffFlowsTester:
             )
             
             handoff_tracker[handoff_id] = handoff_trace
-            logger.info(f"Handoff initiated: {from_agent} → {to_agent}")
+            logger.info(f"Handoff initiated: {from_agent}  ->  {to_agent}")
             
         elif event_type == "handoff_completed":
             # Update handoff trace
@@ -366,7 +366,7 @@ class RealAgentHandoffFlowsTester:
                     trace.data_preserved = handoff_data.get("data_preserved", False)
                     trace.context_maintained = handoff_data.get("context_maintained", False)
                     
-                    logger.info(f"Handoff completed: {trace.from_agent} → {trace.to_agent} ({trace.duration:.2f}s)")
+                    logger.info(f"Handoff completed: {trace.from_agent}  ->  {trace.to_agent} ({trace.duration:.2f}s)")
                     break
                     
         elif event_type == "workflow_data":
@@ -483,14 +483,14 @@ class RealAgentHandoffFlowsTester:
             report.append(f"Event types: {sorted(val.event_types_seen)}")
             
             # Agent execution sequence
-            report.append(f"Agent sequence: {' → '.join(val.agent_sequence)}")
+            report.append(f"Agent sequence: {'  ->  '.join(val.agent_sequence)}")
             
             # Check for REQUIRED WebSocket events (aggregate across all agents)
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             report.append("\nPerformance Metrics:")
@@ -511,9 +511,9 @@ class RealAgentHandoffFlowsTester:
                 
                 # Individual handoff details
                 for j, handoff in enumerate(val.handoff_traces, 1):
-                    status_symbol = "✓" if handoff.success else "✗"
+                    status_symbol = "[U+2713]" if handoff.success else "[U+2717]"
                     duration_text = f"{handoff.duration:.2f}s" if handoff.duration else "N/A"
-                    report.append(f"    {j}. {status_symbol} {handoff.from_agent} → {handoff.to_agent} ({duration_text})")
+                    report.append(f"    {j}. {status_symbol} {handoff.from_agent}  ->  {handoff.to_agent} ({duration_text})")
                     
             # Data flow analysis
             if val.data_flow:
@@ -523,10 +523,10 @@ class RealAgentHandoffFlowsTester:
                 
             # Business logic validation
             report.append("\nBusiness Logic Validation:")
-            report.append(f"  ✓ Handoffs successful: {val.handoffs_successful}")
-            report.append(f"  ✓ Data integrity maintained: {val.data_integrity_maintained}")
-            report.append(f"  ✓ Workflow coherent: {val.workflow_coherent}")
-            report.append(f"  ✓ Final result complete: {val.final_result_complete}")
+            report.append(f"  [U+2713] Handoffs successful: {val.handoffs_successful}")
+            report.append(f"  [U+2713] Data integrity maintained: {val.data_integrity_maintained}")
+            report.append(f"  [U+2713] Workflow coherent: {val.workflow_coherent}")
+            report.append(f"  [U+2713] Final result complete: {val.final_result_complete}")
             
         report.append("\n" + "=" * 80)
         return "\n".join(report)
@@ -574,7 +574,7 @@ class TestRealAgentHandoffFlows:
         if validation.time_to_workflow_completion:
             assert validation.time_to_workflow_completion < 150.0, "Should complete within performance target"
             
-        logger.info(f"Handoff workflow agent sequence: {' → '.join(validation.agent_sequence)}")
+        logger.info(f"Handoff workflow agent sequence: {'  ->  '.join(validation.agent_sequence)}")
         
     async def test_research_to_optimization_workflow(self, handoff_flows_tester):
         """Test research to optimization agent handoff workflow."""

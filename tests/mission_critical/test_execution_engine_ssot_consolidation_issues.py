@@ -634,7 +634,7 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
     async def test_golden_path_execution_engine_integration_protected(self):
         """DESIGNED TO FAIL: Protect golden path user flow from execution engine issues.
         
-        This test validates the complete user journey: login → agent execution → response.
+        This test validates the complete user journey: login  ->  agent execution  ->  response.
         Should fail if execution engine consolidation issues break the golden path.
         
         Business Impact: $500K+ ARR dependency on reliable execution flow
@@ -642,7 +642,7 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
         golden_path_violations = []
         
         try:
-            # Simulate golden path: User login → Agent request → Execution → Response
+            # Simulate golden path: User login  ->  Agent request  ->  Execution  ->  Response
             user_id = str(uuid.uuid4())
             session_id = str(uuid.uuid4())
             connection_id = str(uuid.uuid4())

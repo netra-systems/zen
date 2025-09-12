@@ -61,7 +61,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
         self.env = IsolatedEnvironment()
         
         # Ensure we're testing the actual failure scenario
-        logger.info(f"🚨 REPRODUCTION TEST: {method.__name__} - Testing current auth failure")
+        logger.info(f" ALERT:  REPRODUCTION TEST: {method.__name__} - Testing current auth failure")
         
     def teardown_method(self, method):
         """Teardown with timing validation per CLAUDE.md requirements."""
@@ -73,7 +73,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
             "0.00s execution indicates test not actually running (CLAUDE.md violation)"
         )
         
-        logger.info(f"✅ Test {method.__name__} executed in {execution_time:.3f}s")
+        logger.info(f" PASS:  Test {method.__name__} executed in {execution_time:.3f}s")
         super().teardown_method(method)
     
     @pytest.mark.integration
@@ -88,7 +88,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
         This test demonstrates the root cause: hardcoded "system" user lacks
         proper service authentication headers required by enhanced middleware.
         """
-        logger.info("🚨 REPRODUCING: Current system user 403 authentication failure")
+        logger.info(" ALERT:  REPRODUCING: Current system user 403 authentication failure")
         
         # Track exact timing for validation
         test_start = time.time()
@@ -100,7 +100,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
                 # If we reach here, the bug is fixed (test should initially fail)
                 execution_time = time.time() - test_start
                 logger.error(
-                    f"❌ UNEXPECTED SUCCESS: Database session created with 'system' user "
+                    f" FAIL:  UNEXPECTED SUCCESS: Database session created with 'system' user "
                     f"in {execution_time:.3f}s - bug appears to be fixed"
                 )
                 
@@ -121,7 +121,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
             
             if "not authenticated" in error_message or "403" in error_message:
                 logger.info(
-                    f"✅ REPRODUCED: Expected authentication failure in {execution_time:.3f}s: {e}"
+                    f" PASS:  REPRODUCED: Expected authentication failure in {execution_time:.3f}s: {e}"
                 )
                 
                 # This is the expected failure - log for analysis
@@ -140,7 +140,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
                 
             else:
                 # Different error than expected - still a failure but different cause
-                logger.error(f"❌ UNEXPECTED ERROR: {e}")
+                logger.error(f" FAIL:  UNEXPECTED ERROR: {e}")
                 # Check if it's a greenlet/dependency error vs actual auth error
                 error_str = str(e).lower()
                 if "greenlet" in error_str or "module named" in error_str:
@@ -161,7 +161,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
         
         Expected Failure: Missing service authentication headers
         """
-        logger.info("🚨 TESTING: Dependencies system user lacks service auth headers")
+        logger.info(" ALERT:  TESTING: Dependencies system user lacks service auth headers")
         
         test_start = time.time()
         
@@ -177,7 +177,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
             
             # Validate headers are missing or invalid (demonstrating the issue)
             if not service_headers or not service_headers.get("X-Service-ID") or not service_headers.get("X-Service-Secret"):
-                logger.info("✅ REPRODUCED: Missing service authentication headers")
+                logger.info(" PASS:  REPRODUCED: Missing service authentication headers")
                 
                 self.record_metric("missing_service_auth_headers", {
                     "headers_present": bool(service_headers),
@@ -214,7 +214,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
                             )
                             
                     except Exception as deps_error:
-                        logger.info(f"✅ REPRODUCED: Dependencies don't use service auth - {deps_error}")
+                        logger.info(f" PASS:  REPRODUCED: Dependencies don't use service auth - {deps_error}")
                         raise AssertionError(
                             f"REPRODUCED: Dependencies.py fails to use available service auth: {deps_error}"
                         ) from deps_error
@@ -236,7 +236,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
         
         Expected Failure: Middleware rejection due to missing service auth
         """
-        logger.info("🚨 TESTING: Middleware rejection of system user without service auth")
+        logger.info(" ALERT:  TESTING: Middleware rejection of system user without service auth")
         
         test_start = time.time()
         
@@ -273,7 +273,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
                 })
                 
                 # This demonstrates the correct middleware behavior
-                self.logger.info("✅ REPRODUCED: Middleware correctly rejects service request without auth")
+                self.logger.info(" PASS:  REPRODUCED: Middleware correctly rejects service request without auth")
                 raise AssertionError(
                     "REPRODUCED: Middleware correctly rejects system operations without service auth headers"
                 )
@@ -311,7 +311,7 @@ class TestSystemUserAuthReproduction(SSotBaseTestCase):
         This provides diagnostic information about whether the issue is
         missing configuration or missing usage of existing configuration.
         """
-        logger.info("🔍 DIAGNOSING: Service credentials configuration status")
+        logger.info(" SEARCH:  DIAGNOSING: Service credentials configuration status")
         
         test_start = time.time()
         

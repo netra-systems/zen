@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 E2E Golden Path Real Agent Validation
 
@@ -72,10 +110,10 @@ class GoldenPathTestClient:
         
     async def connect(self, timeout: float = 15.0) -> None:
         """Connect to WebSocket with authentication."""
-        logger.info("🔌 Golden Path: Connecting WebSocket for real agent validation")
+        logger.info("[U+1F50C] Golden Path: Connecting WebSocket for real agent validation")
         self.websocket = await self.auth_helper.connect_authenticated_websocket(timeout=timeout)
         self.start_time = time.time()
-        logger.info("✅ Golden Path: WebSocket connected successfully")
+        logger.info(" PASS:  Golden Path: WebSocket connected successfully")
     
     async def send_golden_path_request(self, request_content: str) -> None:
         """Send golden path business request that should trigger real agents."""
@@ -90,7 +128,7 @@ class GoldenPathTestClient:
         }
         
         await self.websocket.send(json.dumps(request_message))
-        logger.info(f"📤 Golden Path: Sent business request: '{request_content[:50]}...'")
+        logger.info(f"[U+1F4E4] Golden Path: Sent business request: '{request_content[:50]}...'")
     
     async def receive_and_validate_events(self, timeout: float = 60.0, expected_events: int = 5) -> List[Dict[str, Any]]:
         """
@@ -101,7 +139,7 @@ class GoldenPathTestClient:
         self.events_received = []
         end_time = time.time() + timeout
         
-        logger.info(f"📨 Golden Path: Waiting for {expected_events} real agent events (timeout: {timeout}s)")
+        logger.info(f"[U+1F4E8] Golden Path: Waiting for {expected_events} real agent events (timeout: {timeout}s)")
         
         while time.time() < end_time and len(self.events_received) < expected_events:
             try:
@@ -116,28 +154,28 @@ class GoldenPathTestClient:
                 
                 if has_fallback:
                     raise AssertionError(
-                        f"🚨 GOLDEN PATH FAILURE: FALLBACK PATTERNS DETECTED\n"
+                        f" ALERT:  GOLDEN PATH FAILURE: FALLBACK PATTERNS DETECTED\n"
                         f"Event type: {event.get('type', 'unknown')}\n"
                         f"Fallback patterns: {fallback_patterns}\n"
                         f"Event content: {event_content[:200]}...\n"
                         f"BUSINESS IMPACT: User receiving mock response instead of real AI value"
                     )
                 
-                logger.info(f"✅ Golden Path: Event {len(self.events_received)}/{expected_events} - {event.get('type', 'unknown')} (real agent)")
+                logger.info(f" PASS:  Golden Path: Event {len(self.events_received)}/{expected_events} - {event.get('type', 'unknown')} (real agent)")
                 
             except asyncio.TimeoutError:
                 if len(self.events_received) >= expected_events:
                     break
                 continue
             except websockets.ConnectionClosed:
-                logger.error("🚨 Golden Path: WebSocket connection closed unexpectedly")
+                logger.error(" ALERT:  Golden Path: WebSocket connection closed unexpectedly")
                 break
         
         self.end_time = time.time()
         
         if len(self.events_received) < expected_events:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: INSUFFICIENT EVENTS\n"
+                f" ALERT:  GOLDEN PATH FAILURE: INSUFFICIENT EVENTS\n"
                 f"Expected: {expected_events}, Received: {len(self.events_received)}\n"
                 f"Events received: {[e.get('type') for e in self.events_received]}\n"
                 f"BUSINESS IMPACT: Incomplete agent workflow - users not receiving full value"
@@ -158,7 +196,7 @@ class GoldenPathTestClient:
         
         if missing_events:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: MISSING CRITICAL EVENTS\n"
+                f" ALERT:  GOLDEN PATH FAILURE: MISSING CRITICAL EVENTS\n"
                 f"Missing: {missing_events}\n"
                 f"Received: {received_event_types}\n"
                 f"BUSINESS IMPACT: Incomplete agent workflow reduces user value"
@@ -169,12 +207,12 @@ class GoldenPathTestClient:
         
         if processing_duration < 2.0:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: SUSPICIOUSLY FAST PROCESSING\n"
+                f" ALERT:  GOLDEN PATH FAILURE: SUSPICIOUSLY FAST PROCESSING\n"
                 f"Duration: {processing_duration:.2f}s (< 2.0s minimum for real agent work)\n"
                 f"BUSINESS IMPACT: Fast processing indicates mock/template responses"
             )
         
-        logger.info(f"✅ Golden Path: Real agent processing duration: {processing_duration:.2f}s")
+        logger.info(f" PASS:  Golden Path: Real agent processing duration: {processing_duration:.2f}s")
     
     def validate_final_response_business_value(self) -> None:
         """
@@ -186,7 +224,7 @@ class GoldenPathTestClient:
         
         if not completed_events:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: NO COMPLETION EVENT\n"
+                f" ALERT:  GOLDEN PATH FAILURE: NO COMPLETION EVENT\n"
                 f"BUSINESS IMPACT: Users not receiving final AI agent results"
             )
         
@@ -194,7 +232,7 @@ class GoldenPathTestClient:
         
         if len(final_response) < 50:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: INSUFFICIENT RESPONSE LENGTH\n"
+                f" ALERT:  GOLDEN PATH FAILURE: INSUFFICIENT RESPONSE LENGTH\n"
                 f"Length: {len(final_response)} chars (< 50 minimum)\n"
                 f"Response: '{final_response}'\n"
                 f"BUSINESS IMPACT: Short response indicates template/mock content"
@@ -205,7 +243,7 @@ class GoldenPathTestClient:
         
         if not has_business_value:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: NO BUSINESS VALUE DETECTED\n"
+                f" ALERT:  GOLDEN PATH FAILURE: NO BUSINESS VALUE DETECTED\n"
                 f"Response: '{final_response[:200]}...'\n"
                 f"Business patterns found: {business_patterns}\n"
                 f"BUSINESS IMPACT: Users receiving response without actionable insights"
@@ -216,13 +254,13 @@ class GoldenPathTestClient:
         
         if has_fallback:
             raise AssertionError(
-                f"🚨 GOLDEN PATH FAILURE: FALLBACK PATTERNS IN FINAL RESPONSE\n"
+                f" ALERT:  GOLDEN PATH FAILURE: FALLBACK PATTERNS IN FINAL RESPONSE\n"
                 f"Patterns: {fallback_patterns}\n"
                 f"Response: '{final_response[:200]}...'\n"
                 f"BUSINESS IMPACT: Mock content delivered to paying customer"
             )
         
-        logger.info(f"✅ Golden Path: Final response contains authentic business value ({len(final_response)} chars)")
+        logger.info(f" PASS:  Golden Path: Final response contains authentic business value ({len(final_response)} chars)")
     
     async def disconnect(self) -> None:
         """Disconnect WebSocket connection."""
@@ -270,14 +308,14 @@ class TestGoldenPathRealAgentValidation:
         CRITICAL TEST: Golden path cost optimization flow uses only real agents.
         
         This test validates the primary revenue-generating user flow:
-        User Request → Real Agent Processing → Business Value Delivery
+        User Request  ->  Real Agent Processing  ->  Business Value Delivery
         
         MUST FAIL if any fallback handlers are created during this flow.
         
         SUCCESS CRITERIA:
         - WebSocket connection established with real authentication
         - All 5 critical WebSocket events received from real agents
-        - Processing duration indicates real AI work (≥ 2 seconds)
+        - Processing duration indicates real AI work ( >=  2 seconds)
         - Final response contains authentic business insights
         - ZERO fallback patterns detected throughout flow
         
@@ -287,7 +325,7 @@ class TestGoldenPathRealAgentValidation:
         - Missing critical WebSocket events
         - Suspiciously fast processing (< 2 seconds)
         """
-        logger.info("🧪 GOLDEN PATH TEST: Cost optimization with real agents only")
+        logger.info("[U+1F9EA] GOLDEN PATH TEST: Cost optimization with real agents only")
         
         # Connect with real authentication
         await self.golden_path_client.connect(timeout=15.0)
@@ -310,7 +348,7 @@ class TestGoldenPathRealAgentValidation:
         # Validate final response business value
         self.golden_path_client.validate_final_response_business_value()
         
-        logger.success("✅ GOLDEN PATH PASSED: Cost optimization delivered via real agents only")
+        logger.success(" PASS:  GOLDEN PATH PASSED: Cost optimization delivered via real agents only")
     
     async def test_golden_path_data_analysis_real_agents_only(self):
         """
@@ -325,7 +363,7 @@ class TestGoldenPathRealAgentValidation:
         - Response contains analytical insights and recommendations
         - Processing duration indicates real analytical work
         """
-        logger.info("🧪 GOLDEN PATH TEST: Data analysis with real agents only")
+        logger.info("[U+1F9EA] GOLDEN PATH TEST: Data analysis with real agents only")
         
         await self.golden_path_client.connect(timeout=15.0)
         
@@ -343,7 +381,7 @@ class TestGoldenPathRealAgentValidation:
         self.golden_path_client.validate_golden_path_flow()
         self.golden_path_client.validate_final_response_business_value()
         
-        logger.success("✅ GOLDEN PATH PASSED: Data analysis delivered via real agents only")
+        logger.success(" PASS:  GOLDEN PATH PASSED: Data analysis delivered via real agents only")
     
     async def test_golden_path_rapid_succession_requests_no_fallbacks(self):
         """
@@ -358,7 +396,7 @@ class TestGoldenPathRealAgentValidation:
         - All requests deliver authentic business value
         - System maintains real agent quality under load
         """
-        logger.info("🧪 GOLDEN PATH TEST: Rapid succession requests with real agents only")
+        logger.info("[U+1F9EA] GOLDEN PATH TEST: Rapid succession requests with real agents only")
         
         await self.golden_path_client.connect(timeout=15.0)
         
@@ -369,7 +407,7 @@ class TestGoldenPathRealAgentValidation:
         ]
         
         for i, request in enumerate(requests, 1):
-            logger.info(f"📤 Golden Path: Processing request {i}/{len(requests)}")
+            logger.info(f"[U+1F4E4] Golden Path: Processing request {i}/{len(requests)}")
             
             await self.golden_path_client.send_golden_path_request(request)
             
@@ -381,7 +419,7 @@ class TestGoldenPathRealAgentValidation:
             # Brief pause between requests
             await asyncio.sleep(1.0)
         
-        logger.success("✅ GOLDEN PATH PASSED: All rapid succession requests used real agents only")
+        logger.success(" PASS:  GOLDEN PATH PASSED: All rapid succession requests used real agents only")
 
 
 if __name__ == "__main__":
@@ -406,10 +444,10 @@ if __name__ == "__main__":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
         # Direct execution
-        print("🧪 E2E: Golden Path Real Agent Validation Test Suite")
-        print("📋 This suite ensures golden path flows use only real agents")
-        print("⚠️  Tests are designed to FAIL HARD when fallback handlers are detected")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] E2E: Golden Path Real Agent Validation Test Suite")
+        print("[U+1F4CB] This suite ensures golden path flows use only real agents")
+        print(" WARNING: [U+FE0F]  Tests are designed to FAIL HARD when fallback handlers are detected")
+        print("[U+1F680] Starting test execution...")
         
         # Run pytest with specific markers
         exit_code = pytest.main([
@@ -422,8 +460,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: Golden path uses real agents only")
+            print(" PASS:  ALL TESTS PASSED: Golden path uses real agents only")
         else:
-            print("🚨 TEST FAILURES: Fallback handlers detected in golden path - BLOCKS DEPLOYMENT")
+            print(" ALERT:  TEST FAILURES: Fallback handlers detected in golden path - BLOCKS DEPLOYMENT")
             
         sys.exit(exit_code)

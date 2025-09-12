@@ -79,7 +79,7 @@ class TestWebSocket1011ErrorSolutionValidation:
         
         EXPECTED: Connection should succeed with proper E2E headers.
         """
-        logger.info("🧪 SOLUTION TEST: Header-based E2E detection")
+        logger.info("[U+1F9EA] SOLUTION TEST: Header-based E2E detection")
         logger.info(f"Target URL: {staging_config.urls.websocket_url}")
         
         connection_start_time = time.time()
@@ -87,7 +87,7 @@ class TestWebSocket1011ErrorSolutionValidation:
         try:
             # Get staging-compatible token
             token = await staging_websocket_auth_helper.get_staging_token_async()
-            logger.info(f"✅ Token acquired: {token[:20]}...")
+            logger.info(f" PASS:  Token acquired: {token[:20]}...")
             
             # Get enhanced WebSocket headers with explicit E2E indicators
             headers = staging_websocket_auth_helper.get_websocket_headers(token)
@@ -101,7 +101,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 "X-Expected-Result": "connection-success"
             }
             
-            logger.info(f"📤 Enhanced headers sent: {list(enhanced_headers.keys())}")
+            logger.info(f"[U+1F4E4] Enhanced headers sent: {list(enhanced_headers.keys())}")
             
             # Connect with enhanced headers - this should succeed after fix
             connection_timeout = 15.0  
@@ -113,7 +113,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 close_timeout=5.0
             ) as websocket:
                 connection_time = time.time() - connection_start_time
-                logger.info(f"✅ CONNECTION SUCCESSFUL: {connection_time:.2f}s")
+                logger.info(f" PASS:  CONNECTION SUCCESSFUL: {connection_time:.2f}s")
                 
                 # Test message exchange to confirm full functionality
                 test_message = {
@@ -124,19 +124,19 @@ class TestWebSocket1011ErrorSolutionValidation:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.info("📤 Validation message sent")
+                logger.info("[U+1F4E4] Validation message sent")
                 
                 # Wait for response
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 response_data = json.loads(response)
                 
-                logger.info(f"📥 Response received: {response_data.get('type', 'unknown')}")
+                logger.info(f"[U+1F4E5] Response received: {response_data.get('type', 'unknown')}")
                 
                 # Validate response indicates proper E2E handling
                 assert response_data.get("type") in ["ack", "success", "pong"], \
                     f"Expected success response, got: {response_data}"
                 
-                logger.info("✅ SOLUTION VALIDATED: Header-based E2E detection working")
+                logger.info(" PASS:  SOLUTION VALIDATED: Header-based E2E detection working")
                 
                 return {
                     "solution": "header_based_detection",
@@ -147,7 +147,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 
         except websockets.exceptions.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
-            logger.error(f"❌ CONNECTION FAILED: Code {e.code}, Reason: {e.reason}")
+            logger.error(f" FAIL:  CONNECTION FAILED: Code {e.code}, Reason: {e.reason}")
             
             if e.code == 1011:
                 pytest.fail(
@@ -181,7 +181,7 @@ class TestWebSocket1011ErrorSolutionValidation:
         
         EXPECTED: Connection should succeed via auto-detection of staging environment.
         """
-        logger.info("🧪 SOLUTION TEST: Staging auto-detection from GCP metadata")
+        logger.info("[U+1F9EA] SOLUTION TEST: Staging auto-detection from GCP metadata")
         
         connection_start_time = time.time()
         
@@ -199,8 +199,8 @@ class TestWebSocket1011ErrorSolutionValidation:
                 "X-Expected-Behavior": "auto-e2e-detection"
             })
             
-            logger.info("📤 Testing staging auto-detection solution...")
-            logger.info(f"📤 Headers: {list(headers.keys())}")
+            logger.info("[U+1F4E4] Testing staging auto-detection solution...")
+            logger.info(f"[U+1F4E4] Headers: {list(headers.keys())}")
             
             # Connect - should succeed via automatic staging detection
             async with websockets.connect(
@@ -209,7 +209,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 open_timeout=15.0
             ) as websocket:
                 connection_time = time.time() - connection_start_time
-                logger.info(f"✅ AUTO-DETECTION SUCCESS: {connection_time:.2f}s")
+                logger.info(f" PASS:  AUTO-DETECTION SUCCESS: {connection_time:.2f}s")
                 
                 # Test that auto-detection properly enabled E2E mode
                 auto_detection_test = {
@@ -223,13 +223,13 @@ class TestWebSocket1011ErrorSolutionValidation:
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 response_data = json.loads(response)
                 
-                logger.info(f"📥 Auto-detection response: {response_data}")
+                logger.info(f"[U+1F4E5] Auto-detection response: {response_data}")
                 
                 # Validate auto-detection worked
                 assert response_data.get("type") != "error", \
                     f"Auto-detection failed: {response_data}"
                 
-                logger.info("✅ SOLUTION VALIDATED: Staging auto-detection working")
+                logger.info(" PASS:  SOLUTION VALIDATED: Staging auto-detection working")
                 
                 return {
                     "solution": "staging_auto_detection",
@@ -240,7 +240,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 
         except websockets.exceptions.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
-            logger.error(f"❌ AUTO-DETECTION FAILED: Code {e.code}")
+            logger.error(f" FAIL:  AUTO-DETECTION FAILED: Code {e.code}")
             
             if e.code == 1011:
                 pytest.fail(
@@ -267,7 +267,7 @@ class TestWebSocket1011ErrorSolutionValidation:
         
         EXPECTED: End-to-end WebSocket functionality should work perfectly.
         """
-        logger.info("🧪 SOLUTION TEST: Complete WebSocket connection with proper E2E context")
+        logger.info("[U+1F9EA] SOLUTION TEST: Complete WebSocket connection with proper E2E context")
         
         connection_start_time = time.time()
         full_test_results = {
@@ -298,7 +298,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 "X-Expected-Result": "full-websocket-functionality"
             })
             
-            logger.info("📤 Comprehensive context headers sent")
+            logger.info("[U+1F4E4] Comprehensive context headers sent")
             
             # Phase 1: Connection establishment
             async with websockets.connect(
@@ -310,7 +310,7 @@ class TestWebSocket1011ErrorSolutionValidation:
             ) as websocket:
                 connection_time = time.time() - connection_start_time
                 full_test_results["connection_success"] = True
-                logger.info(f"✅ Phase 1: Connection established in {connection_time:.2f}s")
+                logger.info(f" PASS:  Phase 1: Connection established in {connection_time:.2f}s")
                 
                 # Phase 2: Basic message exchange
                 test_messages = [
@@ -329,16 +329,16 @@ class TestWebSocket1011ErrorSolutionValidation:
                 
                 responses = []
                 for i, message in enumerate(test_messages):
-                    logger.info(f"📤 Sending test message {i+1}/2")
+                    logger.info(f"[U+1F4E4] Sending test message {i+1}/2")
                     await websocket.send(json.dumps(message))
                     
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     response_data = json.loads(response)
                     responses.append(response_data)
-                    logger.info(f"📥 Response {i+1}: {response_data.get('type', 'unknown')}")
+                    logger.info(f"[U+1F4E5] Response {i+1}: {response_data.get('type', 'unknown')}")
                 
                 full_test_results["message_exchange"] = True
-                logger.info("✅ Phase 2: Message exchange successful")
+                logger.info(" PASS:  Phase 2: Message exchange successful")
                 
                 # Phase 3: Bidirectional communication test
                 echo_test = {
@@ -354,12 +354,12 @@ class TestWebSocket1011ErrorSolutionValidation:
                 # Validate bidirectional communication
                 if echo_data.get("type") == "echo" or "echo" in str(echo_data):
                     full_test_results["bi_directional_communication"] = True
-                    logger.info("✅ Phase 3: Bidirectional communication successful")
+                    logger.info(" PASS:  Phase 3: Bidirectional communication successful")
                 else:
-                    logger.warning(f"⚠️ Phase 3: Unexpected echo response: {echo_data}")
+                    logger.warning(f" WARNING: [U+FE0F] Phase 3: Unexpected echo response: {echo_data}")
                 
                 # Phase 4: Connection stability test
-                logger.info("🔄 Phase 4: Testing connection stability (30s)...")
+                logger.info(" CYCLE:  Phase 4: Testing connection stability (30s)...")
                 stability_start = time.time()
                 
                 # Send periodic messages to test stability
@@ -374,19 +374,19 @@ class TestWebSocket1011ErrorSolutionValidation:
                     
                     await websocket.send(json.dumps(stability_message))
                     stability_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    logger.info(f"📥 Stability test {i+1}/3: Success")
+                    logger.info(f"[U+1F4E5] Stability test {i+1}/3: Success")
                 
                 full_test_results["connection_stability"] = True
                 total_time = time.time() - connection_start_time
-                logger.info(f"✅ Phase 4: Connection stability validated over {total_time:.1f}s")
+                logger.info(f" PASS:  Phase 4: Connection stability validated over {total_time:.1f}s")
                 
                 # Final validation
                 all_phases_successful = all(full_test_results.values())
                 
                 if all_phases_successful:
-                    logger.info("🎉 COMPLETE SOLUTION VALIDATION SUCCESSFUL!")
-                    logger.info(f"📊 Total test duration: {total_time:.1f}s")
-                    logger.info(f"📊 All phases passed: {full_test_results}")
+                    logger.info(" CELEBRATION:  COMPLETE SOLUTION VALIDATION SUCCESSFUL!")
+                    logger.info(f" CHART:  Total test duration: {total_time:.1f}s")
+                    logger.info(f" CHART:  All phases passed: {full_test_results}")
                 else:
                     pytest.fail(
                         f"PARTIAL SUCCESS: Some phases failed. Results: {full_test_results}"
@@ -402,8 +402,8 @@ class TestWebSocket1011ErrorSolutionValidation:
                 
         except websockets.exceptions.ConnectionClosedError as e:
             connection_time = time.time() - connection_start_time
-            logger.error(f"❌ COMPREHENSIVE TEST FAILED: Code {e.code}")
-            logger.error(f"📊 Phases completed: {full_test_results}")
+            logger.error(f" FAIL:  COMPREHENSIVE TEST FAILED: Code {e.code}")
+            logger.error(f" CHART:  Phases completed: {full_test_results}")
             
             if e.code == 1011:
                 pytest.fail(
@@ -430,7 +430,7 @@ class TestWebSocket1011ErrorSolutionValidation:
         
         EXPECTED: All concurrent connections should succeed after the fix.
         """
-        logger.info("🧪 SOLUTION TEST: Multiple authenticated WebSocket connections")
+        logger.info("[U+1F9EA] SOLUTION TEST: Multiple authenticated WebSocket connections")
         
         num_concurrent_connections = 5
         connection_results = []
@@ -496,7 +496,7 @@ class TestWebSocket1011ErrorSolutionValidation:
                 }
         
         # Execute concurrent connections
-        logger.info(f"🔄 Testing {num_concurrent_connections} concurrent connections...")
+        logger.info(f" CYCLE:  Testing {num_concurrent_connections} concurrent connections...")
         start_time = time.time()
         
         tasks = [test_concurrent_connection(i) for i in range(num_concurrent_connections)]
@@ -509,38 +509,38 @@ class TestWebSocket1011ErrorSolutionValidation:
         failed_connections_1011 = 0
         failed_connections_other = 0
         
-        logger.info("📊 CONCURRENT CONNECTION RESULTS:")
+        logger.info(" CHART:  CONCURRENT CONNECTION RESULTS:")
         for result in connection_results:
             if isinstance(result, Exception):
                 failed_connections_other += 1
-                logger.error(f"❌ Task exception: {result}")
+                logger.error(f" FAIL:  Task exception: {result}")
                 continue
             
             if result["success"]:
                 successful_connections += 1
-                logger.info(f"✅ Connection {result['connection_id']}: SUCCESS ({result['connection_time']:.2f}s)")
+                logger.info(f" PASS:  Connection {result['connection_id']}: SUCCESS ({result['connection_time']:.2f}s)")
             else:
                 if result.get("error_code") == 1011:
                     failed_connections_1011 += 1
-                    logger.error(f"❌ Connection {result['connection_id']}: 1011 ERROR")
+                    logger.error(f" FAIL:  Connection {result['connection_id']}: 1011 ERROR")
                 else:
                     failed_connections_other += 1
-                    logger.error(f"❌ Connection {result['connection_id']}: OTHER ERROR ({result.get('error_type', 'unknown')})")
+                    logger.error(f" FAIL:  Connection {result['connection_id']}: OTHER ERROR ({result.get('error_type', 'unknown')})")
         
         # Validate results
-        logger.info(f"📊 Total time: {total_time:.2f}s")
-        logger.info(f"📊 Successful: {successful_connections}/{num_concurrent_connections}")
-        logger.info(f"📊 Failed (1011): {failed_connections_1011}")
-        logger.info(f"📊 Failed (other): {failed_connections_other}")
+        logger.info(f" CHART:  Total time: {total_time:.2f}s")
+        logger.info(f" CHART:  Successful: {successful_connections}/{num_concurrent_connections}")
+        logger.info(f" CHART:  Failed (1011): {failed_connections_1011}")
+        logger.info(f" CHART:  Failed (other): {failed_connections_other}")
         
         success_rate = successful_connections / num_concurrent_connections
         
         if success_rate >= 0.8:  # 80% success rate minimum
-            logger.info(f"✅ SOLUTION VALIDATED: {success_rate:.0%} concurrent connection success rate")
+            logger.info(f" PASS:  SOLUTION VALIDATED: {success_rate:.0%} concurrent connection success rate")
         else:
             pytest.fail(
                 f"SOLUTION INCOMPLETE: Only {success_rate:.0%} success rate. "
-                f"Expected ≥80% for concurrent connections. "
+                f"Expected  >= 80% for concurrent connections. "
                 f"1011 errors: {failed_connections_1011}, Other errors: {failed_connections_other}"
             )
         
@@ -581,7 +581,7 @@ def validate_solution_implementation():
         }
     }
     
-    logger.info("🔍 SOLUTION IMPLEMENTATION CHECK:")
+    logger.info(" SEARCH:  SOLUTION IMPLEMENTATION CHECK:")
     for category, vars in solution_indicators.items():
         logger.info(f"   {category.upper()}:")
         for key, value in vars.items():
@@ -623,21 +623,21 @@ if __name__ == "__main__":
         results = {}
         for test_name, test_method in solution_tests:
             try:
-                print(f"\n🧪 Running solution test: {test_name}")
+                print(f"\n[U+1F9EA] Running solution test: {test_name}")
                 result = await test_method(staging_config, auth_helper)
                 results[test_name] = {"success": True, "result": result}
-                print(f"✅ {test_name}: SUCCESS")
+                print(f" PASS:  {test_name}: SUCCESS")
                 
             except Exception as e:
                 results[test_name] = {"success": False, "error": str(e)}
-                print(f"❌ {test_name}: FAILED - {e}")
+                print(f" FAIL:  {test_name}: FAILED - {e}")
         
-        print(f"\n📊 SOLUTION VALIDATION SUMMARY:")
+        print(f"\n CHART:  SOLUTION VALIDATION SUMMARY:")
         for test_name, result in results.items():
             status = "PASS" if result["success"] else "FAIL"
             print(f"   {test_name}: {status}")
         
         overall_success = all(result["success"] for result in results.values())
-        print(f"\n🎯 OVERALL SOLUTION STATUS: {'SUCCESS' if overall_success else 'INCOMPLETE'}")
+        print(f"\n TARGET:  OVERALL SOLUTION STATUS: {'SUCCESS' if overall_success else 'INCOMPLETE'}")
     
     asyncio.run(run_solution_tests())

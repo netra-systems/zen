@@ -108,9 +108,9 @@ def main():
     print("\n1. Testing decorator imports...")
     import_success, missing = test_decorator_imports()
     if import_success:
-        print("✅ All required decorators importable")
+        print(" PASS:  All required decorators importable")
     else:
-        print("❌ Missing decorators:")
+        print(" FAIL:  Missing decorators:")
         for missing_decorator in missing:
             print(f"   - {missing_decorator}")
         return False
@@ -118,28 +118,28 @@ def main():
     # Test 2: File count estimation  
     print("\n2. Estimating unit test file count...")
     estimated_files = count_unit_test_files()
-    print(f"📊 Estimated unit test files: {estimated_files}")
+    print(f" CHART:  Estimated unit test files: {estimated_files}")
     
     # Test 3: Pytest collection
     print("\n3. Testing pytest collection...")
     collection_success, message, collected_count = validate_pytest_collection()
     if collection_success:
-        print(f"✅ {message}")
+        print(f" PASS:  {message}")
         if collected_count > 0:
             discovery_rate = (collected_count / (estimated_files * 5)) * 100  # Assume ~5 tests per file
-            print(f"📈 Estimated discovery rate: {discovery_rate:.1f}%")
+            print(f"[U+1F4C8] Estimated discovery rate: {discovery_rate:.1f}%")
             
             if collected_count >= 1000:  # Reasonable threshold for success
-                print(f"🎉 EXCELLENT: {collected_count} tests discovered (target: 7,474+)")
+                print(f" CELEBRATION:  EXCELLENT: {collected_count} tests discovered (target: 7,474+)")
                 return True
             elif collected_count >= 500:
-                print(f"✅ GOOD: {collected_count} tests discovered (improvement over ~160)")
+                print(f" PASS:  GOOD: {collected_count} tests discovered (improvement over ~160)")
                 return True
             else:
-                print(f"⚠️  LIMITED: Only {collected_count} tests discovered")
+                print(f" WARNING: [U+FE0F]  LIMITED: Only {collected_count} tests discovered")
                 return False
     else:
-        print(f"❌ {message}")
+        print(f" FAIL:  {message}")
         return False
     
     return True
@@ -149,12 +149,12 @@ if __name__ == "__main__":
     
     print("\n" + "=" * 60)
     if success:
-        print("🎉 VALIDATION SUCCESSFUL: Issue #268A appears to be resolved")
+        print(" CELEBRATION:  VALIDATION SUCCESSFUL: Issue #268A appears to be resolved")
         print("   - All decorators importable")
         print("   - Test discovery working") 
         print("   - Ready for full unit test execution")
     else:
-        print("❌ VALIDATION FAILED: Issue #268A needs more work")
+        print(" FAIL:  VALIDATION FAILED: Issue #268A needs more work")
         print("   - Check decorator imports")
         print("   - Verify test file syntax")
         print("   - Review pytest configuration")

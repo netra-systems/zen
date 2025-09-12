@@ -104,11 +104,11 @@ def run_validation_tests(verbose=False, category=None, summary=False, business_i
         print("=" * 80)
         
         if result.returncode == 0:
-            print("✅ ALL VALIDATION TESTS PASSED")
+            print(" PASS:  ALL VALIDATION TESTS PASSED")
             print("   This indicates that import fixes have been successfully applied!")
             print("   Test collection should now discover significantly more tests.")
         else:
-            print("🚨 VALIDATION TESTS FAILED (EXPECTED)")
+            print(" ALERT:  VALIDATION TESTS FAILED (EXPECTED)")
             print("   This indicates that import/collection fixes still need to be applied.")
             
             # Parse and summarize failures
@@ -122,13 +122,13 @@ def run_validation_tests(verbose=False, category=None, summary=False, business_i
             
             # Show expected errors
             if "ModuleNotFoundError" in result.stdout:
-                print("\n   📋 Missing Modules Detected (Expected):")
+                print("\n   [U+1F4CB] Missing Modules Detected (Expected):")
                 print("     - WebSocket manager modules")
                 print("     - E2E helper modules")
                 print("     - Factory pattern modules")
             
             if "SyntaxError" in result.stdout:
-                print("\n   📋 Syntax Errors Detected (Expected):")
+                print("\n   [U+1F4CB] Syntax Errors Detected (Expected):")
                 print("     - WebSocket test file syntax issues")
                 print("     - Invalid class name definitions")
         
@@ -163,7 +163,7 @@ def print_business_impact():
     ]
     
     for feature, issue, business_value in impacts:
-        print(f"🚨 {feature}:")
+        print(f" ALERT:  {feature}:")
         print(f"   Issue: {issue}")
         print(f"   Business Value: {business_value}")
         print()

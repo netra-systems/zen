@@ -2,7 +2,7 @@
 Test Auth Service Port Configuration Integration
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure auth service port configuration reliability across all environments
 - Value Impact: Prevent authentication failures due to port misconfigurations that cause service outages
 - Strategic Impact: Core platform stability - auth service must be reachable on correct ports for all features

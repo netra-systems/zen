@@ -183,7 +183,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
                     assert other_state != retrieved_state, f"State should not leak between engines {i} and {j}"
                     assert other_state["user_index"] != i, f"Engine {j} should not have user {i} state"
         
-        logger.info(f"✅ ExecutionEngineFactory user isolation validated: {len(engines)} engines created")
+        logger.info(f" PASS:  ExecutionEngineFactory user isolation validated: {len(engines)} engines created")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -309,7 +309,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
         assert operation_success_rate >= 0.95, f"Operation success rate too low: {operation_success_rate:.2%}"
         assert user_success_rate >= 0.90, f"User success rate too low: {user_success_rate:.2%}"
         
-        logger.info(f"✅ Concurrent engine creation validated: {num_concurrent_users} users, {operation_success_rate:.2%} success rate, {avg_creation_time*1000:.1f}ms avg creation time")
+        logger.info(f" PASS:  Concurrent engine creation validated: {num_concurrent_users} users, {operation_success_rate:.2%} success rate, {avg_creation_time*1000:.1f}ms avg creation time")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -428,7 +428,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
         # Should release most allocated memory (at least 70%)
         assert total_efficiency >= 0.7, f"Memory cleanup insufficient: {total_efficiency:.2%} efficiency"
         
-        logger.info(f"✅ Engine memory isolation and cleanup validated: {memory_increase} bytes allocated, {total_efficiency:.2%} cleanup efficiency")
+        logger.info(f" PASS:  Engine memory isolation and cleanup validated: {memory_increase} bytes allocated, {total_efficiency:.2%} cleanup efficiency")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -562,7 +562,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
             "engines_created": total_engines
         })
         
-        logger.info(f"✅ Factory performance under load validated: {engines_per_second:.1f} engines/sec, {avg_creation_time*1000:.1f}ms avg creation")
+        logger.info(f" PASS:  Factory performance under load validated: {engines_per_second:.1f} engines/sec, {avg_creation_time*1000:.1f}ms avg creation")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -705,7 +705,7 @@ class TestExecutionEngineFactoryIsolationIntegration(SSotAsyncTestCase):
         if recovery_count > 0:
             logger.info(f"Recovery successful: {recovery_count} recoveries out of {error_count} errors")
         
-        logger.info(f"✅ Factory error handling validated: {success_rate:.2%} success rate, {recovery_count} recoveries")
+        logger.info(f" PASS:  Factory error handling validated: {success_rate:.2%} success rate, {recovery_count} recoveries")
 
     def _get_memory_usage(self) -> int:
         """Get current memory usage in bytes."""

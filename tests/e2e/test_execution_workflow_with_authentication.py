@@ -1,7 +1,7 @@
 """E2E tests for execution workflow with authentication.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Complete Authenticated Execution Workflow Validation
 - Value Impact: Ensures $500K+ ARR execution workflows work end-to-end with real auth
 - Strategic Impact: Validates production-ready authenticated multi-user execution patterns

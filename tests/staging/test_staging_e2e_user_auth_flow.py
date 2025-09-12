@@ -250,7 +250,7 @@ class StagingE2EAuthFlowTestRunner:
             
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all E2E user authentication flow tests."""
-        print(f"👤 Running E2E User Authentication Flow Tests")
+        print(f"[U+1F464] Running E2E User Authentication Flow Tests")
         print(f"Environment: {self.environment}")
         print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
@@ -265,7 +265,7 @@ class StagingE2EAuthFlowTestRunner:
         print("3.1 Testing user registration...")
         results["user_registration"] = await self.test_user_registration_flow()
         registration_success = results["user_registration"]["success"]
-        print(f"     ✅ Registration: {registration_success} (may be disabled in staging)")
+        print(f"      PASS:  Registration: {registration_success} (may be disabled in staging)")
         
         # Test 3.2: OAuth simulation login (primary login method for staging)
         print("3.2 Testing OAuth simulation login...")
@@ -276,32 +276,32 @@ class StagingE2EAuthFlowTestRunner:
             access_token = results["oauth_login"]["access_token"]
             refresh_token = results["oauth_login"]["refresh_token"]
             
-        print(f"     ✅ OAuth login: {login_success}")
+        print(f"      PASS:  OAuth login: {login_success}")
         
         # Test 3.3: Token validation and profile
         if access_token:
             print("3.3 Testing token validation and profile...")
             results["token_profile"] = await self.test_token_validation_and_profile(access_token)
-            print(f"     ✅ Token valid: {results['token_profile']['token_valid']}")
-            print(f"     📋 Profile access: {results['token_profile']['profile_exists']}")
+            print(f"      PASS:  Token valid: {results['token_profile']['token_valid']}")
+            print(f"     [U+1F4CB] Profile access: {results['token_profile']['profile_exists']}")
         else:
             results["token_profile"] = {"success": False, "error": "No access token", "skipped": True}
-            print("     ⏭️  Skipped token validation (no access token)")
+            print("     [U+23ED][U+FE0F]  Skipped token validation (no access token)")
             
         # Test 3.4: Token refresh
         print("3.4 Testing token refresh...")
         results["token_refresh"] = await self.test_token_refresh(refresh_token)
         refresh_success = results["token_refresh"]["success"] or results["token_refresh"].get("skipped", False)
-        print(f"     ✅ Token refresh: {refresh_success}")
+        print(f"      PASS:  Token refresh: {refresh_success}")
         
         # Test 3.5: Logout flow
         if access_token:
             print("3.5 Testing logout flow...")
             results["logout"] = await self.test_logout_flow(access_token)
-            print(f"     ✅ Logout: {results['logout']['success']}")
+            print(f"      PASS:  Logout: {results['logout']['success']}")
         else:
             results["logout"] = {"success": False, "error": "No access token", "skipped": True}
-            print("     ⏭️  Skipped logout (no access token)")
+            print("     [U+23ED][U+FE0F]  Skipped logout (no access token)")
             
         # Summary - focus on core auth flow
         core_auth_working = (results["oauth_login"]["success"] and 
@@ -322,11 +322,11 @@ class StagingE2EAuthFlowTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests_run']} tests passed")
-        print(f"🔐 Core auth flow: {'✅ Working' if core_auth_working else '❌ Broken'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests_run']} tests passed")
+        print(f"[U+1F510] Core auth flow: {' PASS:  Working' if core_auth_working else ' FAIL:  Broken'}")
         
         if results["summary"]["critical_failure"]:
-            print("🚨 CRITICAL: Core authentication flow is broken!")
+            print(" ALERT:  CRITICAL: Core authentication flow is broken!")
             
         return results
 

@@ -91,7 +91,7 @@ class JWTSSOTViolationInventoryCatalog:
         SSOT VIOLATION: Backend should have NO JWT operations - only auth service should.
         This method documents every JWT operation found in backend code.
         """
-        logger.info("🔍 Cataloging backend JWT operations (SSOT violations)")
+        logger.info(" SEARCH:  Cataloging backend JWT operations (SSOT violations)")
         
         jwt_operations = []
         
@@ -111,7 +111,7 @@ class JWTSSOTViolationInventoryCatalog:
         
         self.jwt_operations_catalog = jwt_operations
         
-        logger.warning(f"🚨 SSOT VIOLATIONS FOUND: {len(jwt_operations)} JWT operations in backend")
+        logger.warning(f" ALERT:  SSOT VIOLATIONS FOUND: {len(jwt_operations)} JWT operations in backend")
         
         return jwt_operations
     
@@ -143,7 +143,7 @@ class JWTSSOTViolationInventoryCatalog:
                         pass
                 
                 jwt_operations.append(jwt_operation)
-                logger.warning(f"  🚨 JWT Operation Found: {module_name}.{attr_name} ({type(attr).__name__})")
+                logger.warning(f"   ALERT:  JWT Operation Found: {module_name}.{attr_name} ({type(attr).__name__})")
         
         # Scan for JWT-related string patterns in source code if available
         try:
@@ -185,7 +185,7 @@ class JWTSSOTViolationInventoryCatalog:
                         'type': 'source_pattern'
                     }
                     jwt_patterns.append(jwt_pattern)
-                    logger.warning(f"  🚨 JWT Pattern Found: {module_name}:{line_num} - {pattern}")
+                    logger.warning(f"   ALERT:  JWT Pattern Found: {module_name}:{line_num} - {pattern}")
         
         return jwt_patterns
     
@@ -196,9 +196,9 @@ class JWTSSOTViolationInventoryCatalog:
         SSOT PRINCIPLE: Only ONE source for JWT operations (auth service).
         VIOLATION: Multiple sources exist (backend + auth service).
         
-        This test MUST PASS (multiple sources exist) → MUST FAIL (only auth service)
+        This test MUST PASS (multiple sources exist)  ->  MUST FAIL (only auth service)
         """
-        logger.info("🔍 Testing multiple JWT sources detection (SSOT violation)")
+        logger.info(" SEARCH:  Testing multiple JWT sources detection (SSOT violation)")
         
         # Catalog JWT operations in backend
         backend_jwt_operations = self.catalog_backend_jwt_operations()
@@ -220,12 +220,12 @@ class JWTSSOTViolationInventoryCatalog:
                 'business_impact': 'JWT operations scattered across services cause inconsistencies'
             })
             
-            logger.critical(f"🚨 SSOT VIOLATION CONFIRMED: {unique_operations} JWT operations across {jwt_source_count} backend modules")
-            logger.critical("📍 Expected: 0 JWT operations in backend (auth service only)")
-            logger.critical("💰 Business Impact: JWT inconsistencies cause cascade authentication failures")
+            logger.critical(f" ALERT:  SSOT VIOLATION CONFIRMED: {unique_operations} JWT operations across {jwt_source_count} backend modules")
+            logger.critical(" PIN:  Expected: 0 JWT operations in backend (auth service only)")
+            logger.critical("[U+1F4B0] Business Impact: JWT inconsistencies cause cascade authentication failures")
             
         else:
-            logger.info("✅ No JWT operations found in backend - good SSOT compliance")
+            logger.info(" PASS:  No JWT operations found in backend - good SSOT compliance")
         
         return multiple_sources_exist
     
@@ -235,7 +235,7 @@ class JWTSSOTViolationInventoryCatalog:
         
         This creates a detailed inventory of every JWT operation that violates SSOT.
         """
-        logger.info("🔍 Cataloging backend JWT operations for SSOT violation documentation")
+        logger.info(" SEARCH:  Cataloging backend JWT operations for SSOT violation documentation")
         
         # Get comprehensive catalog
         jwt_operations = self.catalog_backend_jwt_operations()
@@ -266,12 +266,12 @@ class JWTSSOTViolationInventoryCatalog:
         logger.critical(f"Modules with JWT Operations: {catalog_summary['modules_with_jwt_operations']}")
         
         for module, operations in operations_by_module.items():
-            logger.warning(f"\n📍 {module}:")
+            logger.warning(f"\n PIN:  {module}:")
             for op in operations:
                 name = op.get('name', op.get('pattern', 'unknown'))
                 op_type = op.get('type', 'pattern')
                 reason = op.get('ssot_violation_reason', 'SSOT violation')
-                logger.critical(f"  • {name} ({op_type}) - {reason}")
+                logger.critical(f"  [U+2022] {name} ({op_type}) - {reason}")
                 if op.get('line_number'):
                     logger.critical(f"    Line {op['line_number']}: {op.get('source_line', '')}")
         
@@ -288,9 +288,9 @@ class JWTSSOTViolationInventoryCatalog:
         SSOT PRINCIPLE: Auth service should be the ONLY JWT source.
         VIOLATION: Backend also has JWT operations.
         
-        This test MUST PASS (auth service not exclusive) → MUST FAIL (auth service exclusive)
+        This test MUST PASS (auth service not exclusive)  ->  MUST FAIL (auth service exclusive)
         """
-        logger.info("🔍 Testing auth service exclusivity violation")
+        logger.info(" SEARCH:  Testing auth service exclusivity violation")
         
         # Check if backend has JWT operations (proving non-exclusivity)
         backend_operations = self.catalog_backend_jwt_operations()
@@ -306,12 +306,12 @@ class JWTSSOTViolationInventoryCatalog:
                 'refactor_requirement': 'Move all JWT operations to auth service'
             })
             
-            logger.critical("🚨 SSOT VIOLATION CONFIRMED: Auth service is NOT exclusive JWT source")
-            logger.critical(f"📊 Backend JWT operations: {len(backend_operations)}")
-            logger.critical("🎯 REFACTOR TARGET: Make auth service the exclusive JWT source")
+            logger.critical(" ALERT:  SSOT VIOLATION CONFIRMED: Auth service is NOT exclusive JWT source")
+            logger.critical(f" CHART:  Backend JWT operations: {len(backend_operations)}")
+            logger.critical(" TARGET:  REFACTOR TARGET: Make auth service the exclusive JWT source")
             
         else:
-            logger.info("✅ Auth service appears to be exclusive JWT source")
+            logger.info(" PASS:  Auth service appears to be exclusive JWT source")
         
         return auth_service_not_exclusive
     
@@ -321,7 +321,7 @@ class JWTSSOTViolationInventoryCatalog:
         
         Fallback patterns violate SSOT by creating alternative JWT validation paths.
         """
-        logger.info("🔍 Inventorying JWT fallback patterns")
+        logger.info(" SEARCH:  Inventorying JWT fallback patterns")
         
         fallback_patterns = []
         
@@ -365,11 +365,11 @@ class JWTSSOTViolationInventoryCatalog:
         }
         
         if fallback_patterns:
-            logger.critical(f"🚨 FALLBACK PATTERNS FOUND: {len(fallback_patterns)} violations")
+            logger.critical(f" ALERT:  FALLBACK PATTERNS FOUND: {len(fallback_patterns)} violations")
             for pattern in fallback_patterns:
-                logger.warning(f"  • {pattern['fallback_pattern']} in {pattern['operation']['module']}")
+                logger.warning(f"  [U+2022] {pattern['fallback_pattern']} in {pattern['operation']['module']}")
         else:
-            logger.info("✅ No JWT fallback patterns found")
+            logger.info(" PASS:  No JWT fallback patterns found")
         
         return fallback_inventory
     
@@ -419,7 +419,7 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
     def setup_violation_catalog(self):
         """Set up JWT SSOT violation catalog."""
         self.catalog = JWTSSOTViolationInventoryCatalog()
-        logger.info("🚀 Starting JWT SSOT Violation Inventory")
+        logger.info("[U+1F680] Starting JWT SSOT Violation Inventory")
         logger.info("=" * 60)
         logger.info("OBJECTIVE: Catalog JWT operations in backend (SSOT violations)")
         logger.info("VALIDATION: Tests MUST PASS now, FAIL after refactor")
@@ -432,7 +432,7 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         This test documents every JWT operation found in the backend,
         proving SSOT violations exist.
         """
-        logger.info("🚀 Cataloging backend JWT operations")
+        logger.info("[U+1F680] Cataloging backend JWT operations")
         
         catalog_summary = self.catalog.test_backend_jwt_operations_catalog()
         
@@ -440,15 +440,15 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         total_operations = catalog_summary['total_jwt_operations']
         modules_with_operations = catalog_summary['modules_with_jwt_operations']
         
-        logger.critical(f"🚨 CATALOG COMPLETE: {total_operations} JWT operations found")
-        logger.critical(f"📍 Violation Modules: {modules_with_operations}")
+        logger.critical(f" ALERT:  CATALOG COMPLETE: {total_operations} JWT operations found")
+        logger.critical(f" PIN:  Violation Modules: {modules_with_operations}")
         
         if total_operations > 0:
-            logger.critical("✅ PHASE A SUCCESS: JWT operations cataloged (violations exist)")
-            logger.critical("🎯 REFACTOR TARGET: Remove all backend JWT operations")
+            logger.critical(" PASS:  PHASE A SUCCESS: JWT operations cataloged (violations exist)")
+            logger.critical(" TARGET:  REFACTOR TARGET: Remove all backend JWT operations")
         else:
-            logger.warning("⚠️ UNEXPECTED: No JWT operations found in backend")
-            logger.warning("🔍 May indicate refactor already completed")
+            logger.warning(" WARNING: [U+FE0F] UNEXPECTED: No JWT operations found in backend")
+            logger.warning(" SEARCH:  May indicate refactor already completed")
         
         # Assertions for catalog validation
         assert catalog_summary is not None, "JWT operations catalog must be generated"
@@ -465,18 +465,18 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         SSOT requires single source (auth service only).
         This test proves backend also has JWT sources (violation).
         """
-        logger.info("🚀 Testing multiple JWT sources detection")
+        logger.info("[U+1F680] Testing multiple JWT sources detection")
         
         multiple_sources_exist = self.catalog.test_multiple_jwt_sources_detected()
         
         if multiple_sources_exist:
-            logger.critical("🚨 CONFIRMED: Multiple JWT sources exist (SSOT violation)")
-            logger.critical("📊 Expected: Auth service only")
-            logger.critical("📊 Actual: Auth service + Backend")
-            logger.critical("🎯 REFACTOR: Make auth service exclusive")
+            logger.critical(" ALERT:  CONFIRMED: Multiple JWT sources exist (SSOT violation)")
+            logger.critical(" CHART:  Expected: Auth service only")
+            logger.critical(" CHART:  Actual: Auth service + Backend")
+            logger.critical(" TARGET:  REFACTOR: Make auth service exclusive")
         else:
-            logger.warning("⚠️ UNEXPECTED: Single JWT source detected")
-            logger.warning("🔍 May indicate good SSOT compliance already")
+            logger.warning(" WARNING: [U+FE0F] UNEXPECTED: Single JWT source detected")
+            logger.warning(" SEARCH:  May indicate good SSOT compliance already")
         
         # PHASE A: This test should pass if violations exist
         # Note: We make this permissive since violation might already be fixed
@@ -492,16 +492,16 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         This proves backend also handles JWT operations, violating SSOT.
         After refactor, auth service should be exclusive.
         """
-        logger.info("🚀 Testing auth service exclusivity violation")
+        logger.info("[U+1F680] Testing auth service exclusivity violation")
         
         not_exclusive = self.catalog.test_auth_service_not_exclusive_jwt_source()
         
         if not_exclusive:
-            logger.critical("🚨 CONFIRMED: Auth service is NOT exclusive (SSOT violation)")
-            logger.critical("💡 Backend also has JWT operations")
-            logger.critical("🎯 REFACTOR: Make auth service exclusive JWT source")
+            logger.critical(" ALERT:  CONFIRMED: Auth service is NOT exclusive (SSOT violation)")
+            logger.critical(" IDEA:  Backend also has JWT operations")
+            logger.critical(" TARGET:  REFACTOR: Make auth service exclusive JWT source")
         else:
-            logger.info("✅ Auth service appears exclusive (good SSOT compliance)")
+            logger.info(" PASS:  Auth service appears exclusive (good SSOT compliance)")
         
         # PHASE A: Store result for comprehensive reporting
         self.auth_service_exclusive = not not_exclusive
@@ -514,18 +514,18 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         
         Fallback patterns create alternative JWT paths, violating SSOT.
         """
-        logger.info("🚀 Inventorying JWT fallback patterns")
+        logger.info("[U+1F680] Inventorying JWT fallback patterns")
         
         fallback_inventory = self.catalog.test_jwt_fallback_patterns_inventory()
         
         fallback_count = fallback_inventory['total_fallback_patterns']
         
         if fallback_count > 0:
-            logger.critical(f"🚨 FALLBACK PATTERNS FOUND: {fallback_count} violations")
-            logger.critical("📍 Fallback patterns create alternative JWT validation paths")
-            logger.critical("🎯 REFACTOR: Eliminate all fallbacks, use auth service exclusively")
+            logger.critical(f" ALERT:  FALLBACK PATTERNS FOUND: {fallback_count} violations")
+            logger.critical(" PIN:  Fallback patterns create alternative JWT validation paths")
+            logger.critical(" TARGET:  REFACTOR: Eliminate all fallbacks, use auth service exclusively")
         else:
-            logger.info("✅ No JWT fallback patterns found")
+            logger.info(" PASS:  No JWT fallback patterns found")
         
         # Store for comprehensive report
         self.fallback_inventory = fallback_inventory
@@ -541,7 +541,7 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         This creates the master report documenting all SSOT violations
         for refactoring reference and validation.
         """
-        logger.info("🚀 Generating comprehensive SSOT violation report")
+        logger.info("[U+1F680] Generating comprehensive SSOT violation report")
         
         # Ensure other tests have run
         if not hasattr(self, 'catalog_summary'):
@@ -563,16 +563,16 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         
         metrics = violation_report['ssot_compliance_metrics']
         logger.critical(f"\nCompliance Metrics:")
-        logger.critical(f"  • Backend JWT Operations: {metrics['backend_jwt_operations']}")
-        logger.critical(f"  • Violation Modules: {metrics['violation_modules']}")
-        logger.critical(f"  • Fallback Patterns: {metrics['fallback_patterns']}")
-        logger.critical(f"  • Compliance Status: {metrics['compliance_status']}")
+        logger.critical(f"  [U+2022] Backend JWT Operations: {metrics['backend_jwt_operations']}")
+        logger.critical(f"  [U+2022] Violation Modules: {metrics['violation_modules']}")
+        logger.critical(f"  [U+2022] Fallback Patterns: {metrics['fallback_patterns']}")
+        logger.critical(f"  [U+2022] Compliance Status: {metrics['compliance_status']}")
         
         validation = violation_report['refactor_validation_approach']
         logger.warning(f"\nRefactor Validation:")
-        logger.warning(f"  • Phase A: {validation['phase_a']}")
-        logger.warning(f"  • Phase B: {validation['phase_b']}")
-        logger.warning(f"  • Success: {validation['success_criteria']}")
+        logger.warning(f"  [U+2022] Phase A: {validation['phase_a']}")
+        logger.warning(f"  [U+2022] Phase B: {validation['phase_b']}")
+        logger.warning(f"  [U+2022] Success: {validation['success_criteria']}")
         
         logger.critical(f"\nBusiness Protection: {violation_report['business_protection']}")
         logger.info("=" * 80)
@@ -587,8 +587,8 @@ class TestJWTSSOTViolationInventory(SSotBaseTestCase):
         self.violation_report = violation_report
         
         # CRITICAL: Document report generation success
-        logger.critical("✅ COMPREHENSIVE SSOT VIOLATION REPORT GENERATED")
-        logger.critical("📋 Report available for refactor planning and validation")
+        logger.critical(" PASS:  COMPREHENSIVE SSOT VIOLATION REPORT GENERATED")
+        logger.critical("[U+1F4CB] Report available for refactor planning and validation")
 
 
 # Standalone execution for direct violation inventory
@@ -614,28 +614,28 @@ if __name__ == "__main__":
     # Execute tests
     total_violations = 0
     for test_name, test_func in tests:
-        print(f"\n🔍 Running: {test_name}")
+        print(f"\n SEARCH:  Running: {test_name}")
         try:
             result = test_func()
             
             if isinstance(result, bool):
                 if result:
-                    print(f"   Result: 🚨 VIOLATIONS FOUND")
+                    print(f"   Result:  ALERT:  VIOLATIONS FOUND")
                     total_violations += 1
                 else:
-                    print(f"   Result: ✅ NO VIOLATIONS")
+                    print(f"   Result:  PASS:  NO VIOLATIONS")
             elif isinstance(result, dict):
                 violation_count = result.get('total_jwt_operations', 0) or result.get('total_fallback_patterns', 0)
                 if violation_count > 0:
-                    print(f"   Result: 🚨 {violation_count} VIOLATIONS CATALOGED")
+                    print(f"   Result:  ALERT:  {violation_count} VIOLATIONS CATALOGED")
                     total_violations += violation_count
                 else:
-                    print(f"   Result: ✅ NO VIOLATIONS CATALOGED")
+                    print(f"   Result:  PASS:  NO VIOLATIONS CATALOGED")
             else:
-                print(f"   Result: ✅ INVENTORY COMPLETED")
+                print(f"   Result:  PASS:  INVENTORY COMPLETED")
                 
         except Exception as e:
-            print(f"   Result: ❌ ERROR - {str(e)}")
+            print(f"   Result:  FAIL:  ERROR - {str(e)}")
     
     # Generate final summary
     print("\n" + "=" * 60)
@@ -648,20 +648,20 @@ if __name__ == "__main__":
     fallback_count = final_report['fallback_patterns']['total_fallback_patterns']
     modules_count = final_report['operations_catalog']['modules_with_jwt_operations']
     
-    print(f"🚨 Backend JWT Operations: {operations_count}")
-    print(f"🚨 JWT Fallback Patterns: {fallback_count}")
-    print(f"📍 Modules with Violations: {modules_count}")
-    print(f"💰 Business Protection: {final_report['business_protection']}")
+    print(f" ALERT:  Backend JWT Operations: {operations_count}")
+    print(f" ALERT:  JWT Fallback Patterns: {fallback_count}")
+    print(f" PIN:  Modules with Violations: {modules_count}")
+    print(f"[U+1F4B0] Business Protection: {final_report['business_protection']}")
     
     if operations_count > 0 or fallback_count > 0:
-        print("\n✅ INVENTORY SUCCESS: SSOT violations cataloged")
-        print("🎯 REFACTOR READY: Use catalog to guide violation removal")
-        print("✅ VALIDATION READY: Tests will FAIL when violations removed")
+        print("\n PASS:  INVENTORY SUCCESS: SSOT violations cataloged")
+        print(" TARGET:  REFACTOR READY: Use catalog to guide violation removal")
+        print(" PASS:  VALIDATION READY: Tests will FAIL when violations removed")
         exit_code = 0
     else:
-        print("\n⚠️ UNEXPECTED: No violations found in inventory")
-        print("🔍 INVESTIGATE: May indicate refactor already completed")
-        print("📋 BASELINE: Use as compliance validation")
+        print("\n WARNING: [U+FE0F] UNEXPECTED: No violations found in inventory")
+        print(" SEARCH:  INVESTIGATE: May indicate refactor already completed")
+        print("[U+1F4CB] BASELINE: Use as compliance validation")
         exit_code = 1
         
     print("=" * 60)

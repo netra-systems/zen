@@ -338,32 +338,32 @@ def main():
         print("="*60)
         
         if report['circular_dependencies']:
-            print(f"\n❌ Found {len(report['circular_dependencies'])} circular dependencies:")
+            print(f"\n FAIL:  Found {len(report['circular_dependencies'])} circular dependencies:")
             for dep in report['circular_dependencies']:
                 print(f"  [{dep['severity']}] {dep['cycle']}")
         else:
-            print("\n✅ No circular dependencies found!")
+            print("\n PASS:  No circular dependencies found!")
         
         if report['critical_issues']:
-            print(f"\n❌ Critical issues found:")
+            print(f"\n FAIL:  Critical issues found:")
             for issue in report['critical_issues']:
                 print(f"  [{issue['severity']}] {issue['module']} imports {issue['forbidden_import']}")
         
         if report['import_depths']:
-            print(f"\n⚠️  Modules with excessive import depth (>10):")
+            print(f"\n WARNING: [U+FE0F]  Modules with excessive import depth (>10):")
             for module, depth in sorted(report['import_depths'].items(), key=lambda x: x[1], reverse=True)[:5]:
                 print(f"  {module}: depth {depth}")
         
         if report['recommendations']:
-            print("\n📋 Recommendations:")
+            print("\n[U+1F4CB] Recommendations:")
             for rec in report['recommendations']:
-                print(f"  • {rec}")
+                print(f"  [U+2022] {rec}")
         
         # Exit with error code if issues found
         if report['circular_dependencies'] or report['critical_issues']:
             sys.exit(1)
         else:
-            print("\n✅ All checks passed!")
+            print("\n PASS:  All checks passed!")
             sys.exit(0)
 
 if __name__ == '__main__':

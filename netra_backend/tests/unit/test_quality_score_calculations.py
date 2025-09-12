@@ -69,7 +69,7 @@ class TestQualityScoreCalculations(BaseTestCase):
         ```python
         import redis
         pool = redis.ConnectionPool(host='localhost', port=6379, socket_timeout=5)
-        client = redis.Redis(connection_pool=pool)
+        client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
         ```
         
         Set max_connections=100 for high-throughput scenarios.
@@ -167,9 +167,9 @@ class TestQualityScoreCalculations(BaseTestCase):
         4. Set up Redis Cluster for horizontal scaling
         
         Expected Impact:
-        - Latency reduction: 150ms → 50ms (67% improvement)
-        - Throughput increase: 500 QPS → 1500 QPS (3x improvement)
-        - Memory efficiency gain: 35% → 15% fragmentation
+        - Latency reduction: 150ms  ->  50ms (67% improvement)
+        - Throughput increase: 500 QPS  ->  1500 QPS (3x improvement)
+        - Memory efficiency gain: 35%  ->  15% fragmentation
         
         Implementation Timeline: 2-week phased rollout with performance monitoring.
         """

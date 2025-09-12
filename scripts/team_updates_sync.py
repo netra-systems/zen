@@ -45,11 +45,11 @@ def generate_simple_report(time_frame="last_day"):
     start_time = end_time - timedelta(hours=hours)
     
     report_lines = [
-        f"# 📊 Team Update Report",
+        f"#  CHART:  Team Update Report",
         f"Generated: {end_time.strftime('%Y-%m-%d %H:%M')}",
         f"Time Frame: {time_frame.replace('_', ' ').title()}",
         "",
-        "## 📋 Executive Summary"
+        "## [U+1F4CB] Executive Summary"
     ]
     
     # Get recent git commits
@@ -76,9 +76,9 @@ def generate_simple_report(time_frame="last_day"):
         if unified.exists():
             content = unified.read_text(encoding='utf-8', errors='ignore')[:500]
             if "PASSED" in content:
-                report_lines.append("- **Test Status**: ✅ Tests passing")
+                report_lines.append("- **Test Status**:  PASS:  Tests passing")
             elif "FAILED" in content:
-                report_lines.append("- **Test Status**: ❌ Some tests failing")
+                report_lines.append("- **Test Status**:  FAIL:  Some tests failing")
     
     # Check compliance
     try:
@@ -87,9 +87,9 @@ def generate_simple_report(time_frame="last_day"):
             capture_output=True, text=True, timeout=10
         )
         if "compliant" in result.stdout.lower():
-            report_lines.append("- **Compliance**: ✅ Architecture compliant")
+            report_lines.append("- **Compliance**:  PASS:  Architecture compliant")
         else:
-            report_lines.append("- **Compliance**: ⚠️ Some violations found")
+            report_lines.append("- **Compliance**:  WARNING: [U+FE0F] Some violations found")
     except Exception:
         report_lines.append("- **Compliance**: Unable to check")
     
@@ -105,7 +105,7 @@ def generate_simple_report(time_frame="last_day"):
     # Get top changed files
     report_lines.extend([
         "",
-        "## 📁 Top 10 Files to Review",
+        "## [U+1F4C1] Top 10 Files to Review",
         "*Most changed files in this period:*",
         ""
     ])
@@ -128,10 +128,10 @@ def generate_simple_report(time_frame="last_day"):
     # Add sections
     report_lines.extend([
         "",
-        "## ✨ Recent Activity",
+        "## [U+2728] Recent Activity",
         f"Team has been active in the {time_frame.replace('_', ' ')}.",
         "",
-        "## 🚀 How to Generate This Report",
+        "## [U+1F680] How to Generate This Report",
         "",
         "### Option 1: Direct CLI Command",
         "```bash",

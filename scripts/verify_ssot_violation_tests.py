@@ -37,10 +37,10 @@ def verify_test_imports() -> Dict[str, bool]:
         try:
             __import__(module_path)
             results[test_name] = True
-            logger.info(f"✅ {test_name}: Import successful")
+            logger.info(f" PASS:  {test_name}: Import successful")
         except Exception as e:
             results[test_name] = False
-            logger.error(f"❌ {test_name}: Import failed - {e}")
+            logger.error(f" FAIL:  {test_name}: Import failed - {e}")
     
     return results
 
@@ -101,33 +101,33 @@ def verify_test_structure() -> Dict[str, Dict[str, Any]]:
         }
         
     except Exception as e:
-        logger.error(f"❌ Test structure verification failed: {e}")
+        logger.error(f" FAIL:  Test structure verification failed: {e}")
     
     return test_info
 
 
 def generate_verification_report() -> None:
     """Generate comprehensive verification report."""
-    logger.info("🚨 SSOT VIOLATION TESTS VERIFICATION REPORT")
+    logger.info(" ALERT:  SSOT VIOLATION TESTS VERIFICATION REPORT")
     logger.info("=" * 60)
     
     # Verify imports
-    logger.info("\n📦 IMPORT VERIFICATION:")
+    logger.info("\n[U+1F4E6] IMPORT VERIFICATION:")
     import_results = verify_test_imports()
     
     successful_imports = sum(1 for result in import_results.values() if result)
     total_tests = len(import_results)
     
-    logger.info(f"\n📊 Import Summary: {successful_imports}/{total_tests} tests import successfully")
+    logger.info(f"\n CHART:  Import Summary: {successful_imports}/{total_tests} tests import successfully")
     
     if successful_imports == total_tests:
-        logger.info("✅ ALL TESTS IMPORT SUCCESSFULLY")
+        logger.info(" PASS:  ALL TESTS IMPORT SUCCESSFULLY")
     else:
-        logger.error("❌ SOME TESTS HAVE IMPORT ISSUES")
+        logger.error(" FAIL:  SOME TESTS HAVE IMPORT ISSUES")
         return
     
     # Verify structure
-    logger.info("\n🏗️ TEST STRUCTURE VERIFICATION:")
+    logger.info("\n[U+1F3D7][U+FE0F] TEST STRUCTURE VERIFICATION:")
     test_structure = verify_test_structure()
     
     total_methods = 0
@@ -139,10 +139,10 @@ def generate_verification_report() -> None:
         for method in info["method_list"]:
             logger.info(f"    - {method}")
     
-    logger.info(f"\n📊 Structure Summary: {len(test_structure)} test classes, {total_methods} total test methods")
+    logger.info(f"\n CHART:  Structure Summary: {len(test_structure)} test classes, {total_methods} total test methods")
     
     # Violation coverage verification
-    logger.info("\n🎯 VIOLATION COVERAGE VERIFICATION:")
+    logger.info("\n TARGET:  VIOLATION COVERAGE VERIFICATION:")
     
     violation_coverage = {
         "JWT Bypass (verify_signature: False)": "JWT Bypass" in test_structure,
@@ -153,26 +153,26 @@ def generate_verification_report() -> None:
     }
     
     for violation, covered in violation_coverage.items():
-        status = "✅" if covered else "❌"
+        status = " PASS: " if covered else " FAIL: "
         logger.info(f"  {status} {violation}")
     
     covered_violations = sum(1 for covered in violation_coverage.values() if covered)
     total_violations = len(violation_coverage)
     
-    logger.info(f"\n📊 Coverage Summary: {covered_violations}/{total_violations} SSOT violations covered")
+    logger.info(f"\n CHART:  Coverage Summary: {covered_violations}/{total_violations} SSOT violations covered")
     
     # Final assessment
-    logger.info("\n🏁 FINAL ASSESSMENT:")
+    logger.info("\n[U+1F3C1] FINAL ASSESSMENT:")
     
     if successful_imports == total_tests and covered_violations == total_violations:
-        logger.info("🎉 SUCCESS: All SSOT violation reproduction tests are ready!")
-        logger.info("🎯 NEXT STEPS:")
+        logger.info(" CELEBRATION:  SUCCESS: All SSOT violation reproduction tests are ready!")
+        logger.info(" TARGET:  NEXT STEPS:")
         logger.info("  1. Execute tests to confirm they expose violations")
         logger.info("  2. Implement SSOT fixes to resolve violations")
         logger.info("  3. Verify tests fail after SSOT compliance")
         logger.info("  4. Add to mission critical test suite")
         
-        logger.info("\n📋 EXECUTION COMMANDS:")
+        logger.info("\n[U+1F4CB] EXECUTION COMMANDS:")
         logger.info("  # Run all violation tests:")
         logger.info("  python -m pytest tests/mission_critical/test_*_violation.py tests/e2e/test_golden_path_auth_ssot_compliance.py -v")
         logger.info("  ")
@@ -180,7 +180,7 @@ def generate_verification_report() -> None:
         logger.info("  python -m pytest tests/mission_critical/test_websocket_jwt_bypass_violation.py -v")
         
     else:
-        logger.error("❌ ISSUES DETECTED: Tests need attention before execution")
+        logger.error(" FAIL:  ISSUES DETECTED: Tests need attention before execution")
     
     logger.info("\n" + "=" * 60)
     logger.info("SSOT VIOLATION TESTS VERIFICATION COMPLETE")

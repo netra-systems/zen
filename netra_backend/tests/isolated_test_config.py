@@ -14,7 +14,7 @@ Features:
 - Environment-specific database settings
 - Cleanup automation and resource management
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import asyncio

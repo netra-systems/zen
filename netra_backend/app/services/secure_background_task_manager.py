@@ -4,7 +4,7 @@ SECURITY CRITICAL: This module provides secure background task management with m
 user context isolation to prevent data leakage between users in background processing.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure secure background processing with user isolation
 - Value Impact: Prevents user data mixing in async tasks and background operations
 - Revenue Impact: Prevents security breaches and maintains user trust

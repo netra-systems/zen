@@ -1,7 +1,7 @@
 """Integration Test for WebSocket Message Handler Context Regression - CRITICAL Business Impact
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Chat is the primary value delivery mechanism
+- Segment: ALL (Free  ->  Enterprise) - Chat is the primary value delivery mechanism
 - Business Goal: Preserve conversation continuity in multi-turn chat interactions
 - Value Impact: CRITICAL - Prevents conversation history loss and broken user experience
 - Strategic/Revenue Impact: $500K+ ARR at risk - Chat experience is core product differentiation

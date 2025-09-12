@@ -81,7 +81,7 @@ class TestWebSocketProxyConfiguration:
         
         This test isolates the HTTP -> WebSocket upgrade process at the GCP Load Balancer level.
         """
-        logger.info("🔍 Testing GCP Load Balancer WebSocket upgrade header handling")
+        logger.info(" SEARCH:  Testing GCP Load Balancer WebSocket upgrade header handling")
         
         websocket_url = staging_config.urls.websocket_url
         headers = {
@@ -101,9 +101,9 @@ class TestWebSocketProxyConfiguration:
         }
         
         try:
-            logger.info(f"🌐 Attempting WebSocket connection to: {websocket_url}")
-            logger.info(f"🔑 Auth token length: {len(staging_auth_token)} chars")
-            logger.info(f"📋 Headers: {list(headers.keys())}")
+            logger.info(f"[U+1F310] Attempting WebSocket connection to: {websocket_url}")
+            logger.info(f"[U+1F511] Auth token length: {len(staging_auth_token)} chars")
+            logger.info(f"[U+1F4CB] Headers: {list(headers.keys())}")
             
             # CRITICAL: Use minimal connection parameters to isolate infrastructure issues
             # No application-level optimizations - just raw WebSocket upgrade
@@ -128,8 +128,8 @@ class TestWebSocketProxyConfiguration:
                 "websocket_state": websocket.state.name if hasattr(websocket, 'state') else 'unknown'
             })
             
-            logger.info(f"✅ UNEXPECTED SUCCESS: WebSocket connection established in {connection_time:.2f}s")
-            logger.info(f"🔍 WebSocket state: {websocket.state.name if hasattr(websocket, 'state') else 'unknown'}")
+            logger.info(f" PASS:  UNEXPECTED SUCCESS: WebSocket connection established in {connection_time:.2f}s")
+            logger.info(f" SEARCH:  WebSocket state: {websocket.state.name if hasattr(websocket, 'state') else 'unknown'}")
             
             # If connection succeeds, test basic functionality
             test_message = {
@@ -140,19 +140,19 @@ class TestWebSocketProxyConfiguration:
             }
             
             await websocket.send(json.dumps(test_message))
-            logger.info("📤 Test message sent successfully")
+            logger.info("[U+1F4E4] Test message sent successfully")
             
             # Try to receive response (with timeout to avoid hanging)
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=10)
-                logger.info(f"📥 Received response: {response[:100]}...")
+                logger.info(f"[U+1F4E5] Received response: {response[:100]}...")
                 connection_attempt_data["response_received"] = True
             except asyncio.TimeoutError:
-                logger.warning("⏰ No response received within 10 seconds")
+                logger.warning("[U+23F0] No response received within 10 seconds")
                 connection_attempt_data["response_received"] = False
             
             await websocket.close()
-            logger.info("🔌 WebSocket connection closed cleanly")
+            logger.info("[U+1F50C] WebSocket connection closed cleanly")
             
             # CRITICAL: If we reach here, the infrastructure test PASSED when it should FAIL
             # This indicates the GCP Load Balancer is NOT the root cause of 1011 errors
@@ -174,21 +174,21 @@ class TestWebSocketProxyConfiguration:
                 "error_code": getattr(e, 'code', None)
             })
             
-            logger.error(f"❌ WebSocket connection failed as EXPECTED: {type(e).__name__}: {e}")
-            logger.info(f"⏱️  Connection attempt duration: {connection_time:.2f}s")
+            logger.error(f" FAIL:  WebSocket connection failed as EXPECTED: {type(e).__name__}: {e}")
+            logger.info(f"[U+23F1][U+FE0F]  Connection attempt duration: {connection_time:.2f}s")
             
             # Check for specific 1011 error
             if hasattr(e, 'code') and e.code == 1011:
-                logger.info("🎯 CONFIRMED: WebSocket 1011 internal error reproduced at infrastructure level")
-                logger.info("🔍 ROOT CAUSE IDENTIFIED: GCP Load Balancer or Cloud Run proxy configuration")
+                logger.info(" TARGET:  CONFIRMED: WebSocket 1011 internal error reproduced at infrastructure level")
+                logger.info(" SEARCH:  ROOT CAUSE IDENTIFIED: GCP Load Balancer or Cloud Run proxy configuration")
                 connection_attempt_data["root_cause_identified"] = "gcp_infrastructure_layer"
                 
                 # This is the EXPECTED failure - infrastructure layer issue confirmed
                 assert e.code == 1011, f"Expected 1011 error code, got {e.code}"
-                logger.info(f"✅ Infrastructure layer failure confirmed: {json.dumps(connection_attempt_data, indent=2)}")
+                logger.info(f" PASS:  Infrastructure layer failure confirmed: {json.dumps(connection_attempt_data, indent=2)}")
                 return  # Test passes by confirming expected infrastructure failure
             else:
-                logger.warning(f"🤔 Unexpected error type: {e} (code: {getattr(e, 'code', 'N/A')})")
+                logger.warning(f"[U+1F914] Unexpected error type: {e} (code: {getattr(e, 'code', 'N/A')})")
                 connection_attempt_data["unexpected_error"] = True
                 
         except asyncio.TimeoutError:
@@ -200,12 +200,12 @@ class TestWebSocketProxyConfiguration:
                 "error_message": f"Connection timed out after {connection_time:.2f}s"
             })
             
-            logger.error(f"⏰ WebSocket connection timed out after {connection_time:.2f}s")
-            logger.info("🔍 TIMEOUT ANALYSIS: Indicates GCP Cloud Run infrastructure timeout")
+            logger.error(f"[U+23F0] WebSocket connection timed out after {connection_time:.2f}s")
+            logger.info(" SEARCH:  TIMEOUT ANALYSIS: Indicates GCP Cloud Run infrastructure timeout")
             connection_attempt_data["root_cause_identified"] = "gcp_cloud_run_timeout"
             
             # Timeout also indicates infrastructure layer issue
-            logger.info(f"✅ Infrastructure layer timeout confirmed: {json.dumps(connection_attempt_data, indent=2)}")
+            logger.info(f" PASS:  Infrastructure layer timeout confirmed: {json.dumps(connection_attempt_data, indent=2)}")
             assert connection_time >= 30, f"Expected timeout >= 30s, got {connection_time:.2f}s"
             return  # Test passes by confirming expected infrastructure timeout
             
@@ -219,8 +219,8 @@ class TestWebSocketProxyConfiguration:
                 "unexpected_error": True
             })
             
-            logger.error(f"🚨 Unexpected error type: {type(e).__name__}: {e}")
-            logger.info(f"🔍 Error details: {json.dumps(connection_attempt_data, indent=2)}")
+            logger.error(f" ALERT:  Unexpected error type: {type(e).__name__}: {e}")
+            logger.info(f" SEARCH:  Error details: {json.dumps(connection_attempt_data, indent=2)}")
             
             # Re-raise unexpected errors for investigation
             raise
@@ -240,7 +240,7 @@ class TestWebSocketProxyConfiguration:
         
         This test validates GCP Cloud Run WebSocket timeout configuration.
         """
-        logger.info("⏰ Testing Cloud Run WebSocket timeout configuration")
+        logger.info("[U+23F0] Testing Cloud Run WebSocket timeout configuration")
         
         websocket_url = staging_config.urls.websocket_url
         headers = {
@@ -260,7 +260,7 @@ class TestWebSocketProxyConfiguration:
         websocket = None
         
         try:
-            logger.info(f"🌐 Establishing WebSocket connection for timeout test")
+            logger.info(f"[U+1F310] Establishing WebSocket connection for timeout test")
             
             # Connect with specific timeout settings
             websocket = await asyncio.wait_for(
@@ -276,11 +276,11 @@ class TestWebSocketProxyConfiguration:
             )
             
             connection_time = time.time() - start_time
-            logger.info(f"✅ WebSocket connected in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket connected in {connection_time:.2f}s")
             timeout_test_data["connection_time_seconds"] = connection_time
             
             # Test sustained connection for >30 seconds
-            logger.info("⏱️  Testing connection sustainability for 40 seconds...")
+            logger.info("[U+23F1][U+FE0F]  Testing connection sustainability for 40 seconds...")
             
             for i in range(8):  # 8 * 5 = 40 seconds
                 await asyncio.sleep(5)
@@ -295,9 +295,9 @@ class TestWebSocketProxyConfiguration:
                 
                 try:
                     await websocket.send(json.dumps(test_msg))
-                    logger.info(f"📤 Message {i+1}/8 sent at {elapsed:.1f}s")
+                    logger.info(f"[U+1F4E4] Message {i+1}/8 sent at {elapsed:.1f}s")
                 except Exception as send_error:
-                    logger.error(f"❌ Message send failed at {elapsed:.1f}s: {send_error}")
+                    logger.error(f" FAIL:  Message send failed at {elapsed:.1f}s: {send_error}")
                     timeout_test_data["failed_at_seconds"] = elapsed
                     timeout_test_data["failure_reason"] = f"send_error_{type(send_error).__name__}"
                     break
@@ -306,8 +306,8 @@ class TestWebSocketProxyConfiguration:
             timeout_test_data["total_duration_seconds"] = total_duration
             
             if total_duration >= 35:
-                logger.info(f"🎯 UNEXPECTED SUCCESS: Connection sustained for {total_duration:.1f}s")
-                logger.info("🔍 ANALYSIS: Cloud Run timeout configuration allows long connections")
+                logger.info(f" TARGET:  UNEXPECTED SUCCESS: Connection sustained for {total_duration:.1f}s")
+                logger.info(" SEARCH:  ANALYSIS: Cloud Run timeout configuration allows long connections")
                 timeout_test_data["success"] = True
                 timeout_test_data["root_cause_analysis"] = "cloud_run_timeout_not_the_issue"
                 
@@ -319,13 +319,13 @@ class TestWebSocketProxyConfiguration:
                     f"Timeout test data: {json.dumps(timeout_test_data, indent=2)}"
                 )
             else:
-                logger.warning(f"⚠️  Connection ended early at {total_duration:.1f}s")
+                logger.warning(f" WARNING: [U+FE0F]  Connection ended early at {total_duration:.1f}s")
                 timeout_test_data["ended_early"] = True
             
         except asyncio.TimeoutError:
             elapsed = time.time() - start_time
-            logger.error(f"⏰ EXPECTED FAILURE: Connection timed out at {elapsed:.1f}s")
-            logger.info("🎯 CONFIRMED: Cloud Run timeout configuration is causing failures")
+            logger.error(f"[U+23F0] EXPECTED FAILURE: Connection timed out at {elapsed:.1f}s")
+            logger.info(" TARGET:  CONFIRMED: Cloud Run timeout configuration is causing failures")
             timeout_test_data.update({
                 "failed_at_seconds": elapsed,
                 "failure_reason": "cloud_run_timeout",
@@ -334,12 +334,12 @@ class TestWebSocketProxyConfiguration:
             
             # This is expected failure - confirms Cloud Run timeout issue
             assert elapsed < 35, f"Expected timeout <35s, connection lasted {elapsed:.1f}s"
-            logger.info(f"✅ Cloud Run timeout failure confirmed: {json.dumps(timeout_test_data, indent=2)}")
+            logger.info(f" PASS:  Cloud Run timeout failure confirmed: {json.dumps(timeout_test_data, indent=2)}")
             return  # Test passes by confirming expected timeout
             
         except (ConnectionClosedError, InvalidStatus) as e:
             elapsed = time.time() - start_time
-            logger.error(f"❌ EXPECTED FAILURE: WebSocket error at {elapsed:.1f}s: {e}")
+            logger.error(f" FAIL:  EXPECTED FAILURE: WebSocket error at {elapsed:.1f}s: {e}")
             timeout_test_data.update({
                 "failed_at_seconds": elapsed,
                 "failure_reason": f"websocket_{type(e).__name__}",
@@ -347,17 +347,17 @@ class TestWebSocketProxyConfiguration:
             })
             
             if hasattr(e, 'code') and e.code == 1011:
-                logger.info("🎯 CONFIRMED: 1011 error during sustained connection test")
+                logger.info(" TARGET:  CONFIRMED: 1011 error during sustained connection test")
                 timeout_test_data["root_cause_identified"] = "websocket_1011_during_sustained_connection"
             
-            logger.info(f"✅ WebSocket failure confirmed: {json.dumps(timeout_test_data, indent=2)}")
+            logger.info(f" PASS:  WebSocket failure confirmed: {json.dumps(timeout_test_data, indent=2)}")
             return  # Test passes by confirming expected failure
             
         finally:
             if websocket:
                 try:
                     await websocket.close()
-                    logger.info("🔌 WebSocket connection closed cleanly")
+                    logger.info("[U+1F50C] WebSocket connection closed cleanly")
                 except:
                     pass  # Ignore errors during cleanup
     
@@ -377,7 +377,7 @@ class TestWebSocketProxyConfiguration:
         
         This test validates WebSocket subprotocol negotiation at the infrastructure level.
         """
-        logger.info("🔗 Testing WebSocket subprotocol negotiation")
+        logger.info("[U+1F517] Testing WebSocket subprotocol negotiation")
         
         websocket_url = staging_config.urls.websocket_url
         headers = {
@@ -399,7 +399,7 @@ class TestWebSocketProxyConfiguration:
         start_time = time.time()
         
         try:
-            logger.info(f"🌐 Testing subprotocol negotiation with: {subprotocols}")
+            logger.info(f"[U+1F310] Testing subprotocol negotiation with: {subprotocols}")
             
             # Test WebSocket connection with subprotocols
             websocket = await asyncio.wait_for(
@@ -422,12 +422,12 @@ class TestWebSocketProxyConfiguration:
                 "subprotocol_negotiation_successful": accepted_subprotocol is not None
             })
             
-            logger.info(f"✅ UNEXPECTED SUCCESS: Subprotocol negotiation succeeded in {connection_time:.2f}s")
-            logger.info(f"🔗 Accepted subprotocol: {accepted_subprotocol}")
+            logger.info(f" PASS:  UNEXPECTED SUCCESS: Subprotocol negotiation succeeded in {connection_time:.2f}s")
+            logger.info(f"[U+1F517] Accepted subprotocol: {accepted_subprotocol}")
             
             # Test if subprotocol is working correctly
             if accepted_subprotocol:
-                logger.info(f"🎯 Subprotocol '{accepted_subprotocol}' was accepted by server")
+                logger.info(f" TARGET:  Subprotocol '{accepted_subprotocol}' was accepted by server")
                 
                 # Send test message to verify subprotocol functionality
                 test_message = {
@@ -437,19 +437,19 @@ class TestWebSocketProxyConfiguration:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.info("📤 Subprotocol test message sent")
+                logger.info("[U+1F4E4] Subprotocol test message sent")
                 
                 # Try to receive response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=10)
-                    logger.info(f"📥 Subprotocol response received: {response[:100]}...")
+                    logger.info(f"[U+1F4E5] Subprotocol response received: {response[:100]}...")
                     subprotocol_test_data["response_received"] = True
                 except asyncio.TimeoutError:
-                    logger.warning("⏰ No subprotocol response within 10 seconds")
+                    logger.warning("[U+23F0] No subprotocol response within 10 seconds")
                     subprotocol_test_data["response_received"] = False
             
             await websocket.close()
-            logger.info("🔌 WebSocket connection closed cleanly")
+            logger.info("[U+1F50C] WebSocket connection closed cleanly")
             
             # If subprotocol negotiation succeeds, infrastructure is NOT the issue
             pytest.fail(
@@ -469,27 +469,27 @@ class TestWebSocketProxyConfiguration:
                 "error_code": getattr(e, 'code', None)
             })
             
-            logger.error(f"❌ EXPECTED FAILURE: Subprotocol negotiation failed: {e}")
+            logger.error(f" FAIL:  EXPECTED FAILURE: Subprotocol negotiation failed: {e}")
             
             if hasattr(e, 'code') and e.code == 1011:
-                logger.info("🎯 CONFIRMED: 1011 error during subprotocol negotiation")
+                logger.info(" TARGET:  CONFIRMED: 1011 error during subprotocol negotiation")
                 subprotocol_test_data["root_cause_identified"] = "subprotocol_negotiation_1011"
                 
                 # Check if specific subprotocols are causing issues
                 if "jwt-auth" in subprotocols:
-                    logger.info("🔍 JWT-auth subprotocol appears to be rejected by infrastructure")
+                    logger.info(" SEARCH:  JWT-auth subprotocol appears to be rejected by infrastructure")
                     subprotocol_test_data["jwt_auth_rejected"] = True
                 
-                logger.info(f"✅ Subprotocol infrastructure failure confirmed: {json.dumps(subprotocol_test_data, indent=2)}")
+                logger.info(f" PASS:  Subprotocol infrastructure failure confirmed: {json.dumps(subprotocol_test_data, indent=2)}")
                 assert e.code == 1011, f"Expected 1011 error code, got {e.code}"
                 return  # Test passes by confirming expected infrastructure failure
             else:
-                logger.warning(f"🤔 Unexpected subprotocol error: {e}")
+                logger.warning(f"[U+1F914] Unexpected subprotocol error: {e}")
                 subprotocol_test_data["unexpected_error"] = True
                 
         except asyncio.TimeoutError:
             connection_time = time.time() - start_time
-            logger.error(f"⏰ Subprotocol negotiation timed out after {connection_time:.2f}s")
+            logger.error(f"[U+23F0] Subprotocol negotiation timed out after {connection_time:.2f}s")
             subprotocol_test_data.update({
                 "connection_successful": False,
                 "connection_time_seconds": connection_time,
@@ -497,12 +497,12 @@ class TestWebSocketProxyConfiguration:
                 "root_cause_identified": "subprotocol_negotiation_timeout"
             })
             
-            logger.info(f"✅ Subprotocol timeout confirmed: {json.dumps(subprotocol_test_data, indent=2)}")
+            logger.info(f" PASS:  Subprotocol timeout confirmed: {json.dumps(subprotocol_test_data, indent=2)}")
             return  # Test passes by confirming expected timeout
             
         except Exception as e:
             connection_time = time.time() - start_time
-            logger.error(f"🚨 Unexpected subprotocol error: {type(e).__name__}: {e}")
+            logger.error(f" ALERT:  Unexpected subprotocol error: {type(e).__name__}: {e}")
             subprotocol_test_data.update({
                 "connection_successful": False,
                 "connection_time_seconds": connection_time,
@@ -511,7 +511,7 @@ class TestWebSocketProxyConfiguration:
                 "unexpected_error": True
             })
             
-            logger.info(f"🔍 Unexpected subprotocol error details: {json.dumps(subprotocol_test_data, indent=2)}")
+            logger.info(f" SEARCH:  Unexpected subprotocol error details: {json.dumps(subprotocol_test_data, indent=2)}")
             raise
     
     @pytest.mark.unit
@@ -528,7 +528,7 @@ class TestWebSocketProxyConfiguration:
         This test performs a comprehensive analysis of all infrastructure components
         to definitively isolate where 1011 errors originate.
         """
-        logger.info("🔬 Performing comprehensive WebSocket infrastructure diagnosis")
+        logger.info("[U+1F52C] Performing comprehensive WebSocket infrastructure diagnosis")
         
         diagnosis_results = {
             "test_name": "websocket_infrastructure_comprehensive_diagnosis",
@@ -541,7 +541,7 @@ class TestWebSocketProxyConfiguration:
         }
         
         # Test 1: Basic HTTP connectivity to backend
-        logger.info("🌐 Testing HTTP connectivity to staging backend...")
+        logger.info("[U+1F310] Testing HTTP connectivity to staging backend...")
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{staging_config.urls.backend_url}/health", timeout=10) as resp:
@@ -553,17 +553,17 @@ class TestWebSocketProxyConfiguration:
                 "status_code": http_status,
                 "response_length": len(http_response)
             }
-            logger.info(f"✅ HTTP connectivity: {http_status}")
+            logger.info(f" PASS:  HTTP connectivity: {http_status}")
             
         except Exception as e:
             diagnosis_results["test_results"]["http_connectivity"] = {
                 "success": False,
                 "error": str(e)
             }
-            logger.error(f"❌ HTTP connectivity failed: {e}")
+            logger.error(f" FAIL:  HTTP connectivity failed: {e}")
         
         # Test 2: DNS resolution and SSL verification
-        logger.info("🔍 Testing DNS resolution and SSL verification...")
+        logger.info(" SEARCH:  Testing DNS resolution and SSL verification...")
         try:
             # Extract hostname from WebSocket URL
             parsed_url = urllib.parse.urlparse(staging_config.urls.websocket_url)
@@ -577,7 +577,7 @@ class TestWebSocketProxyConfiguration:
                 "hostname": hostname,
                 "ip_address": ip_address
             }
-            logger.info(f"✅ DNS resolution: {hostname} -> {ip_address}")
+            logger.info(f" PASS:  DNS resolution: {hostname} -> {ip_address}")
             
             # Test SSL connection
             if parsed_url.scheme == 'wss':
@@ -593,17 +593,17 @@ class TestWebSocketProxyConfiguration:
                     "cert_issuer": cert.get('issuer', []),
                     "cert_version": cert.get('version')
                 }
-                logger.info(f"✅ SSL verification successful")
+                logger.info(f" PASS:  SSL verification successful")
             
         except Exception as e:
             diagnosis_results["test_results"]["dns_ssl"] = {
                 "success": False,
                 "error": str(e)
             }
-            logger.error(f"❌ DNS/SSL verification failed: {e}")
+            logger.error(f" FAIL:  DNS/SSL verification failed: {e}")
         
         # Test 3: WebSocket upgrade with minimal settings
-        logger.info("🔄 Testing WebSocket upgrade with minimal settings...")
+        logger.info(" CYCLE:  Testing WebSocket upgrade with minimal settings...")
         try:
             start_time = time.time()
             websocket = await asyncio.wait_for(
@@ -625,7 +625,7 @@ class TestWebSocketProxyConfiguration:
                 "success": True,
                 "connection_time_seconds": connection_time
             }
-            logger.info(f"✅ WebSocket upgrade succeeded in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket upgrade succeeded in {connection_time:.2f}s")
             
         except Exception as e:
             diagnosis_results["test_results"]["websocket_upgrade_minimal"] = {
@@ -634,10 +634,10 @@ class TestWebSocketProxyConfiguration:
                 "error_type": type(e).__name__,
                 "error_code": getattr(e, 'code', None)
             }
-            logger.error(f"❌ WebSocket upgrade failed: {e}")
+            logger.error(f" FAIL:  WebSocket upgrade failed: {e}")
         
         # Test 4: WebSocket upgrade with full E2E headers
-        logger.info("🔧 Testing WebSocket upgrade with full E2E headers...")
+        logger.info("[U+1F527] Testing WebSocket upgrade with full E2E headers...")
         try:
             headers = auth_helper.get_websocket_headers(staging_auth_token)
             subprotocols = auth_helper.get_websocket_subprotocols(staging_auth_token)
@@ -664,7 +664,7 @@ class TestWebSocketProxyConfiguration:
                 "subprotocols_count": len(subprotocols),
                 "accepted_subprotocol": accepted_subprotocol
             }
-            logger.info(f"✅ Full WebSocket upgrade succeeded in {connection_time:.2f}s")
+            logger.info(f" PASS:  Full WebSocket upgrade succeeded in {connection_time:.2f}s")
             
         except Exception as e:
             diagnosis_results["test_results"]["websocket_upgrade_full"] = {
@@ -673,10 +673,10 @@ class TestWebSocketProxyConfiguration:
                 "error_type": type(e).__name__,
                 "error_code": getattr(e, 'code', None)
             }
-            logger.error(f"❌ Full WebSocket upgrade failed: {e}")
+            logger.error(f" FAIL:  Full WebSocket upgrade failed: {e}")
         
         # Analysis: Determine root cause based on test results
-        logger.info("🧪 Analyzing comprehensive test results...")
+        logger.info("[U+1F9EA] Analyzing comprehensive test results...")
         
         infrastructure_failures = []
         application_failures = []
@@ -701,16 +701,16 @@ class TestWebSocketProxyConfiguration:
         
         if infrastructure_failures:
             diagnosis_results["conclusion"] = "INFRASTRUCTURE_LAYER_ISSUE"
-            logger.info(f"🎯 CONCLUSION: Infrastructure layer issues detected in: {infrastructure_failures}")
+            logger.info(f" TARGET:  CONCLUSION: Infrastructure layer issues detected in: {infrastructure_failures}")
         elif application_failures:
             diagnosis_results["conclusion"] = "APPLICATION_LAYER_ISSUE"
-            logger.info(f"🎯 CONCLUSION: Application layer issues detected in: {application_failures}")
+            logger.info(f" TARGET:  CONCLUSION: Application layer issues detected in: {application_failures}")
         else:
             diagnosis_results["conclusion"] = "NO_ISSUES_DETECTED"
-            logger.info("🤔 CONCLUSION: No infrastructure issues detected - may be application-specific")
+            logger.info("[U+1F914] CONCLUSION: No infrastructure issues detected - may be application-specific")
         
         # Log comprehensive results
-        logger.info(f"📊 Comprehensive diagnosis results:")
+        logger.info(f" CHART:  Comprehensive diagnosis results:")
         logger.info(json.dumps(diagnosis_results, indent=2))
         
         # Assert based on findings
@@ -728,5 +728,5 @@ class TestWebSocketProxyConfiguration:
             )
         else:
             # Mixed results - need further investigation
-            logger.warning(f"🚨 Mixed test results require further investigation")
-            logger.info(f"📋 Full diagnosis: {json.dumps(diagnosis_results, indent=2)}")
+            logger.warning(f" ALERT:  Mixed test results require further investigation")
+            logger.info(f"[U+1F4CB] Full diagnosis: {json.dumps(diagnosis_results, indent=2)}")

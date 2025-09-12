@@ -25,9 +25,10 @@ VALIDATION RULES:
 - Invalid sequences must be rejected
 
 This ensures users see logical progression:
-"Agent started → Agent thinking → Tool executing → Tool completed → Agent completed"
+"Agent started  ->  Agent thinking  ->  Tool executing  ->  Tool completed  ->  Agent completed"
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -113,7 +114,7 @@ class WebSocketEventSequenceValidator:
         )
 
 
-class TestWebSocketEventSequenceValidation(unittest.TestCase):
+class TestWebSocketEventSequenceValidation(SSotBaseTestCase):
     """Test the business logic for WebSocket event sequence validation."""
     
     def setUp(self):
@@ -148,7 +149,7 @@ class TestWebSocketEventSequenceValidation(unittest.TestCase):
         self.assertFalse(self.validator.add_event(WebSocketEventType.AGENT_STARTED))
     
     def test_valid_minimal_sequence(self):
-        """Test the minimal valid sequence: agent_started → agent_completed."""
+        """Test the minimal valid sequence: agent_started  ->  agent_completed."""
         # Add agent_started
         self.assertTrue(self.validator.add_event(WebSocketEventType.AGENT_STARTED))
         
@@ -285,7 +286,7 @@ class TestWebSocketEventSequenceValidation(unittest.TestCase):
         self.assertTrue(self.validator.is_valid_complete_sequence())
 
 
-class TestEventSequenceStateManagement(unittest.TestCase):
+class TestEventSequenceStateManagement(SSotBaseTestCase):
     """Test state machine transitions for event sequence validation."""
     
     def setUp(self):
@@ -355,7 +356,7 @@ class TestEventSequenceStateManagement(unittest.TestCase):
         self.assertFalse(self.validator.is_valid_complete_sequence())
 
 
-class TestEventSequenceErrorPrevention(unittest.TestCase):
+class TestEventSequenceErrorPrevention(SSotBaseTestCase):
     """Test error prevention in event sequence validation."""
     
     def test_prevents_invalid_sequences(self):

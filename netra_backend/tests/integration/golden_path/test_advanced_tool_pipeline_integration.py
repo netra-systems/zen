@@ -360,7 +360,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         logger.info(f"Tool Chain Results: {len(successful_executions)}/{len(tool_executions)} successful ({success_rate:.2%})")
         
         # Validate tool chain success
-        assert success_rate >= 0.95, f"Tool chain success rate too low: {success_rate:.2%} (expected ≥95%)"
+        assert success_rate >= 0.95, f"Tool chain success rate too low: {success_rate:.2%} (expected  >= 95%)"
         
         # Validate dependency execution order
         dependency_violations = []
@@ -436,7 +436,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         ]]
         
         expected_tool_events = len(successful_executions) * 2  # executing + completed per tool
-        assert len(tool_events) >= expected_tool_events * 0.8, f"Insufficient WebSocket tool events: {len(tool_events)} (expected ≥{expected_tool_events * 0.8:.0f})"
+        assert len(tool_events) >= expected_tool_events * 0.8, f"Insufficient WebSocket tool events: {len(tool_events)} (expected  >= {expected_tool_events * 0.8:.0f})"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -697,9 +697,9 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         logger.info(f"  Recovery Success Rate: {recovery_success_rate:.2%}")
         
         # Validate error handling effectiveness
-        assert error_detection_rate >= 0.8, f"Error detection rate too low: {error_detection_rate:.2%} (expected ≥80%)"
-        assert recovery_attempt_rate >= 0.8, f"Recovery attempt rate too low: {recovery_attempt_rate:.2%} (expected ≥80%)"
-        assert recovery_success_rate >= 0.6, f"Recovery success rate too low: {recovery_success_rate:.2%} (expected ≥60%)"
+        assert error_detection_rate >= 0.8, f"Error detection rate too low: {error_detection_rate:.2%} (expected  >= 80%)"
+        assert recovery_attempt_rate >= 0.8, f"Recovery attempt rate too low: {recovery_attempt_rate:.2%} (expected  >= 80%)"
+        assert recovery_success_rate >= 0.6, f"Recovery success rate too low: {recovery_success_rate:.2%} (expected  >= 60%)"
         
         # Phase 3: Test error propagation in tool chains
         logger.info("Testing error propagation in tool chains")
@@ -1074,18 +1074,18 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         logger.info(f"Sequential time would be: {total_sequential_time:.1f}ms, Parallel time: {actual_parallel_time:.1f}ms")
         
         # Parallel execution should provide significant speedup
-        assert parallelization_efficiency >= 0.5, f"Parallelization efficiency too low: {parallelization_efficiency:.2%} (expected ≥50%)"
+        assert parallelization_efficiency >= 0.5, f"Parallelization efficiency too low: {parallelization_efficiency:.2%} (expected  >= 50%)"
         
         # Validate overall success rate
         overall_success_rate = comprehensive_summary["parallel_execution_summary"]["overall_success_rate"]
-        assert overall_success_rate >= 0.8, f"Overall tool success rate too low: {overall_success_rate:.2%} (expected ≥80%)"
+        assert overall_success_rate >= 0.8, f"Overall tool success rate too low: {overall_success_rate:.2%} (expected  >= 80%)"
         
         # Validate aggregation quality
         domains_with_data = len(aggregated_analysis)
         expected_domains = len(parallel_tool_groups)
         aggregation_coverage = domains_with_data / expected_domains
         
-        assert aggregation_coverage >= 0.75, f"Aggregation coverage too low: {aggregation_coverage:.2%} (expected ≥75%)"
+        assert aggregation_coverage >= 0.75, f"Aggregation coverage too low: {aggregation_coverage:.2%} (expected  >= 75%)"
         
         # Validate intelligent recommendations
         recommendations_count = len(comprehensive_summary["recommendations"])
@@ -1110,7 +1110,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         estimated_sequential_time = total_sequential_time / 1000  # Convert to seconds
         speedup_factor = estimated_sequential_time / execution_time if execution_time > 0 else 0
         
-        assert speedup_factor >= 2.0, f"Parallel speedup too low: {speedup_factor:.1f}x (expected ≥2.0x)"
+        assert speedup_factor >= 2.0, f"Parallel speedup too low: {speedup_factor:.1f}x (expected  >= 2.0x)"
         
         logger.info(f"Parallel tool execution test completed in {execution_time:.2f}s with {parallelization_efficiency:.2%} efficiency and {speedup_factor:.1f}x speedup")
 
@@ -1404,16 +1404,16 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Phase 5: Validate dynamic selection and optimization
         
         # Validate selection accuracy
-        assert avg_selection_accuracy >= 0.7, f"Tool selection accuracy too low: {avg_selection_accuracy:.2%} (expected ≥70%)"
+        assert avg_selection_accuracy >= 0.7, f"Tool selection accuracy too low: {avg_selection_accuracy:.2%} (expected  >= 70%)"
         
         # Validate adaptation capability
-        assert adaptation_rate >= 0.5, f"Adaptation rate too low: {adaptation_rate:.2f} (expected ≥0.5 adaptations per scenario)"
+        assert adaptation_rate >= 0.5, f"Adaptation rate too low: {adaptation_rate:.2f} (expected  >= 0.5 adaptations per scenario)"
         
         # Validate execution success rate
-        assert avg_success_rate >= 0.8, f"Tool execution success rate too low: {avg_success_rate:.2%} (expected ≥80%)"
+        assert avg_success_rate >= 0.8, f"Tool execution success rate too low: {avg_success_rate:.2%} (expected  >= 80%)"
         
         # Validate overall optimization effectiveness
-        assert path_optimization_summary["optimization_effectiveness"] >= 0.75, f"Optimization effectiveness too low: {path_optimization_summary['optimization_effectiveness']:.2%} (expected ≥75%)"
+        assert path_optimization_summary["optimization_effectiveness"] >= 0.75, f"Optimization effectiveness too low: {path_optimization_summary['optimization_effectiveness']:.2%} (expected  >= 75%)"
         
         # Validate WebSocket events for dynamic selection
         selection_events = [e for e in websocket_events if "selection" in e.get("type", "").lower()]
@@ -1433,7 +1433,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         estimated_static_time = total_scenarios * len(scenario["available_tools"][0] if scenario else []) * 5  # Assume 5s per tool
         efficiency_gain = (estimated_static_time - execution_time) / estimated_static_time if estimated_static_time > 0 else 0
         
-        assert efficiency_gain >= 0.3, f"Dynamic selection efficiency gain too low: {efficiency_gain:.2%} (expected ≥30%)"
+        assert efficiency_gain >= 0.3, f"Dynamic selection efficiency gain too low: {efficiency_gain:.2%} (expected  >= 30%)"
         
         logger.info(f"Dynamic tool selection test completed in {execution_time:.2f}s with {path_optimization_summary['optimization_effectiveness']:.2%} optimization effectiveness")
 
@@ -1744,7 +1744,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         logger.info(f"  Timeout accuracy: {timeout_accuracy:.2%}")
         logger.info(f"  Timeout events: {len(timeout_events)}")
         
-        assert timeout_accuracy >= 0.8, f"Timeout handling accuracy too low: {timeout_accuracy:.2%} (expected ≥80%)"
+        assert timeout_accuracy >= 0.8, f"Timeout handling accuracy too low: {timeout_accuracy:.2%} (expected  >= 80%)"
         
         # Validate circuit breaker behavior
         circuit_opened = any(event["event"] == "circuit_opened" for event in circuit_breaker_events)
@@ -1782,6 +1782,6 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             estimated_time_without_circuit_breaker = total_attempts * 2.0  # 2s timeout per attempt
             time_saved_ratio = (estimated_time_without_circuit_breaker - execution_time) / estimated_time_without_circuit_breaker
             
-            assert time_saved_ratio >= 0.2, f"Circuit breaker should have saved time: {time_saved_ratio:.2%} time saved (expected ≥20%)"
+            assert time_saved_ratio >= 0.2, f"Circuit breaker should have saved time: {time_saved_ratio:.2%} time saved (expected  >= 20%)"
         
         logger.info(f"Tool timeout and circuit breaker test completed in {execution_time:.2f}s with {timeout_accuracy:.2%} timeout accuracy")

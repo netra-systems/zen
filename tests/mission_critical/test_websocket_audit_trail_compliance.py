@@ -205,7 +205,7 @@ class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
         assert sox_queryable, \
             f"SOX audit entries not efficiently queryable with uuid.uuid4() patterns"
             
-        print(f"✅ Mission Critical: User action audit trail traceability validated")
+        print(f" PASS:  Mission Critical: User action audit trail traceability validated")
 
     def test_business_transaction_audit_integrity_EXPECTED_FAILURE(self):
         """
@@ -334,7 +334,7 @@ class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
         assert chain_hash == reconstructed_hash, \
             f"Audit chain integrity verification failed: {chain_hash} != {reconstructed_hash}"
             
-        print(f"✅ Mission Critical: Business transaction audit integrity validated")
+        print(f" PASS:  Mission Critical: Business transaction audit integrity validated")
 
     def test_regulatory_compliance_reporting_EXPECTED_FAILURE(self):
         """
@@ -494,7 +494,7 @@ class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
         assert len(temporally_queryable_entries) == len(time_range_entries), \
             f"Temporal compliance queries not supported with uuid.uuid4(): {len(temporally_queryable_entries)} != {len(time_range_entries)}"
             
-        print(f"✅ Mission Critical: Regulatory compliance reporting validated")
+        print(f" PASS:  Mission Critical: Regulatory compliance reporting validated")
         print(f"   SOX entries: {len(sox_entries)}")
         print(f"   GDPR entries: {len(gdpr_entries)}")
         print(f"   Time range entries: {len(time_range_entries)}")
@@ -646,7 +646,7 @@ class TestWebSocketAuditTrailComplianceMissionCritical(BaseMissionCriticalTest):
                 assert is_queryable, \
                     f"User security audit entry not efficiently queryable: {entry.audit_id} for pattern {user_query_pattern}"
                     
-        print(f"✅ Mission Critical: Security audit incident investigation validated")
+        print(f" PASS:  Mission Critical: Security audit incident investigation validated")
         print(f"   Incident timeline entries: {len(security_incident_timeline)}")
         print(f"   Users involved: {len(involved_users)}")
 

@@ -889,7 +889,7 @@ class TestUnifiedAuthCoreIntegration(BaseIntegrationTest):
         # Verify permission inheritance is not shared
         free_permissions = set(free_user["auth_result"].permissions)
         enterprise_permissions = set(enterprise_user["auth_result"].permissions)
-        assert free_permissions.issubset(enterprise_permissions)  # Free ⊆ Enterprise
+        assert free_permissions.issubset(enterprise_permissions)  # Free [U+2286] Enterprise
         assert free_permissions != enterprise_permissions  # But not equal
         
         self.logger.info(f"Session isolation validated between {len(authenticated_sessions)} users")

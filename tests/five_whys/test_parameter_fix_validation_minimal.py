@@ -47,7 +47,7 @@ class TestParameterStandardizationFix:
         assert user_context.run_id == run_id
         assert user_context.websocket_client_id == websocket_client_id
         
-        print(f"✅ UserExecutionContext accepts websocket_client_id parameter")
+        print(f" PASS:  UserExecutionContext accepts websocket_client_id parameter")
     
     def test_user_execution_context_rejects_websocket_connection_id_in_constructor(self):
         """Test that UserExecutionContext rejects the deprecated websocket_connection_id in constructor."""
@@ -68,7 +68,7 @@ class TestParameterStandardizationFix:
                 db_session=mock_db_session
             )
         
-        print(f"✅ UserExecutionContext properly rejects deprecated websocket_connection_id in constructor")
+        print(f" PASS:  UserExecutionContext properly rejects deprecated websocket_connection_id in constructor")
     
     def test_backward_compatibility_property_works(self):
         """Test that websocket_connection_id property provides backward compatibility."""
@@ -92,7 +92,7 @@ class TestParameterStandardizationFix:
         assert user_context.websocket_connection_id == websocket_client_id
         assert user_context.websocket_connection_id == user_context.websocket_client_id
         
-        print(f"✅ Backward compatibility property websocket_connection_id works correctly")
+        print(f" PASS:  Backward compatibility property websocket_connection_id works correctly")
     
     def test_parameter_interface_consistency(self):
         """Test that the parameter interface is consistent and follows FIVE WHYS fix."""
@@ -135,9 +135,9 @@ class TestParameterStandardizationFix:
         assert context_dict['websocket_client_id'] == test_websocket_id
         assert context_dict['websocket_connection_id'] == test_websocket_id
         
-        print(f"✅ Parameter interface consistency validated")
-        print(f"✅ FIVE WHYS fix working: websocket_client_id = {test_websocket_id}")
-        print(f"✅ Backward compatibility maintained: websocket_connection_id property works")
+        print(f" PASS:  Parameter interface consistency validated")
+        print(f" PASS:  FIVE WHYS fix working: websocket_client_id = {test_websocket_id}")
+        print(f" PASS:  Backward compatibility maintained: websocket_connection_id property works")
         
     def test_original_error_scenario_parameter_fix(self):
         """Test that the specific scenario from the original error report works."""
@@ -163,9 +163,9 @@ class TestParameterStandardizationFix:
         assert context.websocket_client_id == test_connection_id
         assert context.websocket_connection_id == test_connection_id  # Backward compatibility
         
-        print(f"✅ Original error scenario RESOLVED")
-        print(f"✅ User {original_error_user_id} context creation successful")
-        print(f"✅ Connection ID {test_connection_id} properly handled")
+        print(f" PASS:  Original error scenario RESOLVED")
+        print(f" PASS:  User {original_error_user_id} context creation successful")
+        print(f" PASS:  Connection ID {test_connection_id} properly handled")
 
 
 if __name__ == "__main__":

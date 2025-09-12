@@ -24,7 +24,7 @@ def integrate_ultra_optimization(runner, args) -> bool:
     from test_framework.archived.experimental.ultra_test_orchestrator import UltraTestOrchestrator
     
     # Run with ultra optimization
-    print("\n🚀 ULTRA OPTIMIZATION ENABLED - 100x Performance Mode")
+    print("\n[U+1F680] ULTRA OPTIMIZATION ENABLED - 100x Performance Mode")
     
     orchestrator = UltraTestOrchestrator()
     
@@ -146,7 +146,7 @@ def patch_test_runner():
     # Add integration to test framework
     test_framework_path = Path(__file__).parent
     
-    print("✅ Ultra Test Optimization patched successfully")
+    print(" PASS:  Ultra Test Optimization patched successfully")
     print("   Use --optimization ultra to enable 100x performance mode")
 
 # Monkey-patch helper for quick integration
@@ -157,4 +157,4 @@ def enable_ultra_mode():
     """
     import os
     os.environ['ULTRA_TEST_MODE'] = '1'
-    print("🚀 Ultra Test Mode enabled via environment variable")
+    print("[U+1F680] Ultra Test Mode enabled via environment variable")

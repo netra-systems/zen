@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 E2E Test for Golden Path State Registry Race Condition
 
@@ -27,11 +65,21 @@ from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketExce
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.docker import DockerTestUtility
 from test_framework.ssot.websocket import WebSocketTestUtility
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 
 
 class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     CRITICAL E2E TEST: Golden Path completely blocked by state_registry scope bug
     
@@ -58,9 +106,9 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         cls.auth_service_url = cls.docker_utility.ensure_auth_service()
         cls.websocket_url = f"ws://{cls.backend_url.replace('http://', '')}/ws"
         
-        logger.info(f"🔧 E2E TEST: Backend service at {cls.backend_url}")
-        logger.info(f"🔧 E2E TEST: Auth service at {cls.auth_service_url}")
-        logger.info(f"🔧 E2E TEST: WebSocket endpoint at {cls.websocket_url}")
+        logger.info(f"[U+1F527] E2E TEST: Backend service at {cls.backend_url}")
+        logger.info(f"[U+1F527] E2E TEST: Auth service at {cls.auth_service_url}")
+        logger.info(f"[U+1F527] E2E TEST: WebSocket endpoint at {cls.websocket_url}")
         
         # Wait for services to be ready
         cls._wait_for_service_readiness()
@@ -80,13 +128,13 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
                 auth_health = requests.get(f"{cls.auth_service_url}/health", timeout=2.0)
                 
                 if backend_health.status_code == 200 and auth_health.status_code == 200:
-                    logger.info("✅ All services are ready for E2E testing")
+                    logger.info(" PASS:  All services are ready for E2E testing")
                     return
                     
             except requests.RequestException:
                 pass
                 
-            logger.info("⏳ Waiting for services to be ready...")
+            logger.info("[U+23F3] Waiting for services to be ready...")
             time.sleep(1.0)
         
         raise RuntimeError("Services did not become ready within timeout period")
@@ -124,7 +172,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         EXPECTED RESULT: Complete failure at AI chat initiation due to scope bug
         This represents 100% business value loss for chat functionality.
         """
-        logger.info("🔴 E2E TEST: Testing complete Golden Path blocked by state_registry bug")
+        logger.info("[U+1F534] E2E TEST: Testing complete Golden Path blocked by state_registry bug")
         
         # PHASE 1: User Authentication (should succeed)
         await self._test_user_authentication_phase()
@@ -143,7 +191,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
     
     async def _test_user_authentication_phase(self):
         """Phase 1: Test user authentication (should work)"""
-        logger.info("🔵 PHASE 1: Testing user authentication")
+        logger.info("[U+1F535] PHASE 1: Testing user authentication")
         
         try:
             # Simulate user registration/login
@@ -160,23 +208,23 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
             
             if response.status_code in [200, 201, 409]:  # 409 = already exists, which is fine
                 self.golden_path_results["auth_success"] = True
-                logger.info("✅ PHASE 1: User authentication successful")
+                logger.info(" PASS:  PHASE 1: User authentication successful")
             else:
-                logger.error(f"🔴 PHASE 1: Auth failed with status {response.status_code}")
+                logger.error(f"[U+1F534] PHASE 1: Auth failed with status {response.status_code}")
                 self.golden_path_results["failure_point"] = "authentication"
                 self.golden_path_results["error_details"].append(f"Auth failed: {response.status_code}")
                 
         except Exception as e:
-            logger.error(f"🔴 PHASE 1: Authentication exception: {e}")
+            logger.error(f"[U+1F534] PHASE 1: Authentication exception: {e}")
             self.golden_path_results["failure_point"] = "authentication"
             self.golden_path_results["error_details"].append(f"Auth exception: {str(e)}")
     
     async def _test_websocket_connection_phase(self):
         """Phase 2: Test WebSocket connection (should succeed initially)"""
-        logger.info("🔵 PHASE 2: Testing WebSocket connection")
+        logger.info("[U+1F535] PHASE 2: Testing WebSocket connection")
         
         if not self.golden_path_results["auth_success"]:
-            logger.warning("⚠️ PHASE 2: Skipping WebSocket test - auth failed")
+            logger.warning(" WARNING: [U+FE0F] PHASE 2: Skipping WebSocket test - auth failed")
             return
         
         try:
@@ -188,22 +236,22 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
             ) as websocket:
                 
                 self.golden_path_results["websocket_connect"] = True
-                logger.info("✅ PHASE 2: WebSocket connection successful")
+                logger.info(" PASS:  PHASE 2: WebSocket connection successful")
                 
                 # Store websocket for next phase
                 self._websocket = websocket
                 
         except Exception as e:
-            logger.error(f"🔴 PHASE 2: WebSocket connection failed: {e}")
+            logger.error(f"[U+1F534] PHASE 2: WebSocket connection failed: {e}")
             self.golden_path_results["failure_point"] = "websocket_connection"
             self.golden_path_results["error_details"].append(f"WebSocket failed: {str(e)}")
     
     async def _test_ai_chat_initiation_phase(self):
         """Phase 3: Test AI chat initiation (should fail due to state_registry bug)"""
-        logger.info("🔵 PHASE 3: Testing AI chat initiation - EXPECTED TO FAIL")
+        logger.info("[U+1F535] PHASE 3: Testing AI chat initiation - EXPECTED TO FAIL")
         
         if not self.golden_path_results["websocket_connect"]:
-            logger.warning("⚠️ PHASE 3: Skipping AI chat test - WebSocket failed")
+            logger.warning(" WARNING: [U+FE0F] PHASE 3: Skipping AI chat test - WebSocket failed")
             return
         
         # Reconnect for this phase since the previous connection may have been closed
@@ -222,7 +270,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
                 }
                 
                 await websocket.send(json.dumps(auth_message))
-                logger.info("📤 PHASE 3: Sent authentication message")
+                logger.info("[U+1F4E4] PHASE 3: Sent authentication message")
                 
                 # Send AI chat initiation message
                 chat_message = {
@@ -232,7 +280,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
                 }
                 
                 await websocket.send(json.dumps(chat_message))
-                logger.info("📤 PHASE 3: Sent AI chat initiation message")
+                logger.info("[U+1F4E4] PHASE 3: Sent AI chat initiation message")
                 
                 # Wait for response - this should fail due to state_registry scope bug
                 try:
@@ -240,36 +288,36 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
                     
                     # If we get a response, check if it's an error
                     if "error" in response.lower():
-                        logger.info("🔴 PHASE 3: Received error response as expected")
+                        logger.info("[U+1F534] PHASE 3: Received error response as expected")
                         self.golden_path_results["error_details"].append(f"AI chat error: {response}")
                     else:
-                        logger.warning(f"⚠️ PHASE 3: Unexpected success - got response: {response}")
+                        logger.warning(f" WARNING: [U+FE0F] PHASE 3: Unexpected success - got response: {response}")
                         self.golden_path_results["ai_chat_initiation"] = True
                         
                 except asyncio.TimeoutError:
-                    logger.error("🔴 PHASE 3: AI chat initiation timed out - likely due to state_registry bug")
+                    logger.error("[U+1F534] PHASE 3: AI chat initiation timed out - likely due to state_registry bug")
                     self.golden_path_results["failure_point"] = "ai_chat_initiation"
                     self.golden_path_results["error_details"].append("AI chat timeout - server likely crashed")
                     
                 except ConnectionClosed as e:
-                    logger.error(f"🔴 PHASE 3: WebSocket closed during AI chat - state_registry bug: {e}")
+                    logger.error(f"[U+1F534] PHASE 3: WebSocket closed during AI chat - state_registry bug: {e}")
                     self.golden_path_results["failure_point"] = "ai_chat_initiation"
                     self.golden_path_results["error_details"].append(f"Connection closed: {str(e)}")
                     
         except Exception as e:
-            logger.error(f"🔴 PHASE 3: AI chat phase failed: {e}")
+            logger.error(f"[U+1F534] PHASE 3: AI chat phase failed: {e}")
             self.golden_path_results["failure_point"] = "ai_chat_initiation"
             self.golden_path_results["error_details"].append(f"AI chat exception: {str(e)}")
     
     async def _test_ai_response_delivery_phase(self):
         """Phase 4: Test AI response delivery (should be completely blocked)"""
-        logger.info("🔵 PHASE 4: Testing AI response delivery - EXPECTED TO BE BLOCKED")
+        logger.info("[U+1F535] PHASE 4: Testing AI response delivery - EXPECTED TO BE BLOCKED")
         
         if self.golden_path_results["ai_chat_initiation"]:
-            logger.warning("⚠️ PHASE 4: AI chat succeeded unexpectedly, testing response delivery")
+            logger.warning(" WARNING: [U+FE0F] PHASE 4: AI chat succeeded unexpectedly, testing response delivery")
             # Continue with response testing
         else:
-            logger.info("🔴 PHASE 4: AI chat failed as expected - response delivery blocked")
+            logger.info("[U+1F534] PHASE 4: AI chat failed as expected - response delivery blocked")
             self.golden_path_results["failure_point"] = "ai_response_delivery"
             return
         
@@ -294,26 +342,26 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
                 }
                 
                 # This should fail due to WebSocket state issues
-                logger.info(f"📤 PHASE 4: Testing AI interaction: {interaction}")
+                logger.info(f"[U+1F4E4] PHASE 4: Testing AI interaction: {interaction}")
                 # Implementation would go here, but it's expected to be blocked
                 
             if responses_received > 0:
                 self.golden_path_results["ai_response_received"] = True
-                logger.warning(f"⚠️ PHASE 4: Unexpectedly received {responses_received} AI responses")
+                logger.warning(f" WARNING: [U+FE0F] PHASE 4: Unexpectedly received {responses_received} AI responses")
             else:
-                logger.info("🔴 PHASE 4: No AI responses received - complete blockage confirmed")
+                logger.info("[U+1F534] PHASE 4: No AI responses received - complete blockage confirmed")
                 
         except Exception as e:
-            logger.error(f"🔴 PHASE 4: AI response delivery failed: {e}")
+            logger.error(f"[U+1F534] PHASE 4: AI response delivery failed: {e}")
             self.golden_path_results["error_details"].append(f"Response delivery: {str(e)}")
     
     def _analyze_golden_path_results(self):
         """Analyze complete Golden Path test results"""
-        logger.info("📊 GOLDEN PATH ANALYSIS:")
-        logger.info(f"   ✅ Auth Success: {self.golden_path_results['auth_success']}")
-        logger.info(f"   ✅ WebSocket Connect: {self.golden_path_results['websocket_connect']}")
-        logger.info(f"   ❌ AI Chat Initiation: {self.golden_path_results['ai_chat_initiation']}")
-        logger.info(f"   ❌ AI Response Delivery: {self.golden_path_results['ai_response_received']}")
+        logger.info(" CHART:  GOLDEN PATH ANALYSIS:")
+        logger.info(f"    PASS:  Auth Success: {self.golden_path_results['auth_success']}")
+        logger.info(f"    PASS:  WebSocket Connect: {self.golden_path_results['websocket_connect']}")
+        logger.info(f"    FAIL:  AI Chat Initiation: {self.golden_path_results['ai_chat_initiation']}")
+        logger.info(f"    FAIL:  AI Response Delivery: {self.golden_path_results['ai_response_received']}")
         
         # Determine overall success
         self.golden_path_results["overall_success"] = (
@@ -323,20 +371,20 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
             self.golden_path_results["ai_response_received"]
         )
         
-        logger.info(f"🎯 OVERALL GOLDEN PATH: {'✅ SUCCESS' if self.golden_path_results['overall_success'] else '❌ FAILED'}")
+        logger.info(f" TARGET:  OVERALL GOLDEN PATH: {' PASS:  SUCCESS' if self.golden_path_results['overall_success'] else ' FAIL:  FAILED'}")
         
         if self.golden_path_results["failure_point"]:
-            logger.info(f"🔍 FAILURE POINT: {self.golden_path_results['failure_point']}")
+            logger.info(f" SEARCH:  FAILURE POINT: {self.golden_path_results['failure_point']}")
             
         if self.golden_path_results["error_details"]:
-            logger.info("🔍 ERROR DETAILS:")
+            logger.info(" SEARCH:  ERROR DETAILS:")
             for error in self.golden_path_results["error_details"]:
                 logger.info(f"   - {error}")
         
         # For this test, we EXPECT failure due to state_registry scope bug
         if not self.golden_path_results["overall_success"]:
             if self.golden_path_results["failure_point"] in ["ai_chat_initiation", "ai_response_delivery"]:
-                logger.info("✅ E2E TEST SUCCESS: Golden Path blocked at AI interaction due to state_registry scope bug")
+                logger.info(" PASS:  E2E TEST SUCCESS: Golden Path blocked at AI interaction due to state_registry scope bug")
                 return  # This is the expected result
         
         # If we get here, the bug might be fixed or test setup is wrong
@@ -354,7 +402,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         - User experience degradation: 100%
         - Revenue impact: Complete loss of chat-based value delivery
         """
-        logger.info("🔴 E2E TEST: Measuring business impact of state_registry scope bug")
+        logger.info("[U+1F534] E2E TEST: Measuring business impact of state_registry scope bug")
         
         business_metrics = {
             "chat_availability_percentage": 0.0,
@@ -373,7 +421,7 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         ]
         
         for scenario in test_scenarios:
-            logger.info(f"🧪 Testing scenario: {scenario['user']} (Priority: {scenario['priority']})")
+            logger.info(f"[U+1F9EA] Testing scenario: {scenario['user']} (Priority: {scenario['priority']})")
             
             scenario_success = await self._test_user_scenario(scenario)
             
@@ -390,16 +438,16 @@ class TestGoldenPathStateRegistryRaceCondition(SSotAsyncTestCase):
         business_metrics["user_experience_score"] = success_rate  # Direct correlation
         
         # Log business impact analysis
-        logger.info("💰 BUSINESS IMPACT ANALYSIS:")
-        logger.info(f"   📈 Chat Availability: {business_metrics['chat_availability_percentage']:.1f}%")
-        logger.info(f"   ✅ Successful Interactions: {business_metrics['successful_ai_interactions']}")
-        logger.info(f"   ❌ Failed Interactions: {business_metrics['failed_ai_interactions']}")
-        logger.info(f"   👤 User Experience Score: {business_metrics['user_experience_score']:.1f}/100")
-        logger.info(f"   💸 Revenue Impact: {business_metrics['revenue_impact_severity']}")
+        logger.info("[U+1F4B0] BUSINESS IMPACT ANALYSIS:")
+        logger.info(f"   [U+1F4C8] Chat Availability: {business_metrics['chat_availability_percentage']:.1f}%")
+        logger.info(f"    PASS:  Successful Interactions: {business_metrics['successful_ai_interactions']}")
+        logger.info(f"    FAIL:  Failed Interactions: {business_metrics['failed_ai_interactions']}")
+        logger.info(f"   [U+1F464] User Experience Score: {business_metrics['user_experience_score']:.1f}/100")
+        logger.info(f"   [U+1F4B8] Revenue Impact: {business_metrics['revenue_impact_severity']}")
         
         # For state_registry scope bug, we expect near 0% success rate
         if business_metrics["chat_availability_percentage"] < 10.0:  # Less than 10% success
-            logger.info("✅ E2E TEST SUCCESS: Confirmed critical business impact - chat functionality essentially broken")
+            logger.info(" PASS:  E2E TEST SUCCESS: Confirmed critical business impact - chat functionality essentially broken")
         else:
             pytest.fail(f"Expected critical business impact, but chat availability is {success_rate:.1f}%")
     

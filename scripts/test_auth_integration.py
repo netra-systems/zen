@@ -146,7 +146,7 @@ class AuthServiceTester:
         failed = 0
         
         for test_name, success in self.test_results:
-            status = "✅ PASSED" if success else "❌ FAILED"
+            status = " PASS:  PASSED" if success else " FAIL:  FAILED"
             print(f"{test_name:<30} {status}")
             if success:
                 passed += 1

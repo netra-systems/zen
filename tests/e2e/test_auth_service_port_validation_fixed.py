@@ -159,7 +159,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                 # REMOVED_SYNTAX_ERROR: print(f" )
                                                 # REMOVED_SYNTAX_ERROR: === AUTH SERVICE ENDPOINTS ===")
                                                 # REMOVED_SYNTAX_ERROR: for endpoint, result in results.items():
-                                                    # REMOVED_SYNTAX_ERROR: status = "✅" if result['accessible'] else "❌"
+                                                    # REMOVED_SYNTAX_ERROR: status = " PASS: " if result['accessible'] else " FAIL: "
                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                     # REMOVED_SYNTAX_ERROR: if result['error']:
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")

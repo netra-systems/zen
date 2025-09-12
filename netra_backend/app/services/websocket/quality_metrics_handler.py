@@ -62,7 +62,7 @@ class QualityMetricsHandler(BaseMessageHandler):
         """Send quality metrics response to user."""
         message = self._build_metrics_message(report)
         
-        # ✅ CORRECT - Maintains session continuity
+        #  PASS:  CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=None,  # Let session manager handle missing IDs
@@ -80,7 +80,7 @@ class QualityMetricsHandler(BaseMessageHandler):
         logger.error(f"Error getting quality metrics: {str(error)}")
         error_message = f"Failed to get quality metrics: {str(error)}"
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs

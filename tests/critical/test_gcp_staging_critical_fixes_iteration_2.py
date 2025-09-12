@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 CRITICAL TEST SUITE - GCP STAGING ITERATION 2 FIXES
 
@@ -443,7 +481,7 @@ class TestCriticalFixesIntegration:
 
 # Test execution metadata
 if __name__ == "__main__":
-    print("🚨 CRITICAL TEST SUITE - GCP STAGING ITERATION 2")
+    print(" ALERT:  CRITICAL TEST SUITE - GCP STAGING ITERATION 2")
     print("Testing three critical issues from GCP staging logs:")
     print("1. Redis asyncio event loop error")
     print("2. Google OAuth user ID format validation") 

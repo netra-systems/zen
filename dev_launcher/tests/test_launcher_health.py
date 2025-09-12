@@ -5,6 +5,7 @@ Tests cover HealthMonitor, recovery mechanisms, and error handling.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import sys
 import threading
 import time
@@ -19,7 +20,7 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.utils import wait_for_service
 
 
-class TestHealthMonitor(unittest.TestCase):
+class TestHealthMonitor(SSotBaseTestCase):
     """Test health monitoring functionality."""
     
     def setUp(self):
@@ -108,7 +109,7 @@ class TestHealthMonitor(unittest.TestCase):
         self.monitor.stop()
 
 
-class TestAdvancedHealthMonitor(unittest.TestCase):
+class TestAdvancedHealthMonitor(SSotBaseTestCase):
     """Advanced health monitoring tests."""
     
     def setUp(self):
@@ -221,7 +222,7 @@ class TestAdvancedHealthMonitor(unittest.TestCase):
         self.assertTrue(status.is_healthy)
 
 
-class TestErrorRecovery(unittest.TestCase):
+class TestErrorRecovery(SSotBaseTestCase):
     """Test error recovery mechanisms."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -297,7 +298,7 @@ class TestErrorRecovery(unittest.TestCase):
                     mock_stop.assert_called()
 
 
-class TestHealthStatusManagement(unittest.TestCase):
+class TestHealthStatusManagement(SSotBaseTestCase):
     """Test health status tracking and reporting."""
     
     def test_health_status_initialization(self):

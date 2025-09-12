@@ -203,7 +203,7 @@ class ViolationScanner:
                        show_details: bool = True) -> str:
         """Generate comprehensive violation report."""
         if not violations:
-            return "✅ No mock policy violations found!"
+            return " PASS:  No mock policy violations found!"
         
         total_violations = sum(len(v) for v in violations.values())
         error_violations = sum(len([viol for viol in v if viol.severity == 'ERROR']) 
@@ -236,7 +236,7 @@ class ViolationScanner:
                     # Show first 3 examples
                     for v in vlist[:3]:
                         short_path = v.file_path.split('/netra-apex/')[-1]
-                        report.append(f"      • {short_path}:{v.line_number}")
+                        report.append(f"      [U+2022] {short_path}:{v.line_number}")
                     if len(vlist) > 3:
                         report.append(f"      ... and {len(vlist) - 3} more")
             
@@ -332,12 +332,12 @@ def main():
         total_violations = sum(len(v) for v in violations.values())
         
         if args.fail_on_violations and total_violations > args.max_violations:
-            print(f"\n❌ FAILURE: Found {total_violations} violations (max allowed: {args.max_violations})")
+            print(f"\n FAIL:  FAILURE: Found {total_violations} violations (max allowed: {args.max_violations})")
             sys.exit(1)
         elif total_violations > 0:
-            print(f"\n⚠️  WARNING: Found {total_violations} violations")
+            print(f"\n WARNING: [U+FE0F]  WARNING: Found {total_violations} violations")
         else:
-            print("\n✅ SUCCESS: No violations found!")
+            print("\n PASS:  SUCCESS: No violations found!")
             
         sys.exit(0)
         

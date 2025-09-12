@@ -340,7 +340,7 @@ class TestConfigurationValidation(BaseTestCase):
         assert "Auth:" in report_text, "Report should include auth status"
         
         # Check for success indicator
-        success_found = any("✓" in item and "passed" in item for item in report)
+        success_found = any("[U+2713]" in item and "passed" in item for item in report)
         assert success_found, f"Report should indicate success: {report}"
         
     @pytest.mark.unit

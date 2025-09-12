@@ -552,7 +552,7 @@ class TestMultiServiceCoordination(BaseIntegrationTest):
         assert critical_health["service_counts"]["failed"] >= 3  # database, auth, llm at minimum
         assert critical_health["health_ratios"]["failure_ratio"] >= 0.3  # Significant failure rate
         
-        logger.info("✅ Cascade failure coordination test passed")
+        logger.info(" PASS:  Cascade failure coordination test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -633,7 +633,7 @@ class TestMultiServiceCoordination(BaseIntegrationTest):
         total_recovery_time = auth_recovery["recovery_duration_ms"] + database_recovery["recovery_duration_ms"]
         assert total_recovery_time < 5000, "Total recovery time too long"
         
-        logger.info("✅ Coordinated recovery sequencing test passed")
+        logger.info(" PASS:  Coordinated recovery sequencing test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -712,7 +712,7 @@ class TestMultiServiceCoordination(BaseIntegrationTest):
             "total_dependencies_validated": sum(len(result["affected_services"]) for result in dependency_test_results.values())
         }))
         
-        logger.info("✅ Service dependency mapping accuracy test passed")
+        logger.info(" PASS:  Service dependency mapping accuracy test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -810,7 +810,7 @@ class TestMultiServiceCoordination(BaseIntegrationTest):
         successful_operations = sum(1 for op in resilience_test_operations if op["success"])
         assert successful_operations >= 2, "System not resilient enough for basic operations"
         
-        logger.info("✅ Concurrent multi-service failures test passed")
+        logger.info(" PASS:  Concurrent multi-service failures test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -959,7 +959,7 @@ class TestMultiServiceCoordination(BaseIntegrationTest):
             "impact_calculation_method": "weighted_criticality_score"
         }))
         
-        logger.info("✅ Business continuity impact assessment test passed")
+        logger.info(" PASS:  Business continuity impact assessment test passed")
 
 
 if __name__ == "__main__":

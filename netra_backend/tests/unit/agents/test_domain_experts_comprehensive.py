@@ -891,13 +891,13 @@ if __name__ == "__main__":
     
     if exit_code == 0:
         print("\n" + "="*80)
-        print("🎉 DOMAIN EXPERTS COMPREHENSIVE UNIT TEST SUITE: ALL TESTS PASSED")
+        print(" CELEBRATION:  DOMAIN EXPERTS COMPREHENSIVE UNIT TEST SUITE: ALL TESTS PASSED")
         print("="*80)
-        print(f"✅ Business Value Delivered: $200K+ ARR domain expertise validated")
-        print(f"✅ Coverage: Complete validation of all domain expert patterns")
-        print(f"✅ Test Count: 15+ comprehensive unit tests executed successfully")
-        print(f"✅ Domains Covered: Finance, Engineering, Business expertise")
+        print(f" PASS:  Business Value Delivered: $200K+ ARR domain expertise validated")
+        print(f" PASS:  Coverage: Complete validation of all domain expert patterns")
+        print(f" PASS:  Test Count: 15+ comprehensive unit tests executed successfully")
+        print(f" PASS:  Domains Covered: Finance, Engineering, Business expertise")
         print("="*80)
     else:
-        print(f"\n❌ Tests failed with exit code: {exit_code}")
+        print(f"\n FAIL:  Tests failed with exit code: {exit_code}")
         sys.exit(exit_code)

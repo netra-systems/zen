@@ -54,7 +54,7 @@ This approach typically achieves 25-35% cost reduction within 30 days."""
     print(f"    - Technical Accuracy: {technical_accuracy:.3f}")
     print(f"    - User Experience:   {user_experience:.3f}")
     print(f"    - Overall Quality:   {overall_quality:.3f}")
-    print(f"\n  Meets 0.8 threshold: {'✓ YES' if overall_quality >= 0.8 else '✗ NO'}")
+    print(f"\n  Meets 0.8 threshold: {'[U+2713] YES' if overall_quality >= 0.8 else '[U+2717] NO'}")
     
     # Test case 2: Low-quality response
     print("\n[TEST 2] Low-Quality Response")
@@ -76,7 +76,7 @@ This approach typically achieves 25-35% cost reduction within 30 days."""
     print(f"    - Technical Accuracy: {technical_accuracy2:.3f}")
     print(f"    - User Experience:   {user_experience2:.3f}")
     print(f"    - Overall Quality:   {overall_quality2:.3f}")
-    print(f"\n  Meets 0.8 threshold: {'✓ YES' if overall_quality2 >= 0.8 else '✗ NO'}")
+    print(f"\n  Meets 0.8 threshold: {'[U+2713] YES' if overall_quality2 >= 0.8 else '[U+2717] NO'}")
     
     # Test case 3: Different agent types
     print("\n[TEST 3] Different Agent Types")
@@ -96,16 +96,16 @@ This approach typically achieves 25-35% cost reduction within 30 days."""
     print("="*60)
     
     if overall_quality >= 0.8:
-        print("✓ Quality grader correctly identifies high-quality responses")
+        print("[U+2713] Quality grader correctly identifies high-quality responses")
     else:
-        print("✗ Quality grader failed to identify high-quality response")
+        print("[U+2717] Quality grader failed to identify high-quality response")
     
     if overall_quality2 < 0.8:
-        print("✓ Quality grader correctly identifies low-quality responses")
+        print("[U+2713] Quality grader correctly identifies low-quality responses")
     else:
-        print("✗ Quality grader failed to identify low-quality response")
+        print("[U+2717] Quality grader failed to identify low-quality response")
     
-    print("\n✓ Quality grading system is operational")
+    print("\n[U+2713] Quality grading system is operational")
     print("="*60 + "\n")
     
     return overall_quality >= 0.8 and overall_quality2 < 0.8

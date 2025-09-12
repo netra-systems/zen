@@ -148,7 +148,7 @@ class TestOptimizationRecommendationsBusiness:
         # Test 4: Confidence score should reflect recommendation quality
         assert state.optimizations_result.confidence_score >= 0.6, "Confidence too low for business use"
         
-        print(f"✅ Generated {len(recommendations)} actionable recommendations")
+        print(f" PASS:  Generated {len(recommendations)} actionable recommendations")
         print(f"   - {len(actionable_recommendations)} with clear action verbs")
         print(f"   - {len(detailed_recommendations)} with technical details")
         print(f"   - Confidence: {state.optimizations_result.confidence_score:.2f}")
@@ -219,7 +219,7 @@ class TestOptimizationRecommendationsBusiness:
         
         assert len(cost_focused) >= 1, "No cost-focused recommendations for cost optimization request"
         
-        print("✅ Cost savings calculations validated as realistic and accurate")
+        print(" PASS:  Cost savings calculations validated as realistic and accurate")
     
     @pytest.mark.asyncio 
     async def test_performance_improvements_quantified(self, optimization_agent):
@@ -295,7 +295,7 @@ class TestOptimizationRecommendationsBusiness:
         
         assert len(bottleneck_addressed) >= 2, "Recommendations don't address identified bottlenecks"
         
-        print(f"✅ Performance improvements properly quantified")
+        print(f" PASS:  Performance improvements properly quantified")
         print(f"   - {len(performance_focused)} performance-focused recommendations")
         print(f"   - {len(bottleneck_addressed)} bottlenecks addressed")
 
@@ -426,7 +426,7 @@ class TestActionPlanExecutability:
         # At least some steps should consider team constraints
         # (Not all steps need to, but complex implementations should)
         
-        print(f"✅ Action plan has realistic timeline with {len(plan_steps)} steps")
+        print(f" PASS:  Action plan has realistic timeline with {len(plan_steps)} steps")
         print(f"   - {len(concrete_steps)} concrete implementation steps")
         print(f"   - {len(team_considerations)} steps considering team capacity")
     
@@ -506,7 +506,7 @@ class TestActionPlanExecutability:
         
         assert len(high_impact_early) >= 1, "No high-impact actions prioritized early"
         
-        print(f"✅ Action plan properly prioritized with {len(plan_steps)} steps")
+        print(f" PASS:  Action plan properly prioritized with {len(plan_steps)} steps")
         print(f"   - {early_urgent} urgent actions in first half")
         print(f"   - {len(high_impact_early)} high-impact actions in first 3 steps")
     
@@ -601,7 +601,7 @@ class TestActionPlanExecutability:
         violation_rate = dependency_violations / len(prerequisite_patterns) if prerequisite_patterns else 0
         assert violation_rate <= 0.5, f"Too many dependency violations: {violation_rate:.1%}"
         
-        print(f"✅ Action plan has logical dependencies")
+        print(f" PASS:  Action plan has logical dependencies")
         print(f"   - {len(plan_steps)} total steps")
         print(f"   - {dependency_violations} dependency violations out of {len(prerequisite_patterns)} patterns")
 
@@ -726,7 +726,7 @@ class TestReportingBusinessValue:
         has_value_prop = any(keyword in report_content for keyword in value_keywords)
         assert has_value_prop, "Report lacks clear value proposition"
         
-        print(f"✅ Report includes executive summary with business focus")
+        print(f" PASS:  Report includes executive summary with business focus")
         print(f"   - {summary_elements}/9 summary elements present")
         print(f"   - {metrics_mentioned} business metrics mentioned")
         print(f"   - {content_length} characters (appropriate length)")
@@ -822,7 +822,7 @@ class TestReportingBusinessValue:
         impact_coverage = sum(1 for area in impact_areas if area in report_content.lower())
         assert impact_coverage >= 2, "Report focuses only on cost, missing broader business impact"
         
-        print(f"✅ Report quantifies business impact effectively")
+        print(f" PASS:  Report quantifies business impact effectively")
         print(f"   - {quantified_elements} quantified metrics")
         print(f"   - {roi_mentions} ROI-related mentions")
         print(f"   - {impact_coverage} business impact areas covered")
@@ -919,7 +919,7 @@ class TestReportingBusinessValue:
         balance_indicators = sum(1 for phrase in balanced_language if phrase in report_content)
         assert balance_indicators >= 1, "Report lacks balanced perspective on risks/benefits"
         
-        print(f"✅ Report includes comprehensive risk assessment")
+        print(f" PASS:  Report includes comprehensive risk assessment")
         print(f"   - {risk_mentions} risk-related mentions")
         print(f"   - {mitigation_strategies} mitigation strategies")
         print(f"   - {quality_considerations} quality considerations")

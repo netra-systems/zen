@@ -2,7 +2,7 @@
 Comprehensive UserContextFactory Integration Tests - Factory Pattern Isolation
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core infrastructure supporting all user tiers
+- Segment: All (Free  ->  Enterprise) - Core infrastructure supporting all user tiers
 - Business Goal: Ensure complete factory-based user isolation for secure multi-user operations
 - Value Impact: Prevents user data leakage, enables concurrent operations, ensures reliable context management
 - Strategic Impact: CRITICAL - Factory isolation patterns are the foundation for safe multi-user AI platform
@@ -1618,7 +1618,7 @@ class TestUserContextFactoryIsolation(IntegrationTestBase):
             all_child_context_ids.extend(result["child_context_ids"])
         
         self.assertEqual(len(set(all_child_context_ids)), 75,
-                        "All child context IDs should be unique (25 operations × 3 children)")
+                        "All child context IDs should be unique (25 operations  x  3 children)")
 
 
 if __name__ == "__main__":

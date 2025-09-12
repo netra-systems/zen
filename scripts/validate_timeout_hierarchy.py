@@ -13,7 +13,7 @@ proper timeout hierarchy implementation for cloud-native GCP Cloud Run environme
 **SUCCESS CRITERIA**:
 - All timeout validations pass
 - No premature WebSocket timeout failures
-- Coordination between 35s WebSocket → 30s Agent maintained
+- Coordination between 35s WebSocket  ->  30s Agent maintained
 - Tests work in both local and Cloud Run environments
 
 Usage:

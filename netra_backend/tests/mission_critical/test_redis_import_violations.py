@@ -286,9 +286,9 @@ class TestRedisImportViolations(SSotBaseTestCase):
             violations_by_file[file_path].append((line_num, pattern, line_content))
         
         for file_path, file_violations in sorted(violations_by_file.items()):
-            message_parts.append(f"\n📁 {file_path}")
+            message_parts.append(f"\n[U+1F4C1] {file_path}")
             for line_num, pattern, line_content in file_violations:
-                message_parts.append(f"  ❌ Line {line_num}: {line_content}")
+                message_parts.append(f"   FAIL:  Line {line_num}: {line_content}")
                 
         message_parts.extend([
             f"\n{'='*60}",

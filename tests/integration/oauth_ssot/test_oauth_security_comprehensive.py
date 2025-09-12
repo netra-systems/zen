@@ -94,7 +94,7 @@ class TestOAuthSecurityComprehensive:
         assert not client_secret == "dummy" and not client_secret == "test", \
             f"OAuth client secret should not be generic test value"
         
-        logger.info("✅ OAuth credential format validation passed")
+        logger.info(" PASS:  OAuth credential format validation passed")
         
         # Test 2: Environment-specific credential isolation
         environment = validator.get_environment()
@@ -110,12 +110,12 @@ class TestOAuthSecurityComprehensive:
         assert actual_client_secret_env == client_secret, \
             f"OAuth should use environment-specific client secret variable: {expected_client_secret_var}"
         
-        logger.info("✅ Environment-specific OAuth credential isolation validated")
+        logger.info(" PASS:  Environment-specific OAuth credential isolation validated")
         
         # Test 3: OAuth validation security checks
         try:
             validator.validate_all_requirements()
-            logger.info("✅ OAuth security validation passed with SSOT")
+            logger.info(" PASS:  OAuth security validation passed with SSOT")
         except Exception as e:
             pytest.fail(f"OAuth security validation failed: {e}")
     
@@ -163,7 +163,7 @@ class TestOAuthSecurityComprehensive:
             else:
                 assert not is_valid, f"Invalid redirect URI should fail validation: {redirect_uri}"
         
-        logger.info("✅ OAuth provider configuration validation passed")
+        logger.info(" PASS:  OAuth provider configuration validation passed")
     
     def test_oauth_state_parameter_security(self):
         """
@@ -198,7 +198,7 @@ class TestOAuthSecurityComprehensive:
             is_valid = self._validate_oauth_state_security(state)
             assert not is_valid, f"Invalid OAuth state should fail validation: {state}"
         
-        logger.info("✅ OAuth state parameter security validation passed")
+        logger.info(" PASS:  OAuth state parameter security validation passed")
     
     def test_oauth_credential_access_control(self):
         """
@@ -238,7 +238,7 @@ class TestOAuthSecurityComprehensive:
         except Exception as e:
             pytest.fail(f"OAuth credential access should work: {e}")
         
-        logger.info("✅ OAuth credential access control validation passed")
+        logger.info(" PASS:  OAuth credential access control validation passed")
     
     def test_oauth_error_information_disclosure(self):
         """
@@ -287,7 +287,7 @@ class TestOAuthSecurityComprehensive:
             "configuration", "environment", "variable", "missing"
         ]), "Error message should provide actionable guidance"
         
-        logger.info("✅ OAuth error information disclosure protection validated")
+        logger.info(" PASS:  OAuth error information disclosure protection validated")
     
     def test_oauth_configuration_integrity(self):
         """
@@ -331,9 +331,9 @@ class TestOAuthSecurityComprehensive:
             "OAuth validation should be consistent across validator instances"
         
         if validation1_success:
-            logger.info("✅ OAuth configuration integrity maintained")
+            logger.info(" PASS:  OAuth configuration integrity maintained")
         else:
-            logger.warning("⚠️ OAuth configuration validation failed consistently")
+            logger.warning(" WARNING: [U+FE0F] OAuth configuration validation failed consistently")
     
     def _validate_oauth_redirect_uri_security(self, redirect_uri: str) -> bool:
         """Validate OAuth redirect URI for security."""
@@ -423,7 +423,7 @@ def test_oauth_security_validation_capability():
         oauth_creds = validator.get_oauth_credentials()
         assert oauth_creds["client_id"], "Should be able to get OAuth credentials for testing"
         
-        logger.info("✅ OAuth security validation test capability verified")
+        logger.info(" PASS:  OAuth security validation test capability verified")
         
     finally:
         test_instance.teardown_method()
@@ -432,4 +432,4 @@ def test_oauth_security_validation_capability():
 if __name__ == "__main__":
     # Run the meta-test to verify security validation capability
     test_oauth_security_validation_capability()
-    print("✅ OAuth security comprehensive tests created and capability verified!")
+    print(" PASS:  OAuth security comprehensive tests created and capability verified!")

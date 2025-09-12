@@ -307,7 +307,7 @@ class TestInsufficientDataHandling:
                             "category": "Model Selection",
                             "impact": "30-50% cost reduction",
                             "effort": "Low",
-                            "example": "GPT-4 → GPT-3.5 for appropriate tasks"
+                            "example": "GPT-4  ->  GPT-3.5 for appropriate tasks"
                         },
                         {
                             "category": "Prompt Engineering",

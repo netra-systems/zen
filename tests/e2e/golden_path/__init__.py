@@ -6,7 +6,7 @@ user journey from initial connection through AI-powered business value delivery.
 
 CRITICAL BUSINESS CONTEXT:
 These tests protect $500K+ ARR by ensuring the core revenue-generating user flow works:
-User Opens Chat → Authentication → Cost Optimization Request → Agent Pipeline → Business Value
+User Opens Chat  ->  Authentication  ->  Cost Optimization Request  ->  Agent Pipeline  ->  Business Value
 
 PRIMARY TEST:
 - test_complete_golden_path_business_value.py: THE primary revenue protection test

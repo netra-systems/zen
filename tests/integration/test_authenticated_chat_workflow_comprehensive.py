@@ -96,7 +96,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         Test authenticated user sends chat message and receives AI-powered business insights.
         
         CRITICAL: This tests the PRIMARY business value delivery workflow:
-        User Auth → Chat Message → Agent Processing → Business Insights → User Value
+        User Auth  ->  Chat Message  ->  Agent Processing  ->  Business Insights  ->  User Value
         
         Business Value: Validates core revenue-generating chat interaction workflow.
         """
@@ -183,7 +183,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         self.record_metric("websocket_events_sent", len(self._websocket_events))
         self.record_metric("business_value_delivered", True)
         
-        self.logger.info(f"✅ Authenticated chat workflow delivered business value in {processing_duration:.2f}s")
+        self.logger.info(f" PASS:  Authenticated chat workflow delivered business value in {processing_duration:.2f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.integration  
@@ -192,7 +192,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         Test authenticated user triggers complete agent pipeline delivering substantive results.
         
         CRITICAL: This tests the COMPLETE agent collaboration workflow:
-        Auth → Triage → Data Analysis → Optimization → Reporting → User Results
+        Auth  ->  Triage  ->  Data Analysis  ->  Optimization  ->  Reporting  ->  User Results
         
         Business Value: Validates multi-agent workflows that deliver comprehensive insights.
         """
@@ -279,7 +279,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         self.record_metric("pipeline_stages_executed", len(set(sent_event_types)))
         self.record_metric("substantive_indicators_found", len(found_indicators))
         
-        self.logger.info(f"✅ Authenticated agent pipeline delivered substantive results in {pipeline_duration:.2f}s")
+        self.logger.info(f" PASS:  Authenticated agent pipeline delivered substantive results in {pipeline_duration:.2f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -288,7 +288,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         Test authenticated user chat session maintains continuity and context across interactions.
         
         CRITICAL: This tests SESSION MANAGEMENT for business conversations:
-        Auth → First Message → Context → Second Message → Continued Context → Business Value
+        Auth  ->  First Message  ->  Context  ->  Second Message  ->  Continued Context  ->  Business Value
         
         Business Value: Validates conversation continuity essential for complex business discussions.
         """
@@ -393,7 +393,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         self.record_metric("context_continuity", True)
         self.record_metric("business_value_indicators", len(second_indicators))
         
-        self.logger.info(f"✅ Authenticated chat session maintained continuity with {first_events + second_events} WebSocket events")
+        self.logger.info(f" PASS:  Authenticated chat session maintained continuity with {first_events + second_events} WebSocket events")
     
     # Helper Methods
     
@@ -423,7 +423,7 @@ class TestAuthenticatedChatWorkflowComprehensive(SSotAsyncTestCase):
         # Clear WebSocket events
         self._websocket_events.clear()
         
-        self.logger.info(f"✅ Authenticated chat workflow integration test completed successfully")
+        self.logger.info(f" PASS:  Authenticated chat workflow integration test completed successfully")
 
 
 if __name__ == "__main__":

@@ -99,15 +99,15 @@ class ConsoleFormatter:
         """Format individual error details."""
         details = []
         for error in errors[:5]:  # Limit to 5 most recent
-            details.append(f"  • {error.severity}: {error.message[:100]}...")
+            details.append(f"  [U+2022] {error.severity}: {error.message[:100]}...")
             details.append(f"    Service: {error.service} | Count: {error.occurrences}")
         return details
     
     def format_recommendation(self, should_fail: bool, score: int) -> str:
         """Format deployment recommendation."""
         if should_fail:
-            return f"❌ DEPLOYMENT FAILURE RECOMMENDED (Score: {score})"
-        return f"✅ DEPLOYMENT HEALTHY (Score: {score})"
+            return f" FAIL:  DEPLOYMENT FAILURE RECOMMENDED (Score: {score})"
+        return f" PASS:  DEPLOYMENT HEALTHY (Score: {score})"
 
 
 class DeploymentDecision:
@@ -233,7 +233,7 @@ class StagingErrorMonitor:
             return await self._handle_deployment_failure(decision[1]) if decision[0] else 0
         except Exception as e:
             logger.error(f"Error monitoring failed: {str(e)}")
-            print(f"❌ Error monitoring failed: {str(e)}")
+            print(f" FAIL:  Error monitoring failed: {str(e)}")
             return 2
 
 

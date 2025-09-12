@@ -535,9 +535,9 @@ class RealAgentPerformanceMonitoringTester:
             # Check for REQUIRED WebSocket events
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             metrics = val.performance_metrics
@@ -557,10 +557,10 @@ class RealAgentPerformanceMonitoringTester:
                 
             # Monitoring validation
             report.append("\nMonitoring Validation:")
-            report.append(f"  ✓ Metrics collected: {val.metrics_collected}")
-            report.append(f"  ✓ Performance thresholds met: {val.performance_thresholds_met}")
-            report.append(f"  ✓ Monitoring data complete: {val.monitoring_data_complete}")
-            report.append(f"  ✓ Real-time tracking accurate: {val.real_time_tracking_accurate}")
+            report.append(f"  [U+2713] Metrics collected: {val.metrics_collected}")
+            report.append(f"  [U+2713] Performance thresholds met: {val.performance_thresholds_met}")
+            report.append(f"  [U+2713] Monitoring data complete: {val.monitoring_data_complete}")
+            report.append(f"  [U+2713] Real-time tracking accurate: {val.real_time_tracking_accurate}")
             
             # Execution timeline summary
             if val.execution_timeline:

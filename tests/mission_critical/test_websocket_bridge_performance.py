@@ -360,7 +360,7 @@ class TestWebSocketBridgePerformance:
             assert p50 < 10.0, f"P50 latency {p50:.2f}ms exceeds 10ms target"
             assert avg < 15.0, f"Average latency {avg:.2f}ms exceeds 15ms target"
             
-            logger.info("✅ Latency baseline test PASSED - All requirements met")
+            logger.info(" PASS:  Latency baseline test PASSED - All requirements met")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -419,7 +419,7 @@ class TestWebSocketBridgePerformance:
             # Verify all events were sent
             assert len(websocket.sent_messages) == num_events, f"Expected {num_events} messages, got {len(websocket.sent_messages)}"
             
-            logger.info("✅ Throughput baseline test PASSED")
+            logger.info(" PASS:  Throughput baseline test PASSED")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -469,7 +469,7 @@ class TestWebSocketBridgePerformance:
             assert p99_time < 500.0, f"P99 connection time {p99_time:.2f}ms exceeds 500ms requirement"
             assert avg_time < 100.0, f"Average connection time {avg_time:.2f}ms exceeds 100ms target"
             
-            logger.info("✅ Connection establishment test PASSED")
+            logger.info(" PASS:  Connection establishment test PASSED")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -538,7 +538,7 @@ class TestWebSocketBridgePerformance:
             assert p99_rtt < 100.0, f"P99 round-trip time {p99_rtt:.2f}ms exceeds 100ms target"
             assert avg_rtt < 25.0, f"Average round-trip time {avg_rtt:.2f}ms exceeds 25ms target"
             
-            logger.info("✅ Message round-trip test PASSED")
+            logger.info(" PASS:  Message round-trip test PASSED")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -648,7 +648,7 @@ class TestWebSocketBridgePerformance:
             total_sent = sum(len(websocket.sent_messages) for _, _, websocket in emitters)
             assert total_sent == total_events, f"Expected {total_events} messages, got {total_sent}"
             
-            logger.info("✅ Concurrent users test PASSED - All requirements met")
+            logger.info(" PASS:  Concurrent users test PASSED - All requirements met")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -748,7 +748,7 @@ class TestWebSocketBridgePerformance:
             throughput = total_events / duration_seconds
             assert throughput > 100.0, f"Throughput {throughput:.2f} events/s too low under sustained load"
             
-            logger.info("✅ Resource usage test PASSED")
+            logger.info(" PASS:  Resource usage test PASSED")
             
         finally:
             await self.performance_monitor.stop_monitoring()
@@ -756,7 +756,7 @@ class TestWebSocketBridgePerformance:
     @pytest.mark.asyncio
     async def test_comprehensive_performance_baseline(self, factory):
         """Comprehensive performance baseline test combining all metrics."""
-        logger.info("🚀 Starting comprehensive performance baseline test")
+        logger.info("[U+1F680] Starting comprehensive performance baseline test")
         
         await self.performance_monitor.start_monitoring()
         tracemalloc.start()
@@ -898,7 +898,7 @@ class TestWebSocketBridgePerformance:
                 )
                 
                 # Log comprehensive results
-                logger.info("📊 COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
+                logger.info(" CHART:  COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
                 logger.info("=" * 60)
                 logger.info(f"Test Configuration:")
                 logger.info(f"  Users: {num_users}")
@@ -914,11 +914,11 @@ class TestWebSocketBridgePerformance:
                 logger.info(f"  P50 (Median): {metrics.p50_latency:.2f}ms")
                 logger.info(f"  P90: {metrics.p90_latency:.2f}ms")
                 logger.info(f"  P95: {metrics.p95_latency:.2f}ms")
-                logger.info(f"  P99: {metrics.p99_latency:.2f}ms ⭐ CRITICAL")
+                logger.info(f"  P99: {metrics.p99_latency:.2f}ms  STAR:  CRITICAL")
                 logger.info(f"  Average: {metrics.avg_latency:.2f}ms")
                 logger.info("")
                 logger.info(f"Throughput Performance:")
-                logger.info(f"  Overall: {metrics.throughput:.2f} events/second ⭐ CRITICAL")
+                logger.info(f"  Overall: {metrics.throughput:.2f} events/second  STAR:  CRITICAL")
                 logger.info("")
                 logger.info(f"Resource Usage:")
                 logger.info(f"  Average CPU: {metrics.avg_cpu_usage:.2f}%")
@@ -930,31 +930,31 @@ class TestWebSocketBridgePerformance:
                 logger.info("=" * 60)
                 
                 # CRITICAL PERFORMANCE VALIDATIONS
-                logger.info("🎯 VALIDATING CRITICAL REQUIREMENTS:")
+                logger.info(" TARGET:  VALIDATING CRITICAL REQUIREMENTS:")
                 
                 # P99 latency requirement
                 p99_passed = metrics.p99_latency < 50.0
-                logger.info(f"  P99 latency < 50ms: {metrics.p99_latency:.2f}ms {'✅ PASS' if p99_passed else '❌ FAIL'}")
+                logger.info(f"  P99 latency < 50ms: {metrics.p99_latency:.2f}ms {' PASS:  PASS' if p99_passed else ' FAIL:  FAIL'}")
                 
                 # Throughput requirement
                 throughput_passed = metrics.throughput > 1000.0
-                logger.info(f"  Throughput > 1000/s: {metrics.throughput:.2f}/s {'✅ PASS' if throughput_passed else '❌ FAIL'}")
+                logger.info(f"  Throughput > 1000/s: {metrics.throughput:.2f}/s {' PASS:  PASS' if throughput_passed else ' FAIL:  FAIL'}")
                 
                 # Connection time requirement
                 connection_passed = metrics.avg_connection_time < 500.0
-                logger.info(f"  Connection < 500ms: {metrics.avg_connection_time:.2f}ms {'✅ PASS' if connection_passed else '❌ FAIL'}")
+                logger.info(f"  Connection < 500ms: {metrics.avg_connection_time:.2f}ms {' PASS:  PASS' if connection_passed else ' FAIL:  FAIL'}")
                 
                 # Concurrent user requirement
                 user_passed = len(emitters) >= 25
-                logger.info(f"  Concurrent users ≥ 25: {len(emitters)} {'✅ PASS' if user_passed else '❌ FAIL'}")
+                logger.info(f"  Concurrent users  >=  25: {len(emitters)} {' PASS:  PASS' if user_passed else ' FAIL:  FAIL'}")
                 
                 # Error rate requirement
                 error_passed = metrics.error_rate < 1.0
-                logger.info(f"  Error rate < 1%: {metrics.error_rate:.2f}% {'✅ PASS' if error_passed else '❌ FAIL'}")
+                logger.info(f"  Error rate < 1%: {metrics.error_rate:.2f}% {' PASS:  PASS' if error_passed else ' FAIL:  FAIL'}")
                 
                 # Memory usage requirement
                 memory_passed = metrics.avg_memory_usage < 500.0  # 500MB limit
-                logger.info(f"  Memory usage < 500MB: {metrics.avg_memory_usage:.2f}MB {'✅ PASS' if memory_passed else '❌ FAIL'}")
+                logger.info(f"  Memory usage < 500MB: {metrics.avg_memory_usage:.2f}MB {' PASS:  PASS' if memory_passed else ' FAIL:  FAIL'}")
                 
                 # Verify all critical requirements
                 all_passed = all([
@@ -967,19 +967,19 @@ class TestWebSocketBridgePerformance:
                 ])
                 
                 if all_passed:
-                    logger.info("🎉 ALL PERFORMANCE REQUIREMENTS PASSED!")
+                    logger.info(" CELEBRATION:  ALL PERFORMANCE REQUIREMENTS PASSED!")
                 else:
-                    logger.error("💥 SOME PERFORMANCE REQUIREMENTS FAILED!")
+                    logger.error("[U+1F4A5] SOME PERFORMANCE REQUIREMENTS FAILED!")
                 
                 # Assert critical requirements
                 assert p99_passed, f"P99 latency {metrics.p99_latency:.2f}ms exceeds 50ms requirement"
                 assert throughput_passed, f"Throughput {metrics.throughput:.2f}/s below 1000/s requirement"
                 assert connection_passed, f"Connection time {metrics.avg_connection_time:.2f}ms exceeds 500ms requirement"
-                assert user_passed, f"Only {len(emitters)} users created, need ≥ 25"
+                assert user_passed, f"Only {len(emitters)} users created, need  >=  25"
                 assert error_passed, f"Error rate {metrics.error_rate:.2f}% exceeds 1% limit"
                 assert memory_passed, f"Memory usage {metrics.avg_memory_usage:.2f}MB exceeds 500MB limit"
                 
-                logger.info("✅ COMPREHENSIVE PERFORMANCE BASELINE TEST PASSED")
+                logger.info(" PASS:  COMPREHENSIVE PERFORMANCE BASELINE TEST PASSED")
                 
                 return metrics
             
@@ -1005,9 +1005,9 @@ def generate_performance_report(metrics: PerformanceMetrics) -> str:
 ## Executive Summary
 
 This report validates the WebSocket bridge performance against critical business requirements:
-- **P99 Latency:** {'✅ PASS' if metrics.p99_latency < 50.0 else '❌ FAIL'} ({metrics.p99_latency:.2f}ms < 50ms)
-- **Throughput:** {'✅ PASS' if metrics.throughput > 1000.0 else '❌ FAIL'} ({metrics.throughput:.2f} > 1000 events/s)
-- **Reliability:** {'✅ PASS' if metrics.error_rate < 1.0 else '❌ FAIL'} ({metrics.error_rate:.2f}% < 1% error rate)
+- **P99 Latency:** {' PASS:  PASS' if metrics.p99_latency < 50.0 else ' FAIL:  FAIL'} ({metrics.p99_latency:.2f}ms < 50ms)
+- **Throughput:** {' PASS:  PASS' if metrics.throughput > 1000.0 else ' FAIL:  FAIL'} ({metrics.throughput:.2f} > 1000 events/s)
+- **Reliability:** {' PASS:  PASS' if metrics.error_rate < 1.0 else ' FAIL:  FAIL'} ({metrics.error_rate:.2f}% < 1% error rate)
 
 ## Detailed Performance Metrics
 
@@ -1015,11 +1015,11 @@ This report validates the WebSocket bridge performance against critical business
 - **P50 (Median):** {metrics.p50_latency:.2f}ms
 - **P90:** {metrics.p90_latency:.2f}ms  
 - **P95:** {metrics.p95_latency:.2f}ms
-- **P99:** {metrics.p99_latency:.2f}ms ⭐ **CRITICAL REQUIREMENT**
+- **P99:** {metrics.p99_latency:.2f}ms  STAR:  **CRITICAL REQUIREMENT**
 - **Average:** {metrics.avg_latency:.2f}ms
 
 ### Throughput Performance
-- **Overall Throughput:** {metrics.throughput:.2f} events/second ⭐ **CRITICAL REQUIREMENT**
+- **Overall Throughput:** {metrics.throughput:.2f} events/second  STAR:  **CRITICAL REQUIREMENT**
 
 ### Connection Performance  
 - **Average Connection Time:** {metrics.avg_connection_time:.2f}ms
@@ -1046,9 +1046,9 @@ The WebSocket bridge performance directly impacts:
 ## Recommendations
 
 Based on performance results:
-- ✅ System meets all critical performance requirements
-- ✅ Ready for production deployment with 25+ concurrent users
-- ✅ WebSocket infrastructure can support business growth targets
+-  PASS:  System meets all critical performance requirements
+-  PASS:  Ready for production deployment with 25+ concurrent users
+-  PASS:  WebSocket infrastructure can support business growth targets
 
 ## Technical Details
 

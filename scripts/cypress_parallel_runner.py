@@ -198,7 +198,7 @@ class CypressParallelRunner:
             results.append(spec)
             
             # Report result immediately
-            status_icon = "✓" if spec.result == TestResult.PASSED else "✗"
+            status_icon = "[U+2713]" if spec.result == TestResult.PASSED else "[U+2717]"
             print(f"Worker {worker_id}: {status_icon} {Path(spec.file_path).name} ({spec.duration:.1f}s)")
         
         return results

@@ -70,10 +70,10 @@ class PostDeploymentAuthTest:
             try:
                 response = await client.get(f"{self.auth_url}/health")
                 assert response.status_code == 200, f"Auth service unhealthy: {response.status_code}"
-                logger.info(f"✓ Auth service is healthy at {self.auth_url}")
+                logger.info(f"[U+2713] Auth service is healthy at {self.auth_url}")
                 return True
             except Exception as e:
-                logger.error(f"✗ Auth service health check failed: {e}")
+                logger.error(f"[U+2717] Auth service health check failed: {e}")
                 return False
     
     async def test_backend_health(self) -> bool:
@@ -82,10 +82,10 @@ class PostDeploymentAuthTest:
             try:
                 response = await client.get(f"{self.backend_url}/health")
                 assert response.status_code == 200, f"Backend unhealthy: {response.status_code}"
-                logger.info(f"✓ Backend service is healthy at {self.backend_url}")
+                logger.info(f"[U+2713] Backend service is healthy at {self.backend_url}")
                 return True
             except Exception as e:
-                logger.error(f"✗ Backend health check failed: {e}")
+                logger.error(f"[U+2717] Backend health check failed: {e}")
                 return False
     
     async def test_token_generation(self) -> Optional[str]:
@@ -129,15 +129,15 @@ class PostDeploymentAuthTest:
                     if issues:
                         logger.warning(f"Token generated with issues: {', '.join(issues)}")
                     else:
-                        logger.info(f"✓ Token generated successfully")
+                        logger.info(f"[U+2713] Token generated successfully")
                     
                     return access_token
                 else:
-                    logger.error(f"✗ Token generation failed: {response.status_code}")
+                    logger.error(f"[U+2717] Token generation failed: {response.status_code}")
                     return None
                     
             except Exception as e:
-                logger.error(f"✗ Token generation error: {e}")
+                logger.error(f"[U+2717] Token generation error: {e}")
                 return None
     
     async def test_token_validation(self, token: str) -> bool:
@@ -151,10 +151,10 @@ class PostDeploymentAuthTest:
                 )
                 
                 if response.status_code == 200:
-                    logger.info(f"✓ Token validation successful - backend accepted auth token")
+                    logger.info(f"[U+2713] Token validation successful - backend accepted auth token")
                     return True
                 elif response.status_code == 401:
-                    logger.error(f"✗ Token validation failed - backend rejected valid auth token")
+                    logger.error(f"[U+2717] Token validation failed - backend rejected valid auth token")
                     logger.error(f"  Response: {response.text}")
                     
                     # Try to decode the token to understand why
@@ -170,7 +170,7 @@ class PostDeploymentAuthTest:
                     return False
                     
             except Exception as e:
-                logger.error(f"✗ Token validation error: {e}")
+                logger.error(f"[U+2717] Token validation error: {e}")
                 return False
     
     async def test_token_generation_wrapper(self) -> bool:
@@ -185,11 +185,11 @@ class PostDeploymentAuthTest:
                 # Step 1: Get auth config
                 config_response = await client.get(f"{self.auth_url}/auth/config")
                 if config_response.status_code != 200:
-                    logger.error(f"✗ Failed to get auth config: {config_response.status_code}")
+                    logger.error(f"[U+2717] Failed to get auth config: {config_response.status_code}")
                     return False
                 
                 config = config_response.json()
-                logger.info(f"✓ Auth config retrieved: environment={config.get('environment')}")
+                logger.info(f"[U+2713] Auth config retrieved: environment={config.get('environment')}")
                 
                 # Step 2: Generate token
                 token = await self.test_token_generation()
@@ -205,11 +205,11 @@ class PostDeploymentAuthTest:
                     # This would test refresh token flow
                     pass
                 
-                logger.info(f"✓ Cross-service authentication working correctly")
+                logger.info(f"[U+2713] Cross-service authentication working correctly")
                 return True
                 
             except Exception as e:
-                logger.error(f"✗ Cross-service auth test failed: {e}")
+                logger.error(f"[U+2717] Cross-service auth test failed: {e}")
                 return False
     
     async def run_all_tests(self) -> Dict[str, bool]:
@@ -239,7 +239,7 @@ class PostDeploymentAuthTest:
                 else:
                     results[test_name] = await test_func()
             except Exception as e:
-                logger.error(f"✗ {test_name} failed with exception: {e}")
+                logger.error(f"[U+2717] {test_name} failed with exception: {e}")
                 results[test_name] = False
         
         # Summary
@@ -251,17 +251,17 @@ class PostDeploymentAuthTest:
         failed = len(results) - passed
         
         for test_name, success in results.items():
-            status = "✓ PASS" if success else "✗ FAIL"
+            status = "[U+2713] PASS" if success else "[U+2717] FAIL"
             logger.info(f"{status}: {test_name}")
         
         logger.info(f"\nTotal: {passed} passed, {failed} failed")
         
         if failed > 0:
-            logger.error("\n⚠️  DEPLOYMENT VERIFICATION FAILED")
+            logger.error("\n WARNING: [U+FE0F]  DEPLOYMENT VERIFICATION FAILED")
             logger.error("JWT secrets may be misconfigured between services")
             logger.error("Check that JWT_SECRET_KEY is set to the same value in both services")
         else:
-            logger.info("\n✅ DEPLOYMENT VERIFICATION SUCCESSFUL")
+            logger.info("\n PASS:  DEPLOYMENT VERIFICATION SUCCESSFUL")
         
         return results
 

@@ -336,9 +336,9 @@ class RealAgentCorpusAdminTester:
             # Check for REQUIRED WebSocket events
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             report.append("\nPerformance Metrics:")
@@ -349,9 +349,9 @@ class RealAgentCorpusAdminTester:
             
             # Business logic validation
             report.append("\nBusiness Logic Validation:")
-            report.append(f"  ✓ Operations completed: {val.operations_completed}")
-            report.append(f"  ✓ Data integrity maintained: {val.data_integrity_maintained}")
-            report.append(f"  ✓ Results coherent: {val.results_coherent}")
+            report.append(f"  [U+2713] Operations completed: {val.operations_completed}")
+            report.append(f"  [U+2713] Data integrity maintained: {val.data_integrity_maintained}")
+            report.append(f"  [U+2713] Results coherent: {val.results_coherent}")
             
             # Corpus operations performed
             if val.corpus_operations:

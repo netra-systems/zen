@@ -53,7 +53,7 @@ async def test_websocket_connection():
         else:
             print(f"[FAIL] WebSocket Connection Failed: {e}")
     except Exception as e:
-        print(f"✗ WebSocket Connection Failed: {e}")
+        print(f"[U+2717] WebSocket Connection Failed: {e}")
 
 async def main():
     """Run all staging tests"""

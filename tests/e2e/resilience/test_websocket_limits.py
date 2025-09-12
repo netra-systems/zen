@@ -1,7 +1,7 @@
 """
 WebSocket Connection Limits Tests
 Tests WebSocket connection handling under load.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

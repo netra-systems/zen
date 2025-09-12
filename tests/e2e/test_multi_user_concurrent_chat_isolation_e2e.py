@@ -11,18 +11,18 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tests security architecture that prevents data leaks and ensures compliance
 
 CRITICAL SUCCESS METRICS:
-✅ Complete user isolation in concurrent chat sessions
-✅ No data leakage between users during simultaneous chat
-✅ Performance maintains quality under concurrent load
-✅ Authentication and WebSocket isolation work correctly
-✅ Agent responses are correctly routed to appropriate users
+ PASS:  Complete user isolation in concurrent chat sessions
+ PASS:  No data leakage between users during simultaneous chat
+ PASS:  Performance maintains quality under concurrent load
+ PASS:  Authentication and WebSocket isolation work correctly
+ PASS:  Agent responses are correctly routed to appropriate users
 
 ISOLATION VALIDATION:
-• User context isolation - Each user maintains separate execution context
-• WebSocket isolation - Messages routed only to correct user
-• Agent isolation - Agent responses don't cross-contaminate
-• Data isolation - Business data and insights remain user-specific
-• Thread isolation - Chat threads remain completely separate
+[U+2022] User context isolation - Each user maintains separate execution context
+[U+2022] WebSocket isolation - Messages routed only to correct user
+[U+2022] Agent isolation - Agent responses don't cross-contaminate
+[U+2022] Data isolation - Business data and insights remain user-specific
+[U+2022] Thread isolation - Chat threads remain completely separate
 
 COMPLIANCE:
 @compliance CLAUDE.md - Multi-user system (Section 0.4 and 1.2)
@@ -95,27 +95,27 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         self.cross_contamination_detected = False
         self.performance_degradation = False
         
-        print(f"\n👥 MULTI-USER CONCURRENT CHAT ISOLATION E2E - Environment: {self.environment}")
-        print(f"🔒 Target: Complete user isolation with concurrent chat sessions")
-        print(f"🏢 Business Impact: Enterprise security and scalability validation")
+        print(f"\n[U+1F465] MULTI-USER CONCURRENT CHAT ISOLATION E2E - Environment: {self.environment}")
+        print(f"[U+1F512] Target: Complete user isolation with concurrent chat sessions")
+        print(f"[U+1F3E2] Business Impact: Enterprise security and scalability validation")
     
     def teardown_method(self):
         """Clean up and report multi-user isolation metrics."""
         test_duration = time.time() - self.test_start_time
         
-        print(f"\n📊 Multi-User Isolation Test Summary:")
-        print(f"⏱️ Duration: {test_duration:.2f}s")
-        print(f"👥 Concurrent Users Tested: {self.concurrent_users_tested}")
-        print(f"🔒 Isolation Violations: {self.isolation_violations}")
-        print(f"🚨 Cross-Contamination: {'DETECTED' if self.cross_contamination_detected else 'NONE'}")
-        print(f"📉 Performance Issues: {'YES' if self.performance_degradation else 'NO'}")
+        print(f"\n CHART:  Multi-User Isolation Test Summary:")
+        print(f"[U+23F1][U+FE0F] Duration: {test_duration:.2f}s")
+        print(f"[U+1F465] Concurrent Users Tested: {self.concurrent_users_tested}")
+        print(f"[U+1F512] Isolation Violations: {self.isolation_violations}")
+        print(f" ALERT:  Cross-Contamination: {'DETECTED' if self.cross_contamination_detected else 'NONE'}")
+        print(f"[U+1F4C9] Performance Issues: {'YES' if self.performance_degradation else 'NO'}")
         
         if self.isolation_violations == 0 and not self.cross_contamination_detected:
-            print(f"✅ EXCELLENT ISOLATION - Enterprise-ready security")
+            print(f" PASS:  EXCELLENT ISOLATION - Enterprise-ready security")
         elif self.isolation_violations <= 1:
-            print(f"⚠️ MINOR ISOLATION ISSUES - Acceptable for most use cases")
+            print(f" WARNING: [U+FE0F] MINOR ISOLATION ISSUES - Acceptable for most use cases")
         else:
-            print(f"❌ CRITICAL ISOLATION FAILURES - Enterprise security at risk")
+            print(f" FAIL:  CRITICAL ISOLATION FAILURES - Enterprise security at risk")
         
         super().teardown_method()
     
@@ -182,13 +182,13 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
             context_keywords = other_context.lower().split()[:3]  # First 3 words as identifiers
             for keyword in context_keywords:
                 if len(keyword) > 4 and keyword in response_lower:
-                    print(f"🚨 CONTAMINATION DETECTED: User {user_index} response contains '{keyword}' from other user")
+                    print(f" ALERT:  CONTAMINATION DETECTED: User {user_index} response contains '{keyword}' from other user")
                     return True
         
         # Check for explicit user mentions that shouldn't be there
         for i in range(10):  # Check for user_0 through user_9
             if i != user_index and f"user_{i}" in response_lower:
-                print(f"🚨 USER CONTAMINATION: User {user_index} response mentions user_{i}")
+                print(f" ALERT:  USER CONTAMINATION: User {user_index} response mentions user_{i}")
                 return True
         
         return False
@@ -203,7 +203,7 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates basic multi-tenant security.
         """
-        print("\n🧪 CRITICAL: Testing dual user concurrent chat isolation...")
+        print("\n[U+1F9EA] CRITICAL: Testing dual user concurrent chat isolation...")
         
         # STEP 1: Create two isolated user sessions
         user1_context, user1_helper = await self._create_isolated_user_session(
@@ -220,8 +220,8 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         assert user1_context.user_id != user2_context.user_id, "Users must have different IDs"
         assert user1_context.thread_id != user2_context.thread_id, "Users must have different thread IDs"
         
-        print(f"👤 User 1: {user1_context.user_id} (Technology Startup)")
-        print(f"👤 User 2: {user2_context.user_id} (Manufacturing)")
+        print(f"[U+1F464] User 1: {user1_context.user_id} (Technology Startup)")
+        print(f"[U+1F464] User 2: {user2_context.user_id} (Manufacturing)")
         
         # STEP 2: Define distinct business requests
         user1_request = (
@@ -286,9 +286,9 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         
         self.concurrent_users_tested = 2
         
-        print(f"✅ Both users completed concurrent sessions in {concurrent_duration:.2f}s")
-        print(f"👤 User 1: {'SUCCESS' if user1_result['success'] else 'FAILED'} - {len(user1_result['events_received'])} events")
-        print(f"👤 User 2: {'SUCCESS' if user2_result['success'] else 'FAILED'} - {len(user2_result['events_received'])} events")
+        print(f" PASS:  Both users completed concurrent sessions in {concurrent_duration:.2f}s")
+        print(f"[U+1F464] User 1: {'SUCCESS' if user1_result['success'] else 'FAILED'} - {len(user1_result['events_received'])} events")
+        print(f"[U+1F464] User 2: {'SUCCESS' if user2_result['success'] else 'FAILED'} - {len(user2_result['events_received'])} events")
         
         # STEP 5: Analyze responses for contamination
         user1_responses = []
@@ -328,16 +328,16 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         # STEP 7: Validate performance under concurrent load
         if concurrent_duration > 120.0:  # Performance threshold
             self.performance_degradation = True
-            print(f"⚠️ Performance degradation detected: {concurrent_duration:.2f}s")
+            print(f" WARNING: [U+FE0F] Performance degradation detected: {concurrent_duration:.2f}s")
         
         # STEP 8: Critical isolation assertions
         assert not contamination_detected, "CRITICAL: Cross-contamination detected between users"
         assert user1_result["success"] or user2_result["success"], "At least one user session must succeed"
         assert concurrent_duration < 150.0, f"Concurrent execution too slow: {concurrent_duration:.2f}s"
         
-        print(f"🔒 Dual user isolation validation successful")
-        print(f"✅ No contamination detected")
-        print(f"📊 Performance: {concurrent_duration:.2f}s")
+        print(f"[U+1F512] Dual user isolation validation successful")
+        print(f" PASS:  No contamination detected")
+        print(f" CHART:  Performance: {concurrent_duration:.2f}s")
     
     @pytest.mark.asyncio
     async def test_triple_user_concurrent_isolation_stress(self):
@@ -349,7 +349,7 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates enterprise-scale multi-tenant security.
         """
-        print("\n🧪 CRITICAL: Testing triple user concurrent isolation stress...")
+        print("\n[U+1F9EA] CRITICAL: Testing triple user concurrent isolation stress...")
         
         # STEP 1: Create three isolated user sessions
         user_sessions = []
@@ -366,7 +366,7 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
             )
             user_sessions.append((user_context, user_helper, business_contexts[i]))
         
-        print(f"👥 Created 3 isolated user sessions:")
+        print(f"[U+1F465] Created 3 isolated user sessions:")
         for i, (context, _, business) in enumerate(user_sessions):
             print(f"   User {i+1}: {context.user_id} ({business[:30]}...)")
         
@@ -443,15 +443,15 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
             if not isinstance(result, Exception) and result.get("success"):
                 successful_sessions.append(result)
             elif isinstance(result, Exception):
-                print(f"❌ Session exception: {str(result)[:100]}")
+                print(f" FAIL:  Session exception: {str(result)[:100]}")
             else:
-                print(f"❌ Session failed: User {result.get('user_index', '?')}")
+                print(f" FAIL:  Session failed: User {result.get('user_index', '?')}")
         
         self.concurrent_users_tested = 3
         success_rate = len(successful_sessions) / 3 * 100
         
-        print(f"📊 Stress test results: {len(successful_sessions)}/3 successful ({success_rate:.1f}%)")
-        print(f"⏱️ Total stress duration: {stress_duration:.2f}s")
+        print(f" CHART:  Stress test results: {len(successful_sessions)}/3 successful ({success_rate:.1f}%)")
+        print(f"[U+23F1][U+FE0F] Total stress duration: {stress_duration:.2f}s")
         
         # STEP 5: Advanced contamination analysis
         contamination_violations = 0
@@ -489,10 +489,10 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         assert stress_duration < 200.0, f"Stress test duration excessive: {stress_duration:.2f}s"
         assert avg_execution_time < 100.0, f"Average execution time too slow: {avg_execution_time:.2f}s"
         
-        print(f"🎉 Triple user concurrent isolation stress test successful")
-        print(f"🔒 Isolation violations: {contamination_violations}")
-        print(f"📊 Average execution time: {avg_execution_time:.2f}s")
-        print(f"✅ Enterprise-scale isolation validated")
+        print(f" CELEBRATION:  Triple user concurrent isolation stress test successful")
+        print(f"[U+1F512] Isolation violations: {contamination_violations}")
+        print(f" CHART:  Average execution time: {avg_execution_time:.2f}s")
+        print(f" PASS:  Enterprise-scale isolation validated")
     
     @pytest.mark.asyncio
     async def test_isolation_with_similar_business_contexts(self):
@@ -504,7 +504,7 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates isolation robustness in realistic scenarios.
         """
-        print("\n🧪 CRITICAL: Testing isolation with similar business contexts...")
+        print("\n[U+1F9EA] CRITICAL: Testing isolation with similar business contexts...")
         
         # STEP 1: Create users with deliberately similar contexts
         user1_context, user1_helper = await self._create_isolated_user_session(
@@ -517,8 +517,8 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
             user_business_context="E-commerce Marketplace with Revenue Optimization"
         )
         
-        print(f"👤 User 1: E-commerce Platform ({user1_context.user_id})")
-        print(f"👤 User 2: E-commerce Marketplace ({user2_context.user_id})")
+        print(f"[U+1F464] User 1: E-commerce Platform ({user1_context.user_id})")
+        print(f"[U+1F464] User 2: E-commerce Marketplace ({user2_context.user_id})")
         
         # STEP 2: Define subtly different but related requests
         user1_request = (
@@ -587,14 +587,14 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         for content in user1_content:
             for user2_metric in user2_specific:
                 if user2_metric in content:
-                    print(f"🚨 SUBTLE CONTAMINATION: User 1 content contains User 2 metric: {user2_metric}")
+                    print(f" ALERT:  SUBTLE CONTAMINATION: User 1 content contains User 2 metric: {user2_metric}")
                     subtle_contamination_detected = True
                     self.isolation_violations += 1
         
         for content in user2_content:
             for user1_metric in user1_specific:
                 if user1_metric in content:
-                    print(f"🚨 SUBTLE CONTAMINATION: User 2 content contains User 1 metric: {user1_metric}")
+                    print(f" ALERT:  SUBTLE CONTAMINATION: User 2 content contains User 1 metric: {user1_metric}")
                     subtle_contamination_detected = True
                     self.isolation_violations += 1
         
@@ -614,20 +614,20 @@ class TestMultiUserConcurrentChatIsolationE2E(SSotBaseTestCase):
         
         # Users should have context-appropriate terminology
         if user1_content and user1_platform_mentions < user1_marketplace_mentions:
-            print(f"⚠️ User 1 (platform) has more marketplace mentions than platform")
+            print(f" WARNING: [U+FE0F] User 1 (platform) has more marketplace mentions than platform")
         
         if user2_content and user2_marketplace_mentions < user2_platform_mentions:
-            print(f"⚠️ User 2 (marketplace) has more platform mentions than marketplace")
+            print(f" WARNING: [U+FE0F] User 2 (marketplace) has more platform mentions than marketplace")
         
         # STEP 7: Critical similar context isolation assertions
         assert not subtle_contamination_detected, "CRITICAL: Subtle contamination detected with similar contexts"
         assert user1_result["success"] and user2_result["success"], "Both similar context sessions must succeed"
         assert similar_duration < 120.0, f"Similar context execution too slow: {similar_duration:.2f}s"
         
-        print(f"🔒 Similar context isolation validation successful")
-        print(f"✅ No subtle contamination detected")
-        print(f"👥 Both users maintained context appropriately")
-        print(f"📊 Execution time: {similar_duration:.2f}s")
+        print(f"[U+1F512] Similar context isolation validation successful")
+        print(f" PASS:  No subtle contamination detected")
+        print(f"[U+1F465] Both users maintained context appropriately")
+        print(f" CHART:  Execution time: {similar_duration:.2f}s")
 
 
 if __name__ == "__main__":

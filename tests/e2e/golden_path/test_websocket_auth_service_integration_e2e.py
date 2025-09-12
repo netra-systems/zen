@@ -27,8 +27,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md Section 6.2):
 
 WEBSOCKET AUTH SERVICE INTEGRATION FLOW:
 ```
-Auth Service Health Check → JWT Token Validation → WebSocket Connection with Auth →
-Auth Service Failure Detection → Hard Failure with Auth Diagnosis → Test Failure
+Auth Service Health Check  ->  JWT Token Validation  ->  WebSocket Connection with Auth  -> 
+Auth Service Failure Detection  ->  Hard Failure with Auth Diagnosis  ->  Test Failure
 ```
 """
 
@@ -247,11 +247,11 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
         # Record successful auth service integration
         self.record_metric("websocket_auth_service_integration_success", connection_success)
         
-        print(f"✅ AUTH SERVICE INTEGRATION: WORKING")
-        print(f"   🟢 Auth service: Available")
-        print(f"   🟢 JWT validation: Success")
-        print(f"   🟢 WebSocket auth: Success") 
-        print(f"   👤 Authenticated user: {user_id}")
+        print(f" PASS:  AUTH SERVICE INTEGRATION: WORKING")
+        print(f"   [U+1F7E2] Auth service: Available")
+        print(f"   [U+1F7E2] JWT validation: Success")
+        print(f"   [U+1F7E2] WebSocket auth: Success") 
+        print(f"   [U+1F464] Authenticated user: {user_id}")
 
     async def _test_websocket_blocked_when_auth_unavailable(self, auth_error: str, response_time: float):
         """Test WebSocket access is blocked when auth service is unavailable."""
@@ -299,10 +299,10 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
                 
                 # This might be OK if using fallback auth or cached validation
                 self.record_metric("websocket_connection_with_auth_service_down", "succeeded")
-                print(f"ℹ️ WebSocket connection succeeded despite auth service unavailability")
-                print(f"   📡 May be using cached auth or fallback validation")
-                print(f"   🔐 JWT token: Present")
-                print(f"   👤 User ID: {user_id}")
+                print(f"[U+2139][U+FE0F] WebSocket connection succeeded despite auth service unavailability")
+                print(f"   [U+1F4E1] May be using cached auth or fallback validation")
+                print(f"   [U+1F510] JWT token: Present")
+                print(f"   [U+1F464] User ID: {user_id}")
                 
             except Exception as e:
                 websocket_blocked = True
@@ -315,25 +315,25 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
         # === VALIDATION OF AUTH SERVICE UNAVAILABILITY IMPACT ===
         
         auth_service_impact_message = (
-            f"🚨 AUTH SERVICE UNAVAILABILITY DETECTED:\n"
-            f"   🔴 Auth Service URL: {self._auth_service_url}\n"
-            f"   🔴 Health Check Error: {auth_error}\n"
-            f"   🔴 Response Time: {response_time:.3f}s\n"
-            f"   🔴 WebSocket URL: {self._websocket_url}\n"
+            f" ALERT:  AUTH SERVICE UNAVAILABILITY DETECTED:\n"
+            f"   [U+1F534] Auth Service URL: {self._auth_service_url}\n"
+            f"   [U+1F534] Health Check Error: {auth_error}\n"
+            f"   [U+1F534] Response Time: {response_time:.3f}s\n"
+            f"   [U+1F534] WebSocket URL: {self._websocket_url}\n"
             f"\n"
-            f"   💼 BUSINESS IMPACT:\n"
-            f"   • User authentication cannot be validated\n"
-            f"   • New WebSocket connections may be blocked\n"
-            f"   • JWT token validation not available\n"
-            f"   • Security-critical authentication flows broken\n"
-            f"   • Real-time AI features may be inaccessible\n"
+            f"   [U+1F4BC] BUSINESS IMPACT:\n"
+            f"   [U+2022] User authentication cannot be validated\n"
+            f"   [U+2022] New WebSocket connections may be blocked\n"
+            f"   [U+2022] JWT token validation not available\n"
+            f"   [U+2022] Security-critical authentication flows broken\n"
+            f"   [U+2022] Real-time AI features may be inaccessible\n"
             f"\n"
-            f"   🔧 RESOLUTION REQUIRED:\n"
-            f"   • Start auth service at {self._auth_service_url}\n"
-            f"   • Verify auth service configuration and database connectivity\n"
-            f"   • Check auth service health endpoint: {self._auth_service_url}/health\n"
-            f"   • Validate JWT secret configuration consistency\n"
-            f"   • Ensure auth service can validate WebSocket authentication\n"
+            f"   [U+1F527] RESOLUTION REQUIRED:\n"
+            f"   [U+2022] Start auth service at {self._auth_service_url}\n"
+            f"   [U+2022] Verify auth service configuration and database connectivity\n"
+            f"   [U+2022] Check auth service health endpoint: {self._auth_service_url}/health\n"
+            f"   [U+2022] Validate JWT secret configuration consistency\n"
+            f"   [U+2022] Ensure auth service can validate WebSocket authentication\n"
         )
         
         # Print detailed auth service diagnosis
@@ -472,11 +472,11 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
         
         self.record_metric("expired_jwt_rejected", True)
         
-        print(f"\n✅ JWT TOKEN VALIDATION WITH AUTH SERVICE:")
-        print(f"   ✅ Valid JWT tokens: ACCEPTED")
-        print(f"   🚫 Invalid JWT tokens: REJECTED ({len(invalid_jwts)} tested)")
-        print(f"   🚫 Expired JWT tokens: REJECTED")
-        print(f"   🛡️ JWT validation security: ENFORCED")
+        print(f"\n PASS:  JWT TOKEN VALIDATION WITH AUTH SERVICE:")
+        print(f"    PASS:  Valid JWT tokens: ACCEPTED")
+        print(f"   [U+1F6AB] Invalid JWT tokens: REJECTED ({len(invalid_jwts)} tested)")
+        print(f"   [U+1F6AB] Expired JWT tokens: REJECTED")
+        print(f"   [U+1F6E1][U+FE0F] JWT validation security: ENFORCED")
 
     @pytest.mark.timeout(30)
     @pytest.mark.asyncio
@@ -567,46 +567,46 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
             
             if performance_issues:
                 performance_warning = (
-                    f"⚠️ AUTH SERVICE PERFORMANCE ISSUES:\n" +
-                    "\n".join(f"   🐌 {issue}" for issue in performance_issues) +
-                    f"\n\n   📊 PERFORMANCE BREAKDOWN:\n"
-                    f"   • Auth user creation: {auth_response_time:.3f}s\n"
-                    f"   • JWT validation: {jwt_validation_time:.3f}s\n"
-                    f"   • WebSocket connection: {websocket_auth_time:.3f}s\n"
-                    f"   • Total flow time: {total_auth_flow_time:.3f}s\n"
-                    f"\n   🔧 PERFORMANCE OPTIMIZATION REQUIRED:\n"
-                    f"   • Auth service response time optimization\n"
-                    f"   • JWT validation caching/optimization\n"
-                    f"   • WebSocket authentication streamlining\n"
+                    f" WARNING: [U+FE0F] AUTH SERVICE PERFORMANCE ISSUES:\n" +
+                    "\n".join(f"   [U+1F40C] {issue}" for issue in performance_issues) +
+                    f"\n\n    CHART:  PERFORMANCE BREAKDOWN:\n"
+                    f"   [U+2022] Auth user creation: {auth_response_time:.3f}s\n"
+                    f"   [U+2022] JWT validation: {jwt_validation_time:.3f}s\n"
+                    f"   [U+2022] WebSocket connection: {websocket_auth_time:.3f}s\n"
+                    f"   [U+2022] Total flow time: {total_auth_flow_time:.3f}s\n"
+                    f"\n   [U+1F527] PERFORMANCE OPTIMIZATION REQUIRED:\n"
+                    f"   [U+2022] Auth service response time optimization\n"
+                    f"   [U+2022] JWT validation caching/optimization\n"
+                    f"   [U+2022] WebSocket authentication streamlining\n"
                 )
                 print(performance_warning)
                 # Note: This is a warning, not a hard failure for performance issues
                 
             else:
-                print(f"\n✅ AUTH SERVICE PERFORMANCE: ACCEPTABLE")
-                print(f"   ⚡ Auth user creation: {auth_response_time:.3f}s")
-                print(f"   ⚡ JWT validation: {jwt_validation_time:.3f}s")
-                print(f"   ⚡ WebSocket connection: {websocket_auth_time:.3f}s")
-                print(f"   ⚡ Total flow time: {total_auth_flow_time:.3f}s")
+                print(f"\n PASS:  AUTH SERVICE PERFORMANCE: ACCEPTABLE")
+                print(f"    LIGHTNING:  Auth user creation: {auth_response_time:.3f}s")
+                print(f"    LIGHTNING:  JWT validation: {jwt_validation_time:.3f}s")
+                print(f"    LIGHTNING:  WebSocket connection: {websocket_auth_time:.3f}s")
+                print(f"    LIGHTNING:  Total flow time: {total_auth_flow_time:.3f}s")
                 
         except Exception as e:
             auth_error_time = time.time() - auth_start_time
             
             auth_timeout_message = (
-                f"🚨 AUTH SERVICE TIMEOUT/ERROR:\n"
-                f"   🔴 Error after {auth_error_time:.3f}s: {e}\n"
-                f"   🔴 Auth service may be slow or unavailable\n"
+                f" ALERT:  AUTH SERVICE TIMEOUT/ERROR:\n"
+                f"   [U+1F534] Error after {auth_error_time:.3f}s: {e}\n"
+                f"   [U+1F534] Auth service may be slow or unavailable\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • Auth service performance issues prevent WebSocket access\n"
-                f"   • Users experience slow or failed authentication\n"
-                f"   • Real-time AI features degraded or unavailable\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Auth service performance issues prevent WebSocket access\n"
+                f"   [U+2022] Users experience slow or failed authentication\n"
+                f"   [U+2022] Real-time AI features degraded or unavailable\n"
                 f"\n"
-                f"   🔧 RESOLUTION REQUIRED:\n"
-                f"   • Check auth service performance and resource usage\n"
-                f"   • Verify database connectivity and performance\n"
-                f"   • Review auth service logs for bottlenecks\n"
-                f"   • Consider auth service scaling if needed\n"
+                f"   [U+1F527] RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Check auth service performance and resource usage\n"
+                f"   [U+2022] Verify database connectivity and performance\n"
+                f"   [U+2022] Review auth service logs for bottlenecks\n"
+                f"   [U+2022] Consider auth service scaling if needed\n"
             )
             
             print(auth_timeout_message)
@@ -618,8 +618,8 @@ class TestWebSocketAuthServiceIntegrationE2E(SSotAsyncTestCase):
         if hasattr(self, '_metrics'):
             final_metrics = self.get_all_metrics()
             auth_status = "available" if final_metrics.get("auth_service_available") else "unavailable"
-            print(f"\n📊 WEBSOCKET AUTH SERVICE INTEGRATION TEST SUMMARY:")
-            print(f"   🔐 Auth Service Status: {auth_status}")
-            print(f"   📊 Total Integration Metrics: {len(final_metrics)}")
+            print(f"\n CHART:  WEBSOCKET AUTH SERVICE INTEGRATION TEST SUMMARY:")
+            print(f"   [U+1F510] Auth Service Status: {auth_status}")
+            print(f"    CHART:  Total Integration Metrics: {len(final_metrics)}")
         
         await super().async_teardown_method(method)

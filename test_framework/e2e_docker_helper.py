@@ -97,7 +97,7 @@ class E2EDockerHelper:
                 
         except (subprocess.TimeoutExpired, FileNotFoundError, RuntimeError) as e:
             raise RuntimeError(
-                f"❌ DOCKER REQUIRED: E2E tests require Docker to be installed and running.\n"
+                f" FAIL:  DOCKER REQUIRED: E2E tests require Docker to be installed and running.\n"
                 f"   Error: {e}\n"
                 f"   Please:\n"
                 f"   1. Install Docker Desktop (Windows/Mac) or Docker Engine (Linux)\n"
@@ -120,7 +120,7 @@ class E2EDockerHelper:
         Raises:
             RuntimeError: If setup fails
         """
-        logger.info(f"🚀 Setting up E2E environment (test_id: {self.test_id})")
+        logger.info(f"[U+1F680] Setting up E2E environment (test_id: {self.test_id})")
         
         try:
             # 1. Validate Docker available
@@ -132,12 +132,12 @@ class E2EDockerHelper:
             
             if not self.compose_file.exists():
                 raise RuntimeError(
-                    f"❌ CRITICAL: Required E2E compose file not found: {self.compose_file}\n"
+                    f" FAIL:  CRITICAL: Required E2E compose file not found: {self.compose_file}\n"
                     f"   E2E tests require docker-compose.alpine-test.yml to exist.\n"
                     f"   Please ensure the file exists in the project root."
                 )
             
-            logger.info(f"   📦 Using compose file: {self.compose_file}")
+            logger.info(f"   [U+1F4E6] Using compose file: {self.compose_file}")
             
             # 3. Clean previous test artifacts
             await self._clean_previous_artifacts()
@@ -155,7 +155,7 @@ class E2EDockerHelper:
                 "redis": f"redis://localhost:{self.E2E_PORTS['ALPINE_TEST_REDIS_PORT']}/0"
             }
             
-            logger.info("✅ E2E environment ready!")
+            logger.info(" PASS:  E2E environment ready!")
             logger.info(f"   Backend: {self.service_urls['backend']}")
             logger.info(f"   Auth: {self.service_urls['auth']}")
             logger.info(f"   WebSocket: {self.service_urls['websocket']}")
@@ -163,14 +163,14 @@ class E2EDockerHelper:
             return self.service_urls
             
         except Exception as e:
-            logger.error(f"❌ E2E environment setup failed: {e}")
+            logger.error(f" FAIL:  E2E environment setup failed: {e}")
             # Attempt cleanup on failure
             await self.teardown_e2e_environment()
             raise RuntimeError(f"E2E environment setup failed: {e}")
     
     async def _clean_previous_artifacts(self):
         """Clean test data and stale containers using reliability patches."""
-        logger.info("   🧹 Cleaning previous test artifacts...")
+        logger.info("   [U+1F9F9] Cleaning previous test artifacts...")
         
         try:
             # Use reliability patches for comprehensive cleanup
@@ -183,7 +183,7 @@ class E2EDockerHelper:
             if conflicts:
                 logger.warning(f"   Found {len(conflicts)} port conflicts, resolving...")
                 if not patcher.resolve_port_conflicts(force_kill=True):
-                    logger.error("   ❌ Could not resolve all port conflicts")
+                    logger.error("    FAIL:  Could not resolve all port conflicts")
                     raise RuntimeError("Port conflicts prevent E2E Docker setup")
             
             # Clean up stale resources
@@ -209,15 +209,15 @@ class E2EDockerHelper:
                 "down", "-v", "--remove-orphans"
             ], capture_output=True, timeout=60, env=test_env)
             
-            logger.info("   ✅ Previous artifacts cleaned")
+            logger.info("    PASS:  Previous artifacts cleaned")
             
         except Exception as e:
-            logger.warning(f"   ⚠️  Could not clean all previous artifacts: {e}")
+            logger.warning(f"    WARNING: [U+FE0F]  Could not clean all previous artifacts: {e}")
             # Don't fail setup for cleanup issues
     
     async def _start_services_with_health_checks(self, timeout: int):
         """Start services and wait for them to be healthy."""
-        logger.info("   🔨 Building and starting E2E services...")
+        logger.info("   [U+1F528] Building and starting E2E services...")
         
         test_env = os.environ.copy()
         test_env.update(self.E2E_PORTS)
@@ -241,13 +241,13 @@ class E2EDockerHelper:
             )
             
             if result.returncode != 0:
-                logger.error(f"❌ Failed to start E2E services:")
+                logger.error(f" FAIL:  Failed to start E2E services:")
                 logger.error(f"   Command: {' '.join(cmd)}")
                 logger.error(f"   stderr: {result.stderr}")
                 logger.error(f"   stdout: {result.stdout}")
                 raise RuntimeError(f"Docker compose failed: {result.stderr}")
             
-            logger.info("   ✅ Services started, waiting for health checks...")
+            logger.info("    PASS:  Services started, waiting for health checks...")
             
             # Wait for services to be healthy
             await self._wait_for_services_healthy(test_env, timeout)
@@ -269,7 +269,7 @@ class E2EDockerHelper:
         start_time = time.time()
         healthy_services = set()
         
-        logger.info("   ⏳ Waiting for services to become healthy...")
+        logger.info("   [U+23F3] Waiting for services to become healthy...")
         
         while time.time() - start_time < timeout:
             try:
@@ -298,13 +298,13 @@ class E2EDockerHelper:
                     
                     # Check if all required services are healthy
                     if current_healthy.issuperset(required_services):
-                        logger.info("   ✅ All E2E services are healthy")
+                        logger.info("    PASS:  All E2E services are healthy")
                         return
                     
                     # Show progress for newly healthy services
                     newly_healthy = current_healthy - healthy_services
                     if newly_healthy:
-                        logger.info(f"   🟢 Healthy: {', '.join(newly_healthy)}")
+                        logger.info(f"   [U+1F7E2] Healthy: {', '.join(newly_healthy)}")
                         healthy_services.update(newly_healthy)
                 
                 await asyncio.sleep(3)  # Check every 3 seconds
@@ -320,7 +320,7 @@ class E2EDockerHelper:
     async def _collect_failure_logs(self, test_env: Dict[str, str]):
         """Collect logs from failed services for debugging."""
         try:
-            logger.error("🔍 Collecting failure logs for debugging...")
+            logger.error(" SEARCH:  Collecting failure logs for debugging...")
             
             result = subprocess.run([
                 "docker-compose", "-f", str(self.compose_file),
@@ -344,7 +344,7 @@ class E2EDockerHelper:
             return
         
         try:
-            logger.info(f"🧹 Tearing down E2E environment (test_id: {self.test_id})")
+            logger.info(f"[U+1F9F9] Tearing down E2E environment (test_id: {self.test_id})")
             
             test_env = os.environ.copy()
             test_env.update(self.E2E_PORTS)
@@ -360,7 +360,7 @@ class E2EDockerHelper:
             if result.returncode != 0:
                 logger.warning(f"Warning during teardown: {result.stderr}")
             else:
-                logger.info("   ✅ E2E environment cleaned up")
+                logger.info("    PASS:  E2E environment cleaned up")
             
         except Exception as e:
             logger.warning(f"Warning during E2E teardown: {e}")

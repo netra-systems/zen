@@ -58,11 +58,11 @@ class TestFailureAnalyzer:
             diagnostics_completed = self.run_diagnostics(strategy)
             
             if diagnostics_completed:
-                self.log("✓ Analysis complete - recommendations generated")
+                self.log("[U+2713] Analysis complete - recommendations generated")
                 self.update_report(success=True, analysis=analysis, strategy=strategy)
                 return True
             else:
-                self.log("✗ Failed to complete diagnostics")
+                self.log("[U+2717] Failed to complete diagnostics")
                 self.update_report(success=False, analysis=analysis, strategy=strategy)
                 return False
                 
@@ -383,7 +383,7 @@ class TestFailureAnalyzer:
         # Find or create section for this test
         test_section = f"\n## Fix Report: {self.test_name}\n"
         test_section += f"Timestamp: {datetime.now().isoformat()}\n"
-        test_section += f"Status: {'✓ FIXED' if success else '✗ FAILED'}\n\n"
+        test_section += f"Status: {'[U+2713] FIXED' if success else '[U+2717] FAILED'}\n\n"
         
         if analysis:
             test_section += f"### Analysis\n"

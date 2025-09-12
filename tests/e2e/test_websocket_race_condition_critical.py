@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """CRITICAL E2E TEST SUITE: WebSocket Race Condition Bug Reproduction and Validation
 
 CRITICAL BUSINESS VALUE: Fixes the WebSocket "Need to call 'accept' first" race condition
@@ -17,11 +55,11 @@ STAGING ERROR PATTERN REPRODUCED:
 - Error frequency: Every ~3 minutes
 
 CLAUDE.md COMPLIANCE:
-- ✅ Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION)
-- ✅ Real services via unified_test_runner.py --real-services
-- ✅ Tests MUST FAIL HARD - no try/except bypassing
-- ✅ E2E tests completing in 0.00s = automatic hard failure
-- ✅ Business value focus: Chat delivery pipeline validation
+-  PASS:  Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION)
+-  PASS:  Real services via unified_test_runner.py --real-services
+-  PASS:  Tests MUST FAIL HARD - no try/except bypassing
+-  PASS:  E2E tests completing in 0.00s = automatic hard failure
+-  PASS:  Business value focus: Chat delivery pipeline validation
 
 Business Impact: Prevents user churn from failed WebSocket connections
 Revenue Impact: Ensures reliable Chat interactions for revenue retention
@@ -389,9 +427,9 @@ class TestWebSocketRaceConditionCritical:
         # Determine test environment
         cls.test_environment = cls.env.get("TEST_ENV", cls.env.get("ENVIRONMENT", "test"))
         
-        logger.info(f"🚀 Starting WebSocket Race Condition Critical Tests")
-        logger.info(f"📍 Environment: {cls.test_environment}")
-        logger.info(f"🎯 Testing race condition reproduction and validation")
+        logger.info(f"[U+1F680] Starting WebSocket Race Condition Critical Tests")
+        logger.info(f" PIN:  Environment: {cls.test_environment}")
+        logger.info(f" TARGET:  Testing race condition reproduction and validation")
     
     def setup_method(self, method):
         """Set up each test method with authenticated helpers."""
@@ -401,8 +439,8 @@ class TestWebSocketRaceConditionCritical:
         # Reset test framework for each test
         self.test_framework = WebSocketRaceConditionTestFramework(self.test_environment)
         
-        logger.info(f"🧪 Starting test: {method.__name__}")
-        logger.info(f"🔐 Authentication configured for: {self.test_environment}")
+        logger.info(f"[U+1F9EA] Starting test: {method.__name__}")
+        logger.info(f"[U+1F510] Authentication configured for: {self.test_environment}")
     
     @pytest.mark.asyncio
     async def test_websocket_race_condition_reproduction(self):
@@ -420,7 +458,7 @@ class TestWebSocketRaceConditionCritical:
         Success Criteria: Zero race condition errors over 10-minute test
         """
         test_start_time = time.time()
-        logger.info("🔥 CRITICAL: Reproducing staging WebSocket race condition")
+        logger.info(" FIRE:  CRITICAL: Reproducing staging WebSocket race condition")
         
         # Test configuration for race condition reproduction
         test_duration_seconds = 120  # 2 minutes intensive test
@@ -444,14 +482,14 @@ class TestWebSocketRaceConditionCritical:
                 await self.test_framework.inject_network_delay("high")
             
             # Wait for all connection tasks to complete
-            logger.info(f"⏳ Waiting for {len(connection_tasks)} connection tests to complete...")
+            logger.info(f"[U+23F3] Waiting for {len(connection_tasks)} connection tests to complete...")
             await asyncio.gather(*connection_tasks, return_exceptions=True)
             
             # Generate comprehensive test report
             report = self.test_framework.generate_report()
             
             # Log detailed results
-            logger.info("📊 RACE CONDITION TEST RESULTS:")
+            logger.info(" CHART:  RACE CONDITION TEST RESULTS:")
             logger.info(f"   Total Duration: {report['test_duration']:.2f}s")
             logger.info(f"   Total Connections: {report['total_connections']}")
             logger.info(f"   Race Condition Errors: {report['race_condition_errors']}")
@@ -460,13 +498,13 @@ class TestWebSocketRaceConditionCritical:
             
             # CRITICAL ASSERTION: Validate race condition reproduction/resolution
             if report['race_condition_errors'] > 0:
-                logger.error("🚨 RACE CONDITION REPRODUCED - This test will pass after fix implementation")
-                logger.error(f"🔍 Race condition errors detected: {report['race_condition_errors']}")
+                logger.error(" ALERT:  RACE CONDITION REPRODUCED - This test will pass after fix implementation")
+                logger.error(f" SEARCH:  Race condition errors detected: {report['race_condition_errors']}")
                 
                 # Log first race condition error for debugging
                 if self.test_framework.race_condition_errors:
                     first_error = self.test_framework.race_condition_errors[0]
-                    logger.error(f"🔍 First race condition: {first_error['error_message']}")
+                    logger.error(f" SEARCH:  First race condition: {first_error['error_message']}")
                 
                 # BEFORE FIX: This assertion will fail (reproducing the bug)
                 # AFTER FIX: This assertion should pass (bug resolved)
@@ -475,7 +513,7 @@ class TestWebSocketRaceConditionCritical:
                     f"This confirms the staging issue exists. Fix implementation required."
                 )
             else:
-                logger.info("✅ SUCCESS: No race condition errors detected - fix is working!")
+                logger.info(" PASS:  SUCCESS: No race condition errors detected - fix is working!")
                 
                 # Additional validation for fix verification
                 assert report['connection_success_rate'] >= 0.95, \
@@ -486,11 +524,11 @@ class TestWebSocketRaceConditionCritical:
         
         except Exception as e:
             # Log exception details for debugging
-            logger.error(f"❌ Race condition test failed with exception: {e}")
+            logger.error(f" FAIL:  Race condition test failed with exception: {e}")
             
             # Generate report even on failure
             report = self.test_framework.generate_report()
-            logger.error(f"📊 Partial results: {report}")
+            logger.error(f" CHART:  Partial results: {report}")
             
             # Re-raise for hard failure (per CLAUDE.md)
             raise
@@ -506,7 +544,7 @@ class TestWebSocketRaceConditionCritical:
         assert actual_duration > 10.0, \
             f"E2E test completed too quickly ({actual_duration:.2f}s). Must run real connections for meaningful duration."
         
-        logger.info(f"✅ Race condition reproduction test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Race condition reproduction test completed in {actual_duration:.2f}s")
     
     async def _test_single_connection_with_delays(self, client: RaceConditionWebSocketClient):
         """Test single connection with race condition detection."""
@@ -532,9 +570,9 @@ class TestWebSocketRaceConditionCritical:
                         client.websocket.recv(),
                         timeout=5.0
                     )
-                    logger.debug(f"✅ Connection {client.connection_id} received response")
+                    logger.debug(f" PASS:  Connection {client.connection_id} received response")
                 except asyncio.TimeoutError:
-                    logger.warning(f"⚠️ Connection {client.connection_id} response timeout")
+                    logger.warning(f" WARNING: [U+FE0F] Connection {client.connection_id} response timeout")
                 
                 # Keep connection alive to test race conditions
                 await asyncio.sleep(2.0)
@@ -542,7 +580,7 @@ class TestWebSocketRaceConditionCritical:
         except Exception as e:
             # Race condition or other connection error
             error_message = str(e)
-            logger.warning(f"⚠️ Connection {client.connection_id} error: {error_message}")
+            logger.warning(f" WARNING: [U+FE0F] Connection {client.connection_id} error: {error_message}")
             
             # Error will be logged by test framework
             # Don't re-raise here to allow other connections to continue
@@ -559,7 +597,7 @@ class TestWebSocketRaceConditionCritical:
         Success Criteria: All users receive agent events properly with 100% isolation
         """
         test_start_time = time.time()
-        logger.info("👥 CRITICAL: Multi-user concurrent WebSocket load test")
+        logger.info("[U+1F465] CRITICAL: Multi-user concurrent WebSocket load test")
         
         # Multi-user test configuration
         num_concurrent_users = 6  # Realistic concurrent user load
@@ -578,7 +616,7 @@ class TestWebSocketRaceConditionCritical:
                     websocket_enabled=True
                 )
                 user_contexts.append(user_context)
-                logger.info(f"🔐 Created user context {i}: {user_context.user_id}")
+                logger.info(f"[U+1F510] Created user context {i}: {user_context.user_id}")
             
             # Create concurrent WebSocket connections for all users
             connection_tasks = []
@@ -589,7 +627,7 @@ class TestWebSocketRaceConditionCritical:
                 connection_tasks.append(task)
             
             # Execute all user connections concurrently
-            logger.info(f"🚀 Starting {num_concurrent_users} concurrent user connections...")
+            logger.info(f"[U+1F680] Starting {num_concurrent_users} concurrent user connections...")
             user_results = await asyncio.gather(*connection_tasks, return_exceptions=True)
             
             # Analyze multi-user results
@@ -599,17 +637,17 @@ class TestWebSocketRaceConditionCritical:
             
             for i, result in enumerate(user_results):
                 if isinstance(result, Exception):
-                    logger.error(f"❌ User {i} failed: {result}")
+                    logger.error(f" FAIL:  User {i} failed: {result}")
                 else:
                     successful_users += 1
                     total_events_delivered += result.get("events_delivered", 0)
                     user_isolation_violations += result.get("isolation_violations", 0)
-                    logger.info(f"✅ User {i}: {result.get('events_delivered', 0)} events delivered")
+                    logger.info(f" PASS:  User {i}: {result.get('events_delivered', 0)} events delivered")
             
             # Generate multi-user test report
             report = self.test_framework.generate_report()
             
-            logger.info("📊 MULTI-USER CONCURRENT LOAD RESULTS:")
+            logger.info(" CHART:  MULTI-USER CONCURRENT LOAD RESULTS:")
             logger.info(f"   Successful Users: {successful_users}/{num_concurrent_users}")
             logger.info(f"   Total Events Delivered: {total_events_delivered}")
             logger.info(f"   User Isolation Violations: {user_isolation_violations}")
@@ -618,7 +656,7 @@ class TestWebSocketRaceConditionCritical:
             # CRITICAL ASSERTIONS for multi-user business value
             user_success_rate = successful_users / num_concurrent_users
             assert user_success_rate >= 0.8, \
-                f"Multi-user success rate too low: {user_success_rate:.2%} (need ≥80%)"
+                f"Multi-user success rate too low: {user_success_rate:.2%} (need  >= 80%)"
             
             assert user_isolation_violations == 0, \
                 f"User isolation violated: {user_isolation_violations} cross-user events detected"
@@ -626,14 +664,14 @@ class TestWebSocketRaceConditionCritical:
             expected_total_events = num_concurrent_users * agent_requests_per_user * len(self.test_framework.critical_agent_events)
             event_delivery_rate = total_events_delivered / expected_total_events if expected_total_events > 0 else 0
             assert event_delivery_rate >= 0.7, \
-                f"Event delivery rate too low: {event_delivery_rate:.2%} (need ≥70%)"
+                f"Event delivery rate too low: {event_delivery_rate:.2%} (need  >= 70%)"
             
             # No race conditions allowed in multi-user scenario
             assert report['race_condition_errors'] == 0, \
                 f"Race conditions detected in multi-user load: {report['race_condition_errors']}"
         
         except Exception as e:
-            logger.error(f"❌ Multi-user concurrent load test failed: {e}")
+            logger.error(f" FAIL:  Multi-user concurrent load test failed: {e}")
             raise
         
         finally:
@@ -647,7 +685,7 @@ class TestWebSocketRaceConditionCritical:
         assert actual_duration > 5.0, \
             f"Multi-user test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Multi-user concurrent load test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Multi-user concurrent load test completed in {actual_duration:.2f}s")
     
     async def _test_concurrent_user_connection(self, user_index: int, user_context, agent_requests: int) -> Dict:
         """Test single user connection in concurrent scenario."""
@@ -690,12 +728,12 @@ class TestWebSocketRaceConditionCritical:
                         event_user_id = parsed.get("user_id")
                         if event_user_id and event_user_id != user_id:
                             isolation_violations += 1
-                            logger.error(f"🔒 User isolation violated: User {user_index} received event for {event_user_id}")
+                            logger.error(f"[U+1F512] User isolation violated: User {user_index} received event for {event_user_id}")
                     except:
                         pass  # Non-JSON messages are okay
         
         except Exception as e:
-            logger.error(f"❌ User {user_index} connection failed: {e}")
+            logger.error(f" FAIL:  User {user_index} connection failed: {e}")
             raise
         
         return {
@@ -717,7 +755,7 @@ class TestWebSocketRaceConditionCritical:
         Success Criteria: All connections stable with 300ms+ network delays
         """
         test_start_time = time.time()
-        logger.info("☁️ CRITICAL: Cloud Run network latency simulation test")
+        logger.info("[U+2601][U+FE0F] CRITICAL: Cloud Run network latency simulation test")
         
         # Cloud Run latency test configuration
         latency_scenarios = [
@@ -730,7 +768,7 @@ class TestWebSocketRaceConditionCritical:
         
         try:
             for scenario in latency_scenarios:
-                logger.info(f"🌐 Testing {scenario['name']} scenario...")
+                logger.info(f"[U+1F310] Testing {scenario['name']} scenario...")
                 
                 scenario_start = time.time()
                 connections_attempted = 5
@@ -767,14 +805,14 @@ class TestWebSocketRaceConditionCritical:
                                     timeout=10.0
                                 )
                                 successful_connections += 1
-                                logger.debug(f"✅ {scenario['name']} connection {i} successful")
+                                logger.debug(f" PASS:  {scenario['name']} connection {i} successful")
                             except asyncio.TimeoutError:
-                                logger.warning(f"⏰ {scenario['name']} connection {i} response timeout")
+                                logger.warning(f"[U+23F0] {scenario['name']} connection {i} response timeout")
                                 # Still count as successful connection if no handshake error
                                 successful_connections += 1
                     
                     except Exception as e:
-                        logger.warning(f"❌ {scenario['name']} connection {i} failed: {e}")
+                        logger.warning(f" FAIL:  {scenario['name']} connection {i} failed: {e}")
                         # Don't raise - continue testing other connections
                 
                 # Calculate scenario results
@@ -792,7 +830,7 @@ class TestWebSocketRaceConditionCritical:
                 }
                 scenario_results.append(scenario_result)
                 
-                logger.info(f"📊 {scenario['name']} Results:")
+                logger.info(f" CHART:  {scenario['name']} Results:")
                 logger.info(f"   Success Rate: {success_rate:.2%}")
                 logger.info(f"   Avg Handshake Time: {avg_handshake_time:.3f}s")
                 logger.info(f"   Successful: {successful_connections}/{connections_attempted}")
@@ -804,7 +842,7 @@ class TestWebSocketRaceConditionCritical:
             # Overall test results
             report = self.test_framework.generate_report()
             
-            logger.info("📊 CLOUD RUN LATENCY SIMULATION RESULTS:")
+            logger.info(" CHART:  CLOUD RUN LATENCY SIMULATION RESULTS:")
             for result in scenario_results:
                 logger.info(f"   {result['name']}: {result['success_rate']:.2%} success, {result['avg_handshake_time']:.3f}s handshake")
             logger.info(f"   Race Condition Errors: {report['race_condition_errors']}")
@@ -819,7 +857,7 @@ class TestWebSocketRaceConditionCritical:
                 f"Race conditions detected under Cloud Run latency: {report['race_condition_errors']}"
         
         except Exception as e:
-            logger.error(f"❌ Cloud Run latency simulation failed: {e}")
+            logger.error(f" FAIL:  Cloud Run latency simulation failed: {e}")
             raise
         
         # Verify test duration
@@ -827,7 +865,7 @@ class TestWebSocketRaceConditionCritical:
         assert actual_duration > 10.0, \
             f"Cloud Run latency test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Cloud Run latency simulation completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Cloud Run latency simulation completed in {actual_duration:.2f}s")
     
     @pytest.mark.asyncio
     async def test_websocket_agent_events_delivery_reliability(self):
@@ -841,7 +879,7 @@ class TestWebSocketRaceConditionCritical:
         Success Criteria: All events delivered within 2s of generation with 100% reliability
         """
         test_start_time = time.time()
-        logger.info("🎯 CRITICAL: Agent events delivery reliability test")
+        logger.info(" TARGET:  CRITICAL: Agent events delivery reliability test")
         
         # Critical agent events test configuration
         num_agent_sessions = 3  # Multiple agent sessions to test
@@ -855,11 +893,11 @@ class TestWebSocketRaceConditionCritical:
             client = RaceConditionWebSocketClient(self.auth_helper, self.test_framework)
             
             async with client.connect(timeout=20.0):
-                logger.info(f"🔗 WebSocket connected for agent events test")
+                logger.info(f"[U+1F517] WebSocket connected for agent events test")
                 
                 # Test multiple agent sessions
                 for session_num in range(num_agent_sessions):
-                    logger.info(f"🤖 Starting agent session {session_num + 1}/{num_agent_sessions}")
+                    logger.info(f"[U+1F916] Starting agent session {session_num + 1}/{num_agent_sessions}")
                     
                     session_start = time.time()
                     
@@ -906,7 +944,7 @@ class TestWebSocketRaceConditionCritical:
                             {"session_id": f"events_test_session_{session_num}"}
                         )
                         
-                        logger.debug(f"📤 Sent {event['type']} for thread {thread_id}")
+                        logger.debug(f"[U+1F4E4] Sent {event['type']} for thread {thread_id}")
                     
                     # Wait for event delivery with timeout
                     event_validation_timeout = 10.0
@@ -934,7 +972,7 @@ class TestWebSocketRaceConditionCritical:
                     }
                     agent_session_results.append(session_result)
                     
-                    logger.info(f"📊 Session {session_num} Results:")
+                    logger.info(f" CHART:  Session {session_num} Results:")
                     logger.info(f"   Events Delivered: {len(session_events)}/{len(events_sent)}")
                     logger.info(f"   Missing Events: {missing_events}")
                     logger.info(f"   Session Duration: {session_result['session_duration']:.2f}s")
@@ -949,7 +987,7 @@ class TestWebSocketRaceConditionCritical:
             total_events_delivered = sum(r["events_delivered"] for r in agent_session_results)
             successful_sessions = sum(1 for r in agent_session_results if r["success"])
             
-            logger.info("📊 AGENT EVENTS DELIVERY RELIABILITY RESULTS:")
+            logger.info(" CHART:  AGENT EVENTS DELIVERY RELIABILITY RESULTS:")
             logger.info(f"   Successful Sessions: {successful_sessions}/{num_agent_sessions}")
             logger.info(f"   Total Events Delivered: {total_events_delivered}/{expected_total_events}")
             logger.info(f"   Event Delivery Rate: {total_events_delivered/expected_total_events:.2%}")
@@ -962,7 +1000,7 @@ class TestWebSocketRaceConditionCritical:
             
             event_delivery_rate = total_events_delivered / expected_total_events
             assert event_delivery_rate >= 0.95, \
-                f"Event delivery rate too low: {event_delivery_rate:.2%} (need ≥95%)"
+                f"Event delivery rate too low: {event_delivery_rate:.2%} (need  >= 95%)"
             
             # Verify all critical event types were delivered
             all_delivered_types = set()
@@ -978,7 +1016,7 @@ class TestWebSocketRaceConditionCritical:
                 f"Race conditions detected during agent event delivery: {report['race_condition_errors']}"
         
         except Exception as e:
-            logger.error(f"❌ Agent events delivery reliability test failed: {e}")
+            logger.error(f" FAIL:  Agent events delivery reliability test failed: {e}")
             raise
         
         # Verify test duration
@@ -986,8 +1024,8 @@ class TestWebSocketRaceConditionCritical:
         assert actual_duration > 5.0, \
             f"Agent events test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Agent events delivery reliability test completed in {actual_duration:.2f}s")
-        logger.info(f"🎯 All {len(self.test_framework.critical_agent_events)} critical agent event types validated")
+        logger.info(f" PASS:  Agent events delivery reliability test completed in {actual_duration:.2f}s")
+        logger.info(f" TARGET:  All {len(self.test_framework.critical_agent_events)} critical agent event types validated")
 
 
 # ============================================================================
@@ -1009,13 +1047,13 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    logger.info("🚀 Starting WebSocket Race Condition Critical Test Suite")
-    logger.info("📋 Tests included:")
+    logger.info("[U+1F680] Starting WebSocket Race Condition Critical Test Suite")
+    logger.info("[U+1F4CB] Tests included:")
     logger.info("   1. test_websocket_race_condition_reproduction")
     logger.info("   2. test_websocket_multi_user_concurrent_load") 
     logger.info("   3. test_websocket_cloud_run_latency_simulation")
     logger.info("   4. test_websocket_agent_events_delivery_reliability")
-    logger.info("🎯 Business Value: Ensures $500K+ ARR Chat functionality reliability")
+    logger.info(" TARGET:  Business Value: Ensures $500K+ ARR Chat functionality reliability")
     
     # Run tests with pytest
     pytest.main([__file__, "-v", "-s", "--tb=short"])

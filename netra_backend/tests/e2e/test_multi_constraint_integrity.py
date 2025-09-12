@@ -3,7 +3,7 @@ import asyncio
 """
 Multi-Constraint Data Integrity Test Module
 Tests data integrity across multi-constraint workflows.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """""
 
 import sys

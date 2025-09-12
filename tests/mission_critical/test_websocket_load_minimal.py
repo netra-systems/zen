@@ -223,7 +223,7 @@
                     # REMOVED_SYNTAX_ERROR: - All required events are emitted via REAL WebSocket connections
                     # REMOVED_SYNTAX_ERROR: - Response times are reasonable under concurrent load
                     # REMOVED_SYNTAX_ERROR: - No events are lost through REAL connections
-                    # REMOVED_SYNTAX_ERROR: - Each user gets the complete event sequence: agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+                    # REMOVED_SYNTAX_ERROR: - Each user gets the complete event sequence: agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed
 
                     # REMOVED_SYNTAX_ERROR: FAILS FAST if any critical requirement is not met.
                     # REMOVED_SYNTAX_ERROR: '''
@@ -458,11 +458,11 @@
                                         # REMOVED_SYNTAX_ERROR: CRITICAL TEST: Real WebSocket load test with REAL connections only.
 
                                         # REMOVED_SYNTAX_ERROR: Validates core chat responsiveness requirements:
-                                            # REMOVED_SYNTAX_ERROR: ✅ 8 concurrent users can establish REAL WebSocket connections
-                                            # REMOVED_SYNTAX_ERROR: ✅ All required WebSocket events are fired through REAL connections
-                                            # REMOVED_SYNTAX_ERROR: ✅ Response times are reasonable under concurrent load
-                                            # REMOVED_SYNTAX_ERROR: ✅ No event loss occurs through REAL connections
-                                            # REMOVED_SYNTAX_ERROR: ✅ Each user receives complete event sequence
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  8 concurrent users can establish REAL WebSocket connections
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  All required WebSocket events are fired through REAL connections
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  Response times are reasonable under concurrent load
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  No event loss occurs through REAL connections
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  Each user receives complete event sequence
 
                                             # REMOVED_SYNTAX_ERROR: FAILS FAST if any critical requirement is not met.
                                             # REMOVED_SYNTAX_ERROR: '''
@@ -496,7 +496,7 @@
                                                 # REMOVED_SYNTAX_ERROR: assert metrics.events_received >= expected_min_events * 0.8, \
                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ REAL WebSocket load test PASSED")
+                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  REAL WebSocket load test PASSED")
 
                                                 # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                 # REMOVED_SYNTAX_ERROR: return metrics
@@ -543,7 +543,7 @@
                                                                     # REMOVED_SYNTAX_ERROR: assert not metrics.missing_required_events, \
                                                                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ REAL WebSocket concurrent stress test PASSED")
+                                                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  REAL WebSocket concurrent stress test PASSED")
 
                                                                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
                                                                     # REMOVED_SYNTAX_ERROR: return metrics
@@ -575,7 +575,7 @@
 
         # REMOVED_SYNTAX_ERROR: logger.info(" )
         # REMOVED_SYNTAX_ERROR: " + "="*80)
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ ALL REAL WEBSOCKET LOAD TESTS PASSED")
+        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  ALL REAL WEBSOCKET LOAD TESTS PASSED")
         # REMOVED_SYNTAX_ERROR: logger.info("="*80)
 
         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)

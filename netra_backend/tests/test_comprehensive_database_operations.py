@@ -1,7 +1,7 @@
 """
 Comprehensive Database Operations Tests - 12 Required Tests
 Testing database operations with mocked connections for reliability.
-Each function ≤8 lines per requirements.
+Each function  <= 8 lines per requirements.
 """
 
 import sys
@@ -536,7 +536,7 @@ class TestComprehensiveDatabaseOperations:
         assert mock_user.updated_at >= original_time
         assert mock_user.full_name == "Updated Name"
 
-# Helper functions ≤8 lines each
+# Helper functions  <= 8 lines each
 async def cleanup_test_data(session: AsyncSession, username_pattern: str) -> None:
     """Clean up test data matching pattern."""
     await session.execute(

@@ -375,7 +375,7 @@ class AlpineVerifier:
         if self.results['image_sizes']:
             report.append("\nImage Sizes:")
             for service, size in self.results['image_sizes'].items():
-                status = "✓" if size < 200 else "⚠"
+                status = "[U+2713]" if size < 200 else " WARNING: "
                 report.append(f"  {status} {service}: {size:.1f}MB")
         
         # Startup times
@@ -383,42 +383,42 @@ class AlpineVerifier:
             report.append("\nStartup Times:")
             for service, time_sec in self.results['startup_times'].items():
                 if time_sec > 0:
-                    status = "✓" if time_sec < 30 else "⚠"
+                    status = "[U+2713]" if time_sec < 30 else " WARNING: "
                     report.append(f"  {status} {service}: {time_sec:.1f}s")
                 else:
-                    report.append(f"  ✗ {service}: Failed to start")
+                    report.append(f"  [U+2717] {service}: Failed to start")
         
         # Memory usage
         if self.results['memory_usage']:
             report.append("\nMemory Usage:")
             for service, mem_mb in self.results['memory_usage'].items():
                 max_mb = MAX_MEMORY_MB.get(service, 1024)
-                status = "✓" if mem_mb < max_mb else "⚠"
+                status = "[U+2713]" if mem_mb < max_mb else " WARNING: "
                 report.append(f"  {status} {service}: {mem_mb:.1f}MB / {max_mb}MB")
         
         # Health checks
         if self.results['health_checks']:
             report.append("\nHealth Checks:")
             for service, configured in self.results['health_checks'].items():
-                status = "✓" if configured else "✗"
+                status = "[U+2713]" if configured else "[U+2717]"
                 report.append(f"  {status} {service}: {'Configured' if configured else 'Missing'}")
         
         # Issues
         if self.results['issues']:
             report.append("\nIssues Found:")
             for issue in self.results['issues']:
-                report.append(f"  ⚠ {issue}")
+                report.append(f"   WARNING:  {issue}")
         else:
-            report.append("\n✓ No issues found")
+            report.append("\n[U+2713] No issues found")
         
         report.append("\n" + "=" * 60)
         
         # Overall status
         total_issues = len(self.results['issues'])
         if total_issues == 0:
-            report.append("✓ Alpine containers are properly optimized")
+            report.append("[U+2713] Alpine containers are properly optimized")
         else:
-            report.append(f"⚠ Found {total_issues} optimization opportunities")
+            report.append(f" WARNING:  Found {total_issues} optimization opportunities")
         
         return "\n".join(report)
     

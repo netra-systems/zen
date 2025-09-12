@@ -7,7 +7,7 @@ After SSOT consolidation, these tests should PASS, proving Golden Path chat work
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Restore $500K+ ARR chat functionality disrupted by manager fragmentation
-- Value Impact: Ensure complete user login → AI response workflow works reliably
+- Value Impact: Ensure complete user login  ->  AI response workflow works reliably
 - Revenue Impact: Protect primary revenue stream from WebSocket manager inconsistencies
 
 SSOT Violations This Module Proves:
@@ -24,6 +24,7 @@ Golden Path Critical Requirements:
 - Multi-user isolation maintained
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import time
 import unittest
@@ -55,7 +56,7 @@ class MockWebSocketConnection:
         self.is_closed = True
 
 
-class TestWebSocketManagerGoldenPathIntegration(unittest.TestCase):
+class TestWebSocketManagerGoldenPathIntegration(SSotAsyncTestCase):
     """
     Integration tests to prove WebSocket manager consolidation violations break Golden Path.
     

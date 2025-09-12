@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -66,7 +67,7 @@
             # Pytest imports for test markers - using standard pytest marks
 
 
-# REMOVED_SYNTAX_ERROR: class TestFrontendBuildErrorReporting(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for Issue 1: Frontend build failure without detailed error reporting
 
@@ -171,7 +172,7 @@
             # REMOVED_SYNTAX_ERROR: "Arguments should be validated before shell execution")
 
 
-# REMOVED_SYNTAX_ERROR: class TestBackendProcessStability(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestBackendProcessStability(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for Issue 2: Backend process exit with code 1 during runtime
 
@@ -267,7 +268,7 @@
         # REMOVED_SYNTAX_ERROR: "Health monitoring should trigger automatic recovery")
 
 
-# REMOVED_SYNTAX_ERROR: class TestReadinessCheckReliability(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestReadinessCheckReliability(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for Issue 3: Backend/Auth readiness check failures despite successful startup
 
@@ -375,7 +376,7 @@
             # REMOVED_SYNTAX_ERROR: "Readiness response should indicate bootstrap progress")
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketValidationWarnings(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestWebSocketValidationWarnings(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for Issue 4: WebSocket validation warning (non-critical)
 

@@ -4,7 +4,7 @@ WebSocket SSOT Integration Violation Detection Tests
 These tests detect current SSOT violations in WebSocket-agent integration and ensure
 all 5 critical events are properly delivered through unified communication.
 
-Business Value: Platform/Internal - Ensure golden path (login → AI responses) works
+Business Value: Platform/Internal - Ensure golden path (login  ->  AI responses) works
 Critical for chat functionality that delivers 90% of platform value.
 
 Test Status: DESIGNED TO FAIL with current code (detecting violations)
@@ -212,7 +212,7 @@ class TestWebSocketSSotIntegrationViolations(SSotAsyncTestCase):
 
     async def test_golden_path_flow_unified_manager(self):
         """
-        Test that golden path flow (login → AI responses) works through unified manager.
+        Test that golden path flow (login  ->  AI responses) works through unified manager.
         
         CURRENT BEHAVIOR: May use multiple managers/paths (VIOLATION)
         EXPECTED AFTER SSOT: Single manager handles entire flow

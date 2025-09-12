@@ -1,7 +1,7 @@
 """
 Corpus Audit Repository
 Repository layer for corpus audit operations with async patterns.
-Focused on database interactions only. ≤300 lines, ≤8 lines per function.
+Focused on database interactions only.  <= 300 lines,  <= 8 lines per function.
 """
 
 from typing import Any, Dict, List

@@ -13,7 +13,7 @@ WebSocket "accepted" (transport ready) was conflated with "ready to process mess
 (fully operational).
 
 The state machine provides:
-1. Clear state transitions: CONNECTING → ACCEPTED → AUTHENTICATED → SERVICES_READY → PROCESSING_READY
+1. Clear state transitions: CONNECTING  ->  ACCEPTED  ->  AUTHENTICATED  ->  SERVICES_READY  ->  PROCESSING_READY
 2. Thread-safe state management with proper rollback on failures
 3. Integration with existing is_websocket_connected_and_ready() function
 4. Message queuing coordination to buffer messages until fully ready

@@ -3,7 +3,7 @@ Admin Corpus WebSocket Messages
 
 WebSocket message types for admin corpus operations.
 All models follow Pydantic with strong typing per type_safety.xml.
-Maximum 300 lines per conventions.xml, each function ≤8 lines.
+Maximum 300 lines per conventions.xml, each function  <= 8 lines.
 """
 
 from datetime import UTC, datetime

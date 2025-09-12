@@ -1,5 +1,5 @@
 """
-🚨 MISSION CRITICAL: WebSocket Auth Fallback SSOT Violation
+ ALERT:  MISSION CRITICAL: WebSocket Auth Fallback SSOT Violation
 
 SSOT VIOLATION REPRODUCTION - Test #4 of 5  
 This test EXPOSES the violation where WebSocket implements fallback auth patterns
@@ -59,7 +59,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         CURRENT VIOLATION: _resilient_validation_fallback() method (lines 265-324)
         implements complex fallback logic that should be in UnifiedAuthInterface.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: WebSocket local fallback patterns")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: WebSocket local fallback patterns")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         
@@ -78,12 +78,12 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
             if hasattr(extractor, method_name):
                 violations_found.append(method_name)
                 fallback_logic_detected = True
-                logger.error(f"🚨 SSOT VIOLATION: WebSocket has fallback method: {method_name}")
+                logger.error(f" ALERT:  SSOT VIOLATION: WebSocket has fallback method: {method_name}")
                 
                 # Test that the method exists and can be called
                 method = getattr(extractor, method_name)
                 if callable(method):
-                    logger.error(f"🚨 CALLABLE FALLBACK LOGIC FOUND: {method_name}")
+                    logger.error(f" ALERT:  CALLABLE FALLBACK LOGIC FOUND: {method_name}")
         
         # Check for fallback logic in source code
         try:
@@ -102,16 +102,16 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                 if pattern in source_code:
                     violations_found.append(f"Source contains: {pattern}")
                     fallback_logic_detected = True
-                    logger.error(f"🚨 FALLBACK PATTERN IN SOURCE: {pattern}")
+                    logger.error(f" ALERT:  FALLBACK PATTERN IN SOURCE: {pattern}")
         
         except Exception as e:
-            logger.warning(f"⚠️ Could not analyze source code: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Could not analyze source code: {e}")
         
         if fallback_logic_detected:
-            logger.critical("🚨 FALLBACK SSOT VIOLATION CONFIRMED")
-            logger.critical(f"🚨 Fallback violations found: {violations_found}")
-            logger.critical("🚨 WebSocket should delegate ALL fallback to UnifiedAuthInterface")
-            logger.critical("🚨 THIS TEST PASSES = VIOLATION EXISTS")
+            logger.critical(" ALERT:  FALLBACK SSOT VIOLATION CONFIRMED")
+            logger.critical(f" ALERT:  Fallback violations found: {violations_found}")
+            logger.critical(" ALERT:  WebSocket should delegate ALL fallback to UnifiedAuthInterface")
+            logger.critical(" ALERT:  THIS TEST PASSES = VIOLATION EXISTS")
             
             assert len(violations_found) > 0, f"FALLBACK SSOT VIOLATION: WebSocket implements local fallback: {violations_found}"
             return True
@@ -127,7 +127,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         This test demonstrates that WebSocket implements complex multi-step
         fallback logic that should be centralized in UnifiedAuthInterface.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: Complex fallback logic duplication")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: Complex fallback logic duplication")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         
@@ -167,28 +167,28 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                         # Check if fallback logic was used
                         if mock_resilient_auth.called and user_context:
                             fallback_calls.append("validate_token_with_resilience")
-                            logger.error("🚨 COMPLEX FALLBACK LOGIC EXECUTED")
-                            logger.error(f"🚨 Fallback result: {user_context}")
+                            logger.error(" ALERT:  COMPLEX FALLBACK LOGIC EXECUTED")
+                            logger.error(f" ALERT:  Fallback result: {user_context}")
                             
                             # Check environment access (configuration duplication)
                             if mock_env.called:
                                 fallback_calls.append("environment_access")
-                                logger.error("🚨 FALLBACK ACCESSES ENVIRONMENT DIRECTLY")
+                                logger.error(" ALERT:  FALLBACK ACCESSES ENVIRONMENT DIRECTLY")
                             
                             # Check for JWT payload construction (logic duplication)
                             if user_context.get("sub") == "fallback_user":
                                 fallback_calls.append("jwt_payload_construction")
-                                logger.error("🚨 FALLBACK CONSTRUCTS JWT PAYLOAD LOCALLY")
+                                logger.error(" ALERT:  FALLBACK CONSTRUCTS JWT PAYLOAD LOCALLY")
                             
-                            logger.critical("🚨 COMPLEX FALLBACK SSOT VIOLATION CONFIRMED")
-                            logger.critical(f"🚨 Fallback complexity indicators: {fallback_calls}")
-                            logger.critical("🚨 ALL FALLBACK LOGIC SHOULD BE IN UnifiedAuthInterface")
+                            logger.critical(" ALERT:  COMPLEX FALLBACK SSOT VIOLATION CONFIRMED")
+                            logger.critical(f" ALERT:  Fallback complexity indicators: {fallback_calls}")
+                            logger.critical(" ALERT:  ALL FALLBACK LOGIC SHOULD BE IN UnifiedAuthInterface")
                             
                             assert len(fallback_calls) > 0, f"COMPLEX FALLBACK VIOLATION: {fallback_calls}"
                             return True
                             
                     except Exception as e:
-                        logger.info(f"ℹ️ Fallback test failed: {e}")
+                        logger.info(f"[U+2139][U+FE0F] Fallback test failed: {e}")
         
         pytest.fail("VIOLATION NOT REPRODUCED: Complex fallback logic not detected")
 
@@ -201,7 +201,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         CURRENT VIOLATION: WebSocket imports and uses auth_client_core directly
         instead of accessing it through UnifiedAuthInterface abstraction.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: auth_client_core duplication in fallback")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: auth_client_core duplication in fallback")
         
         # Check for direct auth_client_core import violations
         try:
@@ -224,10 +224,10 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                 
                 if auth_client_refs:
                     websocket_can_import_auth_client = True
-                    logger.error(f"🚨 VIOLATION: WebSocket has auth_client references: {auth_client_refs}")
+                    logger.error(f" ALERT:  VIOLATION: WebSocket has auth_client references: {auth_client_refs}")
                 
             except Exception as e:
-                logger.info(f"ℹ️ Direct import test failed: {e}")
+                logger.info(f"[U+2139][U+FE0F] Direct import test failed: {e}")
             
             # Test if WebSocket fallback can call auth_client_core methods
             auth_client_duplication_detected = False
@@ -249,11 +249,11 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                         # Check if auth_client_core was called directly (VIOLATION)
                         if mock_auth_client.called:
                             auth_client_duplication_detected = True
-                            logger.error("🚨 VIOLATION: WebSocket called auth_client_core directly")
-                            logger.error(f"🚨 Direct call arguments: {mock_auth_client.call_args}")
+                            logger.error(" ALERT:  VIOLATION: WebSocket called auth_client_core directly")
+                            logger.error(f" ALERT:  Direct call arguments: {mock_auth_client.call_args}")
                             
                     except Exception as e:
-                        logger.info(f"ℹ️ Duplication test failed: {e}")
+                        logger.info(f"[U+2139][U+FE0F] Duplication test failed: {e}")
             
             # Summarize violations  
             violations = []
@@ -263,12 +263,12 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                 violations.append("WebSocket calls auth_client_core methods directly")
             
             if violations:
-                logger.critical("🚨 AUTH_CLIENT_CORE DUPLICATION VIOLATIONS:")
+                logger.critical(" ALERT:  AUTH_CLIENT_CORE DUPLICATION VIOLATIONS:")
                 for violation in violations:
-                    logger.critical(f"🚨 - {violation}")
+                    logger.critical(f" ALERT:  - {violation}")
                     
-                logger.critical("🚨 WebSocket should ONLY use UnifiedAuthInterface")
-                logger.critical("🚨 NO DIRECT auth_client_core access allowed")
+                logger.critical(" ALERT:  WebSocket should ONLY use UnifiedAuthInterface")
+                logger.critical(" ALERT:  NO DIRECT auth_client_core access allowed")
                 
                 assert len(violations) > 0, f"AUTH_CLIENT_CORE DUPLICATION: {violations}"
                 return True
@@ -276,7 +276,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                 pytest.fail("VIOLATION NOT REPRODUCED: No auth_client_core duplication detected")
                 
         except Exception as e:
-            logger.warning(f"⚠️ Duplication test failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Duplication test failed: {e}")
             pytest.skip("Cannot test auth_client_core duplication")
 
     @pytest.mark.asyncio 
@@ -291,7 +291,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         if NoDockerModeDetector.is_no_docker_mode():
             pytest.skip("Integration test requires services")
             
-        logger.info("🚨 TESTING ARCHITECTURAL VIOLATION: Resilience pattern duplication")
+        logger.info(" ALERT:  TESTING ARCHITECTURAL VIOLATION: Resilience pattern duplication")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         
@@ -330,32 +330,32 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                         # Analyze resilience pattern duplication
                         if len(retry_attempts) > 0:
                             resilience_patterns_detected.append("retry_logic_duplication")
-                            logger.error("🚨 RESILIENCE VIOLATION: WebSocket implements retry logic")
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements retry logic")
                         
                         if len(env_accesses) > 0:
                             resilience_patterns_detected.append("environment_resilience_config")
-                            logger.error("🚨 RESILIENCE VIOLATION: WebSocket accesses resilience config")
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket accesses resilience config")
                         
                         # Check for error handling patterns
                         if user_context and user_context.get("user_id") == "resilient_user":
                             resilience_patterns_detected.append("error_recovery_patterns")
-                            logger.error("🚨 RESILIENCE VIOLATION: WebSocket implements error recovery")
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket implements error recovery")
                         
                         # Check for JWT payload construction after failure (resilience duplication)
                         if user_context and "sub" in user_context:
                             resilience_patterns_detected.append("jwt_construction_after_failure")
-                            logger.error("🚨 RESILIENCE VIOLATION: WebSocket constructs JWT after auth failure")
+                            logger.error(" ALERT:  RESILIENCE VIOLATION: WebSocket constructs JWT after auth failure")
                         
                     except Exception as e:
-                        logger.info(f"ℹ️ Resilience test failed: {e}")
+                        logger.info(f"[U+2139][U+FE0F] Resilience test failed: {e}")
         
         if resilience_patterns_detected:
-            logger.critical("🚨 RESILIENCE PATTERN DUPLICATION VIOLATIONS:")
+            logger.critical(" ALERT:  RESILIENCE PATTERN DUPLICATION VIOLATIONS:")
             for pattern in resilience_patterns_detected:
-                logger.critical(f"🚨 - {pattern}")
+                logger.critical(f" ALERT:  - {pattern}")
                 
-            logger.critical("🚨 ALL RESILIENCE PATTERNS SHOULD BE IN UnifiedAuthInterface")
-            logger.critical("🚨 WebSocket should delegate resilience, not implement it")
+            logger.critical(" ALERT:  ALL RESILIENCE PATTERNS SHOULD BE IN UnifiedAuthInterface")
+            logger.critical(" ALERT:  WebSocket should delegate resilience, not implement it")
             
             assert len(resilience_patterns_detected) > 0, f"RESILIENCE DUPLICATION: {resilience_patterns_detected}"
             return True
@@ -371,7 +371,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
         This test shows that WebSocket fallback logic constructs user authentication
         state (JWT payload) instead of receiving it from UnifiedAuthInterface.
         """
-        logger.info("🚨 TESTING SSOT VIOLATION: Independent auth state creation in fallback")
+        logger.info(" ALERT:  TESTING SSOT VIOLATION: Independent auth state creation in fallback")
         
         from netra_backend.app.websocket_core.user_context_extractor import WebSocketUserContextExtractor
         
@@ -405,33 +405,33 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
                         
                         if len(constructed_fields) > 0:
                             state_construction_violations.append(f"JWT fields constructed: {constructed_fields}")
-                            logger.error(f"🚨 VIOLATION: WebSocket constructed JWT fields: {constructed_fields}")
+                            logger.error(f" ALERT:  VIOLATION: WebSocket constructed JWT fields: {constructed_fields}")
                         
                         # Check if WebSocket added its own auth metadata
                         if "permissions" in user_context:
                             state_construction_violations.append("Permissions processed locally")
-                            logger.error("🚨 VIOLATION: WebSocket processed permissions locally")
+                            logger.error(" ALERT:  VIOLATION: WebSocket processed permissions locally")
                         
                         # Check for timestamp creation (iat, exp)
                         if "iat" in user_context or "exp" in user_context:
                             state_construction_violations.append("Timestamp creation")
-                            logger.error("🚨 VIOLATION: WebSocket created auth timestamps")
+                            logger.error(" ALERT:  VIOLATION: WebSocket created auth timestamps")
                         
                         # Check for issuer/audience setting
                         if user_context.get("iss") == "netra-auth-service":
                             state_construction_violations.append("Issuer field set locally")
-                            logger.error("🚨 VIOLATION: WebSocket set JWT issuer locally")
+                            logger.error(" ALERT:  VIOLATION: WebSocket set JWT issuer locally")
                         
                 except Exception as e:
-                    logger.info(f"ℹ️ State construction test failed: {e}")
+                    logger.info(f"[U+2139][U+FE0F] State construction test failed: {e}")
         
         if state_construction_violations:
-            logger.critical("🚨 AUTH STATE CONSTRUCTION VIOLATIONS:")
+            logger.critical(" ALERT:  AUTH STATE CONSTRUCTION VIOLATIONS:")
             for violation in state_construction_violations:
-                logger.critical(f"🚨 - {violation}")
+                logger.critical(f" ALERT:  - {violation}")
                 
-            logger.critical("🚨 WebSocket should receive complete auth state from UnifiedAuthInterface")
-            logger.critical("🚨 NO LOCAL auth state construction allowed")
+            logger.critical(" ALERT:  WebSocket should receive complete auth state from UnifiedAuthInterface")
+            logger.critical(" ALERT:  NO LOCAL auth state construction allowed")
             
             assert len(state_construction_violations) > 0, f"AUTH STATE VIOLATIONS: {state_construction_violations}"
             return True
@@ -440,7 +440,7 @@ class TestWebSocketAuthFallbackSsotViolation(SSotAsyncTestCase):
 
     def tearDown(self):
         """Clean up test artifacts.""" 
-        logger.info("🧹 Fallback SSOT violation test cleanup complete")
+        logger.info("[U+1F9F9] Fallback SSOT violation test cleanup complete")
 
 
 if __name__ == "__main__":

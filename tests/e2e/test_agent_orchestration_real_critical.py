@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 MISSION CRITICAL E2E TEST: Real Agent Orchestration for Chat Flow
 
@@ -6,7 +44,7 @@ THIS TEST MUST PASS OR CHAT IS BROKEN - THE CORE PRODUCT FUNCTIONALITY.
 Business Value: $500K+ ARR - Core chat functionality
 
 This test validates the MOST CRITICAL path:
-User sends message → Agent processes → WebSocket events sent → User sees response
+User sends message  ->  Agent processes  ->  WebSocket events sent  ->  User sees response
 
 REQUIREMENTS FROM CLAUDE.md:
 - NO MOCKS AT ALL - Uses REAL services only
@@ -50,6 +88,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthH
 from tests.clients.websocket_client import WebSocketTestClient
 from tests.clients.backend_client import BackendTestClient
 from tests.clients.auth_client import AuthTestClient
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # ============================================================================
 # REAL WEBSOCKET EVENT VALIDATOR - NO MOCKS
@@ -203,6 +242,15 @@ class RealWebSocketEventValidator:
 # ============================================================================
 
 class RealServiceChatTester:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests real chat flow using actual services with SSOT authentication."""
     
     def __init__(self):
@@ -257,9 +305,9 @@ class RealServiceChatTester:
         connected = await self.ws_client.connect(token=self.test_user_token, timeout=10.0)
         assert connected, "CRITICAL: Failed to establish authenticated WebSocket connection"
         
-        logger.info(f"✅ Real services setup complete with SSOT auth (environment: {test_environment})")
-        logger.info(f"✅ User authenticated: {self.test_user_data.get('email')}")
-        logger.info(f"✅ WebSocket connected with proper authentication headers")
+        logger.info(f" PASS:  Real services setup complete with SSOT auth (environment: {test_environment})")
+        logger.info(f" PASS:  User authenticated: {self.test_user_data.get('email')}")
+        logger.info(f" PASS:  WebSocket connected with proper authentication headers")
         
     async def test_critical_chat_flow(self, user_message: str, timeout: float = 5.0) -> tuple[bool, RealWebSocketEventValidator]:
         """Test the critical chat flow with real services."""
@@ -329,6 +377,15 @@ class RealServiceChatTester:
 # ============================================================================
 
 class TestRealAgentOrchestrationCritical:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """MISSION CRITICAL: Tests real agent orchestration for chat functionality."""
     
     @pytest.mark.asyncio
@@ -392,10 +449,10 @@ class TestRealAgentOrchestrationCritical:
             assert total_flow_time <= 3.0, f"Total flow time too slow: {total_flow_time:.2f}s"
             assert total_flow_time >= 0.1, f"CRITICAL: Event flow too fast ({total_flow_time:.3f}s) - indicates mocking"
             
-            logger.info(f"✅ CRITICAL TEST PASSED: Basic chat flow completed in {execution_time:.2f}s with {len(validator.events)} events")
+            logger.info(f" PASS:  CRITICAL TEST PASSED: Basic chat flow completed in {execution_time:.2f}s with {len(validator.events)} events")
             
         except Exception as e:
-            logger.error(f"❌ CRITICAL TEST FAILED: {e}")
+            logger.error(f" FAIL:  CRITICAL TEST FAILED: {e}")
             raise
         finally:
             await tester.cleanup()
@@ -441,7 +498,7 @@ class TestRealAgentOrchestrationCritical:
                 has_content = any(key in event for key in ["thought", "thinking", "analysis", "message", "content"])
                 assert has_content, f"Thinking event lacks content: {event}"
             
-            logger.info(f"✅ Agent thinking visibility verified with {thinking_count} thinking events")
+            logger.info(f" PASS:  Agent thinking visibility verified with {thinking_count} thinking events")
             
         finally:
             await tester.cleanup()
@@ -488,7 +545,7 @@ class TestRealAgentOrchestrationCritical:
                 has_tool_id = any(key in event for key in ["tool_name", "tool", "tool_id"])
                 assert has_tool_id, f"Tool executing event missing tool identifier: {event}"
             
-            logger.info(f"✅ Tool execution transparency verified with {tool_executing_count} tool pairs")
+            logger.info(f" PASS:  Tool execution transparency verified with {tool_executing_count} tool pairs")
             
         finally:
             await tester.cleanup()
@@ -536,7 +593,7 @@ class TestRealAgentOrchestrationCritical:
                 has_result = any(key in event for key in ["result", "response", "final_response", "message"])
                 assert has_result, f"Completion event missing result: {event}"
             
-            logger.info(f"✅ Chat completion notification verified")
+            logger.info(f" PASS:  Chat completion notification verified")
             
         finally:
             await tester.cleanup()
@@ -595,9 +652,9 @@ class TestRealAgentOrchestrationCritical:
                 missing_events = validator.REQUIRED_EVENTS - set(validator.event_counts.keys())
                 assert len(missing_events) == 0, f"Session {i+1} missing events: {missing_events}"
                 
-                logger.info(f"✅ Session {i+1} completed with {len(validator.events)} events")
+                logger.info(f" PASS:  Session {i+1} completed with {len(validator.events)} events")
             
-            logger.info(f"✅ Concurrent chat sessions test passed for {len(testers)} sessions")
+            logger.info(f" PASS:  Concurrent chat sessions test passed for {len(testers)} sessions")
             
         finally:
             # Cleanup all testers
@@ -622,9 +679,9 @@ if __name__ == "__main__":
     """
     import sys
     
-    logger.info("🚀 Starting MISSION CRITICAL real agent orchestration tests")
-    logger.info("⚠️  USING REAL SERVICES ONLY - NO MOCKS")
-    logger.info("📊 Testing core chat functionality for $500K+ ARR product")
+    logger.info("[U+1F680] Starting MISSION CRITICAL real agent orchestration tests")
+    logger.info(" WARNING: [U+FE0F]  USING REAL SERVICES ONLY - NO MOCKS")
+    logger.info(" CHART:  Testing core chat functionality for $500K+ ARR product")
     
     # Run with pytest
     exit_code = pytest.main([
@@ -636,8 +693,8 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        logger.info("✅ ALL MISSION CRITICAL TESTS PASSED - Chat functionality verified")
+        logger.info(" PASS:  ALL MISSION CRITICAL TESTS PASSED - Chat functionality verified")
     else:
-        logger.error("❌ MISSION CRITICAL TESTS FAILED - Chat functionality broken")
+        logger.error(" FAIL:  MISSION CRITICAL TESTS FAILED - Chat functionality broken")
     
     sys.exit(exit_code)

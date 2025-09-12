@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 P1 Critical Fixes Validation - SSOT-Compliant Test Suite
 
@@ -12,6 +50,7 @@ This test validates the 4 critical P1 fixes implemented to resolve WebSocket 101
 Business Impact: Restores $120K+ MRR WebSocket functionality
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import os
 import sys
@@ -33,18 +72,18 @@ try:
     )
     from fastapi.websockets import WebSocketState
     
-    print("✅ Successfully imported SSOT functions")
+    print(" PASS:  Successfully imported SSOT functions")
 except ImportError as e:
-    print(f"❌ Import failed: {e}")
+    print(f" FAIL:  Import failed: {e}")
     sys.exit(1)
 
 
-class P1CriticalFixesValidation(unittest.TestCase):
+class P1CriticalFixesValidation(SSotBaseTestCase):
     """Validate all P1 critical fixes are working correctly."""
     
     def test_fix_1_websocket_state_logging_ssot(self):
         """Test Fix 1: WebSocket state logging uses SSOT function."""
-        print("\n🔧 Testing Fix 1: WebSocket State Logging SSOT...")
+        print("\n[U+1F527] Testing Fix 1: WebSocket State Logging SSOT...")
         
         # Test with WebSocketState enum
         connected_state = WebSocketState.CONNECTED
@@ -52,36 +91,36 @@ class P1CriticalFixesValidation(unittest.TestCase):
         
         self.assertIsInstance(result, str)
         self.assertEqual(result, "connected")
-        print(f"   ✅ WebSocketState.CONNECTED -> '{result}'")
+        print(f"    PASS:  WebSocketState.CONNECTED -> '{result}'")
         
         # Test with disconnected state  
         disconnected_state = WebSocketState.DISCONNECTED
         result = _safe_websocket_state_for_logging(disconnected_state)
         self.assertEqual(result, "disconnected")
-        print(f"   ✅ WebSocketState.DISCONNECTED -> '{result}'")
+        print(f"    PASS:  WebSocketState.DISCONNECTED -> '{result}'")
         
         # Test with invalid object (should not crash)
         invalid_state = {"not": "an_enum"}
         result = _safe_websocket_state_for_logging(invalid_state)
         self.assertIsInstance(result, str)
-        print(f"   ✅ Invalid object -> '{result}' (safe fallback)")
+        print(f"    PASS:  Invalid object -> '{result}' (safe fallback)")
         
-        print("   🎯 Fix 1 VALIDATED: SSOT function prevents JSON serialization errors")
+        print("    TARGET:  Fix 1 VALIDATED: SSOT function prevents JSON serialization errors")
         
     def test_fix_2_execute_agent_message_mapping(self):
         """Test Fix 2: execute_agent message type mapping."""
-        print("\n🔧 Testing Fix 2: execute_agent Message Type Mapping...")
+        print("\n[U+1F527] Testing Fix 2: execute_agent Message Type Mapping...")
         
         # Test the critical missing mapping
         self.assertIn("execute_agent", LEGACY_MESSAGE_TYPE_MAP)
         mapped_type = LEGACY_MESSAGE_TYPE_MAP["execute_agent"]
         self.assertEqual(mapped_type, MessageType.START_AGENT)
-        print(f"   ✅ 'execute_agent' -> {mapped_type}")
+        print(f"    PASS:  'execute_agent' -> {mapped_type}")
         
         # Test normalize function with execute_agent
         normalized = normalize_message_type("execute_agent")
         self.assertEqual(normalized, MessageType.START_AGENT)
-        print(f"   ✅ normalize_message_type('execute_agent') -> {normalized}")
+        print(f"    PASS:  normalize_message_type('execute_agent') -> {normalized}")
         
         # Test other critical agent events are still mapped
         critical_mappings = {
@@ -96,13 +135,13 @@ class P1CriticalFixesValidation(unittest.TestCase):
             self.assertIn(event_type, LEGACY_MESSAGE_TYPE_MAP)
             actual_mapping = LEGACY_MESSAGE_TYPE_MAP[event_type] 
             self.assertEqual(actual_mapping, expected_mapping)
-            print(f"   ✅ '{event_type}' -> {actual_mapping}")
+            print(f"    PASS:  '{event_type}' -> {actual_mapping}")
             
-        print("   🎯 Fix 2 VALIDATED: execute_agent and all agent events properly mapped")
+        print("    TARGET:  Fix 2 VALIDATED: execute_agent and all agent events properly mapped")
         
     def test_fix_3_duplicate_function_removal(self):
         """Test Fix 3: Duplicate functions removed, SSOT imports working."""
-        print("\n🔧 Testing Fix 3: Duplicate Function Removal...")
+        print("\n[U+1F527] Testing Fix 3: Duplicate Function Removal...")
         
         # The fact that we can import the SSOT function means duplicates are resolved
         # Test that the function works correctly from the SSOT location
@@ -116,21 +155,21 @@ class P1CriticalFixesValidation(unittest.TestCase):
         for state, expected in test_states:
             result = _safe_websocket_state_for_logging(state)
             self.assertEqual(result, expected)
-            print(f"   ✅ SSOT function handles {state} -> '{result}'")
+            print(f"    PASS:  SSOT function handles {state} -> '{result}'")
             
         # Test error handling doesn't crash
         try:
             result = _safe_websocket_state_for_logging(None)
             self.assertIsInstance(result, str)
-            print(f"   ✅ SSOT function handles None -> '{result}' (graceful)")
+            print(f"    PASS:  SSOT function handles None -> '{result}' (graceful)")
         except Exception as e:
             self.fail(f"SSOT function should handle None gracefully: {e}")
             
-        print("   🎯 Fix 3 VALIDATED: SSOT function working, duplicates removed")
+        print("    TARGET:  Fix 3 VALIDATED: SSOT function working, duplicates removed")
         
     def test_fix_4_message_type_coverage(self):
         """Test Fix 4: Comprehensive message type coverage."""
-        print("\n🔧 Testing Fix 4: Message Type Coverage...")
+        print("\n[U+1F527] Testing Fix 4: Message Type Coverage...")
         
         # Test all critical business-value message types are covered
         business_critical_types = [
@@ -150,21 +189,21 @@ class P1CriticalFixesValidation(unittest.TestCase):
             try:
                 normalized = normalize_message_type(msg_type)
                 self.assertIsInstance(normalized, MessageType)
-                print(f"   ✅ '{msg_type}' -> {normalized}")
+                print(f"    PASS:  '{msg_type}' -> {normalized}")
             except Exception as e:
                 self.fail(f"Failed to normalize business-critical type '{msg_type}': {e}")
                 
         # Test unknown types gracefully default to USER_MESSAGE
         unknown_result = normalize_message_type("completely_unknown_type")
         self.assertEqual(unknown_result, MessageType.USER_MESSAGE)
-        print(f"   ✅ Unknown type -> {unknown_result} (safe default)")
+        print(f"    PASS:  Unknown type -> {unknown_result} (safe default)")
         
-        print("   🎯 Fix 4 VALIDATED: All business-critical message types covered")
+        print("    TARGET:  Fix 4 VALIDATED: All business-critical message types covered")
 
 
 def validate_import_resolution():
     """Validate all critical imports resolve correctly."""
-    print("🔍 Validating import resolution...")
+    print(" SEARCH:  Validating import resolution...")
     
     # Test that duplicate function imports don't exist
     import_tests = [
@@ -178,9 +217,9 @@ def validate_import_resolution():
         try:
             module = __import__(module_name, fromlist=[function_name])
             func = getattr(module, function_name)
-            print(f"   ✅ {module_name}.{function_name} imported successfully")
+            print(f"    PASS:  {module_name}.{function_name} imported successfully")
         except (ImportError, AttributeError) as e:
-            print(f"   ❌ Failed to import {module_name}.{function_name}: {e}")
+            print(f"    FAIL:  Failed to import {module_name}.{function_name}: {e}")
             return False
     
     return True
@@ -189,7 +228,7 @@ def validate_import_resolution():
 def main():
     """Run P1 critical fixes validation."""
     print("=" * 80)
-    print("🚨 P1 CRITICAL FIXES VALIDATION")
+    print(" ALERT:  P1 CRITICAL FIXES VALIDATION")
     print("=" * 80)
     print("Business Impact: Restoring $120K+ MRR WebSocket functionality")
     print("Fixes Applied:")
@@ -201,10 +240,10 @@ def main():
     
     # First validate imports
     if not validate_import_resolution():
-        print("\n❌ CRITICAL: Import resolution failed!")
+        print("\n FAIL:  CRITICAL: Import resolution failed!")
         sys.exit(1)
         
-    print("\n✅ All imports resolved successfully")
+    print("\n PASS:  All imports resolved successfully")
     
     # Run the test suite
     suite = unittest.TestSuite()
@@ -223,13 +262,13 @@ def main():
     
     print("\n" + "=" * 80)
     if result.wasSuccessful():
-        print("🎉 ALL P1 CRITICAL FIXES VALIDATED SUCCESSFULLY!")
-        print("✅ WebSocket 1011 errors should be resolved")
-        print("✅ execute_agent messages will now route correctly")
-        print("✅ SSOT compliance achieved - no duplicate functions")
-        print("✅ Ready for staging deployment")
+        print(" CELEBRATION:  ALL P1 CRITICAL FIXES VALIDATED SUCCESSFULLY!")
+        print(" PASS:  WebSocket 1011 errors should be resolved")
+        print(" PASS:  execute_agent messages will now route correctly")
+        print(" PASS:  SSOT compliance achieved - no duplicate functions")
+        print(" PASS:  Ready for staging deployment")
         
-        print("\n📋 DEPLOYMENT CHECKLIST:")
+        print("\n[U+1F4CB] DEPLOYMENT CHECKLIST:")
         print("  [ ] Deploy to staging environment")
         print("  [ ] Run WebSocket connection tests")
         print("  [ ] Validate agent execution pipeline")
@@ -238,8 +277,8 @@ def main():
         
         return 0
     else:
-        print("❌ P1 CRITICAL FIXES VALIDATION FAILED!")
-        print("🚨 DO NOT DEPLOY - Issues must be resolved first")
+        print(" FAIL:  P1 CRITICAL FIXES VALIDATION FAILED!")
+        print(" ALERT:  DO NOT DEPLOY - Issues must be resolved first")
         return 1
 
 

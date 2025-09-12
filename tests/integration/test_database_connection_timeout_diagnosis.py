@@ -377,7 +377,7 @@
         # REMOVED_SYNTAX_ERROR: print(f" )
         # REMOVED_SYNTAX_ERROR: Timeout Test Results:")
         # REMOVED_SYNTAX_ERROR: for result in timeout_tests:
-            # REMOVED_SYNTAX_ERROR: status = "✅ SUCCESS" if result['success'] else "❌ FAILED"
+            # REMOVED_SYNTAX_ERROR: status = " PASS:  SUCCESS" if result['success'] else " FAIL:  FAILED"
             # REMOVED_SYNTAX_ERROR: time_str = "formatted_string" if result['connection_time'] else "N/A"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: if result.get('error'):
@@ -391,7 +391,7 @@
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: for stage_name, stage_result in init_result.get('stages', {}).items():
-                    # REMOVED_SYNTAX_ERROR: status = "✅" if stage_result['success'] else "❌"
+                    # REMOVED_SYNTAX_ERROR: status = " PASS: " if stage_result['success'] else " FAIL: "
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                     # REMOVED_SYNTAX_ERROR: if init_result.get('error'):
@@ -428,7 +428,7 @@
                                 # REMOVED_SYNTAX_ERROR: if has_critical_issues:
                                     # This test should document the issue but not fail - we need to implement fixes
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                    # REMOVED_SYNTAX_ERROR: print("❌ CRITICAL BLOCKING ISSUE IDENTIFIED")
+                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  CRITICAL BLOCKING ISSUE IDENTIFIED")
                                     # REMOVED_SYNTAX_ERROR: print("This test documents the database connection timeout issue.")
                                     # REMOVED_SYNTAX_ERROR: print("Fixes are being implemented in subsequent tests.")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -583,7 +583,7 @@
                                     # REMOVED_SYNTAX_ERROR: for issue in url_issues:
                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                         # REMOVED_SYNTAX_ERROR: else:
-                                            # REMOVED_SYNTAX_ERROR: print(f"  ✅ No URL formation issues detected")
+                                            # REMOVED_SYNTAX_ERROR: print(f"   PASS:  No URL formation issues detected")
 
                                             # Verify no critical URL issues
                                             # REMOVED_SYNTAX_ERROR: critical_issues = [item for item in []]
@@ -691,7 +691,7 @@
             # REMOVED_SYNTAX_ERROR: result = await conn.fetchval("SELECT 1")
             # REMOVED_SYNTAX_ERROR: assert result == 1
 
-            # REMOVED_SYNTAX_ERROR: print("✅ Enhanced database connection with timeouts working")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Enhanced database connection with timeouts working")
 
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_database_readiness_with_timeout_fix(self):
@@ -705,7 +705,7 @@
                 
 
                 # REMOVED_SYNTAX_ERROR: assert is_ready, "Database readiness check with timeout should pass"
-                # REMOVED_SYNTAX_ERROR: print("✅ Database readiness check with timeout working")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Database readiness check with timeout working")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # Removed problematic line: async def test_retry_database_operation_fix(self):
@@ -724,7 +724,7 @@
                             
 
                             # REMOVED_SYNTAX_ERROR: assert result == 1
-                            # REMOVED_SYNTAX_ERROR: print("✅ Database operation retry logic working")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Database operation retry logic working")
 
 
                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

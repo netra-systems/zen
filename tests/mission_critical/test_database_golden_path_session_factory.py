@@ -1,4 +1,42 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """MISSION CRITICAL: Database Golden Path Session Factory Test Suite
 
 THIS SUITE VALIDATES GOLDEN PATH DATABASE SESSION CREATION
@@ -37,11 +75,21 @@ if project_root not in sys.path:
 
 # SSOT imports - all tests must use SSOT framework
 from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 
 
 class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Test suite to validate database session factory in golden path flows.
     
@@ -84,22 +132,22 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
             # Pattern 1: get_async_session method
             if hasattr(db_manager, 'get_async_session'):
                 session_methods_available.append('get_async_session')
-                logger.info("✓ WebSocket manager can use get_async_session")
+                logger.info("[U+2713] WebSocket manager can use get_async_session")
             
             # Pattern 2: session factory method
             if hasattr(db_manager, 'get_session_factory'):
                 session_methods_available.append('get_session_factory')
-                logger.info("✓ WebSocket manager can use get_session_factory")
+                logger.info("[U+2713] WebSocket manager can use get_session_factory")
             
             # Pattern 3: create_session method
             if hasattr(db_manager, 'create_session'):
                 session_methods_available.append('create_session')
-                logger.info("✓ WebSocket manager can use create_session")
+                logger.info("[U+2713] WebSocket manager can use create_session")
             
             # Pattern 4: initialize then use sessions
             if hasattr(db_manager, 'initialize'):
                 session_methods_available.append('initialize')
-                logger.info("✓ WebSocket manager can initialize database")
+                logger.info("[U+2713] WebSocket manager can initialize database")
             
             self.record_metric("websocket_session_methods", session_methods_available)
             
@@ -141,7 +189,7 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
                 "This blocks WebSocket connections and chat functionality."
             )
         
-        logger.info("✓ WebSocket manager database session creation validated")
+        logger.info("[U+2713] WebSocket manager database session creation validated")
     
     async def test_user_login_database_session_creation_works(self):
         """
@@ -172,18 +220,18 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
                     with patch('netra_backend.app.db.database_manager.create_async_engine'):
                         # Mock successful session creation for login
                         login_db_patterns.append('async_session_for_auth')
-                        logger.info("✓ Login flow can use async sessions")
+                        logger.info("[U+2713] Login flow can use async sessions")
                 except Exception as e:
                     logger.info(f"Login async session pattern test: {e}")
             
             # Pattern 2: Session-based authentication
             if hasattr(db_manager, 'initialize'):
                 login_db_patterns.append('database_initialization_for_auth')
-                logger.info("✓ Login flow can initialize database")
+                logger.info("[U+2713] Login flow can initialize database")
             
             # Pattern 3: Direct database manager usage
             login_db_patterns.append('direct_database_manager_usage')
-            logger.info("✓ Login flow can use DatabaseManager directly")
+            logger.info("[U+2713] Login flow can use DatabaseManager directly")
             
             self.record_metric("login_database_patterns", login_db_patterns)
             
@@ -222,7 +270,7 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
                 "This blocks user authentication and chat access."
             )
         
-        logger.info("✓ User login database session access validated")
+        logger.info("[U+2713] User login database session access validated")
     
     async def test_agent_execution_database_access_works(self):
         """
@@ -249,16 +297,16 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
             # Pattern 1: Agent data retrieval sessions
             if hasattr(db_manager, 'get_async_session'):
                 agent_db_patterns.append('agent_async_session_access')
-                logger.info("✓ Agents can use async sessions for data access")
+                logger.info("[U+2713] Agents can use async sessions for data access")
             
             # Pattern 2: Agent data storage sessions  
             if hasattr(db_manager, 'initialize'):
                 agent_db_patterns.append('agent_database_initialization')
-                logger.info("✓ Agents can initialize database connections")
+                logger.info("[U+2713] Agents can initialize database connections")
             
             # Pattern 3: Agent metrics and logging
             agent_db_patterns.append('agent_metrics_logging_db')
-            logger.info("✓ Agents can access database for metrics/logging")
+            logger.info("[U+2713] Agents can access database for metrics/logging")
             
             self.record_metric("agent_database_patterns", agent_db_patterns)
             
@@ -297,7 +345,7 @@ class TestDatabaseGoldenPathSessionFactory(SSotAsyncTestCase):
                 "This blocks AI processing and data-driven agent responses."
             )
         
-        logger.info("✓ Agent execution database access validated")
+        logger.info("[U+2713] Agent execution database access validated")
     
     async def _test_websocket_session_creation_pattern(self, db_manager, session_methods):
         """Test WebSocket manager session creation patterns."""

@@ -214,7 +214,7 @@
 
     # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌ MISSING"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL:  MISSING"
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if failures:
@@ -459,7 +459,7 @@
                     # REMOVED_SYNTAX_ERROR: has_completion = any(t in event_types for t in ["agent_completed", "final_report"])
                     # REMOVED_SYNTAX_ERROR: assert has_completion, "User doesn"t know when processing finished - UX FAILURE"
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Primary chat WebSocket flow E2E test PASSED with real services")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Primary chat WebSocket flow E2E test PASSED with real services")
 
                     # Removed problematic line: @pytest.mark.asyncio
                     # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -600,7 +600,7 @@
                             # REMOVED_SYNTAX_ERROR: assert "tool_name" in event.get("data", {}), "tool_completed event missing tool_name"
                             # REMOVED_SYNTAX_ERROR: assert "result" in event.get("data", {}), "tool_completed event missing result"
 
-                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Tool execution WebSocket events test PASSED with real services")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Tool execution WebSocket events test PASSED with real services")
 
                             # Removed problematic line: @pytest.mark.asyncio
                             # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -750,7 +750,7 @@
     # REMOVED_SYNTAX_ERROR: state.user_id = user_id
 
     # Execute complete agent workflow
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Starting complete user chat journey...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting complete user chat journey...")
     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
     # REMOVED_SYNTAX_ERROR: result = await engine.execute_agent(context, state)
@@ -784,10 +784,10 @@
                     # REMOVED_SYNTAX_ERROR: event_types = [e.get("type") for e in all_events]
 
                     # Critical user experience checkpoints
-                    # REMOVED_SYNTAX_ERROR: assert "agent_started" in event_types, "❌ User never knew processing started - UX BROKEN"
-                    # REMOVED_SYNTAX_ERROR: assert any("thinking" in t or "partial" in t for t in event_types), "❌ User saw no progress - feels unresponsive"
-                    # REMOVED_SYNTAX_ERROR: assert any("tool" in t for t in event_types), "❌ User has no visibility into system work being done"
-                    # REMOVED_SYNTAX_ERROR: assert any("completed" in t or "final" in t for t in event_types), "❌ User never knows when done - UX BROKEN"
+                    # REMOVED_SYNTAX_ERROR: assert "agent_started" in event_types, " FAIL:  User never knew processing started - UX BROKEN"
+                    # REMOVED_SYNTAX_ERROR: assert any("thinking" in t or "partial" in t for t in event_types), " FAIL:  User saw no progress - feels unresponsive"
+                    # REMOVED_SYNTAX_ERROR: assert any("tool" in t for t in event_types), " FAIL:  User has no visibility into system work being done"
+                    # REMOVED_SYNTAX_ERROR: assert any("completed" in t or "final" in t for t in event_types), " FAIL:  User never knows when done - UX BROKEN"
 
                     # Timing validation for user experience
                     # REMOVED_SYNTAX_ERROR: if validator.event_timeline:
@@ -802,9 +802,9 @@
                         # REMOVED_SYNTAX_ERROR: messages_with_content = [item for item in []]
                         # REMOVED_SYNTAX_ERROR: assert len(messages_with_content) >= 1, "User received no actual content - empty experience"
 
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ COMPLETE USER CHAT JOURNEY PASSED - Product works end-to-end!")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  COMPLETE USER CHAT JOURNEY PASSED - Product works end-to-end!")
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"   🎯 User Experience: Responsive, Informative, Complete")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f"    TARGET:  User Experience: Responsive, Informative, Complete")
 
                         # Removed problematic line: @pytest.mark.asyncio
                         # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -822,7 +822,7 @@
                                 # REMOVED_SYNTAX_ERROR: '''
                                 # REMOVED_SYNTAX_ERROR: pass
                                 # Override the setup to skip service validation for this specific test
-                                # REMOVED_SYNTAX_ERROR: logger.info("🚀 Running minimal WebSocket test - bypassing external service dependencies")
+                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Running minimal WebSocket test - bypassing external service dependencies")
 
                                 # Set up isolated environment manually for this test
                                 # REMOVED_SYNTAX_ERROR: env = get_env()
@@ -890,7 +890,7 @@
         
 
         # Test complete WebSocket event flow
-        # REMOVED_SYNTAX_ERROR: logger.info("🚀 Testing minimal WebSocket event flow...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Testing minimal WebSocket event flow...")
 
         # Send all required events per CLAUDE.md Section 6.1
         # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(context)
@@ -949,9 +949,9 @@
                     # REMOVED_SYNTAX_ERROR: assert tool_executing_count == tool_completed_count, \
                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ MINIMAL WEBSOCKET E2E TEST PASSED - Core event flow works!")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  MINIMAL WEBSOCKET E2E TEST PASSED - Core event flow works!")
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
-                    # REMOVED_SYNTAX_ERROR: logger.info(f"   🎯 All required WebSocket events validated successfully")
+                    # REMOVED_SYNTAX_ERROR: logger.info(f"    TARGET:  All required WebSocket events validated successfully")
 
                     # Mark this as successful completion of core WebSocket testing
                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)

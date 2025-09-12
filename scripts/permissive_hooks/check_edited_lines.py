@@ -105,7 +105,7 @@ def main():
         if not passed:
             all_passed = False
             total_issues += len(issues)
-            print(f"\n⚠️  {filepath} (checking {len(modified_lines)} modified lines)")
+            print(f"\n WARNING: [U+FE0F]  {filepath} (checking {len(modified_lines)} modified lines)")
             for issue in issues:
                 print(f"   - {issue}")
     

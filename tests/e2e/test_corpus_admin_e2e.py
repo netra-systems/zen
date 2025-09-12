@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Prevents $500K+ MRR loss from corpus operation failures
 
 CRITICAL E2E COVERAGE:
-- Complete user journeys: API → Triage → Supervisor → CorpusAdmin → Database → Response
+- Complete user journeys: API  ->  Triage  ->  Supervisor  ->  CorpusAdmin  ->  Database  ->  Response
 - Real-time WebSocket communication throughout workflow
 - Multi-agent collaboration and orchestration
 - Production-like data volumes and scenarios
@@ -132,8 +132,8 @@ class TestCorpusAdminE2E:
     ):
         """Test complete corpus creation journey from API to database.
         
-        E2E Flow: API Request → Authentication → Triage → Supervisor → 
-                 CorpusAdmin → Database → WebSocket Updates → Final Response
+        E2E Flow: API Request  ->  Authentication  ->  Triage  ->  Supervisor  ->  
+                 CorpusAdmin  ->  Database  ->  WebSocket Updates  ->  Final Response
         """
         start_time = time.time()
         
@@ -196,7 +196,7 @@ class TestCorpusAdminE2E:
         authenticated_session, 
         websocket_helper
     ):
-        """Test complete multi-agent collaboration: Triage → Supervisor → CorpusAdmin.
+        """Test complete multi-agent collaboration: Triage  ->  Supervisor  ->  CorpusAdmin.
         
         Validates agent handoff, context preservation, and workflow orchestration.
         """

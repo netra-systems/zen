@@ -437,11 +437,11 @@ fGnJm6gOdrj8ym3rFkEjWT2btf31mrD5oKH6cPHa+xj9z3mz4QH6H8M=
                 )
                 
             # If we get here, the token was properly rejected
-            print("✓ Auth client properly rejected 'none' algorithm attack")
+            print("[U+2713] Auth client properly rejected 'none' algorithm attack")
             
         except Exception as e:
             # If there's an exception, that's also good - it means the token was rejected
-            print(f"✓ Auth client rejected malicious token with error: {e}")
+            print(f"[U+2713] Auth client rejected malicious token with error: {e}")
             
         # The test passes if the malicious token is properly rejected
         # It fails if there's a security vulnerability that allows the token

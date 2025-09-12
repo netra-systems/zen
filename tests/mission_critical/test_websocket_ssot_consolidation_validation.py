@@ -275,7 +275,7 @@ class TestWebSocketSsotConsolidationValidation(SSotAsyncTestCase):
         """
         CRITICAL: Validate Golden Path functionality preserved during SSOT consolidation.
         
-        BUSINESS REQUIREMENT: Users login → get AI responses (90% of platform value)
+        BUSINESS REQUIREMENT: Users login  ->  get AI responses (90% of platform value)
         ARCHITECTURE REQUIREMENT: SSOT consolidation must not break core functionality
         """
         # TARGET STATE: WebSocket manager supports Golden Path agent events

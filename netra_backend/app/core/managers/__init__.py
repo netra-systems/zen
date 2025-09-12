@@ -13,8 +13,8 @@ Business Value: Reduces operational complexity from 808 managers to 3 SSOT manag
 Strategic Impact: Eliminates manager sprawl and provides consistent interfaces.
 
 MIGRATION STATUS: 
-- UnifiedLifecycleManager → SystemLifecycle (COMPLETED)
-- LifecycleManagerFactory → SystemLifecycleFactory (COMPLETED)
+- UnifiedLifecycleManager  ->  SystemLifecycle (COMPLETED)
+- LifecycleManagerFactory  ->  SystemLifecycleFactory (COMPLETED)
 - Backward compatibility maintained with deprecation warnings
 
 BUSINESS NAMING CONVENTION: Classes now use business-focused names that clearly indicate their purpose.
@@ -42,13 +42,13 @@ def _deprecation_warning(old_name: str, new_name: str) -> None:
     )
 
 class _DeprecatedUnifiedLifecycleManager:
-    """Deprecated wrapper for UnifiedLifecycleManager → SystemLifecycle migration."""
+    """Deprecated wrapper for UnifiedLifecycleManager  ->  SystemLifecycle migration."""
     def __new__(cls, *args, **kwargs):
         _deprecation_warning("UnifiedLifecycleManager", "SystemLifecycle")
         return SystemLifecycle(*args, **kwargs)
 
 class _DeprecatedLifecycleManagerFactory:
-    """Deprecated wrapper for LifecycleManagerFactory → SystemLifecycleFactory migration."""
+    """Deprecated wrapper for LifecycleManagerFactory  ->  SystemLifecycleFactory migration."""
     def __getattr__(self, name):
         _deprecation_warning("LifecycleManagerFactory", "SystemLifecycleFactory")
         return getattr(SystemLifecycleFactory, name)

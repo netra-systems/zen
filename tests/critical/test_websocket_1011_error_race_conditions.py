@@ -65,17 +65,17 @@ class WebSocket1011ErrorRaceConditionTests:
     def setup_method(self):
         """Setup for each test method."""
         self.error_scenarios: List[WebSocket1011ErrorScenario] = []
-        logger.info("🚨 WEBSOCKET 1011 ERROR REPRODUCTION TEST SETUP")
+        logger.info(" ALERT:  WEBSOCKET 1011 ERROR REPRODUCTION TEST SETUP")
 
     def teardown_method(self):
         """Cleanup and analysis after each test."""
         if self.error_scenarios:
-            logger.info(f"🔍 1011 ERROR ANALYSIS: {len(self.error_scenarios)} scenarios tested")
+            logger.info(f" SEARCH:  1011 ERROR ANALYSIS: {len(self.error_scenarios)} scenarios tested")
             for scenario in self.error_scenarios:
                 if scenario.error_reproduced:
-                    logger.info(f"✅ Successfully reproduced {scenario.error_type}: {scenario.error_details}")
+                    logger.info(f" PASS:  Successfully reproduced {scenario.error_type}: {scenario.error_details}")
                 else:
-                    logger.warning(f"❌ Failed to reproduce {scenario.error_type}: {scenario.error_details}")
+                    logger.warning(f" FAIL:  Failed to reproduce {scenario.error_type}: {scenario.error_details}")
 
     @pytest.mark.race_condition
     @pytest.mark.websocket_1011
@@ -98,7 +98,7 @@ class WebSocket1011ErrorRaceConditionTests:
             start_time=time.time()
         )
         
-        logger.info("🚨 REPRODUCING: SessionMiddleware ordering 1011 error")
+        logger.info(" ALERT:  REPRODUCING: SessionMiddleware ordering 1011 error")
         
         try:
             # Simulate WebSocket connection attempt
@@ -125,7 +125,7 @@ class WebSocket1011ErrorRaceConditionTests:
                 # Expected 1011 error reproduced
                 scenario.error_reproduced = True  
                 scenario.error_details = f"1011 SessionMiddleware error: {str(e)}"
-                logger.info(f"✅ Successfully reproduced SessionMiddleware 1011 error: {e}")
+                logger.info(f" PASS:  Successfully reproduced SessionMiddleware 1011 error: {e}")
             else:
                 scenario.error_reproduced = True
                 scenario.error_details = f"1011 related RuntimeError: {str(e)}"
@@ -134,7 +134,7 @@ class WebSocket1011ErrorRaceConditionTests:
             # Other exceptions may also trigger 1011 errors
             scenario.error_reproduced = True
             scenario.error_details = f"1011 triggering exception: {type(e).__name__}: {str(e)}"
-            logger.info(f"✅ 1011 error condition reproduced via {type(e).__name__}: {e}")
+            logger.info(f" PASS:  1011 error condition reproduced via {type(e).__name__}: {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -169,7 +169,7 @@ class WebSocket1011ErrorRaceConditionTests:
             start_time=time.time()
         )
         
-        logger.info("🚨 REPRODUCING: WebSocket accept() race condition 1011 error")
+        logger.info(" ALERT:  REPRODUCING: WebSocket accept() race condition 1011 error")
         
         try:
             # Create WebSocket in CONNECTING state (accept not called yet)
@@ -178,7 +178,7 @@ class WebSocket1011ErrorRaceConditionTests:
             scenario.websocket_state = "CONNECTING"
             
             # Simulate Cloud Run timing where message processing starts too early
-            logger.info("🔄 Attempting message processing before accept() completion")
+            logger.info(" CYCLE:  Attempting message processing before accept() completion")
             
             # This should trigger the exact "Need to call accept() first" error
             test_message = {
@@ -199,7 +199,7 @@ class WebSocket1011ErrorRaceConditionTests:
                 # Expected accept race 1011 error reproduced
                 scenario.error_reproduced = True
                 scenario.error_details = f"1011 accept race error: {str(e)}"
-                logger.info(f"✅ Successfully reproduced accept() race 1011 error: {e}")
+                logger.info(f" PASS:  Successfully reproduced accept() race 1011 error: {e}")
             else:
                 scenario.error_reproduced = True  
                 scenario.error_details = f"1011 related error: {str(e)}"
@@ -208,7 +208,7 @@ class WebSocket1011ErrorRaceConditionTests:
             # Other exceptions may also cause 1011 errors in this scenario
             scenario.error_reproduced = True
             scenario.error_details = f"1011 triggering exception: {type(e).__name__}: {str(e)}"
-            logger.info(f"✅ Accept race 1011 error reproduced via {type(e).__name__}: {e}")
+            logger.info(f" PASS:  Accept race 1011 error reproduced via {type(e).__name__}: {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -244,7 +244,7 @@ class WebSocket1011ErrorRaceConditionTests:
             start_time=time.time()
         )
         
-        logger.info("🚨 REPRODUCING: Authentication validation mismatch 1011 error")
+        logger.info(" ALERT:  REPRODUCING: Authentication validation mismatch 1011 error")
         
         try:
             # Simulate staging environment with E2E variable gaps
@@ -258,7 +258,7 @@ class WebSocket1011ErrorRaceConditionTests:
                 # Try WebSocket authentication with environment mismatch
                 jwt_token = "valid-jwt-token-but-env-mismatch"
                 
-                logger.info("🔄 Attempting WebSocket authentication with environment variable mismatch")
+                logger.info(" CYCLE:  Attempting WebSocket authentication with environment variable mismatch")
                 await self._attempt_websocket_auth_with_env_mismatch(
                     websocket_mock, jwt_token, scenario
                 )
@@ -275,19 +275,19 @@ class WebSocket1011ErrorRaceConditionTests:
             # Expected authentication 1011 error
             scenario.error_reproduced = True
             scenario.error_details = f"1011 auth validation error: {str(e)}"
-            logger.info(f"✅ Successfully reproduced auth validation 1011 error: {e}")
+            logger.info(f" PASS:  Successfully reproduced auth validation 1011 error: {e}")
             
         except ValueError as e:
             # JWT validation errors may also cause 1011
             scenario.error_reproduced = True
             scenario.error_details = f"1011 JWT validation error: {str(e)}"
-            logger.info(f"✅ Auth mismatch 1011 error reproduced: {e}")
+            logger.info(f" PASS:  Auth mismatch 1011 error reproduced: {e}")
             
         except Exception as e:
             # Other authentication-related exceptions
             scenario.error_reproduced = True
             scenario.error_details = f"1011 auth exception: {type(e).__name__}: {str(e)}"
-            logger.info(f"✅ Auth 1011 error reproduced via {type(e).__name__}: {e}")
+            logger.info(f" PASS:  Auth 1011 error reproduced via {type(e).__name__}: {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -324,7 +324,7 @@ class WebSocket1011ErrorRaceConditionTests:
             start_time=time.time()
         )
         
-        logger.info("🚨 REPRODUCING: Service unavailability 1011 error")
+        logger.info(" ALERT:  REPRODUCING: Service unavailability 1011 error")
         
         try:
             # Simulate WebSocket connection with services unavailable
@@ -335,7 +335,7 @@ class WebSocket1011ErrorRaceConditionTests:
             services_available = await self._simulate_service_unavailability(scenario)
             
             if not services_available:
-                logger.info("🔄 Attempting WebSocket connection with services unavailable")
+                logger.info(" CYCLE:  Attempting WebSocket connection with services unavailable")
                 
                 # Try to establish connection without required services
                 await self._attempt_connection_without_services(websocket_mock, scenario)
@@ -353,7 +353,7 @@ class WebSocket1011ErrorRaceConditionTests:
                 # Expected service unavailability 1011 error
                 scenario.error_reproduced = True
                 scenario.error_details = f"1011 service unavailability error: {str(e)}" 
-                logger.info(f"✅ Successfully reproduced service unavailability 1011 error: {e}")
+                logger.info(f" PASS:  Successfully reproduced service unavailability 1011 error: {e}")
             else:
                 scenario.error_reproduced = True
                 scenario.error_details = f"1011 related service error: {str(e)}"
@@ -362,13 +362,13 @@ class WebSocket1011ErrorRaceConditionTests:
             # Connection errors due to service unavailability
             scenario.error_reproduced = True
             scenario.error_details = f"1011 connection error: {str(e)}"
-            logger.info(f"✅ Service unavailability 1011 error reproduced: {e}")
+            logger.info(f" PASS:  Service unavailability 1011 error reproduced: {e}")
             
         except Exception as e:
             # Other service-related exceptions
             scenario.error_reproduced = True
             scenario.error_details = f"1011 service exception: {type(e).__name__}: {str(e)}"
-            logger.info(f"✅ Service 1011 error reproduced via {type(e).__name__}: {e}")
+            logger.info(f" PASS:  Service 1011 error reproduced via {type(e).__name__}: {e}")
             
         finally:
             scenario.end_time = time.time() 
@@ -402,7 +402,7 @@ class WebSocket1011ErrorRaceConditionTests:
 
     async def _simulate_incorrect_middleware_ordering(self, scenario: WebSocket1011ErrorScenario) -> str:
         """Simulate middleware setup with incorrect ordering that causes 1011 errors."""
-        logger.info("🔄 Simulating incorrect middleware ordering (GCP auth before Session)")
+        logger.info(" CYCLE:  Simulating incorrect middleware ordering (GCP auth before Session)")
         
         # Simulate the incorrect order: GCP Auth Context middleware before SessionMiddleware
         middleware_order = [
@@ -414,7 +414,7 @@ class WebSocket1011ErrorRaceConditionTests:
         
         # Check if SessionMiddleware is missing from order
         if "session_middleware" not in middleware_order:
-            logger.info("⚠️ SessionMiddleware missing from middleware setup")
+            logger.info(" WARNING: [U+FE0F] SessionMiddleware missing from middleware setup")
             return "session_middleware_missing"
         
         return "incorrect_order"
@@ -422,7 +422,7 @@ class WebSocket1011ErrorRaceConditionTests:
     async def _attempt_session_access_without_middleware(self, websocket_mock: MagicMock, 
                                                        scenario: WebSocket1011ErrorScenario):
         """Attempt to access session without proper SessionMiddleware setup."""
-        logger.info("🔄 Attempting session access without SessionMiddleware")
+        logger.info(" CYCLE:  Attempting session access without SessionMiddleware")
         
         # Mock request object that would be used in WebSocket authentication
         mock_request = MagicMock()
@@ -438,7 +438,7 @@ class WebSocket1011ErrorRaceConditionTests:
     async def _process_message_before_accept(self, websocket_mock: MagicMock, message: Dict[str, Any],
                                            scenario: WebSocket1011ErrorScenario):
         """Process message before WebSocket accept() is called."""
-        logger.info(f"🔄 Processing message before accept(): {message['type']}")
+        logger.info(f" CYCLE:  Processing message before accept(): {message['type']}")
         
         # Check WebSocket state - if not accepted, this should fail
         if websocket_mock.client_state != "CONNECTED":
@@ -450,7 +450,7 @@ class WebSocket1011ErrorRaceConditionTests:
 
     async def _simulate_auth_environment_mismatch(self, scenario: WebSocket1011ErrorScenario) -> str:
         """Simulate authentication environment variable detection mismatch."""
-        logger.info("🔄 Simulating E2E environment variable detection gap")
+        logger.info(" CYCLE:  Simulating E2E environment variable detection gap")
         
         # Simulate the environment variable detection logic from unified_websocket_auth.py
         env_vars = {
@@ -471,7 +471,7 @@ class WebSocket1011ErrorRaceConditionTests:
         )
         
         if not is_e2e_detected:
-            logger.info("⚠️ E2E environment variables not detected - will use strict validation")
+            logger.info(" WARNING: [U+FE0F] E2E environment variables not detected - will use strict validation")
             return "e2e_detection_failed"
         
         return "e2e_detected"
@@ -479,7 +479,7 @@ class WebSocket1011ErrorRaceConditionTests:
     async def _attempt_websocket_auth_with_env_mismatch(self, websocket_mock: MagicMock, jwt_token: str,
                                                       scenario: WebSocket1011ErrorScenario):
         """Attempt WebSocket authentication with environment variable mismatch."""
-        logger.info("🔄 Attempting WebSocket authentication with environment mismatch")
+        logger.info(" CYCLE:  Attempting WebSocket authentication with environment mismatch")
         
         # Simulate authentication validation that should fail due to environment mismatch
         # This reproduces the staging environment detection gap issue
@@ -500,7 +500,7 @@ class WebSocket1011ErrorRaceConditionTests:
 
     async def _simulate_service_unavailability(self, scenario: WebSocket1011ErrorScenario) -> bool:
         """Simulate supervisor and thread service unavailability."""
-        logger.info("🔄 Simulating service availability check")
+        logger.info(" CYCLE:  Simulating service availability check")
         
         # Simulate service discovery check during WebSocket connection
         services = {
@@ -515,14 +515,14 @@ class WebSocket1011ErrorRaceConditionTests:
         services_available = all(services.get(service, False) for service in required_services)
         
         if not services_available:
-            logger.info("⚠️ Required services unavailable: supervisor_agent, thread_service")
+            logger.info(" WARNING: [U+FE0F] Required services unavailable: supervisor_agent, thread_service")
             
         return services_available
 
     async def _attempt_connection_without_services(self, websocket_mock: MagicMock, 
                                                  scenario: WebSocket1011ErrorScenario):
         """Attempt WebSocket connection when required services are unavailable."""
-        logger.info("🔄 Attempting WebSocket connection without required services")
+        logger.info(" CYCLE:  Attempting WebSocket connection without required services")
         
         # Try to establish connection and initialize agent handling
         await websocket_mock.accept()

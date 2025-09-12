@@ -140,12 +140,12 @@ class DataRequestGenerationRealServicesTest(BaseIntegrationTest):
     async def setup_real_services(self, real_services_fixture):
         """Setup real services for testing.""" 
         # Simplified setup - services initialized as needed
-        logger.info("✓ Real services setup for data request generation testing")
+        logger.info("[U+2713] Real services setup for data request generation testing")
         
     async def cleanup_real_services(self):
         """Clean up real service connections."""
         # Simplified cleanup
-        logger.info("✓ Real services cleanup completed")
+        logger.info("[U+2713] Real services cleanup completed")
             
     async def create_real_llm_manager(self) -> LLMManager:
         """Create LLM manager with real API connection or comprehensive mock."""
@@ -468,7 +468,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Data request generation with real LLM validated")
+        logger.success("[U+2713] Data request generation with real LLM validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -517,12 +517,12 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
                     f"found in generated categories: {category_names}"
                 )
                 
-                logger.success(f"✓ Scenario {scenario['name']} validated")
+                logger.success(f"[U+2713] Scenario {scenario['name']} validated")
                 
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Different triage categories data requests validated")
+        logger.success("[U+2713] Different triage categories data requests validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -576,7 +576,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Structured data extraction validated")
+        logger.success("[U+2713] Structured data extraction validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -632,7 +632,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Prompt template formatting with context validated")
+        logger.success("[U+2713] Prompt template formatting with context validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -708,7 +708,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Concurrent data request generation with user isolation validated")
+        logger.success("[U+2713] Concurrent data request generation with user isolation validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -758,7 +758,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Database persistence and retrieval validated")
+        logger.success("[U+2713] Database persistence and retrieval validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -829,7 +829,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ WebSocket event emission validated")
+        logger.success("[U+2713] WebSocket event emission validated")
     
     @pytest.mark.integration 
     @pytest.mark.real_services
@@ -897,7 +897,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
             instructions = data_request.get("user_instructions", "")
             assert len(instructions) > 200, "Complex requests need detailed instructions"
             
-            logger.success(f"✓ Performance validated - Generation: {self.metrics.generation_time_seconds:.2f}s, "
+            logger.success(f"[U+2713] Performance validated - Generation: {self.metrics.generation_time_seconds:.2f}s, "
                           f"LLM: {self.metrics.llm_response_time_seconds:.2f}s, "
                           f"Categories: {self.metrics.categories_generated}, "
                           f"Items: {self.metrics.data_items_requested}")
@@ -905,7 +905,7 @@ class TestDataRequestGenerationRealServices(BaseIntegrationTest):
         finally:
             await self.test_helper.cleanup_real_services()
             
-        logger.success("✓ Performance metrics and business value compliance validated")
+        logger.success("[U+2713] Performance metrics and business value compliance validated")
 
 
 if __name__ == "__main__":
@@ -928,10 +928,10 @@ if __name__ == "__main__":
             mock_database = "mock_database"
             
             await test_instance.test_data_request_generation_with_real_llm(mock_services, mock_database)
-            logger.success("✓ All data request generation integration tests passed")
+            logger.success("[U+2713] All data request generation integration tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Integration tests failed: {e}")
+            logger.error(f"[U+2717] Integration tests failed: {e}")
             raise
     
     asyncio.run(run_integration_tests())

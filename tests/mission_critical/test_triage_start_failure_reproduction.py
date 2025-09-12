@@ -10,7 +10,7 @@ BUSINESS CRITICAL ISSUE:
 - This blocks the entire chat experience delivery pipeline
 
 PURPOSE: Validate the exact conditions that cause triage start failure and
-ensure the fix (async for → async with) resolves the issue completely.
+ensure the fix (async for  ->  async with) resolves the issue completely.
 
 FAILURE REPRODUCTION:
 1. WebSocket connection established 
@@ -26,7 +26,7 @@ Ensures triage agents can start successfully to deliver AI-powered responses.
 MISSION CRITICAL REQUIREMENTS:
 - Must reproduce exact production failure conditions
 - Must fail with current broken code
-- Must pass after async for → async with fix  
+- Must pass after async for  ->  async with fix  
 - Uses real services where possible
 - Validates complete triage agent start flow
 """
@@ -56,7 +56,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
     preventing users from receiving AI responses in the chat interface.
     
     GOLDEN PATH IMPACT: This failure breaks the core user journey:
-    User Message → Triage Agent → AI Response
+    User Message  ->  Triage Agent  ->  AI Response
     """
     
     async def async_setup_method(self, method=None):
@@ -123,7 +123,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         
         EXPECTED BEHAVIOR:
         - With current broken code: Test FAILS, reproducing production issue
-        - After fix (async for → async with): Test PASSES, chat works
+        - After fix (async for  ->  async with): Test PASSES, chat works
         """
         
         # Create execution context that would be passed to start_agent
@@ -233,7 +233,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_triage_start_fix_validation_async_with(self):
         """
-        Validate that the proposed fix (async for → async with) resolves triage start.
+        Validate that the proposed fix (async for  ->  async with) resolves triage start.
         
         This demonstrates the exact change needed in agent_handler.py line 125
         to fix the triage agent start failure and restore chat functionality.
@@ -292,7 +292,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         """
         Validate the business impact of triage start failure on Golden Path user flow.
         
-        Golden Path: User Login → Send Message → Get AI Response
+        Golden Path: User Login  ->  Send Message  ->  Get AI Response
         Failure Point: Triage agent cannot start to process user message
         
         This test demonstrates how the session pattern failure breaks the
@@ -410,7 +410,7 @@ class TestTriageStartFailureReproduction(SSotAsyncTestCase):
         
         metrics = self.get_all_metrics()
         for metric_name, metric_value in metrics.items():
-            print(f"  ✓ {metric_name}: {metric_value}")
+            print(f"  [U+2713] {metric_name}: {metric_value}")
         print("=" * 80)
 
 

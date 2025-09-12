@@ -36,10 +36,10 @@ async def test_staging_websocket_auth():
         token = await auth_helper.get_staging_token_async(
             email="staging-e2e-user-002@netrasystems.ai"
         )
-        print(f"✅ Token created successfully")
+        print(f" PASS:  Token created successfully")
         print(f"Token (first 50 chars): {token[:50]}...")
     except Exception as e:
-        print(f"❌ Token creation failed: {e}")
+        print(f" FAIL:  Token creation failed: {e}")
         return False
     
     print("\n2. Getting WebSocket headers with E2E detection...")
@@ -65,7 +65,7 @@ async def test_staging_websocket_auth():
             close_timeout=5.0
         ) as websocket:
             connection_time = time.time() - start_time
-            print(f"✅ WebSocket connected successfully in {connection_time:.2f}s")
+            print(f" PASS:  WebSocket connected successfully in {connection_time:.2f}s")
             
             # Send a simple message
             test_message = {
@@ -76,13 +76,13 @@ async def test_staging_websocket_auth():
             
             print("\n4. Sending test message...")
             await websocket.send(json.dumps(test_message))
-            print("✅ Message sent")
+            print(" PASS:  Message sent")
             
             # Wait for response
             print("\n5. Waiting for response...")
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                print(f"✅ Received response: {response}")
+                print(f" PASS:  Received response: {response}")
                 
                 # Parse and display response
                 try:
@@ -93,31 +93,31 @@ async def test_staging_websocket_auth():
                     print("Response is not JSON")
                     
             except asyncio.TimeoutError:
-                print("⚠️  No response received (timeout)")
+                print(" WARNING: [U+FE0F]  No response received (timeout)")
                 
-            print(f"✅ Test completed successfully")
+            print(f" PASS:  Test completed successfully")
             return True
             
     except Exception as e:
         connection_time = time.time() - start_time
-        print(f"❌ WebSocket connection failed after {connection_time:.2f}s: {e}")
+        print(f" FAIL:  WebSocket connection failed after {connection_time:.2f}s: {e}")
         
         # Enhanced error analysis
         error_str = str(e).lower()
         if "1008" in error_str:
-            print("🔍 Error Analysis: 1008 = Policy Violation (likely authentication failure)")
+            print(" SEARCH:  Error Analysis: 1008 = Policy Violation (likely authentication failure)")
             print("   This indicates the server rejected the connection due to authentication")
         elif "timeout" in error_str:
-            print("🔍 Error Analysis: Connection timeout")
+            print(" SEARCH:  Error Analysis: Connection timeout")
             print("   This may indicate server is not responding or taking too long to process auth")
         elif "403" in error_str:
-            print("🔍 Error Analysis: 403 Forbidden")
+            print(" SEARCH:  Error Analysis: 403 Forbidden")
             print("   This indicates authentication was rejected")
         elif "401" in error_str:
-            print("🔍 Error Analysis: 401 Unauthorized")
+            print(" SEARCH:  Error Analysis: 401 Unauthorized")
             print("   This indicates no valid authentication was provided")
         else:
-            print(f"🔍 Error Analysis: Unknown error pattern")
+            print(f" SEARCH:  Error Analysis: Unknown error pattern")
             
         return False
 

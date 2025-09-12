@@ -1,7 +1,7 @@
 """
 Retry strategy executor with exponential backoff using UnifiedRetryHandler.
 
-⚠️  DEPRECATED: This module now delegates to UnifiedRetryHandler.
+ WARNING: [U+FE0F]  DEPRECATED: This module now delegates to UnifiedRetryHandler.
 Use UnifiedRetryHandler directly for new code.
 
 Provides the main exponential_backoff_retry function for async generators.
@@ -23,7 +23,7 @@ async def exponential_backoff_retry(
 ) -> AsyncGenerator:
     """Execute async generator with exponential backoff retry logic using UnifiedRetryHandler.
     
-    ⚠️  DEPRECATED: Use UnifiedRetryHandler directly for new code.
+     WARNING: [U+FE0F]  DEPRECATED: Use UnifiedRetryHandler directly for new code.
     
     Args:
         async_generator_func: Async generator function to retry

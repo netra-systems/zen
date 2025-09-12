@@ -57,15 +57,15 @@ class OAuthStagingValidator:
         
         if status == 'PASS':
             self.results['summary']['passed'] += 1
-            print(f"✅ {test_name}: {message}")
+            print(f" PASS:  {test_name}: {message}")
         elif status == 'FAIL':
             self.results['summary']['failed'] += 1
-            print(f"❌ {test_name}: {message}")
+            print(f" FAIL:  {test_name}: {message}")
         elif status == 'WARN':
             self.results['summary']['warnings'] += 1
-            print(f"⚠️  {test_name}: {message}")
+            print(f" WARNING: [U+FE0F]  {test_name}: {message}")
         else:
-            print(f"ℹ️  {test_name}: {message}")
+            print(f"[U+2139][U+FE0F]  {test_name}: {message}")
 
     def test_backend_health(self) -> bool:
         """Test 1: Backend Service Health"""
@@ -152,9 +152,9 @@ class OAuthStagingValidator:
                     response = self.session.get(f"{self.base_url}{endpoint}", timeout=10)
                     if response.status_code in [200, 401, 403]:  # Any structured response indicates working
                         working_endpoints += 1
-                        print(f"  ✓ {description}: HTTP {response.status_code}")
+                        print(f"  [U+2713] {description}: HTTP {response.status_code}")
                 except Exception as e:
-                    print(f"  ✗ {description}: {str(e)}")
+                    print(f"  [U+2717] {description}: {str(e)}")
             
             if working_endpoints >= 1:  # At least one auth endpoint working
                 self.log_test_result(
@@ -319,17 +319,17 @@ class OAuthStagingValidator:
                         try:
                             json_response = response.json()
                             functional_endpoints += 1
-                            print(f"  ✓ {description}: Working (HTTP 200, JSON response)")
+                            print(f"  [U+2713] {description}: Working (HTTP 200, JSON response)")
                         except ValueError:
                             print(f"  ~ {description}: Responding but not JSON (HTTP {response.status_code})")
                     elif response.status_code in [401, 403]:
                         functional_endpoints += 1
-                        print(f"  ✓ {description}: Protected endpoint working (HTTP {response.status_code})")
+                        print(f"  [U+2713] {description}: Protected endpoint working (HTTP {response.status_code})")
                     else:
-                        print(f"  ✗ {description}: HTTP {response.status_code}")
+                        print(f"  [U+2717] {description}: HTTP {response.status_code}")
                         
                 except Exception as e:
-                    print(f"  ✗ {description}: {str(e)}")
+                    print(f"  [U+2717] {description}: {str(e)}")
             
             if functional_endpoints >= 1:
                 self.log_test_result(
@@ -355,7 +355,7 @@ class OAuthStagingValidator:
     def run_all_tests(self) -> Dict[str, Any]:
         """Run all OAuth validation tests"""
         print("=" * 80)
-        print("🔐 OAuth Compatibility Classes - GCP Staging Validation")
+        print("[U+1F510] OAuth Compatibility Classes - GCP Staging Validation")
         print("=" * 80)
         print(f"Backend URL: {self.base_url}")
         print(f"Timestamp: {self.results['timestamp']}")
@@ -382,14 +382,14 @@ class OAuthStagingValidator:
         # Print summary
         print()
         print("=" * 80)
-        print("📊 VALIDATION SUMMARY")
+        print(" CHART:  VALIDATION SUMMARY")
         print("=" * 80)
         
         summary = self.results['summary']
         print(f"Total Tests: {summary['total']}")
-        print(f"✅ Passed: {summary['passed']}")
-        print(f"❌ Failed: {summary['failed']}")
-        print(f"⚠️  Warnings: {summary['warnings']}")
+        print(f" PASS:  Passed: {summary['passed']}")
+        print(f" FAIL:  Failed: {summary['failed']}")
+        print(f" WARNING: [U+FE0F]  Warnings: {summary['warnings']}")
         
         success_rate = (summary['passed'] / summary['total'] * 100) if summary['total'] > 0 else 0
         print(f"Success Rate: {success_rate:.1f}%")
@@ -397,30 +397,30 @@ class OAuthStagingValidator:
         # Overall assessment
         print()
         if summary['failed'] == 0 and summary['passed'] >= 4:
-            print("🎉 VALIDATION RESULT: PRODUCTION READY")
-            print("✅ OAuth compatibility classes successfully deployed and functional")
-            print("✅ Ready for production deployment")
+            print(" CELEBRATION:  VALIDATION RESULT: PRODUCTION READY")
+            print(" PASS:  OAuth compatibility classes successfully deployed and functional")
+            print(" PASS:  Ready for production deployment")
         elif summary['failed'] <= 1 and summary['passed'] >= 3:
-            print("⚠️  VALIDATION RESULT: MOSTLY READY")
-            print("✅ Core OAuth functionality working")
-            print("⚠️  Minor issues detected - review warnings")
+            print(" WARNING: [U+FE0F]  VALIDATION RESULT: MOSTLY READY")
+            print(" PASS:  Core OAuth functionality working")
+            print(" WARNING: [U+FE0F]  Minor issues detected - review warnings")
         else:
-            print("❌ VALIDATION RESULT: ISSUES DETECTED")
-            print("❌ Critical issues found - review failed tests")
-            print("⚠️  Do NOT deploy to production")
+            print(" FAIL:  VALIDATION RESULT: ISSUES DETECTED")
+            print(" FAIL:  Critical issues found - review failed tests")
+            print(" WARNING: [U+FE0F]  Do NOT deploy to production")
         
         # Business impact assessment
         print()
-        print("💰 BUSINESS IMPACT ASSESSMENT:")
+        print("[U+1F4B0] BUSINESS IMPACT ASSESSMENT:")
         
         if summary['passed'] >= 4:
-            print("✅ $500K+ ARR OAuth functionality: PROTECTED")
-            print("✅ Enterprise customer authentication ($15K+ MRR each): OPERATIONAL")
-            print("✅ OAuth test collection capability: VALIDATED")
+            print(" PASS:  $500K+ ARR OAuth functionality: PROTECTED")
+            print(" PASS:  Enterprise customer authentication ($15K+ MRR each): OPERATIONAL")
+            print(" PASS:  OAuth test collection capability: VALIDATED")
         else:
-            print("❌ $500K+ ARR OAuth functionality: AT RISK")
-            print("❌ Enterprise customer authentication: UNCERTAIN")
-            print("❌ Production deployment: NOT RECOMMENDED")
+            print(" FAIL:  $500K+ ARR OAuth functionality: AT RISK")
+            print(" FAIL:  Enterprise customer authentication: UNCERTAIN")
+            print(" FAIL:  Production deployment: NOT RECOMMENDED")
         
         return self.results
 
@@ -436,9 +436,9 @@ def main():
     try:
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2)
-        print(f"\n📄 Full results saved to: {results_file}")
+        print(f"\n[U+1F4C4] Full results saved to: {results_file}")
     except Exception as e:
-        print(f"\n⚠️  Could not save results file: {e}")
+        print(f"\n WARNING: [U+FE0F]  Could not save results file: {e}")
     
     # Exit with appropriate code
     if results['summary']['failed'] > 2:

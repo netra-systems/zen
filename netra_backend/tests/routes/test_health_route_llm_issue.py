@@ -197,9 +197,9 @@ if __name__ == "__main__":
         try:
             print(f"\nRunning: {test_name}")
             test_func()
-            print(f"✓ PASSED: {test_name}")
+            print(f"[U+2713] PASSED: {test_name}")
         except Exception as e:
-            print(f"✗ FAILED: {test_name}")
+            print(f"[U+2717] FAILED: {test_name}")
             print(f"  Error: {e}")
             failed_tests.append((test_name, str(e)))
     

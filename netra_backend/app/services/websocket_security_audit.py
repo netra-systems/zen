@@ -105,7 +105,7 @@ class WebSocketSecurityValidator:
             'last_validation': None
         }
         
-        logger.info("🛡️ WebSocket Security Validator initialized")
+        logger.info("[U+1F6E1][U+FE0F] WebSocket Security Validator initialized")
     
     def validate_user_context_isolation(
         self, 
@@ -172,7 +172,7 @@ class WebSocketSecurityValidator:
                 )
                 return False, violation
             
-            logger.debug(f"✅ User context validation passed for {user_context.get_correlation_id()}")
+            logger.debug(f" PASS:  User context validation passed for {user_context.get_correlation_id()}")
             return True, None
             
         except Exception as e:
@@ -225,12 +225,12 @@ class WebSocketSecurityValidator:
             )
             
             self._security_metrics['violations_detected'] += 1
-            logger.error(f"🚨 CRITICAL SECURITY VIOLATION: Event routing user ID mismatch - "
+            logger.error(f" ALERT:  CRITICAL SECURITY VIOLATION: Event routing user ID mismatch - "
                         f"event_user={event_user_id}, context_user={context_user_id}, event={event_type}")
             
             return False, violation
         
-        logger.debug(f"✅ Event routing validation passed for user {context_user_id}, event {event_type}")
+        logger.debug(f" PASS:  Event routing validation passed for user {context_user_id}, event {event_type}")
         return True, None
     
     def validate_connection_ownership(
@@ -271,12 +271,12 @@ class WebSocketSecurityValidator:
             )
             
             self._security_metrics['violations_detected'] += 1
-            logger.error(f"🚨 CRITICAL SECURITY VIOLATION: Connection access denied - "
+            logger.error(f" ALERT:  CRITICAL SECURITY VIOLATION: Connection access denied - "
                         f"owner={connection_user_id}, requester={requesting_user_id}, op={operation}")
             
             return False, violation
         
-        logger.debug(f"✅ Connection ownership validation passed for user {requesting_user_id}")
+        logger.debug(f" PASS:  Connection ownership validation passed for user {requesting_user_id}")
         return True, None
     
     def get_security_metrics(self) -> Dict[str, Any]:
@@ -321,7 +321,7 @@ class WebSocketAuditLogger:
             'start_time': datetime.now(timezone.utc)
         }
         
-        logger.info(f"📋 WebSocket Audit Logger initialized - file: {audit_file_path}")
+        logger.info(f"[U+1F4CB] WebSocket Audit Logger initialized - file: {audit_file_path}")
     
     def log_websocket_operation(
         self,
@@ -374,7 +374,7 @@ class WebSocketAuditLogger:
             if self._audit_file_path:
                 self._write_audit_event_to_file(audit_event)
         
-        logger.info(f"📋 AUDIT: {operation} by user {user_id} - {result} (event_id: {audit_event.event_id})")
+        logger.info(f"[U+1F4CB] AUDIT: {operation} by user {user_id} - {result} (event_id: {audit_event.event_id})")
         return audit_event.event_id
     
     def log_security_violation(self, violation: SecurityViolation) -> str:
@@ -412,7 +412,7 @@ class WebSocketAuditLogger:
             if self._audit_file_path:
                 self._write_audit_event_to_file(audit_event)
         
-        logger.error(f"🚨 SECURITY AUDIT: {violation.violation_type.value} - "
+        logger.error(f" ALERT:  SECURITY AUDIT: {violation.violation_type.value} - "
                     f"threat_level={violation.threat_level.value} (event_id: {audit_event.event_id})")
         
         return audit_event.event_id

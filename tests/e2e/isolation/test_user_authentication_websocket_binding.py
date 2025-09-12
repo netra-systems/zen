@@ -205,7 +205,7 @@ class TestUserAuthenticationWebSocketBinding(BaseE2ETest):
             assert required_event in event_types, \
                 f"Missing required event through authenticated WebSocket: {required_event}"
         
-        self.logger.info("✅ SUCCESS: Valid JWT WebSocket binding and execution validated")
+        self.logger.info(" PASS:  SUCCESS: Valid JWT WebSocket binding and execution validated")
         self.logger.info(f"  - User ID: {user_id}")
         self.logger.info(f"  - Events received: {len(all_events)}")
         self.logger.info(f"  - Auth-related events: {len(auth_events)}")
@@ -278,9 +278,9 @@ class TestUserAuthenticationWebSocketBinding(BaseE2ETest):
                 
             except Exception as e:
                 # Expected - invalid tokens should cause connection failures
-                self.logger.info(f"  ✅ Invalid token {i+1} properly rejected: {type(e).__name__}")
+                self.logger.info(f"   PASS:  Invalid token {i+1} properly rejected: {type(e).__name__}")
         
-        self.logger.info("✅ SUCCESS: All invalid JWT tokens properly rejected by WebSocket")
+        self.logger.info(" PASS:  SUCCESS: All invalid JWT tokens properly rejected by WebSocket")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -365,9 +365,9 @@ class TestUserAuthenticationWebSocketBinding(BaseE2ETest):
             
         except Exception as e:
             # Expected - expired tokens should cause failures
-            self.logger.info(f"✅ Expired token properly handled with rejection: {type(e).__name__}")
+            self.logger.info(f" PASS:  Expired token properly handled with rejection: {type(e).__name__}")
         
-        self.logger.info("✅ SUCCESS: Expired JWT token properly rejected by WebSocket")
+        self.logger.info(" PASS:  SUCCESS: Expired JWT token properly rejected by WebSocket")
     
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -538,7 +538,7 @@ class TestUserAuthenticationWebSocketBinding(BaseE2ETest):
         # But same user context maintained
         # This is validated by successful execution with same user_id and thread_id
         
-        self.logger.info("✅ SUCCESS: Token refresh WebSocket continuity validated")
+        self.logger.info(" PASS:  SUCCESS: Token refresh WebSocket continuity validated")
         self.logger.info(f"  - Initial events: {len(initial_events)}")
         self.logger.info(f"  - Refresh events: {len(refresh_events)}")
-        self.logger.info(f"  - Session continuity: ✅")
+        self.logger.info(f"  - Session continuity:  PASS: ")

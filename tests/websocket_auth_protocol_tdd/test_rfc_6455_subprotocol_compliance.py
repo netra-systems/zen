@@ -110,8 +110,8 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         Test: Main mode websocket.accept() missing subprotocol parameter
         
         Location: websocket_ssot.py line 298
-        Expected: await websocket.accept() → FAILS RFC 6455 (missing subprotocol)
-        Should Be: await websocket.accept(subprotocol="jwt-auth") → RFC 6455 compliant
+        Expected: await websocket.accept()  ->  FAILS RFC 6455 (missing subprotocol)
+        Should Be: await websocket.accept(subprotocol="jwt-auth")  ->  RFC 6455 compliant
         
         This test validates that the main mode WebSocket endpoint violates RFC 6455
         by not including the subprotocol parameter in the accept() call.
@@ -147,7 +147,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
             "EXPECTED FAILURE: websocket.accept() called without subprotocol parameter (RFC 6455 violation)"
         
         # Log the RFC violation
-        logger.error(f"🚨 RFC 6455 VIOLATION: Main mode websocket.accept() missing subprotocol parameter")
+        logger.error(f" ALERT:  RFC 6455 VIOLATION: Main mode websocket.accept() missing subprotocol parameter")
         logger.error(f"   Client sent: {self.rfc_compliant_subprotocols}")
         logger.error(f"   Server response: websocket.accept() with no subprotocol")
         logger.error(f"   RFC 6455 requires: websocket.accept(subprotocol='jwt-auth')")
@@ -157,8 +157,8 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         Test: Factory mode websocket.accept() missing subprotocol parameter
         
         Location: websocket_ssot.py line 393  
-        Expected: await websocket.accept() → FAILS RFC 6455 (missing subprotocol)
-        Should Be: await websocket.accept(subprotocol="jwt-auth") → RFC 6455 compliant
+        Expected: await websocket.accept()  ->  FAILS RFC 6455 (missing subprotocol)
+        Should Be: await websocket.accept(subprotocol="jwt-auth")  ->  RFC 6455 compliant
         """
         # Arrange: WebSocket with factory mode context
         websocket = self.create_mock_websocket(self.rfc_compliant_subprotocols)
@@ -186,15 +186,15 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         assert call_args[1].get('subprotocol') is None, \
             "EXPECTED FAILURE: Factory mode websocket.accept() missing subprotocol parameter"
             
-        logger.error(f"🚨 RFC 6455 VIOLATION: Factory mode websocket.accept() missing subprotocol parameter")
+        logger.error(f" ALERT:  RFC 6455 VIOLATION: Factory mode websocket.accept() missing subprotocol parameter")
 
     async def test_isolated_mode_subprotocol_negotiation_failure(self):
         """
         Test: Isolated mode websocket.accept() missing subprotocol parameter
         
         Location: websocket_ssot.py line 461
-        Expected: await websocket.accept() → FAILS RFC 6455 (missing subprotocol) 
-        Should Be: await websocket.accept(subprotocol="jwt-auth") → RFC 6455 compliant
+        Expected: await websocket.accept()  ->  FAILS RFC 6455 (missing subprotocol) 
+        Should Be: await websocket.accept(subprotocol="jwt-auth")  ->  RFC 6455 compliant
         """
         # Arrange: WebSocket for isolated mode
         websocket = self.create_mock_websocket(self.rfc_compliant_subprotocols)
@@ -221,15 +221,15 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         assert call_args[1].get('subprotocol') is None, \
             "EXPECTED FAILURE: Isolated mode websocket.accept() missing subprotocol parameter"
             
-        logger.error(f"🚨 RFC 6455 VIOLATION: Isolated mode websocket.accept() missing subprotocol parameter")
+        logger.error(f" ALERT:  RFC 6455 VIOLATION: Isolated mode websocket.accept() missing subprotocol parameter")
 
     async def test_legacy_mode_subprotocol_negotiation_failure(self):
         """
         Test: Legacy mode websocket.accept() missing subprotocol parameter
         
         Location: websocket_ssot.py line 539
-        Expected: await websocket.accept() → FAILS RFC 6455 (missing subprotocol)
-        Should Be: await websocket.accept(subprotocol="jwt-auth") → RFC 6455 compliant
+        Expected: await websocket.accept()  ->  FAILS RFC 6455 (missing subprotocol)
+        Should Be: await websocket.accept(subprotocol="jwt-auth")  ->  RFC 6455 compliant
         """
         # Arrange: WebSocket for legacy mode
         websocket = self.create_mock_websocket(self.rfc_compliant_subprotocols)
@@ -248,7 +248,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         assert call_args[1].get('subprotocol') is None, \
             "EXPECTED FAILURE: Legacy mode websocket.accept() missing subprotocol parameter"
             
-        logger.error(f"🚨 RFC 6455 VIOLATION: Legacy mode websocket.accept() missing subprotocol parameter")
+        logger.error(f" ALERT:  RFC 6455 VIOLATION: Legacy mode websocket.accept() missing subprotocol parameter")
 
     async def test_rfc_6455_subprotocol_selection_logic(self):
         """
@@ -289,7 +289,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
                 # This test documents expected behavior after fix
                 # Currently will fail due to missing subprotocol selection
                 
-                logger.info(f"🧪 RFC 6455 Test Case: {test_case['name']}")
+                logger.info(f"[U+1F9EA] RFC 6455 Test Case: {test_case['name']}")
                 logger.info(f"   Client subprotocols: {test_case['subprotocols']}")
                 logger.info(f"   Expected selected: {test_case['expected_selected']}")
                 logger.info(f"   Should extract JWT: {test_case['should_extract_jwt']}")
@@ -304,7 +304,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
                     # No supported subprotocol
                     await websocket.close(code=1002, reason="Unsupported subprotocol")
                 """
-                logger.info(f"📋 Required implementation:\n{expected_fix}")
+                logger.info(f"[U+1F4CB] Required implementation:\n{expected_fix}")
 
     @pytest.mark.integration 
     async def test_real_websocket_connection_subprotocol_failure(self):
@@ -319,7 +319,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         """
         try:
             # Attempt real WebSocket connection with RFC 6455 compliant subprotocols
-            logger.info(f"🔌 Attempting WebSocket connection to: {self.backend_websocket_url}")
+            logger.info(f"[U+1F50C] Attempting WebSocket connection to: {self.backend_websocket_url}")
             logger.info(f"   Subprotocols: {self.rfc_compliant_subprotocols}")
             
             # This should FAIL due to backend RFC 6455 violation
@@ -334,7 +334,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
             
             # If we get here, connection unexpectedly succeeded
             selected_subprotocol = connection.subprotocol
-            logger.error(f"🚨 UNEXPECTED: WebSocket connection succeeded!")
+            logger.error(f" ALERT:  UNEXPECTED: WebSocket connection succeeded!")
             logger.error(f"   Selected subprotocol: {selected_subprotocol}")
             
             await connection.close()
@@ -347,12 +347,12 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
                 asyncio.TimeoutError,
                 OSError) as e:
             # Expected failure due to RFC 6455 subprotocol violation
-            logger.info(f"✅ EXPECTED FAILURE: WebSocket connection failed due to subprotocol issue")
+            logger.info(f" PASS:  EXPECTED FAILURE: WebSocket connection failed due to subprotocol issue")
             logger.info(f"   Error type: {type(e).__name__}")
             logger.info(f"   Error details: {str(e)}")
             
             # Document the expected fix impact
-            logger.info(f"🔧 After fix: Connection should succeed with subprotocol='jwt-auth'")
+            logger.info(f"[U+1F527] After fix: Connection should succeed with subprotocol='jwt-auth'")
             
             # Test passes - this failure is expected with current bug
             assert True, "Expected connection failure due to RFC 6455 subprotocol violation"
@@ -401,7 +401,7 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
                 assert result == test_case["expected_selected"], \
                     f"Subprotocol selection failed for case {i}"
                 
-                logger.info(f"✅ RFC 6455 Algorithm Test {i}: {result}")
+                logger.info(f" PASS:  RFC 6455 Algorithm Test {i}: {result}")
 
     def test_business_impact_validation(self):
         """
@@ -423,13 +423,13 @@ class RFC6455SubprotocolComplianceTest(SSotAsyncTestCase):
         # Document business impact
         business_impact = {
             "revenue_at_risk": "$500K+ ARR",
-            "affected_user_flow": "Golden Path (login → AI responses)",
+            "affected_user_flow": "Golden Path (login  ->  AI responses)",
             "critical_events_blocked": critical_events_blocked,
             "user_experience_impact": "Complete chat functionality failure",
             "error_manifestation": "WebSocket Error 1006 (abnormal closure)"
         }
         
-        logger.error(f"🚨 BUSINESS IMPACT OF RFC 6455 VIOLATION:")
+        logger.error(f" ALERT:  BUSINESS IMPACT OF RFC 6455 VIOLATION:")
         for key, value in business_impact.items():
             logger.error(f"   {key}: {value}")
         
@@ -452,7 +452,7 @@ if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(RFC6455SubprotocolComplianceTest)
     runner = unittest.TextTestRunner(verbosity=2)
     
-    print("🧪 RFC 6455 WebSocket Subprotocol Compliance Test Suite")
+    print("[U+1F9EA] RFC 6455 WebSocket Subprotocol Compliance Test Suite")
     print("Issue #280: WebSocket authentication failure - P0 CRITICAL")
     print("Expected: Tests should FAIL initially, demonstrating RFC 6455 violation")
     print("After Fix: Tests should PASS, validating subprotocol negotiation")
@@ -461,7 +461,7 @@ if __name__ == "__main__":
     result = runner.run(suite)
     
     if result.failures or result.errors:
-        print("✅ EXPECTED: Tests failed, demonstrating RFC 6455 subprotocol violation")
-        print("🔧 Next Step: Apply subprotocol parameter fix to websocket.accept() calls")
+        print(" PASS:  EXPECTED: Tests failed, demonstrating RFC 6455 subprotocol violation")
+        print("[U+1F527] Next Step: Apply subprotocol parameter fix to websocket.accept() calls")
     else:
-        print("🚨 UNEXPECTED: Tests passed - RFC 6455 violation may already be fixed")
+        print(" ALERT:  UNEXPECTED: Tests passed - RFC 6455 violation may already be fixed")

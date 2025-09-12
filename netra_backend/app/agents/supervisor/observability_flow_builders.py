@@ -1,7 +1,7 @@
 """Flow data builder module for supervisor observability.
 
 Handles building data structures for flow logging.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import time

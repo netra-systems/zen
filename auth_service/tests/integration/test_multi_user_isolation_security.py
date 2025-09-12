@@ -245,7 +245,7 @@ class TestMultiUserIsolationSecurity(SSotBaseTestCase):
         self.record_metric("cross_user_access_blocked", blocked_attempts)
         self.record_metric("user_authentication_context_isolation", "working")
         
-        logger.info(f"✅ User authentication context isolation working ({len(multiple_test_users)} users, {blocked_attempts} cross-access attempts blocked)")
+        logger.info(f" PASS:  User authentication context isolation working ({len(multiple_test_users)} users, {blocked_attempts} cross-access attempts blocked)")
     
     async def _test_cross_user_token_access(
         self, 
@@ -350,7 +350,7 @@ class TestMultiUserIsolationSecurity(SSotBaseTestCase):
         self.record_metric("unique_session_ids", len(unique_session_ids))
         self.record_metric("session_isolation", "working")
         
-        logger.info(f"✅ Session isolation working ({len(user_sessions)} users, {len(unique_session_ids)} unique sessions)")
+        logger.info(f" PASS:  Session isolation working ({len(user_sessions)} users, {len(unique_session_ids)} unique sessions)")
     
     async def _test_concurrent_session_access(
         self,
@@ -490,7 +490,7 @@ class TestMultiUserIsolationSecurity(SSotBaseTestCase):
         self.record_metric("privilege_escalation_prevention", "working")
         
         logger.info(
-            f"✅ Privilege escalation prevention working "
+            f" PASS:  Privilege escalation prevention working "
             f"({admin_access_blocked} escalation attempts blocked, permission boundaries enforced)"
         )
     
@@ -751,7 +751,7 @@ class TestMultiUserIsolationSecurity(SSotBaseTestCase):
         self.record_metric("users_tested_for_leakage", len(multiple_test_users))
         self.record_metric("data_leakage_prevention", "working")
         
-        logger.info(f"✅ User data leakage prevention working ({len(multiple_test_users)} users tested, 0 leakage incidents)")
+        logger.info(f" PASS:  User data leakage prevention working ({len(multiple_test_users)} users tested, 0 leakage incidents)")
     
     async def _detect_user_data_leakage(
         self,

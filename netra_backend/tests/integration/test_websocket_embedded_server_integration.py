@@ -55,7 +55,7 @@ class TestWebSocketEmbeddedServerIntegration:
         health_check = await quick_websocket_health_check(websocket_url)
         assert health_check, "WebSocket health check should pass"
         
-        logger.info("✅ Embedded WebSocket server basic connection test passed")
+        logger.info(" PASS:  Embedded WebSocket server basic connection test passed")
     
     @pytest.mark.integration
     async def test_critical_websocket_events_for_chat_business_value(self, websocket_test_suite):
@@ -77,7 +77,7 @@ class TestWebSocketEmbeddedServerIntegration:
             assert event in critical_events, f"Critical event {event} not found in response"
             assert critical_events[event], f"Critical event {event} was not received"
         
-        logger.info("✅ All critical WebSocket events validated for chat business value")
+        logger.info(" PASS:  All critical WebSocket events validated for chat business value")
     
     @pytest.mark.integration
     async def test_websocket_chat_message_flow(self, websocket_test_client):
@@ -106,7 +106,7 @@ class TestWebSocketEmbeddedServerIntegration:
         for event in expected_events:
             assert event in event_sequence, f"Event {event} not found in message sequence"
         
-        logger.info(f"✅ Chat message flow completed with {len(messages)} messages")
+        logger.info(f" PASS:  Chat message flow completed with {len(messages)} messages")
         logger.info(f"Event sequence: {event_sequence}")
     
     @pytest.mark.integration
@@ -147,7 +147,7 @@ class TestWebSocketEmbeddedServerIntegration:
             
             assert len(results) == connection_count, "All clients should complete successfully"
             
-            logger.info(f"✅ Concurrent connections test passed with {connection_count} clients")
+            logger.info(f" PASS:  Concurrent connections test passed with {connection_count} clients")
         
         finally:
             # Cleanup connections
@@ -198,7 +198,7 @@ class TestWebSocketEmbeddedServerIntegration:
             assert response.get("type") == test_case["expected_response_type"], \
                 f"Response type should be {test_case['expected_response_type']} for {test_case['name']}"
         
-        logger.info("✅ Message routing test completed for all message types")
+        logger.info(" PASS:  Message routing test completed for all message types")
     
     @pytest.mark.integration
     async def test_websocket_error_handling(self, websocket_test_client):
@@ -222,7 +222,7 @@ class TestWebSocketEmbeddedServerIntegration:
             # Some WebSocket implementations may close connection on invalid JSON
             logger.info(f"WebSocket closed on invalid JSON (acceptable): {e}")
         
-        logger.info("✅ Error handling test completed")
+        logger.info(" PASS:  Error handling test completed")
     
     @pytest.mark.integration
     async def test_comprehensive_websocket_suite(self, embedded_websocket_server_fixture):
@@ -244,7 +244,7 @@ class TestWebSocketEmbeddedServerIntegration:
         for event in expected_events:
             assert critical_events_detail.get(event, False), f"Critical event {event} should be received"
         
-        logger.info("✅ Comprehensive WebSocket test suite completed successfully")
+        logger.info(" PASS:  Comprehensive WebSocket test suite completed successfully")
         logger.info(f"Test results: {json.dumps(results, indent=2)}")
     
     @pytest.mark.integration
@@ -263,7 +263,7 @@ class TestWebSocketEmbeddedServerIntegration:
         assert chat_business_value_validated, \
             "WebSocket implementation must support chat business value with all critical events"
         
-        logger.info("✅ PRIMARY BUSINESS VALUE VALIDATED: WebSocket supports chat functionality")
+        logger.info(" PASS:  PRIMARY BUSINESS VALUE VALIDATED: WebSocket supports chat functionality")
 
 
 class TestWebSocketEmbeddedServerAdvanced:
@@ -280,7 +280,7 @@ class TestWebSocketEmbeddedServerAdvanced:
             health_check = await quick_websocket_health_check(websocket_url)
             assert health_check, "Server should be healthy"
             
-            logger.info(f"✅ Server lifecycle test passed: {websocket_url}")
+            logger.info(f" PASS:  Server lifecycle test passed: {websocket_url}")
         
         # Server should be stopped after context exit
         # Attempting to connect should fail
@@ -290,7 +290,7 @@ class TestWebSocketEmbeddedServerAdvanced:
             logger.warning("Server still accessible after shutdown (may be normal)")
         except:
             # Expected - server should be inaccessible
-            logger.info("✅ Server properly shut down")
+            logger.info(" PASS:  Server properly shut down")
     
     @pytest.mark.integration
     async def test_websocket_message_performance(self, websocket_test_client):
@@ -321,7 +321,7 @@ class TestWebSocketEmbeddedServerAdvanced:
         duration = end_time - start_time
         messages_per_second = (message_count * 2) / duration  # *2 for send+receive
         
-        logger.info(f"✅ Performance test: {messages_per_second:.1f} messages/second over {duration:.2f}s")
+        logger.info(f" PASS:  Performance test: {messages_per_second:.1f} messages/second over {duration:.2f}s")
         
         # Basic performance assertion (should handle at least 10 messages/second)
         assert messages_per_second > 10, f"Performance too slow: {messages_per_second:.1f} msg/s"
@@ -368,7 +368,7 @@ class TestWebSocketEmbeddedServerAdvanced:
             assert response.get("processed") is True, "Should indicate message was processed"
             
             await client.disconnect()
-            logger.info("✅ Custom message handler test passed")
+            logger.info(" PASS:  Custom message handler test passed")
         
         finally:
             await server.stop()

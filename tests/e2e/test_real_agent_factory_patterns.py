@@ -121,7 +121,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         # Validate memory isolation
         self._assert_memory_isolation(user_contexts)
         
-        self.logger.info(f"✅ User execution context factory isolation validated for {len(test_users)} users")
+        self.logger.info(f" PASS:  User execution context factory isolation validated for {len(test_users)} users")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -187,7 +187,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         # Validate no shared state between agent instances
         self._assert_no_shared_agent_state(user_agent_instances)
         
-        self.logger.info(f"✅ Agent factory instance isolation validated for {len(factory_test_scenario)} users")
+        self.logger.info(f" PASS:  Agent factory instance isolation validated for {len(factory_test_scenario)} users")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -241,7 +241,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         # Test WebSocket connection cleanup isolation
         await self._test_websocket_connection_cleanup_isolation(user_websocket_contexts)
         
-        self.logger.info(f"✅ WebSocket factory connection isolation validated for {len(websocket_users)} users")
+        self.logger.info(f" PASS:  WebSocket factory connection isolation validated for {len(websocket_users)} users")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -295,7 +295,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         # Validate resource cleanup
         await self._validate_factory_resource_cleanup(user_workflow_results)
         
-        self.logger.info("✅ Complete factory pattern integration validated")
+        self.logger.info(" PASS:  Complete factory pattern integration validated")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -353,7 +353,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         # Validate performance under stress
         self._assert_stress_performance(stress_execution_time, len(concurrent_tasks))
         
-        self.logger.info(f"✅ Factory pattern stress test passed: {len(concurrent_tasks)} concurrent operations in {stress_execution_time:.2f}s")
+        self.logger.info(f" PASS:  Factory pattern stress test passed: {len(concurrent_tasks)} concurrent operations in {stress_execution_time:.2f}s")
 
     # =============================================================================
     # HELPER METHODS
@@ -993,7 +993,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
                     
                     state_references[state_id] = (user_id, agent_type)
         
-        self.logger.info(f"✅ Validated {len(state_references)} isolated agent states")
+        self.logger.info(f" PASS:  Validated {len(state_references)} isolated agent states")
 
     def _validate_websocket_isolation(self, websocket_context: Dict[str, Any], user_id: str):
         """Validate WebSocket isolation."""
@@ -1122,7 +1122,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
                                     f"User {user_key_2} sensitive list item leaked to {user_key_1}: {item}"
                                 )
         
-        self.logger.info("✅ Complete cross-user isolation validated")
+        self.logger.info(" PASS:  Complete cross-user isolation validated")
 
     def _assert_factory_performance_metrics(self):
         """Assert factory performance metrics are reasonable."""

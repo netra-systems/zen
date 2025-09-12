@@ -253,7 +253,7 @@ class TestServiceAuthConfigurationRegression:
 
 
 if __name__ == "__main__":
-    print("🔧 Running Docker Compose Configuration Validation for Issue #115")
+    print("[U+1F527] Running Docker Compose Configuration Validation for Issue #115")
     print("This validates the configuration fix in docker-compose.staging.yml")
     print("=" * 70)
     

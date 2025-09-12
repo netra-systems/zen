@@ -5,7 +5,7 @@ E2E Migration Validation Suite - Mission Critical Test Suite
 Business Value: Platform/Internal - Test Infrastructure Migration Safety
 Critical for maintaining system stability during SSOT migration of 114+ E2E test files.
 
-This validation suite ensures BaseE2ETest → SSOT base class migration safety by:
+This validation suite ensures BaseE2ETest  ->  SSOT base class migration safety by:
 1. FAILING if any E2E test still inherits from BaseE2ETest (catching incomplete migrations)
 2. Validating all E2E tests use SSOT base classes (SSotBaseTestCase or SSotAsyncTestCase)  
 3. Ensuring migrated tests use IsolatedEnvironment vs direct os.environ access
@@ -293,7 +293,7 @@ class TestE2EMigrationValidation(SSotBaseTestCase):
             assert False, failure_message
         
         # Test PASSES when no violations detected
-        logger.info(f"✅ MIGRATION VALIDATION PASSED: No BaseE2ETest inheritance violations in {len(e2e_files)} E2E files")
+        logger.info(f" PASS:  MIGRATION VALIDATION PASSED: No BaseE2ETest inheritance violations in {len(e2e_files)} E2E files")
         
     def test_all_e2e_tests_use_ssot_base_classes(self):
         """
@@ -376,7 +376,7 @@ class TestE2EMigrationValidation(SSotBaseTestCase):
             
             assert False, failure_message
         
-        logger.info(f"✅ SSOT COMPLIANCE PASSED: {len(valid_ssot_classes)} E2E test classes use SSOT base classes")
+        logger.info(f" PASS:  SSOT COMPLIANCE PASSED: {len(valid_ssot_classes)} E2E test classes use SSOT base classes")
     
     def test_migrated_tests_use_isolated_environment(self):
         """
@@ -423,7 +423,7 @@ class TestE2EMigrationValidation(SSotBaseTestCase):
             )
         
         # Always pass - this is a recommendation, not a hard requirement
-        logger.info(f"✅ ENVIRONMENT CHECK COMPLETED: {clean_files} files have clean environment usage")
+        logger.info(f" PASS:  ENVIRONMENT CHECK COMPLETED: {clean_files} files have clean environment usage")
         
     def test_no_basee2etest_imports_detected(self):
         """
@@ -467,7 +467,7 @@ class TestE2EMigrationValidation(SSotBaseTestCase):
             
             assert False, failure_message
         
-        logger.info(f"✅ IMPORT VALIDATION PASSED: No BaseE2ETest imports detected in {len(e2e_files)} E2E files")
+        logger.info(f" PASS:  IMPORT VALIDATION PASSED: No BaseE2ETest imports detected in {len(e2e_files)} E2E files")
     
     def test_migration_validation_comprehensive_report(self):
         """

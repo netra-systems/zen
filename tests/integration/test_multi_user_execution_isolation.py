@@ -1,7 +1,7 @@
 """Integration tests for multi-user execution context isolation.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Multi-User Execution Isolation & Security
 - Value Impact: Prevents $500K+ ARR loss from user data mixing and context leakage
 - Strategic Impact: Foundation for safe multi-tenant execution at enterprise scale

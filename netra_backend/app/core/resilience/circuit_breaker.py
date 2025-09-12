@@ -5,7 +5,7 @@ This module provides enterprise circuit breaker functionality with:
 - Enterprise-grade configuration extensions
 - Integration with unified resilience framework
 
-All functions are ≤8 lines per MANDATORY requirements.
+All functions are  <= 8 lines per MANDATORY requirements.
 """
 
 from dataclasses import dataclass

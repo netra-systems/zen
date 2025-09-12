@@ -35,7 +35,7 @@ try:
     
     # Try to import the E2E auth helper
     from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
-    logger.info("✅ Successfully imported E2EWebSocketAuthHelper")
+    logger.info(" PASS:  Successfully imported E2EWebSocketAuthHelper")
     
     # Now try importing the backend app (this may cause import issues)
     logger.info("Attempting to import backend app...")
@@ -46,9 +46,9 @@ try:
     
     try:
         from netra_backend.app.main import app
-        logger.info("✅ Successfully imported FastAPI app")
+        logger.info(" PASS:  Successfully imported FastAPI app")
     except Exception as e:
-        logger.error(f"❌ Failed to import FastAPI app: {e}")
+        logger.error(f" FAIL:  Failed to import FastAPI app: {e}")
         logger.info("Creating minimal mock app for WebSocket testing...")
         
         from fastapi import FastAPI, WebSocket
@@ -96,12 +96,12 @@ try:
             except Exception as e:
                 logger.info(f"Mock WebSocket connection closed: {e}")
                 
-        logger.info("✅ Created minimal mock app for WebSocket testing")
+        logger.info(" PASS:  Created minimal mock app for WebSocket testing")
     
     
     async def test_websocket_connection_success():
         """Test successful WebSocket connection with proper JWT authentication."""
-        logger.info("🧪 Testing WebSocket connection success...")
+        logger.info("[U+1F9EA] Testing WebSocket connection success...")
         
         try:
             # Create auth helper
@@ -128,7 +128,7 @@ try:
             
             try:
                 with client.websocket_connect("/ws", headers=headers) as websocket:
-                    logger.info("✅ WebSocket connection successful!")
+                    logger.info(" PASS:  WebSocket connection successful!")
                     
                     # Should receive connection_established message
                     data = websocket.receive_json()
@@ -140,18 +140,18 @@ try:
                     assert "user_id" in data
                     assert data["connection_ready"] is True
                     
-                    logger.info("✅ Connection success test passed!")
+                    logger.info(" PASS:  Connection success test passed!")
                     return True
                     
             except Exception as e:
-                logger.error(f"❌ WebSocket connection failed: {e}")
+                logger.error(f" FAIL:  WebSocket connection failed: {e}")
                 logger.error(f"Error type: {type(e)}")
                 import traceback
                 traceback.print_exc()
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Test setup failed: {e}")
+            logger.error(f" FAIL:  Test setup failed: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -159,7 +159,7 @@ try:
     
     async def test_websocket_no_auth():
         """Test WebSocket connection fails without authentication token."""
-        logger.info("🧪 Testing WebSocket connection without auth...")
+        logger.info("[U+1F9EA] Testing WebSocket connection without auth...")
         
         try:
             client = TestClient(app)
@@ -167,20 +167,20 @@ try:
             # Try to connect without authentication - should fail
             try:
                 with client.websocket_connect("/ws") as websocket:
-                    logger.error("❌ Connection succeeded when it should have failed!")
+                    logger.error(" FAIL:  Connection succeeded when it should have failed!")
                     return False
             except Exception as e:
-                logger.info(f"✅ Connection correctly failed: {e}")
+                logger.info(f" PASS:  Connection correctly failed: {e}")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Test setup failed: {e}")
+            logger.error(f" FAIL:  Test setup failed: {e}")
             return False
     
     
     async def test_websocket_ping_pong():
         """Test WebSocket ping/pong messaging with authentication."""
-        logger.info("🧪 Testing WebSocket ping/pong...")
+        logger.info("[U+1F9EA] Testing WebSocket ping/pong...")
         
         try:
             # Create auth helper
@@ -210,11 +210,11 @@ try:
                 assert response["type"] == "pong"
                 assert "timestamp" in response
                 
-                logger.info("✅ Ping/pong test passed!")
+                logger.info(" PASS:  Ping/pong test passed!")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Ping/pong test failed: {e}")
+            logger.error(f" FAIL:  Ping/pong test failed: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -222,7 +222,7 @@ try:
     
     async def main():
         """Main test execution."""
-        logger.info("🚀 Starting WebSocket App Integration Tests...")
+        logger.info("[U+1F680] Starting WebSocket App Integration Tests...")
         
         tests = [
             ("Connection Success", test_websocket_connection_success),
@@ -240,12 +240,12 @@ try:
                 # Run each test with timeout
                 result = await asyncio.wait_for(test_func(), timeout=15.0)
                 results[test_name] = result
-                logger.info(f"✅ {test_name}: {'PASS' if result else 'FAIL'}")
+                logger.info(f" PASS:  {test_name}: {'PASS' if result else 'FAIL'}")
             except asyncio.TimeoutError:
-                logger.error(f"❌ {test_name}: TIMEOUT (15s)")
+                logger.error(f" FAIL:  {test_name}: TIMEOUT (15s)")
                 results[test_name] = False
             except Exception as e:
-                logger.error(f"❌ {test_name}: ERROR - {e}")
+                logger.error(f" FAIL:  {test_name}: ERROR - {e}")
                 results[test_name] = False
         
         # Print final results
@@ -279,7 +279,7 @@ try:
             exit(1)
 
 except ImportError as e:
-    logger.error(f"❌ Import failed: {e}")
+    logger.error(f" FAIL:  Import failed: {e}")
     logger.error("This indicates missing dependencies or import path issues")
     logger.error("The integration tests are likely failing due to similar import issues")
     exit(1)

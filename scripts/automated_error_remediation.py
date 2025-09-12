@@ -282,7 +282,7 @@ class AutomatedRemediator:
             # Check if all errors are fixed
             total_issues = report['summary']['total_issues']
             if total_issues == 0:
-                self.log_step("🎉 ALL ERRORS FIXED! No issues remaining.", "SUCCESS")
+                self.log_step(" CELEBRATION:  ALL ERRORS FIXED! No issues remaining.", "SUCCESS")
                 break
             
             # Get next issue to fix

@@ -2,7 +2,7 @@
 Multi-Layer State Synchronization Test Suite - Issue #370
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Critical for multi-user system integrity
+- Segment: ALL (Free  ->  Enterprise) - Critical for multi-user system integrity
 - Business Goal: Prevent state synchronization gaps across WebSocket, Agent, Database, Cache layers
 - Value Impact: Ensures data consistency and prevents user experience degradation
 - Strategic Impact: CRITICAL - State synchronization gaps risk $500K+ ARR from chat functionality failures

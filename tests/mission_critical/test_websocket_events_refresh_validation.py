@@ -207,7 +207,7 @@ from shared.isolated_environment import IsolatedEnvironment
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing: {test_name}")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing: {test_name}")
 
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: events_before_refresh: List[str] = []
@@ -695,7 +695,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                 # Test events with complex data for JSON serialization
                                                                                 # REMOVED_SYNTAX_ERROR: test_events_data = [ )
                                                                                 # REMOVED_SYNTAX_ERROR: ('agent_started', {'agent_name': 'TestAgent', 'status': 'started', 'complex_data': {'nested': {'value': 123}}}),
-                                                                                # REMOVED_SYNTAX_ERROR: ('tool_executing', {'tool_name': 'complex_tool', 'tool_input': {'array': [1, 2, 3], 'unicode': '❤️🚀'}}),
+                                                                                # REMOVED_SYNTAX_ERROR: ('tool_executing', {'tool_name': 'complex_tool', 'tool_input': {'array': [1, 2, 3], 'unicode': '[U+2764][U+FE0F][U+1F680]'}}),
                                                                                 # REMOVED_SYNTAX_ERROR: ('agent_completed', {'result': {'success': True, 'metrics': {'time_ms': 1500, 'accuracy': 0.95}}})
                                                                                 
 
@@ -769,7 +769,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                                                 # REMOVED_SYNTAX_ERROR: self.test_results['passed'] += 1
                                                                                                                 # REMOVED_SYNTAX_ERROR: return True
                                                                                                                 # REMOVED_SYNTAX_ERROR: elif len(successful_serializations) > len(failed_serializations):
-                                                                                                                    # REMOVED_SYNTAX_ERROR: print(f"⚠️ Some serialization failures but mostly working")
+                                                                                                                    # REMOVED_SYNTAX_ERROR: print(f" WARNING: [U+FE0F] Some serialization failures but mostly working")
                                                                                                                     # REMOVED_SYNTAX_ERROR: self.test_results['passed'] += 1
                                                                                                                     # REMOVED_SYNTAX_ERROR: return True
                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
@@ -786,7 +786,7 @@ from shared.isolated_environment import IsolatedEnvironment
     # REMOVED_SYNTAX_ERROR: """Run all WebSocket event validations including factory-based tests."""
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 70)
-    # REMOVED_SYNTAX_ERROR: print("🔍 WebSocket Event Validation During Refresh (Browser + Factory)")
+    # REMOVED_SYNTAX_ERROR: print(" SEARCH:  WebSocket Event Validation During Refresh (Browser + Factory)")
     # REMOVED_SYNTAX_ERROR: print("=" * 70)
 
     # Factory-based tests (run first, don't require browser)
@@ -796,7 +796,7 @@ from shared.isolated_environment import IsolatedEnvironment
     
 
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🏭 Running Factory-Based Tests...")
+    # REMOVED_SYNTAX_ERROR: [U+1F3ED] Running Factory-Based Tests...")
     # REMOVED_SYNTAX_ERROR: for test_func in factory_tests:
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: await test_func()
@@ -814,7 +814,7 @@ from shared.isolated_environment import IsolatedEnvironment
                 
 
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: 🌐 Running Browser-Based Tests...")
+                # REMOVED_SYNTAX_ERROR: [U+1F310] Running Browser-Based Tests...")
                 # REMOVED_SYNTAX_ERROR: for test_func in browser_tests:
                     # REMOVED_SYNTAX_ERROR: context = await browser.new_context()
                     # REMOVED_SYNTAX_ERROR: page = await context.new_page()
@@ -831,7 +831,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                 # Print summary
                                 # REMOVED_SYNTAX_ERROR: print(" )
                                 # REMOVED_SYNTAX_ERROR: " + "=" * 70)
-                                # REMOVED_SYNTAX_ERROR: print("📊 VALIDATION RESULTS SUMMARY")
+                                # REMOVED_SYNTAX_ERROR: print(" CHART:  VALIDATION RESULTS SUMMARY")
                                 # REMOVED_SYNTAX_ERROR: print("=" * 70)
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -840,7 +840,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                 # Factory test results
                                 # REMOVED_SYNTAX_ERROR: if self.test_results['factory_tests']:
                                     # REMOVED_SYNTAX_ERROR: print(" )
-                                    # REMOVED_SYNTAX_ERROR: 🏭 FACTORY TEST DETAILS:")
+                                    # REMOVED_SYNTAX_ERROR: [U+1F3ED] FACTORY TEST DETAILS:")
                                     # REMOVED_SYNTAX_ERROR: for test_name, test_data in self.test_results['factory_tests'].items():
                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                         # REMOVED_SYNTAX_ERROR: for key, value in test_data.items():
@@ -848,7 +848,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                             # REMOVED_SYNTAX_ERROR: if self.test_results['missing_events']:
                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                # REMOVED_SYNTAX_ERROR: ⚠️ MISSING REQUIRED EVENTS:")
+                                                # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] MISSING REQUIRED EVENTS:")
                                                 # REMOVED_SYNTAX_ERROR: for missing in self.test_results['missing_events']:
                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -864,12 +864,12 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                 # REMOVED_SYNTAX_ERROR: missing_required = self.REQUIRED_EVENTS - captured_required
 
                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                # REMOVED_SYNTAX_ERROR: 📋 REQUIRED EVENT COMPLIANCE:")
+                                                                # REMOVED_SYNTAX_ERROR: [U+1F4CB] REQUIRED EVENT COMPLIANCE:")
                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: if missing_required:
                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                                        # REMOVED_SYNTAX_ERROR: print("  ✅ All required events captured!")
+                                                                        # REMOVED_SYNTAX_ERROR: print("   PASS:  All required events captured!")
 
                                                                         # Factory pattern compliance
                                                                         # REMOVED_SYNTAX_ERROR: factory_events = set()
@@ -881,12 +881,12 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                     # REMOVED_SYNTAX_ERROR: factory_captured = factory_events & self.REQUIRED_EVENTS
                                                                                     # REMOVED_SYNTAX_ERROR: factory_missing = self.REQUIRED_EVENTS - factory_captured
                                                                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                    # REMOVED_SYNTAX_ERROR: 🏭 FACTORY PATTERN COMPLIANCE:")
+                                                                                    # REMOVED_SYNTAX_ERROR: [U+1F3ED] FACTORY PATTERN COMPLIANCE:")
                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                     # REMOVED_SYNTAX_ERROR: if factory_missing:
                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                                                            # REMOVED_SYNTAX_ERROR: print("  ✅ All factory events working correctly!")
+                                                                                            # REMOVED_SYNTAX_ERROR: print("   PASS:  All factory events working correctly!")
 
                                                                                             # Determine overall status
                                                                                             # REMOVED_SYNTAX_ERROR: factory_events = set()
@@ -898,10 +898,10 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                                                                                     # REMOVED_SYNTAX_ERROR: if self.test_results['failed'] == 0 and not missing_required and not factory_missing:
                                                                                                         # REMOVED_SYNTAX_ERROR: print(" )
-                                                                                                        # REMOVED_SYNTAX_ERROR: ✅ ALL VALIDATIONS PASSED - WebSocket events working correctly!")
-                                                                                                        # REMOVED_SYNTAX_ERROR: print("  ✅ Browser tests passed")
-                                                                                                        # REMOVED_SYNTAX_ERROR: print("  ✅ Factory tests passed")
-                                                                                                        # REMOVED_SYNTAX_ERROR: print("  ✅ All required events validated")
+                                                                                                        # REMOVED_SYNTAX_ERROR:  PASS:  ALL VALIDATIONS PASSED - WebSocket events working correctly!")
+                                                                                                        # REMOVED_SYNTAX_ERROR: print("   PASS:  Browser tests passed")
+                                                                                                        # REMOVED_SYNTAX_ERROR: print("   PASS:  Factory tests passed")
+                                                                                                        # REMOVED_SYNTAX_ERROR: print("   PASS:  All required events validated")
                                                                                                         # REMOVED_SYNTAX_ERROR: elif missing_required or factory_missing:
                                                                                                             # REMOVED_SYNTAX_ERROR: all_missing = missing_required | factory_missing
                                                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")

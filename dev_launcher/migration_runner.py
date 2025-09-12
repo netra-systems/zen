@@ -41,22 +41,22 @@ class MigrationRunner:
         """
         # Check if we should skip migrations
         if self._should_skip_migrations(env):
-            self._print("⏭️", "MIGRATIONS", "Skipping migrations (explicitly disabled)")
+            self._print("[U+23ED][U+FE0F]", "MIGRATIONS", "Skipping migrations (explicitly disabled)")
             return True
         
         # Check if PostgreSQL is in mock mode from service configuration
         if self._is_postgres_mock_mode():
-            self._print("🎭", "MIGRATIONS", "PostgreSQL in mock mode, skipping migrations")
+            self._print("[U+1F3AD]", "MIGRATIONS", "PostgreSQL in mock mode, skipping migrations")
             return True
             
         # Check if database is configured
         database_url = self._get_database_url(env)
         if not database_url:
-            self._print("⚠️", "MIGRATIONS", "No database URL configured, skipping migrations")
+            self._print(" WARNING: [U+FE0F]", "MIGRATIONS", "No database URL configured, skipping migrations")
             return True
             
         if "mock" in database_url.lower():
-            self._print("🎭", "MIGRATIONS", "Database in mock mode, skipping migrations")
+            self._print("[U+1F3AD]", "MIGRATIONS", "Database in mock mode, skipping migrations")
             return True
         
         try:
@@ -65,20 +65,20 @@ class MigrationRunner:
             head_revision = self._get_head_revision(env)
             
             if current_revision == head_revision:
-                self._print("✅", "MIGRATIONS", "Database schema is up-to-date")
+                self._print(" PASS: ", "MIGRATIONS", "Database schema is up-to-date")
                 return True
             
             # Run migrations
-            self._print("🔄", "MIGRATIONS", f"Migrating database from {current_revision or 'initial'} to {head_revision}")
+            self._print(" CYCLE: ", "MIGRATIONS", f"Migrating database from {current_revision or 'initial'} to {head_revision}")
             return self._run_migrations(env)
             
         except Exception as e:
             logger.error(f"Migration check failed: {e}")
-            self._print("❌", "MIGRATIONS", f"Migration check failed: {e}")
+            self._print(" FAIL: ", "MIGRATIONS", f"Migration check failed: {e}")
             
             # In development, we can continue even if migrations fail
             if self._is_development_mode(env):
-                self._print("⚠️", "MIGRATIONS", "Continuing despite migration errors (development mode)")
+                self._print(" WARNING: [U+FE0F]", "MIGRATIONS", "Continuing despite migration errors (development mode)")
                 return True
             return False
     
@@ -197,7 +197,7 @@ class MigrationRunner:
     def _run_migrations(self, env: Optional[Dict] = None) -> bool:
         """Run database migrations to head."""
         try:
-            self._print("🔨", "MIGRATIONS", "Running database migrations...")
+            self._print("[U+1F528]", "MIGRATIONS", "Running database migrations...")
             
             cmd = [
                 sys.executable, "-m", "alembic",
@@ -215,21 +215,21 @@ class MigrationRunner:
             )
             
             if result.returncode == 0:
-                self._print("✅", "MIGRATIONS", "Database migrations completed successfully")
+                self._print(" PASS: ", "MIGRATIONS", "Database migrations completed successfully")
                 return True
             else:
                 error_msg = result.stderr or result.stdout
                 logger.error(f"Migration failed: {error_msg}")
-                self._print("❌", "MIGRATIONS", f"Migration failed: {error_msg[:200]}")
+                self._print(" FAIL: ", "MIGRATIONS", f"Migration failed: {error_msg[:200]}")
                 return False
                 
         except subprocess.TimeoutExpired:
             logger.error("Migration timed out")
-            self._print("⏱️", "MIGRATIONS", "Migration timed out")
+            self._print("[U+23F1][U+FE0F]", "MIGRATIONS", "Migration timed out")
             return False
         except Exception as e:
             logger.error(f"Migration execution failed: {e}")
-            self._print("❌", "MIGRATIONS", f"Migration execution failed: {e}")
+            self._print(" FAIL: ", "MIGRATIONS", f"Migration execution failed: {e}")
             return False
     
     def _is_development_mode(self, env: Optional[Dict] = None) -> bool:
@@ -267,7 +267,7 @@ class MigrationRunner:
             import asyncio
             asyncio.run(initialize_postgres())
             
-            self._print("✅", "MIGRATIONS", "Database tables verified/created")
+            self._print(" PASS: ", "MIGRATIONS", "Database tables verified/created")
             return True
             
         except ImportError as e:
@@ -275,5 +275,5 @@ class MigrationRunner:
             return False
         except Exception as e:
             logger.error(f"Table creation failed: {e}")
-            self._print("⚠️", "MIGRATIONS", f"Could not verify tables: {e}")
+            self._print(" WARNING: [U+FE0F]", "MIGRATIONS", f"Could not verify tables: {e}")
             return False

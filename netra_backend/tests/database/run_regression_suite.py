@@ -52,7 +52,7 @@ class RegressionTestRunner:
         """
         self.start_time = time.time()
         
-        self.console.print("\n[bold blue]🔍 Database Regression Test Suite[/bold blue]\n")
+        self.console.print("\n[bold blue] SEARCH:  Database Regression Test Suite[/bold blue]\n")
         
         # Define test modules
         test_modules = [
@@ -145,9 +145,9 @@ class RegressionTestRunner:
         self.console.print(f"  Duration: {duration:.2f}s")
         
         if failed == 0:
-            self.console.print("\n[bold green]✅ All regression tests passed![/bold green]")
+            self.console.print("\n[bold green] PASS:  All regression tests passed![/bold green]")
         else:
-            self.console.print("\n[bold red]❌ Some regression tests failed![/bold red]")
+            self.console.print("\n[bold red] FAIL:  Some regression tests failed![/bold red]")
     
     async def run_health_checks(self) -> bool:
         """Run pre-test health checks.
@@ -165,10 +165,10 @@ class RegressionTestRunner:
             success = await DatabaseManager.test_connection_with_retry(engine)
             
             if not success:
-                self.console.print("[red]❌ Database connection failed[/red]")
+                self.console.print("[red] FAIL:  Database connection failed[/red]")
                 return False
             
-            self.console.print("[green]✓ Database connection successful[/green]")
+            self.console.print("[green][U+2713] Database connection successful[/green]")
             
             # Check for required tables
             from sqlalchemy import text
@@ -182,17 +182,17 @@ class RegressionTestRunner:
                 count = result.scalar()
                 
                 if count < 4:
-                    self.console.print(f"[red]❌ Missing required tables (found {count}/4)[/red]")
+                    self.console.print(f"[red] FAIL:  Missing required tables (found {count}/4)[/red]")
                     self.console.print("[yellow]Run migrations: python netra_backend/app/alembic/run_migrations.py[/yellow]")
                     return False
                 
-                self.console.print(f"[green]✓ Required tables exist ({count}/4)[/green]")
+                self.console.print(f"[green][U+2713] Required tables exist ({count}/4)[/green]")
             
             await engine.dispose()
             return True
             
         except Exception as e:
-            self.console.print(f"[red]❌ Health check error: {e}[/red]")
+            self.console.print(f"[red] FAIL:  Health check error: {e}[/red]")
             return False
 
 

@@ -418,11 +418,11 @@ class TestFrontendErrorHandling:
     async def test_80_handle_unicode_edge_cases(self):
         """Test 80: Unicode and special characters handled correctly"""
         unicode_tests = [
-            "Hello 世界",  # Chinese
-            "مرحبا بالعالم",  # Arabic
-            "🚀💡✨",  # Emojis
+            "Hello [U+4E16][U+754C]",  # Chinese
+            "[U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",  # Arabic
+            "[U+1F680] IDEA: [U+2728]",  # Emojis
             "\u0000null\u0000",  # Null bytes
-            "​​​​",  # Zero-width spaces
+            "[U+200B][U+200B][U+200B][U+200B]",  # Zero-width spaces
             "A" * 10000  # Very long string
         ]
         

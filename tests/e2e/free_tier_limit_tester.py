@@ -3,7 +3,7 @@ Free Tier Limit Enforcement Tester - E2E Test Core Logic
 Business Value: $300K+ MRR - Free-to-paid conversion flow testing
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion (100% of new revenue generation)
+1. Segment: Free  ->  Paid conversion (100% of new revenue generation)
 2. Business Goal: Execute complete limit enforcement and upgrade flow testing
 3. Value Impact: Validates free-to-paid conversion pipeline
 4. Revenue Impact: Each conversion = $348-3588/year in recurring revenue

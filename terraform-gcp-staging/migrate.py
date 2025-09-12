@@ -29,9 +29,9 @@ def check_gcloud_auth():
     print("Checking gcloud authentication...")
     try:
         run_command(["gcloud", "auth", "list"])
-        print("✓ Authenticated with gcloud")
+        print("[U+2713] Authenticated with gcloud")
     except Exception as e:
-        print(f"✗ Not authenticated. Run: gcloud auth login")
+        print(f"[U+2717] Not authenticated. Run: gcloud auth login")
         sys.exit(1)
 
 def get_terraform_outputs():
@@ -47,7 +47,7 @@ def get_terraform_outputs():
             "new_private_ip": outputs["database_private_ip"]["value"],
         }
     except Exception as e:
-        print(f"✗ Failed to get Terraform outputs: {e}")
+        print(f"[U+2717] Failed to get Terraform outputs: {e}")
         print("Make sure Terraform has been applied first")
         sys.exit(1)
 
@@ -68,10 +68,10 @@ def backup_old_database(project_id, old_instance="staging-shared-postgres"):
     
     try:
         run_command(cmd)
-        print(f"✓ Backup created: {backup_name}")
+        print(f"[U+2713] Backup created: {backup_name}")
         return backup_name
     except Exception as e:
-        print(f"✗ Backup failed: {e}")
+        print(f"[U+2717] Backup failed: {e}")
         if not args.force:
             print("Use --force to continue without backup")
             sys.exit(1)
@@ -110,10 +110,10 @@ def export_database(project_id, old_instance, bucket_name, database_name="netra"
     
     try:
         run_command(cmd)
-        print(f"✓ Database exported to: {export_file}")
+        print(f"[U+2713] Database exported to: {export_file}")
         return export_file
     except Exception as e:
-        print(f"✗ Export failed: {e}")
+        print(f"[U+2717] Export failed: {e}")
         sys.exit(1)
 
 def import_database(project_id, new_instance, export_file, database_name="netra"):
@@ -129,9 +129,9 @@ def import_database(project_id, new_instance, export_file, database_name="netra"
     
     try:
         run_command(cmd)
-        print(f"✓ Database imported successfully")
+        print(f"[U+2713] Database imported successfully")
     except Exception as e:
-        print(f"✗ Import failed: {e}")
+        print(f"[U+2717] Import failed: {e}")
         sys.exit(1)
 
 def update_deployment_script(new_instance_name):
@@ -139,7 +139,7 @@ def update_deployment_script(new_instance_name):
     deploy_script = Path(__file__).parent.parent / "scripts" / "deploy_to_gcp.py"
     
     if not deploy_script.exists():
-        print(f"⚠ Deployment script not found: {deploy_script}")
+        print(f" WARNING:  Deployment script not found: {deploy_script}")
         return
     
     print(f"\nUpdating deployment script...")
@@ -162,9 +162,9 @@ def update_deployment_script(new_instance_name):
     if updated:
         with open(deploy_script, 'w') as f:
             f.write(content)
-        print(f"✓ Updated deployment script to use: {new_instance_name}")
+        print(f"[U+2713] Updated deployment script to use: {new_instance_name}")
     else:
-        print("⚠ No changes needed in deployment script")
+        print(" WARNING:  No changes needed in deployment script")
 
 def verify_migration(project_id, new_instance):
     """Verify the migration was successful"""
@@ -181,11 +181,11 @@ def verify_migration(project_id, new_instance):
     try:
         state = run_command(cmd).strip()
         if state == "RUNNABLE":
-            print(f"✓ New instance is running")
+            print(f"[U+2713] New instance is running")
         else:
-            print(f"⚠ Instance state: {state}")
+            print(f" WARNING:  Instance state: {state}")
     except Exception as e:
-        print(f"✗ Failed to verify instance: {e}")
+        print(f"[U+2717] Failed to verify instance: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description="Migrate GCP Cloud SQL from PostgreSQL 14 to 17")
@@ -202,7 +202,7 @@ def main():
     args = parser.parse_args()
     
     print("=" * 60)
-    print("PostgreSQL Migration: v14 → v17")
+    print("PostgreSQL Migration: v14  ->  v17")
     print("=" * 60)
     
     # Check prerequisites
@@ -228,7 +228,7 @@ def main():
     elif not args.skip_export:
         export_file = export_database(args.project, args.old_instance, args.bucket, args.database)
     else:
-        print("✗ Must provide --export-file when using --skip-export")
+        print("[U+2717] Must provide --export-file when using --skip-export")
         sys.exit(1)
     
     # Step 3: Import to new instance
@@ -241,7 +241,7 @@ def main():
     verify_migration(args.project, new_instance)
     
     print("\n" + "=" * 60)
-    print("✓ Migration completed successfully!")
+    print("[U+2713] Migration completed successfully!")
     print("=" * 60)
     print("\nNext steps:")
     print("1. Test application connectivity to new instance")

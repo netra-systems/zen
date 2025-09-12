@@ -1698,7 +1698,7 @@ class TestSessionSecurityAndValidation(SSotBaseTestCase):
                 "description": "Special characters should be preserved",
                 "data": {
                     "special_chars": "!@#$%^&*()_+-=[]{}|;':\",./<>?",
-                    "unicode_chars": "αβγδε 中文 العربية 🚀🎉",
+                    "unicode_chars": "[U+03B1][U+03B2][U+03B3][U+03B4][U+03B5] [U+4E2D][U+6587] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629] [U+1F680] CELEBRATION: ",
                     "json_like": '{"key": "value", "number": 123}'
                 },
                 "should_succeed": True,

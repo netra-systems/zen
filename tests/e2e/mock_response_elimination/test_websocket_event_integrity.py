@@ -95,7 +95,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
             fallback_trigger_query = {
                 "type": "agent_request",
                 "agent": "cost_optimizer",
-                "message": "🚨 FORCE_FALLBACK_SCENARIO 🚨 " + "INVALID" * 1000,
+                "message": " ALERT:  FORCE_FALLBACK_SCENARIO  ALERT:  " + "INVALID" * 1000,
                 "context": {
                     "user_id": str(user.user_id),
                     "test_scenario": "fallback_trigger"
@@ -148,7 +148,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
             
             assert len(event_trace) > 0, "No WebSocket events received"
             
-            # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
             # If we detected both authentic processing events AND fallback response,
             # this is misleading to users
             
@@ -298,7 +298,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
             )
             
             if is_system_failure:
-                # ⚠️ THIS IS THE FAILING ASSERTION ⚠️ 
+                #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F] 
                 # System failures must be communicated with trust-preserving events
                 
                 assert len(trust_indicators) > 0, (
@@ -456,7 +456,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
             genuine_indicators_count = sum(genuine_ai_indicators.values())
             
             if is_fallback_response:
-                # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+                #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
                 # If response was fallback, events should reflect this honestly
                 
                 # Should not send "agent_thinking" for fallback responses
@@ -610,7 +610,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
             
             assert len(enterprise_events) > 0, "No events for enterprise request"
             
-            # ⚠️ ENTERPRISE TRANSPARENCY FAILING ASSERTIONS ⚠️
+            #  WARNING: [U+FE0F] ENTERPRISE TRANSPARENCY FAILING ASSERTIONS  WARNING: [U+FE0F]
             # Enterprise customers must receive premium transparency features
             
             transparency_score = sum(transparency_features.values())
@@ -772,7 +772,7 @@ class TestWebSocketEventIntegrity(BaseE2ETest):
                 ]
             )
             
-            # ⚠️ BUSINESS IMPACT TRANSPARENCY FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] BUSINESS IMPACT TRANSPARENCY FAILING ASSERTION  WARNING: [U+FE0F]
             # Business-critical queries must have clear impact communication
             
             if is_fallback:

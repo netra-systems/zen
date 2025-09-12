@@ -77,7 +77,7 @@ async def test_database_exception_handling():
     
     print("\n" + "=" * 60)
     print("VALIDATION COMPLETE")
-    print("✅ Issue #374 + #414 Integration Successfully Deployed")
+    print(" PASS:  Issue #374 + #414 Integration Successfully Deployed")
     print("=" * 60)
 
 if __name__ == "__main__":

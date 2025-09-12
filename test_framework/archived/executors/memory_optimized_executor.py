@@ -231,7 +231,7 @@ class MemoryOptimizedExecutor:
                 "status": "all_cached",
                 "cached_count": len(tests),
                 "duration": 0.001,
-                "speedup": "∞"
+                "speedup": " infinity "
             }
         
         # Calculate optimal batch size

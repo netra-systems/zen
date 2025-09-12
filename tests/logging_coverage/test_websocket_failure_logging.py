@@ -79,10 +79,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 GOLDEN PATH CONNECTION FAILURE: WebSocket mode MAIN failed for connection {connection_id} after {connection_duration:.3f}s"
+                f" ALERT:  GOLDEN PATH CONNECTION FAILURE: WebSocket mode MAIN failed for connection {connection_id} after {connection_duration:.3f}s"
             )
             self.mock_logger.critical(
-                f"🔍 CONNECTION FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}"
+                f" SEARCH:  CONNECTION FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -111,7 +111,7 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             
             # This logging needs to be implemented for header stripping detection
             self.mock_logger.critical(
-                f"🚨 INFRASTRUCTURE FAILURE: GCP Load Balancer header stripping detected for connection {connection_id} "
+                f" ALERT:  INFRASTRUCTURE FAILURE: GCP Load Balancer header stripping detected for connection {connection_id} "
                 f"(missing_headers: ['Authorization'], resolution: 'Update terraform-gcp-staging/load-balancer.tf')"
             )
         
@@ -136,7 +136,7 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates race condition detection and mitigation logging
             self.mock_logger.warning(
-                f"🔄 CLOUD RUN RACE CONDITION: WebSocket handshake race detected for connection {connection_id} "
+                f" CYCLE:  CLOUD RUN RACE CONDITION: WebSocket handshake race detected for connection {connection_id} "
                 f"(attempt: {attempt_number}, delay_applied: {delay_applied}s, resolution: 'Progressive delay strategy')"
             )
         
@@ -169,10 +169,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 GOLDEN PATH MODE FAILURE: Unsupported WebSocket mode {invalid_mode} for connection {connection_id}"
+                f" ALERT:  GOLDEN PATH MODE FAILURE: Unsupported WebSocket mode {invalid_mode} for connection {connection_id}"
             )
             self.mock_logger.critical(
-                f"🔍 MODE FAILURE CONTEXT: {json.dumps(error_context, indent=2)}"
+                f" SEARCH:  MODE FAILURE CONTEXT: {json.dumps(error_context, indent=2)}"
             )
         
         # Validate logging
@@ -205,10 +205,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 GOLDEN PATH MANAGER FAILURE: Failed to create WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}"
+                f" ALERT:  GOLDEN PATH MANAGER FAILURE: Failed to create WebSocket manager for user {user_id[:8] if user_id else 'unknown'}... connection {connection_id}"
             )
             self.mock_logger.critical(
-                f"🔍 MANAGER FAILURE CONTEXT: {json.dumps(manager_failure_context, indent=2)}"
+                f" SEARCH:  MANAGER FAILURE CONTEXT: {json.dumps(manager_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -243,10 +243,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 WEBSOCKET EVENT FAILURE: Failed to deliver {failed_event} event to user {user_id[:8]}... connection {connection_id}"
+                f" ALERT:  WEBSOCKET EVENT FAILURE: Failed to deliver {failed_event} event to user {user_id[:8]}... connection {connection_id}"
             )
             self.mock_logger.critical(
-                f"🔍 EVENT FAILURE CONTEXT: {json.dumps(event_failure_context, indent=2)}"
+                f" SEARCH:  EVENT FAILURE CONTEXT: {json.dumps(event_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -269,7 +269,7 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             
             # This logging needs to be implemented for connection timeouts
             self.mock_logger.warning(
-                f"⏰ WEBSOCKET TIMEOUT: Connection {connection_id} timed out after {timeout_duration}s "
+                f"[U+23F0] WEBSOCKET TIMEOUT: Connection {connection_id} timed out after {timeout_duration}s "
                 f"(phase: 'handshake', resolution: 'Increase timeout or check client connectivity')"
             )
         
@@ -305,10 +305,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.warning(
-                f"🔌 WEBSOCKET DISCONNECT: Unexpected disconnect for user {user_id[:8]}... connection {connection_id} after {connection_duration}s"
+                f"[U+1F50C] WEBSOCKET DISCONNECT: Unexpected disconnect for user {user_id[:8]}... connection {connection_id} after {connection_duration}s"
             )
             self.mock_logger.info(
-                f"🔍 DISCONNECT CONTEXT: {json.dumps(disconnect_context, indent=2)}"
+                f" SEARCH:  DISCONNECT CONTEXT: {json.dumps(disconnect_context, indent=2)}"
             )
         
         # Validate logging
@@ -362,7 +362,7 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             
             # This logging needs to be implemented for message size violations
             self.mock_logger.warning(
-                f"📏 MESSAGE SIZE VIOLATION: Message from connection {connection_id} exceeds limit "
+                f"[U+1F4CF] MESSAGE SIZE VIOLATION: Message from connection {connection_id} exceeds limit "
                 f"(size: {message_size} bytes, limit: {size_limit} bytes, action: 'rejected')"
             )
         
@@ -393,10 +393,10 @@ class TestWebSocketConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.info(
-                f"✅ GOLDEN PATH ESTABLISHED: Connection {connection_id} ready for user {user_id[:8] if user_id else 'unknown'}... with all 5 critical events"
+                f" PASS:  GOLDEN PATH ESTABLISHED: Connection {connection_id} ready for user {user_id[:8] if user_id else 'unknown'}... with all 5 critical events"
             )
             self.mock_logger.info(
-                f"🔍 ESTABLISHMENT CONTEXT: {json.dumps(establishment_context, indent=2)}"
+                f" SEARCH:  ESTABLISHMENT CONTEXT: {json.dumps(establishment_context, indent=2)}"
             )
         
         # Validate success logging
@@ -440,7 +440,7 @@ class TestWebSocketPerformanceLogging(SSotAsyncTestCase):
             
             # This logging needs to be implemented for performance monitoring
             self.mock_logger.warning(
-                f"🐌 WEBSOCKET PERFORMANCE: Slow response detected for connection {connection_id} "
+                f"[U+1F40C] WEBSOCKET PERFORMANCE: Slow response detected for connection {connection_id} "
                 f"(response_time: {response_time}s, threshold: {threshold}s, action: 'monitor')"
             )
         
@@ -470,7 +470,7 @@ class TestWebSocketPerformanceLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.info(
-                f"📊 WEBSOCKET METRICS: {json.dumps(metrics, indent=2)}"
+                f" CHART:  WEBSOCKET METRICS: {json.dumps(metrics, indent=2)}"
             )
         
         # Validate metrics logging

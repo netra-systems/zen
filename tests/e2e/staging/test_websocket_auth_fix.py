@@ -165,7 +165,7 @@ class TestWebSocketAuthenticationFix:
                 additional_headers=ws_headers,
                 close_timeout=10
             ) as ws:
-                print("✅ WebSocket connection successful!")
+                print(" PASS:  WebSocket connection successful!")
                 connection_successful = True
                 
                 # Try to send a ping
@@ -181,20 +181,20 @@ class TestWebSocketAuthenticationFix:
                 "status_code": getattr(e, 'status_code', 'unknown'),
                 "message": str(e)
             }
-            print(f"❌ WebSocket connection failed: {error_details}")
+            print(f" FAIL:  WebSocket connection failed: {error_details}")
             
             # This is the expected error we're reproducing
             if "403" in str(e):
-                print("✅ Successfully reproduced the 403 authentication error!")
+                print(" PASS:  Successfully reproduced the 403 authentication error!")
             else:
-                print(f"❌ Got different error than expected 403: {e}")
+                print(f" FAIL:  Got different error than expected 403: {e}")
                 
         except Exception as e:
             error_details = {
                 "error_type": type(e).__name__,
                 "message": str(e)
             }
-            print(f"❌ Unexpected WebSocket error: {error_details}")
+            print(f" FAIL:  Unexpected WebSocket error: {error_details}")
         
         duration = time.time() - start_time
         print(f"\nTest duration: {duration:.3f}s")
@@ -205,12 +205,12 @@ class TestWebSocketAuthenticationFix:
         # For this reproducing test, we expect the connection to fail with 403
         # Once we fix the issue, we'll update this test to expect success
         if not connection_successful and error_details and "403" in str(error_details.get('message', '')):
-            print("✅ Test reproduced the 403 authentication error as expected")
+            print(" PASS:  Test reproduced the 403 authentication error as expected")
             # This is the bug we're trying to fix
         elif connection_successful:
-            print("✅ WebSocket connection successful - bug may already be fixed!")
+            print(" PASS:  WebSocket connection successful - bug may already be fixed!")
         else:
-            print(f"❌ Got unexpected error: {error_details}")
+            print(f" FAIL:  Got unexpected error: {error_details}")
             # Still a failure, but different from what we expected
     
     @pytest.mark.asyncio  
@@ -252,7 +252,7 @@ class TestWebSocketAuthenticationFix:
         print(f"Backend secret: {backend_secret[:20]}...{backend_secret[-10:] if backend_secret and len(backend_secret) > 30 else backend_secret}")
         
         if not backend_secret:
-            print("❌ No backend secret found!")
+            print(" FAIL:  No backend secret found!")
             return
         
         # Create JWT using backend secret
@@ -269,7 +269,7 @@ class TestWebSocketAuthenticationFix:
             }
             
             token = jwt.encode(payload, backend_secret, algorithm="HS256")
-            print(f"✅ Created JWT token using backend secret")
+            print(f" PASS:  Created JWT token using backend secret")
             print(f"Token length: {len(token)}")
             
             # Try WebSocket connection with this token
@@ -288,7 +288,7 @@ class TestWebSocketAuthenticationFix:
                     additional_headers=headers,
                     close_timeout=10
                 ) as ws:
-                    print("✅ WebSocket connection successful with backend secret!")
+                    print(" PASS:  WebSocket connection successful with backend secret!")
                     
                     # Send test message
                     await ws.send(json.dumps({
@@ -301,14 +301,14 @@ class TestWebSocketAuthenticationFix:
                     return True
                     
             except websockets.exceptions.InvalidStatus as e:
-                print(f"❌ Still getting WebSocket error with backend secret: {e}")
+                print(f" FAIL:  Still getting WebSocket error with backend secret: {e}")
                 return False
             except Exception as e:
-                print(f"❌ Unexpected error with backend secret: {e}")
+                print(f" FAIL:  Unexpected error with backend secret: {e}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Failed to create JWT with backend secret: {e}")
+            print(f" FAIL:  Failed to create JWT with backend secret: {e}")
             return False
 
 

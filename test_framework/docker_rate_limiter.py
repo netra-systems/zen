@@ -81,7 +81,7 @@ class DockerRateLimiter:
         logger.info(f"Docker rate limiter initialized with FORCE FLAG PROTECTION: "
                    f"min_interval={min_interval}s, max_concurrent={max_concurrent}, "
                    f"max_retries={max_retries}")
-        logger.critical("🛡️  FORCE FLAG GUARDIAN ACTIVE - Zero tolerance for -f/--force flags")
+        logger.critical("[U+1F6E1][U+FE0F]  FORCE FLAG GUARDIAN ACTIVE - Zero tolerance for -f/--force flags")
     
     def execute_docker_command(self, 
                              cmd: List[str], 
@@ -103,13 +103,13 @@ class DockerRateLimiter:
             subprocess.TimeoutExpired: If command times out
             RuntimeError: If all retries fail
         """
-        # 🚨 CRITICAL SECURITY CHECK FIRST - NO EXCEPTIONS
+        #  ALERT:  CRITICAL SECURITY CHECK FIRST - NO EXCEPTIONS
         try:
             command_str = ' '.join(cmd) if isinstance(cmd, list) else str(cmd)
             self.force_flag_guardian.validate_command(command_str)
         except DockerForceFlagViolation as e:
             self._force_flag_violations += 1
-            logger.critical(f"🚨 FORCE FLAG VIOLATION BLOCKED: {command_str}")
+            logger.critical(f" ALERT:  FORCE FLAG VIOLATION BLOCKED: {command_str}")
             # Re-raise with no possibility of bypass
             raise e
         
@@ -345,7 +345,7 @@ def safe_subprocess_run(cmd: List[str], **kwargs) -> subprocess.CompletedProcess
         DockerForceFlagViolation: If Docker command contains force flags (CRITICAL SECURITY)
     """
     if len(cmd) > 0 and cmd[0] in ['docker', 'docker-compose']:
-        # 🚨 CRITICAL: Use rate limiter with force flag protection for Docker commands
+        #  ALERT:  CRITICAL: Use rate limiter with force flag protection for Docker commands
         result = execute_docker_command(cmd, **kwargs)
         
         # Convert to subprocess.CompletedProcess for compatibility

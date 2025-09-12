@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tools are the foundation of agent intelligence and business value delivery
 
 CRITICAL REQUIREMENTS:
-1. Test tool execution progression: tool_executing → tool_processing → tool_completed  
+1. Test tool execution progression: tool_executing  ->  tool_processing  ->  tool_completed  
 2. Test tool result validation and business value extraction
 3. Test tool failure recovery and error handling
 4. Test tool execution within multi-agent workflows  
@@ -384,7 +384,7 @@ class TestToolExecutionPipelineComprehensive(BaseIntegrationTest):
         Test 1: Complete tool execution pipeline from start to finish.
         
         Validates that tools execute through complete pipeline: 
-        selection → execution → result processing → business value extraction
+        selection  ->  execution  ->  result processing  ->  business value extraction
         """
         assert real_services_fixture["database_available"], "Real database required"
         

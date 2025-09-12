@@ -23,7 +23,7 @@ This E2E test simulates:
 1. Developer running `python -m dev_launcher` for first time
 2. Environment validation and secret loading
 3. Database connectivity verification (PostgreSQL, Redis, ClickHouse)
-4. Service startup orchestration (auth → backend → frontend → websocket)
+4. Service startup orchestration (auth  ->  backend  ->  frontend  ->  websocket)
 5. Port allocation with conflict resolution
 6. Service health validation
 7. WebSocket endpoint registration and updates

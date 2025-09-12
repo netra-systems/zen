@@ -57,7 +57,7 @@ class FrontendStarter:
         # Wait for environment loading to complete before starting frontend
         self._wait_for_environment_loading()
         
-        self._print("🚀", "FRONTEND", "Starting frontend server...")
+        self._print("[U+1F680]", "FRONTEND", "Starting frontend server...")
         startup_params = self._prepare_frontend_startup()
         if not startup_params:
             # Only show detailed errors after environment is fully loaded
@@ -82,11 +82,11 @@ class FrontendStarter:
         frontend_path = resolve_path("frontend", root=self.config.project_root)
         
         if not backend_info:
-            self._print("❌", "ERROR", "Backend service not available - ensure backend is running")
+            self._print(" FAIL: ", "ERROR", "Backend service not available - ensure backend is running")
             logger.info("Hint: Start backend service first or check service discovery")
         
         if not frontend_path or not frontend_path.exists():
-            self._print("❌", "ERROR", f"Frontend directory not found: {frontend_path}")
+            self._print(" FAIL: ", "ERROR", f"Frontend directory not found: {frontend_path}")
             logger.info("Hint: Ensure you're running from the project root directory")
     
     def _prepare_frontend_startup(self) -> Optional[Tuple[Dict, int, Path]]:
@@ -305,7 +305,7 @@ class FrontendStarter:
     def _handle_frontend_startup_exception(self, e: Exception):
         """Handle frontend startup exception."""
         logger.error(f"Failed to start frontend: {e}")
-        self._print("❌", "ERROR", f"Frontend startup failed: {str(e)[:100]}")
+        self._print(" FAIL: ", "ERROR", f"Frontend startup failed: {str(e)[:100]}")
     
     def _create_frontend_log_streamer(self, process: subprocess.Popen) -> LogStreamer:
         """Create frontend log streamer."""
@@ -324,14 +324,14 @@ class FrontendStarter:
     def _handle_frontend_startup_failure(self, process: subprocess.Popen):
         """Handle frontend startup failure with detailed error capture."""
         exit_code = process.poll()
-        self._print("❌", "ERROR", f"Frontend failed to start (exit code: {exit_code})")
+        self._print(" FAIL: ", "ERROR", f"Frontend failed to start (exit code: {exit_code})")
         
         # Capture detailed error information
         detailed_errors = self._capture_frontend_build_errors(process)
         if detailed_errors:
-            self._print("📋", "DETAILS", "Frontend build errors:")
+            self._print("[U+1F4CB]", "DETAILS", "Frontend build errors:")
             for error in detailed_errors[:5]:  # Show max 5 most relevant errors
-                print(f"  → {error}")
+                print(f"   ->  {error}")
         
         self._print_frontend_troubleshooting()
     
@@ -447,65 +447,65 @@ class FrontendStarter:
         
         # Check if port was the issue
         current_port = getattr(self.config, 'frontend_port', 3000)
-        print(f"• Attempted port: {current_port}")
+        print(f"[U+2022] Attempted port: {current_port}")
         
         from dev_launcher.utils import _get_process_using_port
         process_info = _get_process_using_port(current_port)
         if process_info:
-            print(f"  → Port {current_port} is occupied by: {process_info}")
-            print(f"  → Solution: Kill the process or use --dynamic flag for automatic port allocation")
+            print(f"   ->  Port {current_port} is occupied by: {process_info}")
+            print(f"   ->  Solution: Kill the process or use --dynamic flag for automatic port allocation")
         else:
-            print(f"  → Port {current_port} appears available")
+            print(f"   ->  Port {current_port} appears available")
         
         # Check frontend directory
         try:
             from dev_launcher.config import resolve_path
             frontend_path = resolve_path("frontend", root=self.config.project_root)
             if frontend_path and frontend_path.exists():
-                print(f"• Frontend directory: ✓ Found at {frontend_path}")
+                print(f"[U+2022] Frontend directory: [U+2713] Found at {frontend_path}")
                 
                 # Check for package.json
                 package_json = frontend_path / "package.json"
                 if package_json.exists():
-                    print("• package.json: ✓ Found")
+                    print("[U+2022] package.json: [U+2713] Found")
                 else:
-                    print("• package.json: ✗ Missing")
+                    print("[U+2022] package.json: [U+2717] Missing")
                 
                 # Check for node_modules
                 node_modules = frontend_path / "node_modules"
                 if node_modules.exists():
-                    print("• node_modules: ✓ Found")
+                    print("[U+2022] node_modules: [U+2713] Found")
                 else:
-                    print("• node_modules: ✗ Missing (run: cd frontend && npm install)")
+                    print("[U+2022] node_modules: [U+2717] Missing (run: cd frontend && npm install)")
                     
                 # Check for Next.js config
                 next_config = frontend_path / "next.config.js"
                 next_config_mjs = frontend_path / "next.config.mjs"
                 if next_config.exists() or next_config_mjs.exists():
-                    print("• Next.js config: ✓ Found")
+                    print("[U+2022] Next.js config: [U+2713] Found")
                 else:
-                    print("• Next.js config: ⚠ Not found (may be optional)")
+                    print("[U+2022] Next.js config:  WARNING:  Not found (may be optional)")
                     
             else:
-                print(f"• Frontend directory: ✗ Not found at expected location")
-                print(f"  → Expected: {frontend_path}")
-                print(f"  → Solution: Ensure you're running from project root")
+                print(f"[U+2022] Frontend directory: [U+2717] Not found at expected location")
+                print(f"   ->  Expected: {frontend_path}")
+                print(f"   ->  Solution: Ensure you're running from project root")
         except Exception as e:
-            print(f"• Directory check failed: {e}")
+            print(f"[U+2022] Directory check failed: {e}")
         
         print("\nCommon Solutions:")
-        print("• For port conflicts: python scripts/dev_launcher.py --dynamic")
-        print("• For missing dependencies: cd frontend && npm install")  
-        print("• For TypeScript errors: cd frontend && npm run build")
-        print("• For permission issues: Run as administrator (Windows) or use sudo (Linux/Mac)")
-        print("• For firewall issues: Allow Node.js/npm through firewall")
+        print("[U+2022] For port conflicts: python scripts/dev_launcher.py --dynamic")
+        print("[U+2022] For missing dependencies: cd frontend && npm install")  
+        print("[U+2022] For TypeScript errors: cd frontend && npm run build")
+        print("[U+2022] For permission issues: Run as administrator (Windows) or use sudo (Linux/Mac)")
+        print("[U+2022] For firewall issues: Allow Node.js/npm through firewall")
         
         print(f"\nFor more help, check logs in: {self.config.log_dir}")
         print("=" * 50)
     
     def _finalize_frontend_startup(self, port: int, process: subprocess.Popen):
         """Finalize frontend startup."""
-        self._print("✅", "OK", f"Frontend started on port {port}")
+        self._print(" PASS: ", "OK", f"Frontend started on port {port}")
         logger.info(f"Frontend URL: http://localhost:{port}")
         self.service_discovery.write_frontend_info(port)
         self.frontend_health_info = {"port": port, "process": process}

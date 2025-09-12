@@ -531,20 +531,20 @@ class TestAgentExecutionInvalidInputHandling(BaseIntegrationTest):
         encoding_tests = [
             {
                 'name': 'unicode_emoji',
-                'message': 'Test message with emojis 🚀🔥💯🎉',
-                'context': {'emoji_context': '✨🌟⭐'},
+                'message': 'Test message with emojis [U+1F680] FIRE: [U+1F4AF] CELEBRATION: ',
+                'context': {'emoji_context': '[U+2728][U+1F31F] STAR: '},
                 'expected_behavior': 'handled'
             },
             {
                 'name': 'unicode_special_chars',
-                'message': 'Special chars: àáâãäåæçèéêë',
-                'context': {'special': 'ñòóôõöøùúûü'},
+                'message': 'Special chars: [U+00E0][U+00E1][U+00E2][U+00E3][U+00E4][U+00E5][U+00E6][U+00E7][U+00E8][U+00E9][U+00EA][U+00EB]',
+                'context': {'special': '[U+00F1][U+00F2][U+00F3][U+00F4][U+00F5][U+00F6][U+00F8][U+00F9][U+00FA][U+00FB][U+00FC]'},
                 'expected_behavior': 'handled'
             },
             {
                 'name': 'mixed_scripts',
-                'message': 'Mixed: Hello 你好 مرحبا Здравствуйте',
-                'context': {'languages': 'Français Deutsch Español'},
+                'message': 'Mixed: Hello [U+4F60][U+597D] [U+0645][U+0631][U+062D][U+0628][U+0627] [U+0417][U+0434]pavctvu[U+0439]te',
+                'context': {'languages': 'Fran[U+00E7]ais Deutsch Espa[U+00F1]ol'},
                 'expected_behavior': 'handled'
             },
             {

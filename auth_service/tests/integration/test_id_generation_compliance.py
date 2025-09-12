@@ -286,7 +286,7 @@ class TestAuthServiceIDGenerationCompliance(BaseIntegrationTest):
             f"Bulk user creation ID quality violations:\n" +
             "\n".join(uniqueness_violations) +
             "\n\nSTRUCTURED ID BENEFITS:\n" +
-            "\n".join(f"• {benefit}" for benefit in structured_id_benefits) +
+            "\n".join(f"[U+2022] {benefit}" for benefit in structured_id_benefits) +
             "\n\nRECOMMENDATION: Migrate to UnifiedIdGenerator for improved guarantees"
         )
 

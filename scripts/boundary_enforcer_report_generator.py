@@ -194,12 +194,12 @@ class PRCommentGenerator:
     def _determine_pr_status(report: BoundaryReport) -> Tuple[str, str, str]:
         """Determine PR status emoji, text, and color"""
         if report.emergency_actions:
-            return "🚨", "EMERGENCY", "red"
+            return " ALERT: ", "EMERGENCY", "red"
         elif report.total_violations > 50:
-            return "❌", "FAILING", "red"
+            return " FAIL: ", "FAILING", "red"
         elif report.total_violations > 0:
-            return "⚠️", "WARNING", "yellow"
-        return "✅", "PASSING", "green"
+            return " WARNING: [U+FE0F]", "WARNING", "yellow"
+        return " PASS: ", "PASSING", "green"
 
     @staticmethod
     def _build_pr_header(emoji: str, status_text: str, color: str, report: BoundaryReport) -> str:
@@ -229,7 +229,7 @@ class PRCommentGenerator:
         """Build boundary status section"""
         section = "## Boundary Status\n"
         for boundary, count in report.violations_by_boundary.items():
-            emoji = "🔴" if count > 0 else "✅"
+            emoji = "[U+1F534]" if count > 0 else " PASS: "
             boundary_name = boundary.replace('_', ' ').title()
             section += f"- **{boundary_name}:** {emoji} {count} violations\n"
         return section + "\n"
@@ -239,10 +239,10 @@ class PRCommentGenerator:
         """Build emergency actions and remediation plan sections"""
         sections = ""
         if report.emergency_actions:
-            sections += "## 🚨 Emergency Actions Required\n"
+            sections += "##  ALERT:  Emergency Actions Required\n"
             sections += "\n".join(f"- {action}" for action in report.emergency_actions) + "\n\n"
         if report.remediation_plan:
-            sections += "## 📋 Remediation Plan\n"
+            sections += "## [U+1F4CB] Remediation Plan\n"
             sections += "\n".join(f"- {action}" for action in report.remediation_plan) + "\n\n"
         return sections
 
@@ -254,17 +254,17 @@ class PRCommentGenerator:
         critical_violations = [v for v in report.violations if v.severity == "critical"][:5]
         if not critical_violations:
             return ""
-        section = "## 🔍 Top Critical Violations\n"
+        section = "##  SEARCH:  Top Critical Violations\n"
         for i, violation in enumerate(critical_violations, 1):
             section += f"{i}. **{violation.file_path}** - {violation.description}\n"
             if violation.auto_split_suggestion:
-                section += f"   💡 *{violation.auto_split_suggestion}*\n"
+                section += f"    IDEA:  *{violation.auto_split_suggestion}*\n"
         return section + "\n"
 
     @staticmethod
     def _build_tools_section(report: BoundaryReport) -> str:
         """Build available tools section"""
-        return f"""## 🛠️ Available Tools
+        return f"""## [U+1F6E0][U+FE0F] Available Tools
 - `python scripts/boundary_enforcer.py --enforce` - Full boundary check
 - `python scripts/auto_split_files.py --scan` - Automated file splitting
 - `python scripts/auto_decompose_functions.py --scan` - Function decomposition

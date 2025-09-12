@@ -68,7 +68,7 @@ class AuthStartupValidator:
         Returns (success, results) tuple.
         """
         logger.info("=" * 60)
-        logger.info("🔐 SSOT AUTH VALIDATION STARTING")
+        logger.info("[U+1F510] SSOT AUTH VALIDATION STARTING")
         logger.info(f"Environment: {self.environment}")
         logger.info(f"Production Mode: {self.is_production}")
         logger.info("=" * 60)
@@ -94,10 +94,10 @@ class AuthStartupValidator:
         
         # Log summary
         logger.info("=" * 60)
-        logger.info("🔐 AUTH VALIDATION SUMMARY")
-        logger.info(f"✅ Passed: {len(successes)}")
-        logger.info(f"⚠️  Warnings: {len(warnings)}")
-        logger.info(f"❌ Critical Failures: {len(critical_failures)}")
+        logger.info("[U+1F510] AUTH VALIDATION SUMMARY")
+        logger.info(f" PASS:  Passed: {len(successes)}")
+        logger.info(f" WARNING: [U+FE0F]  Warnings: {len(warnings)}")
+        logger.info(f" FAIL:  Critical Failures: {len(critical_failures)}")
         
         if critical_failures:
             logger.error("CRITICAL AUTH FAILURES DETECTED:")
@@ -162,12 +162,12 @@ class AuthStartupValidator:
                 result.details = {"length": len(jwt_secret), "minimum": 32}
             else:
                 result.valid = True
-                logger.info(f"  ✓ JWT secret validated (length: {len(jwt_secret)})")
-                logger.info(f"  ✓ Using SSOT JWT secret resolution for {self.environment}")
+                logger.info(f"  [U+2713] JWT secret validated (length: {len(jwt_secret)})")
+                logger.info(f"  [U+2713] Using SSOT JWT secret resolution for {self.environment}")
         
         except Exception as e:
             result.error = f"JWT validation error: {e}"
-            logger.error(f"  ❌ JWT validation failed: {e}")
+            logger.error(f"   FAIL:  JWT validation failed: {e}")
         
         self.validation_results.append(result)
     
@@ -188,6 +188,17 @@ class AuthStartupValidator:
         try:
             service_id = self.env.get('SERVICE_ID')
             service_secret = self.env.get('SERVICE_SECRET')
+
+            # TEMPORARY FIX: Fallback to direct os.environ if IsolatedEnvironment doesn't find SERVICE_ID
+            if not service_id:
+                import os
+                service_id = os.environ.get('SERVICE_ID')
+                logger.warning(f"SERVICE_ID not found in IsolatedEnvironment, using direct os.environ fallback: {service_id is not None}")
+
+            if not service_secret:
+                import os
+                service_secret = os.environ.get('SERVICE_SECRET')
+                logger.warning(f"SERVICE_SECRET not found in IsolatedEnvironment, using direct os.environ fallback: {service_secret is not None}")
             
             # Check SERVICE_ID first
             if not service_id:
@@ -213,7 +224,7 @@ class AuthStartupValidator:
                     ],
                     "recovery": "Set SERVICE_SECRET environment variable immediately"
                 }
-                logger.critical("🚨 SERVICE_SECRET MISSING - SYSTEM WILL FAIL")
+                logger.critical(" ALERT:  SERVICE_SECRET MISSING - SYSTEM WILL FAIL")
             else:
                 # Validate SERVICE_SECRET format and strength
                 validation_errors = []
@@ -273,13 +284,13 @@ class AuthStartupValidator:
                 else:
                     # Additional connectivity check for production
                     if self.is_production:
-                        logger.info("  🔍 Performing SERVICE_SECRET connectivity verification...")
+                        logger.info("   SEARCH:  Performing SERVICE_SECRET connectivity verification...")
                         # Could add actual auth service ping here
                     
                     result.valid = True
-                    logger.info(f"  ✓ Service credentials validated (ID: {service_id})")
-                    logger.info(f"  ✓ SERVICE_SECRET strength validated (length: {len(service_secret)})")
-                    logger.info("  ✓ Inter-service authentication ready")
+                    logger.info(f"  [U+2713] Service credentials validated (ID: {service_id})")
+                    logger.info(f"  [U+2713] SERVICE_SECRET strength validated (length: {len(service_secret)})")
+                    logger.info("  [U+2713] Inter-service authentication ready")
         
         except Exception as e:
             result.error = f"Service credentials validation error: {e}"
@@ -303,7 +314,7 @@ class AuthStartupValidator:
                 # Auth can be disabled in development
                 result.valid = True
                 result.is_critical = False
-                logger.info("  ⚠ Auth service disabled (development mode)")
+                logger.info("   WARNING:  Auth service disabled (development mode)")
             elif not auth_url:
                 result.error = "AUTH_SERVICE_URL not configured"
             elif not auth_url.startswith(('http://', 'https://')):
@@ -315,7 +326,7 @@ class AuthStartupValidator:
                     result.details = {"url": auth_url}
                 else:
                     result.valid = True
-                    logger.info(f"  ✓ Auth service URL validated: {auth_url}")
+                    logger.info(f"  [U+2713] Auth service URL validated: {auth_url}")
         
         except Exception as e:
             result.error = f"Auth service URL validation error: {e}"
@@ -365,18 +376,18 @@ class AuthStartupValidator:
                         providers = []
                         if has_google: providers.append("Google")
                         if has_github: providers.append("GitHub")
-                        logger.info(f"  ✓ OAuth credentials validated: {', '.join(providers)}")
+                        logger.info(f"  [U+2713] OAuth credentials validated: {', '.join(providers)}")
                 elif frontend_url and oauth_config.redirect_uri:
                     # Less strict validation in staging/dev - just warn
                     result.valid = True  # Don't fail on this in staging
                     providers = []
                     if has_google: providers.append("Google")
                     if has_github: providers.append("GitHub")
-                    logger.warning(f"  ⚠ OAuth redirect URI mismatch (non-critical in {self.environment}): {oauth_config.redirect_uri} vs {frontend_url}")
-                    logger.info(f"  ✓ OAuth credentials present: {', '.join(providers)}")
+                    logger.warning(f"   WARNING:  OAuth redirect URI mismatch (non-critical in {self.environment}): {oauth_config.redirect_uri} vs {frontend_url}")
+                    logger.info(f"  [U+2713] OAuth credentials present: {', '.join(providers)}")
                 else:
                     result.valid = True
-                    logger.info("  ✓ OAuth credentials present (redirect URI validation skipped)")
+                    logger.info("  [U+2713] OAuth credentials present (redirect URI validation skipped)")
         
         except Exception as e:
             result.error = f"OAuth validation error: {e}"
@@ -409,7 +420,7 @@ class AuthStartupValidator:
                 else:
                     result.valid = True
                     origins_list = cors_origins.split(',')
-                    logger.info(f"  ✓ CORS configuration validated ({len(origins_list)} origins)")
+                    logger.info(f"  [U+2713] CORS configuration validated ({len(origins_list)} origins)")
         
         except Exception as e:
             result.error = f"CORS validation error: {e}"
@@ -441,7 +452,7 @@ class AuthStartupValidator:
                 result.details = {"maximum": 90}
             else:
                 result.valid = True
-                logger.info(f"  ✓ Token expiry validated (access: {access_minutes}m, refresh: {refresh_days}d)")
+                logger.info(f"  [U+2713] Token expiry validated (access: {access_minutes}m, refresh: {refresh_days}d)")
         
         except ValueError as e:
             result.error = f"Invalid token expiry values: {e}"
@@ -468,7 +479,7 @@ class AuthStartupValidator:
             else:
                 result.valid = True
                 result.is_critical = False  # Not critical, just a warning
-                logger.info(f"  ✓ Circuit breaker config validated (threshold: {failure_threshold}, timeout: {timeout}s)")
+                logger.info(f"  [U+2713] Circuit breaker config validated (threshold: {failure_threshold}, timeout: {timeout}s)")
         
         except Exception as e:
             result.error = f"Circuit breaker validation error: {e}"
@@ -496,7 +507,7 @@ class AuthStartupValidator:
                 result.valid = True
                 result.is_critical = False
                 status = "enabled" if cache_enabled else "disabled"
-                logger.info(f"  ✓ Cache config validated ({status}, TTL: {cache_ttl}s)")
+                logger.info(f"  [U+2713] Cache config validated ({status}, TTL: {cache_ttl}s)")
         
         except Exception as e:
             result.error = f"Cache validation error: {e}"
@@ -544,4 +555,4 @@ async def validate_auth_at_startup() -> None:
             f"Critical auth validation failures: {'; '.join(error_messages)}"
         )
     
-    logger.info("🔐 All auth validations passed - system is secure")
+    logger.info("[U+1F510] All auth validations passed - system is secure")

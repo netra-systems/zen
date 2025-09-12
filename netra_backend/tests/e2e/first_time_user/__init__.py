@@ -9,7 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 First-Time User E2E Test Package
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
-1. **Segment**: Free users → Paid conversions (10,000+ potential users)
+1. **Segment**: Free users  ->  Paid conversions (10,000+ potential users)
 2. **Business Goal**: Increase conversion rate from 2% to 15% = 6.5x improvement
 3. **Value Impact**: Each test validates $99-$999/month revenue per conversion
 4. **Revenue Impact**: Optimized journey = +$1.2M ARR from improved conversions

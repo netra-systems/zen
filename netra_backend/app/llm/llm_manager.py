@@ -163,19 +163,19 @@ class LLMManager:
             return response
             
         except CircuitBreakerOpenError as e:
-            self._logger.error(f"🚫 LLM circuit breaker open: {e}")
+            self._logger.error(f"[U+1F6AB] LLM circuit breaker open: {e}")
             return (
                 "I apologize, but our AI service is temporarily unavailable due to high demand. "
                 "Please try again in a moment. If the issue persists, please contact support."
             )
         except TimeoutError as e:
-            self._logger.error(f"⏰ LLM request timed out: {e}")
+            self._logger.error(f"[U+23F0] LLM request timed out: {e}")
             return (
                 "I apologize, but your request is taking longer than expected to process. "
                 "Please try again with a simpler request or contact support if the issue persists."
             )
         except Exception as e:
-            self._logger.error(f"❌ LLM request failed: {e}")
+            self._logger.error(f" FAIL:  LLM request failed: {e}")
             return f"I apologize, but I'm unable to process your request at the moment. Error: {str(e)}"
     
     async def ask_llm_full(

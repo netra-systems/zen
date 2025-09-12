@@ -12,7 +12,7 @@ async def test_websocket_connectivity() -> bool:
     """Test WebSocket connectivity to staging environment."""
     staging_url = "wss://api.staging.netrasystems.ai/ws"
     
-    print(f"🔍 Testing WebSocket connectivity to: {staging_url}")
+    print(f" SEARCH:  Testing WebSocket connectivity to: {staging_url}")
     
     try:
         # Simple connection test with minimal headers
@@ -27,44 +27,44 @@ async def test_websocket_connectivity() -> bool:
         )
         
         async with timeout_config as websocket:
-            print("✅ WebSocket connection established successfully!")
+            print(" PASS:  WebSocket connection established successfully!")
             
             # Try to receive welcome message
             try:
                 welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=10)
                 welcome_data = json.loads(welcome_msg)
-                print(f"✅ Welcome message received: {welcome_data.get('type', 'unknown')}")
+                print(f" PASS:  Welcome message received: {welcome_data.get('type', 'unknown')}")
                 return True
                 
             except asyncio.TimeoutError:
-                print("⚠️ No welcome message received within timeout")
+                print(" WARNING: [U+FE0F] No welcome message received within timeout")
                 return True  # Connection succeeded even without message
                 
             except json.JSONDecodeError as e:
-                print(f"⚠️ Could not parse welcome message: {e}")
+                print(f" WARNING: [U+FE0F] Could not parse welcome message: {e}")
                 return True  # Connection succeeded even with parsing issue
                 
     except websockets.exceptions.ConnectionClosedError as e:
-        print(f"❌ WebSocket connection closed with error: Code {e.code} - {e.reason}")
+        print(f" FAIL:  WebSocket connection closed with error: Code {e.code} - {e.reason}")
         if e.code == 1011:
-            print("🚨 CONFIRMED: 1011 internal error still present!")
+            print(" ALERT:  CONFIRMED: 1011 internal error still present!")
         return False
         
     except Exception as e:
-        print(f"❌ WebSocket connection failed: {e}")
+        print(f" FAIL:  WebSocket connection failed: {e}")
         return False
 
 async def main():
-    print("🔬 WEBSOCKET 1011 ERROR VALIDATION TEST")
+    print("[U+1F52C] WEBSOCKET 1011 ERROR VALIDATION TEST")
     print("=" * 50)
     
     success = await test_websocket_connectivity()
     
     if success:
-        print("\n✅ RESULT: WebSocket connectivity WORKING")
+        print("\n PASS:  RESULT: WebSocket connectivity WORKING")
         print("   The 1011 error has been resolved!")
     else:
-        print("\n❌ RESULT: WebSocket connectivity STILL FAILING")
+        print("\n FAIL:  RESULT: WebSocket connectivity STILL FAILING")
         print("   The 1011 error persists - further fixes needed")
     
     return 0 if success else 1

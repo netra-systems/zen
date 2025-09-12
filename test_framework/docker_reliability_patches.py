@@ -115,21 +115,21 @@ class DockerReliabilityPatcher:
         conflicts = self.check_port_conflicts()
         
         if not conflicts:
-            logger.info("✅ No port conflicts detected")
+            logger.info(" PASS:  No port conflicts detected")
             return True
         
-        logger.info(f"🔧 Resolving {len(conflicts)} port conflicts...")
+        logger.info(f"[U+1F527] Resolving {len(conflicts)} port conflicts...")
         
         for port, process_info in conflicts:
             if force_kill:
                 success = self._kill_process_on_port(port)
                 if success:
-                    logger.info(f"✅ Freed port {port}")
+                    logger.info(f" PASS:  Freed port {port}")
                 else:
-                    logger.error(f"❌ Failed to free port {port}")
+                    logger.error(f" FAIL:  Failed to free port {port}")
                     return False
             else:
-                logger.warning(f"⚠️  Port {port} still in use by {process_info}")
+                logger.warning(f" WARNING: [U+FE0F]  Port {port} still in use by {process_info}")
                 logger.warning("   Use force_kill=True to automatically resolve")
                 return False
         
@@ -138,10 +138,10 @@ class DockerReliabilityPatcher:
         remaining_conflicts = self.check_port_conflicts()
         
         if remaining_conflicts:
-            logger.error(f"❌ {len(remaining_conflicts)} port conflicts remain unresolved")
+            logger.error(f" FAIL:  {len(remaining_conflicts)} port conflicts remain unresolved")
             return False
         
-        logger.info("✅ All port conflicts resolved")
+        logger.info(" PASS:  All port conflicts resolved")
         return True
     
     def clean_stale_containers(self, max_age_hours: int = 2) -> int:
@@ -154,7 +154,7 @@ class DockerReliabilityPatcher:
         Returns:
             Number of containers cleaned up
         """
-        logger.info(f"🧹 Cleaning containers older than {max_age_hours} hours...")
+        logger.info(f"[U+1F9F9] Cleaning containers older than {max_age_hours} hours...")
         
         try:
             # Find containers with test-related names
@@ -199,7 +199,7 @@ class DockerReliabilityPatcher:
                         else:
                             logger.warning(f"   Failed to remove container {name}: {remove_result.stderr}")
             
-            logger.info(f"✅ Removed {containers_removed} stale containers")
+            logger.info(f" PASS:  Removed {containers_removed} stale containers")
             return containers_removed
             
         except Exception as e:
@@ -216,7 +216,7 @@ class DockerReliabilityPatcher:
         Returns:
             Number of volumes cleaned up
         """
-        logger.info(f"🧹 Cleaning volumes older than {max_age_hours} hours...")
+        logger.info(f"[U+1F9F9] Cleaning volumes older than {max_age_hours} hours...")
         
         try:
             # List all volumes with test-related names
@@ -251,7 +251,7 @@ class DockerReliabilityPatcher:
                         # Volume might be in use, that's OK during active tests
                         logger.debug(f"   Could not remove volume {volume_name}: {remove_result.stderr}")
             
-            logger.info(f"✅ Removed {volumes_removed} stale volumes")
+            logger.info(f" PASS:  Removed {volumes_removed} stale volumes")
             return volumes_removed
             
         except Exception as e:
@@ -265,7 +265,7 @@ class DockerReliabilityPatcher:
         Returns:
             Number of networks cleaned up
         """
-        logger.info("🧹 Cleaning stale test networks...")
+        logger.info("[U+1F9F9] Cleaning stale test networks...")
         
         try:
             # List networks
@@ -305,7 +305,7 @@ class DockerReliabilityPatcher:
                         # Network might be in use, that's OK during active tests
                         logger.debug(f"   Could not remove network {network_name}: {remove_result.stderr}")
             
-            logger.info(f"✅ Removed {networks_removed} stale networks")
+            logger.info(f" PASS:  Removed {networks_removed} stale networks")
             return networks_removed
             
         except Exception as e:
@@ -322,7 +322,7 @@ class DockerReliabilityPatcher:
         Returns:
             True if fixes applied successfully
         """
-        logger.info(f"🔧 Checking race conditions in {compose_file.name}...")
+        logger.info(f"[U+1F527] Checking race conditions in {compose_file.name}...")
         
         if not compose_file.exists():
             logger.error(f"Compose file not found: {compose_file}")
@@ -392,10 +392,10 @@ class DockerReliabilityPatcher:
                 with open(compose_file, 'w') as f:
                     yaml.dump(compose_data, f, default_flow_style=False)
                 
-                logger.info(f"✅ Applied {fixes_applied} race condition fixes")
+                logger.info(f" PASS:  Applied {fixes_applied} race condition fixes")
                 logger.info(f"   Backup saved to: {backup_file}")
             else:
-                logger.info("✅ No race condition fixes needed")
+                logger.info(" PASS:  No race condition fixes needed")
             
             return True
             
@@ -410,7 +410,7 @@ class DockerReliabilityPatcher:
         Returns:
             Dictionary of check results
         """
-        logger.info("🔍 Running comprehensive Docker reliability check...")
+        logger.info(" SEARCH:  Running comprehensive Docker reliability check...")
         
         results = {}
         
@@ -441,11 +441,11 @@ class DockerReliabilityPatcher:
         
         # Summary
         all_passed = all(results.values())
-        status = "✅ PASSED" if all_passed else "❌ ISSUES FOUND"
+        status = " PASS:  PASSED" if all_passed else " FAIL:  ISSUES FOUND"
         
-        logger.info(f"\n📊 Reliability Check Results: {status}")
+        logger.info(f"\n CHART:  Reliability Check Results: {status}")
         for check, passed in results.items():
-            status_icon = "✅" if passed else "❌"
+            status_icon = " PASS: " if passed else " FAIL: "
             logger.info(f"   {status_icon} {check}")
         
         return results
@@ -613,7 +613,7 @@ if __name__ == "__main__":
         results = await run_reliability_check()
         print("\nReliability Check Results:")
         for check, passed in results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             print(f"  {status} {check}")
     
     asyncio.run(main())

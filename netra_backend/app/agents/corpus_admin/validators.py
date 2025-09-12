@@ -6,7 +6,7 @@ This module has been removed but tests still reference it.
 """
 
 from typing import Any, Dict, List
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class CorpusApprovalValidator:
@@ -20,7 +20,7 @@ class CorpusApprovalValidator:
         self.high_risk_operations = ["delete", "bulk_update", "migrate"]
         self.approval_required_corpus_types = ["production", "critical"]
     
-    def validate_approval_required(self, request: Any, state: DeepAgentState,
+    def validate_approval_required(self, request: Any, user_context: UserExecutionContext,
                                  run_id: str, stream_updates: bool) -> bool:
         """Validate if operation requires approval."""
         # Extract operation from request

@@ -3,7 +3,7 @@ import asyncio
 """
 Multi-Constraint Workflows Main Test File
 Provides shared fixtures for multi-constraint optimization tests.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """""
 
 import sys

@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 CRITICAL WebSocket Message to Agent Execution Golden Path E2E Test
 
@@ -39,6 +77,7 @@ from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthC
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.real_services import ServiceEndpoints
 from tests.e2e.staging_config import StagingTestConfig
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +144,15 @@ class WebSocketEventCapture:
 
 
 class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     CRITICAL: WebSocket Message to Agent Execution Golden Path Test
     
@@ -170,18 +218,18 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         
         Expected Result: This test SHOULD FAIL initially to prove current system issues.
         """
-        logger.info("🚀 Starting WebSocket Message to Agent Golden Path Test")
+        logger.info("[U+1F680] Starting WebSocket Message to Agent Golden Path Test")
         
         # Create event capture for validation
         event_capture = WebSocketEventCapture()
         self.event_captures.append(event_capture)
         
         # Step 1: Establish authenticated WebSocket connection
-        logger.info("📡 Step 1: Establishing authenticated WebSocket connection")
+        logger.info("[U+1F4E1] Step 1: Establishing authenticated WebSocket connection")
         websocket = await self._establish_authenticated_websocket_connection(event_capture)
         
         # Step 2: Send user message and track routing
-        logger.info("💬 Step 2: Sending user message for agent execution")
+        logger.info("[U+1F4AC] Step 2: Sending user message for agent execution")
         user_message = {
             "type": "user_message",
             "text": "Analyze my AI costs and provide optimization recommendations",
@@ -191,25 +239,25 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         }
         
         await websocket.send(json.dumps(user_message))
-        logger.info(f"✅ Sent user message: {user_message['text']}")
+        logger.info(f" PASS:  Sent user message: {user_message['text']}")
         
         # Step 3: Listen for WebSocket events with timeout
-        logger.info("👂 Step 3: Listening for WebSocket events during agent execution")
+        logger.info("[U+1F442] Step 3: Listening for WebSocket events during agent execution")
         await self._listen_for_websocket_events(websocket, event_capture, timeout=60.0)
         
         # Step 4: Validate all critical events were received
-        logger.info("✅ Step 4: Validating critical WebSocket events")
+        logger.info(" PASS:  Step 4: Validating critical WebSocket events")
         self._validate_critical_websocket_events(event_capture)
         
         # Step 5: Validate agent execution flow
-        logger.info("🔍 Step 5: Validating agent execution flow")
+        logger.info(" SEARCH:  Step 5: Validating agent execution flow")
         self._validate_agent_execution_flow(event_capture)
         
         # Step 6: Clean up connection
-        logger.info("🧹 Step 6: Cleaning up WebSocket connection")
+        logger.info("[U+1F9F9] Step 6: Cleaning up WebSocket connection")
         await websocket.close()
         
-        logger.info("🎉 WebSocket Message to Agent Golden Path Test completed")
+        logger.info(" CELEBRATION:  WebSocket Message to Agent Golden Path Test completed")
     
     async def _establish_authenticated_websocket_connection(self, event_capture: WebSocketEventCapture) -> websockets.WebSocketServerProtocol:
         """Establish authenticated WebSocket connection following golden path."""
@@ -227,11 +275,11 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
             assert ready_data.get('type') == 'connection_ready', f"Expected connection_ready, got: {ready_data}"
             assert ready_data.get('user_id') is not None, "Missing user_id in connection_ready message"
             
-            logger.info(f"✅ WebSocket connection established with user_id: {ready_data.get('user_id')}")
+            logger.info(f" PASS:  WebSocket connection established with user_id: {ready_data.get('user_id')}")
             return websocket
             
         except Exception as e:
-            logger.error(f"❌ Failed to establish WebSocket connection: {e}")
+            logger.error(f" FAIL:  Failed to establish WebSocket connection: {e}")
             raise AssertionError(f"WebSocket connection failed: {e}")
     
     async def _listen_for_websocket_events(self, websocket: websockets.WebSocketServerProtocol, event_capture: WebSocketEventCapture, timeout: float):
@@ -253,15 +301,15 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                     event_capture.add_event(event_data)
                     
                     event_type = event_data.get('type', 'unknown')
-                    logger.info(f"📨 Received WebSocket event [{events_received}]: {event_type}")
+                    logger.info(f"[U+1F4E8] Received WebSocket event [{events_received}]: {event_type}")
                     
                     # Log critical events specially
                     if event_type in ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']:
-                        logger.info(f"🎯 CRITICAL EVENT: {event_type} - {event_data.get('message', '')}")
+                        logger.info(f" TARGET:  CRITICAL EVENT: {event_type} - {event_data.get('message', '')}")
                     
                     # Check if we received agent_completed (potential end of flow)
                     if event_type == 'agent_completed':
-                        logger.info("🏁 Received agent_completed - agent execution may be finished")
+                        logger.info("[U+1F3C1] Received agent_completed - agent execution may be finished")
                         # Continue listening for a bit more to catch any late events
                         await asyncio.sleep(2.0)
                         break
@@ -269,32 +317,32 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                 except asyncio.TimeoutError:
                     # Check if we've been idle too long
                     if time.time() - last_event_time > 15.0:
-                        logger.warning("⏰ No events received for 15 seconds, stopping listen")
+                        logger.warning("[U+23F0] No events received for 15 seconds, stopping listen")
                         break
                     continue
                     
         except ConnectionClosedError:
-            logger.info("🔌 WebSocket connection closed by server")
+            logger.info("[U+1F50C] WebSocket connection closed by server")
         except Exception as e:
-            logger.error(f"❌ Error listening for WebSocket events: {e}")
+            logger.error(f" FAIL:  Error listening for WebSocket events: {e}")
             
-        logger.info(f"📊 Total events received: {events_received} over {time.time() - start_time:.1f}s")
+        logger.info(f" CHART:  Total events received: {events_received} over {time.time() - start_time:.1f}s")
     
     def _validate_critical_websocket_events(self, event_capture: WebSocketEventCapture):
         """Validate that all 5 critical WebSocket events were received."""
-        logger.info("🔍 Validating critical WebSocket events...")
+        logger.info(" SEARCH:  Validating critical WebSocket events...")
         
         # Get received critical events
         critical_events = event_capture.get_critical_events()
         missing_events = event_capture.get_missing_critical_events()
         
-        logger.info(f"✅ Critical events received: {sorted(critical_events)}")
+        logger.info(f" PASS:  Critical events received: {sorted(critical_events)}")
         
         if missing_events:
-            logger.error(f"❌ MISSING CRITICAL EVENTS: {sorted(missing_events)}")
+            logger.error(f" FAIL:  MISSING CRITICAL EVENTS: {sorted(missing_events)}")
             
             # Log all received events for debugging
-            logger.error("📋 All received events:")
+            logger.error("[U+1F4CB] All received events:")
             for i, event in enumerate(event_capture.events_received):
                 event_type = event.get('type', 'unknown')
                 relative_time = event.get('relative_time', 0)
@@ -308,11 +356,11 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                 f"Total events received: {len(event_capture.events_received)}"
             )
         
-        logger.info("🎉 All critical WebSocket events successfully received!")
+        logger.info(" CELEBRATION:  All critical WebSocket events successfully received!")
     
     def _validate_agent_execution_flow(self, event_capture: WebSocketEventCapture):
         """Validate the agent execution flow follows expected patterns."""
-        logger.info("🔍 Validating agent execution flow patterns...")
+        logger.info(" SEARCH:  Validating agent execution flow patterns...")
         
         # Check that events follow logical order
         event_types = [event.get('type', 'unknown') for event in event_capture.events_received]
@@ -325,7 +373,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
             assert started_index < completed_index, (
                 f"agent_started (index {started_index}) should come before agent_completed (index {completed_index})"
             )
-            logger.info("✅ Agent events are in correct order")
+            logger.info(" PASS:  Agent events are in correct order")
         
         # tool_executing should come before tool_completed
         if 'tool_executing' in event_types and 'tool_completed' in event_types:
@@ -337,14 +385,14 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                 matching_completed = [idx for idx in completed_indices if idx > exec_index]
                 assert matching_completed, f"No tool_completed found after tool_executing at index {exec_index}"
             
-            logger.info("✅ Tool execution events are properly paired")
+            logger.info(" PASS:  Tool execution events are properly paired")
         
         # Check for reasonable timing
         total_duration = event_capture.events_received[-1].get('relative_time', 0) if event_capture.events_received else 0
         assert total_duration > 0, "Agent execution should take some time"
         assert total_duration < 120.0, f"Agent execution took too long: {total_duration}s"
         
-        logger.info(f"✅ Agent execution completed in reasonable time: {total_duration:.1f}s")
+        logger.info(f" PASS:  Agent execution completed in reasonable time: {total_duration:.1f}s")
         
         # Validate event content
         for event in event_capture.events_received:
@@ -359,7 +407,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                     f"Critical event {event_type} should have meaningful content"
                 )
         
-        logger.info("✅ Agent execution flow validation completed successfully")
+        logger.info(" PASS:  Agent execution flow validation completed successfully")
     
     @pytest.mark.asyncio
     @pytest.mark.critical 
@@ -373,10 +421,10 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         3. Service unavailability
         4. Timeout scenarios
         """
-        logger.info("🚀 Starting WebSocket Message Routing Failure Modes Test")
+        logger.info("[U+1F680] Starting WebSocket Message Routing Failure Modes Test")
         
         # Test 1: Invalid message format
-        logger.info("📋 Test 1: Invalid message format handling")
+        logger.info("[U+1F4CB] Test 1: Invalid message format handling")
         websocket = await self.auth_helper.connect_authenticated_websocket()
         self.test_connections.append(websocket)
         
@@ -392,11 +440,11 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         error_data = json.loads(error_response)
         
         assert error_data.get('type') == 'error', f"Expected error event, got: {error_data}"
-        logger.info("✅ Invalid message format properly handled")
+        logger.info(" PASS:  Invalid message format properly handled")
         
         await websocket.close()
         
-        logger.info("🎉 WebSocket Message Routing Failure Modes Test completed")
+        logger.info(" CELEBRATION:  WebSocket Message Routing Failure Modes Test completed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -409,7 +457,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         2. Each message gets proper agent execution
         3. Events are properly isolated per message
         """
-        logger.info("🚀 Starting WebSocket Concurrent Message Handling Test")
+        logger.info("[U+1F680] Starting WebSocket Concurrent Message Handling Test")
         
         websocket = await self.auth_helper.connect_authenticated_websocket()
         self.test_connections.append(websocket)
@@ -425,7 +473,7 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
         
         for msg in messages:
             await websocket.send(json.dumps(msg))
-            logger.info(f"📨 Sent concurrent message: {msg['text']}")
+            logger.info(f"[U+1F4E8] Sent concurrent message: {msg['text']}")
         
         # Listen for responses - should handle both messages
         events_received = []
@@ -436,17 +484,17 @@ class TestWebSocketMessageToAgentGoldenPath(SSotBaseTestCase):
                 message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 event_data = json.loads(message)
                 events_received.append(event_data)
-                logger.info(f"📨 Received concurrent event: {event_data.get('type', 'unknown')}")
+                logger.info(f"[U+1F4E8] Received concurrent event: {event_data.get('type', 'unknown')}")
             except asyncio.TimeoutError:
                 break
         
         # Should have received events for both messages
         assert len(events_received) >= 2, f"Expected at least 2 events for concurrent messages, got {len(events_received)}"
         
-        logger.info(f"✅ Concurrent messages handled - received {len(events_received)} events")
+        logger.info(f" PASS:  Concurrent messages handled - received {len(events_received)} events")
         await websocket.close()
         
-        logger.info("🎉 WebSocket Concurrent Message Handling Test completed")
+        logger.info(" CELEBRATION:  WebSocket Concurrent Message Handling Test completed")
 
 
 # Test Configuration and Utilities
@@ -458,12 +506,12 @@ async def run_websocket_golden_path_test():
     
     try:
         await test_instance.test_websocket_message_to_agent_complete_golden_path()
-        print("✅ Golden Path Test PASSED (unexpected - system may be working)")
+        print(" PASS:  Golden Path Test PASSED (unexpected - system may be working)")
     except AssertionError as e:
-        print(f"❌ Golden Path Test FAILED (expected): {e}")
+        print(f" FAIL:  Golden Path Test FAILED (expected): {e}")
         print("This failure proves current system issues exist and need fixing.")
     except Exception as e:
-        print(f"💥 Golden Path Test ERROR: {e}")
+        print(f"[U+1F4A5] Golden Path Test ERROR: {e}")
     finally:
         await test_instance.cleanup_method()
 

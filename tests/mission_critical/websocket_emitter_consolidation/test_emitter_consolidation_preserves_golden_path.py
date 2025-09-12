@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Test Emitter Consolidation Preserves Golden Path - PHASE 2: BUSINESS VALUE VALIDATION
 
@@ -8,7 +46,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Proves consolidation doesn't break revenue-generating chat functionality
 
 CRITICAL: This test validates the complete Golden Path user flow after emitter consolidation:
-1. User login → WebSocket connection → Agent request → AI responses
+1. User login  ->  WebSocket connection  ->  Agent request  ->  AI responses
 2. All 5 critical events delivered from single emitter preserving chat value
 3. Business value metrics maintained through consolidation
 4. User experience quality preserved with single event source
@@ -52,6 +90,7 @@ from test_framework.ssot.websocket_golden_path_helpers import (
 )
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @dataclass
@@ -77,6 +116,15 @@ class ChatInteractionFlow:
 
 
 class TestEmitterConsolidationPreservesGoldenPath(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Phase 2 test to validate that emitter consolidation preserves Golden Path business value.
     

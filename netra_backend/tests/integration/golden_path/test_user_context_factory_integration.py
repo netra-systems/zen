@@ -124,7 +124,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
         # Test factory performance
         assert factory_result.creation_time < 2.0, f"Factory too slow: {factory_result.creation_time}s"
         
-        self.logger.info(f"✅ Factory user lookup validated for user {auth_user.user_id}")
+        self.logger.info(f" PASS:  Factory user lookup validated for user {auth_user.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -248,7 +248,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
         
         assert cross_access_prevented, "Cross-user data access should be prevented"
         
-        self.logger.info(f"✅ User isolation validated for {num_test_users} concurrent users")
+        self.logger.info(f" PASS:  User isolation validated for {num_test_users} concurrent users")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -335,7 +335,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
             # Should handle edge cases gracefully
             assert edge_result["success"], f"Edge case {i} failed: {edge_result['error']}"
         
-        self.logger.info(f"✅ Factory configuration validation completed")
+        self.logger.info(f" PASS:  Factory configuration validation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -413,7 +413,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
         import_validation = await self._validate_ssot_imports()
         assert import_validation["valid"], f"SSOT import violations: {import_validation['violations']}"
         
-        self.logger.info(f"✅ SSOT compliance validation completed")
+        self.logger.info(f" PASS:  SSOT compliance validation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -487,7 +487,7 @@ class TestUserContextFactoryIntegration(BaseIntegrationTest):
         assert cleanup_result["resources_cleaned"], "Resources should be cleaned up after errors"
         assert cleanup_result["no_leaks"], "No resource leaks should remain"
         
-        self.logger.info(f"✅ Factory error handling and recovery validated")
+        self.logger.info(f" PASS:  Factory error handling and recovery validated")
     
     # Helper methods for factory testing
     

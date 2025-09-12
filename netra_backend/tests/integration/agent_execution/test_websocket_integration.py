@@ -181,7 +181,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
             assert event['data']['agent_name'] == "TestChatAgent"
             assert 'timestamp' in event['data']
             
-            logger.info("✅ agent_started event delivery verified")
+            logger.info(" PASS:  agent_started event delivery verified")
 
     async def test_agent_thinking_events_real_websocket_stream(self):
         """Test that agent_thinking events stream correctly via WebSocket.
@@ -238,7 +238,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
                 assert 'reasoning' in event['data']
                 assert event['data']['step_number'] >= 1
             
-            logger.info(f"✅ {len(thinking_events)} thinking events streamed correctly")
+            logger.info(f" PASS:  {len(thinking_events)} thinking events streamed correctly")
 
     async def test_tool_execution_events_real_websocket_transparency(self):
         """Test tool execution visibility through WebSocket events.
@@ -308,7 +308,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
                 assert 'tool_name' in event['data']
                 assert 'parameters' in event['data']
             
-            logger.info(f"✅ Tool execution transparency verified with {len(tools_used)} tools")
+            logger.info(f" PASS:  Tool execution transparency verified with {len(tools_used)} tools")
 
     async def test_agent_completed_event_final_notification(self):
         """Test agent_completed event marks successful execution end.
@@ -373,7 +373,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
             assert event['data']['result']['success'] is True
             assert 'execution_time_ms' in event['data']
             
-            logger.info("✅ agent_completed event final notification verified")
+            logger.info(" PASS:  agent_completed event final notification verified")
 
     async def test_websocket_authentication_and_user_routing(self):
         """Test WebSocket authentication and proper user message routing.
@@ -437,7 +437,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
             assert event['data']['run_id'] == self.test_run_id, \
                 "User should only receive their own messages"
         
-        logger.info("✅ WebSocket authentication and routing verified")
+        logger.info(" PASS:  WebSocket authentication and routing verified")
 
     async def test_websocket_reconnection_and_message_replay(self):
         """Test WebSocket reconnection handling and message replay.
@@ -491,7 +491,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
             
             assert len(post_connection_events) >= 0, "Should handle reconnection gracefully"
             
-        logger.info("✅ WebSocket reconnection and message handling verified")
+        logger.info(" PASS:  WebSocket reconnection and message handling verified")
 
     async def test_websocket_error_events_delivery(self):
         """Test delivery of error events through WebSocket.
@@ -553,7 +553,7 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
                 assert 'run_id' in event['data']
                 assert 'agent_name' in event['data']
             
-            logger.info(f"✅ Error event delivery verified for {len(error_scenarios)} scenarios")
+            logger.info(f" PASS:  Error event delivery verified for {len(error_scenarios)} scenarios")
 
     # Helper methods for WebSocket testing
 
@@ -643,4 +643,4 @@ class TestWebSocketIntegration(BaseAgentExecutionTest):
             assert len(self.received_messages) >= expected_messages * 0.9, \
                 f"Should deliver at least 90% of messages under load"
             
-            logger.info(f"✅ WebSocket load test completed: {len(self.received_messages)} messages in {delivery_time:.2f}s")
+            logger.info(f" PASS:  WebSocket load test completed: {len(self.received_messages)} messages in {delivery_time:.2f}s")

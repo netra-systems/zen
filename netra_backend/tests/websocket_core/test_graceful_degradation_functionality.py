@@ -76,7 +76,7 @@ class TestGracefulDegradationFunctionality:
         
         This test validates that graceful_degradation_manager.py works correctly.
         """
-        logger.info("🧪 TEST: Verifying service health check works correctly")
+        logger.info("[U+1F9EA] TEST: Verifying service health check works correctly")
         
         # Create a mock service object
         mock_service = Mock()
@@ -92,7 +92,7 @@ class TestGracefulDegradationFunctionality:
         assert result.response_time is not None
         assert result.response_time >= 0
         
-        logger.info("✅ VALIDATION PASSED: Service health check works correctly")
+        logger.info(" PASS:  VALIDATION PASSED: Service health check works correctly")
 
     @pytest.mark.asyncio  
     async def test_check_service_health_calculates_response_time_correctly(self, degradation_manager):
@@ -101,7 +101,7 @@ class TestGracefulDegradationFunctionality:
         
         This test validates that line 372: response_time = time.time() - check_start works correctly.
         """
-        logger.info("🧪 TEST: Verifying response time calculation works correctly")
+        logger.info("[U+1F9EA] TEST: Verifying response time calculation works correctly")
         
         # Mock a service with health check that takes some time
         mock_service = Mock()
@@ -119,7 +119,7 @@ class TestGracefulDegradationFunctionality:
         assert result.response_time >= 0.01  # Should be at least the sleep time
         assert result.status == ServiceStatus.AVAILABLE
         
-        logger.info("✅ VALIDATION PASSED: Response time calculation works correctly")
+        logger.info(" PASS:  VALIDATION PASSED: Response time calculation works correctly")
 
     @pytest.mark.asyncio
     async def test_check_service_health_handles_timeout_correctly(self, degradation_manager):
@@ -128,7 +128,7 @@ class TestGracefulDegradationFunctionality:
         
         This test validates that line 395: response_time=time.time() - check_start works correctly.
         """
-        logger.info("🧪 TEST: Verifying timeout handling works correctly")
+        logger.info("[U+1F9EA] TEST: Verifying timeout handling works correctly")
         
         # Mock a service that will timeout
         mock_service = Mock()
@@ -143,7 +143,7 @@ class TestGracefulDegradationFunctionality:
         assert result.error_message == "Health check timeout"
         assert result.response_time == degradation_manager.service_timeout  # Should be the timeout value
         
-        logger.info("✅ VALIDATION PASSED: Timeout handling works correctly")
+        logger.info(" PASS:  VALIDATION PASSED: Timeout handling works correctly")
 
     @pytest.mark.asyncio
     async def test_check_service_health_handles_exceptions_correctly(self, degradation_manager):
@@ -152,7 +152,7 @@ class TestGracefulDegradationFunctionality:
         
         This test validates that line 395: response_time=time.time() - check_start works correctly.
         """
-        logger.info("🧪 TEST: Verifying exception handling works correctly")
+        logger.info("[U+1F9EA] TEST: Verifying exception handling works correctly")
         
         # Mock a service that throws an exception
         mock_service = Mock()
@@ -168,7 +168,7 @@ class TestGracefulDegradationFunctionality:
         assert result.response_time is not None
         assert result.response_time >= 0
         
-        logger.info("✅ VALIDATION PASSED: Exception handling works correctly")
+        logger.info(" PASS:  VALIDATION PASSED: Exception handling works correctly")
 
     @pytest.mark.asyncio
     async def test_assess_service_availability_works_correctly(self, degradation_manager, mock_app_state):
@@ -177,7 +177,7 @@ class TestGracefulDegradationFunctionality:
         
         This test validates the full flow works with time.time() usage.
         """
-        logger.info("🧪 TEST: Full service availability assessment working correctly")
+        logger.info("[U+1F9EA] TEST: Full service availability assessment working correctly")
         
         # This should work correctly
         degradation_context = await degradation_manager.assess_service_availability()
@@ -190,7 +190,7 @@ class TestGracefulDegradationFunctionality:
         assert isinstance(degradation_context.user_message, str)
         assert isinstance(degradation_context.capabilities, dict)
         
-        logger.info("✅ VALIDATION PASSED: Service availability assessment works correctly")
+        logger.info(" PASS:  VALIDATION PASSED: Service availability assessment works correctly")
 
 
 if __name__ == "__main__":

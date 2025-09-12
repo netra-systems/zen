@@ -16,7 +16,7 @@ Prevents triage agent start failures that block $500K+ ARR chat functionality.
 
 TEST REQUIREMENTS:
 - These tests MUST fail with current broken code
-- Tests will pass after changing 'async for' → 'async with' in agent_handler.py
+- Tests will pass after changing 'async for'  ->  'async with' in agent_handler.py
 - Use SSOT test patterns from SSotBaseTestCase
 - Include proper error message validation
 
@@ -99,7 +99,7 @@ class TestAgentHandlerAsyncSessionPatterns(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR:
         - With current broken code: Test FAILS with TypeError
-        - After fix (async for → async with): Test PASSES
+        - After fix (async for  ->  async with): Test PASSES
         """
         # Create an async generator context manager like get_request_scoped_db_session
         async_context_manager = self.mock_async_generator_context_manager()

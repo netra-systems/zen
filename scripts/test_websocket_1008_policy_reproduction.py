@@ -105,11 +105,11 @@ class WebSocket1008PolicyReproduction:
             print(f"[ERROR] Connection closed with code {e.code}: {e.reason}")
             
             if e.code == 1008:
-                print(f"[REPRODUCE SUCCESS] ✅ Successfully reproduced 1008 policy violation!")
+                print(f"[REPRODUCE SUCCESS]  PASS:  Successfully reproduced 1008 policy violation!")
                 print(f"[ERROR DETAILS] Reason: {e.reason}")
                 
                 if "SSOT Auth failed" in str(e.reason):
-                    print(f"[EXACT MATCH] ✅ Found exact error: 'SSOT Auth failed'")
+                    print(f"[EXACT MATCH]  PASS:  Found exact error: 'SSOT Auth failed'")
                     attempt["exact_error_reproduced"] = True
             else:
                 print(f"[DIFFERENT ERROR] Got code {e.code} instead of 1008")
@@ -378,11 +378,11 @@ class WebSocket1008PolicyReproduction:
         exact_match = scenario_1.get("exact_error_reproduced", False)
         
         if reproduced_1008:
-            print("✅ SUCCESS: Reproduced the 1008 policy violation error!")
+            print(" PASS:  SUCCESS: Reproduced the 1008 policy violation error!")
             if exact_match:
-                print("✅ EXACT MATCH: Found the exact 'SSOT Auth failed' error message!")
+                print(" PASS:  EXACT MATCH: Found the exact 'SSOT Auth failed' error message!")
         else:
-            print("❌ Could not reproduce the 1008 error in this environment")
+            print(" FAIL:  Could not reproduce the 1008 error in this environment")
         
         # Analyze the authentication chain
         auth_validation = scenario_2.get("final_result")
@@ -431,7 +431,7 @@ class WebSocket1008PolicyReproduction:
                 result = attempt.get('connection_result')
                 print(f"   Connection Result: {result}")
                 if attempt.get('error_details', {}).get('is_1008_policy_violation'):
-                    print(f"   ✅ 1008 Error Reproduced: {attempt['error_details']['reason']}")
+                    print(f"    PASS:  1008 Error Reproduced: {attempt['error_details']['reason']}")
             
             elif attempt['scenario'] == 'manual_jwt_validation':
                 print(f"   Validation Result: {attempt.get('final_result')}")

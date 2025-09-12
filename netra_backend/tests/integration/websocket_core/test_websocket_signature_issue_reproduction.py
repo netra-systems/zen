@@ -44,10 +44,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             
             # This should work fine
             assert system_msg.type == MessageType.SYSTEM_MESSAGE
-            self.logger.info("✅ Basic system message creation works")
+            self.logger.info(" PASS:  Basic system message creation works")
             
         except Exception as e:
-            self.logger.error(f"❌ Basic system message creation failed: {e}")
+            self.logger.error(f" FAIL:  Basic system message creation failed: {e}")
             pytest.fail(f"Basic message creation should work: {e}")
 
     async def test_pong_heartbeat_patterns_from_handlers(self):
@@ -69,10 +69,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             )
             assert heartbeat_response.type == MessageType.HEARTBEAT_ACK
             
-            self.logger.info("✅ Ping/heartbeat patterns work correctly")
+            self.logger.info(" PASS:  Ping/heartbeat patterns work correctly")
             
         except Exception as e:
-            self.logger.error(f"❌ Ping/heartbeat patterns failed: {e}")
+            self.logger.error(f" FAIL:  Ping/heartbeat patterns failed: {e}")
             pytest.fail(f"Ping/heartbeat should work: {e}")
 
     async def test_agent_event_patterns_from_handlers(self):
@@ -137,10 +137,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
                 assert hasattr(event, 'type')
                 assert hasattr(event, 'data')
             
-            self.logger.info("✅ All agent event patterns work correctly")
+            self.logger.info(" PASS:  All agent event patterns work correctly")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent event patterns failed: {e}")
+            self.logger.error(f" FAIL:  Agent event patterns failed: {e}")
             pytest.fail(f"Agent events should work: {e}")
 
     async def test_ack_response_patterns_from_handlers(self):
@@ -173,10 +173,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             assert ack_response.type == MessageType.AGENT_TASK_ACK
             assert status_response.type == MessageType.AGENT_STATUS_UPDATE
             
-            self.logger.info("✅ Acknowledgment patterns work correctly")
+            self.logger.info(" PASS:  Acknowledgment patterns work correctly")
             
         except Exception as e:
-            self.logger.error(f"❌ Acknowledgment patterns failed: {e}")
+            self.logger.error(f" FAIL:  Acknowledgment patterns failed: {e}")
             pytest.fail(f"Acknowledgment patterns should work: {e}")
 
     async def test_signature_issue_reproduction_invalid_calls(self):
@@ -191,7 +191,7 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
         with pytest.raises(TypeError, match="missing 1 required positional argument"):
             create_server_message(MessageType.SYSTEM_MESSAGE)
             
-        self.logger.info("✅ Confirmed: Missing data parameter causes TypeError as expected")
+        self.logger.info(" PASS:  Confirmed: Missing data parameter causes TypeError as expected")
 
     async def test_serialization_compatibility(self):
         """
@@ -222,10 +222,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             json_string = json.dumps(json_data)
             assert isinstance(json_string, str)
             
-            self.logger.info("✅ Message serialization works correctly")
+            self.logger.info(" PASS:  Message serialization works correctly")
             
         except Exception as e:
-            self.logger.error(f"❌ Message serialization failed: {e}")
+            self.logger.error(f" FAIL:  Message serialization failed: {e}")
             pytest.fail(f"Message serialization should work: {e}")
 
     async def test_empty_data_edge_case(self):
@@ -242,10 +242,10 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             assert message.type == MessageType.SYSTEM_MESSAGE
             assert message.data == {}
             
-            self.logger.info("✅ Empty data dict works correctly")
+            self.logger.info(" PASS:  Empty data dict works correctly")
             
         except Exception as e:
-            self.logger.error(f"❌ Empty data dict failed: {e}")
+            self.logger.error(f" FAIL:  Empty data dict failed: {e}")
             pytest.fail(f"Empty data dict should be valid: {e}")
 
     async def test_none_data_should_fail(self):
@@ -260,12 +260,12 @@ class TestWebSocketSignatureIssueReproduction(SSotAsyncTestCase):
             )
             
             # If this succeeds, None is acceptable
-            self.logger.info("ℹ️ None data is accepted by create_server_message")
+            self.logger.info("[U+2139][U+FE0F] None data is accepted by create_server_message")
             assert message.data is None
             
         except (TypeError, ValueError) as e:
             # Expected if None is not allowed
-            self.logger.info(f"ℹ️ None data rejected as expected: {e}")
+            self.logger.info(f"[U+2139][U+FE0F] None data rejected as expected: {e}")
             assert True  # This is expected behavior
 
 

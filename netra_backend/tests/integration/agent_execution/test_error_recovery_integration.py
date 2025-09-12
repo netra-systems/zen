@@ -74,7 +74,7 @@ class FailureSimulator:
         self.active_failures[failure_id] = failure_info
         self.failure_history.append(failure_info.copy())
         
-        logger.warning(f"🚨 SIMULATING FAILURE: {failure_type} for {duration}s (severity: {severity})")
+        logger.warning(f" ALERT:  SIMULATING FAILURE: {failure_type} for {duration}s (severity: {severity})")
         return failure_id
     
     def recover_from_failure(self, failure_id: str):
@@ -94,7 +94,7 @@ class FailureSimulator:
                     logger.error(f"Recovery callback error: {e}")
             
             del self.active_failures[failure_id]
-            logger.info(f"✅ RECOVERED FROM FAILURE: {failure_info['failure_type']}")
+            logger.info(f" PASS:  RECOVERED FROM FAILURE: {failure_info['failure_type']}")
     
     def is_failure_active(self, failure_type: str) -> bool:
         """Check if a specific type of failure is currently active."""
@@ -230,7 +230,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         assert 'database_connection' in stats['failure_types']
         
         self.recovery_metrics['successful_recoveries'] += 1
-        logger.info("✅ Database connection failure recovery verified")
+        logger.info(" PASS:  Database connection failure recovery verified")
 
     async def test_websocket_connection_failure_graceful_degradation(self):
         """Test graceful degradation when WebSocket connections fail.
@@ -300,7 +300,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         working_websocket_manager.notify_agent_completed.assert_called_once()
         
         self.recovery_metrics['successful_recoveries'] += 1
-        logger.info("✅ WebSocket connection failure graceful degradation verified")
+        logger.info(" PASS:  WebSocket connection failure graceful degradation verified")
 
     async def test_circuit_breaker_failure_protection(self):
         """Test circuit breaker protection during cascading failures.
@@ -366,7 +366,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         assert cb_status['failure_count'] >= 0
         
         self.recovery_metrics['successful_recoveries'] += 1
-        logger.info("✅ Circuit breaker failure protection verified")
+        logger.info(" PASS:  Circuit breaker failure protection verified")
 
     async def test_timeout_failure_recovery_patterns(self):
         """Test recovery from various timeout scenarios.
@@ -439,7 +439,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
                 assert record.state == ExecutionState.COMPLETED, \
                     f"Expected completion for scenario {scenario['name']}"
         
-        logger.info("✅ Timeout failure recovery patterns verified")
+        logger.info(" PASS:  Timeout failure recovery patterns verified")
 
     async def test_concurrent_failure_isolation(self):
         """Test that failures in one execution don't affect others.
@@ -495,7 +495,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         assert isolation_success_rate >= 0.4, \
             f"Isolation success rate too low: {isolation_success_rate:.2%}"
         
-        logger.info(f"✅ Concurrent failure isolation verified: {isolation_success_rate:.2%} isolation success")
+        logger.info(f" PASS:  Concurrent failure isolation verified: {isolation_success_rate:.2%} isolation success")
 
     async def test_recovery_notification_and_user_feedback(self):
         """Test user notification systems during recovery scenarios.
@@ -524,7 +524,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
                 'user_id': self.test_user_id
             }
             user_notifications.append(notification)
-            logger.info(f"📢 USER NOTIFICATION: {notification_type} - {message}")
+            logger.info(f"[U+1F4E2] USER NOTIFICATION: {notification_type} - {message}")
         
         # Simulate various failure and recovery scenarios with notifications
         failure_scenarios = [
@@ -612,7 +612,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
             assert notification['user_id'] == self.test_user_id
         
         self.recovery_metrics['user_notifications_sent'] += len(user_notifications)
-        logger.info(f"✅ Recovery notification system verified: {len(user_notifications)} notifications")
+        logger.info(f" PASS:  Recovery notification system verified: {len(user_notifications)} notifications")
 
     # Helper methods for error recovery testing
 
@@ -690,7 +690,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
             ]
         }
         
-        logger.info(f"📢 TIMEOUT NOTIFICATION: {timeout_notification['message']}")
+        logger.info(f"[U+1F4E2] TIMEOUT NOTIFICATION: {timeout_notification['message']}")
         return timeout_notification
 
     async def test_comprehensive_system_recovery_simulation(self):
@@ -759,7 +759,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         
         # Verify acceptable recovery performance
         assert total_recovery_rate >= 0.6, \
-            f"Total recovery rate too low: {total_recovery_rate:.2%} (need ≥60%)"
+            f"Total recovery rate too low: {total_recovery_rate:.2%} (need  >= 60%)"
         
         # Update metrics
         self.recovery_metrics['successful_recoveries'] += successful_recoveries
@@ -769,7 +769,7 @@ class TestErrorRecoveryIntegration(BaseAgentExecutionTest):
         failure_stats = self.failure_simulator.get_failure_stats()
         assert failure_stats['active_failures'] == 0, "All failures should be recovered"
         
-        logger.info(f"✅ System recovery verified: {total_recovery_rate:.2%} total recovery, {full_recovery_rate:.2%} full recovery")
+        logger.info(f" PASS:  System recovery verified: {total_recovery_rate:.2%} total recovery, {full_recovery_rate:.2%} full recovery")
 
     async def _execute_with_recovery(self, execution_id: str) -> Dict[str, Any]:
         """Execute with recovery patterns during system stress."""

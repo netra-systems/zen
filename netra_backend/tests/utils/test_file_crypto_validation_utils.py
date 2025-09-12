@@ -1,6 +1,6 @@
 """
 Tests for file, crypto, and validation utilities (Tests 89-91).
-Each function ≤8 lines, using helper functions for setup and assertions.
+Each function  <= 8 lines, using helper functions for setup and assertions.
 """
 
 import sys

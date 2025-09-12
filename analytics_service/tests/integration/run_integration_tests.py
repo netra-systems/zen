@@ -355,7 +355,7 @@ class IntegrationTestRunner:
                 elif result["status"] == "failed":
                     results["failed_files"] += 1
                     if fail_fast:
-                        print(f"❌ Failing fast due to failure in {test_file}")
+                        print(f" FAIL:  Failing fast due to failure in {test_file}")
                         break
                 else:
                     results["skipped_files"] += 1

@@ -27,7 +27,7 @@ class TestWebSocketTimeoutConfigurationGap:
         assert 'backend_memory = "4Gi"' in content, "4Gi memory scaling not found in deploy script"
         assert 'backend_cpu = "4"' in content, "4 CPU scaling not found in deploy script"
         
-        print("✅ All Issue #128 WebSocket timeout optimizations found in codebase")
+        print(" PASS:  All Issue #128 WebSocket timeout optimizations found in codebase")
         
     def test_circuit_breaker_implementation_exists(self):
         """UNIT: Validate circuit breaker implementation exists"""
@@ -43,7 +43,7 @@ class TestWebSocketTimeoutConfigurationGap:
             circuit_breaker = WebSocketCircuitBreaker(config=config)
             assert circuit_breaker is not None, "Circuit breaker cannot be instantiated"
             
-            print("✅ Circuit breaker implementation exists and functional")
+            print(" PASS:  Circuit breaker implementation exists and functional")
             
         except ImportError as e:
             pytest.fail(f"Circuit breaker implementation not found: {e}")
@@ -68,7 +68,7 @@ class TestWebSocketTimeoutConfigurationGap:
                 # BEFORE DEPLOYMENT: This assertion SHOULD FAIL (configs not active)
                 # AFTER DEPLOYMENT: This assertion SHOULD PASS (configs active)
                 if websocket_timeout == "360":
-                    print("✅ Optimized WebSocket timeout configs are active in staging")
+                    print(" PASS:  Optimized WebSocket timeout configs are active in staging")
                     return  # Test passes after deployment
                 else:
                     # Expected before deployment - optimized configs not yet active

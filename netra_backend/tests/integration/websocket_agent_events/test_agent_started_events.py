@@ -892,10 +892,10 @@ class TestAgentStartedEvents(BaseIntegrationTest):
             assert post_reconnect_event.get("type") == "agent_started", "Event not received after reconnection"
             
             print(f"Network resilience test:")
-            print(f"  Baseline event: ✓")
+            print(f"  Baseline event: [U+2713]")
             print(f"  Delayed event time: {delayed_time:.3f}s")
             print(f"  Reconnect time: {reconnect_time:.3f}s")
-            print(f"  Post-reconnect event: ✓")
+            print(f"  Post-reconnect event: [U+2713]")
             
         finally:
             await client.disconnect()
@@ -1164,9 +1164,9 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                     pass
             
             print(f"Security validation results:")
-            print(f"  Legitimate request: {'✓' if legit_event_received else '✗'}")
-            print(f"  Spoofed user ID: {'⚠️ Allowed' if spoofed_event_received else '✓ Prevented/Corrected'}")
-            print(f"  Malicious payload: {'✓ Handled' if not malicious_processed else '⚠️ Processed'}")
+            print(f"  Legitimate request: {'[U+2713]' if legit_event_received else '[U+2717]'}")
+            print(f"  Spoofed user ID: {' WARNING: [U+FE0F] Allowed' if spoofed_event_received else '[U+2713] Prevented/Corrected'}")
+            print(f"  Malicious payload: {'[U+2713] Handled' if not malicious_processed else ' WARNING: [U+FE0F] Processed'}")
             
         finally:
             await legitimate_client.disconnect()
@@ -1238,9 +1238,9 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                 event_str = json.dumps(sensitive_event)
                 assert "123-45-6789" not in event_str, "SSN should be filtered from event"
                 assert "4111-1111-1111-1111" not in event_str, "Credit card should be filtered from event"
-                print("✓ Sensitive content processed with filtering")
+                print("[U+2713] Sensitive content processed with filtering")
             else:
-                print("✓ Sensitive content blocked entirely")
+                print("[U+2713] Sensitive content blocked entirely")
             
             # Test 3: Large content (test size limits)
             large_message = "X" * 10000  # 10KB message
@@ -1269,13 +1269,13 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                     # Verify large content is handled appropriately
                     event_size = len(json.dumps(large_event))
                     assert event_size < 50000, f"Event size too large: {event_size} bytes"
-                    print(f"✓ Large content handled, event size: {event_size} bytes")
+                    print(f"[U+2713] Large content handled, event size: {event_size} bytes")
                 else:
-                    print("✓ Large content rejected or filtered")
+                    print("[U+2713] Large content rejected or filtered")
                     
             except Exception as e:
                 # Large content rejection is acceptable
-                print(f"✓ Large content rejected: {e}")
+                print(f"[U+2713] Large content rejected: {e}")
             
             print("Content filtering test completed successfully")
             
@@ -1468,7 +1468,7 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                 await final_client.connect(headers=final_headers)
                 final_event = await self.simulate_agent_execution_start(final_client)
                 assert final_event.get("type") == "agent_started", "System not functional after cleanup"
-                print("✓ System functional after resource cleanup")
+                print("[U+2713] System functional after resource cleanup")
                 
             finally:
                 await final_client.disconnect()
@@ -1518,11 +1518,11 @@ class TestAgentStartedEvents(BaseIntegrationTest):
             # System should handle minimal payload gracefully
             if minimal_response:
                 if minimal_response.get("type") == "agent_started":
-                    print("✓ Minimal payload accepted")
+                    print("[U+2713] Minimal payload accepted")
                 else:
-                    print("✓ Minimal payload rejected with error (acceptable)")
+                    print("[U+2713] Minimal payload rejected with error (acceptable)")
             else:
-                print("✓ Minimal payload ignored (acceptable)")
+                print("[U+2713] Minimal payload ignored (acceptable)")
             
             # Test 2: Empty string fields
             empty_fields_request = {
@@ -1547,9 +1547,9 @@ class TestAgentStartedEvents(BaseIntegrationTest):
             # System should handle empty fields appropriately
             if empty_response and empty_response.get("type") == "agent_started":
                 # If accepted, verify system filled in defaults
-                print("⚠️ Empty fields accepted - verify defaults applied")
+                print(" WARNING: [U+FE0F] Empty fields accepted - verify defaults applied")
             else:
-                print("✓ Empty fields rejected (recommended)")
+                print("[U+2713] Empty fields rejected (recommended)")
             
             # Test 3: Very large message
             large_data = {
@@ -1568,7 +1568,7 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                 await client.send_message(large_data)
                 large_payload_sent = True
             except Exception as e:
-                print(f"✓ Large payload rejected at send: {e}")
+                print(f"[U+2713] Large payload rejected at send: {e}")
             
             if large_payload_sent:
                 large_response = None
@@ -1585,21 +1585,21 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                 if large_response:
                     # Verify large payload handled appropriately
                     response_size = len(json.dumps(large_response))
-                    print(f"✓ Large payload processed, response size: {response_size} bytes")
+                    print(f"[U+2713] Large payload processed, response size: {response_size} bytes")
                     assert response_size < 1000000, "Response size should be reasonable"
                 else:
-                    print("✓ Large payload timed out or rejected")
+                    print("[U+2713] Large payload timed out or rejected")
             
             # Test 4: Special characters and Unicode
             unicode_request = {
                 "type": "agent_request",
                 "agent": "triage_agent",
-                "message": "Unicode test: 🚀🔥💯 中文测试 العربية русский язык",
-                "thread_id": "unicode-test-🚀",
+                "message": "Unicode test: [U+1F680] FIRE: [U+1F4AF] [U+4E2D][U+6587][U+6D4B][U+8BD5] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629] pucck[U+0438][U+0439] [U+044F][U+0437][U+044B]k",
+                "thread_id": "unicode-test-[U+1F680]",
                 "metadata": {
-                    "emoji": "🎉🎊✨",
-                    "chinese": "测试消息",
-                    "arabic": "رسالة اختبار"
+                    "emoji": " CELEBRATION: [U+1F38A][U+2728]",
+                    "chinese": "[U+6D4B][U+8BD5][U+6D88][U+606F]",
+                    "arabic": "[U+0631][U+0633][U+0627][U+0644][U+0629] [U+0627][U+062E][U+062A][U+0628][U+0627][U+0631]"
                 }
             }
             await client.send_message(unicode_request)
@@ -1616,9 +1616,9 @@ class TestAgentStartedEvents(BaseIntegrationTest):
                     pass
             
             if unicode_response:
-                print("✓ Unicode characters handled correctly")
+                print("[U+2713] Unicode characters handled correctly")
             else:
-                print("⚠️ Unicode handling may have issues")
+                print(" WARNING: [U+FE0F] Unicode handling may have issues")
             
             print("Edge case testing completed")
             
@@ -1749,14 +1749,14 @@ class TestAgentStartedEvents(BaseIntegrationTest):
             
             # Print business metrics report
             print("=== BUSINESS METRICS REPORT ===")
-            print(f"📊 Total agent_started events: {metrics['total_events']}")
-            print(f"📈 Success rate: {success_rate:.2%}")
-            print(f"📉 Error rate: {error_rate:.2%}")
-            print(f"⏱️ Avg response time: {metrics['performance_metrics']['avg_response_time']:.3f}s")
-            print(f"⚡ Min response time: {metrics['performance_metrics']['min_response_time']:.3f}s")
-            print(f"🐌 Max response time: {metrics['performance_metrics']['max_response_time']:.3f}s")
-            print(f"🤖 Agent types used: {list(metrics['agent_types'].keys())}")
-            print(f"👥 User engagement: {len(metrics['user_engagement'])} users")
+            print(f" CHART:  Total agent_started events: {metrics['total_events']}")
+            print(f"[U+1F4C8] Success rate: {success_rate:.2%}")
+            print(f"[U+1F4C9] Error rate: {error_rate:.2%}")
+            print(f"[U+23F1][U+FE0F] Avg response time: {metrics['performance_metrics']['avg_response_time']:.3f}s")
+            print(f" LIGHTNING:  Min response time: {metrics['performance_metrics']['min_response_time']:.3f}s")
+            print(f"[U+1F40C] Max response time: {metrics['performance_metrics']['max_response_time']:.3f}s")
+            print(f"[U+1F916] Agent types used: {list(metrics['agent_types'].keys())}")
+            print(f"[U+1F465] User engagement: {len(metrics['user_engagement'])} users")
             
             # Business value assertions
             assert success_rate >= 0.8, f"Business success rate too low: {success_rate:.2%}"

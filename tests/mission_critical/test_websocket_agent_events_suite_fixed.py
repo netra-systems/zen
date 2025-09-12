@@ -70,7 +70,7 @@ class FixedWebSocketEventCapture:
         
         self.events.append(event_with_timestamp)
         self.event_counts[event_type] += 1
-        logger.info(f"📋 Captured event: {event_type} (total: {self.event_counts[event_type]})")
+        logger.info(f"[U+1F4CB] Captured event: {event_type} (total: {self.event_counts[event_type]})")
     
     def has_all_critical_events(self) -> bool:
         """Check if all 5 critical events have been received."""
@@ -127,7 +127,7 @@ class TestWebSocketAgentEventsFixed:
         assert hasattr(bridge, 'emit_agent_event'), "Missing critical method: emit_agent_event"
         assert callable(getattr(bridge, 'emit_agent_event')), "emit_agent_event is not callable"
         
-        logger.info("✅ AgentWebSocketBridge has required methods for event emission")
+        logger.info(" PASS:  AgentWebSocketBridge has required methods for event emission")
     
     @pytest.mark.asyncio 
     @pytest.mark.critical
@@ -144,7 +144,7 @@ class TestWebSocketAgentEventsFixed:
             assert supervisor.websocket_bridge is not None, "WebSocket bridge not set"
             assert supervisor._llm_manager is not None, "LLM manager not set"
             
-            logger.info("✅ SupervisorAgent initialized successfully with WebSocket bridge")
+            logger.info(" PASS:  SupervisorAgent initialized successfully with WebSocket bridge")
             
         except Exception as e:
             pytest.fail(f"SupervisorAgent initialization failed: {e}")
@@ -215,7 +215,7 @@ class TestWebSocketAgentEventsFixed:
                     **event_data
                 })
                 
-                logger.info(f"✅ Successfully emitted {event_type} event")
+                logger.info(f" PASS:  Successfully emitted {event_type} event")
                 
             except Exception as e:
                 pytest.fail(f"Failed to emit {event_type} event: {e}")
@@ -226,7 +226,7 @@ class TestWebSocketAgentEventsFixed:
             pytest.fail(f"Missing critical events: {missing_events}")
         
         assert self.event_capture.has_all_critical_events(), "Not all critical events were captured"
-        logger.info("✅ All 5 critical events successfully emitted and captured")
+        logger.info(" PASS:  All 5 critical events successfully emitted and captured")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -244,7 +244,7 @@ class TestWebSocketAgentEventsFixed:
         # Test that the bridge has the websocket_manager
         assert hasattr(supervisor.websocket_bridge, 'websocket_manager'), "WebSocket bridge missing manager"
         
-        logger.info("✅ SupervisorAgent WebSocket integration verified")
+        logger.info(" PASS:  SupervisorAgent WebSocket integration verified")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -273,7 +273,7 @@ class TestWebSocketAgentEventsFixed:
             assert context.run_id == run_id, "Run ID not set correctly"
             assert context.agent_context.get("user_request") is not None, "User request not set in agent_context"
             
-            logger.info("✅ UserExecutionContext created successfully")
+            logger.info(" PASS:  UserExecutionContext created successfully")
             
         except Exception as e:
             pytest.fail(f"UserExecutionContext creation failed: {e}")
@@ -319,7 +319,7 @@ if __name__ == "__main__":
         sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
         sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
     
-    print("🚀 Running Mission Critical WebSocket Agent Events Tests (Fixed Version)")
+    print("[U+1F680] Running Mission Critical WebSocket Agent Events Tests (Fixed Version)")
     
     # Run with pytest
     pytest_args = [
@@ -333,8 +333,8 @@ if __name__ == "__main__":
     exit_code = pytest.main(pytest_args)
     
     if exit_code == 0:
-        print("✅ All mission critical tests passed!")
+        print(" PASS:  All mission critical tests passed!")
     else:
-        print("❌ Some mission critical tests failed!")
+        print(" FAIL:  Some mission critical tests failed!")
         
     sys.exit(exit_code)

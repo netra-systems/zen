@@ -1,7 +1,7 @@
 """Integration Test for API Route Context Creation Regression Prevention.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Critical for multi-user system integrity
+- Segment: ALL (Free  ->  Enterprise) - Critical for multi-user system integrity
 - Business Goal: Prevent conversation continuity breakage and memory leaks from improper context creation
 - Value Impact: Ensures API routes maintain session continuity across HTTP calls
 - Strategic/Revenue Impact: CRITICAL - Broken context management destroys chat experience
@@ -404,7 +404,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         assert self.metrics.session_continuity_breaks <= 1, \
             f"Too many session continuity breaks: {self.metrics.session_continuity_breaks}"
         
-        logger.info("✅ API route session continuity test passed")
+        logger.info(" PASS:  API route session continuity test passed")
     
     @pytest.mark.asyncio  
     @pytest.mark.integration
@@ -474,7 +474,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         assert self.metrics.contexts_created >= 2, \
             f"Expected at least 2 contexts created, got {self.metrics.contexts_created}"
         
-        logger.info("✅ Multi-user context isolation test passed")
+        logger.info(" PASS:  Multi-user context isolation test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -539,7 +539,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         assert efficiency_ratio >= 0.6, \
             f"Database session efficiency too low: {efficiency_ratio:.2%}"
         
-        logger.info(f"✅ Database session efficiency test passed with {efficiency_ratio:.2%} efficiency")
+        logger.info(f" PASS:  Database session efficiency test passed with {efficiency_ratio:.2%} efficiency")
     
     @pytest.mark.asyncio
     @pytest.mark.integration  
@@ -600,7 +600,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         # Note: This may not always be true due to system variance, so we log but don't assert
         logger.info(f"Context reuse time: {reuse_time:.4f}s")
         
-        logger.info("✅ Context creation vs getter pattern validation passed")
+        logger.info(" PASS:  Context creation vs getter pattern validation passed")
     
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -672,7 +672,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         assert efficiency >= 0.7, \
             f"Context reuse efficiency too low during rapid calls: {efficiency:.2%}"
         
-        logger.info(f"✅ Rapid succession test passed: {efficiency:.2%} efficiency in {total_time:.2f}s")
+        logger.info(f" PASS:  Rapid succession test passed: {efficiency:.2%} efficiency in {total_time:.2f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -738,7 +738,7 @@ class TestApiRouteContextCreationRegression(SSotBaseTestCase):
         logger.info(f"  Max context creation: {max_context_time:.4f}s")
         logger.info(f"  Max session context: {max_session_time:.4f}s")
         
-        logger.info("✅ Performance benchmarks established successfully")
+        logger.info(" PASS:  Performance benchmarks established successfully")
 
 
 # Test execution markers for pytest

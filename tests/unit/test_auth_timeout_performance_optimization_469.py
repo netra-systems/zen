@@ -467,21 +467,21 @@ class TestAuthTimeoutPerformanceOptimization(SSotAsyncTestCase):
             # VALIDATION ASSERTION: Should show optimal efficiency after optimization
             self.assertGreaterEqual(optimized_buffer_utilization, 25.0,
                                   f"Optimized buffer utilization {optimized_buffer_utilization:.1f}% "
-                                  f"should be ≥25% for adequate efficiency - TEST SHOULD PASS after optimization")
+                                  f"should be  >= 25% for adequate efficiency - TEST SHOULD PASS after optimization")
             
             self.assertLessEqual(optimized_buffer_utilization, 90.0,
                                f"Optimized buffer utilization {optimized_buffer_utilization:.1f}% "
-                               f"should be ≤90% to maintain safety margin - TEST SHOULD PASS after optimization")
+                               f"should be  <= 90% to maintain safety margin - TEST SHOULD PASS after optimization")
             
             self.assertGreaterEqual(optimized_efficiency_ratio, 0.25,
                                   f"Optimized efficiency ratio {optimized_efficiency_ratio:.3f} "
-                                  f"should be ≥0.25 for good timeout efficiency - TEST SHOULD PASS after optimization")
+                                  f"should be  >= 0.25 for good timeout efficiency - TEST SHOULD PASS after optimization")
             
             # Performance improvement should be substantial
             performance_improvement = ((self.current_timeout_ms - optimized_timeout_ms) / self.current_timeout_ms * 100)
             self.assertGreaterEqual(performance_improvement, 80.0,
                                   f"Performance improvement {performance_improvement:.1f}% "
-                                  f"should be ≥80% - TEST SHOULD PASS after optimization")
+                                  f"should be  >= 80% - TEST SHOULD PASS after optimization")
 
     @pytest.mark.asyncio
     async def test_dynamic_timeout_adjustment_under_load_validation(self):
@@ -594,11 +594,11 @@ class TestAuthTimeoutPerformanceOptimization(SSotAsyncTestCase):
             # Each scenario should maintain 20-85% buffer utilization
             self.assertGreaterEqual(buffer_utilization, 15.0,
                                   f"{scenario} buffer utilization {buffer_utilization:.1f}% "
-                                  f"should be ≥15% for timeout efficiency")
+                                  f"should be  >= 15% for timeout efficiency")
             
             self.assertLessEqual(buffer_utilization, 90.0,
                                f"{scenario} buffer utilization {buffer_utilization:.1f}% "
-                               f"should be ≤90% to maintain safety margin")
+                               f"should be  <= 90% to maintain safety margin")
         
         # Heavy load scenarios should use higher multipliers but maintain efficiency
         heavy_scenarios = ['heavy_load', 'peak_load']
@@ -607,11 +607,11 @@ class TestAuthTimeoutPerformanceOptimization(SSotAsyncTestCase):
             buffer_util = load_performance_analysis[scenario]['buffer_utilization']
             
             self.assertGreaterEqual(multiplier, 3.0,
-                                  f"{scenario} should use ≥3x timeout multiplier under heavy load")
+                                  f"{scenario} should use  >= 3x timeout multiplier under heavy load")
             
             # Even with higher multipliers, should maintain reasonable efficiency
             self.assertGreaterEqual(buffer_util, 20.0,
-                                  f"{scenario} should maintain ≥20% buffer utilization even with high multipliers")
+                                  f"{scenario} should maintain  >= 20% buffer utilization even with high multipliers")
 
     def test_performance_optimization_recommendations_summary(self):
         """
@@ -624,44 +624,44 @@ class TestAuthTimeoutPerformanceOptimization(SSotAsyncTestCase):
         print("ISSUE #469: GCP TIMEOUT OPTIMIZATION RECOMMENDATIONS")
         print(f"{'='*70}")
         
-        print("\\n🚨 IDENTIFIED PERFORMANCE ISSUES:")
+        print("\\n ALERT:  IDENTIFIED PERFORMANCE ISSUES:")
         print("   1. MASSIVE TIMEOUT WASTE: 1.5s timeout vs 57ms actual response (26x over-provision)")
         print("   2. BUFFER UTILIZATION <4%: 96% of timeout budget is wasted")
         print("   3. GCP CLOUD RUN MISMATCH: Universal timeouts don't match cloud performance")
         print("   4. NO DYNAMIC SCALING: Fixed timeouts don't adapt to load conditions")
         
-        print("\\n💡 OPTIMIZATION RECOMMENDATIONS:")
-        print("\\n   🎯 IMMEDIATE FIXES (Quick Wins):")
+        print("\\n IDEA:  OPTIMIZATION RECOMMENDATIONS:")
+        print("\\n    TARGET:  IMMEDIATE FIXES (Quick Wins):")
         print("      - Reduce staging auth timeouts from 1500ms to 200-300ms")
         print("      - Implement GCP-optimized timeout configurations")
         print("      - Add buffer utilization monitoring and alerting")
         print("      - Enable environment variable timeout overrides")
         
-        print("\\n   🔧 DYNAMIC IMPROVEMENTS (Medium Term):")
+        print("\\n   [U+1F527] DYNAMIC IMPROVEMENTS (Medium Term):")
         print("      - Implement load-based dynamic timeout adjustment")
         print("      - Add P95 response time monitoring for auto-tuning")
         print("      - Create timeout efficiency dashboards")
         print("      - Implement timeout regression prevention tests")
         
-        print("\\n   🏗️ ARCHITECTURAL ENHANCEMENTS (Long Term):")  
+        print("\\n   [U+1F3D7][U+FE0F] ARCHITECTURAL ENHANCEMENTS (Long Term):")  
         print("      - Implement circuit breaker timeout coordination")
         print("      - Add intelligent timeout caching and prediction")
         print("      - Create customer-tier specific timeout profiles")
         print("      - Implement real-time timeout optimization ML")
         
-        print("\\n📊 EXPECTED PERFORMANCE IMPROVEMENTS:")
-        print("      ⚡ Response Speed: 80-85% reduction in timeout waits")
-        print("      📈 Efficiency: 25-40x improvement in buffer utilization")
-        print("      🏗️ Scalability: Dynamic scaling supports 3-5x more concurrent users")
-        print("      💰 Cost Reduction: 60-70% reduction in timeout-related resource waste")
+        print("\\n CHART:  EXPECTED PERFORMANCE IMPROVEMENTS:")
+        print("       LIGHTNING:  Response Speed: 80-85% reduction in timeout waits")
+        print("      [U+1F4C8] Efficiency: 25-40x improvement in buffer utilization")
+        print("      [U+1F3D7][U+FE0F] Scalability: Dynamic scaling supports 3-5x more concurrent users")
+        print("      [U+1F4B0] Cost Reduction: 60-70% reduction in timeout-related resource waste")
         
-        print("\\n🎯 SUCCESS CRITERIA:")
+        print("\\n TARGET:  SUCCESS CRITERIA:")
         print("      - Buffer utilization: 60-85% (current <4%)")
         print("      - Timeout efficiency ratio: >0.6 (current <0.04)")
         print("      - P95 timeout waste: <200ms (current >1400ms)")
         print("      - Load adaptation: 2-5x timeout scaling under load")
         
-        print("\\n🚀 IMPLEMENTATION PRIORITY:")
+        print("\\n[U+1F680] IMPLEMENTATION PRIORITY:")
         print("      1. HIGH: Reduce staging auth timeouts (immediate 80% improvement)")
         print("      2. HIGH: Add GCP-specific timeout configurations")
         print("      3. MEDIUM: Implement dynamic timeout adjustment")

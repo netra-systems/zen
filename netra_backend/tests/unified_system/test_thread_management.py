@@ -362,7 +362,7 @@ class TestThreadLifecycle:
 
         saved_messages = msg_result.scalars().all()
 
-        assert len(saved_messages) == 6  # 3 users × 2 messages
+        assert len(saved_messages) == 6  # 3 users  x  2 messages
         
         # Verify proper ordering by creation time
 

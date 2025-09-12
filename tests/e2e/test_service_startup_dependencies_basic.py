@@ -49,7 +49,7 @@ class ServiceStartupValidator:
         self.startup_start_time = time.time()
         
     async def validate_sequential_startup_order(self) -> Dict[str, Any]:
-        """Test Case 1: Verify Auth → Backend → Frontend sequence."""
+        """Test Case 1: Verify Auth  ->  Backend  ->  Frontend sequence."""
         auth_result = await self._validate_service("auth", [8001, 8081], True)
         backend_result = await self._validate_service("backend", [8000, 8080], 
                                                     await self._is_dependency_available("auth"))
@@ -227,7 +227,7 @@ class TestServiceStartupDependenciesBasic:
         assert services["auth"].started, "Auth service not started"
         assert services["backend"].deps_healthy, "Backend dependencies not satisfied"
         
-        logger.info("✓ Sequential startup order validated")
+        logger.info("[U+2713] Sequential startup order validated")
     
     @pytest.mark.e2e
     async def test_health_check_validation(self, startup_validator):
@@ -240,7 +240,7 @@ class TestServiceStartupDependenciesBasic:
         # TODO: Fix backend service startup issues before enabling this check
         # assert "backend" in healthy_services, "Backend service health check failed"
         
-        logger.info("✓ Health check validation completed")
+        logger.info("[U+2713] Health check validation completed")
     
     @pytest.mark.e2e
     async def test_dependency_failure_handling(self, startup_validator):
@@ -249,7 +249,7 @@ class TestServiceStartupDependenciesBasic:
         
         assert result["backend_handles_auth_failure"], f"Backend dependency handling failed: {result}"
         
-        logger.info("✓ Dependency failure handling validated")
+        logger.info("[U+2713] Dependency failure handling validated")
     
     @pytest.mark.e2e
     async def test_startup_performance(self, startup_validator):
@@ -258,7 +258,7 @@ class TestServiceStartupDependenciesBasic:
         
         assert result["under_30_seconds"], f"Startup too slow: {result['startup_time_ms']}ms"
         
-        logger.info(f"✓ Startup performance: {result['startup_time_ms']:.0f}ms ({result['performance_rating']})")
+        logger.info(f"[U+2713] Startup performance: {result['startup_time_ms']:.0f}ms ({result['performance_rating']})")
     
     @pytest.mark.e2e
     async def test_recovery_after_failure(self, startup_validator):
@@ -267,7 +267,7 @@ class TestServiceStartupDependenciesBasic:
         
         assert result["recovery_working"], f"Service recovery failed: {result}"
         
-        logger.info("✓ Recovery after failure validated")
+        logger.info("[U+2713] Recovery after failure validated")
     
     @pytest.mark.e2e
     async def test_concurrent_health_checks(self, startup_validator):
@@ -277,7 +277,7 @@ class TestServiceStartupDependenciesBasic:
         assert result["concurrent_checks_successful"], f"Concurrent health checks failed: {result}"
         assert result["successful_attempts"] >= 3, "Insufficient concurrent check success"
         
-        logger.info("✓ Concurrent health checks validated")
+        logger.info("[U+2713] Concurrent health checks validated")
     
     @pytest.mark.e2e
     async def test_startup_state_consistency(self, startup_validator):
@@ -286,7 +286,7 @@ class TestServiceStartupDependenciesBasic:
         
         assert result["state_consistent"], f"Startup state inconsistent: {result}"
         
-        logger.info("✓ Startup state consistency validated")
+        logger.info("[U+2713] Startup state consistency validated")
 
 
 # Standalone execution for development testing

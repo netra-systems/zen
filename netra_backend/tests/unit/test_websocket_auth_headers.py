@@ -25,6 +25,7 @@ Test Coverage:
 - X-E2E-Bypass header processing for staging
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import json
 import pytest
 import unittest
@@ -42,7 +43,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 
 
-class TestWebSocketAuthHeaders(unittest.TestCase):
+class TestWebSocketAuthHeaders(SSotAsyncTestCase):
     """
     CRITICAL Unit Tests for WebSocket Authentication Header Processing
     
@@ -429,7 +430,7 @@ class TestWebSocketAuthHeaders(unittest.TestCase):
                                        f"E2E should be disabled for env_vars: {env_vars}, but got context: {e2e_context}")
 
 
-class TestWebSocketAuthenticatorIntegration(unittest.TestCase):
+class TestWebSocketAuthenticatorIntegration(SSotAsyncTestCase):
     """
     Integration tests for UnifiedWebSocketAuthenticator with mocked services.
     

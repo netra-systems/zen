@@ -397,16 +397,16 @@ async def test_websocket_performance_requirements():
     print("="*60)
     
     concurrent = results["concurrent_users"]
-    print(f"✓ 5 concurrent users: {concurrent['total_send_time']:.3f}s (requirement: <2s)")
+    print(f"[U+2713] 5 concurrent users: {concurrent['total_send_time']:.3f}s (requirement: <2s)")
     
     recovery = results["connection_recovery"]
-    print(f"✓ Connection recovery: {recovery['recovery_time']:.3f}s (requirement: <5s)")
+    print(f"[U+2713] Connection recovery: {recovery['recovery_time']:.3f}s (requirement: <5s)")
     
     message_loss = results["message_loss_prevention"]
-    print(f"✓ Zero message loss: {message_loss['critical_messages_preserved']}/{message_loss['critical_messages_sent']} critical messages preserved")
+    print(f"[U+2713] Zero message loss: {message_loss['critical_messages_preserved']}/{message_loss['critical_messages_sent']} critical messages preserved")
     
     confirmation = results["event_delivery_confirmation"]
-    print(f"✓ Event confirmation: {confirmation['confirmation_rate']:.1%} success rate")
+    print(f"[U+2713] Event confirmation: {confirmation['confirmation_rate']:.1%} success rate")
     
     print("\nAll performance requirements validated successfully!")
 

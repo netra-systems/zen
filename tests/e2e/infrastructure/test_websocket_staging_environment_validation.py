@@ -73,7 +73,7 @@ class TestWebSocketStagingEnvironmentValidation:
         
         EXPECTED: All staging domains should resolve and return valid responses.
         """
-        logger.info("🏗️ INFRASTRUCTURE TEST: Staging domain resolution validation")
+        logger.info("[U+1F3D7][U+FE0F] INFRASTRUCTURE TEST: Staging domain resolution validation")
         
         # Extract domains from staging URLs
         staging_domains = {
@@ -86,7 +86,7 @@ class TestWebSocketStagingEnvironmentValidation:
         
         async with httpx.AsyncClient(timeout=15.0) as client:
             for service_name, service_url in staging_domains.items():
-                logger.info(f"🔍 Testing {service_name} domain: {service_url}")
+                logger.info(f" SEARCH:  Testing {service_name} domain: {service_url}")
                 
                 try:
                     # Test basic HTTP connectivity
@@ -111,11 +111,11 @@ class TestWebSocketStagingEnvironmentValidation:
                         "error": None
                     }
                     
-                    logger.info(f"✅ {service_name}: {response.status_code} in {response_time:.3f}s")
+                    logger.info(f" PASS:  {service_name}: {response.status_code} in {response_time:.3f}s")
                     
                     # Validate response indicates healthy service
                     if response.status_code not in [200, 404]:  # 404 is acceptable for health endpoint
-                        logger.warning(f"⚠️ {service_name}: Unexpected status code {response.status_code}")
+                        logger.warning(f" WARNING: [U+FE0F] {service_name}: Unexpected status code {response.status_code}")
                     
                 except httpx.RequestError as e:
                     domain_results[service_name] = {
@@ -125,7 +125,7 @@ class TestWebSocketStagingEnvironmentValidation:
                         "error": f"RequestError: {e}",
                         "response_time": None
                     }
-                    logger.error(f"❌ {service_name}: Request failed - {e}")
+                    logger.error(f" FAIL:  {service_name}: Request failed - {e}")
                     
                 except Exception as e:
                     domain_results[service_name] = {
@@ -135,13 +135,13 @@ class TestWebSocketStagingEnvironmentValidation:
                         "error": f"Unexpected error: {e}",
                         "response_time": None
                     }
-                    logger.error(f"❌ {service_name}: Unexpected error - {e}")
+                    logger.error(f" FAIL:  {service_name}: Unexpected error - {e}")
         
         # Validate results
         reachable_services = sum(1 for result in domain_results.values() if result["reachable"])
         total_services = len(domain_results)
         
-        logger.info("🔍 DOMAIN RESOLUTION RESULTS:")
+        logger.info(" SEARCH:  DOMAIN RESOLUTION RESULTS:")
         for service, result in domain_results.items():
             status = "REACHABLE" if result["reachable"] else "UNREACHABLE"
             time_str = f" ({result['response_time']:.3f}s)" if result["response_time"] else ""
@@ -159,7 +159,7 @@ class TestWebSocketStagingEnvironmentValidation:
         if not auth_reachable:
             pytest.fail(f"CRITICAL: Auth service unreachable at {staging_config.urls.auth_url}")
         
-        logger.info(f"✅ Infrastructure connectivity: {reachable_services}/{total_services} services reachable")
+        logger.info(f" PASS:  Infrastructure connectivity: {reachable_services}/{total_services} services reachable")
         
         return domain_results
 
@@ -176,7 +176,7 @@ class TestWebSocketStagingEnvironmentValidation:
         
         EXPECTED: Load balancer should support WebSocket upgrade headers.
         """
-        logger.info("🏗️ INFRASTRUCTURE TEST: Load balancer WebSocket upgrade support")
+        logger.info("[U+1F3D7][U+FE0F] INFRASTRUCTURE TEST: Load balancer WebSocket upgrade support")
         
         # Test WebSocket upgrade request to the staging WebSocket endpoint
         websocket_url = staging_config.urls.websocket_url
@@ -203,8 +203,8 @@ class TestWebSocketStagingEnvironmentValidation:
                 "X-Load-Balancer-Test": "websocket-upgrade-support"
             }
             
-            logger.info(f"🔍 Testing WebSocket upgrade to: {host}{path}")
-            logger.info(f"📤 Upgrade headers: {list(upgrade_headers.keys())}")
+            logger.info(f" SEARCH:  Testing WebSocket upgrade to: {host}{path}")
+            logger.info(f"[U+1F4E4] Upgrade headers: {list(upgrade_headers.keys())}")
             
             # Send HTTP upgrade request to test load balancer support
             http_url = f"{scheme}://{host}{path}"
@@ -214,8 +214,8 @@ class TestWebSocketStagingEnvironmentValidation:
                 response = await client.get(http_url, headers=upgrade_headers)
                 response_time = time.time() - start_time
                 
-                logger.info(f"📥 Response: {response.status_code} in {response_time:.3f}s")
-                logger.info(f"📥 Response headers: {dict(response.headers)}")
+                logger.info(f"[U+1F4E5] Response: {response.status_code} in {response_time:.3f}s")
+                logger.info(f"[U+1F4E5] Response headers: {dict(response.headers)}")
                 
                 # Analyze response for WebSocket upgrade support
                 upgrade_analysis = {
@@ -232,28 +232,28 @@ class TestWebSocketStagingEnvironmentValidation:
                     # Perfect - WebSocket upgrade successful
                     upgrade_analysis["upgrade_supported"] = True
                     upgrade_analysis["websocket_ready"] = True
-                    logger.info("✅ WebSocket upgrade successful (101 Switching Protocols)")
+                    logger.info(" PASS:  WebSocket upgrade successful (101 Switching Protocols)")
                     
                 elif response.status_code == 426:
                     # Upgrade Required - server supports WebSocket but needs proper handshake
                     upgrade_analysis["upgrade_supported"] = True
-                    logger.info("✅ WebSocket upgrade supported (426 Upgrade Required)")
+                    logger.info(" PASS:  WebSocket upgrade supported (426 Upgrade Required)")
                     
                 elif response.status_code in [400, 404]:
                     # Bad Request or Not Found - may indicate WebSocket endpoint exists but needs proper handshake
                     if any(header.lower() in ["upgrade", "websocket"] for header in response.headers):
                         upgrade_analysis["upgrade_supported"] = True
-                        logger.info("✅ WebSocket upgrade likely supported (upgrade headers present)")
+                        logger.info(" PASS:  WebSocket upgrade likely supported (upgrade headers present)")
                     else:
-                        logger.warning(f"⚠️ WebSocket upgrade unclear (status {response.status_code})")
+                        logger.warning(f" WARNING: [U+FE0F] WebSocket upgrade unclear (status {response.status_code})")
                         
                 elif response.status_code >= 500:
                     # Server error - may indicate configuration issues
                     upgrade_analysis["error_details"] = f"Server error: {response.status_code}"
-                    logger.error(f"❌ Server error during upgrade test: {response.status_code}")
+                    logger.error(f" FAIL:  Server error during upgrade test: {response.status_code}")
                     
                 else:
-                    logger.warning(f"⚠️ Unexpected response: {response.status_code}")
+                    logger.warning(f" WARNING: [U+FE0F] Unexpected response: {response.status_code}")
                 
                 # Additional analysis of response headers
                 response_headers = {k.lower(): v for k, v in response.headers.items()}
@@ -267,9 +267,9 @@ class TestWebSocketStagingEnvironmentValidation:
                 
                 if any(websocket_indicators):
                     upgrade_analysis["upgrade_supported"] = True
-                    logger.info("✅ WebSocket indicators found in response headers")
+                    logger.info(" PASS:  WebSocket indicators found in response headers")
                 
-                logger.info("🔍 WEBSOCKET UPGRADE ANALYSIS:")
+                logger.info(" SEARCH:  WEBSOCKET UPGRADE ANALYSIS:")
                 logger.info(f"   Upgrade Supported: {upgrade_analysis['upgrade_supported']}")
                 logger.info(f"   WebSocket Ready: {upgrade_analysis['websocket_ready']}")
                 logger.info(f"   Response Time: {upgrade_analysis['response_time']:.3f}s")
@@ -283,11 +283,11 @@ class TestWebSocketStagingEnvironmentValidation:
                 return upgrade_analysis
                 
         except httpx.RequestError as e:
-            logger.error(f"❌ WebSocket upgrade test failed: {e}")
+            logger.error(f" FAIL:  WebSocket upgrade test failed: {e}")
             pytest.fail(f"INFRASTRUCTURE ISSUE: Cannot reach WebSocket endpoint for upgrade test: {e}")
             
         except Exception as e:
-            logger.error(f"❌ Unexpected error in upgrade test: {e}")
+            logger.error(f" FAIL:  Unexpected error in upgrade test: {e}")
             raise
 
     async def test_gcp_cloud_run_websocket_configuration(
@@ -304,7 +304,7 @@ class TestWebSocketStagingEnvironmentValidation:
         
         EXPECTED: Cloud Run should support WebSocket connections with appropriate timeouts.
         """
-        logger.info("🏗️ INFRASTRUCTURE TEST: GCP Cloud Run WebSocket configuration")
+        logger.info("[U+1F3D7][U+FE0F] INFRASTRUCTURE TEST: GCP Cloud Run WebSocket configuration")
         
         # Test Cloud Run service health and WebSocket capabilities
         cloud_run_tests = {}
@@ -325,7 +325,7 @@ class TestWebSocketStagingEnvironmentValidation:
                     "healthy": response.status_code == 200
                 }
                 
-                logger.info(f"📊 Backend health: {response.status_code} in {health_response_time:.3f}s")
+                logger.info(f" CHART:  Backend health: {response.status_code} in {health_response_time:.3f}s")
                 
                 if response.status_code == 200:
                     health_data = response.json()
@@ -337,22 +337,22 @@ class TestWebSocketStagingEnvironmentValidation:
                     cloud_run_tests["websocket_health"] = websocket_health
                     cloud_run_tests["e2e_health"] = e2e_health
                     
-                    logger.info(f"📊 WebSocket health data: {websocket_health}")
-                    logger.info(f"📊 E2E testing health data: {e2e_health}")
+                    logger.info(f" CHART:  WebSocket health data: {websocket_health}")
+                    logger.info(f" CHART:  E2E testing health data: {e2e_health}")
                     
                     # Analyze E2E testing configuration
                     e2e_enabled = e2e_health.get("enabled", False)
                     if not e2e_enabled:
-                        logger.warning("⚠️ E2E testing shows as disabled in health check")
-                        logger.warning("⚠️ This confirms the root cause of WebSocket 1011 errors")
+                        logger.warning(" WARNING: [U+FE0F] E2E testing shows as disabled in health check")
+                        logger.warning(" WARNING: [U+FE0F] This confirms the root cause of WebSocket 1011 errors")
                 
         except Exception as e:
-            logger.error(f"❌ Health check failed: {e}")
+            logger.error(f" FAIL:  Health check failed: {e}")
             cloud_run_tests["health_check"] = {"error": str(e), "healthy": False}
         
         try:
             # Test 2: WebSocket connection establishment (basic test)
-            logger.info("🔍 Testing basic WebSocket connection to Cloud Run...")
+            logger.info(" SEARCH:  Testing basic WebSocket connection to Cloud Run...")
             
             # Get auth token for WebSocket test
             token = await staging_auth_helper.get_staging_token_async()
@@ -382,7 +382,7 @@ class TestWebSocketStagingEnvironmentValidation:
                         "cloud_run_capable": True
                     }
                     
-                    logger.info(f"✅ WebSocket connection successful in {connection_time:.3f}s")
+                    logger.info(f" PASS:  WebSocket connection successful in {connection_time:.3f}s")
                     
                     # Send a simple test message to validate full functionality
                     test_message = {
@@ -396,10 +396,10 @@ class TestWebSocketStagingEnvironmentValidation:
                     try:
                         response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                         cloud_run_tests["websocket_connection"]["message_exchange"] = True
-                        logger.info("✅ WebSocket message exchange successful")
+                        logger.info(" PASS:  WebSocket message exchange successful")
                     except asyncio.TimeoutError:
                         cloud_run_tests["websocket_connection"]["message_exchange"] = False
-                        logger.warning("⚠️ WebSocket message exchange timeout (may be expected)")
+                        logger.warning(" WARNING: [U+FE0F] WebSocket message exchange timeout (may be expected)")
                     
             except websockets.exceptions.ConnectionClosedError as e:
                 connection_time = time.time() - start_time
@@ -412,12 +412,12 @@ class TestWebSocketStagingEnvironmentValidation:
                     "cloud_run_capable": e.code != 1006  # 1006 would indicate infrastructure failure
                 }
                 
-                logger.info(f"📊 WebSocket connection closed: {e.code} - {e.reason} in {connection_time:.3f}s")
+                logger.info(f" CHART:  WebSocket connection closed: {e.code} - {e.reason} in {connection_time:.3f}s")
                 
                 if e.code == 1011:
-                    logger.info("✅ Got expected 1011 error - confirms issue reproduction capability")
+                    logger.info(" PASS:  Got expected 1011 error - confirms issue reproduction capability")
                 elif e.code == 1006:
-                    logger.error("❌ 1006 error indicates potential Cloud Run infrastructure issue")
+                    logger.error(" FAIL:  1006 error indicates potential Cloud Run infrastructure issue")
                 
             except asyncio.TimeoutError:
                 connection_time = time.time() - start_time
@@ -429,15 +429,15 @@ class TestWebSocketStagingEnvironmentValidation:
                     "cloud_run_capable": False  # Timeout may indicate configuration issue
                 }
                 
-                logger.warning(f"⚠️ WebSocket connection timeout after {connection_time:.3f}s")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket connection timeout after {connection_time:.3f}s")
                 
         except Exception as e:
-            logger.error(f"❌ WebSocket connection test failed: {e}")
+            logger.error(f" FAIL:  WebSocket connection test failed: {e}")
             cloud_run_tests["websocket_connection"] = {"error": str(e), "success": False}
         
         # Test 3: Environment variable analysis
         try:
-            logger.info("🔍 Analyzing Cloud Run environment configuration...")
+            logger.info(" SEARCH:  Analyzing Cloud Run environment configuration...")
             
             # Check if we can infer environment configuration from responses
             env_analysis = {
@@ -460,16 +460,16 @@ class TestWebSocketStagingEnvironmentValidation:
             
             cloud_run_tests["environment_analysis"] = env_analysis
             
-            logger.info("🔍 CLOUD RUN ENVIRONMENT ANALYSIS:")
+            logger.info(" SEARCH:  CLOUD RUN ENVIRONMENT ANALYSIS:")
             for key, value in env_analysis.items():
                 logger.info(f"   {key}: {value}")
             
         except Exception as e:
-            logger.error(f"❌ Environment analysis failed: {e}")
+            logger.error(f" FAIL:  Environment analysis failed: {e}")
             cloud_run_tests["environment_analysis"] = {"error": str(e)}
         
         # Validate overall Cloud Run configuration
-        logger.info("🔍 CLOUD RUN CONFIGURATION RESULTS:")
+        logger.info(" SEARCH:  CLOUD RUN CONFIGURATION RESULTS:")
         for test_name, result in cloud_run_tests.items():
             if isinstance(result, dict):
                 success = result.get("success") or result.get("healthy") or not result.get("error")
@@ -496,13 +496,13 @@ class TestWebSocketStagingEnvironmentValidation:
         
         EXPECTED: SSL certificates should be valid and properly configured for WebSocket upgrades.
         """
-        logger.info("🏗️ INFRASTRUCTURE TEST: SSL certificate WebSocket validation")
+        logger.info("[U+1F3D7][U+FE0F] INFRASTRUCTURE TEST: SSL certificate WebSocket validation")
         
         websocket_url = staging_config.urls.websocket_url
         
         # Only test SSL if using WSS protocol
         if not websocket_url.startswith("wss://"):
-            logger.info("ℹ️ Skipping SSL test - WebSocket URL uses non-secure protocol")
+            logger.info("[U+2139][U+FE0F] Skipping SSL test - WebSocket URL uses non-secure protocol")
             return {"ssl_test": "skipped", "reason": "non_secure_protocol"}
         
         try:
@@ -511,7 +511,7 @@ class TestWebSocketStagingEnvironmentValidation:
             host = parsed_url.netloc
             port = parsed_url.port or 443
             
-            logger.info(f"🔍 Testing SSL certificate for: {host}:{port}")
+            logger.info(f" SEARCH:  Testing SSL certificate for: {host}:{port}")
             
             # Test SSL certificate using HTTPS request to same host
             https_test_url = f"https://{host}/health"
@@ -537,7 +537,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 ssl_results["response_time"] = response_time
                 ssl_results["status_code"] = response.status_code
                 
-                logger.info(f"✅ SSL certificate valid - HTTPS response: {response.status_code} in {response_time:.3f}s")
+                logger.info(f" PASS:  SSL certificate valid - HTTPS response: {response.status_code} in {response_time:.3f}s")
                 
                 # Check response headers for WebSocket upgrade support over SSL
                 headers = dict(response.headers)
@@ -553,7 +553,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 
                 ssl_results["security_headers"] = security_headers
                 
-                logger.info("📊 Security headers:")
+                logger.info(" CHART:  Security headers:")
                 for header_name, header_value in security_headers.items():
                     if header_value:
                         logger.info(f"   {header_name}: {header_value[:100]}...")
@@ -562,7 +562,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 
                 # Test actual WSS connection to validate SSL + WebSocket combination
                 try:
-                    logger.info("🔍 Testing actual WSS connection...")
+                    logger.info(" SEARCH:  Testing actual WSS connection...")
                     
                     wss_start_time = time.time()
                     async with websockets.connect(
@@ -575,7 +575,7 @@ class TestWebSocketStagingEnvironmentValidation:
                         ssl_results["websocket_ssl_ready"] = True
                         ssl_results["wss_connection_time"] = wss_connection_time
                         
-                        logger.info(f"✅ WSS connection successful in {wss_connection_time:.3f}s")
+                        logger.info(f" PASS:  WSS connection successful in {wss_connection_time:.3f}s")
                         
                 except websockets.exceptions.ConnectionClosedError as e:
                     wss_connection_time = time.time() - wss_start_time
@@ -586,26 +586,26 @@ class TestWebSocketStagingEnvironmentValidation:
                     ssl_results["wss_close_code"] = e.code
                     ssl_results["wss_close_reason"] = e.reason
                     
-                    logger.info(f"✅ WSS SSL handshake successful, connection closed: {e.code} in {wss_connection_time:.3f}s")
+                    logger.info(f" PASS:  WSS SSL handshake successful, connection closed: {e.code} in {wss_connection_time:.3f}s")
                     
                 except Exception as wss_error:
                     ssl_results["websocket_ssl_ready"] = False
                     ssl_results["wss_error"] = str(wss_error)
                     
-                    logger.error(f"❌ WSS connection failed: {wss_error}")
+                    logger.error(f" FAIL:  WSS connection failed: {wss_error}")
                 
         except httpx.RequestError as e:
             ssl_results["certificate_valid"] = False
             ssl_results["error"] = f"HTTPS request failed: {e}"
-            logger.error(f"❌ SSL certificate test failed: {e}")
+            logger.error(f" FAIL:  SSL certificate test failed: {e}")
             
         except Exception as e:
             ssl_results["certificate_valid"] = False  
             ssl_results["error"] = f"Unexpected error: {e}"
-            logger.error(f"❌ SSL validation failed: {e}")
+            logger.error(f" FAIL:  SSL validation failed: {e}")
         
         # Validate SSL results
-        logger.info("🔍 SSL CERTIFICATE VALIDATION RESULTS:")
+        logger.info(" SEARCH:  SSL CERTIFICATE VALIDATION RESULTS:")
         logger.info(f"   Certificate Valid: {ssl_results['certificate_valid']}")
         logger.info(f"   WebSocket SSL Ready: {ssl_results['websocket_ssl_ready']}")
         
@@ -635,7 +635,7 @@ class TestWebSocketStagingEnvironmentValidation:
         
         EXPECTED: Complete infrastructure path should be functional.
         """
-        logger.info("🏗️ INFRASTRUCTURE TEST: Complete WebSocket connection through load balancer")
+        logger.info("[U+1F3D7][U+FE0F] INFRASTRUCTURE TEST: Complete WebSocket connection through load balancer")
         
         infrastructure_test_results = {
             "load_balancer_path": False,
@@ -659,7 +659,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 "User-Agent": "Infrastructure-Test-Client/1.0"
             }
             
-            logger.info(f"📤 Testing complete infrastructure path with headers: {list(infrastructure_headers.keys())}")
+            logger.info(f"[U+1F4E4] Testing complete infrastructure path with headers: {list(infrastructure_headers.keys())}")
             
             # Test complete WebSocket connection flow
             start_time = time.time()
@@ -680,7 +680,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 infrastructure_test_results["load_balancer_path"] = True
                 infrastructure_test_results["websocket_upgrade"] = True
                 
-                logger.info(f"✅ Phase 1: Connection established through load balancer in {connection_time:.3f}s")
+                logger.info(f" PASS:  Phase 1: Connection established through load balancer in {connection_time:.3f}s")
                 
                 # Phase 2: Authentication validation
                 auth_test_message = {
@@ -701,14 +701,14 @@ class TestWebSocketStagingEnvironmentValidation:
                     }
                     infrastructure_test_results["authentication_path"] = True
                     
-                    logger.info("✅ Phase 2: Authentication path through infrastructure successful")
+                    logger.info(" PASS:  Phase 2: Authentication path through infrastructure successful")
                     
                 except asyncio.TimeoutError:
                     connection_phases["authentication"] = {
                         "success": False,
                         "error": "timeout"
                     }
-                    logger.warning("⚠️ Phase 2: Authentication response timeout")
+                    logger.warning(" WARNING: [U+FE0F] Phase 2: Authentication response timeout")
                 
                 # Phase 3: Message routing validation
                 routing_messages = [
@@ -724,13 +724,13 @@ class TestWebSocketStagingEnvironmentValidation:
                     try:
                         response = await asyncio.wait_for(websocket.recv(), timeout=8.0)
                         routing_responses.append(json.loads(response))
-                        logger.info(f"📥 Routing message {i+1}: Response received")
+                        logger.info(f"[U+1F4E5] Routing message {i+1}: Response received")
                         
                     except asyncio.TimeoutError:
-                        logger.warning(f"⚠️ Routing message {i+1}: Response timeout")
+                        logger.warning(f" WARNING: [U+FE0F] Routing message {i+1}: Response timeout")
                         break
                     except Exception as e:
-                        logger.error(f"❌ Routing message {i+1}: Error - {e}")
+                        logger.error(f" FAIL:  Routing message {i+1}: Error - {e}")
                         break
                 
                 if routing_responses:
@@ -740,16 +740,16 @@ class TestWebSocketStagingEnvironmentValidation:
                         "total_sent": len(routing_messages)
                     }
                     infrastructure_test_results["message_routing"] = True
-                    logger.info(f"✅ Phase 3: Message routing successful ({len(routing_responses)}/{len(routing_messages)} responses)")
+                    logger.info(f" PASS:  Phase 3: Message routing successful ({len(routing_responses)}/{len(routing_messages)} responses)")
                 else:
                     connection_phases["message_routing"] = {
                         "success": False,
                         "error": "no_responses"
                     }
-                    logger.warning("⚠️ Phase 3: Message routing failed - no responses received")
+                    logger.warning(" WARNING: [U+FE0F] Phase 3: Message routing failed - no responses received")
                 
                 # Phase 4: Connection persistence test
-                logger.info("🔄 Phase 4: Testing connection persistence (20s)...")
+                logger.info(" CYCLE:  Phase 4: Testing connection persistence (20s)...")
                 persistence_start = time.time()
                 
                 persistence_successful = True
@@ -765,10 +765,10 @@ class TestWebSocketStagingEnvironmentValidation:
                     try:
                         await websocket.send(json.dumps(persistence_message))
                         persistence_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                        logger.info(f"📥 Persistence test {i+1}/4: Success")
+                        logger.info(f"[U+1F4E5] Persistence test {i+1}/4: Success")
                         
                     except Exception as e:
-                        logger.error(f"❌ Persistence test {i+1}/4: Failed - {e}")
+                        logger.error(f" FAIL:  Persistence test {i+1}/4: Failed - {e}")
                         persistence_successful = False
                         break
                 
@@ -779,9 +779,9 @@ class TestWebSocketStagingEnvironmentValidation:
                 infrastructure_test_results["connection_persistence"] = persistence_successful
                 
                 if persistence_successful:
-                    logger.info("✅ Phase 4: Connection persistence validation successful")
+                    logger.info(" PASS:  Phase 4: Connection persistence validation successful")
                 else:
-                    logger.warning("⚠️ Phase 4: Connection persistence issues detected")
+                    logger.warning(" WARNING: [U+FE0F] Phase 4: Connection persistence issues detected")
                 
                 # Final infrastructure validation
                 total_test_time = time.time() - start_time
@@ -789,7 +789,7 @@ class TestWebSocketStagingEnvironmentValidation:
                 successful_phases = sum(1 for result in infrastructure_test_results.values() if result)
                 total_phases = len(infrastructure_test_results)
                 
-                logger.info("🔍 COMPLETE INFRASTRUCTURE TEST RESULTS:")
+                logger.info(" SEARCH:  COMPLETE INFRASTRUCTURE TEST RESULTS:")
                 logger.info(f"   Total Test Time: {total_test_time:.3f}s")
                 logger.info(f"   Successful Phases: {successful_phases}/{total_phases}")
                 
@@ -798,7 +798,7 @@ class TestWebSocketStagingEnvironmentValidation:
                     logger.info(f"   {phase}: {status}")
                 
                 if successful_phases >= 3:  # Require at least 3/5 phases to pass
-                    logger.info("✅ Infrastructure validation successful")
+                    logger.info(" PASS:  Infrastructure validation successful")
                 else:
                     pytest.fail(
                         f"INFRASTRUCTURE ISSUES: Only {successful_phases}/{total_phases} phases successful. "
@@ -815,11 +815,11 @@ class TestWebSocketStagingEnvironmentValidation:
         except websockets.exceptions.ConnectionClosedError as e:
             connection_time = time.time() - start_time
             
-            logger.error(f"❌ Infrastructure connection failed: Code {e.code} - {e.reason} in {connection_time:.3f}s")
+            logger.error(f" FAIL:  Infrastructure connection failed: Code {e.code} - {e.reason} in {connection_time:.3f}s")
             
             # Analyze failure type
             if e.code == 1011:
-                logger.info("ℹ️ Got 1011 error - confirms infrastructure can reproduce the issue")
+                logger.info("[U+2139][U+FE0F] Got 1011 error - confirms infrastructure can reproduce the issue")
             elif e.code == 1006:
                 pytest.fail("INFRASTRUCTURE ISSUE: Connection closed abnormally - possible load balancer configuration problem")
             
@@ -830,7 +830,7 @@ class TestWebSocketStagingEnvironmentValidation:
             }
             
         except Exception as e:
-            logger.error(f"❌ Infrastructure test failed: {e}")
+            logger.error(f" FAIL:  Infrastructure test failed: {e}")
             raise
 
 
@@ -860,7 +860,7 @@ if __name__ == "__main__":
         results = {}
         for test_name, test_method in infrastructure_tests:
             try:
-                print(f"\n🏗️ Running infrastructure test: {test_name}")
+                print(f"\n[U+1F3D7][U+FE0F] Running infrastructure test: {test_name}")
                 
                 if test_name in ["cloud_run_configuration", "complete_lb_path"]:
                     result = await test_method(staging_config, auth_helper)
@@ -868,18 +868,18 @@ if __name__ == "__main__":
                     result = await test_method(staging_config)
                 
                 results[test_name] = {"success": True, "result": result}
-                print(f"✅ {test_name}: SUCCESS")
+                print(f" PASS:  {test_name}: SUCCESS")
                 
             except Exception as e:
                 results[test_name] = {"success": False, "error": str(e)}
-                print(f"❌ {test_name}: FAILED - {e}")
+                print(f" FAIL:  {test_name}: FAILED - {e}")
         
-        print(f"\n📊 INFRASTRUCTURE VALIDATION SUMMARY:")
+        print(f"\n CHART:  INFRASTRUCTURE VALIDATION SUMMARY:")
         for test_name, result in results.items():
             status = "PASS" if result["success"] else "FAIL"
             print(f"   {test_name}: {status}")
         
         overall_success = all(result["success"] for result in results.values())
-        print(f"\n🏗️ OVERALL INFRASTRUCTURE STATUS: {'READY' if overall_success else 'ISSUES_DETECTED'}")
+        print(f"\n[U+1F3D7][U+FE0F] OVERALL INFRASTRUCTURE STATUS: {'READY' if overall_success else 'ISSUES_DETECTED'}")
     
     asyncio.run(run_infrastructure_tests())

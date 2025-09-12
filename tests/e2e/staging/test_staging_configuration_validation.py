@@ -17,7 +17,7 @@ This test suite validates staging environment configuration integrity:
 6. Secret management and environment variable validation
 7. API endpoint configuration and CORS validation
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 - ALL tests use REAL staging environment authentication
 - Real configuration validation against deployed staging services
 - Environment variable and secret validation
@@ -83,7 +83,7 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         self.auth_helper = E2EAuthHelper(environment="staging")
         self.ws_auth_helper = E2EWebSocketAuthHelper(environment="staging")
         
-        self.logger.info(f"✅ Staging configuration validation setup complete")
+        self.logger.info(f" PASS:  Staging configuration validation setup complete")
         
     async def test_staging_service_connectivity_and_health(self):
         """
@@ -175,10 +175,10 @@ class TestStagingConfigurationValidation(BaseE2ETest):
                 content_type = headers.get("content-type", "")
                 assert "json" in content_type.lower() or health_data.get("status_code") == 200, f"Auth service health endpoint has invalid content type: {content_type}"
         
-        self.logger.info(f"✅ Staging service connectivity validation completed")
-        self.logger.info(f"🏥 All services healthy: {len(health_results)}")
+        self.logger.info(f" PASS:  Staging service connectivity validation completed")
+        self.logger.info(f"[U+1F3E5] All services healthy: {len(health_results)}")
         average_response_time = sum(h.get("response_time", 0) for h in health_results.values()) / len(health_results)
-        self.logger.info(f"⏱️ Average response time: {average_response_time:.2f}s")
+        self.logger.info(f"[U+23F1][U+FE0F] Average response time: {average_response_time:.2f}s")
         
     async def test_staging_authentication_configuration_validation(self):
         """
@@ -322,10 +322,10 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         
         assert successful_tests >= (total_tests * 0.8), f"Too many authentication config tests failed: {successful_tests}/{total_tests}"
         
-        self.logger.info(f"✅ Staging authentication configuration validation completed")
-        self.logger.info(f"🔐 Authentication tests passed: {successful_tests}/{total_tests}")
+        self.logger.info(f" PASS:  Staging authentication configuration validation completed")
+        self.logger.info(f"[U+1F510] Authentication tests passed: {successful_tests}/{total_tests}")
         for test_name, result in auth_config_results.items():
-            status = "✅" if result.get("success") else "❌"
+            status = " PASS: " if result.get("success") else " FAIL: "
             self.logger.info(f"  {status} {test_name}: {result.get('success', 'Unknown')}")
         
     async def test_staging_websocket_configuration_and_ssl(self):
@@ -528,10 +528,10 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         
         assert successful_tests >= (total_tests * 0.8), f"Too many WebSocket config tests failed: {successful_tests}/{total_tests}"
         
-        self.logger.info(f"✅ WebSocket configuration and SSL validation completed")
-        self.logger.info(f"🔌 WebSocket tests passed: {successful_tests}/{total_tests}")
+        self.logger.info(f" PASS:  WebSocket configuration and SSL validation completed")
+        self.logger.info(f"[U+1F50C] WebSocket tests passed: {successful_tests}/{total_tests}")
         for test_name, result in websocket_config_results.items():
-            status = "✅" if result.get("success") else "❌"
+            status = " PASS: " if result.get("success") else " FAIL: "
             self.logger.info(f"  {status} {test_name}: {result.get('success', 'Unknown')}")
         
     async def test_staging_environment_variables_validation(self):
@@ -693,10 +693,10 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         success_threshold = 0.6  # 60% success rate acceptable
         assert successful_tests >= (total_tests * success_threshold), f"Too many environment validation tests failed: {successful_tests}/{total_tests}"
         
-        self.logger.info(f"✅ Environment variables validation completed")
-        self.logger.info(f"🌍 Environment tests passed: {successful_tests}/{total_tests}")
+        self.logger.info(f" PASS:  Environment variables validation completed")
+        self.logger.info(f"[U+1F30D] Environment tests passed: {successful_tests}/{total_tests}")
         for test_name, result in env_validation_results.items():
-            status = "✅" if result.get("success") else "⚠️"
+            status = " PASS: " if result.get("success") else " WARNING: [U+FE0F]"
             self.logger.info(f"  {status} {test_name}: {result.get('success', 'Unknown')}")
         
     async def test_staging_api_endpoints_and_cors_validation(self):
@@ -878,10 +878,10 @@ class TestStagingConfigurationValidation(BaseE2ETest):
         success_threshold = 0.7  # 70% success rate acceptable
         assert successful_tests >= (total_tests * success_threshold), f"Too many API validation tests failed: {successful_tests}/{total_tests}"
         
-        self.logger.info(f"✅ API endpoints and CORS validation completed")
-        self.logger.info(f"🔗 API tests passed: {successful_tests}/{total_tests}")
+        self.logger.info(f" PASS:  API endpoints and CORS validation completed")
+        self.logger.info(f"[U+1F517] API tests passed: {successful_tests}/{total_tests}")
         for test_name, result in api_validation_results.items():
-            status = "✅" if result.get("success") else "⚠️"
+            status = " PASS: " if result.get("success") else " WARNING: [U+FE0F]"
             self.logger.info(f"  {status} {test_name}: {result.get('success', 'Unknown')}")
 
 

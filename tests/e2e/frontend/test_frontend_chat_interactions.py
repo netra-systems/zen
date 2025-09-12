@@ -291,7 +291,7 @@ class TestFrontendChatInteractions:
             "Message with **bold** and *italic* text",
             "Message with `code` blocks",
             "Message with\nmultiple\nlines",
-            "Message with emoji 🚀 💡 ✨",
+            "Message with emoji [U+1F680]  IDEA:  [U+2728]",
             "Message with [link](https://example.com)",
         ]
         
@@ -416,7 +416,7 @@ class TestFrontendChatInteractions:
             # Use token parameter instead of headers
             
             # Add reaction
-            reaction_data = {"emoji": "👍", "type": "like"}
+            reaction_data = {"emoji": "[U+1F44D]", "type": "like"}
             
             try:
                 response = await self.harness.http_client.post(

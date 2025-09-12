@@ -56,13 +56,13 @@ def check_github_secrets() -> Dict[str, bool]:
     # In GitHub Actions, secrets are passed as env vars
     for secret_name in secrets:
         if get_env().get(secret_name):
-            print(f"{Fore.GREEN}✓ {secret_name}: Configured{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}[U+2713] {secret_name}: Configured{Style.RESET_ALL}")
             secrets[secret_name] = True
         else:
             if secret_name in ["GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"]:
-                print(f"{Fore.YELLOW}⚠ {secret_name}: Not set (optional){Style.RESET_ALL}")
+                print(f"{Fore.YELLOW} WARNING:  {secret_name}: Not set (optional){Style.RESET_ALL}")
             else:
-                print(f"{Fore.RED}✗ {secret_name}: Not configured{Style.RESET_ALL}")
+                print(f"{Fore.RED}[U+2717] {secret_name}: Not configured{Style.RESET_ALL}")
     
     return secrets
 
@@ -70,7 +70,7 @@ def _get_database_url() -> Optional[str]:
     """Get and validate #removed-legacyenvironment variable."""
     db_url = get_env().get("DATABASE_URL")
     if not db_url:
-        print(f"{Fore.RED}✗ #removed-legacynot set{Style.RESET_ALL}")
+        print(f"{Fore.RED}[U+2717] #removed-legacynot set{Style.RESET_ALL}")
         return None
     return db_url
 
@@ -89,7 +89,7 @@ def _parse_cloud_sql_url(db_url: str) -> Optional[Tuple[str, str, str, str]]:
         creds, db = creds_and_db.split("@")[0], creds_and_db.split("/")[-1]
         user, password = creds.split(":")
         return user, password, db, socket_path
-    print(f"{Fore.RED}✗ Invalid #removed-legacyformat{Style.RESET_ALL}")
+    print(f"{Fore.RED}[U+2717] Invalid #removed-legacyformat{Style.RESET_ALL}")
     return None
 
 def _connect_cloud_sql(user: str, password: str, db: str, socket_path: str):
@@ -109,7 +109,7 @@ def _test_db_version(conn) -> None:
     cursor = conn.cursor()
     cursor.execute("SELECT version()")
     version = cursor.fetchone()[0]
-    print(f"{Fore.GREEN}✓ PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}[U+2713] PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
     cursor.close()
 
 def _check_db_tables(conn) -> None:
@@ -128,7 +128,7 @@ def _check_db_tables(conn) -> None:
         for table in tables[:5]:
             print(f"    - {table[0]}")
     else:
-        print(f"{Fore.YELLOW}  ⚠ No tables found (run migrations){Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}   WARNING:  No tables found (run migrations){Style.RESET_ALL}")
     cursor.close()
 
 def check_database_connection() -> bool:
@@ -157,5 +157,5 @@ def check_database_connection() -> bool:
         return True
         
     except Exception as e:
-        print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}[U+2717] PostgreSQL connection failed: {e}{Style.RESET_ALL}")
         return False

@@ -1,5 +1,5 @@
 """
-🔧 INTEGRATION TEST SUITE: Authentication Configuration Regression Prevention
+[U+1F527] INTEGRATION TEST SUITE: Authentication Configuration Regression Prevention
 
 Tests to prevent auth configuration regressions that have caused production outages.
 This validates configuration consistency and prevents repeat of past incidents.
@@ -192,7 +192,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents auth failures due to JWT secret misconfigurations.
         """
-        logger.info("🔑 Integration: Testing JWT secret regression prevention")
+        logger.info("[U+1F511] Integration: Testing JWT secret regression prevention")
         
         # Test JWT secret consistency
         validation = self.validator.validate_jwt_secret_consistency(["test", "development"])
@@ -243,7 +243,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         if not strength_validation["valid"]:
             pytest.fail(f"JWT SECRET SECURITY REGRESSION: {strength_validation['business_impact']}")
         
-        logger.info("✅ JWT secret regression prevention validated")
+        logger.info(" PASS:  JWT secret regression prevention validated")
         
     async def test_service_url_configuration_regression_prevention(self):
         """
@@ -251,7 +251,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents service discovery failures and routing issues.
         """
-        logger.info("🔗 Integration: Testing service URL configuration regression prevention")
+        logger.info("[U+1F517] Integration: Testing service URL configuration regression prevention")
         
         # Collect service URL configuration
         service_configs = {
@@ -314,7 +314,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
             logger.warning(f"Service connectivity issues: {connectivity_validation['unreachable_services']}")
             # Don't fail test - services may not be running in test environment
             
-        logger.info("✅ Service URL configuration regression prevention validated")
+        logger.info(" PASS:  Service URL configuration regression prevention validated")
         
     async def test_oauth_configuration_regression_prevention(self):
         """
@@ -322,7 +322,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents OAuth login failures that block user onboarding.
         """
-        logger.info("🔐 Integration: Testing OAuth configuration regression prevention")
+        logger.info("[U+1F510] Integration: Testing OAuth configuration regression prevention")
         
         # Test OAuth configuration validation
         oauth_config = {
@@ -369,7 +369,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         elif not oauth_validation["valid"]:
             pytest.fail(f"OAUTH CONFIG REGRESSION: {oauth_validation['business_impact']}")
         
-        logger.info("✅ OAuth configuration regression prevention tested")
+        logger.info(" PASS:  OAuth configuration regression prevention tested")
         
     async def test_database_configuration_regression_prevention(self):
         """
@@ -377,7 +377,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents data access failures and connection issues.
         """
-        logger.info("🗄️ Integration: Testing database configuration regression prevention")
+        logger.info("[U+1F5C4][U+FE0F] Integration: Testing database configuration regression prevention")
         
         # Test database configuration
         db_config = {
@@ -427,7 +427,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
             logger.warning(f"Database configuration issue: {db_validation['business_impact']}")
             # Don't fail - may be expected in test environment
             
-        logger.info("✅ Database configuration regression prevention tested")
+        logger.info(" PASS:  Database configuration regression prevention tested")
         
     async def test_environment_isolation_regression_prevention(self):
         """
@@ -435,7 +435,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents test/staging from affecting production systems.
         """
-        logger.info("🔒 Integration: Testing environment isolation regression prevention")
+        logger.info("[U+1F512] Integration: Testing environment isolation regression prevention")
         
         # Test environment isolation
         production_indicators = [
@@ -470,7 +470,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         if sensitive_env_checks:
             pytest.fail(f"CRITICAL ISOLATION REGRESSION: Test environment compromised - {sensitive_env_checks}")
         
-        logger.info("✅ Environment isolation regression prevention validated")
+        logger.info(" PASS:  Environment isolation regression prevention validated")
         
     async def test_configuration_completeness_regression_prevention(self):
         """
@@ -478,7 +478,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         
         BUSINESS VALUE: Ensures all required configuration is present and valid.
         """
-        logger.info("📋 Integration: Testing configuration completeness regression prevention")
+        logger.info("[U+1F4CB] Integration: Testing configuration completeness regression prevention")
         
         # Check completeness of critical configurations
         required_configs = {
@@ -526,7 +526,7 @@ class TestAuthConfigRegressionPrevention(BaseIntegrationTest):
         if completeness_validation["optional_missing"]:
             logger.info(f"Optional configuration info: {completeness_validation['business_impact']}")
         
-        logger.info("✅ Configuration completeness regression prevention validated")
+        logger.info(" PASS:  Configuration completeness regression prevention validated")
 
 
 @pytest.mark.integration
@@ -540,7 +540,7 @@ class TestAuthConfigRegressionRecovery(BaseIntegrationTest):
         
         BUSINESS VALUE: System degrades gracefully when configuration is invalid.
         """
-        logger.info("🔄 Integration: Testing configuration error recovery")
+        logger.info(" CYCLE:  Integration: Testing configuration error recovery")
         
         auth_helper = E2EAuthHelper()
         
@@ -580,7 +580,7 @@ class TestAuthConfigRegressionRecovery(BaseIntegrationTest):
             logger.warning(f"Configuration issues detected: {failure_details}")
             # Don't fail - this tests recovery capability
             
-        logger.info(f"✅ Configuration error recovery tested - {len(recovery_tests)} tests")
+        logger.info(f" PASS:  Configuration error recovery tested - {len(recovery_tests)} tests")
 
 
 if __name__ == "__main__":

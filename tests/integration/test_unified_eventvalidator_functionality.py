@@ -89,7 +89,7 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         
     def test_unified_validator_initialization(self):
         """Test that UnifiedEventValidator initializes correctly."""
-        logger.info("🧪 Testing UnifiedEventValidator initialization")
+        logger.info("[U+1F9EA] Testing UnifiedEventValidator initialization")
         
         # Test default initialization
         validator = self.UnifiedEventValidator()
@@ -105,11 +105,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertFalse(validator_custom.strict_mode)
         self.assertEqual(validator_custom.timeout_seconds, 60.0)
         
-        logger.success("✅ UnifiedEventValidator initialization test passed")
+        logger.success(" PASS:  UnifiedEventValidator initialization test passed")
         
     def test_critical_events_validation(self):
         """Test validation of all 5 critical WebSocket events."""
-        logger.info("🧪 Testing critical events validation")
+        logger.info("[U+1F9EA] Testing critical events validation")
         
         validator = self.UnifiedEventValidator()
         
@@ -136,11 +136,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
             self.assertTrue(result.is_valid, f"Critical event {event_type} should be valid")
             self.assertEqual(result.criticality, self.EventCriticality.MISSION_CRITICAL)
             
-        logger.success("✅ All 5 critical events validation test passed")
+        logger.success(" PASS:  All 5 critical events validation test passed")
         
     def test_business_value_scoring(self):
         """Test business value scoring functionality."""
-        logger.info("🧪 Testing business value scoring")
+        logger.info("[U+1F9EA] Testing business value scoring")
         
         validator = self.UnifiedEventValidator()
         
@@ -165,11 +165,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertEqual(result.revenue_impact, "NONE")
         self.assertEqual(len(result.missing_critical_events), 0)
         
-        logger.success("✅ Business value scoring test passed")
+        logger.success(" PASS:  Business value scoring test passed")
         
     def test_event_sequence_validation(self):
         """Test event sequence validation logic."""
-        logger.info("🧪 Testing event sequence validation")
+        logger.info("[U+1F9EA] Testing event sequence validation")
         
         validator = self.UnifiedEventValidator()
         
@@ -188,11 +188,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         sequence_valid, sequence_errors = validator.validate_event_sequence()
         self.assertTrue(sequence_valid, f"Correct sequence should be valid. Errors: {sequence_errors}")
         
-        logger.success("✅ Event sequence validation test passed")
+        logger.success(" PASS:  Event sequence validation test passed")
         
     def test_connection_readiness_validation(self):
         """Test connection readiness validation."""
-        logger.info("🧪 Testing connection readiness validation")
+        logger.info("[U+1F9EA] Testing connection readiness validation")
         
         validator = self.UnifiedEventValidator()
         
@@ -215,11 +215,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertFalse(result.is_valid)
         self.assertIn("connection_id", result.error_message)
         
-        logger.success("✅ Connection readiness validation test passed")
+        logger.success(" PASS:  Connection readiness validation test passed")
         
     def test_backward_compatibility_functions(self):
         """Test backward compatibility functions work correctly."""
-        logger.info("🧪 Testing backward compatibility functions")
+        logger.info("[U+1F9EA] Testing backward compatibility functions")
         
         # Test global validator functions
         from netra_backend.app.websocket_core.event_validator import (
@@ -259,11 +259,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertTrue(result.is_valid)
         self.assertEqual(result.business_value_score, 100.0)
         
-        logger.success("✅ Backward compatibility functions test passed")
+        logger.success(" PASS:  Backward compatibility functions test passed")
         
     def test_loud_failure_patterns(self):
         """Test that validation failures are logged loudly."""
-        logger.info("🧪 Testing loud failure patterns")
+        logger.info("[U+1F9EA] Testing loud failure patterns")
         
         validator = self.UnifiedEventValidator()
         
@@ -285,11 +285,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertGreater(stats["total_validations"], 0)
         self.assertGreater(stats["failed_validations"], 0)
         
-        logger.success("✅ Loud failure patterns test passed")
+        logger.success(" PASS:  Loud failure patterns test passed")
         
     def test_websocket_event_message_functionality(self):
         """Test WebSocketEventMessage dataclass functionality."""
-        logger.info("🧪 Testing WebSocketEventMessage functionality")
+        logger.info("[U+1F9EA] Testing WebSocketEventMessage functionality")
         
         # Test creation from dict
         event_dict = {
@@ -312,11 +312,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertEqual(converted_dict["type"], "agent_started")
         self.assertEqual(converted_dict["user_id"], self.test_user_id)
         
-        logger.success("✅ WebSocketEventMessage functionality test passed")
+        logger.success(" PASS:  WebSocketEventMessage functionality test passed")
         
     def test_validation_result_business_metrics(self):
         """Test ValidationResult business metrics calculation."""
-        logger.info("🧪 Testing ValidationResult business metrics")
+        logger.info("[U+1F9EA] Testing ValidationResult business metrics")
         
         # Test with missing critical events
         missing_events = {"agent_completed"}
@@ -342,11 +342,11 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         self.assertEqual(result_complete.business_value_score, 100.0)
         self.assertEqual(result_complete.revenue_impact, "NONE")
         
-        logger.success("✅ ValidationResult business metrics test passed")
+        logger.success(" PASS:  ValidationResult business metrics test passed")
         
     def test_golden_path_protection(self):
         """Test that unified validator protects Golden Path functionality."""
-        logger.info("🧪 Testing Golden Path protection")
+        logger.info("[U+1F9EA] Testing Golden Path protection")
         
         validator = self.UnifiedEventValidator()
         
@@ -367,7 +367,7 @@ class TestUnifiedEventValidatorFunctionality(SSotBaseTestCase):
         expected_fields = {"run_id", "agent_name", "timestamp", "payload"}
         self.assertEqual(required_schema, expected_fields)
         
-        logger.success("✅ Golden Path protection test passed")
+        logger.success(" PASS:  Golden Path protection test passed")
 
 
 if __name__ == "__main__":
@@ -380,8 +380,8 @@ if __name__ == "__main__":
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ SUCCESS: Unified EventValidator functionality validated")
+        print(" PASS:  SUCCESS: Unified EventValidator functionality validated")
         print("This proves the SSOT consolidation preserves all functionality")
     else:
-        print("❌ FAILURE: Unified EventValidator has issues")
+        print(" FAIL:  FAILURE: Unified EventValidator has issues")
         print("SSOT consolidation may have broken functionality")

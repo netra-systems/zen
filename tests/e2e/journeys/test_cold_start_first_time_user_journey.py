@@ -291,17 +291,17 @@ Welcome to Netra! I'm excited to help you optimize your AI infrastructure costs 
 
 Since you're new to the platform, let me guide you through what I can help with:
 
-🎯 **AI Cost Optimization**
+ TARGET:  **AI Cost Optimization**
 - Analyze your current LLM usage patterns and spending
 - Recommend optimal model selection for your workloads
 - Set up automated cost monitoring and alerts
 
-💡 **Getting Started Recommendations**
+ IDEA:  **Getting Started Recommendations**
 1. Connect your AI services (OpenAI, Anthropic, etc.)
 2. Review your usage patterns from the past 30 days
 3. Set up budget alerts and optimization rules
 
-📊 **Quick Wins**
+ CHART:  **Quick Wins**
 - Model tier optimization can reduce costs by 40-70%
 - Batch processing for non-urgent requests
 - Smart caching for repeated queries
@@ -883,7 +883,7 @@ async def test_cold_start_first_time_user_complete_journey():
         print(f"[SUCCESS] Real Cold Start Journey: {results['total_journey_time']:.2f}s")
         print(f"[BUSINESS] Real first-time user onboarding validated - $120K+ MRR protected")
         print(f"[USER] {results['user_data']['email']} -> Complete REAL journey from cold start")
-        print(f"[REAL SERVICES] Auth: ✓, Dashboard: ✓, Chat: ✓, WebSocket: ✓")
+        print(f"[REAL SERVICES] Auth: [U+2713], Dashboard: [U+2713], Chat: [U+2713], WebSocket: [U+2713]")
 
 
 @pytest.mark.asyncio
@@ -973,4 +973,4 @@ async def test_first_time_user_value_delivery():
         print("[VALUE] First-time user received comprehensive value through REAL services")
         print(f"[ENGAGEMENT] Real agent response: {len(agent_response)} characters")
         print(f"[GUIDANCE] Real backend provided {len(recommendations)} actionable recommendations")
-        print(f"[BUSINESS] Real onboarding: ✓, Engagement: ✓, Value: ✓")
+        print(f"[BUSINESS] Real onboarding: [U+2713], Engagement: [U+2713], Value: [U+2713]")

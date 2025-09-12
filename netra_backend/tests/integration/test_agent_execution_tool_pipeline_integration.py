@@ -4,11 +4,11 @@ Agent Execution & Tool Pipeline Integration Tests - Golden Path Critical
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure reliable AI-powered business workflows for $500K+ ARR
-- Value Impact: Validates Data→Optimization→Report agent execution order critical to business value delivery
+- Value Impact: Validates Data -> Optimization -> Report agent execution order critical to business value delivery
 - Strategic Impact: Prevents agent coordination failures that block 90% of customer value (chat interactions)
 
 CRITICAL: These tests validate the core Golden Path user flow:
-1. SupervisorAgent orchestrates sub-agent workflow (Data Agent → Optimization Agent → Report Agent)
+1. SupervisorAgent orchestrates sub-agent workflow (Data Agent  ->  Optimization Agent  ->  Report Agent)
 2. Tool execution pipeline with transparency (tool_executing, tool_completed events)
 3. Agent context sharing for data flow between sub-agents  
 4. Real business value delivery through cost optimization and data analysis
@@ -25,7 +25,7 @@ Following CLAUDE.md requirements:
 - SSOT patterns from test_framework
 - Each test has Business Value Justification 
 - Tests MUST FAIL HARD when issues are present
-- Validates the specific Data→Optimization→Report sequence
+- Validates the specific Data -> Optimization -> Report sequence
 """
 
 import asyncio
@@ -65,7 +65,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
     Integration tests for Agent Execution & Tool Pipeline coordination.
     
     CRITICAL: These tests validate the Golden Path user flow where SupervisorAgent
-    orchestrates Data→Optimization→Report agent sequence with tool pipeline integration.
+    orchestrates Data -> Optimization -> Report agent sequence with tool pipeline integration.
     """
     
     @pytest.mark.integration
@@ -75,7 +75,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Ensures SupervisorAgent can be created with proper SSOT patterns
         
         Golden Path Component: Agent pipeline initialization and setup
-        Data Flow: SupervisorAgent → UserExecutionEngine → AgentInstanceFactory
+        Data Flow: SupervisorAgent  ->  UserExecutionEngine  ->  AgentInstanceFactory
         """
         # Create mock LLM manager and WebSocket bridge for integration test
         mock_llm_manager = AsyncMock(spec=LLMManager)
@@ -107,7 +107,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Validates per-user isolated execution context creation
         
         Golden Path Component: User context isolation for concurrent operations
-        Data Flow: UserExecutionContext → Database Session → Redis Session
+        Data Flow: UserExecutionContext  ->  Database Session  ->  Redis Session
         """
         # Create user context using real database session
         user_id = UnifiedIdGenerator.generate_user_id()
@@ -147,7 +147,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Ensures AgentInstanceFactory creates isolated agent instances
         
         Golden Path Component: Agent instance factory initialization sequences  
-        Data Flow: Factory → Registry → Agent Classes → WebSocket Emitters
+        Data Flow: Factory  ->  Registry  ->  Agent Classes  ->  WebSocket Emitters
         """
         # Get factory instance
         factory = get_agent_instance_factory()
@@ -201,7 +201,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Tests core agent execution pipeline with user isolation
         
         Golden Path Component: Agent execution pipeline with UserExecutionEngine
-        Data Flow: SupervisorAgent → UserExecutionEngine → AgentExecutionCore → Results
+        Data Flow: SupervisorAgent  ->  UserExecutionEngine  ->  AgentExecutionCore  ->  Results
         """
         # Create user context
         user_id = UnifiedIdGenerator.generate_user_id()
@@ -272,7 +272,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Ensures WebSocket events provide user visibility into agent progress
         
         Golden Path Component: WebSocket event emission for real-time user feedback
-        Data Flow: Agent Execution → WebSocket Events → User Interface Updates
+        Data Flow: Agent Execution  ->  WebSocket Events  ->  User Interface Updates
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -328,10 +328,10 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
     @pytest.mark.real_services  
     async def test_data_to_optimization_to_report_agent_sequence(self, real_services_fixture):
         """
-        Business Value: Critical Data→Optimization→Report execution order for business workflows
+        Business Value: Critical Data -> Optimization -> Report execution order for business workflows
         
         Golden Path Component: Agent execution order (Data BEFORE Optimization BEFORE Report) 
-        Data Flow: Data Agent → Context Sharing → Optimization Agent → Report Agent
+        Data Flow: Data Agent  ->  Context Sharing  ->  Optimization Agent  ->  Report Agent
         """
         # Create user context for agent sequence
         user_context = UserExecutionContext.from_request_supervisor(
@@ -427,7 +427,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Ensures multiple users can run agents concurrently without interference
         
         Golden Path Component: Multi-user concurrent execution with isolation
-        Data Flow: User1 Context | User2 Context → Isolated Executions → Separate Results
+        Data Flow: User1 Context | User2 Context  ->  Isolated Executions  ->  Separate Results
         """
         # Create contexts for 3 concurrent users
         user_contexts = []
@@ -528,7 +528,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Tool execution provides transparency and actionable insights
         
         Golden Path Component: Tool dispatcher integration and execution
-        Data Flow: Agent → Tool Dispatcher → Tool Execution → WebSocket Notifications → Results
+        Data Flow: Agent  ->  Tool Dispatcher  ->  Tool Execution  ->  WebSocket Notifications  ->  Results
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -600,7 +600,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: System gracefully handles timeouts without data loss
         
         Golden Path Component: Agent timeout handling and recovery
-        Data Flow: Long Running Agent → Timeout Detection → Graceful Recovery → User Notification
+        Data Flow: Long Running Agent  ->  Timeout Detection  ->  Graceful Recovery  ->  User Notification
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -683,7 +683,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Errors are communicated clearly to users with actionable information
         
         Golden Path Component: Agent error propagation and handling
-        Data Flow: Agent Error → Error Classification → User Communication → Recovery Options
+        Data Flow: Agent Error  ->  Error Classification  ->  User Communication  ->  Recovery Options
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -770,7 +770,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Agent execution state is preserved for reliability and debugging
         
         Golden Path Component: Agent state persistence and recovery
-        Data Flow: Agent State → Database Storage → State Recovery → Execution Continuation
+        Data Flow: Agent State  ->  Database Storage  ->  State Recovery  ->  Execution Continuation
         """
         # Create user context with database session
         user_context = UserExecutionContext.from_request_supervisor(
@@ -845,7 +845,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Users can cancel long-running operations without resource leaks
         
         Golden Path Component: Agent cancellation and cleanup
-        Data Flow: Cancel Request → Active Run Termination → Resource Cleanup → User Notification
+        Data Flow: Cancel Request  ->  Active Run Termination  ->  Resource Cleanup  ->  User Notification
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -925,7 +925,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Tool execution is secure and isolated between users
         
         Golden Path Component: Tool execution isolation and security
-        Data Flow: User Request → Tool Validation → Isolated Execution → Secure Results
+        Data Flow: User Request  ->  Tool Validation  ->  Isolated Execution  ->  Secure Results
         """
         # Create multiple user contexts
         user_contexts = []
@@ -1005,7 +1005,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: System efficiently manages memory for scalable operations
         
         Golden Path Component: Agent memory management and performance
-        Data Flow: Memory Allocation → Usage Tracking → Cleanup → Performance Optimization
+        Data Flow: Memory Allocation  ->  Usage Tracking  ->  Cleanup  ->  Performance Optimization
         """
         # Create user context
         user_context = UserExecutionContext.from_request_supervisor(
@@ -1086,7 +1086,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Agents can be configured for different business scenarios
         
         Golden Path Component: Agent configuration and parameterization
-        Data Flow: Configuration Parameters → Agent Customization → Business Logic Adaptation
+        Data Flow: Configuration Parameters  ->  Agent Customization  ->  Business Logic Adaptation
         """
         # Test different configuration scenarios
         configurations = [
@@ -1191,7 +1191,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Complete audit trail enables compliance and troubleshooting
         
         Golden Path Component: Agent audit trail and observability  
-        Data Flow: Agent Actions → Audit Logging → Observability Metrics → Compliance Reports
+        Data Flow: Agent Actions  ->  Audit Logging  ->  Observability Metrics  ->  Compliance Reports
         """
         # Create user context for audit tracking
         user_context = UserExecutionContext.from_request_supervisor(
@@ -1307,7 +1307,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Multiple agents can work together for complex business workflows
         
         Golden Path Component: Multi-agent concurrent execution
-        Data Flow: Orchestrator → Multiple Agents → Result Coordination → Business Value Delivery
+        Data Flow: Orchestrator  ->  Multiple Agents  ->  Result Coordination  ->  Business Value Delivery
         """
         # Create orchestrator user context
         orchestrator_context = UserExecutionContext.from_request_supervisor(
@@ -1512,7 +1512,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Complex workflows execute in correct order with proper data flow
         
         Golden Path Component: Agent dependency resolution
-        Data Flow: Dependency Graph → Execution Planning → Sequential Coordination → Business Results
+        Data Flow: Dependency Graph  ->  Execution Planning  ->  Sequential Coordination  ->  Business Results
         """
         # Create comprehensive dependency graph for business workflow
         dependency_graph = {
@@ -1687,7 +1687,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Tool results are processed correctly and provide actionable insights
         
         Golden Path Component: Tool result processing and validation
-        Data Flow: Tool Execution → Result Processing → Validation → Business Insights
+        Data Flow: Tool Execution  ->  Result Processing  ->  Validation  ->  Business Insights
         """
         # Create user context for tool processing
         user_context = UserExecutionContext.from_request_supervisor(
@@ -1872,7 +1872,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: System monitoring enables optimization and reliability improvements
         
         Golden Path Component: Agent execution metrics and monitoring
-        Data Flow: Agent Execution → Metrics Collection → Performance Analysis → System Optimization
+        Data Flow: Agent Execution  ->  Metrics Collection  ->  Performance Analysis  ->  System Optimization
         """
         # Create user context for metrics testing
         user_context = UserExecutionContext.from_request_supervisor(
@@ -1988,7 +1988,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
         Business Value: Complete Golden Path validates end-to-end AI value delivery pipeline
         
         Golden Path Component: Complete integration with all WebSocket events
-        Data Flow: User Request → SupervisorAgent → Data→Optimization→Report → WebSocket Events → Business Value
+        Data Flow: User Request  ->  SupervisorAgent  ->  Data -> Optimization -> Report  ->  WebSocket Events  ->  Business Value
         """
         # Create comprehensive user context for Golden Path
         user_context = UserExecutionContext.from_request_supervisor(
@@ -2072,7 +2072,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
             if result.get('orchestration_successful'):
                 business_value_delivered = True
             
-            # Test Data→Optimization→Report sequence simulation
+            # Test Data -> Optimization -> Report sequence simulation
             agent_sequence_test = await self._simulate_golden_path_agent_sequence(
                 user_context, supervisor, mock_websocket_bridge
             )
@@ -2111,7 +2111,7 @@ class TestAgentExecutionToolPipelineIntegration(BaseIntegrationTest):
     async def _simulate_golden_path_agent_sequence(self, user_context: UserExecutionContext,
                                                   supervisor: SupervisorAgent,
                                                   mock_websocket_bridge: AsyncMock) -> Dict[str, Any]:
-        """Simulate the critical Data→Optimization→Report agent sequence."""
+        """Simulate the critical Data -> Optimization -> Report agent sequence."""
         try:
             # Simulate Data Agent execution
             data_context = user_context.metadata.copy()

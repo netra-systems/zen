@@ -1,7 +1,7 @@
 """Structured LLM operations module.
 
 Handles structured output generation, schema validation, and fallback parsing.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 from typing import Any, Optional, Type, TypeVar
 

@@ -173,7 +173,7 @@
                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                 # REMOVED_SYNTAX_ERROR: for service_name, service_result in results['service_results'].items():
-                                                    # REMOVED_SYNTAX_ERROR: status = "✅ HEALTHY" if service_result['healthy'] else "❌ UNHEALTHY"
+                                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  HEALTHY" if service_result['healthy'] else " FAIL:  UNHEALTHY"
                                                     # REMOVED_SYNTAX_ERROR: port = service_result['port']
                                                     # REMOVED_SYNTAX_ERROR: response_time = service_result.get('response_time_ms', 0)
 
@@ -181,7 +181,7 @@
                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string" if response_time else "   No response time")
 
                                                     # REMOVED_SYNTAX_ERROR: if service_result.get('service_identity_confirmed'):
-                                                        # REMOVED_SYNTAX_ERROR: print(f"   ✅ Service identity confirmed")
+                                                        # REMOVED_SYNTAX_ERROR: print(f"    PASS:  Service identity confirmed")
                                                         # REMOVED_SYNTAX_ERROR: elif 'actual_service' in service_result:
                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -200,7 +200,7 @@
                                                                     # REMOVED_SYNTAX_ERROR: assert auth_result['port'] == 8001, "formatted_string"
 
                                                                     # REMOVED_SYNTAX_ERROR: if auth_result['healthy']:
-                                                                        # REMOVED_SYNTAX_ERROR: print("✅ Auth service is healthy on correct port 8001")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Auth service is healthy on correct port 8001")
                                                                         # REMOVED_SYNTAX_ERROR: else:
                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                             # Don't fail if service is accessible but not perfectly healthy
@@ -209,7 +209,7 @@
 
                                                                                 # Validate service identity
                                                                                 # REMOVED_SYNTAX_ERROR: if auth_result.get('service_identity_confirmed'):
-                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ Service identity confirmed as auth-service")
+                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Service identity confirmed as auth-service")
                                                                                     # REMOVED_SYNTAX_ERROR: else:
                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -233,7 +233,7 @@
                                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                             # REMOVED_SYNTAX_ERROR: if result.get('requires_auth'):
-                                                                                                # REMOVED_SYNTAX_ERROR: print("✅ WebSocket endpoint requires authentication (expected)")
+                                                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket endpoint requires authentication (expected)")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: if result.get('connection_time_ms'):
                                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -246,7 +246,7 @@
                                                                                                         # REMOVED_SYNTAX_ERROR: if not result['endpoint_accessible'] and result['error']:
                                                                                                             # If there's a connection error, it might be because services aren't running
                                                                                                             # REMOVED_SYNTAX_ERROR: if "connection" in result['error'].lower() or "endpoint not accessible" in result['error'].lower():
-                                                                                                                # REMOVED_SYNTAX_ERROR: print("⚠️  WebSocket endpoint not accessible - this may indicate backend service issues")
+                                                                                                                # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  WebSocket endpoint not accessible - this may indicate backend service issues")
                                                                                                                 # Don't fail the test if services aren't fully running yet
                                                                                                                 # REMOVED_SYNTAX_ERROR: pytest.skip("formatted_string")
                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
@@ -286,11 +286,11 @@
                                                                                                                                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
                                                                                                                                     # REMOVED_SYNTAX_ERROR: if response_time < max_time / 2:
-                                                                                                                                        # REMOVED_SYNTAX_ERROR: print(f"   ✅ Excellent response time")
+                                                                                                                                        # REMOVED_SYNTAX_ERROR: print(f"    PASS:  Excellent response time")
                                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(f"   ✅ Acceptable response time")
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(f"    PASS:  Acceptable response time")
                                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: print(f"   ⚠️  Service not healthy, timing not validated")
+                                                                                                                                                # REMOVED_SYNTAX_ERROR: print(f"    WARNING: [U+FE0F]  Service not healthy, timing not validated")
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

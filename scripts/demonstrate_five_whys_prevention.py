@@ -47,19 +47,19 @@ def print_header(title: str, char: str = "="):
 
 def print_section(title: str):
     """Print a formatted section header."""
-    print(f"\n{'─' * 60}")
-    print(f"📋 {title}")
-    print(f"{'─' * 60}")
+    print(f"\n{'[U+2500]' * 60}")
+    print(f"[U+1F4CB] {title}")
+    print(f"{'[U+2500]' * 60}")
 
 
 async def demonstrate_root_cause_prevention():
     """Demonstrate how the protocol prevents the Five Whys root cause."""
     
-    print_header("🚨 Five Whys Root Cause Prevention Demonstration", "🚨")
+    print_header(" ALERT:  Five Whys Root Cause Prevention Demonstration", " ALERT: ")
     
     print("""
 CONTEXT: Five Whys Analysis Results
-═══════════════════════════════════
+[U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550]
 
 WHY #1: WebSocket events failed during agent execution
 WHY #2: Agent handler couldn't update thread association  
@@ -68,7 +68,7 @@ WHY #4: IsolatedWebSocketManager missing this method
 WHY #5: No formal WebSocket Manager interface contract exists (ROOT CAUSE)
 
 SOLUTION: WebSocketManagerProtocol Interface Architecture
-═══════════════════════════════════════════════════════
+[U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550]
 
 This demonstration shows how the formal protocol prevents this root cause.
     """)
@@ -88,47 +88,47 @@ This demonstration shows how the formal protocol prevents this root cause.
         websocket_client_id=f"ws_client_{user_id}"
     )
     
-    print(f"✅ Created UserExecutionContext for user: {user_id[:12]}...")
+    print(f" PASS:  Created UserExecutionContext for user: {user_id[:12]}...")
     
     # 2. Create WebSocket manager using factory
     print_section("2. Creating WebSocket Manager (IsolatedWebSocketManager)")
     
     manager = create_websocket_manager(user_context)
-    print(f"✅ Created manager: {type(manager).__name__}")
-    print(f"✅ Manager ID: {id(manager)}")
+    print(f" PASS:  Created manager: {type(manager).__name__}")
+    print(f" PASS:  Manager ID: {id(manager)}")
     
     # 3. Demonstrate protocol compliance
     print_section("3. Protocol Compliance Validation")
     
     # Check if it implements the protocol
     is_protocol_instance = isinstance(manager, WebSocketManagerProtocol)
-    print(f"✅ Implements WebSocketManagerProtocol: {is_protocol_instance}")
+    print(f" PASS:  Implements WebSocketManagerProtocol: {is_protocol_instance}")
     
     # Run full protocol validation
     validation_result = WebSocketManagerProtocolValidator.validate_manager_protocol(manager)
-    print(f"✅ Protocol Compliant: {validation_result['compliant']}")
-    print(f"✅ Compliance Percentage: {validation_result['summary']['compliance_percentage']}%")
-    print(f"✅ Methods Present: {validation_result['summary']['methods_present']}/{validation_result['summary']['total_methods_required']}")
+    print(f" PASS:  Protocol Compliant: {validation_result['compliant']}")
+    print(f" PASS:  Compliance Percentage: {validation_result['summary']['compliance_percentage']}%")
+    print(f" PASS:  Methods Present: {validation_result['summary']['methods_present']}/{validation_result['summary']['total_methods_required']}")
     
     if validation_result['missing_methods']:
-        print(f"❌ Missing Methods: {validation_result['missing_methods']}")
+        print(f" FAIL:  Missing Methods: {validation_result['missing_methods']}")
     else:
-        print("✅ All Required Methods Present")
+        print(" PASS:  All Required Methods Present")
     
     # 4. Demonstrate Five Whys Critical Methods
     print_section("4. Five Whys Critical Methods Verification")
     
     # Check for the specific method that was missing
     has_get_connection_id = hasattr(manager, 'get_connection_id_by_websocket')
-    print(f"✅ get_connection_id_by_websocket: {has_get_connection_id}")
+    print(f" PASS:  get_connection_id_by_websocket: {has_get_connection_id}")
     
     has_update_thread = hasattr(manager, 'update_connection_thread')
-    print(f"✅ update_connection_thread: {has_update_thread}")
+    print(f" PASS:  update_connection_thread: {has_update_thread}")
     
     if has_get_connection_id and has_update_thread:
-        print("✅ FIVE WHYS ROOT CAUSE PREVENTED: Both critical methods present!")
+        print(" PASS:  FIVE WHYS ROOT CAUSE PREVENTED: Both critical methods present!")
     else:
-        print("❌ Five Whys root cause NOT prevented - critical methods missing!")
+        print(" FAIL:  Five Whys root cause NOT prevented - critical methods missing!")
     
     # 5. Test actual functionality
     print_section("5. Critical Methods Functionality Testing")
@@ -142,11 +142,11 @@ This demonstration shows how the formal protocol prevents this root cause.
     
     # Should return None for unknown websocket (graceful handling)
     connection_id = manager.get_connection_id_by_websocket(mock_ws)
-    print(f"✅ get_connection_id_by_websocket(unknown): {connection_id} (should be None)")
+    print(f" PASS:  get_connection_id_by_websocket(unknown): {connection_id} (should be None)")
     
     # Test update_connection_thread
     update_result = manager.update_connection_thread("nonexistent_conn", "test_thread")
-    print(f"✅ update_connection_thread(nonexistent): {update_result} (should be False)")
+    print(f" PASS:  update_connection_thread(nonexistent): {update_result} (should be False)")
     
     # 6. Demonstrate agent handler pattern
     print_section("6. Agent Handler Integration Pattern")
@@ -166,31 +166,31 @@ This demonstration shows how the formal protocol prevents this root cause.
         # This pattern now works reliably
         if manager:
             connection_id = manager.get_connection_id_by_websocket(websocket)
-            print(f"✅ Step 1: get_connection_id_by_websocket succeeded: {connection_id}")
+            print(f" PASS:  Step 1: get_connection_id_by_websocket succeeded: {connection_id}")
             
             if connection_id:
                 result = manager.update_connection_thread(connection_id, thread_id)
-                print(f"✅ Step 2: update_connection_thread succeeded: {result}")
+                print(f" PASS:  Step 2: update_connection_thread succeeded: {result}")
             else:
-                print("ℹ️  Step 2: Skipped - no connection found (expected for demo)")
+                print("[U+2139][U+FE0F]  Step 2: Skipped - no connection found (expected for demo)")
                 
-        print("✅ PATTERN SUCCESS: No AttributeError exceptions!")
+        print(" PASS:  PATTERN SUCCESS: No AttributeError exceptions!")
         
     except AttributeError as e:
-        print(f"❌ PATTERN FAILED: AttributeError - {e}")
-        print("❌ This would indicate Five Whys root cause is NOT prevented!")
+        print(f" FAIL:  PATTERN FAILED: AttributeError - {e}")
+        print(" FAIL:  This would indicate Five Whys root cause is NOT prevented!")
     
     # 7. Run comprehensive testing
     print_section("7. Comprehensive Critical Methods Testing")
     
     test_results = await test_critical_method_functionality(manager)
-    print(f"✅ Tests Run: {test_results['tests_run']}")
-    print(f"✅ Tests Passed: {test_results['tests_passed']}")
-    print(f"✅ Success Rate: {test_results['success_rate']:.1f}%")
-    print(f"✅ Overall Success: {test_results['overall_success']}")
+    print(f" PASS:  Tests Run: {test_results['tests_run']}")
+    print(f" PASS:  Tests Passed: {test_results['tests_passed']}")
+    print(f" PASS:  Success Rate: {test_results['success_rate']:.1f}%")
+    print(f" PASS:  Overall Success: {test_results['overall_success']}")
     
     if test_results['errors']:
-        print(f"⚠️  Errors Encountered: {test_results['errors']}")
+        print(f" WARNING: [U+FE0F]  Errors Encountered: {test_results['errors']}")
     
     # 8. Generate compliance report
     print_section("8. Detailed Compliance Report")
@@ -203,7 +203,7 @@ This demonstration shows how the formal protocol prevents this root cause.
     
     five_whys_methods = report['five_whys_critical_methods']
     for method, details in five_whys_methods.items():
-        status = "✅" if details.get('exists') and details.get('callable') else "❌"
+        status = " PASS: " if details.get('exists') and details.get('callable') else " FAIL: "
         print(f"  {status} {method}: exists={details.get('exists', False)}, callable={details.get('callable', False)}")
     
     # 9. Test with UnifiedWebSocketManager for comparison
@@ -218,28 +218,28 @@ This demonstration shows how the formal protocol prevents this root cause.
     has_get_conn_id = hasattr(unified_manager, 'get_connection_id_by_websocket')
     has_update_thread = hasattr(unified_manager, 'update_connection_thread')
     
-    print(f"✅ get_connection_id_by_websocket: {has_get_conn_id}")
-    print(f"✅ update_connection_thread: {has_update_thread}")
+    print(f" PASS:  get_connection_id_by_websocket: {has_get_conn_id}")
+    print(f" PASS:  update_connection_thread: {has_update_thread}")
     
     if has_get_conn_id and has_update_thread:
-        print("✅ UnifiedWebSocketManager also prevents Five Whys root cause!")
+        print(" PASS:  UnifiedWebSocketManager also prevents Five Whys root cause!")
     
     # 10. Summary
-    print_header("🎉 Five Whys Root Cause Prevention SUCCESSFUL", "🎉")
+    print_header(" CELEBRATION:  Five Whys Root Cause Prevention SUCCESSFUL", " CELEBRATION: ")
     
     print("""
 PREVENTION VERIFICATION RESULTS:
-═══════════════════════════════
+[U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550]
 
-✅ IsolatedWebSocketManager implements WebSocketManagerProtocol
-✅ All required methods present (100% compliance)
-✅ Five Whys critical methods exist and are callable
-✅ Agent handler pattern works without AttributeError
-✅ Runtime functionality testing passes
-✅ Both manager types have consistent interfaces
+ PASS:  IsolatedWebSocketManager implements WebSocketManagerProtocol
+ PASS:  All required methods present (100% compliance)
+ PASS:  Five Whys critical methods exist and are callable
+ PASS:  Agent handler pattern works without AttributeError
+ PASS:  Runtime functionality testing passes
+ PASS:  Both manager types have consistent interfaces
 
-ROOT CAUSE STATUS: 🛡️ PREVENTED
-═══════════════════════════════
+ROOT CAUSE STATUS: [U+1F6E1][U+FE0F] PREVENTED
+[U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550]
 
 The formal WebSocketManagerProtocol interface contract ensures that:
 
@@ -252,13 +252,13 @@ The formal WebSocketManagerProtocol interface contract ensures that:
 The AttributeError that triggered the Five Whys analysis can NO LONGER occur
 because the protocol prevents deployment of non-compliant managers.
 
-MISSION ACCOMPLISHED: Five Whys root cause eliminated! 🎯
+MISSION ACCOMPLISHED: Five Whys root cause eliminated!  TARGET: 
     """)
 
 
 def demonstrate_non_compliant_manager():
     """Show what happens with a non-compliant manager."""
-    print_header("❌ Non-Compliant Manager Demonstration", "⚠️")
+    print_header(" FAIL:  Non-Compliant Manager Demonstration", " WARNING: [U+FE0F]")
     
     # Create a manager that doesn't implement the protocol
     class IncompleteWebSocketManager:
@@ -284,17 +284,17 @@ def demonstrate_non_compliant_manager():
     
     validation = WebSocketManagerProtocolValidator.validate_manager_protocol(incomplete_manager)
     
-    print(f"❌ Protocol Compliant: {validation['compliant']}")
-    print(f"❌ Compliance: {validation['summary']['compliance_percentage']}%")
-    print(f"❌ Missing Methods: {validation['missing_methods']}")
+    print(f" FAIL:  Protocol Compliant: {validation['compliant']}")
+    print(f" FAIL:  Compliance: {validation['summary']['compliance_percentage']}%")
+    print(f" FAIL:  Missing Methods: {validation['missing_methods']}")
     
     # Check for Five Whys critical methods
     critical_methods = ['get_connection_id_by_websocket', 'update_connection_thread']
     missing_critical = [m for m in critical_methods if m in validation['missing_methods']]
     
     if missing_critical:
-        print(f"🚨 FIVE WHYS CRITICAL METHODS MISSING: {missing_critical}")
-        print("🚨 This manager would cause the SAME AttributeError that triggered Five Whys!")
+        print(f" ALERT:  FIVE WHYS CRITICAL METHODS MISSING: {missing_critical}")
+        print(" ALERT:  This manager would cause the SAME AttributeError that triggered Five Whys!")
     
     # Try to use it in agent handler pattern
     print("\nTesting agent handler pattern with incomplete manager...")
@@ -302,10 +302,10 @@ def demonstrate_non_compliant_manager():
     try:
         # This would fail with AttributeError
         connection_id = incomplete_manager.get_connection_id_by_websocket("test_ws")
-        print("❌ This should not succeed!")
+        print(" FAIL:  This should not succeed!")
     except AttributeError as e:
-        print(f"✅ EXPECTED AttributeError: {e}")
-        print("✅ This demonstrates the Five Whys root cause!")
+        print(f" PASS:  EXPECTED AttributeError: {e}")
+        print(" PASS:  This demonstrates the Five Whys root cause!")
     
     # Show how protocol validation prevents deployment
     print("\nTesting protocol enforcement...")
@@ -314,20 +314,20 @@ def demonstrate_non_compliant_manager():
         WebSocketManagerProtocolValidator.require_protocol_compliance(
             incomplete_manager, "Production System"
         )
-        print("❌ Should have raised RuntimeError!")
+        print(" FAIL:  Should have raised RuntimeError!")
     except RuntimeError as e:
-        print(f"✅ PROTOCOL ENFORCEMENT: {str(e)[:100]}...")
-        print("✅ Non-compliant managers are BLOCKED from deployment!")
+        print(f" PASS:  PROTOCOL ENFORCEMENT: {str(e)[:100]}...")
+        print(" PASS:  Non-compliant managers are BLOCKED from deployment!")
     
-    print_header("🛡️ Root Cause Prevention Confirmed", "✅")
+    print_header("[U+1F6E1][U+FE0F] Root Cause Prevention Confirmed", " PASS: ")
     print("""
 The protocol validation system successfully:
 
-1. ❌ Detects missing Five Whys critical methods
-2. ❌ Prevents deployment of non-compliant managers
-3. ❌ Blocks the AttributeError root cause at validation time
-4. ✅ Forces all managers to implement complete interface
-5. ✅ Eliminates interface drift during migrations
+1.  FAIL:  Detects missing Five Whys critical methods
+2.  FAIL:  Prevents deployment of non-compliant managers
+3.  FAIL:  Blocks the AttributeError root cause at validation time
+4.  PASS:  Forces all managers to implement complete interface
+5.  PASS:  Eliminates interface drift during migrations
 
 CONCLUSION: The WebSocketManagerProtocol architecture completely
 eliminates the possibility of the Five Whys root cause occurring again.
@@ -335,7 +335,7 @@ eliminates the possibility of the Five Whys root cause occurring again.
 
 
 if __name__ == "__main__":
-    print("🚀 Starting Five Whys Root Cause Prevention Demonstration...")
+    print("[U+1F680] Starting Five Whys Root Cause Prevention Demonstration...")
     
     try:
         # Run main demonstration
@@ -344,10 +344,10 @@ if __name__ == "__main__":
         # Show what happens with non-compliant managers
         demonstrate_non_compliant_manager()
         
-        print("\n🏁 Demonstration completed successfully!")
+        print("\n[U+1F3C1] Demonstration completed successfully!")
         
     except Exception as e:
-        print(f"\n💥 Demonstration failed with error: {e}")
+        print(f"\n[U+1F4A5] Demonstration failed with error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

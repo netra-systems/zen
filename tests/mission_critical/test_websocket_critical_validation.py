@@ -1,4 +1,42 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 MISSION CRITICAL: WebSocket Critical Validation Test Suite
 
@@ -169,7 +207,7 @@ class TestWebSocketCriticalValidation:
         run_id = generate_run_id(thread_id, "critical_test")
         agent_name = "CriticalTestAgent"
         
-        print(f"🎯 Testing required events for thread: {thread_id}")
+        print(f" TARGET:  Testing required events for thread: {thread_id}")
         
         # Send all required events in proper sequence
         events_to_send = [
@@ -239,7 +277,7 @@ class TestWebSocketCriticalValidation:
             assert event['data']['run_id'] == run_id, "Event data should have correct run_id"
             assert event['data']['agent_name'] == agent_name, "Event data should have correct agent_name"
         
-        print("✅ All required agent events sent and validated")
+        print(" PASS:  All required agent events sent and validated")
     
     @pytest.mark.asyncio
     async def test_concurrent_user_event_isolation(self):
@@ -257,7 +295,7 @@ class TestWebSocketCriticalValidation:
             }
             user_scenarios.append(scenario)
         
-        print(f"🔒 Testing event isolation for {len(user_scenarios)} concurrent users")
+        print(f"[U+1F512] Testing event isolation for {len(user_scenarios)} concurrent users")
         
         # Send events for all users concurrently
         async def send_user_events(scenario):
@@ -333,7 +371,7 @@ class TestWebSocketCriticalValidation:
             user_count = user_event_counts.get(scenario['user_id'], 0)
             assert user_count >= 4, f"User {scenario['user_id']} should have at least 4 events"
         
-        print("✅ Concurrent user event isolation verified")
+        print(" PASS:  Concurrent user event isolation verified")
     
     @pytest.mark.asyncio  
     async def test_event_ordering_and_timing(self):
@@ -344,7 +382,7 @@ class TestWebSocketCriticalValidation:
         run_id = generate_run_id(thread_id, "ordering_test")
         agent_name = "OrderingTestAgent"
         
-        print(f"📋 Testing event ordering and timing for thread: {thread_id}")
+        print(f"[U+1F4CB] Testing event ordering and timing for thread: {thread_id}")
         
         # Record timing for each event
         event_times = []
@@ -428,13 +466,13 @@ class TestWebSocketCriticalValidation:
         avg_duration = sum(timing['duration_ms'] for timing in event_times) / len(event_times)
         assert avg_duration < 100, f"Average event delivery too slow: {avg_duration:.2f}ms"
         
-        print("✅ Event ordering and timing verified")
+        print(" PASS:  Event ordering and timing verified")
     
     @pytest.mark.asyncio
     async def test_websocket_performance_under_load(self):
         """CRITICAL: Test WebSocket performance with high message volume."""
         
-        print("💪 Testing WebSocket performance under load")
+        print("[U+1F4AA] Testing WebSocket performance under load")
         
         # Setup high-volume scenario
         test_threads = []
@@ -517,13 +555,13 @@ class TestWebSocketCriticalValidation:
                 assert event['data']['user_id'] == thread_info['user_id'], \
                     "Load test event isolation violation"
         
-        print(f"✅ Performance under load: {total_sent}/{total_events} events sent in {total_time:.2f}s ({events_per_second:.1f} events/sec)")
+        print(f" PASS:  Performance under load: {total_sent}/{total_events} events sent in {total_time:.2f}s ({events_per_second:.1f} events/sec)")
     
     @pytest.mark.asyncio
     async def test_run_id_generation_and_validation(self):
         """CRITICAL: Test run ID generation follows SSOT standards."""
         
-        print("🆔 Testing run ID generation and validation")
+        print("[U+1F194] Testing run ID generation and validation")
         
         # Test various thread ID scenarios
         test_thread_ids = [
@@ -583,7 +621,7 @@ class TestWebSocketCriticalValidation:
             extracted = extract_thread_id_from_run_id(run_id)
             assert extracted == thread_id, f"Event run ID thread extraction failed: {run_id}"
         
-        print("✅ Run ID generation and validation completed")
+        print(" PASS:  Run ID generation and validation completed")
 
 
 class TestWebSocketEventContent:
@@ -618,7 +656,7 @@ class TestWebSocketEventContent:
                     "boolean_value": True,
                     "array_value": [1, 2, 3, "four", {"five": 5}]
                 },
-                "unicode_test": "Test with émojis 🚀 and spëcial chàrs",
+                "unicode_test": "Test with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial ch[U+00E0]rs",
                 "large_text": "A" * 1000  # Test large content
             },
             "metadata": {
@@ -656,7 +694,7 @@ class TestWebSocketEventContent:
         assert captured_data['complex_data']['nested_object']['array_value'] == [1, 2, 3, "four", {"five": 5}]
         
         # Verify unicode handling
-        assert captured_data['complex_data']['unicode_test'] == "Test with émojis 🚀 and spëcial chàrs"
+        assert captured_data['complex_data']['unicode_test'] == "Test with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial ch[U+00E0]rs"
         
         # Verify large content
         assert captured_data['complex_data']['large_text'] == "A" * 1000
@@ -665,7 +703,7 @@ class TestWebSocketEventContent:
         assert captured_data['metadata']['version'] == "1.0.0"
         assert captured_data['metadata']['source'] == "integrity_test"
         
-        print("✅ Agent event data integrity verified")
+        print(" PASS:  Agent event data integrity verified")
     
     @pytest.mark.asyncio
     async def test_event_message_structure(self):
@@ -725,7 +763,7 @@ class TestWebSocketEventContent:
         for field in message_required_fields:
             assert field in message, f"WebSocket message should have {field} field"
         
-        print("✅ Event message structure verified")
+        print(" PASS:  Event message structure verified")
 
 
 if __name__ == "__main__":

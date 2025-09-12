@@ -23,7 +23,7 @@ COMPREHENSIVE DATA PERSISTENCE FLOWS TESTED:
 8. Large conversation history storage with performance validation
 9. User preferences and profile data persistence across services
 10. Agent tool execution result caching with retrieval performance
-11. Cross-service data synchronization (auth ↔ backend ↔ cache)
+11. Cross-service data synchronization (auth [U+2194] backend [U+2194] cache)
 12. Database connection pooling with concurrent access validation
 13. Data backup scenarios and recovery validation
 14. Cache eviction and memory management validation
@@ -122,8 +122,8 @@ class TestDataPersistenceComprehensive(
         """
         Test P0: Thread and conversation persistence across complete session lifecycle.
         
-        Critical business flow: User creates thread → adds messages → disconnects → reconnects
-        → conversation continues seamlessly with complete message history.
+        Critical business flow: User creates thread  ->  adds messages  ->  disconnects  ->  reconnects
+         ->  conversation continues seamlessly with complete message history.
         """
         if not SQLALCHEMY_AVAILABLE:
             pytest.skip("SQLAlchemy not available for database testing")
@@ -313,7 +313,7 @@ class TestDataPersistenceComprehensive(
         
         self.validation_metrics['integrity_checks'] += len(retrieved_messages)
         
-        self.logger.info(f"✅ Thread conversation persistence test completed successfully")
+        self.logger.info(f" PASS:  Thread conversation persistence test completed successfully")
         self.logger.info(f"   - Thread persisted with {len(retrieved_messages)} messages")
         self.logger.info(f"   - Thread creation: {thread_creation_time:.3f}s")
         self.logger.info(f"   - Message retrieval: {retrieval_time:.3f}s")
@@ -335,8 +335,8 @@ class TestDataPersistenceComprehensive(
         """
         Test P0: User session state persistence in Redis cache with failover validation.
         
-        Critical business flow: User authentication → session cached → operations cached
-        → cache eviction → session recovery → seamless continuation.
+        Critical business flow: User authentication  ->  session cached  ->  operations cached
+         ->  cache eviction  ->  session recovery  ->  seamless continuation.
         """
         real_services = real_services_fixture
         redis_client = real_redis_fixture
@@ -458,7 +458,7 @@ class TestDataPersistenceComprehensive(
         assert ttl > 0, "Session must have proper TTL set"
         assert ttl <= 3600, "Session TTL must not exceed expected value"
         
-        self.logger.info(f"✅ User session Redis persistence test completed successfully")
+        self.logger.info(f" PASS:  User session Redis persistence test completed successfully")
         self.logger.info(f"   - Session cached with {len(update_scenarios)} updates")
         self.logger.info(f"   - Cache store time: {cache_store_time:.3f}s")
         self.logger.info(f"   - Cache retrieval time: {retrieval_time:.3f}s")
@@ -670,11 +670,11 @@ class TestDataPersistenceComprehensive(
         
         self.validation_metrics['integrity_checks'] += len(isolation_test_data) * (len(isolation_test_data) - 1)
         
-        self.logger.info(f"✅ Multi-user data isolation test completed successfully")
+        self.logger.info(f" PASS:  Multi-user data isolation test completed successfully")
         self.logger.info(f"   - Tested {len(isolation_test_data)} isolated user contexts")
-        self.logger.info(f"   - Database isolation: ✓ Validated")
-        self.logger.info(f"   - Redis cache isolation: ✓ Validated")
-        self.logger.info(f"   - Cross-user access prevention: ✓ Validated")
+        self.logger.info(f"   - Database isolation: [U+2713] Validated")
+        self.logger.info(f"   - Redis cache isolation: [U+2713] Validated")
+        self.logger.info(f"   - Cross-user access prevention: [U+2713] Validated")
         
         self.assert_business_value_delivered(
             {
@@ -853,10 +853,10 @@ class TestDataPersistenceComprehensive(
         
         self.validation_metrics['integrity_checks'] += len(transaction_scenarios)
         
-        self.logger.info(f"✅ Database transaction integrity test completed successfully")
+        self.logger.info(f" PASS:  Database transaction integrity test completed successfully")
         self.logger.info(f"   - Successful transactions: {len(successful_transactions)}")
         self.logger.info(f"   - Failed/rolled-back transactions: {len(failed_transactions)}")
-        self.logger.info(f"   - Rollback data cleanup: ✓ Validated")
+        self.logger.info(f"   - Rollback data cleanup: [U+2713] Validated")
         
         self.assert_business_value_delivered(
             {
@@ -1095,10 +1095,10 @@ class TestDataPersistenceComprehensive(
         
         assert all_tests_passed, "All large conversation performance tests must pass"
         
-        self.logger.info(f"✅ Large conversation performance test completed successfully")
+        self.logger.info(f" PASS:  Large conversation performance test completed successfully")
         self.logger.info(f"   - Tested conversation sizes: {large_conversation_sizes}")
         self.logger.info(f"   - Average retrieval time: {avg_retrieval_time:.3f}s")
-        self.logger.info(f"   - All performance requirements met: ✓")
+        self.logger.info(f"   - All performance requirements met: [U+2713]")
         
         self.assert_business_value_delivered(
             {
@@ -1114,10 +1114,10 @@ class TestDataPersistenceComprehensive(
     @pytest.mark.real_services
     async def test_cross_service_data_synchronization_comprehensive(self, real_services_fixture, real_redis_fixture):
         """
-        Test P0: Cross-service data synchronization (auth ↔ backend ↔ cache).
+        Test P0: Cross-service data synchronization (auth [U+2194] backend [U+2194] cache).
         
-        Critical business flow: User authentication → backend user context → cache state
-        → data consistency across all service boundaries with real-time sync validation.
+        Critical business flow: User authentication  ->  backend user context  ->  cache state
+         ->  data consistency across all service boundaries with real-time sync validation.
         """
         real_services = real_services_fixture
         redis_client = real_redis_fixture
@@ -1165,7 +1165,7 @@ class TestDataPersistenceComprehensive(
         # PHASE 2: Synchronize data across all services
         sync_operations = []
         
-        # 1. Auth service → Database sync (user profile)
+        # 1. Auth service  ->  Database sync (user profile)
         start_time = time.time()
         
         auth_sync_query = text("""
@@ -1200,7 +1200,7 @@ class TestDataPersistenceComprehensive(
         auth_sync_time = time.time() - start_time
         sync_operations.append({"service": "auth_to_db", "time": auth_sync_time})
         
-        # 2. Backend service → Cache sync
+        # 2. Backend service  ->  Cache sync
         start_time = time.time()
         
         backend_cache_key = f"user_backend:{user_id}"
@@ -1369,7 +1369,7 @@ class TestDataPersistenceComprehensive(
         self.validation_metrics['cross_service_syncs'] += len(sync_operations)
         self.validation_metrics['integrity_checks'] += len(consistency_checks) + len(update_scenarios)
         
-        self.logger.info(f"✅ Cross-service data synchronization test completed successfully")
+        self.logger.info(f" PASS:  Cross-service data synchronization test completed successfully")
         self.logger.info(f"   - Sync operations: {len(sync_operations)}")
         self.logger.info(f"   - Total sync time: {total_sync_time:.3f}s")
         self.logger.info(f"   - Average sync time: {avg_sync_time:.3f}s")
@@ -1402,9 +1402,9 @@ class TestDataPersistenceComprehensive(
         self.logger.info(f"Performance violations detected: {self.validation_metrics['performance_violations']}")
         
         if self.validation_metrics['performance_violations'] == 0:
-            self.logger.info("✅ All performance requirements met")
+            self.logger.info(" PASS:  All performance requirements met")
         else:
-            self.logger.warning(f"⚠️  {self.validation_metrics['performance_violations']} performance violations detected")
+            self.logger.warning(f" WARNING: [U+FE0F]  {self.validation_metrics['performance_violations']} performance violations detected")
         
         self.logger.info("=" * 60)
 

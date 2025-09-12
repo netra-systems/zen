@@ -40,7 +40,7 @@ class LayerConfigValidator:
     
     def validate_all(self) -> ValidationResult:
         """Run comprehensive validation"""
-        print("🔍 Starting layer configuration validation...")
+        print(" SEARCH:  Starting layer configuration validation...")
         
         # Load configurations
         if not self._load_configurations():
@@ -81,7 +81,7 @@ class LayerConfigValidator:
             # Initialize layer system for additional validation
             self.layer_system = LayerSystem(self.project_root, self.config_path)
             
-            print("✅ Configuration files loaded successfully")
+            print(" PASS:  Configuration files loaded successfully")
             return True
             
         except Exception as e:
@@ -94,7 +94,7 @@ class LayerConfigValidator:
             self.warnings.append("Schema file not found, skipping schema validation")
             return
         
-        print("📋 Validating schema compliance...")
+        print("[U+1F4CB] Validating schema compliance...")
         
         # Basic structure validation
         required_root_sections = ['metadata', 'layers', 'execution_config']
@@ -188,7 +188,7 @@ class LayerConfigValidator:
     
     def _validate_business_rules(self):
         """Validate business logic rules"""
-        print("🔧 Validating business rules...")
+        print("[U+1F527] Validating business rules...")
         
         # Check layer naming conventions
         layers = self.config.get('layers', {})
@@ -211,7 +211,7 @@ class LayerConfigValidator:
     
     def _validate_dependencies(self):
         """Validate layer dependencies and conflicts"""
-        print("🔗 Validating dependencies and conflicts...")
+        print("[U+1F517] Validating dependencies and conflicts...")
         
         layers = self.config.get('layers', {})
         layer_names = set(layers.keys())
@@ -242,7 +242,7 @@ class LayerConfigValidator:
     
     def _validate_resource_allocation(self):
         """Validate resource limits and allocation"""
-        print("💾 Validating resource allocation...")
+        print("[U+1F4BE] Validating resource allocation...")
         
         layers = self.config.get('layers', {})
         exec_config = self.config.get('execution_config', {})
@@ -275,7 +275,7 @@ class LayerConfigValidator:
     
     def _validate_timing_constraints(self):
         """Validate timing and duration constraints"""
-        print("⏱️  Validating timing constraints...")
+        print("[U+23F1][U+FE0F]  Validating timing constraints...")
         
         layers = self.config.get('layers', {})
         exec_config = self.config.get('execution_config', {})
@@ -305,7 +305,7 @@ class LayerConfigValidator:
     
     def _validate_service_requirements(self):
         """Validate service requirements and dependencies"""
-        print("🔌 Validating service requirements...")
+        print("[U+1F50C] Validating service requirements...")
         
         layers = self.config.get('layers', {})
         service_deps = self.config.get('service_dependencies', {})
@@ -330,7 +330,7 @@ class LayerConfigValidator:
     
     def _validate_environment_consistency(self):
         """Validate environment-specific configurations"""
-        print("🌍 Validating environment consistency...")
+        print("[U+1F30D] Validating environment consistency...")
         
         layers = self.config.get('layers', {})
         environments = self.config.get('environments', {})
@@ -353,7 +353,7 @@ class LayerConfigValidator:
     
     def _generate_suggestions(self):
         """Generate optimization suggestions"""
-        print("💡 Generating optimization suggestions...")
+        print(" IDEA:  Generating optimization suggestions...")
         
         layers = self.config.get('layers', {})
         
@@ -385,22 +385,22 @@ class LayerConfigValidator:
         print(f"{'='*60}")
         
         if result.is_valid:
-            print("✅ Configuration is VALID!")
+            print(" PASS:  Configuration is VALID!")
         else:
-            print("❌ Configuration has ERRORS!")
+            print(" FAIL:  Configuration has ERRORS!")
         
         if result.errors:
-            print(f"\n🚨 ERRORS ({len(result.errors)}):")
+            print(f"\n ALERT:  ERRORS ({len(result.errors)}):")
             for i, error in enumerate(result.errors, 1):
                 print(f"  {i:2d}. {error}")
         
         if result.warnings:
-            print(f"\n⚠️  WARNINGS ({len(result.warnings)}):")
+            print(f"\n WARNING: [U+FE0F]  WARNINGS ({len(result.warnings)}):")
             for i, warning in enumerate(result.warnings, 1):
                 print(f"  {i:2d}. {warning}")
         
         if result.suggestions:
-            print(f"\n💡 SUGGESTIONS ({len(result.suggestions)}):")
+            print(f"\n IDEA:  SUGGESTIONS ({len(result.suggestions)}):")
             for i, suggestion in enumerate(result.suggestions, 1):
                 print(f"  {i:2d}. {suggestion}")
         

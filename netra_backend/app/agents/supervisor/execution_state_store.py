@@ -502,7 +502,7 @@ class ExecutionStateStore:
             self._recent_executions.clear()
             self._concurrent_tracking.clear()
             
-            logger.info("✅ ExecutionStateStore shutdown complete")
+            logger.info(" PASS:  ExecutionStateStore shutdown complete")
             
         except Exception as e:
             logger.error(f"Error during ExecutionStateStore shutdown: {e}")

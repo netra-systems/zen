@@ -158,11 +158,11 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         # Extract JWT token (this should always work regardless of auth service status)
         extracted_token = extractor.extract_jwt_from_websocket(mock_websocket)
         assert extracted_token == valid_token
-        self.logger.info("✅ JWT token successfully extracted from WebSocket headers")
+        self.logger.info(" PASS:  JWT token successfully extracted from WebSocket headers")
         
         if auth_available:
             # NORMAL PATH: Auth service is available - test successful validation
-            self.logger.info("🟢 Auth service available - testing normal authentication flow")
+            self.logger.info("[U+1F7E2] Auth service available - testing normal authentication flow")
             
             # Validate JWT token using resilient validation (same as REST endpoints)
             validated_payload = await extractor.validate_and_decode_jwt(extracted_token)
@@ -170,7 +170,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             assert validated_payload["sub"] == self.test_user_id
             assert validated_payload["email"] == self.test_email
             assert "websocket_access" in validated_payload["permissions"]
-            self.logger.info("✅ JWT token successfully validated using resilient validation")
+            self.logger.info(" PASS:  JWT token successfully validated using resilient validation")
             
             # Create user context from JWT
             user_context = extractor.create_user_context_from_jwt(validated_payload, mock_websocket)
@@ -178,18 +178,18 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             assert user_context.websocket_connection_id is not None
             assert user_context.thread_id is not None
             assert user_context.run_id is not None
-            self.logger.info("✅ UserExecutionContext successfully created from JWT")
+            self.logger.info(" PASS:  UserExecutionContext successfully created from JWT")
             
         else:
             # GRACEFUL DEGRADATION PATH: Auth service is not available
-            self.logger.info("🟡 Auth service unavailable - testing graceful degradation and error handling")
+            self.logger.info("[U+1F7E1] Auth service unavailable - testing graceful degradation and error handling")
             
             # Validate JWT token (should fail gracefully with proper error handling)
             validated_payload = await extractor.validate_and_decode_jwt(extracted_token)
             
             # Should return None when auth service is unavailable
             assert validated_payload is None or validated_payload.get("valid") is False
-            self.logger.info("✅ JWT validation gracefully handled auth service unavailability")
+            self.logger.info(" PASS:  JWT validation gracefully handled auth service unavailability")
             
             # Test complete user context extraction (should raise HTTPException)
             with pytest.raises(Exception) as exc_info:
@@ -206,14 +206,14 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
                 "authentication", "auth service", "unavailable", "failed", "unreachable"
             ])
             
-            self.logger.info("✅ Graceful degradation properly raises appropriate HTTP exceptions")
-            self.logger.info(f"✅ Error detail: {exception.detail}")
+            self.logger.info(" PASS:  Graceful degradation properly raises appropriate HTTP exceptions")
+            self.logger.info(f" PASS:  Error detail: {exception.detail}")
         
         # Log final test result based on scenario
         if auth_available:
-            self.logger.info("✅ NORMAL AUTH FLOW: Test completed successfully with auth service")
+            self.logger.info(" PASS:  NORMAL AUTH FLOW: Test completed successfully with auth service")
         else:
-            self.logger.info("✅ GRACEFUL DEGRADATION: Test completed successfully without auth service")
+            self.logger.info(" PASS:  GRACEFUL DEGRADATION: Test completed successfully without auth service")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -240,12 +240,12 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         # Extract JWT token (should succeed)
         extracted_token = extractor.extract_jwt_from_websocket(mock_websocket)
         assert extracted_token == invalid_token
-        self.logger.info("✅ Invalid JWT token extracted from headers")
+        self.logger.info(" PASS:  Invalid JWT token extracted from headers")
         
         # Validate JWT token (should fail due to wrong signature)
         validated_payload = await extractor.validate_and_decode_jwt(extracted_token)
         assert validated_payload is None
-        self.logger.info("✅ Invalid JWT token properly rejected during validation")
+        self.logger.info(" PASS:  Invalid JWT token properly rejected during validation")
         
         # Test complete user context extraction (should raise HTTPException)
         with pytest.raises(Exception) as exc_info:
@@ -256,7 +256,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert hasattr(exception, 'status_code')
         assert exception.status_code == 401
         assert "invalid" in exception.detail.lower() or "failed" in exception.detail.lower()
-        self.logger.info("✅ Invalid JWT properly raises 401 HTTPException")
+        self.logger.info(" PASS:  Invalid JWT properly raises 401 HTTPException")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -277,7 +277,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         extractor = UserContextExtractor()
         extracted_token = extractor.extract_jwt_from_websocket(mock_websocket)
         assert extracted_token is None
-        self.logger.info("✅ No JWT token found in WebSocket headers (as expected)")
+        self.logger.info(" PASS:  No JWT token found in WebSocket headers (as expected)")
         
         # Test complete user context extraction (should raise HTTPException)
         with pytest.raises(Exception) as exc_info:
@@ -288,7 +288,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert hasattr(exception, 'status_code')
         assert exception.status_code == 401
         assert "authentication required" in exception.detail.lower()
-        self.logger.info("✅ Missing JWT properly raises 401 HTTPException")
+        self.logger.info(" PASS:  Missing JWT properly raises 401 HTTPException")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -315,12 +315,12 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         # Extract JWT token (should succeed)
         extracted_token = extractor.extract_jwt_from_websocket(mock_websocket)
         assert extracted_token == expired_token
-        self.logger.info("✅ Expired JWT token extracted from headers")
+        self.logger.info(" PASS:  Expired JWT token extracted from headers")
         
         # Validate JWT token (should fail due to expiration)
         validated_payload = await extractor.validate_and_decode_jwt(extracted_token)
         assert validated_payload is None
-        self.logger.info("✅ Expired JWT token properly rejected during validation")
+        self.logger.info(" PASS:  Expired JWT token properly rejected during validation")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -379,7 +379,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             assert hasattr(exception, 'status_code')
             assert exception.status_code == 401
             
-            self.logger.info(f"✅ JWT validation error properly handled for {scenario['name']}")
+            self.logger.info(f" PASS:  JWT validation error properly handled for {scenario['name']}")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -407,7 +407,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         
         assert user_context_dev.user_id == self.test_user_id
         assert auth_info_dev["user_id"] == self.test_user_id
-        self.logger.info("✅ Development environment allows JWT authentication")
+        self.logger.info(" PASS:  Development environment allows JWT authentication")
         
         # Test staging environment behavior  
         isolated_env.set("ENVIRONMENT", "staging", "test")
@@ -422,7 +422,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         
         assert user_context_staging.user_id == self.test_user_id
         assert auth_info_staging["user_id"] == self.test_user_id
-        self.logger.info("✅ Staging environment enforces strict JWT authentication")
+        self.logger.info(" PASS:  Staging environment enforces strict JWT authentication")
         
         # Test production environment behavior
         isolated_env.set("ENVIRONMENT", "production", "test")
@@ -437,7 +437,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         
         assert user_context_prod.user_id == self.test_user_id
         assert auth_info_prod["user_id"] == self.test_user_id
-        self.logger.info("✅ Production environment enforces strict JWT authentication")
+        self.logger.info(" PASS:  Production environment enforces strict JWT authentication")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -496,7 +496,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             error_detail = exception.detail.lower()
             assert any(keyword in error_detail for keyword in scenario['expected_reason_contains'])
             
-            self.logger.info(f"✅ Close code scenario {scenario['name']} handled correctly")
+            self.logger.info(f" PASS:  Close code scenario {scenario['name']} handled correctly")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -567,7 +567,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert user1_auth_info["roles"] == ["basic_user"]
         assert user2_auth_info["roles"] == ["premium_user"]
         
-        self.logger.info("✅ Multi-user isolation properly implemented with different JWT contexts")
+        self.logger.info(" PASS:  Multi-user isolation properly implemented with different JWT contexts")
         self.logger.info(f"User 1 context: {user1_context.websocket_connection_id}")
         self.logger.info(f"User 2 context: {user2_context.websocket_connection_id}")
 
@@ -600,7 +600,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         # Extract JWT token from subprotocol
         extracted_token = extractor.extract_jwt_from_websocket(mock_websocket)
         assert extracted_token == valid_token
-        self.logger.info("✅ JWT token successfully extracted from WebSocket subprotocol")
+        self.logger.info(" PASS:  JWT token successfully extracted from WebSocket subprotocol")
         
         # Validate and create user context
         user_context, auth_info = await extractor.extract_user_context_from_websocket(mock_websocket)
@@ -609,7 +609,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert auth_info["user_id"] == self.test_user_id
         assert "websocket_access" in auth_info["permissions"]
         
-        self.logger.info("✅ JWT subprotocol authentication successfully validated")
+        self.logger.info(" PASS:  JWT subprotocol authentication successfully validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -638,7 +638,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert validated_payload["sub"] == self.test_user_id
         assert validated_payload.get("source") == "resilient_validation"  # Mark of resilient validation
         
-        self.logger.info("✅ WebSocket JWT validation uses resilient validation (same as REST endpoints)")
+        self.logger.info(" PASS:  WebSocket JWT validation uses resilient validation (same as REST endpoints)")
         
         # Test complete authentication flow
         user_context, auth_info = await extractor.extract_user_context_from_websocket(mock_websocket)
@@ -651,7 +651,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert "client_info" in auth_info
         assert auth_info["client_info"]["user_agent"] == "test-client"
         
-        self.logger.info("✅ WebSocket authentication provides same user context as REST endpoints")
+        self.logger.info(" PASS:  WebSocket authentication provides same user context as REST endpoints")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -668,7 +668,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         
         assert jwt_secret_1 == jwt_secret_2
         assert len(jwt_secret_1) >= 32  # Minimum secure length
-        self.logger.info("✅ Unified JWT secret manager provides consistent secrets")
+        self.logger.info(" PASS:  Unified JWT secret manager provides consistent secrets")
         
         # Create token with unified secret
         test_token = self._create_jwt_token(self.valid_jwt_payload, jwt_secret_1)
@@ -680,13 +680,13 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert validated_payload is not None
         assert validated_payload["sub"] == self.test_user_id
         
-        self.logger.info("✅ JWT token created and validated with unified secret successfully")
+        self.logger.info(" PASS:  JWT token created and validated with unified secret successfully")
         
         # Test that UserContextExtractor uses unified secret internally
         extractor_secret = extractor._get_jwt_secret()
         assert extractor_secret == jwt_secret_1
         
-        self.logger.info("✅ UserContextExtractor uses unified JWT secret for validation")
+        self.logger.info(" PASS:  UserContextExtractor uses unified JWT secret for validation")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -730,7 +730,7 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             assert conn_id.startswith("ws_")
             assert self.test_user_id[:8] in conn_id  # Contains user ID prefix
         
-        self.logger.info("✅ WebSocket connection IDs are unique for each connection")
+        self.logger.info(" PASS:  WebSocket connection IDs are unique for each connection")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -772,8 +772,8 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
         assert avg_time_per_auth < 0.1  # Should be under 100ms per authentication
         assert total_time < 10.0  # Total time should be reasonable
         
-        self.logger.info(f"✅ WebSocket authentication performance: {auth_count} auths in {total_time:.2f}s")
-        self.logger.info(f"✅ Average time per authentication: {avg_time_per_auth:.3f}s")
+        self.logger.info(f" PASS:  WebSocket authentication performance: {auth_count} auths in {total_time:.2f}s")
+        self.logger.info(f" PASS:  Average time per authentication: {avg_time_per_auth:.3f}s")
         
         # Log performance metrics for monitoring
         self.logger.info(f"Performance Metrics: success_rate={successful_auths/auth_count:.2%}, avg_time={avg_time_per_auth:.3f}s")
@@ -831,4 +831,4 @@ class TestWebSocketJWTAuthenticationIntegration(BaseIntegrationTest):
             user_context, auth_info = await extractor.extract_user_context_from_websocket(valid_websocket)
             assert user_context.user_id == self.test_user_id
             
-            self.logger.info(f"✅ Error recovery successful for {scenario['name']}")
+            self.logger.info(f" PASS:  Error recovery successful for {scenario['name']}")

@@ -7,7 +7,7 @@ BVJ (Business Value Justification):
 3. Value Impact: Ensures accurate payment processing, usage tracking, and invoicing
 4. Revenue Impact: Each billing error costs $1K+ in customer trust and support time
 
-CRITICAL PATH: User Upgrade → Payment Processing → Usage Tracking → Invoice Generation → Billing Records
+CRITICAL PATH: User Upgrade  ->  Payment Processing  ->  Usage Tracking  ->  Invoice Generation  ->  Billing Records
 
 TEST SCENARIOS COVERED:
 1. Free to Early tier upgrade with Stripe payment validation
@@ -46,7 +46,7 @@ async def test_free_to_pro_tier_payment_accuracy():
     Test #1: Free to Pro Tier Upgrade with Payment Validation
     
     BVJ: Protects $29/month Pro tier conversions ($348/year per user)
-    Critical Path: Free signup → Pro tier selection → Payment → Billing validation
+    Critical Path: Free signup  ->  Pro tier selection  ->  Payment  ->  Billing validation
     - Validates Stripe payment webhook processing
     - Ensures accurate tier upgrade and feature activation
     - Verifies billing record creation with correct amounts

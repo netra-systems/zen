@@ -87,7 +87,7 @@ class ImportFixer:
                 return True
                 
         except (IOError, UnicodeDecodeError) as e:
-            print(f"❌ Error processing {file_path}: {e}")
+            print(f" FAIL:  Error processing {file_path}: {e}")
             return False
             
         return False
@@ -109,7 +109,7 @@ class ImportFixer:
 
     def run_fixes(self):
         """Run all import fixes and dependency checks."""
-        print("🔍 Scanning for import issues...")
+        print(" SEARCH:  Scanning for import issues...")
         
         # Search paths for unit tests
         search_paths = [
@@ -125,37 +125,37 @@ class ImportFixer:
             for file_path, pattern in problem_files:
                 print(f"  - {file_path}")
                 if self.fix_imports_in_file(file_path):
-                    print(f"    ✅ Fixed")
+                    print(f"     PASS:  Fixed")
                 else:
-                    print(f"    ❌ Could not fix")
+                    print(f"     FAIL:  Could not fix")
         else:
-            print("✅ No problematic imports found in test files")
+            print(" PASS:  No problematic imports found in test files")
             
         # Check dependencies
-        print("\n🔍 Checking Python dependencies...")
+        print("\n SEARCH:  Checking Python dependencies...")
         missing_deps, available_deps = self.check_dependencies()
         
         if available_deps:
-            print("✅ Available dependencies:")
+            print(" PASS:  Available dependencies:")
             for dep in available_deps:
                 print(f"  - {dep}")
                 
         if missing_deps:
-            print("❌ Missing dependencies:")
+            print(" FAIL:  Missing dependencies:")
             for dep in missing_deps:
                 print(f"  - {dep}")
             print(f"\nTo install missing dependencies:")
             print(f"pip install {' '.join(missing_deps)}")
         else:
-            print("✅ All required dependencies are available")
+            print(" PASS:  All required dependencies are available")
             
         # Summary
-        print(f"\n📋 Summary:")
+        print(f"\n[U+1F4CB] Summary:")
         print(f"  - Files with import issues fixed: {len(self.fixes_applied)}")
         print(f"  - Missing dependencies: {len(missing_deps)}")
         
         if self.fixes_applied:
-            print(f"\n📁 Fixed files:")
+            print(f"\n[U+1F4C1] Fixed files:")
             for file_path in self.fixes_applied:
                 print(f"  - {file_path}")
                 
@@ -163,17 +163,17 @@ class ImportFixer:
 
 def main():
     """Main execution function."""
-    print("🚀 Running Import Fix Script for Unit Tests")
+    print("[U+1F680] Running Import Fix Script for Unit Tests")
     print("=" * 50)
     
     fixer = ImportFixer()
     success = fixer.run_fixes()
     
     if success:
-        print("\n✅ All fixes applied successfully!")
+        print("\n PASS:  All fixes applied successfully!")
         print("   Unit tests should now collect properly.")
     else:
-        print("\n⚠️  Some issues remain - check missing dependencies above")
+        print("\n WARNING: [U+FE0F]  Some issues remain - check missing dependencies above")
         return 1
         
     return 0

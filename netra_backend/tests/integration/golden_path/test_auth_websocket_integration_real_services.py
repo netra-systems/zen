@@ -91,7 +91,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
         session_exists = await self._verify_websocket_session_in_redis(user_id)
         assert session_exists is True, "WebSocket session should be stored in Redis"
         
-        print("✅ Authenticated WebSocket connection with real JWT test passed")
+        print(" PASS:  Authenticated WebSocket connection with real JWT test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_failure_handling(self):
@@ -161,7 +161,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
             technical_terms = ["jwt", "signature", "validation", "decode"]
             assert not any(term in error_message.lower() for term in technical_terms)
             
-        print("✅ WebSocket authentication failure handling test passed")
+        print(" PASS:  WebSocket authentication failure handling test passed")
 
     @pytest.mark.asyncio
     async def test_multi_user_websocket_session_isolation(self):
@@ -257,7 +257,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
                 # Should not have access to other users' WebSocket connections
                 assert other_session["websocket_client_id"] not in session_str
         
-        print("✅ Multi-user WebSocket session isolation test passed")
+        print(" PASS:  Multi-user WebSocket session isolation test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_session_persistence_across_reconnections(self):
@@ -360,7 +360,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
         assert session_continuity["is_continuous"] is True
         assert session_continuity["data_loss"] is False
         
-        print("✅ WebSocket session persistence across reconnections test passed")
+        print(" PASS:  WebSocket session persistence across reconnections test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_token_refresh(self):
@@ -448,7 +448,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
         assert connection_status["connected"] is True
         assert connection_status["authenticated"] is True
         
-        print("✅ WebSocket authentication token refresh test passed")
+        print(" PASS:  WebSocket authentication token refresh test passed")
 
     @pytest.mark.asyncio
     async def test_websocket_authentication_permissions_enforcement(self):
@@ -522,7 +522,7 @@ class TestAuthWebSocketIntegrationRealServices(SSotBaseTestCase):
                 assert "upgrade" in error_message.lower() or "permission" in error_message.lower()
                 assert "unauthorized" not in error_message.lower()  # Not technical
         
-        print("✅ WebSocket authentication permissions enforcement test passed")
+        print(" PASS:  WebSocket authentication permissions enforcement test passed")
 
     # Helper methods for real service integration
 

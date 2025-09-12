@@ -1,7 +1,7 @@
 """Integration Test for User Context Factory - Thread Isolation Validation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Critical for multi-user system integrity  
+- Segment: ALL (Free  ->  Enterprise) - Critical for multi-user system integrity  
 - Business Goal: Prevent context mixing and data leakage between user conversations
 - Value Impact: Ensures conversation isolation and prevents user data cross-contamination
 - Strategic Impact: CRITICAL - Context isolation violations could expose user data

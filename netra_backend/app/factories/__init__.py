@@ -6,7 +6,7 @@ the USER_CONTEXT_ARCHITECTURE.md patterns. Each factory creates user-scoped
 contexts that eliminate shared state and ensure proper isolation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Complete user isolation for multi-tenant data security
 - Value Impact: Prevents data leakage between users, enables enterprise deployment
 - Revenue Impact: Critical for Enterprise segments requiring strict data isolation

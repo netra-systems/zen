@@ -121,21 +121,6 @@ class BrokenTestPatternExample:
     to show the pattern that was causing issues.
     """
     
-    def setUp(self):  # BROKEN: Should be setup_method()
-        """
-        BROKEN PATTERN: Uses setUp() instead of setup_method().
-        
-        If this class inherited from SSotAsyncTestCase, this method would never be called
-        because pytest calls setup_method(), not setUp().
-        """
-        self.golden_user_context = UserExecutionContext(
-            user_id="broken_user",
-            thread_id="broken_thread", 
-            run_id="broken_run",
-            request_id="broken_request",
-            websocket_client_id="broken_ws"
-        )
-    
     def test_would_fail_missing_golden_user_context(self):
         """
         This test would fail if the class inherited from SSotAsyncTestCase

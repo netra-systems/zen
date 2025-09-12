@@ -45,7 +45,7 @@ class DatabaseChecker:
             from netra_backend.app.logging_config import central_logger
             logger = central_logger.get_logger(__name__)
             logger.error(
-                f"❌ VALIDATION FAILURE: Database connection check failed during startup. "
+                f" FAIL:  VALIDATION FAILURE: Database connection check failed during startup. "
                 f"Environment: {self.environment}, Error: {e}, "
                 f"This will block system startup and prevent user access."
             )

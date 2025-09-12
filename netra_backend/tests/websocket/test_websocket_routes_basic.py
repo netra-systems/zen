@@ -36,7 +36,7 @@ class TestWebSocketRoutesBasic:
             assert websocket_health_check is not None
             assert WEBSOCKET_CONFIG is not None
             
-            print("✅ All websocket routes imported successfully")
+            print(" PASS:  All websocket routes imported successfully")
             
         except ImportError as e:
             pytest.fail(f"Failed to import websocket routes: {e}")
@@ -64,7 +64,7 @@ class TestWebSocketRoutesBasic:
             assert WEBSOCKET_CONFIG.cleanup_interval_seconds > 0
             assert isinstance(WEBSOCKET_CONFIG.enable_compression, bool)
             
-            print(f"✅ WebSocket config validated: {WEBSOCKET_CONFIG}")
+            print(f" PASS:  WebSocket config validated: {WEBSOCKET_CONFIG}")
             
         except ImportError as e:
             pytest.fail(f"Failed to import websocket config: {e}")
@@ -113,7 +113,7 @@ class TestWebSocketRoutesBasic:
             assert MessageType is not None
             assert WebSocketConfig is not None
             
-            print("✅ All websocket core components imported successfully")
+            print(" PASS:  All websocket core components imported successfully")
             
         except ImportError as e:
             pytest.fail(f"Failed to import websocket core components: {e}")
@@ -160,7 +160,7 @@ class TestWebSocketRoutesBasic:
                 assert "uptime_seconds" in server_config
                 assert "server_time" in server_config
                 
-                print(f"✅ WebSocket config endpoint returned: {config}")
+                print(f" PASS:  WebSocket config endpoint returned: {config}")
                 
         except Exception as e:
             pytest.fail(f"WebSocket config endpoint test failed: {e}")
@@ -226,7 +226,7 @@ class TestWebSocketRoutesBasic:
                 assert "authentication" in metrics
                 assert "monitoring" in metrics
                 
-                print(f"✅ WebSocket health check returned: {health}")
+                print(f" PASS:  WebSocket health check returned: {health}")
                 
         except Exception as e:
             pytest.fail(f"WebSocket health endpoint test failed: {e}")
@@ -240,7 +240,7 @@ class TestWebSocketRoutesBasic:
             assert hasattr(MessageType, 'SYSTEM_MESSAGE')
             assert hasattr(MessageType, 'ERROR_MESSAGE')
             
-            print("✅ MessageType enum validated")
+            print(" PASS:  MessageType enum validated")
             
         except ImportError as e:
             pytest.fail(f"Failed to import MessageType: {e}")
@@ -276,16 +276,16 @@ class TestWebSocketRoutesBasic:
             # This might work differently depending on implementation
             try:
                 result = is_websocket_connected(mock_websocket)
-                print(f"✅ is_websocket_connected returned: {result}")
+                print(f" PASS:  is_websocket_connected returned: {result}")
             except Exception as e:
-                print(f"ℹ️  is_websocket_connected test skipped due to implementation: {e}")
+                print(f"[U+2139][U+FE0F]  is_websocket_connected test skipped due to implementation: {e}")
             
-            print("✅ WebSocket utility functions tested")
+            print(" PASS:  WebSocket utility functions tested")
             
         except ImportError as e:
             pytest.fail(f"Failed to import websocket utilities: {e}")
         except Exception as e:
-            print(f"⚠️  Some utility function tests failed: {e}")
+            print(f" WARNING: [U+FE0F]  Some utility function tests failed: {e}")
             # Don't fail the test for this since implementations can vary
 
 

@@ -1,5 +1,5 @@
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -12,7 +12,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 """
 
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -129,13 +129,13 @@ class RequestScopedExecutionEngine:
         
         if not registry:
             logger.error(
-                f"❌ VALIDATION FAILURE: AgentRegistry cannot be None for RequestScopedExecutionEngine. "
+                f" FAIL:  VALIDATION FAILURE: AgentRegistry cannot be None for RequestScopedExecutionEngine. "
                 f"User: {user_context.user_id[:8]}..., Engine initialization failed."
             )
             raise ValueError("AgentRegistry cannot be None")
         if not websocket_bridge:
             logger.error(
-                f"❌ VALIDATION FAILURE: AgentWebSocketBridge cannot be None for RequestScopedExecutionEngine. "
+                f" FAIL:  VALIDATION FAILURE: AgentWebSocketBridge cannot be None for RequestScopedExecutionEngine. "
                 f"User: {user_context.user_id[:8]}..., Engine initialization failed."
             )
             raise ValueError("AgentWebSocketBridge cannot be None")
@@ -166,7 +166,7 @@ class RequestScopedExecutionEngine:
         self.created_at = datetime.now(timezone.utc)
         self._is_active = True
         
-        logger.info(f"✅ Created RequestScopedExecutionEngine {self.engine_id} for user {user_context.user_id} "
+        logger.info(f" PASS:  Created RequestScopedExecutionEngine {self.engine_id} for user {user_context.user_id} "
                    f"(run_id: {user_context.run_id})")
     
     def _init_components(self) -> None:
@@ -201,7 +201,7 @@ class RequestScopedExecutionEngine:
         """
         if not self._is_active:
             logger.error(
-                f"❌ VALIDATION FAILURE: Attempted to execute agent on inactive ExecutionEngine. "
+                f" FAIL:  VALIDATION FAILURE: Attempted to execute agent on inactive ExecutionEngine. "
                 f"Engine ID: {self.engine_id}, User: {self.user_context.user_id[:8]}..., "
                 f"Agent: {context.agent_name}, This indicates improper engine lifecycle management."
             )
@@ -213,7 +213,7 @@ class RequestScopedExecutionEngine:
         # Ensure context matches our user context
         if context.user_id != self.user_context.user_id:
             logger.error(
-                f"❌ VALIDATION FAILURE: Context user_id mismatch in agent execution. "
+                f" FAIL:  VALIDATION FAILURE: Context user_id mismatch in agent execution. "
                 f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
                 f"Agent: {context.agent_name}, Engine: {self.engine_id}, "
                 f"This is a critical security violation - user context isolation compromised."
@@ -353,14 +353,14 @@ class RequestScopedExecutionEngine:
         """
         if not context.user_id or not context.user_id.strip():
             logger.error(
-                f"❌ VALIDATION FAILURE: Invalid execution context - user_id must be non-empty. "
+                f" FAIL:  VALIDATION FAILURE: Invalid execution context - user_id must be non-empty. "
                 f"Got: {context.user_id!r}, Agent: {getattr(context, 'agent_name', 'unknown')}"
             )
             raise ValueError("Invalid execution context: user_id must be non-empty")
         
         if not context.run_id or not context.run_id.strip():
             logger.error(
-                f"❌ VALIDATION FAILURE: Invalid execution context - run_id must be non-empty. "
+                f" FAIL:  VALIDATION FAILURE: Invalid execution context - run_id must be non-empty. "
                 f"Got: {context.run_id!r}, User: {context.user_id[:8]}..., "
                 f"Agent: {getattr(context, 'agent_name', 'unknown')}"
             )
@@ -368,7 +368,7 @@ class RequestScopedExecutionEngine:
         
         if context.run_id == 'registry':
             logger.error(
-                f"❌ VALIDATION FAILURE: Invalid execution context - run_id cannot be 'registry' placeholder. "
+                f" FAIL:  VALIDATION FAILURE: Invalid execution context - run_id cannot be 'registry' placeholder. "
                 f"User: {context.user_id[:8]}..., Agent: {getattr(context, 'agent_name', 'unknown')}, "
                 f"This indicates improper context initialization."
             )
@@ -377,7 +377,7 @@ class RequestScopedExecutionEngine:
         # Validate consistency with user context
         if context.user_id != self.user_context.user_id:
             logger.error(
-                f"❌ VALIDATION FAILURE: Context user_id mismatch during validation. "
+                f" FAIL:  VALIDATION FAILURE: Context user_id mismatch during validation. "
                 f"Expected: {self.user_context.user_id}, Got: {context.user_id}, "
                 f"Agent: {getattr(context, 'agent_name', 'unknown')}, "
                 f"This is a critical security violation - user isolation compromised."
@@ -583,7 +583,7 @@ class RequestScopedExecutionEngine:
             # Mark as inactive
             self._is_active = False
             
-            logger.info(f"✅ Cleaned up RequestScopedExecutionEngine {self.engine_id}")
+            logger.info(f" PASS:  Cleaned up RequestScopedExecutionEngine {self.engine_id}")
             
         except Exception as e:
             logger.error(f"Error cleaning up RequestScopedExecutionEngine {self.engine_id}: {e}")

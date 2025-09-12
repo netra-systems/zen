@@ -210,8 +210,8 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
         self.record_metric("docker_integration_enabled", True)
         self.record_metric("e2e_test_started", datetime.now(timezone.utc).isoformat())
         
-        print(f"🚀 Starting E2E migration test: {self.e2e_test_id}")
-        print(f"🌍 Environment: {self.test_environment}")
+        print(f"[U+1F680] Starting E2E migration test: {self.e2e_test_id}")
+        print(f"[U+1F30D] Environment: {self.test_environment}")
         
     @pytest.mark.asyncio
     async def test_e2e_migration_with_websocket_events(
@@ -241,7 +241,7 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
         self.record_metric("websocket_connection_established", True)
         self.record_metric("docker_services_validated", len(services))
         
-        print(f"✅ E2E setup complete - User: {auth_data['user_id']}")
+        print(f" PASS:  E2E setup complete - User: {auth_data['user_id']}")
         
         try:
             # Start WebSocket event monitoring
@@ -323,9 +323,9 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
             # Business continuity validation
             assert migration_duration < 30.0, f"E2E migration check took too long: {migration_duration:.3f}s"
             
-            print(f"✅ E2E Migration Check Complete - Duration: {migration_duration:.3f}s")
-            print(f"📡 WebSocket Events: {total_ws_events}")
-            print(f"📊 Current→Head: {current_revision} → {head_revision}")
+            print(f" PASS:  E2E Migration Check Complete - Duration: {migration_duration:.3f}s")
+            print(f"[U+1F4E1] WebSocket Events: {total_ws_events}")
+            print(f" CHART:  Current -> Head: {current_revision}  ->  {head_revision}")
             
         except Exception as e:
             self.record_metric("e2e_migration_error", str(e))
@@ -442,8 +442,8 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
             # Business validation
             assert isolation_maintained, "Migration state should be consistent across all user sessions"
             
-            print(f"✅ User Isolation Verified - {len(user_migration_contexts)} users tested")
-            print(f"📊 Migration State Consistency: {isolation_maintained}")
+            print(f" PASS:  User Isolation Verified - {len(user_migration_contexts)} users tested")
+            print(f" CHART:  Migration State Consistency: {isolation_maintained}")
             
         except Exception as e:
             self.record_metric("user_isolation_error", str(e))
@@ -467,8 +467,8 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
         # Initialize production-like migration context
         migrator = DatabaseMigrator(services["database"])
         
-        print(f"🏭 Starting production-like migration simulation")
-        print(f"🔧 Services: {list(services.keys())}")
+        print(f"[U+1F3ED] Starting production-like migration simulation")
+        print(f"[U+1F527] Services: {list(services.keys())}")
         
         try:
             # Simulate pre-deployment checks (what would happen in CI/CD)
@@ -560,10 +560,10 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
             assert deployment_readiness > 0.5, f"Deployment readiness too low: {deployment_readiness:.2%}"
             assert total_pre_deployment_time < 120.0, f"Pre-deployment checks took too long: {total_pre_deployment_time:.3f}s"
             
-            print(f"✅ Production-like simulation complete")
-            print(f"📊 Deployment Readiness: {deployment_readiness:.1%} ({deployment_ready_checks}/{total_checks})")
-            print(f"⏱️  Total Check Time: {total_pre_deployment_time:.3f}s")
-            print(f"🎯 Deployment Decision: {'GO' if deployment_go_decision else 'NO-GO'}")
+            print(f" PASS:  Production-like simulation complete")
+            print(f" CHART:  Deployment Readiness: {deployment_readiness:.1%} ({deployment_ready_checks}/{total_checks})")
+            print(f"[U+23F1][U+FE0F]  Total Check Time: {total_pre_deployment_time:.3f}s")
+            print(f" TARGET:  Deployment Decision: {'GO' if deployment_go_decision else 'NO-GO'}")
             
         except Exception as e:
             self.record_metric("production_simulation_error", str(e))
@@ -586,7 +586,7 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
         
         migrator = DatabaseMigrator(services["database"])
         
-        print(f"⚡ Starting migration performance test under load")
+        print(f" LIGHTNING:  Starting migration performance test under load")
         
         try:
             # Simulate concurrent load on migration system
@@ -671,9 +671,9 @@ class TestSSOTMigrationEndToEnd(SSotBaseTestCase):
                                     
             self.record_metric("performance_under_load_acceptable", performance_acceptable)
             
-            print(f"✅ Performance test complete - Success Rate: {success_rate:.1%}")
-            print(f"⏱️  Avg/Max Operation Time: {avg_operation_time:.3f}s / {max_operation_time:.3f}s")
-            print(f"🏋️  Total Load Test Duration: {total_load_time:.3f}s")
+            print(f" PASS:  Performance test complete - Success Rate: {success_rate:.1%}")
+            print(f"[U+23F1][U+FE0F]  Avg/Max Operation Time: {avg_operation_time:.3f}s / {max_operation_time:.3f}s")
+            print(f"[U+1F3CB][U+FE0F]  Total Load Test Duration: {total_load_time:.3f}s")
             
         except Exception as e:
             self.record_metric("performance_load_test_error", str(e))

@@ -21,7 +21,7 @@ KEY COVERAGE:
 
 GOLDEN PATH INTEGRATION VALIDATION:
 These tests validate integrated components that enable:
-User Connection → Message Routing → Agent Processing → Event Delivery → Response
+User Connection  ->  Message Routing  ->  Agent Processing  ->  Event Delivery  ->  Response
 
 These tests MUST initially FAIL to demonstrate current WebSocket 1011 integration issues.
 """
@@ -669,7 +669,7 @@ class TestBasicTriageResponseIntegration(SSotAsyncTestCase):
         Business Impact: Validates the integrated components that deliver
         the core $500K+ ARR user journey with real service connections.
         
-        Flow: Connection → Authentication → Message → Processing → Events → Response
+        Flow: Connection  ->  Authentication  ->  Message  ->  Processing  ->  Events  ->  Response
         
         EXPECTED OUTCOME: Should initially FAIL demonstrating integration issues.
         """
@@ -827,11 +827,11 @@ class TestBasicTriageResponseIntegration(SSotAsyncTestCase):
         
         # Key findings for Issue #135
         if any("async_session" in k for k in error_metrics):
-            print("🚨 CRITICAL: Async session pattern errors confirmed")
+            print(" ALERT:  CRITICAL: Async session pattern errors confirmed")
         if any("websocket_1011" in k for k in error_metrics):
-            print("🚨 CRITICAL: WebSocket 1011 errors confirmed")
+            print(" ALERT:  CRITICAL: WebSocket 1011 errors confirmed")
         if any("golden_path" in k for k in failure_metrics):
-            print("🚨 BUSINESS IMPACT: Golden Path integration failures confirmed")
+            print(" ALERT:  BUSINESS IMPACT: Golden Path integration failures confirmed")
         
         self.record_metric("integration_test_execution_time", total_test_time)
         self.record_metric("integration_events_generated", len(self.sent_events))

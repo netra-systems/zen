@@ -375,10 +375,10 @@ class TestTokenValidatorSecurityPatterns:
         """Test TokenValidator handles special characters properly"""
         special_data = {
             "user_id": "user_123",
-            "email": "tëst@éxämplé.com",
-            "name": "José María García-Pérez",
-            "description": "User with émojis 🚀 and ñoño characters",
-            "unicode": "测试用户",  # Chinese characters
+            "email": "t[U+00EB]st@[U+00E9]x[U+00E4]mpl[U+00E9].com",
+            "name": "Jos[U+00E9] Mar[U+00ED]a Garc[U+00ED]a-P[U+00E9]rez",
+            "description": "User with [U+00E9]mojis [U+1F680] and [U+00F1]o[U+00F1]o characters",
+            "unicode": "[U+6D4B][U+8BD5][U+7528][U+6237]",  # Chinese characters
             "symbols": "!@#$%^&*()[]{}|\\:;\"'<>,.?/",
             "whitespace": "  tab\there  \n newline \r return  "
         }

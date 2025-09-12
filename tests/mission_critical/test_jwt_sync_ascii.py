@@ -7,7 +7,7 @@
 # REMOVED_SYNTAX_ERROR: revenue-critical paths and user value delivery with cross-platform compatibility.
 
 # REMOVED_SYNTAX_ERROR: AUTHENTICATION FLOW VALIDATION:
-    # REMOVED_SYNTAX_ERROR: - Complete signup → login → chat flow with ASCII logging
+    # REMOVED_SYNTAX_ERROR: - Complete signup  ->  login  ->  chat flow with ASCII logging
     # REMOVED_SYNTAX_ERROR: - JWT token generation and validation
     # REMOVED_SYNTAX_ERROR: - Token refresh during active chat
     # REMOVED_SYNTAX_ERROR: - Cross-service authentication
@@ -132,12 +132,12 @@
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: print(message.encode('ascii', 'replace').decode('ascii'))
         # REMOVED_SYNTAX_ERROR: except:
-            # REMOVED_SYNTAX_ERROR: print(message.replace('🎉', '[SUCCESS]').replace('⚠️', '[WARNING]').replace('✗', '[FAIL]').replace('✓', '[OK]'))
+            # REMOVED_SYNTAX_ERROR: print(message.replace(' CELEBRATION: ', '[SUCCESS]').replace(' WARNING: [U+FE0F]', '[WARNING]').replace('[U+2717]', '[FAIL]').replace('[U+2713]', '[OK]'))
 
             # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)
 
 # REMOVED_SYNTAX_ERROR: def test_complete_signup_login_chat_flow_ascii(self, tier: str = "free") -> bool:
-    # REMOVED_SYNTAX_ERROR: """Test complete signup → login → chat flow with ASCII-safe logging."""
+    # REMOVED_SYNTAX_ERROR: """Test complete signup  ->  login  ->  chat flow with ASCII-safe logging."""
     # REMOVED_SYNTAX_ERROR: user_id = "formatted_string"
     # REMOVED_SYNTAX_ERROR: metrics = UserJourneyMetrics(user_id=user_id, journey_type="complete_flow_ascii",
     # REMOVED_SYNTAX_ERROR: start_time=time.time(), tier=tier)

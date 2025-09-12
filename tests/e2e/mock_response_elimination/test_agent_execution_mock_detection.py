@@ -78,7 +78,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             complex_query = {
                 "type": "agent_request",
                 "agent": "cost_optimizer",
-                "message": "🚨 SIMULATE_LLM_FAILURE 🚨 " + "x" * 10000,  # Force failure
+                "message": " ALERT:  SIMULATE_LLM_FAILURE  ALERT:  " + "x" * 10000,  # Force failure
                 "context": {
                     "user_id": str(user.user_id),
                     "subscription": "enterprise",
@@ -121,7 +121,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             response_data = final_event.get("data", {})
             response_content = response_data.get("response") or response_data.get("content", "")
             
-            # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
             # Currently this will FAIL because ModelCascade returns the fallback:
             # "I apologize, but I encountered an error processing your request."
             
@@ -233,7 +233,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             response_data = final_event.get("data", {})
             response_content = response_data.get("response") or response_data.get("content", "")
             
-            # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
             # This will FAIL because enhanced_execution_agent returns:
             # "Processing completed with fallback response for: {user_prompt}"
             
@@ -347,7 +347,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             response_data = completion_event.get("data", {})
             response_content = response_data.get("response") or response_data.get("content", "")
             
-            # ⚠️ CRITICAL BUSINESS FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] CRITICAL BUSINESS FAILING ASSERTION  WARNING: [U+FE0F]
             # Enterprise customers must NEVER receive mock responses
             
             enterprise_forbidden_responses = [
@@ -472,7 +472,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             query = {
                 "type": "agent_request",
                 "agent": "triage_agent",
-                "message": "🚨 FORCE_FAILURE_SCENARIO 🚨",
+                "message": " ALERT:  FORCE_FAILURE_SCENARIO  ALERT: ",
                 "request_id": f"websocket_authenticity_test_{int(time.time())}"
             }
             
@@ -520,7 +520,7 @@ class TestAgentExecutionMockDetection(BaseE2ETest):
             )
             
             if is_mock_response:
-                # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+                #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
                 # If we received a mock response, the WebSocket events should clearly indicate this
                 
                 # Check if we had agent_thinking events

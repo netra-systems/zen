@@ -1058,7 +1058,7 @@
 
                                         # REMOVED_SYNTAX_ERROR: print("Running COMPREHENSIVE SSOT Orchestration Isolation Tests...")
                                         # REMOVED_SYNTAX_ERROR: print("=" * 80)
-                                        # REMOVED_SYNTAX_ERROR: print("🔥 ISOLATION MODE: Testing concurrent users, race conditions, security boundaries")
+                                        # REMOVED_SYNTAX_ERROR: print(" FIRE:  ISOLATION MODE: Testing concurrent users, race conditions, security boundaries")
                                         # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
                                         # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
@@ -1066,14 +1066,14 @@
                                         # REMOVED_SYNTAX_ERROR: if result == 0:
                                             # REMOVED_SYNTAX_ERROR: print(" )
                                             # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-                                            # REMOVED_SYNTAX_ERROR: print("✅ ALL SSOT ORCHESTRATION ISOLATION TESTS PASSED")
-                                            # REMOVED_SYNTAX_ERROR: print("🚀 SSOT Orchestration isolation is BULLETPROOF")
+                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL SSOT ORCHESTRATION ISOLATION TESTS PASSED")
+                                            # REMOVED_SYNTAX_ERROR: print("[U+1F680] SSOT Orchestration isolation is BULLETPROOF")
                                             # REMOVED_SYNTAX_ERROR: print("=" * 80)
                                             # REMOVED_SYNTAX_ERROR: else:
                                                 # REMOVED_SYNTAX_ERROR: print(" )
                                                 # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-                                                # REMOVED_SYNTAX_ERROR: print("❌ SSOT ORCHESTRATION ISOLATION TESTS FAILED")
-                                                # REMOVED_SYNTAX_ERROR: print("🚨 Orchestration isolation has CRITICAL ISSUES")
+                                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  SSOT ORCHESTRATION ISOLATION TESTS FAILED")
+                                                # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration isolation has CRITICAL ISSUES")
                                                 # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
                                                 # REMOVED_SYNTAX_ERROR: sys.exit(result)

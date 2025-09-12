@@ -32,7 +32,7 @@ def run_tests(category="all", quick=False):
     security_tests_dir = Path("tests/security")
     
     if not security_tests_dir.exists():
-        print(f"❌ Security tests directory not found: {security_tests_dir}")
+        print(f" FAIL:  Security tests directory not found: {security_tests_dir}")
         return 1
     
     # Add test directory
@@ -50,7 +50,7 @@ def run_tests(category="all", quick=False):
         if category in category_filters:
             cmd.extend(["-k", category_filters[category]])
         else:
-            print(f"❌ Unknown category: {category}")
+            print(f" FAIL:  Unknown category: {category}")
             print(f"Available categories: {', '.join(category_filters.keys())}")
             return 1
     
@@ -66,17 +66,17 @@ def run_tests(category="all", quick=False):
     # Add output formatting
     cmd.extend(["--color=yes"])
     
-    print(f"🔒 Running security tests: {' '.join(cmd)}")
+    print(f"[U+1F512] Running security tests: {' '.join(cmd)}")
     print("=" * 60)
     
     try:
         result = subprocess.run(cmd, check=False)
         return result.returncode
     except KeyboardInterrupt:
-        print("\n⚠️  Tests interrupted by user")
+        print("\n WARNING: [U+FE0F]  Tests interrupted by user")
         return 130
     except Exception as e:
-        print(f"❌ Error running tests: {e}")
+        print(f" FAIL:  Error running tests: {e}")
         return 1
 
 
@@ -109,7 +109,7 @@ Examples:
     
     args = parser.parse_args()
     
-    print("🛡️  Netra Security Test Suite")
+    print("[U+1F6E1][U+FE0F]  Netra Security Test Suite")
     print(f"Category: {args.category}")
     print(f"Quick mode: {args.quick}")
     print()
@@ -118,12 +118,12 @@ Examples:
     
     if exit_code == 0:
         print()
-        print("✅ All security tests passed!")
-        print("🛡️  Agent execution protection is working correctly.")
+        print(" PASS:  All security tests passed!")
+        print("[U+1F6E1][U+FE0F]  Agent execution protection is working correctly.")
     else:
         print()
-        print(f"❌ Security tests failed with exit code: {exit_code}")
-        print("🚨 Security vulnerabilities may exist - review failures above.")
+        print(f" FAIL:  Security tests failed with exit code: {exit_code}")
+        print(" ALERT:  Security vulnerabilities may exist - review failures above.")
     
     return exit_code
 

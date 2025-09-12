@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Database Persistence Golden Path Integration Tests
 
@@ -35,10 +73,20 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread, Message
 from netra_backend.app.models.agent_execution import AgentExecution
 from netra_backend.app.schemas.core_models import MessageCreate, ThreadMetadata
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @dataclass
 class TestUserData:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test user data for multi-user scenarios."""
     user_id: str
     email: str
@@ -48,6 +96,15 @@ class TestUserData:
 
 
 class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Comprehensive database persistence tests for golden path user journey.
     
@@ -115,7 +172,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
         assert len(user1_only) == 1
         assert user1_only[0]["email"] == user1_data["email"]
         
-        self.logger.info(f"✓ User isolation verified: {user1_id} != {user2_id}")
+        self.logger.info(f"[U+2713] User isolation verified: {user1_id} != {user2_id}")
         
         # Business value assertion
         self.assert_business_value_delivered(
@@ -223,7 +280,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
         for i in range(len(message_results) - 1):
             assert message_results[i]["created_at"] < message_results[i + 1]["created_at"]
         
-        self.logger.info(f"✓ Thread persistence verified: {thread_id} with {len(message_results)} messages")
+        self.logger.info(f"[U+2713] Thread persistence verified: {thread_id} with {len(message_results)} messages")
         
         # Business value assertion
         self.assert_business_value_delivered(
@@ -354,7 +411,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
         assert len(output["analysis_results"]["optimization_opportunities"]) == 2
         assert output["execution_metrics"]["data_points_analyzed"] == 50000
         
-        self.logger.info(f"✓ Agent execution tracking verified: {execution_id}")
+        self.logger.info(f"[U+2713] Agent execution tracking verified: {execution_id}")
         
         # Business value assertion  
         self.assert_business_value_delivered(
@@ -483,7 +540,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 
                 assert len(cross_executions) == 0, f"Data leakage: {user.user_id} can see {other_user.user_id}'s executions"
         
-        self.logger.info(f"✓ Multi-user isolation verified: {len(completed_users)} users, {operations_per_user * len(completed_users)} operations in {duration:.2f}s")
+        self.logger.info(f"[U+2713] Multi-user isolation verified: {len(completed_users)} users, {operations_per_user * len(completed_users)} operations in {duration:.2f}s")
         
         # Business value assertion
         self.assert_business_value_delivered(
@@ -600,7 +657,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
         assert len(failed_thread_check) == 0, "Failed transaction thread should not exist"
         assert len(failed_execution_check) == 0, "Failed transaction execution should not exist"
         
-        self.logger.info("✓ Transaction rollback and consistency verified")
+        self.logger.info("[U+2713] Transaction rollback and consistency verified")
         
         # Business value assertion
         self.assert_business_value_delivered(
@@ -734,7 +791,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
             
             await redis_client.close()
         
-        self.logger.info(f"✓ Cache coordination verified - DB: {db_query_time:.4f}s, Cache: {cache_query_time:.4f}s" if cache_query_time else f"✓ Database query verified: {db_query_time:.4f}s")
+        self.logger.info(f"[U+2713] Cache coordination verified - DB: {db_query_time:.4f}s, Cache: {cache_query_time:.4f}s" if cache_query_time else f"[U+2713] Database query verified: {db_query_time:.4f}s")
         
         # Business value assertion
         performance_improvement = None
@@ -824,7 +881,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 assert thread_exists is not None, f"Thread {data['thread_id']} should exist"
                 assert execution_exists is not None, f"Execution {data['execution_id']} should exist"
             
-            self.logger.info(f"✓ Created test data for {len(test_data_created)} users")
+            self.logger.info(f"[U+2713] Created test data for {len(test_data_created)} users")
             
             # Test query performance under load
             start_time = time.time()
@@ -850,7 +907,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 assert len(result) == 1, f"User {i} should have exactly 1 thread"
                 assert result[0]["execution_count"] == 1, f"User {i} should have 1 execution"
             
-            self.logger.info(f"✓ Concurrent queries completed in {query_duration:.2f}s")
+            self.logger.info(f"[U+2713] Concurrent queries completed in {query_duration:.2f}s")
             
         finally:
             # Cleanup test data (simulating application shutdown)
@@ -892,7 +949,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 assert len(remaining_threads) == 0, f"All threads for user {data['user_id']} should be deleted"
                 assert len(remaining_executions) == 0, f"All executions for user {data['user_id']} should be deleted"
             
-            self.logger.info(f"✓ Cleanup completed in {cleanup_duration:.2f}s")
+            self.logger.info(f"[U+2713] Cleanup completed in {cleanup_duration:.2f}s")
         
         # Business value assertion
         self.assert_business_value_delivered(

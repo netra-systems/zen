@@ -579,7 +579,7 @@ class AuthServiceClient:
             
             # Enhanced logging with buffer utilization metrics
             if is_reachable:
-                logger.info(f"✅ Auth service connectivity successful - "
+                logger.info(f" PASS:  Auth service connectivity successful - "
                            f"Duration: {connectivity_duration:.3f}s, "
                            f"Timeout: {health_timeout}s, "
                            f"Buffer utilization: {buffer_utilization:.1f}%, "
@@ -587,16 +587,16 @@ class AuthServiceClient:
                 
                 # Alert if buffer utilization is too low (< 50% suggests timeout could be reduced)
                 if buffer_utilization < 50:
-                    logger.warning(f"🚨 LOW BUFFER UTILIZATION: {buffer_utilization:.1f}% - "
+                    logger.warning(f" ALERT:  LOW BUFFER UTILIZATION: {buffer_utilization:.1f}% - "
                                   f"Consider reducing AUTH_HEALTH_CHECK_TIMEOUT from {health_timeout}s "
                                   f"to ~{connectivity_duration * 2:.1f}s for better performance")
                 
                 # Alert if buffer utilization is dangerously high (> 90% suggests timeout too aggressive)  
                 elif buffer_utilization > 90:
-                    logger.warning(f"⚠️ HIGH BUFFER UTILIZATION: {buffer_utilization:.1f}% - "
+                    logger.warning(f" WARNING: [U+FE0F] HIGH BUFFER UTILIZATION: {buffer_utilization:.1f}% - "
                                   f"Timeout {health_timeout}s may be too aggressive for {connectivity_duration:.3f}s response time")
             else:
-                logger.error(f"❌ Auth service connectivity failed - "
+                logger.error(f" FAIL:  Auth service connectivity failed - "
                            f"Duration: {connectivity_duration:.3f}s, "
                            f"Timeout: {health_timeout}s, "
                            f"Status: {response.status_code}")
@@ -605,20 +605,20 @@ class AuthServiceClient:
         except asyncio.TimeoutError:
             # REMEDIATION ISSUE #395: Enhanced timeout monitoring with buffer utilization analysis
             timeout_duration = time.time() - health_check_start
-            logger.warning(f"🕐 Auth service connectivity TIMEOUT - "
+            logger.warning(f"[U+1F550] Auth service connectivity TIMEOUT - "
                           f"Duration: {timeout_duration:.3f}s, "
                           f"Configured timeout: {health_timeout}s, "
                           f"Environment: {environment}")
             
             # Provide actionable remediation guidance
             suggested_timeout = health_timeout * 1.5  # 50% buffer increase
-            logger.warning(f"💡 TIMEOUT REMEDIATION: Consider increasing AUTH_HEALTH_CHECK_TIMEOUT "
+            logger.warning(f" IDEA:  TIMEOUT REMEDIATION: Consider increasing AUTH_HEALTH_CHECK_TIMEOUT "
                           f"from {health_timeout}s to {suggested_timeout:.1f}s for better reliability")
             
             return False
         except Exception as e:
             connectivity_duration = time.time() - health_check_start
-            logger.warning(f"⚠️ Auth service connectivity check failed - "
+            logger.warning(f" WARNING: [U+FE0F] Auth service connectivity check failed - "
                           f"Duration: {connectivity_duration:.3f}s, "
                           f"Error: {e}, "
                           f"Environment: {environment}")

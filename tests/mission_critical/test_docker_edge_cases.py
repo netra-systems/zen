@@ -107,7 +107,7 @@
     # REMOVED_SYNTAX_ERROR: self.docker_manager = UnifiedDockerManager()
     # REMOVED_SYNTAX_ERROR: self.rate_limiter = get_docker_rate_limiter()
 
-    # REMOVED_SYNTAX_ERROR: logger.info("🔧 Docker Edge Case Test Framework initialized")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F527] Docker Edge Case Test Framework initialized")
 
 # REMOVED_SYNTAX_ERROR: def create_orphaned_container(self, container_name: str) -> bool:
     # REMOVED_SYNTAX_ERROR: """Create a container that will become orphaned."""
@@ -222,7 +222,7 @@
 
 # REMOVED_SYNTAX_ERROR: def cleanup(self):
     # REMOVED_SYNTAX_ERROR: """Comprehensive cleanup of all test resources."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧹 Starting comprehensive edge case cleanup...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9F9] Starting comprehensive edge case cleanup...")
 
     # Clean up regular test resources
     # REMOVED_SYNTAX_ERROR: for container in self.test_containers:
@@ -253,7 +253,7 @@
                                                     # Clean up orphaned resources
                                                     # REMOVED_SYNTAX_ERROR: self.cleanup_orphaned_resources()
 
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Edge case cleanup completed")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Edge case cleanup completed")
 
 
                                                     # REMOVED_SYNTAX_ERROR: @pytest.fixture
@@ -270,7 +270,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_orphaned_container_discovery_and_cleanup(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test discovery and cleanup of orphaned containers."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔍 Testing orphaned container discovery and cleanup")
+    # REMOVED_SYNTAX_ERROR: logger.info(" SEARCH:  Testing orphaned container discovery and cleanup")
 
     # Create several orphaned containers
     # REMOVED_SYNTAX_ERROR: orphaned_containers = []
@@ -311,7 +311,7 @@
 # REMOVED_SYNTAX_ERROR: def test_orphaned_network_with_dependencies(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test orphaned network cleanup with container dependencies."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🌐 Testing orphaned network cleanup with dependencies")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F310] Testing orphaned network cleanup with dependencies")
 
     # Create network
     # REMOVED_SYNTAX_ERROR: network_name = 'formatted_string'
@@ -343,7 +343,7 @@
                             # REMOVED_SYNTAX_ERROR: network_remove_failed = True
 
                             # REMOVED_SYNTAX_ERROR: assert network_remove_failed, "Network removal should fail due to connected containers"
-                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Network correctly cannot be removed due to dependencies")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Network correctly cannot be removed due to dependencies")
 
                             # Clean up containers first
                             # REMOVED_SYNTAX_ERROR: containers_cleaned = 0
@@ -370,7 +370,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_volume_cleanup_with_active_mounts(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test volume cleanup when volumes have active container mounts."""
-    # REMOVED_SYNTAX_ERROR: logger.info("💾 Testing volume cleanup with active mounts")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Testing volume cleanup with active mounts")
 
     # Create volume
     # REMOVED_SYNTAX_ERROR: volume_name = 'formatted_string'
@@ -426,7 +426,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_interrupted_container_creation(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test recovery from interrupted container creation operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🚧 Testing interrupted container creation recovery")
+    # REMOVED_SYNTAX_ERROR: logger.info(" UNDER_CONSTRUCTION:  Testing interrupted container creation recovery")
 
     # Simulate interrupted container creation by creating and then simulating failure
     # REMOVED_SYNTAX_ERROR: container_name = 'formatted_string'
@@ -482,7 +482,7 @@
 # REMOVED_SYNTAX_ERROR: def test_interrupted_image_pull_recovery(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test recovery from interrupted image pull operations."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("📥 Testing interrupted image pull recovery")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4E5] Testing interrupted image pull recovery")
 
     # Use a small image for faster testing
     # REMOVED_SYNTAX_ERROR: test_image = 'alpine:3.18'
@@ -522,7 +522,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_interrupted_network_operations(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test recovery from interrupted network operations."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🌐 Testing interrupted network operations recovery")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F310] Testing interrupted network operations recovery")
 
     # REMOVED_SYNTAX_ERROR: network_name = 'formatted_string'
 
@@ -581,7 +581,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_port_conflict_detection_and_resolution(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test detection and resolution of Docker port conflicts."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔌 Testing port conflict detection and resolution")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F50C] Testing port conflict detection and resolution")
 
     # Find an available port
     # REMOVED_SYNTAX_ERROR: test_port = edge_case_framework.find_available_port(9000)
@@ -628,7 +628,7 @@
                                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                         # REMOVED_SYNTAX_ERROR: assert port_conflict_detected, "Port conflict should be detected"
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Port conflict correctly detected")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Port conflict correctly detected")
 
                                         # Test resolution by using different port
                                         # REMOVED_SYNTAX_ERROR: alternative_port = edge_case_framework.find_available_port(test_port + 1)
@@ -657,7 +657,7 @@
 # REMOVED_SYNTAX_ERROR: def test_dynamic_port_allocation_conflicts(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test dynamic port allocation with potential conflicts."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🎯 Testing dynamic port allocation conflict handling")
+    # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Testing dynamic port allocation conflict handling")
 
     # Create multiple containers with dynamic port allocation
     # REMOVED_SYNTAX_ERROR: containers_with_ports = []
@@ -720,7 +720,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_container_name_conflict_handling(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test handling of container name conflicts."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🏷️ Testing container name conflict handling")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3F7][U+FE0F] Testing container name conflict handling")
 
     # REMOVED_SYNTAX_ERROR: base_name = 'formatted_string'
 
@@ -753,7 +753,7 @@
                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                             # REMOVED_SYNTAX_ERROR: assert name_conflict_detected, "Container name conflict should be detected"
-                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Container name conflict correctly detected")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Container name conflict correctly detected")
 
                             # Test resolution with modified names
                             # REMOVED_SYNTAX_ERROR: resolution_strategies = [ )
@@ -789,7 +789,7 @@
 # REMOVED_SYNTAX_ERROR: def test_concurrent_name_generation(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test concurrent container creation with name generation."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Testing concurrent name generation")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Testing concurrent name generation")
 
 # REMOVED_SYNTAX_ERROR: def create_container_with_generated_name(thread_id: int) -> Tuple[bool, str]:
     # REMOVED_SYNTAX_ERROR: """Create container with thread-specific generated name."""
@@ -844,7 +844,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_daemon_availability_monitoring(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test monitoring of Docker daemon availability."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing Docker daemon availability monitoring")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing Docker daemon availability monitoring")
 
     # Test Docker daemon connectivity
     # REMOVED_SYNTAX_ERROR: connectivity_tests = 0
@@ -873,7 +873,7 @@
 # REMOVED_SYNTAX_ERROR: def test_operation_retry_after_daemon_issues(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test operation retry mechanisms after potential daemon issues."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing operation retry after daemon issues")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing operation retry after daemon issues")
 
     # Test with operations that might fail due to daemon issues
     # REMOVED_SYNTAX_ERROR: retry_operations = [ )
@@ -920,7 +920,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_memory_limit_boundary_conditions(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test memory limits at boundary conditions (very low/high values)."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧠 Testing memory limit boundary conditions")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing memory limit boundary conditions")
 
     # REMOVED_SYNTAX_ERROR: boundary_tests = [ )
     # REMOVED_SYNTAX_ERROR: ('tiny_memory', '16m'),      # Very small memory limit
@@ -986,7 +986,7 @@
 # REMOVED_SYNTAX_ERROR: def test_cpu_limit_boundary_conditions(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test CPU limits at boundary conditions."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("⚙️ Testing CPU limit boundary conditions")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+2699][U+FE0F] Testing CPU limit boundary conditions")
 
     # REMOVED_SYNTAX_ERROR: cpu_tests = [ )
     # REMOVED_SYNTAX_ERROR: ('minimal_cpu', '0.1'),     # Very minimal CPU
@@ -1049,7 +1049,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_storage_limit_boundary_conditions(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test storage and disk space boundary conditions."""
-    # REMOVED_SYNTAX_ERROR: logger.info("💾 Testing storage limit boundary conditions")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Testing storage limit boundary conditions")
 
     # Test with containers that create varying amounts of data
     # REMOVED_SYNTAX_ERROR: storage_tests = [ )
@@ -1102,7 +1102,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_network_isolation_edge_cases(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test network isolation in edge case scenarios."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔒 Testing network isolation edge cases")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Testing network isolation edge cases")
 
     # Create custom networks for isolation testing
     # REMOVED_SYNTAX_ERROR: isolated_networks = []
@@ -1176,7 +1176,7 @@
 # REMOVED_SYNTAX_ERROR: def test_network_name_conflicts_and_resolution(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test network name conflicts and resolution strategies."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🌐 Testing network name conflicts and resolution")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F310] Testing network name conflicts and resolution")
 
     # REMOVED_SYNTAX_ERROR: base_network_name = 'formatted_string'
 
@@ -1203,7 +1203,7 @@
                         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                         # REMOVED_SYNTAX_ERROR: assert name_conflict_detected, "Network name conflict should be detected"
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Network name conflict correctly detected")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Network name conflict correctly detected")
 
                         # Test resolution strategies
                         # REMOVED_SYNTAX_ERROR: resolution_strategies = [ )
@@ -1233,7 +1233,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_bridge_network_edge_cases(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test bridge network configuration edge cases."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🌉 Testing bridge network edge cases")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F309] Testing bridge network edge cases")
 
     # Test various bridge network configurations
     # REMOVED_SYNTAX_ERROR: bridge_configs = [ )
@@ -1298,7 +1298,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_volume_mount_permission_edge_cases(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test volume mount permission edge cases."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔐 Testing volume mount permission edge cases")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Testing volume mount permission edge cases")
 
     # Test different mount scenarios
     # REMOVED_SYNTAX_ERROR: mount_scenarios = [ )
@@ -1367,7 +1367,7 @@
 # REMOVED_SYNTAX_ERROR: def test_volume_cleanup_with_dependency_chains(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test volume cleanup with complex dependency chains."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🔗 Testing volume cleanup with dependency chains")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F517] Testing volume cleanup with dependency chains")
 
     # Create a chain of volumes and containers with dependencies
     # REMOVED_SYNTAX_ERROR: base_volume = 'formatted_string'
@@ -1458,7 +1458,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_container_state_transition_edge_cases(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test edge cases in container state transitions."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing container state transition edge cases")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing container state transition edge cases")
 
     # REMOVED_SYNTAX_ERROR: state_transition_tests = [ )
     # REMOVED_SYNTAX_ERROR: ('create_start_stop', ['create', 'start', 'stop']),
@@ -1536,7 +1536,7 @@
 # REMOVED_SYNTAX_ERROR: def test_container_exit_code_edge_cases(self, edge_case_framework):
     # REMOVED_SYNTAX_ERROR: """Test handling of various container exit codes."""
     # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: logger.info("🚪 Testing container exit code edge cases")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F6AA] Testing container exit code edge cases")
 
     # REMOVED_SYNTAX_ERROR: exit_code_tests = [ )
     # REMOVED_SYNTAX_ERROR: ('success_exit', 0, 'exit 0'),
@@ -1596,7 +1596,7 @@
                                             # Direct execution for debugging
                                             # REMOVED_SYNTAX_ERROR: framework = DockerEdgeCaseFramework()
                                             # REMOVED_SYNTAX_ERROR: try:
-                                                # REMOVED_SYNTAX_ERROR: logger.info("🚀 Starting Docker Edge Case Test Suite...")
+                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting Docker Edge Case Test Suite...")
 
                                                 # Run a subset of tests for direct execution
                                                 # REMOVED_SYNTAX_ERROR: orphan_test = TestOrphanedResourceRecovery()
@@ -1605,7 +1605,7 @@
                                                 # REMOVED_SYNTAX_ERROR: port_test = TestPortConflictResolution()
                                                 # REMOVED_SYNTAX_ERROR: port_test.test_dynamic_port_allocation_conflicts(framework)
 
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Direct execution edge case tests completed successfully")
+                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Direct execution edge case tests completed successfully")
 
                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")

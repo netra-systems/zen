@@ -59,7 +59,7 @@ class TestRealJWTValidation:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for authentication testing."""
-        print("🐳 Starting Docker services for JWT validation tests...")
+        print("[U+1F433] Starting Docker services for JWT validation tests...")
         
         # Start required services: PostgreSQL, Redis, Auth Service, Backend
         services = ["backend", "auth", "postgres", "redis"]
@@ -74,13 +74,13 @@ class TestRealJWTValidation:
             # Wait for services to be fully ready
             await asyncio.sleep(5)
             
-            print("✅ Docker services ready for JWT validation tests")
+            print(" PASS:  Docker services ready for JWT validation tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for JWT tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for JWT tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after JWT validation tests...")
+            print("[U+1F9F9] Cleaning up Docker services after JWT validation tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -138,10 +138,10 @@ class TestRealJWTValidation:
             assert "user_id" in decoded
             assert "permissions" in decoded
             
-            print("✅ Valid JWT token successfully validated")
+            print(" PASS:  Valid JWT token successfully validated")
             
         except jwt.InvalidTokenError as e:
-            pytest.fail(f"❌ Valid JWT token failed validation: {e}")
+            pytest.fail(f" FAIL:  Valid JWT token failed validation: {e}")
 
     @pytest.mark.asyncio
     async def test_expired_jwt_token_rejection(self, jwt_secret_key: str):
@@ -163,7 +163,7 @@ class TestRealJWTValidation:
         with pytest.raises(jwt.ExpiredSignatureError):
             jwt.decode(expired_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
             
-        print("✅ Expired JWT token correctly rejected")
+        print(" PASS:  Expired JWT token correctly rejected")
 
     @pytest.mark.asyncio
     async def test_invalid_signature_jwt_rejection(self, valid_jwt_payload: Dict[str, Any]):
@@ -179,7 +179,7 @@ class TestRealJWTValidation:
         with pytest.raises(jwt.InvalidSignatureError):
             jwt.decode(invalid_token, correct_secret, algorithms=[JWTConstants.HS256_ALGORITHM])
             
-        print("✅ JWT token with invalid signature correctly rejected")
+        print(" PASS:  JWT token with invalid signature correctly rejected")
 
     @pytest.mark.asyncio
     async def test_malformed_jwt_token_rejection(self, jwt_secret_key: str):
@@ -200,7 +200,7 @@ class TestRealJWTValidation:
             with pytest.raises((jwt.InvalidTokenError, jwt.DecodeError, ValueError)):
                 jwt.decode(token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
         
-        print("✅ Malformed JWT tokens correctly rejected")
+        print(" PASS:  Malformed JWT tokens correctly rejected")
 
     @pytest.mark.asyncio
     async def test_jwt_token_missing_required_claims(self, jwt_secret_key: str):
@@ -222,7 +222,7 @@ class TestRealJWTValidation:
         assert JWTConstants.SUBJECT not in decoded
         assert JWTConstants.EMAIL in decoded
         
-        print("✅ JWT token missing required claims detected")
+        print(" PASS:  JWT token missing required claims detected")
 
     @pytest.mark.asyncio
     async def test_jwt_algorithm_confusion_protection(self, valid_jwt_payload: Dict[str, Any], jwt_secret_key: str):
@@ -235,7 +235,7 @@ class TestRealJWTValidation:
         with pytest.raises((jwt.InvalidSignatureError, jwt.InvalidAlgorithmError)):
             jwt.decode(rs256_token, jwt_secret_key, algorithms=["RS256"])
             
-        print("✅ JWT algorithm confusion attack prevented")
+        print(" PASS:  JWT algorithm confusion attack prevented")
 
     @pytest.mark.asyncio
     async def test_jwt_token_user_context_isolation(self, jwt_secret_key: str):
@@ -272,7 +272,7 @@ class TestRealJWTValidation:
         assert user1_decoded[JWTConstants.SUBJECT] != user2_decoded[JWTConstants.SUBJECT]
         assert user1_decoded["permissions"] != user2_decoded["permissions"]
         
-        print("✅ JWT token user context isolation verified")
+        print(" PASS:  JWT token user context isolation verified")
 
     @pytest.mark.asyncio
     async def test_jwt_token_permission_validation(self, jwt_secret_key: str):
@@ -313,7 +313,7 @@ class TestRealJWTValidation:
         assert "delete" not in readonly_decoded["permissions"]
         assert "read" in readonly_decoded["permissions"]
         
-        print("✅ JWT token permission validation successful")
+        print(" PASS:  JWT token permission validation successful")
 
     @pytest.mark.asyncio
     async def test_jwt_token_refresh_mechanism(self, jwt_secret_key: str, real_db_session):
@@ -353,7 +353,7 @@ class TestRealJWTValidation:
         assert access_decoded["user_id"] == refresh_decoded["user_id"]
         assert access_decoded[JWTConstants.EXPIRES_AT] < refresh_decoded[JWTConstants.EXPIRES_AT]
         
-        print("✅ JWT token refresh mechanism validated")
+        print(" PASS:  JWT token refresh mechanism validated")
 
     @pytest.mark.asyncio
     async def test_jwt_token_api_endpoint_integration(self, async_client: AsyncClient, jwt_secret_key: str):
@@ -384,11 +384,11 @@ class TestRealJWTValidation:
             
             # Should succeed if endpoint accepts the token
             # Note: Response depends on actual endpoint auth requirements
-            print(f"✅ API request with JWT token - Status: {response.status_code}")
+            print(f" PASS:  API request with JWT token - Status: {response.status_code}")
             
         except Exception as e:
             # Log error but don't fail test - endpoint may not require auth
-            print(f"⚠️ API request with JWT token encountered error: {e}")
+            print(f" WARNING: [U+FE0F] API request with JWT token encountered error: {e}")
             
         # Test API request with invalid token
         invalid_headers = {
@@ -398,10 +398,10 @@ class TestRealJWTValidation:
         
         try:
             response = await async_client.get("/health", headers=invalid_headers)
-            print(f"✅ API request with invalid JWT token - Status: {response.status_code}")
+            print(f" PASS:  API request with invalid JWT token - Status: {response.status_code}")
             
         except Exception as e:
-            print(f"⚠️ API request with invalid JWT token encountered error: {e}")
+            print(f" WARNING: [U+FE0F] API request with invalid JWT token encountered error: {e}")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

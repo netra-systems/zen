@@ -149,7 +149,7 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
             except RuntimeError as e:
                 if "Direct instantiation" in str(e):
                     # Expected - direct instantiation is properly blocked
-                    print("✅ Direct instantiation properly blocked - using factory patterns")
+                    print(" PASS:  Direct instantiation properly blocked - using factory patterns")
                 else:
                     raise
         
@@ -166,14 +166,14 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
         assert executor_2 is not None, "Second executor should be created"
         assert id(executor) != id(executor_2), "Executors should be isolated instances"
         
-        print("✅ Single tool execution path validation complete")
+        print(" PASS:  Single tool execution path validation complete")
     
     @pytest.mark.integration
     async def test_websocket_event_consistency(self):
         """
         SHOULD PASS: Validate all 5 WebSocket events deliver consistently.
         
-        Tests golden path: login → tool execution → AI response.
+        Tests golden path: login  ->  tool execution  ->  AI response.
         """
         # Skip if modules not available
         if not (TOOL_EXECUTOR_FACTORY_AVAILABLE and USER_EXECUTION_CONTEXT_AVAILABLE):
@@ -273,16 +273,16 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
                     assert completed_event["data"]["tool_name"] == test_tool_name, "Completion event should include correct tool name"
                     assert completed_event["data"]["status"] == "success", "Completion event should show success"
                     
-                    print(f"✅ WebSocket events validated: {len(mock_events_sent)} events sent")
+                    print(f" PASS:  WebSocket events validated: {len(mock_events_sent)} events sent")
                     print(f"   Event types: {event_types}")
             
             except RuntimeError as e:
                 if "Direct instantiation" in str(e):
-                    print("✅ Direct instantiation properly blocked - WebSocket events should work via factory")
+                    print(" PASS:  Direct instantiation properly blocked - WebSocket events should work via factory")
                 else:
                     raise
         
-        print("✅ WebSocket event consistency validation complete")
+        print(" PASS:  WebSocket event consistency validation complete")
     
     @pytest.mark.integration
     async def test_tool_registry_singleton(self):
@@ -325,9 +325,9 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
             assert unique_registries in [1, 3], f"Should have either 1 shared registry or 3 isolated registries, got {unique_registries}"
             
             if unique_registries == 1:
-                print("✅ Single shared registry pattern detected")
+                print(" PASS:  Single shared registry pattern detected")
             else:
-                print("✅ Per-user registry isolation pattern detected")
+                print(" PASS:  Per-user registry isolation pattern detected")
         
         # Test registry consistency
         test_tool_name = "registry_consistency_tool"
@@ -353,21 +353,21 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
                         # Isolated registries - tool should not be available
                         assert not has_tool, f"Tool should not be available in executor {i} with isolated registry"
         
-        print("✅ Tool registry singleton validation complete")
+        print(" PASS:  Tool registry singleton validation complete")
     
     @pytest.mark.integration
     async def test_golden_path_user_flow_integration(self):
         """
         SHOULD PASS: Test complete golden path user flow works end-to-end.
         
-        Validates: user login → tool execution → AI response delivery.
+        Validates: user login  ->  tool execution  ->  AI response delivery.
         """
         # Skip if modules not available
         if not (TOOL_EXECUTOR_FACTORY_AVAILABLE and USER_EXECUTION_CONTEXT_AVAILABLE):
             pytest.skip("Required modules not available")
         
         # Simulate complete user flow
-        print("🚀 Testing Golden Path User Flow")
+        print("[U+1F680] Testing Golden Path User Flow")
         
         # Step 1: User login (simulated with user context)
         user_context = UserExecutionContext(
@@ -449,7 +449,7 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
                     
                     except RuntimeError as e:
                         if "Direct instantiation" in str(e):
-                            print(f"✅ Tool {tool_name}: Direct instantiation properly blocked")
+                            print(f" PASS:  Tool {tool_name}: Direct instantiation properly blocked")
                         else:
                             raise
         
@@ -477,7 +477,7 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
                 assert event["user_id"] == user_context.user_id, f"Event should have correct user_id"
                 assert event["run_id"] == user_context.run_id, f"Event should have correct run_id"
         
-        print(f"✅ Golden Path User Flow validated")
+        print(f" PASS:  Golden Path User Flow validated")
         print(f"   Tools executed: {len(events_by_tool)}")
         print(f"   Total events: {len(golden_path_events)}")
         print(f"   Event types: {set(e['type'] for e in golden_path_events)}")
@@ -502,7 +502,7 @@ class TestToolExecutorFactorySSotConsolidation(SSotBaseTestCase):
         
         # Report test results
         if self._websocket_events:
-            print(f"\n📊 WebSocket Events Summary:")
+            print(f"\n CHART:  WebSocket Events Summary:")
             print(f"   Total events captured: {len(self._websocket_events)}")
             event_types = [e["type"] for e in self._websocket_events]
             print(f"   Event types: {set(event_types)}")

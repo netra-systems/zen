@@ -131,7 +131,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                 if correct_result["success"]:
                     try:
                         correct_result["response_data"] = correct_response.json()
-                        self.logger.info("✅ Correct URL pattern works - service token created successfully")
+                        self.logger.info(" PASS:  Correct URL pattern works - service token created successfully")
                     except:
                         correct_result["response_data"] = correct_response.text
                 else:
@@ -140,7 +140,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                         correct_result["error"] = error_data.get("detail", str(error_data))
                     except:
                         correct_result["error"] = correct_response.text
-                    self.logger.warning(f"⚠️ Correct URL pattern failed: {correct_result['error']}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Correct URL pattern failed: {correct_result['error']}")
                     
             except Exception as e:
                 correct_result = {
@@ -150,7 +150,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                     "response_data": None,
                     "error": f"Request failed: {str(e)}"
                 }
-                self.logger.error(f"❌ Correct URL pattern request failed: {e}")
+                self.logger.error(f" FAIL:  Correct URL pattern request failed: {e}")
             
             # Test 2: Incorrect URL pattern - /auth/service/token (with slash)
             incorrect_url = f"{self.auth_service_url}/auth/service/token"
@@ -176,7 +176,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                 if incorrect_result["success"]:
                     try:
                         incorrect_result["response_data"] = incorrect_response.json()
-                        self.logger.warning("⚠️ Incorrect URL pattern unexpectedly works!")
+                        self.logger.warning(" WARNING: [U+FE0F] Incorrect URL pattern unexpectedly works!")
                     except:
                         incorrect_result["response_data"] = incorrect_response.text
                 else:
@@ -185,7 +185,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                         incorrect_result["error"] = error_data.get("detail", str(error_data))
                     except:
                         incorrect_result["error"] = incorrect_response.text
-                    self.logger.info("✅ Incorrect URL pattern correctly fails (expected)")
+                    self.logger.info(" PASS:  Incorrect URL pattern correctly fails (expected)")
                     
             except Exception as e:
                 incorrect_result = {
@@ -195,7 +195,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                     "response_data": None,
                     "error": f"Request failed: {str(e)}"
                 }
-                self.logger.info("✅ Incorrect URL pattern request failed (expected)")
+                self.logger.info(" PASS:  Incorrect URL pattern request failed (expected)")
         
         # Validation Logic - Designed to demonstrate the URL pattern issue
         self.logger.info("=== URL Pattern Validation Results ===")
@@ -222,17 +222,17 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
         )
         
         # Log the successful URL pattern validation
-        self.logger.info("✅ URL Pattern Validation PASSED:")
+        self.logger.info(" PASS:  URL Pattern Validation PASSED:")
         self.logger.info(f"  - Correct URL /auth/service-token exists (Status: {correct_result['status_code']})")
         self.logger.info(f"  - Incorrect URL /auth/service/token missing (Status: {incorrect_result['status_code']})")
         
         # Additional validation: If correct endpoint returned 401, that's actually good
         if correct_result["status_code"] == 401:
-            self.logger.info("✅ HTTP 401 on correct URL indicates endpoint exists and is validating credentials")
+            self.logger.info(" PASS:  HTTP 401 on correct URL indicates endpoint exists and is validating credentials")
             
         # Additional validation: If correct endpoint returned 422, that's validation errors
         if correct_result["status_code"] == 422:
-            self.logger.info("✅ HTTP 422 on correct URL indicates endpoint exists and is validating request format")
+            self.logger.info(" PASS:  HTTP 422 on correct URL indicates endpoint exists and is validating request format")
         
         # Validate that we got a proper token from the correct URL
         if correct_result["success"] and correct_result["response_data"]:
@@ -259,12 +259,12 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                 f"with length {len(str(token_value))}"
             )
             
-            self.logger.info(f"✅ Service token validation successful - token field: {token_field}")
+            self.logger.info(f" PASS:  Service token validation successful - token field: {token_field}")
         
         self.logger.info("=== URL Pattern Test Complete ===")
         self.logger.info("If this test passes, the URL patterns are working correctly:")
-        self.logger.info("  - /auth/service-token (hyphen) works ✅")
-        self.logger.info("  - /auth/service/token (slash) fails as expected ✅")
+        self.logger.info("  - /auth/service-token (hyphen) works  PASS: ")
+        self.logger.info("  - /auth/service/token (slash) fails as expected  PASS: ")
     
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -324,7 +324,7 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                     assert isinstance(data["expires_in"], int), "Expires_in should be integer"
                     assert data["expires_in"] > 0, "Expires_in should be positive"
                 
-                self.logger.info("✅ Service token response structure validated")
+                self.logger.info(" PASS:  Service token response structure validated")
                 
             elif response.status_code == 422:
                 # Validation error - check that it's a proper error response
@@ -332,11 +332,11 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                 assert "detail" in error_data or "error" in error_data, (
                     "422 responses should have proper error structure"
                 )
-                self.logger.info("✅ Service token validation error response properly structured")
+                self.logger.info(" PASS:  Service token validation error response properly structured")
                 
             elif response.status_code == 401:
                 # Authentication error - expected for invalid credentials
-                self.logger.info("✅ Service token authentication error response (expected for test credentials)")
+                self.logger.info(" PASS:  Service token authentication error response (expected for test credentials)")
                 
             else:
                 # Unexpected response - this might indicate an issue
@@ -398,14 +398,14 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                         f"This indicates a missing or incorrectly configured endpoint."
                     )
                     
-                    self.logger.info(f"✅ Expected pattern {pattern_name} exists: {pattern_url}")
+                    self.logger.info(f" PASS:  Expected pattern {pattern_name} exists: {pattern_url}")
                     
                 except httpx.TimeoutException:
                     # Timeout is acceptable - means endpoint exists but is slow
-                    self.logger.info(f"⏱️ Expected pattern {pattern_name} exists but timed out: {pattern_url}")
+                    self.logger.info(f"[U+23F1][U+FE0F] Expected pattern {pattern_name} exists but timed out: {pattern_url}")
                     
                 except Exception as e:
-                    self.logger.warning(f"⚠️ Could not test pattern {pattern_name} at {pattern_url}: {e}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Could not test pattern {pattern_name} at {pattern_url}: {e}")
             
             # Test that incorrect patterns properly fail
             for pattern_name, pattern_url in incorrect_patterns.items():
@@ -426,20 +426,20 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
                     # If they don't return 404, it might indicate pattern inconsistency
                     if response.status_code != 404:
                         self.logger.warning(
-                            f"⚠️ Incorrect pattern {pattern_name} at {pattern_url} "
+                            f" WARNING: [U+FE0F] Incorrect pattern {pattern_name} at {pattern_url} "
                             f"returned {response.status_code} instead of 404. "
                             f"This might indicate URL pattern inconsistency."
                         )
                     else:
-                        self.logger.info(f"✅ Incorrect pattern {pattern_name} properly returns 404: {pattern_url}")
+                        self.logger.info(f" PASS:  Incorrect pattern {pattern_name} properly returns 404: {pattern_url}")
                         
                 except httpx.TimeoutException:
                     # Timeout on incorrect pattern might indicate it exists when it shouldn't
-                    self.logger.warning(f"⚠️ Incorrect pattern {pattern_name} timed out (might exist): {pattern_url}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Incorrect pattern {pattern_name} timed out (might exist): {pattern_url}")
                     
                 except Exception as e:
                     # Connection errors are expected for non-existent patterns
-                    self.logger.info(f"✅ Incorrect pattern {pattern_name} failed as expected: {e}")
+                    self.logger.info(f" PASS:  Incorrect pattern {pattern_name} failed as expected: {e}")
         
         self.logger.info("=== URL Pattern Consistency Test Complete ===")
 
@@ -464,8 +464,8 @@ class TestServiceTokenUrlPatterns(BaseIntegrationTest):
         ]
         
         self.logger.info("=== Cross-Service URL Pattern Documentation ===")
-        self.logger.info(f"✅ CORRECT pattern: {documented_correct_usage}")
-        self.logger.info("❌ INCORRECT patterns that should be avoided:")
+        self.logger.info(f" PASS:  CORRECT pattern: {documented_correct_usage}")
+        self.logger.info(" FAIL:  INCORRECT patterns that should be avoided:")
         
         for mistake_pattern in common_mistake_patterns:
             self.logger.info(f"   - {mistake_pattern}")

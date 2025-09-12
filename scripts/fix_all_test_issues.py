@@ -290,9 +290,9 @@ def main():
     print(f"  Remaining syntax errors: {remaining_errors}")
     
     if remaining_errors == 0:
-        print("\n✓ All syntax errors fixed!")
+        print("\n[U+2713] All syntax errors fixed!")
     else:
-        print(f"\n⚠ {remaining_errors} syntax errors remain - manual intervention may be needed")
+        print(f"\n WARNING:  {remaining_errors} syntax errors remain - manual intervention may be needed")
 
 if __name__ == "__main__":
     main()

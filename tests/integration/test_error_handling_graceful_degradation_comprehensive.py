@@ -348,7 +348,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
         ai_chat_cap = degradation_manager.capabilities["ai_chat"]
         assert ai_chat_cap.enabled is True  # Should still be enabled via fallback
         
-        logger.info("✅ Single service failure degradation test passed")
+        logger.info(" PASS:  Single service failure degradation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -446,7 +446,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
             # Clean up test table
             await postgres.execute("DROP TABLE IF EXISTS degradation_events")
         
-        logger.info("✅ Multiple service failure cascade test passed")
+        logger.info(" PASS:  Multiple service failure cascade test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -575,7 +575,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
         # Store performance analysis in Redis
         await redis.set_json("performance_analysis", performance_analysis, ex=600)
         
-        logger.info("✅ Performance degradation scaling test passed")
+        logger.info(" PASS:  Performance degradation scaling test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -684,7 +684,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
             # Clean up test table
             await postgres.execute("DROP TABLE IF EXISTS recovery_events")
         
-        logger.info("✅ Automatic service recovery restoration test passed")
+        logger.info(" PASS:  Automatic service recovery restoration test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -851,7 +851,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
         # Store analysis results
         await redis.set_json("user_isolation_analysis", user_analysis, ex=600)
         
-        logger.info("✅ Concurrent user isolation during degradation test passed")
+        logger.info(" PASS:  Concurrent user isolation during degradation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -936,7 +936,7 @@ class TestGracefulDegradationErrorHandling(BaseIntegrationTest):
         # Business continuity should be maintained for critical functions
         assert business_impact_report["business_value_preserved"]["business_operations_supported"] is True
         
-        logger.info("✅ Business impact prioritization during degradation test passed")
+        logger.info(" PASS:  Business impact prioritization during degradation test passed")
 
 
 if __name__ == "__main__":

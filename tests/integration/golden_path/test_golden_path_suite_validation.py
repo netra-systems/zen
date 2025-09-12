@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path Test Suite Validation and Execution Summary
 
@@ -37,12 +75,13 @@ from typing import Dict, List, Any, Optional, Set
 from unittest.mock import AsyncMock
 
 # SSOT Test Infrastructure
-from test_framework.base_integration_test import BaseIntegrationTest
-from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.base_integration_test import BaseIntegrationTest
+# CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
 
 # No-Docker fixtures for service-independent testing
-from test_framework.fixtures.no_docker_golden_path_fixtures import (
+# CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
     no_docker_golden_path_services, 
     golden_path_services,
     mock_authenticated_user,
@@ -53,9 +92,19 @@ from test_framework.fixtures.no_docker_golden_path_fixtures import (
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathSuiteValidation(BaseIntegrationTest):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Golden path test suite validation and execution summary.
     
@@ -112,8 +161,8 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
     # Critical SSOT patterns to validate
     REQUIRED_SSOT_PATTERNS = {
         'imports': [
-            'from test_framework.ssot.base_test_case import SSotAsyncTestCase',
-            'from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context',
+# CONSOLIDATED:             'from test_framework.ssot.base_test_case import SSotAsyncTestCase',
+# CONSOLIDATED:             'from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context',
             'from shared.types.core_types import UserID, ThreadID, RunID'
         ],
         'test_markers': [
@@ -217,13 +266,13 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         # Critical validations
         assert test_coverage_rate >= 0.9, \
-            f"Test suite completeness too low: {test_coverage_rate:.1%} (expected ≥90%)"
+            f"Test suite completeness too low: {test_coverage_rate:.1%} (expected  >= 90%)"
         
         assert len(missing_tests) <= 1, \
             f"Too many critical tests missing: {missing_tests}"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Test suite completeness validation completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Test suite completeness validation completed in {test_duration:.3f}s")
         self.logger.info(f"   Coverage: {test_coverage_rate:.1%} ({found_test_count}/{expected_test_count})")
     
     @pytest.mark.integration
@@ -288,10 +337,10 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         # Critical validation
         assert ssot_compliance_rate >= 0.85, \
-            f"SSOT compliance rate too low: {ssot_compliance_rate:.1%} (expected ≥85%)"
+            f"SSOT compliance rate too low: {ssot_compliance_rate:.1%} (expected  >= 85%)"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ SSOT compliance validation completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  SSOT compliance validation completed in {test_duration:.3f}s")
         self.logger.info(f"   Compliance rate: {ssot_compliance_rate:.1%} ({compliant_files}/{total_files_analyzed})")
     
     @pytest.mark.integration
@@ -386,10 +435,10 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         # Critical validation
         assert real_services_rate >= 0.8, \
-            f"Real services integration rate too low: {real_services_rate:.1%} (expected ≥80%)"
+            f"Real services integration rate too low: {real_services_rate:.1%} (expected  >= 80%)"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Real services integration validation completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Real services integration validation completed in {test_duration:.3f}s")
         self.logger.info(f"   Real services rate: {real_services_rate:.1%} ({real_services_tests}/{total_analyzed})")
     
     @pytest.mark.integration
@@ -480,10 +529,10 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         # WebSocket event coverage should be reasonable but not required in all tests
         assert websocket_coverage_rate >= 0.4, \
-            f"WebSocket event coverage too low: {websocket_coverage_rate:.1%} (expected ≥40%)"
+            f"WebSocket event coverage too low: {websocket_coverage_rate:.1%} (expected  >= 40%)"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ WebSocket event validation coverage completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  WebSocket event validation coverage completed in {test_duration:.3f}s")
         self.logger.info(f"   WebSocket coverage: {websocket_coverage_rate:.1%} ({websocket_event_tests}/{total_analyzed})")
     
     @pytest.mark.integration
@@ -538,14 +587,14 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         # Critical business validation
         assert overall_coverage_score >= 0.75, \
-            f"Overall golden path test suite validation score too low: {overall_coverage_score:.1%} (expected ≥75%)"
+            f"Overall golden path test suite validation score too low: {overall_coverage_score:.1%} (expected  >= 75%)"
         
         assert business_impact_assessment['business_continuity_protection'] != 'CRITICAL_GAPS', \
             "Critical gaps in business continuity protection detected in test suite"
         
         test_duration = time.time() - test_start
         
-        self.logger.info("🎯 GOLDEN PATH SUITE VALIDATION COMPLETE")
+        self.logger.info(" TARGET:  GOLDEN PATH SUITE VALIDATION COMPLETE")
         self.logger.info(f"   Overall validation score: {overall_coverage_score:.1%}")
         self.logger.info(f"   Business impact assessment: {business_impact_assessment['overall_assessment']}")
         
@@ -628,7 +677,7 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         """Generate comprehensive golden path suite validation report."""
         report_timestamp = datetime.now(timezone.utc).isoformat()
         
-        self.logger.info("🛡️ GOLDEN PATH TEST SUITE VALIDATION REPORT")
+        self.logger.info("[U+1F6E1][U+FE0F] GOLDEN PATH TEST SUITE VALIDATION REPORT")
         self.logger.info("=" * 70)
         self.logger.info(f"Generated: {report_timestamp}")
         self.logger.info(f"Total tests discovered: {self.validation_metrics['total_tests_found']}")
@@ -637,7 +686,7 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         self.logger.info("VALIDATION AREA RESULTS:")
         for area, result in validation_summary.items():
-            status_icon = "✅" if result['status'] == 'PASSED' else "❌"
+            status_icon = " PASS: " if result['status'] == 'PASSED' else " FAIL: "
             self.logger.info(f"  {status_icon} {area}: {result['score']:.1%} ({result['status']})")
         
         self.logger.info("")
@@ -654,13 +703,13 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         
         if business_impact['validation_score'] >= 0.8:
             self.logger.info("")
-            self.logger.info("🎉 SUITE VALIDATION: EXCELLENT - Business operations fully protected")
+            self.logger.info(" CELEBRATION:  SUITE VALIDATION: EXCELLENT - Business operations fully protected")
         elif business_impact['validation_score'] >= 0.75:
             self.logger.info("")
-            self.logger.info("✅ SUITE VALIDATION: ACCEPTABLE - Core business operations protected")
+            self.logger.info(" PASS:  SUITE VALIDATION: ACCEPTABLE - Core business operations protected")
         else:
             self.logger.info("")
-            self.logger.info("⚠️  SUITE VALIDATION: NEEDS IMPROVEMENT - Critical gaps identified")
+            self.logger.info(" WARNING: [U+FE0F]  SUITE VALIDATION: NEEDS IMPROVEMENT - Critical gaps identified")
         
         self.logger.info("=" * 70)
     
@@ -671,7 +720,7 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         # Final validation metrics summary
         overall_score = self.validation_metrics.get('overall_coverage_score', 0)
         
-        self.logger.info("📊 GOLDEN PATH SUITE VALIDATION SUMMARY")
+        self.logger.info(" CHART:  GOLDEN PATH SUITE VALIDATION SUMMARY")
         self.logger.info(f"   Total tests found: {self.validation_metrics.get('total_tests_found', 0)}")
         self.logger.info(f"   Expected tests found: {self.validation_metrics.get('expected_tests_found', 0)}")
         self.logger.info(f"   SSOT compliant tests: {self.validation_metrics.get('ssot_compliant_tests', 0)}")
@@ -680,8 +729,8 @@ class TestGoldenPathSuiteValidation(BaseIntegrationTest):
         self.logger.info(f"   Overall validation score: {overall_score:.1%}")
         
         if overall_score >= 0.8:
-            self.logger.info("   🏆 GOLDEN PATH SUITE STATUS: EXCELLENT")
+            self.logger.info("    TROPHY:  GOLDEN PATH SUITE STATUS: EXCELLENT")
         elif overall_score >= 0.75:
-            self.logger.info("   ✅ GOLDEN PATH SUITE STATUS: GOOD")
+            self.logger.info("    PASS:  GOLDEN PATH SUITE STATUS: GOOD")
         else:
-            self.logger.info("   ⚠️  GOLDEN PATH SUITE STATUS: NEEDS IMPROVEMENT")
+            self.logger.info("    WARNING: [U+FE0F]  GOLDEN PATH SUITE STATUS: NEEDS IMPROVEMENT")

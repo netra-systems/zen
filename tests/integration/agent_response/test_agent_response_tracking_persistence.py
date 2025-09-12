@@ -157,7 +157,7 @@ class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
                 assert stored_response["success"] is True, "Success status must be tracked"
                 assert stored_response["execution_time_ms"] > 0, "Execution time must be positive"
                 
-                logger.info(f"✅ Agent response tracked with ID: {response_id}")
+                logger.info(f" PASS:  Agent response tracked with ID: {response_id}")
                 
     async def test_conversation_history_persistence_for_context(self):
         """
@@ -226,7 +226,7 @@ class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
             assert response_data["query"] == conversation_queries[i], f"Query {i} must match"
             assert response_data["thread_id"] == self.test_thread_id, f"Thread ID must be consistent for query {i}"
             
-        logger.info(f"✅ Conversation history persisted ({len(conversation_thread_responses)} responses)")
+        logger.info(f" PASS:  Conversation history persisted ({len(conversation_thread_responses)} responses)")
         
     async def test_response_analytics_metadata_for_business_intelligence(self):
         """
@@ -295,7 +295,7 @@ class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
                 assert analytics["execution_time_ms"] > 0, "Execution time must be positive"
                 assert analytics["agent_type"] == "DataHelperAgent", "Agent type must be tracked"
                 
-                logger.info(f"✅ Analytics metadata tracked for business intelligence")
+                logger.info(f" PASS:  Analytics metadata tracked for business intelligence")
                 
     async def test_response_persistence_error_handling_maintains_functionality(self):
         """
@@ -348,7 +348,7 @@ class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
             ]
             assert len(persistence_test_responses) == 0, "No responses should be stored when persistence fails"
             
-            logger.info("✅ Core functionality maintained despite persistence failure")
+            logger.info(" PASS:  Core functionality maintained despite persistence failure")
             
     async def test_response_audit_trail_for_compliance_requirements(self):
         """
@@ -425,7 +425,7 @@ class TestAgentResponseTrackingPersistence(BaseIntegrationTest):
                 execution_metadata = stored_audit["execution_metadata"]
                 assert execution_metadata["success"] is True, "Execution success must be audited"
                 
-                logger.info(f"✅ Compliance audit trail created: {audit_id}")
+                logger.info(f" PASS:  Compliance audit trail created: {audit_id}")
                 
     def teardown_method(self):
         """Clean up test resources."""

@@ -1,6 +1,6 @@
 """
 Unified JWT Token Validation Tests - Enterprise Security Testing
-Tests token flow: Auth service → Backend validation → WebSocket auth → Agent context
+Tests token flow: Auth service  ->  Backend validation  ->  WebSocket auth  ->  Agent context
 
 Business Value: Prevents unauthorized access to paid features (Growth & Enterprise tiers)
 """

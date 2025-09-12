@@ -147,7 +147,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert engine._success_count == 0
         assert engine._error_count == 0
         
-        self.logger.info("✅ ExecutionEngine initialization patterns validated")
+        self.logger.info(" PASS:  ExecutionEngine initialization patterns validated")
     
     @pytest.mark.integration
     async def test_execution_engine_extension_coordination_patterns(self, test_engine_config, mock_agent_registry):
@@ -197,7 +197,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert data_ext.cache_enabled is True
         assert data_ext.data_cache == {}
         
-        self.logger.info("✅ ExecutionEngine extension coordination patterns validated")
+        self.logger.info(" PASS:  ExecutionEngine extension coordination patterns validated")
     
     @pytest.mark.integration
     async def test_execution_engine_user_context_coordination(self, test_engine_config, test_user_context, mock_agent_registry, mock_websocket_bridge):
@@ -243,7 +243,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert engine._error_count == 0
         assert len(engine._execution_times) == 1
         
-        self.logger.info("✅ ExecutionEngine user context coordination validated")
+        self.logger.info(" PASS:  ExecutionEngine user context coordination validated")
     
     @pytest.mark.integration
     async def test_execution_engine_websocket_event_coordination(self, test_engine_config, mock_agent_registry, mock_websocket_bridge):
@@ -294,7 +294,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert mock_websocket_bridge.notify_agent_completed.call_count == 0
         assert mock_websocket_bridge.notify_agent_error.call_count == 1
         
-        self.logger.info("✅ ExecutionEngine WebSocket event coordination validated")
+        self.logger.info(" PASS:  ExecutionEngine WebSocket event coordination validated")
     
     @pytest.mark.integration
     async def test_execution_engine_factory_patterns(self, test_user_context):
@@ -333,7 +333,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert mcp_engine.config.enable_mcp is True
         assert mcp_engine.config.enable_websocket_events is True
         
-        self.logger.info("✅ ExecutionEngineFactory patterns validated")
+        self.logger.info(" PASS:  ExecutionEngineFactory patterns validated")
     
     @pytest.mark.integration
     async def test_execution_engine_request_scoped_coordination(self, test_user_context, mock_agent_registry):
@@ -385,7 +385,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         assert isinstance(factory_scoped, RequestScopedExecutionEngine)
         assert factory_scoped.engine.user_context == test_user_context
         
-        self.logger.info("✅ ExecutionEngine request-scoped coordination validated")
+        self.logger.info(" PASS:  ExecutionEngine request-scoped coordination validated")
     
     @pytest.mark.integration
     async def test_execution_engine_error_handling_coordination(self, mock_agent_registry, mock_websocket_bridge):
@@ -433,7 +433,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         # Validate error metrics
         assert engine._error_count > 0
         
-        self.logger.info("✅ ExecutionEngine error handling coordination validated")
+        self.logger.info(" PASS:  ExecutionEngine error handling coordination validated")
     
     @pytest.mark.integration
     async def test_execution_engine_concurrent_coordination_safety(self, test_user_context, mock_agent_registry):
@@ -484,7 +484,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         # Validate no active runs remain
         assert len(engine.active_runs) == 0
         
-        self.logger.info("✅ ExecutionEngine concurrent coordination safety validated")
+        self.logger.info(" PASS:  ExecutionEngine concurrent coordination safety validated")
 
 
 # Additional helper functions for coordination validation

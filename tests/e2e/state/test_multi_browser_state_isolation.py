@@ -311,7 +311,7 @@ class TestMultiBrowserStateIsolation(BaseE2ETest):
                 f"ISOLATION VIOLATION: Browsers share user_ids in events: " \
                 f"Browser1={browser_1_user_ids}, Browser2={browser_2_user_ids}"
             
-            self.logger.info("✅ CRITICAL SUCCESS: Complete browser state isolation validated")
+            self.logger.info(" PASS:  CRITICAL SUCCESS: Complete browser state isolation validated")
             self.logger.info(f"  - Browser 1: User {session_1_data['user_id'][:8]}..., Run {run_id_1[:8]}...")
             self.logger.info(f"  - Browser 2: User {session_2_data['user_id'][:8]}..., Run {run_id_2[:8]}...")
             
@@ -405,7 +405,7 @@ class TestMultiBrowserStateIsolation(BaseE2ETest):
             assert desktop_run_id != mobile_run_id, \
                 "Same user should have different run_ids across browser sessions"
             
-            self.logger.info("✅ SUCCESS: Same user browser isolation validated")
+            self.logger.info(" PASS:  SUCCESS: Same user browser isolation validated")
             self.logger.info(f"  - Desktop: {desktop_session['user_id'][:8]}..., Thread: {desktop_session['thread_id'][:8]}...")
             self.logger.info(f"  - Mobile: {mobile_session['user_id'][:8]}..., Thread: {mobile_session['thread_id'][:8]}...")
             
@@ -488,7 +488,7 @@ class TestMultiBrowserStateIsolation(BaseE2ETest):
             assert average_time < 15.0, \
                 f"Average per-browser time too high: {average_time:.2f}s"
             
-            self.logger.info(f"✅ PERFORMANCE SUCCESS: {num_browsers} browser isolation validated")
+            self.logger.info(f" PASS:  PERFORMANCE SUCCESS: {num_browsers} browser isolation validated")
             self.logger.info(f"  - Total time: {total_time:.2f}s")
             self.logger.info(f"  - Average per browser: {average_time:.2f}s")
             self.logger.info(f"  - Unique user IDs: {len(all_user_ids)}")

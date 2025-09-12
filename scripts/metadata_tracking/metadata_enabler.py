@@ -64,13 +64,13 @@ class MetadataTrackingEnabler:
         print(f"\n=== Setup Complete: {success_count}/{total_steps} steps successful ===")
         
         if success:
-            print("✅ Metadata tracking enabled successfully!")
+            print(" PASS:  Metadata tracking enabled successfully!")
             print("\nNext steps:")
             print("1. Review configuration in metadata_config.json")
             print("2. Test with: python scripts/metadata_validator.py --validate-all")
             print("3. Make a test commit to verify hooks are working")
         else:
-            print("❌ Some setup steps failed. Check error messages above.")
+            print(" FAIL:  Some setup steps failed. Check error messages above.")
         
         return success
     
@@ -103,11 +103,11 @@ class MetadataTrackingEnabler:
         for component, details in status['components'].items():
             print(f"\n{component.upper()}:")
             for key, value in details.items():
-                status_icon = "✅" if value else "❌"
+                status_icon = " PASS: " if value else " FAIL: "
                 if isinstance(value, bool):
                     print(f"  {status_icon} {key}: {value}")
                 else:
-                    print(f"  📍 {key}: {value}")
+                    print(f"   PIN:  {key}: {value}")
     
     def _get_timestamp(self) -> str:
         """Get current timestamp."""

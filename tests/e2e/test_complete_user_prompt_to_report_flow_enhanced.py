@@ -329,7 +329,7 @@ class EnhancedBusinessValueReportValidator:
             ]
         )
         
-        has_bullet_points = report_content.count('•') + report_content.count('-') + report_content.count('*') >= 3
+        has_bullet_points = report_content.count('[U+2022]') + report_content.count('-') + report_content.count('*') >= 3
         has_numbered_list = any(f'{i}.' in report_content for i in range(1, 6))
         
         # Calculate structure score
@@ -1037,7 +1037,7 @@ class EnhancedCompleteUserPromptToReportTester:
                 logger.warning(f"WebSocket connection attempt {attempt + 1} failed: {e}, retrying...")
                 await asyncio.sleep(2.0)
             
-        logger.info("✅ Enhanced real services setup complete with validation")
+        logger.info(" PASS:  Enhanced real services setup complete with validation")
     
     async def _validate_service_availability(self, backend_url: str, auth_url: str) -> None:
         """Validate that required services are available."""
@@ -1068,7 +1068,7 @@ class EnhancedCompleteUserPromptToReportTester:
         try:
             response = await self.ws_client.receive(timeout=5.0)
             if response:
-                logger.info("✅ WebSocket connection validated")
+                logger.info(" PASS:  WebSocket connection validated")
             else:
                 raise RuntimeError("No response to WebSocket ping")
         except asyncio.TimeoutError:
@@ -1102,7 +1102,7 @@ class EnhancedCompleteUserPromptToReportTester:
         complexity_multipliers = {"simple": 1.0, "medium": 1.5, "complex": 2.0}
         adjusted_timeout = timeout * complexity_multipliers.get(expected_complexity, 1.0)
         
-        logger.info(f"🚀 Starting enhanced flow test with prompt: '{user_prompt[:50]}...'")
+        logger.info(f"[U+1F680] Starting enhanced flow test with prompt: '{user_prompt[:50]}...'")
         logger.info(f"Expected complexity: {expected_complexity}, timeout: {adjusted_timeout:.1f}s")
         
         # Start event collection with enhanced monitoring
@@ -1122,13 +1122,13 @@ class EnhancedCompleteUserPromptToReportTester:
         }
         
         await self.ws_client.send_chat(text=user_prompt)
-        logger.info("📤 Enhanced user prompt sent via WebSocket")
+        logger.info("[U+1F4E4] Enhanced user prompt sent via WebSocket")
         
         # Wait for complete flow to finish with enhanced timeout handling
         try:
             await event_task
         except asyncio.TimeoutError:
-            logger.error(f"⏰ Enhanced flow timed out after {adjusted_timeout:.1f}s")
+            logger.error(f"[U+23F0] Enhanced flow timed out after {adjusted_timeout:.1f}s")
             
         execution_time = time.time() - performance_start
         
@@ -1153,9 +1153,9 @@ class EnhancedCompleteUserPromptToReportTester:
         }
         
         if is_valid and final_report_content:
-            logger.info(f"✅ Enhanced complete prompt-to-report flow PASSED in {execution_time:.2f}s")
+            logger.info(f" PASS:  Enhanced complete prompt-to-report flow PASSED in {execution_time:.2f}s")
         else:
-            logger.error(f"❌ Enhanced complete flow FAILED: {failures}")
+            logger.error(f" FAIL:  Enhanced complete flow FAILED: {failures}")
             
         return is_valid, validator, final_report_content, performance_metrics
         
@@ -1196,7 +1196,7 @@ class EnhancedCompleteUserPromptToReportTester:
                     if event_type in completion_events:
                         # Verify we have sufficient events for the complexity level
                         if len(validator.events) >= expectations["min_events"]:
-                            logger.info(f"🏁 Enhanced flow completed with event: {event_type}")
+                            logger.info(f"[U+1F3C1] Enhanced flow completed with event: {event_type}")
                             await asyncio.sleep(2.0)  # Allow for trailing events
                             flow_completed = True
                         else:
@@ -1207,7 +1207,7 @@ class EnhancedCompleteUserPromptToReportTester:
                     if current_time - last_stall_check >= stall_detection_interval:
                         events_since_check = len(validator.events) - event_count_at_last_check
                         if events_since_check == 0:
-                            logger.warning(f"⚠️ No events received in last {stall_detection_interval}s - possible stall")
+                            logger.warning(f" WARNING: [U+FE0F] No events received in last {stall_detection_interval}s - possible stall")
                         
                         event_count_at_last_check = len(validator.events)
                         last_stall_check = current_time
@@ -1220,7 +1220,7 @@ class EnhancedCompleteUserPromptToReportTester:
                 break
                 
         if not flow_completed:
-            logger.warning(f"⚠️ Enhanced flow did not complete within {timeout:.1f}s")
+            logger.warning(f" WARNING: [U+FE0F] Enhanced flow did not complete within {timeout:.1f}s")
             logger.info(f"Collected {len(validator.events)} events, expected >= {expectations['min_events']}")
             
     def _extract_enhanced_final_report(self, events: List[Dict[str, Any]]) -> Optional[str]:
@@ -1298,7 +1298,7 @@ class EnhancedCompleteUserPromptToReportTester:
         
     async def cleanup(self) -> None:
         """Enhanced cleanup with resource monitoring."""
-        logger.info("🧹 Starting enhanced cleanup")
+        logger.info("[U+1F9F9] Starting enhanced cleanup")
         
         # Stop resource monitoring if still running
         if self.resource_monitor.monitoring:
@@ -1324,7 +1324,7 @@ class EnhancedCompleteUserPromptToReportTester:
             except asyncio.TimeoutError:
                 logger.warning("Cleanup timeout - some connections may not have closed cleanly")
             
-        logger.info("✅ Enhanced cleanup completed")
+        logger.info(" PASS:  Enhanced cleanup completed")
 
 
 # ============================================================================
@@ -1422,15 +1422,15 @@ class TestEnhancedCompleteUserPromptToReportFlow:
             assert memory_increase < 500, f"Excessive memory usage: {memory_increase:.1f}MB"
             
             # Success logging with enhanced metrics
-            logger.info(f"✅ ENHANCED CRITICAL TEST PASSED: {execution_time:.2f}s")
-            logger.info(f"📊 Business Value Score: {business_metrics.score:.1f}/100")
-            logger.info(f"📝 Report Length: {len(final_report)} chars")
-            logger.info(f"🔧 Tools Used: {tool_count}")
-            logger.info(f"⚡ Event Sequence Integrity: {sequence_metrics.get('sequence_integrity', 0):.2f}")
-            logger.info(f"💾 Memory Usage: {memory_increase:.1f}MB")
+            logger.info(f" PASS:  ENHANCED CRITICAL TEST PASSED: {execution_time:.2f}s")
+            logger.info(f" CHART:  Business Value Score: {business_metrics.score:.1f}/100")
+            logger.info(f"[U+1F4DD] Report Length: {len(final_report)} chars")
+            logger.info(f"[U+1F527] Tools Used: {tool_count}")
+            logger.info(f" LIGHTNING:  Event Sequence Integrity: {sequence_metrics.get('sequence_integrity', 0):.2f}")
+            logger.info(f"[U+1F4BE] Memory Usage: {memory_increase:.1f}MB")
             
         except Exception as e:
-            logger.error(f"❌ ENHANCED CRITICAL TEST FAILED: {e}")
+            logger.error(f" FAIL:  ENHANCED CRITICAL TEST FAILED: {e}")
             raise
         finally:
             await tester.cleanup()
@@ -1521,11 +1521,11 @@ class TestEnhancedCompleteUserPromptToReportFlow:
             assert sequence_metrics.get('total_events', 0) >= 10, "Complex flow should generate many events"
             assert sequence_metrics.get('business_content_ratio', 0) >= 0.4, "Complex analysis needs high business content ratio"
             
-            logger.info(f"✅ ENHANCED Complex infrastructure analysis PASSED: {execution_time:.2f}s")
-            logger.info(f"📊 Business Score: {business_metrics.score:.1f}/100")
-            logger.info(f"🏗️ Services Mentioned: {mentioned_services}")
-            logger.info(f"🔧 Tools Used: {tool_count}")
-            logger.info(f"📈 Total Events: {sequence_metrics.get('total_events', 0)}")
+            logger.info(f" PASS:  ENHANCED Complex infrastructure analysis PASSED: {execution_time:.2f}s")
+            logger.info(f" CHART:  Business Score: {business_metrics.score:.1f}/100")
+            logger.info(f"[U+1F3D7][U+FE0F] Services Mentioned: {mentioned_services}")
+            logger.info(f"[U+1F527] Tools Used: {tool_count}")
+            logger.info(f"[U+1F4C8] Total Events: {sequence_metrics.get('total_events', 0)}")
             
         finally:
             await tester.cleanup()
@@ -1609,10 +1609,10 @@ class TestEnhancedCompleteUserPromptToReportFlow:
                         assert len(validator.events) > 0, f"No events generated for mixed query: {test_case['name']}"
                     
                     results.append(test_result)
-                    logger.info(f"✅ Error scenario '{test_case['name']}' handled: {execution_time:.2f}s")
+                    logger.info(f" PASS:  Error scenario '{test_case['name']}' handled: {execution_time:.2f}s")
                     
                 except Exception as e:
-                    logger.warning(f"⚠️ Error scenario '{test_case['name']}' failed: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Error scenario '{test_case['name']}' failed: {e}")
                     results.append({
                         'test_name': test_case['name'],
                         'completed': False,
@@ -1625,9 +1625,9 @@ class TestEnhancedCompleteUserPromptToReportFlow:
             
             assert resilience_ratio >= 0.7, f"Poor system resilience: {resilience_ratio:.2f} ({completed_tests}/{len(test_cases)})"
             
-            logger.info(f"✅ ENHANCED Error recovery testing completed")
-            logger.info(f"🛡️ Resilience ratio: {resilience_ratio:.2f}")
-            logger.info(f"📊 Test results: {results}")
+            logger.info(f" PASS:  ENHANCED Error recovery testing completed")
+            logger.info(f"[U+1F6E1][U+FE0F] Resilience ratio: {resilience_ratio:.2f}")
+            logger.info(f" CHART:  Test results: {results}")
             
         finally:
             await tester.cleanup()
@@ -1707,8 +1707,8 @@ class TestEnhancedCompleteUserPromptToReportFlow:
                 
                 performance_results.append(perf_result)
                 
-                logger.info(f"✅ Performance test '{query_test['name']}' passed: {execution_time:.2f}s")
-                logger.info(f"📊 Events: {len(validator.events)}, Memory: {perf_result['memory_usage_mb']:.1f}MB")
+                logger.info(f" PASS:  Performance test '{query_test['name']}' passed: {execution_time:.2f}s")
+                logger.info(f" CHART:  Events: {len(validator.events)}, Memory: {perf_result['memory_usage_mb']:.1f}MB")
                 
                 # Brief pause between tests
                 await asyncio.sleep(2.0)
@@ -1723,10 +1723,10 @@ class TestEnhancedCompleteUserPromptToReportFlow:
             assert avg_memory_usage <= 150.0, f"Average memory usage too high: {avg_memory_usage:.2f}MB" 
             assert avg_business_ratio >= 0.25, f"Average business content ratio too low: {avg_business_ratio:.3f}"
             
-            logger.info(f"✅ ENHANCED Performance profiling completed")
-            logger.info(f"⚡ Average execution time: {avg_execution_time:.2f}s")
-            logger.info(f"💾 Average memory usage: {avg_memory_usage:.2f}MB")
-            logger.info(f"📈 Average business content ratio: {avg_business_ratio:.3f}")
+            logger.info(f" PASS:  ENHANCED Performance profiling completed")
+            logger.info(f" LIGHTNING:  Average execution time: {avg_execution_time:.2f}s")
+            logger.info(f"[U+1F4BE] Average memory usage: {avg_memory_usage:.2f}MB")
+            logger.info(f"[U+1F4C8] Average business content ratio: {avg_business_ratio:.3f}")
             
         finally:
             await tester.cleanup()
@@ -1752,10 +1752,10 @@ if __name__ == "__main__":
         pytest test_complete_user_prompt_to_report_flow_enhanced.py -v -s
     """
     
-    logger.info("🚀 Starting ENHANCED MISSION CRITICAL complete user prompt to report tests")
-    logger.info("⚠️  USING REAL SERVICES ONLY - NO MOCKS")
-    logger.info("💼 Testing complete business value delivery with enhanced validation")
-    logger.info("📊 Including performance profiling, resource monitoring, and error scenarios")
+    logger.info("[U+1F680] Starting ENHANCED MISSION CRITICAL complete user prompt to report tests")
+    logger.info(" WARNING: [U+FE0F]  USING REAL SERVICES ONLY - NO MOCKS")
+    logger.info("[U+1F4BC] Testing complete business value delivery with enhanced validation")
+    logger.info(" CHART:  Including performance profiling, resource monitoring, and error scenarios")
     
     # Run with pytest
     exit_code = pytest.main([
@@ -1767,8 +1767,8 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        logger.info("✅ ALL ENHANCED COMPLETE FLOW TESTS PASSED - Business value delivery verified")
+        logger.info(" PASS:  ALL ENHANCED COMPLETE FLOW TESTS PASSED - Business value delivery verified")
     else:
-        logger.error("❌ ENHANCED COMPLETE FLOW TESTS FAILED - Business value delivery broken")
+        logger.error(" FAIL:  ENHANCED COMPLETE FLOW TESTS FAILED - Business value delivery broken")
     
     sys.exit(exit_code)

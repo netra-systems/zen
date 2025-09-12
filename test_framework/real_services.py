@@ -154,14 +154,12 @@ class RedisManager:
         """Establish Redis connection with fallback handling."""
         try:
             import redis.asyncio as redis
+            # MIGRATED: Use modern async Redis client with config
             self._client = redis.Redis(
                 host=self.config.redis_host,
                 port=self.config.redis_port,
                 db=self.config.redis_db,
-                password=self.config.redis_password,
-                decode_responses=True,
-                socket_timeout=10,
-                socket_connect_timeout=10
+                password=self.config.redis_password
             )
             # Test connection
             await self._client.ping()
@@ -458,12 +456,12 @@ class RealServicesManager:
         for service_name, connect_func in services_to_check:
             try:
                 await connect_func()
-                logger.info(f"✅ {service_name} is available")
+                logger.info(f" PASS:  {service_name} is available")
             except ServiceUnavailableError as e:
-                logger.error(f"❌ {service_name} is unavailable: {e}")
+                logger.error(f" FAIL:  {service_name} is unavailable: {e}")
                 raise
             except Exception as e:
-                logger.error(f"❌ {service_name} connection error: {e}")
+                logger.error(f" FAIL:  {service_name} connection error: {e}")
                 raise ServiceUnavailableError(f"{service_name} connection failed: {e}")
     
     async def get_http_client(self) -> HTTPTestClient:

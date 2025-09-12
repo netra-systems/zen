@@ -34,7 +34,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         
         Expected: This test should FAIL until the scope issue is fixed.
         """
-        print("\n🔍 TESTING: state_registry scope initialization bug...")
+        print("\n SEARCH:  TESTING: state_registry scope initialization bug...")
         
         # Mock the WebSocket request context to simulate the scope issue
         mock_websocket = MagicMock()
@@ -71,30 +71,30 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
                         mock_websocket.send_json = AsyncMock()
                         mock_websocket.close = AsyncMock()
                         
-                        print("⚠️  Simulating websocket endpoint with scope isolation bug...")
+                        print(" WARNING: [U+FE0F]  Simulating websocket endpoint with scope isolation bug...")
                         
                         # This should trigger the NameError due to scope isolation
                         with pytest.raises(NameError, match="state_registry"):
                             await websocket_endpoint(mock_websocket)
                             
-                        print("✅ REPRODUCED: state_registry scope isolation NameError")
+                        print(" PASS:  REPRODUCED: state_registry scope isolation NameError")
                         
                 except NameError as e:
                     if "state_registry" in str(e):
-                        print(f"✅ REPRODUCED: Expected NameError - {e}")
+                        print(f" PASS:  REPRODUCED: Expected NameError - {e}")
                         # This is the bug we're reproducing
                         assert "state_registry" in str(e)
                     else:
                         # Unexpected NameError
                         raise
                 except ImportError:
-                    print("❌ Cannot import websocket endpoint - skipping direct test")
+                    print(" FAIL:  Cannot import websocket endpoint - skipping direct test")
                     # Fallback: Test the scope logic directly
                     self._test_scope_isolation_logic_directly()
 
     def _test_scope_isolation_logic_directly(self):
         """Test the scope isolation logic directly without importing full endpoint."""
-        print("🔧 Testing scope isolation logic directly...")
+        print("[U+1F527] Testing scope isolation logic directly...")
         
         # Simulate the problematic function scope logic
         def simulate_websocket_function_scope():
@@ -115,7 +115,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         with pytest.raises(NameError, match="state_registry"):
             simulate_websocket_function_scope()
             
-        print("✅ REPRODUCED: Scope isolation NameError confirmed")
+        print(" PASS:  REPRODUCED: Scope isolation NameError confirmed")
 
     @pytest.mark.asyncio
     async def test_variable_scope_isolation_race_condition(self):
@@ -126,7 +126,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         access undefined variables due to improper scope isolation, causing
         intermittent failures in concurrent scenarios.
         """
-        print("\n🔍 TESTING: Variable scope race condition...")
+        print("\n SEARCH:  TESTING: Variable scope race condition...")
         
         # Simulate multiple concurrent connections with scope issues
         async def simulate_concurrent_connection(connection_id: str):
@@ -161,12 +161,12 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         # Verify all connections failed due to scope isolation
         failed_count = sum(1 for result in results if isinstance(result, str) and "FAILED" in result)
         
-        print(f"📊 Concurrent connections tested: {len(connection_ids)}")
-        print(f"📊 Failed due to scope issues: {failed_count}")
+        print(f" CHART:  Concurrent connections tested: {len(connection_ids)}")
+        print(f" CHART:  Failed due to scope issues: {failed_count}")
         
         # All should fail due to scope isolation bug
         assert failed_count == len(connection_ids), f"Expected all connections to fail, got {failed_count}/{len(connection_ids)}"
-        print("✅ REPRODUCED: Scope isolation race condition confirmed")
+        print(" PASS:  REPRODUCED: Scope isolation race condition confirmed")
 
     @pytest.mark.asyncio
     async def test_preliminary_connection_id_scope_bug(self):
@@ -177,7 +177,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         is not properly accessible across different parts of the WebSocket
         endpoint function due to scope isolation problems.
         """
-        print("\n🔍 TESTING: preliminary_connection_id scope isolation...")
+        print("\n SEARCH:  TESTING: preliminary_connection_id scope isolation...")
         
         # Mock WebSocket with proper structure
         mock_websocket = MagicMock()
@@ -189,7 +189,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
             
             # Step 1: preliminary_connection_id is created
             preliminary_connection_id = "prelim_123"
-            print(f"🔧 Created preliminary_connection_id: {preliminary_connection_id}")
+            print(f"[U+1F527] Created preliminary_connection_id: {preliminary_connection_id}")
             
             # Step 2: Try to access it in a different scope (this is where bug occurs)
             def inner_function():
@@ -206,14 +206,14 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         # Test the scope isolation bug
         try:
             result = simulate_preliminary_connection_scope()
-            print(f"❌ UNEXPECTED: Scope isolation worked - result: {result}")
+            print(f" FAIL:  UNEXPECTED: Scope isolation worked - result: {result}")
             
             # If it works, the bug might be fixed
             assert False, "Expected scope isolation bug but function worked correctly"
             
         except NameError as e:
             if "preliminary_connection_id" in str(e):
-                print(f"✅ REPRODUCED: preliminary_connection_id scope issue - {e}")
+                print(f" PASS:  REPRODUCED: preliminary_connection_id scope issue - {e}")
                 # This confirms the bug
                 assert "preliminary_connection_id" in str(e)
             else:
@@ -228,7 +228,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         variables are not properly initialized in the correct function scope,
         causing coordination failures.
         """
-        print("\n🔍 TESTING: State coordinator scope initialization bug...")
+        print("\n SEARCH:  TESTING: State coordinator scope initialization bug...")
         
         # Simulate the problematic state coordinator initialization
         with patch('netra_backend.app.websocket_core.state_coordinator.get_websocket_state_coordinator') as mock_coordinator:
@@ -257,7 +257,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
             with pytest.raises(NameError, match="coordinator"):
                 simulate_coordinator_scope_bug()
                 
-            print("✅ REPRODUCED: State coordinator scope initialization bug")
+            print(" PASS:  REPRODUCED: State coordinator scope initialization bug")
 
     def test_local_scope_variable_accessibility(self):
         """
@@ -266,7 +266,7 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         This demonstrates the difference between correct and buggy scope patterns
         that cause the WebSocket connection failures.
         """
-        print("\n🔍 TESTING: Local scope variable accessibility patterns...")
+        print("\n SEARCH:  TESTING: Local scope variable accessibility patterns...")
         
         # Pattern 1: CORRECT - Proper scope isolation
         def correct_scope_pattern():
@@ -296,21 +296,21 @@ class TestIssue172ScopeIsolation(SSotAsyncTestCase):
         # Test correct pattern (should work)
         try:
             result_correct = correct_scope_pattern()
-            print(f"✅ Correct scope pattern works: {result_correct}")
+            print(f" PASS:  Correct scope pattern works: {result_correct}")
             assert result_correct == "not_found"
         except Exception as e:
-            print(f"❌ Correct pattern failed unexpectedly: {e}")
+            print(f" FAIL:  Correct pattern failed unexpectedly: {e}")
             raise
         
         # Test buggy pattern (should work in simple Python but demonstrates the issue)
         try:
             result_buggy = buggy_scope_pattern()
-            print(f"⚠️  Buggy pattern worked in test: {result_buggy}")
+            print(f" WARNING: [U+FE0F]  Buggy pattern worked in test: {result_buggy}")
             # In the actual WebSocket code, this pattern causes failures
             # due to more complex scope management
-            print("📝 Note: This pattern causes failures in actual WebSocket code due to complex async scope management")
+            print("[U+1F4DD] Note: This pattern causes failures in actual WebSocket code due to complex async scope management")
         except Exception as e:
-            print(f"✅ REPRODUCED: Buggy pattern failed as expected: {e}")
+            print(f" PASS:  REPRODUCED: Buggy pattern failed as expected: {e}")
 
 
 if __name__ == "__main__":
@@ -322,45 +322,45 @@ if __name__ == "__main__":
         """Run all Issue #172 scope isolation tests."""
         test_instance = TestIssue172ScopeIsolation()
         
-        print("🚨 STARTING ISSUE #172 SCOPE ISOLATION TESTS")
+        print(" ALERT:  STARTING ISSUE #172 SCOPE ISOLATION TESTS")
         print("=" * 60)
         
         # Test 1: state_registry scope initialization
         try:
-            print("\n1️⃣ STATE REGISTRY SCOPE TEST:")
+            print("\n1[U+FE0F][U+20E3] STATE REGISTRY SCOPE TEST:")
             await test_instance.test_state_registry_scope_initialization_failure()
         except Exception as e:
-            print(f"✅ Test 1 reproduced scope bug: {e}")
+            print(f" PASS:  Test 1 reproduced scope bug: {e}")
         
         # Test 2: Variable scope race condition
         try:
-            print("\n2️⃣ SCOPE RACE CONDITION TEST:")
+            print("\n2[U+FE0F][U+20E3] SCOPE RACE CONDITION TEST:")
             await test_instance.test_variable_scope_isolation_race_condition()
         except Exception as e:
-            print(f"❌ Test 2 failed: {e}")
+            print(f" FAIL:  Test 2 failed: {e}")
         
         # Test 3: preliminary_connection_id scope
         try:
-            print("\n3️⃣ PRELIMINARY CONNECTION ID SCOPE TEST:")
+            print("\n3[U+FE0F][U+20E3] PRELIMINARY CONNECTION ID SCOPE TEST:")
             await test_instance.test_preliminary_connection_id_scope_bug()
         except Exception as e:
-            print(f"✅ Test 3 reproduced preliminary_connection_id scope bug: {e}")
+            print(f" PASS:  Test 3 reproduced preliminary_connection_id scope bug: {e}")
         
         # Test 4: State coordinator scope
         try:
-            print("\n4️⃣ STATE COORDINATOR SCOPE TEST:")
+            print("\n4[U+FE0F][U+20E3] STATE COORDINATOR SCOPE TEST:")
             await test_instance.test_state_coordinator_scope_initialization_bug()
         except Exception as e:
-            print(f"✅ Test 4 reproduced coordinator scope bug: {e}")
+            print(f" PASS:  Test 4 reproduced coordinator scope bug: {e}")
         
         # Test 5: Scope pattern demonstration
         try:
-            print("\n5️⃣ SCOPE PATTERN DEMONSTRATION:")
+            print("\n5[U+FE0F][U+20E3] SCOPE PATTERN DEMONSTRATION:")
             test_instance.test_local_scope_variable_accessibility()
         except Exception as e:
-            print(f"❌ Test 5 failed: {e}")
+            print(f" FAIL:  Test 5 failed: {e}")
         
-        print("\n🏁 ISSUE #172 SCOPE ISOLATION TESTS COMPLETED")
+        print("\n[U+1F3C1] ISSUE #172 SCOPE ISOLATION TESTS COMPLETED")
         print("=" * 60)
     
     # Run if executed directly

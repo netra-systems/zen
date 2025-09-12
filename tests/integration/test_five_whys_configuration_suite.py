@@ -116,7 +116,7 @@ Docker Available: {self.docker_available}
 Critical Failures: {len(self.critical_failures)}
 {chr(10).join(f"  - {cf}" for cf in self.critical_failures)}
 
-Root Cause Prevention Status: {'✅ PREVENTED' if len(self.critical_failures) == 0 else '❌ RISKS DETECTED'}
+Root Cause Prevention Status: {' PASS:  PREVENTED' if len(self.critical_failures) == 0 else ' FAIL:  RISKS DETECTED'}
 """
         return summary
     
@@ -605,9 +605,9 @@ class TestFiveWhysComprehensiveValidation:
             assert all_ready, \
                 f"Five Whys Prevention: Integration test readiness check failed: {integration_test_readiness}"
             
-            print("✅ Five Whys End-to-End Prevention: All validations passed")
-            print("✅ Configuration that caused original issue would now be caught")
-            print("✅ Integration tests would have proper Redis connectivity")
+            print(" PASS:  Five Whys End-to-End Prevention: All validations passed")
+            print(" PASS:  Configuration that caused original issue would now be caught")
+            print(" PASS:  Integration tests would have proper Redis connectivity")
             
         finally:
             env.reset_to_original()
@@ -636,7 +636,7 @@ class TestFiveWhysComprehensiveValidation:
         print("")
         print("Prevention Mechanisms Implemented:")
         for mechanism, active in prevention_checklist.items():
-            status = "✅ ACTIVE" if active else "❌ MISSING"
+            status = " PASS:  ACTIVE" if active else " FAIL:  MISSING"
             print(f"  {mechanism}: {status}")
         print("")
         print("Result: Configuration mismatches will be caught before deployment")

@@ -2922,29 +2922,29 @@ class TestWebSocketManagerRaceConditions(BaseTestCase):
         assert success_rate > 0.9, f"Success rate too low: {success_rate:.2%}"
         
         # Comprehensive test summary
-        print(f"\n🧪 COMPREHENSIVE WEBSOCKET RACE CONDITION STRESS TEST SUMMARY:")
-        print(f"  👥 Users: {num_users}")
-        print(f"  🔄 Operations per user: {operations_per_user}")
-        print(f"  ⏱️  Total duration: {total_duration:.3f}s")
-        print(f"  ✅ Success rate: {success_rate:.2%}")
-        print(f"  🏁 Total operations: {total_actual_operations}")
-        print(f"  ❌ Failed operations: {len(failed_operations)}")
-        print(f"  ⚡ Operations per second: {total_actual_operations / total_duration:.1f}")
-        print(f"  🔍 Timing clusters detected: {len(timing_clusters)}")
+        print(f"\n[U+1F9EA] COMPREHENSIVE WEBSOCKET RACE CONDITION STRESS TEST SUMMARY:")
+        print(f"  [U+1F465] Users: {num_users}")
+        print(f"   CYCLE:  Operations per user: {operations_per_user}")
+        print(f"  [U+23F1][U+FE0F]  Total duration: {total_duration:.3f}s")
+        print(f"   PASS:  Success rate: {success_rate:.2%}")
+        print(f"  [U+1F3C1] Total operations: {total_actual_operations}")
+        print(f"   FAIL:  Failed operations: {len(failed_operations)}")
+        print(f"   LIGHTNING:  Operations per second: {total_actual_operations / total_duration:.1f}")
+        print(f"   SEARCH:  Timing clusters detected: {len(timing_clusters)}")
         
         if timing_clusters:
-            print(f"\n🚨 RACE CONDITION PATTERNS DETECTED:")
+            print(f"\n ALERT:  RACE CONDITION PATTERNS DETECTED:")
             for i, cluster in enumerate(timing_clusters[:3]):  # Show first 3
                 severity = cluster['severity']
                 operation_count = len(cluster['overlapping_operations']) + 1
                 print(f"  Cluster {i+1} ({severity}): {operation_count} concurrent operations")
         
         # Per-user performance summary
-        print(f"\n👤 PER-USER PERFORMANCE:")
+        print(f"\n[U+1F464] PER-USER PERFORMANCE:")
         for user_id, perf in user_performance.items():
             print(f"  {user_id}: {perf['successful']}/{perf['total']} ops ({perf['success_rate']:.1%})")
         
-        print(f"\n✨ COMPREHENSIVE RACE CONDITION TEST COMPLETED SUCCESSFULLY")
+        print(f"\n[U+2728] COMPREHENSIVE RACE CONDITION TEST COMPLETED SUCCESSFULLY")
         print(f"   Total test methods executed: 50 comprehensive race condition scenarios")
         print(f"   System demonstrated resilience under concurrent load")
         print(f"   All critical WebSocket manager race conditions tested")

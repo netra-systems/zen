@@ -68,7 +68,7 @@
     # Removed problematic line: async def test_oauth_callback_not_blocked(self) -> Dict:
         # REMOVED_SYNTAX_ERROR: """Test that OAuth callback with encoded parameters is not blocked."""
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: 🔍 Testing OAuth callback endpoint...")
+        # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing OAuth callback endpoint...")
 
         # Simulate OAuth callback with encoded parameters that triggered the issue
         # REMOVED_SYNTAX_ERROR: callback_url = "formatted_string"
@@ -122,7 +122,7 @@
                             # REMOVED_SYNTAX_ERROR: "http_status": response.status,
                             # REMOVED_SYNTAX_ERROR: "error": "Blocked by Cloud Armor"
                             
-                            # REMOVED_SYNTAX_ERROR: print(f"    ❌ FAILED: Got 403 (blocked)")
+                            # REMOVED_SYNTAX_ERROR: print(f"     FAIL:  FAILED: Got 403 (blocked)")
                             # REMOVED_SYNTAX_ERROR: else:
                                 # REMOVED_SYNTAX_ERROR: results.append({ ))
                                 # REMOVED_SYNTAX_ERROR: "case": test_case["name"],
@@ -180,7 +180,7 @@
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: print(f"  ✅ No blocked OAuth requests found")
+                        # REMOVED_SYNTAX_ERROR: print(f"   PASS:  No blocked OAuth requests found")
 
                         # REMOVED_SYNTAX_ERROR: return { )
                         # REMOVED_SYNTAX_ERROR: "blocked_requests": blocked_count,
@@ -201,7 +201,7 @@
                             # Removed problematic line: async def test_sql_injection_still_blocked(self) -> Dict:
                                 # REMOVED_SYNTAX_ERROR: """Ensure SQL injection attempts are still blocked on other paths."""
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: 🛡️  Testing SQL injection protection...")
+                                # REMOVED_SYNTAX_ERROR: [U+1F6E1][U+FE0F]  Testing SQL injection protection...")
 
                                 # Test paths that should still be protected
                                 # REMOVED_SYNTAX_ERROR: test_cases = [ )
@@ -238,7 +238,7 @@
                                                     # REMOVED_SYNTAX_ERROR: "http_status": response.status,
                                                     # REMOVED_SYNTAX_ERROR: "note": "Correctly blocked SQL injection"
                                                     
-                                                    # REMOVED_SYNTAX_ERROR: print(f"    ✅ PASSED: SQL injection blocked (403)")
+                                                    # REMOVED_SYNTAX_ERROR: print(f"     PASS:  PASSED: SQL injection blocked (403)")
                                                     # REMOVED_SYNTAX_ERROR: else:
                                                         # REMOVED_SYNTAX_ERROR: results.append({ ))
                                                         # REMOVED_SYNTAX_ERROR: "case": test_case["name"],
@@ -255,7 +255,7 @@
                                                             # REMOVED_SYNTAX_ERROR: "status": "PASSED",
                                                             # REMOVED_SYNTAX_ERROR: "note": "formatted_string"
                                                             
-                                                            # REMOVED_SYNTAX_ERROR: print(f"    ✅ PASSED: Likely blocked (connection failed)")
+                                                            # REMOVED_SYNTAX_ERROR: print(f"     PASS:  PASSED: Likely blocked (connection failed)")
 
                                                             # REMOVED_SYNTAX_ERROR: return { )
                                                             # REMOVED_SYNTAX_ERROR: "test": "sql_injection_protection",
@@ -266,7 +266,7 @@
 # REMOVED_SYNTAX_ERROR: def verify_security_policy(self) -> Dict:
     # REMOVED_SYNTAX_ERROR: """Verify Cloud Armor security policy configuration."""
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔐 Verifying security policy configuration...")
+    # REMOVED_SYNTAX_ERROR: [U+1F510] Verifying security policy configuration...")
 
     # REMOVED_SYNTAX_ERROR: cmd = [ )
     # REMOVED_SYNTAX_ERROR: "gcloud", "compute", "security-policies", "rules", "describe", "50",
@@ -299,7 +299,7 @@
             # REMOVED_SYNTAX_ERROR: all_passed = all(checks.values())
 
             # REMOVED_SYNTAX_ERROR: for check, passed in checks.items():
-                # REMOVED_SYNTAX_ERROR: status = "✅" if passed else "❌"
+                # REMOVED_SYNTAX_ERROR: status = " PASS: " if passed else " FAIL: "
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: return { )
@@ -328,7 +328,7 @@
 # REMOVED_SYNTAX_ERROR: async def run_test_suite(self) -> Dict:
     # REMOVED_SYNTAX_ERROR: """Run complete test suite."""
     # REMOVED_SYNTAX_ERROR: print("=" * 60)
-    # REMOVED_SYNTAX_ERROR: print(f"🚀 OAuth Cloud Armor Test Suite")
+    # REMOVED_SYNTAX_ERROR: print(f"[U+1F680] OAuth Cloud Armor Test Suite")
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
     # REMOVED_SYNTAX_ERROR: print("=" * 60)
@@ -369,7 +369,7 @@
                                 # Print summary
                                 # REMOVED_SYNTAX_ERROR: print(" )
                                 # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                                # REMOVED_SYNTAX_ERROR: print("📋 TEST SUMMARY")
+                                # REMOVED_SYNTAX_ERROR: print("[U+1F4CB] TEST SUMMARY")
                                 # REMOVED_SYNTAX_ERROR: print("=" * 60)
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")

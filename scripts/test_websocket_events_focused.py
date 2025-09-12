@@ -29,7 +29,7 @@ class MockWebSocketManager:
         
     async def send_to_user(self, user_id: str, event_data: Dict[str, Any]) -> None:
         """Capture events sent to user."""
-        print(f"📤 WebSocket Event: {event_data.get('type', 'unknown')} for user {user_id}")
+        print(f"[U+1F4E4] WebSocket Event: {event_data.get('type', 'unknown')} for user {user_id}")
         self.events_sent.append({
             'user_id': user_id,
             'event': event_data.copy()
@@ -47,7 +47,7 @@ class MockWebSocketManager:
 async def test_legacy_run_method():
     """Test if the legacy run method exists and emits events."""
     
-    print("🧪 Testing Legacy Run Method with WebSocket Events")
+    print("[U+1F9EA] Testing Legacy Run Method with WebSocket Events")
     print("=" * 60)
     
     # Create user context
@@ -60,7 +60,7 @@ async def test_legacy_run_method():
         websocket_connection_id=UnifiedIdGenerator.generate_websocket_client_id("test_user_123")
     )
     
-    print(f"✅ Created user context for user {user_context.user_id}")
+    print(f" PASS:  Created user context for user {user_context.user_id}")
     
     # Test 1: Verify SupervisorAgent has run method
     try:
@@ -68,35 +68,35 @@ async def test_legacy_run_method():
         
         # Check if run method exists
         if hasattr(SupervisorAgent, 'run'):
-            print("✅ SupervisorAgent.run() method exists (legacy compatibility)")
+            print(" PASS:  SupervisorAgent.run() method exists (legacy compatibility)")
         else:
-            print("❌ SupervisorAgent.run() method missing - this is the problem!")
+            print(" FAIL:  SupervisorAgent.run() method missing - this is the problem!")
             return False
             
     except Exception as e:
-        print(f"❌ Failed to import SupervisorAgent: {e}")
+        print(f" FAIL:  Failed to import SupervisorAgent: {e}")
         return False
     
     # Test 2: Verify that our modified supervisor has the WebSocket event methods
     try:
         # Check for event emission methods
         if hasattr(SupervisorAgent, '_emit_agent_started'):
-            print("✅ _emit_agent_started method exists")
+            print(" PASS:  _emit_agent_started method exists")
         else:
-            print("❌ _emit_agent_started method missing")
+            print(" FAIL:  _emit_agent_started method missing")
             
         if hasattr(SupervisorAgent, '_emit_agent_completed'):
-            print("✅ _emit_agent_completed method exists")
+            print(" PASS:  _emit_agent_completed method exists")
         else:
-            print("❌ _emit_agent_completed method missing")
+            print(" FAIL:  _emit_agent_completed method missing")
             
         if hasattr(SupervisorAgent, '_emit_thinking'):
-            print("✅ _emit_thinking method exists")
+            print(" PASS:  _emit_thinking method exists")
         else:
-            print("❌ _emit_thinking method missing")
+            print(" FAIL:  _emit_thinking method missing")
             
     except Exception as e:
-        print(f"❌ Failed to check event methods: {e}")
+        print(f" FAIL:  Failed to check event methods: {e}")
         return False
     
     # Test 3: Test tool dispatcher WebSocket events
@@ -105,17 +105,17 @@ async def test_legacy_run_method():
         
         # Check if tool dispatcher has event methods
         if hasattr(UnifiedToolDispatcher, '_emit_tool_executing'):
-            print("✅ UnifiedToolDispatcher._emit_tool_executing method exists")
+            print(" PASS:  UnifiedToolDispatcher._emit_tool_executing method exists")
         else:
-            print("❌ UnifiedToolDispatcher._emit_tool_executing method missing")
+            print(" FAIL:  UnifiedToolDispatcher._emit_tool_executing method missing")
             
         if hasattr(UnifiedToolDispatcher, '_emit_tool_completed'):
-            print("✅ UnifiedToolDispatcher._emit_tool_completed method exists")
+            print(" PASS:  UnifiedToolDispatcher._emit_tool_completed method exists")
         else:
-            print("❌ UnifiedToolDispatcher._emit_tool_completed method missing")
+            print(" FAIL:  UnifiedToolDispatcher._emit_tool_completed method missing")
             
     except Exception as e:
-        print(f"❌ Failed to check tool dispatcher methods: {e}")
+        print(f" FAIL:  Failed to check tool dispatcher methods: {e}")
         return False
     
     # Test 4: Verify WebSocket bridge integration
@@ -123,30 +123,30 @@ async def test_legacy_run_method():
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         
         if hasattr(AgentWebSocketBridge, 'emit_agent_event'):
-            print("✅ AgentWebSocketBridge.emit_agent_event method exists")
+            print(" PASS:  AgentWebSocketBridge.emit_agent_event method exists")
         else:
-            print("❌ AgentWebSocketBridge.emit_agent_event method missing")
+            print(" FAIL:  AgentWebSocketBridge.emit_agent_event method missing")
             
     except Exception as e:
-        print(f"❌ Failed to check WebSocket bridge: {e}")
+        print(f" FAIL:  Failed to check WebSocket bridge: {e}")
         
-    print("\n📊 WebSocket Events Implementation Status:")
+    print("\n CHART:  WebSocket Events Implementation Status:")
     
     # Check if all required events are implemented
     required_events = {
-        'agent_started': '✅ Implemented in SupervisorAgent.run()',
-        'agent_thinking': '✅ Implemented in SupervisorAgent._emit_thinking()',
-        'tool_executing': '✅ Implemented in UnifiedToolDispatcher._emit_tool_executing()',
-        'tool_completed': '✅ Implemented in UnifiedToolDispatcher._emit_tool_completed()',
-        'agent_completed': '✅ Implemented in SupervisorAgent.run()'
+        'agent_started': ' PASS:  Implemented in SupervisorAgent.run()',
+        'agent_thinking': ' PASS:  Implemented in SupervisorAgent._emit_thinking()',
+        'tool_executing': ' PASS:  Implemented in UnifiedToolDispatcher._emit_tool_executing()',
+        'tool_completed': ' PASS:  Implemented in UnifiedToolDispatcher._emit_tool_completed()',
+        'agent_completed': ' PASS:  Implemented in SupervisorAgent.run()'
     }
     
     for event, status in required_events.items():
         print(f"   {event}: {status}")
     
-    print(f"\n💰 Business Value Assessment:")
+    print(f"\n[U+1F4B0] Business Value Assessment:")
     print("   Event Coverage: 5/5 (100%)")
-    print("   🎉 SUCCESS: All critical WebSocket events are implemented!")
+    print("    CELEBRATION:  SUCCESS: All critical WebSocket events are implemented!")
     print("   Users will see complete AI transparency and progress updates")
     
     return True
@@ -161,8 +161,8 @@ if __name__ == "__main__":
     
     print(f"\n{'='*60}")
     if result:
-        print("🎉 SUCCESS: WebSocket events implementation is complete!")
+        print(" CELEBRATION:  SUCCESS: WebSocket events implementation is complete!")
         sys.exit(0)
     else:
-        print("❌ ISSUES: WebSocket events implementation needs work")
+        print(" FAIL:  ISSUES: WebSocket events implementation needs work")
         sys.exit(1)

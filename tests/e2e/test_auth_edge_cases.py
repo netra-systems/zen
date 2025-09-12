@@ -88,7 +88,7 @@ class AuthSecurityTestHarness:
         violation["timestamp"] = datetime.now(timezone.utc).isoformat()
         violation["test_environment"] = self.environment
         self.security_violations.append(violation)
-        logger.error(f"🚨 SECURITY VIOLATION: {violation}")
+        logger.error(f" ALERT:  SECURITY VIOLATION: {violation}")
 
 
 @pytest.mark.e2e 
@@ -139,9 +139,9 @@ class TestAuthEdgeCaseSecurity:
                 "token_age": "7+ seconds past expiration"
             })
             
-        assert not is_valid_after_expiry, "🚨 SECURITY BREACH: Expired token was accepted - allows session hijacking"
+        assert not is_valid_after_expiry, " ALERT:  SECURITY BREACH: Expired token was accepted - allows session hijacking"
         
-        logger.info("✅ JWT expiration security validation PASSED")
+        logger.info(" PASS:  JWT expiration security validation PASSED")
         
     @pytest.mark.asyncio
     async def test_concurrent_user_data_isolation_security(self):
@@ -192,7 +192,7 @@ class TestAuthEdgeCaseSecurity:
             await websocket_a.close()
             await websocket_b.close()
             
-            logger.info("✅ Concurrent user data isolation security PASSED")
+            logger.info(" PASS:  Concurrent user data isolation security PASSED")
             
         except Exception as e:
             self.harness.report_security_violation({
@@ -255,13 +255,13 @@ class TestAuthEdgeCaseSecurity:
                     
             except Exception as e:
                 # Exceptions during validation are expected for tampered tokens
-                logger.info(f"✅ JWT tampering correctly rejected for {scenario['name']}: {e}")
+                logger.info(f" PASS:  JWT tampering correctly rejected for {scenario['name']}: {e}")
                 
         if security_breaches:
             breach_details = "\\n".join([f"  - {breach['scenario']}: {breach['description']}" for breach in security_breaches])
-            pytest.fail(f"🚨 SECURITY BREACHES DETECTED:\\n{breach_details}")
+            pytest.fail(f" ALERT:  SECURITY BREACHES DETECTED:\\n{breach_details}")
             
-        logger.info("✅ JWT tampering detection security PASSED")
+        logger.info(" PASS:  JWT tampering detection security PASSED")
         
     @pytest.mark.asyncio  
     async def test_session_timing_attack_prevention_security(self):
@@ -326,7 +326,7 @@ class TestAuthEdgeCaseSecurity:
                 "invalid_avg": f"{avg_invalid_time:.3f}s"
             })
             
-        logger.info(f"✅ Authentication timing analysis: {timing_difference:.3f}s difference (threshold: {timing_threshold:.3f}s)")
+        logger.info(f" PASS:  Authentication timing analysis: {timing_difference:.3f}s difference (threshold: {timing_threshold:.3f}s)")
         
     def _tamper_jwt_payload(self, token: str, new_claims: Dict[str, Any]) -> str:
         """Tamper with JWT payload for security testing"""
@@ -363,22 +363,22 @@ class TestAuthEdgeCaseSecurity:
         
         # Report security violations summary
         if self.harness.security_violations:
-            violation_summary = f"\\n🚨 SECURITY VIOLATIONS DETECTED ({len(self.harness.security_violations)}):\\n"
+            violation_summary = f"\\n ALERT:  SECURITY VIOLATIONS DETECTED ({len(self.harness.security_violations)}):\\n"
             for violation in self.harness.security_violations:
                 violation_summary += f"  - {violation['type']}: {violation['description']}\\n"
             
             logger.error(violation_summary)
             pytest.fail(
-                f"\\n🚨 AUTHENTICATION SECURITY VIOLATIONS DETECTED:\\n"
+                f"\\n ALERT:  AUTHENTICATION SECURITY VIOLATIONS DETECTED:\\n"
                 f"{violation_summary}\\n"
-                f"💰 BUSINESS IMPACT: Authentication security compromised\\n" 
-                f"🔒 REVENUE RISK: $75K+ MRR security boundaries breached\\n"
-                f"⚙️ TECHNICAL: Real authentication security validation failed\\n"
+                f"[U+1F4B0] BUSINESS IMPACT: Authentication security compromised\\n" 
+                f"[U+1F512] REVENUE RISK: $75K+ MRR security boundaries breached\\n"
+                f"[U+2699][U+FE0F] TECHNICAL: Real authentication security validation failed\\n"
             )
             
-        logger.info(f"✅ Authentication edge case security validation PASSED ({elapsed_time:.2f}s)")
-        logger.info("✅ Multi-user authentication security VALIDATED")
-        logger.info("✅ $75K+ MRR authentication security boundaries PROTECTED")
+        logger.info(f" PASS:  Authentication edge case security validation PASSED ({elapsed_time:.2f}s)")
+        logger.info(" PASS:  Multi-user authentication security VALIDATED")
+        logger.info(" PASS:  $75K+ MRR authentication security boundaries PROTECTED")
 
 
 if __name__ == "__main__":

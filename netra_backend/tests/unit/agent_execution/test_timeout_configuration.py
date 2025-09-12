@@ -2,7 +2,7 @@
 Unit Tests for Agent Execution Timeout Configuration
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) with tier-specific optimization  
+- Segment: ALL (Free  ->  Enterprise) with tier-specific optimization  
 - Business Goal: User experience optimization and resource management
 - Value Impact: Ensures appropriate timeout values for different user tiers while preventing resource waste
 - Strategic Impact: Balance user experience with platform scalability - Enterprise users get longer timeouts

@@ -7,6 +7,7 @@ The issue occurs when:
 3. Windows shows error: "only one usage of each socket address is normally permitted"
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import socket
 import subprocess
 import sys
@@ -27,7 +28,7 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import find_available_port, is_port_available
 
 
-class TestPortBindingRaceCondition(unittest.TestCase):
+class TestPortBindingRaceCondition(SSotBaseTestCase):
     """Test that reproduces the port binding race condition."""
     
     def setUp(self):
@@ -42,7 +43,7 @@ class TestPortBindingRaceCondition(unittest.TestCase):
         Test that demonstrates the race condition between port check and actual bind.
         
         This test reproduces the actual error:
-        [AUTH] ❌ ERROR: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8081)
+        [AUTH]  FAIL:  ERROR: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8081)
         
         The issue is that is_port_available() binds to check, then immediately releases,
         but the OS may not have fully released the port when uvicorn tries to bind.

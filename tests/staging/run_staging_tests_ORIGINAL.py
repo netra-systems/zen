@@ -173,7 +173,7 @@ class StagingTestSuiteRunner:
     def print_header(self):
         """Print test suite header."""
         print("=" * 80)
-        self.safe_print("🚀 NETRA STAGING TEST SUITE", "[ROCKET] NETRA STAGING TEST SUITE")
+        self.safe_print("[U+1F680] NETRA STAGING TEST SUITE", "[ROCKET] NETRA STAGING TEST SUITE")
         print("=" * 80)
         print(f"Environment: {self.environment}")
         print(f"Total Tests: {len(STAGING_TESTS) if not self.args.test else 1}")
@@ -187,7 +187,7 @@ class StagingTestSuiteRunner:
         if not self.args.verbose:
             return
             
-        self.safe_print(f"🧪 Starting: {test_config['name']}", f"[TEST] Starting: {test_config['name']}")
+        self.safe_print(f"[U+1F9EA] Starting: {test_config['name']}", f"[TEST] Starting: {test_config['name']}")
         print(f"   Description: {test_config['description']}")
         print(f"   Critical: {'Yes' if test_config['critical'] else 'No'}")
         print(f"   Timeout: {test_config['timeout']}s")
@@ -199,10 +199,10 @@ class StagingTestSuiteRunner:
         execution_time = result.get("execution_time", 0)
         
         if success:
-            self.safe_print(f"✅ PASS {test_config['name']} ({execution_time:.2f}s)",
+            self.safe_print(f" PASS:  PASS {test_config['name']} ({execution_time:.2f}s)",
                           f"[PASS] {test_config['name']} ({execution_time:.2f}s)")
         else:
-            self.safe_print(f"❌ FAIL {test_config['name']} ({execution_time:.2f}s)",
+            self.safe_print(f" FAIL:  FAIL {test_config['name']} ({execution_time:.2f}s)",
                           f"[FAIL] {test_config['name']} ({execution_time:.2f}s)")
         
         if self.args.verbose or not success:
@@ -223,7 +223,7 @@ class StagingTestSuiteRunner:
                     
                     for error_key in error_keys:
                         if summary.get(error_key):
-                            print(f"     🚨 {error_key.replace('_', ' ').title()}")
+                            print(f"      ALERT:  {error_key.replace('_', ' ').title()}")
                             
         print()
         
@@ -291,7 +291,7 @@ class StagingTestSuiteRunner:
             
             # Stop on first failure if fail-fast is enabled
             if self.args.fail_fast and not result.get("summary", {}).get("all_tests_passed", result.get("success", False)):
-                print(f"🛑 Stopping due to failure in {test_config['name']} (--fail-fast enabled)")
+                print(f"[U+1F6D1] Stopping due to failure in {test_config['name']} (--fail-fast enabled)")
                 break
                 
         return results
@@ -299,7 +299,7 @@ class StagingTestSuiteRunner:
     async def run_tests_parallel(self, tests_to_run: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Run tests in parallel."""
         if self.args.verbose:
-            print("🔄 Running tests in parallel...")
+            print(" CYCLE:  Running tests in parallel...")
             print()
             
         # Create tasks for all tests
@@ -337,7 +337,7 @@ class StagingTestSuiteRunner:
     def generate_summary_report(self, results: Dict[str, Any]):
         """Generate and print summary report."""
         print("=" * 80)
-        self.safe_print("📊 STAGING TEST SUITE SUMMARY", "[SUMMARY] STAGING TEST SUITE SUMMARY")
+        self.safe_print(" CHART:  STAGING TEST SUITE SUMMARY", "[SUMMARY] STAGING TEST SUITE SUMMARY")
         print("=" * 80)
         
         total_tests = len(results)
@@ -358,12 +358,12 @@ class StagingTestSuiteRunner:
         
         # Show failed tests
         if failed_tests > 0:
-            self.safe_print("❌ FAILED TESTS:", "[X] FAILED TESTS:")
+            self.safe_print(" FAIL:  FAILED TESTS:", "[X] FAILED TESTS:")
             for test_key, result in results.items():
                 if not result.get("summary", {}).get("all_tests_passed", result.get("success", False)):
                     test_name = result.get("test_name", test_key)
                     error = result.get("error", "Unknown failure")
-                    self.safe_print(f"   • {test_name}: {error}", f"   * {test_name}: {error}")
+                    self.safe_print(f"   [U+2022] {test_name}: {error}", f"   * {test_name}: {error}")
             print()
             
         # Critical system status
@@ -378,26 +378,26 @@ class StagingTestSuiteRunner:
                     critical_issues.extend([f"{test_name}: {key}" for key in critical_keys])
                     
         if critical_issues:
-            self.safe_print("🚨 CRITICAL ISSUES DETECTED:", "[!] CRITICAL ISSUES DETECTED:")
+            self.safe_print(" ALERT:  CRITICAL ISSUES DETECTED:", "[!] CRITICAL ISSUES DETECTED:")
             for issue in critical_issues:
-                self.safe_print(f"   • {issue}", f"   * {issue}")
+                self.safe_print(f"   [U+2022] {issue}", f"   * {issue}")
             print()
         else:
-            self.safe_print("✅ No critical issues detected", "[OK] No critical issues detected")
+            self.safe_print(" PASS:  No critical issues detected", "[OK] No critical issues detected")
             print()
             
         # Overall system status
         system_operational = passed_tests == total_tests and not critical_issues
         if system_operational:
-            self.safe_print("🎯 STAGING SYSTEM STATUS: ✅ OPERATIONAL",
+            self.safe_print(" TARGET:  STAGING SYSTEM STATUS:  PASS:  OPERATIONAL",
                           "[TARGET] STAGING SYSTEM STATUS: [OK] OPERATIONAL")
         else:
-            self.safe_print("🎯 STAGING SYSTEM STATUS: ❌ ISSUES DETECTED",
+            self.safe_print(" TARGET:  STAGING SYSTEM STATUS:  FAIL:  ISSUES DETECTED",
                           "[TARGET] STAGING SYSTEM STATUS: [X] ISSUES DETECTED")
         
         if not system_operational:
             print()
-            self.safe_print("🔧 RECOMMENDED ACTIONS:", "[TOOLS] RECOMMENDED ACTIONS:")
+            self.safe_print("[U+1F527] RECOMMENDED ACTIONS:", "[TOOLS] RECOMMENDED ACTIONS:")
             if failed_tests > 0:
                 print("   1. Review failed test details above")
                 print("   2. Check service logs for errors")
@@ -425,7 +425,7 @@ class StagingTestSuiteRunner:
         # Determine tests to run
         if self.args.test:
             if self.args.test not in STAGING_TESTS:
-                print(f"❌ Test '{self.args.test}' not found.")
+                print(f" FAIL:  Test '{self.args.test}' not found.")
                 print(f"Available tests: {', '.join(STAGING_TESTS.keys())}")
                 return 1
             tests_to_run = {self.args.test: STAGING_TESTS[self.args.test]}
@@ -452,7 +452,7 @@ class StagingTestSuiteRunner:
                 "test_results": results
             }
             print("\n" + "=" * 80)
-            print("📄 JSON OUTPUT:")
+            print("[U+1F4C4] JSON OUTPUT:")
             print("=" * 80)
             print(json.dumps(output, indent=2, default=str))
             
@@ -514,13 +514,13 @@ def main():
         sys.exit(exit_code)
     except KeyboardInterrupt:
         try:
-            print("\n🛑 Test suite interrupted by user")
+            print("\n[U+1F6D1] Test suite interrupted by user")
         except UnicodeEncodeError:
             print("\n[STOP] Test suite interrupted by user")
         sys.exit(130)
     except Exception as e:
         try:
-            print(f"\n❌ Test suite runner failed: {e}")
+            print(f"\n FAIL:  Test suite runner failed: {e}")
         except UnicodeEncodeError:
             print(f"\n[ERROR] Test suite runner failed: {e}")
         sys.exit(1)

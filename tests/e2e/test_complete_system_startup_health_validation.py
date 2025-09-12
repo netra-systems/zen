@@ -23,7 +23,7 @@ CRITICAL REQUIREMENTS:
 This E2E test validates the entire system startup sequence including:
 1. Environment validation and configuration loading
 2. Database connectivity and migration validation
-3. Service startup orchestration (auth → backend → websocket coordination)
+3. Service startup orchestration (auth  ->  backend  ->  websocket coordination)
 4. Health check cascading and dependency validation
 5. Port allocation with conflict resolution
 6. Service discovery and registration
@@ -497,11 +497,11 @@ class TestComprehensiveSystemer:
         """Phase 5: Validate inter-service communication."""
         logger.info("Phase 5: Validating inter-service communication")
         
-        # Test auth service → backend communication
+        # Test auth service  ->  backend communication
         auth_to_backend = await self._test_auth_to_backend_communication()
         self.metrics.inter_service_communication["auth_to_backend"] = auth_to_backend
         
-        # Test backend → auth service communication
+        # Test backend  ->  auth service communication
         backend_to_auth = await self._test_backend_to_auth_communication()
         self.metrics.inter_service_communication["backend_to_auth"] = backend_to_auth
         

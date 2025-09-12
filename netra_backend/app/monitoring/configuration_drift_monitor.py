@@ -231,7 +231,7 @@ class E2EOAuthSimulationKeyValidator:
                     logger.error(f"CRITICAL CONFIGURATION DRIFT: E2E OAuth simulation key non-functional in {current_env}")
             
             if not validation_result["drift_detected"]:
-                logger.info(f"✅ E2E_OAUTH_SIMULATION_KEY validation passed in {current_env}")
+                logger.info(f" PASS:  E2E_OAUTH_SIMULATION_KEY validation passed in {current_env}")
             
             return validation_result
             
@@ -479,7 +479,7 @@ class WebSocketConfigurationValidator:
                     validation_result["business_impact"] = cors_result.get("business_impact", "moderate")
             
             if not validation_result["drift_detected"]:
-                logger.info(f"✅ WebSocket configuration validation passed in {current_env}")
+                logger.info(f" PASS:  WebSocket configuration validation passed in {current_env}")
             
             return validation_result
             
@@ -722,11 +722,11 @@ class ConfigurationDriftMonitor(BaseHealthChecker):
             # Log results
             if total_drift_detected:
                 if critical_drifts:
-                    logger.error(f"🚨 CRITICAL CONFIGURATION DRIFT: {len(critical_drifts)} critical drifts detected with ${total_business_impact:,.0f} MRR impact")
+                    logger.error(f" ALERT:  CRITICAL CONFIGURATION DRIFT: {len(critical_drifts)} critical drifts detected with ${total_business_impact:,.0f} MRR impact")
                 else:
-                    logger.warning(f"⚠️ CONFIGURATION DRIFT: {len(all_drift_details)} drifts detected with ${total_business_impact:,.0f} MRR impact")
+                    logger.warning(f" WARNING: [U+FE0F] CONFIGURATION DRIFT: {len(all_drift_details)} drifts detected with ${total_business_impact:,.0f} MRR impact")
             else:
-                logger.info(f"✅ CONFIGURATION DRIFT: No drift detected in {current_env}")
+                logger.info(f" PASS:  CONFIGURATION DRIFT: No drift detected in {current_env}")
             
             return HealthCheckResult(
                 component_name=self.name,

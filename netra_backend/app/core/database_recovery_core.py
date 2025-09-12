@@ -1,7 +1,7 @@
-"""Database recovery strategies with ≤8 line functions.
+"""Database recovery strategies with  <= 8 line functions.
 
 Provides recovery strategies for database pools with aggressive function
-decomposition. All functions ≤8 lines.
+decomposition. All functions  <= 8 lines.
 """
 
 import asyncio

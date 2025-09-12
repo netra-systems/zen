@@ -12,7 +12,7 @@ import sys
 import time
 import requests
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import logging
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -154,7 +154,7 @@ class DockerServicesAuditor:
     def check_redis_connectivity(self, host: str, port: int) -> Tuple[bool, str]:
         """Test Redis connectivity"""
         try:
-            client = redis.Redis(host=host, port=port, socket_timeout=5)
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, socket_timeout=5)
             client.ping()
             return True, "Connected successfully"
         except redis.ConnectionError as e:
@@ -353,9 +353,9 @@ class DockerServicesAuditor:
                           self.unexpected_services.get(service_name))
                 
                 # Status indicators
-                container_indicator = "🟢" if status.container_status == "running" else "🔴" if status.container_status in ["exited", "dead"] else "⚪"
-                health_indicator = "🟢" if status.health_status == "healthy" else "🔴" if status.health_status == "unhealthy" else "⚪"
-                port_indicator = "🟢" if status.port_accessible else "🔴"
+                container_indicator = "[U+1F7E2]" if status.container_status == "running" else "[U+1F534]" if status.container_status in ["exited", "dead"] else "[U+26AA]"
+                health_indicator = "[U+1F7E2]" if status.health_status == "healthy" else "[U+1F534]" if status.health_status == "unhealthy" else "[U+26AA]"
+                port_indicator = "[U+1F7E2]" if status.port_accessible else "[U+1F534]"
                 
                 print(f"  {service_name}")
                 print(f"    Container: {container_indicator} {status.container_status}")
@@ -367,13 +367,13 @@ class DockerServicesAuditor:
                 if status.errors:
                     print("    Errors:")
                     for error in status.errors:
-                        print(f"      ❌ {error}")
+                        print(f"       FAIL:  {error}")
                         
                 # Warnings
                 if status.warnings:
                     print("    Warnings:")
                     for warning in status.warnings:
-                        print(f"      ⚠️  {warning}")
+                        print(f"       WARNING: [U+FE0F]  {warning}")
                 print()
         
         # Recommendations

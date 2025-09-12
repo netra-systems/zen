@@ -31,7 +31,7 @@ class BusinessHealthChecker:
         
     async def check_docker_and_start(self) -> bool:
         """Start Docker if needed - don't just complain about it."""
-        print("🐳 Checking Docker services...")
+        print("[U+1F433] Checking Docker services...")
         
         try:
             # Check if Docker is running
@@ -64,7 +64,7 @@ class BusinessHealthChecker:
             
     async def test_chat_infrastructure(self) -> Dict[str, Any]:
         """Test the critical chat components that deliver 90% of value."""
-        print("\n💬 Testing Chat Infrastructure (90% of business value)...")
+        print("\n[U+1F4AC] Testing Chat Infrastructure (90% of business value)...")
         
         chat_health = {
             'websocket_events': False,
@@ -155,7 +155,7 @@ class BusinessHealthChecker:
         
     def check_test_syntax(self) -> Dict[str, Any]:
         """Quick check for test file syntax errors - but don't obsess."""
-        print("\n🧪 Checking test file health...")
+        print("\n[U+1F9EA] Checking test file health...")
         
         import ast
         test_dirs = [
@@ -191,7 +191,7 @@ class BusinessHealthChecker:
             
     def check_configuration(self) -> bool:
         """Verify core configuration is working."""
-        print("\n⚙️ Checking configuration...")
+        print("\n[U+2699][U+FE0F] Checking configuration...")
         
         try:
             from netra_backend.app.core.configuration.loader import ConfigurationLoader
@@ -220,7 +220,7 @@ class BusinessHealthChecker:
             
     async def run_critical_chat_test(self) -> bool:
         """Run actual chat flow test if possible."""
-        print("\n🚀 Testing real chat flow...")
+        print("\n[U+1F680] Testing real chat flow...")
         
         try:
             # Try to run a simple chat test
@@ -267,62 +267,62 @@ class BusinessHealthChecker:
         
         # Overall health with emoji
         if overall_score >= 80:
-            status = "✅ HEALTHY"
+            status = " PASS:  HEALTHY"
             color = "\033[92m"  # Green
         elif overall_score >= 60:
-            status = "⚠️ DEGRADED" 
+            status = " WARNING: [U+FE0F] DEGRADED" 
             color = "\033[93m"  # Yellow
         else:
-            status = "❌ CRITICAL"
+            status = " FAIL:  CRITICAL"
             color = "\033[91m"  # Red
             
         print(f"\n{color}Overall Health: {overall_score}/100 - {status}\033[0m")
         
         # Chat specifically (90% of value)
         chat_score = chat_health.get('score', 0)
-        print(f"\n💬 CHAT SYSTEM (90% of business value): {chat_score:.0f}%")
+        print(f"\n[U+1F4AC] CHAT SYSTEM (90% of business value): {chat_score:.0f}%")
         for component, working in chat_health.get('components', {}).items():
-            icon = "✅" if working else "❌"
+            icon = " PASS: " if working else " FAIL: "
             print(f"  {icon} {component.replace('_', ' ').title()}")
             
         # Critical issues first
         if self.critical_issues:
-            print(f"\n🚨 CRITICAL ISSUES ({len(self.critical_issues)}):")
+            print(f"\n ALERT:  CRITICAL ISSUES ({len(self.critical_issues)}):")
             for issue in self.critical_issues[:3]:
-                print(f"  • {issue}")
+                print(f"  [U+2022] {issue}")
                 
         # Successes
         if self.successes:
-            print(f"\n✅ WORKING COMPONENTS ({len(self.successes)}):")
+            print(f"\n PASS:  WORKING COMPONENTS ({len(self.successes)}):")
             for success in self.successes[:5]:
-                print(f"  • {success}")
+                print(f"  [U+2022] {success}")
                 
         # Warnings (don't obsess)
         if self.warnings and len(self.warnings) <= 5:
-            print(f"\n⚠️ MINOR ISSUES ({len(self.warnings)}):")
+            print(f"\n WARNING: [U+FE0F] MINOR ISSUES ({len(self.warnings)}):")
             for warning in self.warnings[:3]:
-                print(f"  • {warning}")
+                print(f"  [U+2022] {warning}")
         elif self.warnings:
-            print(f"\n⚠️ {len(self.warnings)} minor issues logged")
+            print(f"\n WARNING: [U+FE0F] {len(self.warnings)} minor issues logged")
             
         # Business impact
-        print("\n📊 BUSINESS IMPACT:")
+        print("\n CHART:  BUSINESS IMPACT:")
         if chat_score >= 80:
-            print("  ✅ Users can chat with agents effectively")
-            print("  ✅ WebSocket events deliver real-time updates")
-            print("  ✅ System ready for customer value delivery")
+            print("   PASS:  Users can chat with agents effectively")
+            print("   PASS:  WebSocket events deliver real-time updates")
+            print("   PASS:  System ready for customer value delivery")
         elif chat_score >= 60:
-            print("  ⚠️ Chat functional but degraded")
-            print("  ⚠️ Some features may be slow or limited")
-            print("  ⚡ Action: Fix critical components")
+            print("   WARNING: [U+FE0F] Chat functional but degraded")
+            print("   WARNING: [U+FE0F] Some features may be slow or limited")
+            print("   LIGHTNING:  Action: Fix critical components")
         else:
-            print("  ❌ Chat system not operational")
-            print("  ❌ Cannot deliver customer value")
-            print("  🚨 IMMEDIATE ACTION REQUIRED")
+            print("   FAIL:  Chat system not operational")
+            print("   FAIL:  Cannot deliver customer value")
+            print("   ALERT:  IMMEDIATE ACTION REQUIRED")
             
         # Quick fixes
         if self.critical_issues or overall_score < 80:
-            print("\n🔧 QUICK FIXES:")
+            print("\n[U+1F527] QUICK FIXES:")
             
             if any("Docker" in str(w) for w in self.warnings):
                 print("  1. Start Docker Desktop manually")
@@ -359,7 +359,7 @@ class BusinessHealthChecker:
     async def run(self):
         """Run complete business-focused health check."""
         
-        print("🏥 Starting Netra Apex Business Health Check...")
+        print("[U+1F3E5] Starting Netra Apex Business Health Check...")
         print("Focus: Chat functionality (90% of business value)\n")
         
         # 1. Docker - start it don't just complain
@@ -385,7 +385,7 @@ class BusinessHealthChecker:
         
         # Cleanup Docker if we started it
         if docker_ready and '--keep-docker' not in sys.argv:
-            print("\n🧹 Cleaning up Docker services...")
+            print("\n[U+1F9F9] Cleaning up Docker services...")
             await self.docker_manager.cleanup_test_environment()
             
         return overall_score

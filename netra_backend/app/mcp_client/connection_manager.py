@@ -6,7 +6,7 @@ and load balancing for Model Context Protocol (MCP) server connections.
 
 CRITICAL ARCHITECTURAL COMPLIANCE:
 - File size: <300 lines
-- Function size: ≤8 lines each
+- Function size:  <= 8 lines each
 - Strong typing: All parameters and returns typed
 - Single responsibility: Connection management only
 

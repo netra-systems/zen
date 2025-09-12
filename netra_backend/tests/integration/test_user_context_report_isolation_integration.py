@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: User isolation is mandatory for enterprise adoption and regulatory compliance
 - Strategic Impact: Isolation failures would block enterprise sales and create legal liability
 
-This test suite validates critical multi-user isolation: user contexts → isolated execution → secure report delivery.
+This test suite validates critical multi-user isolation: user contexts  ->  isolated execution  ->  secure report delivery.
 Without proper user context isolation, the platform cannot be deployed in enterprise multi-user scenarios.
 """
 
@@ -1718,7 +1718,7 @@ class TestUserContextReportIsolation(BaseIntegrationTest):
         
         # CRITICAL ASSERTIONS: Perfect session isolation and ownership
         
-        assert len(all_reports) == 9, "Must have 9 reports (3 users × 3 sessions each)"
+        assert len(all_reports) == 9, "Must have 9 reports (3 users  x  3 sessions each)"
         
         # Validate report ownership
         for report in all_reports:
@@ -2040,7 +2040,7 @@ class TestUserContextReportIsolation(BaseIntegrationTest):
         # CRITICAL ASSERTIONS: Perfect multi-tenant isolation
         
         total_reports = sum(len(reports) for reports in tenant_reports.values())
-        assert total_reports == 6, "Must have 6 reports (3 tenants × 2 users each)"
+        assert total_reports == 6, "Must have 6 reports (3 tenants  x  2 users each)"
         
         # Validate tenant isolation
         for tenant in tenants:

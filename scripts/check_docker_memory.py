@@ -65,7 +65,7 @@ def check_wsl_config():
     """Check WSL configuration file for memory settings."""
     wsl_config = Path.home() / ".wslconfig"
     if wsl_config.exists():
-        print(f"\n📄 WSL Config File: {wsl_config}")
+        print(f"\n[U+1F4C4] WSL Config File: {wsl_config}")
         with open(wsl_config, 'r') as f:
             content = f.read()
             print("Current .wslconfig content:")
@@ -73,26 +73,26 @@ def check_wsl_config():
             print(content)
             print("-" * 40)
     else:
-        print(f"\n📄 No .wslconfig file found at: {wsl_config}")
+        print(f"\n[U+1F4C4] No .wslconfig file found at: {wsl_config}")
         print("   You can create one to customize WSL2 memory allocation")
 
 def print_recommendations(current_memory_gb):
     """Print memory recommendations based on current allocation."""
-    print("\n🎯 Memory Recommendations for Netra Project:")
+    print("\n TARGET:  Memory Recommendations for Netra Project:")
     print("-" * 50)
     
     if current_memory_gb < 8:
-        print("⚠️  WARNING: Current allocation is below minimum!")
+        print(" WARNING: [U+FE0F]  WARNING: Current allocation is below minimum!")
         print("   Minimum required: 8GB")
         print("   You may experience performance issues")
     elif current_memory_gb < 12:
-        print("⚡ Current allocation meets minimum requirements")
+        print(" LIGHTNING:  Current allocation meets minimum requirements")
         print("   Consider upgrading to 12-16GB for better performance")
     elif current_memory_gb < 16:
-        print("✅ Good allocation for development")
+        print(" PASS:  Good allocation for development")
         print("   This should handle all services comfortably")
     else:
-        print("🚀 Excellent allocation!")
+        print("[U+1F680] Excellent allocation!")
         print("   You have plenty of memory for all services")
     
     print("\nRecommended per-service allocation:")
@@ -134,7 +134,7 @@ idleCommitLimit=max
     with open(template_path, 'w') as f:
         f.write(template)
     
-    print(f"\n📝 WSL config template created: {template_path}")
+    print(f"\n[U+1F4DD] WSL config template created: {template_path}")
     print(f"   Copy to: {Path.home() / '.wslconfig'}")
     print("   Then run: wsl --shutdown")
     print("   And restart Docker Desktop")
@@ -153,7 +153,7 @@ def main():
         total_memory = docker_info.get('MemTotal', 0)
         total_memory_gb = bytes_to_gb(total_memory)
         
-        print(f"\n🐳 Docker System Information:")
+        print(f"\n[U+1F433] Docker System Information:")
         print(f"  Platform: {docker_info.get('OperatingSystem', 'Unknown')}")
         print(f"  Kernel: {docker_info.get('KernelVersion', 'Unknown')}")
         print(f"  Total Memory: {total_memory_gb:.2f} GB ({total_memory:,} bytes)")
@@ -163,7 +163,7 @@ def main():
         # Container information
         containers = docker_info.get('Containers', 0)
         running = docker_info.get('ContainersRunning', 0)
-        print(f"\n📦 Containers:")
+        print(f"\n[U+1F4E6] Containers:")
         print(f"  Total: {containers}")
         print(f"  Running: {running}")
         print(f"  Stopped: {docker_info.get('ContainersStopped', 0)}")
@@ -173,7 +173,7 @@ def main():
         if running > 0:
             stats = get_container_stats()
             if stats:
-                print(f"\n💾 Running Container Memory Usage:")
+                print(f"\n[U+1F4BE] Running Container Memory Usage:")
                 for stat in stats:
                     name = stat.get('Name', 'Unknown')
                     mem_usage = stat.get('MemUsage', 'Unknown')
@@ -192,7 +192,7 @@ def main():
         if response == 'y':
             create_wslconfig_template()
     else:
-        print("\n❌ Could not retrieve Docker information")
+        print("\n FAIL:  Could not retrieve Docker information")
         print("   Make sure Docker Desktop is running")
         sys.exit(1)
     

@@ -1,7 +1,7 @@
 """
 Auth-Agent Flow Test - Complete authentication to personalized agent response
 BVJ: All paid tiers | Security foundation | $50K+ MRR protection | 20% performance fees
-File ≤300 lines, functions ≤8 lines per architectural requirements.
+File  <= 300 lines, functions  <= 8 lines per architectural requirements.
 
 CLAUDE.md Compliance:
 - NO MOCKS: Uses real auth service and real database
@@ -86,7 +86,7 @@ class TestAuthAgentFlow:
     async def test_auth_to_agent_token_flow(self):
         """
         BVJ: $50K MRR protection - Complete auth-to-agent flow validation
-        Test: Login → JWT → Backend validation → Agent context → Personalized response
+        Test: Login  ->  JWT  ->  Backend validation  ->  Agent context  ->  Personalized response
         """
         # Execute complete flow
         flow_result = await self._execute_complete_auth_flow()
@@ -289,7 +289,7 @@ class TestAuthAgentFlow:
     async def test_token_expiration_handling(self):
         """
         BVJ: $25K MRR protection - Expired tokens handled gracefully
-        Test: Expired token → Validation fails → Clear error handling
+        Test: Expired token  ->  Validation fails  ->  Clear error handling
         """
         expired_token = f"expired.{uuid.uuid4().hex[:8]}.token"
         
@@ -310,7 +310,7 @@ class TestAuthAgentFlow:
     async def test_role_based_agent_context(self):
         """
         BVJ: $40K MRR protection - Role-based access controls work
-        Test: Different user roles → Different agent permissions → Appropriate responses
+        Test: Different user roles  ->  Different agent permissions  ->  Appropriate responses
         """
         admin_context = await self._create_role_context("admin")
         user_context = await self._create_role_context("user")
@@ -343,7 +343,7 @@ class TestAuthAgentFlow:
     async def test_concurrent_user_sessions(self):
         """
         BVJ: $35K MRR protection - Multiple user sessions work correctly
-        Test: Multiple users → Separate contexts → Isolated responses
+        Test: Multiple users  ->  Separate contexts  ->  Isolated responses
         """
         user1_context = {"user": {"id": "u1", "email": "user1@test.com", "roles": ["user"]}, "authenticated": True}
         user2_context = {"user": {"id": "u2", "email": "user2@test.com", "roles": ["user"]}, "authenticated": True}
@@ -361,7 +361,7 @@ class TestAuthAgentFlow:
     async def test_auth_service_resilience(self):
         """
         BVJ: $20K MRR protection - Test real auth service resilience patterns
-        Test: Real auth service → Circuit breaker → Resilience handling → No security bypass
+        Test: Real auth service  ->  Circuit breaker  ->  Resilience handling  ->  No security bypass
 
         This test validates the auth client's built-in resilience mechanisms
         without mocks - using real circuit breaker and cache fallback.

@@ -40,7 +40,7 @@ class TestHandshakeCoordinatorIntegration(SSotAsyncTestCase):
 
     async def test_handshake_coordinator_ready_but_connection_state_missing_bug(self):
         """
-        🚨 BUG REPRODUCTION: Coordination gap between HandshakeCoordinator and connection state
+         ALERT:  BUG REPRODUCTION: Coordination gap between HandshakeCoordinator and connection state
         
         Scenario:
         1. HandshakeCoordinator completes successfully and reports ready
@@ -74,7 +74,7 @@ class TestHandshakeCoordinatorIntegration(SSotAsyncTestCase):
         # BUG DETECTION: is_connection_ready_for_messages returns True due to fallback bug
         connection_ready = is_connection_ready_for_messages(connection_id)
         
-        # 🚨 THIS IS THE COORDINATION BUG:
+        #  ALERT:  THIS IS THE COORDINATION BUG:
         # - HandshakeCoordinator.is_ready_for_messages() = True (correct, handshake done)
         # - is_connection_ready_for_messages() = True (wrong reason - fallback bug, not proper state)
         # - Both report ready but neither is tracking the actual connection properly
@@ -242,7 +242,7 @@ class TestHandshakeCoordinatorIntegration(SSotAsyncTestCase):
         # Log metrics for bug tracking
         metrics = self.get_all_metrics()
         if "coordination_bug_detected" in metrics:
-            print(f"\n🚨 HANDSHAKE COORDINATION BUG REPORT:")
+            print(f"\n ALERT:  HANDSHAKE COORDINATION BUG REPORT:")
             print(f"Coordination Bug: {metrics.get('coordination_bug_detected')}")
             print(f"HandshakeCoordinator Ready: {metrics.get('handshake_coordinator_ready')}")
             print(f"Connection State Ready: {metrics.get('connection_state_ready')}")

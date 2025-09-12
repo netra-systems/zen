@@ -199,7 +199,7 @@ class ResponseQualityValidator:
                 suggestions.append("Consider shorter sentences for better readability")
                 
         # Check for structure indicators
-        if any(indicator in response_text for indicator in [':', '-', '1.', '•', '\n']):
+        if any(indicator in response_text for indicator in [':', '-', '1.', '[U+2022]', '\n']):
             score += 0.1
             evidence.append("Response uses structure to improve clarity")
             
@@ -392,7 +392,7 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
                     assert dimension_score >= 0.6, \
                         f"{dimension.value} score {dimension_score:.2f} below critical threshold (0.6)"
                 
-                logger.info(f"✅ DataHelper response quality validated: "
+                logger.info(f" PASS:  DataHelper response quality validated: "
                            f"overall={quality_assessment.overall_score:.2f}, "
                            f"tier={quality_assessment.quality_tier}, "
                            f"business_standards={quality_assessment.meets_business_standards}")
@@ -456,7 +456,7 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
                        "moderately appropriate" in quality_assessment.user_segment_appropriateness.lower(), \
                     f"Response not appropriate for Enterprise: {quality_assessment.user_segment_appropriateness}"
                 
-                logger.info(f"✅ Enterprise optimization response quality validated: "
+                logger.info(f" PASS:  Enterprise optimization response quality validated: "
                            f"overall={quality_assessment.overall_score:.2f}, "
                            f"tier={quality_assessment.quality_tier}, "
                            f"appropriateness='{quality_assessment.user_segment_appropriateness}'")
@@ -521,7 +521,7 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
                 assert actual_tier_value >= expected_tier_value, \
                     f"{assessment.query_complexity} query: quality tier '{assessment.quality_tier}' below expected '{assessment.expected_tier}'"
             
-            logger.info(f"✅ Quality consistency validated across query types: "
+            logger.info(f" PASS:  Quality consistency validated across query types: "
                        f"avg_quality={avg_quality:.2f}, variance={quality_variance:.3f}, "
                        f"assessments={len(quality_assessments)}")
                        
@@ -589,7 +589,7 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
                         assert len(score_info.improvement_suggestions) > 0, \
                             f"{dimension.value} score {score_info.score:.2f} should have improvement suggestions"
                 
-                logger.info(f"✅ Quality improvement feedback validated: "
+                logger.info(f" PASS:  Quality improvement feedback validated: "
                            f"overall_score={initial_assessment.overall_score:.2f}, "
                            f"total_suggestions={len(improvement_suggestions)}, "
                            f"improvement_areas={[(area, len(suggestions)) for area, suggestions in improvement_areas.items() if suggestions]}")

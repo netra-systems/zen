@@ -38,7 +38,7 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         
         Expected: This test should FAIL until JWT protocol is aligned.
         """
-        print("\n🔍 TESTING: JWT token format mismatch...")
+        print("\n SEARCH:  TESTING: JWT token format mismatch...")
         
         # Create test tokens in different formats to reproduce the mismatch
         valid_jwt_payload = {
@@ -51,11 +51,11 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         
         # Format 1: Standard JWT (what client might send)
         client_format_token = self._create_mock_jwt_token(valid_jwt_payload, format_type="standard")
-        print(f"🔑 Client format token: {client_format_token[:30]}...")
+        print(f"[U+1F511] Client format token: {client_format_token[:30]}...")
         
         # Format 2: WebSocket specific format (what server expects)
         server_expected_token = self._create_mock_jwt_token(valid_jwt_payload, format_type="websocket")
-        print(f"🔑 Server expected token: {server_expected_token[:30]}...")
+        print(f"[U+1F511] Server expected token: {server_expected_token[:30]}...")
         
         # Test authentication with different token formats
         from netra_backend.app.websocket_core.unified_websocket_auth import authenticate_websocket_ssot
@@ -72,7 +72,7 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         
         try:
             # Test client format (should fail due to format mismatch)
-            print("🧪 Testing client format token...")
+            print("[U+1F9EA] Testing client format token...")
             with patch('netra_backend.app.services.unified_authentication_service.get_unified_auth_service') as mock_auth_service:
                 mock_service = AsyncMock()
                 mock_auth_service.return_value = mock_service
@@ -84,20 +84,20 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
                 
                 result_client = await authenticate_websocket_ssot(mock_websocket_client_format)
                 
-                print(f"📊 Client format result: success={result_client.success}")
-                print(f"📊 Client format error: {result_client.error_code}")
+                print(f" CHART:  Client format result: success={result_client.success}")
+                print(f" CHART:  Client format error: {result_client.error_code}")
                 
                 # Should fail due to format mismatch
                 assert not result_client.success, "Expected client format to fail"
                 assert "FORMAT" in result_client.error_code or "MISMATCH" in result_client.error_code
                 
-            print("✅ REPRODUCED: Client format token rejected due to format mismatch")
+            print(" PASS:  REPRODUCED: Client format token rejected due to format mismatch")
             
         except Exception as e:
-            print(f"⚠️  Authentication test failed: {e}")
+            print(f" WARNING: [U+FE0F]  Authentication test failed: {e}")
             # This might indicate the bug is present
             if "format" in str(e).lower() or "protocol" in str(e).lower():
-                print("✅ REPRODUCED: JWT format/protocol error detected")
+                print(" PASS:  REPRODUCED: JWT format/protocol error detected")
             else:
                 raise
 
@@ -134,7 +134,7 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         subprotocols (Sec-WebSocket-Protocol header) use different encoding
         than expected, causing authentication failures.
         """
-        print("\n🔍 TESTING: WebSocket subprotocol JWT encoding mismatch...")
+        print("\n SEARCH:  TESTING: WebSocket subprotocol JWT encoding mismatch...")
         
         # Create test token for subprotocol transmission
         test_payload = {
@@ -151,10 +151,10 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
             "no_padding": f"jwt.{base64.urlsafe_b64encode(base_token.encode()).decode().rstrip('=')}",  # No padding
         }
         
-        print(f"📊 Testing {len(encodings_to_test)} encoding variations...")
+        print(f" CHART:  Testing {len(encodings_to_test)} encoding variations...")
         
         for encoding_name, encoded_token in encodings_to_test.items():
-            print(f"\n🧪 Testing {encoding_name} encoding...")
+            print(f"\n[U+1F9EA] Testing {encoding_name} encoding...")
             print(f"   Token format: {encoded_token[:50]}...")
             
             # Mock WebSocket with this subprotocol encoding
@@ -172,12 +172,12 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
                 print(f"   Format valid: {is_valid_format}")
                 
                 if not is_valid_format:
-                    print(f"✅ REPRODUCED: {encoding_name} encoding causes format validation failure")
+                    print(f" PASS:  REPRODUCED: {encoding_name} encoding causes format validation failure")
                 else:
-                    print(f"⚠️  {encoding_name} encoding passed format validation")
+                    print(f" WARNING: [U+FE0F]  {encoding_name} encoding passed format validation")
                     
             except Exception as e:
-                print(f"✅ REPRODUCED: {encoding_name} encoding failed with error: {e}")
+                print(f" PASS:  REPRODUCED: {encoding_name} encoding failed with error: {e}")
 
     def _extract_token_from_subprotocol(self, subprotocol: str) -> Optional[str]:
         """Extract JWT token from WebSocket subprotocol string."""
@@ -233,7 +233,7 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         expects JWTs in a specific protocol format that doesn't match
         what the WebSocket implementation provides.
         """
-        print("\n🔍 TESTING: JWT validation service protocol mismatch...")
+        print("\n SEARCH:  TESTING: JWT validation service protocol mismatch...")
         
         # Create tokens that match different service expectations
         service_protocols = {
@@ -255,10 +255,10 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
             "exp": int(time.time()) + 3600
         }
         
-        print("🧪 Testing protocol compatibility between services...")
+        print("[U+1F9EA] Testing protocol compatibility between services...")
         
         for service_name, protocol_spec in service_protocols.items():
-            print(f"\n📋 Testing {service_name} protocol expectations...")
+            print(f"\n[U+1F4CB] Testing {service_name} protocol expectations...")
             
             # Add service-specific required fields
             service_payload = test_payload.copy()
@@ -292,9 +292,9 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
                 print(f"   Fields compatible: {fields_compatible}")
                 
                 if not format_compatible or not fields_compatible:
-                    print(f"✅ REPRODUCED: {service_name} → {other_service} protocol mismatch")
+                    print(f" PASS:  REPRODUCED: {service_name}  ->  {other_service} protocol mismatch")
                 else:
-                    print(f"⚠️  {service_name} → {other_service} protocols are compatible")
+                    print(f" WARNING: [U+FE0F]  {service_name}  ->  {other_service} protocols are compatible")
 
     def _check_format_compatibility(self, token: str, expected_format: str, expected_encoding: str) -> bool:
         """Check if token format matches service expectations."""
@@ -318,7 +318,7 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
         This test reproduces the complete authentication flow to identify
         where JWT protocol mismatches cause failures in the real system.
         """
-        print("\n🔍 TESTING: Real WebSocket JWT authentication flow...")
+        print("\n SEARCH:  TESTING: Real WebSocket JWT authentication flow...")
         
         # Create realistic test scenario
         mock_websocket = MagicMock()
@@ -342,10 +342,10 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
             f"bearer.{test_token}",
         ]
         
-        print(f"🧪 Testing {len(auth_header_formats)} header formats and {len(subprotocol_formats)} subprotocol formats...")
+        print(f"[U+1F9EA] Testing {len(auth_header_formats)} header formats and {len(subprotocol_formats)} subprotocol formats...")
         
         for i, header_format in enumerate(auth_header_formats):
-            print(f"\n📋 Header format {i+1}: {header_format[:50]}...")
+            print(f"\n[U+1F4CB] Header format {i+1}: {header_format[:50]}...")
             
             mock_websocket.headers = {"authorization": header_format}
             mock_websocket.subprotocols = []
@@ -368,16 +368,16 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
                     result = await authenticate_websocket_ssot(mock_websocket)
                     
                     if not result.success:
-                        print(f"✅ REPRODUCED: Header format {i+1} rejected - {result.error_code}")
+                        print(f" PASS:  REPRODUCED: Header format {i+1} rejected - {result.error_code}")
                     else:
-                        print(f"⚠️  Header format {i+1} unexpectedly accepted")
+                        print(f" WARNING: [U+FE0F]  Header format {i+1} unexpectedly accepted")
                         
             except Exception as e:
-                print(f"✅ REPRODUCED: Header format {i+1} caused exception - {e}")
+                print(f" PASS:  REPRODUCED: Header format {i+1} caused exception - {e}")
         
         # Test subprotocol formats
         for i, subprotocol_format in enumerate(subprotocol_formats):
-            print(f"\n📋 Subprotocol format {i+1}: {subprotocol_format[:50]}...")
+            print(f"\n[U+1F4CB] Subprotocol format {i+1}: {subprotocol_format[:50]}...")
             
             mock_websocket.headers = {}
             mock_websocket.subprotocols = [subprotocol_format]
@@ -399,12 +399,12 @@ class TestIssue171JWTProtocol(SSotAsyncTestCase):
                     result = await authenticate_websocket_ssot(mock_websocket)
                     
                     if not result.success:
-                        print(f"✅ REPRODUCED: Subprotocol format {i+1} rejected - {result.error_code}")
+                        print(f" PASS:  REPRODUCED: Subprotocol format {i+1} rejected - {result.error_code}")
                     else:
-                        print(f"⚠️  Subprotocol format {i+1} unexpectedly accepted")
+                        print(f" WARNING: [U+FE0F]  Subprotocol format {i+1} unexpectedly accepted")
                         
             except Exception as e:
-                print(f"✅ REPRODUCED: Subprotocol format {i+1} caused exception - {e}")
+                print(f" PASS:  REPRODUCED: Subprotocol format {i+1} caused exception - {e}")
 
 
 if __name__ == "__main__":
@@ -416,38 +416,38 @@ if __name__ == "__main__":
         """Run all Issue #171 JWT protocol tests."""
         test_instance = TestIssue171JWTProtocol()
         
-        print("🚨 STARTING ISSUE #171 JWT PROTOCOL TESTS")
+        print(" ALERT:  STARTING ISSUE #171 JWT PROTOCOL TESTS")
         print("=" * 60)
         
         # Test 1: JWT format mismatch
         try:
-            print("\n1️⃣ JWT FORMAT MISMATCH TEST:")
+            print("\n1[U+FE0F][U+20E3] JWT FORMAT MISMATCH TEST:")
             await test_instance.test_jwt_token_format_mismatch_reproduction()
         except Exception as e:
-            print(f"❌ Test 1 failed: {e}")
+            print(f" FAIL:  Test 1 failed: {e}")
         
         # Test 2: Subprotocol encoding mismatch
         try:
-            print("\n2️⃣ SUBPROTOCOL ENCODING TEST:")
+            print("\n2[U+FE0F][U+20E3] SUBPROTOCOL ENCODING TEST:")
             await test_instance.test_websocket_subprotocol_jwt_encoding_mismatch()
         except Exception as e:
-            print(f"❌ Test 2 failed: {e}")
+            print(f" FAIL:  Test 2 failed: {e}")
         
         # Test 3: Service protocol mismatch
         try:
-            print("\n3️⃣ SERVICE PROTOCOL MISMATCH TEST:")
+            print("\n3[U+FE0F][U+20E3] SERVICE PROTOCOL MISMATCH TEST:")
             await test_instance.test_jwt_validation_service_protocol_mismatch()
         except Exception as e:
-            print(f"❌ Test 3 failed: {e}")
+            print(f" FAIL:  Test 3 failed: {e}")
         
         # Test 4: Real authentication flow
         try:
-            print("\n4️⃣ REAL AUTHENTICATION FLOW TEST:")
+            print("\n4[U+FE0F][U+20E3] REAL AUTHENTICATION FLOW TEST:")
             await test_instance.test_real_websocket_jwt_authentication_flow()
         except Exception as e:
-            print(f"❌ Test 4 failed: {e}")
+            print(f" FAIL:  Test 4 failed: {e}")
         
-        print("\n🏁 ISSUE #171 JWT PROTOCOL TESTS COMPLETED")
+        print("\n[U+1F3C1] ISSUE #171 JWT PROTOCOL TESTS COMPLETED")
         print("=" * 60)
     
     # Run if executed directly

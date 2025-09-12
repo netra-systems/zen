@@ -464,7 +464,7 @@ async def stream_chat(
                     
             except asyncio.TimeoutError:
                 logger.error(
-                    f"🚨 STREAMING TIMEOUT: Chat stream timed out after 30 seconds for user {current_user[:8]}..., "
+                    f" ALERT:  STREAMING TIMEOUT: Chat stream timed out after 30 seconds for user {current_user[:8]}..., "
                     f"thread {request.thread_id[:8]}... - This indicates potential system overload or infinite loops"
                 )
                 
@@ -481,7 +481,7 @@ async def stream_chat(
                 
             except Exception as stream_outer_error:
                 logger.error(
-                    f"🚨 STREAMING ERROR: Outer streaming error for user {current_user[:8]}...: {stream_outer_error}",
+                    f" ALERT:  STREAMING ERROR: Outer streaming error for user {current_user[:8]}...: {stream_outer_error}",
                     exc_info=True
                 )
                 
@@ -511,7 +511,7 @@ async def stream_chat(
         
     except Exception as e:
         logger.error(
-            f"🚨 CRITICAL STREAMING FAILURE: Failed to create chat stream for user {current_user[:8]}..., "
+            f" ALERT:  CRITICAL STREAMING FAILURE: Failed to create chat stream for user {current_user[:8]}..., "
             f"thread {request.thread_id[:8]}..., error: {e}. "
             f"Error type: {type(e).__name__}. "
             f"This indicates a fundamental streaming infrastructure issue that prevents investor demo functionality.",

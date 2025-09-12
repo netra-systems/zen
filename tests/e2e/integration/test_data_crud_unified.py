@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 SUCCESS CRITERIA:
 - Create user data in Auth Service (<2 seconds)
 - Read user data from Backend API (<1 second) 
-- Update user preferences via Frontend → Backend (<2 seconds)
+- Update user preferences via Frontend  ->  Backend (<2 seconds)
 - Delete user data with GDPR compliance (<5 seconds)
 - Verify 100% data consistency across all services
 - Complete E2E flow in <10 seconds total
@@ -83,7 +83,7 @@ class TestDataCRUDUnifiedE2E:
         # READ: User data from Backend API  
         results['read'] = await self._test_read_operations(manager, results['create']['user_id'])
         
-        # UPDATE: User preferences via Frontend → Backend
+        # UPDATE: User preferences via Frontend  ->  Backend
         results['update'] = await self._test_update_operations(manager, results['create']['user_id'])
         
         # DELETE: User data with GDPR compliance
@@ -132,7 +132,7 @@ class TestDataCRUDUnifiedE2E:
                 'execution_time': read_time, 'success': True}
     
     async def _test_update_operations(self, manager: DataCRUDManager, user_id: str) -> Dict:
-        """Test data updates via Frontend → Backend."""
+        """Test data updates via Frontend  ->  Backend."""
         update_start = time.time()
         preferences_data = create_user_preferences_data()
         

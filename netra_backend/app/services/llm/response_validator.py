@@ -316,7 +316,7 @@ class ResponseValidator:
             repetition_score = min(1.0, repetition_ratio * 2)  # Penalize excessive repetition
             
             # Check for proper structure
-            has_structure = any(ind in response for ind in [':', '-', '1.', '2.', '•', '*'])
+            has_structure = any(ind in response for ind in [':', '-', '1.', '2.', '[U+2022]', '*'])
             structure_score = 0.9 if has_structure else 0.7
             
             coherence_score = (length_score * 0.25 + transition_score * 0.25 + repetition_score * 0.25 + structure_score * 0.25)

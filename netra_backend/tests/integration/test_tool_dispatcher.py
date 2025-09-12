@@ -597,7 +597,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         assert stats["cache_hits"] >= 1
         assert stats["cache_hit_rate"] >= 0.5
         
-        logger.info(f"✅ Tool caching test passed - cache hit rate: {stats['cache_hit_rate']:.2f}")
+        logger.info(f" PASS:  Tool caching test passed - cache hit rate: {stats['cache_hit_rate']:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -633,7 +633,7 @@ class TestToolDispatcher(BaseIntegrationTest):
             assert "error" not in tool_result, f"Tool {tool_name} failed: {tool_result}"
             assert tool_result["tool_name"] == tool_name
         
-        logger.info(f"✅ Agent tool integration test passed - {result['tools_executed']} tools used")
+        logger.info(f" PASS:  Agent tool integration test passed - {result['tools_executed']} tools used")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -690,7 +690,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         assert stats["total_executions"] >= successful_executions
         assert stats["error_rate"] <= 0.25  # Error rate should be manageable
         
-        logger.info(f"✅ Concurrent tool execution test passed - {successful_executions}/4 tools in {execution_time:.3f}s")
+        logger.info(f" PASS:  Concurrent tool execution test passed - {successful_executions}/4 tools in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -722,7 +722,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         assert stats["error_count"] >= 2  # Should have recorded the errors
         assert stats["total_executions"] >= 3  # Including successful recovery
         
-        logger.info("✅ Tool error handling and recovery test passed")
+        logger.info(" PASS:  Tool error handling and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -768,7 +768,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         # Cache should provide performance benefits
         assert cache_eligible_time <= avg_execution_time  # Cached executions faster or equal
         
-        logger.info(f"✅ Tool performance optimization test passed - {stats['cache_hit_rate']:.2f} hit rate, {avg_execution_time:.3f}s avg time")
+        logger.info(f" PASS:  Tool performance optimization test passed - {stats['cache_hit_rate']:.2f} hit rate, {avg_execution_time:.3f}s avg time")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -824,7 +824,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         assert cost_tool_stats["total_executions"] >= 1
         assert perf_tool_stats["total_executions"] >= 1
         
-        logger.info("✅ Tool state persistence test passed")
+        logger.info(" PASS:  Tool state persistence test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -867,7 +867,7 @@ class TestToolDispatcher(BaseIntegrationTest):
         # Validate workflow success rate
         assert result["tool_integration"]["tool_success_rate"] >= 0.75  # High success rate for complex workflow
         
-        logger.info(f"✅ Multi-tool workflow orchestration test passed - {len(tools_used)} tools, {len(business_insights)} insights")
+        logger.info(f" PASS:  Multi-tool workflow orchestration test passed - {len(tools_used)} tools, {len(business_insights)} insights")
 
 
 if __name__ == "__main__":

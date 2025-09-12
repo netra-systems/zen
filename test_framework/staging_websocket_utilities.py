@@ -136,7 +136,7 @@ class StagingWebSocketTester:
                 self.is_connected = True
                 self.session.successful_connections += 1
                 
-                logger.info(f"✅ Connected to staging WebSocket on attempt {attempt + 1} ({connection_time:.2f}s)")
+                logger.info(f" PASS:  Connected to staging WebSocket on attempt {attempt + 1} ({connection_time:.2f}s)")
                 
                 # Start message listener
                 asyncio.create_task(self._message_listener())
@@ -151,7 +151,7 @@ class StagingWebSocketTester:
                 if attempt < max_retries:
                     await asyncio.sleep(retry_delay * (attempt + 1))  # Exponential backoff
         
-        logger.error(f"❌ Failed to establish WebSocket connection after {max_retries + 1} attempts")
+        logger.error(f" FAIL:  Failed to establish WebSocket connection after {max_retries + 1} attempts")
         return False
     
     async def _message_listener(self) -> None:
@@ -244,7 +244,7 @@ class StagingWebSocketTester:
             if track_latency:
                 self.message_latencies[f"{message_type}-{thread_id}"] = send_time
             
-            logger.debug(f"📤 Sent {message_type} to thread {thread_id}")
+            logger.debug(f"[U+1F4E4] Sent {message_type} to thread {thread_id}")
             return True
             
         except Exception as e:
@@ -273,7 +273,7 @@ class StagingWebSocketTester:
         thread_id = f"agent-flow-{int(time.time())}"
         flow_start = time.time()
         
-        logger.info(f"🤖 Starting agent flow test: {query[:50]}...")
+        logger.info(f"[U+1F916] Starting agent flow test: {query[:50]}...")
         
         # Track events for this flow
         flow_events = []
@@ -285,7 +285,7 @@ class StagingWebSocketTester:
                     "timestamp": time.time(),
                     "data": data
                 })
-                logger.info(f"  📨 Flow event: {data.get('type')}")
+                logger.info(f"  [U+1F4E8] Flow event: {data.get('type')}")
         
         # Register event tracking
         required_events = [
@@ -362,7 +362,7 @@ class StagingWebSocketTester:
         # Update session end time
         self.session.end_time = datetime.now()
         
-        logger.info(f"🔌 Disconnected from staging WebSocket")
+        logger.info(f"[U+1F50C] Disconnected from staging WebSocket")
     
     def get_session_report(self) -> Dict[str, Any]:
         """Get comprehensive session report."""
@@ -441,7 +441,7 @@ async def validate_staging_websocket_events(
         "tool_completed", "agent_completed"
     }
     
-    logger.info(f"🔍 Validating staging WebSocket events with query: {query}")
+    logger.info(f" SEARCH:  Validating staging WebSocket events with query: {query}")
     
     async with staging_websocket_session() as tester:
         # Test comprehensive agent flow
@@ -482,7 +482,7 @@ async def run_staging_websocket_smoke_test() -> bool:
     Returns:
         True if smoke test passes
     """
-    logger.info("🔥 Running staging WebSocket smoke test...")
+    logger.info(" FIRE:  Running staging WebSocket smoke test...")
     
     try:
         # Quick validation
@@ -492,13 +492,13 @@ async def run_staging_websocket_smoke_test() -> bool:
         )
         
         if result["staging_ready"]:
-            logger.info("✅ Staging WebSocket smoke test PASSED")
+            logger.info(" PASS:  Staging WebSocket smoke test PASSED")
             logger.info(f"  - Flow duration: {result['flow_duration']:.2f}s")
             logger.info(f"  - Events received: {result['total_events']}")
             logger.info(f"  - Connection success: {result['session_report']['success_rate']:.1%}")
             return True
         else:
-            logger.error("❌ Staging WebSocket smoke test FAILED")
+            logger.error(" FAIL:  Staging WebSocket smoke test FAILED")
             if result["missing_events"]:
                 logger.error(f"  - Missing events: {result['missing_events']}")
             if result["session_report"]["errors"]:
@@ -506,7 +506,7 @@ async def run_staging_websocket_smoke_test() -> bool:
             return False
             
     except Exception as e:
-        logger.error(f"❌ Smoke test failed with exception: {e}")
+        logger.error(f" FAIL:  Smoke test failed with exception: {e}")
         return False
 
 
@@ -517,7 +517,7 @@ async def debug_staging_websocket_connection() -> Dict[str, Any]:
     Returns:
         Debug information about connection
     """
-    logger.info("🔧 Debugging staging WebSocket connection...")
+    logger.info("[U+1F527] Debugging staging WebSocket connection...")
     
     debug_info = {
         "config_valid": False,
@@ -582,28 +582,28 @@ async def debug_staging_websocket_connection() -> Dict[str, Any]:
 if __name__ == "__main__":
     # Run tests when executed directly
     async def main():
-        print("🧪 Testing Staging WebSocket Utilities")
+        print("[U+1F9EA] Testing Staging WebSocket Utilities")
         print("=" * 50)
         
         # Run debug first
         debug_info = await debug_staging_websocket_connection()
-        print("\n🔧 Debug Results:")
+        print("\n[U+1F527] Debug Results:")
         for key, value in debug_info.items():
             if key != "error_details":
-                status = "✅" if value else "❌"
+                status = " PASS: " if value else " FAIL: "
                 print(f"  {status} {key}: {value}")
         
         if debug_info["error_details"]:
-            print("\n❌ Errors:")
+            print("\n FAIL:  Errors:")
             for error in debug_info["error_details"]:
                 print(f"  - {error}")
         
         # Run smoke test if basic connectivity works
         if debug_info["websocket_connectable"]:
-            print("\n🔥 Running smoke test...")
+            print("\n FIRE:  Running smoke test...")
             smoke_passed = await run_staging_websocket_smoke_test()
-            print(f"\n{'✅' if smoke_passed else '❌'} Smoke test {'PASSED' if smoke_passed else 'FAILED'}")
+            print(f"\n{' PASS: ' if smoke_passed else ' FAIL: '} Smoke test {'PASSED' if smoke_passed else 'FAILED'}")
         else:
-            print("\n⚠️ Skipping smoke test due to connection issues")
+            print("\n WARNING: [U+FE0F] Skipping smoke test due to connection issues")
     
     asyncio.run(main())

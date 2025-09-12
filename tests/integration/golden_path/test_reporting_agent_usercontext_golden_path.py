@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path Tests for ReportingSubAgent UserExecutionContext Migration - Issue #354
 
@@ -6,15 +44,15 @@ workflow that protects $500K+ ARR. ReportingSubAgent is the final step in the Go
 that delivers customer value through comprehensive AI-generated reports.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - All customers depend on reporting functionality
+- Segment: ALL (Free  ->  Enterprise) - All customers depend on reporting functionality
 - Business Goal: Ensure core revenue workflow continues working after security migration
 - Value Impact: Protects the primary value delivery mechanism (AI-powered reports)
 - Revenue Impact: Prevents $500K+ ARR loss from broken Golden Path after migration
 
 GOLDEN PATH WORKFLOW:
 1. User submits analysis request
-2. System processes through multiple agents (Triage → Data → Optimizations → Action Plan)
-3. ReportingSubAgent generates final comprehensive report ← CRITICAL POINT
+2. System processes through multiple agents (Triage  ->  Data  ->  Optimizations  ->  Action Plan)
+3. ReportingSubAgent generates final comprehensive report  <-  CRITICAL POINT
 4. Report delivered to user with actionable insights
 
 MIGRATION VALIDATION:
@@ -228,7 +266,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         # CRITICAL: Golden Path must succeed after migration
         if not golden_path_result.execution_success:
             assert False, (
-                f"🚨 GOLDEN PATH FAILURE: Enterprise cost optimization workflow failed after migration. "
+                f" ALERT:  GOLDEN PATH FAILURE: Enterprise cost optimization workflow failed after migration. "
                 f"Errors: {golden_path_result.errors}. This represents $50K+ ARR customer impact. "
                 f"ReportingSubAgent UserExecutionContext migration broke core business workflow."
             )
@@ -236,7 +274,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         # Validate business value delivery
         if not golden_path_result.business_value_delivered:
             assert False, (
-                f"🚨 BUSINESS VALUE LOSS: Enterprise scenario executed but failed to deliver business value. "
+                f" ALERT:  BUSINESS VALUE LOSS: Enterprise scenario executed but failed to deliver business value. "
                 f"Report generated: {golden_path_result.report_generated}. "
                 f"User satisfaction: {golden_path_result.user_satisfaction_score}. "
                 f"Migration must maintain 100% business functionality."
@@ -255,7 +293,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         # CRITICAL: Startup workflow must succeed (growth segment is strategic)
         if not golden_path_result.execution_success:
             assert False, (
-                f"🚨 GOLDEN PATH FAILURE: Startup growth optimization workflow failed after migration. "
+                f" ALERT:  GOLDEN PATH FAILURE: Startup growth optimization workflow failed after migration. "
                 f"Errors: {golden_path_result.errors}. This impacts business growth strategy. "
                 f"Startup customers are critical for market expansion and future revenue growth."
             )
@@ -263,7 +301,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         # Validate growth enablement
         if golden_path_result.user_satisfaction_score < 8.0:  # 8/10 minimum for growth scenarios
             assert False, (
-                f"🚨 GROWTH ENABLEMENT FAILURE: Startup scenario satisfaction score "
+                f" ALERT:  GROWTH ENABLEMENT FAILURE: Startup scenario satisfaction score "
                 f"{golden_path_result.user_satisfaction_score} below minimum 8.0. "
                 f"Growth customers require exceptional experience for retention and expansion."
             )
@@ -281,7 +319,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         # CRITICAL: Mid-market workflow must succeed (revenue stability)
         if not golden_path_result.execution_success:
             assert False, (
-                f"🚨 GOLDEN PATH FAILURE: Mid-market efficiency optimization workflow failed. "
+                f" ALERT:  GOLDEN PATH FAILURE: Mid-market efficiency optimization workflow failed. "
                 f"Errors: {golden_path_result.errors}. This represents stable revenue base impact. "
                 f"Mid-market customers are core revenue contributors requiring consistent service."
             )
@@ -504,7 +542,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         
         if performance_failures:
             assert False, (
-                f"🚨 GOLDEN PATH PERFORMANCE FAILURE: Migration degraded performance beyond "
+                f" ALERT:  GOLDEN PATH PERFORMANCE FAILURE: Migration degraded performance beyond "
                 f"business requirements. Failures: {performance_failures}. "
                 f"UserExecutionContext migration must not impact customer experience."
             )
@@ -540,14 +578,14 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         
         if success_rate < minimum_success_rate:
             assert False, (
-                f"🚨 BUSINESS VALUE DEGRADATION: Success rate {success_rate*100:.1f}% below "
+                f" ALERT:  BUSINESS VALUE DEGRADATION: Success rate {success_rate*100:.1f}% below "
                 f"required {minimum_success_rate*100:.1f}%. {total_scenarios - successful_scenarios} "
                 f"Golden Path scenarios failed after migration. This represents direct revenue impact."
             )
         
         if high_value_rate < minimum_high_value_rate:
             assert False, (
-                f"🚨 CUSTOMER SATISFACTION DEGRADATION: High-value delivery rate {high_value_rate*100:.1f}% "
+                f" ALERT:  CUSTOMER SATISFACTION DEGRADATION: High-value delivery rate {high_value_rate*100:.1f}% "
                 f"below required {minimum_high_value_rate*100:.1f}%. Migration reduced customer value "
                 f"delivery quality. This impacts customer retention and expansion."
             )
@@ -588,7 +626,7 @@ class TestReportingAgentUserContextGoldenPath(SSotAsyncTestCase):
         
         if integration_issues:
             assert False, (
-                f"🚨 INTEGRATION INCOMPLETENESS: UserExecutionContext integration issues detected: "
+                f" ALERT:  INTEGRATION INCOMPLETENESS: UserExecutionContext integration issues detected: "
                 f"{integration_issues}. Golden Path data must be fully accessible after migration."
             )
 

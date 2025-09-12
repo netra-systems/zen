@@ -20,7 +20,7 @@ def validate_fix():
     print("=" * 60)
     
     if not auth_file.exists():
-        print(f"❌ Auth file not found: {auth_file}")
+        print(f" FAIL:  Auth file not found: {auth_file}")
         return False
     
     with open(auth_file, 'r', encoding='utf-8') as f:
@@ -29,25 +29,25 @@ def validate_fix():
     # Check that environment check has been removed (auto-creation in all environments)
     staging_check = 'config.environment in ["development", "staging"]'
     if staging_check not in content:
-        print("✅ Environment check removed - auto-creation enabled for all environments")
+        print(" PASS:  Environment check removed - auto-creation enabled for all environments")
     else:
-        print("❌ Old environment check still present - should be removed")
+        print(" FAIL:  Old environment check still present - should be removed")
         return False
     
     # Check for auto-creation logic
     auto_create_check = 'user_service.get_or_create_dev_user'
     if auto_create_check in content:
-        print("✅ User auto-creation logic present")
+        print(" PASS:  User auto-creation logic present")
     else:
-        print("❌ User auto-creation logic not found")
+        print(" FAIL:  User auto-creation logic not found")
         return False
     
     # Check for proper logging
     log_check = 'logger.info(f"Auto-created user from JWT:'
     if log_check in content:
-        print("✅ Proper logging for auto-created users")
+        print(" PASS:  Proper logging for auto-created users")
     else:
-        print("⚠️  Logging message may differ slightly")
+        print(" WARNING: [U+FE0F]  Logging message may differ slightly")
     
     # Extract the relevant code section
     pattern = r'if not user:(.*?)return user'
@@ -55,7 +55,7 @@ def validate_fix():
     
     if match:
         code_section = match.group(1)
-        print("\n📝 Relevant code section:")
+        print("\n[U+1F4DD] Relevant code section:")
         print("-" * 40)
         for line in code_section.split('\n')[:15]:
             if line.strip():
@@ -66,18 +66,18 @@ def validate_fix():
     test_file = Path(__file__).parent.parent / "netra_backend" / "tests" / "integration" / "test_staging_user_auto_creation.py"
     
     if test_file.exists():
-        print("\n✅ Test file created: test_staging_user_auto_creation.py")
+        print("\n PASS:  Test file created: test_staging_user_auto_creation.py")
         with open(test_file, 'r', encoding='utf-8') as f:
             test_content = f.read()
             test_count = test_content.count('async def test_')
             print(f"   - Contains {test_count} test functions")
     else:
-        print("\n⚠️  Test file not found")
+        print("\n WARNING: [U+FE0F]  Test file not found")
     
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    print("✅ Fix has been successfully implemented!")
+    print(" PASS:  Fix has been successfully implemented!")
     print("\nWhat the fix does:")
     print("1. Auto-creates users in ALL environments (dev, staging, production)")
     print("2. Extracts email from JWT claims when available")

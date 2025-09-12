@@ -43,22 +43,22 @@ def test_staging_config_instantiation():
         
         # This should NOT raise an error anymore
         config = StagingConfig()
-        print("✓ StagingConfig instantiated successfully without ClickHouse env vars")
+        print("[U+2713] StagingConfig instantiated successfully without ClickHouse env vars")
         
         # But validation should fail
         try:
             config.validate_mandatory_services()
-            print("✗ Validation should have failed for missing ClickHouse")
+            print("[U+2717] Validation should have failed for missing ClickHouse")
             return False
         except ValueError as e:
             if "ClickHouse configuration is MANDATORY" in str(e):
-                print(f"✓ Validation correctly identified missing ClickHouse: {e}")
+                print(f"[U+2713] Validation correctly identified missing ClickHouse: {e}")
             else:
-                print(f"✗ Unexpected validation error: {e}")
+                print(f"[U+2717] Unexpected validation error: {e}")
                 return False
                 
     except Exception as e:
-        print(f"✗ Failed to instantiate StagingConfig: {e}")
+        print(f"[U+2717] Failed to instantiate StagingConfig: {e}")
         return False
     
     return True
@@ -91,23 +91,23 @@ def test_staging_config_with_clickhouse():
         
         # Create config
         config = StagingConfig()
-        print("✓ StagingConfig instantiated")
+        print("[U+2713] StagingConfig instantiated")
         
         # Populate ClickHouse configuration
         db_manager = DatabaseConfigManager()
         db_manager.populate_database_config(config)
-        print("✓ Database configuration populated")
+        print("[U+2713] Database configuration populated")
         
         # Now validation should pass
         try:
             config.validate_mandatory_services()
-            print("✓ Validation passed with ClickHouse configured")
+            print("[U+2713] Validation passed with ClickHouse configured")
         except ValueError as e:
-            print(f"✗ Validation failed unexpectedly: {e}")
+            print(f"[U+2717] Validation failed unexpectedly: {e}")
             return False
             
     except Exception as e:
-        print(f"✗ Test failed: {e}")
+        print(f"[U+2717] Test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -147,15 +147,15 @@ def test_full_configuration_flow():
         config_manager = UnifiedConfigManager()
         config = config_manager.get_config()
         
-        print(f"✓ Configuration loaded for environment: {config.environment}")
-        print(f"✓ ClickHouse host: {config.clickhouse_native.host if hasattr(config, 'clickhouse_native') else 'Not set'}")
-        print(f"✓ Redis host: {config.redis.host if hasattr(config, 'redis') else 'Not set'}")
-        print(f"✓ Database URL configured: {'Yes' if config.database_url else 'No'}")
+        print(f"[U+2713] Configuration loaded for environment: {config.environment}")
+        print(f"[U+2713] ClickHouse host: {config.clickhouse_native.host if hasattr(config, 'clickhouse_native') else 'Not set'}")
+        print(f"[U+2713] Redis host: {config.redis.host if hasattr(config, 'redis') else 'Not set'}")
+        print(f"[U+2713] Database URL configured: {'Yes' if config.database_url else 'No'}")
         
         return True
         
     except Exception as e:
-        print(f"✗ Configuration flow failed: {e}")
+        print(f"[U+2717] Configuration flow failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -179,7 +179,7 @@ def main():
             result = test_func()
             results.append(result)
         except Exception as e:
-            print(f"\n✗ Test {test_func.__name__} crashed: {e}")
+            print(f"\n[U+2717] Test {test_func.__name__} crashed: {e}")
             results.append(False)
     
     print("\n" + "=" * 60)
@@ -190,10 +190,10 @@ def main():
     total = len(results)
     
     if passed == total:
-        print(f"✓ All {total} tests passed!")
+        print(f"[U+2713] All {total} tests passed!")
         return 0
     else:
-        print(f"✗ {passed}/{total} tests passed")
+        print(f"[U+2717] {passed}/{total} tests passed")
         return 1
 
 

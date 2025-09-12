@@ -89,7 +89,7 @@ class QualityValidator:
         self._add_quality_suggestions(suggestions, metrics)
         return suggestions
     
-    # Implementation helper methods (≤8 lines each)
+    # Implementation helper methods ( <= 8 lines each)
     
     def _init_content_type_thresholds(self) -> Dict[ContentType, Dict[str, float]]:
         """Initialize quality thresholds by content type."""
@@ -166,7 +166,7 @@ class QualityValidator:
         else:
             self.quality_stats['failed'] += 1
     
-    # Helper methods for refactored functions (≤8 lines each)
+    # Helper methods for refactored functions ( <= 8 lines each)
     
     def _resolve_strict_mode(self, strict_mode: Optional[bool]) -> bool:
         """Resolve strict mode setting."""

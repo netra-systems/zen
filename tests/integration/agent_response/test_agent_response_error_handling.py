@@ -132,7 +132,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
             assert "timeout" in result.error.lower(), "Error message should mention timeout"
             assert result.execution_time_ms is not None, "Execution time should be tracked"
             
-            logger.info(f"✅ Agent timeout handled gracefully: {result.error}")
+            logger.info(f" PASS:  Agent timeout handled gracefully: {result.error}")
             
     async def test_agent_exception_error_handling_prevents_system_crash(self):
         """
@@ -177,7 +177,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
             healthy_result = await healthy_agent.run(context, query="Simple test query")
             assert healthy_result is not None, "System should continue functioning after exception"
             
-            logger.info(f"✅ Agent exception handled without system crash: {result.error}")
+            logger.info(f" PASS:  Agent exception handled without system crash: {result.error}")
             
     async def test_memory_error_handling_protects_system_resources(self):
         """
@@ -220,7 +220,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
             assert "memory" not in result.error.lower(), "Error message should not expose technical details"
             assert "unavailable" in result.error.lower(), "Error message should indicate temporary unavailability"
             
-            logger.info(f"✅ Memory error handled with resource protection: {result.error}")
+            logger.info(f" PASS:  Memory error handled with resource protection: {result.error}")
             
     async def test_network_error_handling_provides_actionable_feedback(self):
         """
@@ -263,7 +263,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
             assert "connectivity" in result.error.lower(), "Error should mention connectivity"
             assert "try again" in result.error.lower(), "Error should suggest retry action"
             
-            logger.info(f"✅ Network error handled with actionable feedback: {result.error}")
+            logger.info(f" PASS:  Network error handled with actionable feedback: {result.error}")
             
     async def test_invalid_context_error_handling_maintains_security(self):
         """
@@ -308,7 +308,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
         assert "invalid" not in result.error.lower(), "Error should not expose technical details"
         assert "user_id" not in result.error.lower(), "Error should not expose internal field names"
         
-        logger.info(f"✅ Invalid context handled securely: {result.error}")
+        logger.info(f" PASS:  Invalid context handled securely: {result.error}")
         
     async def test_intermittent_error_retry_mechanism(self):
         """
@@ -358,11 +358,11 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
             if isinstance(result, TypedAgentResult):
                 if result.success:
                     assert retry_count >= 1, "Should have retried at least once"
-                    logger.info(f"✅ Intermittent error resolved after {retry_count + 1} attempts")
+                    logger.info(f" PASS:  Intermittent error resolved after {retry_count + 1} attempts")
                 else:
                     assert retry_count == max_retries, "Should have exhausted all retries"
                     assert "failed after" in result.error, "Error should mention retry attempts"
-                    logger.info(f"✅ Intermittent error handling exhausted retries: {result.error}")
+                    logger.info(f" PASS:  Intermittent error handling exhausted retries: {result.error}")
             
     async def test_concurrent_error_handling_isolation(self):
         """
@@ -421,7 +421,7 @@ class TestAgentResponseErrorHandling(BaseIntegrationTest):
         # Validate isolation
         assert user_1_result["user_id"] != user_2_result["user_id"], "Users should be different"
         
-        logger.info("✅ Concurrent error handling maintained user isolation")
+        logger.info(" PASS:  Concurrent error handling maintained user isolation")
         
     def teardown_method(self):
         """Clean up test resources."""

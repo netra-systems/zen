@@ -47,7 +47,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Any, Optional
 from unittest.mock import patch
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import psycopg2
 
 # SSOT Imports - Following SSOT_IMPORT_REGISTRY.md

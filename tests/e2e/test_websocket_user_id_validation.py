@@ -14,7 +14,7 @@ ROOT CAUSE: Missing regex pattern ^e2e-[a-zA-Z]+-[a-zA-Z0-9_-]+$ in ID validatio
 
 CRITICAL BUG CONTEXT:
 - Issue: WebSocket error "Invalid user_id format: e2e-staging_pipeline"
-- End-to-End Impact: Complete WebSocket connection failure → No AI chat capability
+- End-to-End Impact: Complete WebSocket connection failure  ->  No AI chat capability
 - GitHub Issue: https://github.com/netra-systems/netra-apex/issues/105
 
 E2E SCOPE:
@@ -135,7 +135,7 @@ class TestWebSocketUserIDValidationE2E(BaseE2ETest):
         TEST 1: CRITICAL - Complete end-to-end chat flow with failing user pattern.
         
         This test MUST FAIL initially, proving the bug blocks complete user workflows.
-        Tests: Authentication → WebSocket Connection → Agent Execution → Chat Response
+        Tests: Authentication  ->  WebSocket Connection  ->  Agent Execution  ->  Chat Response
         
         EXPECTED: FAILURE (before fix) - WebSocket connection fails at user ID validation
         """

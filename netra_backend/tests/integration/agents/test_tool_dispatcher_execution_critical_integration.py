@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Critical Tool Dispatcher Execution Integration Tests
 
@@ -542,7 +580,7 @@ class TestToolDispatcherExecutionCriticalIntegration(BaseIntegrationTest):
             user1_events = mock_websocket_manager.get_events_for_user("enterprise_user_1")
             user2_events = mock_websocket_manager.get_events_for_user("enterprise_user_2")
             
-            assert len(user1_events) >= 4  # At least 2 tools × 2 events each
+            assert len(user1_events) >= 4  # At least 2 tools  x  2 events each
             assert len(user2_events) >= 4
             
             # Critical: Verify no cross-user data leakage in events

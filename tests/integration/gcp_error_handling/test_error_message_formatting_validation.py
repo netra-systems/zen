@@ -115,8 +115,8 @@ class ErrorMessageFormatter:
                 template_text="We're experiencing technical difficulties. Please try again in a few moments.",
                 placeholders=[],
                 language_variants={
-                    "es": "Estamos experimentando dificultades técnicas. Inténtalo de nuevo en unos momentos.",
-                    "fr": "Nous rencontrons des difficultés techniques. Veuillez réessayer dans quelques instants."
+                    "es": "Estamos experimentando dificultades t[U+00E9]cnicas. Int[U+00E9]ntalo de nuevo en unos momentos.",
+                    "fr": "Nous rencontrons des difficult[U+00E9]s techniques. Veuillez r[U+00E9]essayer dans quelques instants."
                 }
             ),
             ErrorMessageTemplate(
@@ -134,8 +134,8 @@ class ErrorMessageFormatter:
                 template_text="Invalid credentials. Please check your username and password.",
                 placeholders=[],
                 language_variants={
-                    "es": "Credenciales inválidas. Por favor verifica tu usuario y contraseña.",
-                    "fr": "Identifiants invalides. Veuillez vérifier votre nom d'utilisateur et mot de passe."
+                    "es": "Credenciales inv[U+00E1]lidas. Por favor verifica tu usuario y contrase[U+00F1]a.",
+                    "fr": "Identifiants invalides. Veuillez v[U+00E9]rifier votre nom d'utilisateur et mot de passe."
                 }
             ),
             ErrorMessageTemplate(
@@ -169,11 +169,11 @@ class ErrorMessageFormatter:
                 ErrorSeverity.DEBUG: "#808080"      # Gray
             },
             "severity_icons": {
-                ErrorSeverity.CRITICAL: "🚨",
-                ErrorSeverity.ERROR: "❌",
-                ErrorSeverity.WARNING: "⚠️",
-                ErrorSeverity.INFO: "ℹ️",
-                ErrorSeverity.DEBUG: "🔍"
+                ErrorSeverity.CRITICAL: " ALERT: ",
+                ErrorSeverity.ERROR: " FAIL: ",
+                ErrorSeverity.WARNING: " WARNING: [U+FE0F]",
+                ErrorSeverity.INFO: "[U+2139][U+FE0F]",
+                ErrorSeverity.DEBUG: " SEARCH: "
             },
             "truncation_indicators": {
                 "end": "...",
@@ -862,7 +862,7 @@ class TestErrorMessageFormattingValidation(SSotAsyncTestCase):
             # Verify language-appropriate content
             if language == "es":
                 # Spanish should contain Spanish-specific terms
-                spanish_indicators = ["técnicas", "momentos", "dificultades"]
+                spanish_indicators = ["t[U+00E9]cnicas", "momentos", "dificultades"]
                 has_spanish = any(indicator in formatted_message.formatted_message.lower() 
                                 for indicator in spanish_indicators)
                 # Note: Assertion relaxed as template may not be available for all errors
@@ -939,14 +939,14 @@ class TestErrorMessageFormattingValidation(SSotAsyncTestCase):
             
             if severity == ErrorSeverity.CRITICAL:
                 # Critical messages should indicate urgency
-                urgency_indicators = ["critical", "urgent", "immediate", "🚨"]
+                urgency_indicators = ["critical", "urgent", "immediate", " ALERT: "]
                 has_urgency = any(indicator in formatted_message.formatted_message 
                                 for indicator in urgency_indicators)
                 assert has_urgency, f"Critical severity message lacks urgency indicators: {formatted_message.formatted_message}"
             
             if severity == ErrorSeverity.ERROR:
                 # Error messages should clearly indicate failure
-                error_indicators = ["error", "failed", "failure", "❌"]
+                error_indicators = ["error", "failed", "failure", " FAIL: "]
                 has_error_indication = any(indicator in formatted_message.formatted_message 
                                          for indicator in error_indicators)
                 assert has_error_indication, f"Error severity message lacks error indicators: {formatted_message.formatted_message}"
@@ -969,7 +969,7 @@ class TestErrorMessageFormattingValidation(SSotAsyncTestCase):
                 {
                     "severity": r["severity"].value,
                     "validation_score": r["validation"]["validation_score"],
-                    "has_urgency_indicators": "critical" in r["formatted_message"].formatted_message.lower() or "🚨" in r["formatted_message"].formatted_message,
+                    "has_urgency_indicators": "critical" in r["formatted_message"].formatted_message.lower() or " ALERT: " in r["formatted_message"].formatted_message,
                     "message_length": len(r["formatted_message"].formatted_message)
                 }
                 for r in severity_results

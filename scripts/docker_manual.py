@@ -88,7 +88,7 @@ class ContainerManualControl:
                     return "podman", "podman-compose"
                 else:
                     # SSOT: No fallbacks - user must install proper compose tool
-                    logger.error("❌ SSOT VIOLATION: podman-compose not found")
+                    logger.error(" FAIL:  SSOT VIOLATION: podman-compose not found")
                     logger.error("Solution: Install podman-compose with: pip install podman-compose")
                     raise RuntimeError(
                         "SSOT RUNTIME REQUIREMENT: When using Podman, podman-compose must be installed. "
@@ -98,12 +98,12 @@ class ContainerManualControl:
         # Windows: Prefer Podman if available for better performance (only if not preferred)
         if platform.system() == 'Windows' and not preferred:
             if shutil.which("podman"):
-                logger.info("🐧 Windows detected - preferring Podman for better performance")
+                logger.info("[U+1F427] Windows detected - preferring Podman for better performance")
                 if shutil.which("podman-compose"):
                     return "podman", "podman-compose"
                 else:
                     # SSOT: No docker-compose fallback with Podman
-                    logger.error("❌ SSOT VIOLATION: podman-compose required on Windows")
+                    logger.error(" FAIL:  SSOT VIOLATION: podman-compose required on Windows")
                     logger.error("Solution: Install podman-compose with: pip install podman-compose") 
                     raise RuntimeError(
                         "SSOT WINDOWS REQUIREMENT: Podman on Windows requires podman-compose. "
@@ -132,7 +132,7 @@ class ContainerManualControl:
         
     def start(self, environment: str = "test") -> bool:
         """Start container services using central manager"""
-        logger.info(f"🚀 Starting {environment} environment with {self.runtime}...")
+        logger.info(f"[U+1F680] Starting {environment} environment with {self.runtime}...")
         
         # Ensure container runtime is available
         if not self._is_runtime_available():
@@ -144,7 +144,7 @@ class ContainerManualControl:
         # Acquire environment from central manager
         try:
             env_name, ports = self.manager.acquire_environment()
-            logger.info(f"✅ Environment '{env_name}' started successfully")
+            logger.info(f" PASS:  Environment '{env_name}' started successfully")
             logger.info(f"Available ports: {ports}")
             
             # Wait for services to be healthy
@@ -152,7 +152,7 @@ class ContainerManualControl:
                 logger.error("Services failed health checks")
                 return False
                 
-            logger.info("✅ All services are healthy")
+            logger.info(" PASS:  All services are healthy")
             return True
             
         except Exception as e:
@@ -161,7 +161,7 @@ class ContainerManualControl:
     
     def stop(self) -> bool:
         """Stop all container services using central manager"""
-        logger.info(f"🛑 Stopping all {self.runtime} services...")
+        logger.info(f"[U+1F6D1] Stopping all {self.runtime} services...")
         
         # Get current environment name
         env_name = self.manager._get_environment_name()
@@ -169,13 +169,13 @@ class ContainerManualControl:
         # Release environment
         self.manager.release_environment(env_name)
         
-        logger.info("✅ All services stopped")
+        logger.info(" PASS:  All services stopped")
         return True
     
     def restart(self, services: Optional[List[str]] = None) -> bool:
         """Restart container services using central manager"""
         if services:
-            logger.info(f"🔄 Restarting {self.runtime} services: {', '.join(services)}")
+            logger.info(f" CYCLE:  Restarting {self.runtime} services: {', '.join(services)}")
             success = True
             for service in services:
                 if not restart_service(service):
@@ -183,14 +183,14 @@ class ContainerManualControl:
                     success = False
             return success
         else:
-            logger.info("🔄 Restarting all services...")
+            logger.info(" CYCLE:  Restarting all services...")
             self.stop()
             time.sleep(2)
             return self.start()
     
     def clean(self) -> bool:
         """Clean up everything using central manager"""
-        logger.info("🧹 Cleaning up everything...")
+        logger.info("[U+1F9F9] Cleaning up everything...")
         
         # Stop all services first
         self.stop()
@@ -201,12 +201,12 @@ class ContainerManualControl:
         # Clean up old environments
         self.manager.cleanup_old_environments(max_age_hours=0)  # Clean all
         
-        logger.info("✅ Cleanup complete")
+        logger.info(" PASS:  Cleanup complete")
         return True
     
     def test(self, test_args: List[str] = None) -> bool:
         """Run tests with container services"""
-        logger.info(f"🧪 Running tests with {self.runtime}...")
+        logger.info(f"[U+1F9EA] Running tests with {self.runtime}...")
         
         # Check if services are already running
         if not self._is_runtime_available():
@@ -218,7 +218,7 @@ class ContainerManualControl:
             if not self.start("test"):
                 return False
         else:
-            logger.info("✅ Using existing Docker services")
+            logger.info(" PASS:  Using existing Docker services")
         
         # Run tests
         test_cmd = [
@@ -239,11 +239,11 @@ class ContainerManualControl:
     
     def status(self) -> bool:
         """Check status of all services using central manager"""
-        logger.info(f"📊 Checking {self.runtime} service status...")
+        logger.info(f" CHART:  Checking {self.runtime} service status...")
         
         # Check if runtime is available
         if not self._is_runtime_available():
-            logger.error(f"❌ {self.runtime.title()} is not running")
+            logger.error(f" FAIL:  {self.runtime.title()} is not running")
             return False
         
         # Get container status from central manager
@@ -252,7 +252,7 @@ class ContainerManualControl:
         if container_info:
             logger.info("\nRunning containers:")
             for name, info in container_info.items():
-                status = "✅ Healthy" if info.health == "healthy" else f"⚠️ {info.health or 'Unknown'}"
+                status = " PASS:  Healthy" if info.health == "healthy" else f" WARNING: [U+FE0F] {info.health or 'Unknown'}"
                 logger.info(f"  {name}: {status} - {info.state.value}")
         else:
             logger.info("No Netra containers are running")
@@ -265,11 +265,11 @@ class ContainerManualControl:
     
     def monitor_resources(self) -> bool:
         """Monitor resource usage of running containers"""
-        logger.info("📊 Monitoring container resource usage...")
+        logger.info(" CHART:  Monitoring container resource usage...")
         
         # Check if runtime is available
         if not self._is_runtime_available():
-            logger.error(f"❌ {self.runtime.title()} is not running")
+            logger.error(f" FAIL:  {self.runtime.title()} is not running")
             return False
         
         # Get real-time stats
@@ -281,7 +281,7 @@ class ContainerManualControl:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             
             if result.returncode == 0:
-                logger.info("\n🔍 Current Resource Usage:")
+                logger.info("\n SEARCH:  Current Resource Usage:")
                 print(result.stdout)
                 
                 # Parse and analyze the output
@@ -305,16 +305,16 @@ class ContainerManualControl:
                                 continue
                     
                     # Summary analysis
-                    logger.info(f"\n📈 Resource Analysis:")
+                    logger.info(f"\n[U+1F4C8] Resource Analysis:")
                     logger.info(f"  Total Memory Usage: {total_mem_percent:.1f}%")
                     
                     if high_usage_containers:
-                        logger.warning("  ⚠️ High memory usage detected:")
+                        logger.warning("   WARNING: [U+FE0F] High memory usage detected:")
                         for container, usage in high_usage_containers:
                             logger.warning(f"    - {container}: {usage:.1f}%")
                     
                     if total_mem_percent > 80:
-                        logger.error("  🚨 CRITICAL: Total memory usage exceeds 80%!")
+                        logger.error("   ALERT:  CRITICAL: Total memory usage exceeds 80%!")
                         logger.info("  Consider stopping unnecessary services or reducing limits")
                 
                 # Check WSL2 memory if on Windows
@@ -342,7 +342,7 @@ class ContainerManualControl:
             result = subprocess.run(wsl_cmd, capture_output=True, text=True, timeout=5)
             
             if result.returncode == 0:
-                logger.info("\n🖥️ WSL2 Memory Status:")
+                logger.info("\n[U+1F5A5][U+FE0F] WSL2 Memory Status:")
                 for line in result.stdout.split('\n'):
                     if line.strip():
                         print(f"  {line}")
@@ -412,13 +412,13 @@ class ContainerManualControl:
         max_wait = 60
         for i in range(max_wait):
             if self._is_runtime_available():
-                logger.info(f"✅ {self.runtime.title()} is ready after {i+1} seconds")
+                logger.info(f" PASS:  {self.runtime.title()} is ready after {i+1} seconds")
                 return True
             time.sleep(1)
             if i % 5 == 0:
                 logger.info(f"Waiting for {self.runtime}... ({i}/{max_wait}s)")
         
-        logger.error(f"❌ {self.runtime.title()} failed to start after {max_wait} seconds")
+        logger.error(f" FAIL:  {self.runtime.title()} failed to start after {max_wait} seconds")
         return False
 
 
@@ -477,7 +477,7 @@ def main():
         elif args.command == "monitor":
             success = controller.monitor_resources()
         elif args.command == "refresh-dev":
-            logger.info("🔄 Forwarding to refresh_dev command...")
+            logger.info(" CYCLE:  Forwarding to refresh_dev command...")
             # Forward to the official refresh_dev script
             import subprocess
             script_path = Path(__file__).parent / "refresh_dev.py"
@@ -493,10 +493,10 @@ def main():
         sys.exit(0 if success else 1)
         
     except KeyboardInterrupt:
-        logger.info("\n⚠️ Operation cancelled by user")
+        logger.info("\n WARNING: [U+FE0F] Operation cancelled by user")
         sys.exit(130)
     except Exception as e:
-        logger.error(f"❌ Error: {e}")
+        logger.error(f" FAIL:  Error: {e}")
         sys.exit(1)
 
 

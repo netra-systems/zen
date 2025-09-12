@@ -17,7 +17,7 @@ def fix_file_to_importable(file_path):
         # Check if already valid
         try:
             ast.parse(content)
-            print(f"✓ Already valid: {file_path}")
+            print(f"[U+2713] Already valid: {file_path}")
             return True
         except SyntaxError as e:
             print(f"Fixing {file_path} - error on line {e.lineno}: {e.msg}")
@@ -64,7 +64,7 @@ def fix_file_to_importable(file_path):
                 # Save if valid
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(new_content)
-                print(f"✓ Fixed: {file_path}")
+                print(f"[U+2713] Fixed: {file_path}")
                 return True
             except SyntaxError:
                 # If still invalid, create a minimal valid file
@@ -94,13 +94,13 @@ class TestPlaceholder:
                 
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(minimal_content)
-                print(f"⚠ Made importable with placeholder: {file_path}")
+                print(f" WARNING:  Made importable with placeholder: {file_path}")
                 return True
         
         return False
         
     except Exception as e:
-        print(f"✗ Error processing {file_path}: {e}")
+        print(f"[U+2717] Error processing {file_path}: {e}")
         return False
 
 def main():

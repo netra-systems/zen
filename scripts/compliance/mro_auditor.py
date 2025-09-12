@@ -325,7 +325,7 @@ class MROAuditor:
         
         # Critical issues first
         if critical_count > 0:
-            lines.append("## 🔴 Critical Issues\n")
+            lines.append("## [U+1F534] Critical Issues\n")
             for result in results:
                 for violation in result.violations:
                     if violation.severity == "critical":
@@ -336,13 +336,13 @@ class MROAuditor:
         # High complexity classes
         high_complexity = [r for r in results if r.complexity_score > 70]
         if high_complexity:
-            lines.append("## ⚠️ High Complexity Classes\n")
+            lines.append("##  WARNING: [U+FE0F] High Complexity Classes\n")
             for result in sorted(high_complexity, key=lambda x: x.complexity_score, reverse=True)[:10]:
                 lines.append(f"- **{result.class_name}** (Score: {result.complexity_score:.1f})")
                 lines.append(f"  - MRO Depth: {result.mro_depth}")
                 lines.append(f"  - Parents: {', '.join(result.parent_classes)}")
                 if result.diamond_patterns:
-                    lines.append(f"  - ⚠️ Diamond Pattern Detected")
+                    lines.append(f"  -  WARNING: [U+FE0F] Diamond Pattern Detected")
                 lines.append("")
         
         return "\n".join(lines)

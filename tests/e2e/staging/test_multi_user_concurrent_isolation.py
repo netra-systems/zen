@@ -128,9 +128,9 @@ class TestMultiUserConcurrentIsolation:
                 try:
                     async with session.get(endpoint, timeout=15) as resp:
                         assert resp.status == 200, f"Staging {service} service unhealthy: {resp.status}"
-                        logger.info(f"✅ Staging {service} service healthy")
+                        logger.info(f" PASS:  Staging {service} service healthy")
                 except Exception as e:
-                    pytest.fail(f"❌ Staging {service} service unavailable: {e}")
+                    pytest.fail(f" FAIL:  Staging {service} service unavailable: {e}")
     
     async def _cleanup_user_sessions(self):
         """Clean up all user sessions created during testing."""
@@ -267,7 +267,7 @@ class TestMultiUserConcurrentIsolation:
         
         try:
             # Step 1: Create multiple user sessions concurrently
-            logger.info(f"🚀 Creating {num_concurrent_users} concurrent user sessions")
+            logger.info(f"[U+1F680] Creating {num_concurrent_users} concurrent user sessions")
             
             async def create_and_authenticate_user(user_index: int) -> UserTestSession:
                 try:
@@ -283,15 +283,15 @@ class TestMultiUserConcurrentIsolation:
                                 validation_data = await resp.json()
                                 session.isolated_data.add(validation_data.get("sub", ""))
                                 session.success = True
-                                logger.info(f"✅ User {user_index} authenticated successfully")
+                                logger.info(f" PASS:  User {user_index} authenticated successfully")
                             else:
                                 session.success = False
-                                logger.warning(f"⚠️ User {user_index} authentication failed: {resp.status}")
+                                logger.warning(f" WARNING: [U+FE0F] User {user_index} authentication failed: {resp.status}")
                     
                     return session
                     
                 except Exception as e:
-                    logger.error(f"❌ Failed to create user {user_index}: {e}")
+                    logger.error(f" FAIL:  Failed to create user {user_index}: {e}")
                     return UserTestSession(
                         user_id=f"failed-{user_index}",
                         email=f"failed-{user_index}@test.com",
@@ -390,7 +390,7 @@ class TestMultiUserConcurrentIsolation:
             assert len(isolation_violations) == 0, f"Session isolation violations: {isolation_violations}"
             assert result.business_value_delivered, "Concurrent authentication failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: System supports concurrent user authentication and isolation")
+            logger.info(f" PASS:  BUSINESS VALUE: System supports concurrent user authentication and isolation")
             logger.info(f"   Successful authentications: {len(successful_sessions)}/{num_concurrent_users}")
             logger.info(f"   Authentication success rate: {performance_metrics['authentication_success_rate']:.1%}")
             logger.info(f"   Isolation violations: {len(isolation_violations)}")
@@ -399,7 +399,7 @@ class TestMultiUserConcurrentIsolation:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Concurrent user authentication test failed: {e}")
+            logger.error(f" FAIL:  Concurrent user authentication test failed: {e}")
             pytest.fail(f"Concurrent user authentication and session isolation failed: {e}")
     
     @pytest.mark.asyncio
@@ -426,16 +426,16 @@ class TestMultiUserConcurrentIsolation:
         
         try:
             # Step 1: Set up multiple authenticated users
-            logger.info(f"🤖 Setting up {num_concurrent_users} users for parallel agent execution")
+            logger.info(f"[U+1F916] Setting up {num_concurrent_users} users for parallel agent execution")
             
             user_sessions = []
             for i in range(num_concurrent_users):
                 session = await self._create_user_session(i)
                 if await self._connect_user_websocket(session):
                     user_sessions.append(session)
-                    logger.info(f"✅ User {i} WebSocket connected")
+                    logger.info(f" PASS:  User {i} WebSocket connected")
                 else:
-                    logger.warning(f"⚠️ User {i} WebSocket connection failed")
+                    logger.warning(f" WARNING: [U+FE0F] User {i} WebSocket connection failed")
             
             assert len(user_sessions) >= 3, f"Too few WebSocket connections: {len(user_sessions)}/4"
             
@@ -555,7 +555,7 @@ class TestMultiUserConcurrentIsolation:
             assert len(context_separation_violations) == 0, f"Context separation violations: {context_separation_violations}"
             assert result.business_value_delivered, "Parallel agent execution failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: System supports parallel agent execution with user isolation")
+            logger.info(f" PASS:  BUSINESS VALUE: System supports parallel agent execution with user isolation")
             logger.info(f"   Successful parallel executions: {len(successful_executions)}/{len(user_sessions)}")
             logger.info(f"   Execution success rate: {performance_metrics['execution_success_rate']:.1%}")
             logger.info(f"   Average execution time: {performance_metrics['average_execution_time']:.1f}s")
@@ -564,7 +564,7 @@ class TestMultiUserConcurrentIsolation:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Parallel agent execution test failed: {e}")
+            logger.error(f" FAIL:  Parallel agent execution test failed: {e}")
             pytest.fail(f"Parallel agent execution with user context separation failed: {e}")
     
     @pytest.mark.asyncio
@@ -591,7 +591,7 @@ class TestMultiUserConcurrentIsolation:
         
         try:
             # Step 1: Establish multiple concurrent WebSocket connections
-            logger.info(f"🔌 Establishing {num_concurrent_connections} concurrent WebSocket connections")
+            logger.info(f"[U+1F50C] Establishing {num_concurrent_connections} concurrent WebSocket connections")
             
             connection_tasks = []
             for i in range(num_concurrent_connections):
@@ -758,7 +758,7 @@ class TestMultiUserConcurrentIsolation:
             assert len(contamination_violations) == 0, f"Message contamination violations: {contamination_violations}"
             assert result.business_value_delivered, "WebSocket isolation failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: WebSocket connections maintain isolation under concurrent load")
+            logger.info(f" PASS:  BUSINESS VALUE: WebSocket connections maintain isolation under concurrent load")
             logger.info(f"   Successful connections: {len(connected_sessions)}/{num_concurrent_connections}")
             logger.info(f"   Successful messaging: {len(successful_messaging)}/{len(connected_sessions)}")
             logger.info(f"   Average responses per user: {performance_metrics['average_responses_per_user']:.1f}")
@@ -767,7 +767,7 @@ class TestMultiUserConcurrentIsolation:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ WebSocket isolation test failed: {e}")
+            logger.error(f" FAIL:  WebSocket isolation test failed: {e}")
             pytest.fail(f"WebSocket connection isolation under concurrent load failed: {e}")
     
     @pytest.mark.asyncio
@@ -794,7 +794,7 @@ class TestMultiUserConcurrentIsolation:
         
         try:
             # Step 1: Create users with distinct data profiles
-            logger.info(f"🔒 Creating {num_test_users} users with distinct data profiles for isolation testing")
+            logger.info(f"[U+1F512] Creating {num_test_users} users with distinct data profiles for isolation testing")
             
             test_users = []
             for i in range(num_test_users):
@@ -819,9 +819,9 @@ class TestMultiUserConcurrentIsolation:
                 test_users.append((session, user_profile))
                 
                 if await self._connect_user_websocket(session):
-                    logger.info(f"✅ User {i} created with isolated data profile")
+                    logger.info(f" PASS:  User {i} created with isolated data profile")
                 else:
-                    logger.warning(f"⚠️ User {i} WebSocket connection failed")
+                    logger.warning(f" WARNING: [U+FE0F] User {i} WebSocket connection failed")
             
             # Step 2: Execute operations creating user-specific data
             async def create_user_specific_data(user_data: Tuple[UserTestSession, Dict[str, Any]]) -> Dict[str, Any]:
@@ -952,7 +952,7 @@ class TestMultiUserConcurrentIsolation:
             assert len(isolation_violations) == 0, f"Data isolation violations detected: {len(isolation_violations)}"
             assert result.business_value_delivered, "Cross-user data isolation failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: System maintains strict data isolation between users")
+            logger.info(f" PASS:  BUSINESS VALUE: System maintains strict data isolation between users")
             logger.info(f"   Users with isolated data: {len(successful_data_creation)}/{num_test_users}")
             logger.info(f"   Isolation tests performed: {len(isolation_validation_results)}")
             logger.info(f"   Successful isolations: {len(successful_isolations)}/{len(isolation_validation_results)}")
@@ -961,7 +961,7 @@ class TestMultiUserConcurrentIsolation:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Cross-user data isolation test failed: {e}")
+            logger.error(f" FAIL:  Cross-user data isolation test failed: {e}")
             pytest.fail(f"Cross-user data isolation validation failed: {e}")
     
     @pytest.mark.asyncio
@@ -988,7 +988,7 @@ class TestMultiUserConcurrentIsolation:
         
         try:
             # Step 1: Set up realistic multi-user load scenario
-            logger.info(f"📈 Simulating realistic load with {concurrent_load_users} concurrent users")
+            logger.info(f"[U+1F4C8] Simulating realistic load with {concurrent_load_users} concurrent users")
             
             # Create different types of concurrent user activities
             user_activity_types = [
@@ -1153,7 +1153,7 @@ class TestMultiUserConcurrentIsolation:
             assert performance_metrics["average_response_time"] < 120.0, f"Average response time too high: {performance_metrics['average_response_time']:.1f}s"
             assert result.business_value_delivered, "System performance under load failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: System demonstrates scalability for concurrent user load")
+            logger.info(f" PASS:  BUSINESS VALUE: System demonstrates scalability for concurrent user load")
             logger.info(f"   Concurrent users handled: {len(successful_loads)}/{concurrent_load_users}")
             logger.info(f"   Load success rate: {performance_metrics['load_success_rate']:.1%}")
             logger.info(f"   Average response time: {performance_metrics['average_response_time']:.1f}s")
@@ -1166,7 +1166,7 @@ class TestMultiUserConcurrentIsolation:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Multi-user concurrent load test failed: {e}")
+            logger.error(f" FAIL:  Multi-user concurrent load test failed: {e}")
             pytest.fail(f"System performance under multi-user concurrent load failed: {e}")
 
 

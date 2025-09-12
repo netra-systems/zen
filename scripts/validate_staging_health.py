@@ -88,13 +88,13 @@ class StagingHealthValidator:
     
     async def run_comprehensive_health_check(self) -> Dict[str, Any]:
         """Run comprehensive health check."""
-        print("🏥 Starting Comprehensive Staging Health Check")
+        print("[U+1F3E5] Starting Comprehensive Staging Health Check")
         print("=" * 60)
         
         self.results = []
         
         # Check service health
-        print("\n🔍 Checking Service Health...")
+        print("\n SEARCH:  Checking Service Health...")
         for name, url in self.services.items():
             print(f"   Checking {name}...")
             result = await self.check_service_health(name, url)
@@ -138,21 +138,21 @@ class StagingHealthValidator:
         print("STAGING HEALTH CHECK SUMMARY")
         print("=" * 60)
         
-        status_icon = "✅" if summary["overall_health"] == "healthy" else "❌"
+        status_icon = " PASS: " if summary["overall_health"] == "healthy" else " FAIL: "
         print(f"{status_icon} Overall Health: {summary['overall_health'].upper()}")
-        print(f"📊 Success Rate: {summary['success_rate']:.1f}%")
-        print(f"✅ Healthy Checks: {summary['healthy_checks']}/{summary['total_checks']}")
-        print(f"🚨 Critical Failures: {summary['critical_failures']}")
+        print(f" CHART:  Success Rate: {summary['success_rate']:.1f}%")
+        print(f" PASS:  Healthy Checks: {summary['healthy_checks']}/{summary['total_checks']}")
+        print(f" ALERT:  Critical Failures: {summary['critical_failures']}")
         
         if summary["critical_failures"] > 0:
-            print(f"\n🚨 CRITICAL ISSUES DETECTED:")
+            print(f"\n ALERT:  CRITICAL ISSUES DETECTED:")
             for detail in summary["details"]:
                 if detail["status"] in ["unhealthy", "error"] and detail["critical"]:
-                    print(f"   ❌ {detail['name']}: {detail['status']}")
+                    print(f"    FAIL:  {detail['name']}: {detail['status']}")
                     if "error" in detail["details"]:
                         print(f"      Error: {detail['details']['error']}")
         
-        print(f"\n📅 Timestamp: {summary['timestamp']}")
+        print(f"\n[U+1F4C5] Timestamp: {summary['timestamp']}")
         
         return 0 if summary["overall_health"] == "healthy" else 1
 

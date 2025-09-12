@@ -215,7 +215,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                                 # REMOVED_SYNTAX_ERROR: backend_ready = await tester.wait_for_backend_service_ready()
                                                                                                 # REMOVED_SYNTAX_ERROR: assert backend_ready, "Backend service not ready - cannot test WebSocket connectivity"
 
-                                                                                                # REMOVED_SYNTAX_ERROR: print("✅ Both auth and backend services are ready for WebSocket testing")
+                                                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  Both auth and backend services are ready for WebSocket testing")
 
 
                                                                                                 # Removed problematic line: @pytest.mark.asyncio
@@ -298,7 +298,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                                                                         # Validate that connection was properly rejected
                                                                                                                                         # Note: If WebSocket auth is not yet implemented, this test may need adjustment
                                                                                                                                         # REMOVED_SYNTAX_ERROR: if not result['connection_rejected'] and not result['error']:
-                                                                                                                                            # REMOVED_SYNTAX_ERROR: print("⚠️  Warning: WebSocket connection succeeded without authentication")
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Warning: WebSocket connection succeeded without authentication")
                                                                                                                                             # REMOVED_SYNTAX_ERROR: print("   This may indicate WebSocket authentication is not yet fully implemented")
                                                                                                                                             # Don't fail the test if auth isn't implemented yet, just warn
 
@@ -364,7 +364,7 @@ from shared.isolated_environment import IsolatedEnvironment
                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: print("No successful connections for timing analysis")
                                                                                                                                                                             # Don't fail if connections aren't working yet - just log the issue
-                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print("⚠️  WebSocket connections not working - may indicate service configuration issues")
+                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  WebSocket connections not working - may indicate service configuration issues")
 
 
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
@@ -382,15 +382,15 @@ from shared.isolated_environment import IsolatedEnvironment
     # REMOVED_SYNTAX_ERROR: backend_ready = await tester.wait_for_backend_service_ready()
 
     # REMOVED_SYNTAX_ERROR: if auth_ready and backend_ready:
-        # REMOVED_SYNTAX_ERROR: print("✅ Services ready - testing WebSocket auth...")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  Services ready - testing WebSocket auth...")
 
         # REMOVED_SYNTAX_ERROR: token = await tester.create_test_jwt_token()
         # REMOVED_SYNTAX_ERROR: if token:
             # REMOVED_SYNTAX_ERROR: result = await tester.test_websocket_connection_with_auth(token)
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: print("❌ Could not create test token")
+                # REMOVED_SYNTAX_ERROR: print(" FAIL:  Could not create test token")
                 # REMOVED_SYNTAX_ERROR: else:
-                    # REMOVED_SYNTAX_ERROR: print("❌ Services not ready for WebSocket testing")
+                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Services not ready for WebSocket testing")
 
                     # REMOVED_SYNTAX_ERROR: asyncio.run(main())

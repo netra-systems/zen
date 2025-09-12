@@ -451,22 +451,22 @@ class NetworkResilientClient:
     
     def _log_attempt(self, operation_id: str, attempt: int, max_attempts: int, target: str):
         """Log network attempt."""
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = " CYCLE: " if self.use_emoji else ""
         logger.debug(f"{emoji} Network attempt {attempt + 1}/{max_attempts} for {operation_id}: {target}")
     
     def _log_success(self, operation_id: str, attempts: int, duration: float):
         """Log successful network operation."""
-        emoji = "✅" if self.use_emoji else ""
+        emoji = " PASS: " if self.use_emoji else ""
         logger.debug(f"{emoji} Network success for {operation_id} after {attempts} attempt(s) in {duration:.2f}s")
     
     def _log_retry_delay(self, operation_id: str, attempt: int, delay: float, error: str):
         """Log retry delay."""
-        emoji = "⏳" if self.use_emoji else ""
+        emoji = "[U+23F3]" if self.use_emoji else ""
         logger.debug(f"{emoji} Retrying {operation_id} in {delay:.1f}s after attempt {attempt}: {error}")
     
     def _log_final_failure(self, operation_id: str, attempts: int, error: str):
         """Log final failure."""
-        emoji = "❌" if self.use_emoji else ""
+        emoji = " FAIL: " if self.use_emoji else ""
         logger.warning(f"{emoji} Network operation {operation_id} failed after {attempts} attempts: {error}")
     
     def get_service_health_summary(self) -> Dict[str, Any]:

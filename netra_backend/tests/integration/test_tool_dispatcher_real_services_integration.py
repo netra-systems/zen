@@ -300,7 +300,7 @@ class TestToolDispatcherRealServices:
         # Assert - verify concurrent execution succeeded
         successful_results = [r for r in results if isinstance(r, ToolResult) and r.status == ToolStatus.SUCCESS]
         
-        # Should have 9 successful results (3 users × 3 operations each)
+        # Should have 9 successful results (3 users  x  3 operations each)
         assert len(successful_results) >= 6  # At least 2 operations per user succeeded
         
         # Verify no exceptions occurred

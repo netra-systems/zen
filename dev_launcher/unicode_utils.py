@@ -78,22 +78,22 @@ def emoji_safe(emoji: str, fallback: str) -> str:
 
 # Common emoji replacements for development messages
 EMOJI_MAP = {
-    'rocket': ('🚀', '[START]'),
-    'check': ('✅', '[OK]'),
-    'warning': ('⚠️', '[WARN]'),
-    'error': ('❌', '[ERROR]'),
-    'info': ('📝', '[INFO]'),
-    'wave': ('👋', '[HELLO]'),
-    'gear': ('🔧', '[CONFIG]'),
-    'fire': ('🔥', '[HOT]'),
-    'globe': ('🌐', '[WEB]'),
-    'folder': ('📂', '[DIR]'),
-    'key': ('🔑', '[KEY]'),
-    'lock': ('🔐', '[SECURE]'),
-    'magnifier': ('🔍', '[SEARCH]'),
-    'clock': ('⏰', '[TIME]'),
-    'recycle': ('♻️', '[RELOAD]'),
-    'sparkles': ('✨', '[NEW]'),
+    'rocket': ('[U+1F680]', '[START]'),
+    'check': (' PASS: ', '[OK]'),
+    'warning': (' WARNING: [U+FE0F]', '[WARN]'),
+    'error': (' FAIL: ', '[ERROR]'),
+    'info': ('[U+1F4DD]', '[INFO]'),
+    'wave': ('[U+1F44B]', '[HELLO]'),
+    'gear': ('[U+1F527]', '[CONFIG]'),
+    'fire': (' FIRE: ', '[HOT]'),
+    'globe': ('[U+1F310]', '[WEB]'),
+    'folder': ('[U+1F4C2]', '[DIR]'),
+    'key': ('[U+1F511]', '[KEY]'),
+    'lock': ('[U+1F510]', '[SECURE]'),
+    'magnifier': (' SEARCH: ', '[SEARCH]'),
+    'clock': ('[U+23F0]', '[TIME]'),
+    'recycle': ('[U+267B][U+FE0F]', '[RELOAD]'),
+    'sparkles': ('[U+2728]', '[NEW]'),
 }
 
 

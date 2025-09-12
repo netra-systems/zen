@@ -13,7 +13,7 @@ This package contains focused integration tests for:
 - Admin Operations: User management, billing, and system monitoring
 - System Monitoring: Quality monitoring and health aggregation
 
-All tests maintain ≤8 lines per test function and ≤300 lines per module.
+All tests maintain  <= 8 lines per test function and  <= 300 lines per module.
 """
 
 from netra_backend.tests.integration.operational.shared_fixtures import (

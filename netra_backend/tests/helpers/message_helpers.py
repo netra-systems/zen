@@ -1,7 +1,7 @@
 """Message database repository test helper functions.
 
 This module provides helper functions for message test operations
-on database repositories. All functions are ≤8 lines.
+on database repositories. All functions are  <= 8 lines.
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 

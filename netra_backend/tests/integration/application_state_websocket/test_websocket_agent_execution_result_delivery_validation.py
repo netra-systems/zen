@@ -348,7 +348,7 @@ class TestWebSocketAgentExecutionResultDeliveryValidation(BaseIntegrationTest):
         assert data_validation.get("business_value_score", 0) >= 90
         
         self.logger.info(
-            f"✅ Result delivery validation test PASSED - "
+            f" PASS:  Result delivery validation test PASSED - "
             f"Score: {validation['overall_score']}, "
             f"Quality: {validation['delivery_quality']}, "
             f"Savings: ${cost_opt['potential_monthly_savings']:,}/month"

@@ -331,7 +331,7 @@ class UnifiedToolPermissionLayer:
         # Initialize default policies
         self._initialize_default_policies()
         
-        logger.info(f"✅ Created UnifiedToolPermissionLayer {self.layer_id}")
+        logger.info(f" PASS:  Created UnifiedToolPermissionLayer {self.layer_id}")
     
     def _initialize_default_policies(self) -> None:
         """Initialize default tool policies."""
@@ -396,7 +396,7 @@ class UnifiedToolPermissionLayer:
             policy.updated_at = datetime.now(timezone.utc)
             self.policies[policy.tool_name] = policy
             
-            logger.info(f"✅ Added/updated policy for tool {policy.tool_name} "
+            logger.info(f" PASS:  Added/updated policy for tool {policy.tool_name} "
                        f"(security_level: {policy.security_level.name})")
             return True
             
@@ -412,7 +412,7 @@ class UnifiedToolPermissionLayer:
         """Remove tool policy."""
         if tool_name in self.policies:
             del self.policies[tool_name]
-            logger.info(f"🗑️ Removed policy for tool {tool_name}")
+            logger.info(f"[U+1F5D1][U+FE0F] Removed policy for tool {tool_name}")
             return True
         return False
     
@@ -631,7 +631,7 @@ class UnifiedToolPermissionLayer:
         if len(self.audit_log) > self.max_audit_entries:
             self.audit_log = self.audit_log[-self.max_audit_entries//2:]
         
-        logger.debug(f"📝 Audit: {action} - {user_id} - {tool_name} - {details}")
+        logger.debug(f"[U+1F4DD] Audit: {action} - {user_id} - {tool_name} - {details}")
     
     def get_audit_log(
         self,

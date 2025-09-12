@@ -7,7 +7,7 @@ creates completely isolated instances per user, preventing shared state violatio
 could lead to data leakage between concurrent users.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - affects every user
+- Segment: ALL (Free  ->  Enterprise) - affects every user
 - Business Goal: Legal/Compliance - prevent data leakage between users  
 - Value Impact: Guarantees user data privacy and regulatory compliance
 - Revenue Impact: Prevents legal liability and maintains user trust
@@ -597,7 +597,7 @@ class TestExecutionEngineFactoryUserIsolationUnit(SSotBaseTestCase):
 """
 BUSINESS VALUE JUSTIFICATION for ExecutionEngine Factory User Isolation Tests
 
-Segment: ALL (Free → Enterprise) - affects every user on the platform
+Segment: ALL (Free  ->  Enterprise) - affects every user on the platform
 Business Goal: Legal/Compliance & User Trust - prevent data leakage between users
 Value Impact: Guarantees user data privacy, regulatory compliance (GDPR, HIPAA), maintains user trust
 Revenue Impact: Prevents catastrophic legal liability, maintains business license, prevents user churn

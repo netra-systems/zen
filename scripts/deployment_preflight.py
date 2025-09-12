@@ -64,7 +64,7 @@ class DeploymentPreflightChecker:
                     self.errors.append("Development JWT secret detected in production environment")
                     return False
             
-            logger.info(f"✅ JWT secret configuration valid: {len(secret)} chars")
+            logger.info(f" PASS:  JWT secret configuration valid: {len(secret)} chars")
             return True
             
         except Exception as e:
@@ -101,7 +101,7 @@ class DeploymentPreflightChecker:
                 self.errors.append("ClickHouse ping test failed")
                 return False
             
-            logger.info(f"✅ ClickHouse connectivity verified: {config.clickhouse_native.host or config.clickhouse_https.host}")
+            logger.info(f" PASS:  ClickHouse connectivity verified: {config.clickhouse_native.host or config.clickhouse_https.host}")
             return True
             
         except ImportError:
@@ -145,7 +145,7 @@ class DeploymentPreflightChecker:
             
             await client.close()
             
-            logger.info(f"✅ Redis connectivity verified: {config.redis.host}")
+            logger.info(f" PASS:  Redis connectivity verified: {config.redis.host}")
             return True
             
         except ImportError:
@@ -182,7 +182,7 @@ class DeploymentPreflightChecker:
             
             await engine.dispose()
             
-            logger.info("✅ Database connectivity verified")
+            logger.info(" PASS:  Database connectivity verified")
             return True
             
         except Exception as e:
@@ -214,7 +214,7 @@ class DeploymentPreflightChecker:
                 )
                 return False
             
-            logger.info("✅ Auth service and backend JWT secrets synchronized")
+            logger.info(" PASS:  Auth service and backend JWT secrets synchronized")
             return True
             
         except Exception as e:
@@ -251,7 +251,7 @@ class DeploymentPreflightChecker:
             self.errors.append(f"Missing required environment variables: {', '.join(missing_vars)}")
             return False
         
-        logger.info("✅ All required environment variables present")
+        logger.info(" PASS:  All required environment variables present")
         return True
     
     async def run_all_checks(self) -> Tuple[bool, Dict[str, bool]]:
@@ -281,11 +281,11 @@ class DeploymentPreflightChecker:
                 result = await check_coro
                 results[name] = result
                 if result:
-                    logger.info(f"  ✅ {name}: PASSED")
+                    logger.info(f"   PASS:  {name}: PASSED")
                 else:
-                    logger.error(f"  ❌ {name}: FAILED")
+                    logger.error(f"   FAIL:  {name}: FAILED")
             except Exception as e:
-                logger.error(f"  ❌ {name}: ERROR - {e}")
+                logger.error(f"   FAIL:  {name}: ERROR - {e}")
                 results[name] = False
                 self.errors.append(f"{name} check failed: {e}")
         
@@ -294,9 +294,9 @@ class DeploymentPreflightChecker:
         
         logger.info(f"\n{'='*60}")
         if all_passed:
-            logger.info("✅ ALL PREFLIGHT CHECKS PASSED")
+            logger.info(" PASS:  ALL PREFLIGHT CHECKS PASSED")
         else:
-            logger.error("❌ PREFLIGHT CHECKS FAILED")
+            logger.error(" FAIL:  PREFLIGHT CHECKS FAILED")
             logger.error("\nErrors detected:")
             for error in self.errors:
                 logger.error(f"  - {error}")

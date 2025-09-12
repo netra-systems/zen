@@ -167,7 +167,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
         Test complete chat error recovery workflow with business continuity validation.
         
         CRITICAL: This tests CUSTOMER EXPERIENCE during system errors:
-        Normal Chat → Error Occurs → Transparent Communication → Recovery Attempt → Business Value Restored
+        Normal Chat  ->  Error Occurs  ->  Transparent Communication  ->  Recovery Attempt  ->  Business Value Restored
         
         Business Value: Validates customer trust is maintained during system issues.
         """
@@ -183,7 +183,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
         websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
         headers = self._websocket_helper.get_websocket_headers()
         
-        self.logger.info(f"🔌 Connecting to WebSocket for error recovery testing: {websocket_url}")
+        self.logger.info(f"[U+1F50C] Connecting to WebSocket for error recovery testing: {websocket_url}")
         
         pre_error_events = []
         error_phase_events = []
@@ -192,7 +192,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
         async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
             
             # Phase 1: Establish normal chat functionality
-            self.logger.info("📤 Phase 1: Establishing normal chat baseline")
+            self.logger.info("[U+1F4E4] Phase 1: Establishing normal chat baseline")
             
             normal_chat_request = {
                 "type": "chat_message",
@@ -220,7 +220,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
                         "received_timestamp": time.time()
                     })
                     
-                    self.logger.info(f"📨 Baseline: {event.get('type', 'unknown')}")
+                    self.logger.info(f"[U+1F4E8] Baseline: {event.get('type', 'unknown')}")
                     
                     # Stop when we get some baseline functionality
                     if len(pre_error_events) >= 3:
@@ -232,7 +232,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
                     continue
             
             # Phase 2: Introduce controlled error scenario
-            self.logger.info("💥 Phase 2: Introducing error scenario")
+            self.logger.info("[U+1F4A5] Phase 2: Introducing error scenario")
             
             # Send request that will trigger error conditions
             # This simulates real error scenarios like service timeouts, data issues, etc.
@@ -273,7 +273,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
                             "received_timestamp": time.time()
                         })
                         
-                        self.logger.info(f"💥 Error phase: {event.get('type', 'unknown')}")
+                        self.logger.info(f"[U+1F4A5] Error phase: {event.get('type', 'unknown')}")
                         
                         # Stop when we receive recovery completion or fallback success
                         if event.get("type") in ["recovery_completed", "fallback_success", "agent_completed"]:
@@ -285,7 +285,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
                         continue
             
             # Phase 3: Validate business continuity restoration
-            self.logger.info("🔄 Phase 3: Validating business continuity restoration")
+            self.logger.info(" CYCLE:  Phase 3: Validating business continuity restoration")
             
             # Send follow-up request to test if system recovered
             recovery_validation_request = {
@@ -315,7 +315,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
                         "received_timestamp": time.time()
                     })
                     
-                    self.logger.info(f"🔄 Recovery: {event.get('type', 'unknown')}")
+                    self.logger.info(f" CYCLE:  Recovery: {event.get('type', 'unknown')}")
                     
                     # Stop when we get completion event
                     if event.get("type") == "agent_completed":
@@ -392,7 +392,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
         self.record_metric("continuity_ratio", continuity_analysis["continuity_ratio"])
         self.record_metric("error_recovery_success", True)
         
-        self.logger.info(f"✅ Chat error recovery validated: "
+        self.logger.info(f" PASS:  Chat error recovery validated: "
                         f"baseline={len(pre_error_events)}, errors={len(error_phase_events)}, "
                         f"recovery={len(post_recovery_events)}, continuity_ratio={continuity_analysis['continuity_ratio']:.2f}")
     
@@ -418,7 +418,7 @@ class TestChatErrorHandlingRecovery(SSotAsyncTestCase):
             self._error_validator.recovery_events.clear()
             self._error_validator.user_communication_events.clear()
             
-        self.logger.info(f"✅ Chat error handling and recovery E2E test completed successfully")
+        self.logger.info(f" PASS:  Chat error handling and recovery E2E test completed successfully")
 
 
 if __name__ == "__main__":

@@ -102,7 +102,7 @@ class SyntheticDataWorkflowOrchestrator:
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed."
+        return f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed."
     
     def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
         """Create result indicating approval required."""

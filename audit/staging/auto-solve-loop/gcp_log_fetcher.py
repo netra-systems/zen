@@ -24,7 +24,7 @@ def setup_gcp_auth():
     key_path = project_root / "config" / "netra-staging-sa-key.json"
     if key_path.exists():
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(key_path)
-        print(f"✓ Using service account credentials: {key_path}")
+        print(f"[U+2713] Using service account credentials: {key_path}")
         return True
     
     # Try other credential paths
@@ -36,10 +36,10 @@ def setup_gcp_auth():
     for path in alt_paths:
         if path.exists():
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(path)
-            print(f"✓ Using credentials: {path}")
+            print(f"[U+2713] Using credentials: {path}")
             return True
     
-    print("❌ No GCP credentials found")
+    print(" FAIL:  No GCP credentials found")
     return False
 
 def get_recent_gcp_logs(project_id: str = "netra-staging", hours_back: int = 24):
@@ -82,11 +82,11 @@ def get_recent_gcp_logs(project_id: str = "netra-staging", hours_back: int = 24)
         
         logs_by_severity = defaultdict(list)
         
-        print(f"🔍 Fetching logs from {project_id} for last {hours_back} hours...")
+        print(f" SEARCH:  Fetching logs from {project_id} for last {hours_back} hours...")
         
         # Fetch ERROR logs first (highest priority)
         for severity in ['ERROR', 'WARNING', 'NOTICE', 'INFO']:
-            print(f"  📋 Checking {severity} logs...")
+            print(f"  [U+1F4CB] Checking {severity} logs...")
             
             try:
                 filters = [
@@ -107,18 +107,18 @@ def get_recent_gcp_logs(project_id: str = "netra-staging", hours_back: int = 24)
                     if count >= 100:  # Limit per severity
                         break
                 
-                print(f"    ✓ Found {len(logs_by_severity[severity])} {severity} entries")
+                print(f"    [U+2713] Found {len(logs_by_severity[severity])} {severity} entries")
                 
             except Exception as e:
-                print(f"    ❌ Error fetching {severity} logs: {e}")
+                print(f"     FAIL:  Error fetching {severity} logs: {e}")
         
         return logs_by_severity
         
     except ImportError:
-        print("❌ google-cloud-logging not installed")
+        print(" FAIL:  google-cloud-logging not installed")
         return {}
     except Exception as e:
-        print(f"❌ Error fetching logs: {e}")
+        print(f" FAIL:  Error fetching logs: {e}")
         return {}
 
 def parse_log_entry(entry) -> Dict[str, Any]:
@@ -295,7 +295,7 @@ def identify_top_issue(analysis: Dict) -> Optional[Dict]:
 
 def main():
     """Main execution"""
-    print("🚀 Starting GCP Staging Log Audit - Cycle 1")
+    print("[U+1F680] Starting GCP Staging Log Audit - Cycle 1")
     
     if not setup_gcp_auth():
         return
@@ -304,7 +304,7 @@ def main():
     logs = get_recent_gcp_logs(hours_back=6)  # Start with recent 6 hours
     
     if not logs:
-        print("❌ No logs retrieved")
+        print(" FAIL:  No logs retrieved")
         return
     
     # Analyze for issues
@@ -318,13 +318,13 @@ def main():
     with open(analysis_file, 'w') as f:
         json.dump(analysis, f, indent=2)
     
-    print(f"📊 Analysis saved to: {analysis_file}")
+    print(f" CHART:  Analysis saved to: {analysis_file}")
     
     # Identify top issue
     top_issue = identify_top_issue(analysis)
     
     if top_issue:
-        print(f"\n🎯 IDENTIFIED TOP ISSUE:")
+        print(f"\n TARGET:  IDENTIFIED TOP ISSUE:")
         print(f"   Type: {top_issue['type']}")
         print(f"   Severity: {top_issue['severity']}")
         print(f"   Count: {top_issue['count']}")
@@ -334,7 +334,7 @@ def main():
         
         return top_issue
     else:
-        print("✅ No critical issues identified in recent logs")
+        print(" PASS:  No critical issues identified in recent logs")
         return None
 
 if __name__ == '__main__':

@@ -23,7 +23,7 @@ def run_command(cmd, capture=True):
 
 def test_frontend_hot_reload():
     """Test that frontend container picks up code changes via volume mounts."""
-    print("\n🔍 Testing Frontend Hot Reload...")
+    print("\n SEARCH:  Testing Frontend Hot Reload...")
     
     # 1. Create a test marker file
     test_file = Path("frontend/auth/test_hot_reload_marker.ts")
@@ -35,7 +35,7 @@ export const HOT_RELOAD_WORKING = true;
     
     try:
         # Write test marker
-        print(f"  ✍️  Writing test marker with timestamp {timestamp}")
+        print(f"  [U+270D][U+FE0F]  Writing test marker with timestamp {timestamp}")
         test_file.write_text(test_content)
         
         # Give Next.js time to detect the change
@@ -47,10 +47,10 @@ export const HOT_RELOAD_WORKING = true;
         )
         
         if code == 0 and str(timestamp) in stdout:
-            print(f"  ✅ Frontend hot reload WORKING - marker {timestamp} found in container")
+            print(f"   PASS:  Frontend hot reload WORKING - marker {timestamp} found in container")
             return True
         else:
-            print(f"  ❌ Frontend hot reload FAILED - marker not found in container")
+            print(f"   FAIL:  Frontend hot reload FAILED - marker not found in container")
             print(f"     Expected timestamp: {timestamp}")
             print(f"     Container output: {stdout[:100]}...")
             return False
@@ -59,11 +59,11 @@ export const HOT_RELOAD_WORKING = true;
         # Clean up test file
         if test_file.exists():
             test_file.unlink()
-            print(f"  🧹 Cleaned up test marker file")
+            print(f"  [U+1F9F9] Cleaned up test marker file")
 
 def test_backend_hot_reload():
     """Test that backend container picks up code changes via volume mounts."""
-    print("\n🔍 Testing Backend Hot Reload...")
+    print("\n SEARCH:  Testing Backend Hot Reload...")
     
     # 1. Create a test marker file
     test_file = Path("netra_backend/app/test_hot_reload_marker.py")
@@ -75,7 +75,7 @@ HOT_RELOAD_WORKING = True
     
     try:
         # Write test marker
-        print(f"  ✍️  Writing test marker with timestamp {timestamp}")
+        print(f"  [U+270D][U+FE0F]  Writing test marker with timestamp {timestamp}")
         test_file.write_text(test_content)
         
         # Give uvicorn time to detect the change
@@ -87,21 +87,21 @@ HOT_RELOAD_WORKING = True
         )
         
         if code == 0 and str(timestamp) in stdout:
-            print(f"  ✅ Backend hot reload WORKING - marker {timestamp} found in container")
+            print(f"   PASS:  Backend hot reload WORKING - marker {timestamp} found in container")
             return True
         else:
-            print(f"  ❌ Backend hot reload FAILED - marker not found in container")
+            print(f"   FAIL:  Backend hot reload FAILED - marker not found in container")
             return False
             
     finally:
         # Clean up test file
         if test_file.exists():
             test_file.unlink()
-            print(f"  🧹 Cleaned up test marker file")
+            print(f"  [U+1F9F9] Cleaned up test marker file")
 
 def test_auth_hot_reload():
     """Test that auth service container picks up code changes via volume mounts."""
-    print("\n🔍 Testing Auth Service Hot Reload...")
+    print("\n SEARCH:  Testing Auth Service Hot Reload...")
     
     # 1. Create a test marker file
     test_file = Path("auth_service/test_hot_reload_marker.py")
@@ -113,7 +113,7 @@ HOT_RELOAD_WORKING = True
     
     try:
         # Write test marker
-        print(f"  ✍️  Writing test marker with timestamp {timestamp}")
+        print(f"  [U+270D][U+FE0F]  Writing test marker with timestamp {timestamp}")
         test_file.write_text(test_content)
         
         # Give uvicorn time to detect the change
@@ -125,21 +125,21 @@ HOT_RELOAD_WORKING = True
         )
         
         if code == 0 and str(timestamp) in stdout:
-            print(f"  ✅ Auth service hot reload WORKING - marker {timestamp} found in container")
+            print(f"   PASS:  Auth service hot reload WORKING - marker {timestamp} found in container")
             return True
         else:
-            print(f"  ❌ Auth service hot reload FAILED - marker not found in container")
+            print(f"   FAIL:  Auth service hot reload FAILED - marker not found in container")
             return False
             
     finally:
         # Clean up test file
         if test_file.exists():
             test_file.unlink()
-            print(f"  🧹 Cleaned up test marker file")
+            print(f"  [U+1F9F9] Cleaned up test marker file")
 
 def check_container_mounts():
     """Check if containers have proper volume mounts configured."""
-    print("\n📂 Checking Container Volume Mounts...")
+    print("\n[U+1F4C2] Checking Container Volume Mounts...")
     
     containers = {
         'netra-dev-frontend': ['./frontend/', '/app/'],
@@ -154,7 +154,7 @@ def check_container_mounts():
         )
         
         if code != 0:
-            print(f"  ⚠️  Container {container} not running")
+            print(f"   WARNING: [U+FE0F]  Container {container} not running")
             all_good = False
             continue
             
@@ -167,14 +167,14 @@ def check_container_mounts():
             )
             
             if has_mount:
-                print(f"  ✅ {container}: Volume mounts configured")
+                print(f"   PASS:  {container}: Volume mounts configured")
             else:
-                print(f"  ❌ {container}: Missing volume mounts")
+                print(f"   FAIL:  {container}: Missing volume mounts")
                 print(f"     Expected: {expected_mount[0]} -> {expected_mount[1]}")
                 all_good = False
                 
         except json.JSONDecodeError:
-            print(f"  ❌ {container}: Failed to parse mount info")
+            print(f"   FAIL:  {container}: Failed to parse mount info")
             all_good = False
     
     return all_good
@@ -186,16 +186,16 @@ def main():
     print("=" * 60)
     
     # Check if containers are running
-    print("\n🐳 Checking Docker Containers...")
+    print("\n[U+1F433] Checking Docker Containers...")
     stdout, stderr, code = run_command('docker ps --filter "name=netra-dev" --format "{{.Names}}"')
     
     running_containers = stdout.strip().split('\n') if stdout else []
     if not running_containers or not any('netra-dev' in c for c in running_containers):
-        print("❌ No dev containers running! Start them with:")
+        print(" FAIL:  No dev containers running! Start them with:")
         print("   docker-compose -f docker-compose.dev.yml up -d")
         return 1
     
-    print(f"✅ Found {len(running_containers)} dev containers running")
+    print(f" PASS:  Found {len(running_containers)} dev containers running")
     
     # Run tests
     results = []
@@ -216,22 +216,22 @@ def main():
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 Test Summary:")
+    print(" CHART:  Test Summary:")
     print("=" * 60)
     
     all_passed = True
     for test_name, passed in results:
-        status = "✅ PASS" if passed else "❌ FAIL"
+        status = " PASS:  PASS" if passed else " FAIL:  FAIL"
         print(f"  {status}: {test_name}")
         if not passed:
             all_passed = False
     
     if all_passed:
-        print("\n🎉 All hot reload tests passed!")
+        print("\n CELEBRATION:  All hot reload tests passed!")
         return 0
     else:
-        print("\n⚠️  Some tests failed. Fix volume mounts in docker-compose.dev.yml")
-        print("\n📝 Required volume mounts:")
+        print("\n WARNING: [U+FE0F]  Some tests failed. Fix volume mounts in docker-compose.dev.yml")
+        print("\n[U+1F4DD] Required volume mounts:")
         print("  Frontend: ./frontend/* -> /app/*")
         print("  Backend:  ./netra_backend -> /app/netra_backend")
         print("  Auth:     ./auth_service -> /app/auth_service")

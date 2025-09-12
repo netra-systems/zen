@@ -75,7 +75,7 @@ class DeveloperWorkflowAutomation:
     
     def automated_pre_commit_check(self) -> WorkflowResult:
         """Run automated pre-commit quality checks."""
-        self.logger.info("🔍 Running automated pre-commit checks...")
+        self.logger.info(" SEARCH:  Running automated pre-commit checks...")
         start_time = time.time()
         
         checks = [
@@ -92,32 +92,32 @@ class DeveloperWorkflowAutomation:
         recommendations = []
         
         for check_name, check_func in checks:
-            self.logger.info(f"  → {check_name}...")
+            self.logger.info(f"   ->  {check_name}...")
             try:
                 check_result = check_func()
                 if check_result.success:
-                    results.append(f"✅ {check_name}: PASSED")
-                    self.logger.info(f"  ✅ {check_name}: PASSED")
+                    results.append(f" PASS:  {check_name}: PASSED")
+                    self.logger.info(f"   PASS:  {check_name}: PASSED")
                 else:
-                    results.append(f"❌ {check_name}: FAILED")
-                    self.logger.warning(f"  ❌ {check_name}: FAILED")
+                    results.append(f" FAIL:  {check_name}: FAILED")
+                    self.logger.warning(f"   FAIL:  {check_name}: FAILED")
                     all_passed = False
                     if check_result.error:
                         results.append(f"    Error: {check_result.error}")
                     recommendations.extend(check_result.recommendations)
                 
             except Exception as e:
-                results.append(f"❌ {check_name}: ERROR - {e}")
-                self.logger.error(f"  ❌ {check_name}: ERROR - {e}")
+                results.append(f" FAIL:  {check_name}: ERROR - {e}")
+                self.logger.error(f"   FAIL:  {check_name}: ERROR - {e}")
                 all_passed = False
         
         duration = time.time() - start_time
         output = "\n".join(results)
         
         if all_passed:
-            self.logger.info("🎉 All pre-commit checks passed!")
+            self.logger.info(" CELEBRATION:  All pre-commit checks passed!")
         else:
-            self.logger.warning("⚠️ Some pre-commit checks failed")
+            self.logger.warning(" WARNING: [U+FE0F] Some pre-commit checks failed")
             recommendations.append("Run individual checks for detailed error information")
             recommendations.append("Consider using pre-commit hooks to catch issues earlier")
         
@@ -240,7 +240,7 @@ class DeveloperWorkflowAutomation:
     
     def performance_monitor(self, duration: int = 60) -> WorkflowResult:
         """Monitor local development performance."""
-        self.logger.info(f"📊 Starting performance monitoring for {duration} seconds...")
+        self.logger.info(f" CHART:  Starting performance monitoring for {duration} seconds...")
         start_time = time.time()
         
         # Collect performance metrics
@@ -317,7 +317,7 @@ class DeveloperWorkflowAutomation:
     
     def _generate_performance_report(self, metrics: Dict[str, List]) -> str:
         """Generate performance monitoring report."""
-        lines = ["📊 Performance Monitoring Report", "=" * 40]
+        lines = [" CHART:  Performance Monitoring Report", "=" * 40]
         
         if metrics['cpu_usage']:
             avg_cpu = sum(metrics['cpu_usage']) / len(metrics['cpu_usage'])
@@ -380,7 +380,7 @@ class DeveloperWorkflowAutomation:
     
     def automated_test_suite(self, category: str = 'all') -> WorkflowResult:
         """Run automated test suite with reporting."""
-        self.logger.info(f"🧪 Running automated test suite: {category}")
+        self.logger.info(f"[U+1F9EA] Running automated test suite: {category}")
         start_time = time.time()
         
         test_commands = {
@@ -414,9 +414,9 @@ class DeveloperWorkflowAutomation:
             recommendations = []
             
             if result.returncode == 0:
-                self.logger.info(f"✅ All {category} tests passed!")
+                self.logger.info(f" PASS:  All {category} tests passed!")
             else:
-                self.logger.warning(f"⚠️ Some {category} tests failed")
+                self.logger.warning(f" WARNING: [U+FE0F] Some {category} tests failed")
                 recommendations.append("Review failing tests and fix issues")
                 recommendations.append("Consider running individual tests for debugging")
             
@@ -446,14 +446,14 @@ class DeveloperWorkflowAutomation:
         for line in output.split('\n'):
             if 'passed' in line or 'failed' in line or 'error' in line:
                 if '=' in line:
-                    lines.append(f"📋 Test Summary: {line.strip('= ')}")
+                    lines.append(f"[U+1F4CB] Test Summary: {line.strip('= ')}")
                     break
         
         return "\n".join(lines) if lines else "Test summary not available"
     
     def code_generation_helper(self, template_type: str, name: str) -> WorkflowResult:
         """Generate code from templates."""
-        self.logger.info(f"🏗️ Generating {template_type}: {name}")
+        self.logger.info(f"[U+1F3D7][U+FE0F] Generating {template_type}: {name}")
         start_time = time.time()
         
         templates = {
@@ -568,14 +568,14 @@ def main():
     print(result.output)
     
     if result.error:
-        print(f"\n❌ Error: {result.error}")
+        print(f"\n FAIL:  Error: {result.error}")
     
     if result.recommendations:
-        print("\n💡 Recommendations:")
+        print("\n IDEA:  Recommendations:")
         for rec in result.recommendations:
-            print(f"  • {rec}")
+            print(f"  [U+2022] {rec}")
     
-    print(f"\n⏱️ Duration: {result.duration:.2f} seconds")
+    print(f"\n[U+23F1][U+FE0F] Duration: {result.duration:.2f} seconds")
     print("="*60)
     
     sys.exit(0 if result.success else 1)

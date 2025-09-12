@@ -207,43 +207,43 @@ import pytest
 
         # REMOVED_SYNTAX_ERROR: print("Testing chat orchestrator imports...")
         # REMOVED_SYNTAX_ERROR: test.test_chat_orchestrator_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Chat orchestrator imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Chat orchestrator imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing agent imports...")
         # REMOVED_SYNTAX_ERROR: test.test_agent_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Agent imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Agent imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing domain expert imports...")
         # REMOVED_SYNTAX_ERROR: test.test_domain_expert_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Domain expert imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Domain expert imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing tools imports...")
         # REMOVED_SYNTAX_ERROR: test.test_tools_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Tools imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Tools imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing guardrails imports...")
         # REMOVED_SYNTAX_ERROR: test.test_guardrails_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Guardrails imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Guardrails imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing semantic cache import...")
         # REMOVED_SYNTAX_ERROR: test.test_semantic_cache_import()
-        # REMOVED_SYNTAX_ERROR: print("✓ Semantic cache import successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Semantic cache import successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing cross-module imports...")
         # REMOVED_SYNTAX_ERROR: test.test_cross_module_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Cross-module imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Cross-module imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing enum imports...")
         # REMOVED_SYNTAX_ERROR: test.test_enum_imports()
-        # REMOVED_SYNTAX_ERROR: print("✓ Enum imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Enum imports successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing instantiation...")
         # REMOVED_SYNTAX_ERROR: test.test_instantiation_without_dependencies()
-        # REMOVED_SYNTAX_ERROR: print("✓ Instantiation successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Instantiation successful")
 
         # REMOVED_SYNTAX_ERROR: print("Testing function-scoped imports...")
         # REMOVED_SYNTAX_ERROR: test_all_imports_in_function()
-        # REMOVED_SYNTAX_ERROR: print("✓ Function-scoped imports successful")
+        # REMOVED_SYNTAX_ERROR: print("[U+2713] Function-scoped imports successful")
 
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: ✅ All import tests passed!")
+        # REMOVED_SYNTAX_ERROR:  PASS:  All import tests passed!")

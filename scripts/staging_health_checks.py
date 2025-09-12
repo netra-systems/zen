@@ -133,7 +133,7 @@ class AutomatedHealthChecker:
     
     async def run_pre_deployment_checks(self) -> Tuple[CheckResult, Dict[str, Any]]:
         """Run pre-deployment validation checks."""
-        logger.info("🚀 Starting pre-deployment health checks")
+        logger.info("[U+1F680] Starting pre-deployment health checks")
         
         try:
             self.client = httpx.AsyncClient(timeout=30.0)
@@ -162,9 +162,9 @@ class AutomatedHealthChecker:
             
             logger.info(f"Pre-deployment checks completed: {overall_result.value}")
             if not deployment_approved:
-                logger.error("❌ Deployment NOT APPROVED - critical issues found")
+                logger.error(" FAIL:  Deployment NOT APPROVED - critical issues found")
             else:
-                logger.info("✅ Deployment APPROVED - all checks passed")
+                logger.info(" PASS:  Deployment APPROVED - all checks passed")
             
             return overall_result, summary
             
@@ -178,7 +178,7 @@ class AutomatedHealthChecker:
     
     async def run_post_deployment_verification(self, deployment_id: str) -> Tuple[CheckResult, Dict[str, Any]]:
         """Run post-deployment verification checks."""
-        logger.info(f"🔍 Starting post-deployment verification for deployment {deployment_id}")
+        logger.info(f" SEARCH:  Starting post-deployment verification for deployment {deployment_id}")
         
         try:
             self.client = httpx.AsyncClient(timeout=30.0)
@@ -211,7 +211,7 @@ class AutomatedHealthChecker:
             summary["rollback_needed"] = rollback_needed
             
             if rollback_needed:
-                logger.error("🚨 ROLLBACK TRIGGERED - critical post-deployment failures detected")
+                logger.error(" ALERT:  ROLLBACK TRIGGERED - critical post-deployment failures detected")
                 await self._trigger_rollback(deployment_id, results)
             
             logger.info(f"Post-deployment verification completed: {overall_result.value}")
@@ -228,7 +228,7 @@ class AutomatedHealthChecker:
     
     async def start_continuous_monitoring(self) -> None:
         """Start continuous health monitoring."""
-        logger.info("📊 Starting continuous health monitoring")
+        logger.info(" CHART:  Starting continuous health monitoring")
         
         if not self.config["continuous_monitoring"]["enabled"]:
             logger.info("Continuous monitoring is disabled in configuration")
@@ -265,7 +265,7 @@ class AutomatedHealthChecker:
     
     async def validate_environment(self) -> Tuple[CheckResult, Dict[str, Any]]:
         """Validate staging environment configuration and readiness."""
-        logger.info("🔧 Validating staging environment")
+        logger.info("[U+1F527] Validating staging environment")
         
         try:
             self.client = httpx.AsyncClient(timeout=30.0)
@@ -768,7 +768,7 @@ class AutomatedHealthChecker:
                     
                     # Check rollback conditions
                     if self._should_trigger_rollback():
-                        logger.error("🚨 ROLLBACK CONDITIONS MET - triggering rollback")
+                        logger.error(" ALERT:  ROLLBACK CONDITIONS MET - triggering rollback")
                         await self._trigger_emergency_rollback()
                         break
                 
@@ -1044,7 +1044,7 @@ class AutomatedHealthChecker:
     
     async def _trigger_rollback(self, deployment_id: str, results: Dict[str, Dict[str, Any]]) -> None:
         """Trigger deployment rollback."""
-        logger.error(f"🚨 TRIGGERING ROLLBACK for deployment {deployment_id}")
+        logger.error(f" ALERT:  TRIGGERING ROLLBACK for deployment {deployment_id}")
         
         rollback_info = {
             "deployment_id": deployment_id,
@@ -1067,7 +1067,7 @@ class AutomatedHealthChecker:
     
     async def _trigger_emergency_rollback(self) -> None:
         """Trigger emergency rollback due to continuous monitoring failures."""
-        logger.error("🚨 TRIGGERING EMERGENCY ROLLBACK due to continuous monitoring failures")
+        logger.error(" ALERT:  TRIGGERING EMERGENCY ROLLBACK due to continuous monitoring failures")
         
         rollback_info = {
             "emergency_rollback_triggered_at": time.time(),

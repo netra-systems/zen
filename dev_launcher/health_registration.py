@@ -80,7 +80,7 @@ class HealthRegistrationHelper:
                             frontend_info: Optional[Dict[str, Any]],
                             auth_info: Optional[Dict[str, Any]] = None):
         """Register all services for health monitoring."""
-        self._print("💚", "HEALTH", "Registering service health monitoring endpoints...")
+        self._print("[U+1F49A]", "HEALTH", "Registering service health monitoring endpoints...")
         if auth_info:
             self.register_auth(auth_info)
         self.register_backend(backend_info)

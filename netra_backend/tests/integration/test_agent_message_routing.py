@@ -200,7 +200,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert agent_handler.get_stats()['start_agent_requests'] == 1
         assert agent_handler.get_stats()['messages_processed'] == 1
         
-        self.logger.info("✅ agent_started event routed successfully to correct WebSocket")
+        self.logger.info(" PASS:  agent_started event routed successfully to correct WebSocket")
 
     @pytest.mark.asyncio
     async def test_agent_thinking_event_routing(self):
@@ -260,7 +260,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert thinking_message.payload["status"] == "thinking"
         assert thinking_message.payload["progress_percentage"] > 0
         
-        self.logger.info("✅ agent_thinking event provides real-time reasoning visibility")
+        self.logger.info(" PASS:  agent_thinking event provides real-time reasoning visibility")
 
     @pytest.mark.asyncio  
     async def test_tool_executing_event_routing(self):
@@ -325,7 +325,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert "tool_description" in payload
         assert "execution_details" in payload
         
-        self.logger.info("✅ tool_executing event provides tool usage transparency")
+        self.logger.info(" PASS:  tool_executing event provides tool usage transparency")
 
     @pytest.mark.asyncio
     async def test_tool_completed_event_routing(self):
@@ -397,7 +397,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         
         self.assert_business_value_delivered(results, 'cost_savings')
         
-        self.logger.info("✅ tool_completed event delivers actionable business insights")
+        self.logger.info(" PASS:  tool_completed event delivers actionable business insights")
 
     @pytest.mark.asyncio
     async def test_agent_completed_event_routing(self):
@@ -470,7 +470,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         
         self.assert_business_value_delivered(final_response, 'cost_savings')
         
-        self.logger.info("✅ agent_completed event delivers comprehensive business value")
+        self.logger.info(" PASS:  agent_completed event delivers comprehensive business value")
 
     @pytest.mark.asyncio
     async def test_agent_event_sequence_routing(self):
@@ -546,7 +546,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert stats["messages_processed"] == 5
         assert stats["start_agent_requests"] == 1
         
-        self.logger.info("✅ Complete agent event sequence routed successfully")
+        self.logger.info(" PASS:  Complete agent event sequence routed successfully")
 
     # =============================================================================
     # AGENT MESSAGE HANDLER INTEGRATION TESTS (4 tests)
@@ -618,7 +618,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert stats["user_messages"] == 1
         assert stats["messages_processed"] == 1
         
-        self.logger.info("✅ AgentMessageHandler WebSocket integration successful")
+        self.logger.info(" PASS:  AgentMessageHandler WebSocket integration successful")
 
     @pytest.mark.asyncio
     async def test_agent_message_handler_routing_accuracy(self):
@@ -693,7 +693,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
             assert stats["messages_processed"] == 1, f"User {user_id} should have 1 processed message"
             assert stats["user_messages"] == 1, f"User {user_id} should have 1 user message"
             
-        self.logger.info("✅ AgentMessageHandler routing accuracy validated for multiple users")
+        self.logger.info(" PASS:  AgentMessageHandler routing accuracy validated for multiple users")
 
     @pytest.mark.asyncio
     async def test_agent_message_handler_multi_user_isolation(self):
@@ -776,7 +776,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert handler_b.websocket == websocket_b, "Handler B should use WebSocket B"
         assert handler_a.websocket != handler_b.websocket, "Handlers should use different WebSockets"
         
-        self.logger.info("✅ AgentMessageHandler multi-user isolation validated")
+        self.logger.info(" PASS:  AgentMessageHandler multi-user isolation validated")
 
     @pytest.mark.asyncio
     async def test_agent_message_handler_error_recovery(self):
@@ -850,7 +850,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         # Verify recovery successful
         assert recovery_result is True, "Handler should recover and process messages successfully"
         
-        self.logger.info("✅ AgentMessageHandler error recovery validated")
+        self.logger.info(" PASS:  AgentMessageHandler error recovery validated")
 
     # =============================================================================
     # AGENT EXECUTION CONTEXT ROUTING TESTS (4 tests)
@@ -916,7 +916,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         # Verify successful routing with context
         assert result is True, "Message should route successfully with execution context"
         
-        self.logger.info("✅ Agent execution context routing integration validated")
+        self.logger.info(" PASS:  Agent execution context routing integration validated")
 
     @pytest.mark.asyncio
     async def test_agent_context_to_websocket_mapping(self):
@@ -982,7 +982,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
                 
             assert result is True, f"Context {i} should route successfully to mapped WebSocket"
             
-        self.logger.info("✅ Agent context to WebSocket mapping validated")
+        self.logger.info(" PASS:  Agent context to WebSocket mapping validated")
 
     @pytest.mark.asyncio
     async def test_agent_execution_context_user_isolation(self):
@@ -1077,7 +1077,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert stats_a["user_messages"] == 1, "Handler A should have 1 user message"
         assert stats_b["user_messages"] == 1, "Handler B should have 1 user message"
         
-        self.logger.info("✅ Agent execution context user isolation validated")
+        self.logger.info(" PASS:  Agent execution context user isolation validated")
 
     @pytest.mark.asyncio
     async def test_agent_context_factory_pattern_routing(self):
@@ -1167,7 +1167,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert stats_1["user_messages"] == 1, "Handler 1 should have 1 message"
         assert stats_2["user_messages"] == 1, "Handler 2 should have 1 message"
         
-        self.logger.info("✅ Agent context factory pattern routing validated")
+        self.logger.info(" PASS:  Agent context factory pattern routing validated")
 
     # =============================================================================
     # AGENT TOOL INTEGRATION ROUTING TESTS (3 tests)
@@ -1240,7 +1240,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         stats = agent_handler.get_stats()
         assert stats["start_agent_requests"] == 1, "Should have 1 start_agent request with tools"
         
-        self.logger.info("✅ Tool dispatcher routing integration validated")
+        self.logger.info(" PASS:  Tool dispatcher routing integration validated")
 
     @pytest.mark.asyncio
     async def test_tool_execution_result_routing(self):
@@ -1323,7 +1323,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         
         self.assert_business_value_delivered(tool_results, 'insights')
         
-        self.logger.info("✅ Tool execution result routing validated")
+        self.logger.info(" PASS:  Tool execution result routing validated")
 
     @pytest.mark.asyncio
     async def test_tool_error_routing_to_user(self):
@@ -1395,7 +1395,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         # Note: This should not increment handler errors since this is a valid tool error message
         # The error count tracks handler routing errors, not tool execution errors
         
-        self.logger.info("✅ Tool error routing to user validated")
+        self.logger.info(" PASS:  Tool error routing to user validated")
 
     # =============================================================================
     # AGENT-TO-USER MESSAGE ROUTING TESTS (3 tests)  
@@ -1473,7 +1473,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         
         self.assert_business_value_delivered(response_data, 'cost_savings')
         
-        self.logger.info("✅ Agent response routing to user validated")
+        self.logger.info(" PASS:  Agent response routing to user validated")
 
     @pytest.mark.asyncio
     async def test_agent_streaming_response_routing(self):
@@ -1565,7 +1565,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         assert "savings" in final_chunk["content"], "Final chunk should contain savings information"
         assert "$" in final_chunk["content"], "Should include monetary value"
         
-        self.logger.info("✅ Agent streaming response routing validated")
+        self.logger.info(" PASS:  Agent streaming response routing validated")
 
     @pytest.mark.asyncio
     async def test_agent_final_response_routing(self):
@@ -1675,7 +1675,7 @@ class AgentMessageRoutingIntegrationTest(BaseIntegrationTest):
         
         self.assert_business_value_delivered(response_data, 'cost_savings')
         
-        self.logger.info("✅ Agent final response routing with comprehensive business value validated")
+        self.logger.info(" PASS:  Agent final response routing with comprehensive business value validated")
 
 
 # Test configuration for pytest

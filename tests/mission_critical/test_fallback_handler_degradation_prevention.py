@@ -96,7 +96,7 @@ class MockServiceController:
                 # Simulate None supervisor (race condition)
                 AgentRegistry._instance = None
                 self.disabled_services.add('agent_supervisor')
-                logger.warning("🚨 MockServiceController: Agent supervisor DISABLED - simulating race condition")
+                logger.warning(" ALERT:  MockServiceController: Agent supervisor DISABLED - simulating race condition")
     
     def disable_thread_service(self) -> None:
         """
@@ -113,7 +113,7 @@ class MockServiceController:
                 if hasattr(ThreadService, '_instance'):
                     ThreadService._instance = None
                 self.disabled_services.add('thread_service')
-                logger.warning("🚨 MockServiceController: Thread service DISABLED - simulating race condition")
+                logger.warning(" ALERT:  MockServiceController: Thread service DISABLED - simulating race condition")
     
     def set_startup_incomplete(self) -> None:
         """
@@ -129,14 +129,14 @@ class MockServiceController:
                 # For the purpose of this test, we'll use a mock startup incomplete state
                 # The actual startup state is managed by the smd StartupOrchestrator
                 self.disabled_services.add('startup_incomplete')
-                logger.warning("🚨 MockServiceController: Startup INCOMPLETE - simulating boot race condition")
+                logger.warning(" ALERT:  MockServiceController: Startup INCOMPLETE - simulating boot race condition")
     
     def disable_all_services(self) -> None:
         """Disable all services to test cascade failure prevention."""
         self.disable_agent_supervisor()
         self.disable_thread_service() 
         self.set_startup_incomplete()
-        logger.error("🚨 MockServiceController: ALL SERVICES DISABLED - testing cascade failure prevention")
+        logger.error(" ALERT:  MockServiceController: ALL SERVICES DISABLED - testing cascade failure prevention")
     
     def restore_all_services(self) -> None:
         """Restore all disabled services to original state."""
@@ -158,7 +158,7 @@ class MockServiceController:
                 # The original startup state was just a test simulation
                 self.disabled_services.discard('startup_incomplete')
                 
-            logger.info("✅ MockServiceController: All services RESTORED")
+            logger.info(" PASS:  MockServiceController: All services RESTORED")
     
     def is_service_disabled(self, service_name: str) -> bool:
         """Check if a service is currently disabled."""
@@ -361,7 +361,7 @@ class BusinessValueValidator:
         
         if has_fallback:
             error_message = (
-                f"🚨 FALLBACK HANDLER DETECTED in {context}: {patterns}\n"
+                f" ALERT:  FALLBACK HANDLER DETECTED in {context}: {patterns}\n"
                 f"Content sample: {content[:200]}...\n"
                 f"BUSINESS IMPACT: Users receiving mock responses instead of real AI agent value.\n"
                 f"This violates SSOT principles and provides no business value while appearing to 'work'."
@@ -383,7 +383,7 @@ class BusinessValueValidator:
         
         if not has_business_value:
             error_message = (
-                f"🚨 NO BUSINESS VALUE DETECTED in {context}\n"
+                f" ALERT:  NO BUSINESS VALUE DETECTED in {context}\n"
                 f"Content sample: {content[:200]}...\n"
                 f"BUSINESS IMPACT: Response lacks authentic AI agent insights.\n"
                 f"Users should receive actionable business value, not generic content."
@@ -430,14 +430,14 @@ class WebSocketTestClient:
         try:
             self.websocket = await self.auth_helper.connect_authenticated_websocket(timeout=timeout)
             self.is_connected = True
-            logger.info("✅ WebSocket test client connected successfully")
+            logger.info(" PASS:  WebSocket test client connected successfully")
             
         except Exception as e:
             error_message = f"WebSocket connection failed: {e}"
             
             # Check if failure might be due to fallback handlers
             if "fallback" in str(e).lower() or "mock" in str(e).lower():
-                error_message += "\n🚨 POSSIBLE FALLBACK HANDLER ISSUE: Connection failure may indicate fallback creation"
+                error_message += "\n ALERT:  POSSIBLE FALLBACK HANDLER ISSUE: Connection failure may indicate fallback creation"
             
             logger.error(error_message)
             raise AssertionError(error_message)
@@ -467,7 +467,7 @@ class WebSocketTestClient:
         }
         
         await self.websocket.send(json.dumps(request))
-        logger.info(f"📤 Sent agent request: {message[:50]}...")
+        logger.info(f"[U+1F4E4] Sent agent request: {message[:50]}...")
     
     async def receive_events(self, timeout: float = 30.0, expected_events: int = 5) -> List[Dict[str, Any]]:
         """
@@ -507,11 +507,11 @@ class WebSocketTestClient:
                         context=f"WebSocket event {event.get('type', 'unknown')}"
                     )
                     
-                    logger.info(f"📥 Received event: {event.get('type', 'unknown')}")
+                    logger.info(f"[U+1F4E5] Received event: {event.get('type', 'unknown')}")
                     
                     # Check for completion
                     if event.get('type') == 'agent_completed':
-                        logger.info("✅ Agent completed - checking for additional events")
+                        logger.info(" PASS:  Agent completed - checking for additional events")
                         # Brief wait for any additional events
                         await asyncio.sleep(0.5)
                         break
@@ -520,11 +520,11 @@ class WebSocketTestClient:
                     if len(events) == 0:
                         # No events received at all - potential fallback issue
                         raise AssertionError(
-                            f"🚨 NO EVENTS RECEIVED within {event_timeout}s - potential fallback handler blocking events"
+                            f" ALERT:  NO EVENTS RECEIVED within {event_timeout}s - potential fallback handler blocking events"
                         )
                     else:
                         # Some events received, continue waiting
-                        logger.warning(f"⏳ Timeout waiting for event {len(events)+1}, continuing...")
+                        logger.warning(f"[U+23F3] Timeout waiting for event {len(events)+1}, continuing...")
                         continue
         
         except Exception as e:
@@ -532,19 +532,19 @@ class WebSocketTestClient:
             
             # Enhanced error context for fallback detection
             if "fallback" in str(e).lower():
-                error_message += "\n🚨 FALLBACK HANDLER DETECTED during event reception"
+                error_message += "\n ALERT:  FALLBACK HANDLER DETECTED during event reception"
             elif len(events) == 0:
-                error_message += f"\n🚨 NO EVENTS RECEIVED - possible service unavailability or fallback blocking"
+                error_message += f"\n ALERT:  NO EVENTS RECEIVED - possible service unavailability or fallback blocking"
             elif len(events) < expected_events:
-                error_message += f"\n⚠️ INCOMPLETE EVENT SEQUENCE: {len(events)}/{expected_events} events received"
+                error_message += f"\n WARNING: [U+FE0F] INCOMPLETE EVENT SEQUENCE: {len(events)}/{expected_events} events received"
             
             raise AssertionError(error_message)
         
         # Validate received events
         if len(events) == 0:
-            raise AssertionError("🚨 ZERO EVENTS RECEIVED - indicates fallback handlers or service failure")
+            raise AssertionError(" ALERT:  ZERO EVENTS RECEIVED - indicates fallback handlers or service failure")
         
-        logger.info(f"✅ Received {len(events)} WebSocket events")
+        logger.info(f" PASS:  Received {len(events)} WebSocket events")
         return events
     
     async def disconnect(self) -> None:
@@ -552,7 +552,7 @@ class WebSocketTestClient:
         if self.websocket and self.is_connected:
             await self.websocket.close()
             self.is_connected = False
-            logger.info("🔌 WebSocket test client disconnected")
+            logger.info("[U+1F50C] WebSocket test client disconnected")
     
     def get_connection_duration(self) -> float:
         """Get connection duration in seconds."""
@@ -574,7 +574,7 @@ class WebSocketTestClient:
         
         if duration < min_duration:
             raise AssertionError(
-                f"🚨 SUSPICIOUSLY FAST PROCESSING: {duration:.2f}s < {min_duration}s\n"
+                f" ALERT:  SUSPICIOUSLY FAST PROCESSING: {duration:.2f}s < {min_duration}s\n"
                 f"BUSINESS IMPACT: Fast responses indicate mock/fallback handlers, not real AI processing.\n"
                 f"Users should receive authentic agent processing, not instant mock responses."
             )
@@ -640,7 +640,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         - Suspiciously fast processing (instant responses)
         - Generic or template-like content
         """
-        logger.info("🧪 TEST: Real agent provides authentic business value (BASELINE)")
+        logger.info("[U+1F9EA] TEST: Real agent provides authentic business value (BASELINE)")
         
         # Connect WebSocket with full real infrastructure
         await self.ws_client.connect(timeout=15.0)
@@ -652,19 +652,19 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         )
         
         await self.ws_client.send_agent_request(business_request)
-        logger.info("📤 Sent high-value business analysis request")
+        logger.info("[U+1F4E4] Sent high-value business analysis request")
         
         # Receive and validate all WebSocket events
         events = await self.ws_client.receive_events(timeout=60.0, expected_events=5)
         
         # Assert minimum event count
-        assert len(events) >= 5, f"🚨 INSUFFICIENT EVENTS: {len(events)}/5 - missing critical agent workflow events"
+        assert len(events) >= 5, f" ALERT:  INSUFFICIENT EVENTS: {len(events)}/5 - missing critical agent workflow events"
         
         # Validate WebSocket events for business value
         event_validation = self.validator.validate_websocket_events(events)
         
         assert event_validation['is_valid'], (
-            f"🚨 EVENT VALIDATION FAILED: {event_validation['failure_reason']}\n"
+            f" ALERT:  EVENT VALIDATION FAILED: {event_validation['failure_reason']}\n"
             f"Forbidden patterns: {event_validation['forbidden_patterns_detected']}\n"
             f"Required events present: {event_validation['required_events_present']}"
         )
@@ -674,18 +674,18 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         
         # Find agent_completed event for final response validation
         completed_events = [e for e in events if e.get('type') == 'agent_completed']
-        assert len(completed_events) > 0, "🚨 NO AGENT_COMPLETED EVENT - incomplete agent workflow"
+        assert len(completed_events) > 0, " ALERT:  NO AGENT_COMPLETED EVENT - incomplete agent workflow"
         
         final_response = completed_events[0].get('content', '')
         assert len(final_response) > 50, (
-            f"🚨 INSUFFICIENT RESPONSE LENGTH: {len(final_response)} chars - indicates mock/template response"
+            f" ALERT:  INSUFFICIENT RESPONSE LENGTH: {len(final_response)} chars - indicates mock/template response"
         )
         
         # Validate final response contains authentic business value
         self.validator.assert_has_business_value(final_response, context="final agent response")
         self.validator.assert_no_fallback_patterns(final_response, context="final agent response")
         
-        logger.success("✅ BASELINE PASSED: Real agent provides authentic business value")
+        logger.success(" PASS:  BASELINE PASSED: Real agent provides authentic business value")
     
     async def test_agent_supervisor_unavailable_should_fail_hard(self):
         """
@@ -705,11 +705,11 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         
         CRITICAL: Any fallback response should cause test FAILURE.
         """
-        logger.info("🧪 TEST: Agent supervisor unavailable should fail hard")
+        logger.info("[U+1F9EA] TEST: Agent supervisor unavailable should fail hard")
         
         # Step 1: Connect WebSocket with real infrastructure first
         await self.ws_client.connect(timeout=10.0)
-        logger.info("✅ WebSocket connected with real supervisor")
+        logger.info(" PASS:  WebSocket connected with real supervisor")
         
         # Step 2: Disable agent supervisor to simulate race condition
         self.service_controller.disable_agent_supervisor()
@@ -717,7 +717,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         # Step 3: Send agent request that would trigger fallback handler
         try:
             await self.ws_client.send_agent_request("Test message requiring supervisor")
-            logger.info("📤 Sent request with supervisor unavailable")
+            logger.info("[U+1F4E4] Sent request with supervisor unavailable")
             
             # Step 4: Attempt to receive events - should fail or get proper error
             try:
@@ -747,20 +747,20 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                             context="non-error response during supervisor unavailability"
                         )
                         
-                logger.warning("⚠️ System continued processing despite supervisor unavailability - validating response quality")
+                logger.warning(" WARNING: [U+FE0F] System continued processing despite supervisor unavailability - validating response quality")
                 
             except AssertionError as e:
                 # Expected outcome - system should fail when supervisor unavailable
                 if "FALLBACK HANDLER DETECTED" in str(e):
                     # CRITICAL FAILURE: Fallback handler was used
                     raise AssertionError(
-                        f"🚨 CRITICAL FAILURE: Fallback handler created when supervisor unavailable\n"
+                        f" ALERT:  CRITICAL FAILURE: Fallback handler created when supervisor unavailable\n"
                         f"BUSINESS IMPACT: Users receiving mock responses instead of proper error/waiting.\n"
                         f"Original error: {e}"
                     )
                 else:
                     # Good outcome - system failed appropriately
-                    logger.success(f"✅ EXPECTED FAILURE: System failed appropriately when supervisor unavailable: {e}")
+                    logger.success(f" PASS:  EXPECTED FAILURE: System failed appropriately when supervisor unavailable: {e}")
                     return
             
             except Exception as e:
@@ -768,11 +768,11 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                 error_msg = str(e)
                 if "fallback" in error_msg.lower() or "mock" in error_msg.lower():
                     raise AssertionError(
-                        f"🚨 FALLBACK DETECTED in error handling: {error_msg}\n"
+                        f" ALERT:  FALLBACK DETECTED in error handling: {error_msg}\n"
                         f"System should fail cleanly without fallback references."
                     )
                 else:
-                    logger.success(f"✅ EXPECTED FAILURE: System failed cleanly when supervisor unavailable: {error_msg}")
+                    logger.success(f" PASS:  EXPECTED FAILURE: System failed cleanly when supervisor unavailable: {error_msg}")
                     return
         
         except Exception as e:
@@ -780,14 +780,14 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
             error_msg = str(e)
             if "fallback" in error_msg.lower():
                 raise AssertionError(
-                    f"🚨 FALLBACK DETECTED during send: {error_msg}\n"
+                    f" ALERT:  FALLBACK DETECTED during send: {error_msg}\n"
                     f"System should fail without creating fallback handlers."
                 )
             else:
-                logger.success(f"✅ EXPECTED FAILURE: System failed to send when supervisor unavailable: {error_msg}")
+                logger.success(f" PASS:  EXPECTED FAILURE: System failed to send when supervisor unavailable: {error_msg}")
                 return
         
-        logger.success("✅ PASSED: No fallback handlers created during supervisor unavailability")
+        logger.success(" PASS:  PASSED: No fallback handlers created during supervisor unavailability")
     
     async def test_thread_service_unavailable_should_fail_hard(self):
         """
@@ -805,11 +805,11 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         
         CRITICAL: No thread service fallback handlers should be created.
         """
-        logger.info("🧪 TEST: Thread service unavailable should fail hard")
+        logger.info("[U+1F9EA] TEST: Thread service unavailable should fail hard")
         
         # Connect WebSocket with real infrastructure
         await self.ws_client.connect(timeout=10.0)
-        logger.info("✅ WebSocket connected with real thread service")
+        logger.info(" PASS:  WebSocket connected with real thread service")
         
         # Disable thread service to simulate race condition
         self.service_controller.disable_thread_service()
@@ -817,7 +817,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         # Send message requiring thread management
         try:
             await self.ws_client.send_agent_request("Create a new analysis thread for cost optimization")
-            logger.info("📤 Sent thread management request with thread service unavailable")
+            logger.info("[U+1F4E4] Sent thread management request with thread service unavailable")
             
             # Attempt to receive events - should fail appropriately
             try:
@@ -829,7 +829,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                     # Check for thread service specific fallback patterns
                     if re.search(r'thread.*fallback|mock.*thread|temporary.*thread', event_content, re.IGNORECASE):
                         raise AssertionError(
-                            f"🚨 THREAD SERVICE FALLBACK DETECTED: {event_content[:200]}...\n"
+                            f" ALERT:  THREAD SERVICE FALLBACK DETECTED: {event_content[:200]}...\n"
                             f"Thread operations should fail hard, not use fallback thread management."
                         )
                     
@@ -838,36 +838,36 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                         context="event during thread service unavailability"
                     )
                 
-                logger.warning("⚠️ System processed thread request despite thread service unavailability")
+                logger.warning(" WARNING: [U+FE0F] System processed thread request despite thread service unavailability")
                 
             except AssertionError as e:
                 if "FALLBACK HANDLER DETECTED" in str(e) or "THREAD SERVICE FALLBACK" in str(e):
                     raise AssertionError(
-                        f"🚨 CRITICAL FAILURE: Thread service fallback handler created\n"
+                        f" ALERT:  CRITICAL FAILURE: Thread service fallback handler created\n"
                         f"BUSINESS IMPACT: Mock thread management instead of proper failure.\n"
                         f"Original error: {e}"
                     )
                 else:
-                    logger.success(f"✅ EXPECTED FAILURE: System failed appropriately without thread service: {e}")
+                    logger.success(f" PASS:  EXPECTED FAILURE: System failed appropriately without thread service: {e}")
                     return
             
             except Exception as e:
                 error_msg = str(e)
                 if "thread" in error_msg.lower() and "fallback" in error_msg.lower():
-                    raise AssertionError(f"🚨 THREAD FALLBACK DETECTED: {error_msg}")
+                    raise AssertionError(f" ALERT:  THREAD FALLBACK DETECTED: {error_msg}")
                 else:
-                    logger.success(f"✅ EXPECTED FAILURE: System failed cleanly without thread service: {error_msg}")
+                    logger.success(f" PASS:  EXPECTED FAILURE: System failed cleanly without thread service: {error_msg}")
                     return
         
         except Exception as e:
             error_msg = str(e)
             if "fallback" in error_msg.lower() and "thread" in error_msg.lower():
-                raise AssertionError(f"🚨 THREAD FALLBACK in send operation: {error_msg}")
+                raise AssertionError(f" ALERT:  THREAD FALLBACK in send operation: {error_msg}")
             else:
-                logger.success(f"✅ EXPECTED FAILURE: Send failed appropriately without thread service: {error_msg}")
+                logger.success(f" PASS:  EXPECTED FAILURE: Send failed appropriately without thread service: {error_msg}")
                 return
         
-        logger.success("✅ PASSED: No thread service fallback handlers created")
+        logger.success(" PASS:  PASSED: No thread service fallback handlers created")
     
     async def test_startup_incomplete_should_wait_or_fail_not_fallback(self):
         """
@@ -885,7 +885,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         
         CRITICAL: No startup fallback content should be delivered to users.
         """
-        logger.info("🧪 TEST: Startup incomplete should wait or fail, not fallback")
+        logger.info("[U+1F9EA] TEST: Startup incomplete should wait or fail, not fallback")
         
         # Force startup incomplete to simulate boot race condition
         self.service_controller.set_startup_incomplete()
@@ -893,12 +893,12 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         # Attempt WebSocket connection during startup
         try:
             await self.ws_client.connect(timeout=15.0)  # Longer timeout for potential waiting
-            logger.info("✅ WebSocket connected despite incomplete startup")
+            logger.info(" PASS:  WebSocket connected despite incomplete startup")
             
             # Send agent request during incomplete startup
             try:
                 await self.ws_client.send_agent_request("Test request during system startup")
-                logger.info("📤 Sent request during incomplete startup")
+                logger.info("[U+1F4E4] Sent request during incomplete startup")
                 
                 # Attempt to receive events
                 try:
@@ -910,7 +910,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                         # Check for startup-specific fallback patterns
                         if re.search(r'startup.*fallback|boot.*mock|initialization.*temporary', event_content, re.IGNORECASE):
                             raise AssertionError(
-                                f"🚨 STARTUP FALLBACK DETECTED: {event_content[:200]}...\n"
+                                f" ALERT:  STARTUP FALLBACK DETECTED: {event_content[:200]}...\n"
                                 f"System should wait for complete startup, not provide startup fallback content."
                             )
                         
@@ -930,45 +930,45 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                                 context="response during startup (non-startup-error)"
                             )
                     
-                    logger.warning("⚠️ System processed request despite incomplete startup - validating response quality")
+                    logger.warning(" WARNING: [U+FE0F] System processed request despite incomplete startup - validating response quality")
                     
                 except AssertionError as e:
                     if "FALLBACK HANDLER DETECTED" in str(e) or "STARTUP FALLBACK" in str(e):
                         raise AssertionError(
-                            f"🚨 CRITICAL FAILURE: Startup fallback handler created\n"
+                            f" ALERT:  CRITICAL FAILURE: Startup fallback handler created\n"
                             f"BUSINESS IMPACT: Mock startup responses instead of proper waiting/error.\n"
                             f"Original error: {e}"
                         )
                     else:
-                        logger.success(f"✅ EXPECTED BEHAVIOR: System handled startup appropriately: {e}")
+                        logger.success(f" PASS:  EXPECTED BEHAVIOR: System handled startup appropriately: {e}")
                         return
                 
                 except Exception as e:
                     error_msg = str(e)
                     if "startup" in error_msg.lower() and "fallback" in error_msg.lower():
-                        raise AssertionError(f"🚨 STARTUP FALLBACK DETECTED: {error_msg}")
+                        raise AssertionError(f" ALERT:  STARTUP FALLBACK DETECTED: {error_msg}")
                     else:
-                        logger.success(f"✅ EXPECTED BEHAVIOR: System failed/waited appropriately during startup: {error_msg}")
+                        logger.success(f" PASS:  EXPECTED BEHAVIOR: System failed/waited appropriately during startup: {error_msg}")
                         return
             
             except Exception as e:
                 error_msg = str(e)
                 if "fallback" in error_msg.lower():
-                    raise AssertionError(f"🚨 FALLBACK DETECTED during startup send: {error_msg}")
+                    raise AssertionError(f" ALERT:  FALLBACK DETECTED during startup send: {error_msg}")
                 else:
-                    logger.success(f"✅ EXPECTED BEHAVIOR: Send operation handled startup appropriately: {error_msg}")
+                    logger.success(f" PASS:  EXPECTED BEHAVIOR: Send operation handled startup appropriately: {error_msg}")
                     return
         
         except Exception as e:
             # Connection failed during startup - this is acceptable behavior
             error_msg = str(e)
             if "fallback" in error_msg.lower():
-                raise AssertionError(f"🚨 STARTUP FALLBACK in connection: {error_msg}")
+                raise AssertionError(f" ALERT:  STARTUP FALLBACK in connection: {error_msg}")
             else:
-                logger.success(f"✅ EXPECTED BEHAVIOR: Connection handled incomplete startup appropriately: {error_msg}")
+                logger.success(f" PASS:  EXPECTED BEHAVIOR: Connection handled incomplete startup appropriately: {error_msg}")
                 return
         
-        logger.success("✅ PASSED: No startup fallback handlers created during incomplete startup")
+        logger.success(" PASS:  PASSED: No startup fallback handlers created during incomplete startup")
     
     async def test_multiple_service_failures_should_not_cascade_to_fallbacks(self):
         """
@@ -985,23 +985,23 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
         This scenario tests the most dangerous anti-pattern where multiple
         service failures lead to cascading fallback creation.
         """
-        logger.info("🧪 TEST: Multiple service failures should not cascade to fallbacks")
+        logger.info("[U+1F9EA] TEST: Multiple service failures should not cascade to fallbacks")
         
         # Disable ALL services to test cascade failure prevention
         self.service_controller.disable_all_services()
-        logger.error("🚨 ALL SERVICES DISABLED - testing cascade failure prevention")
+        logger.error(" ALERT:  ALL SERVICES DISABLED - testing cascade failure prevention")
         
         # Attempt WebSocket connection with all services down
         try:
             await self.ws_client.connect(timeout=10.0)
-            logger.warning("⚠️ WebSocket connected despite all services being disabled")
+            logger.warning(" WARNING: [U+FE0F] WebSocket connected despite all services being disabled")
             
             # Send high-value business request
             try:
                 await self.ws_client.send_agent_request(
                     "Provide comprehensive cost optimization analysis with detailed recommendations"
                 )
-                logger.info("📤 Sent business request with all services disabled")
+                logger.info("[U+1F4E4] Sent business request with all services disabled")
                 
                 # Attempt to receive events
                 try:
@@ -1033,7 +1033,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                     # CRITICAL FAILURE: Multiple fallback patterns detected
                     if fallback_count > 1:
                         raise AssertionError(
-                            f"🚨 CRITICAL FAILURE: CASCADING FALLBACK HANDLERS DETECTED\n"
+                            f" ALERT:  CRITICAL FAILURE: CASCADING FALLBACK HANDLERS DETECTED\n"
                             f"Fallback count: {fallback_count}\n"
                             f"Cascade patterns: {cascade_patterns}\n"
                             f"BUSINESS IMPACT: Multiple mock services masking system failures.\n"
@@ -1043,13 +1043,13 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                     # CRITICAL FAILURE: Any fallback patterns during multiple service failure
                     if fallback_count > 0:
                         raise AssertionError(
-                            f"🚨 CRITICAL FAILURE: Fallback handlers during multiple service failures\n"
+                            f" ALERT:  CRITICAL FAILURE: Fallback handlers during multiple service failures\n"
                             f"Patterns detected: {cascade_patterns}\n"
                             f"BUSINESS IMPACT: Mock responses masking critical system failure.\n"
                             f"Users should get clear error, not degraded mock functionality."
                         )
                     
-                    logger.warning("⚠️ System somehow processed request despite all services disabled - unusual but validating response")
+                    logger.warning(" WARNING: [U+FE0F] System somehow processed request despite all services disabled - unusual but validating response")
                     
                     # If system somehow processed successfully, validate it's authentic
                     completed_events = [e for e in events if e.get('type') == 'agent_completed']
@@ -1059,7 +1059,7 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                             final_response, 
                             context="response despite multiple service failures"
                         )
-                        logger.info("✅ Response contains authentic business value despite service issues")
+                        logger.info(" PASS:  Response contains authentic business value despite service issues")
                 
                 except AssertionError as e:
                     if "CASCADING FALLBACK" in str(e) or "FALLBACK HANDLERS" in str(e):
@@ -1067,35 +1067,35 @@ class TestFallbackHandlerDegradationPrevention(BaseE2ETest):
                         raise e
                     else:
                         # Expected behavior - system failed appropriately
-                        logger.success(f"✅ EXPECTED BEHAVIOR: System failed appropriately with multiple service failures: {e}")
+                        logger.success(f" PASS:  EXPECTED BEHAVIOR: System failed appropriately with multiple service failures: {e}")
                         return
                 
                 except Exception as e:
                     error_msg = str(e)
                     if "cascade" in error_msg.lower() or "multiple.*fallback" in error_msg.lower():
-                        raise AssertionError(f"🚨 CASCADE FALLBACK DETECTED: {error_msg}")
+                        raise AssertionError(f" ALERT:  CASCADE FALLBACK DETECTED: {error_msg}")
                     else:
-                        logger.success(f"✅ EXPECTED BEHAVIOR: System failed cleanly with multiple service failures: {error_msg}")
+                        logger.success(f" PASS:  EXPECTED BEHAVIOR: System failed cleanly with multiple service failures: {error_msg}")
                         return
             
             except Exception as e:
                 error_msg = str(e)
                 if "fallback" in error_msg.lower():
-                    raise AssertionError(f"🚨 FALLBACK DETECTED during send with multiple service failures: {error_msg}")
+                    raise AssertionError(f" ALERT:  FALLBACK DETECTED during send with multiple service failures: {error_msg}")
                 else:
-                    logger.success(f"✅ EXPECTED BEHAVIOR: Send failed appropriately with multiple service failures: {error_msg}")
+                    logger.success(f" PASS:  EXPECTED BEHAVIOR: Send failed appropriately with multiple service failures: {error_msg}")
                     return
         
         except Exception as e:
             # Connection failed with multiple services down - this is expected
             error_msg = str(e)
             if "fallback" in error_msg.lower() or "cascade" in error_msg.lower():
-                raise AssertionError(f"🚨 CASCADE FALLBACK in connection: {error_msg}")
+                raise AssertionError(f" ALERT:  CASCADE FALLBACK in connection: {error_msg}")
             else:
-                logger.success(f"✅ EXPECTED BEHAVIOR: Connection failed cleanly with multiple service failures: {error_msg}")
+                logger.success(f" PASS:  EXPECTED BEHAVIOR: Connection failed cleanly with multiple service failures: {error_msg}")
                 return
         
-        logger.success("✅ PASSED: No cascading fallback handlers created during multiple service failures")
+        logger.success(" PASS:  PASSED: No cascading fallback handlers created during multiple service failures")
 
 
 if __name__ == "__main__":
@@ -1120,10 +1120,10 @@ if __name__ == "__main__":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
         # Direct execution
-        print("🧪 MISSION CRITICAL: Fallback Handler Degradation Prevention Test Suite")
-        print("📋 This suite tests for fallback handler anti-patterns that degrade business value")
-        print("⚠️  Tests are designed to FAIL HARD when fallback handlers are detected")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] MISSION CRITICAL: Fallback Handler Degradation Prevention Test Suite")
+        print("[U+1F4CB] This suite tests for fallback handler anti-patterns that degrade business value")
+        print(" WARNING: [U+FE0F]  Tests are designed to FAIL HARD when fallback handlers are detected")
+        print("[U+1F680] Starting test execution...")
         
         # Run pytest with specific markers
         exit_code = pytest.main([
@@ -1136,8 +1136,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: No fallback handler degradation detected")
+            print(" PASS:  ALL TESTS PASSED: No fallback handler degradation detected")
         else:
-            print("🚨 TEST FAILURES: Fallback handler degradation detected - BLOCKS DEPLOYMENT")
+            print(" ALERT:  TEST FAILURES: Fallback handler degradation detected - BLOCKS DEPLOYMENT")
             
         sys.exit(exit_code)

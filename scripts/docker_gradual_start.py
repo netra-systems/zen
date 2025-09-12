@@ -35,12 +35,12 @@ def check_docker_desktop():
         )
         return "RUNNING" in result.stdout
     except Exception as e:
-        print(f"❌ Error checking Docker Desktop: {e}")
+        print(f" FAIL:  Error checking Docker Desktop: {e}")
         return False
 
 def wait_for_docker_desktop():
     """Wait for Docker Desktop to be ready."""
-    print("⏳ Waiting for Docker Desktop to be ready...")
+    print("[U+23F3] Waiting for Docker Desktop to be ready...")
     
     max_attempts = 30
     for attempt in range(max_attempts):
@@ -53,7 +53,7 @@ def wait_for_docker_desktop():
                     timeout=5
                 )
                 if result.returncode == 0:
-                    print("✅ Docker Desktop is ready")
+                    print(" PASS:  Docker Desktop is ready")
                     return True
             except:
                 pass
@@ -62,7 +62,7 @@ def wait_for_docker_desktop():
             print(f"  Attempt {attempt + 1}/{max_attempts} - Docker not ready, waiting 5 seconds...")
             time.sleep(5)
     
-    print("❌ Docker Desktop failed to start")
+    print(" FAIL:  Docker Desktop failed to start")
     return False
 
 def check_container_health(container_name):
@@ -80,7 +80,7 @@ def check_container_health(container_name):
 
 def start_service_gradually(service_name, compose_file="docker-compose.yml", delay=5):
     """Start a single Docker service and wait for it to be healthy."""
-    print(f"\n🚀 Starting {service_name}...")
+    print(f"\n[U+1F680] Starting {service_name}...")
     
     try:
         # Start the specific service
@@ -101,7 +101,7 @@ def start_service_gradually(service_name, compose_file="docker-compose.yml", del
         )
         
         if result.returncode != 0:
-            print(f"❌ Failed to start {service_name}")
+            print(f" FAIL:  Failed to start {service_name}")
             print(f"   Error: {result.stderr}")
             return False
         
@@ -115,21 +115,21 @@ def start_service_gradually(service_name, compose_file="docker-compose.yml", del
         
         for i in range(max_health_checks):
             if check_container_health(container_name):
-                print(f"✅ {service_name} is healthy")
+                print(f" PASS:  {service_name} is healthy")
                 return True
             
             if i < max_health_checks - 1:
                 print(f"   Health check {i+1}/{max_health_checks} - waiting 3 seconds...")
                 time.sleep(3)
         
-        print(f"⚠️  {service_name} started but health check timed out")
+        print(f" WARNING: [U+FE0F]  {service_name} started but health check timed out")
         return True  # Continue anyway
         
     except subprocess.TimeoutExpired:
-        print(f"❌ Timeout starting {service_name}")
+        print(f" FAIL:  Timeout starting {service_name}")
         return False
     except Exception as e:
-        print(f"❌ Error starting {service_name}: {e}")
+        print(f" FAIL:  Error starting {service_name}: {e}")
         return False
 
 def start_all_services_gradually():
@@ -153,7 +153,7 @@ def start_all_services_gradually():
     
     # Check Docker Desktop first
     if not wait_for_docker_desktop():
-        print("\n❌ Docker Desktop is not running!")
+        print("\n FAIL:  Docker Desktop is not running!")
         print("Please start Docker Desktop and try again.")
         return False
     
@@ -166,23 +166,23 @@ def start_all_services_gradually():
             successful.append(service)
         else:
             failed.append(service)
-            print(f"\n⚠️  Continuing despite {service} failure...")
+            print(f"\n WARNING: [U+FE0F]  Continuing despite {service} failure...")
     
     # Summary
     print("\n" + "=" * 60)
     print("STARTUP SUMMARY")
     print("=" * 60)
-    print(f"✅ Successfully started: {', '.join(successful) if successful else 'None'}")
+    print(f" PASS:  Successfully started: {', '.join(successful) if successful else 'None'}")
     
     if failed:
-        print(f"❌ Failed to start: {', '.join(failed)}")
+        print(f" FAIL:  Failed to start: {', '.join(failed)}")
         print("\nTo check logs for failed services:")
         for service in failed:
             print(f"  docker-compose logs {service}")
     
     # Final health check
     if successful:
-        print("\n🔍 Final health check...")
+        print("\n SEARCH:  Final health check...")
         time.sleep(3)
         
         try:
@@ -200,11 +200,11 @@ def start_all_services_gradually():
                 try:
                     response = requests.get("http://localhost:8000/health", timeout=2)
                     if response.status_code == 200:
-                        print("\n✅ Backend health check passed!")
+                        print("\n PASS:  Backend health check passed!")
                     else:
-                        print(f"\n⚠️  Backend returned status {response.status_code}")
+                        print(f"\n WARNING: [U+FE0F]  Backend returned status {response.status_code}")
                 except Exception as e:
-                    print(f"\n⚠️  Could not reach backend: {e}")
+                    print(f"\n WARNING: [U+FE0F]  Could not reach backend: {e}")
         except:
             pass
     
@@ -212,7 +212,7 @@ def start_all_services_gradually():
 
 def stop_all_services():
     """Stop all Docker services."""
-    print("\n🛑 Stopping all services...")
+    print("\n[U+1F6D1] Stopping all services...")
     
     try:
         result = subprocess.run(
@@ -224,11 +224,11 @@ def stop_all_services():
         )
         
         if result.returncode == 0:
-            print("✅ All services stopped")
+            print(" PASS:  All services stopped")
         else:
-            print(f"⚠️  Error stopping services: {result.stderr}")
+            print(f" WARNING: [U+FE0F]  Error stopping services: {result.stderr}")
     except Exception as e:
-        print(f"❌ Failed to stop services: {e}")
+        print(f" FAIL:  Failed to stop services: {e}")
 
 def main():
     """Main entry point."""
@@ -251,7 +251,7 @@ def main():
     args = parser.parse_args()
     
     if platform.system() != 'Windows':
-        print("⚠️  This script is designed for Windows.")
+        print(" WARNING: [U+FE0F]  This script is designed for Windows.")
         print("On other platforms, use: docker-compose up -d")
         
         if input("Continue anyway? (y/n): ").lower() != 'y':

@@ -2,7 +2,7 @@
 Real UserWebSocketEmitter Integration Tests - Per-User Event Emission with Complete Isolation
 
 Business Value Justification:
-- Segment: Platform/Internal + ALL (Free → Enterprise) 
+- Segment: Platform/Internal + ALL (Free  ->  Enterprise) 
 - Business Goal: User Isolation & Chat Value Delivery
 - Value Impact: Ensures WebSocket events reach only intended users, enabling secure multi-user chat
 - Strategic Impact: Critical for $500K+ ARR - prevents cross-user event leakage, delivers real AI value
@@ -219,7 +219,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         assert "uptime_seconds" in stats, "Uptime metrics missing"
         assert "success_rate" in stats, "Success rate metrics missing"
         
-        logger.info(f"✅ UserWebSocketEmitter initialized successfully for authenticated user")
+        logger.info(f" PASS:  UserWebSocketEmitter initialized successfully for authenticated user")
     
     @pytest.mark.asyncio
     async def test_agent_started_event_real_delivery(
@@ -279,7 +279,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         assert stats["events_failed"] == 0, "No events should have failed"
         assert stats["success_rate"] == 100.0, "Success rate should be 100%"
         
-        logger.info(f"✅ Agent started event delivered successfully through real WebSocket")
+        logger.info(f" PASS:  Agent started event delivered successfully through real WebSocket")
     
     @pytest.mark.asyncio
     async def test_all_critical_websocket_events_real(
@@ -359,7 +359,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
             assert "timestamp" in event_data, f"Timestamp missing in {expected_type}"
             assert "payload" in event_data, f"Payload missing in {expected_type}"
             
-            logger.info(f"✅ Received and validated {expected_type} event")
+            logger.info(f" PASS:  Received and validated {expected_type} event")
         
         # Validate emitter final stats
         final_stats = emitter.get_stats()
@@ -367,7 +367,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         assert final_stats["events_failed"] == 0, "No events should have failed"
         assert final_stats["success_rate"] == 100.0, "Perfect success rate expected"
         
-        logger.info(f"✅ All {len(expected_event_types)} critical WebSocket events validated")
+        logger.info(f" PASS:  All {len(expected_event_types)} critical WebSocket events validated")
     
     @pytest.mark.asyncio
     async def test_event_sanitization_business_ip_protection(
@@ -428,7 +428,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         assert tool_input["query"] == "user search query", "Safe query data modified"
         assert tool_input["normal_param"] == "safe_value", "Normal param modified"
         
-        logger.info("✅ Business IP protection validated through event sanitization")
+        logger.info(" PASS:  Business IP protection validated through event sanitization")
     
     @pytest.mark.asyncio
     async def test_concurrent_user_isolation_real(
@@ -509,7 +509,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
                 assert event_data["thread_id"] == expected_thread_id, f"Thread ID mismatch for user {i}"
                 assert event_data["payload"]["metadata"]["user_index"] == expected_user_index, f"Wrong user data for user {i}"
                 
-                logger.info(f"✅ User {i+1} received only their own event")
+                logger.info(f" PASS:  User {i+1} received only their own event")
             
             # Validate no additional events received (no cross-user leakage)
             for i, websocket in enumerate(websockets):
@@ -517,7 +517,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
                     # This should timeout - no additional events should be received
                     await asyncio.wait_for(websocket.recv(), timeout=2.0)
                 
-                logger.info(f"✅ User {i+1} received no additional events - isolation confirmed")
+                logger.info(f" PASS:  User {i+1} received no additional events - isolation confirmed")
                 
         finally:
             # Cleanup all connections
@@ -525,7 +525,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
                 if websocket:
                     await websocket.close()
         
-        logger.info(f"✅ Complete user isolation validated with {num_users} concurrent users")
+        logger.info(f" PASS:  Complete user isolation validated with {num_users} concurrent users")
     
     @pytest.mark.asyncio
     async def test_websocket_error_handling_real_failure_scenarios(
@@ -560,7 +560,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         assert stats["events_failed"] == 1, "One event should have failed"
         assert stats["success_rate"] == 0.0, "Success rate should be 0%"
         
-        logger.info("✅ Error handling validated - system handles connection failures gracefully")
+        logger.info(" PASS:  Error handling validated - system handles connection failures gracefully")
 
 
 # Test configuration and setup

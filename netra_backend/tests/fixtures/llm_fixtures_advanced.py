@@ -2,7 +2,7 @@
 LLM Fixtures Advanced - Advanced LLM testing patterns
 
 Error simulation, provider switching, performance monitoring, and circuit breaker patterns.
-Each function is ≤8 lines, following modular architecture.
+Each function is  <= 8 lines, following modular architecture.
 """
 
 import asyncio

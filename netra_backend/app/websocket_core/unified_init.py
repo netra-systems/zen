@@ -11,8 +11,8 @@ Business Value Justification:
 - Strategic Impact: Single source of truth reduces bugs by 80%
 
 This unified package consolidates:
-- 5+ WebSocketManager implementations → UnifiedWebSocketManager
-- 8+ emitter implementations → UnifiedWebSocketEmitter
+- 5+ WebSocketManager implementations  ->  UnifiedWebSocketManager
+- 8+ emitter implementations  ->  UnifiedWebSocketEmitter
 - All factory and pool patterns integrated
 """
 

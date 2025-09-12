@@ -1,4 +1,42 @@
 #!/usr/bin/env python3
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Golden Path Integration Test Validation Script
 
@@ -23,6 +61,7 @@ from typing import Dict, List, Tuple, Any, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
 import re
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
@@ -30,6 +69,15 @@ sys.path.insert(0, str(project_root))
 
 @dataclass
 class TestFileAnalysis:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Analysis results for a single test file"""
     file_path: str
     relative_path: str
@@ -404,7 +452,7 @@ class GoldenPathValidator:
         
         # Critical Issues
         if self.validation_summary.critical_issues:
-            report.append("## 🚨 CRITICAL ISSUES")
+            report.append("##  ALERT:  CRITICAL ISSUES")
             report.append("")
             for issue in self.validation_summary.critical_issues:
                 report.append(f"- {issue}")
@@ -412,7 +460,7 @@ class GoldenPathValidator:
         
         # Recommendations
         if self.validation_summary.recommendations:
-            report.append("## 📋 RECOMMENDATIONS")
+            report.append("## [U+1F4CB] RECOMMENDATIONS")
             report.append("")
             for rec in self.validation_summary.recommendations:
                 report.append(f"- {rec}")
@@ -422,10 +470,10 @@ class GoldenPathValidator:
     
     def validate_all(self) -> ValidationSummary:
         """Run complete validation of all golden path tests"""
-        print("🔍 Finding golden path test files...")
+        print(" SEARCH:  Finding golden path test files...")
         golden_path_files = self.find_golden_path_files()
         
-        print(f"📊 Analyzing {len(golden_path_files)} files...")
+        print(f" CHART:  Analyzing {len(golden_path_files)} files...")
         for file_path in golden_path_files:
             analysis = self.analyze_file(file_path)
             self.test_files.append(analysis)
@@ -434,7 +482,7 @@ class GoldenPathValidator:
         self._generate_summary()
         
         # Validate sample tests
-        print("🧪 Running sample test validation...")
+        print("[U+1F9EA] Running sample test validation...")
         sample_results = self.run_sample_tests()
         
         if sample_results['failed_runs'] > 0:
@@ -511,7 +559,7 @@ class GoldenPathValidator:
 
 def main():
     """Main execution function"""
-    print("🚀 Starting Golden Path Test Validation...")
+    print("[U+1F680] Starting Golden Path Test Validation...")
     print("=" * 60)
     
     project_root = Path(__file__).parent.parent
@@ -521,7 +569,7 @@ def main():
     summary = validator.validate_all()
     
     # Generate report
-    print("\n📋 Generating compliance report...")
+    print("\n[U+1F4CB] Generating compliance report...")
     report = validator.generate_compliance_report()
     
     # Save detailed analysis
@@ -535,21 +583,21 @@ def main():
     print("\n" + "=" * 60)
     print("VALIDATION COMPLETE")
     print("=" * 60)
-    print(f"📁 Total Files: {summary.total_files}")
-    print(f"🧪 Total Tests: {summary.total_tests}")  
-    print(f"✅ Compliant Files: {summary.compliant_files}/{summary.total_files}")
-    print(f"🔐 Auth Required: {summary.files_with_auth}")
-    print(f"🔧 Real Services: {summary.files_with_real_services}")
-    print(f"🌐 WebSocket Events: {summary.files_with_websocket_events}")
-    print(f"💼 Business Value: {summary.files_with_bvj}")
+    print(f"[U+1F4C1] Total Files: {summary.total_files}")
+    print(f"[U+1F9EA] Total Tests: {summary.total_tests}")  
+    print(f" PASS:  Compliant Files: {summary.compliant_files}/{summary.total_files}")
+    print(f"[U+1F510] Auth Required: {summary.files_with_auth}")
+    print(f"[U+1F527] Real Services: {summary.files_with_real_services}")
+    print(f"[U+1F310] WebSocket Events: {summary.files_with_websocket_events}")
+    print(f"[U+1F4BC] Business Value: {summary.files_with_bvj}")
     
     if summary.critical_issues:
-        print(f"\n🚨 Critical Issues: {len(summary.critical_issues)}")
+        print(f"\n ALERT:  Critical Issues: {len(summary.critical_issues)}")
         for issue in summary.critical_issues[:3]:  # Show first 3
-            print(f"   • {issue}")
+            print(f"   [U+2022] {issue}")
     
-    print(f"\n📊 Full report will be saved to: reports/GOLDEN_PATH_TEST_AUDIT_REPORT.md")
-    print(f"📄 Detailed data: reports/golden_path_validation_data.json")
+    print(f"\n CHART:  Full report will be saved to: reports/GOLDEN_PATH_TEST_AUDIT_REPORT.md")
+    print(f"[U+1F4C4] Detailed data: reports/golden_path_validation_data.json")
     
     return report, detailed_data
 

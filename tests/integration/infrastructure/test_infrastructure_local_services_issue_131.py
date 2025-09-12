@@ -74,7 +74,7 @@ class TestInfrastructureLocalServicesIssue131:
             'redis_test': {'host': 'localhost', 'port': 6381, 'available': False}
         }
         
-        print("🔍 Checking local service availability...")
+        print(" SEARCH:  Checking local service availability...")
         
         for service_name, config in services.items():
             try:
@@ -83,11 +83,11 @@ class TestInfrastructureLocalServicesIssue131:
                 result = sock.connect_ex((config['host'], config['port']))
                 sock.close()
                 config['available'] = result == 0
-                status = "✅ Available" if config['available'] else "❌ Not Available"
+                status = " PASS:  Available" if config['available'] else " FAIL:  Not Available"
                 print(f"  {service_name} ({config['host']}:{config['port']}): {status}")
             except Exception as e:
                 config['available'] = False
-                print(f"  {service_name}: ❌ Error checking - {e}")
+                print(f"  {service_name}:  FAIL:  Error checking - {e}")
         
         return services
 
@@ -108,7 +108,7 @@ class TestInfrastructureLocalServicesIssue131:
         - Connection timing should be reasonable
         - Error handling should be clear and actionable
         """
-        print("🐘 Testing local PostgreSQL connectivity validation")
+        print("[U+1F418] Testing local PostgreSQL connectivity validation")
         
         postgresql_services = [
             {'name': 'postgresql', 'port': 5432},
@@ -120,7 +120,7 @@ class TestInfrastructureLocalServicesIssue131:
             
             # Check if service is available
             if not local_services_available[pg_service['name']]['available']:
-                print(f"    ⏭️  Skipping - {pg_service['name']} not available locally")
+                print(f"    [U+23ED][U+FE0F]  Skipping - {pg_service['name']} not available locally")
                 continue
             
             # Test connection configuration
@@ -150,16 +150,16 @@ class TestInfrastructureLocalServicesIssue131:
                         f"Database URL should use port {pg_service['port']}, got: {database_url}"
                     )
                     
-                    print(f"    ✅ {pg_service['name']} URL formation validated")
+                    print(f"     PASS:  {pg_service['name']} URL formation validated")
                     
                 except Exception as e:
-                    print(f"    ❌ {pg_service['name']} URL formation failed: {e}")
+                    print(f"     FAIL:  {pg_service['name']} URL formation failed: {e}")
                     # This might be expected if database configuration is incomplete
                     assert "database" in str(e).lower() or "connection" in str(e).lower(), (
                         f"Error should mention database/connection: {e}"
                     )
         
-        print("✅ PASS: Local PostgreSQL connectivity validation completed")
+        print(" PASS:  PASS: Local PostgreSQL connectivity validation completed")
 
     @pytest.mark.integration
     @pytest.mark.infrastructure
@@ -178,7 +178,7 @@ class TestInfrastructureLocalServicesIssue131:
         - Connection timing should be reasonable (<3s as per Issue #131 fix)
         - Multiple Redis instances (6379, 6381) should be handled properly
         """
-        print("🔴 Testing local Redis connectivity validation")
+        print("[U+1F534] Testing local Redis connectivity validation")
         
         redis_services = [
             {'name': 'redis', 'port': 6379, 'description': 'Standard Redis'},
@@ -190,7 +190,7 @@ class TestInfrastructureLocalServicesIssue131:
             
             # Check if service is available
             if not local_services_available[redis_service['name']]['available']:
-                print(f"    ⏭️  Skipping - {redis_service['name']} not available locally")
+                print(f"    [U+23ED][U+FE0F]  Skipping - {redis_service['name']} not available locally")
                 continue
             
             # Test Redis connection configuration
@@ -223,7 +223,7 @@ class TestInfrastructureLocalServicesIssue131:
                         f"Redis URL should use localhost in test environment, got: {redis_url}"
                     )
                     
-                    print(f"    ✅ {redis_service['description']} URL formation validated")
+                    print(f"     PASS:  {redis_service['description']} URL formation validated")
                     
                     # Test connection timing simulation
                     start_time = time.time()
@@ -237,16 +237,16 @@ class TestInfrastructureLocalServicesIssue131:
                         f"should be <3.0s to prevent Issue #131 timeout problems!"
                     )
                     
-                    print(f"    ✅ {redis_service['description']} timing validated ({connection_time:.3f}s)")
+                    print(f"     PASS:  {redis_service['description']} timing validated ({connection_time:.3f}s)")
                     
                 except Exception as e:
-                    print(f"    ❌ {redis_service['name']} configuration failed: {e}")
+                    print(f"     FAIL:  {redis_service['name']} configuration failed: {e}")
                     # This might be expected if Redis configuration is incomplete
                     assert "redis" in str(e).lower() or "connection" in str(e).lower(), (
                         f"Error should mention Redis/connection: {e}"
                     )
         
-        print("✅ PASS: Local Redis connectivity validation completed")
+        print(" PASS:  PASS: Local Redis connectivity validation completed")
 
     @pytest.mark.integration
     @pytest.mark.infrastructure
@@ -259,7 +259,7 @@ class TestInfrastructureLocalServicesIssue131:
         This test validates service initialization timing patterns that prevent
         the startup failures and resource exhaustion in Issue #131.
         """
-        print("⏱️  Testing service initialization timing patterns")
+        print("[U+23F1][U+FE0F]  Testing service initialization timing patterns")
         
         # Test service initialization sequence timing
         initialization_steps = [
@@ -340,19 +340,19 @@ class TestInfrastructureLocalServicesIssue131:
                 
                 # ASSERTION: Step timing should be within expected limits
                 if actual_time > expected_max:
-                    print(f"    ⚠️  WARNING: {step_name} took {actual_time:.3f}s, "
-                          f"expected ≤{expected_max:.1f}s")
+                    print(f"     WARNING: [U+FE0F]  WARNING: {step_name} took {actual_time:.3f}s, "
+                          f"expected  <= {expected_max:.1f}s")
                     # Don't fail for timing warnings in local environment
                 else:
-                    print(f"    ✅ {step_name} timing OK ({actual_time:.3f}s ≤ {expected_max:.1f}s)")
+                    print(f"     PASS:  {step_name} timing OK ({actual_time:.3f}s  <=  {expected_max:.1f}s)")
         
         # ASSERTION: Total initialization should be reasonable
         assert total_time <= 10.0, (
             f"CRITICAL FAILURE: Total service initialization took {total_time:.3f}s, "
-            f"should be ≤10.0s to prevent Issue #131 startup failures!"
+            f"should be  <= 10.0s to prevent Issue #131 startup failures!"
         )
         
-        print("✅ PASS: Service initialization timing patterns validated")
+        print(" PASS:  PASS: Service initialization timing patterns validated")
 
     @pytest.mark.integration
     @pytest.mark.infrastructure
@@ -365,7 +365,7 @@ class TestInfrastructureLocalServicesIssue131:
         This test monitors resource usage during service startup to validate
         patterns that prevent the resource exhaustion in Issue #131.
         """
-        print("📊 Testing resource usage during service startup")
+        print(" CHART:  Testing resource usage during service startup")
         
         # Get baseline resource usage
         initial_memory = psutil.virtual_memory()
@@ -448,7 +448,7 @@ class TestInfrastructureLocalServicesIssue131:
                 memory_increase = sample['memory_percent'] - resource_samples[i-1]['memory_percent']
                 memory_increases.append(memory_increase)
                 if memory_increase > 0.1:  # More than 0.1% increase
-                    print(f"      📈 Memory increased by {memory_increase:.2f}%")
+                    print(f"      [U+1F4C8] Memory increased by {memory_increase:.2f}%")
         
         # Validate resource usage patterns
         final_memory_percent = resource_samples[-1]['memory_percent']
@@ -459,23 +459,23 @@ class TestInfrastructureLocalServicesIssue131:
         # ASSERTION: Memory increase should be reasonable
         assert total_memory_increase <= 5.0, (
             f"CRITICAL FAILURE: Service startup increased memory by {total_memory_increase:.2f}%, "
-            f"should be ≤5.0% to prevent Issue #131 resource exhaustion!"
+            f"should be  <= 5.0% to prevent Issue #131 resource exhaustion!"
         )
         
         # ASSERTION: Final memory usage should not be excessive
         assert final_memory_percent <= 90.0, (
             f"CRITICAL FAILURE: Final memory usage {final_memory_percent:.1f}% too high, "
-            f"should be ≤90% to prevent system exhaustion!"
+            f"should be  <= 90% to prevent system exhaustion!"
         )
         
         # ASSERTION: No single step should cause large memory spike
         max_step_increase = max(memory_increases) if memory_increases else 0
         assert max_step_increase <= 2.0, (
             f"CRITICAL FAILURE: Largest memory increase in single step was {max_step_increase:.2f}%, "
-            f"should be ≤2.0% to prevent memory spikes!"
+            f"should be  <= 2.0% to prevent memory spikes!"
         )
         
-        print("✅ PASS: Resource usage during service startup validated")
+        print(" PASS:  PASS: Resource usage during service startup validated")
 
     @pytest.mark.integration
     @pytest.mark.infrastructure
@@ -488,7 +488,7 @@ class TestInfrastructureLocalServicesIssue131:
         This test validates health check patterns that prevent the timeout
         failures identified in Issue #131 backend health endpoint.
         """
-        print("🏥 Testing local service health check patterns")
+        print("[U+1F3E5] Testing local service health check patterns")
         
         # Simulate health check configuration
         health_check_config = {
@@ -562,11 +562,11 @@ class TestInfrastructureLocalServicesIssue131:
             
             # ASSERTION: Component check should complete within timeout
             if health_status == 'timeout':
-                print(f"      ⚠️  {component_name} timed out (expected if service not available)")
+                print(f"       WARNING: [U+FE0F]  {component_name} timed out (expected if service not available)")
             else:
                 assert check_time <= component_timeout, (
                     f"{component_name} health check took {check_time:.3f}s, "
-                    f"should be ≤{component_timeout}s"
+                    f"should be  <= {component_timeout}s"
                 )
         
         print(f"  Total Health Check Time: {total_health_check_time:.3f}s")
@@ -583,11 +583,11 @@ class TestInfrastructureLocalServicesIssue131:
         if redis_result.get('status') == 'healthy':
             assert redis_result['time'] <= 3.0, (
                 f"CRITICAL FAILURE: Redis health check took {redis_result['time']:.3f}s, "
-                f"should be ≤3.0s to validate Issue #131 fix!"
+                f"should be  <= 3.0s to validate Issue #131 fix!"
             )
-            print(f"    ✅ Redis health check timing validates Issue #131 fix")
+            print(f"     PASS:  Redis health check timing validates Issue #131 fix")
         
-        print("✅ PASS: Local service health check patterns validated")
+        print(" PASS:  PASS: Local service health check patterns validated")
 
 
 # Test metadata for Issue #131 integration validation  

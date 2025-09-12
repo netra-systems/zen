@@ -1,10 +1,48 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 SSOT Validation Test: Golden Path Post-SSOT Remediation
 
 PHASE 2: CREATE PASSING TEST - Validate Golden Path with SSOT
 
 Purpose: This test MUST PASS after SSOT remediation to validate that the
-complete Golden Path (users login → get AI responses) works reliably
+complete Golden Path (users login  ->  get AI responses) works reliably
 with centralized SERVICE_ID constant.
 
 Business Value: Platform/Critical - Validates end-to-end Golden Path 
@@ -15,7 +53,7 @@ Expected Behavior:
 - FAIL: Initially with Golden Path broken by SERVICE_ID inconsistencies
 - PASS: After SSOT remediation ensures complete Golden Path functionality
 
-CRITICAL: This test validates the core business flow: users login → get AI responses
+CRITICAL: This test validates the core business flow: users login  ->  get AI responses
 """
 
 import asyncio
@@ -28,9 +66,19 @@ import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathPostSsotRemediation(SSotAsyncTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     Validate complete Golden Path functionality after SSOT remediation.
     
@@ -235,7 +283,7 @@ class TestGoldenPathPostSsotRemediation(SSotAsyncTestCase):
         
         assert response_delivery_result["response_quality"] >= 0.8, (
             f"AI response quality insufficient: {response_delivery_result['response_quality']} "
-            f"(required: ≥0.8)"
+            f"(required:  >= 0.8)"
         )
         
         assert response_delivery_result["delivery_time"] <= 6.0, (
@@ -282,7 +330,7 @@ class TestGoldenPathPostSsotRemediation(SSotAsyncTestCase):
         # This should PASS after SSOT remediation (high resilience)
         assert resilience_score >= 0.8, (
             f"Golden Path resilience insufficient: {resilience_score:.3f} "
-            f"(required: ≥0.8). Failed scenarios: "
+            f"(required:  >= 0.8). Failed scenarios: "
             f"{[r['scenario'] for r in resilience_results if not r['golden_path_success']]}"
         )
     

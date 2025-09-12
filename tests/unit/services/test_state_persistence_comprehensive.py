@@ -726,7 +726,7 @@ class TestPerformanceOptimizations:
         await asyncio.gather(*workers)
         
         # Should have cached all items without corruption
-        assert len(service._local_cache) == 50  # 5 workers × 10 items
+        assert len(service._local_cache) == 50  # 5 workers  x  10 items
     
     def test_optimized_json_handling(self):
         """Test optimized JSON handling for state serialization"""

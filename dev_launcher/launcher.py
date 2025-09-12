@@ -279,7 +279,7 @@ class DevLauncher:
         
         self._shutting_down = True
         signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
-        self._print("\n🛑", "SHUTDOWN", f"Received {signal_name}, initiating comprehensive shutdown...")
+        self._print("\n[U+1F6D1]", "SHUTDOWN", f"Received {signal_name}, initiating comprehensive shutdown...")
         
         # Use the comprehensive signal handler
         self.signal_handler.initiate_shutdown(signal_name)
@@ -297,23 +297,23 @@ class DevLauncher:
         
         # Only print if we're actually shutting down services
         if hasattr(self, 'process_manager') and self.process_manager.processes:
-            self._print("🔄", "CLEANUP", "Starting graceful shutdown sequence...")
+            self._print(" CYCLE: ", "CLEANUP", "Starting graceful shutdown sequence...")
         else:
             return  # Nothing to shutdown
         
         # Phase 1: Stop health monitoring FIRST (prevents interference with shutdown)
-        self._print("🔄", "PHASE 1", "Stopping health monitoring...")
+        self._print(" CYCLE: ", "PHASE 1", "Stopping health monitoring...")
         if hasattr(self, 'health_monitor') and self.health_monitor:
             try:
                 self.health_monitor.stop()
                 # Wait briefly for health monitor to stop cleanly
                 time.sleep(0.5)
-                self._print("✅", "HEALTH", "Health monitoring stopped")
+                self._print(" PASS: ", "HEALTH", "Health monitoring stopped")
             except Exception as e:
                 logger.error(f"Error stopping health monitor: {e}")
         
         # Phase 2: Stop database monitoring to prevent connection errors
-        self._print("🔄", "PHASE 2", "Stopping database monitoring...")
+        self._print(" CYCLE: ", "PHASE 2", "Stopping database monitoring...")
         if hasattr(self, 'database_connector') and self.database_connector:
             try:
                 # Check if we're in an event loop
@@ -325,22 +325,22 @@ class DevLauncher:
                 # No running event loop, safe to use asyncio.run
                 try:
                     asyncio.run(self.database_connector.stop_health_monitoring())
-                    self._print("✅", "DATABASE", "Database monitoring stopped")
+                    self._print(" PASS: ", "DATABASE", "Database monitoring stopped")
                 except Exception as e:
                     logger.error(f"Error stopping database monitoring: {e}")
         
-        # Phase 3: Terminate services in proper order (Frontend → Backend → Auth)
-        self._print("🔄", "PHASE 3", "Terminating services in order...")
+        # Phase 3: Terminate services in proper order (Frontend  ->  Backend  ->  Auth)
+        self._print(" CYCLE: ", "PHASE 3", "Terminating services in order...")
         self._terminate_all_services_ordered()
         
         # Phase 4: Stop supporting services
-        self._print("🔄", "PHASE 4", "Stopping supporting services...")
+        self._print(" CYCLE: ", "PHASE 4", "Stopping supporting services...")
         
         # Stop log streamers
         if hasattr(self, 'log_manager') and self.log_manager:
             try:
                 self.log_manager.stop_all()
-                self._print("✅", "LOGS", "Log streaming stopped")
+                self._print(" PASS: ", "LOGS", "Log streaming stopped")
             except Exception as e:
                 logger.error(f"Error stopping log streamers: {e}")
         
@@ -348,29 +348,29 @@ class DevLauncher:
         if hasattr(self, 'startup_optimizer') and self.startup_optimizer:
             try:
                 self.startup_optimizer.cleanup()
-                self._print("✅", "OPTIMIZER", "Startup optimizer cleaned up")
+                self._print(" PASS: ", "OPTIMIZER", "Startup optimizer cleaned up")
             except Exception as e:
                 logger.error(f"Error cleaning up startup optimizer: {e}")
         
         if hasattr(self, 'parallel_executor') and self.parallel_executor:
             try:
                 self.parallel_executor.cleanup()
-                self._print("✅", "PARALLEL", "Parallel executor cleaned up")
+                self._print(" PASS: ", "PARALLEL", "Parallel executor cleaned up")
             except Exception as e:
                 logger.error(f"Error cleaning up parallel executor: {e}")
         
         # Phase 5: Force port cleanup and verification
-        self._print("🔄", "PHASE 5", "Verifying port cleanup...")
+        self._print(" CYCLE: ", "PHASE 5", "Verifying port cleanup...")
         self._verify_ports_freed_with_force_cleanup()
         
         # Calculate shutdown time
         shutdown_time = time.time() - shutdown_start
-        self._print("✅", "SHUTDOWN", f"Graceful shutdown complete in {shutdown_time:.1f}s")
+        self._print(" PASS: ", "SHUTDOWN", f"Graceful shutdown complete in {shutdown_time:.1f}s")
     
     
     def _terminate_all_services_ordered(self):
         """Terminate all services with enhanced ordering and timeout handling."""
-        # Service termination order: Frontend → Backend → Auth
+        # Service termination order: Frontend  ->  Backend  ->  Auth
         # This prevents client connection errors and ensures clean dependency shutdown
         services_order = [
             ("Frontend", 5),   # 5 second timeout for frontend (React dev server)
@@ -382,7 +382,7 @@ class DevLauncher:
         
         for service_name, timeout in services_order:
             if self.process_manager.is_running(service_name):
-                self._print("🛑", "STOP", f"Stopping {service_name} service (timeout: {timeout}s)...")
+                self._print("[U+1F6D1]", "STOP", f"Stopping {service_name} service (timeout: {timeout}s)...")
                 
                 # Record start time for timeout
                 start_time = time.time()
@@ -390,15 +390,15 @@ class DevLauncher:
                 # Attempt graceful termination
                 if self.process_manager.terminate_process(service_name, timeout=timeout):
                     elapsed = time.time() - start_time
-                    self._print("✅", "STOPPED", f"{service_name} terminated gracefully in {elapsed:.1f}s")
+                    self._print(" PASS: ", "STOPPED", f"{service_name} terminated gracefully in {elapsed:.1f}s")
                     terminated_services.append(service_name)
                 else:
                     elapsed = time.time() - start_time
-                    self._print("⚠️", "WARN", f"{service_name} termination failed after {elapsed:.1f}s - forcing shutdown")
+                    self._print(" WARNING: [U+FE0F]", "WARN", f"{service_name} termination failed after {elapsed:.1f}s - forcing shutdown")
                     # Try force kill
                     try:
                         self.process_manager.kill_process(service_name)
-                        self._print("🔨", "KILLED", f"{service_name} force terminated")
+                        self._print("[U+1F528]", "KILLED", f"{service_name} force terminated")
                         terminated_services.append(service_name)
                     except Exception as e:
                         logger.error(f"Failed to force kill {service_name}: {e}")
@@ -409,7 +409,7 @@ class DevLauncher:
                         cleanup_instance = WindowsProcessCleanup() if not hasattr(self, 'windows_cleanup') else self.windows_cleanup
                         cleaned = cleanup_instance.cleanup_node_processes()
                         if cleaned > 0:
-                            self._print("🧹", "CLEANUP", f"Cleaned {cleaned} hanging Node.js processes")
+                            self._print("[U+1F9F9]", "CLEANUP", f"Cleaned {cleaned} hanging Node.js processes")
                     except Exception as e:
                         logger.debug(f"Node.js cleanup error: {e}")
                 
@@ -420,7 +420,7 @@ class DevLauncher:
         # Final cleanup of any remaining processes
         try:
             self.process_manager.cleanup_all()
-            self._print("✅", "CLEANUP", f"Process cleanup complete ({len(terminated_services)} services terminated)")
+            self._print(" PASS: ", "CLEANUP", f"Process cleanup complete ({len(terminated_services)} services terminated)")
         except Exception as e:
             logger.error(f"Process cleanup error: {e}")
     
@@ -437,26 +437,26 @@ class DevLauncher:
                 ports_still_in_use.append((port, service))
         
         if not ports_still_in_use:
-            self._print("✅", "PORTS", "All service ports freed successfully")
+            self._print(" PASS: ", "PORTS", "All service ports freed successfully")
             return
         
         # Report ports still in use
         port_list = ", ".join([f"{port}({service})" for port, service in ports_still_in_use])
-        self._print("⚠️", "PORT", f"Ports still in use: {port_list}")
+        self._print(" WARNING: [U+FE0F]", "PORT", f"Ports still in use: {port_list}")
         
         # Attempt force cleanup with retry
         cleanup_success = []
         cleanup_failures = []
         
         for port, service in ports_still_in_use:
-            self._print("🔧", "CLEANUP", f"Force cleaning port {port} ({service})...")
+            self._print("[U+1F527]", "CLEANUP", f"Force cleaning port {port} ({service})...")
             
             if self._force_free_port_with_retry(port, max_retries=3):
                 cleanup_success.append((port, service))
-                self._print("✅", "FREED", f"Port {port} ({service}) cleaned successfully")
+                self._print(" PASS: ", "FREED", f"Port {port} ({service}) cleaned successfully")
             else:
                 cleanup_failures.append((port, service))
-                self._print("❌", "FAILED", f"Port {port} ({service}) cleanup failed")
+                self._print(" FAIL: ", "FAILED", f"Port {port} ({service}) cleanup failed")
         
         # Final verification
         if cleanup_success:
@@ -786,23 +786,23 @@ class DevLauncher:
     def check_environment(self) -> bool:
         """Check if environment is ready for launch."""
         if not self.cache_manager.has_environment_changed():
-            self._print("✅", "CACHE", "Environment unchanged, skipping checks")
+            self._print(" PASS: ", "CACHE", "Environment unchanged, skipping checks")
             return True
         
         # Run comprehensive environment validation with fallbacks
-        self._print("🔍", "ENV", "Checking environment...")
+        self._print(" SEARCH: ", "ENV", "Checking environment...")
         validation_result = self.environment_validator.validate_with_fallbacks()
         
         if not validation_result.is_valid:
-            self._print("❌", "ENV", "Environment validation failed")
+            self._print(" FAIL: ", "ENV", "Environment validation failed")
             self.environment_validator.print_validation_summary(validation_result)
             
             # Print fix suggestions
             suggestions = self.environment_validator.get_fix_suggestions(validation_result)
             if suggestions:
-                self._print("💡", "HELP", "Suggestions:")
+                self._print(" IDEA: ", "HELP", "Suggestions:")
                 for suggestion in suggestions:
-                    print(f"  • {suggestion}")
+                    print(f"  [U+2022] {suggestion}")
             
             return False
         
@@ -819,9 +819,9 @@ class DevLauncher:
         if validation_result.warnings:
             self.environment_validator.print_validation_summary(validation_result)
         elif service_check_result:
-            self._print("✅", "ENV", "Environment and services ready")
+            self._print(" PASS: ", "ENV", "Environment and services ready")
         else:
-            self._print("✅", "ENV", "Environment check passed")
+            self._print(" PASS: ", "ENV", "Environment check passed")
         
         return result and service_check_result
     
@@ -845,7 +845,7 @@ class DevLauncher:
         for var, default_value in defaults.items():
             if not self.env.get(var):
                 if self.env.set(var, default_value, source="launcher_defaults"):
-                    self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
+                    self._print("[U+2139][U+FE0F]", "DEFAULT", f"Set {var}={default_value}")
         
         # Generate cross-service auth token if not present
         self._ensure_cross_service_auth_token()
@@ -859,13 +859,13 @@ class DevLauncher:
         if existing_token:
             # Check minimum length (32 chars)
             if len(existing_token) < 32:
-                self._print("⚠️", "TOKEN", f"Existing token too short ({len(existing_token)} chars), regenerating secure token")
+                self._print(" WARNING: [U+FE0F]", "TOKEN", f"Existing token too short ({len(existing_token)} chars), regenerating secure token")
             else:
                 # Validate token is URL-safe base64 (only contains safe characters)
                 import re
                 url_safe_pattern = re.compile(r'^[A-Za-z0-9_-]+$')
                 if not url_safe_pattern.match(existing_token):
-                    self._print("⚠️", "TOKEN", "Existing token contains unsafe characters, regenerating")
+                    self._print(" WARNING: [U+FE0F]", "TOKEN", "Existing token contains unsafe characters, regenerating")
                 else:
                     token_valid = True
         
@@ -887,7 +887,7 @@ class DevLauncher:
             # Use environment manager to set token
             self.env.set('CROSS_SERVICE_AUTH_TOKEN', token, 
                                            source="launcher_auth_token", force=True)
-            self._print("🔑", "TOKEN", f"Generated secure cross-service auth token ({len(token)} chars)")
+            self._print("[U+1F511]", "TOKEN", f"Generated secure cross-service auth token ({len(token)} chars)")
             
             # Log token characteristics for debugging (without revealing token)
             logger.debug(f"Token entropy check: unique chars={len(set(token))}, length={len(token)}")
@@ -895,7 +895,7 @@ class DevLauncher:
             # Use environment manager to set existing token
             self.env.set('CROSS_SERVICE_AUTH_TOKEN', existing_token, 
                                            source="launcher_auth_token", force=True)
-            self._print("🔑", "TOKEN", f"Using existing cross-service auth token ({len(existing_token)} chars)")
+            self._print("[U+1F511]", "TOKEN", f"Using existing cross-service auth token ({len(existing_token)} chars)")
     
     def _validate_critical_env_vars(self):
         """Validate required environment variables."""
@@ -913,7 +913,7 @@ class DevLauncher:
             from dev_launcher.docker_services import DockerServiceManager
             
             if not hasattr(self.config, 'services_config') or not self.config.services_config:
-                self._print("ℹ️", "SKIP", "No services config found, using default service configuration")
+                self._print("[U+2139][U+FE0F]", "SKIP", "No services config found, using default service configuration")
                 return True  # Skip if no services config
             
             # FIRST: Perform Docker service discovery with enhanced reporting
@@ -923,23 +923,23 @@ class DevLauncher:
             
             if running_services:
                 services_list = ", ".join(running_services.keys())
-                self._print("🔍", "DISCOVERY", f"Found running Docker services: {services_list}")
+                self._print(" SEARCH: ", "DISCOVERY", f"Found running Docker services: {services_list}")
                 
                 # Show details for each running service
                 for service, details in running_services.items():
-                    self._print("✅", "REUSE", f"{service.capitalize()}: {details}")
+                    self._print(" PASS: ", "REUSE", f"{service.capitalize()}: {details}")
                 
                 # Store discovery info for use later in startup
                 self._docker_discovery_report = discovery_report
                 self._running_docker_services = running_services
             else:
-                self._print("🔍", "DISCOVERY", "No existing Docker services found")
+                self._print(" SEARCH: ", "DISCOVERY", "No existing Docker services found")
                 self._docker_discovery_report = {}
                 self._running_docker_services = {}
             
             # Run availability checker
             checker = ServiceAvailabilityChecker(self.use_emoji)
-            self._print("🔄", "CHECKING", "Analyzing service availability...")
+            self._print(" CYCLE: ", "CHECKING", "Analyzing service availability...")
             results = checker.check_all_services(self.config.services_config)
             
             # Store original environment state for comparison
@@ -955,7 +955,7 @@ class DevLauncher:
             changes_made = checker.apply_recommendations(self.config.services_config, results)
             
             if changes_made:
-                self._print("🔧", "AUTO-ADJUST", "Applied service availability recommendations")
+                self._print("[U+1F527]", "AUTO-ADJUST", "Applied service availability recommendations")
                 
                 # Update environment variables with detailed tracking
                 service_env_vars = self.config.services_config.get_all_env_vars()
@@ -966,10 +966,10 @@ class DevLauncher:
                     old_value = original_env.get(key)
                     if old_value != new_value:
                         env_instance.set(key, new_value, "launcher_service_config")
-                        env_changes.append(f"{key}: {old_value or 'unset'} → {new_value}")
+                        env_changes.append(f"{key}: {old_value or 'unset'}  ->  {new_value}")
                 
                 if env_changes:
-                    self._print("🔄", "ENV-UPDATE", f"Updated {len(env_changes)} environment variables")
+                    self._print(" CYCLE: ", "ENV-UPDATE", f"Updated {len(env_changes)} environment variables")
                     for change in env_changes[:5]:  # Show first 5 changes
                         logger.debug(f"Environment change: {change}")
                     if len(env_changes) > 5:
@@ -978,7 +978,7 @@ class DevLauncher:
                 # Verify critical environment variables are set
                 self._verify_updated_environment_variables(service_env_vars)
             else:
-                self._print("✅", "CONFIG", "Service configuration already optimal")
+                self._print(" PASS: ", "CONFIG", "Service configuration already optimal")
             
             # Enhanced critical service issue reporting
             critical_issues = []
@@ -1000,20 +1000,20 @@ class DevLauncher:
             
             # Report configuration results
             if successful_configs:
-                self._print("✅", "CONFIGURED", f"Successfully configured {len(successful_configs)} service(s)")
+                self._print(" PASS: ", "CONFIGURED", f"Successfully configured {len(successful_configs)} service(s)")
                 for config in successful_configs[:3]:  # Show first 3
                     logger.debug(f"Service config: {config}")
             
             if warnings:
-                self._print("⚠️", "WARNINGS", f"{len(warnings)} service warning(s):")
+                self._print(" WARNING: [U+FE0F]", "WARNINGS", f"{len(warnings)} service warning(s):")
                 for warning in warnings:
-                    print(f"  • {warning}")
+                    print(f"  [U+2022] {warning}")
             
             if critical_issues:
-                self._print("🚨", "CRITICAL", f"Critical service issues detected:")
+                self._print(" ALERT: ", "CRITICAL", f"Critical service issues detected:")
                 for issue in critical_issues:
-                    print(f"  • {issue}")
-                print("  → Platform may have reduced functionality")
+                    print(f"  [U+2022] {issue}")
+                print("   ->  Platform may have reduced functionality")
                 # Don't fail startup but log for monitoring
                 logger.warning(f"Critical service configuration issues: {len(critical_issues)}")
             
@@ -1021,11 +1021,11 @@ class DevLauncher:
             
         except ImportError:
             logger.debug("Service availability checker not available, using basic configuration")
-            self._print("ℹ️", "BASIC", "Using basic service configuration (availability checker not available)")
+            self._print("[U+2139][U+FE0F]", "BASIC", "Using basic service configuration (availability checker not available)")
             return True
         except Exception as e:
             logger.error(f"Service availability check failed: {e}")
-            self._print("⚠️", "FALLBACK", f"Service availability check failed, using defaults: {str(e)[:60]}")
+            self._print(" WARNING: [U+FE0F]", "FALLBACK", f"Service availability check failed, using defaults: {str(e)[:60]}")
             return True  # Don't fail startup due to availability check issues
     
     def _verify_updated_environment_variables(self, service_env_vars: dict):
@@ -1039,7 +1039,7 @@ class DevLauncher:
                 verification_failures.append(f"{key}: expected '{expected_value}', got '{actual_value}'")
         
         if verification_failures:
-            self._print("⚠️", "ENV-VERIFY", f"Environment variable verification failures: {len(verification_failures)}")
+            self._print(" WARNING: [U+FE0F]", "ENV-VERIFY", f"Environment variable verification failures: {len(verification_failures)}")
             for failure in verification_failures[:3]:  # Show first 3
                 logger.warning(f"Environment verification failed: {failure}")
         else:
@@ -1083,7 +1083,7 @@ class DevLauncher:
                 
                 # NO MOCKS ALLOWED - fail if any service uses mock
                 if redis_mock or clickhouse_mock or postgres_mock:
-                    self._print("❌", "DATABASE", "Mock mode not allowed in development - use real services")
+                    self._print(" FAIL: ", "DATABASE", "Mock mode not allowed in development - use real services")
                     mock_services = []
                     if redis_mock: mock_services.append("Redis")
                     if clickhouse_mock: mock_services.append("ClickHouse")
@@ -1098,7 +1098,7 @@ class DevLauncher:
                 all_disabled = all([redis_disabled, clickhouse_disabled, postgres_disabled])
                 
                 if all_disabled:
-                    self._print("✅", "DATABASE", f"All databases disabled - skipping validation")
+                    self._print(" PASS: ", "DATABASE", f"All databases disabled - skipping validation")
                     return True
                 
                 # Show which services will be validated (real services only)
@@ -1111,9 +1111,9 @@ class DevLauncher:
                     services_to_validate.append("PostgreSQL")
                 
                 if services_to_validate:
-                    self._print("🔍", "DATABASE", f"Validating connections for: {', '.join(services_to_validate)}")
+                    self._print(" SEARCH: ", "DATABASE", f"Validating connections for: {', '.join(services_to_validate)}")
             else:
-                self._print("🔍", "DATABASE", "No service config found, attempting full database validation")
+                self._print(" SEARCH: ", "DATABASE", "No service config found, attempting full database validation")
             
             # Perform connection validation with timeout and error handling
             validation_result = await asyncio.wait_for(
@@ -1127,11 +1127,11 @@ class DevLauncher:
                 ready_dbs = [db for db, ready in readiness_status.items() if ready]
                 
                 if ready_dbs:
-                    self._print("✅", "DATABASE", f"Database connections validated and ready: {', '.join(ready_dbs)}")
+                    self._print(" PASS: ", "DATABASE", f"Database connections validated and ready: {', '.join(ready_dbs)}")
                 else:
-                    self._print("⚠️", "DATABASE", "Connections validated but readiness check failed - continuing")
+                    self._print(" WARNING: [U+FE0F]", "DATABASE", "Connections validated but readiness check failed - continuing")
             else:
-                self._print("⚠️", "DATABASE", "Some database connections failed - continuing with available services")
+                self._print(" WARNING: [U+FE0F]", "DATABASE", "Some database connections failed - continuing with available services")
                 # Don't fail startup for database connection issues in development
                 return True
             
@@ -1139,11 +1139,11 @@ class DevLauncher:
             
         except asyncio.TimeoutError:
             logger.warning("Database validation timed out after 25 seconds")
-            self._print("⚠️", "DATABASE", "Validation timed out - continuing with mock/local fallback")
+            self._print(" WARNING: [U+FE0F]", "DATABASE", "Validation timed out - continuing with mock/local fallback")
             return True  # Continue startup with fallback
         except Exception as e:
             logger.error(f"Database validation failed: {e}")
-            self._print("⚠️", "DATABASE", f"Validation error: {str(e)[:100]}... - continuing with fallback")
+            self._print(" WARNING: [U+FE0F]", "DATABASE", f"Validation error: {str(e)[:100]}... - continuing with fallback")
             # In development, continue even if database validation fails
             return True
     
@@ -1153,7 +1153,7 @@ class DevLauncher:
             return await self.websocket_validator.validate_all_endpoints()
         except Exception as e:
             logger.error(f"WebSocket validation failed: {e}")
-            self._print("❌", "WEBSOCKET", f"Validation error: {str(e)}")
+            self._print(" FAIL: ", "WEBSOCKET", f"Validation error: {str(e)}")
             return False
     
     def run_migrations(self, env: Optional[Dict] = None) -> bool:
@@ -1208,23 +1208,23 @@ class DevLauncher:
             ResourceType.ENVIRONMENT_VARS, "main_secrets", "launcher", timeout=10
         )
         if not lock_acquired:
-            self._print("⚠️", "SECRETS", "Failed to acquire secret loading lock")
+            self._print(" WARNING: [U+FE0F]", "SECRETS", "Failed to acquire secret loading lock")
             return False
         
         try:
             # Prevent race condition - ensure environment loading is complete
             if self.env.get('NETRA_SECRETS_LOADING'):
-                self._print("⏳", "SECRETS", "Waiting for environment loading to complete...")
+                self._print("[U+23F3]", "SECRETS", "Waiting for environment loading to complete...")
                 # Brief wait to ensure loading completes
                 time.sleep(0.1)
             
             if self._secrets_loaded and not self.config.load_secrets:
                 # Already loaded local secrets, no GCP needed
-                self._print("🔒", "SECRETS", "Local secrets loaded (GCP disabled)")
+                self._print("[U+1F512]", "SECRETS", "Local secrets loaded (GCP disabled)")
                 return True
             
             if not self.config.load_secrets:
-                self._print("🔒", "SECRETS", "Secret loading disabled (--no-secrets flag)")
+                self._print("[U+1F512]", "SECRETS", "Secret loading disabled (--no-secrets flag)")
                 return True
             
             return self._load_secrets_with_debug()
@@ -1241,12 +1241,12 @@ class DevLauncher:
         """
         if self._secrets_loaded:
             # Local secrets already loaded, only load GCP secrets if needed
-            self._print("🔐", "SECRETS", "Loading additional secrets from GCP...")
+            self._print("[U+1F510]", "SECRETS", "Loading additional secrets from GCP...")
             # GCP loading not implemented in unified config, using local files only
             self._load_environment_files()
             result = True
         else:
-            self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
+            self._print("[U+1F510]", "SECRETS", "Starting enhanced environment variable loading...")
             self._load_environment_files()
             result = True
             self._secrets_loaded = True
@@ -1301,7 +1301,7 @@ class DevLauncher:
             success = await self._execute_spec_startup_sequence()
             
             if not success:
-                self._print("❌", "ERROR", "Failed to start services")
+                self._print(" FAIL: ", "ERROR", "Failed to start services")
                 return 1
             
             # Show summary
@@ -1312,7 +1312,7 @@ class DevLauncher:
             return 0
             
         except KeyboardInterrupt:
-            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+            self._print("\n[U+1F6D1]", "SHUTDOWN", "Interrupted by user")
             return 0
         except Exception as e:
             error_type = type(e).__name__
@@ -1350,69 +1350,69 @@ class DevLauncher:
                 step_timeouts[0]
             ):
                 # Non-critical failure, continue with warning
-                self._print("⚠️", "WARNING", "Docker service discovery timed out - continuing startup")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Docker service discovery timed out - continuing startup")
             
             # Steps 1-3: Already done in pre-checks, log completion
-            self._print("✅", "STEP 1-3", "Pre-checks completed (cache, environment, secrets)")
+            self._print(" PASS: ", "STEP 1-3", "Pre-checks completed (cache, environment, secrets)")
             
             # Step 4: Database validation with timeout and network resilience
-            self._print("🔄", "STEP 4", "Validating database connections with network resilience...")
+            self._print(" CYCLE: ", "STEP 4", "Validating database connections with network resilience...")
             if not await self._execute_step_with_timeout(
                 "Step 4: Database Validation",
                 self._validate_databases_with_resilience,
                 step_timeouts[4]
             ):
-                self._print("❌", "ERROR", "Database validation failed or timed out")
+                self._print(" FAIL: ", "ERROR", "Database validation failed or timed out")
                 return False
             
             # Step 5: Migrations with timeout
-            self._print("🔄", "STEP 5", "Checking and running migrations...")
+            self._print(" CYCLE: ", "STEP 5", "Checking and running migrations...")
             if not await self._execute_step_with_timeout(
                 "Step 5: Migration Check",
                 self._run_migrations_async,
                 step_timeouts[5]
             ):
-                self._print("❌", "ERROR", "Migration check failed or timed out")
+                self._print(" FAIL: ", "ERROR", "Migration check failed or timed out")
                 return False
             
             # Step 6-7: Start backend and auth processes with cascade handling
-            self._print("🔄", "STEP 6-7", "Starting backend and auth services...")
+            self._print(" CYCLE: ", "STEP 6-7", "Starting backend and auth services...")
             backend_success, auth_success = await self._start_core_services_with_cascade()
             
             if not backend_success and not auth_success:
-                self._print("❌", "ERROR", "Failed to start any core services")
+                self._print(" FAIL: ", "ERROR", "Failed to start any core services")
                 return False
             elif not backend_success:
-                self._print("⚠️", "WARNING", "Backend failed to start, continuing with auth-only mode")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Backend failed to start, continuing with auth-only mode")
             elif not auth_success:
-                self._print("⚠️", "WARNING", "Auth service failed to start, continuing with backend-only mode")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Auth service failed to start, continuing with backend-only mode")
             
             # Step 8: Wait for backend readiness (if started)
             if backend_success:
-                self._print("🔄", "STEP 8", "Waiting for backend readiness...")
+                self._print(" CYCLE: ", "STEP 8", "Waiting for backend readiness...")
                 if not await self._execute_step_with_timeout(
                     "Step 8: Backend Readiness",
                     self._wait_for_backend_readiness_async,
                     step_timeouts[8]
                 ):
-                    self._print("⚠️", "WARNING", "Backend readiness check failed - continuing startup")
+                    self._print(" WARNING: [U+FE0F]", "WARNING", "Backend readiness check failed - continuing startup")
             else:
-                self._print("⏭️", "SKIP", "Skipping backend readiness check (service not started)")
+                self._print("[U+23ED][U+FE0F]", "SKIP", "Skipping backend readiness check (service not started)")
             
             # Step 9: Verify auth system (if started)
             if auth_success:
-                self._print("🔄", "STEP 9", "Verifying auth system...")
+                self._print(" CYCLE: ", "STEP 9", "Verifying auth system...")
                 if not await self._execute_step_with_timeout(
                     "Step 9: Auth Verification",
                     self._verify_auth_system_async,
                     step_timeouts[9]
                 ):
-                    self._print("⚠️", "WARNING", "Auth system verification failed - continuing startup")
+                    self._print(" WARNING: [U+FE0F]", "WARNING", "Auth system verification failed - continuing startup")
             else:
-                self._print("⏭️", "SKIP", "Skipping auth verification (service not started)")
+                self._print("[U+23ED][U+FE0F]", "SKIP", "Skipping auth verification (service not started)")
             
             # Step 10: Start frontend process with timeout
-            self._print("🔄", "STEP 10", "Starting frontend service...")
+            self._print(" CYCLE: ", "STEP 10", "Starting frontend service...")
             frontend_success = await self._execute_step_with_timeout(
                 "Step 10: Frontend Start",
                 self._start_frontend_async,
@@ -1421,18 +1421,18 @@ class DevLauncher:
             
             # Step 11: Wait for frontend readiness (if started)
             if frontend_success:
-                self._print("🔄", "STEP 11", "Waiting for frontend readiness...")
+                self._print(" CYCLE: ", "STEP 11", "Waiting for frontend readiness...")
                 if not await self._execute_step_with_timeout(
                     "Step 11: Frontend Readiness",
                     self._wait_for_frontend_readiness_async,
                     step_timeouts[11]
                 ):
-                    self._print("⚠️", "WARNING", "Frontend readiness check failed - services still accessible")
+                    self._print(" WARNING: [U+FE0F]", "WARNING", "Frontend readiness check failed - services still accessible")
             else:
-                self._print("⚠️", "WARNING", "Frontend failed to start - backend services still available")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Frontend failed to start - backend services still available")
             
             # Step 11.5: Validate WebSocket endpoints (non-critical)
-            self._print("🔄", "STEP 11.5", "Validating WebSocket endpoints...")
+            self._print(" CYCLE: ", "STEP 11.5", "Validating WebSocket endpoints...")
             await self._execute_step_with_timeout(
                 "Step 11.5: WebSocket Validation",
                 self._validate_websocket_endpoints,
@@ -1441,7 +1441,7 @@ class DevLauncher:
             )
             
             # Step 12: Cache successful startup state
-            self._print("🔄", "STEP 12", "Caching successful startup state...")
+            self._print(" CYCLE: ", "STEP 12", "Caching successful startup state...")
             await self._execute_step_with_timeout(
                 "Step 12: Cache Update",
                 self._cache_startup_success_async,
@@ -1449,13 +1449,13 @@ class DevLauncher:
             )
             
             # Step 13: Start health monitoring with timeout
-            self._print("🔄", "STEP 13", "Starting health monitoring...")
+            self._print(" CYCLE: ", "STEP 13", "Starting health monitoring...")
             if not await self._execute_step_with_timeout(
                 "Step 13: Health Monitoring Start",
                 self._start_health_monitoring_after_readiness_async,
                 step_timeouts[13]
             ):
-                self._print("⚠️", "WARNING", "Health monitoring failed to start - continuing without monitoring")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Health monitoring failed to start - continuing without monitoring")
             
             # Start database health monitoring (non-critical)
             try:
@@ -1473,10 +1473,10 @@ class DevLauncher:
         """Validate database connections with network resilience and enhanced error handling."""
         try:
             # Step 1: Initialize databases first (only once)
-            self._print("🔧", "DATABASE", "Initializing databases for cold start...")
+            self._print("[U+1F527]", "DATABASE", "Initializing databases for cold start...")
             init_success = await self.database_initializer.initialize_databases()
             if not init_success:
-                self._print("⚠️", "DATABASE", "Database initialization had issues, continuing...")
+                self._print(" WARNING: [U+FE0F]", "DATABASE", "Database initialization had issues, continuing...")
                 
             # Use network resilient client for database checks
             db_policy = RetryPolicy(
@@ -1494,14 +1494,14 @@ class DevLauncher:
                 'clickhouse': (env.get('CLICKHOUSE_URL'), 'clickhouse')
             }
             
-            self._print("🔍", "DATABASE", f"Validating connections for: Redis, ClickHouse, PostgreSQL")
+            self._print(" SEARCH: ", "DATABASE", f"Validating connections for: Redis, ClickHouse, PostgreSQL")
             
             # Check individual database services with resilience
             successful_connections = []
             failed_connections = []
             
             # Use the database_connector for parallel validation with unified output
-            self._print("🔄", "DATABASE", f"Validating {len(db_configs)} database connections...")
+            self._print(" CYCLE: ", "DATABASE", f"Validating {len(db_configs)} database connections...")
             
             for service_name, (db_url, db_type) in db_configs.items():
                 if not db_url:
@@ -1511,19 +1511,19 @@ class DevLauncher:
                 if service_name == 'redis':
                     redis_mode = getattr(self.config.services_config.redis, 'mode', None) if hasattr(self.config.services_config, 'redis') else None
                     if redis_mode and redis_mode.value == "disabled":
-                        self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
+                        self._print("[U+23ED][U+FE0F]", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled
                         continue
                 elif service_name == 'clickhouse':
                     clickhouse_mode = getattr(self.config.services_config.clickhouse, 'mode', None) if hasattr(self.config.services_config, 'clickhouse') else None
                     if clickhouse_mode and clickhouse_mode.value == "disabled":
-                        self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
+                        self._print("[U+23ED][U+FE0F]", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled
                         continue
                 elif service_name == 'postgres':
                     postgres_mode = getattr(self.config.services_config.postgres, 'mode', None) if hasattr(self.config.services_config, 'postgres') else None
                     if postgres_mode and postgres_mode.value == "disabled":
-                        self._print("⏭️", "SKIP", f"{service_name}: Service disabled, skipping validation")
+                        self._print("[U+23ED][U+FE0F]", "SKIP", f"{service_name}: Service disabled, skipping validation")
                         successful_connections.append(service_name)  # Count as successful since it's intentionally disabled
                         continue
                     
@@ -1532,7 +1532,7 @@ class DevLauncher:
                     successful_connections.append(service_name)
                     continue
                 
-                self._print("🔄", "CONNECT", f"{service_name}: Attempt 1/5")
+                self._print(" CYCLE: ", "CONNECT", f"{service_name}: Attempt 1/5")
                 success, error = await self.network_client.resilient_database_check(
                     db_url,
                     db_type=db_type,
@@ -1541,20 +1541,20 @@ class DevLauncher:
                 
                 if success:
                     successful_connections.append(service_name)
-                    self._print("✅", "CONNECT", f"{service_name}: Connected successfully")
+                    self._print(" PASS: ", "CONNECT", f"{service_name}: Connected successfully")
                 else:
                     failed_connections.append((service_name, error))
-                    self._print("⚠️", "CONNECT", f"{service_name}: {error}")
+                    self._print(" WARNING: [U+FE0F]", "CONNECT", f"{service_name}: {error}")
             
             # Report overall status
             if len(successful_connections) == len(db_configs):
-                self._print("✅", "DATABASE", "All database connections validated successfully")
+                self._print(" PASS: ", "DATABASE", "All database connections validated successfully")
             elif successful_connections:
-                self._print("✅", "DATABASE", f"Connected to {len(successful_connections)} database service(s)")
+                self._print(" PASS: ", "DATABASE", f"Connected to {len(successful_connections)} database service(s)")
                 if failed_connections:
-                    self._print("⚠️", "DATABASE", f"{len(failed_connections)} database service(s) failed - continuing with available services")
+                    self._print(" WARNING: [U+FE0F]", "DATABASE", f"{len(failed_connections)} database service(s) failed - continuing with available services")
             else:
-                self._print("⚠️", "DATABASE", "All database connections failed - continuing with fallback mode")
+                self._print(" WARNING: [U+FE0F]", "DATABASE", "All database connections failed - continuing with fallback mode")
             
             # Continue startup even with some failed connections in development
             return True
@@ -1575,7 +1575,7 @@ class DevLauncher:
             
             if discovery_report.get('reusable_services'):
                 reusable_count = len(discovery_report['reusable_services'])
-                self._print("✅", "DISCOVERY", f"Found {reusable_count} reusable Docker service(s)")
+                self._print(" PASS: ", "DISCOVERY", f"Found {reusable_count} reusable Docker service(s)")
                 
                 # Store discovery results for use during service startup
                 self._docker_discovery_report = discovery_report
@@ -1584,22 +1584,22 @@ class DevLauncher:
                 # Log detailed information
                 for service in discovery_report['reusable_services']:
                     container_info = running_services.get(service, "unknown")
-                    self._print("🔄", "REUSE", f"Will reuse {service}: {container_info}")
+                    self._print(" CYCLE: ", "REUSE", f"Will reuse {service}: {container_info}")
             else:
-                self._print("🔍", "DISCOVERY", "No existing Docker services to reuse")
+                self._print(" SEARCH: ", "DISCOVERY", "No existing Docker services to reuse")
                 self._docker_discovery_report = discovery_report
                 self._running_docker_services = {}
                 
             # Check for unhealthy containers that might need attention
             if discovery_report.get('unhealthy_containers'):
                 unhealthy_count = len(discovery_report['unhealthy_containers'])
-                self._print("⚠️", "WARNING", f"Found {unhealthy_count} unhealthy container(s)")
+                self._print(" WARNING: [U+FE0F]", "WARNING", f"Found {unhealthy_count} unhealthy container(s)")
                 for container in discovery_report['unhealthy_containers']:
-                    self._print("⚠️", "UNHEALTHY", f"Container {container} may need restart")
+                    self._print(" WARNING: [U+FE0F]", "UNHEALTHY", f"Container {container} may need restart")
                     
         except Exception as e:
             logger.warning(f"Docker service discovery failed: {e}")
-            self._print("⚠️", "WARNING", "Docker service discovery unavailable")
+            self._print(" WARNING: [U+FE0F]", "WARNING", "Docker service discovery unavailable")
             self._docker_discovery_report = {}
             self._running_docker_services = {}
     
@@ -1653,12 +1653,12 @@ class DevLauncher:
                         asyncio.set_event_loop(None)
             
             if ready:
-                self._print("✅", "READY", "Backend is ready")
+                self._print(" PASS: ", "READY", "Backend is ready")
                 # Mark service as ready in health monitor
                 self.health_monitor.mark_service_ready("Backend")
                 return True
             else:
-                self._print("⚠️", "WARNING", f"Backend not ready at {ready_url} after {timeout}s")
+                self._print(" WARNING: [U+FE0F]", "WARNING", f"Backend not ready at {ready_url} after {timeout}s")
                 return False
                 
         except Exception as e:
@@ -1716,12 +1716,12 @@ class DevLauncher:
                         asyncio.set_event_loop(None)
             
             if verified:
-                self._print("✅", "READY", "Auth system verified")
+                self._print(" PASS: ", "READY", "Auth system verified")
                 # Mark service as ready in health monitor
                 self.health_monitor.mark_service_ready("Auth")
                 return True
             else:
-                self._print("⚠️", "WARNING", f"Auth system not accessible at {auth_config_url}")
+                self._print(" WARNING: [U+FE0F]", "WARNING", f"Auth system not accessible at {auth_config_url}")
                 return False
                 
         except Exception as e:
@@ -1778,12 +1778,12 @@ class DevLauncher:
                         asyncio.set_event_loop(None)
             
             if ready:
-                self._print("✅", "READY", "Frontend is ready")
+                self._print(" PASS: ", "READY", "Frontend is ready")
                 # Mark service as ready in health monitor
                 self.health_monitor.mark_service_ready("Frontend")
                 return True
             else:
-                self._print("⚠️", "DEGRADED", f"Frontend not ready at {frontend_url} - backend services still available")
+                self._print(" WARNING: [U+FE0F]", "DEGRADED", f"Frontend not ready at {frontend_url} - backend services still available")
                 return False
                 
         except Exception as e:
@@ -1808,7 +1808,7 @@ class DevLauncher:
             min_grace_period = 10  # Minimum 10 seconds for services to stabilize
             if elapsed_startup_time < min_grace_period:
                 grace_remaining = min_grace_period - elapsed_startup_time
-                self._print("⏳", "GRACE", f"Waiting {grace_remaining:.1f}s for service stabilization...")
+                self._print("[U+23F3]", "GRACE", f"Waiting {grace_remaining:.1f}s for service stabilization...")
                 time.sleep(grace_remaining)
         
         # Register database connector with health monitor
@@ -1833,7 +1833,7 @@ class DevLauncher:
             # Verify cross-service connectivity before enabling monitoring
             cross_service_healthy = self.health_monitor.verify_cross_service_connectivity()
             if not cross_service_healthy:
-                self._print("⚠️", "WARNING", f"Cross-service connectivity issues detected (attempt {attempt + 1}/{max_readiness_checks})")
+                self._print(" WARNING: [U+FE0F]", "WARNING", f"Cross-service connectivity issues detected (attempt {attempt + 1}/{max_readiness_checks})")
             
             # Check if all services are ready
             all_services_ready = self.health_monitor.all_services_ready()
@@ -1848,33 +1848,33 @@ class DevLauncher:
                     cors_enabled = status_report.get('cross_service_integration', {}).get('cors_enabled', False)
                     service_discovery_active = status_report.get('cross_service_integration', {}).get('service_discovery_active', False)
                     
-                    self._print("✅", "MONITORING", "Health monitoring enabled after full validation")
+                    self._print(" PASS: ", "MONITORING", "Health monitoring enabled after full validation")
                     if cors_enabled:
-                        self._print("🌐", "CORS", "Cross-service CORS integration active")
+                        self._print("[U+1F310]", "CORS", "Cross-service CORS integration active")
                     if service_discovery_active:
-                        self._print("🔍", "DISCOVERY", "Service discovery integration active")
+                        self._print(" SEARCH: ", "DISCOVERY", "Service discovery integration active")
                 except Exception as e:
                     logger.warning(f"Status report generation failed: {e}")
-                    self._print("✅", "MONITORING", "Health monitoring enabled (status report unavailable)")
+                    self._print(" PASS: ", "MONITORING", "Health monitoring enabled (status report unavailable)")
                 
                 return  # Successfully enabled monitoring
             
             elif attempt < max_readiness_checks - 1:
-                self._print("⏳", "RETRY", f"Services not ready, retrying in {readiness_check_interval}s... (attempt {attempt + 1}/{max_readiness_checks})")
+                self._print("[U+23F3]", "RETRY", f"Services not ready, retrying in {readiness_check_interval}s... (attempt {attempt + 1}/{max_readiness_checks})")
                 time.sleep(readiness_check_interval)
             else:
                 # Final attempt failed
-                self._print("⚠️", "WARNING", "Not all services ready after maximum attempts - health monitoring delayed")
+                self._print(" WARNING: [U+FE0F]", "WARNING", "Not all services ready after maximum attempts - health monitoring delayed")
                 
                 # Start monitoring anyway but with warnings
                 self.health_monitor.enable_monitoring()
-                self._print("🔄", "MONITORING", "Health monitoring started with partial service readiness")
+                self._print(" CYCLE: ", "MONITORING", "Health monitoring started with partial service readiness")
     
     
     def _print_startup_banner(self):
         """Print startup banner with service configuration summary."""
         print("=" * 60)
-        self._print("🚀", "LAUNCH", "Netra AI Development Environment")
+        self._print("[U+1F680]", "LAUNCH", "Netra AI Development Environment")
         print("=" * 60)
         
         # Show service configuration if available
@@ -1920,7 +1920,7 @@ class DevLauncher:
     def _run_parallel_pre_checks(self) -> bool:
         """Run pre-checks in parallel for faster startup with measurable performance benefits."""
         start_time = time.time()
-        self._print("🔄", "PARALLEL", "Running pre-checks in parallel...")
+        self._print(" CYCLE: ", "PARALLEL", "Running pre-checks in parallel...")
         
         # Create parallel tasks for independent checks with enhanced timeout and failure handling
         tasks = [
@@ -1971,11 +1971,11 @@ class DevLauncher:
                 overall_timeout = min(15, max(task.timeout for task in tasks) + 5)
             results = self.parallel_executor.execute_all(timeout=overall_timeout)
         except TimeoutError:
-            self._print("❌", "TIMEOUT", "Parallel execution timed out, falling back to sequential")
+            self._print(" FAIL: ", "TIMEOUT", "Parallel execution timed out, falling back to sequential")
             return self._run_sequential_pre_checks()
         except Exception as e:
             logger.error(f"Parallel execution failed: {e}")
-            self._print("⚠️", "FALLBACK", "Parallel execution failed, using sequential mode")
+            self._print(" WARNING: [U+FE0F]", "FALLBACK", "Parallel execution failed, using sequential mode")
             return self._run_sequential_pre_checks()
         
         # Measure actual performance
@@ -1984,7 +1984,7 @@ class DevLauncher:
         
         # Report performance metrics
         if performance_gain > 10:  # Only report significant gains
-            self._print("⚡", "PERFORMANCE", f"Parallel execution saved {performance_gain:.1f}% time ({sequential_estimate:.1f}s → {parallel_time:.1f}s)")
+            self._print(" LIGHTNING: ", "PERFORMANCE", f"Parallel execution saved {performance_gain:.1f}% time ({sequential_estimate:.1f}s  ->  {parallel_time:.1f}s)")
         else:
             logger.debug(f"Parallel execution time: {parallel_time:.1f}s vs estimated sequential: {sequential_estimate:.1f}s")
         
@@ -2008,15 +2008,15 @@ class DevLauncher:
         
         # Report issues
         for warning in warnings:
-            self._print("⚠️", "WARN", warning)
+            self._print(" WARNING: [U+FE0F]", "WARN", warning)
         
         for failure in critical_failures:
-            self._print("❌", "ERROR", failure)
+            self._print(" FAIL: ", "ERROR", failure)
             return False
         
         # Show task completion summary
         completed_tasks = len([r for r in results.values() if r.success])
-        self._print("✅", "PARALLEL", f"Completed {completed_tasks}/{len(tasks)} pre-checks in {parallel_time:.1f}s")
+        self._print(" PASS: ", "PARALLEL", f"Completed {completed_tasks}/{len(tasks)} pre-checks in {parallel_time:.1f}s")
         
         return True
     
@@ -2073,7 +2073,7 @@ class DevLauncher:
     
     def _print_secret_loading_warning(self):
         """Print secret loading warning."""
-        self._print("⚠️", "WARN", "Failed to load some secrets")
+        self._print(" WARNING: [U+FE0F]", "WARN", "Failed to load some secrets")
         print("\nNote: The application may not work correctly without secrets.")
         print("To skip secret loading, use: --no-secrets")
     
@@ -2087,10 +2087,10 @@ class DevLauncher:
             # Wait for all processes
             self.process_manager.wait_for_all()
         except KeyboardInterrupt:
-            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+            self._print("\n[U+1F6D1]", "SHUTDOWN", "Interrupted by user")
         except Exception as e:
             logger.error(f"Service monitoring error: {e}")
-            self._print("❌", "ERROR", f"Service monitoring failed: {str(e)[:100]}")
+            self._print(" FAIL: ", "ERROR", f"Service monitoring failed: {str(e)[:100]}")
     
     def _run_main_loop(self):
         """Run main service loop."""
@@ -2104,7 +2104,7 @@ class DevLauncher:
             self.process_manager.wait_for_all()
         except KeyboardInterrupt:
             if not self._shutting_down:
-                self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+                self._print("\n CYCLE: ", "INTERRUPT", "Received interrupt signal")
                 self._shutting_down = True
         except Exception as e:
             self._handle_main_loop_exception(e)
@@ -2112,7 +2112,7 @@ class DevLauncher:
     def _handle_main_loop_exception(self, e: Exception):
         """Handle main loop exception."""
         logger.error(f"Unexpected error: {e}")
-        self._print("❌", "ERROR", f"Unexpected error: {str(e)[:100]}")
+        self._print(" FAIL: ", "ERROR", f"Unexpected error: {str(e)[:100]}")
     
     def emergency_cleanup(self):
         """Enhanced emergency cleanup with robust recovery and signal handler safety."""
@@ -2133,13 +2133,13 @@ class DevLauncher:
         emergency_start = time.time()
         
         # Use direct print to avoid potential logger issues during emergency
-        print("\n🚨 EMERGENCY RECOVERY | Starting emergency cleanup sequence...")
+        print("\n ALERT:  EMERGENCY RECOVERY | Starting emergency cleanup sequence...")
         
         cleanup_phases = []
         
         try:
             # Phase 1: Stop monitoring systems immediately
-            print("🔄 PHASE 1 | Stopping monitoring systems...")
+            print(" CYCLE:  PHASE 1 | Stopping monitoring systems...")
             phase1_start = time.time()
             
             # Stop health monitoring with timeout
@@ -2151,22 +2151,22 @@ class DevLauncher:
                     health_stop_thread.daemon = True
                     health_stop_thread.start()
                     health_stop_thread.join(timeout=2)  # 2 second timeout
-                    print("✅ PHASE 1 | Health monitoring stopped")
+                    print(" PASS:  PHASE 1 | Health monitoring stopped")
                 except Exception as e:
-                    print(f"⚠️ PHASE 1 | Health monitor stop failed: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 1 | Health monitor stop failed: {e}")
             
             # Stop database monitoring
             if hasattr(self, 'database_connector') and self.database_connector:
                 try:
                     self.database_connector._shutdown_requested = True
-                    print("✅ PHASE 1 | Database monitoring stop requested")
+                    print(" PASS:  PHASE 1 | Database monitoring stop requested")
                 except Exception as e:
-                    print(f"⚠️ PHASE 1 | Database monitor error: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 1 | Database monitor error: {e}")
             
             cleanup_phases.append(("Phase 1", time.time() - phase1_start))
             
             # Phase 2: Force terminate all services
-            print("🔄 PHASE 2 | Force terminating services...")
+            print(" CYCLE:  PHASE 2 | Force terminating services...")
             phase2_start = time.time()
             
             services_terminated = 0
@@ -2176,28 +2176,28 @@ class DevLauncher:
                 for service_name in services_order:
                     try:
                         if self.process_manager.is_running(service_name):
-                            print(f"🔨 KILL | Force terminating {service_name}...")
+                            print(f"[U+1F528] KILL | Force terminating {service_name}...")
                             # Use immediate force kill in emergency
                             if hasattr(self.process_manager, 'kill_process'):
                                 self.process_manager.kill_process(service_name)
                             else:
                                 self.process_manager.terminate_process(service_name)
                             services_terminated += 1
-                            print(f"✅ KILLED | {service_name} terminated")
+                            print(f" PASS:  KILLED | {service_name} terminated")
                     except Exception as e:
-                        print(f"⚠️ KILL | {service_name} termination error: {e}")
+                        print(f" WARNING: [U+FE0F] KILL | {service_name} termination error: {e}")
                 
                 # Final process cleanup
                 try:
                     self.process_manager.cleanup_all()
-                    print("✅ PHASE 2 | Process cleanup completed")
+                    print(" PASS:  PHASE 2 | Process cleanup completed")
                 except Exception as e:
-                    print(f"⚠️ PHASE 2 | Process cleanup error: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 2 | Process cleanup error: {e}")
             
             cleanup_phases.append(("Phase 2", time.time() - phase2_start))
             
             # Phase 3: Emergency port cleanup
-            print("🔄 PHASE 3 | Emergency port cleanup...")
+            print(" CYCLE:  PHASE 3 | Emergency port cleanup...")
             phase3_start = time.time()
             
             # Get all potential ports to clean
@@ -2207,19 +2207,19 @@ class DevLauncher:
             for port, service in emergency_ports:
                 try:
                     if self._is_port_in_use(port):
-                        print(f"🧹 CLEAN | Force cleaning port {port} ({service})...")
+                        print(f"[U+1F9F9] CLEAN | Force cleaning port {port} ({service})...")
                         if self._emergency_force_free_port(port):
                             ports_cleaned += 1
-                            print(f"✅ FREED | Port {port} ({service}) cleaned")
+                            print(f" PASS:  FREED | Port {port} ({service}) cleaned")
                         else:
-                            print(f"⚠️ STUCK | Port {port} ({service}) still in use")
+                            print(f" WARNING: [U+FE0F] STUCK | Port {port} ({service}) still in use")
                 except Exception as e:
-                    print(f"⚠️ CLEAN | Port {port} cleanup error: {e}")
+                    print(f" WARNING: [U+FE0F] CLEAN | Port {port} cleanup error: {e}")
             
             cleanup_phases.append(("Phase 3", time.time() - phase3_start))
             
             # Phase 4: Stop supporting services
-            print("🔄 PHASE 4 | Stopping supporting services...")
+            print(" CYCLE:  PHASE 4 | Stopping supporting services...")
             phase4_start = time.time()
             
             # Stop log streamers with timeout
@@ -2230,33 +2230,33 @@ class DevLauncher:
                     log_stop_thread.daemon = True
                     log_stop_thread.start()
                     log_stop_thread.join(timeout=1)  # 1 second timeout
-                    print("✅ PHASE 4 | Log streaming stopped")
+                    print(" PASS:  PHASE 4 | Log streaming stopped")
                 except Exception as e:
-                    print(f"⚠️ PHASE 4 | Log streamer error: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 4 | Log streamer error: {e}")
             
             # Cleanup parallel executor
             if hasattr(self, 'parallel_executor') and self.parallel_executor:
                 try:
                     self.parallel_executor.cleanup()
-                    print("✅ PHASE 4 | Parallel executor cleaned")
+                    print(" PASS:  PHASE 4 | Parallel executor cleaned")
                 except Exception as e:
-                    print(f"⚠️ PHASE 4 | Parallel executor error: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 4 | Parallel executor error: {e}")
             
             # Cleanup startup optimizer
             if hasattr(self, 'startup_optimizer') and self.startup_optimizer:
                 try:
                     self.startup_optimizer.cleanup()
-                    print("✅ PHASE 4 | Startup optimizer cleaned")
+                    print(" PASS:  PHASE 4 | Startup optimizer cleaned")
                 except Exception as e:
-                    print(f"⚠️ PHASE 4 | Startup optimizer error: {e}")
+                    print(f" WARNING: [U+FE0F] PHASE 4 | Startup optimizer error: {e}")
             
             cleanup_phases.append(("Phase 4", time.time() - phase4_start))
             
             # Calculate total time
             total_time = time.time() - emergency_start
-            print(f"\n✅ EMERGENCY RECOVERY | Cleanup completed in {total_time:.1f}s")
-            print(f"   • Services terminated: {services_terminated}")
-            print(f"   • Ports cleaned: {ports_cleaned}")
+            print(f"\n PASS:  EMERGENCY RECOVERY | Cleanup completed in {total_time:.1f}s")
+            print(f"   [U+2022] Services terminated: {services_terminated}")
+            print(f"   [U+2022] Ports cleaned: {ports_cleaned}")
             
             # Show phase timing if it took significant time
             if total_time > 2.0:
@@ -2265,12 +2265,12 @@ class DevLauncher:
                     print(f"     - {phase_name}: {phase_time:.1f}s")
             
         except Exception as e:
-            print(f"❌ EMERGENCY | Critical cleanup error: {e}")
+            print(f" FAIL:  EMERGENCY | Critical cleanup error: {e}")
             # Last resort - try to at least free critical ports
             try:
                 self._last_resort_port_cleanup()
             except Exception as final_error:
-                print(f"❌ EMERGENCY | Last resort cleanup failed: {final_error}")
+                print(f" FAIL:  EMERGENCY | Last resort cleanup failed: {final_error}")
         
         finally:
             self._emergency_cleanup_running = False
@@ -2315,12 +2315,12 @@ class DevLauncher:
             # Use maximum aggression - force kill immediately
             return self._force_free_port_with_retry(port, max_retries=1)
         except Exception as e:
-            print(f"⚠️ EMERGENCY | Port {port} force cleanup failed: {e}")
+            print(f" WARNING: [U+FE0F] EMERGENCY | Port {port} force cleanup failed: {e}")
             return False
     
     def _last_resort_port_cleanup(self):
         """Last resort port cleanup when all else fails."""
-        print("🆘 LAST RESORT | Attempting final port cleanup...")
+        print("[U+1F198] LAST RESORT | Attempting final port cleanup...")
         
         critical_ports = [8000, 3000, 8081]
         for port in critical_ports:
@@ -2336,7 +2336,7 @@ class DevLauncher:
             except Exception:
                 pass  # Ignore all errors in last resort
         
-        print("🆘 LAST RESORT | Final cleanup attempt completed")
+        print("[U+1F198] LAST RESORT | Final cleanup attempt completed")
 
     def _handle_cleanup(self) -> int:
         """Handle cleanup and return exit code."""
@@ -2348,14 +2348,14 @@ class DevLauncher:
         
         # Show startup time and optimization report
         elapsed = time.time() - self.startup_time
-        self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
+        self._print("[U+23F1][U+FE0F]", "TIME", f"Total startup time: {elapsed:.1f}s")
         
         # Show optimization report
         if self.config.verbose:
             timing_report = self.startup_optimizer.get_timing_report()
-            self._print("📊", "PERF", f"Target met: {timing_report['target_met']}")
+            self._print(" CHART: ", "PERF", f"Target met: {timing_report['target_met']}")
             if timing_report['cached_steps']:
-                self._print("⚡", "CACHE", f"Cached steps: {len(timing_report['cached_steps'])}")
+                self._print(" LIGHTNING: ", "CACHE", f"Cached steps: {len(timing_report['cached_steps'])}")
         
         # Save successful run to cache
         self.cache_manager.mark_successful_startup(elapsed)
@@ -2365,7 +2365,7 @@ class DevLauncher:
             self._graceful_shutdown()
         
         if not self.health_monitor.all_healthy():
-            self._print("⚠️", "WARN", "Some services were unhealthy during execution")
+            self._print(" WARNING: [U+FE0F]", "WARN", "Some services were unhealthy during execution")
             return 1
         return 0
 
@@ -2417,13 +2417,13 @@ class DevLauncher:
             if backend_result[0]:
                 self.process_manager.add_process("Backend", backend_result[0])
                 backend_success = True
-                self._print("✅", "BACKEND", "Backend service started successfully")
+                self._print(" PASS: ", "BACKEND", "Backend service started successfully")
                 
                 # Update WebSocket validator with actual backend port
                 actual_backend_port = self.config.backend_port or 8000
                 self.websocket_validator.update_backend_port(actual_backend_port)
             else:
-                self._print("❌", "BACKEND", "Backend service failed to start")
+                self._print(" FAIL: ", "BACKEND", "Backend service failed to start")
         except Exception as e:
             error_type = type(e).__name__
             startup_error_code = f"BACKEND_STARTUP_{error_type.upper()}"
@@ -2435,9 +2435,9 @@ class DevLauncher:
             if auth_result[0]:
                 self.process_manager.add_process("Auth", auth_result[0])
                 auth_success = True
-                self._print("✅", "AUTH", "Auth service started successfully")
+                self._print(" PASS: ", "AUTH", "Auth service started successfully")
             else:
-                self._print("❌", "AUTH", "Auth service failed to start")
+                self._print(" FAIL: ", "AUTH", "Auth service failed to start")
         except Exception as e:
             error_type = type(e).__name__
             startup_error_code = f"AUTH_STARTUP_{error_type.upper()}"
@@ -2459,10 +2459,10 @@ class DevLauncher:
             frontend_result = self.service_startup.start_frontend()
             if frontend_result[0]:
                 self.process_manager.add_process("Frontend", frontend_result[0])
-                self._print("✅", "FRONTEND", "Frontend service started successfully")
+                self._print(" PASS: ", "FRONTEND", "Frontend service started successfully")
                 return True
             else:
-                self._print("❌", "FRONTEND", "Frontend service failed to start")
+                self._print(" FAIL: ", "FRONTEND", "Frontend service failed to start")
                 return False
         except Exception as e:
             error_type = type(e).__name__

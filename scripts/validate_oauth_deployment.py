@@ -240,11 +240,11 @@ class OAuthDeploymentValidator:
                 
                 print(f"  [LIST] Authorized Origins: {len(authorized_origins)}")
                 for origin in authorized_origins:
-                    print(f"    • {origin}")
+                    print(f"    [U+2022] {origin}")
                 
                 print(f"  [LIST] Redirect URIs: {len(redirect_uris)}")
                 for uri in redirect_uris:
-                    print(f"    • {uri}")
+                    print(f"    [U+2022] {uri}")
                 
                 # Check if expected domains are covered
                 missing_domains = []

@@ -11,9 +11,9 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents $100K+ loss from service communication failures
 
 Service Dependencies Tested:
-1. Backend ↔ Auth Service real authentication flows
-2. Backend ↔ PostgreSQL real database operations
-3. Backend ↔ Redis real cache interactions
+1. Backend [U+2194] Auth Service real authentication flows
+2. Backend [U+2194] PostgreSQL real database operations
+3. Backend [U+2194] Redis real cache interactions
 4. Cross-service dependency chains with real services
 5. Service error propagation with real failure scenarios
 6. Concurrent service access patterns
@@ -87,7 +87,7 @@ class ServiceDependencyMetrics:
 
 class TestBackendToAuthServiceIntegration:
     """
-    Integration tests for Backend ↔ Auth Service dependency using real services.
+    Integration tests for Backend [U+2194] Auth Service dependency using real services.
     
     CRITICAL: These tests use real Auth Service with mandatory authentication
     to validate actual JWT token flows and user management operations.
@@ -166,7 +166,7 @@ class TestBackendToAuthServiceIntegration:
         """
         Integration test for real JWT token validation through auth service.
         
-        This validates the complete Backend ↔ Auth Service authentication flow
+        This validates the complete Backend [U+2194] Auth Service authentication flow
         using real services and actual JWT token validation.
         """
         user = await self.create_integration_authenticated_user("jwt_validation")
@@ -352,7 +352,7 @@ class TestBackendToAuthServiceIntegration:
 
 class TestBackendToDatabaseIntegration:
     """
-    Integration tests for Backend ↔ PostgreSQL database dependency using real database.
+    Integration tests for Backend [U+2194] PostgreSQL database dependency using real database.
     
     CRITICAL: These tests use real PostgreSQL database with actual transactions
     to validate database operations, connection management, and data consistency.
@@ -557,7 +557,7 @@ class TestBackendToDatabaseIntegration:
 
 class TestBackendToRedisIntegration:
     """
-    Integration tests for Backend ↔ Redis cache dependency using real Redis.
+    Integration tests for Backend [U+2194] Redis cache dependency using real Redis.
     
     CRITICAL: These tests use real Redis cache with actual cache operations
     to validate caching patterns, pub/sub functionality, and fallback behavior.
@@ -725,7 +725,7 @@ class TestBackendToRedisIntegration:
         
         try:
             # Replace connection with a mock that simulates failures
-            failed_connection = redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
+            failed_connection = await get_redis_client()  # MIGRATED: was redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
             self.cache_manager.connection = failed_connection
             
             # Test fallback behavior
@@ -800,10 +800,10 @@ class TestCrossServiceDependencyChains:
     @pytest.mark.asyncio
     async def test_complete_user_authentication_to_database_chain(self, real_services_fixture):
         """
-        CRITICAL Integration test for complete authentication → database dependency chain.
+        CRITICAL Integration test for complete authentication  ->  database dependency chain.
         
         This validates the full user authentication flow through all services:
-        Auth Service → Backend → Database with real service interactions.
+        Auth Service  ->  Backend  ->  Database with real service interactions.
         """
         test_session_id = f"cross_service_test_{int(time.time())}"
         
@@ -877,7 +877,7 @@ class TestCrossServiceDependencyChains:
         final_validation = await auth_client.validate_token(jwt_token)
         assert final_validation.get('valid'), "Final auth validation failed"
         
-        self.logger.info(f"Complete user auth → database chain test passed. User: {user_id}, Session: {test_session_id}")
+        self.logger.info(f"Complete user auth  ->  database chain test passed. User: {user_id}, Session: {test_session_id}")
         
     @pytest.mark.asyncio
     async def test_service_failure_isolation_and_recovery(self, real_services_fixture):
@@ -908,7 +908,7 @@ class TestCrossServiceDependencyChains:
         
         try:
             # Replace with failed connection
-            failed_redis = redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
+            failed_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
             self.cache_manager.connection = failed_redis
             
             # System should fall back to database gracefully

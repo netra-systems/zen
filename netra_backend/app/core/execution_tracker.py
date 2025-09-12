@@ -3,7 +3,7 @@ Execution Tracker - SSOT Compatibility Layer
 =============================================
 CRITICAL: This module provides backward compatibility for legacy imports.
 
-⚠️  DEPRECATED: This module is now a compatibility layer.
+ WARNING: [U+FE0F]  DEPRECATED: This module is now a compatibility layer.
     New code should import from:
     `from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionState`
 
@@ -68,7 +68,7 @@ class ExecutionTracker(_SSOT_AgentExecutionTracker):
     """
     DEPRECATED: Backward compatibility wrapper around AgentExecutionTracker.
     
-    ⚠️  This class is now a thin wrapper around the SSOT AgentExecutionTracker.
+     WARNING: [U+FE0F]  This class is now a thin wrapper around the SSOT AgentExecutionTracker.
         New code should use AgentExecutionTracker directly:
         
         from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker
@@ -127,7 +127,7 @@ def get_execution_tracker() -> ExecutionTracker:
     """
     Get the global execution tracker instance.
     
-    ⚠️  DEPRECATED: Use the SSOT function instead:
+     WARNING: [U+FE0F]  DEPRECATED: Use the SSOT function instead:
         from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
     
     Returns:
@@ -168,7 +168,7 @@ async def init_execution_tracker():
     """
     Initialize and start the execution tracker.
     
-    ⚠️  DEPRECATED: Use the SSOT function instead:
+     WARNING: [U+FE0F]  DEPRECATED: Use the SSOT function instead:
         from netra_backend.app.core.agent_execution_tracker import initialize_tracker
     """
     warnings.warn(

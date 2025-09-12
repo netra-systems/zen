@@ -19,11 +19,21 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import pytest
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Add project root to path
 
 
 class AgentOrchestrationTestRunner:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Runner for agent orchestration tests with real LLM support."""
     
     # Top 20 high-value agent tests for Real LLM enabling

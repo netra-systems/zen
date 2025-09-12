@@ -1,7 +1,83 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Regression Test - WebSocket Context Import Failure (Mission Critical)
 
-🚨 ULTRA CRITICAL REGRESSION TEST 🚨
+ ALERT:  ULTRA CRITICAL REGRESSION TEST  ALERT: 
 This test MUST FAIL initially to prove the regression exists.
 
 Purpose: Prove WebSocketRequestContext import regression breaks MISSION CRITICAL WebSocket event delivery
@@ -35,7 +111,7 @@ except ImportError as e:
     WEBSOCKET_CONTEXT_ERROR = str(e)
 
 try:
-    # 🚨 MISSION CRITICAL: This import MUST FAIL to prove regression
+    #  ALERT:  MISSION CRITICAL: This import MUST FAIL to prove regression
     from netra_backend.app.websocket_core import WebSocketRequestContext
     WEBSOCKET_REQUEST_CONTEXT_AVAILABLE = True
     WEBSOCKET_REQUEST_CONTEXT_ERROR = None
@@ -116,27 +192,27 @@ class TestWebSocketContextMissionCriticalRegression:
     
     def test_mission_critical_context_imports_availability(self):
         """
-        🚨 MISSION CRITICAL: Validate core WebSocket context components are available.
+         ALERT:  MISSION CRITICAL: Validate core WebSocket context components are available.
         
         BUSINESS IMPACT: If this fails, the entire WebSocket event delivery system is broken.
         """
         # WebSocketContext should be available - this is the baseline
         assert WEBSOCKET_CONTEXT_AVAILABLE, (
-            f"🚨 MISSION CRITICAL FAILURE: WebSocketContext not available. "
+            f" ALERT:  MISSION CRITICAL FAILURE: WebSocketContext not available. "
             f"Error: {WEBSOCKET_CONTEXT_ERROR}. "
             f"This breaks ALL WebSocket functionality and destroys business value."
         )
         
         # Critical WebSocket components must be available
         assert CRITICAL_WEBSOCKET_COMPONENTS_AVAILABLE, (
-            f"🚨 MISSION CRITICAL FAILURE: Core WebSocket components not available. "
+            f" ALERT:  MISSION CRITICAL FAILURE: Core WebSocket components not available. "
             f"Error: {CRITICAL_WEBSOCKET_ERROR}. "
             f"This prevents delivery of mission critical events and destroys chat value."
         )
     
     def test_websocket_request_context_alias_mission_critical_EXPECTED_TO_FAIL(self):
         """
-        🚨 MISSION CRITICAL REGRESSION TEST: This test MUST FAIL to prove the regression.
+         ALERT:  MISSION CRITICAL REGRESSION TEST: This test MUST FAIL to prove the regression.
         
         Test that WebSocketRequestContext alias is available for mission critical operations.
         
@@ -144,20 +220,20 @@ class TestWebSocketContextMissionCriticalRegression:
         """
         # This assertion MUST FAIL, proving the mission critical regression
         assert WEBSOCKET_REQUEST_CONTEXT_AVAILABLE, (
-            f"🚨 MISSION CRITICAL REGRESSION: WebSocketRequestContext alias not available. "
+            f" ALERT:  MISSION CRITICAL REGRESSION: WebSocketRequestContext alias not available. "
             f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
-            f"\\n\\n💥 BUSINESS IMPACT:"
+            f"\\n\\n[U+1F4A5] BUSINESS IMPACT:"
             f"\\n- DESTROYS agent-WebSocket integration"
             f"\\n- BREAKS substantive chat value delivery (90% of business value)"
             f"\\n- VIOLATES Section 6 mission critical WebSocket events"
             f"\\n- PREVENTS real-time AI progress updates to users"
             f"\\n- ELIMINATES competitive advantage in AI-powered chat"
-            f"\\n\\n🚨 THIS REGRESSION MUST BE FIXED IMMEDIATELY"
+            f"\\n\\n ALERT:  THIS REGRESSION MUST BE FIXED IMMEDIATELY"
         )
     
     def test_critical_events_delivery_system_EXPECTED_TO_FAIL(self, mock_websocket, authenticated_user_context):
         """
-        🚨 MISSION CRITICAL: Test delivery of the 5 critical WebSocket events.
+         ALERT:  MISSION CRITICAL: Test delivery of the 5 critical WebSocket events.
         
         Section 6 CLAUDE.md requires: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
         
@@ -176,14 +252,14 @@ class TestWebSocketContextMissionCriticalRegression:
         }
         
         assert hasattr(UnifiedWebSocketEmitter, 'CRITICAL_EVENTS'), (
-            "🚨 MISSION CRITICAL: UnifiedWebSocketEmitter missing CRITICAL_EVENTS constant"
+            " ALERT:  MISSION CRITICAL: UnifiedWebSocketEmitter missing CRITICAL_EVENTS constant"
         )
         
         actual_critical_events = set(CRITICAL_EVENTS) if CRITICAL_EVENTS else set()
         missing_events = expected_critical_events - actual_critical_events
         
         assert not missing_events, (
-            f"🚨 MISSION CRITICAL EVENTS MISSING: {missing_events}. "
+            f" ALERT:  MISSION CRITICAL EVENTS MISSING: {missing_events}. "
             f"This breaks Section 6 requirements and destroys chat value delivery."
         )
         
@@ -201,7 +277,7 @@ class TestWebSocketContextMissionCriticalRegression:
         # If WebSocketRequestContext is not available, this might affect event delivery
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             pytest.fail(
-                f"🚨 CRITICAL EVENT DELIVERY COMPROMISED: WebSocketRequestContext alias missing. "
+                f" ALERT:  CRITICAL EVENT DELIVERY COMPROMISED: WebSocketRequestContext alias missing. "
                 f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
                 f"This may prevent proper context handling in mission critical event delivery, "
                 f"breaking the substantive chat value that represents 90% of business value."
@@ -210,7 +286,7 @@ class TestWebSocketContextMissionCriticalRegression:
     @pytest.mark.asyncio
     async def test_agent_websocket_bridge_mission_critical_integration_EXPECTED_TO_FAIL(self, authenticated_user_context):
         """
-        🚨 MISSION CRITICAL: Test agent-WebSocket bridge integration with context handling.
+         ALERT:  MISSION CRITICAL: Test agent-WebSocket bridge integration with context handling.
         
         This validates the core integration that delivers AI value to users through WebSocket events.
         """
@@ -240,7 +316,7 @@ class TestWebSocketContextMissionCriticalRegression:
             # If context check fails due to missing alias, this is mission critical
             if not context_check_result:
                 pytest.fail(
-                    f"🚨 MISSION CRITICAL: Agent-WebSocket bridge context compatibility failed. "
+                    f" ALERT:  MISSION CRITICAL: Agent-WebSocket bridge context compatibility failed. "
                     f"This likely indicates WebSocketRequestContext regression is breaking "
                     f"mission critical agent-WebSocket integration patterns."
                 )
@@ -248,7 +324,7 @@ class TestWebSocketContextMissionCriticalRegression:
         except Exception as e:
             if "WebSocketRequestContext" in str(e) or "import" in str(e).lower():
                 pytest.fail(
-                    f"🚨 MISSION CRITICAL AGENT INTEGRATION BROKEN: {e}. "
+                    f" ALERT:  MISSION CRITICAL AGENT INTEGRATION BROKEN: {e}. "
                     f"The WebSocketRequestContext regression is destroying agent-WebSocket integration, "
                     f"which is essential for delivering substantive AI value to users."
                 )
@@ -258,7 +334,7 @@ class TestWebSocketContextMissionCriticalRegression:
     
     def test_websocket_context_type_compatibility_mission_critical_EXPECTED_TO_FAIL(self, mock_websocket, authenticated_user_context):
         """
-        🚨 MISSION CRITICAL: Test WebSocket context type compatibility for business value delivery.
+         ALERT:  MISSION CRITICAL: Test WebSocket context type compatibility for business value delivery.
         
         This validates that both WebSocketContext and WebSocketRequestContext work interchangeably.
         Mission critical because legacy code depends on this compatibility.
@@ -279,20 +355,20 @@ class TestWebSocketContextMissionCriticalRegression:
         # Mission critical compatibility check
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             pytest.fail(
-                f"🚨 MISSION CRITICAL COMPATIBILITY BROKEN: WebSocketRequestContext alias not available. "
+                f" ALERT:  MISSION CRITICAL COMPATIBILITY BROKEN: WebSocketRequestContext alias not available. "
                 f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
-                f"\\n\\n💥 BUSINESS IMPACT:"
+                f"\\n\\n[U+1F4A5] BUSINESS IMPACT:"
                 f"\\n- Existing code expecting WebSocketRequestContext will BREAK"
                 f"\\n- Agent-WebSocket integration patterns will FAIL" 
                 f"\\n- Multi-user isolation patterns may be COMPROMISED"
                 f"\\n- Mission critical event delivery may be UNRELIABLE"
-                f"\\n\\n🚨 This breaks backward compatibility and SSOT principles"
+                f"\\n\\n ALERT:  This breaks backward compatibility and SSOT principles"
             )
         
         # If both types are available (after fix), validate they're identical
         if WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             assert WebSocketRequestContext is WebSocketContext, (
-                "🚨 MISSION CRITICAL: WebSocketRequestContext must be identical to WebSocketContext for compatibility"
+                " ALERT:  MISSION CRITICAL: WebSocketRequestContext must be identical to WebSocketContext for compatibility"
             )
             
             # Test isinstance compatibility
@@ -301,7 +377,7 @@ class TestWebSocketContextMissionCriticalRegression:
     
     def test_websocket_notifier_context_handling_EXPECTED_TO_FAIL(self, mock_websocket, authenticated_user_context):
         """
-        🚨 MISSION CRITICAL: Test WebSocket notifier context handling with potential regression impact.
+         ALERT:  MISSION CRITICAL: Test WebSocket notifier context handling with potential regression impact.
         
         WebSocket notifier is essential for delivering mission critical events to users.
         """
@@ -332,22 +408,22 @@ class TestWebSocketContextMissionCriticalRegression:
                 # Check if this is due to missing WebSocketRequestContext
                 if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
                     pytest.fail(
-                        f"🚨 MISSION CRITICAL NOTIFIER REGRESSION: WebSocket notifier context validation failed. "
+                        f" ALERT:  MISSION CRITICAL NOTIFIER REGRESSION: WebSocket notifier context validation failed. "
                         f"This appears to be caused by missing WebSocketRequestContext alias. "
                         f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
                         f"This breaks mission critical event delivery to users."
                     )
                 else:
-                    pytest.fail("🚨 MISSION CRITICAL: WebSocket notifier context validation failed unexpectedly")
+                    pytest.fail(" ALERT:  MISSION CRITICAL: WebSocket notifier context validation failed unexpectedly")
         
         except Exception as e:
             if "WebSocketRequestContext" in str(e):
                 pytest.fail(
-                    f"🚨 MISSION CRITICAL NOTIFIER BROKEN: WebSocket notifier fails due to WebSocketRequestContext regression: {e}. "
+                    f" ALERT:  MISSION CRITICAL NOTIFIER BROKEN: WebSocket notifier fails due to WebSocketRequestContext regression: {e}. "
                     f"This destroys the ability to deliver mission critical events and breaks substantive chat value."
                 )
             else:
-                pytest.fail(f"🚨 MISSION CRITICAL: WebSocket notifier unexpectedly failed: {e}")
+                pytest.fail(f" ALERT:  MISSION CRITICAL: WebSocket notifier unexpectedly failed: {e}")
     
     def test_mission_critical_regression_business_impact_summary(self):
         """
@@ -375,32 +451,32 @@ class TestWebSocketContextMissionCriticalRegression:
         )
         impact_score = (working_components / total_components) * 100 if total_components > 0 else 0
         
-        print("\\n🚨 MISSION CRITICAL REGRESSION BUSINESS IMPACT ANALYSIS 🚨")
-        print(f"\\n📊 System Health Score: {impact_score:.1f}%")
+        print("\\n ALERT:  MISSION CRITICAL REGRESSION BUSINESS IMPACT ANALYSIS  ALERT: ")
+        print(f"\\n CHART:  System Health Score: {impact_score:.1f}%")
         
-        print("\\n🔧 Core Functionality:")
+        print("\\n[U+1F527] Core Functionality:")
         for component, status in impact_analysis["core_functionality"].items():
-            status_icon = "✅" if status else "❌"
+            status_icon = " PASS: " if status else " FAIL: "
             print(f"   {status_icon} {component}: {'Available' if status else 'BROKEN'}")
         
-        print("\\n💼 Business Critical Integrations:")
+        print("\\n[U+1F4BC] Business Critical Integrations:")
         for component, status in impact_analysis["business_critical_integrations"].items():
-            status_icon = "✅" if status else "❌" 
+            status_icon = " PASS: " if status else " FAIL: " 
             print(f"   {status_icon} {component}: {'Available' if status else 'BROKEN'}")
         
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
-            print("\\n🚨 PRIMARY REGRESSION IDENTIFIED:")
-            print(f"   ❌ WebSocketRequestContext alias missing from websocket_core exports")
-            print(f"   📝 Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}")
+            print("\\n ALERT:  PRIMARY REGRESSION IDENTIFIED:")
+            print(f"    FAIL:  WebSocketRequestContext alias missing from websocket_core exports")
+            print(f"   [U+1F4DD] Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}")
             
-            print("\\n💥 DIRECT BUSINESS IMPACT:")
-            print("   🔻 Destroys agent-WebSocket integration (90% of business value)")
-            print("   🔻 Breaks mission critical event delivery (Section 6 CLAUDE.md)")
-            print("   🔻 Violates backward compatibility and SSOT principles")
-            print("   🔻 Compromises multi-user isolation architecture")
-            print("   🔻 Eliminates competitive advantage in real-time AI chat")
+            print("\\n[U+1F4A5] DIRECT BUSINESS IMPACT:")
+            print("   [U+1F53B] Destroys agent-WebSocket integration (90% of business value)")
+            print("   [U+1F53B] Breaks mission critical event delivery (Section 6 CLAUDE.md)")
+            print("   [U+1F53B] Violates backward compatibility and SSOT principles")
+            print("   [U+1F53B] Compromises multi-user isolation architecture")
+            print("   [U+1F53B] Eliminates competitive advantage in real-time AI chat")
             
-            print("\\n🆘 IMMEDIATE ACTION REQUIRED:")
+            print("\\n[U+1F198] IMMEDIATE ACTION REQUIRED:")
             print("   1. Add WebSocketRequestContext to websocket_core __init__.py __all__ list")
             print("   2. Import WebSocketRequestContext from context module") 
             print("   3. Run mission critical tests to validate fix")

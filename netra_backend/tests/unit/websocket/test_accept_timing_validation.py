@@ -480,17 +480,6 @@ class ConnectionStateMachineRaceConditionTest(BaseTestCase):
     that lead to race conditions in WebSocket lifecycle management.
     """
     
-    def setUp(self):
-        """Set up connection state machine test environment."""
-        super().setUp()
-        
-        self.connection_id = ConnectionID("race_test_conn")
-        self.user_id = ensure_user_id("race_test_user")
-        self.state_machine = ConnectionStateMachine(self.connection_id, self.user_id)
-        
-        self.race_events = []
-        self.state_inconsistencies = []
-    
     def test_state_machine_concurrent_transitions_race(self):
         """
         Test concurrent state transitions that cause race conditions.

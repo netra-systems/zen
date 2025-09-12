@@ -31,9 +31,9 @@ env = get_env()
 
         # REMOVED_SYNTAX_ERROR: print(''' )
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: ╔══════════════════════════════════════════════════════════════╗
-        # REMOVED_SYNTAX_ERROR: ║         NACIS Core Components Test (No Backend)             ║
-        # REMOVED_SYNTAX_ERROR: ╚══════════════════════════════════════════════════════════════╝
+        # REMOVED_SYNTAX_ERROR: [U+2554][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2557]
+        # REMOVED_SYNTAX_ERROR: [U+2551]         NACIS Core Components Test (No Backend)             [U+2551]
+        # REMOVED_SYNTAX_ERROR: [U+255A][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+2550][U+255D]
         # REMOVED_SYNTAX_ERROR: ''')
 
         # Test 1: Model Cascade (CLQT Optimization)
@@ -69,7 +69,7 @@ env = get_env()
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: ✅ Model Cascade working correctly")
+                # REMOVED_SYNTAX_ERROR:  PASS:  Model Cascade working correctly")
 
                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -105,7 +105,7 @@ env = get_env()
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: ✅ Confidence Manager working correctly")
+                            # REMOVED_SYNTAX_ERROR:  PASS:  Confidence Manager working correctly")
 
                             # REMOVED_SYNTAX_ERROR: except Exception as e:
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -140,7 +140,7 @@ env = get_env()
                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                            # REMOVED_SYNTAX_ERROR: ✅ Execution Planner working correctly")
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  Execution Planner working correctly")
 
                                             # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -180,7 +180,7 @@ env = get_env()
                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                                # REMOVED_SYNTAX_ERROR: ✅ Input Guardrails working correctly")
+                                                                # REMOVED_SYNTAX_ERROR:  PASS:  Input Guardrails working correctly")
 
                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -234,7 +234,7 @@ env = get_env()
                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                             # REMOVED_SYNTAX_ERROR: print()
 
-                                                                            # REMOVED_SYNTAX_ERROR: print("✅ Reliability Scorer working correctly")
+                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Reliability Scorer working correctly")
 
                                                                             # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -288,7 +288,7 @@ env = get_env()
                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                                                                # REMOVED_SYNTAX_ERROR: ✅ Output Validators working correctly")
+                                                                                                # REMOVED_SYNTAX_ERROR:  PASS:  Output Validators working correctly")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -299,7 +299,7 @@ env = get_env()
                                                                                                     # REMOVED_SYNTAX_ERROR: print("SUMMARY")
                                                                                                     # REMOVED_SYNTAX_ERROR: print("="*60)
                                                                                                     # REMOVED_SYNTAX_ERROR: print(''' )
-                                                                                                    # REMOVED_SYNTAX_ERROR: ✅ NACIS Core Components Tested Successfully!
+                                                                                                    # REMOVED_SYNTAX_ERROR:  PASS:  NACIS Core Components Tested Successfully!
 
                                                                                                     # REMOVED_SYNTAX_ERROR: Components Validated:
                                                                                                         # REMOVED_SYNTAX_ERROR: 1. Model Cascade (CLQT) - Working

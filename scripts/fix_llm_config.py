@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def check_environment():
     """Check if required environment variables are set."""
-    print("🔍 Checking environment variables...")
+    print(" SEARCH:  Checking environment variables...")
     
     required_vars = {
         'GEMINI_API_KEY': 'Required for LLM functionality',
@@ -35,11 +35,11 @@ def check_environment():
             # Mask the API key for security
             if 'KEY' in var or 'SECRET' in var:
                 masked = value[:4] + '...' + value[-4:] if len(value) > 8 else '***'
-                print(f"  ✅ {var}: {masked} - {description}")
+                print(f"   PASS:  {var}: {masked} - {description}")
             else:
-                print(f"  ✅ {var}: {value} - {description}")
+                print(f"   PASS:  {var}: {value} - {description}")
         else:
-            print(f"  ❌ {var}: NOT SET - {description}")
+            print(f"   FAIL:  {var}: NOT SET - {description}")
             missing.append(var)
     
     return missing
@@ -50,7 +50,7 @@ def create_env_file():
     env_path = Path('.env')
     
     if env_path.exists():
-        print(f"ℹ️  .env file already exists at {env_path.absolute()}")
+        print(f"[U+2139][U+FE0F]  .env file already exists at {env_path.absolute()}")
         return False
     
     template = """# Netra Core Environment Configuration
@@ -86,22 +86,22 @@ SECRET_KEY=dev-secret-key-change-in-production
 """
     
     env_path.write_text(template)
-    print(f"✅ Created .env template at {env_path.absolute()}")
-    print("⚠️  Please edit .env and add your GEMINI_API_KEY")
+    print(f" PASS:  Created .env template at {env_path.absolute()}")
+    print(" WARNING: [U+FE0F]  Please edit .env and add your GEMINI_API_KEY")
     return True
 
 
 async def test_llm_functionality():
     """Test if LLM manager can be initialized and used."""
-    print("\n🧪 Testing LLM functionality...")
+    print("\n[U+1F9EA] Testing LLM functionality...")
     
     try:
         from netra_backend.app.llm.llm_manager import get_llm_manager
         
-        print("  📦 Importing LLM manager...")
+        print("  [U+1F4E6] Importing LLM manager...")
         manager = await get_llm_manager()
         
-        print("  🏥 Running health check...")
+        print("  [U+1F3E5] Running health check...")
         health = await manager.health_check()
         
         print(f"  Status: {health.get('status', 'unknown')}")
@@ -109,23 +109,23 @@ async def test_llm_functionality():
         print(f"  Available configs: {health.get('available_configs', [])}")
         
         if health.get('status') == 'healthy' and health.get('available_configs'):
-            print("\n  🎯 Testing LLM request...")
+            print("\n   TARGET:  Testing LLM request...")
             response = await manager.ask_llm("Say 'Hello World' in exactly two words.")
             print(f"  Response: {response}")
-            print("\n✅ LLM functionality is working!")
+            print("\n PASS:  LLM functionality is working!")
             return True
         else:
-            print("\n⚠️  LLM manager is not fully configured")
+            print("\n WARNING: [U+FE0F]  LLM manager is not fully configured")
             return False
             
     except Exception as e:
-        print(f"\n❌ LLM test failed: {e}")
+        print(f"\n FAIL:  LLM test failed: {e}")
         return False
 
 
 async def test_health_check():
     """Test the startup health check for LLM."""
-    print("\n🏥 Testing startup health check...")
+    print("\n[U+1F3E5] Testing startup health check...")
     
     try:
         from fastapi import FastAPI
@@ -151,13 +151,13 @@ async def test_health_check():
         return result.status.value == "healthy"
         
     except Exception as e:
-        print(f"❌ Health check test failed: {e}")
+        print(f" FAIL:  Health check test failed: {e}")
         return False
 
 
 def apply_fixes():
     """Apply automatic fixes for common issues."""
-    print("\n🔧 Applying fixes...")
+    print("\n[U+1F527] Applying fixes...")
     
     fixes_applied = []
     
@@ -171,17 +171,17 @@ def apply_fixes():
         try:
             from dotenv import load_dotenv
             load_dotenv(override=True)
-            print("✅ Loaded .env file")
+            print(" PASS:  Loaded .env file")
             fixes_applied.append("Loaded environment from .env")
         except ImportError:
-            print("⚠️  python-dotenv not installed. Install with: pip install python-dotenv")
+            print(" WARNING: [U+FE0F]  python-dotenv not installed. Install with: pip install python-dotenv")
     
     # Fix 3: Check if GEMINI_API_KEY is now set
     if os.getenv('GEMINI_API_KEY'):
-        print("✅ GEMINI_API_KEY is now available")
+        print(" PASS:  GEMINI_API_KEY is now available")
         fixes_applied.append("GEMINI_API_KEY configured")
     else:
-        print("⚠️  GEMINI_API_KEY still not set. Please add it to your .env file")
+        print(" WARNING: [U+FE0F]  GEMINI_API_KEY still not set. Please add it to your .env file")
     
     return fixes_applied
 
@@ -203,35 +203,35 @@ async def main():
     if args.command == 'check':
         missing = check_environment()
         if missing:
-            print(f"\n⚠️  Missing {len(missing)} required environment variable(s)")
+            print(f"\n WARNING: [U+FE0F]  Missing {len(missing)} required environment variable(s)")
             print("Run 'python scripts/fix_llm_config.py fix' to apply fixes")
             sys.exit(1)
         else:
-            print("\n✅ All required environment variables are set")
+            print("\n PASS:  All required environment variables are set")
             
     elif args.command == 'fix':
         missing = check_environment()
         fixes = apply_fixes()
         
         if fixes:
-            print(f"\n✅ Applied {len(fixes)} fix(es):")
+            print(f"\n PASS:  Applied {len(fixes)} fix(es):")
             for fix in fixes:
                 print(f"  - {fix}")
         
         # Re-check after fixes
-        print("\n🔍 Re-checking configuration...")
+        print("\n SEARCH:  Re-checking configuration...")
         missing = check_environment()
         
         if not missing:
-            print("\n✅ Configuration fixed! Run 'python scripts/fix_llm_config.py test' to verify")
+            print("\n PASS:  Configuration fixed! Run 'python scripts/fix_llm_config.py test' to verify")
         else:
-            print(f"\n⚠️  Still missing {len(missing)} variable(s). Please check your .env file")
+            print(f"\n WARNING: [U+FE0F]  Still missing {len(missing)} variable(s). Please check your .env file")
             
     elif args.command == 'test':
         # Check environment first
         missing = check_environment()
         if missing:
-            print(f"\n⚠️  Cannot test - missing {len(missing)} required variable(s)")
+            print(f"\n WARNING: [U+FE0F]  Cannot test - missing {len(missing)} required variable(s)")
             print("Run 'python scripts/fix_llm_config.py fix' first")
             sys.exit(1)
         
@@ -240,9 +240,9 @@ async def main():
         health_ok = await test_health_check()
         
         if llm_ok and health_ok:
-            print("\n✅ All tests passed! LLM configuration is working correctly")
+            print("\n PASS:  All tests passed! LLM configuration is working correctly")
         else:
-            print("\n⚠️  Some tests failed. Please check the output above")
+            print("\n WARNING: [U+FE0F]  Some tests failed. Please check the output above")
             sys.exit(1)
 
 

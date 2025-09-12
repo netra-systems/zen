@@ -31,7 +31,7 @@ def setup_pre_commit_hook():
     
     # Check if a pre-commit hook already exists
     if dest_hook.exists():
-        print(f"  ⚠ Pre-commit hook already exists at {dest_hook}")
+        print(f"   WARNING:  Pre-commit hook already exists at {dest_hook}")
         response = input("  Replace with import checking hook? (y/n): ")
         if response.lower() != 'y':
             print("  Skipping pre-commit hook setup")
@@ -49,7 +49,7 @@ def setup_pre_commit_hook():
     if sys.platform != 'win32':
         os.chmod(dest_hook, 0o755)
     
-    print(f"  ✓ Pre-commit hook installed at {dest_hook}")
+    print(f"  [U+2713] Pre-commit hook installed at {dest_hook}")
     print("  To skip import checks: git config hooks.skipimports true")
     print("  To re-enable: git config --unset hooks.skipimports")
     
@@ -72,9 +72,9 @@ def verify_tools():
     for tool_name, description in tools:
         tool_path = scripts_dir / tool_name
         if tool_path.exists():
-            print(f"  ✓ {tool_name}: {description}")
+            print(f"  [U+2713] {tool_name}: {description}")
         else:
-            print(f"  ✗ {tool_name}: NOT FOUND")
+            print(f"  [U+2717] {tool_name}: NOT FOUND")
             all_present = False
     
     return all_present
@@ -96,20 +96,20 @@ def test_import_check():
                     print(f"  Import check completed. Errors found: {error_count}")
                     
                     if int(error_count) > 0:
-                        print(f"  ⚠ {error_count} import errors detected")
+                        print(f"   WARNING:  {error_count} import errors detected")
                         print("  Run 'python scripts/import_management.py fix' to fix them")
                     else:
-                        print("  ✓ No import errors detected!")
+                        print("  [U+2713] No import errors detected!")
                     return True
         
-        print("  ⚠ Could not parse import check results")
+        print("   WARNING:  Could not parse import check results")
         return False
         
     except subprocess.TimeoutExpired:
-        print("  ✗ Import check timed out")
+        print("  [U+2717] Import check timed out")
         return False
     except Exception as e:
-        print(f"  ✗ Import check failed: {e}")
+        print(f"  [U+2717] Import check failed: {e}")
         return False
 
 
@@ -121,7 +121,7 @@ def main():
     
     # Check if we're in a git repository
     if not (PROJECT_ROOT / '.git').exists():
-        print("❌ Not in a git repository. Please run from project root.")
+        print(" FAIL:  Not in a git repository. Please run from project root.")
         return 1
     
     # Setup pre-commit hook
@@ -139,19 +139,19 @@ def main():
     print("=" * 60)
     
     if hook_installed:
-        print("✓ Pre-commit hook installed")
+        print("[U+2713] Pre-commit hook installed")
     else:
-        print("⚠ Pre-commit hook not installed")
+        print(" WARNING:  Pre-commit hook not installed")
     
     if tools_available:
-        print("✓ All import management tools available")
+        print("[U+2713] All import management tools available")
     else:
-        print("⚠ Some tools missing")
+        print(" WARNING:  Some tools missing")
     
     if check_success:
-        print("✓ Import checking system functional")
+        print("[U+2713] Import checking system functional")
     else:
-        print("⚠ Import checking needs attention")
+        print(" WARNING:  Import checking needs attention")
     
     print("\n" + "=" * 60)
     print("NEXT STEPS")

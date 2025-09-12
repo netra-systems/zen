@@ -246,7 +246,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
             )
             assert cleanup_verification["no_partial_data"], "Rollback must clean up all partial data"
             
-        self.logger.info("✅ Atomic conversation persistence transaction test completed")
+        self.logger.info(" PASS:  Atomic conversation persistence transaction test completed")
         return result
 
     @pytest.mark.integration
@@ -440,7 +440,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
             self.logger.error(f"Agent result storage transaction failed: {e}")
             raise
             
-        self.logger.info("✅ Agent execution result storage transaction test completed")
+        self.logger.info(" PASS:  Agent execution result storage transaction test completed")
         return result
 
     @pytest.mark.integration
@@ -575,7 +575,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
                 error_details="Expected constraint violation triggered rollback"
             )
             
-            self.logger.info("✅ Multi-table transaction rollback test completed successfully")
+            self.logger.info(" PASS:  Multi-table transaction rollback test completed successfully")
             return result
 
     @pytest.mark.integration  
@@ -709,7 +709,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
         self.metrics.successful_commits += len(session_results)
         self.test_data_cleanup.extend([{"type": "user_session", "user_id": ctx["user_id"]} for ctx in user_contexts])
         
-        self.logger.info("✅ Concurrent user session isolation test completed")
+        self.logger.info(" PASS:  Concurrent user session isolation test completed")
         return result
 
     @pytest.mark.integration
@@ -857,7 +857,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
         
         self.metrics.successful_commits += total_transactions
         
-        self.logger.info("✅ Connection pooling transaction lifecycle test completed")
+        self.logger.info(" PASS:  Connection pooling transaction lifecycle test completed")
         return result
 
     @pytest.mark.integration
@@ -1060,7 +1060,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
             self.logger.error(f"Distributed transaction coordination failed: {e}")
             raise
             
-        self.logger.info("✅ Distributed transaction coordination test completed")
+        self.logger.info(" PASS:  Distributed transaction coordination test completed")
         return result
 
     @pytest.mark.integration
@@ -1287,7 +1287,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
         self.metrics.deadlocks_detected += deadlock_metrics["deadlocks_detected"]
         self.test_data_cleanup.append({"type": "deadlock_resources", "resources": [resource_a_id, resource_b_id]})
         
-        self.logger.info("✅ Deadlock detection and automatic retry mechanisms test completed")
+        self.logger.info(" PASS:  Deadlock detection and automatic retry mechanisms test completed")
         return result
 
     @pytest.mark.integration
@@ -1537,7 +1537,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
             self.logger.error(f"Large dataset transaction chunking failed: {e}")
             raise
             
-        self.logger.info("✅ Large dataset transaction chunking and progress tracking test completed")
+        self.logger.info(" PASS:  Large dataset transaction chunking and progress tracking test completed")
         return result
 
     @pytest.mark.integration
@@ -1694,7 +1694,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
         self.metrics.timeout_occurrences += timeout_metrics["timeouts_encountered"]
         self.test_data_cleanup.append({"type": "timeout_test", "operation_id": operation_id, "user_id": user_id})
         
-        self.logger.info("✅ Transaction timeout handling and partial commit recovery test completed")
+        self.logger.info(" PASS:  Transaction timeout handling and partial commit recovery test completed")
         return result
 
     @pytest.mark.integration
@@ -1887,7 +1887,7 @@ class TestDatabaseTransactionHandlingIntegration(BaseIntegrationTest):
         self.test_data_cleanup.append({"type": "constraint_test", "user_id": user_id})
         self.assert_business_value_delivered(result.result_data, "insights")
         
-        self.logger.info("✅ Database constraint violation handling with user feedback test completed")
+        self.logger.info(" PASS:  Database constraint violation handling with user feedback test completed")
         return result
 
     # Helper methods for transaction testing

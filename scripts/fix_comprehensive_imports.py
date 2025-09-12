@@ -336,9 +336,9 @@ def main():
         print(f"\nRemaining import issues: {import_errors}")
         
         if import_errors == 0:
-            print("✓ All imports verified successfully!")
+            print("[U+2713] All imports verified successfully!")
         else:
-            print(f"✗ {import_errors} import issues remain")
+            print(f"[U+2717] {import_errors} import issues remain")
             # Show first few remaining issues
             lines = result.stdout.split('\n')
             error_lines = [l for l in lines if l.startswith('[X]')][:5]

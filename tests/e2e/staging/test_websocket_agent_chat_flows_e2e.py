@@ -68,7 +68,7 @@ class TestStagingWebSocketChatFlows:
         Test complete optimization chat flow with all 5 REQUIRED WebSocket events.
         
         CRITICAL: This tests the full business value delivery chain.
-        User requests optimization → Agent analyzes → Tools execute → Results delivered
+        User requests optimization  ->  Agent analyzes  ->  Tools execute  ->  Results delivered
         All steps must have proper WebSocket events for substantive chat experience.
         """
         # Arrange - Create authenticated staging user
@@ -169,7 +169,7 @@ class TestStagingWebSocketChatFlows:
             business_value_found = any(indicator in result_text for indicator in business_value_indicators)
             assert business_value_found, "Final result must contain business value indicators"
             
-            print(f"✅ Complete optimization chat flow validated with all 5 REQUIRED events")
+            print(f" PASS:  Complete optimization chat flow validated with all 5 REQUIRED events")
             print(f"   Events received: {list(received_events.keys())}")
             print(f"   Final result contains business value: {business_value_found}")
     
@@ -291,7 +291,7 @@ class TestStagingWebSocketChatFlows:
         cleanup_tasks = [client.disconnect() for client, _, _ in concurrent_clients]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
-        print(f"✅ Multi-user concurrent chat flows validated in staging")
+        print(f" PASS:  Multi-user concurrent chat flows validated in staging")
         print(f"   Successful connections: {successful_connections}/{user_count}")
         print(f"   Successful chats: {successful_chats}/{user_count}")
     
@@ -406,9 +406,9 @@ class TestStagingWebSocketChatFlows:
             
             # System should remain responsive after error recovery
             if not system_responsive:
-                print("⚠️ System may not be fully responsive after error scenario")
+                print(" WARNING: [U+FE0F] System may not be fully responsive after error scenario")
             
-            print(f"✅ Error recovery flow validated in staging")
+            print(f" PASS:  Error recovery flow validated in staging")
             print(f"   Recovery events received: {len(recovery_events)}")
             print(f"   System responsive after error: {system_responsive}")
             print(f"   Events: {[e.event_type.value for e in recovery_events]}")
@@ -525,7 +525,7 @@ class TestStagingWebSocketPerformance:
                 assert avg_total_response < 30.0, f"Average total response must be under 30s, got {avg_total_response:.1f}s"
                 assert max_total_response < 60.0, f"Max total response must be under 60s, got {max_total_response:.1f}s"
             
-            print(f"✅ Staging chat performance validated")
+            print(f" PASS:  Staging chat performance validated")
             print(f"   Successful requests: {len(successful_requests)}/3")
             if first_response_times:
                 print(f"   Avg first response: {sum(first_response_times)/len(first_response_times):.1f}s")

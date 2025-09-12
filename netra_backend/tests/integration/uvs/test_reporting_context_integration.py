@@ -60,7 +60,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
     Test WebSocket event delivery and business value tracking.
     
     Business Value Justification (BVJ):
-    - Segment: ALL (Free → Enterprise)
+    - Segment: ALL (Free  ->  Enterprise)
     - Business Goal: Ensure real-time user engagement and chat functionality
     - Value Impact: WebSocket events enable $500K+ ARR from chat-based AI interactions
     - Strategic Impact: CRITICAL - without events, chat has no business value
@@ -138,7 +138,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
             assert event['data']['run_id'] == context.run_id
             assert event['data']['user_segment'] == 'enterprise'
             
-            logger.info("✅ agent_started event successfully delivered with business value tracking")
+            logger.info(" PASS:  agent_started event successfully delivered with business value tracking")
     
     @pytest.mark.integration
     @pytest.mark.websocket_events
@@ -220,7 +220,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
             assert completed_event['tool_name'] == 'analyze_aws_spend'
             assert completed_event['transparency_value'] == 'high'
             
-            logger.info("✅ Tool execution events provide transparency and trust-building business value")
+            logger.info(" PASS:  Tool execution events provide transparency and trust-building business value")
     
     @pytest.mark.integration
     @pytest.mark.websocket_events
@@ -294,7 +294,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
                     time_diff = (event['timestamp'] - thinking_events[i-1]['timestamp']).total_seconds()
                     assert time_diff >= 0.05  # At least 50ms between events
             
-            logger.info("✅ agent_thinking events successfully reduce user abandonment risk")
+            logger.info(" PASS:  agent_thinking events successfully reduce user abandonment risk")
     
     @pytest.mark.integration
     @pytest.mark.websocket_events
@@ -387,7 +387,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
             assert result_data['savings_percentage'] > 25  # High percentage savings
             assert len(result_data['recommendations']) >= 2  # Multiple actionable items
             
-            logger.info("✅ agent_completed events drive user satisfaction and business value retention")
+            logger.info(" PASS:  agent_completed events drive user satisfaction and business value retention")
     
     @pytest.mark.integration
     @pytest.mark.websocket_events
@@ -465,7 +465,7 @@ class TestWebSocketEventDeliveryAndBusinessValueTracking(BaseIntegrationTest):
             assert error_info['recovery_action'] == 'automatic_retry_with_fallback'
             assert error_info['support_available'] is True
             
-            logger.info("✅ agent_error events maintain user trust through transparency")
+            logger.info(" PASS:  agent_error events maintain user trust through transparency")
 
 
 class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
@@ -553,7 +553,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
                 assert 'created_at' in engine_data
                 assert 'stats' in engine_data
             
-            logger.info("✅ Comprehensive factory metrics enable business intelligence and optimization")
+            logger.info(" PASS:  Comprehensive factory metrics enable business intelligence and optimization")
             
         finally:
             # Clean up test engines
@@ -645,7 +645,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
             utilization_efficiency = (cleanup['total_cleaned'] / cleanup['total_created']) * 100
             assert utilization_efficiency > 50  # Good cleanup efficiency
             
-            logger.info(f"✅ Resource utilization tracking enables {utilization_efficiency:.1f}% efficiency optimization")
+            logger.info(f" PASS:  Resource utilization tracking enables {utilization_efficiency:.1f}% efficiency optimization")
             
         finally:
             # Final cleanup
@@ -728,7 +728,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
             casual_user_analytics = behavior_analytics['casual_user']
             assert casual_user_analytics['engines_created'] == 1  # Lowest usage
             
-            logger.info("✅ User behavior analytics enable product optimization insights")
+            logger.info(" PASS:  User behavior analytics enable product optimization insights")
             
         finally:
             await factory.shutdown()
@@ -823,7 +823,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
             
             assert unexpected_error_rate < 5  # Very low unexpected error rate
             
-            logger.info(f"✅ Error rate monitoring: {success_rate:.1f}% success rate, {error_rate:.1f}% error rate")
+            logger.info(f" PASS:  Error rate monitoring: {success_rate:.1f}% success rate, {error_rate:.1f}% error rate")
             
         finally:
             # Clean up limit test engines
@@ -921,7 +921,7 @@ class TestFactoryMetricsAndPerformanceMonitoring(BaseIntegrationTest):
             cleanup_efficiency = (total_engines_cleaned / total_engines_processed) * 100
             assert cleanup_efficiency > 95  # Excellent cleanup efficiency
             
-            logger.info(f"✅ Capacity planning: handled {growth_multiplier}x growth with {cleanup_efficiency:.1f}% efficiency")
+            logger.info(f" PASS:  Capacity planning: handled {growth_multiplier}x growth with {cleanup_efficiency:.1f}% efficiency")
             
         finally:
             await factory.shutdown()
@@ -1006,7 +1006,7 @@ class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
         reconstructed_audit = json.loads(audit_json)
         assert reconstructed_audit['user_id'] == context.user_id
         
-        logger.info("✅ Comprehensive audit trail supports SOC2 compliance and enterprise requirements")
+        logger.info(" PASS:  Comprehensive audit trail supports SOC2 compliance and enterprise requirements")
     
     @pytest.mark.integration
     @pytest.mark.audit_trails
@@ -1096,7 +1096,7 @@ class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
         assert parent_correlation.split(':')[3] != child1_correlation.split(':')[3]
         assert child1_correlation.split(':')[3] != child2_correlation.split(':')[3]
         
-        logger.info("✅ Hierarchical audit trails provide complete compliance traceability")
+        logger.info(" PASS:  Hierarchical audit trails provide complete compliance traceability")
     
     @pytest.mark.integration
     @pytest.mark.audit_trails
@@ -1175,7 +1175,7 @@ class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
         time_diff = abs((original_timestamp - reconstructed_timestamp).total_seconds())
         assert time_diff < 1.0  # Should be identical or very close
         
-        logger.info("✅ Audit data serialization supports long-term compliance storage requirements")
+        logger.info(" PASS:  Audit data serialization supports long-term compliance storage requirements")
     
     @pytest.mark.integration
     @pytest.mark.audit_trails
@@ -1327,7 +1327,7 @@ class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
             factory_metrics = factory.get_factory_metrics()
             assert factory_metrics['user_limit_rejections'] > 0
             
-            logger.info(f"✅ Access audit logging captured {len(access_events)} events with security monitoring")
+            logger.info(f" PASS:  Access audit logging captured {len(access_events)} events with security monitoring")
             
         finally:
             # Clean up all created engines
@@ -1493,4 +1493,4 @@ class TestAuditTrailAndComplianceReporting(BaseIntegrationTest):
         compliance_readiness = (passed_checks / total_checks) * 100
         assert compliance_readiness >= 95, f"Compliance readiness {compliance_readiness:.1f}% below threshold"
         
-        logger.info(f"✅ Compliance validation: {compliance_readiness:.1f}% audit readiness across {len(frameworks_tested)} frameworks")
+        logger.info(f" PASS:  Compliance validation: {compliance_readiness:.1f}% audit readiness across {len(frameworks_tested)} frameworks")

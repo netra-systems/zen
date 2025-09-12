@@ -18,7 +18,7 @@ from netra_backend.app.agents.base.timing_decorators import time_operation, Timi
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.agent import SubAgentState, SubAgentUpdate
 from netra_backend.app.schemas.registry import WebSocketMessage, WebSocketMessageType
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)
 
@@ -177,10 +177,10 @@ class AgentCommunicationMixin:
         if len(self._failed_updates) > 10:
             self._failed_updates = self._failed_updates[-10:]
 
-    async def run_in_background(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def run_in_background(self, user_context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """Run agent in background task."""
         loop = asyncio.get_event_loop()
-        loop.create_task(self.run(state, run_id, stream_updates))
+        loop.create_task(self.run(user_context, run_id, stream_updates))
     
     async def _attempt_single_update(self, run_id: str, data: NestedJsonDict, retry_count: int, max_retries: int) -> bool:
         """Attempt single WebSocket update with error handling."""

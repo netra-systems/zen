@@ -1,4 +1,42 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """E2E STAGING TEST SUITE: WebSocket Golden Path Blocked - Issue #165 (Real GCP Services)
 
 THIS SUITE VALIDATES WEBSOCKET SCOPE BUG WITH COMPLETE E2E GOLDEN PATH TESTING.
@@ -54,6 +92,7 @@ from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 from tests.e2e.staging_test_base import StagingTestBase, staging_test, track_test_timing
 from tests.e2e.staging_test_config import get_staging_config, is_staging_available  
 from tests.helpers.auth_test_utils import TestAuthHelper
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Mission critical WebSocket events for Golden Path
 GOLDEN_PATH_EVENTS = {
@@ -66,6 +105,15 @@ GOLDEN_PATH_EVENTS = {
 
 
 class TestWebSocketGoldenPathBlocked(StagingTestBase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E tests validating complete Golden Path failure due to WebSocket scope bug.
     
@@ -93,8 +141,8 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         if not hasattr(self, 'auth_helper'):
             self.auth_helper = TestAuthHelper(environment="staging")
             
-        logger.info(f"🔧 E2E SETUP: Testing Golden Path against {self.backend_url}")
-        logger.info(f"🔧 WebSocket URL: {self.websocket_url}")
+        logger.info(f"[U+1F527] E2E SETUP: Testing Golden Path against {self.backend_url}")
+        logger.info(f"[U+1F527] WebSocket URL: {self.websocket_url}")
         
     @staging_test
     @track_test_timing
@@ -108,8 +156,8 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         
         Expected Behavior: FAIL - Complete Golden Path timeout due to scope violations
         """
-        logger.info("🚨 E2E GOLDEN PATH TEST: Complete WebSocket failure on staging")
-        logger.info(f"📡 Testing against: {self.backend_url}")
+        logger.info(" ALERT:  E2E GOLDEN PATH TEST: Complete WebSocket failure on staging")
+        logger.info(f"[U+1F4E1] Testing against: {self.backend_url}")
         
         # Track Golden Path metrics
         golden_path_metrics = {
@@ -129,7 +177,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         timeout_per_attempt = 30  # 30 seconds per attempt
         
         for attempt in range(max_attempts):
-            logger.info(f"🔄 Golden Path attempt {attempt + 1}/{max_attempts}")
+            logger.info(f" CYCLE:  Golden Path attempt {attempt + 1}/{max_attempts}")
             
             golden_path_metrics["connection_attempts"] += 1
             attempt_start_time = time.time()
@@ -150,7 +198,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                     "X-Scope-Bug-Test": "issue_165"
                 }
                 
-                logger.info(f"📡 Connecting to WebSocket: {self.websocket_url}")
+                logger.info(f"[U+1F4E1] Connecting to WebSocket: {self.websocket_url}")
                 
                 # Attempt real WebSocket connection
                 async with websockets.connect(
@@ -160,7 +208,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 ) as websocket:
                     
                     golden_path_metrics["successful_handshakes"] += 1
-                    logger.info(f"✅ Attempt {attempt + 1}: WebSocket handshake successful")
+                    logger.info(f" PASS:  Attempt {attempt + 1}: WebSocket handshake successful")
                     
                     # Send Golden Path test message
                     golden_path_message = {
@@ -176,7 +224,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                     }
                     
                     await websocket.send(json.dumps(golden_path_message))
-                    logger.info(f"📤 Attempt {attempt + 1}: Sent Golden Path message")
+                    logger.info(f"[U+1F4E4] Attempt {attempt + 1}: Sent Golden Path message")
                     
                     # Collect events and measure Golden Path completion
                     events_received = []
@@ -191,17 +239,17 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                                 events_received.append(event_data)
                                 golden_path_metrics["websocket_events_received"] += 1
                                 
-                                logger.info(f"📥 Attempt {attempt + 1}: Received event - {event_data.get('type', 'unknown')}")
+                                logger.info(f"[U+1F4E5] Attempt {attempt + 1}: Received event - {event_data.get('type', 'unknown')}")
                                 
                                 # Check for Golden Path completion
                                 if event_data.get('type') == 'agent_completed':
                                     golden_path_metrics["complete_responses"] += 1
                                     golden_path_metrics["business_value_delivered"] = True
-                                    logger.info(f"✅ Attempt {attempt + 1}: Golden Path completed successfully!")
+                                    logger.info(f" PASS:  Attempt {attempt + 1}: Golden Path completed successfully!")
                                     break
                                     
                             except asyncio.TimeoutError:
-                                logger.debug(f"⏱️ Attempt {attempt + 1}: Event receive timeout")
+                                logger.debug(f"[U+23F1][U+FE0F] Attempt {attempt + 1}: Event receive timeout")
                                 continue
                                 
                         # Analyze events received
@@ -209,13 +257,13 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                         missing_critical_events = GOLDEN_PATH_EVENTS - event_types
                         
                         if missing_critical_events:
-                            logger.error(f"❌ Attempt {attempt + 1}: Missing critical events: {missing_critical_events}")
+                            logger.error(f" FAIL:  Attempt {attempt + 1}: Missing critical events: {missing_critical_events}")
                         else:
-                            logger.info(f"✅ Attempt {attempt + 1}: All critical events received")
+                            logger.info(f" PASS:  Attempt {attempt + 1}: All critical events received")
                             golden_path_metrics["agent_executions"] += 1
                             
                     except Exception as event_error:
-                        logger.error(f"❌ Attempt {attempt + 1}: Event processing failed - {event_error}")
+                        logger.error(f" FAIL:  Attempt {attempt + 1}: Event processing failed - {event_error}")
                         
                     golden_path_metrics["authentication_successes"] += 1
                     
@@ -225,10 +273,10 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 # Check if this is a scope-related failure (server error codes)
                 if e.code == 1011:  # Internal server error
                     golden_path_metrics["scope_related_failures"] += 1
-                    logger.error(f"❌ Attempt {attempt + 1}: Server internal error 1011 (SCOPE BUG DETECTED)")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Server internal error 1011 (SCOPE BUG DETECTED)")
                     logger.error(f"   This indicates state_registry scope violation causing connection termination")
                 elif e.code >= 1000:
-                    logger.error(f"❌ Attempt {attempt + 1}: Connection closed with code {e.code}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Connection closed with code {e.code}")
                 
                 logger.error(f"   Error details: {e}")
                 
@@ -237,9 +285,9 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 
                 if e.status_code >= 500:
                     golden_path_metrics["scope_related_failures"] += 1
-                    logger.error(f"❌ Attempt {attempt + 1}: Server error {e.status_code} (SCOPE BUG LIKELY)")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Server error {e.status_code} (SCOPE BUG LIKELY)")
                 else:
-                    logger.error(f"❌ Attempt {attempt + 1}: Client error {e.status_code}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Client error {e.status_code}")
                     
             except Exception as e:
                 golden_path_metrics["total_failures"] += 1
@@ -248,9 +296,9 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 # Check for scope-related error indicators
                 if any(indicator in error_msg for indicator in ["internal server error", "state_registry", "not defined", "scope"]):
                     golden_path_metrics["scope_related_failures"] += 1
-                    logger.error(f"❌ Attempt {attempt + 1}: SCOPE-RELATED ERROR - {e}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: SCOPE-RELATED ERROR - {e}")
                 else:
-                    logger.error(f"❌ Attempt {attempt + 1}: Other error - {e}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Other error - {e}")
                     
             # Brief delay between attempts
             await asyncio.sleep(2)
@@ -263,21 +311,21 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         scope_failure_rate = (golden_path_metrics["scope_related_failures"] / golden_path_metrics["connection_attempts"]) * 100
         
         # Log comprehensive Golden Path analysis
-        logger.error("📊 GOLDEN PATH E2E ANALYSIS:")
-        logger.error(f"   🔢 METRICS:")
-        logger.error(f"      • Total connection attempts: {golden_path_metrics['connection_attempts']}")
-        logger.error(f"      • Successful handshakes: {golden_path_metrics['successful_handshakes']} ({connection_success_rate:.1f}%)")
-        logger.error(f"      • Authentication successes: {golden_path_metrics['authentication_successes']} ({auth_success_rate:.1f}%)")
-        logger.error(f"      • Complete responses: {golden_path_metrics['complete_responses']} ({completion_rate:.1f}%)")
-        logger.error(f"      • WebSocket events received: {golden_path_metrics['websocket_events_received']}")
-        logger.error(f"      • Total failures: {golden_path_metrics['total_failures']} ({failure_rate:.1f}%)")
-        logger.error(f"      • Scope-related failures: {golden_path_metrics['scope_related_failures']} ({scope_failure_rate:.1f}%)")
+        logger.error(" CHART:  GOLDEN PATH E2E ANALYSIS:")
+        logger.error(f"   [U+1F522] METRICS:")
+        logger.error(f"      [U+2022] Total connection attempts: {golden_path_metrics['connection_attempts']}")
+        logger.error(f"      [U+2022] Successful handshakes: {golden_path_metrics['successful_handshakes']} ({connection_success_rate:.1f}%)")
+        logger.error(f"      [U+2022] Authentication successes: {golden_path_metrics['authentication_successes']} ({auth_success_rate:.1f}%)")
+        logger.error(f"      [U+2022] Complete responses: {golden_path_metrics['complete_responses']} ({completion_rate:.1f}%)")
+        logger.error(f"      [U+2022] WebSocket events received: {golden_path_metrics['websocket_events_received']}")
+        logger.error(f"      [U+2022] Total failures: {golden_path_metrics['total_failures']} ({failure_rate:.1f}%)")
+        logger.error(f"      [U+2022] Scope-related failures: {golden_path_metrics['scope_related_failures']} ({scope_failure_rate:.1f}%)")
         
-        logger.error(f"   💰 BUSINESS IMPACT:")
-        logger.error(f"      • Golden Path success rate: {completion_rate:.1f}%")
-        logger.error(f"      • Business value delivered: {golden_path_metrics['business_value_delivered']}")
-        logger.error(f"      • Revenue at risk: $500,000+ ARR")
-        logger.error(f"      • User experience: {'DEGRADED' if failure_rate > 0 else 'FUNCTIONAL'}")
+        logger.error(f"   [U+1F4B0] BUSINESS IMPACT:")
+        logger.error(f"      [U+2022] Golden Path success rate: {completion_rate:.1f}%")
+        logger.error(f"      [U+2022] Business value delivered: {golden_path_metrics['business_value_delivered']}")
+        logger.error(f"      [U+2022] Revenue at risk: $500,000+ ARR")
+        logger.error(f"      [U+2022] User experience: {'DEGRADED' if failure_rate > 0 else 'FUNCTIONAL'}")
         
         # This test should FAIL if Golden Path is blocked by scope violations
         if golden_path_metrics["scope_related_failures"] > 0:
@@ -293,7 +341,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 f"Expected 100% success rate for stable production service. Business value delivery compromised."
             )
             
-        logger.info(f"✅ GOLDEN PATH SUCCESS: {completion_rate:.1f}% completion rate achieved")
+        logger.info(f" PASS:  GOLDEN PATH SUCCESS: {completion_rate:.1f}% completion rate achieved")
         
     @staging_test
     @track_test_timing
@@ -307,7 +355,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         
         Expected Behavior: FAIL - Zero chat success rate due to scope violations
         """
-        logger.info("🚨 E2E CHAT TEST: Chat functionality blocked by scope bug")
+        logger.info(" ALERT:  E2E CHAT TEST: Chat functionality blocked by scope bug")
         
         # Chat functionality metrics
         chat_metrics = {
@@ -350,7 +398,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         ]
         
         for scenario in chat_scenarios:
-            logger.info(f"🗣️ Testing chat scenario: {scenario['name']}")
+            logger.info(f"[U+1F5E3][U+FE0F] Testing chat scenario: {scenario['name']}")
             
             chat_metrics["chat_attempts"] += 1
             
@@ -395,7 +443,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                     await websocket.send(json.dumps(chat_message))
                     chat_metrics["messages_sent"] += 1
                     
-                    logger.info(f"💬 {scenario['name']}: Chat message sent")
+                    logger.info(f"[U+1F4AC] {scenario['name']}: Chat message sent")
                     
                     # Wait for substantive agent response
                     response_timeout = 45  # 45 seconds for real LLM processing
@@ -416,51 +464,51 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                                     # Substantive response received
                                     business_value_delivered = True
                                     chat_metrics["chat_value_delivered"] += 1
-                                    logger.info(f"✅ {scenario['name']}: Business value delivered")
+                                    logger.info(f" PASS:  {scenario['name']}: Business value delivered")
                                     break
                                 else:
-                                    logger.warning(f"⚠️ {scenario['name']}: Response lacks business value")
+                                    logger.warning(f" WARNING: [U+FE0F] {scenario['name']}: Response lacks business value")
                                     
                         except asyncio.TimeoutError:
-                            logger.debug(f"⏱️ {scenario['name']}: Response timeout")
+                            logger.debug(f"[U+23F1][U+FE0F] {scenario['name']}: Response timeout")
                             continue
                             
                     if not business_value_delivered:
-                        logger.error(f"❌ {scenario['name']}: No business value delivered within timeout")
+                        logger.error(f" FAIL:  {scenario['name']}: No business value delivered within timeout")
                         
             except ConnectionClosedError as e:
                 if e.code == 1011:
                     chat_metrics["scope_bug_blocks"] += 1
-                    logger.error(f"❌ {scenario['name']}: SCOPE BUG BLOCKED CHAT (code 1011)")
+                    logger.error(f" FAIL:  {scenario['name']}: SCOPE BUG BLOCKED CHAT (code 1011)")
                 else:
-                    logger.error(f"❌ {scenario['name']}: Connection closed - {e}")
+                    logger.error(f" FAIL:  {scenario['name']}: Connection closed - {e}")
                     
             except Exception as e:
                 error_msg = str(e).lower()
                 if "state_registry" in error_msg or "internal server error" in error_msg:
                     chat_metrics["scope_bug_blocks"] += 1
-                    logger.error(f"❌ {scenario['name']}: SCOPE BUG BLOCKED CHAT - {e}")
+                    logger.error(f" FAIL:  {scenario['name']}: SCOPE BUG BLOCKED CHAT - {e}")
                 else:
-                    logger.error(f"❌ {scenario['name']}: Other error - {e}")
+                    logger.error(f" FAIL:  {scenario['name']}: Other error - {e}")
                     
         # Calculate chat success metrics
         connection_success_rate = (chat_metrics["successful_connections"] / chat_metrics["chat_attempts"]) * 100
         chat_success_rate = (chat_metrics["chat_value_delivered"] / chat_metrics["chat_attempts"]) * 100
         scope_block_rate = (chat_metrics["scope_bug_blocks"] / chat_metrics["chat_attempts"]) * 100
         
-        logger.error("💬 CHAT FUNCTIONALITY ANALYSIS:")
-        logger.error(f"   📊 CHAT METRICS:")
-        logger.error(f"      • Chat attempts: {chat_metrics['chat_attempts']}")
-        logger.error(f"      • Successful connections: {chat_metrics['successful_connections']} ({connection_success_rate:.1f}%)")
-        logger.error(f"      • Messages sent: {chat_metrics['messages_sent']}")
-        logger.error(f"      • Agent responses: {chat_metrics['agent_responses_received']}")
-        logger.error(f"      • Business value delivered: {chat_metrics['chat_value_delivered']} ({chat_success_rate:.1f}%)")
-        logger.error(f"      • Scope bug blocks: {chat_metrics['scope_bug_blocks']} ({scope_block_rate:.1f}%)")
+        logger.error("[U+1F4AC] CHAT FUNCTIONALITY ANALYSIS:")
+        logger.error(f"    CHART:  CHAT METRICS:")
+        logger.error(f"      [U+2022] Chat attempts: {chat_metrics['chat_attempts']}")
+        logger.error(f"      [U+2022] Successful connections: {chat_metrics['successful_connections']} ({connection_success_rate:.1f}%)")
+        logger.error(f"      [U+2022] Messages sent: {chat_metrics['messages_sent']}")
+        logger.error(f"      [U+2022] Agent responses: {chat_metrics['agent_responses_received']}")
+        logger.error(f"      [U+2022] Business value delivered: {chat_metrics['chat_value_delivered']} ({chat_success_rate:.1f}%)")
+        logger.error(f"      [U+2022] Scope bug blocks: {chat_metrics['scope_bug_blocks']} ({scope_block_rate:.1f}%)")
         
-        logger.error(f"   💰 BUSINESS IMPACT:")
-        logger.error(f"      • Chat success rate: {chat_success_rate:.1f}%")
-        logger.error(f"      • Platform core value: {'BLOCKED' if chat_success_rate < 90 else 'FUNCTIONAL'}")
-        logger.error(f"      • Customer satisfaction: {'SEVERE IMPACT' if chat_success_rate < 50 else 'MODERATE IMPACT'}")
+        logger.error(f"   [U+1F4B0] BUSINESS IMPACT:")
+        logger.error(f"      [U+2022] Chat success rate: {chat_success_rate:.1f}%")
+        logger.error(f"      [U+2022] Platform core value: {'BLOCKED' if chat_success_rate < 90 else 'FUNCTIONAL'}")
+        logger.error(f"      [U+2022] Customer satisfaction: {'SEVERE IMPACT' if chat_success_rate < 50 else 'MODERATE IMPACT'}")
         
         # This test should FAIL if chat is blocked by scope violations
         if chat_metrics["scope_bug_blocks"] > 0:
@@ -476,7 +524,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 f"Expected >80% success rate for production chat service. Core business functionality compromised."
             )
             
-        logger.info(f"✅ CHAT SUCCESS: {chat_success_rate:.1f}% business value delivery rate achieved")
+        logger.info(f" PASS:  CHAT SUCCESS: {chat_success_rate:.1f}% business value delivery rate achieved")
         
     @staging_test
     @track_test_timing  
@@ -490,7 +538,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         
         Expected Behavior: FAIL - Critical events never delivered due to scope violations
         """
-        logger.info("🚨 E2E EVENTS TEST: WebSocket events blocked by scope bug")
+        logger.info(" ALERT:  E2E EVENTS TEST: WebSocket events blocked by scope bug")
         
         # Event delivery metrics
         event_metrics = {
@@ -508,7 +556,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
         max_attempts = 8
         
         for attempt in range(max_attempts):
-            logger.info(f"📡 Event delivery attempt {attempt + 1}/{max_attempts}")
+            logger.info(f"[U+1F4E1] Event delivery attempt {attempt + 1}/{max_attempts}")
             
             event_metrics["connection_attempts"] += 1
             
@@ -567,18 +615,18 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                                 event_metrics["events_received"][event_type] += 1
                                 event_metrics["total_events_received"] += 1
                                 
-                                logger.info(f"📥 Attempt {attempt + 1}: Received {event_type}")
+                                logger.info(f"[U+1F4E5] Attempt {attempt + 1}: Received {event_type}")
                                 
                                 # Check for completion
                                 if event_type == "agent_completed":
-                                    logger.info(f"🏁 Attempt {attempt + 1}: Agent execution completed")
+                                    logger.info(f"[U+1F3C1] Attempt {attempt + 1}: Agent execution completed")
                                     break
                                     
                         except asyncio.TimeoutError:
-                            logger.debug(f"⏱️ Attempt {attempt + 1}: Event timeout")
+                            logger.debug(f"[U+23F1][U+FE0F] Attempt {attempt + 1}: Event timeout")
                             continue
                         except Exception as event_error:
-                            logger.error(f"❌ Attempt {attempt + 1}: Event processing error - {event_error}")
+                            logger.error(f" FAIL:  Attempt {attempt + 1}: Event processing error - {event_error}")
                             break
                             
                     # Analyze events received in this attempt
@@ -586,55 +634,55 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                     
                     if not missing_events:
                         event_metrics["complete_event_sequences"] += 1
-                        logger.info(f"✅ Attempt {attempt + 1}: Complete event sequence received")
+                        logger.info(f" PASS:  Attempt {attempt + 1}: Complete event sequence received")
                     else:
-                        logger.error(f"❌ Attempt {attempt + 1}: Missing events: {missing_events}")
+                        logger.error(f" FAIL:  Attempt {attempt + 1}: Missing events: {missing_events}")
                         
                         # Check if missing events indicate scope violations
                         critical_missing = missing_events & {"agent_started", "agent_completed"}
                         if critical_missing:
                             event_metrics["scope_violations"] += 1
-                            logger.error(f"🚨 Attempt {attempt + 1}: SCOPE VIOLATION - Critical events never sent: {critical_missing}")
+                            logger.error(f" ALERT:  Attempt {attempt + 1}: SCOPE VIOLATION - Critical events never sent: {critical_missing}")
                             
             except ConnectionClosedError as e:
                 if e.code == 1011:
                     event_metrics["scope_violations"] += 1
-                    logger.error(f"❌ Attempt {attempt + 1}: SCOPE BUG - Server error 1011 prevented events")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: SCOPE BUG - Server error 1011 prevented events")
                 else:
-                    logger.error(f"❌ Attempt {attempt + 1}: Connection error - {e}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Connection error - {e}")
                     
             except Exception as e:
                 error_msg = str(e).lower()
                 if "state_registry" in error_msg or "not defined" in error_msg:
                     event_metrics["scope_violations"] += 1
-                    logger.error(f"❌ Attempt {attempt + 1}: SCOPE VIOLATION prevented events - {e}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: SCOPE VIOLATION prevented events - {e}")
                 else:
-                    logger.error(f"❌ Attempt {attempt + 1}: Other error - {e}")
+                    logger.error(f" FAIL:  Attempt {attempt + 1}: Other error - {e}")
                     
         # Calculate event delivery success rates
         connection_rate = (event_metrics["successful_connections"] / event_metrics["connection_attempts"]) * 100
         complete_sequence_rate = (event_metrics["complete_event_sequences"] / event_metrics["connection_attempts"]) * 100
         scope_violation_rate = (event_metrics["scope_violations"] / event_metrics["connection_attempts"]) * 100
         
-        logger.error("📡 WEBSOCKET EVENT DELIVERY ANALYSIS:")
-        logger.error(f"   📊 EVENT METRICS:")
-        logger.error(f"      • Connection attempts: {event_metrics['connection_attempts']}")
-        logger.error(f"      • Successful connections: {event_metrics['successful_connections']} ({connection_rate:.1f}%)")
-        logger.error(f"      • Agent execution attempts: {event_metrics['agent_execution_attempts']}")
-        logger.error(f"      • Complete event sequences: {event_metrics['complete_event_sequences']} ({complete_sequence_rate:.1f}%)")
-        logger.error(f"      • Total events received: {event_metrics['total_events_received']}")
-        logger.error(f"      • Scope violations: {event_metrics['scope_violations']} ({scope_violation_rate:.1f}%)")
+        logger.error("[U+1F4E1] WEBSOCKET EVENT DELIVERY ANALYSIS:")
+        logger.error(f"    CHART:  EVENT METRICS:")
+        logger.error(f"      [U+2022] Connection attempts: {event_metrics['connection_attempts']}")
+        logger.error(f"      [U+2022] Successful connections: {event_metrics['successful_connections']} ({connection_rate:.1f}%)")
+        logger.error(f"      [U+2022] Agent execution attempts: {event_metrics['agent_execution_attempts']}")
+        logger.error(f"      [U+2022] Complete event sequences: {event_metrics['complete_event_sequences']} ({complete_sequence_rate:.1f}%)")
+        logger.error(f"      [U+2022] Total events received: {event_metrics['total_events_received']}")
+        logger.error(f"      [U+2022] Scope violations: {event_metrics['scope_violations']} ({scope_violation_rate:.1f}%)")
         
-        logger.error(f"   📥 EVENT DELIVERY BY TYPE:")
+        logger.error(f"   [U+1F4E5] EVENT DELIVERY BY TYPE:")
         for event_type, count in event_metrics["events_received"].items():
             delivery_rate = (count / event_metrics["connection_attempts"]) * 100
-            status = "✅" if delivery_rate > 80 else "⚠️" if delivery_rate > 50 else "❌"
-            logger.error(f"      • {event_type}: {count} ({delivery_rate:.1f}%) {status}")
+            status = " PASS: " if delivery_rate > 80 else " WARNING: [U+FE0F]" if delivery_rate > 50 else " FAIL: "
+            logger.error(f"      [U+2022] {event_type}: {count} ({delivery_rate:.1f}%) {status}")
             
-        logger.error(f"   💰 BUSINESS IMPACT:")
-        logger.error(f"      • User visibility: {'BLOCKED' if complete_sequence_rate < 50 else 'DEGRADED' if complete_sequence_rate < 90 else 'FUNCTIONAL'}")
-        logger.error(f"      • Real-time updates: {'FAILED' if scope_violation_rate > 20 else 'UNRELIABLE' if scope_violation_rate > 0 else 'RELIABLE'}")
-        logger.error(f"      • User experience: {'SEVERE DEGRADATION' if complete_sequence_rate < 50 else 'DEGRADED'}")
+        logger.error(f"   [U+1F4B0] BUSINESS IMPACT:")
+        logger.error(f"      [U+2022] User visibility: {'BLOCKED' if complete_sequence_rate < 50 else 'DEGRADED' if complete_sequence_rate < 90 else 'FUNCTIONAL'}")
+        logger.error(f"      [U+2022] Real-time updates: {'FAILED' if scope_violation_rate > 20 else 'UNRELIABLE' if scope_violation_rate > 0 else 'RELIABLE'}")
+        logger.error(f"      [U+2022] User experience: {'SEVERE DEGRADATION' if complete_sequence_rate < 50 else 'DEGRADED'}")
         
         # This test should FAIL if scope violations prevent event delivery
         if event_metrics["scope_violations"] > 0:
@@ -650,7 +698,7 @@ class TestWebSocketGoldenPathBlocked(StagingTestBase):
                 f"Expected >90% event delivery for production service. User experience severely impacted."
             )
             
-        logger.info(f"✅ EVENT DELIVERY SUCCESS: {complete_sequence_rate:.1f}% complete sequence delivery rate achieved")
+        logger.info(f" PASS:  EVENT DELIVERY SUCCESS: {complete_sequence_rate:.1f}% complete sequence delivery rate achieved")
 
 
 if __name__ == "__main__":
@@ -658,11 +706,11 @@ if __name__ == "__main__":
     Direct execution for debugging Golden Path scope bug E2E testing.
     Run: python tests/e2e/staging/test_websocket_golden_path_blocked.py
     """
-    logger.info("🚨 DIRECT EXECUTION: WebSocket Golden Path E2E Scope Bug Tests")
-    logger.info("🌐 REAL GCP SERVICES: Testing against staging GCP infrastructure")
-    logger.info("🎯 GOLDEN PATH: Testing complete user journey blocked by scope bug")
-    logger.info("💰 BUSINESS IMPACT: Validating $500K+ ARR Golden Path failure")
-    logger.info("🔧 PURPOSE: Prove scope bug blocks complete business value delivery")
+    logger.info(" ALERT:  DIRECT EXECUTION: WebSocket Golden Path E2E Scope Bug Tests")
+    logger.info("[U+1F310] REAL GCP SERVICES: Testing against staging GCP infrastructure")
+    logger.info(" TARGET:  GOLDEN PATH: Testing complete user journey blocked by scope bug")
+    logger.info("[U+1F4B0] BUSINESS IMPACT: Validating $500K+ ARR Golden Path failure")
+    logger.info("[U+1F527] PURPOSE: Prove scope bug blocks complete business value delivery")
     
     pytest.main([
         __file__,

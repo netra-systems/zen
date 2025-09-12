@@ -10,7 +10,7 @@ These tests protect the Golden Path user flow by ensuring agent executions are
 properly tracked and failures are detected, preventing chat system breakdowns.
 
 Test Categories:
-1. Execution Lifecycle Tests (4-5 tests) - PENDING→RUNNING→COMPLETED/FAILED flows
+1. Execution Lifecycle Tests (4-5 tests) - PENDING -> RUNNING -> COMPLETED/FAILED flows
 2. Death Detection and Heartbeat Tests (3-4 tests) - Prevent silent failures
 3. Timeout and Cancellation Tests (3-4 tests) - Enforce execution limits  
 4. State Transition and Phase Tracking Tests (3-4 tests) - Track agent progress
@@ -53,7 +53,7 @@ from shared.types.core_types import UserID, ThreadID, RunID
 
 class TestAgentExecutionTrackerLifecycle(SSotAsyncTestCase):
     """
-    Test execution lifecycle management (PENDING→RUNNING→COMPLETED/FAILED).
+    Test execution lifecycle management (PENDING -> RUNNING -> COMPLETED/FAILED).
     
     Business Value: Ensures chat agents properly transition through execution states,
     preventing stuck or zombie agents that break user chat experience.
@@ -134,7 +134,7 @@ class TestAgentExecutionTrackerLifecycle(SSotAsyncTestCase):
         
         # Record business metrics
         self.record_metric("executions_created", 1)
-        self.record_metric("state_transitions_successful", 3)  # PENDING→STARTING→RUNNING
+        self.record_metric("state_transitions_successful", 3)  # PENDING -> STARTING -> RUNNING
         
         self.record_metric("test_passed", "create_and_start_execution_basic_flow")
         
@@ -1017,13 +1017,13 @@ class TestAgentExecutionTrackerPhaseTracking(SSotAsyncTestCase):
             AgentExecutionPhase.THINKING,
             AgentExecutionPhase.LLM_INTERACTION
         )
-        assert valid_next, "THINKING → LLM_INTERACTION should be valid"
+        assert valid_next, "THINKING  ->  LLM_INTERACTION should be valid"
         
         invalid_next = self.tracker.validate_state_transition(
             AgentExecutionPhase.CREATED,
             AgentExecutionPhase.COMPLETED
         )
-        assert not invalid_next, "CREATED → COMPLETED should be invalid"
+        assert not invalid_next, "CREATED  ->  COMPLETED should be invalid"
         
         # Record business metrics
         self.record_metric("valid_transitions_tested", len(valid_transitions))
@@ -1987,11 +1987,11 @@ if __name__ == "__main__":
     exit_code = pytest.main(test_args)
     
     if exit_code == 0:
-        print("\n✅ All AgentExecutionTracker integration tests passed!")
-        print("🚀 Business value protected: Chat reliability and silent failure prevention")
-        print("💰 Revenue protection: $500K+ ARR Golden Path user flow secured")
+        print("\n PASS:  All AgentExecutionTracker integration tests passed!")
+        print("[U+1F680] Business value protected: Chat reliability and silent failure prevention")
+        print("[U+1F4B0] Revenue protection: $500K+ ARR Golden Path user flow secured")
     else:
-        print(f"\n❌ Tests failed with exit code: {exit_code}")
-        print("🚨 Business risk: Chat reliability may be compromised")
+        print(f"\n FAIL:  Tests failed with exit code: {exit_code}")
+        print(" ALERT:  Business risk: Chat reliability may be compromised")
     
     sys.exit(exit_code)

@@ -7,7 +7,7 @@ test business logic without external LLM dependencies.
 
 Business Value:
 - Validates agent workflow orchestration for cost analysis scenarios
-- Tests agent state management and execution order (Data → Optimization → Reporting)
+- Tests agent state management and execution order (Data  ->  Optimization  ->  Reporting)
 - Verifies agent communication and result aggregation business logic
 - Tests agent error handling and recovery workflows
 """
@@ -323,7 +323,7 @@ class TestAgentWorkflowBusinessLogic:
     @pytest.mark.asyncio
     async def test_agent_workflow_orchestration_business_sequence(self):
         """Test agent workflow orchestration follows correct business sequence."""
-        # Business Rule: Agents must execute in proper order: Data → Optimization → Reporting
+        # Business Rule: Agents must execute in proper order: Data  ->  Optimization  ->  Reporting
         user_id = "orchestration-user"
         
         # Create user session for workflow orchestration
@@ -491,13 +491,13 @@ class TestAgentWorkflowBusinessLogic:
         total_cost = sum(data["tokens"] * data["cost_per_1k"] / 1000 for data in token_usage_data)
         
         # Business Rule: Total token usage should be reasonable for business value
-        assert total_tokens <= 1000, f"Total tokens should be ≤ 1000 for cost efficiency, used {total_tokens}"
-        assert total_cost <= 0.002, f"Total cost should be ≤ $0.002 per request, cost was ${total_cost:.4f}"
+        assert total_tokens <= 1000, f"Total tokens should be  <=  1000 for cost efficiency, used {total_tokens}"
+        assert total_cost <= 0.002, f"Total cost should be  <=  $0.002 per request, cost was ${total_cost:.4f}"
         
         # Business Rule: Each agent should use tokens efficiently
         for data in token_usage_data:
             agent_cost = data["tokens"] * data["cost_per_1k"] / 1000
-            assert agent_cost <= 0.001, f"{data['agent']} should cost ≤ $0.001, cost was ${agent_cost:.4f}"
+            assert agent_cost <= 0.001, f"{data['agent']} should cost  <=  $0.001, cost was ${agent_cost:.4f}"
 
     @pytest.mark.asyncio
     async def test_agent_websocket_integration_business_logic(self):

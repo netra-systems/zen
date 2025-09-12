@@ -82,7 +82,7 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
         self.record_metric("ssot_test_id", self.ssot_test_id)
         self.record_metric("ssot_migration_test_started", datetime.now(timezone.utc).isoformat())
         
-        print(f"🔧 SSOT Migration Validation: {self.ssot_test_id}")
+        print(f"[U+1F527] SSOT Migration Validation: {self.ssot_test_id}")
         
     @pytest.mark.asyncio
     async def test_base_test_case_ssot_migration(self, ssot_migration_auth_fixture):
@@ -145,7 +145,7 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             # Business validation
             assert ssot_methods_tested >= 5, f"Should test at least 5 SSOT methods, tested {ssot_methods_tested}"
             
-            print(f"✅ SSOT BaseTestCase validation complete - {ssot_methods_tested} methods tested")
+            print(f" PASS:  SSOT BaseTestCase validation complete - {ssot_methods_tested} methods tested")
             
         except Exception as e:
             self.record_metric("ssot_basetest_migration_error", str(e))
@@ -204,7 +204,7 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             self.record_metric("ssot_env_vars_found", ssot_vars_found)
             self.record_metric("ssot_env_management_validated", True)
             
-            print(f"✅ SSOT Environment Management validated - {contexts_set} contexts, {ssot_vars_found} SSOT vars")
+            print(f" PASS:  SSOT Environment Management validated - {contexts_set} contexts, {ssot_vars_found} SSOT vars")
             
         except Exception as e:
             self.record_metric("ssot_env_migration_error", str(e))
@@ -258,9 +258,9 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             self.record_metric("ssot_auth_permissions_count", len(user_permissions))
             self.record_metric("ssot_auth_migration_compatible", True)
             
-            print(f"✅ SSOT Authentication compatibility validated")
-            print(f"👤 User: {user_data['email']} ({environment})")
-            print(f"🔑 Permissions: {user_permissions}")
+            print(f" PASS:  SSOT Authentication compatibility validated")
+            print(f"[U+1F464] User: {user_data['email']} ({environment})")
+            print(f"[U+1F511] Permissions: {user_permissions}")
             
         except Exception as e:
             self.record_metric("ssot_auth_compatibility_error", str(e))
@@ -351,9 +351,9 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             self.record_metric("ssot_database_url_format_correct", True)
             self.record_metric("ssot_database_migration_successful", True)
             
-            print(f"✅ SSOT Database connection validated")
-            print(f"🔗 Protocol: {protocol}")
-            print(f"📊 Connection Valid: {connection_valid}")
+            print(f" PASS:  SSOT Database connection validated")
+            print(f"[U+1F517] Protocol: {protocol}")
+            print(f" CHART:  Connection Valid: {connection_valid}")
             
         except Exception as e:
             self.record_metric("ssot_database_migration_error", str(e))
@@ -434,11 +434,11 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             self.record_metric("ssot_websocket_tracking_working", True)
             self.record_metric("ssot_metrics_migration_successful", True)
             
-            print(f"✅ SSOT Metrics recording validated")
-            print(f"📊 Custom metrics: {metrics_recorded}/{len(test_metrics)}")
-            print(f"📈 Built-in metrics: {built_in_present}/{len(expected_built_in_metrics)}")
-            print(f"🔢 DB queries tracked: {updated_db_queries}")
-            print(f"📡 WebSocket events tracked: {updated_ws_events}")
+            print(f" PASS:  SSOT Metrics recording validated")
+            print(f" CHART:  Custom metrics: {metrics_recorded}/{len(test_metrics)}")
+            print(f"[U+1F4C8] Built-in metrics: {built_in_present}/{len(expected_built_in_metrics)}")
+            print(f"[U+1F522] DB queries tracked: {updated_db_queries}")
+            print(f"[U+1F4E1] WebSocket events tracked: {updated_ws_events}")
             
         except Exception as e:
             self.record_metric("ssot_metrics_migration_error", str(e))
@@ -513,10 +513,10 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             assert legacy_aliases_working, "Legacy aliases must work during SSOT transition"
             assert legacy_methods_working >= 3, f"Most legacy methods should work, got {legacy_methods_working}"
             
-            print(f"✅ SSOT Backward compatibility validated")
-            print(f"🔄 Legacy methods working: {legacy_methods_working}/{len(legacy_method_tests)}")
-            print(f"📦 Legacy imports working: {legacy_imports_working}")
-            print(f"🛡️  Transition safe: {transition_safe}")
+            print(f" PASS:  SSOT Backward compatibility validated")
+            print(f" CYCLE:  Legacy methods working: {legacy_methods_working}/{len(legacy_method_tests)}")
+            print(f"[U+1F4E6] Legacy imports working: {legacy_imports_working}")
+            print(f"[U+1F6E1][U+FE0F]  Transition safe: {transition_safe}")
             
         except Exception as e:
             self.record_metric("ssot_backward_compatibility_error", str(e))
@@ -549,7 +549,7 @@ class TestSSOTPatternMigrations(SSotBaseTestCase):
             if ssot_metrics:
                 print("SSOT Migration Metrics:")
                 for metric, value in ssot_metrics.items():
-                    status = "✅" if (isinstance(value, bool) and value) or (isinstance(value, (int, float)) and value > 0) else "📊"
+                    status = " PASS: " if (isinstance(value, bool) and value) or (isinstance(value, (int, float)) and value > 0) else " CHART: "
                     print(f"  {status} {metric}: {value}")
                     
             print(f"{'='*70}")

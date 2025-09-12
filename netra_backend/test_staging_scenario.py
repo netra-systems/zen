@@ -64,9 +64,9 @@ async def test_staging_scenario():
     for case in edge_cases:
         try:
             result = safe_convert_timestamp(case)
-            print(f'✅ {case} -> {result} ({type(result).__name__})')
+            print(f' PASS:  {case} -> {result} ({type(result).__name__})')
         except Exception as e:
-            print(f'❌ {case} -> ERROR: {e}')
+            print(f' FAIL:  {case} -> ERROR: {e}')
             all_cases_pass = False
     
     return converted is not None and performance_ok and all_cases_pass
@@ -75,8 +75,8 @@ if __name__ == "__main__":
     # Run the test
     result = asyncio.run(test_staging_scenario())
     if result:
-        print('\n🎉 STAGING ERROR SCENARIO RESOLVED: All tests passed!')
+        print('\n CELEBRATION:  STAGING ERROR SCENARIO RESOLVED: All tests passed!')
         sys.exit(0)
     else:
-        print('\n❌ STAGING ERROR SCENARIO STILL EXISTS: Tests failed!')
+        print('\n FAIL:  STAGING ERROR SCENARIO STILL EXISTS: Tests failed!')
         sys.exit(1)

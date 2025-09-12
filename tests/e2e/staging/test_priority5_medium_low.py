@@ -54,7 +54,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Message list endpoint available: {endpoint}")
+                        print(f"[U+2713] Message list endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             if isinstance(data, (list, dict)):
@@ -90,7 +90,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Message creation endpoint active: {endpoint}")
+                        print(f"[U+2713] Message creation endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "id" in data or "message_id" in data:
@@ -140,7 +140,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Thread list endpoint available: {endpoint}")
+                        print(f"[U+2713] Thread list endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -177,7 +177,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Thread creation endpoint active: {endpoint}")
+                        print(f"[U+2713] Thread creation endpoint active: {endpoint}")
                         try:
                             data = response.json()
                             if "id" in data or "thread_id" in data:
@@ -185,9 +185,9 @@ class TestMediumLowStorage:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Thread creation requires auth: {endpoint}")
+                        print(f"[U+2022] Thread creation requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Thread creation not implemented: {endpoint}")
+                        print(f"[U+2022] Thread creation not implemented: {endpoint}")
                         
                 except Exception as e:
                     thread_results[f"{endpoint}_error"] = {"error": str(e)[:100]}
@@ -231,7 +231,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ User profile endpoint available: {endpoint}")
+                        print(f"[U+2713] User profile endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -246,7 +246,7 @@ class TestMediumLowStorage:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Profile endpoint requires auth: {endpoint} (expected)")
+                        print(f"[U+2022] Profile endpoint requires auth: {endpoint} (expected)")
                     
                     # Test PUT/PATCH - update profile
                     test_profile_update = {
@@ -274,11 +274,11 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code in [200, 201, 202]:
-                        print(f"✓ Profile update endpoint active: {endpoint}")
+                        print(f"[U+2713] Profile update endpoint active: {endpoint}")
                     elif response.status_code in [401, 403]:
-                        print(f"• Profile update requires auth: {endpoint}")
+                        print(f"[U+2022] Profile update requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Profile update not implemented: {endpoint}")
+                        print(f"[U+2022] Profile update not implemented: {endpoint}")
                     elif response.status_code == 405:
                         # Try PATCH instead
                         patch_response = await client.patch(
@@ -311,7 +311,7 @@ class TestMediumLowStorage:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ User quota endpoint available: {endpoint}")
+                        print(f"[U+2713] User quota endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -637,7 +637,7 @@ class TestMediumLowCompliance:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.4):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

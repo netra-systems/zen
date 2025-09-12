@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Real Critical User Journey Auth Helpers - OAuth, AI Providers, and Auth Services
 
@@ -7,7 +45,7 @@ Real Critical User Journey Auth Helpers - OAuth, AI Providers, and Auth Services
 3. **Value Impact**: Modular auth helpers reduce test maintenance by 70%
 4. **Revenue Impact**: Faster auth testing = quicker iteration on conversion optimization
 
-**ARCHITECTURE**: ≤300 lines, ≤8 lines per function as per CLAUDE.md requirements
+**ARCHITECTURE**:  <= 300 lines,  <= 8 lines per function as per CLAUDE.md requirements
 Provides reusable helper methods for authentication and provider connection testing.
 """
 
@@ -23,7 +61,7 @@ from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 
 class CriticalUserJourneyHelpers:
-    """Core helper methods for critical user journey validation (≤8 lines each)"""
+    """Core helper methods for critical user journey validation ( <= 8 lines each)"""
     
     @staticmethod
     async def create_real_user_context():
@@ -94,7 +132,7 @@ class CriticalUserJourneyHelpers:
         }
 
 class OAuthFlowHelpers:
-    """OAuth flow testing helpers (≤8 lines each)"""
+    """OAuth flow testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def initiate_oauth_flow():
@@ -147,7 +185,7 @@ class OAuthFlowHelpers:
         return welcome_data
 
 class AIProviderHelpers:
-    """AI provider connection testing helpers (≤8 lines each)"""
+    """AI provider connection testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def validate_ai_provider_keys():
@@ -200,7 +238,7 @@ class AIProviderHelpers:
         return tracking_config
 
 class WebSocketHelpers:
-    """WebSocket testing helpers (≤8 lines each)"""
+    """WebSocket testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def establish_websocket_connection():

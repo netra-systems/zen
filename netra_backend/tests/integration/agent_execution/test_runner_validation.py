@@ -124,7 +124,7 @@ class ValidationReport:
             ])
             
             for test_name, result in self.execution_results.items():
-                status = "✓ PASSED" if result['passed'] else "✗ FAILED"
+                status = "[U+2713] PASSED" if result['passed'] else "[U+2717] FAILED"
                 time_str = f"{result['execution_time']:.2f}s"
                 report_lines.append(f"{status} {test_name} ({time_str})")
         
@@ -132,9 +132,9 @@ class ValidationReport:
             "",
             "=" * 80,
             "VALIDATION SUMMARY:",
-            f"✓ Real UserExecutionContext patterns: {self.validated_tests}/{self.total_tests}",
-            f"✓ No internal logic mocks: {self.total_tests - len([v for v in self.violations if v['type'] == 'mock_violation'])}/{self.total_tests}",
-            f"✓ Business value focus: {self.total_tests - len([v for v in self.violations if v['type'] == 'business_value'])}/{self.total_tests}",
+            f"[U+2713] Real UserExecutionContext patterns: {self.validated_tests}/{self.total_tests}",
+            f"[U+2713] No internal logic mocks: {self.total_tests - len([v for v in self.violations if v['type'] == 'mock_violation'])}/{self.total_tests}",
+            f"[U+2713] Business value focus: {self.total_tests - len([v for v in self.violations if v['type'] == 'business_value'])}/{self.total_tests}",
             "=" * 80
         ])
         
@@ -484,7 +484,7 @@ def validate_test_authenticity() -> bool:
     Returns:
         True if all tests pass validation, False otherwise
     """
-    print("🚀 Starting Agent Execution Test Validation...")
+    print("[U+1F680] Starting Agent Execution Test Validation...")
     print("=" * 60)
     
     # Run async validation
@@ -501,9 +501,9 @@ def validate_test_authenticity() -> bool:
     overall_success = critical_issues == 0 and test_failures == 0
     
     if overall_success:
-        print("✅ ALL TESTS PASS VALIDATION - Agent execution tests use real patterns!")
+        print(" PASS:  ALL TESTS PASS VALIDATION - Agent execution tests use real patterns!")
     else:
-        print(f"❌ VALIDATION ISSUES FOUND - {critical_issues} violations, {test_failures} test failures")
+        print(f" FAIL:  VALIDATION ISSUES FOUND - {critical_issues} violations, {test_failures} test failures")
     
     return overall_success
 

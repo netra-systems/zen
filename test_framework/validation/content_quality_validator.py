@@ -262,7 +262,7 @@ class ContentQualityValidator:
         # Log critical issues immediately
         critical_violations = [v for v in violations if v.severity == ContentQualityLevel.UNACCEPTABLE]
         for violation in critical_violations:
-            logger.error(f"🚨 CRITICAL CONTENT VIOLATION: {violation.description}")
+            logger.error(f" ALERT:  CRITICAL CONTENT VIOLATION: {violation.description}")
         
         return result
     
@@ -597,7 +597,7 @@ class ContentQualityValidator:
         
         if error_parts:
             error_message = (
-                "🚨 CONTENT QUALITY COMPROMISED - WebSocket event content failed business value requirements!\n"
+                " ALERT:  CONTENT QUALITY COMPROMISED - WebSocket event content failed business value requirements!\n"
                 + "\n".join(error_parts) + "\n\n"
                 "This indicates chat content will not deliver substantive value to users."
             )

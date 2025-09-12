@@ -889,9 +889,9 @@ class TestStagingCrossServiceJWTValidation:
             
             if auth_passed:
                 failure_summary["auth_service_passed"] += 1
-                logger.critical(f"✓ Auth service validated {scenario['name']}")
+                logger.critical(f"[U+2713] Auth service validated {scenario['name']}")
             else:
-                logger.critical(f"✗ Auth service rejected {scenario['name']}")
+                logger.critical(f"[U+2717] Auth service rejected {scenario['name']}")
                 failure_summary["failures"].append({
                     "scenario": scenario['name'],
                     "service": "auth",
@@ -905,9 +905,9 @@ class TestStagingCrossServiceJWTValidation:
             
             if backend_passed:
                 failure_summary["backend_service_passed"] += 1
-                logger.critical(f"✓ Backend service validated {scenario['name']}")
+                logger.critical(f"[U+2713] Backend service validated {scenario['name']}")
             else:
-                logger.critical(f"✗ Backend service rejected {scenario['name']}")
+                logger.critical(f"[U+2717] Backend service rejected {scenario['name']}")
                 logger.critical(f"Backend error: {backend_result.error if backend_result else 'No result'}")
                 failure_summary["failures"].append({
                     "scenario": scenario['name'],
@@ -920,9 +920,9 @@ class TestStagingCrossServiceJWTValidation:
             # Check consistency
             if auth_passed and backend_passed:
                 failure_summary["both_passed"] += 1
-                logger.critical(f"✓ Both services validated {scenario['name']}")
+                logger.critical(f"[U+2713] Both services validated {scenario['name']}")
             elif auth_passed != backend_passed:
-                logger.critical(f"✗ CRITICAL INCONSISTENCY in {scenario['name']}")
+                logger.critical(f"[U+2717] CRITICAL INCONSISTENCY in {scenario['name']}")
                 logger.critical(f"  Auth: {'PASS' if auth_passed else 'FAIL'}")
                 logger.critical(f"  Backend: {'PASS' if backend_passed else 'FAIL'}")
         
@@ -964,7 +964,7 @@ async def run_single_test(test_name: str):
     
     async def test_09_complete_signup_to_chat_flow(self):
         """
-        CRITICAL TEST: Complete user signup → login → chat flow validation.
+        CRITICAL TEST: Complete user signup  ->  login  ->  chat flow validation.
         Tests end-to-end authentication journey for revenue generation.
         """
         validator = StagingAuthCrossServiceValidator()
@@ -1129,7 +1129,7 @@ async def run_single_test(test_name: str):
         logger.critical(f"  P95 auth time: {p95_auth_time:.3f}s")
         
         # Critical business requirements
-        assert success_rate >= 0.95, f"Success rate too low: {success_rate:.2%} (must be ≥95%)" 
+        assert success_rate >= 0.95, f"Success rate too low: {success_rate:.2%} (must be  >= 95%)" 
         assert avg_auth_time < 2.0, f"Average auth time too slow: {avg_auth_time:.3f}s (must be <2s)"
         assert p95_auth_time < 5.0, f"P95 auth time too slow: {p95_auth_time:.3f}s (must be <5s)"
     
@@ -1205,7 +1205,7 @@ async def run_single_test(test_name: str):
         
         logger.critical(f"Multi-device session results:")
         for result in activity_results:
-            status = "✓" if result["success"] else "✗"
+            status = "[U+2713]" if result["success"] else "[U+2717]"
             logger.critical(f"  {status} {result['device_type']}: {result.get('error', 'OK')}")
         
         assert len(successful_sessions) == len(device_types), \
@@ -1426,7 +1426,7 @@ async def run_single_test(test_name: str):
                     "profile_accessible": True
                 })
                 
-                logger.critical(f"✓ {provider['name']} OAuth flow successful")
+                logger.critical(f"[U+2713] {provider['name']} OAuth flow successful")
                 
             except Exception as e:
                 oauth_results.append({
@@ -1434,7 +1434,7 @@ async def run_single_test(test_name: str):
                     "success": False,
                     "error": str(e)
                 })
-                logger.critical(f"✗ {provider['name']} OAuth flow failed: {e}")
+                logger.critical(f"[U+2717] {provider['name']} OAuth flow failed: {e}")
         
         # Verify at least 2 OAuth providers work
         successful_providers = [r for r in oauth_results if r["success"]]
@@ -1908,8 +1908,8 @@ async def run_single_test(test_name: str):
         logger.critical(f"  Error breakdown: {performance_metrics['error_types']}")
         
         # Critical performance requirements for revenue scaling
-        assert success_rate >= 0.99, f"Success rate too low under load: {success_rate:.2%} (must be ≥99%)"
-        assert auth_rate >= 50, f"Auth rate too low: {auth_rate:.1f}/sec (must be ≥50/sec)"
+        assert success_rate >= 0.99, f"Success rate too low under load: {success_rate:.2%} (must be  >= 99%)"
+        assert auth_rate >= 50, f"Auth rate too low: {auth_rate:.1f}/sec (must be  >= 50/sec)"
         assert avg_auth_time < 1.0, f"Avg auth time too slow: {avg_auth_time:.3f}s (must be <1s)"
         assert p95_auth_time < 2.0, f"P95 auth time too slow: {p95_auth_time:.3f}s (must be <2s)"
     

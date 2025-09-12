@@ -12,25 +12,25 @@
         ## CRITICAL INFRASTRUCTURE FAILURES MATRIX
 
         ### 1. Auth Service Configuration Cascade (100% Authentication Breakdown)
-        # REMOVED_SYNTAX_ERROR: - #removed-legacyundefined/misconfigured → Auth service startup failure
-        # REMOVED_SYNTAX_ERROR: - JWT_SECRET_KEY mismatch → Cross-service authentication broken
-        # REMOVED_SYNTAX_ERROR: - Service account credentials invalid → OAuth completely non-functional
-        # REMOVED_SYNTAX_ERROR: - REDIS_URL fallback masking → Session persistence broken
+        # REMOVED_SYNTAX_ERROR: - #removed-legacyundefined/misconfigured  ->  Auth service startup failure
+        # REMOVED_SYNTAX_ERROR: - JWT_SECRET_KEY mismatch  ->  Cross-service authentication broken
+        # REMOVED_SYNTAX_ERROR: - Service account credentials invalid  ->  OAuth completely non-functional
+        # REMOVED_SYNTAX_ERROR: - REDIS_URL fallback masking  ->  Session persistence broken
 
         ### 2. External Service Dependencies (Analytics & Cache System Failure)
-        # REMOVED_SYNTAX_ERROR: - ClickHouse unreachable → Health checks 503, deployment validation fails
-        # REMOVED_SYNTAX_ERROR: - Redis connection failure → Performance 5-10x degradation, sessions lost
-        # REMOVED_SYNTAX_ERROR: - Inappropriate fallback modes → Staging doesn"t validate production requirements
+        # REMOVED_SYNTAX_ERROR: - ClickHouse unreachable  ->  Health checks 503, deployment validation fails
+        # REMOVED_SYNTAX_ERROR: - Redis connection failure  ->  Performance 5-10x degradation, sessions lost
+        # REMOVED_SYNTAX_ERROR: - Inappropriate fallback modes  ->  Staging doesn"t validate production requirements
 
         ### 3. Environment Detection and Validation (Development Behavior in Staging)
-        # REMOVED_SYNTAX_ERROR: - Staging environment not properly detected → Development fallbacks allowed
-        # REMOVED_SYNTAX_ERROR: - Strict validation disabled → Infrastructure issues masked
-        # REMOVED_SYNTAX_ERROR: - Silent failures → Problems not visible until production
+        # REMOVED_SYNTAX_ERROR: - Staging environment not properly detected  ->  Development fallbacks allowed
+        # REMOVED_SYNTAX_ERROR: - Strict validation disabled  ->  Infrastructure issues masked
+        # REMOVED_SYNTAX_ERROR: - Silent failures  ->  Problems not visible until production
 
         ### 4. Health Check and Deployment Validation (Release Pipeline Blocked)
-        # REMOVED_SYNTAX_ERROR: - /health/ready returns 503 → GCP Cloud Run deployment fails
-        # REMOVED_SYNTAX_ERROR: - External service timeouts → Monitoring alerts false positives
-        # REMOVED_SYNTAX_ERROR: - Service readiness != operational capability → Deployment gate failures
+        # REMOVED_SYNTAX_ERROR: - /health/ready returns 503  ->  GCP Cloud Run deployment fails
+        # REMOVED_SYNTAX_ERROR: - External service timeouts  ->  Monitoring alerts false positives
+        # REMOVED_SYNTAX_ERROR: - Service readiness != operational capability  ->  Deployment gate failures
 
         ## TEST-DRIVEN CORRECTION (TDC) APPROACH
 
@@ -50,9 +50,9 @@
             ## BUSINESS IMPACT ANALYSIS
 
             # REMOVED_SYNTAX_ERROR: Configuration failures compound exponentially:
-                # REMOVED_SYNTAX_ERROR: - Single missing env var → Service degradation → Cascade failures → Platform unavailability
-                # REMOVED_SYNTAX_ERROR: - Staging validation gaps → Production failures → Revenue loss → Customer impact
-                # REMOVED_SYNTAX_ERROR: - Infrastructure drift → Deployment failures → Release pipeline blocks → Development velocity loss
+                # REMOVED_SYNTAX_ERROR: - Single missing env var  ->  Service degradation  ->  Cascade failures  ->  Platform unavailability
+                # REMOVED_SYNTAX_ERROR: - Staging validation gaps  ->  Production failures  ->  Revenue loss  ->  Customer impact
+                # REMOVED_SYNTAX_ERROR: - Infrastructure drift  ->  Deployment failures  ->  Release pipeline blocks  ->  Development velocity loss
                 # REMOVED_SYNTAX_ERROR: '''
 
                 # REMOVED_SYNTAX_ERROR: import asyncio
@@ -133,7 +133,7 @@
     # REMOVED_SYNTAX_ERROR: Expected: All critical configuration properly loaded and validated for staging
     # REMOVED_SYNTAX_ERROR: Actual: Configuration cascade failures prevent service from reaching operational state
 
-    # REMOVED_SYNTAX_ERROR: Cascade Pattern: Missing env vars → Wrong defaults → Connection failures → Service degradation → Platform unavailability
+    # REMOVED_SYNTAX_ERROR: Cascade Pattern: Missing env vars  ->  Wrong defaults  ->  Connection failures  ->  Service degradation  ->  Platform unavailability
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # Define comprehensive configuration requirements for staging backend
@@ -294,13 +294,13 @@
                                                     # REMOVED_SYNTAX_ERROR: f"COMPOUND IMPACT ANALYSIS:
                                                         # REMOVED_SYNTAX_ERROR: "
                                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
-                                                        # REMOVED_SYNTAX_ERROR: f"→ 100% auth breakdown
+                                                        # REMOVED_SYNTAX_ERROR: f" ->  100% auth breakdown
                                                         # REMOVED_SYNTAX_ERROR: "
                                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
-                                                        # REMOVED_SYNTAX_ERROR: f"→ Analytics and cache broken
+                                                        # REMOVED_SYNTAX_ERROR: f" ->  Analytics and cache broken
                                                         # REMOVED_SYNTAX_ERROR: "
                                                         # REMOVED_SYNTAX_ERROR: "formatted_string"
-                                                        # REMOVED_SYNTAX_ERROR: f"→ Development behavior in staging
+                                                        # REMOVED_SYNTAX_ERROR: f" ->  Development behavior in staging
 
                                                         # REMOVED_SYNTAX_ERROR: "
                                                         # REMOVED_SYNTAX_ERROR: "formatted_string"

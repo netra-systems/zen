@@ -334,7 +334,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
             
             validate_performance_benchmark("single_execution_max_time", execution_time)
             
-            self.logger.info(f"✅ Performance benchmark passed: {execution_time:.2f}s execution time")
+            self.logger.info(f" PASS:  Performance benchmark passed: {execution_time:.2f}s execution time")
             
             # Validate critical WebSocket events were sent
             self.validate_websocket_events(events)
@@ -587,12 +587,12 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                         f"Found order: {agent_names}. "
                         f"Data agents: {[name for _, name in data_related_agents]} at indices {[idx for idx, _ in data_related_agents]}. "
                         f"Optimization agents: {[name for _, name in optimization_related_agents]} at indices {[idx for idx, _ in optimization_related_agents]}. "
-                        f"This violates the fundamental principle: gather data → analyze → optimize. "
+                        f"This violates the fundamental principle: gather data  ->  analyze  ->  optimize. "
                         f"See SPEC/learnings/agent_execution_order_fix_20250904.xml"
                     )
                     
                     self.logger.info(
-                        f"✅ EXECUTION ORDER COMPLIANCE VERIFIED: Data agents completed before optimization agents. "
+                        f" PASS:  EXECUTION ORDER COMPLIANCE VERIFIED: Data agents completed before optimization agents. "
                         f"Data: {[name for _, name in data_related_agents]}, "
                         f"Optimization: {[name for _, name in optimization_related_agents]}"
                     )
@@ -1064,10 +1064,10 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                             assert hasattr(result, 'error'), (
                                 f"Scenario '{scenario['name']}': Failed result must provide error details"
                             )
-                            self.logger.info(f"✅ Scenario '{scenario['name']}': Error handled gracefully")
+                            self.logger.info(f" PASS:  Scenario '{scenario['name']}': Error handled gracefully")
                         else:
                             # Unexpectedly succeeded - might be valid for some scenarios
-                            self.logger.info(f"⚠️  Scenario '{scenario['name']}': Unexpectedly succeeded")
+                            self.logger.info(f" WARNING: [U+FE0F]  Scenario '{scenario['name']}': Unexpectedly succeeded")
                     else:
                         pytest.fail(f"Scenario '{scenario['name']}': No result returned")
                     
@@ -1091,7 +1091,7 @@ class TestRealAgentExecutionEngine(BaseE2ETest):
                 self.logger.error(f"Scenario '{scenario['name']}' raised unexpected exception: {e}")
                 pytest.fail(f"Unexpected error in scenario '{scenario['name']}': {e}")
         
-        self.logger.info("✅ Comprehensive error recovery scenarios completed")
+        self.logger.info(" PASS:  Comprehensive error recovery scenarios completed")
 
 
 # Additional test utilities and fixtures

@@ -116,7 +116,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         if forbidden_import_detected:
             violation_details = self._format_import_violations()
             assert False, (
-                f"🚨 SSOT VIOLATION: Forbidden DeepAgentState imports detected in ReportingSubAgent. "
+                f" ALERT:  SSOT VIOLATION: Forbidden DeepAgentState imports detected in ReportingSubAgent. "
                 f"{violation_details}. These imports create systematic user isolation vulnerabilities. "
                 f"All imports must be migrated to UserExecutionContext patterns immediately."
             )
@@ -273,7 +273,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         if signature_violations:
             violation_details = self._format_signature_violations(signature_violations)
             assert False, (
-                f"🚨 METHOD SIGNATURE SSOT VIOLATIONS: {len(signature_violations)} violations detected. "
+                f" ALERT:  METHOD SIGNATURE SSOT VIOLATIONS: {len(signature_violations)} violations detected. "
                 f"{violation_details}. All method parameters must use UserExecutionContext patterns only."
             )
 
@@ -405,7 +405,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
             # AFTER migration: Blocking should work (test passes)
             if not runtime_blocking_works:
                 assert False, (
-                    f"🚨 RUNTIME SECURITY VULNERABILITY: DeepAgentState usage not blocked at runtime. "
+                    f" ALERT:  RUNTIME SECURITY VULNERABILITY: DeepAgentState usage not blocked at runtime. "
                     f"ReportingSubAgent.execute_modern() accepts DeepAgentState parameters without "
                     f"security validation. Runtime blocking required to prevent exploitation."
                 )
@@ -441,7 +441,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         if documentation_violations:
             violation_details = self._format_documentation_violations(documentation_violations)
             assert False, (
-                f"🚨 DOCUMENTATION SSOT VIOLATIONS: {len(documentation_violations)} violations detected. "
+                f" ALERT:  DOCUMENTATION SSOT VIOLATIONS: {len(documentation_violations)} violations detected. "
                 f"{violation_details}. Documentation must reference only UserExecutionContext patterns."
             )
 
@@ -496,7 +496,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         if compliance_metrics['overall_score'] < minimum_compliance_score:
             compliance_details = self._format_compliance_report(compliance_metrics)
             assert False, (
-                f"🚨 SSOT COMPLIANCE FAILURE: Overall compliance score {compliance_metrics['overall_score']:.1f}% "
+                f" ALERT:  SSOT COMPLIANCE FAILURE: Overall compliance score {compliance_metrics['overall_score']:.1f}% "
                 f"is below required {minimum_compliance_score}%. {compliance_details}. "
                 f"Complete migration to UserExecutionContext required for compliance."
             )

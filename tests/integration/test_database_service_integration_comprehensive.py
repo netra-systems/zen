@@ -134,7 +134,7 @@ async def test_user_data_persistence_and_retrieval(
         assert retrieved_user.feature_flags["advanced_analytics"] is True
         assert retrieved_user.tool_permissions["cost_optimizer"] is True
         
-        logger.info(f"✅ User data persistence validated for {user_id}")
+        logger.info(f" PASS:  User data persistence validated for {user_id}")
 
 
 @pytest.mark.integration
@@ -205,7 +205,7 @@ async def test_thread_and_message_management(
         assert retrieved_messages[1].role == "assistant"
         assert "optimization suggestions" in retrieved_messages[1].content[0]["text"]
         
-        logger.info(f"✅ Thread and message management validated for {thread_id}")
+        logger.info(f" PASS:  Thread and message management validated for {thread_id}")
 
 
 @pytest.mark.integration
@@ -258,7 +258,7 @@ async def test_transaction_isolation_and_rollback(
         user1 = result.scalar_one()
         assert user1.plan_tier == "free"  # Should not be "enterprise"
         
-        logger.info("✅ Transaction isolation and rollback validated")
+        logger.info(" PASS:  Transaction isolation and rollback validated")
 
 
 @pytest.mark.integration
@@ -333,7 +333,7 @@ async def test_redis_postgresql_integration(
         assert db_user.plan_tier == session_obj["plan_tier"]
         assert db_user.permissions["advanced_features"] is True
     
-    logger.info("✅ Redis-PostgreSQL integration validated")
+    logger.info(" PASS:  Redis-PostgreSQL integration validated")
 
 
 @pytest.mark.integration
@@ -430,7 +430,7 @@ async def test_concurrent_user_data_isolation(
             if other_redis_data:
                 assert f"token_for_{user_id}" not in other_redis_data
     
-    logger.info("✅ Concurrent user data isolation validated")
+    logger.info(" PASS:  Concurrent user data isolation validated")
 
 
 @pytest.mark.integration
@@ -538,7 +538,7 @@ async def test_database_performance_under_load(
         )
         assert result.scalar() == num_concurrent_users
     
-    logger.info(f"✅ Database performance test completed in {execution_time:.2f}s for {num_concurrent_users} concurrent users")
+    logger.info(f" PASS:  Database performance test completed in {execution_time:.2f}s for {num_concurrent_users} concurrent users")
 
 
 @pytest.mark.integration
@@ -612,7 +612,7 @@ async def test_data_integrity_and_constraints(
         # Expected - unique constraint should be enforced
         assert "unique" in str(e).lower() or "duplicate" in str(e).lower()
     
-    logger.info("✅ Data integrity and constraints validated")
+    logger.info(" PASS:  Data integrity and constraints validated")
 
 
 @pytest.mark.integration
@@ -691,7 +691,7 @@ async def test_cache_invalidation_patterns(
     assert final_cached_obj["plan_tier"] == "pro"
     assert final_cached_obj["permissions"]["api_access"] is True
     
-    logger.info("✅ Cache invalidation patterns validated")
+    logger.info(" PASS:  Cache invalidation patterns validated")
 
 
 @pytest.mark.integration
@@ -737,7 +737,7 @@ async def test_database_connection_recovery(
     retrieved_value = await redis_client.get(test_key)
     assert retrieved_value == "recovery_test_value"
     
-    logger.info("✅ Database connection recovery patterns validated")
+    logger.info(" PASS:  Database connection recovery patterns validated")
 
 
 if __name__ == "__main__":

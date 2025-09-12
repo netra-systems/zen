@@ -488,9 +488,9 @@ class E2EImportFixer:
         success = len(failed_files) == 0
         
         if success:
-            print(f"✓ All {len(test_files)} E2E tests can be loaded successfully!")
+            print(f"[U+2713] All {len(test_files)} E2E tests can be loaded successfully!")
         else:
-            print(f"✗ {len(failed_files)} out of {len(test_files)} tests failed to load")
+            print(f"[U+2717] {len(failed_files)} out of {len(test_files)} tests failed to load")
             
         return success, failed_files
         
@@ -514,7 +514,7 @@ class E2EImportFixer:
         if report.recommendations:
             print("\nRecommendations:")
             for rec in report.recommendations:
-                print(f"  • {rec}")
+                print(f"  [U+2022] {rec}")
                 
         # Show files that still can't import
         cant_import = [r for r in report.file_results if not r.can_import]

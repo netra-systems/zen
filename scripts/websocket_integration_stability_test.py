@@ -37,7 +37,7 @@ class WebSocketIntegrationStabilityTest:
     
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all stability tests and return comprehensive results."""
-        logger.info("🔍 Starting WebSocket-Agent Integration Stability Test")
+        logger.info(" SEARCH:  Starting WebSocket-Agent Integration Stability Test")
         
         # Core component tests
         await self._test_execution_engine_instantiation()
@@ -59,7 +59,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_execution_engine_instantiation(self):
         """Test that ExecutionEngine can be instantiated without RuntimeError."""
         try:
-            logger.info("🧪 Testing ExecutionEngine instantiation...")
+            logger.info("[U+1F9EA] Testing ExecutionEngine instantiation...")
             
             # Import components
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
@@ -117,7 +117,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_agent_registry_websocket_integration(self):
         """Test AgentRegistry WebSocket manager integration."""
         try:
-            logger.info("🧪 Testing AgentRegistry WebSocket integration...")
+            logger.info("[U+1F9EA] Testing AgentRegistry WebSocket integration...")
             
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             
@@ -152,7 +152,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_websocket_bridge_creation(self):
         """Test WebSocket bridge factory pattern."""
         try:
-            logger.info("🧪 Testing WebSocket bridge creation...")
+            logger.info("[U+1F9EA] Testing WebSocket bridge creation...")
             
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
@@ -189,7 +189,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_user_context_integration(self):
         """Test UserExecutionContext integration."""
         try:
-            logger.info("🧪 Testing UserExecutionContext integration...")
+            logger.info("[U+1F9EA] Testing UserExecutionContext integration...")
             
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
@@ -215,7 +215,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_import_integrity(self):
         """Test that all imports work correctly after changes."""
         try:
-            logger.info("🧪 Testing import integrity...")
+            logger.info("[U+1F9EA] Testing import integrity...")
             
             critical_imports = [
                 "netra_backend.app.agents.supervisor.agent_registry",
@@ -245,7 +245,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_factory_pattern_stability(self):
         """Test factory patterns remain stable."""
         try:
-            logger.info("🧪 Testing factory pattern stability...")
+            logger.info("[U+1F9EA] Testing factory pattern stability...")
             
             # Test UnifiedToolDispatcherFactory exists and works
             try:
@@ -271,7 +271,7 @@ class WebSocketIntegrationStabilityTest:
     async def _test_error_handling_robustness(self):
         """Test error handling robustness."""
         try:
-            logger.info("🧪 Testing error handling robustness...")
+            logger.info("[U+1F9EA] Testing error handling robustness...")
             
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             
@@ -294,7 +294,7 @@ class WebSocketIntegrationStabilityTest:
     def _record_success(self, test_name: str, details: str):
         """Record a successful test."""
         self.results['tests_passed'] += 1
-        logger.info(f"✅ {test_name}: {details}")
+        logger.info(f" PASS:  {test_name}: {details}")
     
     def _record_failure(self, test_name: str, details: str):
         """Record a failed test."""
@@ -304,7 +304,7 @@ class WebSocketIntegrationStabilityTest:
             'error': details,
             'timestamp': datetime.now().isoformat()
         })
-        logger.error(f"❌ {test_name}: {details}")
+        logger.error(f" FAIL:  {test_name}: {details}")
     
     def print_summary(self):
         """Print test summary."""

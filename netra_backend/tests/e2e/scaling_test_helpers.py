@@ -1,6 +1,6 @@
 """
 Shared helpers for agent scaling workflow tests.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import uuid

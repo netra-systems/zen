@@ -36,48 +36,48 @@ async def test_service_startup():
     launcher = DevLauncher(config)
     
     try:
-        print("📋 PHASE 1 | Environment and pre-checks...")
+        print("[U+1F4CB] PHASE 1 | Environment and pre-checks...")
         # Run environment checks
         env_ok = launcher.check_environment()
         if not env_ok:
-            print("❌ FAILED | Environment check failed")
+            print(" FAIL:  FAILED | Environment check failed")
             return False
         
-        print("🔐 PHASE 2 | Loading secrets...")
+        print("[U+1F510] PHASE 2 | Loading secrets...")
         # Load secrets
         secrets_ok = launcher.load_secrets()
         if not secrets_ok:
-            print("⚠️ WARNING | Secrets loading had issues, continuing...")
+            print(" WARNING: [U+FE0F] WARNING | Secrets loading had issues, continuing...")
         
-        print("💾 PHASE 3 | Database validation...")
+        print("[U+1F4BE] PHASE 3 | Database validation...")
         # Validate databases
         db_ok = await launcher._validate_databases()
         if not db_ok:
-            print("❌ FAILED | Database validation failed")
+            print(" FAIL:  FAILED | Database validation failed")
             return False
         
-        print("🔄 PHASE 4 | Migration check...")
+        print(" CYCLE:  PHASE 4 | Migration check...")
         # Check migrations
         migrations_ok = launcher.run_migrations()
         if not migrations_ok:
-            print("⚠️ WARNING | Migration issues, continuing...")
+            print(" WARNING: [U+FE0F] WARNING | Migration issues, continuing...")
         
-        print("🚀 PHASE 5 | Starting services...")
+        print("[U+1F680] PHASE 5 | Starting services...")
         # Start core services (auth and backend only for this test)
         backend_success, auth_success = await launcher._start_core_services_with_cascade()
         
         if backend_success:
-            print("✅ SUCCESS | Backend service started")
+            print(" PASS:  SUCCESS | Backend service started")
         else:
-            print("❌ FAILED | Backend service failed to start")
+            print(" FAIL:  FAILED | Backend service failed to start")
         
         if auth_success:
-            print("✅ SUCCESS | Auth service started")  
+            print(" PASS:  SUCCESS | Auth service started")  
         else:
-            print("⚠️ WARNING | Auth service failed to start")
+            print(" WARNING: [U+FE0F] WARNING | Auth service failed to start")
         
         if backend_success or auth_success:
-            print("🎯 PHASE 6 | Testing service readiness...")
+            print(" TARGET:  PHASE 6 | Testing service readiness...")
             # Wait a moment for services to initialize
             await asyncio.sleep(3)
             
@@ -85,41 +85,41 @@ async def test_service_startup():
             if backend_success:
                 backend_ready = launcher._wait_for_backend_readiness(timeout=15)
                 if backend_ready:
-                    print("✅ SUCCESS | Backend is ready")
+                    print(" PASS:  SUCCESS | Backend is ready")
                 else:
-                    print("⚠️ WARNING | Backend readiness check failed")
+                    print(" WARNING: [U+FE0F] WARNING | Backend readiness check failed")
             
             # Test auth readiness
             if auth_success:
                 auth_ready = launcher._verify_auth_system(timeout=10)
                 if auth_ready:
-                    print("✅ SUCCESS | Auth system is ready")
+                    print(" PASS:  SUCCESS | Auth system is ready")
                 else:
-                    print("⚠️ WARNING | Auth system verification failed")
+                    print(" WARNING: [U+FE0F] WARNING | Auth system verification failed")
             
-            print("🏁 TESTING COMPLETE | Service startup orchestration test finished")
+            print("[U+1F3C1] TESTING COMPLETE | Service startup orchestration test finished")
             
             # Keep services running for a moment to verify stability
-            print("⏱️ STABILITY | Keeping services running for 5 seconds...")
+            print("[U+23F1][U+FE0F] STABILITY | Keeping services running for 5 seconds...")
             await asyncio.sleep(5)
             
             return True
         else:
-            print("❌ FAILED | No services started successfully")
+            print(" FAIL:  FAILED | No services started successfully")
             return False
             
     except Exception as e:
-        print(f"💥 ERROR | Test failed with exception: {e}")
+        print(f"[U+1F4A5] ERROR | Test failed with exception: {e}")
         import traceback
         traceback.print_exc()
         return False
         
     finally:
-        print("🧹 CLEANUP | Shutting down services...")
+        print("[U+1F9F9] CLEANUP | Shutting down services...")
         try:
             launcher._graceful_shutdown()
         except Exception as e:
-            print(f"⚠️ WARNING | Cleanup error: {e}")
+            print(f" WARNING: [U+FE0F] WARNING | Cleanup error: {e}")
             launcher.emergency_cleanup()
 
 
@@ -137,10 +137,10 @@ def main():
     print()
     print("="*80)
     if success:
-        print(f"✅ TEST PASSED | Service startup orchestration test completed successfully in {elapsed:.1f}s")
+        print(f" PASS:  TEST PASSED | Service startup orchestration test completed successfully in {elapsed:.1f}s")
         exit_code = 0
     else:
-        print(f"❌ TEST FAILED | Service startup orchestration test failed after {elapsed:.1f}s")
+        print(f" FAIL:  TEST FAILED | Service startup orchestration test failed after {elapsed:.1f}s")
         exit_code = 1
     
     print("="*80)

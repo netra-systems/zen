@@ -421,8 +421,8 @@
                                                         # REMOVED_SYNTAX_ERROR: raise AssertionError("formatted_string")
                                                         # REMOVED_SYNTAX_ERROR: else:
                                                             # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                                            # REMOVED_SYNTAX_ERROR: ✓ All staging configuration validations passed!")
-                                                            # REMOVED_SYNTAX_ERROR: logger.info("✓ Safe to deploy to staging environment")
+                                                            # REMOVED_SYNTAX_ERROR: [U+2713] All staging configuration validations passed!")
+                                                            # REMOVED_SYNTAX_ERROR: logger.info("[U+2713] Safe to deploy to staging environment")
 
                                                             # REMOVED_SYNTAX_ERROR: logger.info("="*60)
 
@@ -432,7 +432,7 @@
                                                                 # REMOVED_SYNTAX_ERROR: try:
                                                                     # REMOVED_SYNTAX_ERROR: test_smoke_staging_configuration()
                                                                     # REMOVED_SYNTAX_ERROR: print(" )
-                                                                    # REMOVED_SYNTAX_ERROR: ✓ Smoke test passed - running full test suite...
+                                                                    # REMOVED_SYNTAX_ERROR: [U+2713] Smoke test passed - running full test suite...
                                                                     # REMOVED_SYNTAX_ERROR: ")
                                                                     # REMOVED_SYNTAX_ERROR: except AssertionError as e:
                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")

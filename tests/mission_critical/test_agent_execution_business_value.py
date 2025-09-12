@@ -105,7 +105,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         Business Value: If this fails, no revenue is generated because users
         don't receive AI-powered insights and recommendations.
         """
-        logger.info("🚀 Starting P0 Mission Critical Agent Execution Business Value Test")
+        logger.info("[U+1F680] Starting P0 Mission Critical Agent Execution Business Value Test")
         
         # STEP 1: Set up authenticated user context with real services
         env = get_env()
@@ -119,7 +119,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             websocket_enabled=True
         )
         
-        logger.info(f"✅ Created authenticated user context: {user_context.user_id}")
+        logger.info(f" PASS:  Created authenticated user context: {user_context.user_id}")
         
         # STEP 2: Initialize real agent execution infrastructure
         services = real_services_fixture
@@ -140,7 +140,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         # Set up WebSocket manager in agent registry (critical for business value events)
         agent_registry.set_websocket_manager(agent_bridge)
         
-        logger.info("✅ Initialized real agent execution infrastructure")
+        logger.info(" PASS:  Initialized real agent execution infrastructure")
         
         # STEP 3: Set up WebSocket event monitoring
         event_validator = AgentEventValidator(
@@ -161,7 +161,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             }
         }
         
-        logger.info("🎯 Executing agent with business value request")
+        logger.info(" TARGET:  Executing agent with business value request")
         execution_start_time = time.time()
         
         # STEP 5: Simulate agent execution with business value results
@@ -243,10 +243,10 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             event_validator.record_event(event)
         
         execution_time = time.time() - execution_start_time
-        logger.success(f"✅ Agent execution completed in {execution_time:.2f}s")
+        logger.success(f" PASS:  Agent execution completed in {execution_time:.2f}s")
         
         # STEP 6: Validate WebSocket Events (CRITICAL for business value)
-        logger.info("🔍 Validating WebSocket events for business value delivery")
+        logger.info(" SEARCH:  Validating WebSocket events for business value delivery")
         
         # Perform comprehensive event validation
         validation_result = event_validator.perform_full_validation()
@@ -261,10 +261,10 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             )
         )
         
-        logger.success(f"✅ WebSocket event validation PASSED - Business value score: {validation_result.business_value_score}%")
+        logger.success(f" PASS:  WebSocket event validation PASSED - Business value score: {validation_result.business_value_score}%")
         
         # STEP 7: Validate Business Value Content
-        logger.info("💰 Validating agent results contain actionable business insights")
+        logger.info("[U+1F4B0] Validating agent results contain actionable business insights")
         
         # Verify execution result contains business value
         assert execution_result is not None, "Agent execution returned no result"
@@ -289,10 +289,10 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             f"Expected indicators: {business_value_indicators}"
         )
         
-        logger.success("✅ Agent results contain actionable business value")
+        logger.success(" PASS:  Agent results contain actionable business value")
         
         # STEP 8: Validate Data Persistence
-        logger.info("💾 Validating data persistence and retrieval")
+        logger.info("[U+1F4BE] Validating data persistence and retrieval")
         
         # Verify execution context was persisted
         assert user_context.thread_id is not None, "Thread ID required for data persistence"
@@ -310,15 +310,15 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
                 thread_exists = thread_query_result.fetchone() is not None
                 
                 if thread_exists:
-                    logger.success("✅ Thread data persisted successfully")
+                    logger.success(" PASS:  Thread data persisted successfully")
                 else:
-                    logger.warning("⚠️ Thread not found in database - may be expected for test environment")
+                    logger.warning(" WARNING: [U+FE0F] Thread not found in database - may be expected for test environment")
                     
             except Exception as e:
-                logger.warning(f"⚠️ Database validation skipped due to: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Database validation skipped due to: {e}")
         
         # STEP 9: Validate User Context Isolation
-        logger.info("🔒 Validating user context isolation")
+        logger.info("[U+1F512] Validating user context isolation")
         
         # Verify user context maintained isolation throughout execution
         assert user_context.user_id is not None, "User ID lost during execution"
@@ -333,10 +333,10 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
                     f"Expected: {user_context.user_id}, Got: {event_user_id}"
                 )
         
-        logger.success("✅ User context isolation maintained")
+        logger.success(" PASS:  User context isolation maintained")
         
         # STEP 10: Final Business Value Assessment
-        logger.info("📊 Performing final business value assessment")
+        logger.info(" CHART:  Performing final business value assessment")
         
         # Calculate overall business value score
         execution_success = execution_result is not None
@@ -353,10 +353,10 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             (10 if context_isolated else 0)
         )
         
-        logger.success(f"🎉 BUSINESS VALUE TEST PASSED - Overall Score: {business_value_score}/100")
+        logger.success(f" CELEBRATION:  BUSINESS VALUE TEST PASSED - Overall Score: {business_value_score}/100")
         
         # Log success metrics for monitoring
-        logger.info(f"📈 SUCCESS METRICS:")
+        logger.info(f"[U+1F4C8] SUCCESS METRICS:")
         logger.info(f"   - Execution Time: {execution_time:.2f}s")
         logger.info(f"   - WebSocket Events: {len(collected_events)} received")
         logger.info(f"   - Critical Events: {len(event_validator.critical_events_received)}/5")
@@ -369,7 +369,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
             f"This indicates the platform is not delivering sufficient value to generate revenue."
         )
         
-        logger.success("🚀 P0 MISSION CRITICAL TEST PASSED: Agent execution delivers business value!")
+        logger.success("[U+1F680] P0 MISSION CRITICAL TEST PASSED: Agent execution delivers business value!")
     
     @pytest.mark.mission_critical
     @pytest.mark.real_services
@@ -383,7 +383,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         Business Value: Real-time event delivery creates engagement and demonstrates
         AI value as it's being generated, not just at the end.
         """
-        logger.info("📡 Testing WebSocket event delivery during agent execution")
+        logger.info("[U+1F4E1] Testing WebSocket event delivery during agent execution")
         
         # Set up authenticated context
         user_context = await create_authenticated_user_context(
@@ -420,7 +420,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         assert validation_result.is_valid, f"Event validation failed: {validation_result.error_message}"
         assert validation_result.business_value_score == 100.0, "Not all critical events were received"
         
-        logger.success("✅ All WebSocket events delivered successfully")
+        logger.success(" PASS:  All WebSocket events delivered successfully")
     
     @pytest.mark.mission_critical
     @pytest.mark.real_services
@@ -434,7 +434,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         Business Value: Fast response times improve user experience and
         demonstrate platform efficiency, leading to higher adoption.
         """
-        logger.info("⚡ Testing agent execution performance requirements")
+        logger.info(" LIGHTNING:  Testing agent execution performance requirements")
         
         # Set up user context
         user_context = await create_authenticated_user_context(
@@ -469,7 +469,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         assert "execution_time_ms" in mock_execution_result, "Execution result should include timing metrics"
         assert mock_execution_result["execution_time_ms"] < 30000, "Reported execution time exceeds business requirement"
         
-        logger.success(f"✅ Performance test passed - Execution time: {execution_time:.2f}s")
+        logger.success(f" PASS:  Performance test passed - Execution time: {execution_time:.2f}s")
     
     @pytest.mark.mission_critical
     @pytest.mark.real_services
@@ -486,7 +486,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         Business Value: Proper isolation enables serving multiple users
         simultaneously, increasing platform capacity and revenue potential.
         """
-        logger.info("🔒 Testing user context isolation during agent execution")
+        logger.info("[U+1F512] Testing user context isolation during agent execution")
         
         # Create two separate user contexts
         user1_context = await create_authenticated_user_context(
@@ -524,7 +524,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         assert user2_result["user_id"] == str(user2_context.user_id), "User 2 result has wrong user ID"
         assert user1_result["context"] != user2_result["context"], "Context data should be isolated"
         
-        logger.success("✅ User context isolation maintained successfully")
+        logger.success(" PASS:  User context isolation maintained successfully")
     
     @pytest.mark.mission_critical  
     @pytest.mark.real_services
@@ -541,7 +541,7 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         Business Value: Without actionable insights, users gain no value
         from AI interactions and won't convert to paid plans.
         """
-        logger.info("💡 Testing agent execution generates actionable business insights")
+        logger.info(" IDEA:  Testing agent execution generates actionable business insights")
         
         # Set up user context
         user_context = await create_authenticated_user_context(
@@ -612,14 +612,14 @@ class TestAgentExecutionBusinessValue(BaseIntegrationTest):
         assert business_insights_result.get("confidence_score", 0) >= 70, \
             "Insights must have high confidence score (>=70) to be actionable"
         
-        logger.success("✅ Agent execution generates high-quality actionable business insights")
+        logger.success(" PASS:  Agent execution generates high-quality actionable business insights")
         
         # Log business value metrics
         total_savings = business_insights_result["total_potential_savings"]
         num_recommendations = len(business_insights_result["recommendations"])
         confidence = business_insights_result["confidence_score"]
         
-        logger.info(f"📊 BUSINESS VALUE METRICS:")
+        logger.info(f" CHART:  BUSINESS VALUE METRICS:")
         logger.info(f"   - Total Potential Savings: {total_savings}")
         logger.info(f"   - Number of Recommendations: {num_recommendations}")
         logger.info(f"   - Confidence Score: {confidence}%")

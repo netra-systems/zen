@@ -28,13 +28,13 @@ async def main():
             response = await client.get(f"{config.backend_url}/health")
             if response.status_code == 200:
                 health_data = response.json()
-                print(f"   ✅ Backend healthy: {health_data.get('status')}")
-                print(f"   📊 Response time: {response.elapsed.total_seconds():.3f}s")
+                print(f"    PASS:  Backend healthy: {health_data.get('status')}")
+                print(f"    CHART:  Response time: {response.elapsed.total_seconds():.3f}s")
             else:
-                print(f"   ❌ Backend unhealthy: {response.status_code}")
+                print(f"    FAIL:  Backend unhealthy: {response.status_code}")
                 return
     except Exception as e:
-        print(f"   ❌ Backend connection failed: {e}")
+        print(f"    FAIL:  Backend connection failed: {e}")
         return
     
     # Test 2: WebSocket Connection (no message sending)
@@ -56,37 +56,37 @@ async def main():
             open_timeout=10
         ) as websocket:
             connection_duration = asyncio.get_event_loop().time() - start_time
-            print(f"   ✅ WebSocket connection established")
-            print(f"   📊 Connection time: {connection_duration:.3f}s")
+            print(f"    PASS:  WebSocket connection established")
+            print(f"    CHART:  Connection time: {connection_duration:.3f}s")
             connection_successful = True
             
             # Just wait briefly to see if server closes immediately
-            print("   ⏳ Waiting for server messages (no sending)...")
+            print("   [U+23F3] Waiting for server messages (no sending)...")
             try:
                 # Just listen for any server-initiated messages
                 message = await asyncio.wait_for(websocket.recv(), timeout=5)
-                print(f"   📨 Server sent: {message[:100]}...")
+                print(f"   [U+1F4E8] Server sent: {message[:100]}...")
             except asyncio.TimeoutError:
-                print("   ℹ️  No messages received (timeout - this may be normal)")
+                print("   [U+2139][U+FE0F]  No messages received (timeout - this may be normal)")
             
             # Connection stayed open, this is success
-            print("   ✅ WebSocket connection stable")
+            print("    PASS:  WebSocket connection stable")
             
     except websockets.exceptions.ConnectionClosedOK as e:
-        print(f"   ⚠️  WebSocket closed normally: {e}")
-        print(f"   📊 Connection lasted: {connection_duration:.3f}s")
+        print(f"    WARNING: [U+FE0F]  WebSocket closed normally: {e}")
+        print(f"    CHART:  Connection lasted: {connection_duration:.3f}s")
         # This might still be considered partial success if connection was established
         if connection_duration > 0.1:
-            print("   ℹ️  Connection was established but closed by server")
+            print("   [U+2139][U+FE0F]  Connection was established but closed by server")
             connection_successful = True
         
     except websockets.exceptions.InvalidStatus as e:
         if "403" in str(e) or "401" in str(e):
-            print(f"   🔐 Authentication required: {e}")
+            print(f"   [U+1F510] Authentication required: {e}")
         else:
-            print(f"   ❌ Connection failed: {e}")
+            print(f"    FAIL:  Connection failed: {e}")
     except Exception as e:
-        print(f"   ❌ WebSocket error: {e}")
+        print(f"    FAIL:  WebSocket error: {e}")
     
     # Test 3: API Endpoint Test
     print("\n3. API Endpoint Test...")
@@ -94,29 +94,29 @@ async def main():
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(f"{config.api_url}/health")
             if response.status_code == 200:
-                print(f"   ✅ API endpoint healthy")
-                print(f"   📊 Response time: {response.elapsed.total_seconds():.3f}s")
+                print(f"    PASS:  API endpoint healthy")
+                print(f"    CHART:  Response time: {response.elapsed.total_seconds():.3f}s")
             else:
-                print(f"   ⚠️  API endpoint status: {response.status_code}")
+                print(f"    WARNING: [U+FE0F]  API endpoint status: {response.status_code}")
     except Exception as e:
-        print(f"   ⚠️  API endpoint error: {e}")
+        print(f"    WARNING: [U+FE0F]  API endpoint error: {e}")
     
     # Summary
     print("\n=== TEST SUMMARY ===")
-    print(f"Backend Health: ✅ PASS")
-    print(f"WebSocket Connection: {'✅ PASS' if connection_successful else '❌ FAIL'}")
-    print(f"API Endpoints: ℹ️  INFO")
+    print(f"Backend Health:  PASS:  PASS")
+    print(f"WebSocket Connection: {' PASS:  PASS' if connection_successful else ' FAIL:  FAIL'}")
+    print(f"API Endpoints: [U+2139][U+FE0F]  INFO")
     
     if connection_successful:
-        print("\n🎯 GOLDEN PATH STATUS: WebSocket connectivity confirmed")
+        print("\n TARGET:  GOLDEN PATH STATUS: WebSocket connectivity confirmed")
         print("   - Authentication is working")
         print("   - Server accepts connections") 
         print("   - Issue may be in message handling, not connection")
     else:
-        print("\n❌ GOLDEN PATH STATUS: WebSocket connectivity failed")
+        print("\n FAIL:  GOLDEN PATH STATUS: WebSocket connectivity failed")
         print("   - Authentication or connection issues detected")
     
-    print(f"\n📊 Total test duration: {asyncio.get_event_loop().time() - start_time:.3f}s")
+    print(f"\n CHART:  Total test duration: {asyncio.get_event_loop().time() - start_time:.3f}s")
 
 if __name__ == "__main__":
     start_time = asyncio.get_event_loop().time()

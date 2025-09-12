@@ -122,7 +122,7 @@ class TestUserContextCorruptionRecovery(BaseIntegrationTest):
             # PERFORMANCE ASSERTION: Recovery should be fast (< 5 seconds)
             assert recovery_duration < 5.0, f"Context recovery took too long: {recovery_duration:.2f}s"
             
-            logger.info(f"✅ Partial metadata corruption recovery successful in {recovery_duration:.2f}s")
+            logger.info(f" PASS:  Partial metadata corruption recovery successful in {recovery_duration:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -195,7 +195,7 @@ class TestUserContextCorruptionRecovery(BaseIntegrationTest):
             # PERFORMANCE ASSERTION: State repair should be efficient
             assert consistency_duration < 3.0, f"State repair took too long: {consistency_duration:.2f}s"
             
-            logger.info(f"✅ State inconsistency detection and repair successful in {consistency_duration:.2f}s")
+            logger.info(f" PASS:  State inconsistency detection and repair successful in {consistency_duration:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -287,7 +287,7 @@ class TestUserContextCorruptionRecovery(BaseIntegrationTest):
             "total_recovery_time": recovery_duration
         }
         
-        logger.info(f"✅ Concurrent corruption resilience test: {successful_recoveries}/{num_users} recoveries in {recovery_duration:.2f}s")
+        logger.info(f" PASS:  Concurrent corruption resilience test: {successful_recoveries}/{num_users} recoveries in {recovery_duration:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -374,7 +374,7 @@ class TestUserContextCorruptionRecovery(BaseIntegrationTest):
             "isolation_maintained": True
         }
         
-        logger.info("✅ Context creation failure cascade prevention successful")
+        logger.info(" PASS:  Context creation failure cascade prevention successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -455,7 +455,7 @@ class TestUserContextCorruptionRecovery(BaseIntegrationTest):
                     "success": True
                 }
                 
-                logger.info(f"✅ Memory pressure recovery successful: creation={creation_duration:.2f}s, recovery={recovery_duration:.2f}s")
+                logger.info(f" PASS:  Memory pressure recovery successful: creation={creation_duration:.2f}s, recovery={recovery_duration:.2f}s")
         
         finally:
             # Clean up memory pressure

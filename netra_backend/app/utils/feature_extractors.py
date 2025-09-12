@@ -13,7 +13,7 @@ class LanguageDetector:
         if 'import ' in text or 'def ' in text or 'class ' in text:
             return 'python'
         # Pattern-based language detection for production use
-        if any(char in '你好' for char in text):
+        if any(char in '[U+4F60][U+597D]' for char in text):
             return 'zh'
         return 'en'
 

@@ -273,7 +273,7 @@ class RealWebSocketTestClient:
                 
                 self.metrics.connection_time = time.time() - connection_start
                 
-                logger.info(f"✅ WebSocket connected on attempt {attempt + 1}: {ws_url} (State: {self.state.value})")
+                logger.info(f" PASS:  WebSocket connected on attempt {attempt + 1}: {ws_url} (State: {self.state.value})")
                 return  # Success!
                 
             except (asyncio.TimeoutError, ConnectionRefusedError, OSError) as e:
@@ -285,7 +285,7 @@ class RealWebSocketTestClient:
                 # Calculate exponential backoff delay
                 if attempt < max_retries - 1:  # Don't delay after the last attempt
                     backoff_delay = min(2.0 ** attempt, 8.0)  # Cap at 8 seconds
-                    logger.info(f"⏳ Retrying WebSocket connection in {backoff_delay:.1f}s...")
+                    logger.info(f"[U+23F3] Retrying WebSocket connection in {backoff_delay:.1f}s...")
                     await asyncio.sleep(backoff_delay)
             
             except Exception as e:
@@ -304,7 +304,7 @@ class RealWebSocketTestClient:
         )
         self.state = WebSocketConnectionState.ERROR
         self.metrics.record_error(final_error_msg)
-        logger.error(f"❌ {final_error_msg}")
+        logger.error(f" FAIL:  {final_error_msg}")
         raise RuntimeError(final_error_msg)
     
     async def send_event(self, event_type: str, data: Dict[str, Any]) -> None:

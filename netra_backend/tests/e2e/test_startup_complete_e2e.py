@@ -773,12 +773,12 @@ class TestStartupCompleteE2E(BaseTestCase, E2ETestFixture):
         print(f"\n{'='*60}")
         print(f"E2E Test Business Metrics Summary:")
         print(f"{'='*60}")
-        print(f"✅ Authentication successful: {self.e2e_metrics['authentication_successful']}")
-        print(f"🔧 Services validated: {services_validated}")
-        print(f"📡 WebSocket events tested: {websocket_events}")
-        print(f"🚀 Critical validations completed: {validations_completed}")
-        print(f"⚠️  Error scenarios tested: {errors_handled}")
-        print(f"⏱️  Total E2E duration: {e2e_duration:.3f}s")
+        print(f" PASS:  Authentication successful: {self.e2e_metrics['authentication_successful']}")
+        print(f"[U+1F527] Services validated: {services_validated}")
+        print(f"[U+1F4E1] WebSocket events tested: {websocket_events}")
+        print(f"[U+1F680] Critical validations completed: {validations_completed}")
+        print(f" WARNING: [U+FE0F]  Error scenarios tested: {errors_handled}")
+        print(f"[U+23F1][U+FE0F]  Total E2E duration: {e2e_duration:.3f}s")
         
         # Report performance data
         if self.e2e_metrics['performance_data']:
@@ -790,7 +790,7 @@ class TestStartupCompleteE2E(BaseTestCase, E2ETestFixture):
         if self.e2e_metrics['business_critical_validations']:
             print(f"\nBusiness-Critical Validations:")
             for validation in self.e2e_metrics['business_critical_validations']:
-                print(f"  ✅ {validation}")
+                print(f"   PASS:  {validation}")
         
         print(f"{'='*60}")
         

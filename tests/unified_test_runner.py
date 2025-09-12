@@ -23,7 +23,7 @@ NETRA APEX UNIFIED TEST RUNNER
 ==============================
 Modern test runner with advanced categorization, progress tracking, and intelligent execution planning.
 
-📖 COMPLETE TEST EXECUTION GUIDE: See TEST_EXECUTION_GUIDE.md for comprehensive methodology
+[U+1F4D6] COMPLETE TEST EXECUTION GUIDE: See TEST_EXECUTION_GUIDE.md for comprehensive methodology
    on running all tests without fast-fail, separating collection errors from test failures,
    and understanding test infrastructure.
 
@@ -394,6 +394,30 @@ class UnifiedTestRunner:
             # Configure environment
             self._configure_environment(args)
             
+            # PERFORMANCE: Skip service orchestration for fast collection
+            print(f"[DEBUG] fast_collection = {getattr(args, 'fast_collection', None)}")
+            if hasattr(args, 'fast_collection') and args.fast_collection:
+                print("[INFO] Fast collection mode - skipping service orchestration")
+                # Skip Docker and service setup
+                categories_to_run = self._determine_categories_to_run(args)
+                
+                # Use fast-path collection
+                if args.pattern:
+                    results = {}
+                    for category in categories_to_run:
+                        tests = self._fast_path_collect_tests(args.pattern, category)
+                        results[category] = {
+                            "success": True,
+                            "duration": 0.0,
+                            "output": f"Fast collection: {len(tests)} test files found",
+                            "errors": "",
+                            "test_count": len(tests)
+                        }
+                    
+                    print(f"✅ Fast collection completed: {sum(len(r.get('output', '').split()) for r in results.values())} files")
+                    return 0
+
+
             # Check service availability if real services or E2E tests are requested
             categories_to_run = self._determine_categories_to_run(args)
             e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
@@ -750,7 +774,7 @@ class UnifiedTestRunner:
                     # Wait again
                     if not self.docker_manager.wait_for_services(timeout=30):
                         print("\n" + "="*60)
-                        print("❌ DOCKER SERVICES UNHEALTHY")
+                        print(" FAIL:  DOCKER SERVICES UNHEALTHY")
                         print("="*60)
                         print("\nSome services failed health checks. To fix:")
                         print("  1. python scripts/docker.py health       # Check service health")
@@ -761,8 +785,8 @@ class UnifiedTestRunner:
                         
         except Exception as e:
             # SSOT: Use UnifiedDockerManager's recovery mechanisms instead of manual scripts
-            print(f"\n⚠️ Docker initialization encountered an issue: {str(e)}")
-            print("\n🔄 Attempting graceful recovery with exponential backoff...")
+            print(f"\n WARNING: [U+FE0F] Docker initialization encountered an issue: {str(e)}")
+            print("\n CYCLE:  Attempting graceful recovery with exponential backoff...")
             
             # Try recovery with exponential backoff
             recovery_attempts = 3
@@ -789,7 +813,7 @@ class UnifiedTestRunner:
                         # Wait for services with longer timeout
                         print(f"  Waiting up to {30 + attempt * 10}s for services to become healthy...")
                         if self.docker_manager.wait_for_services(timeout=30 + attempt * 10):
-                            print("\n✅ Docker services recovered successfully!")
+                            print("\n PASS:  Docker services recovered successfully!")
                             return  # Recovery successful
                     
                     # If no containers exist, try to start fresh
@@ -812,7 +836,7 @@ class UnifiedTestRunner:
                             
                             # If that fails, try minimal environment as fallback
                             if not success:
-                                print("\n🔄 Attempting minimal test environment (infrastructure only)...")
+                                print("\n CYCLE:  Attempting minimal test environment (infrastructure only)...")
                                 success = self.docker_manager.start_test_environment(
                                     minimal_only=True
                                 )
@@ -822,7 +846,7 @@ class UnifiedTestRunner:
                             )
                         
                         if success:
-                            print("\n✅ Docker services started successfully on retry!")
+                            print("\n PASS:  Docker services started successfully on retry!")
                             return  # Recovery successful
                             
                 except Exception as recovery_err:
@@ -832,11 +856,11 @@ class UnifiedTestRunner:
             
             # All recovery attempts failed
             print("\n" + "="*60)
-            print("❌ DOCKER RECOVERY FAILED")
+            print(" FAIL:  DOCKER RECOVERY FAILED")
             print("="*60)
             
             # Provide diagnostic information
-            print("\n📊 Diagnostic Information:")
+            print("\n CHART:  Diagnostic Information:")
             try:
                 # Check Docker daemon status
                 daemon_check = subprocess.run(
@@ -846,15 +870,15 @@ class UnifiedTestRunner:
                     timeout=5
                 )
                 if daemon_check.returncode != 0:
-                    print("  ❌ Docker daemon is not running or not accessible")
+                    print("   FAIL:  Docker daemon is not running or not accessible")
                     print("     Please ensure Docker Desktop is running")
                 else:
-                    print("  ✅ Docker daemon is running")
+                    print("   PASS:  Docker daemon is running")
                     
                     # Check for port conflicts
                     port_conflicts = self._check_port_conflicts()
                     if port_conflicts:
-                        print(f"  ⚠️ Port conflicts detected: {port_conflicts}")
+                        print(f"   WARNING: [U+FE0F] Port conflicts detected: {port_conflicts}")
                         print("     Another application may be using required ports")
                     
                     # Check Docker resources
@@ -865,13 +889,13 @@ class UnifiedTestRunner:
                         timeout=5
                     )
                     if "100%" in resource_check.stdout:
-                        print("  ⚠️ Docker disk space may be full")
+                        print("   WARNING: [U+FE0F] Docker disk space may be full")
                         print("     Run: docker system prune -a")
                         
             except Exception:
                 pass  # Ignore diagnostic errors
             
-            print("\n🔧 Manual Recovery Options:")
+            print("\n[U+1F527] Manual Recovery Options:")
             print("  1. Restart Docker Desktop")
             print("  2. Clean Docker resources: docker system prune -a")
             print("  3. Check for port conflicts on 5432, 6379, 8000, 8081")
@@ -1440,7 +1464,7 @@ class UnifiedTestRunner:
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
                 # CRITICAL: Enable local config file loading for staging tests
                 env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_e2e_auth')
-                print("[INFO] ✅ E2E bypass key and staging config loading configured successfully")
+                print("[INFO]  PASS:  E2E bypass key and staging config loading configured successfully")
             else:
                 print(f"[WARNING] Could not fetch E2E bypass key from Google Secrets Manager: {result.stderr}")
                 print("[WARNING] E2E tests requiring authentication may fail")
@@ -1521,7 +1545,7 @@ class UnifiedTestRunner:
             sys.exit(1)
         
         except Exception as e:
-            print(f"⚠️  Unexpected error during service availability check: {e}")
+            print(f" WARNING: [U+FE0F]  Unexpected error during service availability check: {e}")
             print("Continuing with tests, but failures may occur if services are unavailable...")
     
     def _docker_required_for_tests(self, args: argparse.Namespace, running_e2e: bool) -> bool:
@@ -1760,7 +1784,7 @@ class UnifiedTestRunner:
                     # Force test failure for 0-second e2e tests
                     result["success"] = False
                     result["errors"] = (result.get("errors", "") + 
-                                      "\n\n🚨 E2E TESTS FAILED: 0-second execution detected. "
+                                      "\n\n ALERT:  E2E TESTS FAILED: 0-second execution detected. "
                                       "All e2e tests returning in 0 seconds are automatic hard failures.").strip()
             
             # Record test results in tracker
@@ -1843,6 +1867,65 @@ class UnifiedTestRunner:
         
         return category_service_mapping.get(category_name, ["backend"])
     
+
+    def _fast_path_collect_tests(self, pattern: str, category: str) -> List[str]:
+        """Fast-path test collection bypassing heavy setup"""
+        
+        # Skip Docker/service setup for simple collection
+        if hasattr(self, '_collection_cache'):
+            cache_key = f"{pattern}:{category}"
+            if cache_key in self._collection_cache:
+                return self._collection_cache[cache_key]
+        
+        # Use simple file discovery instead of full pytest collection
+        test_files = []
+        test_dirs = [
+            self.project_root / "netra_backend" / "tests",
+            self.project_root / "tests"
+        ]
+        
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                # Use glob for fast file discovery
+                pattern_files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                test_files.extend([str(f) for f in pattern_files if f.is_file()])
+        
+        # Cache result
+        if not hasattr(self, '_collection_cache'):
+            self._collection_cache = {}
+        self._collection_cache[f"{pattern}:{category}"] = test_files
+        
+        return test_files
+
+
+
+    def _parallel_collect_tests(self, patterns: List[str]) -> Dict[str, List[str]]:
+        """Collect tests in parallel for multiple patterns"""
+        
+        def collect_single_pattern(pattern: str) -> Tuple[str, List[str]]:
+            """Collect tests for a single pattern"""
+            try:
+                tests = self._fast_path_collect_tests(pattern, "unknown")
+                return pattern, tests
+            except Exception as e:
+                print(f"Warning: Failed to collect tests for pattern {pattern}: {e}")
+                return pattern, []
+        
+        # Use ThreadPoolExecutor for I/O-bound file discovery
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(collect_single_pattern, pattern) for pattern in patterns]
+            results = {}
+            
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    pattern, tests = future.result()
+                    results[pattern] = tests
+                except Exception as e:
+                    print(f"Warning: Parallel collection failed: {e}")
+        
+        return results
+
+
     def _run_service_tests_for_category(self, service: str, category_name: str, args: argparse.Namespace) -> Dict:
         """Run tests for a specific service and category combination."""
         # Special handling for Cypress tests
@@ -2470,13 +2553,13 @@ class UnifiedTestRunner:
         
         if zero_time_tests:
             print(f"\n{'='*60}")
-            print(f"🚨 CRITICAL E2E TEST FAILURE: 0-SECOND EXECUTION DETECTED")
+            print(f" ALERT:  CRITICAL E2E TEST FAILURE: 0-SECOND EXECUTION DETECTED")
             print(f"{'='*60}")
             print(f"Category: {category_name}")
             print(f"Total tests with 0-second execution: {len(zero_time_tests)}")
             print(f"\nTests that returned in 0 seconds (AUTOMATIC HARD FAIL):")
             for test_name, exec_time in zero_time_tests[:10]:  # Show first 10
-                print(f"  ❌ {test_name}: {exec_time}")
+                print(f"   FAIL:  {test_name}: {exec_time}")
             if len(zero_time_tests) > 10:
                 print(f"  ... and {len(zero_time_tests) - 10} more")
             print(f"\nThis indicates tests are:")
@@ -2490,7 +2573,7 @@ class UnifiedTestRunner:
             
         # Also check if the entire category ran in under 1 second (suspicious for e2e)
         if duration < 1.0 and result.get("success", False):
-            print(f"\n⚠️  WARNING: E2E category '{category_name}' completed in {duration:.2f}s")
+            print(f"\n WARNING: [U+FE0F]  WARNING: E2E category '{category_name}' completed in {duration:.2f}s")
             print(f"   This is suspiciously fast for e2e tests that should connect to real services.")
             print(f"   Verify tests are actually executing and not being skipped.\n")
             
@@ -2581,7 +2664,7 @@ class UnifiedTestRunner:
             print(text)
         except UnicodeEncodeError:
             # Replace Unicode symbols with ASCII equivalents for Windows console compatibility
-            ascii_text = text.replace("✅", "[PASS]").replace("❌", "[FAIL]").replace("⏭️", "[SKIP]")
+            ascii_text = text.replace(" PASS: ", "[PASS]").replace(" FAIL: ", "[FAIL]").replace("[U+23ED][U+FE0F]", "[SKIP]")
             print(ascii_text)
 
     def _generate_report(self, results: Dict, args: argparse.Namespace):
@@ -2623,12 +2706,12 @@ class UnifiedTestRunner:
         
         print(f"\1Category Results:")
         for category_name, result in results.items():
-            status = "✅ PASSED" if result["success"] else "❌ FAILED"
+            status = " PASS:  PASSED" if result["success"] else " FAIL:  FAILED"
             if result.get("skipped"):
-                status = "⏭️ SKIPPED"
+                status = "[U+23ED][U+FE0F] SKIPPED"
             self._safe_print_unicode(f"  {category_name:15} {status:15} ({result['duration']:.2f}s)")
         
-        overall_status = "✅ PASSED" if report_data['overall_success'] else "❌ FAILED"
+        overall_status = " PASS:  PASSED" if report_data['overall_success'] else " FAIL:  FAILED"
         self._safe_print_unicode(f"\nOverall: {overall_status}")
         print(f"Report: {json_report}")
 
@@ -2644,7 +2727,7 @@ async def execute_orchestration_mode(args) -> int:
         Exit code (0 for success, non-zero for failure)
     """
     if not orchestration_config.master_orchestration_available:
-        print("❌ Master Orchestration system not available. Please check imports.")
+        print(" FAIL:  Master Orchestration system not available. Please check imports.")
         print("Falling back to legacy mode...")
         return 1
     
@@ -2675,7 +2758,7 @@ async def execute_orchestration_mode(args) -> int:
     try:
         # Create controller based on execution mode
         if args.execution_mode == "fast_feedback" or (args.layers and "fast_feedback" in args.layers and len(args.layers) == 1):
-            print("🚀 Starting Fast Feedback execution (2-minute cycle)")
+            print("[U+1F680] Starting Fast Feedback execution (2-minute cycle)")
             controller = create_fast_feedback_controller(
                 project_root=project_root,
                 thread_id=args.websocket_thread_id
@@ -2683,7 +2766,7 @@ async def execute_orchestration_mode(args) -> int:
             layers = ["fast_feedback"]
             
         elif args.execution_mode == "background" or args.background_e2e:
-            print("🔄 Starting Background E2E execution")
+            print(" CYCLE:  Starting Background E2E execution")
             controller = create_background_only_controller(
                 project_root=project_root,
                 thread_id=args.websocket_thread_id
@@ -2691,7 +2774,7 @@ async def execute_orchestration_mode(args) -> int:
             layers = ["e2e_background"]
             
         elif args.execution_mode == "hybrid":
-            print("⚡ Starting Hybrid execution (foreground + background)")
+            print(" LIGHTNING:  Starting Hybrid execution (foreground + background)")
             controller = create_hybrid_controller(
                 project_root=project_root,
                 thread_id=args.websocket_thread_id
@@ -2699,7 +2782,7 @@ async def execute_orchestration_mode(args) -> int:
             layers = args.layers or ["fast_feedback", "core_integration", "service_integration", "e2e_background"]
             
         elif args.execution_mode == "nightly" or not args.execution_mode:
-            print("🌙 Starting Full Layered execution")
+            print("[U+1F319] Starting Full Layered execution")
             controller = create_full_layered_controller(
                 project_root=project_root,
                 thread_id=args.websocket_thread_id,
@@ -2710,7 +2793,7 @@ async def execute_orchestration_mode(args) -> int:
                 layers.append("e2e_background")
         
         else:
-            print(f"❌ Invalid execution mode: {args.execution_mode}")
+            print(f" FAIL:  Invalid execution mode: {args.execution_mode}")
             return 1
         
         # Configure progress output mode
@@ -2722,11 +2805,11 @@ async def execute_orchestration_mode(args) -> int:
             elif args.progress_mode == "websocket":
                 controller.config.output_mode = ProgressOutputMode.WEBSOCKET
         
-        print(f"📋 Executing layers: {', '.join(layers)}")
-        print(f"🌍 Environment: {args.env}")
-        print(f"🤖 Real LLM: {'Yes' if args.real_llm else 'No'}")
-        print(f"⚙️  Real Services: {'Yes' if args.real_services else 'No'}")
-        print(f"📊 Progress Mode: {args.progress_mode}")
+        print(f"[U+1F4CB] Executing layers: {', '.join(layers)}")
+        print(f"[U+1F30D] Environment: {args.env}")
+        print(f"[U+1F916] Real LLM: {'Yes' if args.real_llm else 'No'}")
+        print(f"[U+2699][U+FE0F]  Real Services: {'Yes' if args.real_services else 'No'}")
+        print(f" CHART:  Progress Mode: {args.progress_mode}")
         print("-" * 60)
         
         # Execute orchestration
@@ -2740,7 +2823,7 @@ async def execute_orchestration_mode(args) -> int:
         
         if success:
             print("\n" + "="*60)
-            print("🎉 Orchestrated test execution completed successfully!")
+            print(" CELEBRATION:  Orchestrated test execution completed successfully!")
             print("="*60)
             
             # Show summary if available
@@ -2748,18 +2831,18 @@ async def execute_orchestration_mode(args) -> int:
             if summary:
                 test_counts = summary.get("test_counts", {})
                 if test_counts.get("total", 0) > 0:
-                    print(f"📊 Tests: {test_counts.get('total', 0)} total, "
+                    print(f" CHART:  Tests: {test_counts.get('total', 0)} total, "
                           f"{test_counts.get('passed', 0)} passed, "
                           f"{test_counts.get('failed', 0)} failed")
                 
                 duration = summary.get("total_duration", 0)
                 if duration > 0:
-                    print(f"⏱️  Duration: {duration:.1f} seconds")
+                    print(f"[U+23F1][U+FE0F]  Duration: {duration:.1f} seconds")
             
             return 0
         else:
             print("\n" + "="*60)
-            print("❌ Orchestrated test execution failed")
+            print(" FAIL:  Orchestrated test execution failed")
             print("="*60)
             error = results.get("error")
             if error:
@@ -2767,7 +2850,7 @@ async def execute_orchestration_mode(args) -> int:
             return 1
             
     except Exception as e:
-        print(f"❌ Orchestration execution failed: {e}")
+        print(f" FAIL:  Orchestration execution failed: {e}")
         if args.debug:
             import traceback
             traceback.print_exc()
@@ -3017,6 +3100,24 @@ def main():
         "-q",
         action="store_true",
         help="Minimal output"
+    )
+    
+    # Performance optimization arguments
+    parser.add_argument(
+        "--fast-collection",
+        action="store_true",
+        help="Enable fast test collection mode (skip service setup)"
+    )
+    parser.add_argument(
+        "--parallel-collection", 
+        action="store_true",
+        help="Use parallel test discovery"
+    )
+    parser.add_argument(
+        "--collection-timeout",
+        type=int,
+        default=30,
+        help="Timeout for test collection in seconds (default: 30)"
     )
     
     parser.add_argument(
@@ -3279,9 +3380,9 @@ def main():
     if hasattr(args, 'docker_pull_policy'):
         os.environ['DOCKER_PULL_POLICY'] = args.docker_pull_policy
         if args.docker_pull_policy == 'never':
-            print("ℹ️ Docker pull policy set to 'never' - will only use locally cached images")
+            print("[U+2139][U+FE0F] Docker pull policy set to 'never' - will only use locally cached images")
         elif args.docker_pull_policy == 'always':
-            print("⚠️ Docker pull policy set to 'always' - may hit Docker Hub rate limits")
+            print(" WARNING: [U+FE0F] Docker pull policy set to 'always' - may hit Docker Hub rate limits")
     
     # Handle special operations
     if args.list_categories:
@@ -3336,6 +3437,35 @@ def main():
         
         return 0
     
+    # PERFORMANCE: Handle fast collection mode early (skip validation)
+    if hasattr(args, 'fast_collection') and args.fast_collection:
+        print("[INFO] Fast collection mode - running streamlined test discovery")
+        
+        # Create a simple runner for fast collection
+        from pathlib import Path
+        
+        # Determine test pattern 
+        pattern = getattr(args, 'pattern', '*')
+        if not pattern:
+            pattern = '*'
+        
+        # Fast test discovery
+        test_dirs = [
+            PROJECT_ROOT / "netra_backend" / "tests",
+            PROJECT_ROOT / "tests"
+        ]
+        
+        total_files = 0
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                valid_files = [f for f in files if f.is_file() and 'test' in f.name]
+                total_files += len(valid_files)
+                print(f"Found {len(valid_files)} test files in {test_dir.name}")
+        
+        print(f"✅ Fast collection completed: {total_files} test files discovered")
+        return 0
+    
     # Run validation by default unless --no-validate is specified
     if not getattr(args, 'no_validate', False):
         validator = TestValidation()
@@ -3348,9 +3478,9 @@ def main():
         syntax_result = validator.validate_syntax(quick_mode=not full_mode)
         if syntax_result["success"]:
             mode_info = f" ({syntax_result.get('quick_mode', 'unknown')} mode)" if 'quick_mode' in syntax_result else ""
-            print(f"✅ Syntax validation passed: {syntax_result['files_checked']} files checked{mode_info}")
+            print(f" PASS:  Syntax validation passed: {syntax_result['files_checked']} files checked{mode_info}")
         else:
-            print(f"❌ Syntax validation failed: {len(syntax_result['syntax_errors'])} errors found")
+            print(f" FAIL:  Syntax validation failed: {len(syntax_result['syntax_errors'])} errors found")
             for error in syntax_result['syntax_errors']:
                 print(f"  - {error['file']}: {error['error']}")
             return 1
@@ -3359,7 +3489,7 @@ def main():
         print("\n=== TEST STRUCTURE VALIDATION ===")
         print("Test structure validation not fully implemented yet.")
         
-        print("\n✅ All validations passed!")
+        print("\n PASS:  All validations passed!")
         
         # If user ran ONLY validation (no other test arguments), exit here
         # Check if user provided any actual test execution arguments
@@ -3379,7 +3509,7 @@ def main():
         
         print("\n=== PROCEEDING TO TEST EXECUTION ===")
     else:
-        print("⚠️  Skipping validation (--no-validate specified)")
+        print(" WARNING: [U+FE0F]  Skipping validation (--no-validate specified)")
     
     # NEW: Handle Master Orchestration Controller execution first
     if orchestration_config.master_orchestration_available and (

@@ -236,10 +236,10 @@ class TestWebSocketPerformanceRegression(SSotBaseTestCase):
             
             # CRITICAL: Alert if chunked sleep adds significant delay
             if impact > 0.2:  # More than 200ms added delay
-                print(f"⚠️  WARNING: Chunked sleep adds {impact:.3f}s ({impact_percent:.1f}%) delay for {duration}s sleep")
+                print(f" WARNING: [U+FE0F]  WARNING: Chunked sleep adds {impact:.3f}s ({impact_percent:.1f}%) delay for {duration}s sleep")
             
             if impact_percent > 10:  # More than 10% performance impact
-                print(f"🚨 CRITICAL: Chunked sleep has {impact_percent:.1f}% performance impact - likely cause of user-reported slowness")
+                print(f" ALERT:  CRITICAL: Chunked sleep has {impact_percent:.1f}% performance impact - likely cause of user-reported slowness")
         
         self.performance_data['chunked_vs_direct'] = results
         
@@ -292,29 +292,29 @@ class TestWebSocketPerformanceRegression(SSotBaseTestCase):
         print("="*60)
         
         if 'sleep_overhead' in self.performance_data:
-            print("\n🔍 WINDOWS-SAFE SLEEP OVERHEAD:")
+            print("\n SEARCH:  WINDOWS-SAFE SLEEP OVERHEAD:")
             for duration, data in self.performance_data['sleep_overhead'].items():
                 print(f"  {duration}s sleep: +{data['overhead']:.3f}s ({data['overhead_percent']:.1f}% overhead)")
         
         if 'chunked_vs_direct' in self.performance_data:
-            print("\n🚨 CHUNKED VS DIRECT SLEEP COMPARISON:")
+            print("\n ALERT:  CHUNKED VS DIRECT SLEEP COMPARISON:")
             for duration, data in self.performance_data['chunked_vs_direct'].items():
                 print(f"  {duration}s sleep: +{data['impact']:.3f}s ({data['impact_percent']:.1f}% slower)")
         
         if 'connection_timing' in self.performance_data:
-            print("\n⚡ CONNECTION TIMING:")
+            print("\n LIGHTNING:  CONNECTION TIMING:")
             data = self.performance_data['connection_timing']
             print(f"  Manager creation: {data['creation']:.3f}s")
             print(f"  Connection time: {data['connection']:.3f}s")
         
         if 'message_round_trip' in self.performance_data:
-            print("\n💬 MESSAGE ROUND-TRIP:")
+            print("\n[U+1F4AC] MESSAGE ROUND-TRIP:")
             data = self.performance_data['message_round_trip']
             print(f"  Average: {data['average']:.3f}s")
             print(f"  Maximum: {data['max']:.3f}s")
         
         if 'environment_detection' in self.performance_data:
-            print("\n🌩️ ENVIRONMENT DETECTION:")
+            print("\n[U+1F329][U+FE0F] ENVIRONMENT DETECTION:")
             data = self.performance_data['environment_detection']
             print(f"  Average: {data['average']:.4f}s")
             print(f"  Maximum: {data['max']:.4f}s")

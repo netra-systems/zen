@@ -13,7 +13,7 @@ CRITICAL: This test validates REAL service interactions:
 - Real WebSocket connections with event delivery
 - NO MOCKS - Integration testing with actual services
 
-Tests core Golden Path: User connects → Sends message → Database stores → Redis caches → WebSocket delivers
+Tests core Golden Path: User connects  ->  Sends message  ->  Database stores  ->  Redis caches  ->  WebSocket delivers
 """
 
 import asyncio
@@ -265,7 +265,7 @@ class TestWebSocketDatabaseRedisIntegration(WebSocketIntegrationTest, DatabaseIn
     async def test_websocket_message_database_persistence(self, real_services_fixture):
         """
         BVJ: Enterprise/Platform - Chat Message Persistence
-        Tests complete WebSocket → Database → Redis → Response flow with real services.
+        Tests complete WebSocket  ->  Database  ->  Redis  ->  Response flow with real services.
         """
         # Skip if database not available
         if not real_services_fixture.get("database_available"):
@@ -299,7 +299,7 @@ class TestWebSocketDatabaseRedisIntegration(WebSocketIntegrationTest, DatabaseIn
             self.logger.warning(f"Could not create thread in database: {e}")
             # Continue test - focus on WebSocket + cache coordination
         
-        # Test message flow: WebSocket → Database → Cache
+        # Test message flow: WebSocket  ->  Database  ->  Cache
         test_message = {
             "type": "user_message",
             "content": "Integration test message with real services",

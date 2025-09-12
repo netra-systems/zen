@@ -83,8 +83,8 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
         assert websocket_param.default is None or websocket_param.default == inspect.Parameter.empty, \
             "websocket_client_id parameter should be optional with None default"
         
-        print("✅ UserExecutionContext signature validation passed")
-        print(f"✅ Has websocket_client_id parameter: {websocket_param}")
+        print(" PASS:  UserExecutionContext signature validation passed")
+        print(f" PASS:  Has websocket_client_id parameter: {websocket_param}")
     
     def test_websocket_factory_source_code_parameter_usage(self):
         """
@@ -133,8 +133,8 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
             assert 'websocket_client_id=' in constructor_code, \
                 f"REGRESSION: Missing 'websocket_client_id' parameter in UserExecutionContext creation:\n{constructor_code}"
         
-        print("✅ WebSocket factory source code validation passed")
-        print("✅ Uses websocket_client_id parameter in UserExecutionContext creation")
+        print(" PASS:  WebSocket factory source code validation passed")
+        print(" PASS:  Uses websocket_client_id parameter in UserExecutionContext creation")
     
     @pytest.mark.asyncio
     async def test_websocket_supervisor_creation_parameter_flow(
@@ -190,8 +190,8 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
             if websocket and not websocket.closed:
                 await websocket.close()
         
-        print("✅ WebSocket supervisor parameter flow validation passed")
-        print(f"✅ Correct websocket_client_id parameter passed: {captured_parameters.get('websocket_client_id')}")
+        print(" PASS:  WebSocket supervisor parameter flow validation passed")
+        print(f" PASS:  Correct websocket_client_id parameter passed: {captured_parameters.get('websocket_client_id')}")
     
     def test_deprecated_parameter_rejection(self):
         """
@@ -209,8 +209,8 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
                 db_session=None  # Not needed for this parameter validation test
             )
         
-        print("✅ Deprecated parameter rejection validation passed")
-        print("✅ UserExecutionContext properly rejects websocket_connection_id")
+        print(" PASS:  Deprecated parameter rejection validation passed")
+        print(" PASS:  UserExecutionContext properly rejects websocket_connection_id")
     
     def test_correct_parameter_acceptance(self):
         """
@@ -229,21 +229,21 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
             )
             
             # If we get here, parameter was accepted
-            print("✅ Correct parameter acceptance validation passed")
-            print("✅ UserExecutionContext properly accepts websocket_client_id")
+            print(" PASS:  Correct parameter acceptance validation passed")
+            print(" PASS:  UserExecutionContext properly accepts websocket_client_id")
             
         except TypeError as e:
             if "websocket_client_id" in str(e):
                 pytest.fail(f"REGRESSION: UserExecutionContext no longer accepts websocket_client_id: {e}")
             else:
                 # Other TypeErrors are expected (due to None db_session, etc.)
-                print("✅ Correct parameter acceptance validation passed (parameter accepted, other validation failed as expected)")
+                print(" PASS:  Correct parameter acceptance validation passed (parameter accepted, other validation failed as expected)")
         except Exception as e:
             # Other exceptions are fine - we just need to validate the parameter is accepted
             if "websocket_client_id" in str(e) and "unexpected keyword" in str(e):
                 pytest.fail(f"REGRESSION: UserExecutionContext rejects websocket_client_id: {e}")
             else:
-                print("✅ Correct parameter acceptance validation passed (parameter accepted)")
+                print(" PASS:  Correct parameter acceptance validation passed (parameter accepted)")
     
     @pytest.mark.asyncio
     async def test_error_message_improvement_validation(
@@ -295,8 +295,8 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
             if websocket and not websocket.closed:
                 await websocket.close()
         
-        print("✅ Error message improvement validation passed")
-        print("✅ No cryptic 'name' error messages detected")
+        print(" PASS:  Error message improvement validation passed")
+        print(" PASS:  No cryptic 'name' error messages detected")
     
     @pytest.mark.asyncio
     async def test_factory_consistency_across_implementations(
@@ -363,9 +363,9 @@ class TestSpecificWebSocketParameterRegression(SSotBaseTestCase):
                     assert 'websocket_connection_id' not in parameters, \
                         f"REGRESSION: Factory {i} uses deprecated websocket_connection_id: {list(parameters.keys())}"
         
-        print("✅ Factory consistency validation passed")
-        print(f"✅ Checked {len(all_captured_parameters)} UserExecutionContext creations")
-        print("✅ All factories use standardized websocket_client_id parameter")
+        print(" PASS:  Factory consistency validation passed")
+        print(f" PASS:  Checked {len(all_captured_parameters)} UserExecutionContext creations")
+        print(" PASS:  All factories use standardized websocket_client_id parameter")
 
 
 class TestWebSocketSupervisorSpecificErrorScenarios(SSotBaseTestCase):
@@ -435,8 +435,8 @@ class TestWebSocketSupervisorSpecificErrorScenarios(SSotBaseTestCase):
             if websocket and not websocket.closed:
                 await websocket.close()
         
-        print("✅ Original failure scenario recreation passed")
-        print(f"✅ User {user_id} supervisor creation successful")
+        print(" PASS:  Original failure scenario recreation passed")
+        print(f" PASS:  User {user_id} supervisor creation successful")
     
     @pytest.mark.asyncio
     async def test_line_96_parameter_passing_validation(
@@ -505,8 +505,8 @@ class TestWebSocketSupervisorSpecificErrorScenarios(SSotBaseTestCase):
             if websocket and not websocket.closed:
                 await websocket.close()
         
-        print("✅ Line 96 parameter passing validation passed")
-        print(f"✅ UserExecutionContext created with correct websocket_client_id parameter")
+        print(" PASS:  Line 96 parameter passing validation passed")
+        print(f" PASS:  UserExecutionContext created with correct websocket_client_id parameter")
     
     @pytest.mark.asyncio
     async def test_websocket_context_connection_id_mapping(
@@ -560,8 +560,8 @@ class TestWebSocketSupervisorSpecificErrorScenarios(SSotBaseTestCase):
             if websocket and not websocket.closed:
                 await websocket.close()
         
-        print("✅ WebSocket context connection ID mapping validation passed")
-        print(f"✅ context.connection_id correctly maps to websocket_client_id parameter")
+        print(" PASS:  WebSocket context connection ID mapping validation passed")
+        print(f" PASS:  context.connection_id correctly maps to websocket_client_id parameter")
 
 
 if __name__ == "__main__":

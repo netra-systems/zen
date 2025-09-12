@@ -27,7 +27,7 @@ def find_import_issues():
     
     for file_path in test_files:
         if not os.path.exists(file_path):
-            issues.append(f"❌ File not found: {file_path}")
+            issues.append(f" FAIL:  File not found: {file_path}")
             continue
             
         with open(file_path, 'r') as f:
@@ -37,7 +37,7 @@ def find_import_issues():
         for line_num, line in enumerate(lines, 1):
             for bad_pattern, suggestion in bad_patterns:
                 if re.search(bad_pattern, line):
-                    issues.append(f"❌ {file_path}:{line_num} - {line.strip()}")
+                    issues.append(f" FAIL:  {file_path}:{line_num} - {line.strip()}")
                     issues.append(f"   Suggested fix: {suggestion}")
     
     # Check for missing langchain dependencies
@@ -46,9 +46,9 @@ def find_import_issues():
             with open(file_path, 'r') as f:
                 content = f.read()
                 if 'from langchain_core' in content:
-                    issues.append(f"⚠️  {file_path} requires langchain_core (missing dependency)")
+                    issues.append(f" WARNING: [U+FE0F]  {file_path} requires langchain_core (missing dependency)")
                 if 'import pytest' in content:
-                    issues.append(f"⚠️  {file_path} requires pytest (missing dependency)")
+                    issues.append(f" WARNING: [U+FE0F]  {file_path} requires pytest (missing dependency)")
     
     return issues
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     issues = find_import_issues()
     
     if not issues:
-        print("✅ No import issues found!")
+        print(" PASS:  No import issues found!")
     else:
         print("Found import issues:")
         for issue in issues:

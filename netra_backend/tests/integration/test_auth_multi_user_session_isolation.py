@@ -466,7 +466,7 @@ class TestMultiUserSessionIsolationIntegration(BaseIntegrationTest):
             )
         
         # Act: Simulate session cleanup by waiting for short-lived tokens to expire
-        print("⏳ Waiting for short-lived sessions to expire...")
+        print("[U+23F3] Waiting for short-lived sessions to expire...")
         await asyncio.sleep(70)  # Wait for short tokens to expire
         
         # Verify isolation integrity after cleanup
@@ -529,7 +529,7 @@ class TestMultiUserSessionIsolationIntegration(BaseIntegrationTest):
             
             # Short-lived sessions may be invalid (expected)
             if lifespan == "short" and not actually_valid:
-                print(f"✓ Short-lived session for {user_id} properly expired during cleanup")
+                print(f"[U+2713] Short-lived session for {user_id} properly expired during cleanup")
         
         # Verify no cross-contamination occurred during cleanup
         final_isolation_verification = []

@@ -889,18 +889,18 @@ class WebSocketMonitoringOrchestrator:
         recommendations = []
         
         if not patterns:
-            recommendations.append("✓ No failure patterns detected - system operating normally")
+            recommendations.append("[U+2713] No failure patterns detected - system operating normally")
             return recommendations
         
         critical_patterns = [p for p in patterns if p.severity == "CRITICAL"]
         if critical_patterns:
-            recommendations.append("🚨 CRITICAL ISSUES REQUIRE IMMEDIATE ATTENTION:")
+            recommendations.append(" ALERT:  CRITICAL ISSUES REQUIRE IMMEDIATE ATTENTION:")
             for pattern in critical_patterns[:3]:  # Top 3 critical issues
                 recommendations.append(f"  - {pattern.description}: {pattern.recommended_action}")
         
         error_patterns = [p for p in patterns if p.severity == "ERROR"]
         if error_patterns:
-            recommendations.append("⚠️ Error patterns requiring investigation:")
+            recommendations.append(" WARNING: [U+FE0F] Error patterns requiring investigation:")
             for pattern in error_patterns[:3]:
                 recommendations.append(f"  - {pattern.description}: {pattern.recommended_action}")
         
@@ -908,16 +908,16 @@ class WebSocketMonitoringOrchestrator:
         pattern_types = {p.pattern_type for p in patterns}
         
         if any("HIGH_LATENCY" in pt for pt in pattern_types):
-            recommendations.append("💡 Performance optimization recommended: Review system resources and optimize slow operations")
+            recommendations.append(" IDEA:  Performance optimization recommended: Review system resources and optimize slow operations")
         
         if any("VALIDATION_FAILURE" in pt for pt in pattern_types):
-            recommendations.append("🔧 Data validation issues: Review event schemas and validation logic")
+            recommendations.append("[U+1F527] Data validation issues: Review event schemas and validation logic")
         
         if any("USER_ISOLATION" in pt for pt in pattern_types):
-            recommendations.append("🛡️ Security concern: Urgent review of user context isolation implementation")
+            recommendations.append("[U+1F6E1][U+FE0F] Security concern: Urgent review of user context isolation implementation")
         
         if any("INCOMPLETE" in pt for pt in pattern_types):
-            recommendations.append("🔄 Event sequence issues: Investigate agent execution pipeline reliability")
+            recommendations.append(" CYCLE:  Event sequence issues: Investigate agent execution pipeline reliability")
         
         return recommendations
     
@@ -930,21 +930,21 @@ class WebSocketMonitoringOrchestrator:
         logger.info("WEBSOCKET MONITORING SESSION - KEY FINDINGS")
         logger.info("=" * 60)
         
-        logger.info(f"📊 EVENT METRICS:")
+        logger.info(f" CHART:  EVENT METRICS:")
         logger.info(f"  Total Events: {session_summary.get('total_events', 0)}")
         logger.info(f"  Success Rate: {session_summary.get('success_rate_percent', 0):.1f}%")
         logger.info(f"  Avg Latency: {session_summary.get('recent_performance', {}).get('avg_latency_ms', 0):.1f}ms")
         logger.info(f"  Active Users: {session_summary.get('active_users', 0)}")
         logger.info(f"  Active Threads: {session_summary.get('active_threads', 0)}")
         
-        logger.info(f"\n🔍 FAILURE ANALYSIS:")
+        logger.info(f"\n SEARCH:  FAILURE ANALYSIS:")
         logger.info(f"  Patterns Detected: {failure_analysis.get('patterns_detected', 0)}")
         logger.info(f"  Critical Issues: {len(failure_analysis.get('critical_issues', []))}")
         
         if failure_analysis.get('critical_issues'):
-            logger.info(f"  🚨 TOP CRITICAL ISSUE: {failure_analysis['critical_issues'][0].get('description', 'N/A')}")
+            logger.info(f"   ALERT:  TOP CRITICAL ISSUE: {failure_analysis['critical_issues'][0].get('description', 'N/A')}")
         
-        logger.info(f"\n💡 RECOMMENDATIONS:")
+        logger.info(f"\n IDEA:  RECOMMENDATIONS:")
         for rec in summary_report.get("recommendations", [])[:5]:
             logger.info(f"  {rec}")
         

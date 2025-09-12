@@ -27,8 +27,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 WEBSOCKET SERVICE CONNECTION VALIDATION FLOW:
 ```
-Service Health Check → Authentication Setup → Connection Attempt →
-Service Unavailable Detection → Hard Failure with Clear Diagnosis → Test Failure
+Service Health Check  ->  Authentication Setup  ->  Connection Attempt  -> 
+Service Unavailable Detection  ->  Hard Failure with Clear Diagnosis  ->  Test Failure
 ```
 """
 
@@ -188,10 +188,10 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
         if connection_success:
             # Service is available - this is unexpected for this test
             self.record_metric("websocket_service_available", True)
-            print(f"ℹ️ WebSocket service is available at {self._websocket_url}")
-            print(f"   📡 Connection successful in {service_response_time:.3f}s")
-            print(f"   👤 Authenticated as user: {user_id}")
-            print(f"   🔗 This test expects service unavailability for failure detection validation")
+            print(f"[U+2139][U+FE0F] WebSocket service is available at {self._websocket_url}")
+            print(f"   [U+1F4E1] Connection successful in {service_response_time:.3f}s")
+            print(f"   [U+1F464] Authenticated as user: {user_id}")
+            print(f"   [U+1F517] This test expects service unavailability for failure detection validation")
             
             # For this test, we want to validate failure detection
             # If service is available, we can still test timeout scenarios
@@ -203,24 +203,24 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
             
             # CRITICAL: Hard failure with clear business impact explanation
             business_impact_message = (
-                f"🚨 WEBSOCKET SERVICE CONNECTIVITY FAILURE DETECTED:\n"
-                f"   🔴 Service URL: {self._websocket_url}\n"
-                f"   🔴 Connection Error: {connection_error}\n"
-                f"   🔴 Response Time: {service_response_time:.3f}s\n"
-                f"   🔴 User Authentication: Valid (JWT present)\n"
-                f"   🔴 User ID: {user_id}\n"
+                f" ALERT:  WEBSOCKET SERVICE CONNECTIVITY FAILURE DETECTED:\n"
+                f"   [U+1F534] Service URL: {self._websocket_url}\n"
+                f"   [U+1F534] Connection Error: {connection_error}\n"
+                f"   [U+1F534] Response Time: {service_response_time:.3f}s\n"
+                f"   [U+1F534] User Authentication: Valid (JWT present)\n"
+                f"   [U+1F534] User ID: {user_id}\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • Real-time AI chat features unavailable\n"
-                f"   • WebSocket-based agent events blocked\n"
-                f"   • Live agent execution updates not delivered\n"
-                f"   • User experience degraded for interactive AI features\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Real-time AI chat features unavailable\n"
+                f"   [U+2022] WebSocket-based agent events blocked\n"
+                f"   [U+2022] Live agent execution updates not delivered\n"
+                f"   [U+2022] User experience degraded for interactive AI features\n"
                 f"\n"
-                f"   🔧 RESOLUTION REQUIRED:\n"
-                f"   • Check WebSocket service health at {self._websocket_url}\n"
-                f"   • Verify backend service is running and accessible\n"
-                f"   • Validate service configuration and network connectivity\n"
-                f"   • Ensure load balancer and proxy settings are correct\n"
+                f"   [U+1F527] RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Check WebSocket service health at {self._websocket_url}\n"
+                f"   [U+2022] Verify backend service is running and accessible\n"
+                f"   [U+2022] Validate service configuration and network connectivity\n"
+                f"   [U+2022] Ensure load balancer and proxy settings are correct\n"
             )
             
             # Print detailed diagnosis for immediate visibility
@@ -284,7 +284,7 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
         assert interruption_detected, "Connection interruption should be detected"
         self.record_metric("connection_interruption_detected", True)
         
-        print(f"✅ Service timeout scenarios validated for user: {user_id}")
+        print(f" PASS:  Service timeout scenarios validated for user: {user_id}")
 
     @pytest.mark.timeout(25)
     @pytest.mark.asyncio
@@ -376,10 +376,10 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
         # Record port connectivity test success
         self.record_metric("port_connectivity_tests_completed", True)
         
-        print(f"\n✅ WEBSOCKET PORT CONNECTIVITY VALIDATION:")
-        print(f"   🚫 Wrong ports: FAILED as expected ({len(wrong_port_urls)} tested)")
-        print(f"   🚫 Invalid hostnames: FAILED as expected ({len(invalid_host_urls)} tested)")
-        print(f"   🔍 Port-level connectivity issues: PROPERLY DETECTED")
+        print(f"\n PASS:  WEBSOCKET PORT CONNECTIVITY VALIDATION:")
+        print(f"   [U+1F6AB] Wrong ports: FAILED as expected ({len(wrong_port_urls)} tested)")
+        print(f"   [U+1F6AB] Invalid hostnames: FAILED as expected ({len(invalid_host_urls)} tested)")
+        print(f"    SEARCH:  Port-level connectivity issues: PROPERLY DETECTED")
 
     @pytest.mark.timeout(20)
     @pytest.mark.asyncio
@@ -454,17 +454,17 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
             # Should fail due to invalid path
             if path_failed:
                 self.record_metric(f"invalid_path_error", path_error)
-                print(f"✅ Invalid path properly rejected: {invalid_path_url}")
+                print(f" PASS:  Invalid path properly rejected: {invalid_path_url}")
             else:
-                print(f"ℹ️ Path accepted (may be valid route): {invalid_path_url}")
+                print(f"[U+2139][U+FE0F] Path accepted (may be valid route): {invalid_path_url}")
         
         # Record protocol error test success
         self.record_metric("protocol_error_tests_completed", True)
         
-        print(f"\n✅ WEBSOCKET PROTOCOL ERROR VALIDATION:")
-        print(f"   🚫 HTTP protocol mismatch: PROPERLY REJECTED")
-        print(f"   🔍 Invalid paths tested: {len(invalid_paths)}")
-        print(f"   🛡️ Protocol-level errors: PROPERLY DETECTED")
+        print(f"\n PASS:  WEBSOCKET PROTOCOL ERROR VALIDATION:")
+        print(f"   [U+1F6AB] HTTP protocol mismatch: PROPERLY REJECTED")
+        print(f"    SEARCH:  Invalid paths tested: {len(invalid_paths)}")
+        print(f"   [U+1F6E1][U+FE0F] Protocol-level errors: PROPERLY DETECTED")
 
     @pytest.mark.timeout(30)
     @pytest.mark.asyncio
@@ -554,30 +554,30 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
         if basic_health_passed and auth_health_passed:
             # Service is healthy
             self.record_metric("websocket_service_health_status", "healthy")
-            print(f"\n✅ WEBSOCKET SERVICE HEALTH: HEALTHY")
-            print(f"   📡 Basic connectivity: {health_response_time:.3f}s")
-            print(f"   🔐 Authenticated connectivity: {auth_response_time:.3f}s")
-            print(f"   🟢 Service is operational and ready for WebSocket connections")
+            print(f"\n PASS:  WEBSOCKET SERVICE HEALTH: HEALTHY")
+            print(f"   [U+1F4E1] Basic connectivity: {health_response_time:.3f}s")
+            print(f"   [U+1F510] Authenticated connectivity: {auth_response_time:.3f}s")
+            print(f"   [U+1F7E2] Service is operational and ready for WebSocket connections")
             
         elif basic_health_passed and not auth_health_passed:
             # Service connectivity OK but authentication issues
             self.record_metric("websocket_service_health_status", "auth_issues")
             
             auth_issue_message = (
-                f"🚨 WEBSOCKET SERVICE HEALTH: AUTHENTICATION ISSUES\n"
-                f"   🟢 Basic connectivity: {health_response_time:.3f}s (OK)\n"
-                f"   🔴 Authenticated connectivity: FAILED\n"
-                f"   🔴 Auth response time: {auth_response_time:.3f}s\n"
+                f" ALERT:  WEBSOCKET SERVICE HEALTH: AUTHENTICATION ISSUES\n"
+                f"   [U+1F7E2] Basic connectivity: {health_response_time:.3f}s (OK)\n"
+                f"   [U+1F534] Authenticated connectivity: FAILED\n"
+                f"   [U+1F534] Auth response time: {auth_response_time:.3f}s\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • WebSocket service is running but authentication is broken\n"
-                f"   • Users cannot establish authenticated WebSocket connections\n"
-                f"   • Real-time AI features will not work\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] WebSocket service is running but authentication is broken\n"
+                f"   [U+2022] Users cannot establish authenticated WebSocket connections\n"
+                f"   [U+2022] Real-time AI features will not work\n"
                 f"\n"
-                f"   🔧 RESOLUTION REQUIRED:\n"
-                f"   • Check JWT authentication configuration\n"
-                f"   • Verify authentication service connectivity\n"
-                f"   • Validate WebSocket authentication middleware\n"
+                f"   [U+1F527] RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Check JWT authentication configuration\n"
+                f"   [U+2022] Verify authentication service connectivity\n"
+                f"   [U+2022] Validate WebSocket authentication middleware\n"
             )
             
             print(auth_issue_message)
@@ -588,20 +588,20 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
             self.record_metric("websocket_service_health_status", "unavailable")
             
             unavailable_message = (
-                f"🚨 WEBSOCKET SERVICE HEALTH: UNAVAILABLE\n"
-                f"   🔴 Basic connectivity: FAILED\n"
-                f"   🔴 Authenticated connectivity: FAILED\n"
-                f"   🔴 Service URL: {self._websocket_url}\n"
+                f" ALERT:  WEBSOCKET SERVICE HEALTH: UNAVAILABLE\n"
+                f"   [U+1F534] Basic connectivity: FAILED\n"
+                f"   [U+1F534] Authenticated connectivity: FAILED\n"
+                f"   [U+1F534] Service URL: {self._websocket_url}\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • WebSocket service is completely unavailable\n"
-                f"   • No real-time AI chat features available\n"
-                f"   • All WebSocket-dependent functionality broken\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] WebSocket service is completely unavailable\n"
+                f"   [U+2022] No real-time AI chat features available\n"
+                f"   [U+2022] All WebSocket-dependent functionality broken\n"
                 f"\n"
-                f"   🔧 RESOLUTION REQUIRED:\n"
-                f"   • Start WebSocket service\n"
-                f"   • Check service configuration and ports\n"
-                f"   • Verify network connectivity and firewall settings\n"
+                f"   [U+1F527] RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Start WebSocket service\n"
+                f"   [U+2022] Check service configuration and ports\n"
+                f"   [U+2022] Verify network connectivity and firewall settings\n"
             )
             
             print(unavailable_message)
@@ -613,8 +613,8 @@ class TestWebSocketServiceConnectivityE2E(SSotAsyncTestCase):
         if hasattr(self, '_metrics'):
             final_metrics = self.get_all_metrics()
             service_status = final_metrics.get("websocket_service_health_status", "unknown")
-            print(f"\n📊 WEBSOCKET SERVICE CONNECTIVITY TEST SUMMARY:")
-            print(f"   🏥 Final Health Status: {service_status}")
-            print(f"   📊 Total Metrics Recorded: {len(final_metrics)}")
+            print(f"\n CHART:  WEBSOCKET SERVICE CONNECTIVITY TEST SUMMARY:")
+            print(f"   [U+1F3E5] Final Health Status: {service_status}")
+            print(f"    CHART:  Total Metrics Recorded: {len(final_metrics)}")
         
         await super().async_teardown_method(method)

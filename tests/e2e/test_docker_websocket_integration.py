@@ -142,17 +142,17 @@
 
     # REMOVED_SYNTAX_ERROR: Business Value: Ensures test environment matches production for reliable validation.
     # REMOVED_SYNTAX_ERROR: '''
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Setting up Docker-WebSocket integration test environment")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Setting up Docker-WebSocket integration test environment")
 
     # Initialize Docker manager - this is the SSOT for Docker operations
     # REMOVED_SYNTAX_ERROR: docker_manager = get_default_manager()
 
     # Start Docker environment with automatic conflict resolution
-    # REMOVED_SYNTAX_ERROR: logger.info("📦 Starting Docker services with UnifiedDockerManager")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4E6] Starting Docker services with UnifiedDockerManager")
     # REMOVED_SYNTAX_ERROR: env_name, ports = await asyncio.to_thread(docker_manager.acquire_environment)
 
     # Wait for services to be healthy - critical for reliable testing
-    # REMOVED_SYNTAX_ERROR: logger.info("🏥 Waiting for service health validation")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3E5] Waiting for service health validation")
     # REMOVED_SYNTAX_ERROR: await asyncio.to_thread(docker_manager.wait_for_services, timeout=120)
 
     # Check service health to validate all services are operational
@@ -165,7 +165,7 @@
                     # REMOVED_SYNTAX_ERROR: health_report_str = docker_manager.get_health_report()
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ All Docker services are healthy and operational")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  All Docker services are healthy and operational")
 
                     # Initialize WebSocket bridge - SSOT for WebSocket-Agent integration
                     # REMOVED_SYNTAX_ERROR: websocket_bridge = AgentWebSocketBridge()
@@ -175,7 +175,7 @@
                     # REMOVED_SYNTAX_ERROR: if bridge_status.get('state') != IntegrationState.ACTIVE.value:
                         # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket bridge integration failed to reach ACTIVE state")
 
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket-Agent bridge integration is ACTIVE")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket-Agent bridge integration is ACTIVE")
 
                         # Initialize agent service using the bridge
                         # REMOVED_SYNTAX_ERROR: agent_service = AgentService()
@@ -193,7 +193,7 @@
                         # REMOVED_SYNTAX_ERROR: docker_ports=ports
                         
 
-                        # REMOVED_SYNTAX_ERROR: logger.info("🎯 Test environment setup complete - ready for integration testing")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Test environment setup complete - ready for integration testing")
                         # REMOVED_SYNTAX_ERROR: return self.context
 
 # REMOVED_SYNTAX_ERROR: async def cleanup_test_environment(self):
@@ -207,7 +207,7 @@
         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
         # REMOVED_SYNTAX_ERROR: return
 
-        # REMOVED_SYNTAX_ERROR: logger.info("🧹 Starting comprehensive test environment cleanup")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9F9] Starting comprehensive test environment cleanup")
 
         # Cleanup active WebSocket connections
         # REMOVED_SYNTAX_ERROR: for ws_client in self.context.active_websocket_clients:
@@ -234,7 +234,7 @@
                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                                         # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Test environment cleanup complete")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Test environment cleanup complete")
 
                                         # Removed problematic line: async def test_full_agent_execution_flow(self) -> PerformanceMetrics:
                                             # REMOVED_SYNTAX_ERROR: '''
@@ -256,7 +256,7 @@
                                                 
 
                                                 # REMOVED_SYNTAX_ERROR: try:
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🎯 Test 1: Full Agent Execution Flow - Starting")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Test 1: Full Agent Execution Flow - Starting")
 
                                                     # Create WebSocket client for event monitoring
                                                     # REMOVED_SYNTAX_ERROR: backend_port = self.context.docker_ports.get('backend', 8000)
@@ -283,7 +283,7 @@
         # REMOVED_SYNTAX_ERROR: if ws_client.connection_state != ConnectionState.CONNECTED:
             # REMOVED_SYNTAX_ERROR: raise RuntimeError("Failed to establish WebSocket connection")
 
-            # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket connection established")
+            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket connection established")
 
             # Execute agent task - use a simple task for reliable testing
             # REMOVED_SYNTAX_ERROR: task_request = { )
@@ -325,7 +325,7 @@
                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                     # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                     # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Agent execution completed successfully")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Agent execution completed successfully")
 
                         # Validate response time requirement (< 10 seconds)
                         # REMOVED_SYNTAX_ERROR: if metrics.agent_execution_time_ms > 10000:
@@ -339,9 +339,9 @@
                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                                     # REMOVED_SYNTAX_ERROR: else:
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Docker services remained stable during execution")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Docker services remained stable during execution")
                                         # REMOVED_SYNTAX_ERROR: else:
-                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Docker services stability check complete")
+                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Docker services stability check complete")
 
                                             # REMOVED_SYNTAX_ERROR: self.test_results["full_agent_execution_flow"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
@@ -377,7 +377,7 @@
                                                             
 
                                                             # REMOVED_SYNTAX_ERROR: try:
-                                                                # REMOVED_SYNTAX_ERROR: logger.info("🎯 Test 2: Multi-User Concurrent Execution - Starting")
+                                                                # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Test 2: Multi-User Concurrent Execution - Starting")
 
                                                                 # REMOVED_SYNTAX_ERROR: concurrent_users = 5
                                                                 # REMOVED_SYNTAX_ERROR: user_tasks = []
@@ -492,9 +492,9 @@
                         # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                         # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                         # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: logger.info("✅ All services remained healthy during concurrent execution")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  All services remained healthy during concurrent execution")
                             # REMOVED_SYNTAX_ERROR: else:
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Service health check complete for concurrent execution")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Service health check complete for concurrent execution")
 
                                 # REMOVED_SYNTAX_ERROR: self.test_results["multi_user_concurrent_execution"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
@@ -531,10 +531,10 @@
                                                 
 
                                                 # REMOVED_SYNTAX_ERROR: try:
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🎯 Test 3: Failure Recovery Scenarios - Starting")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Test 3: Failure Recovery Scenarios - Starting")
 
                                                     # Scenario 3.1: Docker service restart during execution
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing Docker service restart recovery")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing Docker service restart recovery")
 
                                                     # Start an agent task
                                                     # REMOVED_SYNTAX_ERROR: task_user_id = "formatted_string"
@@ -577,16 +577,16 @@
             # REMOVED_SYNTAX_ERROR: try:
                 # REMOVED_SYNTAX_ERROR: task_result = await asyncio.wait_for(task_future, timeout=30.0)
                 # REMOVED_SYNTAX_ERROR: if task_result and task_result.get('success'):
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Agent task survived Docker service restart")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Agent task survived Docker service restart")
                     # REMOVED_SYNTAX_ERROR: else:
-                        # REMOVED_SYNTAX_ERROR: logger.error("❌ Agent task failed after Docker service restart")
+                        # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  Agent task failed after Docker service restart")
                         # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                         # REMOVED_SYNTAX_ERROR: except asyncio.TimeoutError:
-                            # REMOVED_SYNTAX_ERROR: logger.error("❌ Agent task timed out after Docker service restart")
+                            # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  Agent task timed out after Docker service restart")
                             # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
 
                             # Scenario 3.2: WebSocket disconnection recovery
-                            # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing WebSocket disconnection recovery")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing WebSocket disconnection recovery")
 
                             # REMOVED_SYNTAX_ERROR: backend_port = self.context.docker_ports.get('backend', 8000)
                             # REMOVED_SYNTAX_ERROR: ws_url = "formatted_string"
@@ -608,16 +608,16 @@
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: metrics.websocket_connection_time_ms = reconnect_time
                                     # REMOVED_SYNTAX_ERROR: else:
-                                        # REMOVED_SYNTAX_ERROR: logger.error("❌ WebSocket reconnection failed")
+                                        # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  WebSocket reconnection failed")
                                         # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
 
                                         # REMOVED_SYNTAX_ERROR: await recovery_ws_client.disconnect()
                                         # REMOVED_SYNTAX_ERROR: else:
-                                            # REMOVED_SYNTAX_ERROR: logger.error("❌ Initial WebSocket connection failed")
+                                            # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  Initial WebSocket connection failed")
                                             # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
 
                                             # Scenario 3.3: WebSocket bridge recovery
-                                            # REMOVED_SYNTAX_ERROR: logger.info("🔄 Testing WebSocket bridge recovery")
+                                            # REMOVED_SYNTAX_ERROR: logger.info(" CYCLE:  Testing WebSocket bridge recovery")
 
                                             # REMOVED_SYNTAX_ERROR: bridge_recovery_start = time.time()
                                             # REMOVED_SYNTAX_ERROR: try:
@@ -630,7 +630,7 @@
                                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                                     # REMOVED_SYNTAX_ERROR: metrics.recovery_attempts += 1
                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                        # REMOVED_SYNTAX_ERROR: logger.error("❌ WebSocket bridge recovery failed")
+                                                        # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  WebSocket bridge recovery failed")
                                                         # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                                                         # REMOVED_SYNTAX_ERROR: metrics.recovery_attempts += 1
 
@@ -648,9 +648,9 @@
                                                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                                                                     # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ All services healthy after recovery tests")
+                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  All services healthy after recovery tests")
                                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Service health validation complete after recovery tests")
+                                                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Service health validation complete after recovery tests")
 
                                                                             # REMOVED_SYNTAX_ERROR: self.test_results["failure_recovery_scenarios"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
@@ -687,7 +687,7 @@
                                                                                             
 
                                                                                             # REMOVED_SYNTAX_ERROR: try:
-                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("🎯 Test 4: Performance Under Load - Starting")
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  Test 4: Performance Under Load - Starting")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: concurrent_agents = 10
                                                                                                 # REMOVED_SYNTAX_ERROR: target_events_per_second = 100
@@ -838,7 +838,7 @@
                                             # REMOVED_SYNTAX_ERROR: metrics.container_cpu_usage_percent = final_cpu
 
                                             # Log performance results
-                                            # REMOVED_SYNTAX_ERROR: logger.info(f"📊 Load Test Results:")
+                                            # REMOVED_SYNTAX_ERROR: logger.info(f" CHART:  Load Test Results:")
                                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -872,9 +872,9 @@
                                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                                                     # REMOVED_SYNTAX_ERROR: metrics.error_count += 1
                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ All services remained healthy during load test")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  All services remained healthy during load test")
                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Final system health check complete for load test")
+                                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Final system health check complete for load test")
 
                                                             # REMOVED_SYNTAX_ERROR: self.test_results["performance_under_load"] = TestResult.PASS if metrics.error_count == 0 else TestResult.FAIL
 
@@ -1030,11 +1030,11 @@
 
             # Log final results
             # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
-            # REMOVED_SYNTAX_ERROR: logger.info("🎯 DOCKER-WEBSOCKET INTEGRATION TEST RESULTS")
+            # REMOVED_SYNTAX_ERROR: logger.info(" TARGET:  DOCKER-WEBSOCKET INTEGRATION TEST RESULTS")
             # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
 
             # REMOVED_SYNTAX_ERROR: for test_name, result in integration_tests.test_results.items():
-                # REMOVED_SYNTAX_ERROR: status_emoji = "✅" if result == TestResult.PASS else "❌"
+                # REMOVED_SYNTAX_ERROR: status_emoji = " PASS: " if result == TestResult.PASS else " FAIL: "
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -1043,7 +1043,7 @@
 
                 # Recommendations
                 # REMOVED_SYNTAX_ERROR: logger.info(" )
-                # REMOVED_SYNTAX_ERROR: 🔍 RECOMMENDATIONS:")
+                # REMOVED_SYNTAX_ERROR:  SEARCH:  RECOMMENDATIONS:")
                 # REMOVED_SYNTAX_ERROR: for rec in report['recommendations']:
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
@@ -1077,7 +1077,7 @@
     # REMOVED_SYNTAX_ERROR: integration_tests = DockerWebSocketIntegrationTests()
 
     # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: print("🚀 Starting Docker-WebSocket Integration Test Suite")
+        # REMOVED_SYNTAX_ERROR: print("[U+1F680] Starting Docker-WebSocket Integration Test Suite")
         # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
         # Setup and run tests
@@ -1094,18 +1094,18 @@
 
         # REMOVED_SYNTAX_ERROR: print(" )
         # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-        # REMOVED_SYNTAX_ERROR: print("🎯 FINAL TEST RESULTS")
+        # REMOVED_SYNTAX_ERROR: print(" TARGET:  FINAL TEST RESULTS")
         # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
         # REMOVED_SYNTAX_ERROR: for test_name, result in integration_tests.test_results.items():
-            # REMOVED_SYNTAX_ERROR: status = "PASS ✅" if result == TestResult.PASS else "formatted_string"
+            # REMOVED_SYNTAX_ERROR: status = "PASS  PASS: " if result == TestResult.PASS else "formatted_string"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
             # REMOVED_SYNTAX_ERROR: if report['recommendations']:
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: 🔍 Recommendations:")
+                # REMOVED_SYNTAX_ERROR:  SEARCH:  Recommendations:")
                 # REMOVED_SYNTAX_ERROR: for rec in report['recommendations']:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

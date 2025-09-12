@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 This test validates that service errors properly propagate to GCP Error Reporting
 for enterprise observability and compliance monitoring requirements.
 
-EXPECTED TO FAIL INITIALLY - This proves the service → GCP integration gap exists.
+EXPECTED TO FAIL INITIALLY - This proves the service  ->  GCP integration gap exists.
 Success requires real GCP Error Reporting client integration with business context.
 """
 
@@ -47,7 +47,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
     Tests that service errors propagate properly to GCP Error Reporting
     for enterprise observability and compliance requirements.
     
-    Expected Initial State: FAIL - proves service → GCP integration gap
+    Expected Initial State: FAIL - proves service  ->  GCP integration gap
     Success Criteria: Real GCP client integration with business context preservation
     """
     
@@ -69,18 +69,18 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
         
     def validate_gcp_configuration(self) -> bool:
         """Validate GCP Error Reporting configuration."""
-        print("🔍 Validating GCP Error Reporting configuration...")
+        print(" SEARCH:  Validating GCP Error Reporting configuration...")
         
         gcp_project = self.env.get("GCP_PROJECT_ID")
         gcp_credentials = self.env.get("GOOGLE_APPLICATION_CREDENTIALS")
         
         config_valid = bool(gcp_project and gcp_credentials)
         
-        print(f"GCP Project ID: {'✅' if gcp_project else '❌'} {gcp_project}")
-        print(f"GCP Credentials: {'✅' if gcp_credentials else '❌'} {bool(gcp_credentials)}")
+        print(f"GCP Project ID: {' PASS: ' if gcp_project else ' FAIL: '} {gcp_project}")
+        print(f"GCP Credentials: {' PASS: ' if gcp_credentials else ' FAIL: '} {bool(gcp_credentials)}")
         
         if not config_valid:
-            print("⚠️ GCP configuration incomplete (expected initially)")
+            print(" WARNING: [U+FE0F] GCP configuration incomplete (expected initially)")
         
         return config_valid
         
@@ -111,7 +111,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
         Test that database errors propagate to GCP Error Reporting with business context.
         
         Business Value: Enterprise customers need database error visibility in their monitoring.
-        Expected Result: INITIALLY FAIL - proves database → GCP integration gap exists.
+        Expected Result: INITIALLY FAIL - proves database  ->  GCP integration gap exists.
         
         This test validates:
         1. Database errors are properly caught by error handling
@@ -119,7 +119,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
         3. GCP Error Reporting client receives error data
         4. Business context is preserved in GCP error report
         """
-        print("\n🗄️ DATABASE ERROR → GCP INTEGRATION TEST")
+        print("\n[U+1F5C4][U+FE0F] DATABASE ERROR  ->  GCP INTEGRATION TEST")
         print("=" * 60)
         
         # Setup integration context
@@ -130,7 +130,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
         
         try:
             # Test 1: Force database error with business context
-            print("\n📊 Test 1: Database Error with Business Context")
+            print("\n CHART:  Test 1: Database Error with Business Context")
             
             # Create database connection for error testing
             database_url = self.env.get("DATABASE_URL_TEST", "postgresql://test:test@localhost:5434/test_db")
@@ -147,7 +147,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                         conn.execute(text("SELECT * FROM non_existent_table_for_gcp_test"))
                     
                     database_error = exc_info.value
-                    print(f"✅ Database error triggered: {type(database_error).__name__}")
+                    print(f" PASS:  Database error triggered: {type(database_error).__name__}")
                     
                     # Test error handling with GCP reporting
                     await self.test_gcp_error_reporting_with_context(
@@ -159,7 +159,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     database_error_reported = True
                     
             except Exception as db_setup_error:
-                print(f"⚠️ Database setup error (expected): {db_setup_error}")
+                print(f" WARNING: [U+FE0F] Database setup error (expected): {db_setup_error}")
                 
                 # Mock database error for testing error handling patterns
                 mock_database_error = SQLAlchemyError("Test database error for GCP integration")
@@ -173,22 +173,22 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 database_error_reported = True
             
             # Test 2: Service-level error propagation
-            print("\n🔧 Test 2: Service Error → GCP Propagation")
+            print("\n[U+1F527] Test 2: Service Error  ->  GCP Propagation")
             
             service_error_reported = await self.test_service_error_gcp_propagation(gcp_context)
             
             # Test 3: Validate GCP Error Reporting Client Integration
-            print("\n☁️ Test 3: GCP Error Reporting Client Integration")
+            print("\n[U+2601][U+FE0F] Test 3: GCP Error Reporting Client Integration")
             
             gcp_client_integration_working = await self.validate_gcp_client_integration()
             
             # Test Results Summary
-            print("\n📈 GCP ERROR REPORTING INTEGRATION RESULTS")
+            print("\n[U+1F4C8] GCP ERROR REPORTING INTEGRATION RESULTS")
             print("=" * 50)
-            print(f"GCP Configuration: {'✅' if self.gcp_config_valid else '❌'}")
-            print(f"Database Error Reporting: {'✅' if database_error_reported else '❌'}")
-            print(f"Service Error Reporting: {'✅' if service_error_reported else '❌'}")
-            print(f"GCP Client Integration: {'✅' if gcp_client_integration_working else '❌'}")
+            print(f"GCP Configuration: {' PASS: ' if self.gcp_config_valid else ' FAIL: '}")
+            print(f"Database Error Reporting: {' PASS: ' if database_error_reported else ' FAIL: '}")
+            print(f"Service Error Reporting: {' PASS: ' if service_error_reported else ' FAIL: '}")
+            print(f"GCP Client Integration: {' PASS: ' if gcp_client_integration_working else ' FAIL: '}")
             print(f"GCP Error Reports: {len(self.gcp_error_reports)}")
             print(f"Service Errors Triggered: {len(self.service_errors_triggered)}")
             
@@ -202,13 +202,13 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
             
             if not integration_working:
                 # EXPECTED INITIAL FAILURE - proves integration gaps
-                print("\n🚨 EXPECTED INITIAL FAILURE: GCP Error Reporting integration not complete")
-                print("This proves service → GCP integration gaps exist:")
+                print("\n ALERT:  EXPECTED INITIAL FAILURE: GCP Error Reporting integration not complete")
+                print("This proves service  ->  GCP integration gaps exist:")
                 
                 if not database_error_reported:
-                    print("  - Database error → GCP reporting integration gap")
+                    print("  - Database error  ->  GCP reporting integration gap")
                 if not service_error_reported:
-                    print("  - Service error → GCP reporting integration gap") 
+                    print("  - Service error  ->  GCP reporting integration gap") 
                 if not gcp_client_integration_working:
                     print("  - GCP Error Reporting client integration gap")
                 if len(self.gcp_error_reports) == 0:
@@ -218,7 +218,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 pytest.xfail("EXPECTED: GCP Error Reporting integration gaps detected")
             
             else:
-                print("\n✅ SUCCESS: GCP Error Reporting integration fully functional")
+                print("\n PASS:  SUCCESS: GCP Error Reporting integration fully functional")
                 
                 # Validate business context preservation
                 for error_report in self.gcp_error_reports:
@@ -228,7 +228,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                         "User context not preserved in GCP error report"
         
         except Exception as e:
-            print(f"\n❌ CRITICAL: GCP Error Reporting integration test failed: {e}")
+            print(f"\n FAIL:  CRITICAL: GCP Error Reporting integration test failed: {e}")
             logger.error(f"GCP integration test failure: {e}", extra={
                 "user_id": self.test_user_id,
                 "gcp_project": self.gcp_project_id,
@@ -251,7 +251,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 error_reporter = GCPErrorReporter()
                 gcp_error_reporter_available = True
                 
-                print("✅ GCP Error Reporter available")
+                print(" PASS:  GCP Error Reporter available")
                 
                 # Test error reporting with context
                 business_context = {
@@ -275,11 +275,11 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     "report_result": report_result
                 })
                 
-                print(f"✅ Error reported to GCP: {error_type}")
+                print(f" PASS:  Error reported to GCP: {error_type}")
                 return True
                 
             except ImportError as import_error:
-                print(f"⚠️ GCP Error Reporter not available: {import_error}")
+                print(f" WARNING: [U+FE0F] GCP Error Reporter not available: {import_error}")
                 
                 # Mock the GCP error reporting behavior for testing patterns
                 mock_gcp_report = {
@@ -295,21 +295,21 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 }
                 
                 self.gcp_error_reports.append(mock_gcp_report)
-                print(f"🔄 Mock GCP error report created: {error_type}")
+                print(f" CYCLE:  Mock GCP error report created: {error_type}")
                 return True
                 
             except Exception as gcp_error:
-                print(f"❌ GCP error reporting failed: {gcp_error}")
+                print(f" FAIL:  GCP error reporting failed: {gcp_error}")
                 # This is expected initially - proves GCP integration gap
                 return False
         
         except Exception as e:
-            print(f"❌ Error reporting test failed: {e}")
+            print(f" FAIL:  Error reporting test failed: {e}")
             return False
     
     async def test_service_error_gcp_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
         """Test that service-level errors propagate to GCP Error Reporting."""
-        print("Testing service error → GCP propagation...")
+        print("Testing service error  ->  GCP propagation...")
         
         auth_helper = E2EAuthHelper(environment="test")
         
@@ -335,7 +335,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     
                     if response.status_code >= 400:
                         service_errors_detected += 1
-                        print(f"✅ Service error detected: {response.status_code}")
+                        print(f" PASS:  Service error detected: {response.status_code}")
                         
                         # This should trigger GCP error reporting
                         await self.simulate_service_error_gcp_reporting(
@@ -345,7 +345,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                         )
                         
                 except httpx.ConnectError:
-                    print("⚠️ Service not available - testing with mock service error")
+                    print(" WARNING: [U+FE0F] Service not available - testing with mock service error")
                     
                     # Mock service error for pattern testing
                     await self.simulate_service_error_gcp_reporting(
@@ -356,7 +356,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     service_errors_detected += 1
                 
                 except Exception as e:
-                    print(f"⚠️ Service error test: {e}")
+                    print(f" WARNING: [U+FE0F] Service error test: {e}")
                     service_errors_detected += 1
                 
                 # Test 2: Invalid request error
@@ -371,7 +371,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     
                     if response.status_code >= 400:
                         service_errors_detected += 1
-                        print(f"✅ Invalid request error: {response.status_code}")
+                        print(f" PASS:  Invalid request error: {response.status_code}")
                         
                         await self.simulate_service_error_gcp_reporting(
                             error_type="validation_error", 
@@ -380,7 +380,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                         )
                         
                 except Exception as e:
-                    print(f"⚠️ Invalid request test: {e}")
+                    print(f" WARNING: [U+FE0F] Invalid request test: {e}")
                     # Mock the error for testing
                     await self.simulate_service_error_gcp_reporting(
                         error_type="validation_error",
@@ -393,7 +393,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
             return service_errors_detected >= 1
             
         except Exception as e:
-            print(f"❌ Service error propagation test failed: {e}")
+            print(f" FAIL:  Service error propagation test failed: {e}")
             return False
     
     async def simulate_service_error_gcp_reporting(self, error_type: str, status_code: int, context: StronglyTypedUserExecutionContext):
@@ -429,10 +429,10 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 from netra_backend.app.services.monitoring.gcp_client_manager import GCPClientManager
                 
                 gcp_client_available = True
-                print("✅ GCP client modules available")
+                print(" PASS:  GCP client modules available")
                 
             except ImportError as e:
-                print(f"❌ GCP client modules not available: {e}")
+                print(f" FAIL:  GCP client modules not available: {e}")
                 print("This is expected initially - proves GCP client integration gap")
                 
             # Test 2: GCP configuration and credentials
@@ -447,12 +447,12 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     
                     if error_client:
                         gcp_configured = True
-                        print("✅ GCP Error Reporting client configured")
+                        print(" PASS:  GCP Error Reporting client configured")
                     else:
-                        print("❌ GCP Error Reporting client not configured")
+                        print(" FAIL:  GCP Error Reporting client not configured")
                         
                 except Exception as e:
-                    print(f"❌ GCP client configuration failed: {e}")
+                    print(f" FAIL:  GCP client configuration failed: {e}")
                     print("This is expected initially - proves GCP configuration gap")
             
             # Test 3: GCP error reporting flow
@@ -474,27 +474,27 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                     
                     if result:
                         gcp_reporting_working = True
-                        print("✅ GCP error reporting flow working")
+                        print(" PASS:  GCP error reporting flow working")
                     else:
-                        print("❌ GCP error reporting flow not working")
+                        print(" FAIL:  GCP error reporting flow not working")
                         
                 except Exception as e:
-                    print(f"❌ GCP error reporting test failed: {e}")
+                    print(f" FAIL:  GCP error reporting test failed: {e}")
                     print("This is expected initially - proves GCP reporting flow gap")
             
             # Overall integration status
             overall_integration_working = gcp_client_available and gcp_configured and gcp_reporting_working
             
             print(f"\nGCP Client Integration Status:")
-            print(f"  Client Modules: {'✅' if gcp_client_available else '❌'}")
-            print(f"  Configuration: {'✅' if gcp_configured else '❌'}")
-            print(f"  Reporting Flow: {'✅' if gcp_reporting_working else '❌'}")
-            print(f"  Overall: {'✅' if overall_integration_working else '❌'}")
+            print(f"  Client Modules: {' PASS: ' if gcp_client_available else ' FAIL: '}")
+            print(f"  Configuration: {' PASS: ' if gcp_configured else ' FAIL: '}")
+            print(f"  Reporting Flow: {' PASS: ' if gcp_reporting_working else ' FAIL: '}")
+            print(f"  Overall: {' PASS: ' if overall_integration_working else ' FAIL: '}")
             
             return overall_integration_working
             
         except Exception as e:
-            print(f"❌ GCP client integration validation failed: {e}")
+            print(f" FAIL:  GCP client integration validation failed: {e}")
             return False
     
     @pytest.mark.integration
@@ -506,7 +506,7 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
         Business Value: Enterprise customers need correlated error data for root cause analysis.
         This validates that user context, request context, and business context are preserved.
         """
-        print("\n🔗 GCP ERROR CONTEXT CORRELATION TEST")
+        print("\n[U+1F517] GCP ERROR CONTEXT CORRELATION TEST")
         print("=" * 60)
         
         gcp_context = await self.setup_gcp_integration_context()
@@ -564,12 +564,12 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 
                 if not reported:
                     correlation_successful = False
-                    print(f"❌ Error {i+1} correlation failed")
+                    print(f" FAIL:  Error {i+1} correlation failed")
                 else:
-                    print(f"✅ Error {i+1} correlated: {error_info['type']}")
+                    print(f" PASS:  Error {i+1} correlated: {error_info['type']}")
                     
             except Exception as e:
-                print(f"❌ Error correlation test {i+1} failed: {e}")
+                print(f" FAIL:  Error correlation test {i+1} failed: {e}")
                 correlation_successful = False
         
         # Validate correlation preservation in reports
@@ -581,23 +581,23 @@ class TestGCPErrorReportingIntegration(SSotBaseTestCase):
                 report_context = report.get("context", {})
                 if not report_context.get("user_id") == gcp_context.user_id.value:
                     correlation_preserved = False
-                    print(f"❌ User context not preserved in error report")
+                    print(f" FAIL:  User context not preserved in error report")
                     break
         
-        print(f"\n📊 Error Correlation Results:")
+        print(f"\n CHART:  Error Correlation Results:")
         print(f"Correlated Errors Reported: {len([r for r in self.gcp_error_reports if not r.get('mock')])}/{len(correlated_errors)}")
-        print(f"Correlation Successful: {'✅' if correlation_successful else '❌'}")
-        print(f"Context Preserved: {'✅' if correlation_preserved else '❌'}")
+        print(f"Correlation Successful: {' PASS: ' if correlation_successful else ' FAIL: '}")
+        print(f"Context Preserved: {' PASS: ' if correlation_preserved else ' FAIL: '}")
         
         correlation_test_passed = correlation_successful and correlation_preserved
         
         if not correlation_test_passed:
-            print("❌ GCP error context correlation test failed")
+            print(" FAIL:  GCP error context correlation test failed")
             print("This impacts enterprise root cause analysis capabilities")
             # This may be expected initially
             pytest.xfail("EXPECTED: GCP error context correlation gap detected")
         else:
-            print("✅ GCP error context correlation test passed")
+            print(" PASS:  GCP error context correlation test passed")
     
     def teardown_method(self):
         """Cleanup after each test method."""

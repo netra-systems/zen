@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Data reliability directly enables $500K+ ARR from chat functionality and user operations
 
 This test suite validates PostgreSQL as the PRIMARY database for all core business data operations.
-Critical for golden path: user authentication → conversation storage → agent state → business continuity.
+Critical for golden path: user authentication  ->  conversation storage  ->  agent state  ->  business continuity.
 
 SSOT Compliance:
 - Tests the PRIMARY source for transactional data operations
@@ -464,7 +464,7 @@ class TestPostgresBusinessScenarios:
         """Test user registration transaction scenario.
         
         BVJ: Core business functionality - user onboarding drives platform growth.
-        Golden Path: New user registration → profile creation → authentication setup.
+        Golden Path: New user registration  ->  profile creation  ->  authentication setup.
         """
         with patch('netra_backend.app.db.postgres_session.async_session_factory') as mock_factory:
             
@@ -495,7 +495,7 @@ class TestPostgresBusinessScenarios:
         """Test chat conversation persistence scenario.
         
         BVJ: Core product functionality - chat conversations are 90% of platform value.
-        Golden Path: User message → thread creation → message storage → conversation history.
+        Golden Path: User message  ->  thread creation  ->  message storage  ->  conversation history.
         """
         with patch('netra_backend.app.db.postgres_session.async_session_factory') as mock_factory:
             
@@ -529,7 +529,7 @@ class TestPostgresBusinessScenarios:
         """Test agent execution state persistence scenario.
         
         BVJ: AI agent state enables recovery and optimization - core platform feature.
-        Golden Path: Agent execution → state checkpoints → recovery capability → optimization insights.
+        Golden Path: Agent execution  ->  state checkpoints  ->  recovery capability  ->  optimization insights.
         """
         with patch('netra_backend.app.db.postgres_session.async_session_factory') as mock_factory:
             

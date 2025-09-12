@@ -13,7 +13,7 @@ import time
 from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import httpx
 from test_framework.unified_docker_manager import UnifiedDockerManager
 
@@ -76,7 +76,7 @@ class ExternalServiceIntegration:
         """
         client = None
         try:
-            client = redis.Redis(
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host="localhost",
                 port=6381,  # Test environment port
                 db=db,

@@ -10,14 +10,14 @@ Business Value Justification (BVJ):
 
 CRITICAL: This test validates the COMPLETE auth service lifecycle from external client perspective:
 1. Auth service starts successfully and is ready to serve requests
-2. Complete user authentication workflow (register → login → session management)  
+2. Complete user authentication workflow (register  ->  login  ->  session management)  
 3. OAuth flows work end-to-end after service startup
 4. Service recovery and restart scenarios maintain user sessions
 5. Multi-user authentication works concurrently after startup
 6. Health monitoring integration validates service availability
 
 This is a MISSION CRITICAL E2E test that validates business value delivery chain:
-Auth Service Startup → User Authentication → Platform Access → AI Value Delivery
+Auth Service Startup  ->  User Authentication  ->  Platform Access  ->  AI Value Delivery
 
 Compliance with CLAUDE.md and TEST_CREATION_GUIDE.md:
 - Uses REAL services only (no inappropriate mocks) - NON-NEGOTIABLE
@@ -91,7 +91,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         self.auth_service_started = False
         self.backend_service_started = False
         
-        logger.info("🚀 Auth service startup E2E test setup complete")
+        logger.info("[U+1F680] Auth service startup E2E test setup complete")
     
     async def cleanup_resources(self):
         """Comprehensive cleanup of all E2E test resources."""
@@ -179,7 +179,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         Returns:
             Dict with service URLs
         """
-        logger.info("🔧 Ensuring auth and backend services are running")
+        logger.info("[U+1F527] Ensuring auth and backend services are running")
         
         # Acquire test environment through Docker manager
         env_info = await self.docker_manager.acquire_environment(
@@ -212,7 +212,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         self.auth_service_started = True
         self.backend_service_started = True
         
-        logger.info("✅ Auth and backend services are running and healthy")
+        logger.info(" PASS:  Auth and backend services are running and healthy")
         
         return {
             "auth_url": self.service_endpoints.auth_service_url,
@@ -237,7 +237,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         Returns:
             True if service becomes healthy, False otherwise
         """
-        logger.info(f"⏳ Waiting for {service_name} to be healthy at {service_url}")
+        logger.info(f"[U+23F3] Waiting for {service_name} to be healthy at {service_url}")
         
         start_time = time.time()
         last_error = None
@@ -251,24 +251,24 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
                         if resp.status == 200:
                             health_data = await resp.json()
                             if health_data.get("status") == "healthy":
-                                logger.info(f"✅ {service_name} is healthy")
+                                logger.info(f" PASS:  {service_name} is healthy")
                                 return True
                             else:
-                                logger.debug(f"⚠️ {service_name} health check returned: {health_data}")
+                                logger.debug(f" WARNING: [U+FE0F] {service_name} health check returned: {health_data}")
                     
                     # Fallback: try root endpoint 
                     async with session.get(service_url, timeout=aiohttp.ClientTimeout(total=5)) as resp:
                         if resp.status in [200, 404]:  # 404 is OK for services without root handler
-                            logger.info(f"✅ {service_name} is responding")
+                            logger.info(f" PASS:  {service_name} is responding")
                             return True
                             
             except Exception as e:
                 last_error = e
-                logger.debug(f"⏳ {service_name} not ready yet: {e}")
+                logger.debug(f"[U+23F3] {service_name} not ready yet: {e}")
             
             await asyncio.sleep(2.0)
         
-        logger.error(f"❌ {service_name} failed to become healthy within {timeout}s. Last error: {last_error}")
+        logger.error(f" FAIL:  {service_name} failed to become healthy within {timeout}s. Last error: {last_error}")
         return False
     
     @pytest.mark.e2e
@@ -279,11 +279,11 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         Test complete auth service startup to user authentication flow.
         
         CRITICAL: This test validates the core business value delivery chain:
-        Auth Service Startup → User Registration → User Login → Authenticated Session → Platform Access
+        Auth Service Startup  ->  User Registration  ->  User Login  ->  Authenticated Session  ->  Platform Access
         
         Without this working, users cannot access the AI optimization platform at all.
         """
-        logger.info("🔐 Starting complete auth service startup to user authentication E2E test")
+        logger.info("[U+1F510] Starting complete auth service startup to user authentication E2E test")
         
         # Step 1: Ensure auth service is started and healthy
         service_urls = await self._ensure_services_running()
@@ -299,7 +299,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         assert "id" in user_data, "User should have ID assigned"
         
         self.test_users.append(user_data)
-        logger.info(f"✅ User registration successful: {user_data['email']}")
+        logger.info(f" PASS:  User registration successful: {user_data['email']}")
         
         # Step 3: Authenticate the user (login)
         auth_tokens = await self._authenticate_user(user_email, user_password)
@@ -315,14 +315,14 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
             "user_id": user_data["id"]
         })
         
-        logger.info("✅ User authentication successful")
+        logger.info(" PASS:  User authentication successful")
         
         # Step 4: Validate authenticated session works
         user_profile = await self._get_user_profile(access_token)
         assert user_profile["email"] == user_email, "Profile should match authenticated user"
         assert user_profile["id"] == user_data["id"], "Profile should have correct user ID"
         
-        logger.info("✅ Authenticated session validation successful")
+        logger.info(" PASS:  Authenticated session validation successful")
         
         # Step 5: Test token refresh to ensure session persistence
         new_tokens = await self._refresh_authentication(refresh_token)
@@ -333,15 +333,15 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         refreshed_profile = await self._get_user_profile(new_tokens["access_token"])
         assert refreshed_profile["email"] == user_email, "Refreshed token should work for same user"
         
-        logger.info("✅ Token refresh and session persistence successful")
+        logger.info(" PASS:  Token refresh and session persistence successful")
         
         # Step 6: Test backend service access with authenticated token
         backend_response = await self._test_backend_access(new_tokens["access_token"])
         assert backend_response, "Backend access should work with valid token"
         
-        logger.info("✅ Backend service access with auth token successful")
+        logger.info(" PASS:  Backend service access with auth token successful")
         
-        logger.info("🎉 Complete auth service startup to user authentication E2E test PASSED")
+        logger.info(" CELEBRATION:  Complete auth service startup to user authentication E2E test PASSED")
     
     @pytest.mark.e2e
     @pytest.mark.real_services 
@@ -353,7 +353,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         CRITICAL: OAuth authentication is essential for production user onboarding.
         This test validates that OAuth flows work end-to-end after service startup.
         """
-        logger.info("🔗 Starting OAuth complete flow E2E test after auth service startup")
+        logger.info("[U+1F517] Starting OAuth complete flow E2E test after auth service startup")
         
         # Step 1: Ensure auth service is started and healthy
         service_urls = await self._ensure_services_running()
@@ -395,9 +395,9 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
             backend_access = await self._test_backend_access(access_token)
             assert backend_access, f"{provider} OAuth token should enable backend access"
             
-            logger.info(f"✅ {provider} OAuth flow completed successfully")
+            logger.info(f" PASS:  {provider} OAuth flow completed successfully")
         
-        logger.info("🎉 OAuth complete flow E2E test after auth service startup PASSED")
+        logger.info(" CELEBRATION:  OAuth complete flow E2E test after auth service startup PASSED")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -409,7 +409,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         CRITICAL: Service restarts should not invalidate active user sessions.
         This ensures business continuity during deployments and maintenance.
         """
-        logger.info("🔄 Starting auth service restart session persistence E2E test")
+        logger.info(" CYCLE:  Starting auth service restart session persistence E2E test")
         
         # Step 1: Ensure auth service is started and create authenticated user
         service_urls = await self._ensure_services_running()
@@ -431,10 +431,10 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         initial_profile = await self._get_user_profile(initial_tokens["access_token"])
         assert initial_profile["email"] == user_email, "Initial session should work"
         
-        logger.info("✅ Initial session established before restart")
+        logger.info(" PASS:  Initial session established before restart")
         
         # Step 2: Simulate service restart by stopping and starting auth service
-        logger.info("🔄 Simulating auth service restart...")
+        logger.info(" CYCLE:  Simulating auth service restart...")
         
         # Stop auth service
         await self.docker_manager.stop_service("auth", environment=EnvironmentType.TEST)
@@ -457,7 +457,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         )
         assert auth_healthy_after_restart, "Auth service should be healthy after restart"
         
-        logger.info("✅ Auth service restart completed")
+        logger.info(" PASS:  Auth service restart completed")
         
         # Step 3: Test that refresh token still works after restart
         try:
@@ -468,7 +468,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
             post_restart_profile = await self._get_user_profile(new_access_token)
             assert post_restart_profile["email"] == user_email, "Session should persist through restart"
             
-            logger.info("✅ Session persistence through restart successful")
+            logger.info(" PASS:  Session persistence through restart successful")
             
         except Exception as e:
             # If refresh fails, try re-authentication (acceptable for some auth service implementations)
@@ -479,7 +479,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
             reauth_profile = await self._get_user_profile(reauth_tokens["access_token"])
             assert reauth_profile["email"] == user_email, "Re-authentication should work after restart"
             
-            logger.info("✅ Re-authentication after restart successful")
+            logger.info(" PASS:  Re-authentication after restart successful")
         
         # Step 4: Test new user registration works after restart
         new_user_email = f"post_restart_{uuid.uuid4().hex[:8]}@example.com"
@@ -488,8 +488,8 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         
         self.test_users.append(post_restart_user)
         
-        logger.info("✅ New user registration works after restart")
-        logger.info("🎉 Auth service restart session persistence E2E test PASSED")
+        logger.info(" PASS:  New user registration works after restart")
+        logger.info(" CELEBRATION:  Auth service restart session persistence E2E test PASSED")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -501,7 +501,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         CRITICAL: The platform must handle multiple concurrent users authenticating
         simultaneously, especially during peak usage times.
         """
-        logger.info("👥 Starting concurrent users authentication E2E test after startup")
+        logger.info("[U+1F465] Starting concurrent users authentication E2E test after startup")
         
         # Step 1: Ensure services are running
         service_urls = await self._ensure_services_running()
@@ -523,7 +523,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
                 user_data = await task
                 created_users.append((email, password, user_data))
                 self.test_users.append(user_data)
-                logger.info(f"✅ Concurrent user created: {email}")
+                logger.info(f" PASS:  Concurrent user created: {email}")
             except Exception as e:
                 logger.warning(f"Concurrent user creation failed for {email}: {e}")
         
@@ -531,7 +531,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         success_rate = len(created_users) / concurrent_user_count
         assert success_rate >= 0.8, f"At least 80% of concurrent user creations should succeed (got {success_rate:.1%})"
         
-        logger.info(f"✅ Concurrent user creation: {len(created_users)}/{concurrent_user_count} succeeded")
+        logger.info(f" PASS:  Concurrent user creation: {len(created_users)}/{concurrent_user_count} succeeded")
         
         # Step 3: Authenticate all users concurrently
         auth_tasks = []
@@ -548,7 +548,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
                     "access_token": tokens["access_token"],
                     "user_id": user_data["id"]
                 })
-                logger.info(f"✅ Concurrent authentication successful: {email}")
+                logger.info(f" PASS:  Concurrent authentication successful: {email}")
             except Exception as e:
                 logger.warning(f"Concurrent authentication failed for {email}: {e}")
         
@@ -556,7 +556,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         auth_success_rate = len(authenticated_users) / len(created_users)
         assert auth_success_rate >= 0.8, f"At least 80% of concurrent authentications should succeed (got {auth_success_rate:.1%})"
         
-        logger.info(f"✅ Concurrent authentication: {len(authenticated_users)}/{len(created_users)} succeeded")
+        logger.info(f" PASS:  Concurrent authentication: {len(authenticated_users)}/{len(created_users)} succeeded")
         
         # Step 4: Test concurrent WebSocket connections (subset for performance)
         websocket_test_count = min(3, len(authenticated_users))
@@ -572,7 +572,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
             try:
                 result = await task
                 websocket_results.append((email, result))
-                logger.info(f"✅ Concurrent WebSocket connection successful: {email}")
+                logger.info(f" PASS:  Concurrent WebSocket connection successful: {email}")
             except Exception as e:
                 logger.warning(f"Concurrent WebSocket connection failed for {email}: {e}")
         
@@ -580,8 +580,8 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         ws_success_rate = len(websocket_results) / websocket_test_count if websocket_test_count > 0 else 1.0
         assert ws_success_rate >= 0.7, f"At least 70% of concurrent WebSocket connections should succeed (got {ws_success_rate:.1%})"
         
-        logger.info(f"✅ Concurrent WebSocket connections: {len(websocket_results)}/{websocket_test_count} succeeded")
-        logger.info("🎉 Concurrent users authentication E2E test after startup PASSED")
+        logger.info(f" PASS:  Concurrent WebSocket connections: {len(websocket_results)}/{websocket_test_count} succeeded")
+        logger.info(" CELEBRATION:  Concurrent users authentication E2E test after startup PASSED")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -593,7 +593,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         CRITICAL: Health monitoring ensures the auth service startup is not just successful
         but also ready to handle production traffic and can be monitored for issues.
         """
-        logger.info("🏥 Starting auth service health monitoring integration E2E test")
+        logger.info("[U+1F3E5] Starting auth service health monitoring integration E2E test")
         
         # Step 1: Ensure auth service is started
         service_urls = await self._ensure_services_running()
@@ -604,7 +604,7 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         assert "timestamp" in health_status, "Health status should include timestamp"
         assert "version" in health_status or "uptime" in health_status, "Health status should include service info"
         
-        logger.info("✅ Basic health check successful")
+        logger.info(" PASS:  Basic health check successful")
         
         # Step 3: Test health endpoint under load (simulate multiple concurrent health checks)
         health_check_tasks = []
@@ -624,27 +624,27 @@ class TestAuthServiceStartupE2E(BaseE2ETest):
         health_success_rate = len(health_results) / len(health_check_tasks)
         assert health_success_rate >= 0.9, f"At least 90% of health checks should succeed under load (got {health_success_rate:.1%})"
         
-        logger.info(f"✅ Health monitoring under load: {len(health_results)}/{len(health_check_tasks)} succeeded")
+        logger.info(f" PASS:  Health monitoring under load: {len(health_results)}/{len(health_check_tasks)} succeeded")
         
         # Step 4: Test readiness probe (service can accept traffic)
         readiness_status = await self._check_service_readiness()
         assert readiness_status, "Auth service should be ready to accept traffic"
         
-        logger.info("✅ Service readiness check successful")
+        logger.info(" PASS:  Service readiness check successful")
         
         # Step 5: Test metrics endpoint (if available)
         try:
             metrics_data = await self._get_service_metrics()
             if metrics_data:
-                logger.info("✅ Service metrics endpoint available")
+                logger.info(" PASS:  Service metrics endpoint available")
                 # Basic metrics validation
                 assert isinstance(metrics_data, dict), "Metrics should be structured data"
             else:
-                logger.info("ℹ️ Service metrics endpoint not available (acceptable)")
+                logger.info("[U+2139][U+FE0F] Service metrics endpoint not available (acceptable)")
         except Exception as e:
-            logger.info(f"ℹ️ Service metrics endpoint not available or failed: {e} (acceptable)")
+            logger.info(f"[U+2139][U+FE0F] Service metrics endpoint not available or failed: {e} (acceptable)")
         
-        logger.info("🎉 Auth service health monitoring integration E2E test PASSED")
+        logger.info(" CELEBRATION:  Auth service health monitoring integration E2E test PASSED")
     
     # Helper methods for E2E test implementations
     

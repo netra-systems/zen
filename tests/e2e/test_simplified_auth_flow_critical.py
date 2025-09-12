@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Critical Authentication Flow E2E Test - Simplified Implementation
 
@@ -304,7 +342,7 @@ class TestSimplifiedAuthFlowCritical:
         total_time = time.time() - start_time
         assert total_time < 30.0, f"Authentication flow took too long: {total_time:.2f}s"
         
-        print(f"✓ Complete authentication pipeline passed in {total_time:.2f}s")
+        print(f"[U+2713] Complete authentication pipeline passed in {total_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_authentication_error_handling(self, auth_tester):
@@ -324,7 +362,7 @@ class TestSimplifiedAuthFlowCritical:
         validation_result = await auth_tester.test_token_validation(invalid_token)
         assert not validation_result["valid"], "Invalid token should be rejected"
         
-        print("✓ Authentication error handling tests passed")
+        print("[U+2713] Authentication error handling tests passed")
     
     @pytest.mark.asyncio  
     async def test_concurrent_authentication_requests(self, auth_tester):
@@ -348,7 +386,7 @@ class TestSimplifiedAuthFlowCritical:
         
         assert successful_registrations == 3, f"Only {successful_registrations}/3 registrations succeeded"
         
-        print("✓ Concurrent authentication tests passed")
+        print("[U+2713] Concurrent authentication tests passed")
     
     @pytest.mark.asyncio
     async def test_authentication_performance(self, auth_tester):
@@ -380,7 +418,7 @@ class TestSimplifiedAuthFlowCritical:
         assert validation_time < 2.0, f"Token validation took too long: {validation_time:.2f}s"
         assert validation_result["valid"], "Token validation should succeed"
         
-        print(f"✓ Authentication performance tests passed:")
+        print(f"[U+2713] Authentication performance tests passed:")
         print(f"  Registration: {registration_time:.2f}s")
         print(f"  Login: {login_time:.2f}s") 
         print(f"  Validation: {validation_time:.2f}s")
@@ -408,7 +446,7 @@ class TestSimplifiedAuthFlowCritical:
             validation_result = await auth_tester.test_token_validation(access_token)
             assert validation_result["valid"], f"Token should remain valid on attempt {i+1}"
         
-        print("✓ Session management tests passed")
+        print("[U+2713] Session management tests passed")
 
 
 if __name__ == "__main__":

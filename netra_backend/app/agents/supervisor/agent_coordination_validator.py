@@ -294,9 +294,9 @@ class AgentCoordinationValidator:
         
         # Log validation results
         if result.coordination_valid:
-            logger.info(f"✅ Complete coordination validation passed for workflow {workflow_id}")
+            logger.info(f" PASS:  Complete coordination validation passed for workflow {workflow_id}")
         else:
-            logger.error(f"❌ Coordination validation failed for workflow {workflow_id}: "
+            logger.error(f" FAIL:  Coordination validation failed for workflow {workflow_id}: "
                         f"Order: {order_valid}, Handoffs: {handoff_integrity.is_valid}, "
                         f"Propagation: {propagation_valid}")
         

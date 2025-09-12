@@ -311,11 +311,11 @@ class AlertEngine:
 
     def _get_spike_indicators(self, trend: ErrorTrend) -> List[str]:
         """Get spike indicator messages."""
-        return ["⚠️ Error spike detected"] if trend.is_spike else []
+        return [" WARNING: [U+FE0F] Error spike detected"] if trend.is_spike else []
 
     def _get_sustained_indicators(self, trend: ErrorTrend) -> List[str]:
         """Get sustained pattern indicator messages."""
-        return ["📈 Sustained error pattern"] if trend.is_sustained else []
+        return ["[U+1F4C8] Sustained error pattern"] if trend.is_sustained else []
 
     def _get_projection_indicators(self, trend: ErrorTrend) -> List[str]:
         """Get projection indicator messages."""

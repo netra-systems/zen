@@ -370,7 +370,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
             assert actual_delay >= expected_delay * 0.9, f"Attempt {i} delay too short"
             assert actual_delay <= expected_delay * 1.1, f"Attempt {i} delay too long"
         
-        logger.info("✅ Exponential backoff timing accuracy test passed")
+        logger.info(" PASS:  Exponential backoff timing accuracy test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -446,7 +446,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
         assert fast_stats["retry_policy_stats"]["backoff_strategy"] == "exponential"
         assert slow_stats["retry_policy_stats"]["backoff_strategy"] == "linear"
         
-        logger.info("✅ Different backoff strategies comparison test passed")
+        logger.info(" PASS:  Different backoff strategies comparison test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -563,7 +563,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
             # Clean up test table
             await postgres.execute("DROP TABLE IF EXISTS retry_test_operations")
         
-        logger.info("✅ Retry with real database operations test passed")
+        logger.info(" PASS:  Retry with real database operations test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -653,7 +653,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
         assert coordination_stats["coordination_effectiveness"] >= 0.3, "Coordination too restrictive"
         assert retry_coordinator.retry_metrics["concurrent_peak"] <= 5, "Coordination limit exceeded"
         
-        logger.info("✅ Concurrent retry coordination test passed")
+        logger.info(" PASS:  Concurrent retry coordination test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -763,7 +763,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
             if failure_rate >= 0.3:
                 assert retry_rate >= 0.1, f"{service_name} not retrying enough for high failure rate"
         
-        logger.info("✅ Retry performance impact measurement test passed")
+        logger.info(" PASS:  Retry performance impact measurement test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -847,7 +847,7 @@ class TestRetryBackoffErrorHandling(BaseIntegrationTest):
         assert stats["successful_operations"] >= 1
         assert stats["failed_operations"] >= 1
         
-        logger.info("✅ Retry integration with circuit breaker test passed")
+        logger.info(" PASS:  Retry integration with circuit breaker test passed")
 
 
 if __name__ == "__main__":

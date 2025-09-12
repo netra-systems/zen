@@ -115,10 +115,10 @@ def _import_core_routers() -> dict:
         if not is_mcp_available():
             mcp_router = None
             import logging
-            logging.getLogger(__name__).info("🔄 MCP router disabled - dependencies not available")
+            logging.getLogger(__name__).info(" CYCLE:  MCP router disabled - dependencies not available")
     except ImportError as e:
         import logging
-        logging.getLogger(__name__).warning(f"⚠️ MCP router not available: {e}")
+        logging.getLogger(__name__).warning(f" WARNING: [U+FE0F] MCP router not available: {e}")
     
     routers = {
         "llm_cache_router": llm_cache_router, 

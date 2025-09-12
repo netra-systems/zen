@@ -157,7 +157,7 @@ class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
             "insights"  # WebSocket events provide user insights and transparency
         )
         
-        self.logger.info(f"✅ All {len(self.required_events)} required WebSocket events stored in database")
+        self.logger.info(f" PASS:  All {len(self.required_events)} required WebSocket events stored in database")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -260,7 +260,7 @@ class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
         assert len(partial_replay) == 3, "Should replay last 3 events"
         assert partial_replay[0]["event_type"] == WebSocketEventType.TOOL_EXECUTING.value
         
-        self.logger.info(f"✅ WebSocket event replay validated for {len(execution_events)} events")
+        self.logger.info(f" PASS:  WebSocket event replay validated for {len(execution_events)} events")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -343,7 +343,7 @@ class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
         assert integrity_result["valid_events"] >= len(ordered_events)
         assert integrity_result["corrupted_events"] == 0
         
-        self.logger.info(f"✅ Event ordering validation completed for {len(ordered_events)} events")
+        self.logger.info(f" PASS:  Event ordering validation completed for {len(ordered_events)} events")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -450,7 +450,7 @@ class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
         assert time_filtered_audit["total_events"] == len(audit_events), \
             "All events should be within time range"
         
-        self.logger.info(f"✅ Audit trail validation completed for {len(audit_events)} events")
+        self.logger.info(f" PASS:  Audit trail validation completed for {len(audit_events)} events")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -555,7 +555,7 @@ class TestWebSocketEventPersistenceIntegration(BaseIntegrationTest):
         assert total_count == total_events_expected, \
             f"Expected {total_events_expected} total events, got {total_count}"
         
-        self.logger.info(f"✅ Concurrent event persistence validated for {num_concurrent_users} users")
+        self.logger.info(f" PASS:  Concurrent event persistence validated for {num_concurrent_users} users")
     
     # Helper methods for WebSocket event operations
     

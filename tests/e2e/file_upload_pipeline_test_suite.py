@@ -55,7 +55,7 @@ def get_test_suite_info():
         "business_value": "$45K MRR",
         "description": "Complete file upload pipeline validation",
         "requirements": [
-            "Frontend → Backend → Agent → Storage → WebSocket Response",
+            "Frontend  ->  Backend  ->  Agent  ->  Storage  ->  WebSocket Response",
             "NO MOCKING - Real file processing",
             "Execution time < 10 seconds",
             "Enterprise reliability validation"

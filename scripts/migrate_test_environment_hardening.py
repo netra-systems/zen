@@ -9,6 +9,7 @@ This addresses the CRITICAL finding from CRITICAL_CONFIG_REGRESSION_AUDIT_REPORT
 about test environment variable pollution risks.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import re
 import sys
@@ -154,7 +155,7 @@ from unittest.mock import patch
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class IsolatedTestCase(unittest.TestCase):
+class IsolatedTestCase(SSotBaseTestCase):
     """
     Base test case with automatic environment isolation.
     """
@@ -229,7 +230,7 @@ def patch_env(target: str, **env_vars) -> Callable:
 
 # MIGRATION GUIDE:
 # 
-# 1. Replace unittest.TestCase with IsolatedTestCase:
+# 1. Replace SSotBaseTestCase with IsolatedTestCase:
 #    class TestMyFeature(IsolatedTestCase):
 #        def test_something(self):
 #            self.set_env('KEY', 'value')

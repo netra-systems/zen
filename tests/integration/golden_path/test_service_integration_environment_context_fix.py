@@ -155,7 +155,7 @@ class TestServiceIntegrationEnvironmentContextFix:
     async def test_complete_integration_chain_staging_scenario(
         self, mock_staging_environment_context
     ):
-        """Test complete integration: Environment Detection → Validation → Correct URLs."""
+        """Test complete integration: Environment Detection  ->  Validation  ->  Correct URLs."""
         
         # Mock the environment context service to return staging
         with patch('netra_backend.app.core.environment_context.get_environment_context_service') as mock_get_service:

@@ -135,7 +135,7 @@ class TestSsotEventValidatorStaging(SSotAsyncTestCase):
         print(f"Failed scenarios: {len(failed_scenarios)}")
         
         for scenario, result in validation_results.items():
-            status = '✅ PASS' if result.get('execution_success', False) else '❌ FAIL'
+            status = ' PASS:  PASS' if result.get('execution_success', False) else ' FAIL:  FAIL'
             print(f"  {scenario}: {status}")
             if 'validation_success_rate' in result:
                 print(f"    Validation rate: {result['validation_success_rate']:.1%}")
@@ -232,7 +232,7 @@ class TestSsotEventValidatorStaging(SSotAsyncTestCase):
         print(f"\nConcurrent load testing results:")
         for user_count, result in load_test_results.items():
             if 'exception' in result:
-                print(f"  {user_count} users: ❌ EXCEPTION - {result['exception']}")
+                print(f"  {user_count} users:  FAIL:  EXCEPTION - {result['exception']}")
             else:
                 print(f"  {user_count} users: {result['success_rate']:.1%} success")
                 print(f"    Avg response: {result['average_response_time']:.3f}s")
@@ -340,7 +340,7 @@ class TestSsotEventValidatorStaging(SSotAsyncTestCase):
         print(f"Failed integrations: {len(failed_integrations)}")
         
         for check, result in integration_results.items():
-            status = '✅ PASS' if result.get('success', False) else '❌ FAIL'
+            status = ' PASS:  PASS' if result.get('success', False) else ' FAIL:  FAIL'
             print(f"  {check}: {status}")
             if 'response_time' in result:
                 print(f"    Response time: {result['response_time']:.3f}s")

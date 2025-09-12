@@ -64,9 +64,9 @@ class RealDatabaseConnections:
                 max_size=10,
                 command_timeout=30
             )
-            logger.info("✅ PostgreSQL connection established")
+            logger.info(" PASS:  PostgreSQL connection established")
         except Exception as e:
-            logger.error(f"❌ CRITICAL: PostgreSQL connection failed: {e}")
+            logger.error(f" FAIL:  CRITICAL: PostgreSQL connection failed: {e}")
             raise ConnectionError(f"PostgreSQL unavailable for E2E test {self.test_id}: {e}")
         
         # Connect to ClickHouse - REQUIRED  
@@ -82,9 +82,9 @@ class RealDatabaseConnections:
             )
             # Test connection
             self.clickhouse_client.query("SELECT 1")
-            logger.info("✅ ClickHouse connection established")
+            logger.info(" PASS:  ClickHouse connection established")
         except Exception as e:
-            logger.error(f"❌ CRITICAL: ClickHouse connection failed: {e}")
+            logger.error(f" FAIL:  CRITICAL: ClickHouse connection failed: {e}")
             raise ConnectionError(f"ClickHouse unavailable for E2E test {self.test_id}: {e}")
         
         # Connect to Redis - REQUIRED
@@ -93,9 +93,9 @@ class RealDatabaseConnections:
             self.redis_client = redis.from_url(redis_url)
             # Test connection
             await self.redis_client.ping()
-            logger.info("✅ Redis connection established")
+            logger.info(" PASS:  Redis connection established")
         except Exception as e:
-            logger.error(f"❌ CRITICAL: Redis connection failed: {e}")
+            logger.error(f" FAIL:  CRITICAL: Redis connection failed: {e}")
             raise ConnectionError(f"Redis unavailable for E2E test {self.test_id}: {e}")
 
     async def cleanup_test_data(self) -> None:
@@ -431,7 +431,7 @@ class TestRealDatabaseOperations:
         assert result["business_tier"] == "enterprise", "BUSINESS FAILURE: Enterprise tier not set"
         assert "$15K+" in result["revenue_impact"], "BUSINESS FAILURE: Revenue impact not calculated"
         
-        logger.info(f"✅ BUSINESS SUCCESS: Enterprise user flow completed - {result['revenue_impact']}")
+        logger.info(f" PASS:  BUSINESS SUCCESS: Enterprise user flow completed - {result['revenue_impact']}")
 
     @pytest.mark.asyncio  
     async def test_ai_conversation_storage_revenue_generation(self, real_db_test):
@@ -480,7 +480,7 @@ class TestRealDatabaseOperations:
         assert "$" in result["conversation_value"], "BUSINESS FAILURE: Revenue calculation failed"
         assert "AI conversation" in result["business_impact"], "BUSINESS FAILURE: Business impact not tracked"
         
-        logger.info(f"✅ BUSINESS SUCCESS: AI conversation stored - {result['conversation_value']} value tracked")
+        logger.info(f" PASS:  BUSINESS SUCCESS: AI conversation stored - {result['conversation_value']} value tracked")
 
     @pytest.mark.asyncio
     async def test_enterprise_session_management_revenue_protection(self, real_db_test):
@@ -509,7 +509,7 @@ class TestRealDatabaseOperations:
         assert result["enterprise_features_enabled"] is True, "BUSINESS FAILURE: Enterprise features not enabled"
         assert "$15K+" in result["business_impact"], "BUSINESS FAILURE: Revenue impact not tracked"
         
-        logger.info(f"✅ BUSINESS SUCCESS: Enterprise session active - {result['business_impact']}")
+        logger.info(f" PASS:  BUSINESS SUCCESS: Enterprise session active - {result['business_impact']}")
 
     @pytest.mark.asyncio
     async def test_cross_database_transaction_atomicity_data_integrity(self, real_db_test):
@@ -566,11 +566,11 @@ class TestRealDatabaseOperations:
             
             transaction_time = time.time() - test_start
             
-            logger.info(f"✅ BUSINESS SUCCESS: Complete customer onboarding in {transaction_time:.2f}s - data integrity maintained")
+            logger.info(f" PASS:  BUSINESS SUCCESS: Complete customer onboarding in {transaction_time:.2f}s - data integrity maintained")
             
         except Exception as e:
             # In a real atomic transaction, this would trigger rollback
-            logger.error(f"❌ BUSINESS FAILURE: Customer onboarding transaction failed: {e}")
+            logger.error(f" FAIL:  BUSINESS FAILURE: Customer onboarding transaction failed: {e}")
             raise AssertionError(f"BUSINESS CRITICAL: Transaction atomicity failed - customer data at risk: {e}")
 
     @pytest.mark.asyncio
@@ -600,7 +600,7 @@ class TestRealDatabaseOperations:
         assert pool_size > 0, "BUSINESS CRITICAL: No database connections available"
         assert pool_size <= max_size, "BUSINESS CRITICAL: Connection pool misconfigured"
         
-        logger.info(f"✅ BUSINESS SUCCESS: All databases available - {pool_size}/{max_size} connections active")
+        logger.info(f" PASS:  BUSINESS SUCCESS: All databases available - {pool_size}/{max_size} connections active")
 
 
 if __name__ == "__main__":

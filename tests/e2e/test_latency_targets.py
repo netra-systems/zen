@@ -30,7 +30,7 @@
     # REMOVED_SYNTAX_ERROR: Validates first byte time, WebSocket latency, auth response time, and API P99 latency.
 
     # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-        # REMOVED_SYNTAX_ERROR: 1. Segment: All customer tiers (Free → Enterprise conversion)
+        # REMOVED_SYNTAX_ERROR: 1. Segment: All customer tiers (Free  ->  Enterprise conversion)
         # REMOVED_SYNTAX_ERROR: 2. Business Goal: Speed drives user satisfaction and prevents churn
         # REMOVED_SYNTAX_ERROR: 3. Value Impact: Fast response times increase conversion rates by 15-25%
         # REMOVED_SYNTAX_ERROR: 4. Revenue Impact: Latency issues can cause 30%+ user abandonment

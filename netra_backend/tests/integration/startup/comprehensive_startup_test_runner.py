@@ -208,7 +208,7 @@ class StartupTestRunner:
         phases_to_run = specific_phases or self.STARTUP_PHASES
         
         logger.info("=" * 80)
-        logger.info("🚀 COMPREHENSIVE STARTUP PHASE TEST EXECUTION")
+        logger.info("[U+1F680] COMPREHENSIVE STARTUP PHASE TEST EXECUTION")
         logger.info("=" * 80)
         logger.info(f"Environment: {self.report.environment}")
         logger.info(f"Phases to run: {', '.join(phases_to_run)}")
@@ -222,21 +222,21 @@ class StartupTestRunner:
                     logger.warning(f"Unknown phase '{phase_name}' - skipping")
                     continue
                     
-                logger.info(f"🔄 PHASE: {phase_name.upper()}")
+                logger.info(f" CYCLE:  PHASE: {phase_name.upper()}")
                 phase_result = await self._run_phase_tests(phase_name)
                 self.report.phases.append(phase_result)
                 
                 # Log phase summary
-                logger.info(f"✅ Phase {phase_name}: {phase_result.passed}/{phase_result.total_tests} passed "
+                logger.info(f" PASS:  Phase {phase_name}: {phase_result.passed}/{phase_result.total_tests} passed "
                           f"({phase_result.success_rate:.1f}%) in {phase_result.total_time:.2f}s")
                 
                 # Check if phase failed critically
                 if phase_result.failed > 0 or phase_result.errors > 0:
-                    logger.warning(f"⚠️ Phase {phase_name} had {phase_result.failed} failures, "
+                    logger.warning(f" WARNING: [U+FE0F] Phase {phase_name} had {phase_result.failed} failures, "
                                  f"{phase_result.errors} errors")
                     
                     if self.fail_fast:
-                        logger.error(f"🛑 Stopping execution due to phase {phase_name} failures (fail-fast mode)")
+                        logger.error(f"[U+1F6D1] Stopping execution due to phase {phase_name} failures (fail-fast mode)")
                         break
                 
                 logger.info("")
@@ -280,7 +280,7 @@ class StartupTestRunner:
                 
             # Run pytest on the test file
             try:
-                logger.info(f"  📋 Running {test_file}...")
+                logger.info(f"  [U+1F4CB] Running {test_file}...")
                 test_results = await self._run_pytest_file(test_path, phase_name)
                 
                 for result in test_results:
@@ -289,11 +289,11 @@ class StartupTestRunner:
                     
                     # Log individual test result
                     status_icon = {
-                        'passed': '✅',
-                        'failed': '❌', 
-                        'skipped': '⏭️',
-                        'error': '💥'
-                    }.get(result.status, '❓')
+                        'passed': ' PASS: ',
+                        'failed': ' FAIL: ', 
+                        'skipped': '[U+23ED][U+FE0F]',
+                        'error': '[U+1F4A5]'
+                    }.get(result.status, '[U+2753]')
                     
                     logger.info(f"    {status_icon} {result.test_name} ({result.execution_time:.2f}s)")
                     
@@ -313,7 +313,7 @@ class StartupTestRunner:
                 phase_result.add_test_result(error_result)
                 phase_result.total_tests += 1
                 
-                logger.error(f"    💥 Failed to execute {test_file}: {e}")
+                logger.error(f"    [U+1F4A5] Failed to execute {test_file}: {e}")
         
         return phase_result
     
@@ -570,31 +570,31 @@ class StartupTestRunner:
     def _log_final_summary(self):
         """Log comprehensive final summary."""
         logger.info("=" * 80)
-        logger.info("📊 COMPREHENSIVE STARTUP TEST RESULTS")
+        logger.info(" CHART:  COMPREHENSIVE STARTUP TEST RESULTS")
         logger.info("=" * 80)
         
         # Overall metrics
-        logger.info(f"🎯 Overall Status: {self.report.overall_status.upper()}")
-        logger.info(f"⏱️  Total Time: {self.report.total_execution_time:.2f}s")
-        logger.info(f"📈 Success Rate: {self.report.overall_success_rate:.1f}%")
-        logger.info(f"🧪 Total Tests: {self.report.total_tests}")
-        logger.info(f"✅ Passed: {self.report.total_passed}")
-        logger.info(f"❌ Failed: {self.report.total_failed}")
+        logger.info(f" TARGET:  Overall Status: {self.report.overall_status.upper()}")
+        logger.info(f"[U+23F1][U+FE0F]  Total Time: {self.report.total_execution_time:.2f}s")
+        logger.info(f"[U+1F4C8] Success Rate: {self.report.overall_success_rate:.1f}%")
+        logger.info(f"[U+1F9EA] Total Tests: {self.report.total_tests}")
+        logger.info(f" PASS:  Passed: {self.report.total_passed}")
+        logger.info(f" FAIL:  Failed: {self.report.total_failed}")
         logger.info("")
         
         # Business value validation
-        chat_icon = "✅" if self.report.chat_readiness else "❌"
-        business_icon = "✅" if self.report.business_value_validated else "❌"
+        chat_icon = " PASS: " if self.report.chat_readiness else " FAIL: "
+        business_icon = " PASS: " if self.report.business_value_validated else " FAIL: "
         
-        logger.info("🎯 BUSINESS VALUE VALIDATION:")
+        logger.info(" TARGET:  BUSINESS VALUE VALIDATION:")
         logger.info(f"  {chat_icon} Chat Readiness: {'READY' if self.report.chat_readiness else 'NOT READY'}")
         logger.info(f"  {business_icon} Business Value: {'VALIDATED' if self.report.business_value_validated else 'NOT VALIDATED'}")
         logger.info("")
         
         # Phase breakdown
-        logger.info("📋 PHASE BREAKDOWN:")
+        logger.info("[U+1F4CB] PHASE BREAKDOWN:")
         for phase in self.report.phases:
-            phase_icon = "✅" if phase.success_rate >= 80 else "❌" if phase.success_rate < 50 else "⚠️"
+            phase_icon = " PASS: " if phase.success_rate >= 80 else " FAIL: " if phase.success_rate < 50 else " WARNING: [U+FE0F]"
             logger.info(f"  {phase_icon} {phase.phase_name.upper()}: {phase.passed}/{phase.total_tests} "
                        f"({phase.success_rate:.1f}%) - {phase.total_time:.2f}s")
         
@@ -607,9 +607,9 @@ class StartupTestRunner:
         
         if critical_issues:
             logger.warning("")
-            logger.warning("🚨 CRITICAL BUSINESS VALUE ISSUES:")
+            logger.warning(" ALERT:  CRITICAL BUSINESS VALUE ISSUES:")
             for issue in critical_issues[:5]:  # Show top 5
-                logger.warning(f"  ⚠️ {issue}")
+                logger.warning(f"   WARNING: [U+FE0F] {issue}")
             if len(critical_issues) > 5:
                 logger.warning(f"  ... and {len(critical_issues) - 5} more")
         
@@ -617,11 +617,11 @@ class StartupTestRunner:
         
         # Final recommendation
         if self.report.chat_readiness and self.report.business_value_validated:
-            logger.info("🟢 RECOMMENDATION: System ready for chat operations")
+            logger.info("[U+1F7E2] RECOMMENDATION: System ready for chat operations")
         elif self.report.chat_readiness:
-            logger.info("🟡 RECOMMENDATION: Chat ready but business validation needs attention")  
+            logger.info("[U+1F7E1] RECOMMENDATION: Chat ready but business validation needs attention")  
         else:
-            logger.error("🔴 RECOMMENDATION: System NOT ready for chat operations")
+            logger.error("[U+1F534] RECOMMENDATION: System NOT ready for chat operations")
         
         logger.info("=" * 80)
     
@@ -638,7 +638,7 @@ class StartupTestRunner:
         with open(output_path, 'w') as f:
             json.dump(self.report.to_dict(), f, indent=2)
         
-        logger.info(f"📄 Test report saved: {output_path}")
+        logger.info(f"[U+1F4C4] Test report saved: {output_path}")
         return output_path
 
 

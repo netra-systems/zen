@@ -84,11 +84,11 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         self.test_clients: List[RealWebSocketTestClient] = []
         self.security_violations: List[str] = []
         
-        print(f"🔧 Test setup completed for environment: {self.test_environment}")
+        print(f"[U+1F527] Test setup completed for environment: {self.test_environment}")
     
     async def cleanup_method(self):
         """Clean up test resources."""
-        print("🧹 Cleaning up WebSocket token lifecycle test resources...")
+        print("[U+1F9F9] Cleaning up WebSocket token lifecycle test resources...")
         
         # Close all test clients
         for client in self.test_clients:
@@ -104,7 +104,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         self.test_clients.clear()
         self.security_violations.clear()
         
-        print("✅ Cleanup completed")
+        print(" PASS:  Cleanup completed")
     
     async def test_token_expiration_during_active_connection(self):
         """
@@ -118,7 +118,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         3. Active connections handle token expiry correctly
         4. No security bypass mechanisms accept expired tokens
         """
-        print("🔄 Testing token expiration during active connection...")
+        print(" CYCLE:  Testing token expiration during active connection...")
         
         try:
             # Step 1: Create user with short-lived token (2 minutes)
@@ -135,7 +135,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 permissions=["read", "write"]
             )
             
-            print(f"✅ Created short-lived token (2min expiry) for user: {user_id}")
+            print(f" PASS:  Created short-lived token (2min expiry) for user: {user_id}")
             
             # Step 2: Establish WebSocket connection
             client = await create_authenticated_websocket_client(
@@ -147,7 +147,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             self.test_clients.append(client)
             
             await client.connect()
-            print(f"✅ WebSocket connected with short-lived token")
+            print(f" PASS:  WebSocket connected with short-lived token")
             
             # Step 3: Verify connection works initially
             initial_test_event = {
@@ -157,17 +157,17 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             }
             
             await client.send_event("initial_test", initial_test_event)
-            print("✅ Initial event sent successfully with valid token")
+            print(" PASS:  Initial event sent successfully with valid token")
             
             # Step 4: Wait for token to expire (plus buffer time)
             expiry_wait_seconds = (2 * 60) + 30  # 2 minutes + 30 second buffer
-            print(f"⏳ Waiting {expiry_wait_seconds}s for token to expire...")
+            print(f"[U+23F3] Waiting {expiry_wait_seconds}s for token to expire...")
             
             start_wait = time.time()
             await asyncio.sleep(expiry_wait_seconds)
             actual_wait = time.time() - start_wait
             
-            print(f"⏰ Waited {actual_wait:.1f}s for token expiry")
+            print(f"[U+23F0] Waited {actual_wait:.1f}s for token expiry")
             
             # Step 5: Validate expired token is rejected by auth helper
             validation_result = await auth_helper.validate_jwt_token(short_token)
@@ -183,7 +183,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 # FAIL HARD - this is a critical security issue
                 pytest.fail(violation)
             
-            print(f"✅ Expired token properly rejected: {validation_result.get('error', 'Token invalid')}")
+            print(f" PASS:  Expired token properly rejected: {validation_result.get('error', 'Token invalid')}")
             
             # Step 6: Test WebSocket behavior with expired token
             try:
@@ -208,7 +208,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 pytest.fail(violation)
                 
             except Exception as e:
-                print(f"✅ WebSocket properly rejected expired token: {e}")
+                print(f" PASS:  WebSocket properly rejected expired token: {e}")
                 # This is expected behavior - expired tokens should be rejected
             
             # Step 7: Test connection state after token expiry
@@ -217,14 +217,14 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 await client.receive_event(timeout=3.0)
                 
                 # If successful, it might indicate connection is still active inappropriately
-                print("⚠️ WARNING: Connection still active after token expiry (may be acceptable)")
+                print(" WARNING: [U+FE0F] WARNING: Connection still active after token expiry (may be acceptable)")
                 
             except asyncio.TimeoutError:
-                print("✅ No events received with expired token (expected)")
+                print(" PASS:  No events received with expired token (expected)")
             except Exception as e:
-                print(f"✅ Connection properly handled expired token: {e}")
+                print(f" PASS:  Connection properly handled expired token: {e}")
             
-            print("✅ Token expiration test PASSED - expired tokens properly rejected")
+            print(" PASS:  Token expiration test PASSED - expired tokens properly rejected")
             
         except SecurityError as e:
             # Re-raise security errors to ensure test fails
@@ -242,7 +242,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         3. New tokens are accepted properly
         4. Connection state is maintained during refresh
         """
-        print("🔄 Testing token refresh scenario...")
+        print(" CYCLE:  Testing token refresh scenario...")
         
         try:
             # Step 1: Create initial user and token
@@ -259,7 +259,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 permissions=["read", "write"]
             )
             
-            print(f"✅ Created initial token for user: {user_id}")
+            print(f" PASS:  Created initial token for user: {user_id}")
             
             # Step 2: Connect with initial token
             client = await create_authenticated_websocket_client(
@@ -271,14 +271,14 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             self.test_clients.append(client)
             
             await client.connect()
-            print("✅ Connected with initial token")
+            print(" PASS:  Connected with initial token")
             
             # Step 3: Test initial connection works
             await client.send_event("initial_ping", {"test": "initial"})
-            print("✅ Initial connection validated")
+            print(" PASS:  Initial connection validated")
             
             # Step 4: Generate refresh token
-            print("🔄 Generating refresh token...")
+            print(" CYCLE:  Generating refresh token...")
             
             refresh_token = auth_helper.create_test_jwt_token(
                 user_id=user_id,
@@ -287,7 +287,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 permissions=["read", "write", "refreshed"]  # Additional permission to verify refresh
             )
             
-            print("✅ Refresh token generated with extended expiry and permissions")
+            print(" PASS:  Refresh token generated with extended expiry and permissions")
             
             # Step 5: Validate refresh token
             refresh_validation = await auth_helper.validate_jwt_token(refresh_token)
@@ -295,15 +295,15 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             if not refresh_validation.get("valid", False):
                 pytest.fail(f"Refresh token validation failed: {refresh_validation.get('error')}")
             
-            print(f"✅ Refresh token validated: {refresh_validation.get('user_id')}")
+            print(f" PASS:  Refresh token validated: {refresh_validation.get('user_id')}")
             
             # Step 6: Test that initial token can still be validated (before invalidation)
             initial_validation = await auth_helper.validate_jwt_token(initial_token)
             
             if not initial_validation.get("valid", False):
-                print(f"ℹ️ Initial token already expired: {initial_validation.get('error')}")
+                print(f"[U+2139][U+FE0F] Initial token already expired: {initial_validation.get('error')}")
             else:
-                print("ℹ️ Initial token still valid (as expected before refresh)")
+                print("[U+2139][U+FE0F] Initial token still valid (as expected before refresh)")
             
             # Step 7: Update client with refresh token (simulating refresh process)
             # In a real application, this would happen through a refresh endpoint
@@ -311,7 +311,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 client.authenticated_user.jwt_token = refresh_token
                 client.authenticated_user.permissions.append("refreshed")
             
-            print("✅ Client updated with refresh token")
+            print(" PASS:  Client updated with refresh token")
             
             # Step 8: Test connection with refresh token
             await client.send_event("refresh_test", {
@@ -319,7 +319,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 "new_permission": "refreshed" in (client.authenticated_user.permissions or [])
             })
             
-            print("✅ Connection works with refresh token")
+            print(" PASS:  Connection works with refresh token")
             
             # Step 9: Test that refresh token has extended permissions
             try:
@@ -327,12 +327,12 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                     "action": "use_refreshed_permission",
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 })
-                print("✅ Refresh token enables extended permissions")
+                print(" PASS:  Refresh token enables extended permissions")
                 
             except Exception as e:
-                print(f"ℹ️ Privileged action blocked: {e} (may be expected)")
+                print(f"[U+2139][U+FE0F] Privileged action blocked: {e} (may be expected)")
             
-            print("✅ Token refresh scenario test PASSED")
+            print(" PASS:  Token refresh scenario test PASSED")
             
         except Exception as e:
             pytest.fail(f"Token refresh scenario test failed: {e}")
@@ -350,7 +350,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         4. Token manipulation attempts are blocked
         5. None algorithm attacks are prevented
         """
-        print("🔍 Testing malformed token handling with hard failure validation...")
+        print(" SEARCH:  Testing malformed token handling with hard failure validation...")
         
         # Define malformed tokens that should ALL be rejected
         malformed_test_cases = [
@@ -395,7 +395,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         critical_violations = []
         
         for i, test_case in enumerate(malformed_test_cases):
-            print(f"🧪 Testing case {i+1}/{len(malformed_test_cases)}: {test_case['name']}")
+            print(f"[U+1F9EA] Testing case {i+1}/{len(malformed_test_cases)}: {test_case['name']}")
             
             # Step 1: Test token validation
             try:
@@ -409,12 +409,12 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                         f"This represents a MAJOR authentication bypass vulnerability."
                     )
                     critical_violations.append(violation)
-                    print(f"❌ {violation}")
+                    print(f" FAIL:  {violation}")
                 else:
-                    print(f"✅ {test_case['name']} properly rejected: {validation_result.get('error', 'Invalid token')}")
+                    print(f" PASS:  {test_case['name']} properly rejected: {validation_result.get('error', 'Invalid token')}")
             
             except Exception as e:
-                print(f"✅ {test_case['name']} validation failed as expected: {e}")
+                print(f" PASS:  {test_case['name']} validation failed as expected: {e}")
             
             # Step 2: Test WebSocket connection with malformed token
             try:
@@ -450,19 +450,19 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                         f"This allows unauthorized access with invalid authentication."
                     )
                     critical_violations.append(violation)
-                    print(f"❌ {violation}")
+                    print(f" FAIL:  {violation}")
                     
                     # Try to close the connection if it was established
                     await test_client.close()
                     
                 except Exception as e:
-                    print(f"✅ WebSocket connection properly blocked for {test_case['name']}: {e}")
+                    print(f" PASS:  WebSocket connection properly blocked for {test_case['name']}: {e}")
                 
                 if not connection_success:
-                    print(f"✅ {test_case['name']} WebSocket connection blocked")
+                    print(f" PASS:  {test_case['name']} WebSocket connection blocked")
                 
             except Exception as e:
-                print(f"✅ {test_case['name']} WebSocket test failed as expected: {e}")
+                print(f" PASS:  {test_case['name']} WebSocket test failed as expected: {e}")
         
         # CRITICAL: Fail hard if ANY malformed tokens were accepted
         if critical_violations:
@@ -478,7 +478,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 f"IMMEDIATE ACTION REQUIRED: Fix authentication validation logic."
             )
         
-        print("✅ Malformed token handling test PASSED - all malformed tokens properly rejected")
+        print(" PASS:  Malformed token handling test PASSED - all malformed tokens properly rejected")
     
     async def test_token_manipulation_detection(self):
         """
@@ -490,7 +490,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         3. Header manipulation is blocked
         4. Claims modification is prevented
         """
-        print("🕵️ Testing token manipulation detection...")
+        print("[U+1F575][U+FE0F] Testing token manipulation detection...")
         
         try:
             # Step 1: Create valid token as baseline
@@ -506,7 +506,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                 permissions=["read"]
             )
             
-            print(f"✅ Created valid baseline token for user: {user_id}")
+            print(f" PASS:  Created valid baseline token for user: {user_id}")
             
             # Step 2: Validate baseline token works
             baseline_validation = await auth_helper.validate_jwt_token(valid_token)
@@ -514,7 +514,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             if not baseline_validation.get("valid", False):
                 pytest.fail(f"Baseline token validation failed: {baseline_validation.get('error')}")
             
-            print("✅ Baseline token validation successful")
+            print(" PASS:  Baseline token validation successful")
             
             # Step 3: Test various token manipulation attempts
             token_parts = valid_token.split('.')
@@ -550,7 +550,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             manipulation_violations = []
             
             for attempt in manipulation_attempts:
-                print(f"🎯 Testing: {attempt['name']}")
+                print(f" TARGET:  Testing: {attempt['name']}")
                 
                 # Test validation of manipulated token
                 try:
@@ -562,12 +562,12 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                             f"{attempt['description']}. Manipulated token was accepted as valid."
                         )
                         manipulation_violations.append(violation)
-                        print(f"❌ {violation}")
+                        print(f" FAIL:  {violation}")
                     else:
-                        print(f"✅ {attempt['name']} properly rejected: {manipulation_validation.get('error', 'Invalid')}")
+                        print(f" PASS:  {attempt['name']} properly rejected: {manipulation_validation.get('error', 'Invalid')}")
                 
                 except Exception as e:
-                    print(f"✅ {attempt['name']} validation failed as expected: {e}")
+                    print(f" PASS:  {attempt['name']} validation failed as expected: {e}")
             
             # Fail if any manipulations were accepted
             if manipulation_violations:
@@ -576,7 +576,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                     "\n".join(manipulation_violations)
                 )
             
-            print("✅ Token manipulation detection test PASSED")
+            print(" PASS:  Token manipulation detection test PASSED")
             
         except Exception as e:
             pytest.fail(f"Token manipulation detection test failed: {e}")
@@ -589,7 +589,7 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         and measures the performance improvement from optimizations.
         CRITICAL: This test FAILS HARD for any security violations.
         """
-        print("🔒 Running comprehensive token lifecycle security test suite with performance optimizations...")
+        print("[U+1F512] Running comprehensive token lifecycle security test suite with performance optimizations...")
         
         try:
             # Measure performance with optimizations enabled
@@ -606,35 +606,35 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             # Log performance results
             if test_results.get("performance_metrics"):
                 metrics = test_results["performance_metrics"]
-                print(f"⚡ PERFORMANCE METRICS:")
-                print(f"   • Total duration: {suite_duration:.2f}s")
-                print(f"   • Token generation time: {metrics['total_token_generation_time']:.3f}s")
-                print(f"   • Connection establishment time: {metrics['total_connection_establishment_time']:.3f}s")
-                print(f"   • Parallel operations: {metrics['parallel_operations_count']}")
+                print(f" LIGHTNING:  PERFORMANCE METRICS:")
+                print(f"   [U+2022] Total duration: {suite_duration:.2f}s")
+                print(f"   [U+2022] Token generation time: {metrics['total_token_generation_time']:.3f}s")
+                print(f"   [U+2022] Connection establishment time: {metrics['total_connection_establishment_time']:.3f}s")
+                print(f"   [U+2022] Parallel operations: {metrics['parallel_operations_count']}")
                 
                 if metrics.get("token_cache_stats"):
                     cache_stats = metrics["token_cache_stats"]
-                    print(f"   • Token cache hit rate: {cache_stats['hit_rate_percent']}%")
-                    print(f"   • Cache hits/misses: {cache_stats['cache_hits']}/{cache_stats['cache_misses']}")
+                    print(f"   [U+2022] Token cache hit rate: {cache_stats['hit_rate_percent']}%")
+                    print(f"   [U+2022] Cache hits/misses: {cache_stats['cache_hits']}/{cache_stats['cache_misses']}")
                 
                 if metrics.get("connection_pool_stats"):
                     pool_stats = metrics["connection_pool_stats"]
-                    print(f"   • Connection pool hit rate: {pool_stats['hit_rate_percent']}%")
-                    print(f"   • Pool hits/misses: {pool_stats['pool_hits']}/{pool_stats['pool_misses']}")
+                    print(f"   [U+2022] Connection pool hit rate: {pool_stats['hit_rate_percent']}%")
+                    print(f"   [U+2022] Pool hits/misses: {pool_stats['pool_hits']}/{pool_stats['pool_misses']}")
                 
                 savings_ms = metrics.get("optimization_savings_estimate_ms", 0)
                 if savings_ms > 0:
-                    print(f"   • Estimated savings: {savings_ms:.1f}ms ({savings_ms/1000:.1f}s)")
+                    print(f"   [U+2022] Estimated savings: {savings_ms:.1f}ms ({savings_ms/1000:.1f}s)")
                     improvement_percent = (savings_ms / 1000) / suite_duration * 100
-                    print(f"   • Performance improvement estimate: {improvement_percent:.1f}%")
+                    print(f"   [U+2022] Performance improvement estimate: {improvement_percent:.1f}%")
                     
                     # Check if we achieved the target 30% improvement
                     if improvement_percent >= 30:
-                        print(f"✅ TARGET ACHIEVED: {improvement_percent:.1f}% performance improvement (target: 30%)")
+                        print(f" PASS:  TARGET ACHIEVED: {improvement_percent:.1f}% performance improvement (target: 30%)")
                     elif improvement_percent >= 15:
-                        print(f"🔶 GOOD IMPROVEMENT: {improvement_percent:.1f}% performance improvement (target: 30%)")
+                        print(f"[U+1F536] GOOD IMPROVEMENT: {improvement_percent:.1f}% performance improvement (target: 30%)")
                     else:
-                        print(f"⚠️ LOW IMPROVEMENT: {improvement_percent:.1f}% performance improvement (target: 30%)")
+                        print(f" WARNING: [U+FE0F] LOW IMPROVEMENT: {improvement_percent:.1f}% performance improvement (target: 30%)")
             
             # Store performance data for comparison
             self.baseline_duration = suite_duration
@@ -655,9 +655,9 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
                     f"Security violations: {len(test_results['security_violations'])}"
                 )
             
-            print(f"✅ Comprehensive token lifecycle security test PASSED: {success_rate:.1f}% success rate")
-            print(f"📊 Tests completed: {test_results['total_tests']} passed, 0 failed")
-            print(f"⏱️ Total duration: {test_results['total_duration']:.2f}s")
+            print(f" PASS:  Comprehensive token lifecycle security test PASSED: {success_rate:.1f}% success rate")
+            print(f" CHART:  Tests completed: {test_results['total_tests']} passed, 0 failed")
+            print(f"[U+23F1][U+FE0F] Total duration: {test_results['total_duration']:.2f}s")
             
             # Ensure no security violations
             if test_results["security_violations"]:
@@ -678,11 +678,11 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
         This test measures the actual performance improvement from optimizations
         and validates that the 30% improvement target is achieved.
         """
-        print("⚡ Testing performance optimization improvements...")
+        print(" LIGHTNING:  Testing performance optimization improvements...")
         
         try:
             # Test 1: Run with optimizations DISABLED
-            print("📊 Phase 1: Running tests WITHOUT optimizations...")
+            print(" CHART:  Phase 1: Running tests WITHOUT optimizations...")
             
             baseline_tester = WebSocketAuthenticationTester(
                 backend_url=self.backend_url,
@@ -700,10 +700,10 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             
             await baseline_tester.cleanup()
             
-            print(f"🐌 Baseline (no optimizations): {baseline_duration:.2f}s")
+            print(f"[U+1F40C] Baseline (no optimizations): {baseline_duration:.2f}s")
             
             # Test 2: Run with optimizations ENABLED
-            print("📊 Phase 2: Running tests WITH optimizations...")
+            print(" CHART:  Phase 2: Running tests WITH optimizations...")
             
             optimized_tester = WebSocketAuthenticationTester(
                 backend_url=self.backend_url,
@@ -723,29 +723,29 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             time_saved = baseline_duration - optimized_duration
             improvement_percent = (time_saved / baseline_duration) * 100
             
-            print(f"⚡ Optimized (with optimizations): {optimized_duration:.2f}s")
-            print(f"💾 Time saved: {time_saved:.2f}s")
-            print(f"📈 Actual performance improvement: {improvement_percent:.1f}%")
+            print(f" LIGHTNING:  Optimized (with optimizations): {optimized_duration:.2f}s")
+            print(f"[U+1F4BE] Time saved: {time_saved:.2f}s")
+            print(f"[U+1F4C8] Actual performance improvement: {improvement_percent:.1f}%")
             
             # Log detailed performance metrics
             if optimized_results.get("performance_metrics"):
                 metrics = optimized_results["performance_metrics"]
                 
-                print(f"\n🔍 DETAILED OPTIMIZATION METRICS:")
+                print(f"\n SEARCH:  DETAILED OPTIMIZATION METRICS:")
                 
                 if metrics.get("token_cache_stats"):
                     cache_stats = metrics["token_cache_stats"]
                     print(f"   Token Cache:")
-                    print(f"     • Hit rate: {cache_stats['hit_rate_percent']}%")
-                    print(f"     • Cache hits: {cache_stats['cache_hits']}")
-                    print(f"     • Cache misses: {cache_stats['cache_misses']}")
+                    print(f"     [U+2022] Hit rate: {cache_stats['hit_rate_percent']}%")
+                    print(f"     [U+2022] Cache hits: {cache_stats['cache_hits']}")
+                    print(f"     [U+2022] Cache misses: {cache_stats['cache_misses']}")
                 
                 if metrics.get("connection_pool_stats"):
                     pool_stats = metrics["connection_pool_stats"]
                     print(f"   Connection Pool:")
-                    print(f"     • Hit rate: {pool_stats['hit_rate_percent']}%")
-                    print(f"     • Pool hits: {pool_stats['pool_hits']}")
-                    print(f"     • Pool misses: {pool_stats['pool_misses']}")
+                    print(f"     [U+2022] Hit rate: {pool_stats['hit_rate_percent']}%")
+                    print(f"     [U+2022] Pool hits: {pool_stats['pool_hits']}")
+                    print(f"     [U+2022] Pool misses: {pool_stats['pool_misses']}")
                 
                 print(f"   Parallel Operations: {metrics['parallel_operations_count']}")
                 print(f"   Estimated Savings: {metrics.get('optimization_savings_estimate_ms', 0):.1f}ms")
@@ -754,11 +754,11 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             
             # Validate performance improvement
             if improvement_percent >= 30:
-                print(f"✅ SUCCESS: Achieved {improvement_percent:.1f}% improvement (target: 30%)")
+                print(f" PASS:  SUCCESS: Achieved {improvement_percent:.1f}% improvement (target: 30%)")
             elif improvement_percent >= 20:
-                print(f"🔶 GOOD: Achieved {improvement_percent:.1f}% improvement (target: 30%, acceptable: 20%)")
+                print(f"[U+1F536] GOOD: Achieved {improvement_percent:.1f}% improvement (target: 30%, acceptable: 20%)")
             elif improvement_percent > 0:
-                print(f"⚠️ MODERATE: Achieved {improvement_percent:.1f}% improvement (target: 30%)")
+                print(f" WARNING: [U+FE0F] MODERATE: Achieved {improvement_percent:.1f}% improvement (target: 30%)")
             else:
                 pytest.fail(f"PERFORMANCE REGRESSION: {improvement_percent:.1f}% improvement (negative improvement)")
             
@@ -777,11 +777,11 @@ class TestWebSocketTokenLifecycle(SSotBaseTestCase):
             self.optimized_duration = optimized_duration
             self.performance_improvement = improvement_percent
             
-            print(f"🎯 Performance optimization validation completed successfully!")
+            print(f" TARGET:  Performance optimization validation completed successfully!")
             
             # Ensure minimum improvement threshold is met
             if improvement_percent < 10:
-                print(f"⚠️ WARNING: Performance improvement {improvement_percent:.1f}% is below recommended minimum of 10%")
+                print(f" WARNING: [U+FE0F] WARNING: Performance improvement {improvement_percent:.1f}% is below recommended minimum of 10%")
         
         except Exception as e:
             pytest.fail(f"Performance optimization comparison failed: {e}")
@@ -818,7 +818,7 @@ async def test_token_lifecycle_edge_cases():
     
     CRITICAL: This test validates edge cases that could be exploited.
     """
-    print("🔍 Testing token lifecycle edge cases...")
+    print(" SEARCH:  Testing token lifecycle edge cases...")
     
     auth_helper = E2EWebSocketAuthHelper(environment="test")
     
@@ -829,7 +829,7 @@ async def test_token_lifecycle_edge_cases():
         exp_minutes=0.1  # 6 seconds
     )
     
-    print("⏰ Testing ultra-short token expiry (6 seconds)...")
+    print("[U+23F0] Testing ultra-short token expiry (6 seconds)...")
     
     # Validate token initially works
     initial_validation = await auth_helper.validate_jwt_token(ultra_short_token)
@@ -844,7 +844,7 @@ async def test_token_lifecycle_edge_cases():
     if expired_validation.get("valid", False):
         pytest.fail("CRITICAL: Ultra-short token still valid after expiry time")
     
-    print("✅ Ultra-short token properly expired")
+    print(" PASS:  Ultra-short token properly expired")
     
     # Test token with far future expiry
     far_future_token = auth_helper.create_test_jwt_token(
@@ -856,7 +856,7 @@ async def test_token_lifecycle_edge_cases():
     future_validation = await auth_helper.validate_jwt_token(far_future_token)
     assert future_validation.get("valid", False), "Far future token should be valid"
     
-    print("✅ Token lifecycle edge cases test PASSED")
+    print(" PASS:  Token lifecycle edge cases test PASSED")
 
 
 if __name__ == "__main__":

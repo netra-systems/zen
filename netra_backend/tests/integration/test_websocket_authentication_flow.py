@@ -164,7 +164,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             await websocket.send(json.dumps(connection_test))
             
             # Connection successful - validates core authentication flow
-            logger.info("✅ Test 1: WebSocket connection establishment successful")
+            logger.info(" PASS:  Test 1: WebSocket connection establishment successful")
             
         except Exception as e:
             pytest.fail(f"WebSocket connection establishment failed: {e}")
@@ -223,7 +223,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             
             await websocket.send(json.dumps(validated_message))
             
-            logger.info("✅ Test 2: JWT token validation successful")
+            logger.info(" PASS:  Test 2: JWT token validation successful")
             
         except Exception as e:
             pytest.fail(f"JWT token validation failed: {e}")
@@ -267,7 +267,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 self.websocket_connections.append(websocket)
                 pytest.fail("WebSocket connection should have been rejected with invalid JWT")
         
-        logger.info("✅ Test 3: JWT token validation failure properly handled")
+        logger.info(" PASS:  Test 3: JWT token validation failure properly handled")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -327,7 +327,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             # Verify context was properly created from token
             assert websocket.state.name == "OPEN", "User context creation failed"
             
-            logger.info("✅ Test 4: User context creation from valid token successful")
+            logger.info(" PASS:  Test 4: User context creation from valid token successful")
             
         except Exception as e:
             pytest.fail(f"User context creation failed: {e}")
@@ -414,7 +414,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             assert websocket_a.state.name == "OPEN", "User A connection compromised"
             assert websocket_b.state.name == "OPEN", "User B connection compromised"
             
-            logger.info("✅ Test 5: User context isolation between users successful")
+            logger.info(" PASS:  Test 5: User context isolation between users successful")
             
         except Exception as e:
             pytest.fail(f"User context isolation test failed: {e}")
@@ -469,11 +469,11 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 
                 # Verify ready response received
                 assert "type" in response_data, "Invalid ready response format"
-                logger.info("✅ Test 6: Connection ready message received")
+                logger.info(" PASS:  Test 6: Connection ready message received")
                 
             except asyncio.TimeoutError:
                 # Ready message may be implicit - connection success indicates readiness
-                logger.info("✅ Test 6: Connection ready (implicit via successful connection)")
+                logger.info(" PASS:  Test 6: Connection ready (implicit via successful connection)")
             
         except Exception as e:
             pytest.fail(f"Connection ready message test failed: {e}")
@@ -535,7 +535,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
         # At least one connection should succeed despite race conditions
         assert len(successful_connections) > 0, "All connections failed - race condition not handled"
         
-        logger.info(f"✅ Test 7: Race condition handling successful ({len(successful_connections)}/3 connections)")
+        logger.info(f" PASS:  Test 7: Race condition handling successful ({len(successful_connections)}/3 connections)")
 
     # ==================== AUTHENTICATION VALIDATION TESTS (8-14) ====================
 
@@ -573,11 +573,11 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             
             # If connection succeeds despite short timeout, that's also valid
             self.websocket_connections.append(websocket)
-            logger.info("✅ Test 8: Connection succeeded despite short timeout")
+            logger.info(" PASS:  Test 8: Connection succeeded despite short timeout")
             
         except (asyncio.TimeoutError, OSError):
             # Timeout is expected and properly handled
-            logger.info("✅ Test 8: Connection timeout properly handled")
+            logger.info(" PASS:  Test 8: Connection timeout properly handled")
             
         except Exception as e:
             # Test normal connection to verify timeout was the issue
@@ -591,7 +591,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                     timeout=10.0
                 )
                 self.websocket_connections.append(normal_websocket)
-                logger.info("✅ Test 8: Timeout handling validated (normal connection works)")
+                logger.info(" PASS:  Test 8: Timeout handling validated (normal connection works)")
                 
             except Exception:
                 pytest.fail(f"Connection timeout test failed: {e}")
@@ -644,7 +644,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                     self.websocket_connections.append(websocket)
                     pytest.fail(f"Invalid token {i} should have been rejected")
         
-        logger.info("✅ Test 9: Invalid token rejection successful")
+        logger.info(" PASS:  Test 9: Invalid token rejection successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -683,7 +683,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 self.websocket_connections.append(websocket)
                 pytest.fail("Expired token should have been rejected")
         
-        logger.info("✅ Test 10: Expired token handling successful")
+        logger.info(" PASS:  Test 10: Expired token handling successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -730,7 +730,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                     self.websocket_connections.append(websocket)
                     pytest.fail(f"Malformed token {i} should have been rejected")
         
-        logger.info("✅ Test 11: Malformed token handling successful")
+        logger.info(" PASS:  Test 11: Malformed token handling successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -776,7 +776,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 successful_connection = websocket
                 self.websocket_connections.append(websocket)
                 
-                logger.info(f"✅ Test 12: Authentication retry successful on attempt {attempt + 1}")
+                logger.info(f" PASS:  Test 12: Authentication retry successful on attempt {attempt + 1}")
                 break
                 
             except Exception as e:
@@ -843,7 +843,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             # Verify session was validated (connection remains active)
             assert websocket.state.name == "OPEN", "Session validation failed"
             
-            logger.info("✅ Test 13: User session validation successful")
+            logger.info(" PASS:  Test 13: User session validation successful")
             
         except Exception as e:
             pytest.fail(f"Session validation test failed: {e}")
@@ -912,7 +912,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             
             await websocket.send(json.dumps(message))
         
-        logger.info(f"✅ Test 14: Concurrent connections successful ({len(active_connections)} devices)")
+        logger.info(f" PASS:  Test 14: Concurrent connections successful ({len(active_connections)} devices)")
 
     # ==================== MULTI-USER SCENARIOS (15-21) ====================
 
@@ -969,7 +969,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             assert websocket.state.name == "OPEN", "Connection state tracking failed"
             connection_states.append(("verified", websocket.state.name))
             
-            logger.info("✅ Test 15: Connection state tracking successful")
+            logger.info(" PASS:  Test 15: Connection state tracking successful")
             
         except Exception as e:
             pytest.fail(f"Connection state tracking test failed: {e}")
@@ -1026,7 +1026,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 error_str = str(e).lower()
                 logger.info(f"Authentication error properly handled for {scenario['name']}: {type(e).__name__}")
         
-        logger.info("✅ Test 16: Authentication error messages properly handled")
+        logger.info(" PASS:  Test 16: Authentication error messages properly handled")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1095,7 +1095,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             self.websocket_connections.append(success_websocket)
             assert success_websocket.state.name == "OPEN", "Cleanup validation connection failed"
             
-            logger.info("✅ Test 17: Connection cleanup on auth failure successful")
+            logger.info(" PASS:  Test 17: Connection cleanup on auth failure successful")
             
         except Exception as e:
             pytest.fail(f"Connection cleanup test failed: {e}")
@@ -1158,18 +1158,18 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 
                 if scenario["should_succeed"]:
                     self.websocket_connections.append(websocket)
-                    logger.info(f"✅ Permission test '{scenario['name']}' succeeded as expected")
+                    logger.info(f" PASS:  Permission test '{scenario['name']}' succeeded as expected")
                 else:
                     self.websocket_connections.append(websocket)
-                    logger.warning(f"⚠️ Permission test '{scenario['name']}' succeeded but should have failed")
+                    logger.warning(f" WARNING: [U+FE0F] Permission test '{scenario['name']}' succeeded but should have failed")
                     
             except Exception as e:
                 if not scenario["should_succeed"]:
-                    logger.info(f"✅ Permission test '{scenario['name']}' failed as expected: {type(e).__name__}")
+                    logger.info(f" PASS:  Permission test '{scenario['name']}' failed as expected: {type(e).__name__}")
                 else:
-                    logger.error(f"❌ Permission test '{scenario['name']}' failed unexpectedly: {e}")
+                    logger.error(f" FAIL:  Permission test '{scenario['name']}' failed unexpectedly: {e}")
         
-        logger.info("✅ Test 18: User permissions validation completed")
+        logger.info(" PASS:  Test 18: User permissions validation completed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1225,7 +1225,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             # In real-world scenario, client would handle token refresh
             assert websocket.state.name == "OPEN", "Session expiry handling failed"
             
-            logger.info("✅ Test 19: Session expiry handling successful")
+            logger.info(" PASS:  Test 19: Session expiry handling successful")
             
         except Exception as e:
             pytest.fail(f"Session expiry handling test failed: {e}")
@@ -1288,7 +1288,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             # Verify connection successful (audit logging doesn't interfere)
             assert websocket.state.name == "OPEN", "Audit logging interfered with connection"
             
-            logger.info("✅ Test 20: Authentication audit logging successful")
+            logger.info(" PASS:  Test 20: Authentication audit logging successful")
             
         except Exception as e:
             pytest.fail(f"Authentication audit logging test failed: {e}")
@@ -1360,7 +1360,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
         # At least localhost should work for integration testing
         assert len(successful_origins) > 0, "No cross-origin connections succeeded"
         
-        logger.info(f"✅ Test 21: Cross-origin handling successful ({len(successful_origins)} origins)")
+        logger.info(f" PASS:  Test 21: Cross-origin handling successful ({len(successful_origins)} origins)")
 
     # ==================== ADVANCED AUTH SCENARIOS (22-25) ====================
 
@@ -1416,7 +1416,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
         # For integration testing, verify at least some connections succeed
         assert len(connections) > 0, "No connections succeeded - connection limit too restrictive"
         
-        logger.info(f"✅ Test 22: Connection limit enforcement successful ({len(connections)} connections)")
+        logger.info(f" PASS:  Test 22: Connection limit enforcement successful ({len(connections)} connections)")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1495,7 +1495,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             assert avg_connection_time < 10.0, f"Average connection time too slow: {avg_connection_time:.2f}s"
             assert max_connection_time < 15.0, f"Max connection time too slow: {max_connection_time:.2f}s"
         
-        logger.info(f"✅ Test 23: Authentication performance under load successful")
+        logger.info(f" PASS:  Test 23: Authentication performance under load successful")
         logger.info(f"   - {len(successful_connections)}/5 connections succeeded")
         logger.info(f"   - Total test duration: {total_duration:.2f}s")
         if connection_times:
@@ -1586,7 +1586,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
             
             await websocket2.send(json.dumps(message2))
             
-            logger.info("✅ Test 24: WebSocket reconnection with same token successful")
+            logger.info(" PASS:  Test 24: WebSocket reconnection with same token successful")
             
         except Exception as e:
             pytest.fail(f"Reconnection test failed: {e}")
@@ -1664,7 +1664,7 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
         successful_scenarios = [r for r in results if r[1] == "success"]
         assert len(successful_scenarios) >= 1, f"No scenarios succeeded - degradation not graceful: {results}"
         
-        logger.info("✅ Test 25: Graceful degradation when auth service slow successful")
+        logger.info(" PASS:  Test 25: Graceful degradation when auth service slow successful")
         for name, status, error in results:
             logger.info(f"   - {name}: {status}" + (f" ({error})" if error else ""))
     
@@ -1693,4 +1693,4 @@ class TestWebSocketAuthenticationFlow(BaseIntegrationTest):
                 elif metric == "security_validated" and value is not None:
                     assert value, "Security validation failed - compromises platform integrity"
         
-        logger.info(f"✅ Business value validated for {test_name}")
+        logger.info(f" PASS:  Business value validated for {test_name}")

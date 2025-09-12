@@ -30,32 +30,32 @@ async def test_session_leak_tracker_basic():
     
     # Track a session
     session_id = await tracker.track_session(mock_session)
-    print(f"✓ Session tracking started: {session_id}")
+    print(f"[U+2713] Session tracking started: {session_id}")
     
     # Wait longer than max age
     await asyncio.sleep(3.0)
     
     # Check for leaks - should detect age-based leak
     leaks_detected = await tracker.check_for_leaks()
-    print(f"✓ Leak detection result: {leaks_detected}")
+    print(f"[U+2713] Leak detection result: {leaks_detected}")
     
     if leaks_detected:
-        print("✓ EXPECTED BEHAVIOR: Session age leak detected as designed")
+        print("[U+2713] EXPECTED BEHAVIOR: Session age leak detected as designed")
         leak_report = await tracker.get_leak_report()
         print(f"  - Leak details: {leak_report['leak_details']}")
     else:
-        print("✗ UNEXPECTED: No leaks detected - this indicates a problem with leak detection")
+        print("[U+2717] UNEXPECTED: No leaks detected - this indicates a problem with leak detection")
     
     # Test assertion method (should fail)
     try:
         tracker.assert_no_leaks()
-        print("✗ UNEXPECTED: assert_no_leaks() did not fail - this is a problem")
+        print("[U+2717] UNEXPECTED: assert_no_leaks() did not fail - this is a problem")
     except AssertionError as e:
-        print("✓ EXPECTED BEHAVIOR: assert_no_leaks() failed as designed")
+        print("[U+2713] EXPECTED BEHAVIOR: assert_no_leaks() failed as designed")
         print(f"  - Error message: {str(e)[:100]}...")
     
     await tracker.cleanup()
-    print("✓ Tracker cleanup completed")
+    print("[U+2713] Tracker cleanup completed")
 
 
 async def test_database_session_monitor_basic():
@@ -75,14 +75,14 @@ async def test_database_session_monitor_basic():
     
     # Start monitoring
     await monitor.start_monitoring()
-    print("✓ Session monitoring started")
+    print("[U+2713] Session monitoring started")
     
     # Let it collect a few snapshots
     await asyncio.sleep(0.5)
     
     # Get current pool state
     pool_state = await monitor.get_current_pool_state()
-    print(f"✓ Pool state captured: {pool_state.utilization_percent:.1f}% utilization")
+    print(f"[U+2713] Pool state captured: {pool_state.utilization_percent:.1f}% utilization")
     
     # Simulate increased usage (leak scenario)
     mock_pool.checkedout.return_value = 4  # Increased checkout
@@ -90,10 +90,10 @@ async def test_database_session_monitor_basic():
     
     # Detect leaks
     leak_analysis = await monitor.detect_session_leaks(baseline_duration=0.5)
-    print(f"✓ Leak analysis completed: {leak_analysis['leak_detected']}")
+    print(f"[U+2713] Leak analysis completed: {leak_analysis['leak_detected']}")
     
     if leak_analysis['leak_detected']:
-        print("✓ EXPECTED BEHAVIOR: Pool monitoring detected session issues")
+        print("[U+2713] EXPECTED BEHAVIOR: Pool monitoring detected session issues")
         print(f"  - Indicators: {leak_analysis['leak_indicators']}")
     else:
         print("? Pool monitoring did not detect leaks - may need different conditions")
@@ -101,12 +101,12 @@ async def test_database_session_monitor_basic():
     # Test health assertion (should pass since no overflow)
     try:
         monitor.assert_healthy_pool_state()
-        print("✓ Pool health assertion passed")
+        print("[U+2713] Pool health assertion passed")
     except AssertionError as e:
         print(f"? Pool health assertion failed: {str(e)[:100]}...")
     
     await monitor.stop_monitoring()
-    print("✓ Session monitoring stopped")
+    print("[U+2713] Session monitoring stopped")
 
 
 async def test_session_lifecycle_context():
@@ -120,20 +120,20 @@ async def test_session_lifecycle_context():
     
     try:
         async with track_session_lifecycle(mock_session, tracker):
-            print("✓ Session lifecycle context entered")
+            print("[U+2713] Session lifecycle context entered")
             # Simulate some work
             await asyncio.sleep(0.1)
-            print("✓ Simulated session work completed")
+            print("[U+2713] Simulated session work completed")
         
         # Context exit should mark session as closed
-        print("✓ Session lifecycle context exited")
+        print("[U+2713] Session lifecycle context exited")
         
         # Check if session was properly tracked
         leak_report = await tracker.get_leak_report()
-        print(f"✓ Sessions tracked: {leak_report['total_sessions_tracked']}")
+        print(f"[U+2713] Sessions tracked: {leak_report['total_sessions_tracked']}")
         
     except Exception as e:
-        print(f"✗ Session lifecycle context failed: {e}")
+        print(f"[U+2717] Session lifecycle context failed: {e}")
     
     await tracker.cleanup()
 
@@ -168,7 +168,7 @@ async def test_concurrent_session_tracking():
     tasks = [simulate_session_work(i) for i in range(8)]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     
-    print(f"✓ Concurrent sessions completed: {len([r for r in results if not isinstance(r, Exception)])}")
+    print(f"[U+2713] Concurrent sessions completed: {len([r for r in results if not isinstance(r, Exception)])}")
     
     # Wait for leak detection timeout
     await asyncio.sleep(1.5)
@@ -177,15 +177,15 @@ async def test_concurrent_session_tracking():
     leaks_detected = await tracker.check_for_leaks()
     leak_report = await tracker.get_leak_report()
     
-    print(f"✓ Leak detection result: {leaks_detected}")
+    print(f"[U+2713] Leak detection result: {leaks_detected}")
     print(f"  - Total sessions tracked: {leak_report['total_sessions_tracked']}")
     print(f"  - Active sessions: {leak_report['active_sessions']}")
     
     if leaks_detected:
-        print("✓ EXPECTED BEHAVIOR: Concurrent session leaks detected as designed")
+        print("[U+2713] EXPECTED BEHAVIOR: Concurrent session leaks detected as designed")
         print(f"  - Leak count: {len(leak_report['leak_details'])}")
     else:
-        print("✗ UNEXPECTED: No concurrent session leaks detected")
+        print("[U+2717] UNEXPECTED: No concurrent session leaks detected")
     
     await tracker.cleanup()
 
@@ -209,13 +209,13 @@ async def main():
         
         elapsed = time.time() - start_time
         print(f"\n=== Infrastructure Test Results ===")
-        print(f"✓ All infrastructure tests completed in {elapsed:.2f}s")
+        print(f"[U+2713] All infrastructure tests completed in {elapsed:.2f}s")
         print()
         print("CRITICAL FINDINGS:")
-        print("1. ✓ Session leak detection is working - leaks are properly identified")
-        print("2. ✓ Assertion methods fail hard when leaks are detected")
-        print("3. ✓ Pool monitoring captures connection state changes")
-        print("4. ✓ Concurrent session tracking works under load")
+        print("1. [U+2713] Session leak detection is working - leaks are properly identified")
+        print("2. [U+2713] Assertion methods fail hard when leaks are detected")
+        print("3. [U+2713] Pool monitoring captures connection state changes")
+        print("4. [U+2713] Concurrent session tracking works under load")
         print()
         print("CONCLUSION:")
         print("The session leak detection infrastructure is ready to expose")
@@ -226,7 +226,7 @@ async def main():
         print("current thread handlers lack centralized session management.")
         
     except Exception as e:
-        print(f"\n✗ Infrastructure test failed: {e}")
+        print(f"\n[U+2717] Infrastructure test failed: {e}")
         import traceback
         traceback.print_exc()
 

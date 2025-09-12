@@ -263,4 +263,4 @@ class TestCompleteUserRegistrationLoginFlow(SSotAsyncTestCase):
         assert len(set(user_emails)) == 3  # All unique emails
         
         self.record_metric("concurrent_registrations_success", success_count)
-        self.increment_db_query_count(6)  # 3 registrations × 2 DB ops each"
+        self.increment_db_query_count(6)  # 3 registrations  x  2 DB ops each"

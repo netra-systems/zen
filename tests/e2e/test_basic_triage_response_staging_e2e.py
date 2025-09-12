@@ -21,7 +21,7 @@ KEY COVERAGE:
 
 GOLDEN PATH E2E STAGING VALIDATION:
 These tests validate the complete user journey that generates business value:
-User Login → WebSocket Connect → Send Message → Triage Processing → AI Response
+User Login  ->  WebSocket Connect  ->  Send Message  ->  Triage Processing  ->  AI Response
 
 These tests MUST initially FAIL to demonstrate current GCP staging issues.
 """
@@ -775,7 +775,7 @@ class TestBasicTriageResponseStagingE2E(SSotAsyncTestCase):
         Business Impact: Validates the complete $500K+ ARR user journey
         that must work flawlessly in production-like staging environment.
         
-        Flow: User Creation → Authentication → WebSocket → Message → AI Response
+        Flow: User Creation  ->  Authentication  ->  WebSocket  ->  Message  ->  AI Response
         
         EXPECTED OUTCOME: Should initially FAIL demonstrating current staging issues.
         """
@@ -1101,17 +1101,17 @@ class TestBasicTriageResponseStagingE2E(SSotAsyncTestCase):
         # Business impact assessment
         golden_path_success = metrics.get("staging_golden_path_success", False)
         if golden_path_success:
-            print("✅ BUSINESS SUCCESS: Golden Path working on staging")
+            print(" PASS:  BUSINESS SUCCESS: Golden Path working on staging")
         else:
-            print("🚨 BUSINESS CRITICAL: Golden Path failing on staging")
+            print(" ALERT:  BUSINESS CRITICAL: Golden Path failing on staging")
             
         # Key findings for Issue #135
         if any("1011" in k for k in error_metrics):
-            print("🚨 CRITICAL: WebSocket 1011 errors confirmed on staging")
+            print(" ALERT:  CRITICAL: WebSocket 1011 errors confirmed on staging")
         if any("timeout" in k for k in error_metrics):
-            print("⚠️  WARNING: Timeout issues detected on staging")
+            print(" WARNING: [U+FE0F]  WARNING: Timeout issues detected on staging")
         if any("auth" in k for k in error_metrics):
-            print("🔐 AUTH: Authentication issues detected on staging")
+            print("[U+1F510] AUTH: Authentication issues detected on staging")
         
         self.record_metric("staging_test_execution_time", total_test_time)
         self.record_metric("staging_test_users_created", len(self.test_users))

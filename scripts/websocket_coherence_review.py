@@ -158,7 +158,7 @@ def _build_report_header() -> str:
 This is an updated review after fixing the 7 critical issues identified in the initial report.
 
 ### Fix Status
-✅ **All 7 critical issues have been addressed**
+ PASS:  **All 7 critical issues have been addressed**
 
 """
 
@@ -184,7 +184,7 @@ def _build_fixes_section() -> str:
 
 def _build_structure_fix_section() -> str:
     """Build the event structure fix section"""
-    return """### 1. ✅ Event Structure Mismatch - FIXED
+    return """### 1.  PASS:  Event Structure Mismatch - FIXED
 **Previous:** Backend used two different message structures
 **Fixed:** All messages now use consistent `{type, payload}` structure
 - Standardized ws_manager.py
@@ -196,7 +196,7 @@ def _build_structure_fix_section() -> str:
 
 def _build_events_fix_section() -> str:
     """Build the missing events fix section"""
-    return """### 2. ✅ Missing Unified Events - IMPLEMENTED
+    return """### 2.  PASS:  Missing Unified Events - IMPLEMENTED
 **Previous:** Frontend expected events that backend never sent
 **Fixed:** Added all missing events to supervisor_consolidated.py:
 - `agent_thinking` - Shows intermediate reasoning
@@ -208,7 +208,7 @@ def _build_events_fix_section() -> str:
 
 def _build_payloads_fix_section() -> str:
     """Build the incomplete payloads fix section"""
-    return """### 3. ✅ Incomplete Event Payloads - FIXED
+    return """### 3.  PASS:  Incomplete Event Payloads - FIXED
 **Previous:** AgentStarted missing fields
 **Fixed:** Updated AgentStarted schema to include:
 - agent_name (default: "Supervisor")
@@ -218,7 +218,7 @@ def _build_payloads_fix_section() -> str:
 
 def _build_systems_fix_section() -> str:
     """Build the duplicate systems fix section"""
-    return """### 4. ✅ Duplicate WebSocket Systems - REMOVED
+    return """### 4.  PASS:  Duplicate WebSocket Systems - REMOVED
 **Previous:** Two competing WebSocket systems in frontend
 **Fixed:** Consolidated to unified-chat.ts only
 - Simplified useChatWebSocket.ts to route all events to unified store
@@ -229,7 +229,7 @@ def _build_systems_fix_section() -> str:
 
 def _build_alignment_fix_section() -> str:
     """Build the event name alignment fix section"""
-    return """### 5. ✅ Event Name Misalignment - ALIGNED
+    return """### 5.  PASS:  Event Name Misalignment - ALIGNED
 **Previous:** Backend sent "agent_finished", frontend expected "agent_completed"
 **Fixed:** Changed all backend events to use "agent_completed"
 
@@ -237,7 +237,7 @@ def _build_alignment_fix_section() -> str:
 
 def _build_accumulation_fix_section() -> str:
     """Build the layer data accumulation fix section"""
-    return """### 6. ✅ Layer Data Accumulation Bug - FIXED
+    return """### 6.  PASS:  Layer Data Accumulation Bug - FIXED
 **Previous:** Duplicate content in medium layer
 **Fixed:** Improved deduplication logic:
 - Check for complete replacement flag
@@ -248,7 +248,7 @@ def _build_accumulation_fix_section() -> str:
 
 def _build_thread_fix_section() -> str:
     """Build the thread management events fix section"""
-    return """### 7. ✅ Thread Management Events - ADDED
+    return """### 7.  PASS:  Thread Management Events - ADDED
 **Previous:** Missing thread lifecycle events
 **Fixed:** Added events to thread_service.py:
 - `thread_created` - When new thread is created
@@ -336,7 +336,7 @@ def _build_structure_issues_section(structure_issues: List) -> str:
 """
     return """## Structure Issues
 
-✅ No structure issues found
+ PASS:  No structure issues found
 """
 
 def _build_payload_issues_section(payload_issues: List) -> str:
@@ -349,7 +349,7 @@ def _build_payload_issues_section(payload_issues: List) -> str:
 """
     return """\n## Payload Issues
 
-✅ No payload issues found
+ PASS:  No payload issues found
 """
 
 def _build_recommendations_section() -> str:
@@ -413,13 +413,13 @@ def _build_conclusion_section() -> str:
     return """## Conclusion
 
 All 7 critical issues have been successfully addressed:
-- ✅ Event structure standardized
-- ✅ Missing events implemented
-- ✅ Event payloads completed
-- ✅ Duplicate systems removed
-- ✅ Event names aligned
-- ✅ Accumulation bug fixed
-- ✅ Thread events added
+-  PASS:  Event structure standardized
+-  PASS:  Missing events implemented
+-  PASS:  Event payloads completed
+-  PASS:  Duplicate systems removed
+-  PASS:  Event names aligned
+-  PASS:  Accumulation bug fixed
+-  PASS:  Thread events added
 
 The WebSocket communication system should now provide proper real-time updates to the frontend's three-layer UI architecture.
 
@@ -457,7 +457,7 @@ def main():
     print(f"Frontend Handlers: {len(frontend_handlers)}")
     print(f"Structure Issues: {len(structure_issues)}")
     print(f"Payload Issues: {len(payload_issues)}")
-    print("\n✅ All 7 critical issues have been fixed!")
+    print("\n PASS:  All 7 critical issues have been fixed!")
 
 if __name__ == "__main__":
     main()

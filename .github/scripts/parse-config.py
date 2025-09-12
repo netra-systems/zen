@@ -22,7 +22,7 @@ def is_act_environment() -> bool:
 def print_act_debug() -> None:
     """Print ACT debug information if in ACT environment"""
     if is_act_environment():
-        print("🧪 ACT LOCAL RUN DETECTED", file=sys.stderr)
+        print("[U+1F9EA] ACT LOCAL RUN DETECTED", file=sys.stderr)
         print("Debug: Python config parser starting", file=sys.stderr)
         print("=========================", file=sys.stderr)
 
@@ -46,11 +46,11 @@ def load_json_file(file_path: str) -> Dict[str, Any]:
             return json.load(f)
     except FileNotFoundError:
         if is_act_environment():
-            print(f"🧪 ACT: Config file not found: {file_path}", file=sys.stderr)
+            print(f"[U+1F9EA] ACT: Config file not found: {file_path}", file=sys.stderr)
             return create_mock_config(file_path)
         raise
     except json.JSONDecodeError as e:
-        print(f"❌ Invalid JSON in {file_path}: {e}", file=sys.stderr)
+        print(f" FAIL:  Invalid JSON in {file_path}: {e}", file=sys.stderr)
         raise
 
 
@@ -210,17 +210,17 @@ def main():
         else:
             config_path = Path(args.config_file)
         
-        print(f"📖 Loading config: {config_path}", file=sys.stderr)
+        print(f"[U+1F4D6] Loading config: {config_path}", file=sys.stderr)
         
         # Load configuration
         config_data = load_json_file(str(config_path))
         
         if is_act_environment() and config_data.get('_mock'):
-            print("🧪 ACT: Using mock configuration data", file=sys.stderr)
+            print("[U+1F9EA] ACT: Using mock configuration data", file=sys.stderr)
         
         # List keys if requested
         if args.list_keys:
-            print("📋 Available configuration keys:", file=sys.stderr)
+            print("[U+1F4CB] Available configuration keys:", file=sys.stderr)
             print_keys(config_data)
             return
         
@@ -229,9 +229,9 @@ def main():
         
         if value is None and args.default is not None:
             value = args.default
-            print(f"⚠️  Key '{args.key_path}' not found, using default: {value}", file=sys.stderr)
+            print(f" WARNING: [U+FE0F]  Key '{args.key_path}' not found, using default: {value}", file=sys.stderr)
         elif value is None:
-            print(f"❌ Key '{args.key_path}' not found and no default provided", file=sys.stderr)
+            print(f" FAIL:  Key '{args.key_path}' not found and no default provided", file=sys.stderr)
             sys.exit(1)
         
         # Determine output name
@@ -240,10 +240,10 @@ def main():
         # Output the value
         output_to_github_actions(output_name, value)
         
-        print(f"✅ Successfully parsed: {args.key_path} = {format_output_value(value)}", file=sys.stderr)
+        print(f" PASS:  Successfully parsed: {args.key_path} = {format_output_value(value)}", file=sys.stderr)
         
     except Exception as e:
-        print(f"❌ Error parsing configuration: {e}", file=sys.stderr)
+        print(f" FAIL:  Error parsing configuration: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -262,11 +262,11 @@ def print_keys(data: Dict[str, Any], prefix: str = "") -> None:
         current_path = f"{prefix}.{key}" if prefix else key
         
         if isinstance(value, dict):
-            print(f"  📁 {current_path}/", file=sys.stderr)
+            print(f"  [U+1F4C1] {current_path}/", file=sys.stderr)
             print_keys(value, current_path)
         else:
             value_type = type(value).__name__
-            print(f"  📄 {current_path} ({value_type})", file=sys.stderr)
+            print(f"  [U+1F4C4] {current_path} ({value_type})", file=sys.stderr)
 
 
 if __name__ == '__main__':

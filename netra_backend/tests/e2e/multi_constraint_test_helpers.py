@@ -1,7 +1,7 @@
 """
 Multi-Constraint Test Helpers Module
 Shared helper functions for multi-constraint workflow tests.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (

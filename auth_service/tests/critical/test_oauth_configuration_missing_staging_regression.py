@@ -71,7 +71,7 @@ class TestOAuthConfigurationMissingRegression:
             assert client_id is None or client_id == "", \
                 f"Expected OAuth client ID to be missing, but got: {client_id}"
             
-            print("✓ SUCCESS: OAuth client ID correctly detected as missing in staging")
+            print("[U+2713] SUCCESS: OAuth client ID correctly detected as missing in staging")
                     
         finally:
             # Restore original environment
@@ -109,7 +109,7 @@ class TestOAuthConfigurationMissingRegression:
             assert client_secret is None or client_secret == "", \
                 f"Expected OAuth client secret to be missing, but got a value"
             
-            print("✓ SUCCESS: OAuth client secret correctly detected as missing in staging")
+            print("[U+2713] SUCCESS: OAuth client secret correctly detected as missing in staging")
                     
         finally:
             # Restore original environment
@@ -158,11 +158,11 @@ class TestOAuthConfigurationMissingRegression:
                 assert not provider.is_configured(), \
                     "OAuth provider should not be configured without credentials"
                 
-                print("✓ SUCCESS: OAuth provider correctly handles missing credentials in staging")
+                print("[U+2713] SUCCESS: OAuth provider correctly handles missing credentials in staging")
                 
             except GoogleOAuthError as e:
                 # This is also acceptable - provider can fail to initialize
-                print(f"✓ SUCCESS: OAuth provider initialization failed as expected: {e}")
+                print(f"[U+2713] SUCCESS: OAuth provider initialization failed as expected: {e}")
                 
         finally:
             # Restore original environment
@@ -233,7 +233,7 @@ class TestOAuthConfigurationMissingRegression:
             assert "client_id=" in auth_url, \
                 "Authorization URL should contain client_id parameter"
             
-            print("✓ SUCCESS: OAuth provider works correctly with proper staging credentials")
+            print("[U+2713] SUCCESS: OAuth provider works correctly with proper staging credentials")
             
         finally:
             # Restore original environment
@@ -290,7 +290,7 @@ class TestOAuthConfigurationMissingRegression:
             assert len(validation_issues) == 0, \
                 f"OAuth configuration should have no issues: {validation_issues}"
             
-            print("✓ SUCCESS: OAuth manager works correctly with staging credentials")
+            print("[U+2713] SUCCESS: OAuth manager works correctly with staging credentials")
             
         finally:
             # Restore original environment
@@ -335,7 +335,7 @@ class TestOAuthServiceIntegrationRegression:
             assert len(providers) > 0, "OAuth providers should be available"
             assert 'google' in providers, "Google OAuth provider should be available"
             
-            print("✓ SUCCESS: Auth service OAuth providers are available when configured")
+            print("[U+2713] SUCCESS: Auth service OAuth providers are available when configured")
             
         finally:
             # Restore original environment
@@ -378,7 +378,7 @@ class TestOAuthServiceIntegrationRegression:
             assert "client_id=" in login_url, "OAuth login URL should contain client_id"
             assert test_client_id in login_url, "OAuth login URL should contain correct client_id"
             
-            print("✓ SUCCESS: OAuth login flow works with proper credentials")
+            print("[U+2713] SUCCESS: OAuth login flow works with proper credentials")
             
         finally:
             # Restore original environment
@@ -424,7 +424,7 @@ class TestOAuthServiceIntegrationRegression:
             assert "email" in user_info, "OAuth user info should contain email"
             assert user_info["email"], "OAuth user info email should not be empty"
             
-            print("✓ SUCCESS: OAuth callback handling works with proper credentials")
+            print("[U+2713] SUCCESS: OAuth callback handling works with proper credentials")
             
         finally:
             # Restore original environment

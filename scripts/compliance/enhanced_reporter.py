@@ -106,9 +106,9 @@ class EnhancedComplianceReporter:
     def _format_deployment_status(self, is_ready: bool, message: str) -> str:
         """Format deployment readiness status"""
         if is_ready:
-            status = "✅ DEPLOYMENT READY" if self.use_emoji else "[READY] DEPLOYMENT READY"
+            status = " PASS:  DEPLOYMENT READY" if self.use_emoji else "[READY] DEPLOYMENT READY"
         else:
-            status = "🚫 DEPLOYMENT BLOCKED" if self.use_emoji else "[BLOCKED] DEPLOYMENT BLOCKED"
+            status = "[U+1F6AB] DEPLOYMENT BLOCKED" if self.use_emoji else "[BLOCKED] DEPLOYMENT BLOCKED"
         
         return f"{status}\n{message}"
     
@@ -128,7 +128,7 @@ class EnhancedComplianceReporter:
             marker = self.utils.get_severity_marker(severity.value)
             
             if config.blocks_deployment:
-                status = "✅" if count <= config.max_violations else "❌"
+                status = " PASS: " if count <= config.max_violations else " FAIL: "
                 line = f"{marker} {config.display_name}: {count}/{config.max_violations} {status}"
             else:
                 line = f"{marker} {config.display_name}: {count}"
@@ -153,13 +153,13 @@ class EnhancedComplianceReporter:
             
             if config.blocks_deployment and count > config.max_violations:
                 over = count - config.max_violations
-                lines.append(f"   ⚠️  OVER LIMIT by {over} violations!")
+                lines.append(f"    WARNING: [U+FE0F]  OVER LIMIT by {over} violations!")
         
         return "\n".join(lines)
     
     def _format_critical_violations(self, violations: List[Violation]) -> str:
         """Format critical violations - show ALL"""
-        lines = ["🚨 CRITICAL VIOLATIONS - IMMEDIATE ACTION REQUIRED", "=" * 60]
+        lines = [" ALERT:  CRITICAL VIOLATIONS - IMMEDIATE ACTION REQUIRED", "=" * 60]
         
         for i, v in enumerate(violations, 1):
             lines.append(f"\n{i}. {v.file_path}")
@@ -174,7 +174,7 @@ class EnhancedComplianceReporter:
     
     def _format_high_violations(self, violations: List[Violation]) -> str:
         """Format high severity violations - show up to 20"""
-        lines = ["🔴 HIGH SEVERITY VIOLATIONS", "-" * 40]
+        lines = ["[U+1F534] HIGH SEVERITY VIOLATIONS", "-" * 40]
         
         max_show = min(20, len(violations))
         for i, v in enumerate(violations[:max_show], 1):
@@ -190,7 +190,7 @@ class EnhancedComplianceReporter:
     
     def _format_medium_violations(self, violations: List[Violation]) -> str:
         """Format medium severity violations - show up to 100"""
-        lines = ["🟡 MEDIUM SEVERITY VIOLATIONS", "-" * 40]
+        lines = ["[U+1F7E1] MEDIUM SEVERITY VIOLATIONS", "-" * 40]
         
         # Group by violation type
         by_type = defaultdict(list)
@@ -221,7 +221,7 @@ class EnhancedComplianceReporter:
     
     def _format_low_violations(self, violations: List[Violation]) -> str:
         """Format low severity violations - summary only"""
-        lines = ["🟢 LOW SEVERITY VIOLATIONS - SUMMARY", "-" * 40]
+        lines = ["[U+1F7E2] LOW SEVERITY VIOLATIONS - SUMMARY", "-" * 40]
         
         # Group by category and type
         by_category = defaultdict(lambda: defaultdict(int))
@@ -284,7 +284,7 @@ class EnhancedComplianceReporter:
             lines.append("\nImmediate Risks:")
             lines.extend(impacts)
         else:
-            lines.append("\n✅ No immediate business risks detected")
+            lines.append("\n PASS:  No immediate business risks detected")
         
         # Overall health
         total = sum(len(v) for v in violations_by_severity.values())

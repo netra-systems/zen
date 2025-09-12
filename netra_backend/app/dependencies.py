@@ -75,7 +75,7 @@ def validate_session_is_request_scoped_simple(session: AsyncSession) -> None:
     """Simple session validation for request scope."""
     if hasattr(session, '_global_storage_flag') and session._global_storage_flag:
         logger.error(
-            f"❌ VALIDATION FAILURE: Session {id(session)} is globally stored, violating request scoping. "
+            f" FAIL:  VALIDATION FAILURE: Session {id(session)} is globally stored, violating request scoping. "
             f"Session type: {type(session).__name__}. This is a critical isolation violation."
         )
         raise SessionIsolationError("Session must be request-scoped, not globally stored")
@@ -133,7 +133,7 @@ def _validate_session_type(session) -> None:
         validate_db_session(session, "dependencies_validation")
     except TypeError as e:
         logger.error(
-            f"❌ VALIDATION FAILURE: Invalid session type during validation. "
+            f" FAIL:  VALIDATION FAILURE: Invalid session type during validation. "
             f"Expected AsyncSession, got: {type(session).__name__}. "
             f"Error: {e}. This indicates improper session injection."
         )
@@ -226,13 +226,13 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
             system_validation = await auth_client.validate_service_user_context(service_id, "database_session_creation")
             if system_validation and system_validation.get("valid"):
                 logger.info(
-                    f"✅ Service user validation successful - service ID: {system_validation.get('service_id')} | "
+                    f" PASS:  Service user validation successful - service ID: {system_validation.get('service_id')} | "
                     f"Authentication method: {system_validation.get('authentication_method')} | "
                     f"User context: {user_id}"
                 )
             else:
                 logger.error(
-                    f"❌ Service user validation failed - {system_validation.get('error', 'unknown_error')} | "
+                    f" FAIL:  Service user validation failed - {system_validation.get('error', 'unknown_error')} | "
                     f"User context: {user_id} | "
                     f"Details: {system_validation.get('details', 'No details')} | "
                     f"Fix: {system_validation.get('fix', 'Check service configuration')}"
@@ -241,14 +241,14 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
                 # The session creation should still work for internal operations
         except Exception as validation_error:
             logger.error(
-                f"❌ Service user validation exception: {validation_error} | "
+                f" FAIL:  Service user validation exception: {validation_error} | "
                 f"User context: {user_id} | "
                 f"Continuing with session creation for internal operations"
             )
     
     # ENHANCED DEBUGGING: Log the exact moment and values at function start
     logger.info(
-        f"📍 FUNCTION_START: get_request_scoped_db_session called | "
+        f" PIN:  FUNCTION_START: get_request_scoped_db_session called | "
         f"Generated IDs: request_id='{request_id}', correlation_id='{correlation_id}' | "
         f"Service user_id='{user_id}' (PROPER SERVICE CONTEXT!) | "
         f"Function: netra_backend.app.dependencies.get_request_scoped_db_session:182"
@@ -271,7 +271,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
     }
     
     logger.info(
-        f"🚀 INITIALIZING: Request-scoped database session {request_id} with service user_id='{user_id}'. "
+        f"[U+1F680] INITIALIZING: Request-scoped database session {request_id} with service user_id='{user_id}'. "
         f"IMPORTANT: This service user context enables service-to-service authentication. "
         f"If you see auth errors with user_id='{user_id}', check SERVICE_ID and SERVICE_SECRET configuration. "
         f"Context: {session_init_context}"
@@ -313,14 +313,14 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
             }
             
             logger.info(
-                f"✅ SUCCESS: Database session {id(session)} created for request {request_id} with service user_id='{user_id}'. "
+                f" PASS:  SUCCESS: Database session {id(session)} created for request {request_id} with service user_id='{user_id}'. "
                 f"Context: {session_success_context}"
             )
             
             # Special logging for service user - this helps debug authentication issues
             if user_id.startswith("service:"):
                 logger.info(
-                    f"🔧 SERVICE USER SESSION: Created session for service user_id='{user_id}'. "
+                    f"[U+1F527] SERVICE USER SESSION: Created session for service user_id='{user_id}'. "
                     f"This indicates proper service-to-service authentication is being used. "
                     f"If this causes 403 errors, check SERVICE_ID and SERVICE_SECRET configuration in environment. "
                     f"Session: {id(session)}, Request: {request_id}"
@@ -329,7 +329,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
             yield session
             
             logger.info(
-                f"✅ COMPLETED: Request-scoped session {id(session)} completed successfully for user_id='{user_id}', request_id='{request_id}'"
+                f" PASS:  COMPLETED: Request-scoped session {id(session)} completed successfully for user_id='{user_id}', request_id='{request_id}'"
             )
     except Exception as e:
         # ENHANCED ERROR LOGGING with 10x more authentication context
@@ -361,7 +361,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
         }
         
         logger.error(
-            f"❌ CRITICAL ERROR: Failed to create request-scoped database session {request_id} for user_id='{user_id}'. "
+            f" FAIL:  CRITICAL ERROR: Failed to create request-scoped database session {request_id} for user_id='{user_id}'. "
             f"Error: {e}. This may be an authentication failure! Full context: {error_context}"
         )
         
@@ -384,19 +384,19 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
             )
         except ImportError:
             logger.error(
-                f"🚨 FALLBACK_DEBUG: Auth trace logger not available. "
+                f" ALERT:  FALLBACK_DEBUG: Auth trace logger not available. "
                 f"user_id='{user_id}', request_id='{request_id}', correlation_id='{correlation_id}', error='{e}'"
             )
         except Exception as trace_error:
             logger.error(
-                f"🚨 TRACE_ERROR: Failed to log comprehensive context: {trace_error}. "
+                f" ALERT:  TRACE_ERROR: Failed to log comprehensive context: {trace_error}. "
                 f"Original error: {e}, user_id='{user_id}', request_id='{request_id}'"
             )
         
         # Extra debugging for authentication-related errors with comprehensive dump
         if "403" in str(e) or "Not authenticated" in str(e):
             logger.error(
-                f"🔴 AUTHENTICATION FAILURE DETECTED: The error '{e}' suggests an authentication problem. "
+                f"[U+1F534] AUTHENTICATION FAILURE DETECTED: The error '{e}' suggests an authentication problem. "
                 f"Since user_id='{user_id}', this is likely a service-to-service authentication configuration issue. "
                 f"Check: 1) SERVICE_SECRET config, 2) SERVICE_ID config, 3) Auth service configuration, 4) Service authentication context mechanism. "
                 f"Request ID: {request_id}"
@@ -427,7 +427,7 @@ async def get_request_scoped_db_session() -> AsyncGenerator[AsyncSession, None]:
                 )
             except Exception as critical_trace_error:
                 logger.error(
-                    f"🚨 CRITICAL_TRACE_FAILED: Could not dump 403 error context: {critical_trace_error}. "
+                    f" ALERT:  CRITICAL_TRACE_FAILED: Could not dump 403 error context: {critical_trace_error}. "
                     f"This 403 'Not authenticated' error is the main issue you're debugging!"
                 )
         
@@ -692,7 +692,7 @@ async def get_request_scoped_context(
 def get_user_execution_context(user_id: str, thread_id: Optional[str] = None, run_id: Optional[str] = None) -> UserExecutionContext:
     """Get existing user execution context or create if needed - CORRECT PATTERN.
     
-    ⚠️  DEPRECATED: Use get_user_session_context() for new code.
+     WARNING: [U+FE0F]  DEPRECATED: Use get_user_session_context() for new code.
     
     This function implements proper session management using the SSOT UserSessionManager.
     It maintains conversation continuity by reusing existing contexts instead of always
@@ -798,7 +798,7 @@ def create_user_execution_context(user_id: str,
                                   websocket_connection_id: Optional[str] = None) -> UserExecutionContext:
     """Create UserExecutionContext for per-request isolation.
     
-    ⚠️  DEPRECATED: This function breaks conversation continuity!
+     WARNING: [U+FE0F]  DEPRECATED: This function breaks conversation continuity!
     
     CRITICAL ISSUE: This function always creates NEW contexts instead of maintaining
     session continuity. This breaks multi-turn conversations and causes memory leaks.
@@ -904,7 +904,7 @@ async def get_request_scoped_supervisor(
         # CRITICAL: Validate that session is not globally stored
         if hasattr(db_session, '_global_storage_flag'):
             logger.error(
-                f"❌ VALIDATION FAILURE: Attempted to use globally stored session in request-scoped supervisor. "
+                f" FAIL:  VALIDATION FAILURE: Attempted to use globally stored session in request-scoped supervisor. "
                 f"Session ID: {id(db_session)}, User: {context.user_id}, "
                 f"This is a critical security violation - database sessions must be request-scoped only."
             )
@@ -994,7 +994,7 @@ async def get_request_scoped_supervisor(
                     user_context=user_context,
                     websocket_manager=websocket_bridge
                 )
-                logger.info(f"✅ Created request-scoped tool dispatcher for user {context.user_id}")
+                logger.info(f" PASS:  Created request-scoped tool dispatcher for user {context.user_id}")
             except Exception as e:
                 logger.error(f"Failed to create request-scoped tool dispatcher: {e}")
                 raise HTTPException(
@@ -1015,7 +1015,7 @@ async def get_request_scoped_supervisor(
             tool_dispatcher=tool_dispatcher
         )
         
-        logger.info(f"✅ Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id} using core factory")
+        logger.info(f" PASS:  Created request-scoped SupervisorAgent for user {context.user_id}, run {context.run_id} using core factory")
         return supervisor
         
     except Exception as e:
@@ -1440,7 +1440,7 @@ async def get_request_scoped_message_handler(
         from netra_backend.app.services.message_handlers import MessageHandlerService
         message_service = MessageHandlerService(supervisor, thread_service)
         
-        logger.info(f"✅ Created request-scoped MessageHandlerService for user {context.user_id}")
+        logger.info(f" PASS:  Created request-scoped MessageHandlerService for user {context.user_id}")
         return message_service
         
     except Exception as e:
@@ -1631,7 +1631,7 @@ async def get_factory_execution_engine(
         # Create isolated execution engine
         engine = await factory.create_execution_engine(user_context)
         
-        logger.info(f"✅ Created isolated ExecutionEngine for user {user_id}")
+        logger.info(f" PASS:  Created isolated ExecutionEngine for user {user_id}")
         return engine
         
     except Exception as e:
@@ -1677,7 +1677,7 @@ async def get_factory_websocket_emitter(
         # Create isolated WebSocket emitter
         emitter = await factory.create_user_emitter(user_id, thread_id, connection_id)
         
-        logger.info(f"✅ Created isolated WebSocketEmitter for user {user_id}")
+        logger.info(f" PASS:  Created isolated WebSocketEmitter for user {user_id}")
         return emitter
         
     except Exception as e:
@@ -1852,7 +1852,7 @@ async def configure_session_manager(app) -> None:
         app: FastAPI application instance
     """
     try:
-        logger.info("🔄 Configuring UserSessionManager...")
+        logger.info(" CYCLE:  Configuring UserSessionManager...")
         
         from shared.session_management import initialize_session_manager, get_session_manager
         
@@ -1864,10 +1864,10 @@ async def configure_session_manager(app) -> None:
         
         # Get initial metrics for logging
         metrics = session_manager.get_session_metrics()
-        logger.info(f"✅ UserSessionManager configured successfully - initial metrics: {metrics.to_dict()}")
+        logger.info(f" PASS:  UserSessionManager configured successfully - initial metrics: {metrics.to_dict()}")
         
     except Exception as e:
-        logger.error(f"❌ Failed to configure UserSessionManager: {e}")
+        logger.error(f" FAIL:  Failed to configure UserSessionManager: {e}")
         raise RuntimeError(f"Session manager configuration failed: {e}")
 
 
@@ -1881,7 +1881,7 @@ async def shutdown_session_manager_app(app) -> None:
         app: FastAPI application instance
     """
     try:
-        logger.info("🔄 Shutting down UserSessionManager...")
+        logger.info(" CYCLE:  Shutting down UserSessionManager...")
         
         from shared.session_management import shutdown_session_manager
         
@@ -1892,10 +1892,10 @@ async def shutdown_session_manager_app(app) -> None:
         if hasattr(app.state, 'session_manager'):
             delattr(app.state, 'session_manager')
         
-        logger.info("✅ UserSessionManager shutdown completed")
+        logger.info(" PASS:  UserSessionManager shutdown completed")
         
     except Exception as e:
-        logger.error(f"❌ Failed to shutdown UserSessionManager: {e}")
+        logger.error(f" FAIL:  Failed to shutdown UserSessionManager: {e}")
         # Don't raise exception during shutdown
 
 
@@ -1909,7 +1909,7 @@ def configure_factory_dependencies(app) -> None:
         app: FastAPI application instance
     """
     try:
-        logger.info("🏭 Configuring factory pattern dependencies...")
+        logger.info("[U+1F3ED] Configuring factory pattern dependencies...")
         
         # Create ExecutionEngineFactory
         execution_factory_config = ExecutionFactoryConfig.from_env()
@@ -1950,14 +1950,14 @@ def configure_factory_dependencies(app) -> None:
         if hasattr(app.state, 'agent_registry'):
             try:
                 app.state.agent_registry.configure_factory_adapter(factory_adapter)
-                logger.info("✅ Configured AgentRegistry with FactoryAdapter")
+                logger.info(" PASS:  Configured AgentRegistry with FactoryAdapter")
             except Exception as e:
                 logger.warning(f"Failed to configure AgentRegistry with FactoryAdapter: {e}")
         
-        logger.info("✅ Factory pattern dependencies configured successfully")
+        logger.info(" PASS:  Factory pattern dependencies configured successfully")
         
     except Exception as e:
-        logger.error(f"❌ Failed to configure factory pattern dependencies: {e}")
+        logger.error(f" FAIL:  Failed to configure factory pattern dependencies: {e}")
         raise RuntimeError(f"Factory dependency configuration failed: {e}")
 
 

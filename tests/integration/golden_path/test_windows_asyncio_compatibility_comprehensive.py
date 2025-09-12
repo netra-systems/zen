@@ -84,7 +84,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
         r"\\server\share\netra-data",
         "C:/mixed/forward/slashes",
         r"C:\path with spaces\netra",
-        r"C:\unicode\path\测试\netra"
+        r"C:\unicode\path\[U+6D4B][U+8BD5]\netra"
     ]
     
     def setup_method(self, method=None):
@@ -227,7 +227,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
         test_duration = time.time() - test_start
         assert test_duration < self.ASYNCIO_TIMEOUT, f"Event loop tests took too long: {test_duration:.2f}s"
         
-        self.logger.info(f"✅ Windows event loop compatibility validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows event loop compatibility validated in {test_duration:.3f}s")
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -363,7 +363,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Windows file operations asyncio validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows file operations asyncio validated in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -519,7 +519,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
                 })
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Windows network asyncio compatibility validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows network asyncio compatibility validated in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -647,7 +647,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Windows database asyncio compatibility validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows database asyncio compatibility validated in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -747,7 +747,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Windows threading asyncio integration validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows threading asyncio integration validated in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -870,7 +870,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Windows memory management asyncio validated in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Windows memory management asyncio validated in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -959,10 +959,10 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             assert all(isinstance(op, (str, dict)) for op in golden_path_result['all_operations']), \
                 "All operations must return valid results"
             
-            self.logger.info("✅ Windows golden path end-to-end compatibility VALIDATED")
+            self.logger.info(" PASS:  Windows golden path end-to-end compatibility VALIDATED")
             
         except Exception as e:
-            self.logger.error(f"❌ Windows golden path FAILED: {e}")
+            self.logger.error(f" FAIL:  Windows golden path FAILED: {e}")
             raise
         
         test_duration = time.time() - test_start
@@ -990,7 +990,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
             "automation"
         )
         
-        self.logger.info(f"🎯 WINDOWS ASYNCIO COMPATIBILITY: {success_rate:.1%} success rate")
+        self.logger.info(f" TARGET:  WINDOWS ASYNCIO COMPATIBILITY: {success_rate:.1%} success rate")
         
     def teardown_method(self, method=None):
         """Cleanup and report Windows asyncio compatibility results."""
@@ -1014,7 +1014,7 @@ class TestWindowsAsyncioCompatibilityComprehensive(BaseIntegrationTest):
                 self.logger.info(f"{test_category.upper()}: {successful}/{total} ({success_rate:.1%})")
                 
                 for result in results:
-                    status = "✅" if result.get('success', False) else "❌"
+                    status = " PASS: " if result.get('success', False) else " FAIL: "
                     test_name = result.get('test', 'unknown')
                     self.logger.info(f"  {status} {test_name}")
                     

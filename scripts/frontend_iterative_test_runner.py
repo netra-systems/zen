@@ -6,12 +6,12 @@ Automated test runner for running frontend tests repeatedly with sub-agent fixes
 Designed to achieve 100+ iterations targeting specific issue types per iteration.
 
 BACKGROUND FROM SUCCESSFUL ITERATIONS 1-6:
-- ✅ Fixed npm dependencies (iteration 1)
-- ✅ Fixed Jest mock configuration (iteration 2)  
-- ✅ Fixed User Profile Form validation, Clipboard API (iteration 3)
-- ✅ Investigated ChatHistorySection architectural issues (iteration 4)
-- ✅ Fixed keyboard event handlers completely (iteration 5)
-- ✅ Fixed mock setup issues, identified patterns (iteration 6)
+-  PASS:  Fixed npm dependencies (iteration 1)
+-  PASS:  Fixed Jest mock configuration (iteration 2)  
+-  PASS:  Fixed User Profile Form validation, Clipboard API (iteration 3)
+-  PASS:  Investigated ChatHistorySection architectural issues (iteration 4)
+-  PASS:  Fixed keyboard event handlers completely (iteration 5)
+-  PASS:  Fixed mock setup issues, identified patterns (iteration 6)
 
 KEY AUTOMATION STRATEGY:
 - Focus on specific issue types per iteration (rotate through focus areas)
@@ -511,7 +511,7 @@ Apply only critical async/timing fixes. Maintain test stability.
             
             for line in lines:
                 # Start of test failure
-                if '✕ ' in line or 'FAIL' in line:
+                if '[U+2715] ' in line or 'FAIL' in line:
                     if current_failure:
                         failures.append(current_failure)
                     current_failure = {
@@ -535,7 +535,7 @@ Apply only critical async/timing fixes. Maintain test stability.
                             current_failure['line_number'] = parts[0].strip().replace('>', '').strip()
                             
                 # End of failure section
-                elif in_failure and (line.strip() == '' or '●' in line):
+                elif in_failure and (line.strip() == '' or '[U+25CF]' in line):
                     if current_failure:
                         failures.append(current_failure)
                         current_failure = {}
@@ -781,7 +781,7 @@ Apply only critical async/timing fixes. Maintain test stability.
         focus_area = self._get_focus_area(iteration)
         result = IterationResult(iteration, focus_area)
         
-        logger.info(f"\n🔄 ITERATION {iteration} - Focus: {focus_area}")
+        logger.info(f"\n CYCLE:  ITERATION {iteration} - Focus: {focus_area}")
         logger.info(f"{'='*50}")
         
         try:
@@ -793,11 +793,11 @@ Apply only critical async/timing fixes. Maintain test stability.
             result.tests_failed = stats['failed']
             
             if success:
-                logger.info(f"✅ All tests passed! Iteration {iteration} successful.")
+                logger.info(f" PASS:  All tests passed! Iteration {iteration} successful.")
                 result.complete("success", stats['run'], stats['passed'], stats['failed'])
                 result.notes = "All tests passed"
             else:
-                logger.info(f"❌ Tests failed. Attempting fixes for {focus_area}...")
+                logger.info(f" FAIL:  Tests failed. Attempting fixes for {focus_area}...")
                 
                 # Extract failure information
                 result.failures = self._extract_failures(output)
@@ -830,7 +830,7 @@ Apply only critical async/timing fixes. Maintain test stability.
             
             for line in lines:
                 # Start of a test failure
-                if '● ' in line or 'FAIL' in line:
+                if '[U+25CF] ' in line or 'FAIL' in line:
                     if current_failure:
                         failures.append(current_failure.strip())
                     current_failure = line
@@ -855,7 +855,7 @@ Apply only critical async/timing fixes. Maintain test stability.
         
     def run_automated_iterations(self) -> bool:
         """Run automated iterations until completion or interruption"""
-        logger.info(f"🚀 Starting automated frontend test iterations")
+        logger.info(f"[U+1F680] Starting automated frontend test iterations")
         logger.info(f"Range: {self.start_iteration} to {self.max_iterations}")
         logger.info(f"Focus areas: {', '.join(self.FOCUS_AREAS)}")
         
@@ -870,7 +870,7 @@ Apply only critical async/timing fixes. Maintain test stability.
                 
                 # Check if all tests are passing
                 if result.status == "success":
-                    logger.info(f"🎉 SUCCESS! All frontend tests are passing after iteration {self.current_iteration}")
+                    logger.info(f" CELEBRATION:  SUCCESS! All frontend tests are passing after iteration {self.current_iteration}")
                     self._print_progress_summary()
                     return True
                     
@@ -885,11 +885,11 @@ Apply only critical async/timing fixes. Maintain test stability.
                     self._print_progress_summary()
                     
             if self.interrupted:
-                logger.info(f"⏸️  Process interrupted at iteration {self.current_iteration}")
+                logger.info(f"[U+23F8][U+FE0F]  Process interrupted at iteration {self.current_iteration}")
                 self._print_progress_summary()
                 return False
             elif self.current_iteration > self.max_iterations:
-                logger.info(f"⚠️  Reached maximum iterations ({self.max_iterations}) without complete success")
+                logger.info(f" WARNING: [U+FE0F]  Reached maximum iterations ({self.max_iterations}) without complete success")
                 self._print_progress_summary()
                 return False
                 
@@ -947,10 +947,10 @@ EXAMPLES:
     success = runner.run_automated_iterations()
     
     if success:
-        logger.info("🎉 All frontend tests are now passing!")
+        logger.info(" CELEBRATION:  All frontend tests are now passing!")
         return 0
     else:
-        logger.info("⚠️  Process completed without achieving full success")
+        logger.info(" WARNING: [U+FE0F]  Process completed without achieving full success")
         return 1
         
 if __name__ == "__main__":

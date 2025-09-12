@@ -33,15 +33,15 @@ def test_secret_manager_builder():
     try:
         # Import the SecretManagerBuilder
         from shared.secret_manager_builder import SecretManagerBuilder
-        print("✅ SecretManagerBuilder imported successfully")
+        print(" PASS:  SecretManagerBuilder imported successfully")
         
         # Create builder instance
         builder = SecretManagerBuilder(service="shared")
-        print(f"✅ Builder created for service: {builder.service}")
+        print(f" PASS:  Builder created for service: {builder.service}")
         print(f"   Environment detected: {builder._environment}")
         
         # Test loading all secrets
-        print("\n📦 Testing load_all_secrets()...")
+        print("\n[U+1F4E6] Testing load_all_secrets()...")
         try:
             secrets = builder.load_all_secrets()
             print(f"   Loaded {len(secrets)} secrets")
@@ -50,21 +50,21 @@ def test_secret_manager_builder():
             critical_secrets = ['JWT_SECRET_KEY', 'POSTGRES_PASSWORD', 'REDIS_PASSWORD', 'FERNET_KEY']
             for secret_name in critical_secrets:
                 if secret_name in secrets:
-                    print(f"   ✅ {secret_name}: Found (value length: {len(str(secrets[secret_name]))})")
+                    print(f"    PASS:  {secret_name}: Found (value length: {len(str(secrets[secret_name]))})")
                 else:
-                    print(f"   ❌ {secret_name}: Missing")
+                    print(f"    FAIL:  {secret_name}: Missing")
                     
             # Check new business secret
             if 'ANTHROPIC_API_KEY' in secrets:
-                print(f"   ✅ ANTHROPIC_API_KEY: Found")
+                print(f"    PASS:  ANTHROPIC_API_KEY: Found")
             else:
-                print(f"   ❌ ANTHROPIC_API_KEY: Missing")
+                print(f"    FAIL:  ANTHROPIC_API_KEY: Missing")
                 
         except Exception as e:
-            print(f"   ❌ Failed to load secrets: {e}")
+            print(f"    FAIL:  Failed to load secrets: {e}")
             
         # Test validation
-        print("\n🔐 Testing validate_configuration()...")
+        print("\n[U+1F510] Testing validate_configuration()...")
         try:
             validation_result = builder.validate_configuration()
             print(f"   Validation valid: {validation_result.is_valid}")
@@ -78,10 +78,10 @@ def test_secret_manager_builder():
                     print(f"     - {error}")
                     
         except Exception as e:
-            print(f"   ❌ Validation failed: {e}")
+            print(f"    FAIL:  Validation failed: {e}")
             
         # Test sub-builders
-        print("\n🏗️ Testing sub-builders...")
+        print("\n[U+1F3D7][U+FE0F] Testing sub-builders...")
         
         # Test GCP builder
         try:
@@ -92,20 +92,20 @@ def test_secret_manager_builder():
             # Test connectivity (will fail in dev but should not crash)
             is_valid, error = builder.gcp.validate_gcp_connectivity()
             if is_valid:
-                print(f"     ✅ GCP connectivity valid")
+                print(f"      PASS:  GCP connectivity valid")
             else:
-                print(f"     ⚠️ GCP connectivity not available (expected in dev)")
+                print(f"      WARNING: [U+FE0F] GCP connectivity not available (expected in dev)")
                 
         except Exception as e:
-            print(f"     ❌ GCP builder error: {e}")
+            print(f"      FAIL:  GCP builder error: {e}")
             
         # Test auth builder
         try:
             print("   Testing Auth builder...")
             jwt_secret = builder.auth.get_jwt_secret()
-            print(f"     ✅ JWT secret retrieved (length: {len(jwt_secret)})")
+            print(f"      PASS:  JWT secret retrieved (length: {len(jwt_secret)})")
         except Exception as e:
-            print(f"     ❌ Auth builder error: {e}")
+            print(f"      FAIL:  Auth builder error: {e}")
             
         # Test cache builder
         try:
@@ -113,22 +113,22 @@ def test_secret_manager_builder():
             builder.cache.cache_secret("TEST_SECRET", "test_value", ttl_minutes=5)
             cached_value = builder.cache.get_cached_secret("TEST_SECRET")
             if cached_value == "test_value":
-                print(f"     ✅ Cache working correctly")
+                print(f"      PASS:  Cache working correctly")
             else:
-                print(f"     ❌ Cache not working: got {cached_value}")
+                print(f"      FAIL:  Cache not working: got {cached_value}")
         except Exception as e:
-            print(f"     ❌ Cache builder error: {e}")
+            print(f"      FAIL:  Cache builder error: {e}")
             
         # Test debug info
-        print("\n📊 Getting debug info...")
+        print("\n CHART:  Getting debug info...")
         try:
             debug_info = builder.get_debug_info()
             print(json.dumps(debug_info, indent=2))
         except Exception as e:
-            print(f"   ❌ Debug info failed: {e}")
+            print(f"    FAIL:  Debug info failed: {e}")
             
         # Test backward compatibility functions
-        print("\n🔧 Testing backward compatibility...")
+        print("\n[U+1F527] Testing backward compatibility...")
         try:
             from shared.secret_manager_builder import (
                 get_secret_manager,
@@ -140,42 +140,42 @@ def test_secret_manager_builder():
             
             # Test get_secret_manager
             manager = get_secret_manager("shared")
-            print(f"   ✅ get_secret_manager() works")
+            print(f"    PASS:  get_secret_manager() works")
             
             # Test load_secrets_for_service
             service_secrets = load_secrets_for_service("shared")
-            print(f"   ✅ load_secrets_for_service() returned {len(service_secrets)} secrets")
+            print(f"    PASS:  load_secrets_for_service() returned {len(service_secrets)} secrets")
             
             # Test get_jwt_secret
             jwt = get_jwt_secret("shared")
-            print(f"   ✅ get_jwt_secret() works")
+            print(f"    PASS:  get_jwt_secret() works")
             
             # Test get_database_password
             db_pass = get_database_password("shared")
             if db_pass:
-                print(f"   ✅ get_database_password() returned value")
+                print(f"    PASS:  get_database_password() returned value")
             else:
-                print(f"   ⚠️ get_database_password() returned None (expected in dev)")
+                print(f"    WARNING: [U+FE0F] get_database_password() returned None (expected in dev)")
                 
             # Test get_redis_password
             redis_pass = get_redis_password("shared")
             if redis_pass:
-                print(f"   ✅ get_redis_password() returned value")
+                print(f"    PASS:  get_redis_password() returned value")
             else:
-                print(f"   ⚠️ get_redis_password() returned None (expected in dev)")
+                print(f"    WARNING: [U+FE0F] get_redis_password() returned None (expected in dev)")
                 
         except Exception as e:
-            print(f"   ❌ Backward compatibility error: {e}")
+            print(f"    FAIL:  Backward compatibility error: {e}")
             
         print("\n" + "=" * 80)
         print("TEST COMPLETE")
         print("=" * 80)
         
     except ImportError as e:
-        print(f"❌ Failed to import SecretManagerBuilder: {e}")
+        print(f" FAIL:  Failed to import SecretManagerBuilder: {e}")
         return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         import traceback
         traceback.print_exc()
         return False

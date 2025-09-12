@@ -712,23 +712,23 @@ def main():
                 print(json.dumps(result, indent=2))
             else:
                 print(f"=== Validation Report for {args.issue_id} ===")
-                print(f"Valid: {'✓' if result['valid'] else '✗'}")
+                print(f"Valid: {'[U+2713]' if result['valid'] else '[U+2717]'}")
                 
                 if result['checks']:
                     print("\n--- Validation Checks ---")
                     for check in result['checks']:
-                        status = "✓" if check['passed'] else "✗"
+                        status = "[U+2713]" if check['passed'] else "[U+2717]"
                         print(f"  {status} {check['step']}")
                 
                 if result['warnings']:
                     print("\n--- Warnings ---")
                     for warning in result['warnings']:
-                        print(f"  ⚠ {warning}")
+                        print(f"   WARNING:  {warning}")
                 
                 if result['errors']:
                     print("\n--- Errors ---")
                     for error in result['errors']:
-                        print(f"  ✗ {error}")
+                        print(f"  [U+2717] {error}")
         
         elif args.command == 'alerts':
             alerts = tracker.generate_alerts()
@@ -741,7 +741,7 @@ def main():
                 else:
                     print("=== Generated Alerts ===")
                     for alert in alerts:
-                        severity_icon = {"critical": "🔴", "high": "🟡", "medium": "🟠"}.get(alert['severity'], "ℹ️")
+                        severity_icon = {"critical": "[U+1F534]", "high": "[U+1F7E1]", "medium": "[U+1F7E0]"}.get(alert['severity'], "[U+2139][U+FE0F]")
                         print(f"  {severity_icon} {alert['message']}")
         
     except Exception as e:

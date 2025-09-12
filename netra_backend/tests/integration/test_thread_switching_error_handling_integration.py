@@ -378,7 +378,7 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
             "../../../etc/passwd",   # Path injection attempt
             "<script>alert('xss')</script>", # XSS attempt
             "'; DROP TABLE threads; --",     # SQL injection attempt
-            "thread_with_unicode_🎉",        # Unicode characters
+            "thread_with_unicode_ CELEBRATION: ",        # Unicode characters
             "thread\x00null",               # Null byte injection
         ]
         
@@ -447,7 +447,7 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
             },
             {
                 "name": "unicode_user_id",
-                "user_id": "user_with_emoji_🚀_data",
+                "user_id": "user_with_emoji_[U+1F680]_data",
                 "expected_failure": False  # Unicode might be acceptable
             }
         ]
@@ -646,7 +646,7 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
             },
             {
                 "name": "unicode_content",
-                "content": "Message with emojis 🎉🚀 and unicode ñäïvé",
+                "content": "Message with emojis  CELEBRATION: [U+1F680] and unicode [U+00F1][U+00E4][U+00EF]v[U+00E9]",
                 "role": "user",
                 "should_succeed": True
             },
@@ -1705,22 +1705,22 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
         unicode_test_cases = [
             {
                 "name": "emoji_content",
-                "content": "Hello world! 🌍 Testing emojis: 😀😃😄😁😆😅🤣😂 🚀🎉🎊🎁🎈",
+                "content": "Hello world! [U+1F30D] Testing emojis: [U+1F600][U+1F603][U+1F604][U+1F601][U+1F606][U+1F605][U+1F923][U+1F602] [U+1F680] CELEBRATION: [U+1F38A][U+1F381][U+1F388]",
                 "expected_success": True
             },
             {
                 "name": "multilingual_content",
-                "content": "English, Español, Français, Deutsch, 中文, 日本語, العربية, Русский, हिंदी",
+                "content": "English, Espa[U+00F1]ol, Fran[U+00E7]ais, Deutsch, [U+4E2D][U+6587], [U+65E5][U+672C][U+8A9E], [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629], Pucck[U+0438][U+0439], [U+0939][U+093F][U+0902][U+0926][U+0940]",
                 "expected_success": True
             },
             {
                 "name": "mathematical_symbols",
-                "content": "Mathematical symbols: ∑∏∫∞≈≤≥±∓∆∇∂ α β γ δ ε θ λ μ π σ ω",
+                "content": "Mathematical symbols: [U+2211][U+220F][U+222B] infinity [U+2248] <=  >=  +/- [U+2213][U+2206][U+2207][U+2202] [U+03B1] [U+03B2] [U+03B3] [U+03B4] [U+03B5] [U+03B8] [U+03BB] [U+03BC] [U+03C0] [U+03C3] [U+03C9]",
                 "expected_success": True
             },
             {
                 "name": "currency_symbols",
-                "content": "Currency: $ £ € ¥ ₹ ₽ ₩ ₦ ₨ ₪ ₴ ₵ ₡ ₢ ₣ ₤ ₥ ₦ ₧ ₨ ₩ ₪",
+                "content": "Currency: $ [U+00A3] [U+20AC] [U+00A5] [U+20B9] [U+20BD] [U+20A9] [U+20A6] [U+20A8] [U+20AA] [U+20B4] [U+20B5] [U+20A1] [U+20A2] [U+20A3] [U+20A4] [U+20A5] [U+20A6] [U+20A7] [U+20A8] [U+20A9] [U+20AA]",
                 "expected_success": True
             },
             {
@@ -1735,22 +1735,22 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
             },
             {
                 "name": "rtl_content",
-                "content": "Right-to-left: שלום עולם مرحبا بالعالم",  # Hebrew and Arabic
+                "content": "Right-to-left: [U+05E9][U+05DC][U+05D5][U+05DD] [U+05E2][U+05D5][U+05DC][U+05DD] [U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",  # Hebrew and Arabic
                 "expected_success": True
             },
             {
                 "name": "combining_characters",
-                "content": "Combining: é (e + ́) ñ (n + ̃) å (a + ̊)",
+                "content": "Combining: [U+00E9] (e + [U+0301]) [U+00F1] (n + [U+0303]) [U+00E5] (a + [U+030A])",
                 "expected_success": True
             },
             {
                 "name": "surrogate_pairs",
-                "content": "Surrogate pairs: 𝕌𝕟𝕚𝕔𝕠𝕕𝕖 𝔼𝕞𝕞𝕠𝕛𝕚 🅰🅱🅲🅳",  # High Unicode
+                "content": "Surrogate pairs: [U+1D54C][U+1D55F][U+1D55A][U+1D554][U+1D560][U+1D555][U+1D556] [U+1D53C][U+1D55E][U+1D55E][U+1D560][U+1D55B][U+1D55A] [U+1F170][U+1F171][U+1F172][U+1F173]",  # High Unicode
                 "expected_success": True
             },
             {
                 "name": "mixed_directionality",
-                "content": "Mixed: English العربية English עברית English",
+                "content": "Mixed: English [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629] English [U+05E2][U+05D1][U+05E8][U+05D9][U+05EA] English",
                 "expected_success": True
             }
         ]
@@ -1827,8 +1827,8 @@ class TestThreadSwitchingErrorHandling(BaseIntegrationTest):
         
         print(f"Unicode Test Results:")
         for result in unicode_results:
-            status = "✓" if result["success"] else "✗"
-            preserved = "✓" if result["content_preserved"] else "✗"
+            status = "[U+2713]" if result["success"] else "[U+2717]"
+            preserved = "[U+2713]" if result["content_preserved"] else "[U+2717]"
             print(f"  {status} {result['test_name']}: Created={result['message_created']} Preserved={preserved}")
             if result["error"]:
                 print(f"    Error: {result['error'][:100]}")

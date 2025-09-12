@@ -19,7 +19,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 class TestDeepAgentStateMigrationDetection(SSotAsyncTestCase):
     """
-    Migration validation test for DeepAgentState → UserExecutionContext
+    Migration validation test for DeepAgentState  ->  UserExecutionContext
     
     This test FAILS until all DeepAgentState imports are removed from production files.
     Success = migration complete, security vulnerability resolved.
@@ -61,7 +61,7 @@ class TestDeepAgentStateMigrationDetection(SSotAsyncTestCase):
         if violations:
             violation_summary = self._build_violation_summary(violations)
             self.fail(f"""
-🚨 MIGRATION REQUIRED: DeepAgentState still in use (Issue #271)
+ ALERT:  MIGRATION REQUIRED: DeepAgentState still in use (Issue #271)
 
 Active DeepAgentState imports detected in {len(violations)} production files:
 
@@ -95,7 +95,7 @@ See: USER_CONTEXT_ARCHITECTURE.md for migration guide.
                     
         if missing_adoption:
             self.fail(f"""
-🚨 CRITICAL FILES MISSING UserExecutionContext ADOPTION
+ ALERT:  CRITICAL FILES MISSING UserExecutionContext ADOPTION
 
 Files not yet migrated to secure pattern:
 {chr(10).join(f'  - {f}' for f in missing_adoption)}
@@ -190,9 +190,9 @@ PRIORITY: P0 - Migrate these files first to protect $500K+ ARR.
         summary_lines = []
         
         for file_path, file_violations in violations.items():
-            summary_lines.append(f"📁 {file_path}:")
+            summary_lines.append(f"[U+1F4C1] {file_path}:")
             for violation in file_violations:
-                summary_lines.append(f"   🚨 {violation}")
+                summary_lines.append(f"    ALERT:  {violation}")
             summary_lines.append("")
             
         return '\n'.join(summary_lines)

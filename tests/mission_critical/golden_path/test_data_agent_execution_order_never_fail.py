@@ -107,21 +107,21 @@ class AgentExecutionOrderTracker:
         with self._lock:
             timestamp = time.time()
             self.agent_start_times[agent_name] = timestamp
-            logger.info(f"📊 Agent {agent_name} ({agent_id}) started at {timestamp:.3f}")
+            logger.info(f" CHART:  Agent {agent_name} ({agent_id}) started at {timestamp:.3f}")
     
     def record_agent_completion(self, agent_name: str, agent_id: AgentID) -> None:
         """Record when an agent completes execution."""
         with self._lock:
             timestamp = time.time()
             self.agent_completion_times[agent_name] = timestamp
-            logger.info(f"✅ Agent {agent_name} ({agent_id}) completed at {timestamp:.3f}")
+            logger.info(f" PASS:  Agent {agent_name} ({agent_id}) completed at {timestamp:.3f}")
     
     def record_tool_execution(self, agent_name: str, tool_name: str) -> None:
         """Record tool execution within an agent."""
         with self._lock:
             timestamp = time.time()
             self.tool_execution_order.append((agent_name, tool_name, timestamp))
-            logger.info(f"🔧 Tool {tool_name} executed by {agent_name} at {timestamp:.3f}")
+            logger.info(f"[U+1F527] Tool {tool_name} executed by {agent_name} at {timestamp:.3f}")
     
     def record_websocket_event(self, event_type: str, event_data: Dict[str, Any]) -> None:
         """Record WebSocket events to validate execution visibility."""
@@ -132,7 +132,7 @@ class AgentExecutionOrderTracker:
                 "data": event_data
             }
             self.websocket_events.append(event)
-            logger.info(f"📡 WebSocket event {event_type} at {event['timestamp']:.3f}")
+            logger.info(f"[U+1F4E1] WebSocket event {event_type} at {event['timestamp']:.3f}")
     
     def validate_data_before_optimization_order(self) -> Tuple[bool, List[str]]:
         """
@@ -210,7 +210,7 @@ class AgentExecutionOrderTracker:
         """
         Validate WebSocket events reflect correct agent execution order.
         
-        This ensures users see the correct progression: data → optimization → completion.
+        This ensures users see the correct progression: data  ->  optimization  ->  completion.
         """
         violations = []
         
@@ -270,7 +270,7 @@ class ExecutionOrderTestHarness:
         if self.real_services_started:
             return
         
-        logger.critical("🚀 Starting REAL services for mission critical execution order tests")
+        logger.critical("[U+1F680] Starting REAL services for mission critical execution order tests")
         
         try:
             # Ensure Docker services are running
@@ -282,10 +282,10 @@ class ExecutionOrderTestHarness:
             await asyncio.sleep(15)
             self.real_services_started = True
             
-            logger.success("✅ Real services started successfully")
+            logger.success(" PASS:  Real services started successfully")
             
         except Exception as e:
-            logger.error(f"❌ Failed to start real services: {e}")
+            logger.error(f" FAIL:  Failed to start real services: {e}")
             raise RuntimeError(f"Cannot run mission critical tests without real services: {e}")
     
     async def create_authenticated_test_user(self, user_email: str) -> StronglyTypedUserExecutionContext:
@@ -322,9 +322,9 @@ class ExecutionOrderTestHarness:
         # 3. Execute real agent workflow through WorkflowOrchestrator
         # 4. Track actual agent execution and tool usage
         
-        logger.info(f"🎯 Executing data-optimization workflow for user {user_id}")
+        logger.info(f" TARGET:  Executing data-optimization workflow for user {user_id}")
         
-        # Simulate correct execution order: data → optimization → completion
+        # Simulate correct execution order: data  ->  optimization  ->  completion
         await self._simulate_correct_execution_order(tracker)
         
         return tracker
@@ -413,7 +413,7 @@ class ExecutionOrderTestHarness:
     
     async def cleanup(self) -> None:
         """Clean up test resources."""
-        logger.info("🧹 Cleaning up execution order test harness")
+        logger.info("[U+1F9F9] Cleaning up execution order test harness")
         self.execution_trackers.clear()
 
 
@@ -440,7 +440,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         cls.test_environment = cls.env.get("TEST_ENV", "test")
         cls.test_harness = ExecutionOrderTestHarness(cls.test_environment)
         
-        logger.critical("🚨 MISSION CRITICAL EXECUTION ORDER TESTS STARTING - $200K+ MRR Protection 🚨")
+        logger.critical(" ALERT:  MISSION CRITICAL EXECUTION ORDER TESTS STARTING - $200K+ MRR Protection  ALERT: ")
         logger.info(f"Environment: {cls.test_environment}")
         logger.info("Required: Data agents MUST complete before optimization agents start")
     
@@ -449,12 +449,12 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         """Clean up mission critical test environment."""
         if hasattr(cls, 'test_harness'):
             asyncio.run(cls.test_harness.cleanup())
-        logger.critical("🚨 MISSION CRITICAL EXECUTION ORDER TESTS COMPLETED 🚨")
+        logger.critical(" ALERT:  MISSION CRITICAL EXECUTION ORDER TESTS COMPLETED  ALERT: ")
     
     def setup_method(self, method):
         """Set up individual test method."""
         super().setup_method(method)
-        logger.info(f"🔍 Mission Critical Execution Order Test: {method.__name__}")
+        logger.info(f" SEARCH:  Mission Critical Execution Order Test: {method.__name__}")
     
     # ========================================================================
     # CRITICAL EXECUTION ORDER VALIDATION TESTS
@@ -470,9 +470,9 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         incorrect optimization recommendations based on incomplete data analysis.
         
         Failure Mode: Optimization agent starts before data agent completion
-        Business Impact: Wrong recommendations → customer churn → revenue loss
+        Business Impact: Wrong recommendations  ->  customer churn  ->  revenue loss
         """
-        logger.critical("🎯 TESTING: Data agent completion before optimization start (REVENUE CRITICAL)")
+        logger.critical(" TARGET:  TESTING: Data agent completion before optimization start (REVENUE CRITICAL)")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -493,7 +493,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         order_valid, violations = tracker.validate_data_before_optimization_order()
         
         assert order_valid, (
-            f"💥 REVENUE CRITICAL FAILURE: Data-before-optimization order violated!\n"
+            f"[U+1F4A5] REVENUE CRITICAL FAILURE: Data-before-optimization order violated!\n"
             f"Violations: {violations}\n"
             f"This causes wrong optimization recommendations and revenue loss!\n"
             f"Agent start times: {tracker.agent_start_times}\n"
@@ -511,7 +511,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             f"Cannot validate execution order without completion events!"
         )
         
-        logger.success("✅ CRITICAL TEST PASSED: Data agent completed before optimization started")
+        logger.success(" PASS:  CRITICAL TEST PASSED: Data agent completed before optimization started")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -523,9 +523,9 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         information before optimization tools attempt to generate recommendations.
         
         Failure Mode: Optimization tools execute without complete data
-        Business Impact: Incomplete data → invalid calculations → customer trust loss
+        Business Impact: Incomplete data  ->  invalid calculations  ->  customer trust loss
         """
-        logger.critical("🎯 TESTING: Data collection tool dependency order (DATA INTEGRITY CRITICAL)")
+        logger.critical(" TARGET:  TESTING: Data collection tool dependency order (DATA INTEGRITY CRITICAL)")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -545,7 +545,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         tool_order_valid, tool_violations = tracker.validate_tool_dependency_order()
         
         assert tool_order_valid, (
-            f"💥 TOOL DEPENDENCY FAILURE: Data collection tools executed in wrong order!\n"
+            f"[U+1F4A5] TOOL DEPENDENCY FAILURE: Data collection tools executed in wrong order!\n"
             f"Violations: {tool_violations}\n"
             f"This leads to optimization with incomplete data!\n"
             f"Tool execution order: {tracker.tool_execution_order}"
@@ -568,7 +568,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             f"Cannot validate tool sequence without data tools!"
         )
         
-        logger.success("✅ TOOL SEQUENCE TEST PASSED: Data tools executed before optimization tools")
+        logger.success(" PASS:  TOOL SEQUENCE TEST PASSED: Data tools executed before optimization tools")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -580,9 +580,9 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         data leakage never occurs between users' optimization recommendations.
         
         Failure Mode: Data from one user affects another user's optimization
-        Business Impact: Data leakage → legal liability → customer trust loss
+        Business Impact: Data leakage  ->  legal liability  ->  customer trust loss
         """
-        logger.critical("🎯 TESTING: Multi-user data isolation (USER ISOLATION CRITICAL)")
+        logger.critical(" TARGET:  TESTING: Multi-user data isolation (USER ISOLATION CRITICAL)")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -597,7 +597,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             user_contexts.append(user_context)
         
         # Execute concurrent workflows
-        logger.info(f"🔄 Starting {user_count} concurrent data-optimization workflows")
+        logger.info(f" CYCLE:  Starting {user_count} concurrent data-optimization workflows")
         tasks = []
         for i, user_context in enumerate(user_contexts):
             task = self.test_harness.execute_data_optimization_workflow(
@@ -633,7 +633,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         # CRITICAL: Require 100% success rate for isolation
         success_rate = (successful_users / user_count) * 100
         assert success_rate >= 100.0, (
-            f"💥 USER ISOLATION FAILURE: Only {successful_users}/{user_count} users ({success_rate:.1f}%) "
+            f"[U+1F4A5] USER ISOLATION FAILURE: Only {successful_users}/{user_count} users ({success_rate:.1f}%) "
             f"had correct execution order. This indicates potential data leakage!\n"
             f"Failed users: {failed_users}"
         )
@@ -656,7 +656,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
                 f"Concurrent users are interfering with each other!"
             )
         
-        logger.success(f"✅ ISOLATION TEST PASSED: {successful_users}/{user_count} users with proper isolation")
+        logger.success(f" PASS:  ISOLATION TEST PASSED: {successful_users}/{user_count} users with proper isolation")
     
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -664,13 +664,13 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         """
         MISSION CRITICAL: WebSocket events must show correct agent execution sequence.
         
-        This test ensures users see the correct progress: data collection → optimization → completion.
+        This test ensures users see the correct progress: data collection  ->  optimization  ->  completion.
         Visual feedback builds trust in AI recommendations and drives revenue conversion.
         
         Failure Mode: WebSocket events show wrong execution order
-        Business Impact: User confusion → reduced trust → lower conversion rates
+        Business Impact: User confusion  ->  reduced trust  ->  lower conversion rates
         """
-        logger.critical("🎯 TESTING: WebSocket event execution order (USER VISIBILITY CRITICAL)")
+        logger.critical(" TARGET:  TESTING: WebSocket event execution order (USER VISIBILITY CRITICAL)")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -690,7 +690,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         event_sequence_valid, event_violations = tracker.validate_websocket_event_sequence()
         
         assert event_sequence_valid, (
-            f"💥 WEBSOCKET SEQUENCE FAILURE: Events show wrong execution order!\n"
+            f"[U+1F4A5] WEBSOCKET SEQUENCE FAILURE: Events show wrong execution order!\n"
             f"Violations: {event_violations}\n"
             f"This confuses users and reduces trust in AI recommendations!\n"
             f"WebSocket events: {tracker.websocket_events}"
@@ -723,7 +723,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             f"Original: {event_timestamps}, Sorted: {sorted_timestamps}"
         )
         
-        logger.success("✅ WEBSOCKET EVENTS TEST PASSED: Correct execution order visible to users")
+        logger.success(" PASS:  WEBSOCKET EVENTS TEST PASSED: Correct execution order visible to users")
     
     # ========================================================================
     # STRESS AND EDGE CASE TESTS
@@ -738,7 +738,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         Tests 20+ concurrent users to ensure the data-before-optimization rule
         is maintained even under production-level stress conditions.
         """
-        logger.critical("🎯 STRESS TESTING: Execution order under 20-user concurrent load")
+        logger.critical(" TARGET:  STRESS TESTING: Execution order under 20-user concurrent load")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -761,7 +761,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             concurrent_tasks.append(create_and_execute_user(i))
         
         # Execute all concurrent workflows
-        logger.info(f"🚀 Starting {user_count} concurrent stress test workflows")
+        logger.info(f"[U+1F680] Starting {user_count} concurrent stress test workflows")
         start_time = time.time()
         trackers = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
         total_stress_time = time.time() - start_time
@@ -793,7 +793,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         # CRITICAL: Require at least 90% success under high stress
         success_rate = (successful_users / user_count) * 100
         assert success_rate >= 90.0, (
-            f"💥 STRESS TEST FAILURE: Only {successful_users}/{user_count} users ({success_rate:.1f}%) "
+            f"[U+1F4A5] STRESS TEST FAILURE: Only {successful_users}/{user_count} users ({success_rate:.1f}%) "
             f"maintained correct execution order under stress. System cannot handle production load!\n"
             f"Failed users: {failed_users}\n"
             f"Total stress time: {total_stress_time:.2f}s"
@@ -801,12 +801,12 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         
         # No execution order violations allowed even under stress
         assert execution_order_violations == 0, (
-            f"💥 EXECUTION ORDER VIOLATIONS UNDER STRESS: {execution_order_violations} users "
+            f"[U+1F4A5] EXECUTION ORDER VIOLATIONS UNDER STRESS: {execution_order_violations} users "
             f"had wrong agent execution order. This is unacceptable for production!"
         )
         
         logger.success(
-            f"✅ STRESS TEST PASSED: {successful_users}/{user_count} users ({success_rate:.1f}%) "
+            f" PASS:  STRESS TEST PASSED: {successful_users}/{user_count} users ({success_rate:.1f}%) "
             f"maintained correct execution order in {total_stress_time:.2f}s"
         )
     
@@ -819,7 +819,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         Validates that even when individual agents fail and retry, the fundamental
         data-before-optimization rule is never violated during recovery.
         """
-        logger.critical("🎯 EDGE CASE TESTING: Execution order during agent failures and retries")
+        logger.critical(" TARGET:  EDGE CASE TESTING: Execution order during agent failures and retries")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -845,7 +845,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         order_valid, violations = tracker.validate_data_before_optimization_order()
         
         assert order_valid, (
-            f"💥 FAILURE RECOVERY VIOLATION: Execution order lost during failure recovery!\n"
+            f"[U+1F4A5] FAILURE RECOVERY VIOLATION: Execution order lost during failure recovery!\n"
             f"Violations: {violations}\n"
             f"Agent failures must not compromise data-before-optimization rule!"
         )
@@ -856,7 +856,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
             "System must maintain execution tracking during failures!"
         )
         
-        logger.success("✅ FAILURE RECOVERY TEST PASSED: Execution order maintained during failures")
+        logger.success(" PASS:  FAILURE RECOVERY TEST PASSED: Execution order maintained during failures")
     
     # ========================================================================
     # DEMONSTRATION TEST: SHOWS VIOLATION DETECTION
@@ -873,7 +873,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         
         Expected Result: This test should FAIL with clear violation messages.
         """
-        logger.critical("🎯 DEMONSTRATION: Execution order violation detection capability")
+        logger.critical(" TARGET:  DEMONSTRATION: Execution order violation detection capability")
         
         # Setup real services
         await self.test_harness.setup_real_services()
@@ -886,7 +886,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         tracker = self.test_harness.execution_trackers[user_id]
         
         # INTENTIONALLY violate execution order (optimization before data)
-        logger.warning("⚠️ INTENTIONALLY VIOLATING execution order for demonstration")
+        logger.warning(" WARNING: [U+FE0F] INTENTIONALLY VIOLATING execution order for demonstration")
         await self._simulate_incorrect_execution_order_for_demo(tracker)
         
         # VALIDATION: This should detect the violation
@@ -894,7 +894,7 @@ class TestDataAgentExecutionOrderNeverFail(SSotBaseTestCase):
         
         # This assertion should FAIL, demonstrating violation detection
         assert order_valid, (
-            f"💥 EXPECTED FAILURE - EXECUTION ORDER VIOLATION DETECTED!\n"
+            f"[U+1F4A5] EXPECTED FAILURE - EXECUTION ORDER VIOLATION DETECTED!\n"
             f"Violations: {violations}\n"
             f"This demonstrates the test correctly identifies when optimization "
             f"agents start before data agents complete, protecting $200K+ MRR!\n"
@@ -1022,7 +1022,7 @@ def pytest_runtest_call(pyfuncitem):
     """Hook for mission critical execution order test execution."""
     markers = [mark.name for mark in pyfuncitem.iter_markers()]
     if "agent_execution_order" in markers:
-        logger.critical(f"🚨 EXECUTING EXECUTION ORDER TEST: {pyfuncitem.name} 🚨")
+        logger.critical(f" ALERT:  EXECUTING EXECUTION ORDER TEST: {pyfuncitem.name}  ALERT: ")
 
 
 @pytest.hookimpl(trylast=True) 
@@ -1030,7 +1030,7 @@ def pytest_runtest_teardown(pyfuncitem, nextitem):
     """Hook for mission critical execution order test teardown."""
     markers = [mark.name for mark in pyfuncitem.iter_markers()]
     if "agent_execution_order" in markers:
-        logger.critical(f"🚨 EXECUTION ORDER TEST COMPLETED: {pyfuncitem.name} 🚨")
+        logger.critical(f" ALERT:  EXECUTION ORDER TEST COMPLETED: {pyfuncitem.name}  ALERT: ")
 
 
 if __name__ == "__main__":

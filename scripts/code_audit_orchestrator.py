@@ -62,7 +62,7 @@ class CodeAuditOrchestrator:
                        files: Optional[List[Path]] = None,
                        check_all: bool = False) -> Dict[str, Any]:
         """Run comprehensive audit"""
-        print("🔍 Starting code audit...")
+        print(" SEARCH:  Starting code audit...")
         
         # Determine files to check
         if files:
@@ -74,10 +74,10 @@ class CodeAuditOrchestrator:
             target_files = self._get_changed_files()
         
         if not target_files:
-            print("ℹ️ No files to audit")
+            print("[U+2139][U+FE0F] No files to audit")
             return self.audit_results
         
-        print(f"📁 Auditing {len(target_files)} files...")
+        print(f"[U+1F4C1] Auditing {len(target_files)} files...")
         
         # Run duplicate detection
         if self.config.flags.duplicate_detection:
@@ -133,7 +133,7 @@ class CodeAuditOrchestrator:
     
     async def _detect_duplicates(self, files: List[Path]):
         """Run duplicate detection"""
-        print("  🔄 Checking for duplicates...")
+        print("   CYCLE:  Checking for duplicates...")
         
         # Analyze files
         for file_path in files:
@@ -167,7 +167,7 @@ class CodeAuditOrchestrator:
     
     async def _detect_legacy(self, files: List[Path]):
         """Run legacy pattern detection"""
-        print("  🕰️ Checking for legacy patterns...")
+        print("  [U+1F570][U+FE0F] Checking for legacy patterns...")
         
         # Legacy patterns are detected during file analysis
         legacy_patterns = self.detector.legacy_patterns
@@ -197,7 +197,7 @@ class CodeAuditOrchestrator:
     
     async def _run_claude_analysis(self):
         """Run Claude analysis on findings"""
-        print("  🤖 Running Claude analysis...")
+        print("  [U+1F916] Running Claude analysis...")
         
         requests = []
         
@@ -248,7 +248,7 @@ class CodeAuditOrchestrator:
             print(f"    Analyzed {len(responses)} issues")
             
         except Exception as e:
-            print(f"    ⚠️ Claude analysis error: {e}")
+            print(f"     WARNING: [U+FE0F] Claude analysis error: {e}")
     
     def _determine_blocking(self):
         """Determine if commit should be blocked"""
@@ -285,7 +285,7 @@ class CodeAuditOrchestrator:
     
     def _generate_report(self) -> str:
         """Generate comprehensive audit report"""
-        report = ["# 🔍 Code Audit Report\n"]
+        report = ["#  SEARCH:  Code Audit Report\n"]
         report.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         stats = self._get_statistics()
@@ -298,34 +298,34 @@ class CodeAuditOrchestrator:
         report.append(f"- Critical Legacy: {stats['critical_legacy']}")
         
         if self.should_block:
-            report.append("\n⛔ **COMMIT BLOCKED** - Critical issues found")
+            report.append("\n[U+26D4] **COMMIT BLOCKED** - Critical issues found")
         elif self.bypass_reason:
-            report.append(f"\n⚠️ **AUDIT BYPASSED** - {self.bypass_reason}")
+            report.append(f"\n WARNING: [U+FE0F] **AUDIT BYPASSED** - {self.bypass_reason}")
         else:
-            report.append("\n✅ **COMMIT ALLOWED** - No blocking issues")
+            report.append("\n PASS:  **COMMIT ALLOWED** - No blocking issues")
         
         # Duplicates section
         if self.audit_results["duplicates"]:
-            report.append("\n## 🔄 Duplicates Found\n")
+            report.append("\n##  CYCLE:  Duplicates Found\n")
             
             for i, dup in enumerate(self.audit_results["duplicates"][:10], 1):
                 severity_emoji = {
-                    "critical": "🔴",
-                    "high": "🟠", 
-                    "medium": "🟡",
-                    "low": "🟢"
-                }.get(dup["severity"], "⚪")
+                    "critical": "[U+1F534]",
+                    "high": "[U+1F7E0]", 
+                    "medium": "[U+1F7E1]",
+                    "low": "[U+1F7E2]"
+                }.get(dup["severity"], "[U+26AA]")
                 
                 report.append(f"### {severity_emoji} Duplicate #{i}")
                 report.append(f"- **Similarity**: {dup['similarity']:.1%}")
-                report.append(f"- **Files**: `{dup['original']}` ↔️ `{dup['duplicate']}`")
+                report.append(f"- **Files**: `{dup['original']}` [U+2194][U+FE0F] `{dup['duplicate']}`")
                 report.append(f"- **Lines**: {dup['lines']}")
                 report.append(f"- **Action**: {dup['suggestion']}")
                 report.append("")
         
         # Legacy section
         if self.audit_results["legacy"]:
-            report.append("\n## 🕰️ Legacy Patterns Found\n")
+            report.append("\n## [U+1F570][U+FE0F] Legacy Patterns Found\n")
             
             # Group by severity
             by_severity = {}
@@ -341,12 +341,12 @@ class CodeAuditOrchestrator:
                     for p in by_severity[severity][:5]:
                         report.append(f"- {p['description']} at `{p['file']}:{p['line']}`")
                         if p.get('replacement'):
-                            report.append(f"  → {p['replacement']}")
+                            report.append(f"   ->  {p['replacement']}")
                     report.append("")
         
         # Claude Analysis section
         if self.audit_results["violations"]:
-            report.append("\n## 🤖 Claude Analysis\n")
+            report.append("\n## [U+1F916] Claude Analysis\n")
             
             for v in self.audit_results["violations"]:
                 report.append(f"### {v['id']}")
@@ -361,12 +361,12 @@ class CodeAuditOrchestrator:
                         report.append(f"- {s}")
                 
                 if v.get('can_auto_fix'):
-                    report.append("✨ *Auto-fix available*")
+                    report.append("[U+2728] *Auto-fix available*")
                 
                 report.append("")
         
         # Configuration section
-        report.append("\n## ⚙️ Configuration")
+        report.append("\n## [U+2699][U+FE0F] Configuration")
         report.append(f"- Duplicate Detection: {self.config.flags.duplicate_detection}")
         report.append(f"- Legacy Detection: {self.config.flags.legacy_code_detection}")
         report.append(f"- Claude Analysis: {self.config.flags.claude_analysis}")
@@ -387,7 +387,7 @@ class CodeAuditOrchestrator:
         with open(report_file, 'w') as f:
             f.write(report)
         
-        print(f"\n📄 Report saved to: {report_file}")
+        print(f"\n[U+1F4C4] Report saved to: {report_file}")
 
 
 async def main():
@@ -437,10 +437,10 @@ async def main():
     
     # Exit code
     if results["should_block"]:
-        print("\n❌ Audit failed - commit blocked")
+        print("\n FAIL:  Audit failed - commit blocked")
         sys.exit(1)
     else:
-        print("\n✅ Audit passed")
+        print("\n PASS:  Audit passed")
         sys.exit(0)
 
 

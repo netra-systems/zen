@@ -43,20 +43,20 @@ class Phase1ValidationResults:
         """Record a successful test."""
         self.tests_run += 1
         self.tests_passed += 1
-        print(f"✅ {test_name}: PASSED" + (f" - {details}" if details else ""))
+        print(f" PASS:  {test_name}: PASSED" + (f" - {details}" if details else ""))
         
     def add_failure(self, test_name: str, error: str):
         """Record a failed test."""
         self.tests_run += 1
         self.tests_failed += 1
         self.errors.append(f"{test_name}: {error}")
-        print(f"❌ {test_name}: FAILED - {error}")
+        print(f" FAIL:  {test_name}: FAILED - {error}")
         
     def generate_report(self) -> str:
         """Generate comprehensive validation report."""
         duration = time.time() - self.start_time
         
-        status = "✅ PASSED" if self.tests_failed == 0 else "❌ FAILED"
+        status = " PASS:  PASSED" if self.tests_failed == 0 else " FAIL:  FAILED"
         
         report = [
             "\n" + "=" * 80,
@@ -102,7 +102,7 @@ class MockEliminationValidator:
     async def setup(self):
         """Setup validation environment."""
         try:
-            print("🚀 Setting up Mock Elimination Phase 1 Validation...")
+            print("[U+1F680] Setting up Mock Elimination Phase 1 Validation...")
             
             # Setup isolated environment
             self.env = IsolatedEnvironment()
@@ -126,13 +126,13 @@ class MockEliminationValidator:
                 await self.real_services.close_all()
             if self.env:
                 self.env.disable(restore_original=True)
-            print("🧹 Validation environment cleaned up")
+            print("[U+1F9F9] Validation environment cleaned up")
         except Exception as e:
-            print(f"⚠️ Cleanup warning: {e}")
+            print(f" WARNING: [U+FE0F] Cleanup warning: {e}")
     
     async def validate_file_conversions(self):
         """Validate that files have been converted from mocks to real services."""
-        print("\n📋 Validating file conversions...")
+        print("\n[U+1F4CB] Validating file conversions...")
         
         # High-impact files that should be converted
         converted_files = [
@@ -177,7 +177,7 @@ class MockEliminationValidator:
     
     async def validate_real_websocket_connections(self):
         """Validate that real WebSocket connections can be established."""
-        print("\n🔌 Validating real WebSocket connections...")
+        print("\n[U+1F50C] Validating real WebSocket connections...")
         
         try:
             # Test basic WebSocket connection
@@ -208,7 +208,7 @@ class MockEliminationValidator:
     
     async def validate_websocket_manager_integration(self):
         """Validate WebSocket manager integration with real connections."""
-        print("\n🔗 Validating WebSocket manager integration...")
+        print("\n[U+1F517] Validating WebSocket manager integration...")
         
         try:
             from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -245,7 +245,7 @@ class MockEliminationValidator:
     
     async def validate_agent_events(self):
         """Validate that the 7 critical agent events work with real connections."""
-        print("\n📡 Validating agent event integration...")
+        print("\n[U+1F4E1] Validating agent event integration...")
         
         try:
             from netra_backend.app.websocket_core.manager import WebSocketManager
@@ -295,7 +295,7 @@ class MockEliminationValidator:
     
     async def validate_performance_benchmarks(self):
         """Validate that real connections meet performance requirements."""
-        print("\n⚡ Validating performance benchmarks...")
+        print("\n LIGHTNING:  Validating performance benchmarks...")
         
         try:
             # Test concurrent connection performance
@@ -350,7 +350,7 @@ class MockEliminationValidator:
 
 async def main():
     """Run Phase 1 mock elimination validation."""
-    print("🎯 Starting Mock Elimination Phase 1 Validation")
+    print(" TARGET:  Starting Mock Elimination Phase 1 Validation")
     print("Target: WebSocket & Chat functionality - 258 files, 5911+ mock references")
     print("Mission: Protect $500K+ ARR with real WebSocket connections")
     
@@ -362,7 +362,7 @@ async def main():
     
     # Exit with appropriate code
     exit_code = 0 if results.tests_failed == 0 else 1
-    print(f"\n🏁 Validation {'PASSED' if exit_code == 0 else 'FAILED'}")
+    print(f"\n[U+1F3C1] Validation {'PASSED' if exit_code == 0 else 'FAILED'}")
     
     return exit_code
 
@@ -372,9 +372,9 @@ if __name__ == "__main__":
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        print("\n⚠️ Validation interrupted by user")
+        print("\n WARNING: [U+FE0F] Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n💥 Validation crashed: {e}")
+        print(f"\n[U+1F4A5] Validation crashed: {e}")
         traceback.print_exc()
         sys.exit(1)

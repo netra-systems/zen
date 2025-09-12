@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Extract profile parsing logic from SyntheticDataSubAgent - ≤300 lines, functions ≤8 lines
+# Context: Extract profile parsing logic from SyntheticDataSubAgent -  <= 300 lines, functions  <= 8 lines
 # Git: 8-18-25-AM | new file
 # Change: Create | Scope: Component | Risk: Low
 # Session: module-extraction | Seq: 1

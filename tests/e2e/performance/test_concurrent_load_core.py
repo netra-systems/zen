@@ -1,7 +1,7 @@
 """
 Core Concurrent User Load Tests
 Tests basic concurrent user load scenarios.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

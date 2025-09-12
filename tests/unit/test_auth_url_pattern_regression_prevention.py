@@ -344,7 +344,7 @@ if __name__ == "__main__":
     for filepath, patterns in results.items():
         if patterns['incorrect']:
             if not incorrect_found:
-                print("\n❌ INCORRECT PATTERNS FOUND:")
+                print("\n FAIL:  INCORRECT PATTERNS FOUND:")
                 incorrect_found = True
             
             print(f"\nFile: {filepath}")
@@ -352,7 +352,7 @@ if __name__ == "__main__":
                 print(f"  Line {line_num}: {line_content}")
     
     if not incorrect_found:
-        print("\n✅ No incorrect auth URL patterns found!")
+        print("\n PASS:  No incorrect auth URL patterns found!")
     
     correct_count = sum(len(p['correct']) for p in results.values())
     incorrect_count = sum(len(p['incorrect']) for p in results.values())
@@ -362,8 +362,8 @@ if __name__ == "__main__":
     print(f"  Incorrect patterns found: {incorrect_count}")
     
     if incorrect_found:
-        print(f"\n⚠️  ACTION REQUIRED: Fix incorrect patterns to prevent 404 errors")
+        print(f"\n WARNING: [U+FE0F]  ACTION REQUIRED: Fix incorrect patterns to prevent 404 errors")
         sys.exit(1)
     else:
-        print(f"\n✅ All auth URL patterns are correct!")
+        print(f"\n PASS:  All auth URL patterns are correct!")
         sys.exit(0)

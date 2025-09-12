@@ -105,7 +105,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that handshake timing validation works correctly in integration scenarios.
         This test should FAIL initially if handshake timing logic is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: WebSocket handshake timing validation")
+        logger.info("[U+1F9EA] INTEGRATION TEST: WebSocket handshake timing validation")
         
         # Test with WebSocket in different states
         test_cases = [
@@ -132,7 +132,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests authentication service integration with real service calls.
         This test should FAIL initially if service integration is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: Real authentication service integration")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Real authentication service integration")
         
         # Create WebSocket with E2E context for testing
         websocket = self.create_mock_websocket_with_state(
@@ -180,7 +180,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that E2E context is properly propagated through the entire authentication flow.
         This test should FAIL initially if context propagation is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: E2E context propagation")
+        logger.info("[U+1F9EA] INTEGRATION TEST: E2E context propagation")
         
         # Set up realistic E2E environment variables
         test_env_vars = {
@@ -232,7 +232,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that WebSocket state is properly managed during authentication flow.
         This test should FAIL initially if state management is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: WebSocket state management during authentication")
+        logger.info("[U+1F9EA] INTEGRATION TEST: WebSocket state management during authentication")
         
         # Test authentication with different WebSocket states
         from fastapi.websockets import WebSocketState
@@ -277,7 +277,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that authentication retry mechanism works with realistic timing.
         This test should FAIL initially if retry logic is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: Authentication retry mechanism")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Authentication retry mechanism")
         
         websocket = self.create_mock_websocket_with_state(
             headers={"authorization": "Bearer test-token"}
@@ -315,7 +315,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that circuit breaker pattern works in integration scenarios.
         This test should FAIL initially if circuit breaker logic is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: Circuit breaker pattern")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Circuit breaker pattern")
         
         # Test circuit breaker state management
         circuit_state = await self.authenticator._check_circuit_breaker()
@@ -341,7 +341,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests that multiple concurrent authentication attempts are handled correctly.
         This test should FAIL initially if concurrency handling is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: Concurrent authentication handling")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Concurrent authentication handling")
         
         # Create multiple WebSocket connections for concurrent testing
         websockets = []
@@ -407,7 +407,7 @@ class TestWebSocketAuthenticationHandshakeFlow(SSotAsyncTestCase):
         Issue #395: Tests edge cases in WebSocket validation that cause authentication failures.
         This test should FAIL initially if edge case handling is broken.
         """
-        logger.info("🧪 INTEGRATION TEST: WebSocket validation edge cases")
+        logger.info("[U+1F9EA] INTEGRATION TEST: WebSocket validation edge cases")
         
         edge_cases = [
             # (websocket_config, expected_valid, description)

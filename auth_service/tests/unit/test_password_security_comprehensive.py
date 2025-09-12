@@ -630,10 +630,10 @@ class TestPasswordSecurityComprehensive(SSotBaseTestCase):
         
         # TEST 6: Unicode and international character handling
         unicode_passwords = [
-            "Test123!ñ",  # Spanish character
-            "Test123!中",  # Chinese character
-            "Test123!é",   # French character
-            "Test123!ß",   # German character
+            "Test123![U+00F1]",  # Spanish character
+            "Test123![U+4E2D]",  # Chinese character
+            "Test123![U+00E9]",   # French character
+            "Test123![U+00DF]",   # German character
         ]
         
         for unicode_password in unicode_passwords:

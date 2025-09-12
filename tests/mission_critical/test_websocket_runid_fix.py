@@ -130,7 +130,7 @@
                                 # Verify set_websocket_bridge was NOT called with None run_id
                                 # After our fix, it should not be called at all during registration
                                 # REMOVED_SYNTAX_ERROR: mock_agent.set_websocket_bridge.assert_not_called()
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Registry does not set WebSocket bridge with None run_id")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Registry does not set WebSocket bridge with None run_id")
 
                                 # Removed problematic line: @pytest.mark.asyncio
                                 # Removed problematic line: async def test_websocket_adapter_validates_runid(self):
@@ -146,7 +146,7 @@
 
                                         # Verify error was logged
                                         # REMOVED_SYNTAX_ERROR: mock_error.assert_any_call( )
-                                        # REMOVED_SYNTAX_ERROR: "❌ CRITICAL: Attempting to set None run_id on WebSocketBridgeAdapter for TestAgent!"
+                                        # REMOVED_SYNTAX_ERROR: " FAIL:  CRITICAL: Attempting to set None run_id on WebSocketBridgeAdapter for TestAgent!"
                                         
 
                                         # Test setting with valid run_id (should log success)
@@ -158,7 +158,7 @@
                                             # REMOVED_SYNTAX_ERROR: calls = [str(call) for call in mock_info.call_args_list]
                                             # REMOVED_SYNTAX_ERROR: assert any("WebSocket bridge configured for TestAgent" in str(call) for call in calls)
 
-                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocketBridgeAdapter properly validates run_id")
+                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocketBridgeAdapter properly validates run_id")
 
 
                                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

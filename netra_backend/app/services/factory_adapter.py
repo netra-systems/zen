@@ -221,7 +221,7 @@ class FactoryAdapter:
             creation_time_ms = (time.time() - start_time) * 1000
             
             if self.config.enable_migration_logging:
-                logger.info(f"✅ Factory execution engine created for user {user_context.user_id} in {creation_time_ms:.1f}ms")
+                logger.info(f" PASS:  Factory execution engine created for user {user_context.user_id} in {creation_time_ms:.1f}ms")
             
             async with self._metrics_lock:
                 self.metrics.factory_calls_count += 1
@@ -254,7 +254,7 @@ class FactoryAdapter:
             
             # Fallback to legacy if enabled
             if self.config.legacy_fallback_enabled:
-                logger.warning("🔄 Falling back to legacy execution engine due to factory failure")
+                logger.warning(" CYCLE:  Falling back to legacy execution engine due to factory failure")
                 async with self._metrics_lock:
                     self.metrics.fallback_to_legacy_count += 1
                 
@@ -295,7 +295,7 @@ class FactoryAdapter:
             creation_time_ms = (time.time() - start_time) * 1000
             
             if self.config.log_legacy_calls:
-                logger.warning(f"⚠️ Legacy execution engine used - consider migrating to factory pattern (created in {creation_time_ms:.1f}ms)")
+                logger.warning(f" WARNING: [U+FE0F] Legacy execution engine used - consider migrating to factory pattern (created in {creation_time_ms:.1f}ms)")
             
             # Update metrics
             async with self._metrics_lock:
@@ -372,7 +372,7 @@ class FactoryAdapter:
             creation_time_ms = (time.time() - start_time) * 1000
             
             if self.config.enable_migration_logging:
-                logger.info(f"✅ Factory WebSocket emitter created for user {user_id} in {creation_time_ms:.1f}ms")
+                logger.info(f" PASS:  Factory WebSocket emitter created for user {user_id} in {creation_time_ms:.1f}ms")
             
             return emitter
             
@@ -383,7 +383,7 @@ class FactoryAdapter:
             
             # Fallback to legacy if enabled
             if self.config.legacy_fallback_enabled:
-                logger.warning("🔄 Falling back to legacy WebSocket bridge due to factory failure")
+                logger.warning(" CYCLE:  Falling back to legacy WebSocket bridge due to factory failure")
                 return await self._get_legacy_websocket_bridge()
             else:
                 raise RuntimeError(f"Factory WebSocket emitter creation failed: {e}")
@@ -420,7 +420,7 @@ class FactoryAdapter:
             creation_time_ms = (time.time() - start_time) * 1000
             
             if self.config.log_legacy_calls:
-                logger.warning(f"⚠️ Legacy WebSocket bridge using factory pattern for user {user_id} (created in {creation_time_ms:.1f}ms)")
+                logger.warning(f" WARNING: [U+FE0F] Legacy WebSocket bridge using factory pattern for user {user_id} (created in {creation_time_ms:.1f}ms)")
             
             return bridge
             
@@ -445,23 +445,23 @@ class FactoryAdapter:
         """Enable factory pattern for specific route."""
         async with self._route_lock:
             self._route_feature_flags[route_path] = True
-            logger.info(f"✅ Factory pattern enabled for route: {route_path}")
+            logger.info(f" PASS:  Factory pattern enabled for route: {route_path}")
     
     async def disable_factory_for_route(self, route_path: str) -> None:
         """Disable factory pattern for specific route."""
         async with self._route_lock:
             self._route_feature_flags[route_path] = False
-            logger.info(f"⚠️ Factory pattern disabled for route: {route_path}")
+            logger.info(f" WARNING: [U+FE0F] Factory pattern disabled for route: {route_path}")
     
     async def enable_factory_pattern_globally(self) -> None:
         """Enable factory pattern globally."""
         self.config.migration_mode = MigrationMode.FACTORY_PREFERRED
-        logger.info("✅ Factory pattern enabled globally")
+        logger.info(" PASS:  Factory pattern enabled globally")
     
     async def disable_factory_pattern_globally(self) -> None:
         """Disable factory pattern globally (use legacy only)."""
         self.config.migration_mode = MigrationMode.LEGACY_ONLY
-        logger.info("⚠️ Factory pattern disabled globally - using legacy mode")
+        logger.info(" WARNING: [U+FE0F] Factory pattern disabled globally - using legacy mode")
     
     # Migration status and metrics
     
@@ -571,7 +571,7 @@ async def migrate_to_factory_pattern(app,
         # Enable for specific routes
         for route_path in target_routes:
             await adapter.enable_factory_for_route(route_path)
-            logger.info(f"✅ Factory pattern enabled for route: {route_path}")
+            logger.info(f" PASS:  Factory pattern enabled for route: {route_path}")
     elif enable_gradually:
         # Enable for common routes
         default_routes = [
@@ -581,15 +581,15 @@ async def migrate_to_factory_pattern(app,
         ]
         for route_path in default_routes:
             await adapter.enable_factory_for_route(route_path)
-            logger.info(f"✅ Factory pattern enabled for route: {route_path}")
+            logger.info(f" PASS:  Factory pattern enabled for route: {route_path}")
     else:
         # Enable globally
         await adapter.enable_factory_pattern_globally()
-        logger.info("✅ Factory pattern enabled globally")
+        logger.info(" PASS:  Factory pattern enabled globally")
     
     # Log migration status
     status = adapter.get_migration_status()
-    logger.info(f"📊 Migration status: {status['metrics']['migration_progress_pct']}% factory adoption")
+    logger.info(f" CHART:  Migration status: {status['metrics']['migration_progress_pct']}% factory adoption")
 
 
 # Migration helper for dependency injection

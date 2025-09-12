@@ -125,7 +125,7 @@ class WebSocketMonitoringIntegration:
         self.started = False
         self.startup_time: Optional[datetime] = None
         
-        logger.info("🔄 WebSocket Monitoring Integration initialized")
+        logger.info(" CYCLE:  WebSocket Monitoring Integration initialized")
     
     async def start_all_monitoring(self) -> None:
         """Start all monitoring components."""
@@ -146,7 +146,7 @@ class WebSocketMonitoringIntegration:
             self.started = True
             self.startup_time = datetime.now(timezone.utc)
             
-            logger.info("✅ All WebSocket monitoring components started")
+            logger.info(" PASS:  All WebSocket monitoring components started")
             
             # Log successful startup
             from netra_backend.app.monitoring.websocket_logging_enhanced import LogLevel
@@ -165,7 +165,7 @@ class WebSocketMonitoringIntegration:
             )
             
         except Exception as e:
-            logger.error(f"🚨 Failed to start monitoring system: {e}")
+            logger.error(f" ALERT:  Failed to start monitoring system: {e}")
             await self.stop_all_monitoring()  # Cleanup on failure
             raise
     
@@ -185,10 +185,10 @@ class WebSocketMonitoringIntegration:
             # Log shutdown
             await log_system_shutdown()
             
-            logger.info("✅ All WebSocket monitoring components stopped")
+            logger.info(" PASS:  All WebSocket monitoring components stopped")
             
         except Exception as e:
-            logger.error(f"🚨 Error stopping monitoring system: {e}")
+            logger.error(f" ALERT:  Error stopping monitoring system: {e}")
     
     async def get_comprehensive_status(self) -> Dict[str, Any]:
         """Get comprehensive monitoring system status."""
@@ -256,7 +256,7 @@ class WebSocketMonitoringIntegration:
     @asynccontextmanager
     async def emergency_mode(self, reason: str):
         """Enter emergency mode for critical system recovery."""
-        logger.critical(f"🚨 ENTERING EMERGENCY MODE: {reason}")
+        logger.critical(f" ALERT:  ENTERING EMERGENCY MODE: {reason}")
         
         try:
             # Trigger emergency alert
@@ -272,7 +272,7 @@ class WebSocketMonitoringIntegration:
             yield emergency_assessment
             
         finally:
-            logger.critical("🚨 EXITING EMERGENCY MODE")
+            logger.critical(" ALERT:  EXITING EMERGENCY MODE")
             
             # Log emergency mode completion
             from netra_backend.app.monitoring.websocket_logging_enhanced import LogLevel
@@ -428,29 +428,29 @@ def get_websocket_monitoring_integration() -> WebSocketMonitoringIntegration:
 
 async def initialize_websocket_monitoring_system() -> None:
     """Initialize the complete WebSocket monitoring system."""
-    logger.info("🚀 Initializing WebSocket monitoring system...")
+    logger.info("[U+1F680] Initializing WebSocket monitoring system...")
     
     try:
         integration = get_websocket_monitoring_integration()
         await integration.start_all_monitoring()
         
-        logger.info("🎉 WebSocket monitoring system fully operational")
+        logger.info(" CELEBRATION:  WebSocket monitoring system fully operational")
         
         # Verify system is working
         status = await integration.get_comprehensive_status()
         if status.get("system_status") != "operational":
             raise RuntimeError(f"Monitoring system failed to start properly: {status}")
         
-        logger.info("✅ WebSocket monitoring system verification passed")
+        logger.info(" PASS:  WebSocket monitoring system verification passed")
         
     except Exception as e:
-        logger.error(f"🚨 CRITICAL: Failed to initialize WebSocket monitoring: {e}")
+        logger.error(f" ALERT:  CRITICAL: Failed to initialize WebSocket monitoring: {e}")
         raise RuntimeError(f"WebSocket monitoring initialization failed: {e}")
 
 
 async def shutdown_websocket_monitoring_system() -> None:
     """Shutdown the complete WebSocket monitoring system."""
-    logger.info("🛑 Shutting down WebSocket monitoring system...")
+    logger.info("[U+1F6D1] Shutting down WebSocket monitoring system...")
     
     try:
         global _websocket_monitoring_integration
@@ -458,7 +458,7 @@ async def shutdown_websocket_monitoring_system() -> None:
             await _websocket_monitoring_integration.stop_all_monitoring()
             _websocket_monitoring_integration = None
         
-        logger.info("✅ WebSocket monitoring system shutdown completed")
+        logger.info(" PASS:  WebSocket monitoring system shutdown completed")
         
     except Exception as e:
         logger.error(f"Error during monitoring shutdown: {e}")
@@ -472,14 +472,14 @@ async def websocket_monitoring_lifespan():
     try:
         # Startup
         await initialize_websocket_monitoring_system()
-        logger.info("🔄 WebSocket monitoring ready for application requests")
+        logger.info(" CYCLE:  WebSocket monitoring ready for application requests")
         
         yield
         
     finally:
         # Shutdown
         await shutdown_websocket_monitoring_system()
-        logger.info("🔄 WebSocket monitoring shutdown completed")
+        logger.info(" CYCLE:  WebSocket monitoring shutdown completed")
 
 
 # Startup Hook for FastAPI Application
@@ -566,7 +566,7 @@ async def websocket_monitoring_readiness_check() -> Dict[str, Any]:
 
 async def force_monitoring_restart() -> Dict[str, Any]:
     """Force restart of monitoring system for emergency recovery."""
-    logger.warning("🔄 FORCE RESTART: Restarting WebSocket monitoring system")
+    logger.warning(" CYCLE:  FORCE RESTART: Restarting WebSocket monitoring system")
     
     restart_start = time.time()
     
@@ -589,7 +589,7 @@ async def force_monitoring_restart() -> Dict[str, Any]:
             "message": "Monitoring system restarted successfully"
         }
         
-        logger.info(f"✅ Monitoring restart completed in {restart_duration:.1f}ms")
+        logger.info(f" PASS:  Monitoring restart completed in {restart_duration:.1f}ms")
         return result
         
     except Exception as e:
@@ -603,7 +603,7 @@ async def force_monitoring_restart() -> Dict[str, Any]:
             "message": "Monitoring system restart failed"
         }
         
-        logger.error(f"🚨 Monitoring restart failed: {e}")
+        logger.error(f" ALERT:  Monitoring restart failed: {e}")
         return result
 
 
@@ -671,7 +671,7 @@ def save_monitoring_configuration(file_path: str) -> bool:
         with open(file_path, 'w') as f:
             json.dump(config, f, indent=2)
         
-        logger.info(f"📊 Monitoring configuration saved to: {file_path}")
+        logger.info(f" CHART:  Monitoring configuration saved to: {file_path}")
         return True
         
     except Exception as e:
@@ -692,7 +692,7 @@ def load_monitoring_configuration(file_path: str) -> bool:
         
         # TODO: Load alert rules (would need implementation in alert system)
         
-        logger.info(f"📊 Monitoring configuration loaded from: {file_path}")
+        logger.info(f" CHART:  Monitoring configuration loaded from: {file_path}")
         return True
         
     except Exception as e:

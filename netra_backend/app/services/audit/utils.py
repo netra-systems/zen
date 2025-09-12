@@ -1,7 +1,7 @@
 """
 Corpus Audit Utilities
 Utility classes and functions for audit operations.
-Focused on timing and helper functions. ≤300 lines, ≤8 lines per function.
+Focused on timing and helper functions.  <= 300 lines,  <= 8 lines per function.
 """
 
 import time

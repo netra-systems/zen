@@ -11,7 +11,7 @@ Implements the three-tier architecture's data isolation requirements:
 - Proper resource cleanup and lifecycle management
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Complete user data isolation for agent operations
 - Value Impact: Zero risk of cross-user data contamination in agent workflows
 - Revenue Impact: Critical for Enterprise deployment, enables multi-tenant operations

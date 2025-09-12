@@ -102,9 +102,9 @@ def main():
         all_available = True
         for service in services_to_check:
             if port_manager.wait_for_service(service, timeout=30):
-                print(f"  ✓ {service} is available")
+                print(f"  [U+2713] {service} is available")
             else:
-                print(f"  ✗ {service} is not available")
+                print(f"  [U+2717] {service} is not available")
                 all_available = False
         
         if not all_available:

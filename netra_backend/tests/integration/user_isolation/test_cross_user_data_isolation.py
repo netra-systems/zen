@@ -160,7 +160,7 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
                     assert other_token == stored_data[user]["session_token"]
                     assert other_token != stored_data[other_user]["session_token"]
         
-        print("✅ Redis key namespacing prevents cross-user data access")
+        print(" PASS:  Redis key namespacing prevents cross-user data access")
     
     @pytest.mark.asyncio
     async def test_clickhouse_query_isolation_with_user_context(self):
@@ -198,7 +198,7 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
                 assert ctx1.user_id != ctx2.user_id
                 assert ctx1.request_id != ctx2.request_id
         
-        print("✅ ClickHouse contexts are properly isolated by user")
+        print(" PASS:  ClickHouse contexts are properly isolated by user")
     
     @pytest.mark.asyncio
     async def test_concurrent_data_operations_prevent_mixing(self):
@@ -294,7 +294,7 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
                 for activity in activities:
                     assert user_id in activity
         
-        print(f"✅ Concurrent operations for {len(users)} users completed in {duration:.2f}s with proper isolation")
+        print(f" PASS:  Concurrent operations for {len(users)} users completed in {duration:.2f}s with proper isolation")
     
     @pytest.mark.asyncio
     async def test_malicious_cross_user_access_attempts_blocked(self):
@@ -355,7 +355,7 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
             retrieved_business = await target_redis.get_json("business_data")
             assert retrieved_business == target_sensitive_data["business_data"]
         
-        print("✅ Malicious cross-user access attempts are properly blocked")
+        print(" PASS:  Malicious cross-user access attempts are properly blocked")
     
     @pytest.mark.asyncio 
     async def test_stress_test_enterprise_user_load(self):
@@ -452,11 +452,11 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
         assert ops_per_second > 100, f"Performance too slow: {ops_per_second:.1f} ops/sec"
         
         if errors:
-            print(f"⚠️ {len(errors)} errors occurred during stress test:")
+            print(f" WARNING: [U+FE0F] {len(errors)} errors occurred during stress test:")
             for error in errors[:5]:  # Show first 5 errors
                 print(f"   {error}")
         
-        print(f"✅ Stress test completed: {successful_users}/{num_users} users, "
+        print(f" PASS:  Stress test completed: {successful_users}/{num_users} users, "
               f"{total_operations} operations in {duration:.2f}s "
               f"({ops_per_second:.1f} ops/sec)")
     
@@ -500,7 +500,7 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
                         assert retrieved_data["secret_token"] != user_data[other_user]["secret_token"]
                         assert retrieved_data["sensitive_info"] != user_data[other_user]["sensitive_info"]
         
-        print("✅ Data isolation works correctly with identical key names across users")
+        print(" PASS:  Data isolation works correctly with identical key names across users")
     
     @pytest.mark.asyncio
     async def test_factory_statistics_accuracy_cross_user_operations(self):
@@ -550,4 +550,4 @@ class TestCrossUserDataIsolation(BaseIntegrationTest):
         expected_remaining = set(users[4:])  # Users not cleaned up
         assert remaining_users == expected_remaining
         
-        print("✅ Factory statistics remain accurate during cross-user operations")
+        print(" PASS:  Factory statistics remain accurate during cross-user operations")

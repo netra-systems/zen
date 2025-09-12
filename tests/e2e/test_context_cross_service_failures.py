@@ -232,7 +232,7 @@ class TestCrossServiceContextFailures:
                     "latency": time.time() - partition_start
                 })
                 
-                logger.info(f"✅ Context operation successful during partition for user {user['data']['id']}")
+                logger.info(f" PASS:  Context operation successful during partition for user {user['data']['id']}")
                 
             except Exception as e:
                 partition_operations.append({
@@ -241,7 +241,7 @@ class TestCrossServiceContextFailures:
                     "error": str(e),
                     "latency": time.time() - partition_start
                 })
-                logger.warning(f"❌ Context operation failed during partition for user {user['data']['id']}: {e}")
+                logger.warning(f" FAIL:  Context operation failed during partition for user {user['data']['id']}: {e}")
         
         # PARTITION RECOVERY: Remove network partition
         await self.network_simulator.remove_partition("backend-auth_service-drop")
@@ -277,7 +277,7 @@ class TestCrossServiceContextFailures:
                     "recovery_time": time.time() - recovery_start
                 })
                 
-                logger.info(f"✅ Context recovery successful for user {user['data']['id']}")
+                logger.info(f" PASS:  Context recovery successful for user {user['data']['id']}")
                 
             except Exception as e:
                 recovery_operations.append({
@@ -310,7 +310,7 @@ class TestCrossServiceContextFailures:
             if connection["websocket"]:
                 await connection["websocket"].close()
         
-        logger.info(f"✅ Network partition test completed: {successful_partition_ops}/{total_users} during partition, {successful_recovery_ops}/{total_users} recovered")
+        logger.info(f" PASS:  Network partition test completed: {successful_partition_ops}/{total_users} during partition, {successful_recovery_ops}/{total_users} recovered")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -428,7 +428,7 @@ class TestCrossServiceContextFailures:
                     "recovery_time": time.time() - recovery_start
                 })
                 
-                logger.info(f"✅ Context recovery successful for user {user['data']['id']}")
+                logger.info(f" PASS:  Context recovery successful for user {user['data']['id']}")
                 
             except Exception as e:
                 recovery_contexts.append({
@@ -439,7 +439,7 @@ class TestCrossServiceContextFailures:
                     "error": str(e),
                     "recovery_time": time.time() - recovery_start
                 })
-                logger.error(f"❌ Context recovery failed for user {user['data']['id']}: {e}")
+                logger.error(f" FAIL:  Context recovery failed for user {user['data']['id']}: {e}")
         
         # CONTEXT PERSISTENCE VALIDATION: Verify critical context data survived restart
         persistent_data_recovered = 0
@@ -477,7 +477,7 @@ class TestCrossServiceContextFailures:
             if recovery_info["websocket"]:
                 await recovery_info["websocket"].close()
         
-        logger.info(f"✅ Service restart test completed: {successful_recoveries}/{total_recoverable_contexts} recovered, {persistent_data_recovered} with persistent data")
+        logger.info(f" PASS:  Service restart test completed: {successful_recoveries}/{total_recoverable_contexts} recovered, {persistent_data_recovered} with persistent data")
 
     @pytest.mark.e2e
     @pytest.mark.real_services 
@@ -673,7 +673,7 @@ class TestCrossServiceContextFailures:
                     "response_data": response_data
                 })
                 
-                logger.info(f"✅ Cross-schema compatibility successful: {context_info['schema_version']} -> 2.0")
+                logger.info(f" PASS:  Cross-schema compatibility successful: {context_info['schema_version']} -> 2.0")
                 
             except Exception as e:
                 compatibility_results.append({
@@ -683,7 +683,7 @@ class TestCrossServiceContextFailures:
                     "compatible": False,
                     "error": str(e)
                 })
-                logger.warning(f"❌ Cross-schema compatibility failed: {context_info['schema_version']} -> 2.0: {e}")
+                logger.warning(f" FAIL:  Cross-schema compatibility failed: {context_info['schema_version']} -> 2.0: {e}")
         
         # SCHEMA EVOLUTION ASSERTIONS
         successful_v1_contexts = len([c for c in v1_contexts if c["websocket"]])
@@ -708,7 +708,7 @@ class TestCrossServiceContextFailures:
             if context_info["websocket"]:
                 await context_info["websocket"].close()
         
-        logger.info(f"✅ Schema evolution test completed: v1={successful_v1_contexts}, v2={successful_v2_contexts}, v3={successful_v3_contexts}, compatibility={compatible_accesses}/{total_compatibility_tests}")
+        logger.info(f" PASS:  Schema evolution test completed: v1={successful_v1_contexts}, v2={successful_v2_contexts}, v3={successful_v3_contexts}, compatibility={compatible_accesses}/{total_compatibility_tests}")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -811,7 +811,7 @@ class TestCrossServiceContextFailures:
                     "used_cache": True  # Inferred from successful response during propagation failure
                 })
                 
-                logger.info(f"✅ Context operation successful during propagation failure for user {context_info['user']['data']['id']}")
+                logger.info(f" PASS:  Context operation successful during propagation failure for user {context_info['user']['data']['id']}")
                 
             except Exception as e:
                 failure_test_results.append({
@@ -820,7 +820,7 @@ class TestCrossServiceContextFailures:
                     "error": str(e),
                     "used_cache": False
                 })
-                logger.warning(f"❌ Context operation failed during propagation failure for user {context_info['user']['data']['id']}: {e}")
+                logger.warning(f" FAIL:  Context operation failed during propagation failure for user {context_info['user']['data']['id']}: {e}")
         
         # PROPAGATION RECOVERY: Restore inter-service communication
         await self.network_simulator.clear_all_partitions()
@@ -850,7 +850,7 @@ class TestCrossServiceContextFailures:
                     "sync_response": json.loads(sync_response)
                 })
                 
-                logger.info(f"✅ Context synchronization after recovery successful for user {context_info['user']['data']['id']}")
+                logger.info(f" PASS:  Context synchronization after recovery successful for user {context_info['user']['data']['id']}")
                 
             except Exception as e:
                 recovery_sync_results.append({
@@ -858,7 +858,7 @@ class TestCrossServiceContextFailures:
                     "sync_successful": False,
                     "error": str(e)
                 })
-                logger.error(f"❌ Context synchronization after recovery failed for user {context_info['user']['data']['id']}: {e}")
+                logger.error(f" FAIL:  Context synchronization after recovery failed for user {context_info['user']['data']['id']}: {e}")
         
         # PROPAGATION RESILIENCE ASSERTIONS
         successful_operations_during_failure = len([r for r in failure_test_results if r["operation_successful"]])
@@ -881,7 +881,7 @@ class TestCrossServiceContextFailures:
             if context_info["websocket"]:
                 await context_info["websocket"].close()
         
-        logger.info(f"✅ Cross-service propagation failure test completed: {successful_operations_during_failure}/{total_propagated_contexts} during failure, {successful_syncs_after_recovery}/{total_propagated_contexts} synced after recovery")
+        logger.info(f" PASS:  Cross-service propagation failure test completed: {successful_operations_during_failure}/{total_propagated_contexts} during failure, {successful_syncs_after_recovery}/{total_propagated_contexts} synced after recovery")
 
     def teardown_method(self):
         """Clean up after each test."""

@@ -168,15 +168,15 @@ class WorkflowValidator:
         """Report validation status for file."""
         name = file_path.name
         if self.errors:
-            console.print(f"[red]✗[/red] {name}")
+            console.print(f"[red][U+2717][/red] {name}")
             for error in self.errors:
                 console.print(f"  [red]ERROR:[/red] {error}")
         elif self.warnings:
-            console.print(f"[yellow]⚠[/yellow] {name}")
+            console.print(f"[yellow] WARNING: [/yellow] {name}")
             for warning in self.warnings:
                 console.print(f"  [yellow]WARN:[/yellow] {warning}")
         else:
-            console.print(f"[green]✓[/green] {name}")
+            console.print(f"[green][U+2713][/green] {name}")
         
         return len(self.errors) == 0
     
@@ -254,10 +254,10 @@ def main():
     secrets_valid = secret_validator.validate()
     
     if workflows_valid and secrets_valid:
-        console.print("\n[green]✓ All validations passed[/green]")
+        console.print("\n[green][U+2713] All validations passed[/green]")
         return 0
     else:
-        console.print("\n[red]✗ Validation failed[/red]")
+        console.print("\n[red][U+2717] Validation failed[/red]")
         return 1
 
 

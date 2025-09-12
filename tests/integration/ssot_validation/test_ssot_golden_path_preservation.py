@@ -1,11 +1,49 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """SSOT Golden Path Preservation Test: UserExecutionContext Golden Path Validation
 
 PURPOSE: Ensure golden path works with consolidated UserExecutionContext
 and detect how SSOT violations block the critical user flow.
 
 This test is DESIGNED TO FAIL initially to prove SSOT violations are blocking
-the golden path: user login → chat request → AI response delivery.
+the golden path: user login  ->  chat request  ->  AI response delivery.
 
 Business Impact: $500K+ ARR DIRECTLY AT RISK from golden path failures
 caused by inconsistent UserExecutionContext implementations.
@@ -116,7 +154,7 @@ class TestSSotGoldenPathPreservation(SSotAsyncTestCase):
         """DESIGNED TO FAIL: Detect golden path blockage from UserExecutionContext SSOT violations.
         
         This test should FAIL because inconsistent UserExecutionContext implementations
-        block the golden path: user login → chat request → AI response.
+        block the golden path: user login  ->  chat request  ->  AI response.
         
         Expected Golden Path Violations:
         - Context creation failures blocking user sessions

@@ -97,7 +97,7 @@ def build_with_local_cache(service_name: str, dockerfile: str, compose_file: str
             
             return False
         
-        logger.info(f"✅ Successfully built {service_name} using local cache")
+        logger.info(f" PASS:  Successfully built {service_name} using local cache")
         return True
         
     except Exception as e:
@@ -137,12 +137,12 @@ def ensure_base_images(runtime: Optional[str] = None):
         else:
             missing.append(image)
     
-    logger.info(f"✅ Available images: {len(available)}")
+    logger.info(f" PASS:  Available images: {len(available)}")
     for img in available:
         logger.info(f"   - {img}")
     
     if missing:
-        logger.warning(f"❌ Missing images: {len(missing)}")
+        logger.warning(f" FAIL:  Missing images: {len(missing)}")
         for img in missing:
             logger.warning(f"   - {img}")
         logger.warning(f"\nTo fix: Wait for rate limit reset then run:")

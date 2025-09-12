@@ -74,7 +74,7 @@ class TestOAuthDuplicationPrevention:
                 f"REQUIRED ACTION: Consolidate these into central_config_validator.py SSOT implementation."
             )
         
-        logger.info("✅ No duplicate OAuth validators found - SSOT compliance maintained")
+        logger.info(" PASS:  No duplicate OAuth validators found - SSOT compliance maintained")
         
         # Verify SSOT implementation exists
         assert self.ssot_oauth_file.exists(), \
@@ -108,7 +108,7 @@ class TestOAuthDuplicationPrevention:
                 f"REQUIRED ACTION: Update imports to use SSOT OAuth validation."
             )
         
-        logger.info("✅ All OAuth imports use SSOT - import compliance maintained")
+        logger.info(" PASS:  All OAuth imports use SSOT - import compliance maintained")
     
     def test_oauth_validation_single_source_truth(self):
         """
@@ -137,7 +137,7 @@ class TestOAuthDuplicationPrevention:
                 f"REQUIRED ACTION: Move OAuth validation logic to central_config_validator.py SSOT."
             )
         
-        logger.info("✅ OAuth validation logic exists only in SSOT - logic centralization maintained")
+        logger.info(" PASS:  OAuth validation logic exists only in SSOT - logic centralization maintained")
     
     def test_oauth_configuration_consistency_validation(self):
         """
@@ -163,7 +163,7 @@ class TestOAuthDuplicationPrevention:
                 f"REQUIRED ACTION: Update OAuth config access to use SSOT patterns."
             )
         
-        logger.info("✅ OAuth configuration access patterns are consistent - pattern compliance maintained")
+        logger.info(" PASS:  OAuth configuration access patterns are consistent - pattern compliance maintained")
     
     def _scan_for_oauth_implementations(self) -> List[Dict[str, str]]:
         """Scan codebase for OAuth implementation functions."""
@@ -382,10 +382,10 @@ def test_oauth_duplication_detection_capability():
     assert test_instance._is_allowed_oauth_implementation(ssot_path), \
         "SSOT file should be recognized as allowed implementation"
     
-    logger.info("✅ OAuth duplication detection capability verified")
+    logger.info(" PASS:  OAuth duplication detection capability verified")
 
 
 if __name__ == "__main__":
     # Run the meta-test to verify detection capability
     test_oauth_duplication_detection_capability()
-    print("✅ OAuth duplication prevention tests created and capability verified!")
+    print(" PASS:  OAuth duplication prevention tests created and capability verified!")

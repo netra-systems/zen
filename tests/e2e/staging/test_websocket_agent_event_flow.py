@@ -135,7 +135,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             "actionable_insights_required": 1 # Minimum actionable insights
         }
         
-        self.logger.info("✅ WebSocket event validation setup complete - ready for comprehensive event flow testing")
+        self.logger.info(" PASS:  WebSocket event validation setup complete - ready for comprehensive event flow testing")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -151,7 +151,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Ensures users receive complete real-time AI interaction
         through all required WebSocket events, enabling full AI-powered assistance.
         """
-        self.logger.info("🎯 Starting ALL 5 critical WebSocket events comprehensive validation")
+        self.logger.info(" TARGET:  Starting ALL 5 critical WebSocket events comprehensive validation")
         
         # Create authenticated user context for event flow testing
         user_context = await create_authenticated_user_context(
@@ -179,7 +179,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 close_timeout=10.0
             ) as websocket:
                 
-                self.logger.info("✅ WebSocket connection established for critical event validation")
+                self.logger.info(" PASS:  WebSocket connection established for critical event validation")
                 
                 # Send comprehensive business request that requires all event types
                 business_optimization_request = {
@@ -212,7 +212,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 request_start_time = time.time()
                 await websocket.send(json.dumps(business_optimization_request))
                 
-                self.logger.info(f"📤 Sent comprehensive optimization request for all event validation")
+                self.logger.info(f"[U+1F4E4] Sent comprehensive optimization request for all event validation")
                 
                 # Collect ALL WebSocket events with comprehensive validation
                 all_events = []
@@ -238,14 +238,14 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                             critical_event_tracker[event_type] = event
                             event_timing[event_type] = relative_time
                             
-                            self.logger.info(f"📨 Received CRITICAL event: {event_type} at {relative_time:.2f}s")
+                            self.logger.info(f"[U+1F4E8] Received CRITICAL event: {event_type} at {relative_time:.2f}s")
                             
                             # Validate SLA compliance
                             sla_requirement = self.EVENT_SLA_REQUIREMENTS.get(event_type)
                             if sla_requirement and relative_time <= sla_requirement:
-                                self.logger.info(f"✅ SLA met for {event_type}: {relative_time:.2f}s ≤ {sla_requirement}s")
+                                self.logger.info(f" PASS:  SLA met for {event_type}: {relative_time:.2f}s  <=  {sla_requirement}s")
                             elif sla_requirement:
-                                self.logger.warning(f"⚠️ SLA missed for {event_type}: {relative_time:.2f}s > {sla_requirement}s")
+                                self.logger.warning(f" WARNING: [U+FE0F] SLA missed for {event_type}: {relative_time:.2f}s > {sla_requirement}s")
                         
                         # Analyze event content for business value
                         event_data_content = event.get("data", {})
@@ -263,7 +263,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                         elif event_type == "tool_executing":
                             tool_name = event_data_content.get("tool_name", "")
                             if tool_name:
-                                self.logger.info(f"🔧 Tool executing: {tool_name}")
+                                self.logger.info(f"[U+1F527] Tool executing: {tool_name}")
                         
                         elif event_type == "tool_completed":
                             tool_result = event_data_content.get("result", {})
@@ -291,14 +291,14 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                                     business_value_indicators["implementation_guidance"] += 1
                             
                             # Agent completed - end collection
-                            self.logger.info(f"🎯 Agent completed at {relative_time:.2f}s - ending event collection")
+                            self.logger.info(f" TARGET:  Agent completed at {relative_time:.2f}s - ending event collection")
                             break
                             
                     except asyncio.TimeoutError:
-                        self.logger.warning("⏰ Event collection timeout - checking if all critical events received")
+                        self.logger.warning("[U+23F0] Event collection timeout - checking if all critical events received")
                         break
                     except json.JSONDecodeError as e:
-                        self.logger.warning(f"⚠️ JSON decode error: {e}")
+                        self.logger.warning(f" WARNING: [U+FE0F] JSON decode error: {e}")
                         continue
                 
                 total_collection_time = time.time() - collection_start
@@ -311,12 +311,12 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 ]
                 
                 if missing_critical_events:
-                    self.logger.error(f"❌ CRITICAL FAILURE: Missing required WebSocket events: {missing_critical_events}")
-                    self.logger.error(f"📊 Events received: {list(critical_event_tracker.keys())}")
-                    self.logger.error(f"📊 Event timing: {event_timing}")
+                    self.logger.error(f" FAIL:  CRITICAL FAILURE: Missing required WebSocket events: {missing_critical_events}")
+                    self.logger.error(f" CHART:  Events received: {list(critical_event_tracker.keys())}")
+                    self.logger.error(f" CHART:  Event timing: {event_timing}")
                     raise AssertionError(f"CRITICAL: Missing required WebSocket events: {missing_critical_events}. ALL 5 events are MANDATORY for business value delivery!")
                 
-                self.logger.info(f"✅ ALL 5 CRITICAL WebSocket events received successfully")
+                self.logger.info(f" PASS:  ALL 5 CRITICAL WebSocket events received successfully")
                 
                 # BUSINESS VALUE VALIDATION
                 
@@ -327,7 +327,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                     if sla_requirement and timing > sla_requirement:
                         sla_violations.append(f"{event_type}: {timing:.2f}s > {sla_requirement}s")
                 
-                # Allow minor SLA violations (≤2) for staging environment
+                # Allow minor SLA violations ( <= 2) for staging environment
                 assert len(sla_violations) <= 2, \
                     f"Too many SLA violations affect user experience: {sla_violations}"
                 
@@ -357,21 +357,21 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                     f"Event collection too slow: {total_collection_time:.2f}s - affects user experience"
                 
         except Exception as e:
-            self.logger.error(f"❌ Critical WebSocket events validation failed: {e}")
-            self.logger.error(f"📊 Event metrics collected: {len(event_metrics)}")
-            self.logger.error(f"📈 Business value indicators: {business_value_indicators}")
+            self.logger.error(f" FAIL:  Critical WebSocket events validation failed: {e}")
+            self.logger.error(f" CHART:  Event metrics collected: {len(event_metrics)}")
+            self.logger.error(f"[U+1F4C8] Business value indicators: {business_value_indicators}")
             raise
         
         # SUCCESS METRICS REPORTING
-        self.logger.info("🎉 ALL 5 CRITICAL WEBSOCKET EVENTS VALIDATION SUCCESS")
-        self.logger.info(f"📊 Total events collected: {len(all_events)}")
-        self.logger.info(f"🎯 Critical events timing: {event_timing}")
-        self.logger.info(f"⚠️ SLA violations: {len(sla_violations)} (≤2 acceptable)")
-        self.logger.info(f"💡 Actionable insights: {business_value_indicators['actionable_insights']}")
-        self.logger.info(f"💼 Specific recommendations: {business_value_indicators['specific_recommendations']}")
-        self.logger.info(f"🔧 Implementation guidance: {business_value_indicators['implementation_guidance']}")
-        self.logger.info(f"💰 Cost savings identified: {business_value_indicators['cost_savings_identified']}")
-        self.logger.info(f"⏱️ Total collection time: {total_collection_time:.2f}s")
+        self.logger.info(" CELEBRATION:  ALL 5 CRITICAL WEBSOCKET EVENTS VALIDATION SUCCESS")
+        self.logger.info(f" CHART:  Total events collected: {len(all_events)}")
+        self.logger.info(f" TARGET:  Critical events timing: {event_timing}")
+        self.logger.info(f" WARNING: [U+FE0F] SLA violations: {len(sla_violations)} ( <= 2 acceptable)")
+        self.logger.info(f" IDEA:  Actionable insights: {business_value_indicators['actionable_insights']}")
+        self.logger.info(f"[U+1F4BC] Specific recommendations: {business_value_indicators['specific_recommendations']}")
+        self.logger.info(f"[U+1F527] Implementation guidance: {business_value_indicators['implementation_guidance']}")
+        self.logger.info(f"[U+1F4B0] Cost savings identified: {business_value_indicators['cost_savings_identified']}")
+        self.logger.info(f"[U+23F1][U+FE0F] Total collection time: {total_collection_time:.2f}s")
         
         # Validate minimum business value thresholds for success
         total_business_value = sum(business_value_indicators.values())
@@ -388,7 +388,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Ensures users receive AI insights in real-time with proper
         sequence, maintaining engagement and trust in the AI assistance quality.
         """
-        self.logger.info("⏱️ Starting real-time event delivery timing and ordering validation")
+        self.logger.info("[U+23F1][U+FE0F] Starting real-time event delivery timing and ordering validation")
         
         user_context = await create_authenticated_user_context(
             user_email=f"timing_test_{uuid.uuid4().hex[:8]}@staging.test.com",
@@ -430,7 +430,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             request_timestamp = time.time()
             await websocket.send(json.dumps(realtime_request))
             
-            self.logger.info("📤 Sent real-time optimization request")
+            self.logger.info("[U+1F4E4] Sent real-time optimization request")
             
             # Collect events with precise timing
             timed_events = []
@@ -450,7 +450,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                     if not first_event_received:
                         timing_metrics["first_event_delay"] = delay_from_request
                         first_event_received = True
-                        self.logger.info(f"📨 First event received at {delay_from_request:.3f}s")
+                        self.logger.info(f"[U+1F4E8] First event received at {delay_from_request:.3f}s")
                     
                     timing_metrics["event_intervals"].append(interval_from_previous)
                     
@@ -467,7 +467,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                     
                     event_type = event.get("type")
                     if event_type:
-                        self.logger.info(f"📨 {event_type} at {delay_from_request:.3f}s (interval: {interval_from_previous:.3f}s)")
+                        self.logger.info(f"[U+1F4E8] {event_type} at {delay_from_request:.3f}s (interval: {interval_from_previous:.3f}s)")
                     
                     # Check for real-time SLA compliance
                     if event_type in self.EVENT_SLA_REQUIREMENTS:
@@ -508,8 +508,8 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 assert max_interval < 15.0, \
                     f"Event gap too long: {max_interval:.2f}s - breaks real-time flow"
                 
-                self.logger.info(f"📊 Average event interval: {avg_interval:.3f}s")
-                self.logger.info(f"📊 Maximum event gap: {max_interval:.3f}s")
+                self.logger.info(f" CHART:  Average event interval: {avg_interval:.3f}s")
+                self.logger.info(f" CHART:  Maximum event gap: {max_interval:.3f}s")
             
             # Event ordering validation
             critical_events_in_order = []
@@ -538,18 +538,18 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             
             if total_duration > 0:
                 events_per_second = total_events / total_duration
-                self.logger.info(f"📊 Events per second: {events_per_second:.2f}")
+                self.logger.info(f" CHART:  Events per second: {events_per_second:.2f}")
                 
                 # Should maintain reasonable event throughput
                 assert events_per_second >= 0.5, \
                     f"Event throughput too low: {events_per_second:.2f} events/sec"
         
-        self.logger.info("🎉 REAL-TIME EVENT DELIVERY TIMING VALIDATION SUCCESS")
-        self.logger.info(f"⏱️ First event delay: {timing_metrics['first_event_delay']:.3f}s")
-        self.logger.info(f"🎯 Real-time responsiveness: {timing_metrics['realtime_responsiveness']}")
-        self.logger.info(f"📊 Total events collected: {len(timed_events)}")
-        self.logger.info(f"✅ SLA compliance events: {timing_metrics['timing_sla_compliance']}")
-        self.logger.info(f"💡 Business Value: Real-time event delivery maintains user engagement")
+        self.logger.info(" CELEBRATION:  REAL-TIME EVENT DELIVERY TIMING VALIDATION SUCCESS")
+        self.logger.info(f"[U+23F1][U+FE0F] First event delay: {timing_metrics['first_event_delay']:.3f}s")
+        self.logger.info(f" TARGET:  Real-time responsiveness: {timing_metrics['realtime_responsiveness']}")
+        self.logger.info(f" CHART:  Total events collected: {len(timed_events)}")
+        self.logger.info(f" PASS:  SLA compliance events: {timing_metrics['timing_sla_compliance']}")
+        self.logger.info(f" IDEA:  Business Value: Real-time event delivery maintains user engagement")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -561,7 +561,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Validates that WebSocket events contain high-quality,
         actionable business content that justifies user engagement and platform value.
         """
-        self.logger.info("📝 Starting event content quality and business value validation")
+        self.logger.info("[U+1F4DD] Starting event content quality and business value validation")
         
         user_context = await create_authenticated_user_context(
             user_email=f"content_quality_{uuid.uuid4().hex[:8]}@staging.test.com",
@@ -612,7 +612,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             }
             
             await websocket.send(json.dumps(business_request))
-            self.logger.info("📤 Sent comprehensive business analysis request")
+            self.logger.info("[U+1F4E4] Sent comprehensive business analysis request")
             
             # Collect and analyze event content quality
             quality_events = []
@@ -660,7 +660,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                         thinking_quality = (length_score + keyword_score + number_score) / 3
                         content_quality_metrics["thinking_content_quality_scores"].append(thinking_quality)
                         
-                        self.logger.info(f"🧠 Thinking quality: {thinking_quality:.1f}/10 (length: {len(thinking_content)}, keywords: {keyword_count}, numbers: {numbers_found})")
+                        self.logger.info(f"[U+1F9E0] Thinking quality: {thinking_quality:.1f}/10 (length: {len(thinking_content)}, keywords: {keyword_count}, numbers: {numbers_found})")
                     
                     elif event_type == "agent_completed":
                         final_response_event = event
@@ -693,7 +693,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                             response_length_score + actionable_score + implementation_score
                         ) / 3
                         
-                        self.logger.info(f"📋 Final response quality: {content_quality_metrics['final_response_quality']:.1f}/10")
+                        self.logger.info(f"[U+1F4CB] Final response quality: {content_quality_metrics['final_response_quality']:.1f}/10")
                         break
                         
                 except asyncio.TimeoutError:
@@ -712,7 +712,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 assert avg_thinking_quality >= 4.0, \
                     f"Thinking content quality too low: {avg_thinking_quality:.1f}/10 - insufficient business value"
                 
-                self.logger.info(f"📊 Average thinking quality: {avg_thinking_quality:.1f}/10")
+                self.logger.info(f" CHART:  Average thinking quality: {avg_thinking_quality:.1f}/10")
             
             # Business keyword density validation
             total_thinking_events = content_quality_metrics["thinking_events_analyzed"]
@@ -743,14 +743,14 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             content_quality_metrics["final_response_quality"] * 0.6
         )
         
-        self.logger.info("🎉 EVENT CONTENT QUALITY VALIDATION SUCCESS")
-        self.logger.info(f"🧠 Thinking events analyzed: {content_quality_metrics['thinking_events_analyzed']}")
-        self.logger.info(f"📊 Overall content score: {overall_content_score:.1f}/10")
-        self.logger.info(f"💼 Business keywords found: {content_quality_metrics['business_keywords_found']}")
-        self.logger.info(f"🎯 Actionable items: {content_quality_metrics['actionable_items_identified']}")
-        self.logger.info(f"📈 Specific numbers: {content_quality_metrics['specific_numbers_provided']}")
-        self.logger.info(f"🔧 Implementation steps: {content_quality_metrics['implementation_steps_provided']}")
-        self.logger.info(f"💡 Business Value: WebSocket events deliver high-quality, actionable business content")
+        self.logger.info(" CELEBRATION:  EVENT CONTENT QUALITY VALIDATION SUCCESS")
+        self.logger.info(f"[U+1F9E0] Thinking events analyzed: {content_quality_metrics['thinking_events_analyzed']}")
+        self.logger.info(f" CHART:  Overall content score: {overall_content_score:.1f}/10")
+        self.logger.info(f"[U+1F4BC] Business keywords found: {content_quality_metrics['business_keywords_found']}")
+        self.logger.info(f" TARGET:  Actionable items: {content_quality_metrics['actionable_items_identified']}")
+        self.logger.info(f"[U+1F4C8] Specific numbers: {content_quality_metrics['specific_numbers_provided']}")
+        self.logger.info(f"[U+1F527] Implementation steps: {content_quality_metrics['implementation_steps_provided']}")
+        self.logger.info(f" IDEA:  Business Value: WebSocket events deliver high-quality, actionable business content")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -762,7 +762,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Validates complex multi-agent workflows deliver coordinated
         insights through proper WebSocket event sequencing and handoffs.
         """
-        self.logger.info("🤝 Starting multi-agent event flow coordination test")
+        self.logger.info("[U+1F91D] Starting multi-agent event flow coordination test")
         
         user_context = await create_authenticated_user_context(
             user_email=f"multi_agent_{uuid.uuid4().hex[:8]}@staging.test.com",
@@ -811,7 +811,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             }
             
             await websocket.send(json.dumps(complex_workflow_request))
-            self.logger.info("📤 Sent multi-agent coordination request")
+            self.logger.info("[U+1F4E4] Sent multi-agent coordination request")
             
             # Track agent workflow progression
             workflow_events = []
@@ -841,7 +841,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                         current_agent_events = [event]
                         agent_info = event.get("data", {}).get("agent", "unknown")
                         multi_agent_metrics["agents_executed"].append(agent_info)
-                        self.logger.info(f"🤖 Agent started: {agent_info} at {event_timestamp:.2f}s")
+                        self.logger.info(f"[U+1F916] Agent started: {agent_info} at {event_timestamp:.2f}s")
                     
                     elif event_type in self.CRITICAL_EVENTS:
                         current_agent_events.append(event)
@@ -868,17 +868,17 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                         agent_event_types = [e.get("type") for e in current_agent_events]
                         multi_agent_metrics["event_sequences"].append(agent_event_types)
                         
-                        self.logger.info(f"✅ Agent completed workflow phase ({len(current_agent_events)} events)")
+                        self.logger.info(f" PASS:  Agent completed workflow phase ({len(current_agent_events)} events)")
                         
                         # Check if this appears to be final completion
                         if ("implementation" in agent_response or "roadmap" in agent_response or
                             "timeline" in agent_response):
                             multi_agent_metrics["workflow_completeness"] = 1
-                            self.logger.info("🎯 Multi-agent workflow appears complete")
+                            self.logger.info(" TARGET:  Multi-agent workflow appears complete")
                             break
                     
                 except asyncio.TimeoutError:
-                    self.logger.warning("⏰ Multi-agent workflow timeout - analyzing partial results")
+                    self.logger.warning("[U+23F0] Multi-agent workflow timeout - analyzing partial results")
                     break
                 except json.JSONDecodeError:
                     continue
@@ -922,13 +922,13 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             assert multi_agent_metrics["workflow_completeness"] >= 1, \
                 "Multi-agent workflow did not reach completion with implementation guidance"
         
-        self.logger.info("🎉 MULTI-AGENT EVENT FLOW COORDINATION SUCCESS")
-        self.logger.info(f"🤖 Agents executed: {len(multi_agent_metrics['agents_executed'])}")
-        self.logger.info(f"📊 Event sequences: {len(multi_agent_metrics['event_sequences'])}")
-        self.logger.info(f"🤝 Coordination quality: {multi_agent_metrics['coordination_quality']}")
-        self.logger.info(f"✅ Workflow completeness: {multi_agent_metrics['workflow_completeness']}")
-        self.logger.info(f"⏱️ Total workflow time: {total_workflow_time:.2f}s")
-        self.logger.info(f"💡 Business Value: Multi-agent coordination delivers comprehensive analysis through coordinated event flows")
+        self.logger.info(" CELEBRATION:  MULTI-AGENT EVENT FLOW COORDINATION SUCCESS")
+        self.logger.info(f"[U+1F916] Agents executed: {len(multi_agent_metrics['agents_executed'])}")
+        self.logger.info(f" CHART:  Event sequences: {len(multi_agent_metrics['event_sequences'])}")
+        self.logger.info(f"[U+1F91D] Coordination quality: {multi_agent_metrics['coordination_quality']}")
+        self.logger.info(f" PASS:  Workflow completeness: {multi_agent_metrics['workflow_completeness']}")
+        self.logger.info(f"[U+23F1][U+FE0F] Total workflow time: {total_workflow_time:.2f}s")
+        self.logger.info(f" IDEA:  Business Value: Multi-agent coordination delivers comprehensive analysis through coordinated event flows")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -940,7 +940,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Ensures users receive consistent AI value even when experiencing
         network issues, maintaining platform reliability and user trust.
         """
-        self.logger.info("🛡️ Starting event flow resilience during network interruptions test")
+        self.logger.info("[U+1F6E1][U+FE0F] Starting event flow resilience during network interruptions test")
         
         user_context = await create_authenticated_user_context(
             user_email=f"resilience_test_{uuid.uuid4().hex[:8]}@staging.test.com",
@@ -977,7 +977,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
             }
             
             await websocket1.send(json.dumps(resilience_request))
-            self.logger.info("📤 Sent resilience test request on initial connection")
+            self.logger.info("[U+1F4E4] Sent resilience test request on initial connection")
             
             # Collect initial events
             initial_events = []
@@ -991,11 +991,11 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                     initial_events.append(event)
                     
                     event_type = event.get("type")
-                    self.logger.info(f"📨 Initial phase: {event_type}")
+                    self.logger.info(f"[U+1F4E8] Initial phase: {event_type}")
                     
                     # If agent completes quickly, continue to next phase
                     if event_type == "agent_completed":
-                        self.logger.info("🎯 Agent completed in initial phase - proceeding to interruption test")
+                        self.logger.info(" TARGET:  Agent completed in initial phase - proceeding to interruption test")
                         break
                         
                 except asyncio.TimeoutError:
@@ -1003,10 +1003,10 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 except json.JSONDecodeError:
                     continue
             
-            self.logger.info(f"📊 Initial phase: {len(initial_events)} events collected")
+            self.logger.info(f" CHART:  Initial phase: {len(initial_events)} events collected")
         
         # PHASE 2: Simulate network interruption and reconnection
-        self.logger.info("🔌 Simulating network interruption (connection termination)")
+        self.logger.info("[U+1F50C] Simulating network interruption (connection termination)")
         resilience_metrics["interruptions_simulated"] += 1
         
         # Brief interruption period
@@ -1020,7 +1020,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 open_timeout=25.0  # Longer timeout after interruption
             ) as websocket2:
                 
-                self.logger.info("🔌 Reconnected after interruption")
+                self.logger.info("[U+1F50C] Reconnected after interruption")
                 resilience_metrics["recovery_successful"] += 1
                 
                 # Attempt to get thread status and continue conversation
@@ -1039,7 +1039,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 if (recovery_data.get("type") == "thread_status" and 
                     recovery_data.get("data", {}).get("messages")):
                     resilience_metrics["data_continuity_maintained"] += 1
-                    self.logger.info("✅ Thread data continuity maintained after interruption")
+                    self.logger.info(" PASS:  Thread data continuity maintained after interruption")
                 
                 # Continue conversation to test ongoing functionality
                 followup_request = {
@@ -1066,7 +1066,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                         post_interruption_events.append(event)
                         
                         event_type = event.get("type")
-                        self.logger.info(f"📨 Post-interruption: {event_type}")
+                        self.logger.info(f"[U+1F4E8] Post-interruption: {event_type}")
                         
                         # Check for context continuity in responses
                         if event_type == "agent_completed":
@@ -1075,21 +1075,21 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                             
                             if any(indicator in response_content for indicator in context_indicators):
                                 resilience_metrics["data_continuity_maintained"] += 1
-                                self.logger.info("✅ Agent demonstrates context continuity after interruption")
+                                self.logger.info(" PASS:  Agent demonstrates context continuity after interruption")
                             
                             break
                             
                     except asyncio.TimeoutError:
-                        self.logger.warning("⏰ Timeout in post-interruption phase")
+                        self.logger.warning("[U+23F0] Timeout in post-interruption phase")
                         resilience_metrics["user_experience_degradation"] += 1
                         break
                     except json.JSONDecodeError:
                         continue
                 
-                self.logger.info(f"📊 Post-interruption: {len(post_interruption_events)} events collected")
+                self.logger.info(f" CHART:  Post-interruption: {len(post_interruption_events)} events collected")
                 
         except Exception as e:
-            self.logger.error(f"❌ Reconnection failed: {e}")
+            self.logger.error(f" FAIL:  Reconnection failed: {e}")
             resilience_metrics["user_experience_degradation"] += 1
         
         # RESILIENCE VALIDATION
@@ -1111,12 +1111,12 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         assert total_events >= 5, \
             f"Insufficient event flow across interruption: {total_events} total events"
         
-        self.logger.info("🎉 EVENT FLOW RESILIENCE VALIDATION SUCCESS")
-        self.logger.info(f"🔌 Interruptions simulated: {resilience_metrics['interruptions_simulated']}")
-        self.logger.info(f"✅ Recovery successful: {resilience_metrics['recovery_successful']}")
-        self.logger.info(f"💾 Data continuity maintained: {resilience_metrics['data_continuity_maintained']}")
-        self.logger.info(f"⚠️ User experience degradation: {resilience_metrics['user_experience_degradation']}")
-        self.logger.info(f"💡 Business Value: Platform maintains resilience and data continuity despite network interruptions")
+        self.logger.info(" CELEBRATION:  EVENT FLOW RESILIENCE VALIDATION SUCCESS")
+        self.logger.info(f"[U+1F50C] Interruptions simulated: {resilience_metrics['interruptions_simulated']}")
+        self.logger.info(f" PASS:  Recovery successful: {resilience_metrics['recovery_successful']}")
+        self.logger.info(f"[U+1F4BE] Data continuity maintained: {resilience_metrics['data_continuity_maintained']}")
+        self.logger.info(f" WARNING: [U+FE0F] User experience degradation: {resilience_metrics['user_experience_degradation']}")
+        self.logger.info(f" IDEA:  Business Value: Platform maintains resilience and data continuity despite network interruptions")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -1128,7 +1128,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         Business Value: Validates platform can deliver consistent AI value through
         WebSocket events even under realistic user load conditions.
         """
-        self.logger.info("🏋️ Starting event flow performance under realistic load test")
+        self.logger.info("[U+1F3CB][U+FE0F] Starting event flow performance under realistic load test")
         
         # Create multiple user contexts for load testing
         concurrent_users = 3  # Moderate load for staging
@@ -1222,7 +1222,7 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
                 }
         
         # Execute concurrent load test
-        self.logger.info(f"🚀 Starting concurrent load test with {concurrent_users} users")
+        self.logger.info(f"[U+1F680] Starting concurrent load test with {concurrent_users} users")
         load_start_time = time.time()
         
         load_results = await asyncio.gather(*[
@@ -1272,11 +1272,11 @@ class TestWebSocketAgentEventFlowStaging(BaseIntegrationTest):
         assert load_metrics["total_events_processed"] >= min_expected_events, \
             f"Insufficient event processing under load: {load_metrics['total_events_processed']} < {min_expected_events}"
         
-        self.logger.info("🎉 EVENT FLOW PERFORMANCE UNDER LOAD SUCCESS")
-        self.logger.info(f"👥 Concurrent users: {concurrent_users}")
-        self.logger.info(f"✅ User success rate: {load_metrics['user_success_rate']:.1%}")
-        self.logger.info(f"📊 Total events processed: {load_metrics['total_events_processed']}")
-        self.logger.info(f"⏱️ Average event latency: {load_metrics['average_event_latency']:.2f}s")
-        self.logger.info(f"📈 Event throughput: {load_metrics['event_throughput']:.2f} events/sec")
-        self.logger.info(f"⚠️ Performance degradation: {load_metrics['performance_degradation']} incidents")
-        self.logger.info(f"💡 Business Value: Platform maintains WebSocket event performance under realistic load")
+        self.logger.info(" CELEBRATION:  EVENT FLOW PERFORMANCE UNDER LOAD SUCCESS")
+        self.logger.info(f"[U+1F465] Concurrent users: {concurrent_users}")
+        self.logger.info(f" PASS:  User success rate: {load_metrics['user_success_rate']:.1%}")
+        self.logger.info(f" CHART:  Total events processed: {load_metrics['total_events_processed']}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average event latency: {load_metrics['average_event_latency']:.2f}s")
+        self.logger.info(f"[U+1F4C8] Event throughput: {load_metrics['event_throughput']:.2f} events/sec")
+        self.logger.info(f" WARNING: [U+FE0F] Performance degradation: {load_metrics['performance_degradation']} incidents")
+        self.logger.info(f" IDEA:  Business Value: Platform maintains WebSocket event performance under realistic load")

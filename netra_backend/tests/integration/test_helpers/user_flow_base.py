@@ -3,7 +3,7 @@ Base utilities for user flow testing across tiers.
 Provides common helpers for authentication, session management, and validation.
 
 BVJ (Business Value Justification):
-1. Segment: All tiers (Free → Early → Mid → Enterprise)
+1. Segment: All tiers (Free  ->  Early  ->  Mid  ->  Enterprise)
 2. Business Goal: Prevent regression in revenue funnel
 3. Value Impact: Enables efficient test maintenance and development
 4. Strategic Impact: Protects $570K MRR through test modularity

@@ -663,7 +663,7 @@ class TestAgentExecutionWebSocketIntegration:
         tracker = AgentExecutionWebSocketTracker()
         integrator = RealAgentExecutionWebSocketIntegrator(tracker)
         
-        logger.info("🚀 Starting data analysis agent WebSocket integration test")
+        logger.info("[U+1F680] Starting data analysis agent WebSocket integration test")
         
         execution_params = {
             "analysis_params": {
@@ -697,7 +697,7 @@ class TestAgentExecutionWebSocketIntegration:
         assert integration_report["integration_failures"] == 0, \
             f"Integration failures detected: {integration_report['failure_details']}"
         
-        logger.info("✅ Data analysis agent WebSocket integration VALIDATED")
+        logger.info(" PASS:  Data analysis agent WebSocket integration VALIDATED")
         logger.info(f"  Execution duration: {result['execution_duration']:.1f}s")
         logger.info(f"  WebSocket events: {result['websocket_events_sent']}")
         logger.info(f"  Integration health: {result['integration_health']}")
@@ -714,7 +714,7 @@ class TestAgentExecutionWebSocketIntegration:
         tracker = AgentExecutionWebSocketTracker()
         integrator = RealAgentExecutionWebSocketIntegrator(tracker)
         
-        logger.info(f"🚀 Starting {concurrent_executions} concurrent agent execution isolation test")
+        logger.info(f"[U+1F680] Starting {concurrent_executions} concurrent agent execution isolation test")
         
         async def isolated_agent_execution(execution_index: int) -> Dict[str, Any]:
             """Execute isolated agent with WebSocket integration."""
@@ -768,7 +768,7 @@ class TestAgentExecutionWebSocketIntegration:
         assert integration_report["integration_success_rate"] >= 0.9, \
             f"Overall integration success rate too low: {integration_report['integration_success_rate']:.1%}"
         
-        logger.info("✅ Concurrent agent execution WebSocket isolation VALIDATED")
+        logger.info(" PASS:  Concurrent agent execution WebSocket isolation VALIDATED")
         logger.info(f"  Executions: {len(successful_executions)}/{concurrent_executions}")
         logger.info(f"  WebSocket events: {total_websocket_events}")
         logger.info(f"  Healthy integrations: {healthy_integrations}/{len(successful_executions)}")
@@ -785,7 +785,7 @@ class TestAgentExecutionWebSocketIntegration:
         tracker = AgentExecutionWebSocketTracker()
         integrator = RealAgentExecutionWebSocketIntegrator(tracker)
         
-        logger.info("🚀 Starting tool execution WebSocket event wrapping test")
+        logger.info("[U+1F680] Starting tool execution WebSocket event wrapping test")
         
         execution_params = {
             "tool_test_mode": True,
@@ -842,7 +842,7 @@ class TestAgentExecutionWebSocketIntegration:
             assert completed_index > executing_index, \
                 f"tool_completed should come after tool_executing: {completed_index} vs {executing_index}"
         
-        logger.info("✅ Tool execution WebSocket event wrapping VALIDATED")
+        logger.info(" PASS:  Tool execution WebSocket event wrapping VALIDATED")
         logger.info(f"  Tool executing events: {tool_executing_events}")
         logger.info(f"  Tool completed events: {tool_completed_events}")
         logger.info(f"  Tool executions tracked: {len(tool_executions)}")
@@ -858,7 +858,7 @@ class TestAgentExecutionWebSocketIntegration:
         tracker = AgentExecutionWebSocketTracker()
         integrator = RealAgentExecutionWebSocketIntegrator(tracker)
         
-        logger.info("🚀 Starting agent execution error WebSocket handling test")
+        logger.info("[U+1F680] Starting agent execution error WebSocket handling test")
         
         # Test with parameters that might cause issues (but should be handled gracefully)
         error_test_params = {
@@ -897,7 +897,7 @@ class TestAgentExecutionWebSocketIntegration:
         assert len(tracker.integration_failures) <= 5, \
             f"Too many integration failures during error test: {len(tracker.integration_failures)}"
         
-        logger.info("✅ Agent execution error WebSocket handling VALIDATED")
+        logger.info(" PASS:  Agent execution error WebSocket handling VALIDATED")
         logger.info(f"  WebSocket events during error: {result['websocket_events_sent']}")
         logger.info(f"  Integration failures: {len(tracker.integration_failures)}")
         logger.info(f"  Integration success rate: {integration_report['integration_success_rate']:.1%}")
@@ -913,7 +913,7 @@ class TestAgentExecutionWebSocketIntegration:
         tracker = AgentExecutionWebSocketTracker()
         integrator = RealAgentExecutionWebSocketIntegrator(tracker)
         
-        logger.info("🚀 Starting AgentRegistry WebSocket manager integration E2E test")
+        logger.info("[U+1F680] Starting AgentRegistry WebSocket manager integration E2E test")
         
         # Test multiple agent types to validate registry integration
         agent_scenarios = [
@@ -959,7 +959,7 @@ class TestAgentExecutionWebSocketIntegration:
         assert integration_report["integration_success_rate"] >= 0.8, \
             f"Overall registry integration success too low: {integration_report['integration_success_rate']:.1%}"
         
-        logger.info("✅ AgentRegistry WebSocket manager integration E2E VALIDATED")
+        logger.info(" PASS:  AgentRegistry WebSocket manager integration E2E VALIDATED")
         logger.info(f"  Agent scenarios: {len(successful_registry_tests)}/{len(agent_scenarios)}")
         logger.info(f"  Total WebSocket events: {total_events}")
         logger.info(f"  Healthy integrations: {healthy_integrations}/{len(successful_registry_tests)}")

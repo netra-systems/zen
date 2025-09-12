@@ -312,9 +312,9 @@ Generated: {datetime.now().isoformat()}
 ## New SSOT Structure
 ```
 websocket_core/
-├── unified_manager.py      # Single WebSocketManager
-├── unified_emitter.py      # Single WebSocketEmitter
-└── __init__.py             # Clean exports
+[U+251C][U+2500][U+2500] unified_manager.py      # Single WebSocketManager
+[U+251C][U+2500][U+2500] unified_emitter.py      # Single WebSocketEmitter
+[U+2514][U+2500][U+2500] __init__.py             # Clean exports
 ```
 
 ## Verification Steps

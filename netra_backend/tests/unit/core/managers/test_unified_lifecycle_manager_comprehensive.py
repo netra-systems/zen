@@ -2369,7 +2369,7 @@ class TestLifecycleManagerFactory(AsyncBaseTestCase):
             {"boolean_field": True, "none_field": None},
             {"list_field": [1, 2, 3, "mixed", True]},
             {"nested_dict": {"level1": {"level2": {"data": "deep"}}}},
-            {"unicode_field": "测试数据 🎉"},
+            {"unicode_field": "[U+6D4B][U+8BD5][U+6570][U+636E]  CELEBRATION: "},
             {"large_string": "x" * 1000},  # Large payload
             {"timestamp": time.time()},
             {"complex_structure": {

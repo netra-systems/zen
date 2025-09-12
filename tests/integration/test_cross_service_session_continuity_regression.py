@@ -2,7 +2,7 @@
 Cross-Service Session Continuity Regression Integration Test
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Platform-critical functionality 
+- Segment: ALL (Free  ->  Enterprise) - Platform-critical functionality 
 - Business Goal: Ensure seamless cross-service session continuity for chat experiences
 - Value Impact: Prevents conversation breaks, maintains user state across service boundaries
 - Strategic Impact: CRITICAL - Enables enterprise-grade multi-service architecture reliability
@@ -12,8 +12,8 @@ CRITICAL REGRESSION TEST: This test validates that cross-service communication
 maintains session continuity without creating unnecessary execution contexts.
 
 Key Regression Scenarios Tested:
-1. Backend → Auth Service: Session validation preserves existing thread_id/run_id
-2. Auth Service → Backend: Response maintains original execution context
+1. Backend  ->  Auth Service: Session validation preserves existing thread_id/run_id
+2. Auth Service  ->  Backend: Response maintains original execution context
 3. Cross-service calls don't trigger new context creation when reusing existing sessions  
 4. Service boundary crossings preserve user isolation and audit trail
 5. Multi-service workflows maintain conversation history continuity
@@ -247,7 +247,7 @@ class TestCrossServiceSessionContinuityRegression(SSotBaseTestCase):
     @pytest.mark.asyncio
     async def test_backend_to_auth_service_context_preservation(self):
         """
-        Test that backend → auth service calls preserve existing execution context.
+        Test that backend  ->  auth service calls preserve existing execution context.
         
         CRITICAL: Backend service must not create new execution contexts when
         calling auth service for session validation. The existing thread_id and
@@ -322,7 +322,7 @@ class TestCrossServiceSessionContinuityRegression(SSotBaseTestCase):
             self.record_metric("backend_to_auth_context_preserved", True)
             self.record_metric("auth_validation_time_ms", round(auth_time * 1000, 2))
             
-            logger.info(f"Backend → Auth context preservation test passed in {auth_time:.3f}s")
+            logger.info(f"Backend  ->  Auth context preservation test passed in {auth_time:.3f}s")
             
         finally:
             await self.cleanup_cross_service_environment()

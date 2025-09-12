@@ -90,7 +90,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         if self.services_ready:
             return
             
-        logger.info("📍 Discovering and verifying service readiness")
+        logger.info(" PIN:  Discovering and verifying service readiness")
         
         # Discover service URLs from real services fixture
         try:
@@ -202,7 +202,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         Business Value: Validates that users can securely authenticate
         and access their data across all subscription tiers.
         """
-        logger.info("🔑 Starting JWT token authentication test")
+        logger.info("[U+1F511] Starting JWT token authentication test")
         
         # CLAUDE.md compliance: Ensure real services are ready
         await self._ensure_services_ready(real_services_fixture)
@@ -281,7 +281,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         CRITICAL: OAuth enables social login which reduces friction
         for new user onboarding across all tiers.
         """
-        logger.info("🔐 Starting OAuth integration flows test")
+        logger.info("[U+1F510] Starting OAuth integration flows test")
         
         providers = ["google", "github"]
         
@@ -353,7 +353,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         Business Value: Protects revenue by ensuring users can only access
         paid features they have subscribed for. Prevents feature access abuse.
         """
-        logger.info("🛡️ Starting API access control RBAC test")
+        logger.info("[U+1F6E1][U+FE0F] Starting API access control RBAC test")
         
         # CLAUDE.md compliance: Ensure real services are ready
         await self._ensure_services_ready(real_services_fixture)
@@ -440,7 +440,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         Business Value: Protects user data privacy and prevents data breaches
         that could result in GDPR fines and loss of customer trust.
         """
-        logger.info("🔒 Starting user permissions isolation test")
+        logger.info("[U+1F512] Starting user permissions isolation test")
         
         # CLAUDE.md compliance: Ensure real services are ready
         await self._ensure_services_ready(real_services_fixture)
@@ -536,7 +536,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         CRITICAL: Proper session management ensures secure user state
         across multiple requests and prevents session hijacking.
         """
-        logger.info("🕒 Starting session management lifecycle test")
+        logger.info("[U+1F552] Starting session management lifecycle test")
         
         # Step 1: Create user and establish session
         user_email = f"session_test_{uuid.uuid4().hex[:8]}@example.com"
@@ -617,7 +617,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         Business Value: Prevents security breaches that could cause
         $1M+ ARR loss and destroy user trust.
         """
-        logger.info("🔒 Starting comprehensive security validation test")
+        logger.info("[U+1F512] Starting comprehensive security validation test")
         
         # CLAUDE.md compliance: Ensure real services are ready
         await self._ensure_services_ready(real_services_fixture)
@@ -821,7 +821,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         
         CRITICAL: WebSocket auth is essential for chat functionality (primary business value).
         """
-        logger.info("🌐 Testing WebSocket JWT authentication")
+        logger.info("[U+1F310] Testing WebSocket JWT authentication")
         
         try:
             # Connect to WebSocket with JWT authentication
@@ -877,7 +877,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
     
     async def _test_websocket_oauth_authentication(self, access_token: str, user_data: Dict[str, Any]):
         """Test WebSocket authentication with OAuth token."""
-        logger.info("🌐 Testing WebSocket OAuth authentication")
+        logger.info("[U+1F310] Testing WebSocket OAuth authentication")
         
         try:
             # Similar to JWT but with OAuth-specific validation
@@ -895,7 +895,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         
         Tests timing, structure, and cryptographic security.
         """
-        logger.info("🔒 Validating JWT security properties")
+        logger.info("[U+1F512] Validating JWT security properties")
         
         # Decode token for structure validation
         jwt_payload = self._decode_jwt_token(access_token)
@@ -1364,7 +1364,7 @@ class TestAPIAuthIntegrationComprehensive(BaseIntegrationTest):
         Business Value: Enables enterprise customers to meet their security
         and compliance requirements, supporting high-value contracts.
         """
-        logger.info("🏢 Starting advanced authentication scenarios test")
+        logger.info("[U+1F3E2] Starting advanced authentication scenarios test")
         
         # CLAUDE.md compliance: Ensure real services are ready
         await self._ensure_services_ready(real_services_fixture)

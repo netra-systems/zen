@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL ISSUE #341:
 Current problem: 60s timeout constraints cause failures in production for complex workflows
-Target solution: 60s→300s timeout progression for enterprise analytical use cases
+Target solution: 60s -> 300s timeout progression for enterprise analytical use cases
 Test Strategy: E2E tests on GCP staging environment (NO Docker dependencies)
 
 REQUIREMENTS:
@@ -293,7 +293,7 @@ class TestEnterpriseStreamingTimeouts(SSotAsyncTestCase):
         """
         Test multi-phase enterprise analytical workflow on staging.
         
-        This tests the complete 60s→300s timeout progression requirement.
+        This tests the complete 60s -> 300s timeout progression requirement.
         Should INITIALLY FAIL proving Issue #341 affects complex multi-phase workflows.
         """
         # Define multi-phase enterprise workflow

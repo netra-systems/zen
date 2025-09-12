@@ -346,7 +346,7 @@ class TestEdgeCases:
             result = await auth_service.register_user(
                 email="test@example.com",
                 password="ValidPass123!",
-                full_name="用户名 🚀"
+                full_name="[U+7528][U+6237][U+540D] [U+1F680]"
             )
             
             assert result["user_id"] == "test-user-id"

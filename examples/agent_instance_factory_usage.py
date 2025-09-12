@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -70,7 +70,7 @@ class RequestHandler:
         # Generate unique run ID for this request
         run_id = f"run_{user_id}_{thread_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
         
-        logger.info(f"🚀 Handling request for user {user_id}: '{user_message}'")
+        logger.info(f"[U+1F680] Handling request for user {user_id}: '{user_message}'")
         
         # Create request-scoped database session
         async with self.session_factory() as db_session:
@@ -88,21 +88,23 @@ class RequestHandler:
                 }
             ) as user_context:
                 
-                logger.info(f"✅ Created isolated execution context for user {user_id}")
+                logger.info(f" PASS:  Created isolated execution context for user {user_id}")
                 
                 # Create fresh agent instance for this user
                 agent = await self.factory.create_agent_instance(agent_name, user_context)
-                logger.info(f"✅ Created fresh {agent_name} agent for user {user_id}")
+                logger.info(f" PASS:  Created fresh {agent_name} agent for user {user_id}")
                 
                 # Prepare agent state with user-specific data
-                agent_state = DeepAgentState(
-                    user_request=user_message,
-                    thread_id=thread_id,
-                    user_id=user_id
-                )
+                # Note: UserExecutionContext is now passed via user_context parameter
+                # The agent state data is embedded in the execution context
+                agent_state_data = {
+                    'user_request': user_message,
+                    'thread_id': thread_id,
+                    'user_id': user_id
+                }
                 
                 # Execute agent with proper isolation
-                logger.info(f"🤖 Executing {agent_name} agent for user {user_id}")
+                logger.info(f"[U+1F916] Executing {agent_name} agent for user {user_id}")
                 
                 try:
                     # Agent execution automatically emits WebSocket events
@@ -110,9 +112,11 @@ class RequestHandler:
                     # - agent_thinking 
                     # - tool_executing/tool_completed (if tools are used)
                     # - agent_completed
-                    result = await agent.execute(agent_state, run_id, stream_updates=True)
+                    # Agent now uses UserExecutionContext instead of DeepAgentState
+                    # Pass the user_context which contains all necessary user isolation
+                    result = await agent.execute(user_context, run_id, stream_updates=True)
                     
-                    logger.info(f"✅ Agent execution completed for user {user_id}")
+                    logger.info(f" PASS:  Agent execution completed for user {user_id}")
                     
                     # Store execution result in user context
                     user_context.run_history.append({
@@ -134,7 +138,7 @@ class RequestHandler:
                     }
                     
                 except Exception as e:
-                    logger.error(f"❌ Agent execution failed for user {user_id}: {e}")
+                    logger.error(f" FAIL:  Agent execution failed for user {user_id}: {e}")
                     
                     # Send error notification via WebSocket
                     if user_context.websocket_emitter:
@@ -170,7 +174,7 @@ class RequestHandler:
             Dict containing results for all users
         """
         
-        logger.info(f"🚀 Handling {len(user_requests)} concurrent user requests")
+        logger.info(f"[U+1F680] Handling {len(user_requests)} concurrent user requests")
         
         async def process_single_request(user_request):
             """Process a single user request."""
@@ -187,7 +191,7 @@ class RequestHandler:
         failed_requests = [r for r in results if isinstance(r, dict) and not r.get('success', False)]
         exceptions = [r for r in results if isinstance(r, Exception)]
         
-        logger.info(f"✅ Concurrent processing complete:")
+        logger.info(f" PASS:  Concurrent processing complete:")
         logger.info(f"   - Successful: {len(successful_requests)}")
         logger.info(f"   - Failed: {len(failed_requests)}")
         logger.info(f"   - Exceptions: {len(exceptions)}")
@@ -206,7 +210,7 @@ async def example_basic_usage():
     """Basic usage example of AgentInstanceFactory."""
     
     print("\n" + "="*60)
-    print("🧪 BASIC AGENTINSTANCEFACTORY USAGE EXAMPLE")
+    print("[U+1F9EA] BASIC AGENTINSTANCEFACTORY USAGE EXAMPLE")
     print("="*60)
     
     # Setup test database
@@ -268,7 +272,7 @@ async def example_basic_usage():
     handler = RequestHandler(factory, session_factory)
     
     # Example 1: Single user request
-    print("\n📝 Example 1: Single User Request")
+    print("\n[U+1F4DD] Example 1: Single User Request")
     
     result = await handler.handle_user_request(
         user_id="alice",
@@ -277,11 +281,11 @@ async def example_basic_usage():
         agent_name="example_agent"
     )
     
-    print(f"✅ Result: {result['message']}")
-    print(f"📊 Response: {result['result']['response']}")
+    print(f" PASS:  Result: {result['message']}")
+    print(f" CHART:  Response: {result['result']['response']}")
     
     # Example 2: Concurrent users
-    print("\n👥 Example 2: Concurrent User Requests")
+    print("\n[U+1F465] Example 2: Concurrent User Requests")
     
     concurrent_requests = [
         ("alice", "thread_alice_2", "What's the weather like?", "example_agent"),
@@ -292,11 +296,11 @@ async def example_basic_usage():
     
     concurrent_results = await handler.handle_concurrent_users(concurrent_requests)
     
-    print(f"✅ Processed {concurrent_results['total_requests']} requests concurrently")
-    print(f"📊 Success rate: {concurrent_results['successful_requests']}/{concurrent_results['total_requests']}")
+    print(f" PASS:  Processed {concurrent_results['total_requests']} requests concurrently")
+    print(f" CHART:  Success rate: {concurrent_results['successful_requests']}/{concurrent_results['total_requests']}")
     
     # Show factory metrics
-    print("\n📈 Factory Metrics:")
+    print("\n[U+1F4C8] Factory Metrics:")
     metrics = factory.get_factory_metrics()
     for key, value in metrics.items():
         if key != 'active_context_ids':  # Skip the list for cleaner output
@@ -305,7 +309,7 @@ async def example_basic_usage():
     # Cleanup
     await engine.dispose()
     
-    print("\n✅ Basic usage example completed successfully!")
+    print("\n PASS:  Basic usage example completed successfully!")
     print("   - All users received isolated agent instances")
     print("   - No data leakage between users")
     print("   - WebSocket events were properly emitted")
@@ -316,7 +320,7 @@ async def example_advanced_patterns():
     """Advanced usage patterns for AgentInstanceFactory."""
     
     print("\n" + "="*60)
-    print("🔬 ADVANCED AGENTINSTANCEFACTORY PATTERNS")
+    print("[U+1F52C] ADVANCED AGENTINSTANCEFACTORY PATTERNS")
     print("="*60)
     
     # Get factory instance
@@ -327,7 +331,7 @@ async def example_advanced_patterns():
     session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     
     # Pattern 1: Manual resource management (not recommended, but possible)
-    print("\n🔧 Pattern 1: Manual Resource Management")
+    print("\n[U+1F527] Pattern 1: Manual Resource Management")
     
     async with session_factory() as session:
         
@@ -340,18 +344,18 @@ async def example_advanced_patterns():
             metadata={'pattern': 'manual_management'}
         )
         
-        print(f"✅ Created context: {context.user_id}")
+        print(f" PASS:  Created context: {context.user_id}")
         
         # Create agent manually  
         agent = await factory.create_agent_instance("example_agent", context)
-        print(f"✅ Created agent: {agent.name}")
+        print(f" PASS:  Created agent: {agent.name}")
         
         # Manual cleanup (important!)
         await factory.cleanup_user_context(context)
-        print("✅ Manually cleaned up context")
+        print(" PASS:  Manually cleaned up context")
     
     # Pattern 2: Context manager (recommended)
-    print("\n✨ Pattern 2: Context Manager (Recommended)")
+    print("\n[U+2728] Pattern 2: Context Manager (Recommended)")
     
     async with session_factory() as session:
         async with factory.user_execution_scope(
@@ -363,14 +367,14 @@ async def example_advanced_patterns():
         ) as context:
             
             agent = await factory.create_agent_instance("example_agent", context)
-            print(f"✅ Created agent in managed context: {agent.name}")
+            print(f" PASS:  Created agent in managed context: {agent.name}")
             
             # Context automatically cleaned up when exiting
     
-    print("✅ Context automatically cleaned up!")
+    print(" PASS:  Context automatically cleaned up!")
     
     # Pattern 3: Per-user concurrency control
-    print("\n⚙️ Pattern 3: Per-User Concurrency Control")
+    print("\n[U+2699][U+FE0F] Pattern 3: Per-User Concurrency Control")
     
     async def controlled_execution(user_id: str, request_num: int):
         """Execute with per-user concurrency limits."""
@@ -387,9 +391,9 @@ async def example_advanced_patterns():
                     db_session=session
                 ) as context:
                     
-                    print(f"🎯 User {user_id} request {request_num} started (controlled)")
+                    print(f" TARGET:  User {user_id} request {request_num} started (controlled)")
                     await asyncio.sleep(0.1)  # Simulate work
-                    print(f"✅ User {user_id} request {request_num} completed")
+                    print(f" PASS:  User {user_id} request {request_num} completed")
                     
                     return f"Controlled execution for {user_id} request {request_num}"
     
@@ -400,10 +404,10 @@ async def example_advanced_patterns():
             tasks.append(controlled_execution(user, req))
     
     results = await asyncio.gather(*tasks)
-    print(f"✅ Completed {len(results)} controlled executions")
+    print(f" PASS:  Completed {len(results)} controlled executions")
     
     # Pattern 4: Factory metrics monitoring
-    print("\n📊 Pattern 4: Factory Metrics Monitoring")
+    print("\n CHART:  Pattern 4: Factory Metrics Monitoring")
     
     metrics = factory.get_factory_metrics()
     print("Current factory metrics:")
@@ -416,7 +420,7 @@ async def example_advanced_patterns():
             print(f"   {key}: {value}")
     
     # Pattern 5: Active context monitoring
-    print("\n🔍 Pattern 5: Active Context Monitoring")
+    print("\n SEARCH:  Pattern 5: Active Context Monitoring")
     
     active_summary = factory.get_active_contexts_summary()
     print(f"Active contexts: {active_summary['total_active_contexts']}")
@@ -424,13 +428,13 @@ async def example_advanced_patterns():
     # Cleanup
     await engine.dispose()
     
-    print("\n✅ Advanced patterns example completed!")
+    print("\n PASS:  Advanced patterns example completed!")
 
 
 async def main():
     """Run all examples."""
     
-    print("🚀 AgentInstanceFactory Usage Examples")
+    print("[U+1F680] AgentInstanceFactory Usage Examples")
     print("=====================================")
     print("This demonstrates proper per-request agent instantiation")
     print("with complete user isolation and resource management.")
@@ -440,18 +444,18 @@ async def main():
         await example_advanced_patterns()
         
         print("\n" + "="*60)
-        print("🎉 ALL EXAMPLES COMPLETED SUCCESSFULLY! 🎉")
+        print(" CELEBRATION:  ALL EXAMPLES COMPLETED SUCCESSFULLY!  CELEBRATION: ")
         print("="*60)
-        print("✅ AgentInstanceFactory provides complete user isolation")
-        print("✅ Fresh agent instances created per request")
-        print("✅ WebSocket events properly routed to users")
-        print("✅ Database sessions isolated per request")
-        print("✅ Automatic resource cleanup prevents leaks")
-        print("✅ Concurrent users safely supported")
+        print(" PASS:  AgentInstanceFactory provides complete user isolation")
+        print(" PASS:  Fresh agent instances created per request")
+        print(" PASS:  WebSocket events properly routed to users")
+        print(" PASS:  Database sessions isolated per request")
+        print(" PASS:  Automatic resource cleanup prevents leaks")
+        print(" PASS:  Concurrent users safely supported")
         print("="*60)
         
     except Exception as e:
-        print(f"\n❌ Example failed: {e}")
+        print(f"\n FAIL:  Example failed: {e}")
         import traceback
         traceback.print_exc()
 

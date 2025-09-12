@@ -145,12 +145,12 @@ class AutomatedRemediator:
         # Check for specific error patterns
         if 'No module named' in log_excerpt:
             # Module import issues often need container rebuild
-            print(f"  → Module import error detected, may need rebuild")
+            print(f"   ->  Module import error detected, may need rebuild")
             return False
             
         if 'TypeError' in log_excerpt or 'AttributeError' in log_excerpt:
             # Code errors need code fixes
-            print(f"  → Code error detected, needs manual fix")
+            print(f"   ->  Code error detected, needs manual fix")
             return False
             
         # Try service restart for transient errors
@@ -169,7 +169,7 @@ class AutomatedRemediator:
             
         if 'deprecated' in log_excerpt.lower():
             # Deprecation warnings need code updates
-            print(f"  → Deprecation warning, needs code update")
+            print(f"   ->  Deprecation warning, needs code update")
             return False
             
         return True
@@ -179,7 +179,7 @@ class AutomatedRemediator:
         container = issue.get('container', '')
         
         # Configuration errors usually need env var updates
-        print(f"  → Configuration issue may need environment variable updates")
+        print(f"   ->  Configuration issue may need environment variable updates")
         
         # Try restarting with current config
         subprocess.run(['docker', 'restart', container], capture_output=True)

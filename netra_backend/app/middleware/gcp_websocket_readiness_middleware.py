@@ -172,7 +172,7 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
         state = details.get('state', 'unknown')
         
         self.logger.warning(
-            f"🚫 Rejecting WebSocket connection - services not ready. "
+            f"[U+1F6AB] Rejecting WebSocket connection - services not ready. "
             f"State: {state}, Failed services: {failed_services}, "
             f"Path: {request.url.path}"
         )

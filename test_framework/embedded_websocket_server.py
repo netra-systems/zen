@@ -131,7 +131,7 @@ class EmbeddedWebSocketServer:
                 return
             
             # CRITICAL: Send all 5 required WebSocket events for chat business value
-            logger.info(f"🤖 Emitting CRITICAL WebSocket events for: '{content}'")
+            logger.info(f"[U+1F916] Emitting CRITICAL WebSocket events for: '{content}'")
             
             # 1. agent_started
             await connection.send_message({
@@ -187,7 +187,7 @@ class EmbeddedWebSocketServer:
                 "timestamp": time.time()
             })
             
-            logger.info(f"✅ Successfully sent ALL 5 critical WebSocket events to {user_id}")
+            logger.info(f" PASS:  Successfully sent ALL 5 critical WebSocket events to {user_id}")
         
         async def handle_ping(connection: EmbeddedWebSocketConnection, message: Dict[str, Any]):
             """Handle ping messages."""
@@ -476,7 +476,7 @@ class EmbeddedWebSocketTestHelper:
                         
                         if event_type in critical_events:
                             received_events[event_type] = True
-                            logger.info(f"✅ Received critical event: {event_type}")
+                            logger.info(f" PASS:  Received critical event: {event_type}")
                         
                         # Check if all events received
                         if all(received_events.values()):

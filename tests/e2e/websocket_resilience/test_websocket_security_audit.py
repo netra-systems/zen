@@ -136,7 +136,7 @@ async def test_security_logging_comprehensive_audit_trail(jwt_generator, audit_l
         if client.is_connected:
             await client.disconnect()
     
-    logger.info(f"✓ Comprehensive audit trail: {len(expired_events)} events logged, {alert_count} alerts triggered")
+    logger.info(f"[U+2713] Comprehensive audit trail: {len(expired_events)} events logged, {alert_count} alerts triggered")
 
 
 @pytest.mark.asyncio
@@ -266,7 +266,7 @@ async def test_security_event_correlation_and_pattern_detection(jwt_generator, a
         if client.is_connected:
             await client.disconnect()
     
-    logger.info(f"✓ Pattern detection: {len(pattern_results)} patterns, {total_attempts} attempts, {alert_count} alerts")
+    logger.info(f"[U+2713] Pattern detection: {len(pattern_results)} patterns, {total_attempts} attempts, {alert_count} alerts")
 
 
 @pytest.mark.asyncio
@@ -396,7 +396,7 @@ async def test_audit_trail_data_integrity_and_retention(jwt_generator, audit_log
     
     assert len(truly_recent_events) >= len(test_users), "Recent events should be retained"
     
-    logger.info(f"✓ Audit trail integrity: {len(recent_events)} events validated, proper timestamps and data")
+    logger.info(f"[U+2713] Audit trail integrity: {len(recent_events)} events validated, proper timestamps and data")
 
 
 if __name__ == "__main__":

@@ -1144,9 +1144,9 @@ class TestUnifiedTestRunnerUtilities(SSotBaseTestCase):
         # Test various Unicode scenarios
         test_strings = [
             "Regular ASCII text",
-            "Unicode symbols: ✓ ✗ ⚠",
-            "Emoji: 🚀 🔥 💻",
-            "Mixed: ASCII + Unicode ✓",
+            "Unicode symbols: [U+2713] [U+2717]  WARNING: ",
+            "Emoji: [U+1F680]  FIRE:  [U+1F4BB]",
+            "Mixed: ASCII + Unicode [U+2713]",
             "",  # Empty string
         ]
         
@@ -1215,7 +1215,7 @@ class TestUnifiedTestRunnerWindowsCompatibility(SSotBaseTestCase):
         assert hasattr(self.runner, 'project_root')
         
         # Verify Unicode handling works
-        test_path = "test_file_with_unicode_✓.py"
+        test_path = "test_file_with_unicode_[U+2713].py"
         try:
             self.runner._safe_print_unicode(test_path)
             unicode_handling_works = True
@@ -1631,10 +1631,10 @@ class TestUnifiedTestRunnerComprehensiveIntegration(SSotAsyncTestCase):
         
         # Test Unicode handling
         unicode_test_strings = [
-            "Test with unicode: ✓ ✗ ⚠",
-            "Emoji test: 🚀 🔥 💻 ✅",
+            "Test with unicode: [U+2713] [U+2717]  WARNING: ",
+            "Emoji test: [U+1F680]  FIRE:  [U+1F4BB]  PASS: ",
             "Path test: C:\\Users\\Test\\Documents\\test_file.py",
-            "Mixed: ASCII + Unicode ✓ + Emoji 🎉"
+            "Mixed: ASCII + Unicode [U+2713] + Emoji  CELEBRATION: "
         ]
         
         for test_string in unicode_test_strings:
@@ -1798,11 +1798,11 @@ class TestUnifiedTestRunnerSSotCompliance(SSotBaseTestCase):
         print(f"Test Classes Created: {test_classes_count}")
         print(f"Major Methods in UnifiedTestRunner: {major_methods_count}")
         print(f"Coverage Achieved: Comprehensive unit test suite")
-        print(f"SSOT Compliance: ✅ Validated")
-        print(f"Windows Compatibility: ✅ Tested")
-        print(f"Error Handling: ✅ Comprehensive")
-        print(f"Performance: ✅ Validated")
-        print(f"Integration Points: ✅ Tested")
+        print(f"SSOT Compliance:  PASS:  Validated")
+        print(f"Windows Compatibility:  PASS:  Tested")
+        print(f"Error Handling:  PASS:  Comprehensive")
+        print(f"Performance:  PASS:  Validated")
+        print(f"Integration Points:  PASS:  Tested")
         print(f"=====================================\n")
 
 
@@ -1843,43 +1843,43 @@ def test_comprehensive_unit_test_suite_completion():
         ]
         total_test_methods += len(methods)
     
-    print(f"\n🚀 COMPREHENSIVE UNIT TEST SUITE COMPLETED 🚀")
+    print(f"\n[U+1F680] COMPREHENSIVE UNIT TEST SUITE COMPLETED [U+1F680]")
     print(f"=" * 60)
     print(f"Target: tests/unified_test_runner.py (3,258 lines)")
     print(f"Created: tests/unit/test_unified_test_runner_comprehensive.py")
     print(f"")
-    print(f"📊 COVERAGE STATISTICS:")
+    print(f" CHART:  COVERAGE STATISTICS:")
     print(f"   Test Classes: {len(test_classes)}")
     print(f"   Test Methods: {total_test_methods}")
     print(f"   Lines of Tests: {len(__file__.split(chr(10))) if '__file__' in globals() else 'N/A'}")
     print(f"")
-    print(f"✅ REQUIREMENTS MET:")
-    print(f"   ✓ ABSOLUTELY NO MOCKS - Uses real implementations")
-    print(f"   ✓ FAIL HARD - Tests raise errors, no try/except")
-    print(f"   ✓ 100% SSOT Compliance - Uses test_framework/ssot/")
-    print(f"   ✓ Windows Compatible - Handles Windows paths/encoding")
-    print(f"   ✓ Complete Coverage - All major methods tested")
+    print(f" PASS:  REQUIREMENTS MET:")
+    print(f"   [U+2713] ABSOLUTELY NO MOCKS - Uses real implementations")
+    print(f"   [U+2713] FAIL HARD - Tests raise errors, no try/except")
+    print(f"   [U+2713] 100% SSOT Compliance - Uses test_framework/ssot/")
+    print(f"   [U+2713] Windows Compatible - Handles Windows paths/encoding")
+    print(f"   [U+2713] Complete Coverage - All major methods tested")
     print(f"")
-    print(f"🎯 KEY AREAS COVERED:")
-    print(f"   • Core initialization and Python command detection")
-    print(f"   • Category system and test discovery")
-    print(f"   • Docker integration and Alpine container support") 
-    print(f"   • Orchestration agents and layer-based execution")
-    print(f"   • Progress tracking and reporting")
-    print(f"   • Windows encoding and cross-platform compatibility")
-    print(f"   • Error recovery and cleanup mechanisms")
-    print(f"   • Command building and execution")
-    print(f"   • Environment configuration and isolation")
-    print(f"   • Cypress integration and frontend testing")
-    print(f"   • Service availability checking")
-    print(f"   • Performance and resource management")
+    print(f" TARGET:  KEY AREAS COVERED:")
+    print(f"   [U+2022] Core initialization and Python command detection")
+    print(f"   [U+2022] Category system and test discovery")
+    print(f"   [U+2022] Docker integration and Alpine container support") 
+    print(f"   [U+2022] Orchestration agents and layer-based execution")
+    print(f"   [U+2022] Progress tracking and reporting")
+    print(f"   [U+2022] Windows encoding and cross-platform compatibility")
+    print(f"   [U+2022] Error recovery and cleanup mechanisms")
+    print(f"   [U+2022] Command building and execution")
+    print(f"   [U+2022] Environment configuration and isolation")
+    print(f"   [U+2022] Cypress integration and frontend testing")
+    print(f"   [U+2022] Service availability checking")
+    print(f"   [U+2022] Performance and resource management")
     print(f"")
-    print(f"🏆 BUSINESS VALUE DELIVERED:")
+    print(f" TROPHY:  BUSINESS VALUE DELIVERED:")
     print(f"   Platform reliability through comprehensive test infrastructure validation")
     print(f"   Deployment confidence through validated test orchestration")
     print(f"   Development velocity through stable testing foundation")
     print(f"")
-    print(f"✨ This comprehensive test suite ensures the unified test runner")
+    print(f"[U+2728] This comprehensive test suite ensures the unified test runner")
     print(f"   (the #1 priority SSOT class) works reliably across all scenarios")
     print(f"=" * 60)
     
@@ -1900,4 +1900,4 @@ def test_comprehensive_unit_test_suite_completion():
 if __name__ == "__main__":
     # Run completion validation when executed directly
     result = test_comprehensive_unit_test_suite_completion()
-    print(f"\n🎉 SUCCESS: {result}")
+    print(f"\n CELEBRATION:  SUCCESS: {result}")

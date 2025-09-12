@@ -815,7 +815,7 @@ Executive Summary:
 - Implementation Priority: {final_agent_results['business_results']['implementation_priority']}
 
 Optimization Opportunities:
-{chr(10).join([f"• {opp['category']}: ${opp['savings']}/month" for opp in final_agent_results['business_results']['optimization_opportunities']])}
+{chr(10).join([f"[U+2022] {opp['category']}: ${opp['savings']}/month" for opp in final_agent_results['business_results']['optimization_opportunities']])}
 
 Confidence Score: {final_agent_results['user_value_delivered']['confidence_score']:.0%}
 Completion Status: SUCCESSFUL

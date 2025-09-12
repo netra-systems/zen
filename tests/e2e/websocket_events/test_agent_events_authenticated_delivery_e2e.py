@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures users receive real-time AI insights and agent responses
 - Strategic Impact: Foundation for valuable AI-powered chat interactions
 
-🚨 CRITICAL E2E REQUIREMENTS - MISSION CRITICAL WEBSOCKET EVENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS - MISSION CRITICAL WEBSOCKET EVENTS:
 1. Tests MUST use REAL authentication (JWT/OAuth) - NO MOCKS
 2. Tests MUST validate ALL 5 required agent events with real WebSocket delivery
 3. Tests MUST use REAL agent execution and WebSocket connections
@@ -15,11 +15,11 @@ Business Value Justification (BVJ):
 5. Tests validate business value: users receive actionable AI insights
 
 MISSION CRITICAL WEBSOCKET EVENTS (from CLAUDE.md Section 6):
-✅ agent_started - User must see agent began processing their problem  
-✅ agent_thinking - Real-time reasoning visibility (shows AI working on valuable solutions)
-✅ tool_executing - Tool usage transparency (demonstrates problem-solving approach)
-✅ tool_completed - Tool results display (delivers actionable insights)
-✅ agent_completed - User must know when valuable response is ready
+ PASS:  agent_started - User must see agent began processing their problem  
+ PASS:  agent_thinking - Real-time reasoning visibility (shows AI working on valuable solutions)
+ PASS:  tool_executing - Tool usage transparency (demonstrates problem-solving approach)
+ PASS:  tool_completed - Tool results display (delivers actionable insights)
+ PASS:  agent_completed - User must know when valuable response is ready
 
 This test suite validates Agent Events Authenticated Delivery:
 - End-to-end agent execution with authenticated WebSocket event delivery
@@ -30,7 +30,7 @@ This test suite validates Agent Events Authenticated Delivery:
 
 E2E AGENT EVENT SCENARIOS:
 Complete Agent Execution Journeys:
-- User sends agent request → authentication → agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+- User sends agent request  ->  authentication  ->  agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed
 - Multi-user concurrent agent executions with isolated event delivery
 - Agent failure scenarios with proper error event delivery
 - Real-time event streaming performance under concurrent load
@@ -69,7 +69,7 @@ class TestAgentEventsAuthenticatedDelivery:
     """
     E2E tests for authenticated agent event delivery.
     
-    🚨 MISSION CRITICAL: These tests validate that all 5 required agent events
+     ALERT:  MISSION CRITICAL: These tests validate that all 5 required agent events
     are delivered to authenticated users during real agent execution.
     
     Tests focus on:
@@ -124,7 +124,7 @@ class TestAgentEventsAuthenticatedDelivery:
                 try:
                     requests.get(cls.auth_config.backend_url, timeout=5)
                 except RequestException as e:
-                    pytest.fail(f"❌ CRITICAL: Agent services unavailable for events testing: {e}")
+                    pytest.fail(f" FAIL:  CRITICAL: Agent services unavailable for events testing: {e}")
     
     def test_complete_agent_execution_with_all_mission_critical_events(self):
         """Test complete agent execution with all 5 mission critical WebSocket events."""
@@ -217,7 +217,7 @@ class TestAgentEventsAuthenticatedDelivery:
                             # Check if this is a mission critical event
                             if event_type in mission_critical_events:
                                 mission_critical_events[event_type] = True
-                                print(f"✅ Received mission critical event: {event_type}")
+                                print(f" PASS:  Received mission critical event: {event_type}")
                             
                             # If agent completed, we can stop collecting
                             if event_type == 'agent_completed':
@@ -242,18 +242,18 @@ class TestAgentEventsAuthenticatedDelivery:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Agent events delivery failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Agent events delivery failed: {e}")
         
         # Execute mission critical events test
         events_result = asyncio.run(test_mission_critical_agent_events())
         
-        # 🚨 CRITICAL VALIDATION: All 5 mission critical events MUST be received
+        #  ALERT:  CRITICAL VALIDATION: All 5 mission critical events MUST be received
         assert events_result is not None
-        assert events_result['all_events_received'] is True, f"❌ MISSION CRITICAL FAILURE: Missing events: {[k for k, v in events_result['mission_critical_events'].items() if not v]}"
+        assert events_result['all_events_received'] is True, f" FAIL:  MISSION CRITICAL FAILURE: Missing events: {[k for k, v in events_result['mission_critical_events'].items() if not v]}"
         
         # Validate each mission critical event was received
         for event_name, received in events_result['mission_critical_events'].items():
-            assert received is True, f"❌ CRITICAL: Mission critical event '{event_name}' not received"
+            assert received is True, f" FAIL:  CRITICAL: Mission critical event '{event_name}' not received"
         
         # Validate business performance
         assert events_result['total_events_received'] >= 5, "Must receive at least the 5 mission critical events"
@@ -351,8 +351,8 @@ class TestAgentEventsAuthenticatedDelivery:
                                 event_type = event_data.get('type')
                                 event_user_id = event_data.get('user_id')
                                 
-                                # 🚨 CRITICAL: Validate event isolation - events must belong to this user only
-                                assert event_user_id == user_data.user_id, f"❌ ISOLATION BREACH: User {user_index} received event for user {event_user_id}"
+                                #  ALERT:  CRITICAL: Validate event isolation - events must belong to this user only
+                                assert event_user_id == user_data.user_id, f" FAIL:  ISOLATION BREACH: User {user_index} received event for user {event_user_id}"
                                 
                                 # Record user-specific event
                                 user_events.append({
@@ -421,7 +421,7 @@ class TestAgentEventsAuthenticatedDelivery:
             
             # All events for this user must have correct user_id
             for event in user_events:
-                assert event['user_id'] == user_id, f"❌ ISOLATION BREACH: Event has wrong user_id"
+                assert event['user_id'] == user_id, f" FAIL:  ISOLATION BREACH: Event has wrong user_id"
                 all_received_events.append(event)
         
         # Validate each user received mission critical events
@@ -431,7 +431,7 @@ class TestAgentEventsAuthenticatedDelivery:
             
             # Each user must receive all 5 mission critical events
             for event_name, received in mission_events.items():
-                assert received is True, f"❌ User {user_index} missing mission critical event: {event_name}"
+                assert received is True, f" FAIL:  User {user_index} missing mission critical event: {event_name}"
         
         # Validate total event distribution
         total_events_received = sum(r['event_count'] for r in successful_results)
@@ -547,7 +547,7 @@ class TestAgentEventsAuthenticatedDelivery:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Performance streaming test failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Performance streaming test failed: {e}")
         
         # Execute performance streaming test
         perf_result = asyncio.run(test_agent_event_streaming_performance())

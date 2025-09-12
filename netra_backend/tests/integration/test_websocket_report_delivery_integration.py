@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: WebSocket connections are the primary mechanism for chat value delivery
 - Strategic Impact: Foundation of $3M+ ARR - real-time updates drive user engagement
 
-This test suite validates the critical pathway: agent execution → WebSocket events → user receives reports.
+This test suite validates the critical pathway: agent execution  ->  WebSocket events  ->  user receives reports.
 Without this WebSocket delivery system working, users cannot access AI-generated business insights.
 """
 

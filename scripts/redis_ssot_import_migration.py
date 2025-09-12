@@ -232,19 +232,19 @@ class RedisSSOTMigrator:
         """
         self.root_dir = root_dir
         
-        logger.info("🔍 Redis SSOT Import Migration - Scanning for files to migrate...")
+        logger.info(" SEARCH:  Redis SSOT Import Migration - Scanning for files to migrate...")
         
         # Find files that need migration
         files_to_migrate = self.find_redis_import_files()
         
         if not files_to_migrate:
-            logger.info("✅ No files found that need Redis import migration")
+            logger.info(" PASS:  No files found that need Redis import migration")
             return self.migration_stats
         
-        logger.info(f"📁 Found {len(files_to_migrate)} files with Redis imports to migrate")
+        logger.info(f"[U+1F4C1] Found {len(files_to_migrate)} files with Redis imports to migrate")
         
         if self.dry_run:
-            logger.info("🧪 DRY RUN MODE - No files will be modified")
+            logger.info("[U+1F9EA] DRY RUN MODE - No files will be modified")
         
         # Process each file
         for file_path in files_to_migrate:
@@ -254,13 +254,13 @@ class RedisSSOTMigrator:
             
             if was_modified:
                 status = "WOULD MODIFY" if self.dry_run else "MODIFIED"
-                logger.info(f"✅ {status}: {file_path.relative_to(root_dir)}")
+                logger.info(f" PASS:  {status}: {file_path.relative_to(root_dir)}")
                 
                 if self.verbose and changes:
                     for change in changes:
                         logger.info(change)
             elif self.verbose:
-                logger.debug(f"⏭️  SKIPPED: {file_path.relative_to(root_dir)} (no changes needed)")
+                logger.debug(f"[U+23ED][U+FE0F]  SKIPPED: {file_path.relative_to(root_dir)} (no changes needed)")
         
         return self.migration_stats
     
@@ -269,25 +269,25 @@ class RedisSSOTMigrator:
         stats = self.migration_stats
         
         print("\n" + "="*60)
-        print("🚀 Redis SSOT Import Migration Summary")
+        print("[U+1F680] Redis SSOT Import Migration Summary")
         print("="*60)
-        print(f"📊 Files scanned:      {stats['files_scanned']}")
-        print(f"📝 Files modified:     {stats['files_modified']}")
-        print(f"🔄 Replacements made:  {stats['replacements_made']}")
-        print(f"❌ Errors:            {stats['errors']}")
+        print(f" CHART:  Files scanned:      {stats['files_scanned']}")
+        print(f"[U+1F4DD] Files modified:     {stats['files_modified']}")
+        print(f" CYCLE:  Replacements made:  {stats['replacements_made']}")
+        print(f" FAIL:  Errors:            {stats['errors']}")
         
         if stats['files_modified'] > 0:
-            print(f"\n✅ SUCCESS: {stats['files_modified']} files migrated to Redis SSOT")
-            print("🎯 Expected Benefits:")
+            print(f"\n PASS:  SUCCESS: {stats['files_modified']} files migrated to Redis SSOT")
+            print(" TARGET:  Expected Benefits:")
             print("   - WebSocket 1011 errors eliminated")
             print("   - Single Redis connection pool (down from 12+)")
             print("   - Memory usage reduced by ~75%")
             print("   - Chat functionality restored")
         else:
-            print("\n✅ All files already use Redis SSOT imports")
+            print("\n PASS:  All files already use Redis SSOT imports")
         
         if stats['errors'] > 0:
-            print(f"\n⚠️  WARNING: {stats['errors']} errors occurred during migration")
+            print(f"\n WARNING: [U+FE0F]  WARNING: {stats['errors']} errors occurred during migration")
         
         print("="*60)
 
@@ -352,7 +352,7 @@ Examples:
             sys.exit(0)
             
     except KeyboardInterrupt:
-        logger.info("\n⏹️  Migration cancelled by user")
+        logger.info("\n[U+23F9][U+FE0F]  Migration cancelled by user")
         sys.exit(1)
     except Exception as e:
         logger.error(f"Migration failed: {e}")

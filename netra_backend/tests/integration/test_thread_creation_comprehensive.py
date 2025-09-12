@@ -8,11 +8,11 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core chat functionality that enables all AI-powered interactions
 
 CRITICAL REQUIREMENTS COMPLIANCE:
-✓ NO MOCKS - Uses real PostgreSQL, real Redis, real WebSocket connections
-✓ Business Value Focus - Every test validates real business scenarios
-✓ Factory Pattern Compliance - Uses UserExecutionContext and factory patterns for multi-user isolation
-✓ WebSocket Events - Verifies WebSocket events are sent correctly
-✓ SSOT Compliance - Follows all SSOT patterns from test_framework/
+[U+2713] NO MOCKS - Uses real PostgreSQL, real Redis, real WebSocket connections
+[U+2713] Business Value Focus - Every test validates real business scenarios
+[U+2713] Factory Pattern Compliance - Uses UserExecutionContext and factory patterns for multi-user isolation
+[U+2713] WebSocket Events - Verifies WebSocket events are sent correctly
+[U+2713] SSOT Compliance - Follows all SSOT patterns from test_framework/
 
 This test suite provides 35+ comprehensive integration tests covering:
 1. Basic Thread Creation (10 tests) - Single user, concurrent, error handling, validation
@@ -86,7 +86,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
         # Test 1: Verify PostgreSQL database connection
         result = await services.postgres.fetchval("SELECT 1 as connection_test")
         assert result == 1, "PostgreSQL connection test failed"
-        self.logger.info("✓ PostgreSQL connection established")
+        self.logger.info("[U+2713] PostgreSQL connection established")
         
         # Test 2: Verify we can create a simple test table
         await services.postgres.execute("""
@@ -96,7 +96,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        self.logger.info("✓ Can create database tables")
+        self.logger.info("[U+2713] Can create database tables")
         
         # Test 3: Verify we can insert and query data
         test_data = f"test_data_{uuid.uuid4()}"
@@ -110,12 +110,12 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
             test_data
         )
         assert retrieved_data == test_data, "Data insertion/retrieval failed"
-        self.logger.info("✓ Can insert and retrieve data")
+        self.logger.info("[U+2713] Can insert and retrieve data")
         
         # Test 4: Verify Redis connection (should fall back to mock gracefully)
         redis_ping = await services.redis.ping()
         assert redis_ping is not None, "Redis connection test failed"
-        self.logger.info(f"✓ Redis connection test: {type(redis_ping).__name__}")
+        self.logger.info(f"[U+2713] Redis connection test: {type(redis_ping).__name__}")
         
         # Clean up test data
         await services.postgres.execute(
@@ -123,7 +123,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
             test_data
         )
         
-        self.logger.info("✓ Integration test infrastructure working without Docker dependencies")
+        self.logger.info("[U+2713] Integration test infrastructure working without Docker dependencies")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -2022,11 +2022,11 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
             # on how Redis caching is integrated into the thread service
             
             # Verify cache key format and data consistency
-            redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
             
             # Check if thread data might be cached
             cache_key = f"thread:{thread.id}"
-            cached_data = await redis_client.get(cache_key)
+            cached_data = await await redis_client.get(cache_key)
             
             if cached_data:
                 # If cached, validate consistency with database
@@ -2035,7 +2035,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
                 assert cached_thread["id"] == thread.id
                 assert cached_thread["name"] == thread.name
             
-            await redis_client.close()
+            await await redis_client.close()
         except (ImportError, Exception):
             # Redis not available or not configured - test passes with DB validation only
             pass

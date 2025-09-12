@@ -7,7 +7,7 @@ Real Critical User Journey Fixtures - Consolidated imports for REAL E2E testing
 3. **Value Impact**: Consolidated fixtures reduce test import complexity by 80%
 4. **Revenue Impact**: Streamlined test development = faster iteration on conversion optimization
 
-**ARCHITECTURE**: ≤300 lines, consolidated imports to maintain architectural compliance
+**ARCHITECTURE**:  <= 300 lines, consolidated imports to maintain architectural compliance
 Provides unified access to all fixture modules while maintaining modular design.
 """
 

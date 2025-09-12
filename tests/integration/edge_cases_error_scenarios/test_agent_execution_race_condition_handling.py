@@ -327,7 +327,7 @@ class TestAgentExecutionRaceConditionHandling(BaseIntegrationTest):
             f"State consistency issues after concurrent updates: {consistency_issues}"
         
         # Verify no critical data loss
-        expected_total_updates = 30  # 3 updaters × 10 updates each
+        expected_total_updates = 30  # 3 updaters  x  10 updates each
         actual_concurrent_updates = final_state.get('concurrent_updates', 0)
         update_completeness = actual_concurrent_updates / expected_total_updates
         

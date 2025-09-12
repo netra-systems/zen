@@ -90,7 +90,7 @@ class RealWebSocketEventCollector:
                 
                 # Stop listening if we get agent_completed
                 if event.get("type") == "agent_completed":
-                    logger.info("✓ Received agent_completed - stopping listener")
+                    logger.info("[U+2713] Received agent_completed - stopping listener")
                     break
                     
             except asyncio.TimeoutError:
@@ -114,7 +114,7 @@ class RealWebSocketEventCollector:
         self.event_sequence.append(event_type)
         self.timing[event_type] = time.time() - self.start_time
         
-        logger.info(f"📨 Real event received: {event_type} (#{len(self.events)})")
+        logger.info(f"[U+1F4E8] Real event received: {event_type} (#{len(self.events)})")
     
     def stop_listening(self):
         """Stop listening for events."""
@@ -223,7 +223,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
                 timeout=10
             )
             
-            logger.info(f"✓ Real authenticated WebSocket connection established for {user_data.user_id}")
+            logger.info(f"[U+2713] Real authenticated WebSocket connection established for {user_data.user_id}")
             return websocket
             
         except Exception as e:
@@ -238,14 +238,14 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         """Test that WebSocket manager works with REAL authentication and services.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses REAL WebSocket manager with authentication
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ NO mocks - tests actual manager functionality
-        ✅ Execution time validation >= 0.1s
+         PASS:  Uses REAL WebSocket manager with authentication
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  NO mocks - tests actual manager functionality
+         PASS:  Execution time validation >= 0.1s
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL WebSocket manager functionality")
+        logger.info("[U+1F680] Testing REAL WebSocket manager functionality")
         
         # Create authenticated user - REAL AUTH
         user_data = await self.auth_helper.create_authenticated_user(
@@ -288,9 +288,9 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         await notifier.send_agent_started(context)
         
         # Verify manager functionality
-        logger.info(f"✓ WebSocket manager type: {type(websocket_manager)}")
-        logger.info(f"✓ Connected users: {len(websocket_manager.user_connections)}")
-        logger.info(f"✓ Total connections: {len(websocket_manager.connections)}")
+        logger.info(f"[U+2713] WebSocket manager type: {type(websocket_manager)}")
+        logger.info(f"[U+2713] Connected users: {len(websocket_manager.user_connections)}")
+        logger.info(f"[U+2713] Total connections: {len(websocket_manager.connections)}")
         
         # Cleanup
         await websocket_manager.disconnect_user(user_data.user_id, websocket, conn_id)
@@ -300,7 +300,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         execution_time = time.time() - start_time
         assert execution_time >= 0.1, f"Test executed too quickly ({execution_time:.3f}s) - likely using mocks"
         
-        logger.info(f"✅ REAL WebSocket manager test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f" PASS:  REAL WebSocket manager test PASSED - execution time: {execution_time:.3f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -312,16 +312,16 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         This test validates ALL required WebSocket events using REAL authentication and connections.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses E2EAuthHelper for REAL authentication
-        ✅ Uses REAL WebSocket server connections
-        ✅ NO mocks, NO skipping, NO tolerance for missing events
-        ✅ Hard failures for missing critical events
-        ✅ Execution time validation >= 0.1s
-        ✅ Tests complete agent event sequences
+         PASS:  Uses E2EAuthHelper for REAL authentication
+         PASS:  Uses REAL WebSocket server connections
+         PASS:  NO mocks, NO skipping, NO tolerance for missing events
+         PASS:  Hard failures for missing critical events
+         PASS:  Execution time validation >= 0.1s
+         PASS:  Tests complete agent event sequences
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing MISSION CRITICAL agent WebSocket events with REAL authentication")
+        logger.info("[U+1F680] Testing MISSION CRITICAL agent WebSocket events with REAL authentication")
         
         # Create authenticated user using SSOT patterns - NO MOCKS
         user_data = await self.auth_helper.create_authenticated_user(
@@ -363,7 +363,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
             )
             
             # Send COMPLETE agent event sequence - ALL REQUIRED EVENTS
-            logger.info("📡 Sending COMPLETE mission-critical agent event sequence...")
+            logger.info("[U+1F4E1] Sending COMPLETE mission-critical agent event sequence...")
             
             # 1. Agent started (REQUIRED)
             await notifier.send_agent_started(context)
@@ -444,9 +444,9 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         for required_event in MISSION_CRITICAL_EVENTS:
             assert required_event in event_types, f"CRITICAL FAILURE: Missing required event '{required_event}'. This breaks user experience!"
         
-        logger.info(f"✅ MISSION CRITICAL agent WebSocket events test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   🎯 Events validated: {report['total_events']}, Critical coverage: 100%")
-        logger.info(f"   💰 $500K+ ARR functionality protected: Real-time agent communication working")
+        logger.info(f" PASS:  MISSION CRITICAL agent WebSocket events test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"    TARGET:  Events validated: {report['total_events']}, Critical coverage: 100%")
+        logger.info(f"   [U+1F4B0] $500K+ ARR functionality protected: Real-time agent communication working")
         
         return report
     
@@ -457,15 +457,15 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
         """Test that multiple users receive isolated agent events using REAL services.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses REAL multi-user authentication
-        ✅ Uses REAL WebSocket connections for each user
-        ✅ Validates user isolation in agent events
-        ✅ NO mocks - tests actual isolation behavior
-        ✅ Execution time validation >= 0.1s
+         PASS:  Uses REAL multi-user authentication
+         PASS:  Uses REAL WebSocket connections for each user
+         PASS:  Validates user isolation in agent events
+         PASS:  NO mocks - tests actual isolation behavior
+         PASS:  Execution time validation >= 0.1s
         """
         start_time = time.time()
         
-        logger.info("🚀 Testing REAL multi-user agent event isolation")
+        logger.info("[U+1F680] Testing REAL multi-user agent event isolation")
         
         # Create multiple authenticated users
         users = []
@@ -489,7 +489,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
                 "collector": collector
             })
             
-            logger.info(f"✓ User {i+1} authenticated and connected: {user_data.user_id}")
+            logger.info(f"[U+2713] User {i+1} authenticated and connected: {user_data.user_id}")
         
         # Create REAL WebSocket manager and connect all users
         websocket_manager = UnifiedWebSocketManager()
@@ -525,7 +525,7 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
                     max_retries=1
                 )
                 
-                logger.info(f"📡 Sending agent events for user {i+1}: {user['user_data'].user_id}")
+                logger.info(f"[U+1F4E1] Sending agent events for user {i+1}: {user['user_data'].user_id}")
                 
                 # Send complete event sequence for this user
                 await notifier.send_agent_started(context)
@@ -600,9 +600,9 @@ class TestAgentWebSocketEventsReal(SSotAsyncTestCase):
                     assert actual_user_id == expected_user_id, \
                         f"User isolation violated! User {i+1} received event for different user: {actual_user_id} != {expected_user_id}"
         
-        logger.info(f"✅ REAL multi-user agent event isolation test PASSED - execution time: {execution_time:.3f}s")
-        logger.info(f"   👥 Users tested: {len(users)}, all properly isolated")
-        logger.info(f"   📊 Total events across users: {sum(r['total_events'] for r in reports)}")
+        logger.info(f" PASS:  REAL multi-user agent event isolation test PASSED - execution time: {execution_time:.3f}s")
+        logger.info(f"   [U+1F465] Users tested: {len(users)}, all properly isolated")
+        logger.info(f"    CHART:  Total events across users: {sum(r['total_events'] for r in reports)}")
 
 
 if __name__ == "__main__":

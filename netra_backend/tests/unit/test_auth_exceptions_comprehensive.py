@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for exceptions_auth.py - AUTH Exception Handling SSOT
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Exception handling is critical for user experience
+- Segment: ALL (Free  ->  Enterprise) - Exception handling is critical for user experience
 - Business Goal: Provide clear, secure error messages that guide users to resolution
 - Value Impact: Good error handling reduces support tickets by 30% and prevents user churn
 - Strategic Impact: Security exceptions protect $50K+ MRR platform from attacks

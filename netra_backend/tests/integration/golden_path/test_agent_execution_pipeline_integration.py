@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Agents must orchestrate correctly to provide actionable insights
 - Strategic Impact: Core platform functionality that enables multi-agent AI workflows
 
-These tests validate the SupervisorAgent → Data Agent → Optimization Agent → Report Agent
+These tests validate the SupervisorAgent  ->  Data Agent  ->  Optimization Agent  ->  Report Agent
 workflow that delivers AI-powered optimization insights to users. NO MOCKS - uses real
 database connections, real Redis, real agent execution logic.
 
@@ -381,7 +381,7 @@ class TestAgentExecutionPipelineIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_agent_execution_order_validation(self, real_services_fixture):
         """
-        BVJ: Test agent execution order (Data → Optimization → Report) 
+        BVJ: Test agent execution order (Data  ->  Optimization  ->  Report) 
         Business Value: Correct execution order ensures data flows properly for insights
         """
         # Define expected execution order for business value delivery

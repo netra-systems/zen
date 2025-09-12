@@ -37,7 +37,7 @@ class GoldenDatasets:
     def get_simple_agent_flow() -> Dict[str, Any]:
         """Simple single-agent execution flow (Free/Early tier).
         
-        Represents: Basic user query → triage → response flow
+        Represents: Basic user query  ->  triage  ->  response flow
         Business Impact: 80% of Free tier usage, conversion path
         """
         run_id = str(uuid.uuid4())
@@ -105,7 +105,7 @@ class GoldenDatasets:
     def get_multi_agent_collaboration_flow() -> Dict[str, Any]:
         """Multi-agent collaboration flow (Mid/Enterprise tier).
         
-        Represents: Complex query → supervisor → multiple sub-agents → aggregation
+        Represents: Complex query  ->  supervisor  ->  multiple sub-agents  ->  aggregation
         Business Impact: Core Enterprise value prop, $10K+ MRR workloads
         """
         run_id = str(uuid.uuid4())
@@ -280,7 +280,7 @@ class GoldenDatasets:
     def get_failure_recovery_flow() -> Dict[str, Any]:
         """Agent failure and recovery flow (All tiers).
         
-        Represents: Agent crash → state recovery → resume execution
+        Represents: Agent crash  ->  state recovery  ->  resume execution
         Business Impact: Platform reliability, customer trust
         """
         run_id = str(uuid.uuid4())

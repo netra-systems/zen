@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Critical WebSocket Agent Events E2E Test - COMPLETELY REWRITTEN
 
@@ -149,7 +187,7 @@ class CriticalEventValidator:
             "=" * 60,
             "CRITICAL WEBSOCKET EVENT VALIDATION REPORT",
             "=" * 60,
-            f"Validation Result: {'✅ PASSED' if is_valid else '❌ FAILED'}",
+            f"Validation Result: {' PASS:  PASSED' if is_valid else ' FAIL:  FAILED'}",
             f"Total Events: {len(self.events)}",
             f"Event Types: {sorted(self.event_types)}",
             "",
@@ -157,7 +195,7 @@ class CriticalEventValidator:
         ]
 
         for event in CRITICAL_EVENTS:
-            status = "✅" if event in self.event_types else "❌"
+            status = " PASS: " if event in self.event_types else " FAIL: "
             report.append(f"  {status} {event}")
 
         if errors:
@@ -214,15 +252,15 @@ class TestCriticalWebSocketAgentEvents:
         This test uses REAL authentication, REAL WebSocket connection, and REAL services.
         It will FAIL HARD if the system doesn't work properly. No mocks, no fakes.
         """
-        logger.info("🚀 Starting critical WebSocket agent events test")
+        logger.info("[U+1F680] Starting critical WebSocket agent events test")
         
         # STEP 1: Connect to WebSocket with real authentication
-        logger.info("📡 Connecting to WebSocket with real authentication...")
+        logger.info("[U+1F4E1] Connecting to WebSocket with real authentication...")
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         
         # Track connection state
         assert websocket is not None, "Failed to establish WebSocket connection"
-        logger.info("✅ WebSocket connected successfully")
+        logger.info(" PASS:  WebSocket connected successfully")
         
         # STEP 2: Send a real chat message that will trigger agent execution
         test_message = {
@@ -232,11 +270,11 @@ class TestCriticalWebSocketAgentEvents:
             "request_id": f"test-{int(time.time())}"
         }
         
-        logger.info(f"📨 Sending chat message: {test_message['message']}")
+        logger.info(f"[U+1F4E8] Sending chat message: {test_message['message']}")
         await websocket.send(json.dumps(test_message))
         
         # STEP 3: Receive and validate WebSocket events for 30 seconds max
-        logger.info("👂 Listening for WebSocket events...")
+        logger.info("[U+1F442] Listening for WebSocket events...")
         start_time = time.time()
         max_wait_time = 30.0
         
@@ -251,27 +289,27 @@ class TestCriticalWebSocketAgentEvents:
             event_validator.record_event(event)
             
             event_type = event.get("type", "unknown")
-            logger.info(f"📥 Received event: {event_type}")
+            logger.info(f"[U+1F4E5] Received event: {event_type}")
             
             # Check for completion events
             if event_type in ["agent_completed", "final_report"]:
                 received_completion = True
-                logger.info(f"🎯 Received completion event: {event_type}")
+                logger.info(f" TARGET:  Received completion event: {event_type}")
                 break
                 
             # Log important events
             if event_type in CRITICAL_EVENTS:
                 data = event.get("data", {})
                 content = str(data.get("content", ""))[:100]
-                logger.info(f"📋 {event_type}: {content}...")
+                logger.info(f"[U+1F4CB] {event_type}: {content}...")
         
         # STEP 4: Close WebSocket connection  
         await websocket.close()
-        logger.info("🔌 WebSocket connection closed")
+        logger.info("[U+1F50C] WebSocket connection closed")
         
         # STEP 5: Generate comprehensive validation report
         report = event_validator.generate_report()
-        logger.info(f"📊 Event Validation Report:\n{report}")
+        logger.info(f" CHART:  Event Validation Report:\n{report}")
         
         # STEP 6: CRITICAL ASSERTIONS - These will FAIL HARD if system is broken
         is_valid, errors = event_validator.validate_critical_events()
@@ -297,7 +335,7 @@ class TestCriticalWebSocketAgentEvents:
         # Assert overall validation passed
         assert is_valid, f"CRITICAL FAILURE: Event validation failed:\n{chr(10).join(errors)}"
         
-        logger.info("✅ All critical WebSocket agent events validated successfully!")
+        logger.info(" PASS:  All critical WebSocket agent events validated successfully!")
         
         # Performance checks
         metrics = event_validator.get_performance_metrics()
@@ -307,7 +345,7 @@ class TestCriticalWebSocketAgentEvents:
         assert total_duration > 0, "CRITICAL FAILURE: No event timing recorded"
         assert total_duration < 60.0, f"PERFORMANCE FAILURE: Agent execution took too long: {total_duration:.2f}s"
         
-        logger.info(f"⚡ Performance: {metrics['total_events']} events in {total_duration:.2f}s")
+        logger.info(f" LIGHTNING:  Performance: {metrics['total_events']} events in {total_duration:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -317,7 +355,7 @@ class TestCriticalWebSocketAgentEvents:
         event_validator: CriticalEventValidator
     ):
         """Test WebSocket connection handling and error scenarios."""
-        logger.info("🔄 Testing WebSocket connection resilience...")
+        logger.info(" CYCLE:  Testing WebSocket connection resilience...")
         
         # Test connection establishment
         websocket = await auth_helper.connect_authenticated_websocket(timeout=10.0)
@@ -330,17 +368,17 @@ class TestCriticalWebSocketAgentEvents:
         }
         
         await websocket.send(json.dumps(ping_message))
-        logger.info("📤 Sent ping message")
+        logger.info("[U+1F4E4] Sent ping message")
         
         # Wait for any response (could be pong, error, or other)
         response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
         response_data = json.loads(response)
         
-        logger.info(f"📨 Received response: {response_data.get('type', 'unknown')}")
+        logger.info(f"[U+1F4E8] Received response: {response_data.get('type', 'unknown')}")
         
         # Clean close
         await websocket.close()
-        logger.info("✅ WebSocket resilience test completed")
+        logger.info(" PASS:  WebSocket resilience test completed")
         
         # Assert we got some kind of response
         assert response_data is not None, "No response to ping message"
@@ -353,7 +391,7 @@ class TestCriticalWebSocketAgentEvents:
         event_validator: CriticalEventValidator
     ):
         """Test sending multiple messages through WebSocket connection."""
-        logger.info("🔄 Testing multiple concurrent WebSocket messages...")
+        logger.info(" CYCLE:  Testing multiple concurrent WebSocket messages...")
         
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         assert websocket is not None, "Failed to establish WebSocket connection"
@@ -373,7 +411,7 @@ class TestCriticalWebSocketAgentEvents:
                 "request_id": f"multi-test-{i}-{int(time.time())}"
             }
             
-            logger.info(f"📤 Sending message {i+1}: {msg}")
+            logger.info(f"[U+1F4E4] Sending message {i+1}: {msg}")
             await websocket.send(json.dumps(test_message))
             
             # Wait for at least one response
@@ -381,13 +419,13 @@ class TestCriticalWebSocketAgentEvents:
             event = json.loads(response)
             event_validator.record_event(event)
             
-            logger.info(f"📥 Got response for message {i+1}: {event.get('type', 'unknown')}")
+            logger.info(f"[U+1F4E5] Got response for message {i+1}: {event.get('type', 'unknown')}")
             
             # Small delay between messages
             await asyncio.sleep(0.5)
         
         await websocket.close()
-        logger.info("✅ Multiple message test completed")
+        logger.info(" PASS:  Multiple message test completed")
         
         # Assert we got responses to all messages
         assert len(event_validator.events) >= len(messages), f"Expected at least {len(messages)} events, got {len(event_validator.events)}"

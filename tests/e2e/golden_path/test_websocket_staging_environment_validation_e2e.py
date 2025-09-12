@@ -27,8 +27,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 WEBSOCKET STAGING ENVIRONMENT VALIDATION FLOW:
 ```
-Staging Environment Detection → GCP/DNS Health Check → Staging Auth Validation →
-WebSocket Connection → Staging Issue Detection → Hard Failure with Staging Diagnosis
+Staging Environment Detection  ->  GCP/DNS Health Check  ->  Staging Auth Validation  -> 
+WebSocket Connection  ->  Staging Issue Detection  ->  Hard Failure with Staging Diagnosis
 ```
 """
 
@@ -326,39 +326,39 @@ class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
         
         if not staging_issues:
             # Staging environment is healthy
-            print(f"✅ STAGING ENVIRONMENT: HEALTHY")
-            print(f"   🟢 DNS Resolution: Success")
-            print(f"   🟢 SSL Certificate: Valid")
-            print(f"   🟢 Authentication: Success")
-            print(f"   🟢 WebSocket Connection: Success")
-            print(f"   📡 Connection Time: {websocket_response_time:.3f}s")
-            print(f"   📊 Events Received: {len(staging_events) if 'staging_events' in locals() else 0}")
-            print(f"   🚀 Production Ready: WebSocket staging validation passed")
+            print(f" PASS:  STAGING ENVIRONMENT: HEALTHY")
+            print(f"   [U+1F7E2] DNS Resolution: Success")
+            print(f"   [U+1F7E2] SSL Certificate: Valid")
+            print(f"   [U+1F7E2] Authentication: Success")
+            print(f"   [U+1F7E2] WebSocket Connection: Success")
+            print(f"   [U+1F4E1] Connection Time: {websocket_response_time:.3f}s")
+            print(f"    CHART:  Events Received: {len(staging_events) if 'staging_events' in locals() else 0}")
+            print(f"   [U+1F680] Production Ready: WebSocket staging validation passed")
             
         else:
             # Staging environment has issues
             staging_failure_message = (
-                f"🚨 STAGING ENVIRONMENT FAILURE:\n"
-                f"   🔴 Staging WebSocket URL: {self._staging_websocket_url}\n"
-                f"   🔴 Staging Auth URL: {self._staging_auth_url}\n"
-                f"   🔴 Environment: {self.get_env_var('TEST_ENV', 'unknown')}\n"
+                f" ALERT:  STAGING ENVIRONMENT FAILURE:\n"
+                f"   [U+1F534] Staging WebSocket URL: {self._staging_websocket_url}\n"
+                f"   [U+1F534] Staging Auth URL: {self._staging_auth_url}\n"
+                f"   [U+1F534] Environment: {self.get_env_var('TEST_ENV', 'unknown')}\n"
                 f"\n"
-                f"   🚫 STAGING ISSUES DETECTED:\n" +
-                "\n".join(f"   • {issue}" for issue in staging_issues) +
-                f"\n\n   💼 BUSINESS IMPACT:\n"
-                f"   • Staging environment not production-ready\n"
-                f"   • WebSocket features may not work in production\n"
-                f"   • Production deployment validation failed\n"
-                f"   • User acceptance testing may be blocked\n"
-                f"   • Business stakeholder demos may fail\n"
+                f"   [U+1F6AB] STAGING ISSUES DETECTED:\n" +
+                "\n".join(f"   [U+2022] {issue}" for issue in staging_issues) +
+                f"\n\n   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Staging environment not production-ready\n"
+                f"   [U+2022] WebSocket features may not work in production\n"
+                f"   [U+2022] Production deployment validation failed\n"
+                f"   [U+2022] User acceptance testing may be blocked\n"
+                f"   [U+2022] Business stakeholder demos may fail\n"
                 f"\n"
-                f"   🔧 RESOLUTION REQUIRED:\n"
-                f"   • Fix DNS resolution for staging domains\n"
-                f"   • Update/renew SSL certificates for staging\n"
-                f"   • Validate GCP Cloud Run service configuration\n"
-                f"   • Check load balancer health and routing\n"
-                f"   • Verify staging auth service integration\n"
-                f"   • Test staging environment end-to-end connectivity\n"
+                f"   [U+1F527] RESOLUTION REQUIRED:\n"
+                f"   [U+2022] Fix DNS resolution for staging domains\n"
+                f"   [U+2022] Update/renew SSL certificates for staging\n"
+                f"   [U+2022] Validate GCP Cloud Run service configuration\n"
+                f"   [U+2022] Check load balancer health and routing\n"
+                f"   [U+2022] Verify staging auth service integration\n"
+                f"   [U+2022] Test staging environment end-to-end connectivity\n"
             )
             
             print(staging_failure_message)
@@ -450,46 +450,46 @@ class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
             
             if performance_issues:
                 gcp_performance_warning = (
-                    f"⚠️ GCP CLOUD RUN PERFORMANCE ISSUES:\n" +
-                    "\n".join(f"   🐌 {issue}" for issue in performance_issues) +
-                    f"\n\n   📊 CONNECTION TIME ANALYSIS:\n"
-                    f"   • Average: {avg_connection_time:.3f}s\n"
-                    f"   • Maximum: {max_connection_time:.3f}s\n"
-                    f"   • Minimum: {min_connection_time:.3f}s\n"
-                    f"   • Attempts: {len(cold_start_times)}\n"
-                    f"\n   🔧 GCP OPTIMIZATION REQUIRED:\n"
-                    f"   • Increase Cloud Run CPU allocation\n"
-                    f"   • Optimize container startup time\n"
-                    f"   • Configure minimum instances to avoid cold starts\n"
-                    f"   • Review Cloud Run concurrency settings\n"
+                    f" WARNING: [U+FE0F] GCP CLOUD RUN PERFORMANCE ISSUES:\n" +
+                    "\n".join(f"   [U+1F40C] {issue}" for issue in performance_issues) +
+                    f"\n\n    CHART:  CONNECTION TIME ANALYSIS:\n"
+                    f"   [U+2022] Average: {avg_connection_time:.3f}s\n"
+                    f"   [U+2022] Maximum: {max_connection_time:.3f}s\n"
+                    f"   [U+2022] Minimum: {min_connection_time:.3f}s\n"
+                    f"   [U+2022] Attempts: {len(cold_start_times)}\n"
+                    f"\n   [U+1F527] GCP OPTIMIZATION REQUIRED:\n"
+                    f"   [U+2022] Increase Cloud Run CPU allocation\n"
+                    f"   [U+2022] Optimize container startup time\n"
+                    f"   [U+2022] Configure minimum instances to avoid cold starts\n"
+                    f"   [U+2022] Review Cloud Run concurrency settings\n"
                 )
                 print(gcp_performance_warning)
                 # Note: This is a performance warning, not a hard failure
                 
             else:
-                print(f"✅ GCP CLOUD RUN PERFORMANCE: ACCEPTABLE")
-                print(f"   ⚡ Average connection: {avg_connection_time:.3f}s")
-                print(f"   ⚡ Max connection: {max_connection_time:.3f}s")
-                print(f"   ⚡ Min connection: {min_connection_time:.3f}s")
+                print(f" PASS:  GCP CLOUD RUN PERFORMANCE: ACCEPTABLE")
+                print(f"    LIGHTNING:  Average connection: {avg_connection_time:.3f}s")
+                print(f"    LIGHTNING:  Max connection: {max_connection_time:.3f}s")
+                print(f"    LIGHTNING:  Min connection: {min_connection_time:.3f}s")
                 
         else:
             # No successful connections - critical GCP issue
             gcp_connection_failure = (
-                f"🚨 GCP CLOUD RUN CONNECTION FAILURE:\n"
-                f"   🔴 No successful WebSocket connections in staging\n"
-                f"   🔴 All {3} connection attempts failed\n"
-                f"   🔴 GCP Cloud Run service may be misconfigured\n"
+                f" ALERT:  GCP CLOUD RUN CONNECTION FAILURE:\n"
+                f"   [U+1F534] No successful WebSocket connections in staging\n"
+                f"   [U+1F534] All {3} connection attempts failed\n"
+                f"   [U+1F534] GCP Cloud Run service may be misconfigured\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • Staging environment completely non-functional\n"
-                f"   • Production deployment will fail\n"
-                f"   • WebSocket features unavailable in staging\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Staging environment completely non-functional\n"
+                f"   [U+2022] Production deployment will fail\n"
+                f"   [U+2022] WebSocket features unavailable in staging\n"
                 f"\n"
-                f"   🔧 GCP EMERGENCY RESOLUTION:\n"
-                f"   • Check GCP Cloud Run service status\n"
-                f"   • Verify Cloud Run service configuration\n"
-                f"   • Review Cloud Run logs for errors\n"
-                f"   • Validate GCP project permissions and quotas\n"
+                f"   [U+1F527] GCP EMERGENCY RESOLUTION:\n"
+                f"   [U+2022] Check GCP Cloud Run service status\n"
+                f"   [U+2022] Verify Cloud Run service configuration\n"
+                f"   [U+2022] Review Cloud Run logs for errors\n"
+                f"   [U+2022] Validate GCP project permissions and quotas\n"
             )
             
             print(gcp_connection_failure)
@@ -581,28 +581,28 @@ class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
         # === LOAD BALANCER VALIDATION RESULTS ===
         
         if websocket_upgrade_success:
-            print(f"✅ LOAD BALANCER WEBSOCKET UPGRADE: SUCCESS")
-            print(f"   🟢 HTTP to WebSocket upgrade: Working")
-            print(f"   🟢 Connection persistence: Working")
-            print(f"   🟢 Load balancer configuration: Correct")
+            print(f" PASS:  LOAD BALANCER WEBSOCKET UPGRADE: SUCCESS")
+            print(f"   [U+1F7E2] HTTP to WebSocket upgrade: Working")
+            print(f"   [U+1F7E2] Connection persistence: Working")
+            print(f"   [U+1F7E2] Load balancer configuration: Correct")
             
         else:
             # Load balancer WebSocket upgrade failed
             lb_failure_message = (
-                f"🚨 LOAD BALANCER WEBSOCKET UPGRADE FAILURE:\n"
-                f"   🔴 WebSocket URL: {self._staging_websocket_url}\n"
-                f"   🔴 Upgrade Error: {websocket_upgrade_error}\n"
+                f" ALERT:  LOAD BALANCER WEBSOCKET UPGRADE FAILURE:\n"
+                f"   [U+1F534] WebSocket URL: {self._staging_websocket_url}\n"
+                f"   [U+1F534] Upgrade Error: {websocket_upgrade_error}\n"
                 f"\n"
-                f"   💼 BUSINESS IMPACT:\n"
-                f"   • Load balancer blocking WebSocket connections\n"
-                f"   • WebSocket upgrade requests failing\n"
-                f"   • Real-time features unavailable through load balancer\n"
+                f"   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Load balancer blocking WebSocket connections\n"
+                f"   [U+2022] WebSocket upgrade requests failing\n"
+                f"   [U+2022] Real-time features unavailable through load balancer\n"
                 f"\n"
-                f"   🔧 LOAD BALANCER RESOLUTION:\n"
-                f"   • Configure load balancer for WebSocket upgrade support\n"
-                f"   • Update load balancer timeout settings for WebSocket\n"
-                f"   • Verify load balancer sticky session configuration\n"
-                f"   • Check load balancer WebSocket proxy settings\n"
+                f"   [U+1F527] LOAD BALANCER RESOLUTION:\n"
+                f"   [U+2022] Configure load balancer for WebSocket upgrade support\n"
+                f"   [U+2022] Update load balancer timeout settings for WebSocket\n"
+                f"   [U+2022] Verify load balancer sticky session configuration\n"
+                f"   [U+2022] Check load balancer WebSocket proxy settings\n"
             )
             
             print(lb_failure_message)
@@ -668,31 +668,31 @@ class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
         all_config_issues = missing_vars + config_issues
         
         if not all_config_issues:
-            print(f"✅ STAGING CONFIGURATION: COMPLETE")
-            print(f"   🟢 Required variables: All present")
-            print(f"   🟢 URL patterns: Staging-appropriate")
-            print(f"   🟢 Configuration validation: Passed")
+            print(f" PASS:  STAGING CONFIGURATION: COMPLETE")
+            print(f"   [U+1F7E2] Required variables: All present")
+            print(f"   [U+1F7E2] URL patterns: Staging-appropriate")
+            print(f"   [U+1F7E2] Configuration validation: Passed")
             
         else:
             # Staging configuration has issues
             staging_config_failure = (
-                f"🚨 STAGING CONFIGURATION FAILURE:\n"
-                f"   🔴 Environment: {self.get_env_var('TEST_ENV', 'unknown')}\n"
+                f" ALERT:  STAGING CONFIGURATION FAILURE:\n"
+                f"   [U+1F534] Environment: {self.get_env_var('TEST_ENV', 'unknown')}\n"
                 f"\n"
-                f"   🚫 CONFIGURATION ISSUES:\n" +
+                f"   [U+1F6AB] CONFIGURATION ISSUES:\n" +
                 (f"   Missing variables: {', '.join(missing_vars)}\n" if missing_vars else "") +
-                "\n".join(f"   • {issue}" for issue in config_issues) +
-                f"\n\n   💼 BUSINESS IMPACT:\n"
-                f"   • Staging environment misconfigured\n"
-                f"   • Production deployment validation impossible\n"
-                f"   • WebSocket service may use wrong endpoints\n"
-                f"   • Authentication may fail with wrong URLs\n"
+                "\n".join(f"   [U+2022] {issue}" for issue in config_issues) +
+                f"\n\n   [U+1F4BC] BUSINESS IMPACT:\n"
+                f"   [U+2022] Staging environment misconfigured\n"
+                f"   [U+2022] Production deployment validation impossible\n"
+                f"   [U+2022] WebSocket service may use wrong endpoints\n"
+                f"   [U+2022] Authentication may fail with wrong URLs\n"
                 f"\n"
-                f"   🔧 CONFIGURATION RESOLUTION:\n"
-                f"   • Set missing environment variables\n"
-                f"   • Verify staging URLs are correct and accessible\n"
-                f"   • Update staging configuration to use staging endpoints\n"
-                f"   • Validate secrets are staging-specific and valid\n"
+                f"   [U+1F527] CONFIGURATION RESOLUTION:\n"
+                f"   [U+2022] Set missing environment variables\n"
+                f"   [U+2022] Verify staging URLs are correct and accessible\n"
+                f"   [U+2022] Update staging configuration to use staging endpoints\n"
+                f"   [U+2022] Validate secrets are staging-specific and valid\n"
             )
             
             print(staging_config_failure)
@@ -704,18 +704,18 @@ class TestWebSocketStagingEnvironmentValidationE2E(SSotAsyncTestCase):
         if hasattr(self, '_metrics'):
             final_metrics = self.get_all_metrics()
             is_staging = final_metrics.get("is_staging_environment", False)
-            print(f"\n📊 WEBSOCKET STAGING ENVIRONMENT VALIDATION SUMMARY:")
-            print(f"   🏭 Environment: {'Staging' if is_staging else 'Non-staging'}")
-            print(f"   📊 Total Staging Metrics: {len(final_metrics)}")
+            print(f"\n CHART:  WEBSOCKET STAGING ENVIRONMENT VALIDATION SUMMARY:")
+            print(f"   [U+1F3ED] Environment: {'Staging' if is_staging else 'Non-staging'}")
+            print(f"    CHART:  Total Staging Metrics: {len(final_metrics)}")
             
             if is_staging:
                 dns_ok = final_metrics.get("staging_dns_resolved", False)
                 ssl_ok = final_metrics.get("staging_ssl_valid", False)
                 auth_ok = final_metrics.get("staging_auth_success", False)
                 websocket_ok = final_metrics.get("staging_websocket_connection_success", False)
-                print(f"   🌐 DNS Resolution: {'✅' if dns_ok else '❌'}")
-                print(f"   🔒 SSL Certificate: {'✅' if ssl_ok else '❌'}")
-                print(f"   🔐 Authentication: {'✅' if auth_ok else '❌'}")
-                print(f"   📡 WebSocket Connection: {'✅' if websocket_ok else '❌'}")
+                print(f"   [U+1F310] DNS Resolution: {' PASS: ' if dns_ok else ' FAIL: '}")
+                print(f"   [U+1F512] SSL Certificate: {' PASS: ' if ssl_ok else ' FAIL: '}")
+                print(f"   [U+1F510] Authentication: {' PASS: ' if auth_ok else ' FAIL: '}")
+                print(f"   [U+1F4E1] WebSocket Connection: {' PASS: ' if websocket_ok else ' FAIL: '}")
         
         await super().async_teardown_method(method)

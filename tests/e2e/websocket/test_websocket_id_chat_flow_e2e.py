@@ -193,7 +193,7 @@ class TestWebSocketIdChatFlowE2E(BaseE2ETest):
             assert len(found_keywords) >= 3, \
                 f"Response lacks business value keywords: {found_keywords} in {response_content[:100]}"
                 
-            print(f"✅ Business Value Delivered: {response_content[:200]}...")
+            print(f" PASS:  Business Value Delivered: {response_content[:200]}...")
             
             # PHASE 4: Validate chat flow ID consistency for audit trail
             all_events = [agent_started] + thinking_events + [agent_completed]
@@ -342,7 +342,7 @@ class TestWebSocketIdChatFlowE2E(BaseE2ETest):
                 assert len(contamination_keywords) <= 1, \
                     f"User {session['user_id']} response contaminated with other user context: {contamination_keywords}"
                     
-        print(f"✅ Multi-user business value isolation validated for {len(chat_sessions)} concurrent users")
+        print(f" PASS:  Multi-user business value isolation validated for {len(chat_sessions)} concurrent users")
         
         # Cleanup WebSocket connections
         for ws_client in websocket_clients:
@@ -461,7 +461,7 @@ class TestWebSocketIdChatFlowE2E(BaseE2ETest):
             assert len(found_progression) >= 3, \
                 f"Chat timeline missing business value progression: {found_progression}"
                 
-            print(f"✅ Chat flow traceability validated: {len(all_events)} events over {time.time() - start_time:.1f}s")
+            print(f" PASS:  Chat flow traceability validated: {len(all_events)} events over {time.time() - start_time:.1f}s")
 
     async def test_websocket_reconnection_chat_continuity_EXPECTED_FAILURE(self):
         """
@@ -565,7 +565,7 @@ class TestWebSocketIdChatFlowE2E(BaseE2ETest):
             
         await reconnected_client.__aexit__(None, None, None)
         
-        print(f"✅ Chat continuity validated across WebSocket reconnection")
+        print(f" PASS:  Chat continuity validated across WebSocket reconnection")
 
     # Helper methods for E2E chat flow testing
     

@@ -48,19 +48,19 @@ class WebSocketBridgeAdapter:
             agent_name: The name of the agent
         """
         if not bridge:
-            logger.error(f"❌ CRITICAL: Attempting to set None bridge on WebSocketBridgeAdapter for {agent_name}!")
+            logger.error(f" FAIL:  CRITICAL: Attempting to set None bridge on WebSocketBridgeAdapter for {agent_name}!")
             logger.error(f"   This will cause ALL WebSocket events from {agent_name} to fail silently!")
         if not run_id:
-            logger.error(f"❌ CRITICAL: Attempting to set None run_id on WebSocketBridgeAdapter for {agent_name}!")
+            logger.error(f" FAIL:  CRITICAL: Attempting to set None run_id on WebSocketBridgeAdapter for {agent_name}!")
             
         self._bridge = bridge
         self._run_id = run_id
         self._agent_name = agent_name
         
         if bridge and run_id:
-            logger.info(f"✅ WebSocket bridge configured for {agent_name} (run_id: {run_id}, bridge_type: {type(bridge).__name__})")
+            logger.info(f" PASS:  WebSocket bridge configured for {agent_name} (run_id: {run_id}, bridge_type: {type(bridge).__name__})")
         else:
-            logger.error(f"❌ WebSocket bridge configuration FAILED for {agent_name} - bridge={bridge is not None}, run_id={run_id is not None}")
+            logger.error(f" FAIL:  WebSocket bridge configuration FAILED for {agent_name} - bridge={bridge is not None}, run_id={run_id is not None}")
     
     def enable_test_mode(self) -> None:
         """Enable test mode for Golden Path compatibility.
@@ -86,10 +86,10 @@ class WebSocketBridgeAdapter:
             
             if self._test_mode:
                 # GOLDEN PATH COMPATIBILITY: Log warning but don't raise in test mode
-                logger.warning(f"🧪 TEST MODE: {error_msg}")
+                logger.warning(f"[U+1F9EA] TEST MODE: {error_msg}")
                 return
             else:
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: {error_msg}")
                 
                 # HARD FAILURE: Raise exception instead of silent return
                 # Per CLAUDE.MD Section 6: WebSocket events are MISSION CRITICAL for chat value
@@ -114,8 +114,8 @@ class WebSocketBridgeAdapter:
             
             validation_result = validator.validate_event(mock_event, "validation_user")
             if not validation_result.is_valid:
-                logger.critical(f"🚨 CRITICAL: agent_started event would fail validation: {validation_result.error_message}")
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: Event structure invalid")
+                logger.critical(f" ALERT:  CRITICAL: agent_started event would fail validation: {validation_result.error_message}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Event structure invalid")
             
             await self._bridge.notify_agent_started(
                 self._run_id, 
@@ -123,11 +123,11 @@ class WebSocketBridgeAdapter:
                 context=context
             )
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to emit agent_started for {self._agent_name}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see agent starting")
+            logger.critical(f" ALERT:  CRITICAL: Failed to emit agent_started for {self._agent_name}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User will not see agent starting")
             # Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
     
     async def emit_thinking(self, thought: str, step_number: Optional[int] = None) -> None:
         """Emit agent thinking event for real-time reasoning visibility."""
@@ -140,10 +140,10 @@ class WebSocketBridgeAdapter:
             
             if self._test_mode:
                 # GOLDEN PATH COMPATIBILITY: Log warning but don't raise in test mode
-                logger.warning(f"🧪 TEST MODE: {error_msg}")
+                logger.warning(f"[U+1F9EA] TEST MODE: {error_msg}")
                 return
             else:
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: {error_msg}")
                 
                 # HARD FAILURE: Raise exception instead of silent return
                 # Per CLAUDE.MD Section 6: Real-time reasoning visibility is MISSION CRITICAL
@@ -161,12 +161,12 @@ class WebSocketBridgeAdapter:
                 step_number=step_number
             )
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to emit agent_thinking for {self._agent_name}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see real-time reasoning")
-            logger.critical(f"🚨 Impact: User cannot follow AI's problem-solving approach")
+            logger.critical(f" ALERT:  CRITICAL: Failed to emit agent_thinking for {self._agent_name}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User will not see real-time reasoning")
+            logger.critical(f" ALERT:  Impact: User cannot follow AI's problem-solving approach")
             # Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
     
     async def emit_tool_executing(self, tool_name: str, 
                                  parameters: Optional[Dict[str, Any]] = None) -> None:
@@ -180,10 +180,10 @@ class WebSocketBridgeAdapter:
             
             if self._test_mode:
                 # GOLDEN PATH COMPATIBILITY: Log warning but don't raise in test mode
-                logger.warning(f"🧪 TEST MODE: {error_msg}")
+                logger.warning(f"[U+1F9EA] TEST MODE: {error_msg}")
                 return
             else:
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: {error_msg}")
                 
                 # HARD FAILURE: Raise exception instead of silent return
                 # Per CLAUDE.MD Section 6: Tool usage transparency is MISSION CRITICAL
@@ -201,12 +201,12 @@ class WebSocketBridgeAdapter:
                 parameters=parameters
             )
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to emit tool_executing for {self._agent_name}, tool {tool_name}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see tool usage transparency")
-            logger.critical(f"🚨 Impact: User cannot see which tools AI is using to solve their problem")
+            logger.critical(f" ALERT:  CRITICAL: Failed to emit tool_executing for {self._agent_name}, tool {tool_name}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User will not see tool usage transparency")
+            logger.critical(f" ALERT:  Impact: User cannot see which tools AI is using to solve their problem")
             # Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
     
     async def emit_tool_completed(self, tool_name: str, 
                                  result: Optional[Dict[str, Any]] = None) -> None:
@@ -220,10 +220,10 @@ class WebSocketBridgeAdapter:
             
             if self._test_mode:
                 # GOLDEN PATH COMPATIBILITY: Log warning but don't raise in test mode
-                logger.warning(f"🧪 TEST MODE: {error_msg}")
+                logger.warning(f"[U+1F9EA] TEST MODE: {error_msg}")
                 return
             else:
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: {error_msg}")
                 
                 # HARD FAILURE: Raise exception instead of silent return
                 # Per CLAUDE.MD Section 6: Tool results display is MISSION CRITICAL
@@ -241,12 +241,12 @@ class WebSocketBridgeAdapter:
                 result=result
             )
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to emit tool_completed for {self._agent_name}, tool {tool_name}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not see tool results")
-            logger.critical(f"🚨 Impact: User cannot see the results AI obtained from tools")
+            logger.critical(f" ALERT:  CRITICAL: Failed to emit tool_completed for {self._agent_name}, tool {tool_name}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User will not see tool results")
+            logger.critical(f" ALERT:  Impact: User cannot see the results AI obtained from tools")
             # Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
     
     async def emit_agent_completed(self, result: Optional[Dict[str, Any]] = None) -> None:
         """Emit agent completed event."""
@@ -259,10 +259,10 @@ class WebSocketBridgeAdapter:
             
             if self._test_mode:
                 # GOLDEN PATH COMPATIBILITY: Log warning but don't raise in test mode
-                logger.warning(f"🧪 TEST MODE: {error_msg}")
+                logger.warning(f"[U+1F9EA] TEST MODE: {error_msg}")
                 return
             else:
-                logger.critical(f"🚨 BUSINESS VALUE FAILURE: {error_msg}")
+                logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: {error_msg}")
                 
                 # HARD FAILURE: Raise exception instead of silent return
                 # Per CLAUDE.MD Section 6: Users must know when valuable response is ready
@@ -279,12 +279,12 @@ class WebSocketBridgeAdapter:
                 result=result
             )
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to emit agent_completed for {self._agent_name}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User will not know when valuable response is ready")
-            logger.critical(f"🚨 Impact: User may wait indefinitely for response completion")
+            logger.critical(f" ALERT:  CRITICAL: Failed to emit agent_completed for {self._agent_name}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User will not know when valuable response is ready")
+            logger.critical(f" ALERT:  Impact: User may wait indefinitely for response completion")
             # Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
     
     async def emit_progress(self, content: str, is_complete: bool = False) -> None:
         """Emit progress update."""

@@ -132,7 +132,7 @@ class TestInitPhaseComprehensive(BaseIntegrationTest):
         non_existent_var = env.get('NON_EXISTENT_VAR', 'default_value')
         assert non_existent_var == 'default_value', "Default value handling failed"
         
-        self.logger.info("✓ Basic environment variable loading successful")
+        self.logger.info("[U+2713] Basic environment variable loading successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -174,7 +174,7 @@ class TestInitPhaseComprehensive(BaseIntegrationTest):
         llm_mode = env.get('LLM_MODE')
         assert llm_mode is None, "Deleted environment variable should be None"
         
-        self.logger.info("✓ Critical environment variable validation successful")
+        self.logger.info("[U+2713] Critical environment variable validation successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -232,7 +232,7 @@ DEVELOPER_MODE=true
         assert env.get('DEV_FEATURE_FLAG') == 'enabled', "Dev-specific setting should be loaded"
         assert env.get('DEVELOPER_MODE') == 'true', "Local-specific setting should be loaded"
         
-        self.logger.info("✓ .env file loading hierarchy successful")
+        self.logger.info("[U+2713] .env file loading hierarchy successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -274,7 +274,7 @@ DEVELOPER_MODE=true
         assert is_production, "Should detect production environment"
         assert has_cloud_run_indicators, "Should detect Cloud Run indicators"
         
-        self.logger.info("✓ Cloud Run vs local detection successful")
+        self.logger.info("[U+2713] Cloud Run vs local detection successful")
 
     @pytest.mark.integration  
     @pytest.mark.startup_init
@@ -314,7 +314,7 @@ DEVELOPER_MODE=true
         
         assert vars_already_set >= len(critical_vars) // 2, "Should detect pre-configured environment"
         
-        self.logger.info("✓ Dev launcher integration detection successful")
+        self.logger.info("[U+2713] Dev launcher integration detection successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -343,12 +343,12 @@ DEVELOPER_MODE=true
             # Allow some flexibility - at least netra_backend should exist
             assert (project_root / 'netra_backend').exists(), f"Project root seems invalid, netra_backend directory not found at {project_root}"
             
-            self.logger.info(f"✓ Project root resolved to: {project_root}")
+            self.logger.info(f"[U+2713] Project root resolved to: {project_root}")
             
         except Exception as e:
             pytest.fail(f"Project root resolution failed: {e}")
         
-        self.logger.info("✓ Project root resolution successful")
+        self.logger.info("[U+2713] Project root resolution successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -386,11 +386,11 @@ DEVELOPER_MODE=true
         # This should not raise an exception
         try:
             configure_cloud_run_logging()
-            self.logger.info("✓ Cloud Run logging configuration successful")
+            self.logger.info("[U+2713] Cloud Run logging configuration successful")
         except Exception as e:
             pytest.fail(f"Cloud Run logging configuration failed: {e}")
         
-        self.logger.info("✓ Logging system initialization successful")
+        self.logger.info("[U+2713] Logging system initialization successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -431,12 +431,12 @@ DEVELOPER_MODE=true
             # Test environment-specific validation
             assert config.environment == 'test', "Environment should be set correctly"
             
-            self.logger.info("✓ Configuration loading successful")
+            self.logger.info("[U+2713] Configuration loading successful")
             
         except Exception as e:
             pytest.fail(f"Configuration setup failed: {e}")
         
-        self.logger.info("✓ Configuration setup and validation successful")
+        self.logger.info("[U+2713] Configuration setup and validation successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init  
@@ -474,7 +474,7 @@ DEVELOPER_MODE=true
             cleared_value = env.get(test_key)
             assert cleared_value is None or cleared_value != test_value, "Test values should be clearable"
         
-        self.logger.info("✓ Environment isolation for testing successful")
+        self.logger.info("[U+2713] Environment isolation for testing successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -495,7 +495,7 @@ DEVELOPER_MODE=true
         try:
             _load_base_env_file(non_existent_root)
             # Should not raise an exception
-            self.logger.info("✓ Missing .env file handled gracefully")
+            self.logger.info("[U+2713] Missing .env file handled gracefully")
         except Exception as e:
             pytest.fail(f"Missing .env file should be handled gracefully: {e}")
         
@@ -513,12 +513,12 @@ MALFORMED_LINE_WITHOUT_EQUALS
         try:
             from dotenv import load_dotenv
             load_dotenv(malformed_file)
-            self.logger.info("✓ Malformed .env file handled gracefully")
+            self.logger.info("[U+2713] Malformed .env file handled gracefully")
         except Exception as e:
             # Some malformed content might cause exceptions, which is acceptable
             self.logger.info(f"Malformed .env file caused expected error: {e}")
         
-        self.logger.info("✓ .env loading error handling successful")
+        self.logger.info("[U+2713] .env loading error handling successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -533,9 +533,9 @@ MALFORMED_LINE_WITHOUT_EQUALS
         
         # Test Unicode in environment variables
         unicode_vars = {
-            'TEST_UNICODE_NAME': 'Test User 👨‍💻',
-            'TEST_UNICODE_PATH': 'C:\\Users\\测试\\Documents',
-            'TEST_UNICODE_MESSAGE': 'Hello World! 🌍 Здравствуй мир!',
+            'TEST_UNICODE_NAME': 'Test User [U+1F468][U+200D][U+1F4BB]',
+            'TEST_UNICODE_PATH': 'C:\\Users\\[U+6D4B][U+8BD5]\\Documents',
+            'TEST_UNICODE_MESSAGE': 'Hello World! [U+1F30D] [U+0417][U+0434]pavctvu[U+0439] m[U+0438]p!',
         }
         
         env = get_env()
@@ -552,9 +552,9 @@ MALFORMED_LINE_WITHOUT_EQUALS
         # Test Unicode in .env file
         unicode_env_content = """
 # Unicode test file
-APP_NAME=Netra AI 🤖
-USER_GREETING=Hello! 👋 Привет!
-FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
+APP_NAME=Netra AI [U+1F916]
+USER_GREETING=Hello! [U+1F44B] [U+041F]p[U+0438]vet!
+FILE_PATH=C:\\Users\\[U+7528][U+6237]\\Documents\\[U+6D4B][U+8BD5].txt
         """
         
         unicode_env_file = self.create_test_env_file('.env.unicode', unicode_env_content)
@@ -565,12 +565,12 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
             
             # Verify Unicode values were loaded correctly
             app_name = env.get('APP_NAME')
-            assert 'Netra AI 🤖' in str(app_name) if app_name else False, "Unicode app name should be loaded"
+            assert 'Netra AI [U+1F916]' in str(app_name) if app_name else False, "Unicode app name should be loaded"
             
         except (UnicodeError, UnicodeDecodeError) as e:
             pytest.fail(f"Unicode .env file handling failed: {e}")
         
-        self.logger.info("✓ Unicode and encoding handling successful")
+        self.logger.info("[U+2713] Unicode and encoding handling successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -613,8 +613,8 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
         # Multiple calls should be fast due to caching
         assert project_root_time < 0.05, f"Project root resolution too slow: {project_root_time:.3f}s for 10 operations"
         
-        self.logger.info(f"✓ INIT phase performance: env_access={env_access_time:.3f}s, project_root={project_root_time:.3f}s")
-        self.logger.info("✓ INIT phase timing and performance successful")
+        self.logger.info(f"[U+2713] INIT phase performance: env_access={env_access_time:.3f}s, project_root={project_root_time:.3f}s")
+        self.logger.info("[U+2713] INIT phase timing and performance successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -660,7 +660,7 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
         non_existent_var = env.get('NON_EXISTENT_VAR', 'default_value')
         assert non_existent_var == 'default_value', "Default values should work when no other source exists"
         
-        self.logger.info("✓ Environment variable precedence rules successful")
+        self.logger.info("[U+2713] Environment variable precedence rules successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -710,7 +710,7 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
         elif 'ENVIRONMENT' in os.environ:
             del os.environ['ENVIRONMENT']
         
-        self.logger.info("✓ Production safety checks successful")
+        self.logger.info("[U+2713] Production safety checks successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -756,7 +756,7 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
         empty_with_fallback = env.get('TEST_EMPTY_VAR') or 'fallback_value'
         assert empty_with_fallback == 'fallback_value', "Empty string should allow fallback"
         
-        self.logger.info("✓ INIT phase error recovery successful")
+        self.logger.info("[U+2713] INIT phase error recovery successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_init
@@ -813,4 +813,4 @@ FILE_PATH=C:\\Users\\用户\\Documents\\测试.txt
                 actual_value = result.get(key)
                 assert actual_value == expected_value, f"Thread read failed for {key}: expected {expected_value}, got {actual_value}"
         
-        self.logger.info("✓ Concurrent environment access successful")
+        self.logger.info("[U+2713] Concurrent environment access successful")

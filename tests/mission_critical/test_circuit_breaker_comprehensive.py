@@ -681,7 +681,7 @@ async def test_memory_leak_prevention_circuit_breakers(circuit_breaker_stress_te
             f"Memory usage too volatile: {memory_variance:.2f} variance"
     
     logger.info(f"Memory leak test: {memory_result['memory_increase_mb']:.2f}MB increase over "
-                f"{memory_result['iterations']} iterations - {'✅ PASSED' if not memory_result['memory_leak_detected'] else '❌ FAILED'}")
+                f"{memory_result['iterations']} iterations - {' PASS:  PASSED' if not memory_result['memory_leak_detected'] else ' FAIL:  FAILED'}")
 
 
 @pytest.mark.asyncio
@@ -707,7 +707,7 @@ async def test_circuit_breaker_performance_overhead(circuit_breaker_stress_teste
         f"Circuit breaker adds too much overhead: {overhead_ratio:.2f}x baseline time"
     
     logger.info(f"Performance overhead test: {perf_result['overhead_per_request_ms']:.3f}ms per request "
-                f"({overhead_ratio:.2f}x baseline) - {'✅ PASSED' if perf_result['overhead_acceptable'] else '❌ FAILED'}")
+                f"({overhead_ratio:.2f}x baseline) - {' PASS:  PASSED' if perf_result['overhead_acceptable'] else ' FAIL:  FAILED'}")
 
 
 @pytest.mark.asyncio
@@ -869,7 +869,7 @@ async def test_circuit_breaker_websocket_notifications():
     # Verify WebSocket notifications were sent
     assert websocket_manager.send_to_thread.call_count > 0, "WebSocket notifications should be sent for circuit state changes"
     
-    logger.info("✅ Circuit breaker WebSocket notifications validated")
+    logger.info(" PASS:  Circuit breaker WebSocket notifications validated")
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_websocket_event_sequence():
@@ -950,7 +950,7 @@ async def test_circuit_breaker_websocket_event_sequence():
     timestamps = [event["timestamp"] for event in websocket_events]
     assert timestamps == sorted(timestamps), "WebSocket events should be in chronological order"
     
-    logger.info(f"✅ Circuit breaker WebSocket event sequence validated: {len(websocket_events)} events")
+    logger.info(f" PASS:  Circuit breaker WebSocket event sequence validated: {len(websocket_events)} events")
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_websocket_error_notifications():
@@ -1001,7 +1001,7 @@ async def test_circuit_breaker_websocket_error_notifications():
     assert websocket_manager.send_to_thread.call_count >= len(error_scenarios), \
         "Should send WebSocket notifications for each error scenario"
     
-    logger.info(f"✅ Circuit breaker WebSocket error notifications validated: {len(error_scenarios)} scenarios")
+    logger.info(f" PASS:  Circuit breaker WebSocket error notifications validated: {len(error_scenarios)} scenarios")
 
 @pytest.mark.asyncio
 async def test_circuit_breaker_websocket_concurrent_notifications():
@@ -1080,7 +1080,7 @@ async def test_circuit_breaker_websocket_concurrent_notifications():
     assert timing_errors < len(timestamps) * 0.1, \
         f"Too many timing errors in concurrent notifications: {timing_errors}/{len(timestamps)}"
     
-    logger.info(f"✅ Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications")
+    logger.info(f" PASS:  Circuit breaker concurrent WebSocket notifications validated: {len(concurrent_notifications)} notifications")
 
 
 # ============================================================================
@@ -1179,7 +1179,7 @@ async def test_circuit_breaker_execute_core_integration():
     # Third should be blocked by open circuit
     assert "circuit" in results[2]["status"] or results[2]["circuit_state"] == "open"
     
-    logger.info("✅ Circuit breaker execute_core integration validated")
+    logger.info(" PASS:  Circuit breaker execute_core integration validated")
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_recovery_patterns():
@@ -1266,7 +1266,7 @@ async def test_execute_core_circuit_breaker_recovery_patterns():
     assert success_result["status"] == "immediate_success"
     assert success_result["circuit_state"] == "closed"
     
-    logger.info("✅ Execute core circuit breaker recovery patterns validated")
+    logger.info(" PASS:  Execute core circuit breaker recovery patterns validated")
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_timing():
@@ -1366,7 +1366,7 @@ async def test_execute_core_circuit_breaker_timing():
     # Failure should be fast (not waiting for timeout)
     assert fail_time < 0.1, f"Failure handling should be fast: {fail_time:.3f}s"
     
-    logger.info("✅ Execute core circuit breaker timing validated")
+    logger.info(" PASS:  Execute core circuit breaker timing validated")
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_resource_management():
@@ -1474,7 +1474,7 @@ async def test_execute_core_circuit_breaker_resource_management():
     assert allocation_delta == free_delta, \
         f"Resource leak detected: allocated {allocation_delta}, freed {free_delta}"
     
-    logger.info("✅ Execute core circuit breaker resource management validated")
+    logger.info(" PASS:  Execute core circuit breaker resource management validated")
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_state_consistency():
@@ -1598,7 +1598,7 @@ async def test_execute_core_circuit_breaker_state_consistency():
     fail_agent_states = fail_result["state_consistency"]["agent_state"]
     assert fail_agent_states["final"] == SubAgentLifecycle.FAILED
     
-    logger.info("✅ Execute core circuit breaker state consistency validated")
+    logger.info(" PASS:  Execute core circuit breaker state consistency validated")
 
 @pytest.mark.asyncio
 async def test_execute_core_circuit_breaker_concurrent_safety():
@@ -1710,7 +1710,7 @@ async def test_execute_core_circuit_breaker_concurrent_safety():
     total_handled = len(successful_executions) + len(failed_executions)
     assert total_handled > len(exceptions), "Circuit breaker should handle most operations"
     
-    logger.info(f"✅ Execute core circuit breaker concurrent safety validated: "
+    logger.info(f" PASS:  Execute core circuit breaker concurrent safety validated: "
                 f"{len(successful_executions)} successful, {len(failed_executions)} failed, "
                 f"{len(exceptions)} exceptions")
 
@@ -1839,7 +1839,7 @@ async def test_execute_core_circuit_breaker_error_propagation():
     if len([s for s in circuit_states if s == "open"]) > 0:
         logger.info("Circuit breaker opened after repeated failures")
     
-    logger.info(f"✅ Execute core circuit breaker error propagation validated: "
+    logger.info(f" PASS:  Execute core circuit breaker error propagation validated: "
                 f"{len(error_results)} errors propagated, {len(success_results)} successes")
 
 

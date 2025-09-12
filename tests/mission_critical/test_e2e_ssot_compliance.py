@@ -388,9 +388,9 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
             
             if result_class == expected_class:
                 correct_mappings += 1
-                logger.debug(f"✅ Category '{category}' correctly maps to {expected_class.__name__}")
+                logger.debug(f" PASS:  Category '{category}' correctly maps to {expected_class.__name__}")
             else:
-                logger.warning(f"❌ Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
+                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
         
         # Test async E2E mappings
         for category, expected_class in async_e2e_categories:
@@ -399,9 +399,9 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
             
             if result_class == expected_class:
                 correct_mappings += 1
-                logger.debug(f"✅ Category '{category}' correctly maps to {expected_class.__name__}")
+                logger.debug(f" PASS:  Category '{category}' correctly maps to {expected_class.__name__}")
             else:
-                logger.warning(f"❌ Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
+                logger.warning(f" FAIL:  Category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
         
         # Test fallback logic
         fallback_categories = [
@@ -417,9 +417,9 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
             
             if result_class == expected_class:
                 correct_mappings += 1
-                logger.debug(f"✅ Fallback category '{category}' correctly maps to {expected_class.__name__}")
+                logger.debug(f" PASS:  Fallback category '{category}' correctly maps to {expected_class.__name__}")
             else:
-                logger.debug(f"ℹ️  Fallback category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
+                logger.debug(f"[U+2139][U+FE0F]  Fallback category '{category}' maps to {result_class.__name__}, expected {expected_class.__name__}")
         
         # Record metrics
         mapping_accuracy = (correct_mappings / total_mappings) * 100.0
@@ -434,7 +434,7 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
             f"Only {correct_mappings}/{total_mappings} mappings were correct."
         )
         
-        logger.info(f"✅ E2E category mapping validation passed: {mapping_accuracy:.1f}% accuracy")
+        logger.info(f" PASS:  E2E category mapping validation passed: {mapping_accuracy:.1f}% accuracy")
     
     def test_validate_test_class_works_for_e2e_tests(self):
         """
@@ -485,7 +485,7 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
         self.record_metric("non_compliant_test_detected", not non_compliant_result['is_valid'])
         self.record_metric("validation_function_working", True)
         
-        logger.info("✅ Enhanced test class validation working correctly for E2E tests")
+        logger.info(" PASS:  Enhanced test class validation working correctly for E2E tests")
     
     def test_e2e_tests_follow_ssot_patterns(self):
         """
@@ -552,7 +552,7 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
         self.record_metric("non_compliant_patterns_score", non_compliant_patterns['patterns_score'])
         self.record_metric("pattern_validation_working", True)
         
-        logger.info("✅ E2E SSOT patterns and conventions validation passed")
+        logger.info(" PASS:  E2E SSOT patterns and conventions validation passed")
     
     def test_comprehensive_e2e_ssot_enhancement_validation(self):
         """
@@ -628,10 +628,10 @@ class TestE2ESsotCompliance(SSotBaseTestCase):
         logger.info(f"""
 E2E SSOT ENHANCEMENT VALIDATION REPORT
 ====================================
-Category Mapping: {'✅ FUNCTIONAL' if enhancement_report['category_mapping_functional'] else '❌ BROKEN'}
-Test Validation: {'✅ FUNCTIONAL' if enhancement_report['test_validation_functional'] else '❌ BROKEN'}
-Pattern Validation: {'✅ FUNCTIONAL' if enhancement_report['pattern_validation_functional'] else '❌ BROKEN'}
-Directory Scanning: {'✅ FUNCTIONAL' if enhancement_report['directory_scanning_functional'] else '❌ BROKEN'}
+Category Mapping: {' PASS:  FUNCTIONAL' if enhancement_report['category_mapping_functional'] else ' FAIL:  BROKEN'}
+Test Validation: {' PASS:  FUNCTIONAL' if enhancement_report['test_validation_functional'] else ' FAIL:  BROKEN'}
+Pattern Validation: {' PASS:  FUNCTIONAL' if enhancement_report['pattern_validation_functional'] else ' FAIL:  BROKEN'}
+Directory Scanning: {' PASS:  FUNCTIONAL' if enhancement_report['directory_scanning_functional'] else ' FAIL:  BROKEN'}
 
 Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percentage']:.1f}% ({functional_features}/{total_features})
         """)
@@ -643,7 +643,7 @@ Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percenta
             f"below minimum {minimum_coverage}%. Enhancement features may be broken."
         )
         
-        logger.info(f"✅ COMPREHENSIVE ENHANCEMENT VALIDATION PASSED: {enhancement_report['enhancement_coverage_percentage']:.1f}% coverage")
+        logger.info(f" PASS:  COMPREHENSIVE ENHANCEMENT VALIDATION PASSED: {enhancement_report['enhancement_coverage_percentage']:.1f}% coverage")
     
     def test_integration_with_existing_ssot_infrastructure(self):
         """
@@ -706,7 +706,7 @@ Overall Enhancement Coverage: {enhancement_report['enhancement_coverage_percenta
         if not integration_status['integration_functional']:
             logger.warning("E2E SSOT enhancement integration has issues but continuing...")
         
-        logger.info("✅ SSOT infrastructure integration validation completed")
+        logger.info(" PASS:  SSOT infrastructure integration validation completed")
 
 
 if __name__ == "__main__":

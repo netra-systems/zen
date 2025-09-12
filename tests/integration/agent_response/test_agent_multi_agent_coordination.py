@@ -201,7 +201,7 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
             assert metrics.response_quality_score >= 0.7, "Coordinated response must be high quality"
             assert metrics.user_satisfaction_score >= 0.6, "Coordination must provide satisfactory user experience"
             
-            logger.info(f"✅ Sequential coordination delivered comprehensive response "
+            logger.info(f" PASS:  Sequential coordination delivered comprehensive response "
                        f"(quality: {metrics.response_quality_score:.2f}, "
                        f"satisfaction: {metrics.user_satisfaction_score:.2f}, "
                        f"time: {metrics.total_execution_time:.2f}s)")
@@ -256,7 +256,7 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
             if isinstance(opt_result_seq, TypedAgentResult) and isinstance(opt_result_par, TypedAgentResult):
                 assert opt_result_seq.success == opt_result_par.success, "Result quality must be consistent"
             
-            logger.info(f"✅ Parallel execution performance: sequential={sequential_time:.2f}s, "
+            logger.info(f" PASS:  Parallel execution performance: sequential={sequential_time:.2f}s, "
                        f"parallel={parallel_time:.2f}s, improvement={performance_improvement:.1%}")
             
     async def test_agent_coordination_error_handling_maintains_partial_results(self):
@@ -332,11 +332,11 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
                     assert coordination_result.metadata is not None, "Partial failure metadata required"
                     assert coordination_result.metadata.get("partial_failure") is True, "Partial failure must be flagged"
                     
-                    logger.info("✅ Coordination handled partial failure gracefully with partial results")
+                    logger.info(" PASS:  Coordination handled partial failure gracefully with partial results")
                 else:
                     # Complete failure case - still handled gracefully
                     assert coordination_result.error is not None, "Complete failure must include error message"
-                    logger.info(f"✅ Coordination handled complete failure gracefully: {coordination_result.error}")
+                    logger.info(f" PASS:  Coordination handled complete failure gracefully: {coordination_result.error}")
                     
     async def test_agent_coordination_with_context_sharing_maintains_coherence(self):
         """
@@ -396,7 +396,7 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
             assert "retention" in coherence_summary.lower(), "Coherence summary must reference shared context"
             assert "infrastructure" in coherence_summary.lower(), "Coherence summary must connect both agent outputs"
             
-            logger.info("✅ Agent coordination maintained response coherence through context sharing")
+            logger.info(" PASS:  Agent coordination maintained response coherence through context sharing")
             
     async def test_multi_agent_coordination_performance_meets_enterprise_requirements(self):
         """
@@ -444,7 +444,7 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
                 assert metrics.agent_count >= 2, "Enterprise coordination must involve multiple agents"
                 assert metrics.coordination_overhead < 10.0, "Coordination overhead must be reasonable for enterprise use"
                 
-                logger.info(f"✅ Enterprise coordination requirements met: "
+                logger.info(f" PASS:  Enterprise coordination requirements met: "
                            f"time={execution_time:.2f}s (SLA: {ENTERPRISE_SLA_SECONDS}s), "
                            f"quality={metrics.response_quality_score:.2f} (target: {TARGET_QUALITY_SCORE}), "
                            f"agents={metrics.agent_count}")
@@ -453,7 +453,7 @@ class TestMultiAgentResponseCoordination(BaseIntegrationTest):
                 assert result.success, "Enterprise coordination must succeed"
                 assert result.result is not None, "Enterprise coordination must deliver substantive results"
                 
-                logger.info(f"✅ Enterprise coordination completed in {execution_time:.2f}s (SLA: {ENTERPRISE_SLA_SECONDS}s)")
+                logger.info(f" PASS:  Enterprise coordination completed in {execution_time:.2f}s (SLA: {ENTERPRISE_SLA_SECONDS}s)")
                 
     def teardown_method(self):
         """Clean up test resources."""

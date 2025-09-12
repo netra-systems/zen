@@ -155,7 +155,7 @@ class CoverageIntelligenceAnalyzer:
         """Load coverage data from JSON report."""
         json_report = self.reports_dir / "coverage.json"
         if not json_report.exists():
-            print(f"❌ Coverage JSON report not found: {json_report}")
+            print(f" FAIL:  Coverage JSON report not found: {json_report}")
             print("   Run tests with coverage first: python tests/unified_test_runner.py --category unit")
             return None
         
@@ -163,7 +163,7 @@ class CoverageIntelligenceAnalyzer:
             with open(json_report, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"❌ Error loading coverage data: {e}")
+            print(f" FAIL:  Error loading coverage data: {e}")
             return None
     
     def load_xml_coverage_data(self) -> Optional[ET.Element]:
@@ -308,26 +308,26 @@ class CoverageIntelligenceAnalyzer:
 LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
 ==========================================
 
-📊 LINE COVERAGE (Statement Coverage):
+ CHART:  LINE COVERAGE (Statement Coverage):
    - Measures: Which lines of code were executed during tests
    - Example: If function has 10 lines and tests execute 7 lines = 70% line coverage
    - Good for: Basic code execution validation
    - Limitation: Doesn't test decision logic thoroughly
 
-🔀 BRANCH COVERAGE (Decision Coverage):  
+[U+1F500] BRANCH COVERAGE (Decision Coverage):  
    - Measures: Which decision branches (if/else, try/catch) were tested
    - Example: if condition_a or condition_b: needs tests for both True/False paths
    - Good for: Testing conditional logic and error handling paths  
    - Critical for: Business logic with complex decision trees
 
-🎯 WHY BOTH MATTER FOR NETRA:
+ TARGET:  WHY BOTH MATTER FOR NETRA:
    - Line coverage ensures basic functionality works
    - Branch coverage ensures edge cases and error conditions are handled
    - For AI/LLM systems: Branch coverage critical for handling model failures
    - For multi-user systems: Branch coverage tests isolation boundaries
    - For WebSocket systems: Branch coverage tests connection/disconnection scenarios
 
-💡 PRIORITY GUIDANCE:
+ IDEA:  PRIORITY GUIDANCE:
    - Target 80%+ line coverage for core business logic
    - Target 70%+ branch coverage for conditional logic
    - Branch coverage gaps often indicate missing error handling tests
@@ -336,7 +336,7 @@ LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
     
     def analyze_coverage(self) -> Optional[CoverageAnalysisReport]:
         """Perform comprehensive coverage analysis."""
-        print("🔍 Analyzing test coverage intelligence...")
+        print(" SEARCH:  Analyzing test coverage intelligence...")
         
         # Load coverage data
         json_data = self.load_coverage_data()
@@ -385,12 +385,12 @@ LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
         
         # Generate summary
         summary = f"""
-📈 COVERAGE INTELLIGENCE SUMMARY:
-• Overall Line Coverage: {overall_line_coverage:.1f}%
-• Overall Branch Coverage: {overall_branch_coverage:.1f}%
-• Coverage Gap: {abs(coverage_gap):.1f}% ({'line higher' if coverage_gap > 0 else 'branch higher'})
-• Files Below Threshold ({self.coverage_threshold}%): {files_below_threshold}/{len(file_metrics)}
-• High Priority Test Opportunities: {len(test_recommendations)}
+[U+1F4C8] COVERAGE INTELLIGENCE SUMMARY:
+[U+2022] Overall Line Coverage: {overall_line_coverage:.1f}%
+[U+2022] Overall Branch Coverage: {overall_branch_coverage:.1f}%
+[U+2022] Coverage Gap: {abs(coverage_gap):.1f}% ({'line higher' if coverage_gap > 0 else 'branch higher'})
+[U+2022] Files Below Threshold ({self.coverage_threshold}%): {files_below_threshold}/{len(file_metrics)}
+[U+2022] High Priority Test Opportunities: {len(test_recommendations)}
         """
         
         return CoverageAnalysisReport(
@@ -408,32 +408,32 @@ LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
     def print_detailed_report(self, report: CoverageAnalysisReport):
         """Print detailed human-readable report."""
         print("=" * 80)
-        print("🚀 NETRA APEX COVERAGE INTELLIGENCE REPORT")
+        print("[U+1F680] NETRA APEX COVERAGE INTELLIGENCE REPORT")
         print("=" * 80)
         
         print(report.summary)
         print()
         
         # High Priority Files Section
-        print("🎯 TOP PRIORITY FILES FOR TEST CREATION:")
+        print(" TARGET:  TOP PRIORITY FILES FOR TEST CREATION:")
         print("-" * 50)
         for i, metric in enumerate(report.high_priority_files, 1):
             print(f"{i:2}. {metric.file_path}")
-            print(f"    📊 Line Coverage: {metric.line_coverage:5.1f}% | Branch Coverage: {metric.branch_coverage:5.1f}%")
-            print(f"    🏢 Business Value: {metric.business_value_score:4.1f} | Complexity: {metric.complexity_score:4.1f}")
-            print(f"    ⭐ Priority Score: {metric.test_priority_score:5.1f}")
+            print(f"     CHART:  Line Coverage: {metric.line_coverage:5.1f}% | Branch Coverage: {metric.branch_coverage:5.1f}%")
+            print(f"    [U+1F3E2] Business Value: {metric.business_value_score:4.1f} | Complexity: {metric.complexity_score:4.1f}")
+            print(f"     STAR:  Priority Score: {metric.test_priority_score:5.1f}")
             print()
         
         # Test Recommendations Section  
-        print("💡 ACTIONABLE TEST RECOMMENDATIONS:")
+        print(" IDEA:  ACTIONABLE TEST RECOMMENDATIONS:")
         print("-" * 50)
         for i, rec in enumerate(report.test_recommendations[:10], 1):
             print(f"{i:2}. CREATE: {rec.suggested_test_name}")
-            print(f"    📁 File: {rec.file_path}")
-            print(f"    🧪 Type: {rec.test_type.upper()} test")
-            print(f"    ⭐ Priority: {rec.priority_score:5.1f} | Reason: {rec.reason}")
-            print(f"    🎯 Missing Areas: {', '.join(rec.missing_coverage_areas)}")
-            print(f"    💼 Business Value: {rec.business_justification}")
+            print(f"    [U+1F4C1] File: {rec.file_path}")
+            print(f"    [U+1F9EA] Type: {rec.test_type.upper()} test")
+            print(f"     STAR:  Priority: {rec.priority_score:5.1f} | Reason: {rec.reason}")
+            print(f"     TARGET:  Missing Areas: {', '.join(rec.missing_coverage_areas)}")
+            print(f"    [U+1F4BC] Business Value: {rec.business_justification}")
             print()
         
         # Coverage Education Section
@@ -441,14 +441,14 @@ LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
     
     def print_priority_only_report(self, report: CoverageAnalysisReport):
         """Print concise priority-focused report."""
-        print("🎯 PRIORITY TEST CREATION OPPORTUNITIES")
+        print(" TARGET:  PRIORITY TEST CREATION OPPORTUNITIES")
         print("=" * 60)
         
-        print(f"📊 Current Coverage: {report.overall_line_coverage:.1f}% line, {report.overall_branch_coverage:.1f}% branch")
-        print(f"🎯 Files needing attention: {report.files_below_threshold}/{report.total_files_analyzed}")
+        print(f" CHART:  Current Coverage: {report.overall_line_coverage:.1f}% line, {report.overall_branch_coverage:.1f}% branch")
+        print(f" TARGET:  Files needing attention: {report.files_below_threshold}/{report.total_files_analyzed}")
         print()
         
-        print("⚡ TOP 5 IMMEDIATE ACTIONS:")
+        print(" LIGHTNING:  TOP 5 IMMEDIATE ACTIONS:")
         for i, rec in enumerate(report.test_recommendations[:5], 1):
             print(f"{i}. {rec.suggested_test_name} ({rec.test_type})")
             print(f"   Priority: {rec.priority_score:.1f} | File: {Path(rec.file_path).name}")
@@ -461,7 +461,7 @@ LINE COVERAGE vs BRANCH COVERAGE EXPLAINED:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(report_data, f, indent=2, ensure_ascii=False)
         
-        print(f"📄 JSON report exported: {output_file}")
+        print(f"[U+1F4C4] JSON report exported: {output_file}")
 
 def run_coverage_with_tests() -> bool:
     """Run tests with coverage if coverage data is missing or stale."""
@@ -475,7 +475,7 @@ def run_coverage_with_tests() -> bool:
         if age_hours < 2:  # Less than 2 hours old
             return True
     
-    print("🔄 Coverage data missing or stale. Running tests with coverage...")
+    print(" CYCLE:  Coverage data missing or stale. Running tests with coverage...")
     
     try:
         result = subprocess.run([
@@ -487,7 +487,7 @@ def run_coverage_with_tests() -> bool:
         
         return result.returncode == 0
     except Exception as e:
-        print(f"❌ Error running tests: {e}")
+        print(f" FAIL:  Error running tests: {e}")
         return False
 
 def main():
@@ -540,7 +540,7 @@ EXAMPLES:
     # Refresh coverage if requested
     if args.refresh_coverage:
         if not run_coverage_with_tests():
-            print("❌ Failed to refresh coverage data")
+            print(" FAIL:  Failed to refresh coverage data")
             sys.exit(1)
     
     # Create analyzer and run analysis
@@ -548,7 +548,7 @@ EXAMPLES:
     report = analyzer.analyze_coverage()
     
     if not report:
-        print("❌ Coverage analysis failed. Run tests with coverage first.")
+        print(" FAIL:  Coverage analysis failed. Run tests with coverage first.")
         sys.exit(1)
     
     # Output report based on format

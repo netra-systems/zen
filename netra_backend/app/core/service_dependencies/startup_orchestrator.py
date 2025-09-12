@@ -104,7 +104,7 @@ class StartupOrchestrator:
                 if not docker_result.get("success", True):
                     result.overall_success = False
                     result.error_messages.append("Docker service coordination failed")
-                    self.logger.error("❌ Docker service coordination failed")
+                    self.logger.error(" FAIL:  Docker service coordination failed")
             
             # Phase 2: Service dependency validation with timeout
             self.logger.info("Phase 1: Service Dependency Validation")
@@ -126,14 +126,14 @@ class StartupOrchestrator:
                         f"Dependency validation failed: {failure}"
                         for failure in dependency_result.critical_failures
                     ])
-                    self.logger.error("❌ Service dependency validation failed")
+                    self.logger.error(" FAIL:  Service dependency validation failed")
                 else:
-                    self.logger.info("✓ Service dependency validation succeeded")
+                    self.logger.info("[U+2713] Service dependency validation succeeded")
                     
             except asyncio.TimeoutError:
                 result.overall_success = False
                 result.error_messages.append(f"Service dependency validation timed out after {timeout_seconds * 0.6}s")
-                self.logger.error("❌ Service dependency validation timed out")
+                self.logger.error(" FAIL:  Service dependency validation timed out")
                 return result
             
             # Phase 3: Service integration coordination
@@ -146,10 +146,10 @@ class StartupOrchestrator:
                 result.integration_results["service_integration"] = integration_result
                 
                 if integration_result.get("success", True):
-                    self.logger.info("✓ Service integration coordination succeeded")
+                    self.logger.info("[U+2713] Service integration coordination succeeded")
                 else:
                     result.warnings.append("Service integration coordination had issues")
-                    self.logger.warning("⚠️ Service integration coordination had issues")
+                    self.logger.warning(" WARNING: [U+FE0F] Service integration coordination had issues")
             
             # Phase 4: Final validation and readiness confirmation
             if result.overall_success:
@@ -159,10 +159,10 @@ class StartupOrchestrator:
                 result.integration_results["final_readiness"] = readiness_result
                 
                 if readiness_result.get("success", True):
-                    self.logger.info("✓ Final readiness validation succeeded")
+                    self.logger.info("[U+2713] Final readiness validation succeeded")
                 else:
                     result.warnings.append("Final readiness validation had issues")
-                    self.logger.warning("⚠️ Final readiness validation had issues")
+                    self.logger.warning(" WARNING: [U+FE0F] Final readiness validation had issues")
             
             # Calculate final statistics
             if result.dependency_validation_result:
@@ -332,22 +332,22 @@ class StartupOrchestrator:
                 phase_success = all(result.validation_success for result in results)
                 
                 if phase_success:
-                    self.logger.info(f"✓ Phase {phase.value} startup completed successfully")
+                    self.logger.info(f"[U+2713] Phase {phase.value} startup completed successfully")
                 else:
                     failed_services = [
                         result.service_name for result in results
                         if not result.validation_success
                     ]
-                    self.logger.error(f"❌ Phase {phase.value} startup failed for: {failed_services}")
+                    self.logger.error(f" FAIL:  Phase {phase.value} startup failed for: {failed_services}")
                 
                 return phase_success
                 
             except asyncio.TimeoutError:
-                self.logger.error(f"❌ Phase {phase.value} startup timed out after {phase_timeout}s")
+                self.logger.error(f" FAIL:  Phase {phase.value} startup timed out after {phase_timeout}s")
                 return False
             
         except Exception as e:
-            self.logger.error(f"❌ Phase {phase.value} orchestration failed: {e}")
+            self.logger.error(f" FAIL:  Phase {phase.value} orchestration failed: {e}")
             return False
         finally:
             self._current_phase = None
@@ -413,17 +413,17 @@ class StartupOrchestrator:
                 )
                 
                 if validation_result.validation_success:
-                    self.logger.info(f"✓ Emergency restart successful for {service_type.value}")
+                    self.logger.info(f"[U+2713] Emergency restart successful for {service_type.value}")
                     return True
                 else:
-                    self.logger.error(f"❌ Service validation failed after restart for {service_type.value}")
+                    self.logger.error(f" FAIL:  Service validation failed after restart for {service_type.value}")
                     return False
             else:
-                self.logger.error(f"❌ Emergency restart failed for {service_type.value}")
+                self.logger.error(f" FAIL:  Emergency restart failed for {service_type.value}")
                 return False
                 
         except Exception as e:
-            self.logger.error(f"❌ Emergency restart exception for {service_type.value}: {e}")
+            self.logger.error(f" FAIL:  Emergency restart exception for {service_type.value}: {e}")
             return False
     
     def _log_orchestration_summary(self, result: StartupOrchestrationResult) -> None:
@@ -433,7 +433,7 @@ class StartupOrchestrator:
         self.logger.info("=" * 90)
         
         # Overall status
-        status_emoji = "✅" if result.overall_success else "❌"
+        status_emoji = " PASS: " if result.overall_success else " FAIL: "
         self.logger.info(f"Overall Status: {status_emoji} {'SUCCESS' if result.overall_success else 'FAILED'}")
         
         # Statistics
@@ -455,12 +455,12 @@ class StartupOrchestrator:
         
         # Errors and warnings
         if result.error_messages:
-            self.logger.error(f"\n❌ ERRORS ({len(result.error_messages)}):")
+            self.logger.error(f"\n FAIL:  ERRORS ({len(result.error_messages)}):")
             for i, error in enumerate(result.error_messages, 1):
                 self.logger.error(f"  {i}. {error}")
         
         if result.warnings:
-            self.logger.warning(f"\n⚠️ WARNINGS ({len(result.warnings)}):")
+            self.logger.warning(f"\n WARNING: [U+FE0F] WARNINGS ({len(result.warnings)}):")
             for i, warning in enumerate(result.warnings, 1):
                 self.logger.warning(f"  {i}. {warning}")
         
@@ -469,12 +469,12 @@ class StartupOrchestrator:
             self.logger.info(f"\nIntegration Results:")
             for integration_type, integration_result in result.integration_results.items():
                 success = integration_result.get("success", True)
-                status = "✓" if success else "❌"
+                status = "[U+2713]" if success else " FAIL: "
                 self.logger.info(f"  {status} {integration_type}: {integration_result.get('message', 'completed')}")
         
         if result.overall_success:
-            self.logger.info("\n🚀 SERVICE STARTUP ORCHESTRATION COMPLETED SUCCESSFULLY!")
+            self.logger.info("\n[U+1F680] SERVICE STARTUP ORCHESTRATION COMPLETED SUCCESSFULLY!")
         else:
-            self.logger.error("\n💥 SERVICE STARTUP ORCHESTRATION FAILED!")
+            self.logger.error("\n[U+1F4A5] SERVICE STARTUP ORCHESTRATION FAILED!")
         
         self.logger.info("=" * 90)

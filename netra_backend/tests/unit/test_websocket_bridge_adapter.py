@@ -109,7 +109,7 @@ class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
             # Verify success logging
             mock_logger.info.assert_called_once()
             success_log = mock_logger.info.call_args[0][0]
-            assert "✅ WebSocket bridge configured" in success_log
+            assert " PASS:  WebSocket bridge configured" in success_log
             assert agent_name in success_log
             assert run_id in success_log
     
@@ -130,13 +130,13 @@ class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
             
             # Check first error log (None bridge)
             first_error = error_calls[0][0][0]
-            assert "❌ CRITICAL" in first_error
+            assert " FAIL:  CRITICAL" in first_error
             assert "None bridge" in first_error
             assert agent_name in first_error
             
             # Check second error log (configuration failure)
             second_error = error_calls[1][0][0]
-            assert "❌ WebSocket bridge configuration FAILED" in second_error
+            assert " FAIL:  WebSocket bridge configuration FAILED" in second_error
     
     @pytest.mark.unit
     async def test_set_websocket_bridge_none_run_id_critical_error(self):
@@ -152,8 +152,8 @@ class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
             
             # Verify critical error logging for None run_id
             error_calls = mock_logger.error.call_args_list
-            assert any("❌ CRITICAL" in str(call) and "None run_id" in str(call) for call in error_calls)
-            assert any("❌ WebSocket bridge configuration FAILED" in str(call) for call in error_calls)
+            assert any(" FAIL:  CRITICAL" in str(call) and "None run_id" in str(call) for call in error_calls)
+            assert any(" FAIL:  WebSocket bridge configuration FAILED" in str(call) for call in error_calls)
     
     @pytest.mark.unit
     async def test_set_websocket_bridge_empty_run_id_critical_error(self):
@@ -169,7 +169,7 @@ class TestWebSocketBridgeAdapterConfiguration(AsyncBaseTestCase):
             
             # Verify configuration failure logged
             error_calls = mock_logger.error.call_args_list
-            assert any("❌ WebSocket bridge configuration FAILED" in str(call) for call in error_calls)
+            assert any(" FAIL:  WebSocket bridge configuration FAILED" in str(call) for call in error_calls)
     
     @pytest.mark.unit
     async def test_set_websocket_bridge_reconfiguration(self):
@@ -279,7 +279,7 @@ class TestWebSocketBridgeAdapterEventEmission(AsyncBaseTestCase):
             # Verify warning logged
             mock_logger.warning.assert_called_once()
             warning_msg = mock_logger.warning.call_args[0][0]
-            assert "❌ No WebSocket bridge for agent_started event" in warning_msg
+            assert " FAIL:  No WebSocket bridge for agent_started event" in warning_msg
     
     @pytest.mark.unit
     async def test_emit_agent_started_bridge_exception_handled(self):
@@ -492,7 +492,7 @@ class TestWebSocketBridgeAdapterEventEmission(AsyncBaseTestCase):
             # Verify warning logged
             mock_logger.warning.assert_called_once()
             warning_msg = mock_logger.warning.call_args[0][0]
-            assert "❌ No WebSocket bridge for agent_completed event" in warning_msg
+            assert " FAIL:  No WebSocket bridge for agent_completed event" in warning_msg
     
     @pytest.mark.unit
     async def test_emit_agent_completed_bridge_exception_handled(self):
@@ -927,15 +927,15 @@ class TestWebSocketBridgeAdapterErrorHandlingAndEdgeCases(AsyncBaseTestCase):
         
         # Test various Unicode and special characters
         unicode_data = {
-            "emoji": "🚀 Analysis complete! 💰",
-            "chinese": "数据分析完成",
-            "arabic": "تم تحليل البيانات",
+            "emoji": "[U+1F680] Analysis complete! [U+1F4B0]",
+            "chinese": "[U+6570][U+636E][U+5206][U+6790][U+5B8C][U+6210]",
+            "arabic": "[U+062A][U+0645] [U+062A][U+062D][U+0644][U+064A][U+0644] [U+0627][U+0644][U+0628][U+064A][U+0627][U+0646][U+0627][U+062A]",
             "special_chars": "Special chars: !@#$%^&*()_+{}|:<>?[]\\;',./",
-            "mixed": "Mixed: Hello 世界 🌍 مرحبا"
+            "mixed": "Mixed: Hello [U+4E16][U+754C] [U+1F30D] [U+0645][U+0631][U+062D][U+0628][U+0627]"
         }
         
-        await adapter.emit_agent_started("Starting with 🚀")
-        await adapter.emit_thinking("Thinking about 数据")
+        await adapter.emit_agent_started("Starting with [U+1F680]")
+        await adapter.emit_thinking("Thinking about [U+6570][U+636E]")
         await adapter.emit_tool_completed("UnicodeTool", unicode_data)
         await adapter.emit_error("Error with special chars: !@#$%")
         

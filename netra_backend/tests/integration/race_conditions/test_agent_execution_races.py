@@ -9,7 +9,7 @@ This module tests critical race conditions in agent execution that could lead to
 - Deadlocks in agent lifecycle management
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Agent reliability is core to platform value
+- Segment: All (Free  ->  Enterprise) - Agent reliability is core to platform value
 - Business Goal: Ensure agents deliver consistent results under concurrent load  
 - Value Impact: Prevents execution failures that would render platform unusable
 - Strategic Impact: CRITICAL - Agent execution reliability directly impacts user satisfaction and revenue

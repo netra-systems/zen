@@ -43,7 +43,7 @@ class TestUserSessionsSimpleValidation:
         user = os.getenv("POSTGRES_USER", "postgres")  # Test user
         password = os.getenv("POSTGRES_PASSWORD", "postgres")  # Test password
         
-        print(f"🔗 Connecting to PostgreSQL at {host}:{port}/{database}")
+        print(f"[U+1F517] Connecting to PostgreSQL at {host}:{port}/{database}")
         
         conn: Optional[asyncpg.Connection] = None
         
@@ -58,7 +58,7 @@ class TestUserSessionsSimpleValidation:
                 timeout=10  # 10 second timeout
             )
             
-            print(f"✅ Connected to database successfully")
+            print(f" PASS:  Connected to database successfully")
             
             # CRITICAL TEST: Check if user_sessions table exists in auth schema
             table_exists_query = """
@@ -72,7 +72,7 @@ class TestUserSessionsSimpleValidation:
             table_exists = await conn.fetchval(table_exists_query)
             
             if table_exists:
-                print("✅ user_sessions table EXISTS in auth schema")
+                print(" PASS:  user_sessions table EXISTS in auth schema")
                 
                 # Additional verification: Check table structure
                 columns_query = """
@@ -84,7 +84,7 @@ class TestUserSessionsSimpleValidation:
                 """
                 columns = await conn.fetch(columns_query)
                 
-                print(f"✅ user_sessions table has {len(columns)} columns:")
+                print(f" PASS:  user_sessions table has {len(columns)} columns:")
                 for col in columns:
                     print(f"   - {col['column_name']}: {col['data_type']} ({'nullable' if col['is_nullable'] == 'YES' else 'not null'})")
                 
@@ -93,14 +93,14 @@ class TestUserSessionsSimpleValidation:
                     # Try a simple SELECT to ensure table is accessible
                     count_query = "SELECT COUNT(*) FROM auth.user_sessions;"
                     session_count = await conn.fetchval(count_query)
-                    print(f"✅ Table is accessible: {session_count} sessions in table")
+                    print(f" PASS:  Table is accessible: {session_count} sessions in table")
                     
                 except Exception as e:
-                    print(f"⚠️  Table exists but has access issues: {e}")
+                    print(f" WARNING: [U+FE0F]  Table exists but has access issues: {e}")
                     pytest.fail(f"user_sessions table exists but is not accessible: {e}")
                 
             else:
-                print("❌ user_sessions table is MISSING from auth schema")
+                print(" FAIL:  user_sessions table is MISSING from auth schema")
                 
                 # Check if auth schema exists
                 schema_exists_query = """
@@ -112,10 +112,10 @@ class TestUserSessionsSimpleValidation:
                 schema_exists = await conn.fetchval(schema_exists_query)
                 
                 if not schema_exists:
-                    print("❌ auth schema is also missing")
+                    print(" FAIL:  auth schema is also missing")
                     pytest.fail("CRITICAL: Both auth schema and user_sessions table are missing - staging_init.sql not executed")
                 else:
-                    print("✅ auth schema exists, but user_sessions table is missing")
+                    print(" PASS:  auth schema exists, but user_sessions table is missing")
                     
                     # List what tables DO exist in auth schema
                     tables_query = """
@@ -128,36 +128,36 @@ class TestUserSessionsSimpleValidation:
                     
                     if existing_tables:
                         table_names = [t['table_name'] for t in existing_tables]
-                        print(f"📋 Tables that DO exist in auth schema: {table_names}")
+                        print(f"[U+1F4CB] Tables that DO exist in auth schema: {table_names}")
                     else:
-                        print("📋 No tables exist in auth schema")
+                        print("[U+1F4CB] No tables exist in auth schema")
                     
                     pytest.fail(f"CRITICAL: user_sessions table is missing from auth schema - this blocks authentication functionality")
         
         except asyncpg.InvalidCatalogNameError:
-            print(f"❌ Database '{database}' does not exist")
+            print(f" FAIL:  Database '{database}' does not exist")
             pytest.fail(f"Database '{database}' does not exist - check database setup")
             
         except asyncpg.InvalidPasswordError:
-            print(f"❌ Authentication failed for user '{user}'")
+            print(f" FAIL:  Authentication failed for user '{user}'")
             pytest.fail(f"Authentication failed for user '{user}' - check credentials")
             
         except asyncpg.CannotConnectNowError:
-            print(f"❌ Cannot connect to PostgreSQL at {host}:{port}")
+            print(f" FAIL:  Cannot connect to PostgreSQL at {host}:{port}")
             pytest.fail(f"Cannot connect to PostgreSQL at {host}:{port} - is PostgreSQL running?")
             
         except ConnectionRefusedError:
-            print(f"❌ Connection refused to {host}:{port}")
+            print(f" FAIL:  Connection refused to {host}:{port}")
             pytest.fail(f"Connection refused to {host}:{port} - PostgreSQL may not be running or port blocked")
             
         except Exception as e:
-            print(f"❌ Unexpected database connection error: {e}")
+            print(f" FAIL:  Unexpected database connection error: {e}")
             pytest.fail(f"Database connection failed: {e}")
             
         finally:
             if conn:
                 await conn.close()
-                print("🔗 Database connection closed")
+                print("[U+1F517] Database connection closed")
     
     @pytest.mark.integration
     async def test_auth_schema_and_required_tables(self):
@@ -216,33 +216,33 @@ class TestUserSessionsSimpleValidation:
                 
                 if exists:
                     existing_tables.append(f"{schema}.{table}")
-                    print(f"✅ {schema}.{table} exists")
+                    print(f" PASS:  {schema}.{table} exists")
                 else:
                     missing_tables.append(f"{schema}.{table}")
-                    print(f"❌ {schema}.{table} is MISSING")
+                    print(f" FAIL:  {schema}.{table} is MISSING")
             
-            print(f"\n📊 SUMMARY:")
-            print(f"   ✅ Existing tables: {len(existing_tables)}")
-            print(f"   ❌ Missing tables: {len(missing_tables)}")
+            print(f"\n CHART:  SUMMARY:")
+            print(f"    PASS:  Existing tables: {len(existing_tables)}")
+            print(f"    FAIL:  Missing tables: {len(missing_tables)}")
             
             if missing_tables:
-                print(f"\n🚨 MISSING TABLES:")
+                print(f"\n ALERT:  MISSING TABLES:")
                 for table in missing_tables:
                     print(f"   - {table}")
                 
                 # Special focus on user_sessions
                 if 'auth.user_sessions' in missing_tables:
-                    print(f"\n🔥 CRITICAL: auth.user_sessions table is missing!")
+                    print(f"\n FIRE:  CRITICAL: auth.user_sessions table is missing!")
                     print(f"   This is the ROOT CAUSE of authentication failures")
                     print(f"   Without this table, users cannot authenticate")
                     print(f"   Chat functionality is completely blocked")
                 
                 pytest.fail(f"CRITICAL: {len(missing_tables)} required tables are missing: {missing_tables}")
             else:
-                print(f"\n🎉 SUCCESS: All required tables exist!")
+                print(f"\n CELEBRATION:  SUCCESS: All required tables exist!")
                 
         except Exception as e:
-            print(f"❌ Database validation failed: {e}")
+            print(f" FAIL:  Database validation failed: {e}")
             pytest.fail(f"Database validation failed: {e}")
             
         finally:

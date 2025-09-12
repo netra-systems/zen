@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures reliable state transitions prevent message loss and connection issues
 - Strategic Impact: Foundation for stable multi-user real-time chat functionality
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 1. Tests MUST use REAL WebSocket connections to running services
 2. Tests MUST use REAL state persistence (database/Redis)
 3. Tests MUST validate complete state machine lifecycle end-to-end
@@ -24,7 +24,7 @@ This test suite validates WebSocket State Machine Complete Lifecycle:
 
 E2E STATE MACHINE SCENARIOS:
 Complete Connection Lifecycle:
-- WebSocket handshake → CONNECTING → ACCEPTED → AUTHENTICATED → SERVICES_READY → PROCESSING_READY
+- WebSocket handshake  ->  CONNECTING  ->  ACCEPTED  ->  AUTHENTICATED  ->  SERVICES_READY  ->  PROCESSING_READY
 - Message queuing during state transitions with real message delivery
 - State persistence across connection drops and reconnections
 - Multi-user concurrent state management without interference
@@ -63,7 +63,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
     """
     E2E tests for complete WebSocket state machine lifecycle.
     
-    🚨 CRITICAL: These tests validate the complete WebSocket connection
+     ALERT:  CRITICAL: These tests validate the complete WebSocket connection
     lifecycle with real state machine coordination and service integration.
     
     Tests focus on:
@@ -120,7 +120,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         base_url = "/".join(endpoint_url.split("/")[:-1])
                         requests.get(base_url, timeout=5)
                     except RequestException as e:
-                        pytest.fail(f"❌ CRITICAL: Required service for state machine testing unavailable: {e}")
+                        pytest.fail(f" FAIL:  CRITICAL: Required service for state machine testing unavailable: {e}")
     
     def test_complete_websocket_connection_state_lifecycle(self):
         """Test complete WebSocket connection state lifecycle with real services."""
@@ -153,10 +153,10 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     timeout=self.auth_config.timeout
                 ) as websocket:
                     
-                    # Phase 1: CONNECTING → ACCEPTED
+                    # Phase 1: CONNECTING  ->  ACCEPTED
                     connection_start = time.time()
                     
-                    # WebSocket connection established (CONNECTING → ACCEPTED)
+                    # WebSocket connection established (CONNECTING  ->  ACCEPTED)
                     state_transitions.append({
                         'from_state': 'CONNECTING',
                         'to_state': 'ACCEPTED',
@@ -164,7 +164,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         'duration_ms': (time.time() - connection_start) * 1000
                     })
                     
-                    # Phase 2: ACCEPTED → AUTHENTICATED
+                    # Phase 2: ACCEPTED  ->  AUTHENTICATED
                     auth_start = time.time()
                     
                     authentication_message = {
@@ -191,7 +191,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         'duration_ms': auth_duration
                     })
                     
-                    # Phase 3: AUTHENTICATED → SERVICES_READY
+                    # Phase 3: AUTHENTICATED  ->  SERVICES_READY
                     services_start = time.time()
                     
                     # Request service initialization
@@ -218,7 +218,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         'duration_ms': services_duration
                     })
                     
-                    # Phase 4: SERVICES_READY → PROCESSING_READY
+                    # Phase 4: SERVICES_READY  ->  PROCESSING_READY
                     processing_start = time.time()
                     
                     # Request processing readiness
@@ -273,7 +273,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: WebSocket state lifecycle failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: WebSocket state lifecycle failed: {e}")
         
         # Execute complete state lifecycle test
         lifecycle_result = asyncio.run(test_complete_state_lifecycle())
@@ -288,7 +288,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
         
         # Validate each transition was reasonably fast
         for transition in lifecycle_result['state_transitions']:
-            assert transition['duration_ms'] < 20000, f"Transition {transition['from_state']}→{transition['to_state']} took too long"
+            assert transition['duration_ms'] < 20000, f"Transition {transition['from_state']} -> {transition['to_state']} took too long"
         
         # Validate message processing performance
         assert lifecycle_result['message_processing_duration_ms'] < 30000, "Message processing should be fast in PROCESSING_READY state"
@@ -335,7 +335,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         await websocket.send(json.dumps(early_message))
                         early_messages.append(early_message['message_id'])
                     
-                    # Phase 2: Authenticate (ACCEPTED → AUTHENTICATED)
+                    # Phase 2: Authenticate (ACCEPTED  ->  AUTHENTICATED)
                     auth_message = {
                         'type': 'authenticate',
                         'token': queue_user.jwt_token,
@@ -362,7 +362,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                         await websocket.send(json.dumps(auth_message))
                         auth_messages.append(auth_message['message_id'])
                     
-                    # Phase 4: Initialize services (AUTHENTICATED → SERVICES_READY)
+                    # Phase 4: Initialize services (AUTHENTICATED  ->  SERVICES_READY)
                     service_init = {
                         'type': 'initialize_services',
                         'user_id': queue_user.user_id,
@@ -374,7 +374,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     services_result = json.loads(services_response)
                     assert services_result.get('type') in ['services_ready', 'initialization_complete']
                     
-                    # Phase 5: Enable processing (SERVICES_READY → PROCESSING_READY)
+                    # Phase 5: Enable processing (SERVICES_READY  ->  PROCESSING_READY)
                     enable_processing = {
                         'type': 'enable_processing',
                         'user_id': queue_user.user_id,
@@ -424,7 +424,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Message queuing coordination failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Message queuing coordination failed: {e}")
         
         # Execute message queuing test
         queue_result = asyncio.run(test_message_queuing_coordination())
@@ -675,7 +675,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     # Connection will close when leaving this block (simulating drop)
             
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Initial connection failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Initial connection failed: {e}")
             
             # Phase 2: Reconnect and validate state persistence
             await asyncio.sleep(2)  # Brief delay to simulate connection drop
@@ -723,7 +723,7 @@ class TestWebSocketStateMachineCompleteLifecycle:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Reconnection failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Reconnection failed: {e}")
             
             return {
                 'initial_state': initial_state,

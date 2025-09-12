@@ -445,28 +445,28 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_all_load_balancer_domains_ssl_valid()
-            print("✅ All load balancer SSL certificates valid")
+            print(" PASS:  All load balancer SSL certificates valid")
         except AssertionError as e:
-            print(f"❌ SSL certificate validation failures:\n{e}")
+            print(f" FAIL:  SSL certificate validation failures:\n{e}")
             return False
         
         try:
             await test_instance.test_load_balancer_ssl_security_configuration()
-            print("✅ SSL security configuration meets standards")
+            print(" PASS:  SSL security configuration meets standards")
         except AssertionError as e:
-            print(f"❌ SSL security configuration failures:\n{e}")
+            print(f" FAIL:  SSL security configuration failures:\n{e}")
             return False
         
         try:
             await test_instance.test_ssl_certificate_trust_chain_complete()
-            print("✅ SSL certificate trust chain complete and valid")
+            print(" PASS:  SSL certificate trust chain complete and valid")
         except AssertionError as e:
-            print(f"❌ SSL trust chain failures:\n{e}")
+            print(f" FAIL:  SSL trust chain failures:\n{e}")
             return False
         
         return True
     
     if asyncio.run(run_tests()):
-        print("✅ All SSL certificate validation tests passed!")
+        print(" PASS:  All SSL certificate validation tests passed!")
     else:
         exit(1)

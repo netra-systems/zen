@@ -81,7 +81,7 @@ class ConcurrentUserTester:
     
     async def run_concurrent_users(self, num_users: int) -> List[TestResult]:
         """Run concurrent user sessions."""
-        print(f"🚀 Starting {num_users} concurrent users...")
+        print(f"[U+1F680] Starting {num_users} concurrent users...")
         
         connector = aiohttp.TCPConnector(limit=num_users * 2)
         timeout = aiohttp.ClientTimeout(total=30)
@@ -146,7 +146,7 @@ class ConcurrentUserTester:
     
     async def run_isolation_test(self):
         """Run the complete isolation test with increasing concurrent users."""
-        print(f"🧪 Starting Request Isolation Test")
+        print(f"[U+1F9EA] Starting Request Isolation Test")
         print(f"   Target: {self.target_url}")
         print(f"   Max Users: {self.max_users}")
         print(f"   Duration: {self.test_duration}s")
@@ -162,7 +162,7 @@ class ConcurrentUserTester:
             if level > self.max_users:
                 break
                 
-            print(f"\n📊 Testing with {level} concurrent users...")
+            print(f"\n CHART:  Testing with {level} concurrent users...")
             
             start_time = time.time()
             results = await self.run_concurrent_users(level)
@@ -175,9 +175,9 @@ class ConcurrentUserTester:
             all_results[f"level_{level}"] = analysis
             
             # Print immediate results
-            print(f"   ✅ Success Rate: {analysis['success_rate']:.1f}%")
-            print(f"   ⏱️  Avg Response Time: {analysis['avg_response_time']:.3f}s")
-            print(f"   🔄 Total Requests: {analysis['total_requests']}")
+            print(f"    PASS:  Success Rate: {analysis['success_rate']:.1f}%")
+            print(f"   [U+23F1][U+FE0F]  Avg Response Time: {analysis['avg_response_time']:.3f}s")
+            print(f"    CYCLE:  Total Requests: {analysis['total_requests']}")
             
             # Brief pause between levels
             await asyncio.sleep(5)
@@ -197,9 +197,9 @@ class ConcurrentUserTester:
             os.makedirs("/app/results", exist_ok=True)
             with open(filename, 'w') as f:
                 json.dump(results, f, indent=2)
-            print(f"💾 Results saved to {filename}")
+            print(f"[U+1F4BE] Results saved to {filename}")
         except Exception as e:
-            print(f"❌ Failed to save results: {e}")
+            print(f" FAIL:  Failed to save results: {e}")
     
     def print_summary(self, results: Dict[str, Any]):
         """Print test summary."""
@@ -209,18 +209,18 @@ class ConcurrentUserTester:
         
         for level_key, analysis in results.items():
             level = analysis["concurrent_users"]
-            print(f"\n🔥 {level} Concurrent Users:")
+            print(f"\n FIRE:  {level} Concurrent Users:")
             print(f"   Success Rate: {analysis['success_rate']:.1f}%")
-            print(f"   Isolation Test: {'✅ PASSED' if analysis['isolation_test_passed'] else '❌ FAILED'}")
+            print(f"   Isolation Test: {' PASS:  PASSED' if analysis['isolation_test_passed'] else ' FAIL:  FAILED'}")
             print(f"   Avg Response: {analysis['avg_response_time']:.3f}s")
             print(f"   Total Requests: {analysis['total_requests']}")
             
         # Overall assessment
         all_passed = all(analysis['isolation_test_passed'] for analysis in results.values())
-        print(f"\n🎯 OVERALL ISOLATION TEST: {'✅ PASSED' if all_passed else '❌ FAILED'}")
+        print(f"\n TARGET:  OVERALL ISOLATION TEST: {' PASS:  PASSED' if all_passed else ' FAIL:  FAILED'}")
         
         if not all_passed:
-            print("⚠️  Request isolation issues detected!")
+            print(" WARNING: [U+FE0F]  Request isolation issues detected!")
             print("   Check logs for cross-contamination between users")
 
 async def main():
@@ -229,11 +229,11 @@ async def main():
     max_users = int(os.getenv("MAX_USERS", "150"))
     run_time = int(os.getenv("RUN_TIME", "3600"))
     
-    print("🚀 Starting Concurrent User Load Test")
+    print("[U+1F680] Starting Concurrent User Load Test")
     print(f"   Target URL: {target_url}")
     
     # Wait for backend to be ready
-    print("⏳ Waiting for backend to be ready...")
+    print("[U+23F3] Waiting for backend to be ready...")
     import aiohttp
     
     for attempt in range(30):  # 5 minute timeout
@@ -241,14 +241,14 @@ async def main():
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{target_url}/health") as response:
                     if response.status == 200:
-                        print("✅ Backend is ready!")
+                        print(" PASS:  Backend is ready!")
                         break
         except:
             pass
         
         await asyncio.sleep(10)
     else:
-        print("❌ Backend not ready after 5 minutes, starting test anyway...")
+        print(" FAIL:  Backend not ready after 5 minutes, starting test anyway...")
     
     # Run the test
     tester = ConcurrentUserTester(target_url, max_users, run_time)

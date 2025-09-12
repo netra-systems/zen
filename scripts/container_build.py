@@ -202,7 +202,7 @@ class ContainerBuilder:
                 self._handle_build_error(result.stderr)
                 return False
             
-            logger.info(f"✅ Successfully built {service_name}")
+            logger.info(f" PASS:  Successfully built {service_name}")
             return True
             
         except Exception as e:
@@ -270,7 +270,7 @@ class ContainerBuilder:
                 logger.error(f"Build failed: {result.stderr}")
                 return False
             
-            logger.info(f"✅ Successfully built {image_name}")
+            logger.info(f" PASS:  Successfully built {image_name}")
             return True
             
         except Exception as e:
@@ -329,7 +329,7 @@ class ContainerBuilder:
         # Report results
         logger.info("\nBase image status:")
         for image, is_available in available.items():
-            status = "✅" if is_available else "❌"
+            status = " PASS: " if is_available else " FAIL: "
             logger.info(f"  {status} {image}")
         
         missing = [img for img, avail in available.items() if not avail]

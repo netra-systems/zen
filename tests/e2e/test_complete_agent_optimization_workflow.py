@@ -88,7 +88,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"🚀 Starting cost optimization E2E test for user: {user_data['email']}")
+        print(f"[U+1F680] Starting cost optimization E2E test for user: {user_data['email']}")
         
         # Connect to WebSocket with authentication
         websocket_url = "ws://localhost:8000/ws"
@@ -96,11 +96,11 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                print(f"✅ WebSocket connection established with auth headers")
+                print(f" PASS:  WebSocket connection established with auth headers")
                 
                 # Send optimization request
                 await websocket.send(json.dumps(optimization_request))
-                print(f"📤 Sent optimization request: {optimization_request['message'][:100]}...")
+                print(f"[U+1F4E4] Sent optimization request: {optimization_request['message'][:100]}...")
                 
                 # Collect all events from the complete workflow
                 events = []
@@ -122,20 +122,20 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
                         event = json.loads(message)
                         events.append(event)
                         
-                        print(f"📨 Received event: {event['type']}")
+                        print(f"[U+1F4E8] Received event: {event['type']}")
                         if event.get('data'):
                             print(f"   Data keys: {list(event['data'].keys())}")
                         
                         # Stop when agent workflow is complete
                         if event['type'] == 'agent_completed':
-                            print(f"✅ Agent workflow completed in {time.time() - start_time:.2f}s")
+                            print(f" PASS:  Agent workflow completed in {time.time() - start_time:.2f}s")
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f"⏰ Timeout waiting for events after {time.time() - start_time:.2f}s")
+                        print(f"[U+23F0] Timeout waiting for events after {time.time() - start_time:.2f}s")
                         break
                     except json.JSONDecodeError as e:
-                        print(f"❌ Failed to parse WebSocket message: {e}")
+                        print(f" FAIL:  Failed to parse WebSocket message: {e}")
                         continue
         
         except Exception as e:
@@ -143,13 +143,13 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         
         # Validate we received events
         assert len(events) > 0, "No WebSocket events received"
-        print(f"📊 Total events received: {len(events)}")
+        print(f" CHART:  Total events received: {len(events)}")
         
         # Extract event types for analysis
         event_types = [e['type'] for e in events]
-        print(f"📋 Event types: {event_types}")
+        print(f"[U+1F4CB] Event types: {event_types}")
         
-        # 🚨 CRITICAL: Validate ALL 5 required WebSocket events
+        #  ALERT:  CRITICAL: Validate ALL 5 required WebSocket events
         required_events = [
             'agent_started',
             'agent_thinking', 
@@ -161,7 +161,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         for required_event in required_events:
             assert required_event in event_types, f"Missing critical WebSocket event: {required_event}"
         
-        print(f"✅ All 5 critical WebSocket events validated")
+        print(f" PASS:  All 5 critical WebSocket events validated")
         
         # Find the final completion event
         completion_events = [e for e in events if e['type'] == 'agent_completed']
@@ -172,9 +172,9 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         assert 'result' in final_result['data'], "Completion event missing result"
         
         result_data = final_result['data']['result']
-        print(f"🎯 Final result keys: {list(result_data.keys())}")
+        print(f" TARGET:  Final result keys: {list(result_data.keys())}")
         
-        # 🚨 CRITICAL: Validate business value delivery
+        #  ALERT:  CRITICAL: Validate business value delivery
         # The optimization agent MUST provide actionable cost reduction strategies
         
         # Validate optimization strategies are present
@@ -202,7 +202,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         found_indicators = [indicator for indicator in business_indicators if indicator in result_text]
         assert len(found_indicators) >= 3, f"Result lacks business relevance. Found indicators: {found_indicators}"
         
-        print(f"✅ Business value validated - found indicators: {found_indicators}")
+        print(f" PASS:  Business value validated - found indicators: {found_indicators}")
         
         # Validate agent workflow progression  
         # Should show: triage -> data gathering -> optimization -> completion
@@ -212,7 +212,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         tool_events = [e for e in events if e['type'] in ['tool_executing', 'tool_completed']]
         assert len(tool_events) > 0, "No tool execution events - agents not using tools"
         
-        print(f"✅ Agent workflow progression validated")
+        print(f" PASS:  Agent workflow progression validated")
         print(f"   - Agent thinking events: {len(agent_thinking_events)}")
         print(f"   - Tool execution events: {len(tool_events)}")
         
@@ -220,15 +220,15 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         total_duration = time.time() - start_time
         assert total_duration < 120, f"Workflow took too long: {total_duration:.2f}s (max 120s)"
         
-        print(f"✅ Performance validated - completed in {total_duration:.2f}s")
+        print(f" PASS:  Performance validated - completed in {total_duration:.2f}s")
         
         # Final success validation
-        print(f"🎉 COMPLETE COST OPTIMIZATION WORKFLOW SUCCESS!")
-        print(f"   ✓ All 5 WebSocket events delivered")
-        print(f"   ✓ Business value optimization strategies provided") 
-        print(f"   ✓ Agent workflow progressed through all phases")
-        print(f"   ✓ Performance within acceptable limits")
-        print(f"   ✓ Real authentication and services used")
+        print(f" CELEBRATION:  COMPLETE COST OPTIMIZATION WORKFLOW SUCCESS!")
+        print(f"   [U+2713] All 5 WebSocket events delivered")
+        print(f"   [U+2713] Business value optimization strategies provided") 
+        print(f"   [U+2713] Agent workflow progressed through all phases")
+        print(f"   [U+2713] Performance within acceptable limits")
+        print(f"   [U+2713] Real authentication and services used")
 
 
     @pytest.mark.e2e
@@ -260,7 +260,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"🚀 Starting performance optimization E2E test")
+        print(f"[U+1F680] Starting performance optimization E2E test")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -298,7 +298,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         found = [ind for ind in performance_indicators if ind in result_text]
         
         assert len(found) >= 2, f"Performance optimization lacking relevant recommendations: {found}"
-        print(f"✅ Performance optimization validated with indicators: {found}")
+        print(f" PASS:  Performance optimization validated with indicators: {found}")
 
 
     @pytest.mark.e2e
@@ -331,7 +331,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"🚀 Starting quality optimization E2E test")
+        print(f"[U+1F680] Starting quality optimization E2E test")
         
         websocket_url = "ws://localhost:8000/ws" 
         headers = auth_helper.get_websocket_headers(token)
@@ -369,7 +369,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         found = [ind for ind in quality_indicators if ind in result_text]
         
         assert len(found) >= 2, f"Quality optimization lacking relevant recommendations: {found}"
-        print(f"✅ Quality optimization validated with indicators: {found}")
+        print(f" PASS:  Quality optimization validated with indicators: {found}")
 
 
     @pytest.mark.e2e 
@@ -403,7 +403,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"🚀 Starting balanced optimization E2E test")
+        print(f"[U+1F680] Starting balanced optimization E2E test")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -450,7 +450,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         assert len(found_performance) >= 1, f"Missing performance considerations: {found_performance}"
         assert len(found_quality) >= 1, f"Missing quality considerations: {found_quality}"
         
-        print(f"✅ Multi-objective optimization validated:")
+        print(f" PASS:  Multi-objective optimization validated:")
         print(f"   Cost indicators: {found_cost}")
         print(f"   Performance indicators: {found_performance}")
         print(f"   Quality indicators: {found_quality}")
@@ -478,7 +478,7 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
             "user_id": user_data["id"]
         }
         
-        print(f"🚀 Starting insufficient data workflow test")
+        print(f"[U+1F680] Starting insufficient data workflow test")
         
         websocket_url = "ws://localhost:8000/ws"
         headers = auth_helper.get_websocket_headers(token)
@@ -519,4 +519,4 @@ class TestCompleteAgentOptimizationWorkflow(SSotBaseTestCase):
         found_clarification = [ind for ind in clarification_indicators if ind in result_text]
         assert len(found_clarification) >= 1, f"Should request clarification for insufficient data: {found_clarification}"
         
-        print(f"✅ Insufficient data handling validated: {found_clarification}")
+        print(f" PASS:  Insufficient data handling validated: {found_clarification}")

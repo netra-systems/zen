@@ -133,7 +133,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
         )
         
         # Document integration failure impact
-        print(f"\n❌ INTEGRATION FAILURE - WEBSOCKET BLOCKED BY AUTH:")
+        print(f"\n FAIL:  INTEGRATION FAILURE - WEBSOCKET BLOCKED BY AUTH:")
         print(f"   - WebSocket ready: {result.ready}")
         print(f"   - Failed services: {result.failed_services}")
         print(f"   - Readiness state: {result.state}")
@@ -203,7 +203,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
         )
         
         # Document cumulative timeout issue
-        print(f"\n❌ CUMULATIVE TIMEOUT ISSUE:")
+        print(f"\n FAIL:  CUMULATIVE TIMEOUT ISSUE:")
         print(f"   - Base timeout: {base_timeout}s")
         print(f"   - Retry count: {retry_count}")
         print(f"   - Retry delay: {retry_delay}s each")
@@ -263,7 +263,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
         
         # CRITICAL: This assertion may need adjustment based on actual implementation
         # The test documents expected behavior for comparison
-        print(f"\n📊 GRACEFUL DEGRADATION COMPARISON:")
+        print(f"\n CHART:  GRACEFUL DEGRADATION COMPARISON:")
         print(f"   - Redis result: {redis_result}")
         print(f"   - Redis critical: {redis_critical}")
         print(f"   - Auth result: {auth_result}")
@@ -284,7 +284,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
             "proving auth lacks graceful degradation"
         )
         
-        print(f"\n❌ INCONSISTENT SERVICE HANDLING:")
+        print(f"\n FAIL:  INCONSISTENT SERVICE HANDLING:")
         print(f"   - WebSocket ready: {result.ready}")
         print(f"   - Failed services: {result.failed_services}")
         print(f"   - Issue: Auth blocks hard while Redis allows degradation")
@@ -339,7 +339,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
         )
         
         # Document environment configuration analysis
-        print(f"\n❌ ENVIRONMENT TIMEOUT ANALYSIS:")
+        print(f"\n FAIL:  ENVIRONMENT TIMEOUT ANALYSIS:")
         for env_name, config in timeout_configurations.items():
             print(f"\n   {env_name.upper()} Environment:")
             print(f"   - Timeout: {config['timeout']}s")
@@ -348,7 +348,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
             print(f"   - Critical: {config['is_critical']}")
             print(f"   - Description: {config['description']}")
         
-        print(f"\n❌ CONFIGURATION ISSUE:")
+        print(f"\n FAIL:  CONFIGURATION ISSUE:")
         print(f"   - Both environments use identical timeout: {staging_timeout}s")
         print(f"   - Staging needs: 8+ seconds for cold start auth initialization")
         print(f"   - Production needs: 5s may be adequate for optimized startup")
@@ -402,7 +402,7 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
                 )
                 
                 # Document the simulated rejection
-                print(f"\n❌ WEBSOCKET CONNECTION REJECTED:")
+                print(f"\n FAIL:  WEBSOCKET CONNECTION REJECTED:")
                 print(f"   - Rejection reason: {websocket_rejection_error}")
                 print(f"   - Failed services: {result.failed_services}")
                 print(f"   - Readiness state: {result.state}")
@@ -425,6 +425,6 @@ class TestAuthTimeoutWebSocketReadinessIntegration(SSotAsyncTestCase):
                 
         except Exception as e:
             # This might occur in the actual guard implementation
-            print(f"\n❌ WEBSOCKET GUARD EXCEPTION: {e}")
+            print(f"\n FAIL:  WEBSOCKET GUARD EXCEPTION: {e}")
             print(f"   - This demonstrates how auth timeout breaks WebSocket connections")
             raise

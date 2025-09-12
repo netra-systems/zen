@@ -146,9 +146,9 @@ class TestMessageHandlerServiceEdgeCases:
                     "error": None if actual_success else "Constructor validation failed"
                 })
                 
-                print(f"🧪 {case_name}: {'✅ PASS' if test_passed else '❌ FAIL'} "
-                      f"(Expected: {'✅' if expected_success else '❌'}, "
-                      f"Actual: {'✅' if actual_success else '❌'})")
+                print(f"[U+1F9EA] {case_name}: {' PASS:  PASS' if test_passed else ' FAIL:  FAIL'} "
+                      f"(Expected: {' PASS: ' if expected_success else ' FAIL: '}, "
+                      f"Actual: {' PASS: ' if actual_success else ' FAIL: '})")
                 
             except Exception as e:
                 # Constructor failed with exception
@@ -165,7 +165,7 @@ class TestMessageHandlerServiceEdgeCases:
                     "error": str(e)
                 })
                 
-                print(f"🧪 {case_name}: {'✅ PASS' if test_passed else '❌ FAIL'} "
+                print(f"[U+1F9EA] {case_name}: {' PASS:  PASS' if test_passed else ' FAIL:  FAIL'} "
                       f"(Exception: {str(e)[:50]}...)")
         
         # Analyze constructor validation results
@@ -177,21 +177,21 @@ class TestMessageHandlerServiceEdgeCases:
         unexpected_failures = [r for r in constructor_results if r["expected_success"] and not r["actual_success"]]
         unexpected_successes = [r for r in constructor_results if not r["expected_success"] and r["actual_success"]]
         
-        print(f"\n🔧 CONSTRUCTOR PARAMETER VALIDATION ANALYSIS:")
-        print(f"📊 Total test cases: {total_tests}")
-        print(f"✅ Passed tests: {passed_tests}")
-        print(f"❌ Failed tests: {failed_tests}")
-        print(f"⚠️  Unexpected failures: {len(unexpected_failures)}")
-        print(f"🚨 Unexpected successes: {len(unexpected_successes)}")
+        print(f"\n[U+1F527] CONSTRUCTOR PARAMETER VALIDATION ANALYSIS:")
+        print(f" CHART:  Total test cases: {total_tests}")
+        print(f" PASS:  Passed tests: {passed_tests}")
+        print(f" FAIL:  Failed tests: {failed_tests}")
+        print(f" WARNING: [U+FE0F]  Unexpected failures: {len(unexpected_failures)}")
+        print(f" ALERT:  Unexpected successes: {len(unexpected_successes)}")
         
         if unexpected_failures:
-            print(f"\n❌ UNEXPECTED CONSTRUCTOR FAILURES:")
+            print(f"\n FAIL:  UNEXPECTED CONSTRUCTOR FAILURES:")
             for failure in unexpected_failures:
                 print(f"   {failure['test_case']}: {failure['error']}")
                 print(f"      Parameters: {failure['parameters']}")
         
         if unexpected_successes:
-            print(f"\n🚨 UNEXPECTED CONSTRUCTOR SUCCESSES:")
+            print(f"\n ALERT:  UNEXPECTED CONSTRUCTOR SUCCESSES:")
             for success in unexpected_successes:
                 print(f"   {success['test_case']}: Should have failed but succeeded")
                 print(f"      Parameters: {success['parameters']}")
@@ -203,7 +203,7 @@ class TestMessageHandlerServiceEdgeCases:
         )
         
         if constructor_validation_issues:
-            print(f"\n🚨 CONSTRUCTOR VALIDATION ISSUES DETECTED:")
+            print(f"\n ALERT:  CONSTRUCTOR VALIDATION ISSUES DETECTED:")
             print(f"   Parameter validation inconsistencies found")
             print(f"   These can cause race conditions during service initialization")
             
@@ -215,7 +215,7 @@ class TestMessageHandlerServiceEdgeCases:
                 f"This proves constructor parameter race conditions exist."
             )
         else:
-            print(f"\n✅ CONSTRUCTOR VALIDATION APPEARS CONSISTENT:")
+            print(f"\n PASS:  CONSTRUCTOR VALIDATION APPEARS CONSISTENT:")
             print(f"   All parameter combinations behaved as expected")
 
     def _simulate_message_handler_constructor(self, params: Dict[str, Any]) -> bool:
@@ -350,16 +350,16 @@ class TestMessageHandlerServiceEdgeCases:
         total_error_tests = len(error_message_results)
         passed_error_tests = sum(1 for r in error_message_results if r["test_passed"])
         
-        print(f"\n💬 ERROR MESSAGE QUALITY ANALYSIS:")
-        print(f"📊 Total error message tests: {total_error_tests}")
-        print(f"✅ Clear error messages: {passed_error_tests}")
-        print(f"❌ Unclear error messages: {total_error_tests - passed_error_tests}")
+        print(f"\n[U+1F4AC] ERROR MESSAGE QUALITY ANALYSIS:")
+        print(f" CHART:  Total error message tests: {total_error_tests}")
+        print(f" PASS:  Clear error messages: {passed_error_tests}")
+        print(f" FAIL:  Unclear error messages: {total_error_tests - passed_error_tests}")
         
         # Print detailed error message analysis
-        print(f"\n📋 Error Message Test Results:")
+        print(f"\n[U+1F4CB] Error Message Test Results:")
         for result in error_message_results:
             case_name = result["test_case"]
-            test_passed = "✅" if result["test_passed"] else "❌"
+            test_passed = " PASS: " if result["test_passed"] else " FAIL: "
             coverage = result.get("keywords_coverage", 0)
             keywords = result.get("keywords_found", [])
             error_msg = result.get("error_message", "No error message")
@@ -372,7 +372,7 @@ class TestMessageHandlerServiceEdgeCases:
         poor_error_messages = total_error_tests - passed_error_tests
         
         if poor_error_messages > 0:
-            print(f"\n🚨 POOR ERROR MESSAGE QUALITY DETECTED:")
+            print(f"\n ALERT:  POOR ERROR MESSAGE QUALITY DETECTED:")
             print(f"   {poor_error_messages} error messages lack clarity")
             print(f"   This makes debugging constructor issues difficult")
             
@@ -384,7 +384,7 @@ class TestMessageHandlerServiceEdgeCases:
                 f"This makes constructor race condition debugging difficult."
             )
         else:
-            print(f"\n✅ ERROR MESSAGE QUALITY APPEARS GOOD:")
+            print(f"\n PASS:  ERROR MESSAGE QUALITY APPEARS GOOD:")
             print(f"   All error messages provide clear debugging information")
 
     def _generate_constructor_error_message(self, params: Dict[str, Any]) -> str:
@@ -482,7 +482,7 @@ class TestMessageHandlerServiceEdgeCases:
                     "error": None if actual_success else "Injection pattern validation failed"
                 })
                 
-                print(f"🔌 {case_name}: {'✅ PASS' if test_passed else '❌ FAIL'} "
+                print(f"[U+1F50C] {case_name}: {' PASS:  PASS' if test_passed else ' FAIL:  FAIL'} "
                       f"(Method: {injection_method}, Factory: {factory_used})")
                 
             except Exception as e:
@@ -500,7 +500,7 @@ class TestMessageHandlerServiceEdgeCases:
                     "error": str(e)
                 })
                 
-                print(f"🔌 {case_name}: {'✅ PASS' if test_passed else '❌ FAIL'} "
+                print(f"[U+1F50C] {case_name}: {' PASS:  PASS' if test_passed else ' FAIL:  FAIL'} "
                       f"(Exception: {str(e)[:30]}...)")
         
         # Analyze injection pattern results
@@ -511,12 +511,12 @@ class TestMessageHandlerServiceEdgeCases:
         factory_pattern_failures = [r for r in injection_results if r["factory_used"] and not r["actual_success"]]
         non_factory_failures = [r for r in injection_results if not r["factory_used"] and not r["actual_success"] and r["expected_success"]]
         
-        print(f"\n🔌 WEBSOCKET MANAGER INJECTION ANALYSIS:")
-        print(f"📊 Total injection tests: {total_injection_tests}")
-        print(f"✅ Successful injection patterns: {passed_injection_tests}")
-        print(f"❌ Failed injection patterns: {total_injection_tests - passed_injection_tests}")
-        print(f"🏭 Factory pattern failures: {len(factory_pattern_failures)}")
-        print(f"⚡ Non-factory failures: {len(non_factory_failures)}")
+        print(f"\n[U+1F50C] WEBSOCKET MANAGER INJECTION ANALYSIS:")
+        print(f" CHART:  Total injection tests: {total_injection_tests}")
+        print(f" PASS:  Successful injection patterns: {passed_injection_tests}")
+        print(f" FAIL:  Failed injection patterns: {total_injection_tests - passed_injection_tests}")
+        print(f"[U+1F3ED] Factory pattern failures: {len(factory_pattern_failures)}")
+        print(f" LIGHTNING:  Non-factory failures: {len(non_factory_failures)}")
         
         # Check for injection pattern issues
         injection_issues = (
@@ -525,7 +525,7 @@ class TestMessageHandlerServiceEdgeCases:
         )
         
         if injection_issues:
-            print(f"\n🚨 WEBSOCKET MANAGER INJECTION ISSUES DETECTED:")
+            print(f"\n ALERT:  WEBSOCKET MANAGER INJECTION ISSUES DETECTED:")
             print(f"   Injection pattern failures can cause race conditions")
             print(f"   These affect service initialization reliability")
             
@@ -547,7 +547,7 @@ class TestMessageHandlerServiceEdgeCases:
                 f"This proves injection pattern race conditions exist."
             )
         else:
-            print(f"\n✅ WEBSOCKET MANAGER INJECTION APPEARS ROBUST:")
+            print(f"\n PASS:  WEBSOCKET MANAGER INJECTION APPEARS ROBUST:")
             print(f"   All injection patterns behaved correctly")
 
     def _simulate_websocket_manager_injection(self, injection_method: str, factory_used: bool) -> bool:
@@ -694,15 +694,15 @@ class TestMessageHandlerServiceEdgeCases:
         avg_validation_time = sum(r["validation_time"] for r in concurrent_initialization_results) / len(concurrent_initialization_results)
         max_validation_time = max(r["validation_time"] for r in concurrent_initialization_results)
         
-        print(f"\n⚡ CONCURRENT CONSTRUCTOR VALIDATION ANALYSIS:")
-        print(f"📊 Total concurrent attempts: {total_concurrent}")
-        print(f"✅ Successful attempts: {successful_concurrent}")
-        print(f"❌ Failed attempts: {failed_concurrent}")
-        print(f"🎯 Valid parameter successes: {valid_successes}/{len(valid_results)}")
-        print(f"🚫 Invalid parameter successes: {invalid_successes}/{len(invalid_results)} (should be 0)")
-        print(f"🔄 Concurrent consistency: {'✅' if concurrent_consistency else '❌'}")
-        print(f"⏱️  Average validation time: {avg_validation_time:.4f}s")
-        print(f"📈 Maximum validation time: {max_validation_time:.4f}s")
+        print(f"\n LIGHTNING:  CONCURRENT CONSTRUCTOR VALIDATION ANALYSIS:")
+        print(f" CHART:  Total concurrent attempts: {total_concurrent}")
+        print(f" PASS:  Successful attempts: {successful_concurrent}")
+        print(f" FAIL:  Failed attempts: {failed_concurrent}")
+        print(f" TARGET:  Valid parameter successes: {valid_successes}/{len(valid_results)}")
+        print(f"[U+1F6AB] Invalid parameter successes: {invalid_successes}/{len(invalid_results)} (should be 0)")
+        print(f" CYCLE:  Concurrent consistency: {' PASS: ' if concurrent_consistency else ' FAIL: '}")
+        print(f"[U+23F1][U+FE0F]  Average validation time: {avg_validation_time:.4f}s")
+        print(f"[U+1F4C8] Maximum validation time: {max_validation_time:.4f}s")
         
         # Check for concurrent race conditions
         concurrent_race_conditions = (
@@ -713,7 +713,7 @@ class TestMessageHandlerServiceEdgeCases:
         )
         
         if concurrent_race_conditions:
-            print(f"\n🚨 CONCURRENT CONSTRUCTOR RACE CONDITIONS DETECTED:")
+            print(f"\n ALERT:  CONCURRENT CONSTRUCTOR RACE CONDITIONS DETECTED:")
             print(f"   Concurrent initialization shows inconsistent behavior")
             print(f"   These race conditions can cause unpredictable service failures")
             
@@ -726,6 +726,6 @@ class TestMessageHandlerServiceEdgeCases:
                 f"This proves concurrent constructor race conditions exist."
             )
         else:
-            print(f"\n✅ CONCURRENT CONSTRUCTOR VALIDATION APPEARS ROBUST:")
+            print(f"\n PASS:  CONCURRENT CONSTRUCTOR VALIDATION APPEARS ROBUST:")
             print(f"   All concurrent constructor calls behaved consistently")
             print(f"   No race conditions detected in parameter validation")

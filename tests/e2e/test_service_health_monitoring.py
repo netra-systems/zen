@@ -560,7 +560,7 @@
     # REMOVED_SYNTAX_ERROR: print("1. Testing Service Discovery...")
     # REMOVED_SYNTAX_ERROR: discovery_results = await monitor.discover_service_ports()
     # REMOVED_SYNTAX_ERROR: for service, info in discovery_results.items():
-        # REMOVED_SYNTAX_ERROR: status = "✓ DISCOVERED" if info["discovered"] else "✗ NOT FOUND"
+        # REMOVED_SYNTAX_ERROR: status = "[U+2713] DISCOVERED" if info["discovered"] else "[U+2717] NOT FOUND"
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
         # Test 2: Health Endpoints
@@ -568,7 +568,7 @@
         # REMOVED_SYNTAX_ERROR: 2. Testing Health Endpoints...")
         # REMOVED_SYNTAX_ERROR: health_results = await monitor.health_checker.check_all_services()
         # REMOVED_SYNTAX_ERROR: for result in health_results:
-            # REMOVED_SYNTAX_ERROR: status_symbol = "✓" if result.is_healthy() else "✗"
+            # REMOVED_SYNTAX_ERROR: status_symbol = "[U+2713]" if result.is_healthy() else "[U+2717]"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
             # Test 3: Dependency Cascade
@@ -582,7 +582,7 @@
             # REMOVED_SYNTAX_ERROR: for service, cascade_info in cascade_results["cascade_results"].items():
                 # REMOVED_SYNTAX_ERROR: deps_healthy = cascade_info['healthy_dependencies']
                 # REMOVED_SYNTAX_ERROR: deps_total = cascade_info['total_dependencies']
-                # REMOVED_SYNTAX_ERROR: status_symbol = "✓" if cascade_info['cascade_status'] == 'healthy' else "⚠" if cascade_info['cascade_status'] == 'degraded' else "✗"
+                # REMOVED_SYNTAX_ERROR: status_symbol = "[U+2713]" if cascade_info['cascade_status'] == 'healthy' else " WARNING: " if cascade_info['cascade_status'] == 'degraded' else "[U+2717]"
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: print(" )

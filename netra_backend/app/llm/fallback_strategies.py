@@ -2,7 +2,7 @@
 LLM Fallback Execution Strategies
 
 This module implements the Strategy pattern for different LLM execution approaches.
-Each strategy encapsulates a specific execution behavior with ≤8 line functions.
+Each strategy encapsulates a specific execution behavior with  <= 8 line functions.
 """
 
 import asyncio

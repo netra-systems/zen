@@ -153,7 +153,7 @@ class TestAgentMessageHandlerServiceInitializationFailure:
             f"Current stats: {stats}. This indicates error handling is broken."
         )
         
-        print(f"✅ REPRODUCTION SUCCESS: Caught expected service initialization failure: {error_message}")
+        print(f" PASS:  REPRODUCTION SUCCESS: Caught expected service initialization failure: {error_message}")
     
     async def test_user_execution_context_creation_failure(
         self, mock_websocket, test_user_id, test_message, message_handler_service_mock
@@ -217,7 +217,7 @@ class TestAgentMessageHandlerServiceInitializationFailure:
             f"Error '{error_message}' doesn't match expected context creation patterns: {context_error_patterns}"
         )
         
-        print(f"✅ CONTEXT FAILURE REPRODUCTION SUCCESS: {error_message}")
+        print(f" PASS:  CONTEXT FAILURE REPRODUCTION SUCCESS: {error_message}")
     
     async def test_websocket_manager_factory_dependency_failure(
         self, mock_websocket, test_user_id, test_message, message_handler_service_mock
@@ -282,7 +282,7 @@ class TestAgentMessageHandlerServiceInitializationFailure:
             assert hasattr(context_arg, 'user_id'), f"Context missing user_id attribute"
             assert context_arg.user_id == test_user_id, f"Context user_id mismatch: {context_arg.user_id} != {test_user_id}"
             
-            print(f"✅ FACTORY DEPENDENCY FAILURE REPRODUCTION SUCCESS: {error_message}")
+            print(f" PASS:  FACTORY DEPENDENCY FAILURE REPRODUCTION SUCCESS: {error_message}")
     
     async def test_database_session_creation_failure_integration(
         self, mock_websocket, test_user_id, test_message, message_handler_service_mock
@@ -343,7 +343,7 @@ class TestAgentMessageHandlerServiceInitializationFailure:
                 f"Error '{error_message}' doesn't match database failure patterns: {database_patterns}"
             )
             
-            print(f"✅ DATABASE SESSION FAILURE REPRODUCTION SUCCESS: {error_message}")
+            print(f" PASS:  DATABASE SESSION FAILURE REPRODUCTION SUCCESS: {error_message}")
     
     def test_handler_statistics_tracking_accuracy(self, message_handler_service_mock):
         """
@@ -371,7 +371,7 @@ class TestAgentMessageHandlerServiceInitializationFailure:
         updated_stats = handler.get_stats()
         assert updated_stats["errors"] == 1
         
-        print("✅ STATISTICS TRACKING VALIDATION SUCCESS: Error tracking works correctly")
+        print(" PASS:  STATISTICS TRACKING VALIDATION SUCCESS: Error tracking works correctly")
     
     async def test_websocket_v3_pattern_feature_flag_handling(
         self, mock_websocket, test_user_id, test_message, message_handler_service_mock
@@ -421,11 +421,11 @@ class TestAgentMessageHandlerServiceInitializationFailure:
         )
         
         if v3_has_service_error and v2_has_service_error:
-            print("✅ BOTH PATTERNS FAILING: Service initialization issue affects both V2 and V3")
+            print(" PASS:  BOTH PATTERNS FAILING: Service initialization issue affects both V2 and V3")
         elif v3_has_service_error:
-            print("✅ V3 PATTERN FAILING: Service initialization issue in V3 clean pattern")
+            print(" PASS:  V3 PATTERN FAILING: Service initialization issue in V3 clean pattern")
         else:
-            print("✅ V2 PATTERN FAILING: Service initialization issue in V2 legacy pattern")
+            print(" PASS:  V2 PATTERN FAILING: Service initialization issue in V2 legacy pattern")
 
 
 if __name__ == "__main__":

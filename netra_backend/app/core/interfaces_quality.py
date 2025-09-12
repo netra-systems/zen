@@ -98,7 +98,7 @@ class QualityValidator:
         self._add_language_suggestions(suggestions, metrics)
         return suggestions
     
-    # Implementation helper methods (≤8 lines each)
+    # Implementation helper methods ( <= 8 lines each)
     
     
     def _calculate_base_weighted_score(self, metrics: QualityMetrics, weights: Dict[str, float]) -> Tuple[float, float]:

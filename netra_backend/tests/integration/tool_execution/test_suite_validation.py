@@ -58,7 +58,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                     "test_classes": test_classes
                 })
                 
-                self.logger.info(f"✅ Successfully imported {module_name} with {len(test_classes)} test classes")
+                self.logger.info(f" PASS:  Successfully imported {module_name} with {len(test_classes)} test classes")
                 
             except Exception as e:
                 import_results.append({
@@ -68,7 +68,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                     "test_classes_found": 0
                 })
                 
-                self.logger.error(f"❌ Failed to import {module_name}: {e}")
+                self.logger.error(f" FAIL:  Failed to import {module_name}: {e}")
         
         # Verify all modules imported successfully
         successful_imports = [r for r in import_results if r["import_successful"]]
@@ -93,7 +93,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(suite_validation_result, "automation")
         
-        self.logger.info(f"✅ Tool execution test suite validation passed - {total_test_classes} test classes in {len(successful_imports)} modules")
+        self.logger.info(f" PASS:  Tool execution test suite validation passed - {total_test_classes} test classes in {len(successful_imports)} modules")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -125,7 +125,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                     "type": str(type(target_class))
                 })
                 
-                self.logger.info(f"✅ Dependency available: {module_name}.{class_name}")
+                self.logger.info(f" PASS:  Dependency available: {module_name}.{class_name}")
                 
             except Exception as e:
                 dependency_results.append({
@@ -134,7 +134,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                     "error": str(e)
                 })
                 
-                self.logger.error(f"❌ Dependency missing: {module_name}.{class_name} - {e}")
+                self.logger.error(f" FAIL:  Dependency missing: {module_name}.{class_name} - {e}")
         
         # Test authentication helper functionality
         try:
@@ -150,7 +150,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "functional": len(test_token) > 0
             })
             
-            self.logger.info("✅ E2EAuthHelper functional")
+            self.logger.info(" PASS:  E2EAuthHelper functional")
             
         except Exception as e:
             dependency_results.append({
@@ -176,7 +176,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(dependency_validation_result, "automation")
         
-        self.logger.info(f"✅ Core dependencies validation passed - {len(available_dependencies)} dependencies available")
+        self.logger.info(f" PASS:  Core dependencies validation passed - {len(available_dependencies)} dependencies available")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -199,7 +199,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "test_query_successful": True
             })
             
-            self.logger.info("✅ PostgreSQL service available and functional")
+            self.logger.info(" PASS:  PostgreSQL service available and functional")
             
         except Exception as e:
             services_status.append({
@@ -208,7 +208,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "error": str(e)
             })
             
-            self.logger.error(f"❌ PostgreSQL service issue: {e}")
+            self.logger.error(f" FAIL:  PostgreSQL service issue: {e}")
         
         # Test Redis availability
         try:
@@ -233,7 +233,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "test_operations_successful": True
             })
             
-            self.logger.info("✅ Redis service available and functional")
+            self.logger.info(" PASS:  Redis service available and functional")
             
         except Exception as e:
             services_status.append({
@@ -242,7 +242,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "error": str(e)
             })
             
-            self.logger.error(f"❌ Redis service issue: {e}")
+            self.logger.error(f" FAIL:  Redis service issue: {e}")
         
         # Test user context creation (required for all tool execution tests)
         try:
@@ -261,7 +261,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "context_fields_present": True
             })
             
-            self.logger.info("✅ User context creation functional")
+            self.logger.info(" PASS:  User context creation functional")
             
         except Exception as e:
             services_status.append({
@@ -287,7 +287,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(services_validation_result, "automation")
         
-        self.logger.info(f"✅ Real services integration validation passed - {len(available_services)} services ready")
+        self.logger.info(f" PASS:  Real services integration validation passed - {len(available_services)} services ready")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -377,7 +377,7 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
                 "scenarios": scenarios
             })
             
-            self.logger.info(f"✅ {category_name}: {len(scenarios)} scenarios covered")
+            self.logger.info(f" PASS:  {category_name}: {len(scenarios)} scenarios covered")
         
         # Calculate overall coverage
         total_covered = sum(c["covered_scenarios"] for c in coverage_analysis)
@@ -398,4 +398,4 @@ class TestToolExecutionSuiteValidation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(coverage_validation_result, "automation")
         
-        self.logger.info(f"✅ Tool execution test suite coverage validation passed - {overall_coverage:.1f}% coverage across {len(critical_scenarios)} categories")
+        self.logger.info(f" PASS:  Tool execution test suite coverage validation passed - {overall_coverage:.1f}% coverage across {len(critical_scenarios)} categories")

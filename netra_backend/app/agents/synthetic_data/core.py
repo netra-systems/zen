@@ -250,7 +250,7 @@ class SyntheticDataAgentCore(ABC):
         generation_start_time = time.time()
         await self.send_status_update_with_context(
             context, "generating", 
-            f"🔄 Generating {profile.volume:,} synthetic records..."
+            f" CYCLE:  Generating {profile.volume:,} synthetic records..."
         )
         
         # Generate data
@@ -318,7 +318,7 @@ class SyntheticDataAgentCore(ABC):
         
         await self._send_update(context.run_id, {
             "status": "error",
-            "message": f"❌ Synthetic data generation failed: {str(error)}",
+            "message": f" FAIL:  Synthetic data generation failed: {str(error)}",
             "error": str(error)
         })
 
@@ -435,7 +435,7 @@ class SyntheticDataAgentCore(ABC):
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+        return f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
     
     def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
         """Create approval required result."""
@@ -466,7 +466,7 @@ class SyntheticDataAgentCore(ABC):
         """Execute the actual data generation."""
         context.generation_start_time = time.time()
         await self.send_status_update(context, "generating", 
-                                    f"🔄 Generating {context.workload_profile.volume:,} synthetic records...")
+                                    f" CYCLE:  Generating {context.workload_profile.volume:,} synthetic records...")
         result = await self._generate_and_store_result(context)
         await self._finalize_generation(context, result)
         return result.model_dump()
@@ -504,7 +504,7 @@ class SyntheticDataAgentCore(ABC):
         """Build completion update data dictionary."""
         records_count = result.generation_status.records_generated
         sample_data = result.sample_data[:5] if result.sample_data else None
-        message = f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        message = f" PASS:  Successfully generated {records_count:,} synthetic records in {duration}ms"
         return {"status": "completed", "message": message, "result": result.model_dump(), "sample_data": sample_data}
     
     def _log_completion(self, run_id: str, result: SyntheticDataResult) -> None:
@@ -532,7 +532,7 @@ class SyntheticDataAgentCore(ABC):
         """Send error update if streaming enabled."""
         if context.stream_updates:
             await self._send_update(context.run_id, {"status": "error",
-                                                   "message": f"❌ Synthetic data generation failed: {str(error)}",
+                                                   "message": f" FAIL:  Synthetic data generation failed: {str(error)}",
                                                    "error": str(error)})
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:

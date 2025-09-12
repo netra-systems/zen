@@ -58,10 +58,10 @@ class TokenCounter:
         
         # Token counting patterns and multipliers
         self.token_estimators = {
-            # Rough estimation: 1 token ≈ 4 characters for English
+            # Rough estimation: 1 token [U+2248] 4 characters for English
             "character_based": lambda text: len(text) // 4,
             
-            # Word-based estimation: 1 token ≈ 0.75 words
+            # Word-based estimation: 1 token [U+2248] 0.75 words
             "word_based": lambda text: int(len(text.split()) / 0.75),
             
             # More sophisticated estimation

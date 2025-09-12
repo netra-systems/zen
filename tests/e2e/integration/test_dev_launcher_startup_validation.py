@@ -254,7 +254,7 @@ class DevLauncherStartupValidator:
                 db_name = connection.db_type.value.capitalize()
                 is_healthy = connection.status.value == "connected"
                 connection_results[db_name.lower()] = is_healthy
-                logger.info(f"  {db_name}: {'✓' if is_healthy else '✗'}")
+                logger.info(f"  {db_name}: {'[U+2713]' if is_healthy else '[U+2717]'}")
             
             # Stop health monitoring to cleanup
             await db_connector.stop_health_monitoring()
@@ -449,7 +449,7 @@ class TestDevLauncherStartupValidation:
         logger.info(f"Phases completed: {result['phases_completed']}/{result['total_phases']}")
         
         for phase, success in result['validation_results'].items():
-            status = "✓ PASS" if success else "✗ FAIL"
+            status = "[U+2713] PASS" if success else "[U+2717] FAIL"
             logger.info(f"  {phase}: {status}")
         
         if result['validation_errors']:
@@ -520,7 +520,7 @@ async def run_standalone_startup_validation():
     print(f"Phases completed: {result['phases_completed']}/{result['total_phases']}")
     
     for phase, success in result['validation_results'].items():
-        status = "✓ PASS" if success else "✗ FAIL"
+        status = "[U+2713] PASS" if success else "[U+2717] FAIL"
         print(f"  {phase}: {status}")
     
     if result['validation_errors']:

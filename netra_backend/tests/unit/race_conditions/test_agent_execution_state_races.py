@@ -5,7 +5,7 @@ This module tests for race conditions in concurrent agent execution scenarios.
 Validates that agent execution state remains consistent under high concurrent load.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure reliable agent execution under concurrent load
 - Value Impact: Prevents execution failures, state corruption, and user experience degradation
 - Strategic Impact: CRITICAL - Multi-user agent execution is core platform functionality
@@ -283,7 +283,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 50 concurrent agent executions completed successfully in {execution_time:.2f}s. "
+            f" PASS:  50 concurrent agent executions completed successfully in {execution_time:.2f}s. "
             f"Success rate: {successful_executions}/50, Events: {len(self.websocket_events)}, "
             f"Race conditions: {len(self.race_condition_detections)}"
         )
@@ -365,7 +365,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Execution state isolation verified: 5 users × 4 executions each = 20 total. "
+            f" PASS:  Execution state isolation verified: 5 users  x  4 executions each = 20 total. "
             f"All executions isolated successfully."
         )
     
@@ -440,7 +440,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Execution tracker concurrent access test passed: "
+            f" PASS:  Execution tracker concurrent access test passed: "
             f"{successful_tracks}/30 successful tracks, {len(unique_exec_ids)} unique execution IDs"
         )
     
@@ -528,7 +528,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ WebSocket event emission race test passed: "
+            f" PASS:  WebSocket event emission race test passed: "
             f"{len(events_by_run)} runs with proper event sequences, "
             f"{len(self.websocket_events)} total events, "
             f"0 race conditions detected"
@@ -621,7 +621,7 @@ class TestAgentExecutionStateRaces(SSotBaseTestCase):
             )
             
             logger.info(
-                f"✅ Timing anomaly detection passed: "
+                f" PASS:  Timing anomaly detection passed: "
                 f"{len(times)}/20 successful executions, "
                 f"avg time: {avg_time:.3f}s, variation: {time_variation:.3f}s"
             )

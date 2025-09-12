@@ -73,7 +73,7 @@ class TestAuthServiceIntegration(SSotAsyncTestCase):
 
     async def test_auth_client_to_websocket_auth_flow_integration(self):
         """
-        TEST: Integration of auth client → websocket auth flow with connectivity failures
+        TEST: Integration of auth client  ->  websocket auth flow with connectivity failures
         EXPECTED: Should reproduce full chain failures described in issue #395
         BUSINESS IMPACT: Critical for WebSocket authentication in Golden Path
         """

@@ -8,7 +8,7 @@ BVJ (Business Value Justification):
 4. Revenue Impact: Analytics failures = customer churn = $35K+ MRR loss
 
 CRITICAL PATH PROTECTION:
-Events → ClickHouse → Aggregation → Dashboard
+Events  ->  ClickHouse  ->  Aggregation  ->  Dashboard
 - High-volume event ingestion (10K events/second)
 - Real-time aggregation accuracy (<2 second latency)
 - Dashboard update reliability

@@ -37,7 +37,7 @@ class SeverityTiers:
         SeverityLevel.CRITICAL: SeverityConfig(
             display_name="CRITICAL",
             max_violations=5,
-            emoji="🚨",
+            emoji=" ALERT: ",
             text_marker="[CRIT]",
             blocks_deployment=True,
             business_impact="System stability at risk, customer-facing failures likely",
@@ -47,7 +47,7 @@ class SeverityTiers:
         SeverityLevel.HIGH: SeverityConfig(
             display_name="HIGH",
             max_violations=20,
-            emoji="🔴",
+            emoji="[U+1F534]",
             text_marker="[HIGH]",
             blocks_deployment=True,
             business_impact="Service degradation possible, security vulnerabilities",
@@ -57,7 +57,7 @@ class SeverityTiers:
         SeverityLevel.MEDIUM: SeverityConfig(
             display_name="MEDIUM",
             max_violations=100,
-            emoji="🟡",
+            emoji="[U+1F7E1]",
             text_marker="[MED]",
             blocks_deployment=True,
             business_impact="Technical debt accumulating, maintainability concerns",
@@ -67,7 +67,7 @@ class SeverityTiers:
         SeverityLevel.LOW: SeverityConfig(
             display_name="LOW",
             max_violations=999999,  # Effectively unlimited
-            emoji="🟢",
+            emoji="[U+1F7E2]",
             text_marker="[LOW]",
             blocks_deployment=False,
             business_impact="Code quality improvements, best practice violations",
@@ -236,7 +236,7 @@ class SeverityTiers:
             count = len(violations_by_severity.get(severity, []))
             
             marker = config.emoji if use_emoji else config.text_marker
-            status = "✅" if count <= config.max_violations else "❌"
+            status = " PASS: " if count <= config.max_violations else " FAIL: "
             
             if config.blocks_deployment:
                 line = f"{marker} {config.display_name}: {count}/{config.max_violations} {status}"

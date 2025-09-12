@@ -22,7 +22,7 @@ def main():
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
     
-    print("🚀 Running Critical JWT Authentication Tests")
+    print("[U+1F680] Running Critical JWT Authentication Tests")
     print("=" * 60)
     print("This test uses REAL services - NO MOCKS!")
     print("- Starts real auth service on port 8081")
@@ -53,14 +53,14 @@ def main():
         
         if result.returncode == 0:
             print()
-            print("✅ All JWT authentication tests passed!")
-            print("✅ Real services are working correctly!")
+            print(" PASS:  All JWT authentication tests passed!")
+            print(" PASS:  Real services are working correctly!")
         else:
             print()
-            print("❌ Some tests failed - check output above")
+            print(" FAIL:  Some tests failed - check output above")
             
     except Exception as e:
-        print(f"❌ Error running tests: {e}")
+        print(f" FAIL:  Error running tests: {e}")
         return 1
         
     return result.returncode if 'result' in locals() else 1

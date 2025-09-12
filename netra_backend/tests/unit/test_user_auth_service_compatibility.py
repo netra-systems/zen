@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for user_auth_service.py - Backward Compatibility Shim
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Maintains legacy API compatibility
+- Segment: ALL (Free  ->  Enterprise) - Maintains legacy API compatibility
 - Business Goal: Zero-downtime migration from legacy auth to SSOT auth service
 - Value Impact: Prevents breaking changes that could disrupt $50K+ MRR operations
 - Strategic Impact: Enables gradual migration while maintaining business continuity

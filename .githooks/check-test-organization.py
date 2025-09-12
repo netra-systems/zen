@@ -13,7 +13,7 @@ def check_conftest_violations() -> bool:
     script_path = Path(__file__).parent.parent / "scripts" / "check_conftest_violations.py"
     
     if not script_path.exists():
-        print("⚠️  Warning: check_conftest_violations.py not found")
+        print(" WARNING: [U+FE0F]  Warning: check_conftest_violations.py not found")
         return True
     
     result = subprocess.run(

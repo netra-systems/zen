@@ -1,4 +1,42 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 MISSION CRITICAL: Comprehensive WebSocket Bridge Critical Flows Test Suite
 
@@ -16,7 +54,7 @@ impact the core business value - delivering AI chat experiences to users. These 
 COVERAGE FOCUS:
 - Run ID SSOT compliance and thread extraction accuracy
 - Thread registry persistence, TTL, and cleanup operations  
-- Priority chain resolution: Registry → Orchestrator → Pattern → Fail
+- Priority chain resolution: Registry  ->  Orchestrator  ->  Pattern  ->  Fail
 - End-to-end WebSocket event delivery validation
 - Orchestrator initialization and fallback mechanisms
 - Concurrent multi-agent operations and performance
@@ -285,11 +323,11 @@ class TestRunIdSSotCompliance:
             # Verify not legacy format
             assert not is_legacy_run_id(run_id), f"Generated run_id marked as legacy: {run_id}"
         
-        print("✅ Run ID always includes thread: PASSED")
+        print(" PASS:  Run ID always includes thread: PASSED")
     
     @pytest.mark.asyncio
     async def test_thread_resolution_priority_chain(self, websocket_bridge, test_registry, mock_orchestrator):
-        """CRITICAL: Test priority chain Resolution: Registry → Orchestrator → Pattern → None."""
+        """CRITICAL: Test priority chain Resolution: Registry  ->  Orchestrator  ->  Pattern  ->  None."""
         
         # Test case setup
         run_id = "priority_test_run_123" 
@@ -323,7 +361,7 @@ class TestRunIdSSotCompliance:
         result = await websocket_bridge._resolve_thread_id_from_run_id(impossible_run_id)
         assert result is None, f"Should return None when no resolution possible, got '{result}'"
         
-        print("✅ Thread resolution priority chain: PASSED")
+        print(" PASS:  Thread resolution priority chain: PASSED")
     
     @pytest.mark.asyncio  
     async def test_registry_backup_when_orchestrator_fails(self, websocket_bridge, test_registry, mock_orchestrator):
@@ -346,7 +384,7 @@ class TestRunIdSSotCompliance:
         orchestrator_metrics = await mock_orchestrator.get_metrics()
         assert orchestrator_metrics['failed_resolutions'] > 0, "Should attempt orchestrator resolution"
         
-        print("✅ Registry backup when orchestrator fails: PASSED")
+        print(" PASS:  Registry backup when orchestrator fails: PASSED")
     
     @pytest.mark.asyncio
     async def test_simple_run_id_failure_detection(self, websocket_bridge):
@@ -385,7 +423,7 @@ class TestRunIdSSotCompliance:
                 # Invalid format should return None
                 assert extracted is None, f"Should return None for invalid format '{legacy_run_id}'"
         
-        print("✅ Simple run ID failure detection: PASSED")
+        print(" PASS:  Simple run ID failure detection: PASSED")
 
 
 class TestThreadRegistryOperations:
@@ -439,7 +477,7 @@ class TestThreadRegistryOperations:
         assert metrics['registry_healthy'], "Registry should remain healthy under load"
         assert metrics['active_mappings'] >= mapping_count * 0.9, "Most mappings should still be active"
         
-        print(f"✅ Registry performance under load: {mapping_count} mappings registered in {registration_time:.2f}s, {len(lookup_results)} lookups in {lookup_time:.2f}s")
+        print(f" PASS:  Registry performance under load: {mapping_count} mappings registered in {registration_time:.2f}s, {len(lookup_results)} lookups in {lookup_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_registry_ttl_and_cleanup(self, test_registry):
@@ -484,7 +522,7 @@ class TestThreadRegistryOperations:
             # Restore original TTL
             test_registry.config.mapping_ttl_hours = original_ttl
         
-        print("✅ Registry TTL and cleanup: PASSED")
+        print(" PASS:  Registry TTL and cleanup: PASSED")
     
     @pytest.mark.asyncio
     async def test_registry_concurrent_access(self, test_registry):
@@ -541,7 +579,7 @@ class TestThreadRegistryOperations:
         metrics = await test_registry.get_metrics()
         assert metrics['registry_healthy'], "Registry should remain healthy after concurrent access"
         
-        print(f"✅ Registry concurrent access: {total_stats['registered']} registrations, {total_stats['lookups']} lookups across {worker_count} workers")
+        print(f" PASS:  Registry concurrent access: {total_stats['registered']} registrations, {total_stats['lookups']} lookups across {worker_count} workers")
 
 
 class TestWebSocketEventDelivery:
@@ -619,7 +657,7 @@ class TestWebSocketEventDelivery:
         # Real WebSocket manager ensures proper isolation through connection management
         # Cross-user contamination prevention verified by successful individual event sends
         
-        print(f"✅ WebSocket events reach users: {len(user_scenarios)} users × {len(event_types)} events delivered successfully")
+        print(f" PASS:  WebSocket events reach users: {len(user_scenarios)} users  x  {len(event_types)} events delivered successfully")
     
     @pytest.mark.asyncio
     async def test_event_delivery_failure_recovery(self, websocket_bridge, real_websocket_manager, test_registry):
@@ -689,7 +727,7 @@ class TestWebSocketEventDelivery:
             # With real WebSocket manager, recovery is automatic
             # Successful recovery is indicated by the bridge method success response
         
-        print("✅ Event delivery failure recovery: PASSED")
+        print(" PASS:  Event delivery failure recovery: PASSED")
     
     @pytest.mark.asyncio
     async def test_high_frequency_event_delivery(self, websocket_bridge, real_websocket_manager, test_registry):
@@ -749,7 +787,7 @@ class TestWebSocketEventDelivery:
         events_per_second = event_count / total_time
         assert events_per_second > 50, f"Event throughput too low: {events_per_second:.1f} events/sec"
         
-        print(f"✅ High-frequency event delivery: {event_count} events delivered in {total_time:.2f}s ({events_per_second:.1f} events/sec)")
+        print(f" PASS:  High-frequency event delivery: {event_count} events delivered in {total_time:.2f}s ({events_per_second:.1f} events/sec)")
 
 
 class TestOrchestratorIntegration:
@@ -785,7 +823,7 @@ class TestOrchestratorIntegration:
         assert metrics['failed_resolutions'] > 0, "Should show failures during uninitialized period"
         assert metrics['successful_resolutions'] > 0, "Should show success after initialization"
         
-        print("✅ Orchestrator initialization required: PASSED")
+        print(" PASS:  Orchestrator initialization required: PASSED")
     
     @pytest.mark.asyncio  
     async def test_orchestrator_unavailable_fallback(self, websocket_bridge, mock_orchestrator, test_registry):
@@ -824,7 +862,7 @@ class TestOrchestratorIntegration:
         result = await websocket_bridge._resolve_thread_id_from_run_id(run_id_2)
         assert result == "thread_orchestrator_2", "Should use orchestrator again when available"
         
-        print("✅ Orchestrator unavailable fallback: PASSED")
+        print(" PASS:  Orchestrator unavailable fallback: PASSED")
     
     @pytest.mark.asyncio
     async def test_orchestrator_performance_degradation(self, websocket_bridge, mock_orchestrator):
@@ -879,7 +917,7 @@ class TestOrchestratorIntegration:
         assert metrics['resolution_calls'] == len(all_run_ids), "Should have called orchestrator for each run_id"
         assert metrics['avg_resolution_time_ms'] > 1000, "Average time should reflect delays"
         
-        print(f"✅ Orchestrator performance degradation: {len(all_run_ids)} resolutions in {total_time:.2f}s")
+        print(f" PASS:  Orchestrator performance degradation: {len(all_run_ids)} resolutions in {total_time:.2f}s")
 
 
 class TestConcurrentOperations:
@@ -987,7 +1025,7 @@ class TestConcurrentOperations:
         events_per_second = total_events_sent / total_execution_time
         assert events_per_second > 100, f"Event throughput too low: {events_per_second:.1f} events/sec"
         
-        print(f"✅ Concurrent agents different threads: {len(agent_scenarios)} agents × 11 events = {total_events_sent} events in {total_execution_time:.2f}s ({events_per_second:.1f} events/sec)")
+        print(f" PASS:  Concurrent agents different threads: {len(agent_scenarios)} agents  x  11 events = {total_events_sent} events in {total_execution_time:.2f}s ({events_per_second:.1f} events/sec)")
     
     @pytest.mark.asyncio
     async def test_reconnection_preserves_mappings(self, websocket_bridge, real_websocket_manager, test_registry):
@@ -1051,7 +1089,7 @@ class TestConcurrentOperations:
             # Real WebSocket manager handles message delivery confirmation internally
             pass
         
-        print("✅ Reconnection preserves mappings: PASSED")
+        print(" PASS:  Reconnection preserves mappings: PASSED")
     
     @pytest.mark.asyncio
     async def test_system_under_extreme_load(self, websocket_bridge, real_websocket_manager, test_registry):
@@ -1156,7 +1194,7 @@ class TestConcurrentOperations:
         # Real WebSocket manager health confirmed by high event success rate
         # Individual event failures would have caused assertion failures above
         
-        print(f"✅ System under extreme load: {thread_count} threads × {events_per_thread} events = {total_sent} events in {load_time:.2f}s ({events_per_second:.1f} events/sec, {success_rate:.1%} success rate)")
+        print(f" PASS:  System under extreme load: {thread_count} threads  x  {events_per_thread} events = {total_sent} events in {load_time:.2f}s ({events_per_second:.1f} events/sec, {success_rate:.1%} success rate)")
 
 
 class TestBusinessMetrics:
@@ -1265,7 +1303,7 @@ class TestBusinessMetrics:
         assert enterprise_rate >= free_rate, "Enterprise users should have equal or better performance than free users"
         
         # Log business metrics
-        print("✅ Business Metrics Summary:")
+        print(" PASS:  Business Metrics Summary:")
         for user_type, metrics in business_metrics.items():
             print(f"  {user_type}: {metrics['success_rate']:.1%} success, {metrics['events_per_second']:.1f} events/sec, {metrics['thread_count']} threads")
         print(f"  Overall: {overall_success_rate:.1%} success rate, {total_events} total events")
@@ -1378,7 +1416,7 @@ class TestBusinessMetrics:
         assert orchestrator_success >= pattern_success * 0.95, "Orchestrator should be more reliable than pattern"
         
         # Log resolution accuracy metrics
-        print("✅ Thread Resolution Accuracy Metrics:")
+        print(" PASS:  Thread Resolution Accuracy Metrics:")
         for source, metrics in resolution_metrics.items():
             print(f"  {source}: {metrics['success_rate']:.1%} success, {metrics['accuracy_rate']:.2%} accuracy, {metrics['avg_resolution_time_ms']:.1f}ms avg")
         

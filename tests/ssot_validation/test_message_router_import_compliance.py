@@ -85,7 +85,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
             total_violating_files = sum(len(files) for files in non_canonical_imports.values())
             
             self.fail(
-                f"❌ IMPORT PATH VIOLATIONS: {len(non_canonical_imports)} different "
+                f" FAIL:  IMPORT PATH VIOLATIONS: {len(non_canonical_imports)} different "
                 f"non-canonical import paths found across {total_violating_files} files.\n"
                 f"BUSINESS IMPACT: Inconsistent imports cause module resolution failures, "
                 f"WebSocket connection errors, and chat functionality breakdown.\n"
@@ -94,7 +94,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
             )
         
         self.logger.info(
-            f"✅ All {len(canonical_files)} files use canonical import path: {self.canonical_import_path}"
+            f" PASS:  All {len(canonical_files)} files use canonical import path: {self.canonical_import_path}"
         )
 
     def test_no_relative_message_router_imports(self):
@@ -108,7 +108,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
         if relative_imports:
             relative_summary = self._format_relative_import_violations(relative_imports)
             self.fail(
-                f"❌ RELATIVE IMPORT VIOLATIONS: {len(relative_imports)} files use "
+                f" FAIL:  RELATIVE IMPORT VIOLATIONS: {len(relative_imports)} files use "
                 f"relative imports for MessageRouter.\n"
                 f"BUSINESS IMPACT: Relative imports break when modules are moved or "
                 f"refactored, causing import errors and chat failures.\n"
@@ -116,7 +116,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
                 f"RELATIVE IMPORTS FOUND:\n{relative_summary}"
             )
         
-        self.logger.info("✅ No relative MessageRouter imports detected")
+        self.logger.info(" PASS:  No relative MessageRouter imports detected")
 
     def test_no_wildcard_imports_containing_message_router(self):
         """Test that no wildcard imports are used that might import MessageRouter.
@@ -129,7 +129,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
         if wildcard_imports:
             wildcard_summary = self._format_wildcard_import_violations(wildcard_imports)
             self.fail(
-                f"❌ WILDCARD IMPORT VIOLATIONS: {len(wildcard_imports)} files use "
+                f" FAIL:  WILDCARD IMPORT VIOLATIONS: {len(wildcard_imports)} files use "
                 f"wildcard imports that may include MessageRouter.\n"
                 f"BUSINESS IMPACT: Wildcard imports create namespace pollution and "
                 f"make it unclear where MessageRouter originates, complicating debugging.\n"
@@ -137,7 +137,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
                 f"WILDCARD IMPORTS FOUND:\n{wildcard_summary}"
             )
         
-        self.logger.info("✅ No wildcard imports containing MessageRouter detected")
+        self.logger.info(" PASS:  No wildcard imports containing MessageRouter detected")
 
     def test_import_statement_formatting_consistency(self):
         """Test that MessageRouter import statements follow consistent formatting.
@@ -155,7 +155,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
             pattern_summary = self._format_pattern_inconsistencies(formatting_analysis)
             
             self.fail(
-                f"❌ IMPORT FORMATTING INCONSISTENCY: {len(unique_patterns)} different "
+                f" FAIL:  IMPORT FORMATTING INCONSISTENCY: {len(unique_patterns)} different "
                 f"formatting patterns found for MessageRouter imports.\n"
                 f"BUSINESS IMPACT: Inconsistent formatting makes code maintenance harder "
                 f"and can lead to import statement errors during refactoring.\n"
@@ -163,7 +163,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
                 f"PATTERNS FOUND:\n{pattern_summary}"
             )
         
-        self.logger.info("✅ All MessageRouter imports use consistent formatting")
+        self.logger.info(" PASS:  All MessageRouter imports use consistent formatting")
 
     def test_no_dynamic_message_router_imports(self):
         """Test that no dynamic imports are used for MessageRouter.
@@ -176,7 +176,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
         if dynamic_imports:
             dynamic_summary = self._format_dynamic_import_violations(dynamic_imports)
             self.fail(
-                f"❌ DYNAMIC IMPORT VIOLATIONS: {len(dynamic_imports)} files use "
+                f" FAIL:  DYNAMIC IMPORT VIOLATIONS: {len(dynamic_imports)} files use "
                 f"dynamic imports for MessageRouter.\n"
                 f"BUSINESS IMPACT: Dynamic imports bypass static analysis, make "
                 f"dependencies unclear, and can fail at runtime with cryptic errors.\n"
@@ -184,7 +184,7 @@ class TestMessageRouterImportCompliance(SSotBaseTestCase, unittest.TestCase):
                 f"DYNAMIC IMPORTS FOUND:\n{dynamic_summary}"
             )
         
-        self.logger.info("✅ No dynamic MessageRouter imports detected")
+        self.logger.info(" PASS:  No dynamic MessageRouter imports detected")
 
     def _analyze_all_message_router_imports(self) -> Dict[str, List[str]]:
         """Analyze all MessageRouter import statements in the codebase."""

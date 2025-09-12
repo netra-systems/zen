@@ -3,7 +3,7 @@ User journey test data and scenarios for comprehensive flow testing.
 Provides realistic test data for different user segments and use cases.
 
 BVJ (Business Value Justification):
-1. Segment: All tiers (Free → Early → Mid → Enterprise)
+1. Segment: All tiers (Free  ->  Early  ->  Mid  ->  Enterprise)
 2. Business Goal: Ensure realistic testing scenarios
 3. Value Impact: Validates real user workflows and edge cases
 4. Strategic Impact: Protects conversion funnel integrity

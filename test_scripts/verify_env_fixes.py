@@ -64,15 +64,15 @@ def main():
         violations = check_file_violations(py_file)
         if violations:
             files_with_violations += 1
-            print(f"\n❌ {py_file.relative_to(project_root)}:")
+            print(f"\n FAIL:  {py_file.relative_to(project_root)}:")
             for violation in violations:
                 print(f"   - {violation}")
                 violation_count += 1
     
     if files_with_violations == 0:
-        print(f"\n✅ All {len(python_files)} files are clean! No environment violations found.")
+        print(f"\n PASS:  All {len(python_files)} files are clean! No environment violations found.")
     else:
-        print(f"\n📊 Summary:")
+        print(f"\n CHART:  Summary:")
         print(f"   Files checked: {len(python_files)}")
         print(f"   Files with violations: {files_with_violations}")
         print(f"   Total violations: {violation_count}")

@@ -177,7 +177,7 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
                 if not validation.is_valid:
                     logger.warning(f"Response format issues: {validation.validation_errors}")
                 else:
-                    logger.info(f"✅ DataHelper response format validated (quality: {validation.quality_score:.2f})")
+                    logger.info(f" PASS:  DataHelper response format validated (quality: {validation.quality_score:.2f})")
                     
     async def test_optimization_agent_response_structure_validation(self):
         """
@@ -227,7 +227,7 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
                 assert validation.quality_score >= 0.7, \
                     f"Technical response quality {validation.quality_score:.2f} below standard"
                 
-                logger.info(f"✅ Optimization response structure validated (quality: {validation.quality_score:.2f})")
+                logger.info(f" PASS:  Optimization response structure validated (quality: {validation.quality_score:.2f})")
                 
     async def test_response_consistency_across_multiple_queries(self):
         """
@@ -277,7 +277,7 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
             assert avg_quality >= 0.6, f"Average response quality {avg_quality:.2f} below threshold"
             assert quality_variance < 0.1, f"Response quality variance {quality_variance:.3f} too high (inconsistent)"
             
-            logger.info(f"✅ Response consistency validated (avg quality: {avg_quality:.2f}, variance: {quality_variance:.3f})")
+            logger.info(f" PASS:  Response consistency validated (avg quality: {avg_quality:.2f}, variance: {quality_variance:.3f})")
             
     async def test_error_response_format_maintains_user_experience(self):
         """
@@ -313,11 +313,11 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
                         assert len(result.error) > 0, f"Error message must be informative for {scenario['description']}"
                         assert len(result.error) < 500, f"Error message should be concise for {scenario['description']}"
                         
-                        logger.info(f"✅ Error response well-formatted for {scenario['description']}")
+                        logger.info(f" PASS:  Error response well-formatted for {scenario['description']}")
                     else:
                         # Success case - validate graceful handling
                         if result.result is not None:
-                            logger.info(f"✅ Agent handled {scenario['description']} gracefully")
+                            logger.info(f" PASS:  Agent handled {scenario['description']} gracefully")
                             
     async def test_response_metadata_completeness_for_analytics(self):
         """
@@ -361,7 +361,7 @@ class TestAgentResponseFormattingValidation(BaseIntegrationTest):
                 if hasattr(result, 'metadata') and result.metadata:
                     assert isinstance(result.metadata, dict), "Metadata must be dictionary"
                     
-                logger.info("✅ Response metadata completeness validated")
+                logger.info(" PASS:  Response metadata completeness validated")
                 
     def teardown_method(self):
         """Clean up test resources."""

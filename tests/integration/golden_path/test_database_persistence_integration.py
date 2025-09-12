@@ -1040,11 +1040,11 @@ class TestDatabasePersistenceIntegration(SSotAsyncTestCase):
         self.record_metric("avg_retrieval_time", avg_retrieval_time)
         self.record_metric("performance_test_iterations", test_iterations)
         
-        print(f"\n📊 DATABASE PERFORMANCE METRICS:")
-        print(f"   🧵 Thread Creation: {avg_thread_time:.3f}s")
-        print(f"   💬 Message Batch ({messages_per_batch}): {avg_batch_time:.3f}s")
-        print(f"   📄 Result Storage: {avg_result_time:.3f}s")
-        print(f"   📥 Data Retrieval: {avg_retrieval_time:.3f}s")
+        print(f"\n CHART:  DATABASE PERFORMANCE METRICS:")
+        print(f"   [U+1F9F5] Thread Creation: {avg_thread_time:.3f}s")
+        print(f"   [U+1F4AC] Message Batch ({messages_per_batch}): {avg_batch_time:.3f}s")
+        print(f"   [U+1F4C4] Result Storage: {avg_result_time:.3f}s")
+        print(f"   [U+1F4E5] Data Retrieval: {avg_retrieval_time:.3f}s")
 
 
 if __name__ == "__main__":

@@ -824,13 +824,13 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         successful_recoveries = sum(1 for result in recovery_results if result["recovered"])
         recovery_rate = successful_recoveries / len(recovery_results)
         
-        assert recovery_rate >= 0.8, f"Recovery rate too low: {recovery_rate:.2%} (expected ≥80%)"
+        assert recovery_rate >= 0.8, f"Recovery rate too low: {recovery_rate:.2%} (expected  >= 80%)"
         
         # Validate state preservation rate
         preserved_states = sum(1 for result in recovery_results if result.get("state_preserved", False))
         preservation_rate = preserved_states / len(recovery_results)
         
-        assert preservation_rate >= 0.7, f"State preservation rate too low: {preservation_rate:.2%} (expected ≥70%)"
+        assert preservation_rate >= 0.7, f"State preservation rate too low: {preservation_rate:.2%} (expected  >= 70%)"
         
         # Complete execution
         await execution_engine.complete_agent_execution(
@@ -968,8 +968,8 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         consistency_rate = hash_matches / len(consistency_checks)
         completeness_rate = state_completeness / len(consistency_checks)
         
-        assert consistency_rate >= 0.95, f"State consistency rate too low: {consistency_rate:.2%} (expected ≥95%)"
-        assert completeness_rate >= 0.95, f"State completeness rate too low: {completeness_rate:.2%} (expected ≥95%)"
+        assert consistency_rate >= 0.95, f"State consistency rate too low: {consistency_rate:.2%} (expected  >= 95%)"
+        assert completeness_rate >= 0.95, f"State completeness rate too low: {completeness_rate:.2%} (expected  >= 95%)"
         
         # Validate memory stability (no significant memory leaks)
         memory_growth = state_snapshots[-1]["memory_usage"] - state_snapshots[0]["memory_usage"]
@@ -998,7 +998,7 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Performance validation
         execution_time = time.time() - start_time
-        assert execution_time >= 20.0, f"Long-running test should take ≥20s, took {execution_time:.2f}s"
+        assert execution_time >= 20.0, f"Long-running test should take  >= 20s, took {execution_time:.2f}s"
         assert execution_time < 60.0, f"Long-running test should complete in <60s, took {execution_time:.2f}s"
         
         logger.info(f"Long-running consistency test completed in {execution_time:.2f}s with {consistency_rate:.2%} consistency rate")

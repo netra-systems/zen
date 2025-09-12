@@ -55,7 +55,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         
     def test_terraform_to_script_integration_chain(self):
         """
-        INTEGRATION TEST 1: Validate terraform → deployment script integration
+        INTEGRATION TEST 1: Validate terraform  ->  deployment script integration
         
         Tests the complete terraform deployment pipeline integration.
         """
@@ -66,7 +66,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         if terraform_deploy_script.exists():
             integration_results["terraform_deploy"] = self._analyze_terraform_deploy_script(terraform_deploy_script)
         
-        # Test 2: Check terraform → python script chain
+        # Test 2: Check terraform  ->  python script chain
         terraform_python_chain = self._test_terraform_python_integration()
         integration_results["terraform_python_chain"] = terraform_python_chain
         
@@ -74,7 +74,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         terraform_vars = self._extract_terraform_variables()
         integration_results["terraform_variables"] = terraform_vars
         
-        print(f"\n=== TERRAFORM → SCRIPT INTEGRATION ANALYSIS ===")
+        print(f"\n=== TERRAFORM  ->  SCRIPT INTEGRATION ANALYSIS ===")
         for test_name, result in integration_results.items():
             print(f"{test_name}: {result}")
         
@@ -82,7 +82,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         integration_issues = self._validate_integration_integrity(integration_results)
         
         if integration_issues:
-            print(f"\n⚠️  INTEGRATION ISSUES DETECTED:")
+            print(f"\n WARNING: [U+FE0F]  INTEGRATION ISSUES DETECTED:")
             for issue in integration_issues:
                 print(f"  - {issue}")
         
@@ -109,7 +109,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         print(f"Consistency score: {consistency_analysis['consistency_score']}%")
         
         if consistency_analysis["inconsistencies"]:
-            print(f"\n⚠️  CONSISTENCY ISSUES:")
+            print(f"\n WARNING: [U+FE0F]  CONSISTENCY ISSUES:")
             for issue in consistency_analysis["inconsistencies"]:
                 print(f"  - {issue}")
         
@@ -137,7 +137,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         
         print(f"\n=== ENVIRONMENT CONFIGURATION VALIDATION ===")
         for env_name, result in validation_results.items():
-            status = "✅ VALID" if result["valid"] else "❌ INVALID"
+            status = " PASS:  VALID" if result["valid"] else " FAIL:  INVALID"
             print(f"{env_name}: {status}")
             if result["issues"]:
                 for issue in result["issues"]:
@@ -147,7 +147,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         isolation_issues = self._check_environment_isolation(env_configs)
         
         if isolation_issues:
-            print(f"\n⚠️  ENVIRONMENT ISOLATION ISSUES:")
+            print(f"\n WARNING: [U+FE0F]  ENVIRONMENT ISOLATION ISSUES:")
             for issue in isolation_issues:
                 print(f"  - {issue}")
         
@@ -185,7 +185,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         
         print(f"\n=== DEPLOYMENT ROLLBACK CAPABILITY ANALYSIS ===")
         for source, capability in rollback_capabilities.items():
-            status = "✅ SUPPORTS" if capability["supports_rollback"] else "❌ NO SUPPORT"
+            status = " PASS:  SUPPORTS" if capability["supports_rollback"] else " FAIL:  NO SUPPORT"
             print(f"{source}: {status}")
             if capability["method"]:
                 print(f"  Method: {capability['method']}")
@@ -331,7 +331,7 @@ class TestDeploymentPipelineIntegration(SSotBaseTestCase):
         """Validate integration integrity and return issues."""
         issues = []
         
-        # Check terraform → python integration
+        # Check terraform  ->  python integration
         if "terraform_python_chain" in integration_results:
             chain = integration_results["terraform_python_chain"]
             if not chain.get("integration_working", False):

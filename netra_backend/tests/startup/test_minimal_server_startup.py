@@ -267,12 +267,12 @@ class TestMinimalServerStartup:
                 f"Minimal server failed to start listening. Error: {self.minimal_server.startup_error}"
             )
         
-        print("✅ Minimal FastAPI server started successfully")
+        print(" PASS:  Minimal FastAPI server started successfully")
         
         # Test basic connectivity
         assert self.minimal_server.is_port_listening(), "Server not listening after startup"
         
-        print(f"✅ Server is listening on port {self.minimal_server.port}")
+        print(f" PASS:  Server is listening on port {self.minimal_server.port}")
     
     @pytest.mark.integration
     def test_netra_app_without_lifespan(self):
@@ -295,12 +295,12 @@ class TestMinimalServerStartup:
             error_msg = self.full_server.startup_error or "Unknown startup issue"
             pytest.fail(f"Netra app failed to start listening: {error_msg}")
         
-        print("✅ Netra app (without lifespan) started successfully")
+        print(" PASS:  Netra app (without lifespan) started successfully")
         
         # Test connectivity
         assert self.full_server.is_port_listening(), "Netra app not listening after startup"
         
-        print(f"✅ Netra app is listening on port {self.full_server.port}")
+        print(f" PASS:  Netra app is listening on port {self.full_server.port}")
     
     @pytest.mark.unit
     def test_port_availability_detection(self):
@@ -315,7 +315,7 @@ class TestMinimalServerStartup:
         server.port = 99999
         assert not server.is_port_listening(), "Invalid port should not be listening"
         
-        print("✅ Port availability detection working correctly")
+        print(" PASS:  Port availability detection working correctly")
     
     @pytest.mark.unit  
     def test_fastapi_app_creation_isolated(self):
@@ -326,7 +326,7 @@ class TestMinimalServerStartup:
         assert app is not None, "Failed to create minimal FastAPI app"
         assert len(app.routes) > 0, "No routes registered in minimal app"
         
-        print("✅ FastAPI app creation works in isolation")
+        print(" PASS:  FastAPI app creation works in isolation")
 
 
 # Diagnostic functions
@@ -343,24 +343,24 @@ def test_diagnose_server_startup_issue():
     
     try:
         if not minimal.is_port_listening():
-            print(f"   ✅ Port {minimal.port} is available")
+            print(f"    PASS:  Port {minimal.port} is available")
             
             started = minimal.start_server_thread()
             if started:
-                print("   ✅ Server thread started")
+                print("    PASS:  Server thread started")
                 
                 listening = minimal.wait_for_listening(max_wait=3.0)
                 if listening:
-                    print("   ✅ Minimal server listening successfully!")
-                    print("   📋 RESULT: Basic FastAPI + uvicorn works correctly")
+                    print("    PASS:  Minimal server listening successfully!")
+                    print("   [U+1F4CB] RESULT: Basic FastAPI + uvicorn works correctly")
                 else:
-                    print("   ❌ Minimal server not listening")
-                    print(f"   🔍 Error: {minimal.startup_error}")
+                    print("    FAIL:  Minimal server not listening")
+                    print(f"    SEARCH:  Error: {minimal.startup_error}")
                     
             else:
-                print(f"   ❌ Server thread failed: {minimal.startup_error}")
+                print(f"    FAIL:  Server thread failed: {minimal.startup_error}")
         else:
-            print(f"   ⚠️ Port {minimal.port} already in use")
+            print(f"    WARNING: [U+FE0F] Port {minimal.port} already in use")
             
     finally:
         minimal.stop_server()
@@ -371,26 +371,26 @@ def test_diagnose_server_startup_issue():
     
     try:
         if not full.is_port_listening():
-            print(f"   ✅ Port {full.port} is available")
+            print(f"    PASS:  Port {full.port} is available")
             
             started = full.start_server_thread()
             if started:
-                print("   ✅ Netra app creation succeeded")
+                print("    PASS:  Netra app creation succeeded")
                 
                 listening = full.wait_for_listening(max_wait=5.0)
                 if listening:
-                    print("   ✅ Netra app listening successfully!")
-                    print("   📋 RESULT: Issue is likely in lifespan startup events")
+                    print("    PASS:  Netra app listening successfully!")
+                    print("   [U+1F4CB] RESULT: Issue is likely in lifespan startup events")
                 else:
-                    print("   ❌ Netra app not listening")
-                    print(f"   🔍 Error: {full.startup_error}")
-                    print("   📋 RESULT: Issue is in app creation/route registration")
+                    print("    FAIL:  Netra app not listening")
+                    print(f"    SEARCH:  Error: {full.startup_error}")
+                    print("   [U+1F4CB] RESULT: Issue is in app creation/route registration")
                     
             else:
-                print(f"   ❌ Netra app creation failed: {full.startup_error}")
-                print("   📋 RESULT: Issue is in app factory or imports")
+                print(f"    FAIL:  Netra app creation failed: {full.startup_error}")
+                print("   [U+1F4CB] RESULT: Issue is in app factory or imports")
         else:
-            print(f"   ⚠️ Port {full.port} already in use")
+            print(f"    WARNING: [U+FE0F] Port {full.port} already in use")
             
     finally:
         full.stop_server()

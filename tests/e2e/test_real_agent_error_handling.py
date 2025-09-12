@@ -490,7 +490,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
                     "Must provide alternatives when primary solution fails"
                 )
             
-        logger.success("✓ Comprehensive error recovery flow validated")
+        logger.success("[U+2713] Comprehensive error recovery flow validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -548,7 +548,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
                 ])
                 assert explanation_provided, f"Must explain LLM issues for {scenario['name']}"
             
-        logger.success("✓ LLM API resilience validated")
+        logger.success("[U+2713] LLM API resilience validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -604,7 +604,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
             ])
             assert tool_status_info, "Must explain tool limitations to user"
             
-        logger.success("✓ Tool execution failure recovery validated")
+        logger.success("[U+2713] Tool execution failure recovery validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -654,7 +654,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
             ])
             assert has_results, "Must provide results despite WebSocket interruptions"
             
-        logger.success("✓ WebSocket interruption recovery validated")
+        logger.success("[U+2713] WebSocket interruption recovery validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -730,7 +730,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
                 f"User {result['user_id']} had too many user-facing errors"
             )
         
-        logger.success("✓ Concurrent error isolation validated")
+        logger.success("[U+2713] Concurrent error isolation validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -816,7 +816,7 @@ class TestRealAgentErrorHandling(RealAgentErrorHandlingE2ETest):
                     # Even exceptions should be handled gracefully by the system
                     assert False, f"System should handle invalid input without exceptions: {invalid_input['type']}"
         
-        logger.success("✓ Invalid input graceful handling validated")
+        logger.success("[U+2713] Invalid input graceful handling validated")
 
 
 if __name__ == "__main__":
@@ -837,10 +837,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_error_recovery_flow(mock_services)
-            logger.success("✓ All agent error handling tests passed")
+            logger.success("[U+2713] All agent error handling tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Agent error handling tests failed: {e}")
+            logger.error(f"[U+2717] Agent error handling tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

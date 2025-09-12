@@ -23,9 +23,9 @@ def test_inheritance_structure():
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         
-        print("✓ Successfully imported agent classes")
+        print("[U+2713] Successfully imported agent classes")
     except Exception as e:
-        print(f"✗ Import failed: {e}")
+        print(f"[U+2717] Import failed: {e}")
         traceback.print_exc()
         return False
     
@@ -39,17 +39,17 @@ def test_inheritance_structure():
         print(f"DataSubAgent bases: {[b.__name__ for b in data_bases]}")
         assert len(data_bases) == 1, f"Expected 1 base, got {len(data_bases)}"
         assert data_bases[0] == BaseAgent, f"Expected BaseAgent, got {data_bases[0]}"
-        print("✓ DataSubAgent uses single inheritance correctly")
+        print("[U+2713] DataSubAgent uses single inheritance correctly")
         
         # Check ValidationSubAgent inheritance
         validation_bases = ValidationSubAgent.__bases__
         print(f"ValidationSubAgent bases: {[b.__name__ for b in validation_bases]}")
         assert len(validation_bases) == 1, f"Expected 1 base, got {len(validation_bases)}"
         assert validation_bases[0] == BaseAgent, f"Expected BaseAgent, got {validation_bases[0]}"
-        print("✓ ValidationSubAgent uses single inheritance correctly")
+        print("[U+2713] ValidationSubAgent uses single inheritance correctly")
         
     except Exception as e:
-        print(f"✗ Single inheritance test failed: {e}")
+        print(f"[U+2717] Single inheritance test failed: {e}")
         return False
     
     # Test 2: MRO depth
@@ -66,10 +66,10 @@ def test_inheritance_structure():
             print(f"  Classes: {[c.__name__ for c in netra_classes]}")
             
             assert depth <= 3, f"{name} MRO depth {depth} exceeds recommended maximum of 3"
-            print(f"✓ {name} MRO depth acceptable")
+            print(f"[U+2713] {name} MRO depth acceptable")
             
     except Exception as e:
-        print(f"✗ MRO depth test failed: {e}")
+        print(f"[U+2717] MRO depth test failed: {e}")
         return False
     
     # Test 3: Agent instantiation
@@ -85,16 +85,16 @@ def test_inheritance_structure():
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         validation_agent = ValidationSubAgent(llm_manager, tool_dispatcher)
         
-        print("✓ Successfully created DataSubAgent")
-        print("✓ Successfully created ValidationSubAgent")
+        print("[U+2713] Successfully created DataSubAgent")
+        print("[U+2713] Successfully created ValidationSubAgent")
         
         # Check basic properties
         assert data_agent.name == "DataSubAgent"
         assert validation_agent.name == "ValidationSubAgent"
-        print("✓ Agent names set correctly")
+        print("[U+2713] Agent names set correctly")
         
     except Exception as e:
-        print(f"✗ Agent instantiation failed: {e}")
+        print(f"[U+2717] Agent instantiation failed: {e}")
         traceback.print_exc()
         return False
     
@@ -106,14 +106,14 @@ def test_inheritance_structure():
         # Check execution methods
         assert hasattr(data_agent, 'execute'), "DataSubAgent should have execute method"
         assert not hasattr(data_agent, 'execute_core_logic'), "DataSubAgent should not have execute_core_logic"
-        print("✓ DataSubAgent has correct execution methods")
+        print("[U+2713] DataSubAgent has correct execution methods")
         
         assert hasattr(validation_agent, 'execute'), "ValidationSubAgent should have execute method"
         assert not hasattr(validation_agent, 'execute_core_logic'), "ValidationSubAgent should not have execute_core_logic"
-        print("✓ ValidationSubAgent has correct execution methods")
+        print("[U+2713] ValidationSubAgent has correct execution methods")
         
     except Exception as e:
-        print(f"✗ Execution method test failed: {e}")
+        print(f"[U+2717] Execution method test failed: {e}")
         return False
     
     # Test 5: WebSocket methods
@@ -127,10 +127,10 @@ def test_inheritance_structure():
             assert hasattr(data_agent, method), f"DataSubAgent should have {method}"
             assert hasattr(validation_agent, method), f"ValidationSubAgent should have {method}"
         
-        print("✓ All WebSocket methods available on both agents")
+        print("[U+2713] All WebSocket methods available on both agents")
         
     except Exception as e:
-        print(f"✗ WebSocket method test failed: {e}")
+        print(f"[U+2717] WebSocket method test failed: {e}")
         return False
     
     # Test 6: WebSocket method calls
@@ -144,16 +144,16 @@ def test_inheritance_structure():
             await data_agent.emit_progress("Test progress")
             await data_agent.emit_tool_executing("test_tool")
             await data_agent.emit_tool_completed("test_tool", {"result": "success"})
-            print("✓ DataSubAgent WebSocket methods callable")
+            print("[U+2713] DataSubAgent WebSocket methods callable")
             
             await validation_agent.emit_thinking("Test thinking")
             await validation_agent.emit_progress("Test progress")
             await validation_agent.emit_tool_executing("test_tool")
             await validation_agent.emit_tool_completed("test_tool", {"result": "success"})
-            print("✓ ValidationSubAgent WebSocket methods callable")
+            print("[U+2713] ValidationSubAgent WebSocket methods callable")
             
         except Exception as e:
-            print(f"✗ WebSocket call test failed: {e}")
+            print(f"[U+2717] WebSocket call test failed: {e}")
             traceback.print_exc()
             return False
         return True
@@ -163,7 +163,7 @@ def test_inheritance_structure():
         if not result:
             return False
     except Exception as e:
-        print(f"✗ Async WebSocket test failed: {e}")
+        print(f"[U+2717] Async WebSocket test failed: {e}")
         return False
     
     # Test 7: Method resolution performance
@@ -186,10 +186,10 @@ def test_inheritance_structure():
         
         print(f"Method resolution time for 4000 calls: {resolution_time:.4f}s")
         assert resolution_time < 0.1, f"Method resolution too slow: {resolution_time}s"
-        print("✓ Method resolution performance acceptable")
+        print("[U+2713] Method resolution performance acceptable")
         
     except Exception as e:
-        print(f"✗ Performance test failed: {e}")
+        print(f"[U+2717] Performance test failed: {e}")
         return False
     
     print("\n" + "=" * 60)
@@ -214,17 +214,17 @@ def test_websocket_integration():
         tool_dispatcher = ToolDispatcher()
         data_agent = DataSubAgent(llm_manager, tool_dispatcher)
         
-        print("✓ Agent created successfully")
+        print("[U+2713] Agent created successfully")
         
         # Test WebSocket context check
         has_websocket = data_agent.has_websocket_context()
         print(f"Has WebSocket context: {has_websocket}")
         
-        print("✓ WebSocket integration test completed")
+        print("[U+2713] WebSocket integration test completed")
         return True
         
     except Exception as e:
-        print(f"✗ WebSocket integration test failed: {e}")
+        print(f"[U+2717] WebSocket integration test failed: {e}")
         traceback.print_exc()
         return False
 
@@ -249,39 +249,39 @@ def generate_test_report():
 ## Test Results
 
 ### 1. Single Inheritance Pattern
-- DataSubAgent: Uses single inheritance from BaseAgent only ✓
-- ValidationSubAgent: Uses single inheritance from BaseAgent only ✓
+- DataSubAgent: Uses single inheritance from BaseAgent only [U+2713]
+- ValidationSubAgent: Uses single inheritance from BaseAgent only [U+2713]
 
 ### 2. Method Resolution Order (MRO)
-- DataSubAgent MRO depth: ≤ 3 levels ✓
-- ValidationSubAgent MRO depth: ≤ 3 levels ✓
-- Simplified inheritance hierarchy ✓
+- DataSubAgent MRO depth:  <=  3 levels [U+2713]
+- ValidationSubAgent MRO depth:  <=  3 levels [U+2713]
+- Simplified inheritance hierarchy [U+2713]
 
 ### 3. Execution Methods
-- No execute_core_logic() method conflicts ✓
-- Single execute() method per agent ✓
-- Clear execution path ✓
+- No execute_core_logic() method conflicts [U+2713]
+- Single execute() method per agent [U+2713]
+- Clear execution path [U+2713]
 
 ### 4. WebSocket Events
-- All WebSocket event methods available ✓
-- Methods callable without errors ✓
-- Bridge pattern working correctly ✓
+- All WebSocket event methods available [U+2713]
+- Methods callable without errors [U+2713]
+- Bridge pattern working correctly [U+2713]
 
 ### 5. Performance
-- Agent instantiation fast ✓
-- Method resolution performant ✓
-- No inheritance overhead ✓
+- Agent instantiation fast [U+2713]
+- Method resolution performant [U+2713]
+- No inheritance overhead [U+2713]
 
 ## Architecture Validation
 
 The inheritance refactoring has been successful:
-1. ✅ Multiple inheritance removed
-2. ✅ Single inheritance from BaseAgent only
-3. ✅ MRO depth reduced to acceptable levels
-4. ✅ No method conflicts or duplicates
-5. ✅ WebSocket events still working through bridge pattern
-6. ✅ Performance improved
-7. ✅ All functionality preserved
+1.  PASS:  Multiple inheritance removed
+2.  PASS:  Single inheritance from BaseAgent only
+3.  PASS:  MRO depth reduced to acceptable levels
+4.  PASS:  No method conflicts or duplicates
+5.  PASS:  WebSocket events still working through bridge pattern
+6.  PASS:  Performance improved
+7.  PASS:  All functionality preserved
 
 ## Recommendations
 
@@ -301,7 +301,7 @@ The inheritance refactoring has been successful:
     with open('INHERITANCE_REFACTOR_TEST_RESULTS.md', 'w') as f:
         f.write(report)
     
-    print("✓ Test report generated: INHERITANCE_REFACTOR_TEST_RESULTS.md")
+    print("[U+2713] Test report generated: INHERITANCE_REFACTOR_TEST_RESULTS.md")
     
     return inheritance_success and websocket_success
 

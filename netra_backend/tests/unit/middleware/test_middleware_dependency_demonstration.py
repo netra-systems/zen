@@ -90,7 +90,7 @@ class TestMiddlewareDependencyDemonstration:
             f"Expected patterns: {gcp_patterns}, Found: {found_gcp_patterns}"
         )
         
-        print(f"  ✓ CONFIRMED: GCPAuthContextMiddleware is NOW PROPERLY in SSOT setup_middleware()")
+        print(f"  [U+2713] CONFIRMED: GCPAuthContextMiddleware is NOW PROPERLY in SSOT setup_middleware()")
         
         # Verify the order is correct - should come after session middleware
         setup_gcp_line = None
@@ -108,7 +108,7 @@ class TestMiddlewareDependencyDemonstration:
                 f"GCP auth middleware should come AFTER session middleware. "
                 f"Session line: {session_line}, GCP line: {setup_gcp_line}"
             )
-            print(f"  ✓ CONFIRMED: Proper middleware order maintained")
+            print(f"  [U+2713] CONFIRMED: Proper middleware order maintained")
 
     def test_factory_no_longer_installs_gcp_middleware_outside_ssot(self):
         """TEST 3: Verify that app_factory.py NO LONGER installs GCPAuthContextMiddleware outside SSOT.
@@ -141,7 +141,7 @@ class TestMiddlewareDependencyDemonstration:
             f"All GCP middleware setup should now be in SSOT setup_middleware()."
         )
         
-        print(f"  ✓ CONFIRMED: app_factory.py no longer installs GCP middleware outside SSOT")
+        print(f"  [U+2713] CONFIRMED: app_factory.py no longer installs GCP middleware outside SSOT")
         
         # Verify the note about SSOT delegation exists
         ssot_delegation_patterns = [
@@ -340,9 +340,9 @@ class TestSSOTComplianceRestoration:
                 f"GCP middleware setup should come AFTER session middleware in SSOT. "
                 f"Session: line {session_line}, GCP: line {gcp_line}"
             )
-            print(f"  ✓ CONFIRMED: Proper middleware order in SSOT function")
+            print(f"  [U+2713] CONFIRMED: Proper middleware order in SSOT function")
         
-        print(f"  ✓ SSOT COMPLIANCE FULLY RESTORED")
+        print(f"  [U+2713] SSOT COMPLIANCE FULLY RESTORED")
 
 
 if __name__ == '__main__':

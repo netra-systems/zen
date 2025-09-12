@@ -144,17 +144,17 @@ class FrameworkValidator:
                 }
                 
                 if violations_found:
-                    print("✅ Level 1: Successfully detected async pattern violations")
+                    print(" PASS:  Level 1: Successfully detected async pattern violations")
                     return True
                 else:
-                    print("❌ Level 1: Failed to detect known violations")
+                    print(" FAIL:  Level 1: Failed to detect known violations")
                     return False
             else:
-                print("⚠️  Level 1: No output from async pattern enforcer")
+                print(" WARNING: [U+FE0F]  Level 1: No output from async pattern enforcer")
                 return False
                 
         except Exception as e:
-            print(f"❌ Level 1: Error testing async pattern enforcer: {e}")
+            print(f" FAIL:  Level 1: Error testing async pattern enforcer: {e}")
             self.test_results['level1'] = {'success': False, 'error': str(e)}
             return False
     
@@ -189,23 +189,23 @@ class FrameworkValidator:
                         }
                         
                         if breaking_changes > 0:
-                            print("✅ Level 2: Successfully detected API contract violations")
+                            print(" PASS:  Level 2: Successfully detected API contract violations")
                             return True
                         else:
-                            print("⚠️  Level 2: Contract validation working but no breaking changes detected")
+                            print(" WARNING: [U+FE0F]  Level 2: Contract validation working but no breaking changes detected")
                             return True  # Still working, just no breaking changes in this test
                     except json.JSONDecodeError:
-                        print(f"⚠️  Level 2: JSON parsing error: {result2.stdout}")
+                        print(f" WARNING: [U+FE0F]  Level 2: JSON parsing error: {result2.stdout}")
                         return False
                 else:
-                    print("⚠️  Level 2: No output from contract validator")
+                    print(" WARNING: [U+FE0F]  Level 2: No output from contract validator")
                     return False
             else:
-                print(f"❌ Level 2: Contract generation failed: {result1.stderr}")
+                print(f" FAIL:  Level 2: Contract generation failed: {result1.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Level 2: Error testing API contract validator: {e}")
+            print(f" FAIL:  Level 2: Error testing API contract validator: {e}")
             self.test_results['level2'] = {'success': False, 'error': str(e)}
             return False
     
@@ -231,17 +231,17 @@ class FrameworkValidator:
                         'message': f"Pipeline status: {pipeline_status}"
                     }
                     
-                    print(f"✅ Level 3: Pipeline enhancer working, status: {pipeline_status}")
+                    print(f" PASS:  Level 3: Pipeline enhancer working, status: {pipeline_status}")
                     return True
                 except json.JSONDecodeError:
-                    print(f"⚠️  Level 3: JSON parsing error: {result.stdout}")
+                    print(f" WARNING: [U+FE0F]  Level 3: JSON parsing error: {result.stdout}")
                     return False
             else:
-                print("⚠️  Level 3: No output from pipeline enhancer")
+                print(" WARNING: [U+FE0F]  Level 3: No output from pipeline enhancer")
                 return False
                 
         except Exception as e:
-            print(f"❌ Level 3: Error testing CI pipeline enhancer: {e}")
+            print(f" FAIL:  Level 3: Error testing CI pipeline enhancer: {e}")
             self.test_results['level3'] = {'success': False, 'error': str(e)}
             return False
     
@@ -275,17 +275,17 @@ class FrameworkValidator:
                 }
                 
                 if len(created_files) > 0:
-                    print(f"✅ Level 4: Successfully generated {len(created_files)} training files")
+                    print(f" PASS:  Level 4: Successfully generated {len(created_files)} training files")
                     return True
                 else:
-                    print("❌ Level 4: No training files were created")
+                    print(" FAIL:  Level 4: No training files were created")
                     return False
             else:
-                print(f"❌ Level 4: Training generator failed: {result.stderr}")
+                print(f" FAIL:  Level 4: Training generator failed: {result.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Level 4: Error testing developer training generator: {e}")
+            print(f" FAIL:  Level 4: Error testing developer training generator: {e}")
             self.test_results['level4'] = {'success': False, 'error': str(e)}
             return False
     
@@ -320,20 +320,20 @@ class FrameworkValidator:
                             'message': "Governance framework initialized and dashboard working"
                         }
                         
-                        print("✅ Level 5: API Governance Framework working")
+                        print(" PASS:  Level 5: API Governance Framework working")
                         return True
                     except json.JSONDecodeError:
-                        print(f"⚠️  Level 5: Dashboard JSON parsing error: {result2.stdout}")
+                        print(f" WARNING: [U+FE0F]  Level 5: Dashboard JSON parsing error: {result2.stdout}")
                         return False
                 else:
-                    print("⚠️  Level 5: No dashboard output")
+                    print(" WARNING: [U+FE0F]  Level 5: No dashboard output")
                     return False
             else:
-                print(f"❌ Level 5: Governance initialization failed: {result.stderr}")
+                print(f" FAIL:  Level 5: Governance initialization failed: {result.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"❌ Level 5: Error testing API governance framework: {e}")
+            print(f" FAIL:  Level 5: Error testing API governance framework: {e}")
             self.test_results['level5'] = {'success': False, 'error': str(e)}
             return False
     
@@ -366,21 +366,21 @@ class FrameworkValidator:
             }
             
             if integration_success:
-                print("✅ Integration: All 5 levels working together")
+                print(" PASS:  Integration: All 5 levels working together")
                 return True
             else:
                 working_levels = self.test_results['integration']['levels_working']
-                print(f"⚠️  Integration: {working_levels}/5 levels working")
+                print(f" WARNING: [U+FE0F]  Integration: {working_levels}/5 levels working")
                 return working_levels >= 3  # At least 3 levels working is acceptable
                 
         except Exception as e:
-            print(f"❌ Integration: Error testing integration workflow: {e}")
+            print(f" FAIL:  Integration: Error testing integration workflow: {e}")
             self.test_results['integration'] = {'success': False, 'error': str(e)}
             return False
     
     def run_all_tests(self) -> bool:
         """Run all framework validation tests"""
-        print("🚀 Starting Async Prevention Framework Validation")
+        print("[U+1F680] Starting Async Prevention Framework Validation")
         print("=" * 60)
         
         # Create test files
@@ -400,7 +400,7 @@ class FrameworkValidator:
             try:
                 results.append(test())
             except Exception as e:
-                print(f"❌ Test failed with exception: {e}")
+                print(f" FAIL:  Test failed with exception: {e}")
                 results.append(False)
         
         # Run integration test
@@ -414,7 +414,7 @@ class FrameworkValidator:
     def generate_test_summary(self, level_results: List[bool], integration_result: bool) -> None:
         """Generate comprehensive test summary"""
         print("\n" + "=" * 60)
-        print("📊 ASYNC PREVENTION FRAMEWORK VALIDATION RESULTS")
+        print(" CHART:  ASYNC PREVENTION FRAMEWORK VALIDATION RESULTS")
         print("=" * 60)
         
         level_names = [
@@ -427,7 +427,7 @@ class FrameworkValidator:
         
         successful_levels = 0
         for i, (name, result) in enumerate(zip(level_names, level_results)):
-            status_icon = "✅" if result else "❌"
+            status_icon = " PASS: " if result else " FAIL: "
             print(f"{status_icon} {name}")
             
             if result:
@@ -440,33 +440,33 @@ class FrameworkValidator:
                 print(f"   {details.get('message', 'No details available')}")
         
         # Integration results
-        integration_icon = "✅" if integration_result else "❌"
+        integration_icon = " PASS: " if integration_result else " FAIL: "
         print(f"{integration_icon} Integration Workflow")
         if 'integration' in self.test_results:
             print(f"   {self.test_results['integration'].get('message', 'No details available')}")
         
         # Overall summary
-        print("\n📈 SUMMARY:")
+        print("\n[U+1F4C8] SUMMARY:")
         print(f"Successful Levels: {successful_levels}/5")
         print(f"Integration Status: {'WORKING' if integration_result else 'PARTIAL'}")
         
         # Business impact assessment
-        print(f"\n💰 BUSINESS IMPACT PROTECTION:")
+        print(f"\n[U+1F4B0] BUSINESS IMPACT PROTECTION:")
         if successful_levels >= 4 and integration_result:
-            print("🟢 EXCELLENT: $500K+ ARR fully protected by comprehensive async pattern prevention")
-            print("🟢 All critical prevention layers operational")
+            print("[U+1F7E2] EXCELLENT: $500K+ ARR fully protected by comprehensive async pattern prevention")
+            print("[U+1F7E2] All critical prevention layers operational")
         elif successful_levels >= 3:
-            print("🟡 GOOD: $500K+ ARR substantially protected")
-            print("🟡 Core prevention mechanisms working, some enhancements needed")
+            print("[U+1F7E1] GOOD: $500K+ ARR substantially protected")
+            print("[U+1F7E1] Core prevention mechanisms working, some enhancements needed")
         elif successful_levels >= 2:
-            print("🟠 PARTIAL: $500K+ ARR at moderate risk")  
-            print("🟠 Basic prevention working, need immediate attention to gaps")
+            print("[U+1F7E0] PARTIAL: $500K+ ARR at moderate risk")  
+            print("[U+1F7E0] Basic prevention working, need immediate attention to gaps")
         else:
-            print("🔴 CRITICAL: $500K+ ARR at high risk")
-            print("🔴 Multiple prevention layers failing, immediate action required")
+            print("[U+1F534] CRITICAL: $500K+ ARR at high risk")
+            print("[U+1F534] Multiple prevention layers failing, immediate action required")
         
         # Recommendations
-        print(f"\n🎯 RECOMMENDATIONS:")
+        print(f"\n TARGET:  RECOMMENDATIONS:")
         
         if successful_levels < 5:
             failed_levels = [i for i, result in enumerate(level_results) if not result]
@@ -488,7 +488,7 @@ class FrameworkValidator:
         with open(results_file, 'w') as f:
             json.dump(self.test_results, f, indent=2)
         
-        print(f"\n📝 Detailed results saved to: {results_file}")
+        print(f"\n[U+1F4DD] Detailed results saved to: {results_file}")
 
 
 def main() -> int:
@@ -499,10 +499,10 @@ def main() -> int:
         success = validator.run_all_tests()
         return 0 if success else 1
     except KeyboardInterrupt:
-        print("\n⚠️  Validation interrupted by user")
+        print("\n WARNING: [U+FE0F]  Validation interrupted by user")
         return 1
     except Exception as e:
-        print(f"\n❌ Validation failed with error: {e}")
+        print(f"\n FAIL:  Validation failed with error: {e}")
         return 1
 
 

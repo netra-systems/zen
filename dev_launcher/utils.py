@@ -40,7 +40,7 @@ def check_emoji_support() -> bool:
                 pass
         
         # Try to encode an emoji
-        "✅".encode(sys.stdout.encoding or 'utf-8')
+        " PASS: ".encode(sys.stdout.encoding or 'utf-8')
         
         # Check if we're on Windows terminal that supports emojis
         if sys.platform == "win32":

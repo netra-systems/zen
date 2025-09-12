@@ -15,10 +15,10 @@ class MockSSotAsyncTestCase:
     
     @classmethod
     async def asyncSetUpClass(cls):
-        print("✅ Setting up mock SSOT test environment")
+        print(" PASS:  Setting up mock SSOT test environment")
         
     async def asyncTearDown(self):
-        print("✅ Cleaning up test resources")
+        print(" PASS:  Cleaning up test resources")
         
     def assertTrue(self, condition, msg=""):
         if not condition:
@@ -151,7 +151,7 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         )
         
         cls.state_manager = MockUnifiedStateManager(config=cls.config)
-        print("✅ Mock GCP services initialized")
+        print(" PASS:  Mock GCP services initialized")
         
     async def asyncTearDown(self):
         """Clean up after each test."""
@@ -208,7 +208,7 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         
         self.assertEqual(len(retrieved_states), 100, "Not all states were stored")
         
-        print(f"✅ SUCCESS: {len(results)} state operations completed in {execution_time:.2f}s")
+        print(f" PASS:  SUCCESS: {len(results)} state operations completed in {execution_time:.2f}s")
 
     @pytest.mark.validation_test 
     async def test_resource_exhaustion_failure_scenario(self):
@@ -242,13 +242,13 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         except Exception as e:
             if "storage exhausted" in str(e):
                 resource_exhaustion_triggered = True
-                print(f"✅ SUCCESS: Resource exhaustion detected: {e}")
+                print(f" PASS:  SUCCESS: Resource exhaustion detected: {e}")
         
         # Validate that resource exhaustion was properly detected
         self.assertTrue(resource_exhaustion_triggered, 
                        "Resource exhaustion should have been triggered for production safety")
         
-        print("✅ SUCCESS: Resource limits enforced to protect production stability")
+        print(" PASS:  SUCCESS: Resource limits enforced to protect production stability")
 
     @pytest.mark.validation_test
     async def test_data_integrity_validation_failure_scenario(self):
@@ -288,7 +288,7 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         except Exception as e:
             if "Invalid state data format" in str(e):
                 data_validation_failed = True
-                print(f"✅ SUCCESS: Data validation error detected: {e}")
+                print(f" PASS:  SUCCESS: Data validation error detected: {e}")
         
         self.assertTrue(data_validation_failed,
                        "Invalid data format should be rejected to maintain data integrity")
@@ -303,7 +303,7 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         self.assertEqual(retrieved_data["agent_execution_id"], valid_data["agent_execution_id"],
                         "Valid data should remain accessible after validation failures")
         
-        print("✅ SUCCESS: Data integrity validation working correctly")
+        print(" PASS:  SUCCESS: Data integrity validation working correctly")
 
     @pytest.mark.validation_test
     async def test_ttl_expiration_functionality(self):
@@ -352,12 +352,12 @@ class TestUnifiedStateManagerValidation(MockSSotAsyncTestCase):
         self.assertEqual(expired_retrieval, None,
                         "Data should be None after TTL expiration for resource management")
         
-        print("✅ SUCCESS: TTL expiration working correctly for resource efficiency")
+        print(" PASS:  SUCCESS: TTL expiration working correctly for resource efficiency")
 
 # Test execution function
 async def run_validation_tests():
     """Run the validation tests to demonstrate functionality."""
-    print("🚀 Starting E2E GCP Staging Test Structure Validation")
+    print("[U+1F680] Starting E2E GCP Staging Test Structure Validation")
     print("=" * 60)
     
     # Initialize test class
@@ -375,44 +375,44 @@ async def run_validation_tests():
     failed_tests = 0
     
     for test_name, test_method in tests_to_run:
-        print(f"\n📋 Running: {test_name}")
+        print(f"\n[U+1F4CB] Running: {test_name}")
         print("-" * 40)
         
         try:
             await test_instance.asyncTearDown()  # Clean up before each test
             await test_method()
-            print(f"✅ PASSED: {test_name}")
+            print(f" PASS:  PASSED: {test_name}")
             passed_tests += 1
             
         except AssertionError as e:
-            print(f"❌ FAILED: {test_name} - {e}")
+            print(f" FAIL:  FAILED: {test_name} - {e}")
             failed_tests += 1
             
         except Exception as e:
-            print(f"❌ ERROR: {test_name} - {e}")
+            print(f" FAIL:  ERROR: {test_name} - {e}")
             failed_tests += 1
     
     print("\n" + "=" * 60)
-    print("🏁 VALIDATION RESULTS SUMMARY")
+    print("[U+1F3C1] VALIDATION RESULTS SUMMARY")
     print("=" * 60)
-    print(f"✅ Tests Passed: {passed_tests}")
-    print(f"❌ Tests Failed: {failed_tests}")
-    print(f"📊 Success Rate: {passed_tests/(passed_tests + failed_tests)*100:.1f}%")
+    print(f" PASS:  Tests Passed: {passed_tests}")
+    print(f" FAIL:  Tests Failed: {failed_tests}")
+    print(f" CHART:  Success Rate: {passed_tests/(passed_tests + failed_tests)*100:.1f}%")
     
     if passed_tests > 0 and failed_tests == 0:
-        print("\n🎉 ALL TESTS PASSED - E2E test structure validation successful!")
-        print("✅ Tests can execute properly")
-        print("✅ Tests can legitimately fail to validate business logic")
-        print("✅ Business value protection mechanisms working")
-        print("✅ Resource management and limits enforced") 
-        print("✅ Data integrity validation functional")
+        print("\n CELEBRATION:  ALL TESTS PASSED - E2E test structure validation successful!")
+        print(" PASS:  Tests can execute properly")
+        print(" PASS:  Tests can legitimately fail to validate business logic")
+        print(" PASS:  Business value protection mechanisms working")
+        print(" PASS:  Resource management and limits enforced") 
+        print(" PASS:  Data integrity validation functional")
         
     elif passed_tests > 0:
-        print(f"\n✅ PARTIAL SUCCESS - {passed_tests} tests demonstrate functionality")
-        print("✅ Test structure and execution patterns validated")
+        print(f"\n PASS:  PARTIAL SUCCESS - {passed_tests} tests demonstrate functionality")
+        print(" PASS:  Test structure and execution patterns validated")
         
     else:
-        print("\n❌ VALIDATION FAILED - Test structure needs review")
+        print("\n FAIL:  VALIDATION FAILED - Test structure needs review")
         
     return passed_tests, failed_tests
 

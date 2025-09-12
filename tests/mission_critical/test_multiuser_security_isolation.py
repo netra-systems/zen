@@ -215,7 +215,7 @@
     # Removed problematic line: async def test_invalid_token_rejection(self, security_tester: MultiUserSecurityTester):
         # REMOVED_SYNTAX_ERROR: """Test that invalid tokens are properly rejected."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info("🔒 Testing invalid token rejection...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Testing invalid token rejection...")
 
         # REMOVED_SYNTAX_ERROR: invalid_tokens = [ )
         # REMOVED_SYNTAX_ERROR: "",  # Empty token
@@ -278,7 +278,7 @@
 
                         # Removed problematic line: async def test_token_extraction_methods(self, security_tester: MultiUserSecurityTester):
                             # REMOVED_SYNTAX_ERROR: """Test that all token extraction methods work correctly and securely."""
-                            # REMOVED_SYNTAX_ERROR: logger.info("🔍 Testing token extraction methods...")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" SEARCH:  Testing token extraction methods...")
 
                             # Create a test user
                             # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=1)
@@ -340,7 +340,7 @@
                                                     # Removed problematic line: async def test_concurrent_authentication_race_conditions(self, security_tester: MultiUserSecurityTester):
                                                         # REMOVED_SYNTAX_ERROR: """Test for race conditions in concurrent authentication."""
                                                         # REMOVED_SYNTAX_ERROR: pass
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("🏃‍♂️ Testing concurrent authentication race conditions...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent authentication race conditions...")
 
                                                         # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
 
@@ -457,7 +457,7 @@
     # Removed problematic line: async def test_websocket_message_isolation(self, security_tester: MultiUserSecurityTester):
         # REMOVED_SYNTAX_ERROR: """Test that WebSocket messages don't leak between users."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info("🔐 Testing WebSocket message isolation...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Testing WebSocket message isolation...")
 
         # Establish connections for all users
         # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
@@ -566,7 +566,7 @@
                                                 # Removed problematic line: async def test_agent_response_user_isolation(self, security_tester: MultiUserSecurityTester):
                                                     # REMOVED_SYNTAX_ERROR: """Test that agent responses are correctly isolated per user."""
                                                     # REMOVED_SYNTAX_ERROR: pass
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🤖 Testing agent response user isolation...")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F916] Testing agent response user isolation...")
 
                                                     # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
@@ -687,7 +687,7 @@
                                                                             # Removed problematic line: async def test_llm_conversation_isolation(self, security_tester: MultiUserSecurityTester):
                                                                                 # REMOVED_SYNTAX_ERROR: """Test that LLM conversations don't mix between users."""
                                                                                 # REMOVED_SYNTAX_ERROR: pass
-                                                                                # REMOVED_SYNTAX_ERROR: logger.info("🧠 Testing LLM conversation isolation...")
+                                                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing LLM conversation isolation...")
 
                                                                                 # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
 
@@ -828,7 +828,7 @@
     # Removed problematic line: async def test_websocket_manager_isolation(self, security_tester: MultiUserSecurityTester):
         # REMOVED_SYNTAX_ERROR: """Test that WebSocket managers are properly isolated per user."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info("📡 Testing WebSocket manager isolation...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4E1] Testing WebSocket manager isolation...")
 
         # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
         # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
@@ -928,7 +928,7 @@
                                                                     # Removed problematic line: async def test_execution_engine_isolation(self, security_tester: MultiUserSecurityTester):
                                                                         # REMOVED_SYNTAX_ERROR: """Test that execution engines are properly isolated per user."""
                                                                         # REMOVED_SYNTAX_ERROR: pass
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("⚙️ Testing execution engine isolation...")
+                                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+2699][U+FE0F] Testing execution engine isolation...")
 
                                                                         # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=4)
                                                                         # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
@@ -1049,7 +1049,7 @@
                                                                                                                                 # Removed problematic line: async def test_cache_isolation(self, security_tester: MultiUserSecurityTester):
                                                                                                                                     # REMOVED_SYNTAX_ERROR: """Test that cache systems are properly scoped per user."""
                                                                                                                                     # REMOVED_SYNTAX_ERROR: pass
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("💾 Testing cache isolation...")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F4BE] Testing cache isolation...")
 
                                                                                                                                     # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
                                                                                                                                     # REMOVED_SYNTAX_ERROR: connections = await security_tester.establish_concurrent_connections()
@@ -1174,7 +1174,7 @@
     # Removed problematic line: async def test_client_side_admin_flag_validation(self, security_tester: MultiUserSecurityTester):
         # REMOVED_SYNTAX_ERROR: """Test that client-side admin flags are validated server-side."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info("👑 Testing client-side admin flag validation...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F451] Testing client-side admin flag validation...")
 
         # Create regular users
         # REMOVED_SYNTAX_ERROR: regular_users = []
@@ -1316,7 +1316,7 @@
 
                                 # Removed problematic line: async def test_admin_operation_access_control(self, security_tester: MultiUserSecurityTester):
                                     # REMOVED_SYNTAX_ERROR: """Test that admin operations are properly protected."""
-                                    # REMOVED_SYNTAX_ERROR: logger.info("🔐 Testing admin operation access control...")
+                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Testing admin operation access control...")
 
                                     # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=4)
                                     # REMOVED_SYNTAX_ERROR: regular_users = [item for item in []]
@@ -1476,7 +1476,7 @@
     # Removed problematic line: async def test_concurrent_connection_race_conditions(self, security_tester: MultiUserSecurityTester):
         # REMOVED_SYNTAX_ERROR: """Test for race conditions in concurrent WebSocket connections."""
         # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: logger.info("🏃‍♂️ Testing concurrent connection race conditions...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Testing concurrent connection race conditions...")
 
         # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=5)
 
@@ -1649,7 +1649,7 @@
                                                                                             # Removed problematic line: async def test_memory_leak_detection(self, security_tester: MultiUserSecurityTester):
                                                                                                 # REMOVED_SYNTAX_ERROR: """Test for memory leaks in singleton patterns during high concurrency."""
                                                                                                 # REMOVED_SYNTAX_ERROR: pass
-                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("🧠 Testing memory leak detection in concurrent scenarios...")
+                                                                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9E0] Testing memory leak detection in concurrent scenarios...")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: users = security_tester.create_test_users(count=3)
 
@@ -1789,9 +1789,9 @@
     # REMOVED_SYNTAX_ERROR: """Generate a comprehensive vulnerability report."""
 
     # REMOVED_SYNTAX_ERROR: if not security_tester.vulnerability_findings:
-        # REMOVED_SYNTAX_ERROR: return "✅ NO SECURITY VULNERABILITIES DETECTED - All tests passed!"
+        # REMOVED_SYNTAX_ERROR: return " PASS:  NO SECURITY VULNERABILITIES DETECTED - All tests passed!"
 
-        # REMOVED_SYNTAX_ERROR: report = "🚨 CRITICAL SECURITY VULNERABILITIES DETECTED 🚨
+        # REMOVED_SYNTAX_ERROR: report = " ALERT:  CRITICAL SECURITY VULNERABILITIES DETECTED  ALERT: 
         # REMOVED_SYNTAX_ERROR: "
         # REMOVED_SYNTAX_ERROR: report += "=" * 60 + "
 
@@ -1836,7 +1836,7 @@
                                         # REMOVED_SYNTAX_ERROR: report += "
                                         # REMOVED_SYNTAX_ERROR: " + "=" * 60 + "
                                         # REMOVED_SYNTAX_ERROR: "
-                                        # REMOVED_SYNTAX_ERROR: report += "⚠️  DEPLOYMENT MUST BE BLOCKED UNTIL ALL VULNERABILITIES ARE FIXED ⚠️"
+                                        # REMOVED_SYNTAX_ERROR: report += " WARNING: [U+FE0F]  DEPLOYMENT MUST BE BLOCKED UNTIL ALL VULNERABILITIES ARE FIXED  WARNING: [U+FE0F]"
 
                                         # REMOVED_SYNTAX_ERROR: return report
 
@@ -1848,7 +1848,7 @@
 
                                             # Check if Docker is available
                                             # REMOVED_SYNTAX_ERROR: if not is_docker_available():
-                                                # REMOVED_SYNTAX_ERROR: print("⚠️  Docker not available - some tests may use mocks instead of real services")
+                                                # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Docker not available - some tests may use mocks instead of real services")
 
                                                 # Run tests with pytest
                                                 # REMOVED_SYNTAX_ERROR: exit_code = pytest.main([__file__, "-v", "-s", "--tb=short"])
@@ -1862,7 +1862,7 @@
                                                 # Removed problematic line: @pytest.mark.asyncio
                                                 # Removed problematic line: async def test_comprehensive_security_suite():
                                                     # REMOVED_SYNTAX_ERROR: """Run the comprehensive multi-user security isolation test suite."""
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🚀 Starting comprehensive multi-user security isolation test suite...")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting comprehensive multi-user security isolation test suite...")
 
                                                     # REMOVED_SYNTAX_ERROR: config = RealWebSocketTestConfig()
                                                     # REMOVED_SYNTAX_ERROR: await config.ensure_services_ready()
@@ -1870,7 +1870,7 @@
                                                     # REMOVED_SYNTAX_ERROR: security_tester = MultiUserSecurityTester(config)
 
                                                     # Initialize the test environment
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🔧 Initializing test environment...")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F527] Initializing test environment...")
                                                     # REMOVED_SYNTAX_ERROR: security_tester.create_test_users(count=5)
 
                                                     # Create instances of all test classes
@@ -1882,26 +1882,26 @@
 
                                                     # Run all vulnerability tests
                                                     # REMOVED_SYNTAX_ERROR: try:
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("🔒 Running authentication vulnerability tests...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F512] Running authentication vulnerability tests...")
                                                         # REMOVED_SYNTAX_ERROR: await auth_tests.test_invalid_token_rejection(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await auth_tests.test_token_extraction_methods(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await auth_tests.test_concurrent_authentication_race_conditions(security_tester)
 
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("🔐 Running user isolation vulnerability tests...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F510] Running user isolation vulnerability tests...")
                                                         # REMOVED_SYNTAX_ERROR: await isolation_tests.test_websocket_message_isolation(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await isolation_tests.test_agent_response_user_isolation(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await isolation_tests.test_llm_conversation_isolation(security_tester)
 
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("🏗️ Running singleton pattern vulnerability tests...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3D7][U+FE0F] Running singleton pattern vulnerability tests...")
                                                         # REMOVED_SYNTAX_ERROR: await singleton_tests.test_websocket_manager_isolation(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await singleton_tests.test_execution_engine_isolation(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await singleton_tests.test_cache_isolation(security_tester)
 
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("👑 Running admin privilege vulnerability tests...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F451] Running admin privilege vulnerability tests...")
                                                         # REMOVED_SYNTAX_ERROR: await admin_tests.test_client_side_admin_flag_validation(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await admin_tests.test_admin_operation_access_control(security_tester)
 
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("🏃‍♂️ Running race condition vulnerability tests...")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F3C3][U+200D][U+2642][U+FE0F] Running race condition vulnerability tests...")
                                                         # REMOVED_SYNTAX_ERROR: await race_condition_tests.test_concurrent_connection_race_conditions(security_tester)
                                                         # REMOVED_SYNTAX_ERROR: await race_condition_tests.test_memory_leak_detection(security_tester)
 
@@ -1926,5 +1926,5 @@
                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: raise AssertionError("formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                    # REMOVED_SYNTAX_ERROR: logger.success("✅ All multi-user security isolation tests passed!")
+                                                                    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  All multi-user security isolation tests passed!")
                                                                     # REMOVED_SYNTAX_ERROR: pass

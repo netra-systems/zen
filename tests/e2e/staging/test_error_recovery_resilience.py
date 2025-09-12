@@ -78,7 +78,7 @@ class TestErrorRecoveryResilience:
             email=self.user_context.agent_context['user_email']
         )
         
-        logger.info(f"✅ Setup authenticated context for error recovery tests")
+        logger.info(f" PASS:  Setup authenticated context for error recovery tests")
         logger.info(f"User ID: {self.user_context.user_id}")
 
     @pytest.mark.asyncio
@@ -126,7 +126,7 @@ class TestErrorRecoveryResilience:
                 open_timeout=15.0
             ) as websocket:
                 
-                logger.info("🛡️ Starting circuit breaker resilience test")
+                logger.info("[U+1F6E1][U+FE0F] Starting circuit breaker resilience test")
                 
                 # Step 1: Establish baseline system performance
                 baseline_request = {
@@ -139,7 +139,7 @@ class TestErrorRecoveryResilience:
                 }
                 
                 await websocket.send(json.dumps(baseline_request))
-                logger.info("📊 Sent baseline health check")
+                logger.info(" CHART:  Sent baseline health check")
                 
                 # Step 2: Induce controlled system stress to trigger circuit breakers
                 stress_requests = []
@@ -158,7 +158,7 @@ class TestErrorRecoveryResilience:
                     await websocket.send(json.dumps(stress_request))
                     await asyncio.sleep(0.1)  # Rapid succession
                 
-                logger.info(f"🔥 Sent {len(stress_requests)} stress requests to induce failures")
+                logger.info(f" FIRE:  Sent {len(stress_requests)} stress requests to induce failures")
                 
                 # Step 3: Monitor circuit breaker activation and recovery
                 circuit_breaker_timeout = 120.0  # 2 minutes for circuit breaker cycle
@@ -174,7 +174,7 @@ class TestErrorRecoveryResilience:
                         event_type = event_data.get("event_type", "")
                         status = event_data.get("status", "")
                         
-                        logger.info(f"🔍 Circuit breaker event: {event_type} - {status}")
+                        logger.info(f" SEARCH:  Circuit breaker event: {event_type} - {status}")
                         
                         # Track circuit breaker events
                         if "circuit_breaker" in event_type.lower() or "circuit" in event_type.lower():
@@ -186,7 +186,7 @@ class TestErrorRecoveryResilience:
                                     "detected_at": time.time(),
                                     "failure_type": "circuit_breaker_activation"
                                 })
-                                logger.info("⚡ Circuit breaker activated!")
+                                logger.info(" LIGHTNING:  Circuit breaker activated!")
                                 
                             elif "recovered" in status.lower() or "closed" in status.lower():
                                 business_continuity_metrics["recovery_attempts"] += 1
@@ -196,12 +196,12 @@ class TestErrorRecoveryResilience:
                                     "recovery_type": "circuit_breaker_recovery"
                                 })
                                 recovery_completed = True
-                                logger.info("🔄 Circuit breaker recovered!")
+                                logger.info(" CYCLE:  Circuit breaker recovered!")
                         
                         # Track business continuity mechanisms
                         elif "fallback" in event_type.lower() or "degraded" in event_type.lower():
                             business_continuity_metrics["fallback_activations"] += 1
-                            logger.info("🛟 Fallback mechanism activated for business continuity")
+                            logger.info("[U+1F6DF] Fallback mechanism activated for business continuity")
                             
                         elif event_type == "request_processed":
                             business_continuity_metrics["requests_processed"] += 1
@@ -215,14 +215,14 @@ class TestErrorRecoveryResilience:
                             
                         # Exit condition: Circuit breaker cycle complete
                         if circuit_breaker_activated and recovery_completed:
-                            logger.info("✅ Complete circuit breaker cycle observed")
+                            logger.info(" PASS:  Complete circuit breaker cycle observed")
                             break
                             
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout in circuit breaker monitoring")
+                        logger.warning(" WARNING: [U+FE0F] Timeout in circuit breaker monitoring")
                         continue
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Circuit breaker event decode error: {e}")
+                        logger.error(f" FAIL:  Circuit breaker event decode error: {e}")
                         continue
         
         # Validation: Comprehensive circuit breaker and business continuity validation
@@ -255,7 +255,7 @@ class TestErrorRecoveryResilience:
         )
         assert business_continuity_demonstrated, "No business continuity demonstrated during failures"
         
-        logger.info(f"✅ PASS: Circuit breaker activation and business continuity - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Circuit breaker activation and business continuity - {test_duration:.2f}s")
         logger.info(f"Circuit breaker trips: {business_continuity_metrics['circuit_breaker_trips']}")
         logger.info(f"Fallback activations: {business_continuity_metrics['fallback_activations']}")
         logger.info(f"Recovery attempts: {business_continuity_metrics['recovery_attempts']}")
@@ -302,7 +302,7 @@ class TestErrorRecoveryResilience:
         messages_received_during_test = []
         
         # Step 1: Establish initial stable connection
-        logger.info("🔌 Starting WebSocket resilience test with reconnection")
+        logger.info("[U+1F50C] Starting WebSocket resilience test with reconnection")
         
         headers = self.websocket_helper.get_websocket_headers(self.auth_token)
         websocket_url = self.staging_config.urls.websocket_url
@@ -318,7 +318,7 @@ class TestErrorRecoveryResilience:
             resilience_metrics["connection_attempts"] += 1
             
             try:
-                logger.info(f"🔗 Connection cycle {connection_cycle}: Attempting WebSocket connection")
+                logger.info(f"[U+1F517] Connection cycle {connection_cycle}: Attempting WebSocket connection")
                 
                 async with websockets.connect(
                     websocket_url,
@@ -331,7 +331,7 @@ class TestErrorRecoveryResilience:
                     resilience_metrics["successful_connections"] += 1
                     connection_established = time.time()
                     
-                    logger.info(f"✅ WebSocket connected successfully (cycle {connection_cycle})")
+                    logger.info(f" PASS:  WebSocket connected successfully (cycle {connection_cycle})")
                     
                     # Send test messages during connection
                     test_message_count = 5
@@ -349,7 +349,7 @@ class TestErrorRecoveryResilience:
                         
                         await websocket.send(json.dumps(test_message))
                         messages_sent_during_test.append(test_message)
-                        logger.info(f"📤 Sent resilience test message {i+1}/{test_message_count}")
+                        logger.info(f"[U+1F4E4] Sent resilience test message {i+1}/{test_message_count}")
                         
                         # Try to receive response
                         try:
@@ -362,9 +362,9 @@ class TestErrorRecoveryResilience:
                                 "timestamp": time.time(),
                                 "response_data": response_data
                             })
-                            logger.info("📥 Received response to resilience test message")
+                            logger.info("[U+1F4E5] Received response to resilience test message")
                         except asyncio.TimeoutError:
-                            logger.warning("⚠️ No response to resilience test message (acceptable)")
+                            logger.warning(" WARNING: [U+FE0F] No response to resilience test message (acceptable)")
                             
                         await asyncio.sleep(0.5)  # Brief pause between messages
                     
@@ -374,25 +374,25 @@ class TestErrorRecoveryResilience:
                     if stress_pattern == "rapid_disconnect":
                         # Hold connection briefly then disconnect
                         await asyncio.sleep(2.0)
-                        logger.info("🔥 Simulating rapid disconnect for resilience testing")
+                        logger.info(" FIRE:  Simulating rapid disconnect for resilience testing")
                         break  # Force disconnect by breaking out of context
                         
                     elif stress_pattern == "timeout_stress":
                         # Hold connection longer to test timeout resilience
                         await asyncio.sleep(8.0)
-                        logger.info("⏰ Testing timeout resilience")
+                        logger.info("[U+23F0] Testing timeout resilience")
                         
                     elif stress_pattern == "network_simulation":
                         # Simulate network issues with longer hold
                         await asyncio.sleep(5.0)
-                        logger.info("🌐 Simulating network interruption")
+                        logger.info("[U+1F310] Simulating network interruption")
                     
             except (websockets.exceptions.ConnectionClosed, websockets.exceptions.WebSocketException, OSError) as e:
                 resilience_metrics["disconnection_events"] += 1
                 disconnection_time = time.time()
                 downtime_start = disconnection_time
                 
-                logger.info(f"🔌 WebSocket disconnected (cycle {connection_cycle}): {type(e).__name__}")
+                logger.info(f"[U+1F50C] WebSocket disconnected (cycle {connection_cycle}): {type(e).__name__}")
                 connection_events.append({
                     "event": "disconnection",
                     "cycle": connection_cycle,
@@ -402,7 +402,7 @@ class TestErrorRecoveryResilience:
                 
                 # Attempt reconnection with backoff
                 reconnection_delay = min(2 ** (connection_cycle - 1), 8.0)  # Exponential backoff, max 8s
-                logger.info(f"🔄 Will attempt reconnection after {reconnection_delay:.1f}s backoff")
+                logger.info(f" CYCLE:  Will attempt reconnection after {reconnection_delay:.1f}s backoff")
                 await asyncio.sleep(reconnection_delay)
                 
                 resilience_metrics["reconnection_attempts"] += 1
@@ -410,11 +410,11 @@ class TestErrorRecoveryResilience:
                 resilience_metrics["total_downtime"] += (downtime_end - downtime_start)
                 
             except Exception as e:
-                logger.error(f"❌ Unexpected error in WebSocket resilience test: {e}")
+                logger.error(f" FAIL:  Unexpected error in WebSocket resilience test: {e}")
                 break
         
         # Step 2: Final connection attempt to test recovery
-        logger.info("🔄 Final reconnection attempt to validate recovery")
+        logger.info(" CYCLE:  Final reconnection attempt to validate recovery")
         try:
             async with websockets.connect(
                 websocket_url,
@@ -422,7 +422,7 @@ class TestErrorRecoveryResilience:
                 open_timeout=15.0
             ) as websocket:
                 resilience_metrics["successful_reconnections"] += 1
-                logger.info("✅ Final reconnection successful - recovery validated")
+                logger.info(" PASS:  Final reconnection successful - recovery validated")
                 
                 # Send final validation message
                 final_message = {
@@ -438,12 +438,12 @@ class TestErrorRecoveryResilience:
                 try:
                     final_response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                     messages_received_during_test.append(json.loads(final_response))
-                    logger.info("📥 Recovery validation response received")
+                    logger.info("[U+1F4E5] Recovery validation response received")
                 except asyncio.TimeoutError:
-                    logger.warning("⚠️ No response to recovery validation")
+                    logger.warning(" WARNING: [U+FE0F] No response to recovery validation")
                     
         except Exception as e:
-            logger.error(f"❌ Final reconnection failed: {e}")
+            logger.error(f" FAIL:  Final reconnection failed: {e}")
         
         # Validation: Comprehensive WebSocket resilience validation
         test_duration = time.time() - test_start_time
@@ -476,7 +476,7 @@ class TestErrorRecoveryResilience:
         )
         assert recovery_demonstrated, "No recovery capability demonstrated"
         
-        logger.info(f"✅ PASS: WebSocket connection resilience with reconnection - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: WebSocket connection resilience with reconnection - {test_duration:.2f}s")
         logger.info(f"Connection attempts: {resilience_metrics['connection_attempts']}")
         logger.info(f"Successful connections: {resilience_metrics['successful_connections']}")  
         logger.info(f"Disconnections: {resilience_metrics['disconnection_events']}")
@@ -530,7 +530,7 @@ class TestErrorRecoveryResilience:
                 open_timeout=15.0
             ) as websocket:
                 
-                logger.info("⛓️ Starting multi-service failure cascade test")
+                logger.info("[U+26D3][U+FE0F] Starting multi-service failure cascade test")
                 
                 # Step 1: Establish baseline multi-service health
                 health_check_request = {
@@ -543,7 +543,7 @@ class TestErrorRecoveryResilience:
                 }
                 
                 await websocket.send(json.dumps(health_check_request))
-                logger.info("📊 Sent multi-service health check")
+                logger.info(" CHART:  Sent multi-service health check")
                 
                 # Step 2: Simulate progressive service failures to trigger cascade
                 for i, service in enumerate(failure_cascade_config["target_services"]):
@@ -559,7 +559,7 @@ class TestErrorRecoveryResilience:
                     }
                     
                     await websocket.send(json.dumps(failure_simulation_request))
-                    logger.info(f"🔥 Simulated failure in {service} (step {i+1})")
+                    logger.info(f" FIRE:  Simulated failure in {service} (step {i+1})")
                     
                     # Brief pause between failure simulations to observe cascade
                     await asyncio.sleep(2.0)
@@ -593,7 +593,7 @@ class TestErrorRecoveryResilience:
                     }
                     
                     await websocket.send(json.dumps(business_test_request))
-                    logger.info(f"🏢 Testing business operation: {business_test['operation']}")
+                    logger.info(f"[U+1F3E2] Testing business operation: {business_test['operation']}")
                 
                 # Step 4: Monitor cascade effects and degradation responses
                 cascade_monitoring_duration = 90.0  # 1.5 minutes for cascade observation
@@ -613,7 +613,7 @@ class TestErrorRecoveryResilience:
                         service_name = event_data.get("service_name", "")
                         status = event_data.get("status", "")
                         
-                        logger.info(f"📡 Cascade event: {event_type} - {service_name} - {status}")
+                        logger.info(f"[U+1F4E1] Cascade event: {event_type} - {service_name} - {status}")
                         
                         # Track service health changes
                         if service_name:
@@ -635,30 +635,30 @@ class TestErrorRecoveryResilience:
                                 
                         elif "degradation" in event_type.lower() or "fallback" in event_type.lower():
                             degradation_metrics["degradation_activations"] += 1
-                            logger.info("🛟 Graceful degradation activated")
+                            logger.info("[U+1F6DF] Graceful degradation activated")
                             
                         elif "isolation" in event_type.lower() or "circuit_breaker" in event_type.lower():
                             degradation_metrics["service_isolations"] += 1
-                            logger.info("🔒 Service isolation activated")
+                            logger.info("[U+1F512] Service isolation activated")
                             
                         elif "failover" in event_type.lower() or "bypass" in event_type.lower():
                             degradation_metrics["failover_activations"] += 1
-                            logger.info("🔄 Failover mechanism activated")
+                            logger.info(" CYCLE:  Failover mechanism activated")
                             
                         elif "core_functionality" in event_type.lower():
                             if "preserved" in status.lower() or "available" in status.lower():
                                 degradation_metrics["core_functionality_preserved"] = True
-                                logger.info("🛡️ Core functionality preserved during cascade")
+                                logger.info("[U+1F6E1][U+FE0F] Core functionality preserved during cascade")
                                 
                         elif "business_operation" in event_type.lower():
                             if "successful" in status.lower() or "available" in status.lower():
                                 degradation_metrics["business_operations_maintained"] += 1
                                 
                     except asyncio.TimeoutError:
-                        logger.warning("⚠️ Timeout in cascade monitoring")
+                        logger.warning(" WARNING: [U+FE0F] Timeout in cascade monitoring")
                         continue  
                     except json.JSONDecodeError as e:
-                        logger.error(f"❌ Cascade event decode error: {e}")
+                        logger.error(f" FAIL:  Cascade event decode error: {e}")
                         continue
         
         # Validation: Comprehensive cascade and degradation validation
@@ -694,7 +694,7 @@ class TestErrorRecoveryResilience:
         # Assert 7: System didn't completely fail (some events still processing)
         assert len(cascade_events) > 5, f"Too few cascade events ({len(cascade_events)}) - system may have completely failed"
         
-        logger.info(f"✅ PASS: Multi-service failure cascade and graceful degradation - {test_duration:.2f}s")
+        logger.info(f" PASS:  PASS: Multi-service failure cascade and graceful degradation - {test_duration:.2f}s")
         logger.info(f"Services affected: {degradation_metrics['services_affected']}")
         logger.info(f"Cascade failures: {degradation_metrics['cascade_failures']}")
         logger.info(f"Degradation activations: {degradation_metrics['degradation_activations']}")

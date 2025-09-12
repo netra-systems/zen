@@ -57,7 +57,7 @@ def enhance_tool_dispatcher_with_notifications(tool_dispatcher: Any, websocket_m
     tool_dispatcher._websocket_enhanced = True
     tool_dispatcher._websocket_manager = websocket_manager
     
-    logger.info("✅ Tool dispatcher enhanced with UnifiedToolExecutionEngine and WebSocket notifications")
+    logger.info(" PASS:  Tool dispatcher enhanced with UnifiedToolExecutionEngine and WebSocket notifications")
 
 
 # For backward compatibility, also export from unified_tool_execution

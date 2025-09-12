@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 
 CRITICAL MISSION: Test Complete Agent Workflows with Authentication ensuring:
 1. End-to-end authenticated agent workflows execute successfully with real JWT/OAuth
-2. Complete business workflows (data analysis → insights → actions) work end-to-end  
+2. Complete business workflows (data analysis  ->  insights  ->  actions) work end-to-end  
 3. WebSocket events provide complete real-time visibility throughout authenticated workflows
 4. User context and permissions are enforced throughout complete workflow execution
 5. Factory patterns maintain complete isolation during authenticated multi-user workflows
@@ -735,23 +735,23 @@ class TestCompleteEnterpriseWorkflows(SSotBaseTestCase):
             # 5. WebSocket Events Validation
             required_events = enterprise_data_analysis_workflow.sla_requirements["required_websocket_events"]
             assert execution_metrics.websocket_events_received >= required_events, \
-                f"Should have received ≥{required_events} WebSocket events, got {execution_metrics.websocket_events_received}"
+                f"Should have received  >= {required_events} WebSocket events, got {execution_metrics.websocket_events_received}"
             
             # 6. Business Value Validation
             business_value = execution_metrics.business_value_delivered
             assert "deliverables_completion_rate" in business_value, "Should track deliverables completion"
             assert business_value["deliverables_completion_rate"] >= 0.8, \
-                f"Should deliver ≥80% of expected deliverables, got {business_value['deliverables_completion_rate']:.1%}"
+                f"Should deliver  >= 80% of expected deliverables, got {business_value['deliverables_completion_rate']:.1%}"
             
             assert "overall_business_value_score" in business_value, "Should calculate overall business value"
             assert business_value["overall_business_value_score"] >= 0.7, \
-                f"Should achieve ≥70% business value score, got {business_value['overall_business_value_score']:.1%}"
+                f"Should achieve  >= 70% business value score, got {business_value['overall_business_value_score']:.1%}"
             
             # 7. Quality Metrics Validation
             quality_metrics = execution_metrics.quality_metrics
             assert "data_quality" in quality_metrics, "Should assess data quality"
             assert quality_metrics["data_quality"] >= 0.6, \
-                f"Data quality should be ≥60%, got {quality_metrics['data_quality']:.1%}"
+                f"Data quality should be  >= 60%, got {quality_metrics['data_quality']:.1%}"
             
             # 8. Performance Metrics Validation
             performance_metrics = execution_metrics.performance_metrics
@@ -835,7 +835,7 @@ class TestCompleteEnterpriseWorkflows(SSotBaseTestCase):
             concurrent_success_rate = success_count / total_executions
             
             assert concurrent_success_rate >= 0.80, \
-                f"Concurrent success rate should be ≥80%, got {concurrent_success_rate:.1%} ({success_count}/{total_executions})"
+                f"Concurrent success rate should be  >= 80%, got {concurrent_success_rate:.1%} ({success_count}/{total_executions})"
             
             # 2. Performance Under Concurrent Load
             assert total_concurrent_time < 600, \

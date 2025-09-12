@@ -74,10 +74,10 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 DATABASE CONNECTION FAILURE: PostgreSQL connection failed to {database_host}"
+                f" ALERT:  DATABASE CONNECTION FAILURE: PostgreSQL connection failed to {database_host}"
             )
             self.mock_logger.critical(
-                f"🔍 DATABASE FAILURE CONTEXT: {json.dumps(postgres_failure_context, indent=2)}"
+                f" SEARCH:  DATABASE FAILURE CONTEXT: {json.dumps(postgres_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -109,10 +109,10 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 ANALYTICS DATABASE FAILURE: ClickHouse connection failed to {clickhouse_host}"
+                f" ALERT:  ANALYTICS DATABASE FAILURE: ClickHouse connection failed to {clickhouse_host}"
             )
             self.mock_logger.critical(
-                f"🔍 ANALYTICS FAILURE CONTEXT: {json.dumps(clickhouse_failure_context, indent=2)}"
+                f" SEARCH:  ANALYTICS FAILURE CONTEXT: {json.dumps(clickhouse_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -145,10 +145,10 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.warning(
-                f"💾 CACHE FAILURE: Redis cache unavailable at {redis_host} - falling back to direct database"
+                f"[U+1F4BE] CACHE FAILURE: Redis cache unavailable at {redis_host} - falling back to direct database"
             )
             self.mock_logger.info(
-                f"🔍 CACHE FAILURE CONTEXT: {json.dumps(redis_failure_context, indent=2)}"
+                f" SEARCH:  CACHE FAILURE CONTEXT: {json.dumps(redis_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -182,10 +182,10 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 DATABASE POOL EXHAUSTION: All {pool_size} PostgreSQL connections in use with {waiting_requests} waiting"
+                f" ALERT:  DATABASE POOL EXHAUSTION: All {pool_size} PostgreSQL connections in use with {waiting_requests} waiting"
             )
             self.mock_logger.critical(
-                f"🔍 POOL EXHAUSTION CONTEXT: {json.dumps(pool_exhaustion_context, indent=2)}"
+                f" SEARCH:  POOL EXHAUSTION CONTEXT: {json.dumps(pool_exhaustion_context, indent=2)}"
             )
         
         # Validate logging
@@ -253,10 +253,10 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 THREAD SAVE FAILURE: Failed to save conversation thread {self.thread_id} for user {self.user_id[:8]}..."
+                f" ALERT:  THREAD SAVE FAILURE: Failed to save conversation thread {self.thread_id} for user {self.user_id[:8]}..."
             )
             self.mock_logger.critical(
-                f"🔍 THREAD FAILURE CONTEXT: {json.dumps(thread_failure_context, indent=2)}"
+                f" SEARCH:  THREAD FAILURE CONTEXT: {json.dumps(thread_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -292,10 +292,10 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 MESSAGE SAVE FAILURE: Failed to save {message_type} for run {self.run_id}"
+                f" ALERT:  MESSAGE SAVE FAILURE: Failed to save {message_type} for run {self.run_id}"
             )
             self.mock_logger.critical(
-                f"🔍 MESSAGE FAILURE CONTEXT: {json.dumps(message_failure_context, indent=2)}"
+                f" SEARCH:  MESSAGE FAILURE CONTEXT: {json.dumps(message_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -331,10 +331,10 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.error(
-                f"💾 RESULT SAVE FAILURE: Failed to save {agent_name} results for run {self.run_id}"
+                f"[U+1F4BE] RESULT SAVE FAILURE: Failed to save {agent_name} results for run {self.run_id}"
             )
             self.mock_logger.error(
-                f"🔍 RESULT FAILURE CONTEXT: {json.dumps(result_failure_context, indent=2)}"
+                f" SEARCH:  RESULT FAILURE CONTEXT: {json.dumps(result_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -367,10 +367,10 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 DATA CORRUPTION: {corruption_type} detected for user {self.user_id[:8]}..."
+                f" ALERT:  DATA CORRUPTION: {corruption_type} detected for user {self.user_id[:8]}..."
             )
             self.mock_logger.critical(
-                f"🔍 CORRUPTION CONTEXT: {json.dumps(corruption_context, indent=2)}"
+                f" SEARCH:  CORRUPTION CONTEXT: {json.dumps(corruption_context, indent=2)}"
             )
         
         # Validate logging
@@ -404,10 +404,10 @@ class TestDataPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 BACKUP FAILURE: {backup_type} backup failed to {backup_destination}"
+                f" ALERT:  BACKUP FAILURE: {backup_type} backup failed to {backup_destination}"
             )
             self.mock_logger.critical(
-                f"🔍 BACKUP FAILURE CONTEXT: {json.dumps(backup_failure_context, indent=2)}"
+                f" SEARCH:  BACKUP FAILURE CONTEXT: {json.dumps(backup_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -468,10 +468,10 @@ class TestThreeTierPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.info(
-                f"📊 TIER FALLBACK: Redis cache miss for {cache_key} - falling back to {fallback_tier}"
+                f" CHART:  TIER FALLBACK: Redis cache miss for {cache_key} - falling back to {fallback_tier}"
             )
             self.mock_logger.info(
-                f"🔍 TIER FALLBACK CONTEXT: {json.dumps(tier_fallback_context, indent=2)}"
+                f" SEARCH:  TIER FALLBACK CONTEXT: {json.dumps(tier_fallback_context, indent=2)}"
             )
         
         # Validate logging
@@ -505,10 +505,10 @@ class TestThreeTierPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.warning(
-                f"⚠️ CRITICAL TIER FAILURE: PostgreSQL unavailable - using ClickHouse for read operations"
+                f" WARNING: [U+FE0F] CRITICAL TIER FAILURE: PostgreSQL unavailable - using ClickHouse for read operations"
             )
             self.mock_logger.warning(
-                f"🔍 CRITICAL TIER CONTEXT: {json.dumps(critical_tier_failure_context, indent=2)}"
+                f" SEARCH:  CRITICAL TIER CONTEXT: {json.dumps(critical_tier_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -544,10 +544,10 @@ class TestThreeTierPersistenceFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 COMPLETE PERSISTENCE FAILURE: All 3 tiers unavailable for user {self.user_id[:8]}..."
+                f" ALERT:  COMPLETE PERSISTENCE FAILURE: All 3 tiers unavailable for user {self.user_id[:8]}..."
             )
             self.mock_logger.critical(
-                f"🔍 COMPLETE FAILURE CONTEXT: {json.dumps(complete_failure_context, indent=2)}"
+                f" SEARCH:  COMPLETE FAILURE CONTEXT: {json.dumps(complete_failure_context, indent=2)}"
             )
         
         # Validate logging

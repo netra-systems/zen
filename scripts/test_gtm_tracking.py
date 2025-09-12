@@ -45,7 +45,7 @@ def test_authentication_tracking():
         events = get_datalayer_events(driver)
         page_view_events = [e for e in events if e.get('event') == 'page_view']
         if page_view_events:
-            print("✓ Page view tracking working")
+            print("[U+2713] Page view tracking working")
             events_captured.extend(page_view_events)
         
         # Navigate to protected route to trigger auth check
@@ -57,7 +57,7 @@ def test_authentication_tracking():
         auth_events = [e for e in events if 'auth' in e.get('event', '').lower() or 
                       e.get('event_action', '') == 'auth_required']
         if auth_events:
-            print("✓ Authentication tracking working")
+            print("[U+2713] Authentication tracking working")
             events_captured.extend(auth_events)
             
     finally:
@@ -94,7 +94,7 @@ def test_error_tracking():
         events = get_datalayer_events(driver)
         error_events = [e for e in events if e.get('event') == 'exception']
         if error_events:
-            print("✓ Error tracking working")
+            print("[U+2713] Error tracking working")
             events_captured.extend(error_events)
             
     finally:
@@ -134,7 +134,7 @@ def main():
         for event in all_events[:3]:
             print(f"\n{json.dumps(event, indent=2)}")
     else:
-        print("\n⚠ No GTM events were captured. Check if GTM is properly initialized.")
+        print("\n WARNING:  No GTM events were captured. Check if GTM is properly initialized.")
     
     return len(all_events) > 0
 
@@ -143,5 +143,5 @@ if __name__ == "__main__":
         success = main()
         exit(0 if success else 1)
     except Exception as e:
-        print(f"\n✗ Error running tests: {e}")
+        print(f"\n[U+2717] Error running tests: {e}")
         exit(1)

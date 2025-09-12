@@ -52,21 +52,21 @@ class P0StabilityProof:
     def print_header(self):
         """Print the comprehensive test report header."""
         print("=" * 80)
-        print("🚨 P0 CRITICAL INFRASTRUCTURE STABILITY PROOF REPORT")
+        print(" ALERT:  P0 CRITICAL INFRASTRUCTURE STABILITY PROOF REPORT")
         print("=" * 80)
-        print(f"📅 Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
-        print(f"🎯 Mission: Protect $1.5M+ ARR from Data Helper Agent infrastructure gaps")
-        print(f"🔧 Scope: Validate P0 fixes maintain system stability + solve real problems")
+        print(f"[U+1F4C5] Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print(f" TARGET:  Mission: Protect $1.5M+ ARR from Data Helper Agent infrastructure gaps")
+        print(f"[U+1F527] Scope: Validate P0 fixes maintain system stability + solve real problems")
         print("")
-        print("🚨 CRITICAL P0 FIXES IMPLEMENTED:")
-        print("   1. WebSocket 1011 internal errors → GCP staging auto-detection + retry logic") 
-        print("   2. Agent Registry initialization → llm_manager validation hardening")
-        print("   3. E2E OAuth simulation key → Authentication enablement for testing")
+        print(" ALERT:  CRITICAL P0 FIXES IMPLEMENTED:")
+        print("   1. WebSocket 1011 internal errors  ->  GCP staging auto-detection + retry logic") 
+        print("   2. Agent Registry initialization  ->  llm_manager validation hardening")
+        print("   3. E2E OAuth simulation key  ->  Authentication enablement for testing")
         print("")
         
     def validate_fix_1_websocket_gcp_detection(self) -> Dict[str, Any]:
         """Validate WebSocket GCP staging auto-detection fix."""
-        print("🔍 VALIDATING FIX #1: WebSocket GCP Staging Auto-Detection")
+        print(" SEARCH:  VALIDATING FIX #1: WebSocket GCP Staging Auto-Detection")
         print("-" * 60)
         
         try:
@@ -98,9 +98,9 @@ class P0StabilityProof:
             
             result = {
                 "status": "PASSED" if all([gcp_detection_present, retry_logic_present, cloud_handling_present]) else "FAILED",
-                "gcp_detection": "✅" if gcp_detection_present else "❌",
-                "retry_logic": "✅" if retry_logic_present else "❌", 
-                "cloud_handling": "✅" if cloud_handling_present else "❌",
+                "gcp_detection": " PASS: " if gcp_detection_present else " FAIL: ",
+                "retry_logic": " PASS: " if retry_logic_present else " FAIL: ", 
+                "cloud_handling": " PASS: " if cloud_handling_present else " FAIL: ",
                 "business_impact": "Resolves WebSocket 1011 internal errors in staging environment",
                 "stability_impact": "Enhances reliability without changing core functionality"
             }
@@ -108,18 +108,18 @@ class P0StabilityProof:
             print(f"   GCP Auto-Detection: {result['gcp_detection']}")
             print(f"   Retry Logic: {result['retry_logic']}")
             print(f"   Cloud Handling: {result['cloud_handling']}")
-            print(f"   🎯 Business Impact: {result['business_impact']}")
-            print(f"   🔒 Stability Impact: {result['stability_impact']}")
+            print(f"    TARGET:  Business Impact: {result['business_impact']}")
+            print(f"   [U+1F512] Stability Impact: {result['stability_impact']}")
             
             return result
             
         except Exception as e:
-            print(f"   ❌ Validation failed: {e}")
+            print(f"    FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def validate_fix_2_agent_registry_hardening(self) -> Dict[str, Any]:
         """Validate Agent Registry initialization hardening fix."""
-        print("\n🔍 VALIDATING FIX #2: Agent Registry Initialization Hardening")
+        print("\n SEARCH:  VALIDATING FIX #2: Agent Registry Initialization Hardening")
         print("-" * 60)
         
         try:
@@ -152,8 +152,8 @@ class P0StabilityProof:
             
             result = {
                 "status": "PASSED" if validation_works and source_validation else "FAILED",
-                "runtime_validation": "✅" if validation_works else "❌",
-                "source_validation": "✅" if source_validation else "❌",
+                "runtime_validation": " PASS: " if validation_works else " FAIL: ",
+                "source_validation": " PASS: " if source_validation else " FAIL: ",
                 "error_details": error_message,
                 "business_impact": "Prevents agent execution failures due to missing dependencies",
                 "stability_impact": "Adds fail-fast validation without changing existing workflows"
@@ -161,19 +161,19 @@ class P0StabilityProof:
             
             print(f"   Runtime Validation: {result['runtime_validation']}")
             print(f"   Source Code Validation: {result['source_validation']}")
-            print(f"   📝 Details: {result['error_details']}")
-            print(f"   🎯 Business Impact: {result['business_impact']}")
-            print(f"   🔒 Stability Impact: {result['stability_impact']}")
+            print(f"   [U+1F4DD] Details: {result['error_details']}")
+            print(f"    TARGET:  Business Impact: {result['business_impact']}")
+            print(f"   [U+1F512] Stability Impact: {result['stability_impact']}")
             
             return result
             
         except Exception as e:
-            print(f"   ❌ Validation failed: {e}")
+            print(f"    FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def validate_fix_3_e2e_oauth_deployment(self) -> Dict[str, Any]:
         """Validate E2E OAuth simulation key deployment readiness."""
-        print("\n🔍 VALIDATING FIX #3: E2E OAuth Simulation Key Deployment")
+        print("\n SEARCH:  VALIDATING FIX #3: E2E OAuth Simulation Key Deployment")
         print("-" * 60)
         
         try:
@@ -201,10 +201,10 @@ class P0StabilityProof:
             
             result = {
                 "status": "PASSED" if all([script_exists, commands_exist, key_present, commands_valid]) else "PARTIAL",
-                "deployment_script": "✅" if script_exists else "❌",
-                "deployment_commands": "✅" if commands_exist else "❌",
-                "secret_key": "✅" if key_present else "❌",
-                "command_validation": "✅" if commands_valid else "❌",
+                "deployment_script": " PASS: " if script_exists else " FAIL: ",
+                "deployment_commands": " PASS: " if commands_exist else " FAIL: ",
+                "secret_key": " PASS: " if key_present else " FAIL: ",
+                "command_validation": " PASS: " if commands_valid else " FAIL: ",
                 "business_impact": "Enables E2E authentication testing without production secrets",
                 "stability_impact": "Provides testing capabilities without affecting production auth"
             }
@@ -213,18 +213,18 @@ class P0StabilityProof:
             print(f"   Command Documentation: {result['deployment_commands']}")
             print(f"   Secret Key Present: {result['secret_key']}")
             print(f"   Command Validation: {result['command_validation']}")
-            print(f"   🎯 Business Impact: {result['business_impact']}")
-            print(f"   🔒 Stability Impact: {result['stability_impact']}")
+            print(f"    TARGET:  Business Impact: {result['business_impact']}")
+            print(f"   [U+1F512] Stability Impact: {result['stability_impact']}")
             
             return result
             
         except Exception as e:
-            print(f"   ❌ Validation failed: {e}")
+            print(f"    FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def test_system_stability_imports(self) -> Dict[str, Any]:
         """Test that all critical system imports still work (no breaking changes)."""
-        print("\n🧪 TESTING SYSTEM STABILITY: Critical Import Validation")
+        print("\n[U+1F9EA] TESTING SYSTEM STABILITY: Critical Import Validation")
         print("-" * 60)
         
         critical_imports = [
@@ -245,12 +245,12 @@ class P0StabilityProof:
                 if spec is not None:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-                    import_results[module_name] = "✅ PASSED"
+                    import_results[module_name] = " PASS:  PASSED"
                 else:
-                    import_results[module_name] = "❌ NOT FOUND"
+                    import_results[module_name] = " FAIL:  NOT FOUND"
                     all_passed = False
             except Exception as e:
-                import_results[module_name] = f"❌ FAILED: {str(e)[:50]}..."
+                import_results[module_name] = f" FAIL:  FAILED: {str(e)[:50]}..."
                 all_passed = False
         
         for module, status in import_results.items():
@@ -259,26 +259,26 @@ class P0StabilityProof:
         result = {
             "status": "PASSED" if all_passed else "FAILED", 
             "imports_tested": len(critical_imports),
-            "imports_passed": sum(1 for status in import_results.values() if "✅" in status),
+            "imports_passed": sum(1 for status in import_results.values() if " PASS: " in status),
             "details": import_results,
             "stability_impact": "All critical modules remain importable and functional"
         }
         
-        print(f"   📊 Summary: {result['imports_passed']}/{result['imports_tested']} critical imports working")
-        print(f"   🔒 Stability: {result['stability_impact']}")
+        print(f"    CHART:  Summary: {result['imports_passed']}/{result['imports_tested']} critical imports working")
+        print(f"   [U+1F512] Stability: {result['stability_impact']}")
         
         return result
     
     def validate_business_value_protection(self) -> Dict[str, Any]:
         """Validate that business value delivery capabilities are protected."""
-        print("\n💰 VALIDATING BUSINESS VALUE PROTECTION")
+        print("\n[U+1F4B0] VALIDATING BUSINESS VALUE PROTECTION")
         print("-" * 60)
         
         # Check that Data Helper Agent test file exists and is comprehensive
         data_helper_test = project_root / "tests" / "e2e" / "test_real_agent_data_helper_flow.py"
         
         if not data_helper_test.exists():
-            print("   ❌ Data Helper Agent E2E test missing")
+            print("    FAIL:  Data Helper Agent E2E test missing")
             return {"status": "FAILED", "error": "Critical business value test missing"}
         
         # Analyze the test content for business value validation
@@ -296,7 +296,7 @@ class P0StabilityProof:
         protection_score = sum(business_validations.values()) / len(business_validations)
         
         for validation, passed in business_validations.items():
-            status = "✅" if passed else "❌"
+            status = " PASS: " if passed else " FAIL: "
             print(f"   {validation.replace('_', ' ').title()}: {status}")
         
         result = {
@@ -307,14 +307,14 @@ class P0StabilityProof:
             "test_completeness": f"{protection_score:.1%} of critical business flows validated"
         }
         
-        print(f"   📊 Protection Score: {result['protection_score']:.1%}")
-        print(f"   💰 Business Impact: {result['business_impact']}")
+        print(f"    CHART:  Protection Score: {result['protection_score']:.1%}")
+        print(f"   [U+1F4B0] Business Impact: {result['business_impact']}")
         
         return result
     
     def validate_claude_md_compliance(self) -> Dict[str, Any]:
         """Validate that fixes comply with CLAUDE.md principles."""
-        print("\n📋 VALIDATING CLAUDE.MD COMPLIANCE")
+        print("\n[U+1F4CB] VALIDATING CLAUDE.MD COMPLIANCE")
         print("-" * 60)
         
         compliance_checks = {
@@ -330,7 +330,7 @@ class P0StabilityProof:
         all_compliant = True
         
         for check, description in compliance_checks.items():
-            status = "✅ COMPLIANT"
+            status = " PASS:  COMPLIANT"
             print(f"   {check.replace('_', ' ').title()}: {status} - {description}")
         
         result = {
@@ -340,7 +340,7 @@ class P0StabilityProof:
             "stability_impact": "All changes follow CLAUDE.md architectural principles"
         }
         
-        print(f"   📊 Compliance: {result['compliance_score']:.0%} of CLAUDE.md principles followed")
+        print(f"    CHART:  Compliance: {result['compliance_score']:.0%} of CLAUDE.md principles followed")
         
         return result
     
@@ -366,41 +366,41 @@ class P0StabilityProof:
         overall_status = "PASSED" if fixes_passed == 3 and stability_results["status"] == "PASSED" else "PARTIAL"
         
         print("\n" + "=" * 80)
-        print("🏆 P0 INFRASTRUCTURE STABILITY PROOF - FINAL SUMMARY")
+        print(" TROPHY:  P0 INFRASTRUCTURE STABILITY PROOF - FINAL SUMMARY")
         print("=" * 80)
-        print(f"⏱️  Total Validation Time: {total_time:.2f} seconds")
-        print(f"🎯 Overall Status: {overall_status}")
+        print(f"[U+23F1][U+FE0F]  Total Validation Time: {total_time:.2f} seconds")
+        print(f" TARGET:  Overall Status: {overall_status}")
         print("")
-        print("📊 FIX VALIDATION RESULTS:")
-        print(f"   ✅ Fix #1 (WebSocket GCP): {fix_1_results['status']}")
-        print(f"   ✅ Fix #2 (Agent Registry): {fix_2_results['status']}")
-        print(f"   ✅ Fix #3 (E2E OAuth): {fix_3_results['status']}")
-        print(f"   📈 Fixes Success Rate: {fixes_passed}/3 ({fixes_passed/3:.0%})")
+        print(" CHART:  FIX VALIDATION RESULTS:")
+        print(f"    PASS:  Fix #1 (WebSocket GCP): {fix_1_results['status']}")
+        print(f"    PASS:  Fix #2 (Agent Registry): {fix_2_results['status']}")
+        print(f"    PASS:  Fix #3 (E2E OAuth): {fix_3_results['status']}")
+        print(f"   [U+1F4C8] Fixes Success Rate: {fixes_passed}/3 ({fixes_passed/3:.0%})")
         print("")
-        print("🔒 SYSTEM STABILITY:")
-        print(f"   ✅ Import Stability: {stability_results['status']}")
-        print(f"   ✅ Business Value: {business_results['status']}")
-        print(f"   ✅ CLAUDE.md Compliance: {compliance_results['status']}")
+        print("[U+1F512] SYSTEM STABILITY:")
+        print(f"    PASS:  Import Stability: {stability_results['status']}")
+        print(f"    PASS:  Business Value: {business_results['status']}")
+        print(f"    PASS:  CLAUDE.md Compliance: {compliance_results['status']}")
         print("")
-        print("💰 BUSINESS VALUE PROTECTION:")
+        print("[U+1F4B0] BUSINESS VALUE PROTECTION:")
         for metric, value in self.business_value_metrics.items():
-            print(f"   📈 {metric.replace('_', ' ').title()}: {value}")
+            print(f"   [U+1F4C8] {metric.replace('_', ' ').title()}: {value}")
         print("")
-        print("🚨 CRITICAL STAGING ISSUES ADDRESSED:")
-        print("   ✅ WebSocket 1011 internal errors → Auto-detection + retry logic")
-        print("   ✅ Agent Registry failures → llm_manager validation")
-        print("   ✅ Authentication testing gaps → E2E OAuth simulation key")
+        print(" ALERT:  CRITICAL STAGING ISSUES ADDRESSED:")
+        print("    PASS:  WebSocket 1011 internal errors  ->  Auto-detection + retry logic")
+        print("    PASS:  Agent Registry failures  ->  llm_manager validation")
+        print("    PASS:  Authentication testing gaps  ->  E2E OAuth simulation key")
         print("")
         
         if overall_status == "PASSED":
-            print("🎉 PROOF COMPLETE: All P0 fixes validated successfully!")
-            print("✅ System stability maintained")
-            print("✅ No breaking changes introduced") 
-            print("✅ Business value protection verified")
-            print("✅ Ready for deployment to staging environment")
+            print(" CELEBRATION:  PROOF COMPLETE: All P0 fixes validated successfully!")
+            print(" PASS:  System stability maintained")
+            print(" PASS:  No breaking changes introduced") 
+            print(" PASS:  Business value protection verified")
+            print(" PASS:  Ready for deployment to staging environment")
         else:
-            print("⚠️  PARTIAL SUCCESS: Some validations need review")
-            print("📝 Review failed validations before deployment")
+            print(" WARNING: [U+FE0F]  PARTIAL SUCCESS: Some validations need review")
+            print("[U+1F4DD] Review failed validations before deployment")
         
         print("=" * 80)
         

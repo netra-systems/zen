@@ -16,6 +16,7 @@ Business Impact: This test protects the $500K+ ARR chat functionality by ensurin
 users get isolated, secure AI responses with proper real-time event notifications.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import unittest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
@@ -41,7 +42,7 @@ except ImportError as e:
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
-class TestBusinessFunctionValidation(unittest.TestCase):
+class TestBusinessFunctionValidation(SSotAsyncTestCase):
     """Comprehensive validation of business-critical functions through UserExecutionEngine"""
     
     def setUp(self):
@@ -62,7 +63,7 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         
     def test_user_isolation_prevents_data_leakage(self):
         """Test that user isolation prevents data leakage between users"""
-        print("\n🔒 Testing user isolation prevents data leakage...")
+        print("\n[U+1F512] Testing user isolation prevents data leakage...")
         
         # Create engines for two different users
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
@@ -88,30 +89,30 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertEqual(user2_context['user_id'], "business_user_2")
         self.assertNotEqual(user1_context['user_id'], user2_context['user_id'])
         
-        print("  ✅ User contexts properly isolated")
+        print("   PASS:  User contexts properly isolated")
         
         # Test 2: WebSocket managers are isolated
         self.assertEqual(user1_engine.websocket_manager.user_id, "business_user_1")
         self.assertEqual(user2_engine.websocket_manager.user_id, "business_user_2")
         self.assertIsNot(user1_engine.websocket_manager, user2_engine.websocket_manager)
         
-        print("  ✅ WebSocket managers properly isolated")
+        print("   PASS:  WebSocket managers properly isolated")
         
         # Test 3: Tool dispatchers are separate instances
         self.assertIsNot(user1_engine.tool_dispatcher, user2_engine.tool_dispatcher)
         
-        print("  ✅ Tool dispatchers properly isolated")
+        print("   PASS:  Tool dispatchers properly isolated")
         
         # Test 4: Session data is isolated
         self.assertEqual(user1_engine.session_id, "session_1")
         self.assertEqual(user2_engine.session_id, "session_2")
         self.assertNotEqual(user1_engine.session_id, user2_engine.session_id)
         
-        print("  ✅ Session data properly isolated")
+        print("   PASS:  Session data properly isolated")
         
     def test_websocket_events_sent_correctly(self):
         """Test that WebSocket events are sent correctly for business flows"""
-        print("\n📡 Testing WebSocket events sent correctly...")
+        print("\n[U+1F4E1] Testing WebSocket events sent correctly...")
         
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
             mock_get_manager.return_value = self.user1_ws
@@ -177,7 +178,7 @@ class TestBusinessFunctionValidation(unittest.TestCase):
             self.assertEqual(call_args[i][0], expected_event,
                            f"Event {i+1} should be {expected_event}")
         
-        print(f"  ✅ All {len(expected_events)} business-critical events sent correctly")
+        print(f"   PASS:  All {len(expected_events)} business-critical events sent correctly")
         
         # Verify event data structure
         for i, call in enumerate(self.user1_ws.send_agent_event.call_args_list):
@@ -185,11 +186,11 @@ class TestBusinessFunctionValidation(unittest.TestCase):
             self.assertIsInstance(event_data, dict, f"Event {i+1} data should be dict")
             self.assertIn("timestamp", event_data, f"Event {i+1} should have timestamp")
             
-        print("  ✅ All events have proper data structure and timestamps")
+        print("   PASS:  All events have proper data structure and timestamps")
         
     def test_concurrent_user_websocket_isolation(self):
         """Test WebSocket events are isolated between concurrent users"""
-        print("\n🔄 Testing concurrent user WebSocket isolation...")
+        print("\n CYCLE:  Testing concurrent user WebSocket isolation...")
         
         engines = {}
         
@@ -255,11 +256,11 @@ class TestBusinessFunctionValidation(unittest.TestCase):
             if 'user' in event_data:
                 self.assertEqual(event_data['user'], 'user2')
         
-        print("  ✅ Concurrent WebSocket events properly isolated between users")
+        print("   PASS:  Concurrent WebSocket events properly isolated between users")
         
     def test_tool_execution_maintains_user_context(self):
         """Test tool execution maintains user context and security"""
-        print("\n🔧 Testing tool execution maintains user context...")
+        print("\n[U+1F527] Testing tool execution maintains user context...")
         
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
             mock_get_manager.return_value = self.user1_ws
@@ -273,7 +274,7 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertIsNotNone(engine.tool_dispatcher)
         self.assertIsInstance(engine.tool_dispatcher, EnhancedToolDispatcher)
         
-        print("  ✅ Tool dispatcher properly initialized")
+        print("   PASS:  Tool dispatcher properly initialized")
         
         # Test 2: Execution context includes user data
         exec_context = engine.get_execution_context()
@@ -286,17 +287,17 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertEqual(user_context['user_id'], "business_user_1")
         self.assertEqual(user_context['session_id'], "session_1")
         
-        print("  ✅ Execution context includes proper user data")
+        print("   PASS:  Execution context includes proper user data")
         
         # Test 3: Tool access validation
         self.assertTrue(hasattr(engine, 'validate_tool_access'))
         self.assertTrue(callable(engine.validate_tool_access))
         
-        print("  ✅ Tool access validation available")
+        print("   PASS:  Tool access validation available")
         
     def test_agent_execution_end_to_end_flow(self):
         """Test end-to-end agent execution flow through UserExecutionEngine"""
-        print("\n🤖 Testing end-to-end agent execution flow...")
+        print("\n[U+1F916] Testing end-to-end agent execution flow...")
         
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
             mock_get_manager.return_value = self.user1_ws
@@ -356,7 +357,7 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertLess(execution_time, 1.0,
                        "Agent execution flow should complete quickly")
         
-        print(f"  ✅ End-to-end flow completed in {execution_time:.3f}s")
+        print(f"   PASS:  End-to-end flow completed in {execution_time:.3f}s")
         
         # Verify event sequence
         events = [call[0][0] for call in self.user1_ws.send_agent_event.call_args_list]
@@ -365,11 +366,11 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertEqual(events, expected_sequence,
                         "Events should follow correct business sequence")
         
-        print("  ✅ Event sequence follows correct business flow")
+        print("   PASS:  Event sequence follows correct business flow")
         
     def test_error_handling_maintains_user_isolation(self):
         """Test error handling maintains user isolation"""
-        print("\n🚨 Testing error handling maintains user isolation...")
+        print("\n ALERT:  Testing error handling maintains user isolation...")
         
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
             mock_get_manager.return_value = self.user1_ws
@@ -395,18 +396,18 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         
         asyncio.run(test_error_resilience())
         
-        print("  ✅ Engine maintains user context despite WebSocket errors")
+        print("   PASS:  Engine maintains user context despite WebSocket errors")
         
         # Test 2: Cleanup works correctly
         try:
             engine.cleanup()
-            print("  ✅ Cleanup executes without errors")
+            print("   PASS:  Cleanup executes without errors")
         except Exception as e:
             self.fail(f"Cleanup should not raise exceptions: {e}")
         
     def test_performance_scalability(self):
         """Test performance doesn't degrade with SSOT consolidation"""
-        print("\n⚡ Testing performance scalability...")
+        print("\n LIGHTNING:  Testing performance scalability...")
         
         # Create multiple engines to test scalability
         engines = []
@@ -453,15 +454,15 @@ class TestBusinessFunctionValidation(unittest.TestCase):
         self.assertLess(event_time, 1.0,
                        f"Sending 10 concurrent events should take <1s, took {event_time:.3f}s")
         
-        print(f"  ✅ Created 10 engines in {creation_time:.3f}s")
-        print(f"  ✅ Sent 10 concurrent events in {event_time:.3f}s")
+        print(f"   PASS:  Created 10 engines in {creation_time:.3f}s")
+        print(f"   PASS:  Sent 10 concurrent events in {event_time:.3f}s")
         
         # Verify all events were sent correctly
         for mock_manager in mock_managers:
             self.assertEqual(mock_manager.send_agent_event.call_count, 1,
                            "Each user should receive exactly one event")
         
-        print("  ✅ Performance meets scalability requirements")
+        print("   PASS:  Performance meets scalability requirements")
 
 
 if __name__ == '__main__':

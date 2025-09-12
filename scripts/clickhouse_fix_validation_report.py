@@ -21,7 +21,7 @@ def test_fix_implementation():
         env = get_env()
         
         from netra_backend.app.db.clickhouse import _handle_connection_error
-        print("✅ Successfully imported _handle_connection_error function")
+        print(" PASS:  Successfully imported _handle_connection_error function")
         
         # Test the fix logic by examining the function behavior
         os.environ['ENVIRONMENT'] = 'staging'
@@ -38,10 +38,10 @@ def test_fix_implementation():
         try:
             _handle_connection_error(test_exception)
             exception_raised = False
-            print("✅ Optional service does NOT raise exception (graceful degradation)")
+            print(" PASS:  Optional service does NOT raise exception (graceful degradation)")
         except Exception as e:
             exception_raised = True
-            print(f"❌ Optional service raised exception: {e}")
+            print(f" FAIL:  Optional service raised exception: {e}")
             return False
         
         # Test required service behavior (should raise)
@@ -50,15 +50,15 @@ def test_fix_implementation():
         
         try:
             _handle_connection_error(test_exception)
-            print("❌ Required service should raise exception but didn't")
+            print(" FAIL:  Required service should raise exception but didn't")
             return False
         except Exception as e:
-            print("✅ Required service correctly raises exception for fail-fast behavior")
+            print(" PASS:  Required service correctly raises exception for fail-fast behavior")
         
         return True
         
     except ImportError as e:
-        print(f"❌ Failed to import: {e}")
+        print(f" FAIL:  Failed to import: {e}")
         return False
 
 
@@ -84,13 +84,13 @@ def analyze_code_changes():
         for indicator in fix_indicators:
             if indicator in content:
                 found_indicators.append(indicator)
-                print(f"✅ Found fix indicator: {indicator}")
+                print(f" PASS:  Found fix indicator: {indicator}")
             else:
-                print(f"❌ Missing fix indicator: {indicator}")
+                print(f" FAIL:  Missing fix indicator: {indicator}")
         
         # Check the specific fix location
         if '_handle_connection_error' in content:
-            print("✅ Found _handle_connection_error function")
+            print(" PASS:  Found _handle_connection_error function")
             
             # Extract the function
             start_idx = content.find('def _handle_connection_error')
@@ -112,9 +112,9 @@ def analyze_code_changes():
                 all_patterns_found = True
                 for pattern in critical_patterns:
                     if pattern in function_code:
-                        print(f"✅ Found critical fix pattern: {pattern}")
+                        print(f" PASS:  Found critical fix pattern: {pattern}")
                     else:
-                        print(f"❌ Missing critical fix pattern: {pattern}")
+                        print(f" FAIL:  Missing critical fix pattern: {pattern}")
                         all_patterns_found = False
                 
                 return all_patterns_found
@@ -122,7 +122,7 @@ def analyze_code_changes():
         return len(found_indicators) >= 4
         
     except Exception as e:
-        print(f"❌ Error analyzing code: {e}")
+        print(f" FAIL:  Error analyzing code: {e}")
         return False
 
 
@@ -180,14 +180,14 @@ def validate_environment_behavior():
                 actual_behavior = 'fail_fast'
             
             if actual_behavior == scenario['expected']:
-                print(f"✅ {scenario['name']}: Expected {scenario['expected']}, got {actual_behavior}")
+                print(f" PASS:  {scenario['name']}: Expected {scenario['expected']}, got {actual_behavior}")
                 passed += 1
             else:
-                print(f"❌ {scenario['name']}: Expected {scenario['expected']}, got {actual_behavior}")
+                print(f" FAIL:  {scenario['name']}: Expected {scenario['expected']}, got {actual_behavior}")
                 failed += 1
                 
         except Exception as e:
-            print(f"❌ {scenario['name']}: Error during test: {e}")
+            print(f" FAIL:  {scenario['name']}: Error during test: {e}")
             failed += 1
     
     print(f"\nEnvironment Behavior Results: {passed} passed, {failed} failed")
@@ -219,16 +219,16 @@ def check_backward_compatibility():
                 result = 'exception_raised'
             
             if expected == 'should_fail' and result == 'exception_raised':
-                print(f"✅ {env} with REQUIRED=true correctly raises exception (backward compatibility maintained)")
+                print(f" PASS:  {env} with REQUIRED=true correctly raises exception (backward compatibility maintained)")
             elif expected == 'should_fail' and result == 'no_exception':
-                print(f"❌ {env} with REQUIRED=true should raise exception but didn't (backward compatibility broken)")
+                print(f" FAIL:  {env} with REQUIRED=true should raise exception but didn't (backward compatibility broken)")
                 return False
             
         except Exception as e:
-            print(f"❌ Error testing {env}: {e}")
+            print(f" FAIL:  Error testing {env}: {e}")
             return False
     
-    print("✅ Backward compatibility maintained - required services still fail fast")
+    print(" PASS:  Backward compatibility maintained - required services still fail fast")
     return True
 
 
@@ -252,14 +252,14 @@ def generate_stability_report():
     
     results = {}
     for name, test_func in validations:
-        print(f"\n🔍 {name}:")
+        print(f"\n SEARCH:  {name}:")
         try:
             results[name] = test_func()
-            status = "✅ PASS" if results[name] else "❌ FAIL"
+            status = " PASS:  PASS" if results[name] else " FAIL:  FAIL"
             print(f"Result: {status}")
         except Exception as e:
             results[name] = False
-            print(f"Result: ❌ ERROR - {e}")
+            print(f"Result:  FAIL:  ERROR - {e}")
     
     # Summary
     print("\n" + "=" * 80)
@@ -272,21 +272,21 @@ def generate_stability_report():
     print(f"Validations Passed: {passed}/{total}")
     
     for name, result in results.items():
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = " PASS:  PASS" if result else " FAIL:  FAIL"
         print(f"  {name}: {status}")
     
     # Overall assessment
     if passed == total:
-        print("\n🎉 OVERALL: ALL VALIDATIONS PASSED")
-        print("✅ The ClickHouse logging fix is working correctly and maintains system stability")
-        print("✅ No breaking changes detected")
-        print("✅ Graceful degradation working for optional services")  
-        print("✅ Fail-fast behavior preserved for required services")
-        print("✅ Backward compatibility maintained")
+        print("\n CELEBRATION:  OVERALL: ALL VALIDATIONS PASSED")
+        print(" PASS:  The ClickHouse logging fix is working correctly and maintains system stability")
+        print(" PASS:  No breaking changes detected")
+        print(" PASS:  Graceful degradation working for optional services")  
+        print(" PASS:  Fail-fast behavior preserved for required services")
+        print(" PASS:  Backward compatibility maintained")
         return True
     else:
-        print(f"\n💥 OVERALL: {total - passed} VALIDATIONS FAILED")
-        print("❌ The fix needs investigation or has introduced regressions")
+        print(f"\n[U+1F4A5] OVERALL: {total - passed} VALIDATIONS FAILED")
+        print(" FAIL:  The fix needs investigation or has introduced regressions")
         return False
 
 

@@ -265,7 +265,7 @@ async def test_frontend_backend_state_sync_complete():
     """Complete frontend-backend state synchronization test suite."""
     tester = FrontendBackendStateSyncTester()
     context = await tester.create_test_context()
-    print(f"✓ Test context created: {context['user_id']}")
+    print(f"[U+2713] Test context created: {context['user_id']}")
     
     test_cases = [
         ("User Profile Sync", tester.test_user_profile_state_sync),
@@ -283,10 +283,10 @@ async def test_frontend_backend_state_sync_complete():
         try:
             result = await test_func(context)
             results[test_name] = result
-            print(f"✓ {test_name}: PASSED")
+            print(f"[U+2713] {test_name}: PASSED")
         except Exception as e:
             results[test_name] = {"error": str(e)}
-            print(f"✗ {test_name}: FAILED - {e}")
+            print(f"[U+2717] {test_name}: FAILED - {e}")
     
     await context["backend_client"].close()
     

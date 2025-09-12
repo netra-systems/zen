@@ -1,7 +1,7 @@
 """Mock LLM implementations for development and testing.
 
 Provides mock LLM classes that return predictable responses when real LLM services
-are disabled. Each function must be ≤8 lines as per architecture requirements.
+are disabled. Each function must be  <= 8 lines as per architecture requirements.
 """
 from typing import Any, AsyncIterator, Type, TypeVar
 

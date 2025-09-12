@@ -89,7 +89,7 @@ class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
                 other_company = other_session["user_data"]["company"]
                 assert other_company not in str(user_context["user_data"])
         
-        print("✅ User session complete isolation test passed")
+        print(" PASS:  User session complete isolation test passed")
 
     def test_user_execution_context_thread_safety(self):
         """
@@ -155,7 +155,7 @@ class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
         assert len(set(all_run_ids)) == len(all_run_ids), "Run IDs must be unique" 
         assert len(set(all_request_ids)) == len(all_request_ids), "Request IDs must be unique"
         
-        print("✅ User execution context thread safety test passed")
+        print(" PASS:  User execution context thread safety test passed")
 
     def test_user_permission_boundary_enforcement(self):
         """
@@ -217,7 +217,7 @@ class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
                 has_write_access = self._check_operation_permission(user_id, permissions, "create_reports")
                 assert has_write_access is True
         
-        print("✅ User permission boundary enforcement test passed")
+        print(" PASS:  User permission boundary enforcement test passed")
 
     def test_user_data_context_cleanup_on_session_end(self):
         """
@@ -287,7 +287,7 @@ class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
             # No residual data should remain
             assert cleanup_result["residual_data_count"] == 0, f"No residual data should remain for {user_id}"
         
-        print("✅ User data context cleanup on session end test passed")
+        print(" PASS:  User data context cleanup on session end test passed")
 
     def test_concurrent_user_operations_isolation_validation(self):
         """
@@ -350,7 +350,7 @@ class TestUserContextIsolationBusinessLogic(SSotBaseTestCase):
         all_successful = all(result["operation_successful"] for result in operation_results)
         assert all_successful, "All concurrent operations should succeed independently"
         
-        print("✅ Concurrent user operations isolation validation test passed")
+        print(" PASS:  Concurrent user operations isolation validation test passed")
 
     # Helper methods for test implementation
     

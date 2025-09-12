@@ -508,11 +508,11 @@ class TestSyntaxFix:
         # SLA compliance validation
         assert total_time < 30.0, f"Recovery time {total_time:.2f}s exceeds 30s SLA requirement"
         
-        logger.info(f"✅ Complete error recovery validated in {total_time:.2f} seconds")
-        logger.info("✅ Circuit breaker activated and recovered successfully")
-        logger.info("✅ Service isolation maintained throughout failure")
-        logger.info("✅ Data integrity preserved with no loss")
-        logger.info("✅ All SLA requirements met")
+        logger.info(f" PASS:  Complete error recovery validated in {total_time:.2f} seconds")
+        logger.info(" PASS:  Circuit breaker activated and recovered successfully")
+        logger.info(" PASS:  Service isolation maintained throughout failure")
+        logger.info(" PASS:  Data integrity preserved with no loss")
+        logger.info(" PASS:  All SLA requirements met")
     
     @pytest.mark.resilience
     async def test_circuit_breaker_unit_behavior(self, circuit_breaker_tester):
@@ -534,7 +534,7 @@ class TestSyntaxFix:
         with pytest.raises(CircuitBreakerOpenError):
             await circuit.call(lambda: "test")
         
-        logger.info("✅ Circuit breaker unit behavior validated")
+        logger.info(" PASS:  Circuit breaker unit behavior validated")
     
     @pytest.mark.resilience
     async def test_service_health_endpoint_during_failure(self, orchestrator):
@@ -550,7 +550,7 @@ class TestSyntaxFix:
                 response = await client.get(f"{auth_url}/health")
                 
             assert response.status_code == 200, "Health endpoint should remain accessible"
-            logger.info("✅ Health endpoints remain accessible during isolated failures")
+            logger.info(" PASS:  Health endpoints remain accessible during isolated failures")
             
         except Exception as e:
             pytest.skip(f"Health endpoint test skipped: {e}")
@@ -583,7 +583,7 @@ class TestSyntaxFix:
         if "auth" in healthy_services:
             assert auth_health, "Auth service should remain healthy during backend failure"
         
-        logger.info("✅ No cascading failures detected across service boundaries")
+        logger.info(" PASS:  No cascading failures detected across service boundaries")
 
 # Helper functions for test execution
 async def run_error_recovery_test() -> Dict[str, Any]:
@@ -622,8 +622,8 @@ def validate_circuit_breaker_implementation() -> bool:
 if __name__ == "__main__":
     # Validation when run directly
     if validate_circuit_breaker_implementation():
-        print("✅ Circuit breaker implementation validated")
-        print("✅ Error recovery test implementation complete")
-        print("📋 Run with: pytest tests/unified/e2e/test_error_recovery_complete.py")
+        print(" PASS:  Circuit breaker implementation validated")
+        print(" PASS:  Error recovery test implementation complete")
+        print("[U+1F4CB] Run with: pytest tests/unified/e2e/test_error_recovery_complete.py")
     else:
-        print("❌ Circuit breaker implementation validation failed")
+        print(" FAIL:  Circuit breaker implementation validation failed")

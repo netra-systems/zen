@@ -23,7 +23,7 @@ This test suite validates the WebSocket Connection State Machine business logic:
 - Performance metrics and state timing tracking
 
 STATE TRANSITION FLOW TO TEST:
-CONNECTING → ACCEPTED → AUTHENTICATED → SERVICES_READY → PROCESSING_READY
+CONNECTING  ->  ACCEPTED  ->  AUTHENTICATED  ->  SERVICES_READY  ->  PROCESSING_READY
 
 RACE CONDITION SCENARIOS TO TEST:
 - Concurrent authentication and service initialization

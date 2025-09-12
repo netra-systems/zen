@@ -90,7 +90,7 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
         
         # Should fail quickly at the new 5s limit
         assert elapsed_time < 1.0, f"Timeout test took {elapsed_time:.3f}s - should be quick with mock"
-        print("✅ WebSocket SSOT timeout successfully reduced to 5s")
+        print(" PASS:  WebSocket SSOT timeout successfully reduced to 5s")
     
     async def test_gcp_readiness_validator_timeout_fixes(self):
         """
@@ -141,7 +141,7 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
             assert validation_time < 0.5, f"Validation took {validation_time:.3f}s - timeouts not optimized"
             assert result.ready, "Optimized validation should succeed"
             
-            print("✅ GCP readiness validator timeouts successfully optimized")
+            print(" PASS:  GCP readiness validator timeouts successfully optimized")
     
     async def test_startup_wait_timeout_optimization(self):
         """
@@ -169,7 +169,7 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
             
             print(f"Total {total_timeout}s -> wait {calculated_wait_timeout}s (optimized)")
         
-        print("✅ Startup wait timeout optimization validated")
+        print(" PASS:  Startup wait timeout optimization validated")
     
     async def test_service_validation_timeout_reductions(self):
         """
@@ -199,7 +199,7 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
         print(f"Total service validation: {total_old}s -> {total_new}s ({total_improvement:.0f}% faster)")
         assert total_improvement >= 80, f"Total improvement {total_improvement:.0f}% insufficient"
         
-        print("✅ Service validation timeout reductions validated")
+        print(" PASS:  Service validation timeout reductions validated")
     
     async def test_end_to_end_performance_improvement(self):
         """
@@ -273,7 +273,7 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
         assert connection_time < self.performance_targets['websocket_connection_max'], \
             f"Connection time {connection_time:.3f}s exceeds {self.performance_targets['websocket_connection_max']}s target"
         
-        print(f"✅ End-to-end performance target met: {connection_time:.3f}s < {self.performance_targets['websocket_connection_max']}s")
+        print(f" PASS:  End-to-end performance target met: {connection_time:.3f}s < {self.performance_targets['websocket_connection_max']}s")
     
     def test_performance_improvement_summary(self):
         """
@@ -283,29 +283,29 @@ class TestWebSocketPerformanceValidation(SSotBaseTestCase):
         print("WEBSOCKET PERFORMANCE IMPROVEMENT VALIDATION SUMMARY")
         print("="*60)
         
-        print("\n📊 TIMEOUT REDUCTIONS IMPLEMENTED:")
-        print("   • WebSocket SSOT timeout: 30s → 5s (83% faster)")
-        print("   • Startup wait timeout: 20s → 3s max (85% faster)")
-        print("   • Dependencies validation: 20s → 3s (85% faster)")
-        print("   • Services validation: 10s → 2s (80% faster)")
-        print("   • Integration validation: 5s → 1s (80% faster)")
+        print("\n CHART:  TIMEOUT REDUCTIONS IMPLEMENTED:")
+        print("   [U+2022] WebSocket SSOT timeout: 30s  ->  5s (83% faster)")
+        print("   [U+2022] Startup wait timeout: 20s  ->  3s max (85% faster)")
+        print("   [U+2022] Dependencies validation: 20s  ->  3s (85% faster)")
+        print("   [U+2022] Services validation: 10s  ->  2s (80% faster)")
+        print("   [U+2022] Integration validation: 5s  ->  1s (80% faster)")
         
-        print("\n⚡ PERFORMANCE IMPROVEMENT:")
+        print("\n LIGHTNING:  PERFORMANCE IMPROVEMENT:")
         original_max = 30 + 20 + 20 + 10 + 5  # 85s worst case
         optimized_max = 5 + 3 + 3 + 2 + 1     # 14s worst case
         improvement = ((original_max - optimized_max) / original_max) * 100
         
-        print(f"   • Worst-case blocking time: {original_max}s → {optimized_max}s")
-        print(f"   • Overall improvement: {improvement:.0f}% faster connections")
-        print(f"   • Target achieved: Sub-5s typical connections")
+        print(f"   [U+2022] Worst-case blocking time: {original_max}s  ->  {optimized_max}s")
+        print(f"   [U+2022] Overall improvement: {improvement:.0f}% faster connections")
+        print(f"   [U+2022] Target achieved: Sub-5s typical connections")
         
-        print("\n🎯 BUSINESS IMPACT:")
-        print("   • Chat functionality now responds quickly")
-        print("   • User experience dramatically improved")  
-        print("   • Eliminates user-reported slowness issues")
-        print("   • Protects revenue from connection abandonment")
+        print("\n TARGET:  BUSINESS IMPACT:")
+        print("   [U+2022] Chat functionality now responds quickly")
+        print("   [U+2022] User experience dramatically improved")  
+        print("   [U+2022] Eliminates user-reported slowness issues")
+        print("   [U+2022] Protects revenue from connection abandonment")
         
-        print("\n✅ VALIDATION STATUS: ALL PERFORMANCE FIXES CONFIRMED")
+        print("\n PASS:  VALIDATION STATUS: ALL PERFORMANCE FIXES CONFIRMED")
         print("="*60)
 
 

@@ -41,7 +41,7 @@ class TestDockerTimeoutReproduction:
         EXPECTED RESULT: Shows Docker availability detection behavior
         PURPOSE: Documents actual behavior vs expected timeout issue
         """
-        logger.info("🔍 REPRODUCTION TEST: Docker availability check - measuring actual behavior")
+        logger.info(" SEARCH:  REPRODUCTION TEST: Docker availability check - measuring actual behavior")
         
         start_time = time.time()
         
@@ -58,10 +58,10 @@ class TestDockerTimeoutReproduction:
             # DISCOVERY: is_docker_available() only checks `docker --version` which succeeds
             # even when daemon isn't running. The real timeout issue is elsewhere.
             if result:
-                logger.info("✅ DISCOVERY: is_docker_available() returns True even when daemon isn't running")
+                logger.info(" PASS:  DISCOVERY: is_docker_available() returns True even when daemon isn't running")
                 logger.info("    This is because it only checks 'docker --version', not daemon connection")
             else:
-                logger.info("❌ Docker not available (likely Docker not installed)")
+                logger.info(" FAIL:  Docker not available (likely Docker not installed)")
                 
         except Exception as e:
             duration = time.time() - start_time
@@ -74,7 +74,7 @@ class TestDockerTimeoutReproduction:
         EXPECTED RESULT: SLOW/TIMEOUT - This shows the actual timeout problem
         PURPOSE: Reproduces the real cause of mission critical test hangs
         """
-        logger.info("🚨 REPRODUCTION TEST: wait_for_services timeout - THE REAL ISSUE")
+        logger.info(" ALERT:  REPRODUCTION TEST: wait_for_services timeout - THE REAL ISSUE")
         
         start_time = time.time()
         timeout_setting = 10.0  # Set 10s timeout
@@ -119,7 +119,7 @@ class TestDockerTimeoutReproduction:
         EXPECTED RESULT: TIMEOUT - This test should hang for 120+ seconds 
         PURPOSE: Reproduces exact condition blocking $500K+ ARR validation
         """
-        logger.info("🚨 REPRODUCTION TEST: WebSocket mission critical hanging - SHOULD TIMEOUT")
+        logger.info(" ALERT:  REPRODUCTION TEST: WebSocket mission critical hanging - SHOULD TIMEOUT")
         
         start_time = time.time()
         hang_threshold = 120.0  # Mission critical tests hang for 120+ seconds
@@ -191,7 +191,7 @@ class TestDockerTimeoutReproduction:
         EXPECTED RESULT: SLOW/FAIL - Should demonstrate rate limiter timeout issues
         PURPOSE: Proves rate limiter component of timeout problem
         """
-        logger.info("🚨 REPRODUCTION TEST: Docker rate limiter timeout behavior")
+        logger.info(" ALERT:  REPRODUCTION TEST: Docker rate limiter timeout behavior")
         
         start_time = time.time()
         
@@ -246,7 +246,7 @@ class TestDockerTimeoutReproduction:
         EXPECTED RESULT: Should show baseline Docker timeout behavior
         PURPOSE: Establishes baseline for comparison with wrapped calls
         """
-        logger.info("🚨 REPRODUCTION TEST: Direct Docker subprocess timeout")
+        logger.info(" ALERT:  REPRODUCTION TEST: Direct Docker subprocess timeout")
         
         start_time = time.time()
         
@@ -298,7 +298,7 @@ if __name__ == "__main__":
     # Run individual tests for direct execution
     test_instance = TestDockerTimeoutReproduction()
     
-    print("🚨 ISSUE #411 REPRODUCTION TESTS - These tests SHOULD FAIL/TIMEOUT to prove the issue")
+    print(" ALERT:  ISSUE #411 REPRODUCTION TESTS - These tests SHOULD FAIL/TIMEOUT to prove the issue")
     print("=" * 80)
     
     try:
@@ -326,4 +326,4 @@ if __name__ == "__main__":
         print(f"   RESULT: {e}")
     
     print("\n" + "=" * 80)
-    print("🎯 If any tests FAILED/TIMED OUT, Issue #411 has been reproduced!")
+    print(" TARGET:  If any tests FAILED/TIMED OUT, Issue #411 has been reproduced!")

@@ -7,12 +7,12 @@ This test validates that our comprehensive agent execution tests can connect
 to the real staging environment and receive authentic responses.
 
 Results Summary from Real Agent Execution Test:
-- ✅ WebSocket Connection: 0.435s to staging 
-- ✅ HTTP/HTTPS Connectivity: Health endpoint accessible
-- ✅ Agent Request Pipeline: Real requests sent and processed
-- ✅ Authentication Layer: Properly enforced (returns expected auth errors)  
-- ✅ Error Handling: Graceful connection cleanup and error reporting
-- ✅ WebSocket Events: Real error_message events received from staging
+-  PASS:  WebSocket Connection: 0.435s to staging 
+-  PASS:  HTTP/HTTPS Connectivity: Health endpoint accessible
+-  PASS:  Agent Request Pipeline: Real requests sent and processed
+-  PASS:  Authentication Layer: Properly enforced (returns expected auth errors)  
+-  PASS:  Error Handling: Graceful connection cleanup and error reporting
+-  PASS:  WebSocket Events: Real error_message events received from staging
 
 This validates that our comprehensive agent execution test suite is working
 correctly with the staging environment, demonstrating real connectivity and
@@ -230,7 +230,7 @@ class StagingConnectivityValidator:
         report_lines.append("## Test Results")
         for result in self.test_results:
             test_name = result.get("test", "unknown")
-            success = "✅ PASS" if result.get("success", False) else "❌ FAIL"
+            success = " PASS:  PASS" if result.get("success", False) else " FAIL:  FAIL"
             duration = result.get("duration", 0)
             
             report_lines.append(f"### {test_name}")
@@ -274,13 +274,13 @@ class StagingConnectivityValidator:
         report_lines.append("## Recommendations")
         
         if successful_tests == total_tests:
-            report_lines.append("✅ **All connectivity tests passed!**")
+            report_lines.append(" PASS:  **All connectivity tests passed!**")
             report_lines.append("- Staging environment is accessible and responding correctly")
             report_lines.append("- Agent execution pipeline is functional (auth layer working)")
             report_lines.append("- WebSocket communication is stable")
             report_lines.append("- Ready for comprehensive agent execution testing")
         else:
-            report_lines.append("⚠️ **Some connectivity issues detected**")
+            report_lines.append(" WARNING: [U+FE0F] **Some connectivity issues detected**")
             failed_tests = [r for r in self.test_results if not r.get("success", False)]
             for failed in failed_tests:
                 report_lines.append(f"- Fix {failed.get('test', 'unknown')}: {failed.get('error', 'Unknown error')}")
@@ -316,7 +316,7 @@ class TestStagingConnectivityValidation:
         assert result["duration"] < 10.0, f"HTTP connectivity too slow: {result['duration']:.3f}s"
         assert result["health_status"] == 200, f"Health endpoint unhealthy: {result['health_status']}"
         
-        logger.info(f"✅ HTTP connectivity test passed in {result['duration']:.3f}s")
+        logger.info(f" PASS:  HTTP connectivity test passed in {result['duration']:.3f}s")
     
     @pytest.mark.asyncio  
     async def test_002_websocket_connectivity(self, validator: StagingConnectivityValidator):
@@ -331,7 +331,7 @@ class TestStagingConnectivityValidation:
         assert result["connection_time"] < 5.0, f"WebSocket connection too slow: {result['connection_time']:.3f}s"
         assert result["ping_time"] < 1.0, f"WebSocket ping too slow: {result['ping_time']:.3f}s"
         
-        logger.info(f"✅ WebSocket connectivity test passed - Connection: {result['connection_time']:.3f}s, Ping: {result['ping_time']:.3f}s")
+        logger.info(f" PASS:  WebSocket connectivity test passed - Connection: {result['connection_time']:.3f}s, Ping: {result['ping_time']:.3f}s")
     
     @pytest.mark.asyncio
     async def test_003_agent_request_pipeline(self, validator: StagingConnectivityValidator):
@@ -352,17 +352,17 @@ class TestStagingConnectivityValidation:
         agent_response_received = result.get("agent_response_received", False)
         
         if auth_error_received:
-            logger.info("✅ Auth error received - pipeline is enforcing authentication correctly")
+            logger.info(" PASS:  Auth error received - pipeline is enforcing authentication correctly")
         elif agent_response_received:
-            logger.info("✅ Agent response received - pipeline is working with authentication")
+            logger.info(" PASS:  Agent response received - pipeline is working with authentication")
         elif pipeline_working:
-            logger.info("✅ Pipeline responded - connectivity confirmed")
+            logger.info(" PASS:  Pipeline responded - connectivity confirmed")
         else:
-            logger.warning("⚠️ No clear pipeline response received")
+            logger.warning(" WARNING: [U+FE0F] No clear pipeline response received")
         
         assert pipeline_working, "Pipeline should either authenticate successfully or return proper auth errors"
         
-        logger.info(f"✅ Agent request pipeline test passed in {result['duration']:.3f}s")
+        logger.info(f" PASS:  Agent request pipeline test passed in {result['duration']:.3f}s")
     
     @pytest.mark.asyncio
     async def test_004_generate_connectivity_report(self, validator: StagingConnectivityValidator):
@@ -384,7 +384,7 @@ class TestStagingConnectivityValidation:
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
         
-        logger.info(f"✅ Connectivity report generated: {report_path}")
+        logger.info(f" PASS:  Connectivity report generated: {report_path}")
         
         # Validate report generation
         assert len(report) > 500, "Report should be comprehensive"

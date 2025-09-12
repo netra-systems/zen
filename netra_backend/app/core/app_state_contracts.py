@@ -327,9 +327,9 @@ class AppStateContractValidator:
         
         # Log results
         if results["valid"]:
-            logger.info(f"✅ App state contracts validated: {results['passed_contracts']}/{results['total_contracts']} passed")
+            logger.info(f" PASS:  App state contracts validated: {results['passed_contracts']}/{results['total_contracts']} passed")
         else:
-            logger.error(f"❌ App state contract violations: {results['failed_contracts']}/{results['total_contracts']} failed")
+            logger.error(f" FAIL:  App state contract violations: {results['failed_contracts']}/{results['total_contracts']} failed")
             for error in results["critical_errors"]:
                 logger.error(f"   - {error}")
         
@@ -362,7 +362,7 @@ class AppStateContractValidator:
                         results["valid"] = False
         
         if not results["valid"]:
-            logger.error("❌ Dependency order violations detected:")
+            logger.error(" FAIL:  Dependency order violations detected:")
             for violation in results["dependency_violations"]:
                 logger.error(f"   - {violation}")
         
@@ -406,7 +406,7 @@ class AppStateContractValidator:
             logger.error(error_message)
             raise AppStateContractViolation(error_message)
         
-        logger.info(f"✅ App state contracts enforced successfully for {phase.value} phase")
+        logger.info(f" PASS:  App state contracts enforced successfully for {phase.value} phase")
         return True
 
 
@@ -461,7 +461,7 @@ def create_app_state_contract_report(app_state: Any) -> str:
     report_lines.append("=" * 60)
     
     # Overall status
-    status = "✅ PASSED" if results["valid"] else "❌ FAILED"
+    status = " PASS:  PASSED" if results["valid"] else " FAIL:  FAILED"
     report_lines.append(f"Overall Status: {status}")
     report_lines.append(f"Contracts: {results['passed_contracts']}/{results['total_contracts']} passed")
     report_lines.append("")
@@ -471,7 +471,7 @@ def create_app_state_contract_report(app_state: Any) -> str:
     report_lines.append("-" * 40)
     
     for component_name, component_result in results["component_results"].items():
-        status_icon = "✅" if component_result["valid"] else "❌"
+        status_icon = " PASS: " if component_result["valid"] else " FAIL: "
         report_lines.append(f"{status_icon} {component_name}")
         report_lines.append(f"   Description: {component_result['description']}")
         report_lines.append(f"   Business Value: {component_result['business_value']}")
@@ -493,7 +493,7 @@ def create_app_state_contract_report(app_state: Any) -> str:
         report_lines.append("BUSINESS IMPACT ASSESSMENT:")
         report_lines.append("-" * 40)
         for impact in results["business_impact"]:
-            report_lines.append(f"⚠️  {impact['component']} ({impact['severity']} severity)")
+            report_lines.append(f" WARNING: [U+FE0F]  {impact['component']} ({impact['severity']} severity)")
             report_lines.append(f"   Impact: {impact['impact']}")
             report_lines.append("")
     
@@ -537,14 +537,14 @@ if __name__ == "__main__":
     
     try:
         results = validate_app_state_contracts(mock_app_state, ContractPhase.READINESS)
-        print(f"✅ Validation Results: {results['passed_contracts']}/{results['total_contracts']} passed")
+        print(f" PASS:  Validation Results: {results['passed_contracts']}/{results['total_contracts']} passed")
         
         # Generate report
         report = create_app_state_contract_report(mock_app_state)
         print("\n" + report)
         
     except Exception as e:
-        print(f"❌ Contract validation error: {e}")
+        print(f" FAIL:  Contract validation error: {e}")
     
     # Test with broken state (missing components)
     print("\n" + "="*60)
@@ -567,4 +567,4 @@ if __name__ == "__main__":
                 print(f"  - {error}")
         
     except Exception as e:
-        print(f"❌ Contract validation error (expected): {e}")
+        print(f" FAIL:  Contract validation error (expected): {e}")

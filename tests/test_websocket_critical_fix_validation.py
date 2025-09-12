@@ -1,4 +1,42 @@
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
 # REMOVED_SYNTAX_ERROR: def __init__(self):
@@ -849,16 +887,16 @@
                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                 # REMOVED_SYNTAX_ERROR: for test_name, result in test_results.items():
-                                    # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result else "❌ FAIL"
+                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result else " FAIL:  FAIL"
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                     # REMOVED_SYNTAX_ERROR: if all_passed:
                                         # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                        # REMOVED_SYNTAX_ERROR: 🎉 WEBSOCKET CRITICAL FIX IS FULLY VALIDATED")
+                                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  WEBSOCKET CRITICAL FIX IS FULLY VALIDATED")
                                         # REMOVED_SYNTAX_ERROR: logger.info("The tool execution interface fix is working correctly!")
                                         # REMOVED_SYNTAX_ERROR: else:
                                             # REMOVED_SYNTAX_ERROR: logger.error(" )
-                                            # REMOVED_SYNTAX_ERROR: 💥 WEBSOCKET CRITICAL FIX HAS ISSUES")
+                                            # REMOVED_SYNTAX_ERROR: [U+1F4A5] WEBSOCKET CRITICAL FIX HAS ISSUES")
                                             # REMOVED_SYNTAX_ERROR: logger.error("Some aspects of the fix are not working properly!")
 
                                             # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
@@ -886,9 +924,9 @@
                                                 
 
                                                 # REMOVED_SYNTAX_ERROR: if exit_code == 0:
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🎉 ALL WEBSOCKET CRITICAL FIX VALIDATION TESTS PASSED!")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" CELEBRATION:  ALL WEBSOCKET CRITICAL FIX VALIDATION TESTS PASSED!")
                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                        # REMOVED_SYNTAX_ERROR: logger.error("💥 WEBSOCKET CRITICAL FIX VALIDATION TESTS FAILED!")
+                                                        # REMOVED_SYNTAX_ERROR: logger.error("[U+1F4A5] WEBSOCKET CRITICAL FIX VALIDATION TESTS FAILED!")
                                                         # REMOVED_SYNTAX_ERROR: logger.error("The critical fix may be broken - investigate immediately!")
 
                                                         # REMOVED_SYNTAX_ERROR: exit(exit_code)

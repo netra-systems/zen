@@ -261,7 +261,7 @@ if __name__ == "__main__":
     # Expected: All tests should FAIL initially, proving the issue exists
     # After fix: All tests should PASS, proving the issue is resolved
     
-    print("🔴 Running Issue #115 Reproduction Tests")
+    print("[U+1F534] Running Issue #115 Reproduction Tests")
     print("Expected: ALL TESTS SHOULD FAIL to prove the issue exists")
     print("After fix: All tests should PASS to prove resolution")
     print("=" * 60)

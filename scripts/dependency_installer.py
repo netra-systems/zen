@@ -2,7 +2,7 @@
 """
 Dependency Installer for Netra AI Platform.
 Handles Python virtual environment, packages, and external services installation.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import shutil

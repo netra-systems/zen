@@ -1,7 +1,7 @@
 """
 Core Example Prompts E2E Testing - Infrastructure and Shared Components
 Provides shared fixtures and core testing functionality.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from datetime import datetime, timezone
@@ -193,7 +193,7 @@ def create_workflow_result(success: bool, prompt: str, execution_time: float, qu
 
     }
 
-# State creation functions (≤8 lines each)
+# State creation functions ( <= 8 lines each)
 
 def create_ep_001_state() -> DeepAgentState:
 

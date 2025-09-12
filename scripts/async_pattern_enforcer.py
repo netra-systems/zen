@@ -367,10 +367,10 @@ class AsyncPatternReporter:
     def generate_console_report(violations: List[AsyncPatternViolation]) -> str:
         """Generate human-readable console report"""
         if not violations:
-            return "✅ No async pattern violations detected"
+            return " PASS:  No async pattern violations detected"
         
         report_lines = []
-        report_lines.append("🔴 ASYNC PATTERN VIOLATIONS DETECTED")
+        report_lines.append("[U+1F534] ASYNC PATTERN VIOLATIONS DETECTED")
         report_lines.append("=" * 60)
         
         # Group by severity
@@ -382,7 +382,7 @@ class AsyncPatternReporter:
             if violations_list:
                 report_lines.append(f"\n{severity} ({len(violations_list)}):")
                 for violation in violations_list:
-                    report_lines.append(f"  📁 {violation.file_path}:{violation.line_number}")
+                    report_lines.append(f"  [U+1F4C1] {violation.file_path}:{violation.line_number}")
                     if violation.function_name:
                         report_lines.append(f"     Function: {violation.function_name}")
                     report_lines.append(f"     Code: {violation.violation_code}")
@@ -393,9 +393,9 @@ class AsyncPatternReporter:
         report_lines.append(f"Total violations: {len(violations)} (Errors: {len(errors)}, Warnings: {len(warnings)}, Info: {len(infos)})")
         
         if errors:
-            report_lines.append("\n🚨 COMMIT BLOCKED: Fix all ERROR-level violations before committing")
+            report_lines.append("\n ALERT:  COMMIT BLOCKED: Fix all ERROR-level violations before committing")
         elif warnings:
-            report_lines.append("\n⚠️  Consider fixing warnings to improve code quality")
+            report_lines.append("\n WARNING: [U+FE0F]  Consider fixing warnings to improve code quality")
         
         return "\n".join(report_lines)
     
@@ -504,7 +504,7 @@ def install_precommit_hook() -> None:
             if 'repos:' in current_config:
                 # Add to existing local repo section or create one
                 if '- repo: local' in current_config:
-                    print("⚠️  Please manually add the async pattern validator hook to your existing 'local' repo section in .pre-commit-config.yaml")
+                    print(" WARNING: [U+FE0F]  Please manually add the async pattern validator hook to your existing 'local' repo section in .pre-commit-config.yaml")
                     print("Hook configuration to add:")
                     print(hook_config)
                 else:
@@ -514,12 +514,12 @@ def install_precommit_hook() -> None:
     hooks:{hook_config}"""
                     with open(precommit_config_path, 'w') as f:
                         f.write(new_config)
-                    print("✅ Added async pattern validator hook to .pre-commit-config.yaml")
+                    print(" PASS:  Added async pattern validator hook to .pre-commit-config.yaml")
             else:
-                print("⚠️  .pre-commit-config.yaml exists but has unexpected format")
+                print(" WARNING: [U+FE0F]  .pre-commit-config.yaml exists but has unexpected format")
                 print("Please manually add the async pattern validator hook")
         else:
-            print("✅ Async pattern validator hook already configured")
+            print(" PASS:  Async pattern validator hook already configured")
     else:
         # Create new pre-commit config
         new_config = f"""repos:
@@ -527,7 +527,7 @@ def install_precommit_hook() -> None:
     hooks:{hook_config}"""
         with open(precommit_config_path, 'w') as f:
             f.write(new_config)
-        print("✅ Created .pre-commit-config.yaml with async pattern validator hook")
+        print(" PASS:  Created .pre-commit-config.yaml with async pattern validator hook")
 
 
 def main() -> int:

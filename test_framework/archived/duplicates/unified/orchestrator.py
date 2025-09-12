@@ -173,7 +173,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
             
             # Check fail-fast
             if self.config.fail_fast and any(not r.status for r in results):
-                print(f"\n❌ Fail-fast triggered. Stopping test execution.")
+                print(f"\n FAIL:  Fail-fast triggered. Stopping test execution.")
                 break
         
         # Update history
@@ -550,7 +550,7 @@ class UnifiedTestOrchestrator(BaseTestComponent, ITestOrchestrator[TestSuite]):
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2, default=str)
         
-        print(f"\n📊 Test report saved to: {report_file}")
+        print(f"\n CHART:  Test report saved to: {report_file}")
         
         # Also save latest report
         latest_file = self.config.report_dir / "latest_report.json"

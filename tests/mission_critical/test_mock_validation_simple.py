@@ -57,7 +57,7 @@ async def test_simple_mock_detection():
                     pytest.fail(f"MOCK RESPONSE DETECTED! Patterns found: {detected_patterns}")
                 else:
                     # Test passed - no mock responses detected
-                    print("✅ No mock responses detected in this test")
+                    print(" PASS:  No mock responses detected in this test")
             else:
                 print(f"API returned status {response.status}")
 
@@ -101,7 +101,7 @@ async def test_fallback_detection():
                 if detected:
                     pytest.fail(f"FALLBACK RESPONSE DETECTED! Indicators: {detected}")
                 else:
-                    print("✅ No fallback responses detected")
+                    print(" PASS:  No fallback responses detected")
                     
         except Exception as e:
             # Exception is acceptable - fallback responses are not

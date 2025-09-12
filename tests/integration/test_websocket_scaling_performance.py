@@ -146,7 +146,7 @@ class TestWebSocketScalingPerformance(BaseIntegrationTest):
             except Exception as e:
                 error_msg = f"Connection {connection_id} failed: {str(e)}"
                 metrics.connection_errors.append(error_msg)
-                print(f"❌ {error_msg}")
+                print(f" FAIL:  {error_msg}")
             
             return metrics
         
@@ -198,7 +198,7 @@ class TestWebSocketScalingPerformance(BaseIntegrationTest):
             total_messages_sent = sum(m.messages_sent for m in successful_metrics)
             total_messages_received = sum(m.messages_received for m in successful_metrics)
             
-            print(f"✅ WebSocket Scaling Performance Results:")
+            print(f" PASS:  WebSocket Scaling Performance Results:")
             print(f"   Concurrent connections: {concurrent_connections}")
             print(f"   Successful connections: {len(successful_metrics)} ({success_rate:.1%})")
             print(f"   Failed connections: {failed_connections}")
@@ -292,7 +292,7 @@ class TestWebSocketScalingPerformance(BaseIntegrationTest):
         assert metrics["messages_per_second"] >= 100, f"Throughput {metrics['messages_per_second']:.1f} msg/s below 100 msg/s SLA"
         assert metrics["average_message_time"] < 0.01, f"Average message time {metrics['average_message_time']:.3f}s exceeds 10ms SLA"
         
-        print(f"✅ WebSocket Message Throughput Results:")
+        print(f" PASS:  WebSocket Message Throughput Results:")
         print(f"   Messages sent: {metrics['messages_sent']}")
         print(f"   Total time: {metrics['total_time']:.2f}s")
         print(f"   Throughput: {metrics['messages_per_second']:.1f} msg/s")
@@ -418,7 +418,7 @@ class TestWebSocketScalingPerformance(BaseIntegrationTest):
         assert stability_metrics["uptime_percentage"] >= 99.5, f"Uptime {stability_metrics['uptime_percentage']:.1f}% below 99.5% SLA"
         assert stability_metrics["connection_failures"] <= 1, f"Too many connection failures: {stability_metrics['connection_failures']}"
         
-        print(f"✅ WebSocket Connection Stability Results:")
+        print(f" PASS:  WebSocket Connection Stability Results:")
         print(f"   Test duration: {actual_test_duration:.1f}s")
         print(f"   Concurrent connections: {connection_count}")
         print(f"   Successful connections: {stability_metrics['successful_connections']}")

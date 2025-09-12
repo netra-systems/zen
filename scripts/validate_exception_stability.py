@@ -71,7 +71,7 @@ def test_direct_exception_imports() -> Dict[str, Any]:
             module_result['duration'] = time.time() - start_time
             results['failed_imports'] += 1
             results['success'] = False
-            print(f"  ❌ {module_name}: {type(e).__name__}: {e}")
+            print(f"   FAIL:  {module_name}: {type(e).__name__}: {e}")
         
         results['module_results'].append(module_result)
     
@@ -80,7 +80,7 @@ def test_direct_exception_imports() -> Dict[str, Any]:
 
 def test_exception_class_instantiation() -> Dict[str, Any]:
     """Test that all exception classes can be instantiated correctly."""
-    print("\n🔧 Testing exception class instantiation...")
+    print("\n[U+1F527] Testing exception class instantiation...")
     
     # Key exception classes to test
     exception_tests = [
@@ -132,7 +132,7 @@ def test_exception_class_instantiation() -> Dict[str, Any]:
             class_result['success'] = True
             class_result['duration'] = time.time() - start_time
             results['successful_instantiations'] += 1
-            print(f"  ✅ {class_name}: instantiated and validated")
+            print(f"   PASS:  {class_name}: instantiated and validated")
             
         except Exception as e:
             class_result['success'] = False
@@ -144,7 +144,7 @@ def test_exception_class_instantiation() -> Dict[str, Any]:
             class_result['duration'] = time.time() - start_time
             results['failed_instantiations'] += 1
             results['success'] = False
-            print(f"  ❌ {class_name}: {type(e).__name__}: {e}")
+            print(f"   FAIL:  {class_name}: {type(e).__name__}: {e}")
         
         results['class_results'].append(class_result)
     
@@ -153,7 +153,7 @@ def test_exception_class_instantiation() -> Dict[str, Any]:
 
 def test_unified_exceptions_import() -> Dict[str, Any]:
     """Test the unified exceptions module imports."""
-    print("\n🎯 Testing unified exceptions module...")
+    print("\n TARGET:  Testing unified exceptions module...")
     
     results = {
         'success': False,
@@ -195,9 +195,9 @@ def test_unified_exceptions_import() -> Dict[str, Any]:
         results['success'] = len(results['missing_classes']) == 0
         results['duration'] = time.time() - start_time
         
-        print(f"  ✅ Unified import: {len(results['classes_available'])}/{len(expected_classes)} classes available")
+        print(f"   PASS:  Unified import: {len(results['classes_available'])}/{len(expected_classes)} classes available")
         if results['missing_classes']:
-            print(f"  ⚠️ Missing classes: {results['missing_classes']}")
+            print(f"   WARNING: [U+FE0F] Missing classes: {results['missing_classes']}")
             
     except Exception as e:
         results['success'] = False
@@ -207,14 +207,14 @@ def test_unified_exceptions_import() -> Dict[str, Any]:
             'traceback': traceback.format_exc()
         }
         results['duration'] = time.time() - start_time
-        print(f"  ❌ Unified import failed: {type(e).__name__}: {e}")
+        print(f"   FAIL:  Unified import failed: {type(e).__name__}: {e}")
     
     return results
 
 
 def test_circular_import_resistance() -> Dict[str, Any]:
     """Test resistance to circular import patterns."""
-    print("\n🔄 Testing circular import resistance...")
+    print("\n CYCLE:  Testing circular import resistance...")
     
     results = {
         'success': True,
@@ -262,7 +262,7 @@ def test_circular_import_resistance() -> Dict[str, Any]:
             scenario_result['success'] = True
             scenario_result['duration'] = time.time() - start_time
             results['successful_scenarios'] += 1
-            print(f"  ✅ Scenario {i+1}: import order successful")
+            print(f"   PASS:  Scenario {i+1}: import order successful")
             
         except Exception as e:
             scenario_result['success'] = False
@@ -272,7 +272,7 @@ def test_circular_import_resistance() -> Dict[str, Any]:
             }
             scenario_result['duration'] = time.time() - start_time
             results['success'] = False
-            print(f"  ❌ Scenario {i+1}: {type(e).__name__}: {e}")
+            print(f"   FAIL:  Scenario {i+1}: {type(e).__name__}: {e}")
         
         results['import_scenarios'].append(scenario_result)
     
@@ -281,7 +281,7 @@ def test_circular_import_resistance() -> Dict[str, Any]:
 
 def test_performance_benchmarks() -> Dict[str, Any]:
     """Test import performance to detect regressions."""
-    print("\n⚡ Testing import performance...")
+    print("\n LIGHTNING:  Testing import performance...")
     
     results = {
         'success': True,
@@ -310,7 +310,7 @@ def test_performance_benchmarks() -> Dict[str, Any]:
             
         except Exception as e:
             results['success'] = False
-            print(f"  ❌ Performance test cycle {cycle+1} failed: {e}")
+            print(f"   FAIL:  Performance test cycle {cycle+1} failed: {e}")
             return results
     
     if import_times:
@@ -318,16 +318,16 @@ def test_performance_benchmarks() -> Dict[str, Any]:
         results['slowest_import'] = max(import_times)
         results['fastest_import'] = min(import_times)
         
-        print(f"  📊 Import timing over {num_cycles} cycles:")
+        print(f"   CHART:  Import timing over {num_cycles} cycles:")
         print(f"    Average: {results['average_import_time']:.4f}s")
         print(f"    Fastest: {results['fastest_import']:.4f}s")
         print(f"    Slowest: {results['slowest_import']:.4f}s")
         
         # Flag if imports are unusually slow (> 1 second indicates potential issues)
         if results['average_import_time'] > 1.0:
-            print(f"  ⚠️ Warning: Average import time is slow ({results['average_import_time']:.4f}s)")
+            print(f"   WARNING: [U+FE0F] Warning: Average import time is slow ({results['average_import_time']:.4f}s)")
         else:
-            print(f"  ✅ Import performance is acceptable")
+            print(f"   PASS:  Import performance is acceptable")
     
     return results
 
@@ -335,20 +335,20 @@ def test_performance_benchmarks() -> Dict[str, Any]:
 def generate_comprehensive_report(test_results: Dict[str, Any]) -> None:
     """Generate comprehensive stability assessment report."""
     print("\n" + "="*80)
-    print("📋 SERVICEERROR IMPORTERROR FIX STABILITY ASSESSMENT")
+    print("[U+1F4CB] SERVICEERROR IMPORTERROR FIX STABILITY ASSESSMENT")
     print("="*80)
     
     overall_success = all(result['success'] for result in test_results.values())
     
-    print(f"\n🎯 OVERALL ASSESSMENT: {'✅ STABLE' if overall_success else '❌ UNSTABLE'}")
+    print(f"\n TARGET:  OVERALL ASSESSMENT: {' PASS:  STABLE' if overall_success else ' FAIL:  UNSTABLE'}")
     
-    print(f"\n📊 TEST RESULTS SUMMARY:")
+    print(f"\n CHART:  TEST RESULTS SUMMARY:")
     for test_name, result in test_results.items():
-        status = "✅ PASS" if result['success'] else "❌ FAIL"
+        status = " PASS:  PASS" if result['success'] else " FAIL:  FAIL"
         print(f"  {test_name}: {status}")
     
     # Detailed findings
-    print(f"\n🔍 DETAILED FINDINGS:")
+    print(f"\n SEARCH:  DETAILED FINDINGS:")
     
     # Import results
     if 'direct_imports' in test_results:
@@ -371,36 +371,36 @@ def generate_comprehensive_report(test_results: Dict[str, Any]) -> None:
         if perf_result['success']:
             print(f"  Import Performance: {perf_result['average_import_time']:.4f}s average")
     
-    print(f"\n🚀 PRODUCTION READINESS ASSESSMENT:")
+    print(f"\n[U+1F680] PRODUCTION READINESS ASSESSMENT:")
     
     if overall_success:
-        print("  ✅ All ServiceError ImportError fixes are functioning correctly")
-        print("  ✅ No circular import issues detected")
-        print("  ✅ Exception classes instantiate and work properly")
-        print("  ✅ System is stable for production deployment")
+        print("   PASS:  All ServiceError ImportError fixes are functioning correctly")
+        print("   PASS:  No circular import issues detected")
+        print("   PASS:  Exception classes instantiate and work properly")
+        print("   PASS:  System is stable for production deployment")
         
         # Performance assessment
         if 'performance' in test_results and test_results['performance']['success']:
             avg_time = test_results['performance']['average_import_time']
             if avg_time < 0.1:
-                print("  ✅ Excellent import performance")
+                print("   PASS:  Excellent import performance")
             elif avg_time < 0.5:
-                print("  ✅ Good import performance")  
+                print("   PASS:  Good import performance")  
             else:
-                print("  ⚠️ Import performance could be optimized")
+                print("   WARNING: [U+FE0F] Import performance could be optimized")
         
-        print(f"\n🎉 RECOMMENDATION: DEPLOY - ServiceError fixes are production-ready")
+        print(f"\n CELEBRATION:  RECOMMENDATION: DEPLOY - ServiceError fixes are production-ready")
         
     else:
-        print("  ❌ Critical issues detected that prevent production deployment")
-        print("  ❌ ServiceError ImportError fixes require additional work")
+        print("   FAIL:  Critical issues detected that prevent production deployment")
+        print("   FAIL:  ServiceError ImportError fixes require additional work")
         
         # Specific failure analysis
         for test_name, result in test_results.items():
             if not result['success']:
-                print(f"  🔧 Fix required: {test_name}")
+                print(f"  [U+1F527] Fix required: {test_name}")
         
-        print(f"\n⚠️ RECOMMENDATION: DO NOT DEPLOY - Address failures first")
+        print(f"\n WARNING: [U+FE0F] RECOMMENDATION: DO NOT DEPLOY - Address failures first")
     
     print("="*80)
 
@@ -424,7 +424,7 @@ def main():
         test_results['performance'] = test_performance_benchmarks()
         
     except Exception as e:
-        print(f"\n❌ CRITICAL: Validation suite failed with exception: {e}")
+        print(f"\n FAIL:  CRITICAL: Validation suite failed with exception: {e}")
         traceback.print_exc()
         sys.exit(1)
     
@@ -432,7 +432,7 @@ def main():
     generate_comprehensive_report(test_results)
     
     total_duration = time.time() - test_start_time
-    print(f"\n⏱️ Total validation time: {total_duration:.2f} seconds")
+    print(f"\n[U+23F1][U+FE0F] Total validation time: {total_duration:.2f} seconds")
     
     # Exit with appropriate code
     overall_success = all(result['success'] for result in test_results.values())

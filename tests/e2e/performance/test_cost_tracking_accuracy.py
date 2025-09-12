@@ -3,11 +3,11 @@
 BUSINESS VALUE JUSTIFICATION (BVJ):
     1. Segment: ALL paid tiers (revenue-critical cost accuracy)
     2. Business Goal: Protect $40K+ MRR through accurate billing and cost tracking  
-    3. Value Impact: Ensures 100% cost accuracy from AI operations → billing records
+    3. Value Impact: Ensures 100% cost accuracy from AI operations  ->  billing records
     4. Revenue Impact: Each billing discrepancy = customer trust loss = $1K-$10K+ churn
 
 CRITICAL E2E test for complete cost tracking flow:
-    Frontend → AI Operations → Backend Cost Calculation → Database Billing → Frontend Display
+    Frontend  ->  AI Operations  ->  Backend Cost Calculation  ->  Database Billing  ->  Frontend Display
 
 ARCHITECTURAL COMPLIANCE:
     - File size: <300 lines (modular design with helper imports)
@@ -103,7 +103,7 @@ class TestCostTrackingAccuracyE2E:
                 session["user_id"], expected_tokens=1200, expected_cost_cents=18
             )
             
-            # Execute operation through frontend → backend → database flow
+            # Execute operation through frontend  ->  backend  ->  database flow
             result = await self._execute_full_cost_tracking_flow(
                 session, operation, test_core, cost_calculator_validator,
                 billing_accuracy_validator, frontend_cost_validator

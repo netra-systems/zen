@@ -80,7 +80,7 @@
                                 # REMOVED_SYNTAX_ERROR: messages = [ )
                                 # REMOVED_SYNTAX_ERROR: {"content": "First message for data pipeline test", "role": "user"},
                                 # REMOVED_SYNTAX_ERROR: {"content": "Testing special characters: !@pytest.fixture", "role": "user"},
-                                # REMOVED_SYNTAX_ERROR: {"content": "Unicode test: 🚀💯✅❌", "role": "user"}
+                                # REMOVED_SYNTAX_ERROR: {"content": "Unicode test: [U+1F680][U+1F4AF] PASS:  FAIL: ", "role": "user"}
                                 
 
                                 # REMOVED_SYNTAX_ERROR: message_ids = []
@@ -182,7 +182,7 @@
                                                                                                                                             # REMOVED_SYNTAX_ERROR: if updated_thread.get("title") != update_data["title"]:
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: pipeline_issues.append("Thread update did not propagate correctly")
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ Thread update propagated successfully")
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Thread update propagated successfully")
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: response_text = await verify_response.text()
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: pipeline_issues.append("formatted_string")
@@ -198,7 +198,7 @@
 
                                                                                                                                                                     # Report findings
                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if pipeline_issues:
-                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print("🔍 DATA PIPELINE ISSUES:")
+                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print(" SEARCH:  DATA PIPELINE ISSUES:")
                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: for issue in pipeline_issues:
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -208,7 +208,7 @@
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print("✅ Data pipeline integrity validated successfully")
+                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Data pipeline integrity validated successfully")
 
 
 # REMOVED_SYNTAX_ERROR: async def _create_test_user_and_authenticate(session: aiohttp.ClientSession, auth_url: str, issues_list: List[str]) -> Optional[str]:
@@ -290,7 +290,7 @@
                                                             # REMOVED_SYNTAX_ERROR: return
 
                                                             # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
-                                                            # REMOVED_SYNTAX_ERROR: print(f"✅ User created and authenticated successfully")
+                                                            # REMOVED_SYNTAX_ERROR: print(f" PASS:  User created and authenticated successfully")
 
                                                             # Step 2: Verify authentication works with backend service
                                                             # Try to create a thread to test cross-service authentication
@@ -305,7 +305,7 @@
                                                                     # Clean up the test thread
                                                                     # REMOVED_SYNTAX_ERROR: async with session.delete("formatted_string", headers=headers) as del_response:
                                                                         # REMOVED_SYNTAX_ERROR: if del_response.status in [200, 204]:
-                                                                            # REMOVED_SYNTAX_ERROR: print("✅ Test thread cleaned up successfully")
+                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Test thread cleaned up successfully")
 
                                                                             # REMOVED_SYNTAX_ERROR: elif response.status == 401:
                                                                                 # REMOVED_SYNTAX_ERROR: consistency_issues.append("Backend service doesn"t recognize auth service tokens")
@@ -331,7 +331,7 @@
 
                                                                                                         # Report findings
                                                                                                         # REMOVED_SYNTAX_ERROR: if consistency_issues:
-                                                                                                            # REMOVED_SYNTAX_ERROR: print("🔍 USER DATA CONSISTENCY ISSUES:")
+                                                                                                            # REMOVED_SYNTAX_ERROR: print(" SEARCH:  USER DATA CONSISTENCY ISSUES:")
                                                                                                             # REMOVED_SYNTAX_ERROR: for issue in consistency_issues:
                                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -341,7 +341,7 @@
                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
                                                                                                                         # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                            # REMOVED_SYNTAX_ERROR: print("✅ User data consistency validated successfully")
+                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  User data consistency validated successfully")
 
 
                                                                                                                             # Removed problematic line: @pytest.mark.asyncio
@@ -389,7 +389,7 @@
 
                                                                                                                                             # Special characters and encoding
                                                                                                                                             # REMOVED_SYNTAX_ERROR: {"title": "Test\x00\x01\x02", "metadata": {"test": "null_bytes"}},
-                                                                                                                                            # REMOVED_SYNTAX_ERROR: {"title": "Test🚀🔥💯", "metadata": {"test": "unicode_emojis"}},
+                                                                                                                                            # REMOVED_SYNTAX_ERROR: {"title": "Test[U+1F680] FIRE: [U+1F4AF]", "metadata": {"test": "unicode_emojis"}},
                                                                                                                                             # REMOVED_SYNTAX_ERROR: {"title": "Test )
                                                                                                                                             # REMOVED_SYNTAX_ERROR: \r\t", "metadata": {"test": "control_chars"}},
 
@@ -452,13 +452,13 @@
 
                                                                                                                                                                                                         # Report findings
                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if validation_issues:
-                                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print("🔍 DATA VALIDATION ISSUES:")
+                                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" SEARCH:  DATA VALIDATION ISSUES:")
                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: for issue in validation_issues:
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: pytest.fail("formatted_string")
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ Data validation and sanitization working correctly")
+                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Data validation and sanitization working correctly")
 
 
                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

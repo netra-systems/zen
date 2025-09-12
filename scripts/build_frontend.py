@@ -11,7 +11,7 @@ Features:
 - Error handling and recovery
 - Integration with deployment pipeline
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import argparse
@@ -74,11 +74,11 @@ class FrontendBuilder:
             dir_path = self.frontend_dir / dir_name
             if dir_path.exists():
                 shutil.rmtree(dir_path)
-                print(f"🧹 Cleaned {dir_name} directory")
+                print(f"[U+1F9F9] Cleaned {dir_name} directory")
     
     def install_dependencies(self) -> None:
         """Install frontend dependencies with proper configuration."""
-        print("📦 Installing frontend dependencies...")
+        print("[U+1F4E6] Installing frontend dependencies...")
         
         cmd = ["npm", "ci", "--production=false"]
         result = subprocess.run(
@@ -93,7 +93,7 @@ class FrontendBuilder:
     
     def run_type_check(self) -> None:
         """Run TypeScript type checking."""
-        print("🔍 Running TypeScript type check...")
+        print(" SEARCH:  Running TypeScript type check...")
         
         try:
             subprocess.run(
@@ -103,14 +103,14 @@ class FrontendBuilder:
                 check=True
             )
         except subprocess.CalledProcessError as e:
-            print(f"⚠️ Type check completed with warnings: {e}")
+            print(f" WARNING: [U+FE0F] Type check completed with warnings: {e}")
             # Don't fail build on type warnings in staging
             if self.build_config["ENVIRONMENT"] == "production":
                 raise FrontendBuildError("Type check failed in production build")
     
     def build_application(self) -> None:
         """Build the frontend application."""
-        print(f"🔨 Building application for {self.build_config['ENVIRONMENT']}...")
+        print(f"[U+1F528] Building application for {self.build_config['ENVIRONMENT']}...")
         
         result = subprocess.run(
             ["npm", "run", "build"],
@@ -123,21 +123,21 @@ class FrontendBuilder:
     
     def validate_build_output(self) -> None:
         """Validate that build produced required output files."""
-        print("✅ Validating build output...")
+        print(" PASS:  Validating build output...")
         
         # Check for Next.js build directory
         next_dir = self.frontend_dir / ".next"
         if next_dir.exists():
             build_manifest = next_dir / "build-manifest.json"
             if not build_manifest.exists():
-                print("⚠️ Warning: build-manifest.json not found")
+                print(" WARNING: [U+FE0F] Warning: build-manifest.json not found")
             return
             
         # Check for alternative build outputs
         alt_dirs = ["dist", "out", "build"]
         for dir_name in alt_dirs:
             if (self.frontend_dir / dir_name).exists():
-                print(f"✅ Found build output in {dir_name}")
+                print(f" PASS:  Found build output in {dir_name}")
                 return
                 
         raise FrontendBuildError("No build output directory found")
@@ -163,7 +163,7 @@ class FrontendBuilder:
     
     def build(self, clean: bool = True, validate: bool = True) -> Dict[str, str]:
         """Execute complete frontend build process."""
-        print("🚀 Starting Netra Frontend Build Process...")
+        print("[U+1F680] Starting Netra Frontend Build Process...")
         
         try:
             self.validate_prerequisites()
@@ -180,11 +180,11 @@ class FrontendBuilder:
             self.validate_build_output()
             
             report = self.generate_build_report()
-            print("🎉 Frontend build completed successfully!")
+            print(" CELEBRATION:  Frontend build completed successfully!")
             return report
             
         except Exception as e:
-            print(f"❌ Frontend build failed: {e}")
+            print(f" FAIL:  Frontend build failed: {e}")
             raise FrontendBuildError(f"Build process failed: {e}")
 
 
@@ -218,13 +218,13 @@ def main():
             with open(args.output_report, 'w') as f:
                 json.dump(report, f, indent=2)
                 
-        print(f"✅ Build report: {report}")
+        print(f" PASS:  Build report: {report}")
         
     except FrontendBuildError as e:
-        print(f"❌ Build failed: {e}")
+        print(f" FAIL:  Build failed: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         sys.exit(1)
 
 

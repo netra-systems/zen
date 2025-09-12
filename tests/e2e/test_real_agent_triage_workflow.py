@@ -109,7 +109,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
         # Validate WebSocket event flow
         self._assert_complete_triage_event_flow()
         
-        self.logger.info("✅ Cost optimization triage workflow test passed")
+        self.logger.info(" PASS:  Cost optimization triage workflow test passed")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -150,7 +150,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
         # Validate technical depth in recommendations
         self._assert_technical_recommendation_quality(triage_result)
         
-        self.logger.info("✅ Performance analysis triage workflow test passed")
+        self.logger.info(" PASS:  Performance analysis triage workflow test passed")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -191,7 +191,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
         # Validate comprehensive coverage
         self._assert_comprehensive_coverage(triage_result)
         
-        self.logger.info("✅ General consultation triage workflow test passed")
+        self.logger.info(" PASS:  General consultation triage workflow test passed")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -245,7 +245,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
             # Reset state for next test
             self._reset_triage_state()
         
-        self.logger.info("✅ Triage workflow edge cases test passed")
+        self.logger.info(" PASS:  Triage workflow edge cases test passed")
 
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -308,7 +308,7 @@ class TestRealAgentTriageWorkflow(BaseE2ETest):
         # Validate performance under load
         self._assert_concurrent_triage_performance(execution_time, len(concurrent_requests))
         
-        self.logger.info(f"✅ Concurrent triage workflow test passed with {len(concurrent_requests)} users")
+        self.logger.info(f" PASS:  Concurrent triage workflow test passed with {len(concurrent_requests)} users")
 
     # =============================================================================
     # HELPER METHODS
@@ -894,7 +894,7 @@ Key Findings:
 """
         
         for agent_name, result in agent_results.items():
-            response += f"\n• {agent_name.replace('_', ' ').title()}: {result.get('summary', 'Analysis completed')}"
+            response += f"\n[U+2022] {agent_name.replace('_', ' ').title()}: {result.get('summary', 'Analysis completed')}"
         
         if total_value > 0:
             response += f"\n\nTotal Identified Value: ${total_value:,.2f} in potential improvements"
@@ -1010,7 +1010,7 @@ Key Findings:
             f"Triage confidence {confidence}% too low. May indicate poor decision quality."
         )
         
-        self.logger.info(f"✅ Correct triage decision: {expected_category} with {confidence}% confidence")
+        self.logger.info(f" PASS:  Correct triage decision: {expected_category} with {confidence}% confidence")
 
     def _assert_recommended_agents_executed(self, triage_result: Dict[str, Any]):
         """Assert recommended agents were actually executed."""
@@ -1030,7 +1030,7 @@ Key Findings:
             "No specialized agents were executed. Triage workflow provided no value."
         )
         
-        self.logger.info(f"✅ Recommended agents executed: {executed_agents}")
+        self.logger.info(f" PASS:  Recommended agents executed: {executed_agents}")
 
     def _assert_business_value_delivered(self, triage_result: Dict[str, Any], expected_value_type: str):
         """Assert meaningful business value was delivered."""
@@ -1057,7 +1057,7 @@ Key Findings:
             f"User value score {user_value_score} too low. Business value delivery insufficient."
         )
         
-        self.logger.info(f"✅ Business value delivered: {expected_value_type} with score {user_value_score}")
+        self.logger.info(f" PASS:  Business value delivered: {expected_value_type} with score {user_value_score}")
 
     def _assert_complete_triage_event_flow(self):
         """Assert complete WebSocket event flow for triage workflow."""
@@ -1078,7 +1078,7 @@ Key Findings:
         for expected_phase in expected_phases:
             assert expected_phase in phases, f"Missing workflow phase: {expected_phase}"
         
-        self.logger.info(f"✅ Complete triage event flow validated: {len(self.triage_events)} events")
+        self.logger.info(f" PASS:  Complete triage event flow validated: {len(self.triage_events)} events")
 
     def _assert_performance_focused_analysis(self, triage_result: Dict[str, Any]):
         """Assert performance-focused analysis quality."""
@@ -1098,7 +1098,7 @@ Key Findings:
                 f"Performance analysis lacks performance focus. Data insights: {data_insights}"
             )
         
-        self.logger.info("✅ Performance-focused analysis validated")
+        self.logger.info(" PASS:  Performance-focused analysis validated")
 
     def _assert_technical_recommendation_quality(self, triage_result: Dict[str, Any]):
         """Assert technical recommendations meet quality standards."""
@@ -1114,7 +1114,7 @@ Key Findings:
                 f"Recommendation lacks technical detail: {rec_data}"
             )
         
-        self.logger.info(f"✅ Technical recommendation quality validated: {len(recommendations)} recommendations")
+        self.logger.info(f" PASS:  Technical recommendation quality validated: {len(recommendations)} recommendations")
 
     def _assert_strategic_analysis_quality(self, triage_result: Dict[str, Any]):
         """Assert strategic analysis meets quality standards."""
@@ -1131,7 +1131,7 @@ Key Findings:
             assert "approach" in strategic_insights, "Missing strategic approach"
             assert "priority_areas" in strategic_insights, "Missing priority areas"
         
-        self.logger.info("✅ Strategic analysis quality validated")
+        self.logger.info(" PASS:  Strategic analysis quality validated")
 
     def _assert_comprehensive_coverage(self, triage_result: Dict[str, Any]):
         """Assert comprehensive coverage for general consultation."""
@@ -1155,7 +1155,7 @@ Key Findings:
             assert phase in roadmap, f"Missing roadmap phase: {phase}"
             assert len(roadmap[phase]) > 0, f"Empty roadmap phase: {phase}"
         
-        self.logger.info("✅ Comprehensive coverage validated")
+        self.logger.info(" PASS:  Comprehensive coverage validated")
 
     def _assert_edge_case_handled_appropriately(self, 
                                               triage_result: Dict[str, Any],
@@ -1193,7 +1193,7 @@ Key Findings:
                 "Technical request not routed to data specialist"
             )
         
-        self.logger.info(f"✅ Edge case handled appropriately: {edge_case['name']}")
+        self.logger.info(f" PASS:  Edge case handled appropriately: {edge_case['name']}")
 
     def _assert_concurrent_user_isolation(self, expected_user_count: int):
         """Assert user isolation during concurrent triage."""
@@ -1212,7 +1212,7 @@ Key Findings:
             assert "agent_started" in user_event_types, f"User {user_id} missing agent_started"
             assert "workflow_completed" in user_event_types, f"User {user_id} missing workflow_completed"
         
-        self.logger.info(f"✅ Concurrent user isolation validated for {expected_user_count} users")
+        self.logger.info(f" PASS:  Concurrent user isolation validated for {expected_user_count} users")
 
     def _assert_concurrent_decision_quality(self, 
                                           results: List[Dict[str, Any]],
@@ -1235,7 +1235,7 @@ Key Findings:
                 f"Concurrent request {i} user value score {user_value_score} too low under load"
             )
         
-        self.logger.info("✅ Concurrent decision quality validated")
+        self.logger.info(" PASS:  Concurrent decision quality validated")
 
     def _assert_concurrent_triage_performance(self, execution_time: float, user_count: int):
         """Assert performance under concurrent triage load."""
@@ -1252,7 +1252,7 @@ Key Findings:
             f"Time per user {time_per_user:.2f}s too high for concurrent triage"
         )
         
-        self.logger.info(f"✅ Concurrent triage performance validated: {execution_time:.2f}s for {user_count} users")
+        self.logger.info(f" PASS:  Concurrent triage performance validated: {execution_time:.2f}s for {user_count} users")
 
     async def cleanup_resources(self):
         """Clean up triage test resources."""

@@ -847,9 +847,9 @@ class IsolationAlertValidator:
         if report["failed_tests"]:
             print(f"\nFAILED TESTS:")
             for test in report["failed_tests"]:
-                print(f"  ❌ {test['test_name']} ({test['expected_severity']}): {test['message']}")
+                print(f"   FAIL:  {test['test_name']} ({test['expected_severity']}): {test['message']}")
         else:
-            print(f"\n✅ ALL TESTS PASSED!")
+            print(f"\n PASS:  ALL TESTS PASSED!")
             
         print("="*80)
 
@@ -878,11 +878,11 @@ async def main():
                               if not r.success and r.expected_severity == "CRITICAL"])
         
         if failed_critical > 0:
-            print(f"\n❌ CRITICAL FAILURES DETECTED: {failed_critical}")
+            print(f"\n FAIL:  CRITICAL FAILURES DETECTED: {failed_critical}")
             print("System is NOT ready for production deployment!")
             sys.exit(1)
         else:
-            print(f"\n✅ All critical alerts validated successfully")
+            print(f"\n PASS:  All critical alerts validated successfully")
             print("System isolation monitoring is ready for production!")
             sys.exit(0)
             

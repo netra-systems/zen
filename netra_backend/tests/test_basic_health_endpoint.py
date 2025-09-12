@@ -95,7 +95,7 @@ class TestBasicHealthEndpoint:
             assert result["checks"]["clickhouse"] is True
             assert result["checks"]["redis"] is True
             
-            print(f"✅ Basic health endpoint returned: {result}")
+            print(f" PASS:  Basic health endpoint returned: {result}")
     
     @pytest.mark.asyncio
     @pytest.mark.unit
@@ -134,7 +134,7 @@ class TestBasicHealthEndpoint:
         assert response_data["details"]["phase"] == "initializing_database"
         assert response_data["details"]["progress"] == 75
         
-        print(f"✅ Health endpoint correctly reported startup in progress: {response_data}")
+        print(f" PASS:  Health endpoint correctly reported startup in progress: {response_data}")
     
     @pytest.mark.asyncio
     async def test_basic_health_endpoint_startup_failed(self):
@@ -168,7 +168,7 @@ class TestBasicHealthEndpoint:
         assert response_data["message"] == "Startup failed: Database connection failed"
         assert response_data["startup_failed"] is True
         
-        print(f"✅ Health endpoint correctly reported startup failure: {response_data}")
+        print(f" PASS:  Health endpoint correctly reported startup failure: {response_data}")
     
     @pytest.mark.asyncio
     async def test_basic_health_endpoint_no_startup_state(self):
@@ -197,7 +197,7 @@ class TestBasicHealthEndpoint:
         assert response_data["message"] == "Startup state unknown"
         assert response_data["startup_complete"] is None
         
-        print(f"✅ Health endpoint correctly reported unknown startup state: {response_data}")
+        print(f" PASS:  Health endpoint correctly reported unknown startup state: {response_data}")
     
     @pytest.mark.asyncio
     async def test_basic_health_endpoint_startup_timeout(self):
@@ -234,7 +234,7 @@ class TestBasicHealthEndpoint:
         assert "startup_duration" in response_data
         assert response_data["startup_duration"] >= 360
         
-        print(f"✅ Health endpoint correctly reported startup timeout: {response_data}")
+        print(f" PASS:  Health endpoint correctly reported startup timeout: {response_data}")
     
     @pytest.mark.asyncio
     async def test_basic_health_endpoint_mock_objects_handling(self):
@@ -268,7 +268,7 @@ class TestBasicHealthEndpoint:
         assert response_data["message"] == "Startup state unknown"
         assert response_data["startup_complete"] is None
         
-        print(f"✅ Health endpoint correctly handled MagicMock objects: {response_data}")
+        print(f" PASS:  Health endpoint correctly handled MagicMock objects: {response_data}")
     
     @pytest.mark.asyncio
     async def test_basic_health_endpoint_with_fastapi_app(self):
@@ -303,7 +303,7 @@ class TestBasicHealthEndpoint:
                 assert data["service"] == "netra-ai-platform"
                 assert "timestamp" in data
                 
-                print(f"✅ FastAPI integration test passed: {data}")
+                print(f" PASS:  FastAPI integration test passed: {data}")
                 
                 # Also test the no-slash endpoint
                 response_no_slash = client.get("/health")
@@ -311,7 +311,7 @@ class TestBasicHealthEndpoint:
                 data_no_slash = response_no_slash.json()
                 assert data_no_slash["status"] == "healthy"
                 
-                print(f"✅ No-slash endpoint also works: {data_no_slash}")
+                print(f" PASS:  No-slash endpoint also works: {data_no_slash}")
     
     @pytest.mark.asyncio 
     async def test_basic_health_endpoint_error_response_format(self):
@@ -351,7 +351,7 @@ class TestBasicHealthEndpoint:
         assert isinstance(response_data["startup_failed"], bool)
         assert response_data["startup_failed"] is True
         
-        print(f"✅ Error response format is correct: {response_data}")
+        print(f" PASS:  Error response format is correct: {response_data}")
 
 
 if __name__ == "__main__":

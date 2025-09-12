@@ -178,7 +178,7 @@ KEY_WITH=MULTIPLE=EQUALS=SIGNS
 =empty_key_value
 
 # Unicode test
-UNICODE_KEY=unicode_value_with_special_chars_éñ
+UNICODE_KEY=unicode_value_with_special_chars_[U+00E9][U+00F1]
 
 # Multi-line value (invalid)
 MULTILINE_KEY=line1

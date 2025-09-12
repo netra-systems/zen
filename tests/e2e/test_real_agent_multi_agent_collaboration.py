@@ -313,7 +313,7 @@ class RealMultiAgentCollaborationE2ETest(BaseE2ETest):
             # Log collaborative insights as they emerge
             if event_type == "collaborative_insight":
                 insight = event.get("data", {}).get("insight", "")
-                logger.info(f"  → Collaborative insight: {insight[:100]}...")
+                logger.info(f"   ->  Collaborative insight: {insight[:100]}...")
                 self.metrics.cross_agent_insights += 1
             
             # Stop on final collaboration completion
@@ -498,7 +498,7 @@ class TestRealMultiAgentCollaboration(RealMultiAgentCollaborationE2ETest):
                 f"Collaborative confidence too low: {self.metrics.final_confidence_score}"
             )
             
-        logger.success("✓ Comprehensive multi-agent collaboration validated")
+        logger.success("[U+2713] Comprehensive multi-agent collaboration validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -567,7 +567,7 @@ class TestRealMultiAgentCollaboration(RealMultiAgentCollaborationE2ETest):
             if self.metrics.conflicting_recommendations_resolved > 0:
                 logger.info(f"Successfully resolved {self.metrics.conflicting_recommendations_resolved} specialty conflicts")
             
-        logger.success("✓ Multi-agent specialization value validated")
+        logger.success("[U+2713] Multi-agent specialization value validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -636,7 +636,7 @@ class TestRealMultiAgentCollaboration(RealMultiAgentCollaborationE2ETest):
                 for r in recommendations
             ), "Must explain trade-off decisions"
             
-        logger.success("✓ Multi-agent consensus building validated")
+        logger.success("[U+2713] Multi-agent consensus building validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -717,7 +717,7 @@ class TestRealMultiAgentCollaboration(RealMultiAgentCollaborationE2ETest):
                 f"User {result['user_id']} didn't get collaborative value"
             )
         
-        logger.success("✓ Concurrent multi-agent collaboration isolation validated")
+        logger.success("[U+2713] Concurrent multi-agent collaboration isolation validated")
 
 
 if __name__ == "__main__":
@@ -738,10 +738,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_multi_agent_collaboration(mock_services)
-            logger.success("✓ All multi-agent collaboration tests passed")
+            logger.success("[U+2713] All multi-agent collaboration tests passed")
             
         except Exception as e:
-            logger.error(f"✗ Multi-agent collaboration tests failed: {e}")
+            logger.error(f"[U+2717] Multi-agent collaboration tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

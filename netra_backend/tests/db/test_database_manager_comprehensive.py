@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents data loss that would destroy user trust and business continuity
 
 This test suite validates the Database Manager as the SINGLE SOURCE OF TRUTH for all database operations.
-Critical for golden path: user authentication → chat conversations → agent results → persistent storage.
+Critical for golden path: user authentication  ->  chat conversations  ->  agent results  ->  persistent storage.
 
 SSOT Compliance:
 - Tests the ONLY source for database connection management
@@ -65,7 +65,7 @@ class TestDatabaseManagerSSO:
         """Test proper SSOT initialization with DatabaseURLBuilder integration.
         
         BVJ: Ensures reliable database connections that enable golden path data flow.
-        Golden Path: User registration → conversation storage → results persistence.
+        Golden Path: User registration  ->  conversation storage  ->  results persistence.
         """
         with patch('netra_backend.app.db.database_manager.get_config', return_value=mock_config), \
              patch('netra_backend.app.db.database_manager.DatabaseURLBuilder') as mock_builder, \
@@ -474,7 +474,7 @@ class TestDatabaseManagerBusinessScenarios:
         """Test user registration and data persistence scenario.
         
         BVJ: Core business functionality - user onboarding and profile management.
-        Golden Path: New user registration → profile storage → authentication data persistence.
+        Golden Path: New user registration  ->  profile storage  ->  authentication data persistence.
         """
         with patch('netra_backend.app.db.database_manager.get_config', return_value=mock_config):
             
@@ -511,7 +511,7 @@ class TestDatabaseManagerBusinessScenarios:
         """Test chat conversation storage scenario.
         
         BVJ: Core product functionality - chat conversations are 90% of platform value.
-        Golden Path: User message → agent processing → response storage → conversation history.
+        Golden Path: User message  ->  agent processing  ->  response storage  ->  conversation history.
         """
         with patch('netra_backend.app.db.database_manager.get_config', return_value=mock_config):
             
@@ -543,7 +543,7 @@ class TestDatabaseManagerBusinessScenarios:
         """Test agent execution results storage scenario.
         
         BVJ: AI optimization recommendations storage - core platform differentiator.
-        Golden Path: Agent execution → optimization analysis → results storage → user insights.
+        Golden Path: Agent execution  ->  optimization analysis  ->  results storage  ->  user insights.
         """
         with patch('netra_backend.app.db.database_manager.get_config', return_value=mock_config):
             

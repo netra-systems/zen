@@ -79,9 +79,9 @@ class StagingLogAnalyzer:
         try:
             with open(self.log_file, 'r') as f:
                 self.logs = json.load(f)
-            print(f"✓ Loaded {len(self.logs)} log entries")
+            print(f"[U+2713] Loaded {len(self.logs)} log entries")
         except Exception as e:
-            print(f"✗ Error loading logs: {e}")
+            print(f"[U+2717] Error loading logs: {e}")
             return False
         return True
     
@@ -90,7 +90,7 @@ class StagingLogAnalyzer:
         if not self.load_logs():
             return
         
-        print("\n🔍 Analyzing logs for issues...")
+        print("\n SEARCH:  Analyzing logs for issues...")
         
         # Process each log entry
         for log in self.logs:
@@ -101,7 +101,7 @@ class StagingLogAnalyzer:
         self._identify_critical_issues()
         self._detect_patterns()
         
-        print("✓ Analysis complete")
+        print("[U+2713] Analysis complete")
     
     def _process_log_entry(self, log: Dict[str, Any]):
         """Process a single log entry"""
@@ -206,7 +206,7 @@ class StagingLogAnalyzer:
     
     def _analyze_service_health(self):
         """Analyze overall service health"""
-        print("\n📊 Service Health Analysis:")
+        print("\n CHART:  Service Health Analysis:")
         
         for service, stats in self.service_stats.items():
             total_reqs = stats['total_requests']
@@ -217,7 +217,7 @@ class StagingLogAnalyzer:
             avg_latency_ms = stats['avg_latency'] * 1000
             max_latency_ms = stats['max_latency'] * 1000
             
-            print(f"\n🔸 {service}:")
+            print(f"\n[U+1F538] {service}:")
             print(f"  Total Requests: {total_reqs}")
             print(f"  Error Rate: {error_rate:.2f}%")
             print(f"  Warning Count: {stats['warning_count']}")
@@ -235,21 +235,21 @@ class StagingLogAnalyzer:
         avg_latency = stats['avg_latency']
         
         if error_rate > 10 or avg_latency > 2.0:
-            return "🔴 CRITICAL"
+            return "[U+1F534] CRITICAL"
         elif error_rate > 5 or avg_latency > 1.0:
-            return "🟡 DEGRADED"
+            return "[U+1F7E1] DEGRADED"
         elif error_rate > 1 or avg_latency > 0.5:
-            return "🟠 WARNING"
+            return "[U+1F7E0] WARNING"
         else:
-            return "🟢 HEALTHY"
+            return "[U+1F7E2] HEALTHY"
     
     def _identify_critical_issues(self):
         """Identify and categorize critical issues"""
         critical_issues = [issue for issue in self.issues if issue['severity'] in ['ERROR', 'CRITICAL']]
         major_issues = [issue for issue in self.issues if issue['severity'] == 'WARNING']
         
-        print(f"\n🚨 Critical Issues Found: {len(critical_issues)}")
-        print(f"⚠️  Major Issues Found: {len(major_issues)}")
+        print(f"\n ALERT:  Critical Issues Found: {len(critical_issues)}")
+        print(f" WARNING: [U+FE0F]  Major Issues Found: {len(major_issues)}")
         
         # Group issues by type
         issues_by_type = defaultdict(list)
@@ -258,16 +258,16 @@ class StagingLogAnalyzer:
         
         for issue_type, type_issues in issues_by_type.items():
             if len(type_issues) > 0:
-                print(f"\n🔹 {issue_type.replace('_', ' ').title()}: {len(type_issues)} issues")
+                print(f"\n[U+1F539] {issue_type.replace('_', ' ').title()}: {len(type_issues)} issues")
                 
                 # Show most recent examples
                 recent_issues = sorted(type_issues, key=lambda x: x['timestamp'], reverse=True)[:3]
                 for issue in recent_issues:
-                    print(f"  • [{issue['service']}] {issue['message']}")
+                    print(f"  [U+2022] [{issue['service']}] {issue['message']}")
     
     def _detect_patterns(self):
         """Detect recurring patterns and trends"""
-        print("\n🔍 Pattern Analysis:")
+        print("\n SEARCH:  Pattern Analysis:")
         
         # Service error distribution
         service_errors = defaultdict(int)
@@ -289,7 +289,7 @@ class StagingLogAnalyzer:
     
     def perform_root_cause_analysis(self):
         """Perform Five Whys analysis for top issues"""
-        print("\n🔬 Five Whys Root Cause Analysis:")
+        print("\n[U+1F52C] Five Whys Root Cause Analysis:")
         
         # Group issues by type and frequency
         issue_groups = defaultdict(list)
@@ -301,7 +301,7 @@ class StagingLogAnalyzer:
         top_issues = sorted(issue_groups.items(), key=lambda x: len(x[1]), reverse=True)[:3]
         
         for issue_type, issues in top_issues:
-            print(f"\n🎯 Root Cause Analysis: {issue_type.replace('_', ' ').title()}")
+            print(f"\n TARGET:  Root Cause Analysis: {issue_type.replace('_', ' ').title()}")
             print(f"   Frequency: {len(issues)} occurrences")
             
             # Select most recent issue for detailed analysis
@@ -409,7 +409,7 @@ class StagingLogAnalyzer:
     
     def generate_recommendations(self):
         """Generate actionable recommendations"""
-        print("\n💡 Recommendations:")
+        print("\n IDEA:  Recommendations:")
         
         # Analyze issues and generate specific recommendations
         issue_types = set(issue['type'] for issue in self.issues if issue['severity'] in ['ERROR', 'CRITICAL'])
@@ -417,30 +417,30 @@ class StagingLogAnalyzer:
         recommendations = []
         
         if 'authentication' in issue_types or 'oauth_issues' in issue_types:
-            recommendations.append("1. 🔑 CRITICAL: Configure OAuth credentials (GOOGLE_OAUTH_CLIENT_ID_STAGING, GOOGLE_OAUTH_CLIENT_SECRET_STAGING) in GCP staging environment")
-            recommendations.append("2. 🔍 Verify redirect URIs match in Google Cloud Console and deployment configuration")
+            recommendations.append("1. [U+1F511] CRITICAL: Configure OAuth credentials (GOOGLE_OAUTH_CLIENT_ID_STAGING, GOOGLE_OAUTH_CLIENT_SECRET_STAGING) in GCP staging environment")
+            recommendations.append("2.  SEARCH:  Verify redirect URIs match in Google Cloud Console and deployment configuration")
         
         if 'configuration' in issue_types:
-            recommendations.append("3. ⚙️ Audit all required environment variables in staging deployment")
-            recommendations.append("4. 📝 Implement configuration validation during startup")
+            recommendations.append("3. [U+2699][U+FE0F] Audit all required environment variables in staging deployment")
+            recommendations.append("4. [U+1F4DD] Implement configuration validation during startup")
         
         if 'performance' in issue_types:
-            recommendations.append("5. 🚀 Investigate frontend performance - current 0.37s response time exceeds target")
-            recommendations.append("6. 📊 Enable detailed performance monitoring and profiling")
+            recommendations.append("5. [U+1F680] Investigate frontend performance - current 0.37s response time exceeds target")
+            recommendations.append("6.  CHART:  Enable detailed performance monitoring and profiling")
         
         if 'service_communication' in issue_types:
-            recommendations.append("7. 🔗 Review service-to-service communication patterns and timeouts")
-            recommendations.append("8. 🏥 Implement proper health checks and circuit breakers")
+            recommendations.append("7. [U+1F517] Review service-to-service communication patterns and timeouts")
+            recommendations.append("8. [U+1F3E5] Implement proper health checks and circuit breakers")
         
         if 'database_connection' in issue_types:
-            recommendations.append("9. 🗄️ Verify database connectivity and connection pool configuration")
-            recommendations.append("10. 🔐 Check database credentials and SSL configuration")
+            recommendations.append("9. [U+1F5C4][U+FE0F] Verify database connectivity and connection pool configuration")
+            recommendations.append("10. [U+1F510] Check database credentials and SSL configuration")
         
         # Always include these general recommendations
         recommendations.extend([
-            "11. 📈 Set up proper alerting for error rates > 5% and latency > 1s",
-            "12. 🔍 Implement structured logging with correlation IDs",
-            "13. 📋 Create runbooks for common issue types identified"
+            "11. [U+1F4C8] Set up proper alerting for error rates > 5% and latency > 1s",
+            "12.  SEARCH:  Implement structured logging with correlation IDs",
+            "13. [U+1F4CB] Create runbooks for common issue types identified"
         ])
         
         for rec in recommendations:
@@ -449,7 +449,7 @@ class StagingLogAnalyzer:
     def generate_report(self):
         """Generate final comprehensive report"""
         print("\n" + "="*80)
-        print("🏥 NETRA STAGING ENVIRONMENT HEALTH REPORT")
+        print("[U+1F3E5] NETRA STAGING ENVIRONMENT HEALTH REPORT")
         print("="*80)
         
         # Summary metrics
@@ -457,21 +457,21 @@ class StagingLogAnalyzer:
         critical_issues = len([i for i in self.issues if i['severity'] in ['ERROR', 'CRITICAL']])
         services_with_issues = len(set(i['service'] for i in self.issues))
         
-        print(f"\n📊 SUMMARY:")
+        print(f"\n CHART:  SUMMARY:")
         print(f"  Total Issues Detected: {total_issues}")
         print(f"  Critical Issues: {critical_issues}")
         print(f"  Services Affected: {services_with_issues}")
         print(f"  Analysis Time Range: Last 2-3 hours")
         
         # Service status
-        print(f"\n🏥 SERVICE STATUS:")
+        print(f"\n[U+1F3E5] SERVICE STATUS:")
         for service, stats in self.service_stats.items():
             if stats['total_requests'] > 0:
                 health = self._assess_service_health(stats, stats['total_requests'])
                 print(f"  {service}: {health}")
         
         # Top priority fixes
-        print(f"\n🚨 TOP PRIORITY FIXES:")
+        print(f"\n ALERT:  TOP PRIORITY FIXES:")
         
         issue_priorities = defaultdict(list)
         for issue in self.issues:
@@ -492,7 +492,7 @@ def main():
     """Main execution function"""
     analyzer = StagingLogAnalyzer('staging_logs.json')
     
-    print("🔍 Starting GCP Staging Environment Analysis...")
+    print(" SEARCH:  Starting GCP Staging Environment Analysis...")
     print("Using Five Whys methodology for root cause analysis")
     
     # Run analysis
@@ -501,7 +501,7 @@ def main():
     analyzer.generate_recommendations()
     analyzer.generate_report()
     
-    print(f"\n✅ Analysis complete. Found {len(analyzer.issues)} total issues.")
+    print(f"\n PASS:  Analysis complete. Found {len(analyzer.issues)} total issues.")
 
 if __name__ == '__main__':
     main()

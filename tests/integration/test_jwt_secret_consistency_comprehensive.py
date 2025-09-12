@@ -62,7 +62,7 @@ class TestJWTSecretConsistency:
     
     def test_unified_jwt_secret_manager_validation(self):
         """Test that unified JWT secret manager validates correctly."""
-        logger.info("🔍 Testing unified JWT secret manager validation...")
+        logger.info(" SEARCH:  Testing unified JWT secret manager validation...")
         
         # Validate JWT configuration
         validation_result = validate_unified_jwt_config()
@@ -79,11 +79,11 @@ class TestJWTSecretConsistency:
         assert algorithm in ["HS256", "HS384", "HS512", "RS256", "RS384", "RS512"], \
             f"Unsupported JWT algorithm: {algorithm}"
         
-        logger.info(f"✅ Unified JWT manager validated: algorithm={algorithm}, secret_length={len(secret)}")
+        logger.info(f" PASS:  Unified JWT manager validated: algorithm={algorithm}, secret_length={len(secret)}")
     
     def test_test_framework_uses_unified_secret(self):
         """Test that test framework uses unified JWT secret."""
-        logger.info("🔍 Testing test framework JWT secret alignment...")
+        logger.info(" SEARCH:  Testing test framework JWT secret alignment...")
         
         # Get unified secret
         unified_secret = get_unified_jwt_secret()
@@ -96,11 +96,11 @@ class TestJWTSecretConsistency:
         assert unified_secret == test_framework_secret, \
             f"JWT secret mismatch: unified={unified_secret[:16]}..., test_framework={test_framework_secret[:16]}..."
         
-        logger.info("✅ Test framework using unified JWT secret")
+        logger.info(" PASS:  Test framework using unified JWT secret")
     
     def test_jwt_token_creation_consistency(self):
         """Test JWT token creation produces consistent results."""
-        logger.info("🔍 Testing JWT token creation consistency...")
+        logger.info(" SEARCH:  Testing JWT token creation consistency...")
         
         unified_secret = get_unified_jwt_secret()
         unified_algorithm = get_unified_jwt_algorithm()
@@ -137,12 +137,12 @@ class TestJWTSecretConsistency:
         assert unified_decoded["email"] == framework_decoded["email"], "Email claim mismatch"
         assert unified_decoded["iss"] == framework_decoded["iss"], "Issuer claim mismatch"
         
-        logger.info("✅ JWT token creation consistency validated")
+        logger.info(" PASS:  JWT token creation consistency validated")
     
     @pytest.mark.asyncio
     async def test_cross_service_jwt_consistency_validation(self):
         """Test cross-service JWT consistency validation."""
-        logger.info("🔍 Testing cross-service JWT consistency validation...")
+        logger.info(" SEARCH:  Testing cross-service JWT consistency validation...")
         
         # Run comprehensive consistency validation
         report = await validate_jwt_consistency()
@@ -153,9 +153,9 @@ class TestJWTSecretConsistency:
         
         for service in report.services:
             if service.reachable:
-                logger.info(f"  ✅ {service.service_name}: {service.jwt_secret_hash[:8]}... (source: {service.secret_source})")
+                logger.info(f"   PASS:  {service.service_name}: {service.jwt_secret_hash[:8]}... (source: {service.secret_source})")
             else:
-                logger.warning(f"  ⚠️ {service.service_name}: {service.error}")
+                logger.warning(f"   WARNING: [U+FE0F] {service.service_name}: {service.error}")
         
         # In test environment, we should have consistent secrets
         if self.environment in ["test", "development"]:
@@ -167,9 +167,9 @@ class TestJWTSecretConsistency:
                 secret_hashes = set(s.jwt_secret_hash for s in reachable_services)
                 assert len(secret_hashes) == 1, \
                     f"JWT secret inconsistency detected among reachable services: {secret_hashes}"
-                logger.info("✅ JWT secrets consistent among reachable services")
+                logger.info(" PASS:  JWT secrets consistent among reachable services")
             else:
-                logger.warning("⚠️ Not enough reachable services for consistency validation")
+                logger.warning(" WARNING: [U+FE0F] Not enough reachable services for consistency validation")
         
         # Log any inconsistencies for debugging
         if report.inconsistencies:
@@ -181,18 +181,18 @@ class TestJWTSecretConsistency:
         if report.recommendations:
             logger.info("Recommendations:")
             for recommendation in report.recommendations:
-                logger.info(f"  💡 {recommendation}")
+                logger.info(f"   IDEA:  {recommendation}")
     
     @pytest.mark.asyncio
     async def test_jwt_token_cross_service_validation(self):
         """Test JWT token validation across services."""
-        logger.info("🔍 Testing JWT token cross-service validation...")
+        logger.info(" SEARCH:  Testing JWT token cross-service validation...")
         
         # Run cross-service token validation test
         results = await validate_jwt_cross_service_tokens()
         
         # Log results
-        logger.info(f"Token creation: {'✅ SUCCESS' if results['token_creation'].get('success') else '❌ FAILED'}")
+        logger.info(f"Token creation: {' PASS:  SUCCESS' if results['token_creation'].get('success') else ' FAIL:  FAILED'}")
         
         if results["token_creation"].get("success"):
             logger.info(f"  Token length: {results['token_creation']['token_length']}")
@@ -200,7 +200,7 @@ class TestJWTSecretConsistency:
             
             # Check validation results
             for service_name, validation_result in results["token_validation"].items():
-                status = "✅ SUCCESS" if validation_result.get("success") else "❌ FAILED"
+                status = " PASS:  SUCCESS" if validation_result.get("success") else " FAIL:  FAILED"
                 logger.info(f"  {service_name} validation: {status}")
                 
                 if not validation_result.get("success") and validation_result.get("error"):
@@ -208,12 +208,12 @@ class TestJWTSecretConsistency:
             
             # In test environment, expect reasonable success rate
             if results.get("success_rate", 0) > 0:
-                logger.info(f"✅ Cross-service validation success rate: {results['success_rate']:.1%}")
+                logger.info(f" PASS:  Cross-service validation success rate: {results['success_rate']:.1%}")
             else:
-                logger.warning("⚠️ Low cross-service validation success rate")
+                logger.warning(" WARNING: [U+FE0F] Low cross-service validation success rate")
         
         else:
-            logger.error(f"❌ Token creation failed: {results['token_creation'].get('error')}")
+            logger.error(f" FAIL:  Token creation failed: {results['token_creation'].get('error')}")
         
         # Log any errors
         if results.get("errors"):
@@ -223,7 +223,7 @@ class TestJWTSecretConsistency:
     
     def test_e2e_auth_helper_staging_compatibility(self):
         """Test E2E auth helper staging compatibility."""
-        logger.info("🔍 Testing E2E auth helper staging compatibility...")
+        logger.info(" SEARCH:  Testing E2E auth helper staging compatibility...")
         
         # Test staging-compatible token creation
         auth_helper = E2EAuthHelper()
@@ -246,14 +246,14 @@ class TestJWTSecretConsistency:
             assert "staging" in decoded_payload, "Missing staging claim"
             assert "e2e_test" in decoded_payload, "Missing e2e_test claim"
             
-            logger.info("✅ Staging-compatible JWT token validated successfully")
+            logger.info(" PASS:  Staging-compatible JWT token validated successfully")
             
         except jwt.InvalidTokenError as e:
             pytest.fail(f"Staging JWT token validation failed: {e}")
     
     def test_jwt_secret_environment_resolution(self):
         """Test JWT secret resolution in different environments."""
-        logger.info("🔍 Testing JWT secret environment resolution...")
+        logger.info(" SEARCH:  Testing JWT secret environment resolution...")
         
         # Test unified secret resolution
         unified_secret = get_unified_jwt_secret()
@@ -273,14 +273,14 @@ class TestJWTSecretConsistency:
             # Verify we have at least one available key
             assert len(debug_info['available_keys']) > 0, "No JWT secret keys available"
             
-            logger.info("✅ JWT secret environment resolution working correctly")
+            logger.info(" PASS:  JWT secret environment resolution working correctly")
             
         except Exception as e:
-            logger.warning(f"⚠️ Could not get JWT secret debug info: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Could not get JWT secret debug info: {e}")
     
     def test_auth_service_jwt_handler_integration(self):
         """Test integration with auth service JWT handler if available."""
-        logger.info("🔍 Testing auth service JWT handler integration...")
+        logger.info(" SEARCH:  Testing auth service JWT handler integration...")
         
         try:
             from auth_service.auth_core.core.jwt_handler import JWTHandler
@@ -309,12 +309,12 @@ class TestJWTSecretConsistency:
             assert validation_result is not None, "Auth service rejected unified JWT token"
             assert validation_result.get("sub") == "test-auth-integration-123", "Subject claim mismatch"
             
-            logger.info("✅ Auth service JWT handler integration validated")
+            logger.info(" PASS:  Auth service JWT handler integration validated")
             
         except ImportError:
-            logger.warning("⚠️ Auth service not available for integration testing")
+            logger.warning(" WARNING: [U+FE0F] Auth service not available for integration testing")
         except Exception as e:
-            logger.error(f"❌ Auth service integration test failed: {e}")
+            logger.error(f" FAIL:  Auth service integration test failed: {e}")
             # Don't fail the test in environments where auth service might not be available
             if self.environment in ["staging", "production"]:
                 pytest.fail(f"Auth service JWT integration failed in {self.environment}: {e}")
@@ -322,7 +322,7 @@ class TestJWTSecretConsistency:
     @pytest.mark.parametrize("token_type", ["access", "refresh"])
     def test_jwt_token_types_consistency(self, token_type):
         """Test different JWT token types use consistent secrets."""
-        logger.info(f"🔍 Testing {token_type} token type consistency...")
+        logger.info(f" SEARCH:  Testing {token_type} token type consistency...")
         
         unified_secret = get_unified_jwt_secret()
         unified_algorithm = get_unified_jwt_algorithm()
@@ -351,7 +351,7 @@ class TestJWTSecretConsistency:
         assert decoded_payload.get("token_type") == token_type, f"Token type mismatch for {token_type}"
         assert decoded_payload.get("sub") == f"test-{token_type}-user-123", f"Subject mismatch for {token_type}"
         
-        logger.info(f"✅ {token_type} token type consistency validated")
+        logger.info(f" PASS:  {token_type} token type consistency validated")
 
 
 class TestJWTSecretDriftMonitoring:
@@ -360,7 +360,7 @@ class TestJWTSecretDriftMonitoring:
     @pytest.mark.asyncio
     async def test_jwt_drift_monitor_initialization(self):
         """Test JWT drift monitor can be initialized."""
-        logger.info("🔍 Testing JWT drift monitor initialization...")
+        logger.info(" SEARCH:  Testing JWT drift monitor initialization...")
         
         from shared.jwt_secret_drift_monitor import (
             JWTSecretDriftMonitor, 
@@ -387,12 +387,12 @@ class TestJWTSecretDriftMonitoring:
         assert "config" in status, "Status missing config"
         assert "performance" in status, "Status missing performance"
         
-        logger.info("✅ JWT drift monitor initialization successful")
+        logger.info(" PASS:  JWT drift monitor initialization successful")
     
     @pytest.mark.asyncio 
     async def test_jwt_drift_detection_simulation(self):
         """Test JWT drift detection with simulated inconsistency."""
-        logger.info("🔍 Testing JWT drift detection simulation...")
+        logger.info(" SEARCH:  Testing JWT drift detection simulation...")
         
         # This test simulates what would happen if services had different secrets
         # by temporarily modifying the unified secret manager behavior
@@ -414,7 +414,7 @@ class TestJWTSecretDriftMonitoring:
             logger.warning("JWT inconsistency detected during drift simulation test")
             logger.warning(f"Inconsistencies: {report.inconsistencies}")
         else:
-            logger.info("✅ JWT secrets consistent - drift detection ready")
+            logger.info(" PASS:  JWT secrets consistent - drift detection ready")
 
 
 # Integration with existing test infrastructure
@@ -425,7 +425,7 @@ class TestJWTSecretE2EIntegration:
     @pytest.mark.asyncio
     async def test_full_e2e_jwt_flow(self):
         """Test complete E2E JWT flow with consistent secrets."""
-        logger.info("🔍 Testing full E2E JWT flow...")
+        logger.info(" SEARCH:  Testing full E2E JWT flow...")
         
         # 1. Create E2E auth helper
         auth_helper = E2EAuthHelper()
@@ -454,9 +454,9 @@ class TestJWTSecretE2EIntegration:
             assert auth_validation is not None, "Auth service rejected E2E JWT token"
             assert auth_validation["sub"] == "e2e-integration-user-123", "Auth service validation mismatch"
             
-            logger.info("✅ Full E2E JWT flow with auth service validation successful")
+            logger.info(" PASS:  Full E2E JWT flow with auth service validation successful")
             
         except ImportError:
-            logger.info("✅ Full E2E JWT flow successful (auth service not available)")
+            logger.info(" PASS:  Full E2E JWT flow successful (auth service not available)")
         
-        logger.info("✅ Complete E2E JWT flow validated successfully")
+        logger.info(" PASS:  Complete E2E JWT flow validated successfully")

@@ -2,11 +2,12 @@ print("Testing issue #463 service user auth")
 
 # REPRODUCE ISSUE #463: Missing SERVICE_SECRET environment variable
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import patch
 from shared.isolated_environment import get_env
 
-class TestServiceUserAuth(unittest.TestCase):
+class TestServiceUserAuth(SSotBaseTestCase):
     def test_missing_service_secret_reproduces_issue_463(self):
         """Reproduce issue #463: SERVICE_SECRET missing causes 403 auth failures"""
         with patch("shared.isolated_environment.get_env") as mock_get_env:
@@ -17,7 +18,7 @@ class TestServiceUserAuth(unittest.TestCase):
             
             # This reproduces the core issue from #463
             if not service_secret:
-                print("✓ REPRODUCED: SERVICE_SECRET is missing - this causes 403 auth failures in staging")
+                print("[U+2713] REPRODUCED: SERVICE_SECRET is missing - this causes 403 auth failures in staging")
             
     def test_missing_jwt_secret_reproduces_auth_failure(self):
         """Test JWT_SECRET missing also causes auth failures"""  
@@ -28,7 +29,7 @@ class TestServiceUserAuth(unittest.TestCase):
             self.assertIsNone(jwt_secret, "JWT_SECRET should be missing (None)")
             
             if not jwt_secret:
-                print("✓ REPRODUCED: JWT_SECRET is missing - this also causes auth failures")
+                print("[U+2713] REPRODUCED: JWT_SECRET is missing - this also causes auth failures")
 
 if __name__ == "__main__":
     unittest.main()

@@ -51,11 +51,11 @@ class WebSocketNotifierRollback:
     
     def rollback_phase1_imports(self) -> bool:
         """Rollback Phase 1: Import path migration."""
-        print("🔄 Rolling back Phase 1: Import path migration...")
+        print(" CYCLE:  Rolling back Phase 1: Import path migration...")
         
         backup_files = self.find_backup_files('phase1')
         if not backup_files:
-            print("⚠️  No Phase 1 backup files found - using git rollback")
+            print(" WARNING: [U+FE0F]  No Phase 1 backup files found - using git rollback")
             return self._git_rollback_imports()
         
         success_count = 0
@@ -64,23 +64,23 @@ class WebSocketNotifierRollback:
                 if os.path.exists(original_path):
                     # Restore from backup
                     shutil.copy2(backup_path, original_path)
-                    print(f"✅ Restored: {original_path}")
+                    print(f" PASS:  Restored: {original_path}")
                     success_count += 1
                 else:
-                    print(f"⚠️  Original file not found: {original_path}")
+                    print(f" WARNING: [U+FE0F]  Original file not found: {original_path}")
             except Exception as e:
-                print(f"❌ Failed to restore {original_path}: {e}")
+                print(f" FAIL:  Failed to restore {original_path}: {e}")
         
-        print(f"📊 Phase 1 rollback: {success_count}/{len(backup_files)} files restored")
+        print(f" CHART:  Phase 1 rollback: {success_count}/{len(backup_files)} files restored")
         return success_count == len(backup_files)
     
     def rollback_phase2_factory(self) -> bool:
         """Rollback Phase 2: Factory pattern migration."""
-        print("🔄 Rolling back Phase 2: Factory pattern migration...")
+        print(" CYCLE:  Rolling back Phase 2: Factory pattern migration...")
         
         backup_files = self.find_backup_files('phase2')
         if not backup_files:
-            print("⚠️  No Phase 2 backup files found - using git rollback")
+            print(" WARNING: [U+FE0F]  No Phase 2 backup files found - using git rollback")
             return self._git_rollback_factory()
         
         success_count = 0
@@ -89,12 +89,12 @@ class WebSocketNotifierRollback:
                 if os.path.exists(original_path):
                     # Restore from backup
                     shutil.copy2(backup_path, original_path)
-                    print(f"✅ Restored: {original_path}")
+                    print(f" PASS:  Restored: {original_path}")
                     success_count += 1
                 else:
-                    print(f"⚠️  Original file not found: {original_path}")
+                    print(f" WARNING: [U+FE0F]  Original file not found: {original_path}")
             except Exception as e:
-                print(f"❌ Failed to restore {original_path}: {e}")
+                print(f" FAIL:  Failed to restore {original_path}: {e}")
         
         # Special handling for canonical implementation
         canonical_file = "/Users/anthony/Desktop/netra-apex/netra_backend/app/services/agent_websocket_bridge.py"
@@ -103,21 +103,21 @@ class WebSocketNotifierRollback:
         if os.path.exists(canonical_backup):
             try:
                 shutil.copy2(canonical_backup, canonical_file)
-                print(f"✅ Restored canonical implementation: {canonical_file}")
+                print(f" PASS:  Restored canonical implementation: {canonical_file}")
                 success_count += 1
             except Exception as e:
-                print(f"❌ Failed to restore canonical implementation: {e}")
+                print(f" FAIL:  Failed to restore canonical implementation: {e}")
         
-        print(f"📊 Phase 2 rollback: {success_count}/{len(backup_files) + 1} files restored")
+        print(f" CHART:  Phase 2 rollback: {success_count}/{len(backup_files) + 1} files restored")
         return success_count == len(backup_files) + 1
     
     def rollback_phase3_interface(self) -> bool:
         """Rollback Phase 3: Interface standardization."""
-        print("🔄 Rolling back Phase 3: Interface standardization...")
+        print(" CYCLE:  Rolling back Phase 3: Interface standardization...")
         
         backup_files = self.find_backup_files('phase3')
         if not backup_files:
-            print("⚠️  No Phase 3 backup files found - using git rollback")
+            print(" WARNING: [U+FE0F]  No Phase 3 backup files found - using git rollback")
             return self._git_rollback_interface()
         
         success_count = 0
@@ -126,14 +126,14 @@ class WebSocketNotifierRollback:
                 if os.path.exists(original_path):
                     # Restore from backup
                     shutil.copy2(backup_path, original_path)
-                    print(f"✅ Restored: {original_path}")
+                    print(f" PASS:  Restored: {original_path}")
                     success_count += 1
                 else:
-                    print(f"⚠️  Original file not found: {original_path}")
+                    print(f" WARNING: [U+FE0F]  Original file not found: {original_path}")
             except Exception as e:
-                print(f"❌ Failed to restore {original_path}: {e}")
+                print(f" FAIL:  Failed to restore {original_path}: {e}")
         
-        print(f"📊 Phase 3 rollback: {success_count}/{len(backup_files)} files restored")
+        print(f" CHART:  Phase 3 rollback: {success_count}/{len(backup_files)} files restored")
         return success_count == len(backup_files)
     
     def _git_rollback_imports(self) -> bool:
@@ -148,23 +148,23 @@ class WebSocketNotifierRollback:
                 if commits:
                     # Revert the most recent import-related commit
                     commit_hash = commits[0].split()[0]
-                    print(f"🔄 Reverting import commit: {commit_hash}")
+                    print(f" CYCLE:  Reverting import commit: {commit_hash}")
                     
                     revert_cmd = ['git', 'revert', '--no-edit', commit_hash]
                     revert_result = subprocess.run(revert_cmd, capture_output=True, text=True, cwd=self.project_root)
                     
                     if revert_result.returncode == 0:
-                        print("✅ Git rollback successful")
+                        print(" PASS:  Git rollback successful")
                         return True
                     else:
-                        print(f"❌ Git revert failed: {revert_result.stderr}")
+                        print(f" FAIL:  Git revert failed: {revert_result.stderr}")
                         return False
             
-            print("⚠️  No import-related commits found for rollback")
+            print(" WARNING: [U+FE0F]  No import-related commits found for rollback")
             return False
             
         except Exception as e:
-            print(f"❌ Git rollback failed: {e}")
+            print(f" FAIL:  Git rollback failed: {e}")
             return False
     
     def _git_rollback_factory(self) -> bool:
@@ -180,22 +180,22 @@ class WebSocketNotifierRollback:
                     # Revert factory-related commits
                     for commit_line in commits[:3]:  # Revert up to 3 recent commits
                         commit_hash = commit_line.split()[0]
-                        print(f"🔄 Reverting factory commit: {commit_hash}")
+                        print(f" CYCLE:  Reverting factory commit: {commit_hash}")
                         
                         revert_cmd = ['git', 'revert', '--no-edit', commit_hash]
                         revert_result = subprocess.run(revert_cmd, capture_output=True, text=True, cwd=self.project_root)
                         
                         if revert_result.returncode != 0:
-                            print(f"⚠️  Failed to revert {commit_hash}: {revert_result.stderr}")
+                            print(f" WARNING: [U+FE0F]  Failed to revert {commit_hash}: {revert_result.stderr}")
                     
-                    print("✅ Git rollback completed")
+                    print(" PASS:  Git rollback completed")
                     return True
             
-            print("⚠️  No factory-related commits found for rollback")
+            print(" WARNING: [U+FE0F]  No factory-related commits found for rollback")
             return False
             
         except Exception as e:
-            print(f"❌ Git rollback failed: {e}")
+            print(f" FAIL:  Git rollback failed: {e}")
             return False
     
     def _git_rollback_interface(self) -> bool:
@@ -211,27 +211,27 @@ class WebSocketNotifierRollback:
                     # Revert interface-related commits
                     for commit_line in commits:
                         commit_hash = commit_line.split()[0]
-                        print(f"🔄 Reverting interface commit: {commit_hash}")
+                        print(f" CYCLE:  Reverting interface commit: {commit_hash}")
                         
                         revert_cmd = ['git', 'revert', '--no-edit', commit_hash]
                         revert_result = subprocess.run(revert_cmd, capture_output=True, text=True, cwd=self.project_root)
                         
                         if revert_result.returncode != 0:
-                            print(f"⚠️  Failed to revert {commit_hash}: {revert_result.stderr}")
+                            print(f" WARNING: [U+FE0F]  Failed to revert {commit_hash}: {revert_result.stderr}")
                     
-                    print("✅ Git rollback completed")
+                    print(" PASS:  Git rollback completed")
                     return True
             
-            print("⚠️  No interface-related commits found for rollback")
+            print(" WARNING: [U+FE0F]  No interface-related commits found for rollback")
             return False
             
         except Exception as e:
-            print(f"❌ Git rollback failed: {e}")
+            print(f" FAIL:  Git rollback failed: {e}")
             return False
     
     def validate_rollback(self, phase: str) -> bool:
         """Validate that rollback was successful."""
-        print(f"\n🔍 Validating rollback for phase {phase}...")
+        print(f"\n SEARCH:  Validating rollback for phase {phase}...")
         
         validation_commands = {
             'phase1': [
@@ -256,38 +256,38 @@ class WebSocketNotifierRollback:
         
         commands = validation_commands.get(phase, [])
         if not commands:
-            print(f"⚠️  No validation commands defined for {phase}")
+            print(f" WARNING: [U+FE0F]  No validation commands defined for {phase}")
             return True
         
         success_count = 0
         for cmd in commands:
             try:
-                print(f"  🧪 Running: {' '.join(cmd)}")
+                print(f"  [U+1F9EA] Running: {' '.join(cmd)}")
                 result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.project_root, timeout=300)
                 
                 if result.returncode == 0:
-                    print(f"    ✅ Passed")
+                    print(f"     PASS:  Passed")
                     success_count += 1
                 else:
-                    print(f"    ❌ Failed: {result.stderr.strip()}")
+                    print(f"     FAIL:  Failed: {result.stderr.strip()}")
                     
             except subprocess.TimeoutExpired:
-                print(f"    ⏰ Timeout")
+                print(f"    [U+23F0] Timeout")
             except Exception as e:
-                print(f"    ❌ Error: {e}")
+                print(f"     FAIL:  Error: {e}")
         
         validation_success = success_count == len(commands)
-        print(f"📊 Validation: {success_count}/{len(commands)} tests passed")
+        print(f" CHART:  Validation: {success_count}/{len(commands)} tests passed")
         
         return validation_success
     
     def cleanup_backup_files(self, phase: str) -> bool:
         """Clean up backup files after successful rollback."""
-        print(f"🧹 Cleaning up backup files for {phase}...")
+        print(f"[U+1F9F9] Cleaning up backup files for {phase}...")
         
         backup_files = self.find_backup_files(phase)
         if not backup_files:
-            print("ℹ️  No backup files to clean up")
+            print("[U+2139][U+FE0F]  No backup files to clean up")
             return True
         
         cleaned_count = 0
@@ -295,17 +295,17 @@ class WebSocketNotifierRollback:
             try:
                 if os.path.exists(backup_path):
                     os.remove(backup_path)
-                    print(f"🗑️  Removed backup: {backup_path}")
+                    print(f"[U+1F5D1][U+FE0F]  Removed backup: {backup_path}")
                     cleaned_count += 1
             except Exception as e:
-                print(f"❌ Failed to remove {backup_path}: {e}")
+                print(f" FAIL:  Failed to remove {backup_path}: {e}")
         
-        print(f"📊 Cleanup: {cleaned_count}/{len(backup_files)} backup files removed")
+        print(f" CHART:  Cleanup: {cleaned_count}/{len(backup_files)} backup files removed")
         return cleaned_count == len(backup_files)
     
     def emergency_full_rollback(self) -> bool:
         """Emergency full rollback of all SSOT migration changes."""
-        print("🚨 EMERGENCY FULL ROLLBACK INITIATED")
+        print(" ALERT:  EMERGENCY FULL ROLLBACK INITIATED")
         print("=" * 60)
         
         # Rollback in reverse order (Phase 3 -> 2 -> 1)
@@ -313,7 +313,7 @@ class WebSocketNotifierRollback:
         rollback_success = True
         
         for phase in phases:
-            print(f"\n🔄 Rolling back {phase.upper()}...")
+            print(f"\n CYCLE:  Rolling back {phase.upper()}...")
             
             if phase == 'phase1':
                 success = self.rollback_phase1_imports()
@@ -325,25 +325,25 @@ class WebSocketNotifierRollback:
                 success = False
             
             if not success:
-                print(f"⚠️  {phase.upper()} rollback had issues")
+                print(f" WARNING: [U+FE0F]  {phase.upper()} rollback had issues")
                 rollback_success = False
             
             # Validate each phase
             validation_success = self.validate_rollback(phase)
             if not validation_success:
-                print(f"⚠️  {phase.upper()} validation failed")
+                print(f" WARNING: [U+FE0F]  {phase.upper()} validation failed")
                 rollback_success = False
         
         # Final system validation
-        print(f"\n🔍 Running final system validation...")
+        print(f"\n SEARCH:  Running final system validation...")
         final_validation = self._run_final_validation()
         
         if rollback_success and final_validation:
-            print(f"\n🎉 EMERGENCY ROLLBACK COMPLETED SUCCESSFULLY")
+            print(f"\n CELEBRATION:  EMERGENCY ROLLBACK COMPLETED SUCCESSFULLY")
             print(f"   All phases rolled back and validated")
             return True
         else:
-            print(f"\n❌ EMERGENCY ROLLBACK COMPLETED WITH ISSUES")
+            print(f"\n FAIL:  EMERGENCY ROLLBACK COMPLETED WITH ISSUES")
             print(f"   Manual intervention may be required")
             return False
     
@@ -362,9 +362,9 @@ class WebSocketNotifierRollback:
                 if result.returncode == 0:
                     success_count += 1
                 else:
-                    print(f"❌ Final validation failed: {' '.join(cmd)}")
+                    print(f" FAIL:  Final validation failed: {' '.join(cmd)}")
             except Exception as e:
-                print(f"❌ Final validation error: {e}")
+                print(f" FAIL:  Final validation error: {e}")
         
         return success_count == len(validation_commands)
 
@@ -380,22 +380,22 @@ def main():
     
     args = parser.parse_args()
     
-    print("🔄 WebSocketNotifier SSOT Migration Rollback Utility")
-    print("📋 GitHub Issue #216 - Emergency Rollback")
+    print(" CYCLE:  WebSocketNotifier SSOT Migration Rollback Utility")
+    print("[U+1F4CB] GitHub Issue #216 - Emergency Rollback")
     print("=" * 60)
     
     rollback = WebSocketNotifierRollback()
     
     # Confirm rollback
     if args.phase == 'all':
-        response = input("⚠️  EMERGENCY FULL ROLLBACK - Are you sure? Type 'ROLLBACK' to confirm: ")
+        response = input(" WARNING: [U+FE0F]  EMERGENCY FULL ROLLBACK - Are you sure? Type 'ROLLBACK' to confirm: ")
         if response != 'ROLLBACK':
-            print("❌ Emergency rollback cancelled")
+            print(" FAIL:  Emergency rollback cancelled")
             return 1
     else:
-        response = input(f"❓ Rollback Phase {args.phase}? (y/N): ").strip().lower()
+        response = input(f"[U+2753] Rollback Phase {args.phase}? (y/N): ").strip().lower()
         if response not in ['y', 'yes']:
-            print("❌ Rollback cancelled")
+            print(" FAIL:  Rollback cancelled")
             return 1
     
     # Execute rollback
@@ -414,7 +414,7 @@ def main():
         if success and args.validate:
             success = rollback.validate_rollback('phase3')
     else:
-        print(f"❌ Invalid phase: {args.phase}")
+        print(f" FAIL:  Invalid phase: {args.phase}")
         return 1
     
     # Cleanup if requested and successful
@@ -424,15 +424,15 @@ def main():
     
     # Final status
     if success:
-        print(f"\n🎉 Rollback completed successfully!")
-        print(f"📋 Next Steps:")
+        print(f"\n CELEBRATION:  Rollback completed successfully!")
+        print(f"[U+1F4CB] Next Steps:")
         print(f"   1. Verify system functionality manually")
         print(f"   2. Review rollback logs for any issues")
         print(f"   3. Plan remediation strategy if needed")
         return 0
     else:
-        print(f"\n❌ Rollback completed with issues!")
-        print(f"📋 Manual intervention required:")
+        print(f"\n FAIL:  Rollback completed with issues!")
+        print(f"[U+1F4CB] Manual intervention required:")
         print(f"   1. Check backup files in project directory")
         print(f"   2. Review git history for commit-based rollback")
         print(f"   3. Contact development team if issues persist")

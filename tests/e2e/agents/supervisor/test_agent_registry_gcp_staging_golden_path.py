@@ -1,16 +1,54 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
-🌟 E2E GCP STAGING TEST SUITE: Agent Registry Golden Path Protection
+[U+1F31F] E2E GCP STAGING TEST SUITE: Agent Registry Golden Path Protection
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Protects $500K+ ARR
+- Segment: ALL (Free  ->  Enterprise) - Protects $500K+ ARR
 - Business Goal: Validate agent orchestration works in production-like GCP staging environment
 - Value Impact: Ensures Golden Path agent execution delivers reliable chat experience
 - Revenue Impact: Prevents production failures that could cause mass user abandonment
 
 GOLDEN PATH VALIDATION:
 This test suite validates the COMPLETE Golden Path user flow in GCP staging:
-1. User Authentication → 2. Agent Registry Initialization → 3. Agent Creation
-4. Tool Integration → 5. WebSocket Events → 6. Agent Execution → 7. Response Delivery
+1. User Authentication  ->  2. Agent Registry Initialization  ->  3. Agent Creation
+4. Tool Integration  ->  5. WebSocket Events  ->  6. Agent Execution  ->  7. Response Delivery
 
 CRITICAL E2E SCENARIOS TESTED:
 1. Golden Path Agent Execution - Complete user flow from login to AI response
@@ -34,7 +72,7 @@ RISK MITIGATION:
 - Comprehensive load testing prevents performance surprises in production
 - Real service integration catches configuration and networking issues
 
-This test suite protects the CORE REVENUE FLOW: Users → Chat → Agent Orchestration → AI Responses
+This test suite protects the CORE REVENUE FLOW: Users  ->  Chat  ->  Agent Orchestration  ->  AI Responses
 """
 
 import asyncio
@@ -194,10 +232,10 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
             self.assertTrue(cleanup_success, "Golden Path cleanup must succeed")
             
             # FINAL VALIDATION: Golden Path completed successfully
-            self.assertTrue(True, "🌟 Golden Path validation completed successfully")
+            self.assertTrue(True, "[U+1F31F] Golden Path validation completed successfully")
             
         except Exception as e:
-            self.fail(f"🚨 Golden Path FAILED: {e}")
+            self.fail(f" ALERT:  Golden Path FAILED: {e}")
 
     async def test_golden_path_websocket_event_delivery_production(self):
         """E2E: Validates all 5 critical WebSocket events are delivered in production environment.
@@ -268,10 +306,10 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
                 self.assertGreaterEqual(len(events), 5, "All 5 critical events must be delivered")
             
             # Success: All events delivered
-            self.assertTrue(True, "🌟 All Golden Path WebSocket events delivered successfully")
+            self.assertTrue(True, "[U+1F31F] All Golden Path WebSocket events delivered successfully")
             
         except Exception as e:
-            self.fail(f"🚨 Golden Path WebSocket events FAILED: {e}")
+            self.fail(f" ALERT:  Golden Path WebSocket events FAILED: {e}")
 
     async def test_golden_path_database_persistence_production(self):
         """E2E: Validates agent state persistence in production GCP Cloud SQL.
@@ -329,10 +367,10 @@ class TestGoldenPathAgentExecution(SSotAsyncTestCase):
                                "Database cleanup must be consistent")
             
             # Success: Database persistence validated
-            self.assertTrue(True, "🌟 Golden Path database persistence validated")
+            self.assertTrue(True, "[U+1F31F] Golden Path database persistence validated")
             
         except Exception as e:
-            self.fail(f"🚨 Golden Path database persistence FAILED: {e}")
+            self.fail(f" ALERT:  Golden Path database persistence FAILED: {e}")
 
     async def _create_production_auth_token(self, user_id: str) -> str:
         """Create production-like JWT token for testing."""
@@ -475,10 +513,10 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
                               f"Enterprise customer {result['customer_id']} must have WebSocket connection")
             
             # Success: Enterprise isolation validated
-            self.assertTrue(True, "🌟 Enterprise customer isolation validated")
+            self.assertTrue(True, "[U+1F31F] Enterprise customer isolation validated")
             
         except Exception as e:
-            self.fail(f"🚨 Enterprise isolation FAILED: {e}")
+            self.fail(f" ALERT:  Enterprise isolation FAILED: {e}")
 
     async def test_enterprise_performance_under_production_load(self):
         """E2E: Validates enterprise performance under production-like concurrent load.
@@ -549,9 +587,9 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
             success_rate = len(successful_results) / concurrent_enterprise_users
             
             self.assertGreaterEqual(success_rate, 0.9,
-                                  f"Enterprise success rate must be ≥90%, got {success_rate:.1%}")
+                                  f"Enterprise success rate must be  >= 90%, got {success_rate:.1%}")
             
-            # Enterprise performance requirement: ≤45 seconds for concurrent load
+            # Enterprise performance requirement:  <= 45 seconds for concurrent load
             self.assertLess(execution_time, 45.0,
                            f"Enterprise load must complete within 45s, took {execution_time:.2f}s")
             
@@ -561,10 +599,10 @@ class TestMultiUserEnterpriseIsolation(SSotAsyncTestCase):
                                   "Registry must maintain all successful enterprise sessions")
             
             # Success: Enterprise performance validated
-            self.assertTrue(True, f"🌟 Enterprise performance validated: {execution_time:.2f}s")
+            self.assertTrue(True, f"[U+1F31F] Enterprise performance validated: {execution_time:.2f}s")
             
         except Exception as e:
-            self.fail(f"🚨 Enterprise performance FAILED: {e}")
+            self.fail(f" ALERT:  Enterprise performance FAILED: {e}")
 
     async def _create_enterprise_auth_token(self, customer_id: str) -> str:
         """Create enterprise-level JWT token with admin privileges."""
@@ -653,10 +691,10 @@ class TestProductionToolExecution(SSotAsyncTestCase):
                     pass
             
             # Success: Tool execution validated
-            self.assertTrue(True, "🌟 Production tool execution validated")
+            self.assertTrue(True, "[U+1F31F] Production tool execution validated")
             
         except Exception as e:
-            self.fail(f"🚨 Production tool execution FAILED: {e}")
+            self.fail(f" ALERT:  Production tool execution FAILED: {e}")
 
     async def test_tool_websocket_notifications_in_production(self):
         """E2E: Validates tool execution sends WebSocket notifications in production environment.
@@ -704,10 +742,10 @@ class TestProductionToolExecution(SSotAsyncTestCase):
                                              "Tool execution completed", 2500.0)
             
             # Success: Tool notifications validated
-            self.assertTrue(True, "🌟 Tool WebSocket notifications validated")
+            self.assertTrue(True, "[U+1F31F] Tool WebSocket notifications validated")
             
         except Exception as e:
-            self.fail(f"🚨 Tool WebSocket notifications FAILED: {e}")
+            self.fail(f" ALERT:  Tool WebSocket notifications FAILED: {e}")
 
 
 class TestProductionPerformanceValidation(SSotAsyncTestCase):
@@ -793,9 +831,9 @@ class TestProductionPerformanceValidation(SSotAsyncTestCase):
             
             # Peak load requirements
             self.assertGreaterEqual(success_rate, 0.85,
-                                  f"Peak load success rate must be ≥85%, got {success_rate:.1%}")
+                                  f"Peak load success rate must be  >= 85%, got {success_rate:.1%}")
             
-            # Peak performance: ≤60 seconds for full load
+            # Peak performance:  <= 60 seconds for full load
             self.assertLess(execution_time, 60.0,
                            f"Peak load must complete within 60s, took {execution_time:.2f}s")
             
@@ -808,10 +846,10 @@ class TestProductionPerformanceValidation(SSotAsyncTestCase):
                                "Registry must not leak sessions during peak load")
             
             # Success: Peak performance validated
-            self.assertTrue(True, f"🌟 Peak performance validated: {execution_time:.2f}s, {success_rate:.1%} success")
+            self.assertTrue(True, f"[U+1F31F] Peak performance validated: {execution_time:.2f}s, {success_rate:.1%} success")
             
         except Exception as e:
-            self.fail(f"🚨 Peak performance FAILED: {e}")
+            self.fail(f" ALERT:  Peak performance FAILED: {e}")
 
     async def test_memory_efficiency_during_sustained_production_load(self):
         """E2E: Validates memory efficiency during sustained production-like load.
@@ -893,10 +931,10 @@ class TestProductionPerformanceValidation(SSotAsyncTestCase):
                            f"Max sessions should equal users per cycle: {max_sessions}")
             
             # Success: Sustained load validated
-            self.assertTrue(True, f"🌟 Sustained load validated: avg {avg_cycle_time:.2f}s/cycle")
+            self.assertTrue(True, f"[U+1F31F] Sustained load validated: avg {avg_cycle_time:.2f}s/cycle")
             
         except Exception as e:
-            self.fail(f"🚨 Sustained load FAILED: {e}")
+            self.fail(f" ALERT:  Sustained load FAILED: {e}")
 
 
 if __name__ == '__main__':

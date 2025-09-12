@@ -27,34 +27,34 @@ def demonstrate_the_problem():
     Demonstrates the exact 'bool' object is not callable error that occurs in production.
     """
     print("=" * 60)
-    print("🚨 DEMONSTRATING THE PROBLEM (Issue #334)")
+    print(" ALERT:  DEMONSTRATING THE PROBLEM (Issue #334)")
     print("=" * 60)
     
     # Create mock Redis manager with is_connected as property (like real implementation)
     mock_redis_manager = Mock()
     type(mock_redis_manager).is_connected = property(lambda self: True)
     
-    print("✅ Redis manager created with is_connected as property")
+    print(" PASS:  Redis manager created with is_connected as property")
     print(f"   is_connected type: {type(mock_redis_manager.is_connected)}")
     print(f"   is_connected value: {mock_redis_manager.is_connected}")
     
     # Show that property access works correctly
     try:
         result = mock_redis_manager.is_connected  # Correct property access
-        print(f"✅ Property access works: redis_manager.is_connected = {result}")
+        print(f" PASS:  Property access works: redis_manager.is_connected = {result}")
     except Exception as e:
-        print(f"❌ Property access failed: {e}")
+        print(f" FAIL:  Property access failed: {e}")
         return False
     
     # Show the problematic method call that causes the issue
     try:
-        print("\n🚨 Now attempting the problematic method call...")
+        print("\n ALERT:  Now attempting the problematic method call...")
         print("   Executing: redis_manager.is_connected()")
         result = mock_redis_manager.is_connected()  # This is the BUG!
         print(f"   Result: {result}")
         return False  # Should not reach here
     except TypeError as e:
-        print(f"❌ ERROR REPRODUCED: {e}")
+        print(f" FAIL:  ERROR REPRODUCED: {e}")
         print("   This is the exact error that occurs in production!")
         return True
     
@@ -63,7 +63,7 @@ def demonstrate_the_fix():
     Demonstrates how the fix resolves the issue.
     """
     print("\n" + "=" * 60)
-    print("✅ DEMONSTRATING THE FIX")
+    print(" PASS:  DEMONSTRATING THE FIX")
     print("=" * 60)
     
     # Create the same Redis manager setup
@@ -75,7 +75,7 @@ def demonstrate_the_fix():
     
     # Show the corrected usage pattern
     try:
-        print("\n✅ Using CORRECTED property access:")
+        print("\n PASS:  Using CORRECTED property access:")
         print("   Executing: redis_manager.is_connected  # No parentheses!")
         
         # This is the FIXED version
@@ -83,12 +83,12 @@ def demonstrate_the_fix():
         
         print(f"   Result: {is_connected}")
         print(f"   Type: {type(is_connected)}")
-        print("✅ FIX SUCCESSFUL: No TypeError!")
+        print(" PASS:  FIX SUCCESSFUL: No TypeError!")
         
         return True
         
     except Exception as e:
-        print(f"❌ Unexpected error in fix: {e}")
+        print(f" FAIL:  Unexpected error in fix: {e}")
         return False
 
 def simulate_production_scenario():
@@ -96,7 +96,7 @@ def simulate_production_scenario():
     Simulates the production scenario in GCP initialization validator.
     """
     print("\n" + "=" * 60)
-    print("🏭 SIMULATING PRODUCTION SCENARIO")
+    print("[U+1F3ED] SIMULATING PRODUCTION SCENARIO")
     print("=" * 60)
     
     # Simulate the exact context from gcp_initialization_validator.py
@@ -110,10 +110,10 @@ def simulate_production_scenario():
     print("   Redis is connected and available")
     
     # Show the problematic production code
-    print("\n🚨 PROBLEMATIC PRODUCTION CODE (current):")
+    print("\n ALERT:  PROBLEMATIC PRODUCTION CODE (current):")
     print("   # Line 376 in gcp_initialization_validator.py")
     print("   if hasattr(redis_manager, 'is_connected'):")
-    print("       is_connected = redis_manager.is_connected()  # ❌ WRONG")
+    print("       is_connected = redis_manager.is_connected()  #  FAIL:  WRONG")
     
     try:
         redis_manager = mock_app_state.redis_manager
@@ -121,23 +121,23 @@ def simulate_production_scenario():
             is_connected = redis_manager.is_connected()  # This will fail
             print(f"       Result: {is_connected}")
     except TypeError as e:
-        print(f"   ❌ PRODUCTION ERROR: {e}")
+        print(f"    FAIL:  PRODUCTION ERROR: {e}")
         
     # Show the fixed production code
-    print("\n✅ FIXED PRODUCTION CODE (proposed):")
+    print("\n PASS:  FIXED PRODUCTION CODE (proposed):")
     print("   # Line 376 in gcp_initialization_validator.py (FIXED)")
     print("   if hasattr(redis_manager, 'is_connected'):")
-    print("       is_connected = redis_manager.is_connected   # ✅ CORRECT")
+    print("       is_connected = redis_manager.is_connected   #  PASS:  CORRECT")
     
     try:
         redis_manager = mock_app_state.redis_manager
         if hasattr(redis_manager, 'is_connected'):
             is_connected = redis_manager.is_connected  # Fixed version
             print(f"       Result: {is_connected}")
-            print("✅ PRODUCTION FIX SUCCESSFUL!")
+            print(" PASS:  PRODUCTION FIX SUCCESSFUL!")
             return True
     except Exception as e:
-        print(f"   ❌ Unexpected error: {e}")
+        print(f"    FAIL:  Unexpected error: {e}")
         return False
 
 def test_various_redis_states():
@@ -145,7 +145,7 @@ def test_various_redis_states():
     Tests the fix with various Redis connection states.
     """
     print("\n" + "=" * 60)  
-    print("🧪 TESTING VARIOUS REDIS STATES")
+    print("[U+1F9EA] TESTING VARIOUS REDIS STATES")
     print("=" * 60)
     
     test_cases = [
@@ -154,7 +154,7 @@ def test_various_redis_states():
     ]
     
     for test_name, connected_state in test_cases:
-        print(f"\n📋 Test: {test_name}")
+        print(f"\n[U+1F4CB] Test: {test_name}")
         
         mock_redis_manager = Mock()
         type(mock_redis_manager).is_connected = property(lambda self, state=connected_state: state)
@@ -164,9 +164,9 @@ def test_various_redis_states():
             is_connected = mock_redis_manager.is_connected  # Property access
             print(f"   Result: {is_connected}")
             print(f"   Type: {type(is_connected)}")
-            print("   ✅ Success")
+            print("    PASS:  Success")
         except Exception as e:
-            print(f"   ❌ Failed: {e}")
+            print(f"    FAIL:  Failed: {e}")
             return False
             
     return True
@@ -176,7 +176,7 @@ def performance_comparison():
     Compares performance of property access vs method call attempts.
     """
     print("\n" + "=" * 60)
-    print("⚡ PERFORMANCE COMPARISON")
+    print(" LIGHTNING:  PERFORMANCE COMPARISON")
     print("=" * 60)
     
     import time
@@ -193,8 +193,8 @@ def performance_comparison():
             pass
     property_time = time.perf_counter() - start_time
     
-    print(f"✅ Property access (CORRECT): {property_time*1000:.3f}ms for 1000 calls")
-    print(f"   Average per call: {property_time*1000000:.3f}μs")
+    print(f" PASS:  Property access (CORRECT): {property_time*1000:.3f}ms for 1000 calls")
+    print(f"   Average per call: {property_time*1000000:.3f}[U+03BC]s")
     
     # Test method call attempts (incorrect approach) 
     error_count = 0
@@ -206,14 +206,14 @@ def performance_comparison():
             error_count += 1
     method_time = time.perf_counter() - start_time
     
-    print(f"❌ Method call attempts (WRONG): {method_time*1000:.3f}ms for 1000 calls")
+    print(f" FAIL:  Method call attempts (WRONG): {method_time*1000:.3f}ms for 1000 calls")
     print(f"   Errors generated: {error_count}")
-    print(f"   Average per call: {method_time*1000000:.3f}μs")
+    print(f"   Average per call: {method_time*1000000:.3f}[U+03BC]s")
     
     if property_time < method_time:
-        print("✅ Property access is faster (no exception overhead)")
+        print(" PASS:  Property access is faster (no exception overhead)")
     else:
-        print("⚠️  Method call attempts were somehow faster (unexpected)")
+        print(" WARNING: [U+FE0F]  Method call attempts were somehow faster (unexpected)")
 
 def main():
     """
@@ -240,18 +240,18 @@ def main():
     
     # Final summary
     print("\n" + "=" * 60)
-    print("📊 SUMMARY")
+    print(" CHART:  SUMMARY")
     print("=" * 60)
     
-    print(f"Problem reproduced: {'✅' if problem_reproduced else '❌'}")
-    print(f"Fix works: {'✅' if fix_works else '❌'}")
-    print(f"Production scenario fixed: {'✅' if production_fixed else '❌'}")
-    print(f"Various states work: {'✅' if states_work else '❌'}")
+    print(f"Problem reproduced: {' PASS: ' if problem_reproduced else ' FAIL: '}")
+    print(f"Fix works: {' PASS: ' if fix_works else ' FAIL: '}")
+    print(f"Production scenario fixed: {' PASS: ' if production_fixed else ' FAIL: '}")
+    print(f"Various states work: {' PASS: ' if states_work else ' FAIL: '}")
     
     all_passed = all([problem_reproduced, fix_works, production_fixed, states_work])
     
     if all_passed:
-        print("\n🎉 ALL TESTS PASSED!")
+        print("\n CELEBRATION:  ALL TESTS PASSED!")
         print("The fix successfully resolves issue #334")
         print("\nNext Steps:")
         print("1. Apply the fix to gcp_initialization_validator.py line 376")
@@ -260,7 +260,7 @@ def main():
         print("4. Monitor for elimination of 'GRACEFUL DEGRADATION' messages")
         return True
     else:
-        print("\n❌ SOME TESTS FAILED")
+        print("\n FAIL:  SOME TESTS FAILED")
         print("Review the output above to identify issues")
         return False
 

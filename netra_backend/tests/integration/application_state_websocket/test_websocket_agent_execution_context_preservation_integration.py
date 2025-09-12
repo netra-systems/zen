@@ -584,7 +584,7 @@ class TestWebSocketAgentExecutionContextPreservationIntegration(BaseIntegrationT
                 assert context_record["sensitive_data_protected"] is True
                 
         self.logger.info(
-            f"✅ User context preservation test PASSED - "
+            f" PASS:  User context preservation test PASSED - "
             f"Organization: {alpha_context.metadata['organization']}, "
             f"Snapshots: {snapshots_count}, Violations: {len(violations)}"
         )
@@ -702,7 +702,7 @@ class TestWebSocketAgentExecutionContextPreservationIntegration(BaseIntegrationT
         assert len(violations) == 0, f"Context isolation violations: {violations}"
         
         self.logger.info(
-            f"✅ Concurrent user context isolation test PASSED - "
+            f" PASS:  Concurrent user context isolation test PASSED - "
             f"Alpha events: {isolation_report['user1_events']}, "
             f"Beta events: {isolation_report['user2_events']}, "
             f"Isolation score: {isolation_report['isolation_score']}%"
@@ -772,7 +772,7 @@ class TestWebSocketAgentExecutionContextPreservationIntegration(BaseIntegrationT
         # Validate user context integrity
         validate_user_context(user_context_with_db)  # Should not raise
         
-        self.logger.info("✅ Context preservation during database operations test PASSED")
+        self.logger.info(" PASS:  Context preservation during database operations test PASSED")
 
 
 if __name__ == "__main__":

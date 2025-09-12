@@ -148,7 +148,7 @@ try:
             logger.info("Attempting WebSocket connection...")
             
             with client.websocket_connect("/ws", headers=headers) as websocket:
-                logger.info("✅ WebSocket connection established!")
+                logger.info(" PASS:  WebSocket connection established!")
                 
                 # Should receive connection_established message
                 data = websocket.receive_json()
@@ -162,11 +162,11 @@ try:
                 assert "server_time" in data
                 assert "config" in data
                 
-                logger.info("✅ Connection success test PASSED!")
+                logger.info(" PASS:  Connection success test PASSED!")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Connection success test FAILED: {e}")
+            logger.error(f" FAIL:  Connection success test FAILED: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -182,14 +182,14 @@ try:
             # Try to connect without authentication - should fail
             try:
                 with client.websocket_connect("/ws") as websocket:
-                    logger.error("❌ Connection succeeded when it should have failed!")
+                    logger.error(" FAIL:  Connection succeeded when it should have failed!")
                     return False
             except Exception as e:
-                logger.info(f"✅ Connection correctly failed: {type(e).__name__}")
+                logger.info(f" PASS:  Connection correctly failed: {type(e).__name__}")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Test setup failed: {e}")
+            logger.error(f" FAIL:  Test setup failed: {e}")
             return False
     
     
@@ -226,11 +226,11 @@ try:
                 assert response["type"] == "pong"
                 assert "timestamp" in response
                 
-                logger.info("✅ Ping/pong test PASSED!")
+                logger.info(" PASS:  Ping/pong test PASSED!")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Ping/pong test FAILED: {e}")
+            logger.error(f" FAIL:  Ping/pong test FAILED: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -270,11 +270,11 @@ try:
                 assert response["type"] == "echo_response"
                 assert response["original"] == echo_message
                 
-                logger.info("✅ Echo test PASSED!")
+                logger.info(" PASS:  Echo test PASSED!")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Echo test FAILED: {e}")
+            logger.error(f" FAIL:  Echo test FAILED: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -326,11 +326,11 @@ try:
                 # Should have received all expected events
                 assert len(events_received) >= len(expected_events), f"Expected {len(expected_events)} events, got {len(events_received)}: {events_received}"
                 
-                logger.info(f"✅ Agent message test PASSED! Received events: {events_received}")
+                logger.info(f" PASS:  Agent message test PASSED! Received events: {events_received}")
                 return True
                 
         except Exception as e:
-            logger.error(f"❌ Agent message test FAILED: {e}")
+            logger.error(f" FAIL:  Agent message test FAILED: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -338,7 +338,7 @@ try:
     
     async def main():
         """Run all WebSocket integration tests."""
-        logger.info("🚀 Starting Fixed WebSocket Integration Tests...")
+        logger.info("[U+1F680] Starting Fixed WebSocket Integration Tests...")
         
         tests = [
             ("WebSocket Connection Success", test_websocket_connection_success),
@@ -358,13 +358,13 @@ try:
                 # Run each test with timeout
                 result = await asyncio.wait_for(test_func(), timeout=30.0)
                 results[test_name] = result
-                status = "✅ PASS" if result else "❌ FAIL"
+                status = " PASS:  PASS" if result else " FAIL:  FAIL"
                 logger.info(f"{test_name}: {status}")
             except asyncio.TimeoutError:
-                logger.error(f"❌ {test_name}: TIMEOUT (30s)")
+                logger.error(f" FAIL:  {test_name}: TIMEOUT (30s)")
                 results[test_name] = False
             except Exception as e:
-                logger.error(f"❌ {test_name}: ERROR - {e}")
+                logger.error(f" FAIL:  {test_name}: ERROR - {e}")
                 results[test_name] = False
         
         # Print final results
@@ -373,7 +373,7 @@ try:
         logger.info(f"{'='*60}")
         
         for test_name, passed in results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             logger.info(f"{test_name}: {status}")
         
         total_tests = len(results)
@@ -381,9 +381,9 @@ try:
         logger.info(f"\nTotal: {passed_tests}/{total_tests} tests passed")
         
         if passed_tests == total_tests:
-            logger.info("🎉 All tests PASSED! WebSocket integration is working correctly.")
+            logger.info(" CELEBRATION:  All tests PASSED! WebSocket integration is working correctly.")
         else:
-            logger.error("💥 Some tests FAILED. WebSocket integration has issues.")
+            logger.error("[U+1F4A5] Some tests FAILED. WebSocket integration has issues.")
         
         return passed_tests == total_tests
     
@@ -402,6 +402,6 @@ try:
             exit(1)
 
 except ImportError as e:
-    logger.error(f"❌ Import failed: {e}")
+    logger.error(f" FAIL:  Import failed: {e}")
     logger.error("Missing dependencies - install FastAPI and websockets")
     exit(1)

@@ -1,7 +1,7 @@
 """
 Performance Metrics Models for E2E Agent Testing
 Pydantic models for performance validation results.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from typing import Dict, List

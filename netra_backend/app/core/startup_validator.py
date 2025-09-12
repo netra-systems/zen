@@ -108,9 +108,9 @@ class StartupValidator:
                 result.duration_ms = duration
                 
                 if success:
-                    logger.info(f"✓ {name}: {message} ({duration:.1f}ms)")
+                    logger.info(f"[U+2713] {name}: {message} ({duration:.1f}ms)")
                 else:
-                    logger.error(f"✗ {name}: {message} ({duration:.1f}ms)")
+                    logger.error(f"[U+2717] {name}: {message} ({duration:.1f}ms)")
                     all_passed = False
                     
             except Exception as e:
@@ -121,7 +121,7 @@ class StartupValidator:
                 result.error = e
                 result.traceback = traceback.format_exc()
                 
-                logger.error(f"✗ {name}: {result.message} ({duration:.1f}ms)")
+                logger.error(f"[U+2717] {name}: {result.message} ({duration:.1f}ms)")
                 logger.error(f"  Traceback: {result.traceback}")
                 all_passed = False
             
@@ -131,9 +131,9 @@ class StartupValidator:
         total_duration = (self.end_time - self.start_time).total_seconds()
         
         if all_passed:
-            logger.info(f"✅ All validations passed in {total_duration:.1f}s")
+            logger.info(f" PASS:  All validations passed in {total_duration:.1f}s")
         else:
-            logger.error(f"❌ Validation failed in {total_duration:.1f}s")
+            logger.error(f" FAIL:  Validation failed in {total_duration:.1f}s")
             self._print_summary()
         
         return all_passed
@@ -349,11 +349,11 @@ class StartupValidator:
         
         for result in self.results:
             status_symbol = {
-                ValidationStatus.PASSED: "✓",
-                ValidationStatus.FAILED: "✗",
-                ValidationStatus.SKIPPED: "⊘",
-                ValidationStatus.RUNNING: "⟳",
-                ValidationStatus.PENDING: "◯"
+                ValidationStatus.PASSED: "[U+2713]",
+                ValidationStatus.FAILED: "[U+2717]",
+                ValidationStatus.SKIPPED: "[U+2298]",
+                ValidationStatus.RUNNING: "[U+27F3]",
+                ValidationStatus.PENDING: "[U+25EF]"
             }.get(result.status, "?")
             
             print(f"{status_symbol} {result.name}: {result.message} ({result.duration_ms:.1f}ms)")

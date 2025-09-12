@@ -117,8 +117,8 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
         Test complete user chat workflow integrating 6 SSOT classes.
         
         Business Value: $150K+ annual value - Core chat functionality that drives user engagement.
-        Workflow: IsolatedEnvironment → UnifiedConfigurationManager → AgentRegistry → 
-                 BaseAgent → UnifiedWebSocketManager → UnifiedStateManager
+        Workflow: IsolatedEnvironment  ->  UnifiedConfigurationManager  ->  AgentRegistry  ->  
+                 BaseAgent  ->  UnifiedWebSocketManager  ->  UnifiedStateManager
         
         This test validates the complete user journey from environment setup through
         agent execution with real-time WebSocket notifications and state persistence.
@@ -1216,7 +1216,7 @@ class TestCompleteSSotWorkflowIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_cross_service_authentication_workflow(self, real_services_fixture):
         """
-        Test cross-service authentication workflow: Environment → Config → DatabaseURLBuilder → AuthDatabaseManager.
+        Test cross-service authentication workflow: Environment  ->  Config  ->  DatabaseURLBuilder  ->  AuthDatabaseManager.
         
         Business Value: $200K+ annual value - Secure cross-service communication prevents security breaches.
         Authentication workflow ensures services can securely communicate without exposing credentials.

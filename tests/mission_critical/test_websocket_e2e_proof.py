@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -31,14 +32,14 @@
     # REMOVED_SYNTAX_ERROR: using the new factory-based patterns with complete user isolation.
 
     # REMOVED_SYNTAX_ERROR: CRITICAL FACTORY-BASED FLOW:
-        # REMOVED_SYNTAX_ERROR: 1. User Request → API Endpoint
-        # REMOVED_SYNTAX_ERROR: 2. API → ExecutionEngineFactory
-        # REMOVED_SYNTAX_ERROR: 3. Factory → IsolatedExecutionEngine (per-user)
-        # REMOVED_SYNTAX_ERROR: 4. Factory → UserWebSocketEmitter (per-user)
-        # REMOVED_SYNTAX_ERROR: 5. ExecutionEngine → Agent (with emitter)
-        # REMOVED_SYNTAX_ERROR: 6. Agent → UserWebSocketEmitter (isolated events)
-        # REMOVED_SYNTAX_ERROR: 7. Emitter → UserWebSocketConnection (per-user)
-        # REMOVED_SYNTAX_ERROR: 8. Connection → User"s WebSocket (complete isolation)
+        # REMOVED_SYNTAX_ERROR: 1. User Request  ->  API Endpoint
+        # REMOVED_SYNTAX_ERROR: 2. API  ->  ExecutionEngineFactory
+        # REMOVED_SYNTAX_ERROR: 3. Factory  ->  IsolatedExecutionEngine (per-user)
+        # REMOVED_SYNTAX_ERROR: 4. Factory  ->  UserWebSocketEmitter (per-user)
+        # REMOVED_SYNTAX_ERROR: 5. ExecutionEngine  ->  Agent (with emitter)
+        # REMOVED_SYNTAX_ERROR: 6. Agent  ->  UserWebSocketEmitter (isolated events)
+        # REMOVED_SYNTAX_ERROR: 7. Emitter  ->  UserWebSocketConnection (per-user)
+        # REMOVED_SYNTAX_ERROR: 8. Connection  ->  User"s WebSocket (complete isolation)
 
         # REMOVED_SYNTAX_ERROR: VALIDATES:
             # REMOVED_SYNTAX_ERROR: - Factory pattern user isolation
@@ -76,7 +77,7 @@
             
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketE2EProof(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestWebSocketE2EProof(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Prove the WebSocket factory pattern flow works end-to-end."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):
@@ -118,13 +119,13 @@
     # REMOVED_SYNTAX_ERROR: connection_id=self.connection_id
     
 
-    # REMOVED_SYNTAX_ERROR: print(f"✅ STEP 2: Factory created isolated emitter")
+    # REMOVED_SYNTAX_ERROR: print(f" PASS:  STEP 2: Factory created isolated emitter")
 
     # ===== STEP 3: Emit All 5 Required Events =====
     # REMOVED_SYNTAX_ERROR: agent_name = "TestAgent"
     # REMOVED_SYNTAX_ERROR: run_id = self.run_id
 
-    # REMOVED_SYNTAX_ERROR: print(f"🎯 STEP 3: Emitting all 5 required WebSocket events...")
+    # REMOVED_SYNTAX_ERROR: print(f" TARGET:  STEP 3: Emitting all 5 required WebSocket events...")
 
     # REMOVED_SYNTAX_ERROR: await emitter.notify_agent_started(agent_name, run_id)
     # REMOVED_SYNTAX_ERROR: await emitter.notify_agent_thinking(agent_name, run_id, "Analyzing request...")
@@ -153,7 +154,7 @@
             # REMOVED_SYNTAX_ERROR: self.assertEqual(len(missing_events), 0, "formatted_string")
 
             # ===== STEP 5: Verify Event Structure and JSON =====
-            # REMOVED_SYNTAX_ERROR: print(f"🔍 STEP 5: Validating event structure and JSON serialization...")
+            # REMOVED_SYNTAX_ERROR: print(f" SEARCH:  STEP 5: Validating event structure and JSON serialization...")
 
             # REMOVED_SYNTAX_ERROR: for event in sent_events:
                 # Verify structure
@@ -169,7 +170,7 @@
                 # REMOVED_SYNTAX_ERROR: self.assertEqual(event['event_type'], deserialized['event_type'])
 
                 # ===== STEP 6: Verify User Isolation =====
-                # REMOVED_SYNTAX_ERROR: print(f"🔐 STEP 6: Verifying user isolation...")
+                # REMOVED_SYNTAX_ERROR: print(f"[U+1F510] STEP 6: Verifying user isolation...")
 
                 # Events should only be for this specific user
                 # REMOVED_SYNTAX_ERROR: for event in sent_events:
@@ -203,30 +204,30 @@
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: 🏭 FACTORY FLOW:")
-                            # REMOVED_SYNTAX_ERROR: print("1. Request → ExecutionEngineFactory (user context created)")
-                            # REMOVED_SYNTAX_ERROR: print("2. Factory → WebSocketBridgeFactory (per-user emitter)")
-                            # REMOVED_SYNTAX_ERROR: print("3. Factory → UserWebSocketEmitter (complete isolation)")
-                            # REMOVED_SYNTAX_ERROR: print("4. Emitter → UserWebSocketConnection (user-specific)")
-                            # REMOVED_SYNTAX_ERROR: print("5. Connection → User WebSocket (isolated delivery)")
+                            # REMOVED_SYNTAX_ERROR: [U+1F3ED] FACTORY FLOW:")
+                            # REMOVED_SYNTAX_ERROR: print("1. Request  ->  ExecutionEngineFactory (user context created)")
+                            # REMOVED_SYNTAX_ERROR: print("2. Factory  ->  WebSocketBridgeFactory (per-user emitter)")
+                            # REMOVED_SYNTAX_ERROR: print("3. Factory  ->  UserWebSocketEmitter (complete isolation)")
+                            # REMOVED_SYNTAX_ERROR: print("4. Emitter  ->  UserWebSocketConnection (user-specific)")
+                            # REMOVED_SYNTAX_ERROR: print("5. Connection  ->  User WebSocket (isolated delivery)")
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: 📡 CRITICAL EVENTS VALIDATED:")
+                            # REMOVED_SYNTAX_ERROR: [U+1F4E1] CRITICAL EVENTS VALIDATED:")
                             # REMOVED_SYNTAX_ERROR: required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
                             # REMOVED_SYNTAX_ERROR: for i, event_type in enumerate(required_events, 1):
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: 🔐 USER ISOLATION VERIFIED:")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ Per-user execution context")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ Per-user WebSocket emitter")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ Per-user event queue")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ No shared state")
+                                # REMOVED_SYNTAX_ERROR: [U+1F510] USER ISOLATION VERIFIED:")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  Per-user execution context")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  Per-user WebSocket emitter")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  Per-user event queue")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  No shared state")
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: 🎯 JSON SERIALIZATION VALIDATED:")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ All events serialize to JSON")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ All events deserialize correctly")
-                                # REMOVED_SYNTAX_ERROR: print("  ✅ No data loss in serialization")
+                                # REMOVED_SYNTAX_ERROR:  TARGET:  JSON SERIALIZATION VALIDATED:")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  All events serialize to JSON")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  All events deserialize correctly")
+                                # REMOVED_SYNTAX_ERROR: print("   PASS:  No data loss in serialization")
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: ✅ FACTORY-BASED FLOW COMPLETELY PROVEN!")
+                                # REMOVED_SYNTAX_ERROR:  PASS:  FACTORY-BASED FLOW COMPLETELY PROVEN!")
                                 # REMOVED_SYNTAX_ERROR: print("="*70)
 
 # REMOVED_SYNTAX_ERROR: def test_factory_user_isolation(self):
@@ -279,7 +280,7 @@
                 # REMOVED_SYNTAX_ERROR: self.assertEqual(event['thread_id'], thread2_id)
                 # REMOVED_SYNTAX_ERROR: self.assertIn('Agent2', str(event['data']))
 
-                # REMOVED_SYNTAX_ERROR: print("✅ Complete user isolation verified")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Complete user isolation verified")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -352,13 +353,13 @@
                                                                 # Report results
                                                                 # REMOVED_SYNTAX_ERROR: if missing_components:
                                                                     # REMOVED_SYNTAX_ERROR: print(" )
-                                                                    # REMOVED_SYNTAX_ERROR: ⚠️ MISSING FACTORY COMPONENTS DETECTED:")
+                                                                    # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] MISSING FACTORY COMPONENTS DETECTED:")
                                                                     # REMOVED_SYNTAX_ERROR: for issue in missing_components:
                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                         # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
                                                                         # REMOVED_SYNTAX_ERROR: else:
                                                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                                                            # REMOVED_SYNTAX_ERROR: ✅ ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!")
+                                                                            # REMOVED_SYNTAX_ERROR:  PASS:  ALL FACTORY COMPONENTS VERIFIED - Complete factory pattern available!")
 
 # REMOVED_SYNTAX_ERROR: def test_websocket_event_json_serialization_comprehensive(self):
     # REMOVED_SYNTAX_ERROR: """CRITICAL: Comprehensive JSON serialization test for all event types."""
@@ -446,7 +447,7 @@
                 # REMOVED_SYNTAX_ERROR: self.fail("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: ✅ ALL EVENT TYPES JSON SERIALIZATION VERIFIED")
+                # REMOVED_SYNTAX_ERROR:  PASS:  ALL EVENT TYPES JSON SERIALIZATION VERIFIED")
 
 # REMOVED_SYNTAX_ERROR: def _create_mock_connection_pool(self):
     # REMOVED_SYNTAX_ERROR: """Create mock connection pool for testing."""

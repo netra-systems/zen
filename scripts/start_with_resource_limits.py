@@ -34,12 +34,12 @@ class ResourceLimitedContainerStarter:
                     timeout=2
                 )
                 if result.returncode == 0:
-                    print(f"✅ Found container runtime: {cmd}")
+                    print(f" PASS:  Found container runtime: {cmd}")
                     return cmd
             except:
                 continue
         
-        print("❌ No container runtime (Docker/Podman) found!")
+        print(" FAIL:  No container runtime (Docker/Podman) found!")
         print("\nPlease install one of:")
         print("  - Docker Desktop: https://docs.docker.com/desktop/")
         print("  - Podman: https://podman.io/getting-started/installation")
@@ -66,7 +66,7 @@ class ResourceLimitedContainerStarter:
     
     def cleanup_old_containers(self):
         """Clean up any existing containers to free resources"""
-        print("\n🧹 Cleaning up old containers...")
+        print("\n[U+1F9F9] Cleaning up old containers...")
         
         # Stop existing containers
         cmd = self.compose_tool + ['-f', str(self.compose_file), 'down', '--volumes']
@@ -82,73 +82,73 @@ class ResourceLimitedContainerStarter:
             subprocess.run(['docker', 'system', 'prune', '-f'], capture_output=True)
             subprocess.run(['docker', 'volume', 'prune', '-f'], capture_output=True)
         
-        print("✅ Cleanup complete")
+        print(" PASS:  Cleanup complete")
     
     def check_wsl_memory(self):
         """Check WSL2 memory configuration on Windows"""
         if platform.system() != "Windows":
             return
         
-        print("\n🖥️ Checking WSL2 configuration...")
+        print("\n[U+1F5A5][U+FE0F] Checking WSL2 configuration...")
         
         # Check if .wslconfig exists
         wslconfig_path = Path.home() / '.wslconfig'
         if not wslconfig_path.exists():
-            print("⚠️  WARNING: .wslconfig not found!")
+            print(" WARNING: [U+FE0F]  WARNING: .wslconfig not found!")
             print(f"   Copy .wslconfig from project to: {wslconfig_path}")
             print("   Then run: wsl --shutdown")
             response = input("\nContinue anyway? (y/n): ")
             if response.lower() != 'y':
                 sys.exit(1)
         else:
-            print("✅ .wslconfig found")
+            print(" PASS:  .wslconfig found")
     
     def start_containers_staged(self):
         """Start containers in stages to prevent resource spikes"""
-        print("\n🚀 Starting containers with resource limits...")
+        print("\n[U+1F680] Starting containers with resource limits...")
         print(f"   Using: {self.runtime}")
         print(f"   Compose file: {self.compose_file}")
         
         # Stage 1: Infrastructure (PostgreSQL, Redis)
-        print("\n📦 Stage 1: Starting infrastructure services...")
+        print("\n[U+1F4E6] Stage 1: Starting infrastructure services...")
         services_stage1 = ['postgres', 'redis']
         cmd = self.compose_tool + ['-f', str(self.compose_file), 'up', '-d'] + services_stage1
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to start infrastructure: {result.stderr}")
+            print(f" FAIL:  Failed to start infrastructure: {result.stderr}")
             return False
         
         print("   Waiting for infrastructure to be ready...")
         time.sleep(10)
         
         # Stage 2: Auth service
-        print("\n📦 Stage 2: Starting auth service...")
+        print("\n[U+1F4E6] Stage 2: Starting auth service...")
         cmd = self.compose_tool + ['-f', str(self.compose_file), 'up', '-d', 'auth']
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to start auth: {result.stderr}")
+            print(f" FAIL:  Failed to start auth: {result.stderr}")
             return False
         
         print("   Waiting for auth to be ready...")
         time.sleep(10)
         
         # Stage 3: Backend service
-        print("\n📦 Stage 3: Starting backend service...")
+        print("\n[U+1F4E6] Stage 3: Starting backend service...")
         cmd = self.compose_tool + ['-f', str(self.compose_file), 'up', '-d', 'backend']
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to start backend: {result.stderr}")
+            print(f" FAIL:  Failed to start backend: {result.stderr}")
             return False
         
-        print("\n✅ All core services started successfully!")
+        print("\n PASS:  All core services started successfully!")
         return True
     
     def check_container_health(self):
         """Check health status of running containers"""
-        print("\n🔍 Checking container health...")
+        print("\n SEARCH:  Checking container health...")
         
         if self.runtime == 'podman':
             cmd = ['podman', 'ps', '--format', 'json']
@@ -164,21 +164,21 @@ class ResourceLimitedContainerStarter:
                     if line:
                         containers.append(json.loads(line))
                 
-                print(f"\n📊 Running containers: {len(containers)}")
+                print(f"\n CHART:  Running containers: {len(containers)}")
                 for container in containers:
                     name = container.get('Names', 'unknown')
                     status = container.get('Status', 'unknown')
-                    print(f"   • {name}: {status}")
+                    print(f"   [U+2022] {name}: {status}")
                 
                 return len(containers) > 0
         except Exception as e:
-            print(f"⚠️  Could not check health: {e}")
+            print(f" WARNING: [U+FE0F]  Could not check health: {e}")
         
         return False
     
     def show_resource_usage(self):
         """Display current resource usage"""
-        print("\n📈 Current resource usage:")
+        print("\n[U+1F4C8] Current resource usage:")
         
         if self.runtime == 'podman':
             cmd = ['podman', 'stats', '--no-stream']
@@ -190,9 +190,9 @@ class ResourceLimitedContainerStarter:
             if result.returncode == 0:
                 print(result.stdout)
             else:
-                print("⚠️  Could not get resource stats")
+                print(" WARNING: [U+FE0F]  Could not get resource stats")
         except:
-            print("⚠️  Stats command timed out")
+            print(" WARNING: [U+FE0F]  Stats command timed out")
     
     def run(self):
         """Main execution flow"""
@@ -208,11 +208,11 @@ class ResourceLimitedContainerStarter:
         
         # Start containers with staging
         if not self.start_containers_staged():
-            print("\n❌ Failed to start containers")
+            print("\n FAIL:  Failed to start containers")
             sys.exit(1)
         
         # Wait a bit for stabilization
-        print("\n⏳ Waiting for services to stabilize...")
+        print("\n[U+23F3] Waiting for services to stabilize...")
         time.sleep(5)
         
         # Check health
@@ -221,7 +221,7 @@ class ResourceLimitedContainerStarter:
             self.show_resource_usage()
             
             print("\n" + "="*60)
-            print("✅ CONTAINERS STARTED SUCCESSFULLY")
+            print(" PASS:  CONTAINERS STARTED SUCCESSFULLY")
             print("="*60)
             print("\nNext steps:")
             print("  1. Monitor resources: python scripts/monitor_docker_resources.py")
@@ -231,7 +231,7 @@ class ResourceLimitedContainerStarter:
             print("     - Auth: http://localhost:8081")
             print("     - Frontend: http://localhost:3000 (if started)")
         else:
-            print("\n⚠️  Some containers may not be healthy")
+            print("\n WARNING: [U+FE0F]  Some containers may not be healthy")
             print("Check logs for details")
 
 
@@ -240,10 +240,10 @@ def main():
         starter = ResourceLimitedContainerStarter()
         starter.run()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Startup cancelled by user")
+        print("\n\n WARNING: [U+FE0F]  Startup cancelled by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n FAIL:  Error: {e}")
         sys.exit(1)
 
 

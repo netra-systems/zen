@@ -58,7 +58,7 @@ class MockWebSocket:
 
 async def test_5_concurrent_users_under_2s():
     """Test 5 concurrent users with <2s response time requirement."""
-    print("🔄 Testing 5 concurrent users with <2s response time...")
+    print(" CYCLE:  Testing 5 concurrent users with <2s response time...")
     
     manager = WebSocketManager()
     users = [f"perf_user_{i}" for i in range(5)]
@@ -76,7 +76,7 @@ async def test_5_concurrent_users_under_2s():
             conn_id = await manager.connect_user(user_id, websocket)
             connection_ids.append(conn_id)
         except Exception as e:
-            print(f"❌ Failed to connect {user_id}: {e}")
+            print(f" FAIL:  Failed to connect {user_id}: {e}")
             return False
     
     connection_time = time.time() - connection_start
@@ -111,14 +111,14 @@ async def test_5_concurrent_users_under_2s():
     
     print(f"   Total send time: {total_send_time:.3f}s (requirement: <2s)")
     print(f"   Successful sends: {successful_sends}/5")
-    print(f"   ✅ Response time requirement: {'MET' if response_time_ok else 'NOT MET'}")
+    print(f"    PASS:  Response time requirement: {'MET' if response_time_ok else 'NOT MET'}")
     
     return response_time_ok and successful_sends >= 4  # Allow 1 failure
 
 
 async def test_connection_recovery_under_5s():
     """Test connection recovery within 5 seconds."""
-    print("🔄 Testing connection recovery within 5s...")
+    print(" CYCLE:  Testing connection recovery within 5s...")
     
     # Test optimized reconnection configuration
     config = ReconnectionConfig(
@@ -157,14 +157,14 @@ async def test_connection_recovery_under_5s():
     print(f"   Recovery time: {recovery_time:.3f}s (requirement: <5s)")
     print(f"   Recovery successful: {recovery_successful}")
     print(f"   Attempts made: {handler.get_attempts()}")
-    print(f"   ✅ Recovery requirement: {'MET' if recovery_within_requirement else 'NOT MET'}")
+    print(f"    PASS:  Recovery requirement: {'MET' if recovery_within_requirement else 'NOT MET'}")
     
     return recovery_within_requirement and recovery_successful
 
 
 async def test_zero_message_loss():
     """Test zero message loss for critical messages."""
-    print("🔄 Testing zero message loss for critical messages...")
+    print(" CYCLE:  Testing zero message loss for critical messages...")
     
     from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuffer
     
@@ -190,7 +190,7 @@ async def test_zero_message_loss():
         
         success = await buffer.buffer_message(user_id, msg, BufferPriority.CRITICAL)
         if not success:
-            print(f"❌ Failed to buffer critical message {i}")
+            print(f" FAIL:  Failed to buffer critical message {i}")
     
     # Try to overflow buffer with non-critical messages
     non_critical_buffered = 0
@@ -217,14 +217,14 @@ async def test_zero_message_loss():
     print(f"   Critical messages sent: {len(critical_messages)}")
     print(f"   Critical messages preserved: {critical_preserved}")
     print(f"   Non-critical messages buffered: {non_critical_buffered}")
-    print(f"   ✅ Zero loss for critical: {'ACHIEVED' if zero_loss_achieved else 'NOT ACHIEVED'}")
+    print(f"    PASS:  Zero loss for critical: {'ACHIEVED' if zero_loss_achieved else 'NOT ACHIEVED'}")
     
     return zero_loss_achieved
 
 
 async def test_websocket_event_confirmation():
     """Test WebSocket event delivery confirmation."""
-    print("🔄 Testing WebSocket event delivery confirmation...")
+    print(" CYCLE:  Testing WebSocket event delivery confirmation...")
     
     manager = WebSocketManager()
     user_id = "confirmation_test_user"
@@ -266,19 +266,19 @@ async def test_websocket_event_confirmation():
         print(f"   Successful sends: {successful_sends}")
         print(f"   Confirmation tests: {confirmation_tests}")
         print(f"   Confirmation rate: {confirmation_rate:.1%}")
-        print(f"   ✅ Event confirmation: {'WORKING' if events_working else 'NOT WORKING'}")
+        print(f"    PASS:  Event confirmation: {'WORKING' if events_working else 'NOT WORKING'}")
         
         return events_working
     
     except Exception as e:
-        print(f"❌ Event confirmation test failed: {e}")
+        print(f" FAIL:  Event confirmation test failed: {e}")
         return False
 
 
 async def run_performance_validation():
     """Run comprehensive performance validation."""
     print("="*80)
-    print("🚀 WebSocket Infrastructure Performance Validation")
+    print("[U+1F680] WebSocket Infrastructure Performance Validation")
     print("="*80)
     
     results = {}
@@ -305,29 +305,29 @@ async def run_performance_validation():
     
     # Overall results
     print("="*80)
-    print("📊 PERFORMANCE VALIDATION RESULTS")
+    print(" CHART:  PERFORMANCE VALIDATION RESULTS")
     print("="*80)
     
     all_passed = all(results.values())
     
-    status_icon = "✅" if test1_result else "❌"
+    status_icon = " PASS: " if test1_result else " FAIL: "
     print(f"{status_icon} 5 concurrent users with <2s response times: {'PASS' if test1_result else 'FAIL'}")
     
-    status_icon = "✅" if test2_result else "❌"
+    status_icon = " PASS: " if test2_result else " FAIL: "
     print(f"{status_icon} Connection recovery within 5 seconds: {'PASS' if test2_result else 'FAIL'}")
     
-    status_icon = "✅" if test3_result else "❌"
+    status_icon = " PASS: " if test3_result else " FAIL: "
     print(f"{status_icon} Zero message loss during normal operation: {'PASS' if test3_result else 'FAIL'}")
     
-    status_icon = "✅" if test4_result else "❌"
+    status_icon = " PASS: " if test4_result else " FAIL: "
     print(f"{status_icon} All WebSocket events fire correctly: {'PASS' if test4_result else 'FAIL'}")
     
     print("="*80)
     if all_passed:
-        print("🎉 ALL PERFORMANCE REQUIREMENTS VALIDATED SUCCESSFULLY!")
+        print(" CELEBRATION:  ALL PERFORMANCE REQUIREMENTS VALIDATED SUCCESSFULLY!")
         print("   WebSocket infrastructure is ready for production use.")
     else:
-        print("⚠️  Some performance requirements were not met.")
+        print(" WARNING: [U+FE0F]  Some performance requirements were not met.")
         print("   Additional optimization may be required.")
     print("="*80)
     
@@ -343,7 +343,7 @@ if __name__ == "__main__":
         sys.exit(0 if all_passed else 1)
         
     except Exception as e:
-        print(f"❌ Performance validation failed with error: {e}")
+        print(f" FAIL:  Performance validation failed with error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

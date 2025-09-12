@@ -314,9 +314,9 @@ def main():
     )
     
     if result.returncode == 0:
-        print("✓ Sample tests passing after fixes!")
+        print("[U+2713] Sample tests passing after fixes!")
     else:
-        print("✗ Some tests still failing - manual intervention needed")
+        print("[U+2717] Some tests still failing - manual intervention needed")
     
     return 0
 

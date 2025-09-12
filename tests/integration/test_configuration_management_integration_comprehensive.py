@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core infrastructure reliability enables scalable multi-tenant platform
 
 CRITICAL: These tests validate the configuration architecture per CLAUDE.md requirements:
-- Configuration SSOT ≠ Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) are NOT duplicates
+- Configuration SSOT  !=  Code SSOT: Environment-specific configs (TEST/DEV/STAGING/PROD) are NOT duplicates
 - NEVER delete config without dependency checking - Missing config causes cascade failures
 - Each environment needs INDEPENDENT config - Test/staging/prod MUST have separate configs
 - SILENT FAILURES = ABOMINATION - Hard failures better than wrong environment configs leaking
@@ -256,7 +256,7 @@ FRONTEND_URL=http://localhost:3000
                 
                 self._config_metrics.config_load_time = time.time() - start_time
                 
-                logger.info("✓ Configuration loading from multiple sources works correctly")
+                logger.info("[U+2713] Configuration loading from multiple sources works correctly")
                 
         finally:
             # Cleanup temp file
@@ -342,7 +342,7 @@ FRONTEND_URL=http://localhost:3000
                     self._config_metrics.validation_errors.extend(result.errors)
                     self._config_metrics.validation_warnings.extend(result.warnings)
                     
-                    logger.info(f"✓ Environment-specific validation passed for {env_name}")
+                    logger.info(f"[U+2713] Environment-specific validation passed for {env_name}")
                     
                 except Exception as e:
                     pytest.fail(f"Configuration validation failed for {env_name}: {e}")
@@ -415,7 +415,7 @@ TEST_OVERRIDE_3=override_value_3
                 # Verify configuration object respects precedence
                 assert config is not None
                 
-                logger.info("✓ Configuration merging and precedence working correctly")
+                logger.info("[U+2713] Configuration merging and precedence working correctly")
                 
         finally:
             base_env_file.unlink()
@@ -518,7 +518,7 @@ TEST_OVERRIDE_3=override_value_3
                         assert keyword.lower() in message_text, \
                             f"Expected keyword '{keyword}' in error messages for {scenario['name']}"
                 
-                logger.info(f"✓ Scenario {scenario['name']}: {len(result.errors)} errors, {len(result.warnings)} warnings")
+                logger.info(f"[U+2713] Scenario {scenario['name']}: {len(result.errors)} errors, {len(result.warnings)} warnings")
 
     @pytest.mark.integration
     def test_dynamic_configuration_reload_capabilities(self):
@@ -580,7 +580,7 @@ TEST_OVERRIDE_3=override_value_3
             assert "updated_host" in updated_db_url
             assert env.get("TEST_RELOAD_VAR") == "updated_value"
             
-            logger.info("✓ Dynamic configuration reload works correctly")
+            logger.info("[U+2713] Dynamic configuration reload works correctly")
 
     @pytest.mark.integration
     def test_configuration_schema_validation(self):
@@ -643,7 +643,7 @@ TEST_OVERRIDE_3=override_value_3
             assert "test_user" in db_url
             assert "test_db" in db_url
             
-            logger.info("✓ Configuration schema validation works correctly")
+            logger.info("[U+2713] Configuration schema validation works correctly")
 
     @pytest.mark.integration
     def test_secret_management_and_secure_config_handling(self):
@@ -708,7 +708,7 @@ TEST_OVERRIDE_3=override_value_3
             secret_errors = [error for error in result.errors if "secret" in error.lower()]
             assert len(secret_errors) == 0, f"Unexpected secret validation errors: {secret_errors}"
             
-            logger.info("✓ Secret management and secure config handling works correctly")
+            logger.info("[U+2713] Secret management and secure config handling works correctly")
 
     @pytest.mark.integration
     def test_configuration_templating_and_substitution(self):
@@ -778,7 +778,7 @@ TEST_OVERRIDE_3=override_value_3
             assert "psycopg2" in sync_url or "psycopg" in sync_url
             assert "asyncpg" in async_url
             
-            logger.info("✓ Configuration templating and substitution works correctly")
+            logger.info("[U+2713] Configuration templating and substitution works correctly")
 
     @pytest.mark.integration
     def test_cross_service_configuration_consistency(self):
@@ -848,7 +848,7 @@ TEST_OVERRIDE_3=override_value_3
             assert type(config_1) == type(config_2)
             assert config_1.jwt_secret_key == config_2.jwt_secret_key
             
-            logger.info("✓ Cross-service configuration consistency maintained")
+            logger.info("[U+2713] Cross-service configuration consistency maintained")
 
     @pytest.mark.integration 
     def test_configuration_caching_and_performance(self):
@@ -930,7 +930,7 @@ TEST_OVERRIDE_3=override_value_3
             self.record_metric("cached_load_time_ms", cached_load_time * 1000)
             self.record_metric("url_generation_time_ms", batch_generation_time * 1000)
             
-            logger.info(f"✓ Configuration caching performance: First={first_load_time*1000:.1f}ms, Cached={cached_load_time*1000:.1f}ms")
+            logger.info(f"[U+2713] Configuration caching performance: First={first_load_time*1000:.1f}ms, Cached={cached_load_time*1000:.1f}ms")
 
     @pytest.mark.integration
     def test_configuration_drift_detection(self):
@@ -1009,7 +1009,7 @@ TEST_OVERRIDE_3=override_value_3
             assert drifted_values["environment"] != baseline_values["environment"], "Environments should be different"
             assert drifted_values["service_secret"] != baseline_values["service_secret"], "Service secrets should be different"
             
-            logger.info(f"✓ Configuration drift detected: {drift_detected}")
+            logger.info(f"[U+2713] Configuration drift detected: {drift_detected}")
 
     @pytest.mark.integration
     def test_configuration_inheritance_patterns(self):
@@ -1079,7 +1079,7 @@ TEST_OVERRIDE_3=override_value_3
             for env_name, results in inheritance_results.items():
                 assert results["database_host"] is not None, f"{env_name} config should have database_host"
                 
-            logger.info("✓ Configuration inheritance patterns work correctly")
+            logger.info("[U+2713] Configuration inheritance patterns work correctly")
 
     @pytest.mark.integration
     def test_runtime_configuration_updates(self):
@@ -1166,7 +1166,7 @@ TEST_OVERRIDE_3=override_value_3
                     expected_host = scenario['updates'].get("POSTGRES_HOST", env.get("POSTGRES_HOST"))
                     assert expected_host in updated_db_url
                 
-                logger.info(f"✓ Runtime update scenario {scenario['name']} completed successfully")
+                logger.info(f"[U+2713] Runtime update scenario {scenario['name']} completed successfully")
 
     @pytest.mark.integration  
     def test_configuration_dependency_resolution(self):
@@ -1278,7 +1278,7 @@ TEST_OVERRIDE_3=override_value_3
             assert "test_password_123" in db_url  # PASSWORD dependency
             assert "test_db" in db_url  # DB dependency
             
-            logger.info(f"✓ Configuration dependency resolution completed in {iterations} iterations")
+            logger.info(f"[U+2713] Configuration dependency resolution completed in {iterations} iterations")
 
     # ===== PERFORMANCE AND STRESS TESTS =====
 
@@ -1406,7 +1406,7 @@ TEST_OVERRIDE_3=override_value_3
             self.record_metric("avg_db_url_time_ms", avg_db_url_time * 1000)
             self.record_metric("avg_jwt_time_ms", avg_jwt_time * 1000)
             
-            logger.info(f"✓ Performance under load: {operations_per_second:.1f} ops/sec, config={avg_config_time*1000:.1f}ms")
+            logger.info(f"[U+2713] Performance under load: {operations_per_second:.1f} ops/sec, config={avg_config_time*1000:.1f}ms")
 
     @pytest.mark.integration
     def test_configuration_memory_usage_and_cleanup(self):
@@ -1509,7 +1509,7 @@ TEST_OVERRIDE_3=override_value_3
             self.record_metric("remaining_objects_after_cleanup", remaining_growth)
             self.record_metric("cache_memory_growth", cache_growth)
             
-            logger.info(f"✓ Memory management: {memory_growth} peak growth, {remaining_growth} remaining after cleanup")
+            logger.info(f"[U+2713] Memory management: {memory_growth} peak growth, {remaining_growth} remaining after cleanup")
 
 
 if __name__ == "__main__":

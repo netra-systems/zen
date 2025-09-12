@@ -384,7 +384,7 @@ def main():
         )
         print("\nBatch Results:")
         for file_path, success in results.items():
-            status = "✓" if success else "✗"
+            status = "[U+2713]" if success else "[U+2717]"
             print(f"  {status} {file_path}")
     
     else:

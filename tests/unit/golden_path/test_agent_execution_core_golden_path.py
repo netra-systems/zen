@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Comprehensive Unit Tests for Agent Execution Core in Golden Path
 
@@ -5,7 +43,7 @@ Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
 - Business Goal: Ensure reliable agent execution delivering $500K+ ARR
 - Value Impact: Validates core agent execution logic that drives chat functionality
-- Strategic Impact: Protects primary revenue-generating user flow "users login → get AI responses"
+- Strategic Impact: Protects primary revenue-generating user flow "users login  ->  get AI responses"
 
 This test suite validates the agent execution core components that power the golden path:
 - SupervisorAgent orchestration and workflow management
@@ -141,7 +179,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         supervisor.websocket_bridge = mock_bridge
         assert supervisor.websocket_bridge == mock_bridge
         
-        logger.info("✅ SupervisorAgent initialization validation passed")
+        logger.info(" PASS:  SupervisorAgent initialization validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -208,7 +246,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         assert retrieved_data1["message"] == "user1_message"
         assert retrieved_data2["message"] == "user2_message"
         
-        logger.info("✅ ExecutionEngineFactory user isolation validation passed")
+        logger.info(" PASS:  ExecutionEngineFactory user isolation validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -271,7 +309,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
             assert actual_new == expected_new, f"Transition {i}: expected new state {expected_new}, got {actual_new}"
             assert isinstance(timestamp, datetime), f"Transition {i}: timestamp should be datetime"
         
-        logger.info("✅ Agent state management validation passed")
+        logger.info(" PASS:  Agent state management validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -338,7 +376,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         # Verify LLM was called
         assert "llm_call" in execution_steps, "LLM should be called during execution"
         
-        logger.info(f"✅ Agent execution workflow validation passed: {execution_time:.3f}s")
+        logger.info(f" PASS:  Agent execution workflow validation passed: {execution_time:.3f}s")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -400,7 +438,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         recovery_state = supervisor.get_current_state()
         assert recovery_state != AgentState.ERROR, f"Agent should recover from error state, got {recovery_state}"
         
-        logger.info("✅ Agent error handling and recovery validation passed")
+        logger.info(" PASS:  Agent error handling and recovery validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -472,7 +510,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         # Agent may be in PROCESSING or ERROR state after timeout
         assert timeout_state in [AgentState.PROCESSING, AgentState.ERROR], f"Unexpected state after timeout: {timeout_state}"
         
-        logger.info(f"✅ Agent performance and timeout validation passed: {execution_time:.3f}s")
+        logger.info(f" PASS:  Agent performance and timeout validation passed: {execution_time:.3f}s")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -566,7 +604,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         # Verify all test cases produced results
         assert len(results) == len(test_cases), "All test cases should produce results"
         
-        logger.info(f"✅ Execution result format validation passed: {len(results)} formats tested")
+        logger.info(f" PASS:  Execution result format validation passed: {len(results)} formats tested")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -628,7 +666,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         # Cleanup context2
         await context_manager.cleanup_user_context(context2.user_id)
         
-        logger.info("✅ UserContextManager integration validation passed")
+        logger.info(" PASS:  UserContextManager integration validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path
@@ -733,7 +771,7 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         assert error_info is not None, "Error info should be recorded"
         assert "Test error for tracking" in str(error_info), "Error message should be recorded"
         
-        logger.info("✅ Execution tracker integration validation passed")
+        logger.info(" PASS:  Execution tracker integration validation passed")
 
     def teardown_method(self, method):
         """Cleanup after tests."""

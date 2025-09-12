@@ -36,7 +36,7 @@ class StagingWebSocketValidator:
 
     async def validate_service_health(self) -> Dict[str, Any]:
         """Validate all services are healthy and responsive."""
-        logger.info("🏥 Validating service health...")
+        logger.info("[U+1F3E5] Validating service health...")
         services = {
             "backend": f"{self.backend_url}/health",
             "auth": f"{self.auth_url}/health", 
@@ -57,7 +57,7 @@ class StagingWebSocketValidator:
                         "response_time_ms": round(response_time * 1000, 2),
                         "url": url
                     }
-                    logger.info(f"✅ {service}: {response.status_code} ({health_results[service]['response_time_ms']}ms)")
+                    logger.info(f" PASS:  {service}: {response.status_code} ({health_results[service]['response_time_ms']}ms)")
                     
                 except Exception as e:
                     health_results[service] = {
@@ -66,14 +66,14 @@ class StagingWebSocketValidator:
                         "error": str(e),
                         "url": url
                     }
-                    logger.error(f"❌ {service}: {e}")
+                    logger.error(f" FAIL:  {service}: {e}")
         
         self.results["deployment_validation"] = health_results
         return health_results
 
     async def test_websocket_connection(self) -> Dict[str, Any]:
         """Test WebSocket connection and check for Error 1011."""
-        logger.info("🔌 Testing WebSocket connection...")
+        logger.info("[U+1F50C] Testing WebSocket connection...")
         websocket_results = {
             "connection_successful": False,
             "error_1011_detected": False,
@@ -96,7 +96,7 @@ class StagingWebSocketValidator:
                 websocket_results["connection_time_ms"] = round(connection_time * 1000, 2)
                 websocket_results["connection_successful"] = True
                 
-                logger.info(f"✅ WebSocket connected successfully ({websocket_results['connection_time_ms']}ms)")
+                logger.info(f" PASS:  WebSocket connected successfully ({websocket_results['connection_time_ms']}ms)")
                 
                 # Send a test message
                 test_message = {
@@ -106,14 +106,14 @@ class StagingWebSocketValidator:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.info("📤 Test message sent")
+                logger.info("[U+1F4E4] Test message sent")
                 
                 # Wait for response or timeout
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    logger.info(f"📥 Response received: {response[:200]}...")
+                    logger.info(f"[U+1F4E5] Response received: {response[:200]}...")
                 except asyncio.TimeoutError:
-                    logger.info("⏱️ No response within 5 seconds (expected for test message)")
+                    logger.info("[U+23F1][U+FE0F] No response within 5 seconds (expected for test message)")
 
         except websockets.exceptions.ConnectionClosedError as e:
             websocket_results["close_code"] = e.code
@@ -123,20 +123,20 @@ class StagingWebSocketValidator:
             # Check specifically for Error 1011
             if e.code == 1011:
                 websocket_results["error_1011_detected"] = True
-                logger.error(f"🚨 ERROR 1011 DETECTED: {e.reason}")
+                logger.error(f" ALERT:  ERROR 1011 DETECTED: {e.reason}")
             else:
-                logger.info(f"⚠️ Connection closed with code {e.code}: {e.reason}")
+                logger.info(f" WARNING: [U+FE0F] Connection closed with code {e.code}: {e.reason}")
                 
         except Exception as e:
             websocket_results["errors"].append(str(e))
-            logger.error(f"❌ WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  WebSocket connection failed: {e}")
 
         self.results["websocket_validation"] = websocket_results
         return websocket_results
 
     async def test_golden_path(self) -> Dict[str, Any]:
         """Test basic golden path functionality."""
-        logger.info("🌟 Testing Golden Path functionality...")
+        logger.info("[U+1F31F] Testing Golden Path functionality...")
         golden_path_results = {
             "login_flow": False,
             "api_access": False,
@@ -150,17 +150,17 @@ class StagingWebSocketValidator:
                 try:
                     response = await client.get(f"{self.backend_url}/api/mcp/servers")
                     golden_path_results["api_access"] = response.status_code in [200, 401, 403]  # Any reasonable response
-                    logger.info(f"✅ API access test: {response.status_code}")
+                    logger.info(f" PASS:  API access test: {response.status_code}")
                 except Exception as e:
-                    logger.error(f"❌ API access failed: {e}")
+                    logger.error(f" FAIL:  API access failed: {e}")
 
                 # Test auth service
                 try:
                     response = await client.get(f"{self.auth_url}/health")
                     auth_healthy = response.status_code == 200
-                    logger.info(f"✅ Auth service: {response.status_code}")
+                    logger.info(f" PASS:  Auth service: {response.status_code}")
                 except Exception as e:
-                    logger.error(f"❌ Auth service failed: {e}")
+                    logger.error(f" FAIL:  Auth service failed: {e}")
                     auth_healthy = False
 
                 # WebSocket readiness already tested above
@@ -173,14 +173,14 @@ class StagingWebSocketValidator:
                 )
 
         except Exception as e:
-            logger.error(f"❌ Golden path test failed: {e}")
+            logger.error(f" FAIL:  Golden path test failed: {e}")
 
         self.results["golden_path_validation"] = golden_path_results
         return golden_path_results
 
     async def check_error_1011_in_logs(self) -> Dict[str, Any]:
         """Check if Error 1011 appears in recent logs (simulation)."""
-        logger.info("📋 Checking Error 1011 status...")
+        logger.info("[U+1F4CB] Checking Error 1011 status...")
         
         # Based on our log analysis above, we know there are no 1011 errors
         error_1011_results = {
@@ -195,7 +195,7 @@ class StagingWebSocketValidator:
 
     async def run_full_validation(self) -> Dict[str, Any]:
         """Run complete staging validation suite."""
-        logger.info("🚀 Starting Staging WebSocket Error 1011 Validation...")
+        logger.info("[U+1F680] Starting Staging WebSocket Error 1011 Validation...")
         logger.info("=" * 80)
 
         # Run all validations
@@ -211,26 +211,26 @@ class StagingWebSocketValidator:
     def generate_summary(self):
         """Generate validation summary."""
         logger.info("=" * 80)
-        logger.info("📊 STAGING VALIDATION SUMMARY")
+        logger.info(" CHART:  STAGING VALIDATION SUMMARY")
         logger.info("=" * 80)
 
         # Service Health
         health = self.results["deployment_validation"]
         healthy_services = sum(1 for s in health.values() if s.get("healthy", False))
-        logger.info(f"🏥 Service Health: {healthy_services}/{len(health)} services healthy")
+        logger.info(f"[U+1F3E5] Service Health: {healthy_services}/{len(health)} services healthy")
 
         # WebSocket Status
         websocket = self.results["websocket_validation"]
         connection_success = websocket.get("connection_successful", False)
         error_1011 = websocket.get("error_1011_detected", False)
         
-        logger.info(f"🔌 WebSocket Connection: {'✅ SUCCESS' if connection_success else '❌ FAILED'}")
-        logger.info(f"🚨 Error 1011 Status: {'❌ DETECTED' if error_1011 else '✅ NOT FOUND'}")
+        logger.info(f"[U+1F50C] WebSocket Connection: {' PASS:  SUCCESS' if connection_success else ' FAIL:  FAILED'}")
+        logger.info(f" ALERT:  Error 1011 Status: {' FAIL:  DETECTED' if error_1011 else ' PASS:  NOT FOUND'}")
 
         # Golden Path
         golden_path = self.results["golden_path_validation"]
         golden_path_success = golden_path.get("overall_success", False)
-        logger.info(f"🌟 Golden Path: {'✅ SUCCESS' if golden_path_success else '❌ ISSUES DETECTED'}")
+        logger.info(f"[U+1F31F] Golden Path: {' PASS:  SUCCESS' if golden_path_success else ' FAIL:  ISSUES DETECTED'}")
 
         # Overall Status
         overall_success = (
@@ -241,7 +241,7 @@ class StagingWebSocketValidator:
         )
 
         logger.info("=" * 80)
-        logger.info(f"🏆 OVERALL STATUS: {'✅ VALIDATION PASSED' if overall_success else '❌ VALIDATION FAILED'}")
+        logger.info(f" TROPHY:  OVERALL STATUS: {' PASS:  VALIDATION PASSED' if overall_success else ' FAIL:  VALIDATION FAILED'}")
         logger.info("=" * 80)
 
         # Add overall status to results
@@ -260,13 +260,13 @@ async def main():
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2)
         
-        logger.info(f"💾 Results saved to: {results_file}")
+        logger.info(f"[U+1F4BE] Results saved to: {results_file}")
         
         # Exit with appropriate code
         sys.exit(0 if results.get("overall_validation_success", False) else 1)
         
     except Exception as e:
-        logger.error(f"💥 Validation failed with error: {e}")
+        logger.error(f"[U+1F4A5] Validation failed with error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
