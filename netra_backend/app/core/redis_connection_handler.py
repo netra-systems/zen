@@ -122,7 +122,9 @@ class RedisConnectionHandler:
         """Get Redis client with proper connection configuration."""
         try:
             pool = self.create_connection_pool()
-            client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool, decode_responses=True)
+            # Use synchronous redis client since this function is not async
+            from netra_backend.app.services.redis_client import get_redis_client_sync
+            client = get_redis_client_sync()  # FIXED: Use sync version instead of await
             
             # Test connection
             client.ping()
