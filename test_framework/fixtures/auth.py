@@ -201,6 +201,20 @@ def create_real_jwt_token(user_id: str, permissions: List[str], email: Optional[
     
     CRITICAL: Creates valid JWT tokens for Golden Path testing.
     Enables end-to-end authentication validation without mocking.
+    
+    Args:
+        user_id: User identifier for the JWT subject
+        permissions: List of permissions to include in the token
+        email: User email (optional, defaults to {user_id}@test.netra.ai)
+        expires_in: Token expiration in seconds (default: 3600)
+    
+    Returns:
+        Encoded JWT token string
+    
+    Backwards Compatibility:
+        - Supports old pattern: create_real_jwt_token(user_id, permissions)
+        - Supports old pattern: create_real_jwt_token(user_id, permissions, expires_in=N)
+        - Supports new pattern: create_real_jwt_token(user_id, permissions, email="x@y.com")
     """
     env = IsolatedEnvironment()
     secret = env.get("JWT_SECRET", "test_secret_key_for_integration_tests")
