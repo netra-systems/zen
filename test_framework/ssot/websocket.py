@@ -1256,6 +1256,9 @@ async def create_test_websocket_manager():
 RealWebSocketTestClient = WebSocketTestClient
 WebSocketTestHelper = WebSocketTestUtility  # Alias for WebSocketTestUtility
 
+# Create alias for backward compatibility and Issue #485 fix
+websocket_test_utilities = WebSocketTestUtility
+
 # Export SSOT WebSocket utilities
 __all__ = [
     'WebSocketTestUtility',
@@ -1267,5 +1270,6 @@ __all__ = [
     'WebSocketTestMetrics',
     'get_websocket_test_utility',
     'cleanup_global_websocket_utility',
-    'create_test_websocket_manager'
+    'create_test_websocket_manager',
+    'websocket_test_utilities'  # Issue #485 fix: Missing import
 ]
