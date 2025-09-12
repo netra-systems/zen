@@ -102,19 +102,71 @@ Multiple JWT validation implementations across WebSocket authentication stack cr
 
 **SSOT Target:** `auth_service/auth_core/core/jwt_handler.py:JWTHandler.validate_token()`
 
+## SSOT Remediation Plan (STEP 3)
+
+### Strategic Phased Approach ✅
+**Comprehensive remediation strategy created with 4-phase atomic implementation:**
+
+#### Phase 1: Foundation & Analysis
+- Baseline performance measurement
+- Comprehensive dependency mapping  
+- Error pattern documentation
+- Test suite validation preparation
+
+#### Phase 2A: Core SSOT Infrastructure  
+- **UserContextExtractor consolidation** - Remove JWT validation, delegate to AuthServiceClient
+- **Unified imports** - Standardize auth service delegation patterns
+- **Error handling** - Consolidate to single error pattern
+
+#### Phase 2B: WebSocket Auth Consolidation
+- **UnifiedWebSocketAuth simplification** - Remove JWT logic, pure delegation
+- **Import cleanup** - Remove conditional auth imports
+- **Error propagation** - Standardize SSOT error handling
+
+#### Phase 2C: Auth Integration Cleanup
+- **Remove duplicate JWT validation** from auth_integration/auth.py
+- **Standardize token reuse tracking** through SSOT only
+- **Error handling consolidation**
+
+#### Phase 3: Validation & Testing
+- Execute all 4 SSOT tests (should pass after remediation)
+- Golden Path validation (login → AI responses)  
+- Performance verification
+- Mission critical test validation
+
+### Key Remediation Changes
+🎯 **Target SSOT:** `auth_service/auth_core/core/jwt_handler.py:JWTHandler.validate_token()`
+
+**Eliminate:**
+- Conditional UnifiedAuthInterface usage (`if get_unified_auth:`)
+- auth_client_core fallback paths  
+- Dual JWT validation implementations
+- try/except import patterns for auth services
+
+### Business Protection Strategy
+- **Golden Path monitoring** - Ensure $500K+ ARR functionality maintained
+- **Atomic commits** - Each phase rollback-safe
+- **Performance baselines** - No degradation during consolidation
+- **Backwards compatibility** - Existing functionality preserved
+
+### Timeline Estimate
+- **8-12 hours** over 2-3 days
+- **Progressive validation** at each phase
+- **Immediate rollback capability** if issues arise
+
 ## Work Progress
 
 - [x] **STEP 0:** SSOT audit completed - Critical P0 violation identified
 - [x] **STEP 0.2:** GitHub issue #525 created and local tracking file established
 - [x] **STEP 1:** Discover and plan tests - 16 test files identified, comprehensive strategy created
 - [x] **STEP 2:** Execute test plan - 4 strategic SSOT tests created, all failing (proving violations)
-- [ ] **STEP 3:** Plan SSOT remediation
+- [x] **STEP 3:** Plan SSOT remediation - Comprehensive 4-phase atomic strategy created
 - [ ] **STEP 4:** Execute SSOT remediation plan
 - [ ] **STEP 5:** Enter test fix loop - prove stability
 - [ ] **STEP 6:** Create PR and close issue
 
 ## Next Actions
 
-**IMMEDIATE:** Move to Step 3 - Plan SSOT remediation strategy for JWT consolidation
+**IMMEDIATE:** Move to Step 4 - Execute SSOT remediation plan using phased approach
 
-**PRIORITY:** Eliminate multiple JWT validation paths while maintaining Golden Path stability
+**PRIORITY:** Implement atomic SSOT consolidation while protecting Golden Path business value
