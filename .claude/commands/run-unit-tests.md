@@ -24,19 +24,21 @@ PROCESS INSTRUCTIONS START SNST:
         ELSE: CREATE A NEW GIT ISSUE AND OUTPUT the ISSUE ID here:
 
     2) STATUS UPDATE : 
-        IF EXISTING ISSUE COMMENTS THEN READ THEM FROM MASTER AGENT.
-        AUDIT the current codebase and linked PRs (closed and open) with FIVE WHYS approach and assess the current state of the issue.
-        2.1) Make or UPDATE a comment on the ISSUE with your learnings following @GITHUB_STYLE_GUIDE.md .
+
+        AUDIT the current codebase and linked PRs (closed and open)
+        with FIVE WHYS approach and assess the current state of the issue.
+        2.1) Make or UPDATE a comment on the ISSUE with your learnings.
         OUTPUT the comment ID here:
 
     3) PLAN REMEDIATION OF THE EXISTING FAILING TEST : SNST : 
-    PLAN ONLY THE REMEDIATION TO THE SYSTEM UNDER TEST.
-    to fix the issue and pass the test too.
-    3.1) UPDATE the comment on the ISSUE with the results following @GITHUB_STYLE_GUIDE.md  .
+        PLAN ONLY THE REMEDIATION TO THE SYSTEM UNDER TEST.
+        to fix the issue and pass the test too.
+        3.1) UPDATE the comment on the ISSUE with the results.
 
     4) EXECUTE THE REMEDIATION ITEM SPECIFIC PLAN: SNST :
-    4.1) UPDATE the comment on the ISSUE with the results following @GITHUB_STYLE_GUIDE.md  .
-    4.2) Git commit work in conceptual batches. 
+        4.1) UPDATE the comment on the ISSUE with the results.
+        add tag: actively-being-worked-on
+        4.2) Git commit work in conceptual batches. 
 
     5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
     IF BREAKING CHANGES OR TEST STILL FAILING GO BACK: ensure that any code changes exclusively add value as one atomic package of commit and
