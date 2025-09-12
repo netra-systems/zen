@@ -233,6 +233,63 @@ class CloudNativeTimeoutManager:
         
         return markers
     
+    def _log_startup_environment_info(self, logger: logging.Logger) -> None:
+        """Log comprehensive environment detection information at startup.
+        
+        **Issue #586**: Provides detailed logging to debug environment detection issues
+        and validate that the correct timeout configuration is being used.
+        """
+        try:
+            # Get current environment detection results
+            gcp_markers = self._detect_gcp_environment_markers()
+            config = self.get_timeout_config()
+            
+            logger.info("=" * 80)
+            logger.info("CloudNativeTimeoutManager - Issue #586 Enhanced Environment Detection")
+            logger.info("=" * 80)
+            
+            # Environment Detection Summary
+            logger.info(f"🌍 DETECTED ENVIRONMENT: {self._environment.value}")
+            logger.info(f"🎯 DEFAULT TIER: {self._default_tier.value}")
+            logger.info(f"⏱️  WEBSOCKET RECV TIMEOUT: {config.websocket_recv_timeout}s")
+            logger.info(f"🤖 AGENT EXECUTION TIMEOUT: {config.agent_execution_timeout}s")
+            
+            # GCP Environment Markers
+            logger.info(f"☁️  GCP CLOUD RUN DETECTED: {gcp_markers['is_gcp_cloud_run']}")
+            if gcp_markers['is_gcp_cloud_run']:
+                logger.info(f"   📋 Project ID: {gcp_markers['project_id']}")
+                logger.info(f"   🏷️  Service Name: {gcp_markers['service_name']}")
+                logger.info(f"   📝 Revision: {gcp_markers['revision']}")
+            
+            # Environment Variables Summary
+            direct_env = os.environ.get("ENVIRONMENT")
+            isolated_env = self._env.get("ENVIRONMENT", "not_set")
+            logger.info(f"🔧 ENVIRONMENT (direct): {direct_env}")
+            logger.info(f"🔧 ENVIRONMENT (isolated): {isolated_env}")
+            
+            # Marker Detection Details
+            logger.info("🔍 GCP MARKER DETECTION:")
+            for marker, detected in gcp_markers['markers_detected'].items():
+                status = "✅" if detected else "❌"
+                logger.info(f"   {status} {marker}: {detected}")
+            
+            # Timeout Hierarchy Validation
+            hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
+            hierarchy_status = "✅ VALID" if hierarchy_valid else "❌ BROKEN"
+            gap = config.websocket_recv_timeout - config.agent_execution_timeout
+            logger.info(f"⚖️  TIMEOUT HIERARCHY: {hierarchy_status} (gap: {gap}s)")
+            
+            # Business Impact Assessment
+            if hierarchy_valid:
+                logger.info("💰 BUSINESS IMPACT: $200K+ MRR protected with valid timeout hierarchy")
+            else:
+                logger.error("💰 BUSINESS IMPACT: CRITICAL - Timeout hierarchy broken, $200K+ MRR at risk")
+            
+            logger.info("=" * 80)
+            
+        except Exception as e:
+            logger.error(f"Failed to log startup environment info: {e}", exc_info=True)
+    
     def get_timeout_config(self, tier: Optional[TimeoutTier] = None) -> TimeoutConfig:
         """Get timeout configuration for current environment and customer tier.
         
@@ -572,13 +629,21 @@ class CloudNativeTimeoutManager:
     def get_timeout_hierarchy_info(self) -> Dict[str, Any]:
         """Get timeout hierarchy information for debugging/validation.
         
+        **Issue #586 Enhancement**: Includes comprehensive environment detection information
+        for debugging environment detection issues.
+        
         Returns:
-            Dict[str, Any]: Timeout hierarchy details and validation
+            Dict[str, Any]: Timeout hierarchy details and validation with enhanced diagnostics
         """
         config = self.get_timeout_config()
+        gcp_markers = self._detect_gcp_environment_markers()
         
         # Validate hierarchy: WebSocket > Agent
         hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
+        
+        # Environment detection diagnostics
+        direct_env = os.environ.get("ENVIRONMENT")
+        isolated_env = self._env.get("ENVIRONMENT", "not_set")
         
         return {
             "environment": self._environment.value,
@@ -587,7 +652,27 @@ class CloudNativeTimeoutManager:
             "hierarchy_valid": hierarchy_valid,
             "hierarchy_gap": config.websocket_recv_timeout - config.agent_execution_timeout,
             "business_impact": "$200K+ MRR reliability" if hierarchy_valid else "CRITICAL: Hierarchy broken",
-            "config": config
+            "config": config,
+            # Issue #586 enhanced diagnostics
+            "environment_detection": {
+                "detected_environment": self._environment.value,
+                "environment_sources": {
+                    "direct": direct_env,
+                    "isolated": isolated_env
+                },
+                "gcp_detection": {
+                    "is_gcp_cloud_run": gcp_markers['is_gcp_cloud_run'],
+                    "project_id": gcp_markers['project_id'],
+                    "service_name": gcp_markers['service_name'],
+                    "markers_detected": gcp_markers['markers_detected']
+                }
+            },
+            "tier_info": {
+                "default_tier": self._default_tier.value,
+                "config_tier": config.tier.value if config.tier else None,
+                "streaming_timeout": config.streaming_timeout,
+                "streaming_phase_timeout": config.streaming_phase_timeout
+            }
         }
     
     def validate_timeout_hierarchy(self) -> bool:
@@ -709,10 +794,38 @@ def validate_timeout_hierarchy() -> bool:
 def get_timeout_hierarchy_info() -> Dict[str, Any]:
     """Get timeout hierarchy information for debugging.
     
+    **Issue #586**: Includes enhanced environment detection diagnostics.
+    
     Returns:
         Dict[str, Any]: Complete hierarchy information and validation status
     """
     return _get_timeout_manager().get_timeout_hierarchy_info()
+
+def get_environment_detection_info() -> Dict[str, Any]:
+    """Get detailed environment detection information for Issue #586 debugging.
+    
+    **Issue #586 Solution**: Provides comprehensive environment detection diagnostics
+    to help debug and validate GCP environment detection.
+    
+    Returns:
+        Dict[str, Any]: Complete environment detection diagnostics
+    """
+    manager = _get_timeout_manager()
+    gcp_markers = manager._detect_gcp_environment_markers()
+    
+    return {
+        "detected_environment": manager._environment.value,
+        "environment_sources": {
+            "direct": os.environ.get("ENVIRONMENT"),
+            "isolated": manager._env.get("ENVIRONMENT", "not_set")
+        },
+        "gcp_markers": gcp_markers,
+        "timeout_values": {
+            "websocket_recv_timeout": manager.get_websocket_recv_timeout(),
+            "agent_execution_timeout": manager.get_agent_execution_timeout()
+        },
+        "hierarchy_validation": manager.validate_timeout_hierarchy()
+    }
 
 def reset_timeout_manager() -> None:
     """Reset timeout manager for testing purposes."""
