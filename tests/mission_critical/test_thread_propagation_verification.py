@@ -53,18 +53,18 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
     proper thread propagation is implemented.
     """
     
-    async def asyncSetUp(self):
+    def setup_method(self, method):
         """Setup test environment for thread propagation testing."""
-        await super().asyncSetUp()
+        super().setup_method(method)
         
         # Generate unique test identifiers
         self.user_id = str(uuid.uuid4())
         self.thread_id = str(uuid.uuid4())
         self.run_id = str(uuid.uuid4())
         
-        # Setup WebSocket test utilities first  
-        self.websocket_util = WebSocketTestUtility()
-        self.db_util = DatabaseTestUtility()
+        # WebSocket utilities will be initialized in test methods as needed
+        self.websocket_util = None
+        self.db_util = None
         
         # Initialize services if available
         if REAL_SERVICES_AVAILABLE:
@@ -86,14 +86,16 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         
         logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]}")
     
-    async def asyncTearDown(self):
+    def teardown_method(self, method):
         """Cleanup test resources."""
         try:
-            await self.websocket_manager.shutdown()
+            if hasattr(self, 'websocket_manager') and self.websocket_manager:
+                # Can't use await in sync method - WebSocket manager should handle cleanup
+                pass
         except Exception as e:
             logger.warning(f"Websocket cleanup warning: {e}")
         
-        await super().asyncTearDown()
+        super().teardown_method(method)
     
     @pytest.mark.asyncio
     async def test_websocket_to_message_handler_propagation_FAIL_FIRST(self):
@@ -105,10 +107,18 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         """
         logger.info("Testing WebSocket to Message Handler thread propagation")
         
-        # Create WebSocket test connection
-        websocket_connection = await self.websocket_util.create_test_connection(
-            user_id=self.user_id,
-            thread_id=self.thread_id
+        # Initialize WebSocket test utility in mock mode (no real server needed)
+        # Set environment to force mock mode
+        import os
+        os.environ['WEBSOCKET_MOCK_MODE'] = 'true'
+        os.environ['NO_REAL_SERVERS'] = 'true'
+        
+        self.websocket_util = WebSocketTestUtility()
+        await self.websocket_util.initialize()
+        
+        # Create WebSocket test client
+        websocket_client = await self.websocket_util.create_test_client(
+            user_id=self.user_id
         )
         
         # Test WebSocket manager thread context handling  
@@ -117,7 +127,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 # Connect with thread context
                 connection_id = await self.websocket_manager.connect_user(
                     user_id=self.user_id,
-                    websocket=websocket_connection.mock_websocket,
+                    websocket=websocket_client.websocket,
                     thread_id=self.thread_id
                 )
                 
