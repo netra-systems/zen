@@ -1400,8 +1400,15 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                await redis_client.set(test_key, "healthy")
-                result = await redis_client.get(test_key)
+                from shared.isolated_environment import get_env
+                import redis
+                sync_redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                sync_redis_client.set(test_key, "healthy")
+                result = sync_redis_client.get(test_key)
                 
                 if result != "healthy":
                     health_issues.append({
@@ -1411,7 +1418,7 @@ class TestSSOTContinuousCompliance:
                         'actual': result
                     })
                 
-                await redis_client.delete(test_key)
+                sync_redis_client.delete(test_key)
             
             db_response_time = time.time() - db_start_time
             service_health['database'] = {
@@ -1442,10 +1449,17 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis operations
             test_hash = f"redis_health_{self.test_id}"
-            await redis_client.hset(test_hash, "field1", "value1")
-            await redis_client.hset(test_hash, "field2", "value2")
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            sync_redis_client.hset(test_hash, "field1", "value1")
+            sync_redis_client.hset(test_hash, "field2", "value2")
             
-            all_fields = await redis_client.hgetall(test_hash)
+            all_fields = sync_redis_client.hgetall(test_hash)
             if len(all_fields) != 2 or all_fields.get("field1") != "value1":
                 health_issues.append({
                     'service': 'redis',
@@ -1455,7 +1469,7 @@ class TestSSOTContinuousCompliance:
                     'data': all_fields
                 })
             
-            await redis_client.delete(test_hash)
+            sync_redis_client.delete(test_hash)
             
             redis_response_time = time.time() - redis_start_time
             service_health['redis'] = {
@@ -1563,17 +1577,24 @@ class TestSSOTContinuousCompliance:
             db_start = time.time()
             
             # Execute database operations
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             for i in range(50):
                 key = f"regression_test_{self.test_id}_{i}"
-                await redis_client.set(key, f"test_data_{i}")
-                result = await redis_client.get(key)
+                sync_redis_client.set(key, f"test_data_{i}")
+                result = sync_redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
                         'operation': i,
                         'issue': 'data_persistence_failure'
                     })
-                await redis_client.delete(key)
+                sync_redis_client.delete(key)
             
             db_time = time.time() - db_start
             regression_metrics['service_metrics']['database_50_ops'] = db_time
@@ -1644,11 +1665,18 @@ class TestSSOTContinuousCompliance:
             # Test concurrent isolation operations
             def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                await redis_client.set(
+                from shared.isolated_environment import get_env
+                import redis
+                sync_redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                sync_redis_client.set(
                     f"isolation_test:{test_id}",
                     f"data_{test_id}"
                 )
-                return await redis_client.get(f"isolation_test:{test_id}")
+                return sync_redis_client.get(f"isolation_test:{test_id}")
             
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
@@ -1817,14 +1845,21 @@ class TestSSOTContinuousCompliance:
                 for op_num in range(operations_per_context):
                     operation_key = f"context:{context_id}:operation:{op_num}"
                     
-                    # Store context-specific secret data
-                    await redis_client.hset(
+                    # Store context-specific secret data - using sync redis for non-async context
+                    from shared.isolated_environment import get_env
+                    import redis
+                    sync_redis_client = redis.Redis(
+                        host=get_env('REDIS_HOST', 'localhost'),
+                        port=int(get_env('REDIS_PORT', '6379')),
+                        decode_responses=True
+                    )
+                    sync_redis_client.hset(
                         operation_key,
                         "secret_data",
                         secrets['secret_key']
                     )
                     
-                    await redis_client.hset(
+                    sync_redis_client.hset(
                         operation_key,
                         "private_data",
                         secrets['private_data']
@@ -1836,9 +1871,9 @@ class TestSSOTContinuousCompliance:
                             other_secrets = context_secrets[other_context]
                             
                             # Check if current context's data leaked to other context
-                            other_keys = await redis_client.keys(f"context:{other_context}:*")
+                            other_keys = sync_redis_client.keys(f"context:{other_context}:*")
                             for other_key in other_keys:
-                                other_data = await redis_client.hgetall(other_key)
+                                other_data = sync_redis_client.hgetall(other_key)
                                 
                                 # Check for secret leakage
                                 for field, value in other_data.items():
@@ -1856,7 +1891,7 @@ class TestSSOTContinuousCompliance:
                                         })
                             
                             # Check reverse leakage - other context data in current context
-                            current_data = await redis_client.hgetall(operation_key)
+                            current_data = sync_redis_client.hgetall(operation_key)
                             for field, value in current_data.items():
                                 if (other_secrets['secret_key'] in str(value) or 
                                     other_secrets['private_data'] in str(value) or
@@ -1902,10 +1937,17 @@ class TestSSOTContinuousCompliance:
                     })
         
         # Clean up test data
+        from shared.isolated_environment import get_env
+        import redis
+        cleanup_redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
         for context_id in range(num_isolated_contexts):
-            keys_to_delete = await redis_client.keys(f"context:{context_id}:*")
+            keys_to_delete = cleanup_redis_client.keys(f"context:{context_id}:*")
             if keys_to_delete:
-                await redis_client.delete(*keys_to_delete)
+                cleanup_redis_client.delete(*keys_to_delete)
         
         # Verify NO data leakage detected
         if leakage_violations:
@@ -1963,15 +2005,22 @@ class TestSSOTContinuousCompliance:
                                 }
                             }
                             
-                            # Store complex data
-                            await redis_client.hset(
+                            # Store complex data - using sync redis for non-async context
+                            from shared.isolated_environment import get_env
+                            import redis
+                            sync_redis_client = redis.Redis(
+                                host=get_env('REDIS_HOST', 'localhost'),
+                                port=int(get_env('REDIS_PORT', '6379')),
+                                decode_responses=True
+                            )
+                            sync_redis_client.hset(
                                 key,
                                 "complex_data",
                                 str(complex_data)
                             )
                             
                             # Immediate verification
-                            retrieved = await redis_client.hget(key, "complex_data")
+                            retrieved = sync_redis_client.hget(key, "complex_data")
                             if not retrieved or user_data_signature not in retrieved:
                                 failures.append({
                                     'user_id': user_id,
