@@ -624,6 +624,75 @@ class GCPWebSocketInitializationValidator:
             self.logger.debug(f"WebSocket integration readiness check failed: {e}")
             return False
     
+    async def _wait_for_app_state_ready(self, timeout: float = 10.0) -> bool:
+        """Wait for app_state to be ready before WebSocket validation.
+        
+        **Issue #586 Phase 3 Solution**: Implements app_state readiness check to prevent
+        WebSocket 1011 errors caused by race conditions between WebSocket validation
+        and application state initialization.
+        
+        This method ensures that:
+        1. app_state is available and not None
+        2. app_state has been properly initialized
+        3. Critical app_state attributes are accessible
+        
+        Args:
+            timeout: Maximum time to wait for app_state readiness (default: 10s)
+            
+        Returns:
+            bool: True if app_state is ready, False if timeout or unavailable
+        """
+        start_time = time.time()
+        check_interval = 0.1  # Check every 100ms for responsiveness
+        
+        self.logger.debug(f"Waiting for app_state readiness (timeout: {timeout}s)")
+        
+        while time.time() - start_time < timeout:
+            try:
+                # Check if app object exists and has state attribute
+                from netra_backend.app.main import app
+                if hasattr(app, 'state') and app.state is not None:
+                    # Additional validation - ensure app_state has critical attributes
+                    app_state = app.state
+                    
+                    # Check for basic readiness indicators
+                    if hasattr(app_state, 'startup_complete') and app_state.startup_complete:
+                        elapsed = time.time() - start_time
+                        self.logger.debug(f"app_state ready (startup complete) after {elapsed:.2f}s")
+                        return True
+                    
+                    # Check for startup phase progression (sufficient for validation)
+                    if hasattr(app_state, 'startup_phase'):
+                        phase = str(app_state.startup_phase).lower()
+                        # If we've reached services phase or beyond, app_state is usable
+                        if phase in ['services', 'websocket', 'finalize', 'complete']:
+                            elapsed = time.time() - start_time
+                            self.logger.debug(f"app_state ready (phase: {phase}) after {elapsed:.2f}s")
+                            return True
+                    
+                    # If app_state exists but startup info missing, still consider it ready
+                    # This handles edge cases where app_state exists but startup tracking is incomplete
+                    elapsed = time.time() - start_time
+                    if elapsed > 2.0:  # After 2s, assume app_state is functional
+                        self.logger.debug(f"app_state ready (fallback check) after {elapsed:.2f}s")
+                        return True
+                
+                # Brief sleep before next check
+                await asyncio.sleep(check_interval)
+                
+            except ImportError:
+                # app module not available yet - continue waiting
+                self.logger.debug("app module not yet importable - continuing to wait")
+                await asyncio.sleep(check_interval)
+            except Exception as e:
+                self.logger.debug(f"Exception checking app_state readiness: {e}")
+                await asyncio.sleep(check_interval)
+        
+        # Timeout reached
+        elapsed = time.time() - start_time
+        self.logger.warning(f"Timeout waiting for app_state readiness after {elapsed:.2f}s")
+        return False
+    
     async def _wait_for_startup_phase_completion(
         self, 
         minimum_phase: str = 'services',
@@ -785,6 +854,35 @@ class GCPWebSocketInitializationValidator:
             
             self.logger.info(f" PASS:  Startup phase requirement met - proceeding with service validation")
             
+            # ISSUE #586 PHASE 3: Wait for app_state to be ready before service validation
+            # This prevents race condition where WebSocket validation runs before app_state initialization
+            app_state_timeout = self._get_optimized_timeout(optimized_timeout * 0.2)  # Use 20% of optimized timeout
+            app_state_ready = await self._wait_for_app_state_ready(app_state_timeout)
+            
+            if not app_state_ready:
+                # app_state not ready - this is a critical race condition
+                elapsed_time = time.time() - self.validation_start_time
+                
+                self.logger.error(
+                    f"🔴 APP_STATE RACE CONDITION DETECTED: app_state not ready "
+                    f"within {app_state_timeout:.1f}s - this would cause WebSocket 1011 errors"
+                )
+                
+                return GCPReadinessResult(
+                    ready=False,
+                    state=GCPReadinessState.FAILED,
+                    elapsed_time=elapsed_time,
+                    failed_services=["app_state_timeout"],
+                    warnings=[f"app_state not ready within {app_state_timeout:.1f}s"],
+                    details={
+                        "app_state_race_condition_detected": True,
+                        "app_state_timeout": app_state_timeout,
+                        "issue_586_phase_3": "app_state readiness check failed"
+                    }
+                )
+            
+            self.logger.info(f"✅ PASS: app_state readiness confirmed - services can be validated")
+            
             # Phase 1: Validate Dependencies (Database, Redis, Auth) with GOLDEN PATH degradation
             # PERFORMANCE OPTIMIZATION: Reduced timeout from 3.0s to 1.5s for faster dependency validation
             self.logger.info("[U+1F4CB] Phase 1: Validating dependencies (Database, Redis, Auth)...")
@@ -945,8 +1043,13 @@ class GCPWebSocketInitializationValidator:
         check: ServiceReadinessCheck, 
         timeout_seconds: float
     ) -> bool:
-        """Validate a single service with retry logic."""
+        """Validate a single service with exponential backoff retry logic.
+        
+        **Issue #586 Phase 3.2**: Implements graceful degradation with exponential backoff
+        to handle service startup delays and transient failures more robustly.
+        """
         start_time = time.time()
+        base_delay = check.retry_delay
         
         for attempt in range(check.retry_count + 1):
             try:
@@ -957,21 +1060,53 @@ class GCPWebSocketInitializationValidator:
                     result = check.validator()
                 
                 if result:
+                    if attempt > 0:
+                        self.logger.debug(f"Service {check.name} became ready after {attempt + 1} attempts")
                     return True
                 
-                # If not ready and we have more retries, wait
+                # If not ready and we have more retries, wait with exponential backoff
                 if attempt < check.retry_count:
-                    await asyncio.sleep(check.retry_delay)
+                    # Exponential backoff: base_delay * (2 ^ attempt) with jitter
+                    backoff_delay = base_delay * (2 ** attempt)
+                    # Add small random jitter (±10%) to prevent thundering herd
+                    jitter = backoff_delay * 0.1 * (2 * time.time() % 1 - 1)  # Use time as pseudo-random
+                    actual_delay = backoff_delay + jitter
+                    
+                    # Cap maximum delay to prevent excessive waits
+                    max_delay = min(actual_delay, 5.0)  # Maximum 5 second delay
+                    
+                    self.logger.debug(
+                        f"Service {check.name} not ready (attempt {attempt + 1}/{check.retry_count + 1}), "
+                        f"retrying in {max_delay:.2f}s (exponential backoff)"
+                    )
+                    await asyncio.sleep(max_delay)
                 
                 # Check for timeout
-                if time.time() - start_time > timeout_seconds:
+                elapsed = time.time() - start_time
+                if elapsed > timeout_seconds:
+                    self.logger.debug(
+                        f"Service {check.name} validation timeout after {elapsed:.2f}s "
+                        f"(attempt {attempt + 1}/{check.retry_count + 1})"
+                    )
                     break
                     
             except Exception as e:
-                self.logger.debug(f"Service check exception for {check.name}: {e}")
+                self.logger.debug(f"Service check exception for {check.name} (attempt {attempt + 1}): {e}")
+                
+                # Apply exponential backoff for exceptions too
                 if attempt < check.retry_count:
-                    await asyncio.sleep(check.retry_delay)
+                    backoff_delay = base_delay * (2 ** attempt)
+                    jitter = backoff_delay * 0.1 * (2 * time.time() % 1 - 1)
+                    actual_delay = min(backoff_delay + jitter, 5.0)
+                    
+                    self.logger.debug(f"Exception in {check.name}, retrying in {actual_delay:.2f}s")
+                    await asyncio.sleep(actual_delay)
         
+        elapsed = time.time() - start_time
+        self.logger.warning(
+            f"Service {check.name} validation failed after {check.retry_count + 1} attempts "
+            f"over {elapsed:.2f}s with exponential backoff"
+        )
         return False
 
     # TEST COMPATIBILITY METHODS - Required by existing test suite
