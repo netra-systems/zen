@@ -356,7 +356,7 @@ def detect_execution_engine_compatibility_usage() -> Dict[str, Any]:
 
 
 # Legacy factory methods for backward compatibility
-from netra_backend.app.agents.supervisor.user_execution_engine import (
+from netra_backend.app.agents.supervisor.execution_engine_factory import (
     create_request_scoped_engine,
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import (

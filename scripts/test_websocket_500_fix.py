@@ -166,7 +166,7 @@ class WebSocketFixValidator:
         try:
             uri = f"{self.protocol}://{self.base_url}/ws/test"
             
-            async with websockets.connect(uri, timeout=10.0) as websocket:
+            async with websockets.connect(uri, open_timeout=10.0) as websocket:
                 # Send ping
                 ping_msg = {"type": "ping"}
                 await websocket.send(json.dumps(ping_msg))
@@ -222,7 +222,7 @@ class WebSocketFixValidator:
             uri = f"{self.protocol}://{self.base_url}/ws"
             headers = {"Authorization": f"Bearer {jwt_token}"}
             
-            async with websockets.connect(uri, extra_headers=headers, timeout=10.0) as websocket:
+            async with websockets.connect(uri, extra_headers=headers, open_timeout=10.0) as websocket:
                 # Wait for welcome message
                 welcome_msg = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 welcome_data = json.loads(welcome_msg)
@@ -278,7 +278,7 @@ class WebSocketFixValidator:
         try:
             uri = f"{self.protocol}://{self.base_url}/ws/test"
             
-            async with websockets.connect(uri, timeout=10.0) as websocket:
+            async with websockets.connect(uri, open_timeout=10.0) as websocket:
                 # Test echo functionality
                 test_message = {
                     "type": "echo",
@@ -325,7 +325,7 @@ class WebSocketFixValidator:
         try:
             uri = f"{self.protocol}://{self.base_url}/ws/test"
             
-            async with websockets.connect(uri, timeout=10.0) as websocket:
+            async with websockets.connect(uri, open_timeout=10.0) as websocket:
                 # Send invalid JSON
                 await websocket.send("invalid json {")
                 
@@ -369,7 +369,7 @@ class WebSocketFixValidator:
             concurrent_connections = 3
             
             async def single_connection_test(conn_id: int):
-                async with websockets.connect(uri, timeout=10.0) as websocket:
+                async with websockets.connect(uri, open_timeout=10.0) as websocket:
                     # Send ping
                     ping_msg = {"type": "ping", "connection_id": conn_id}
                     await websocket.send(json.dumps(ping_msg))

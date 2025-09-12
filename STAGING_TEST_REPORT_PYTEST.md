@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 16:23:29
+**Generated:** 2025-09-12 16:27:55
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.26 seconds
+- **Duration:** 3.75 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,28 +19,26 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_golden_path_complete_flow_no_duplication | FAIL failed | 0.000s | test_websocket_golden_path_issue_567.py |
+| test_golden_path_user_login_to_ai_response | FAIL failed | 2.531s | test_golden_path_user_flow_issue_620.py |
 
 ## Failed Tests Details
 
-### FAILED: test_golden_path_complete_flow_no_duplication
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_websocket_golden_path_issue_567.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_websocket_golden_path_issue_567.py:93: in test_golden_path_complete_flow_no_duplication
-    auth_result = await self._authenticate_staging_user()
-                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_websocket_golden_path_issue_567.py:216: in _authenticate_staging_user
-    "user_id": self.test_user_id,
-               ^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestGoldenPathWebSocketIssue567' object has no attribute 'test_user_id'...
+### FAILED: test_golden_path_user_login_to_ai_response
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
+- **Duration:** 2.531s
+- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:78: in test_golden_path_user_login_to_ai_response
+    assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
+E   AssertionError: Response time should be ≤2.0s, got 2.52s
+E   assert 2.5200624465742383 <= 2.0
+E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x000001D3CDA52F90>.MAX_RESPO...
 
 ## Pytest Output Format
 
 ```
-test_websocket_golden_path_issue_567.py::test_golden_path_complete_flow_no_duplication FAILED
+test_golden_path_user_flow_issue_620.py::test_golden_path_user_login_to_ai_response FAILED
 
 ==================================================
-0 passed, 1 failed in 0.26s
+0 passed, 1 failed in 3.75s
 ```
 
 ## Test Coverage Matrix

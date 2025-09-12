@@ -403,7 +403,7 @@ class TestStagingAuthFlowThroughLoadBalancer(SSotBaseTestCase):
             # Test WebSocket connection establishment (should fail gracefully without auth)
             import websockets
             try:
-                async with websockets.connect(websocket_url, timeout=10) as websocket:
+                async with websockets.connect(websocket_url, open_timeout=10) as websocket:
                     return {
                         'success': True,
                         'connection_established': True,

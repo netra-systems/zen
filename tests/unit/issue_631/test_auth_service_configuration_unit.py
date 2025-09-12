@@ -15,7 +15,7 @@ from unittest.mock import patch, MagicMock
 from typing import Optional
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.config import get_config
+from netra_backend.app.config import get_config, reload_config
 from netra_backend.app.auth_integration.auth_config import AuthPermissivenessConfig, AuthConfigLoader
 from netra_backend.app.clients.auth_client_core import AuthClientCore
 
@@ -32,32 +32,37 @@ class TestAuthServiceConfigurationUnit(SSotBaseTestCase):
         """Clean up test environment."""
         os.environ.clear()
         os.environ.update(self.original_env)
+        # CRITICAL: Reload config to clear any cached values from tests
+        reload_config(force=True)
         super().tearDown()
 
     def test_auth_service_url_configuration_loaded(self):
         """
         CRITICAL TEST: Verify AUTH_SERVICE_URL is loaded from environment.
         
-        Expected to FAIL until AUTH_SERVICE_URL configuration is implemented.
-        This test validates the root cause of Issue #631.
+        This test validates the root cause fix for Issue #631.
         """
         # ARRANGE: Set AUTH_SERVICE_URL in environment
         test_auth_url = "http://auth-service:8001"
         os.environ["AUTH_SERVICE_URL"] = test_auth_url
         
+        # CRITICAL: Force reload configuration to pick up environment changes
+        reload_config(force=True)
+        
         # ACT: Load configuration
         config = get_config()
         
         # ASSERT: AUTH_SERVICE_URL should be accessible from config
-        # This will FAIL until configuration is properly implemented
+        actual_value = getattr(config, 'auth_service_url', None)
+        
         self.assertIsNotNone(
-            getattr(config, 'auth_service_url', None),
+            actual_value,
             "AUTH_SERVICE_URL configuration is missing - this is the root cause of Issue #631"
         )
         self.assertEqual(
-            getattr(config, 'auth_service_url', None), 
+            actual_value, 
             test_auth_url,
-            "AUTH_SERVICE_URL should match environment variable"
+            f"AUTH_SERVICE_URL should match environment variable. Got: {actual_value}, Expected: {test_auth_url}"
         )
 
     def test_auth_service_url_missing_handling(self):

@@ -429,7 +429,7 @@ async def test_staging_websocket_infrastructure_health_check():
     websocket_endpoint = f"{staging_websocket_url}/ws/test"
     
     try:
-        async with websockets.connect(websocket_endpoint, timeout=30.0) as websocket:
+        async with websockets.connect(websocket_endpoint, open_timeout=30.0) as websocket:
             # Send health check ping
             health_check = {
                 "type": "health_check",

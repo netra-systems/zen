@@ -130,38 +130,55 @@ class CloudNativeTimeoutManager:
         logger.info(f"Environment detection - Direct: {direct_env}, Env name: {env_name}, "
                    f"GCP markers: {gcp_markers}")
         
-        # **Issue #586**: Enhanced GCP Cloud Run detection
+        # **Issue #586**: Enhanced GCP Cloud Run detection with proper precedence
         if gcp_markers['is_gcp_cloud_run']:
-            # Prioritize explicit environment setting, then use project ID as confirmation/fallback
-            if env_name == "staging" and (gcp_markers['project_id'] is None or 'staging' in gcp_markers['project_id']):
-                logger.info(f"Detected GCP Cloud Run STAGING environment - Env: {env_name}, Project: {gcp_markers['project_id']}, "
-                           f"Service: {gcp_markers['service_name']}")
-                return TimeoutEnvironment.CLOUD_RUN_STAGING
-            elif env_name == "production" and (gcp_markers['project_id'] is None or 'production' in gcp_markers['project_id']):
-                logger.info(f"Detected GCP Cloud Run PRODUCTION environment - Env: {env_name}, Project: {gcp_markers['project_id']}, "
-                           f"Service: {gcp_markers['service_name']}")
-                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
-            elif gcp_markers['project_id'] == 'netra-staging':
+            # PRIORITY FIX: GCP Cloud Run markers take precedence over ENVIRONMENT variable
+            # when there's a conflict, use GCP project ID and service name as authoritative
+            
+            # Direct project ID mapping (highest precedence)
+            if gcp_markers['project_id'] == 'netra-staging':
                 logger.info(f"Detected GCP Cloud Run STAGING environment via project ID - Project: {gcp_markers['project_id']}, "
-                           f"Service: {gcp_markers['service_name']}")
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
                 return TimeoutEnvironment.CLOUD_RUN_STAGING
             elif gcp_markers['project_id'] == 'netra-production':
                 logger.info(f"Detected GCP Cloud Run PRODUCTION environment via project ID - Project: {gcp_markers['project_id']}, "
-                           f"Service: {gcp_markers['service_name']}")
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            
+            # Service name inference (second precedence) 
+            elif gcp_markers['service_name'] and 'staging' in gcp_markers['service_name']:
+                logger.info(f"Detected GCP Cloud Run STAGING environment via service name - Service: {gcp_markers['service_name']}, "
+                           f"Project: {gcp_markers['project_id']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif gcp_markers['service_name'] and 'production' in gcp_markers['service_name']:
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via service name - Service: {gcp_markers['service_name']}, "
+                           f"Project: {gcp_markers['project_id']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+                
+            # Project ID substring matching (third precedence)
+            elif 'staging' in (gcp_markers['project_id'] or ''):
+                logger.info(f"Detected GCP Cloud Run STAGING environment via project ID pattern - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif 'production' in (gcp_markers['project_id'] or ''):
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via project ID pattern - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            
+            # Environment variable confirmation (lowest precedence for Cloud Run)
+            elif env_name == "staging":
+                logger.info(f"Detected GCP Cloud Run STAGING environment via environment variable - Env: {env_name}, "
+                           f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif env_name == "production":
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via environment variable - Env: {env_name}, "
+                           f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
                 return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
             else:
-                # GCP detected but environment unclear - use project ID as fallback
-                if 'staging' in (gcp_markers['project_id'] or ''):
-                    logger.warning(f"GCP staging detected via project ID fallback: {gcp_markers['project_id']}")
-                    return TimeoutEnvironment.CLOUD_RUN_STAGING
-                elif 'production' in (gcp_markers['project_id'] or ''):
-                    logger.warning(f"GCP production detected via project ID fallback: {gcp_markers['project_id']}")
-                    return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
-                else:
-                    # Unknown GCP environment - default to staging for safer timeouts
-                    logger.warning(f"Unknown GCP environment detected, defaulting to staging. "
-                                 f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
-                    return TimeoutEnvironment.CLOUD_RUN_STAGING
+                # Unknown GCP environment - default to staging for safer timeouts
+                logger.warning(f"Unknown GCP Cloud Run environment detected, defaulting to staging for safety. "
+                             f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
         
         # Check for testing environment markers (but allow explicit overrides)
         if not direct_env and (self._env.get("PYTEST_CURRENT_TEST") or 

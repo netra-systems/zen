@@ -43,7 +43,7 @@ async def test_websocket_connection():
             websocket_url = "ws://localhost:8000/websocket"
             print(f"[U+1F517] Connecting to: {websocket_url}")
             
-            async with websockets.connect(websocket_url, timeout=10) as websocket:
+            async with websockets.connect(websocket_url, open_timeout=10) as websocket:
                 print(" PASS:  WebSocket connection established!")
                 
                 # Send a test message

@@ -19,7 +19,7 @@ import websockets
 import requests
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.ssot.websocket_test_utility import WebSocketTestUtility
+from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.clients.auth_client_core import AuthClientCore
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 from shared.isolated_environment import IsolatedEnvironment

@@ -8,7 +8,7 @@ import time
 import uuid
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from netra_backend.app.websocket_core.manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.smd import StartupOrchestrator
 from fastapi import FastAPI
 
