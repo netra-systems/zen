@@ -59,10 +59,10 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
         validator = OAuthDeploymentValidator("staging")
         success, report = validator.validate_all()
         
-        # This should FAIL because GOOGLE_OAUTH_CLIENT_ID_STAGING is missing
-        self.assertFalse(success, "OAuth validation should fail with missing GOOGLE_OAUTH_CLIENT_ID_STAGING")
-        self.assertIn("Google Client ID", report)
-        self.assertIn("NOT FOUND", report)
+        # This should FAIL because required OAuth credentials are missing
+        self.assertFalse(success, "OAuth validation should fail with missing OAuth configuration")
+        self.assertIn("GOOGLE_CLIENT_ID is required", report)
+        self.assertIn("CRITICAL ERRORS", report)
         self.assertTrue(len(validator.validation_errors) > 0, "Should have validation errors")
 
     def test_environment_specific_oauth_configuration_enforcement(self):
@@ -215,9 +215,9 @@ class TestOAuthConfigurationValidation(SSotBaseTestCase):
                 secret_errors = [e for e in validator.validation_errors if "secret" in e.lower()]
                 self.assertTrue(len(secret_errors) > 0)
 
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up test environment."""
-        super().tearDown()
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":

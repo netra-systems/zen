@@ -10,7 +10,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 
 """Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
- ALERT:  CRITICAL SSOT MIGRATION NOTICE  ALERT: 
+⚠️  ALERT:  CRITICAL SSOT MIGRATION NOTICE  ALERT ⚠️
 This ExecutionEngine is DEPRECATED and will be REMOVED in the next release.
 
 MIGRATION REQUIRED:
@@ -355,9 +355,11 @@ def detect_execution_engine_compatibility_usage() -> Dict[str, Any]:
     }
 
 
-# Legacy factory methods for backward compatibility - added to resolve conflict
+# Legacy factory methods for backward compatibility
 from netra_backend.app.agents.supervisor.user_execution_engine import (
     create_request_scoped_engine,
+)
+from netra_backend.app.agents.supervisor.user_execution_engine import (
     create_execution_context_manager,
     detect_global_state_usage
 )
