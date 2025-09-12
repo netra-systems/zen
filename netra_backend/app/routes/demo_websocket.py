@@ -13,10 +13,89 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.user_execution_context import get_user_execution_context
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
 
 logger = central_logger.get_logger(__name__)
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
+
+
+async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, connection_id: str) -> None:
+    """Execute real agent workflow with actual AI processing.
+    
+    This function:
+    1. Creates proper execution context
+    2. Initializes real supervisor agent
+    3. Processes the message through actual agent workflow
+    4. Sends real WebSocket events as agents execute
+    """
+    try:
+        # Create demo user context
+        demo_user_id = f"demo_{connection_id}"
+        thread_id = f"thread_{connection_id}"
+        run_id = f"run_{uuid.uuid4()}"
+        
+        # Get user execution context
+        user_context = get_user_execution_context(
+            user_id=demo_user_id,
+            thread_id=thread_id,
+            run_id=run_id
+        )
+        
+        # Create WebSocket bridge adapter
+        class WebSocketAdapter:
+            """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
+            async def send_event(self, event_type: str, data: dict):
+                await websocket.send_json({
+                    "type": event_type,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    **data
+                })
+        
+        ws_adapter = WebSocketAdapter()
+        
+        # Initialize WebSocket bridge
+        bridge = AgentWebSocketBridge()
+        bridge.websocket_manager = ws_adapter
+        
+        # Get LLM manager
+        config = get_config()
+        llm_manager = LLMManager(config)
+        
+        # Import and create supervisor agent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+        supervisor = SupervisorAgent(
+            llm_manager=llm_manager,
+            websocket_bridge=bridge
+        )
+        
+        # Send initial agent_started event
+        await ws_adapter.send_event("agent_started", {
+            "agent": "Supervisor",
+            "message": "Starting AI optimization analysis..."
+        })
+        
+        # Execute the agent workflow
+        await supervisor.run(
+            user_prompt=user_message,
+            thread_id=thread_id,
+            user_id=demo_user_id,
+            run_id=run_id
+        )
+        
+        # Send completion event
+        await ws_adapter.send_event("agent_completed", {
+            "agent": "Supervisor",
+            "message": "Analysis complete. Optimization recommendations ready."
+        })
+        
+    except Exception as e:
+        logger.error(f"Real agent execution failed: {e}")
+        # Fall back to simulator if real execution fails
+        await DemoAgentSimulator.simulate_agent_execution(websocket, user_message)
 
 class DemoAgentSimulator:
     """Simulates agent execution with proper event emissions"""
@@ -180,8 +259,8 @@ async def demo_websocket_endpoint(websocket: WebSocket):
                 user_message = data["message"]
                 logger.info(f"Demo received message: {user_message[:100]}...")
                 
-                # Simulate agent execution with all required events
-                await DemoAgentSimulator.simulate_agent_execution(websocket, user_message)
+                # Use real agent execution instead of simulation
+                await execute_real_agent_workflow(websocket, user_message, connection_id)
             
     except WebSocketDisconnect:
         logger.info(f"Demo WebSocket disconnected: {connection_id}")

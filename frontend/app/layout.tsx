@@ -18,8 +18,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
-      <body className={`${inter.className} h-full`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.className}`}>
         <SentryInit />
         <GTMProvider enabled={process.env.NEXT_PUBLIC_GTM_ENABLED !== 'false' && process.env.NODE_ENV !== 'test'}>
           <AuthProvider>

@@ -86,7 +86,11 @@
       "Bash(gcloud run services update-traffic:*)",
       "Bash(gcloud run services update:*)",
       "Bash(npm run build:*)",
-      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx next build)"
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx next build)",
+      "Bash(gcloud run revisions describe:*)",
+      "Bash(cat:*)",
+      "Bash(export NODE_OPTIONS=--max-old-space-size=4096)",
+      "Bash(npx next:*)"
     ],
     "deny": [],
     "ask": []
