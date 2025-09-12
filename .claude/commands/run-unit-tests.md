@@ -39,7 +39,7 @@ PROCESS INSTRUCTIONS START SNST:
         add tag: actively-being-worked-on
         4.2) Git commit work in conceptual batches. 
 
-        5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+    5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
         IF BREAKING CHANGES OR TEST STILL FAILING GO BACK: ensure that any code changes exclusively add value as one atomic package of commit and
         do not introduce new problems.
         5.1) UPDATE a comment on the ISSUE with PROOF
