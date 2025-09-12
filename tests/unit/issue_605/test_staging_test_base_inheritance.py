@@ -137,8 +137,8 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             pytest.skip(f"Required base classes not available: {e}")
     
     def _get_class_methods(self, cls) -> Set[str]:
-        """Get all methods from a class (excluding private methods)."""
-        return {name for name in dir(cls) if not name.startswith('_') and callable(getattr(cls, name, None))}
+        """Get all methods from a class (excluding truly private methods but including protected ones)."""
+        return {name for name in dir(cls) if not name.startswith('__') and callable(getattr(cls, name, None))}
     
     def _check_async_method_compatibility(self, base_class, staging_class) -> List[Dict[str, Any]]:
         """Check for async/sync method compatibility issues."""
@@ -435,6 +435,86 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             
         except ImportError as e:
             pytest.skip(f"Required base classes not available: {e}")
+    
+    def test_unified_e2e_test_base_inheritance_compatibility(self):
+        """
+        TEST: Verify that the new UnifiedE2ETestBase resolves inheritance issues.
+        
+        This test verifies that the new unified base class provides all the methods
+        needed from both BaseE2ETest and StagingTestBase, resolving Issue #605.
+        
+        Expected Result: PASS - Unified base class has all required methods
+        """
+        try:
+            # Import the original problem classes and the new unified class
+            from test_framework.base_e2e_test import BaseE2ETest
+            from tests.e2e.staging_test_base import StagingTestBase
+            from test_framework.unified_e2e_test_base import UnifiedE2ETestBase
+            
+            # Get methods from all three classes
+            base_e2e_methods = self._get_class_methods(BaseE2ETest)
+            staging_methods = self._get_class_methods(StagingTestBase)
+            unified_methods = self._get_class_methods(UnifiedE2ETestBase)
+            
+            # Check that the unified class has all methods from both original classes
+            missing_from_base_e2e = base_e2e_methods - unified_methods
+            missing_from_staging = staging_methods - unified_methods
+            
+            compatibility_analysis = {
+                "unified_methods_count": len(unified_methods),
+                "base_e2e_methods_count": len(base_e2e_methods),
+                "staging_methods_count": len(staging_methods),
+                "missing_from_base_e2e": list(missing_from_base_e2e),
+                "missing_from_staging": list(missing_from_staging),
+                "unified_has_all_base_e2e": len(missing_from_base_e2e) == 0,
+                "unified_has_all_staging": len(missing_from_staging) == 0
+            }
+            
+            logger.info(f"Unified base class compatibility analysis: {compatibility_analysis}")
+            
+            # Check that unified class provides all critical staging methods
+            # Note: track_test_timing is a module-level function, not a class method
+            staging_critical_methods = {"setup_class", "_load_staging_environment"}
+            unified_has_critical = staging_critical_methods <= unified_methods
+            
+            # Check that track_test_timing function is available in the unified module
+            import test_framework.unified_e2e_test_base as unified_module
+            has_track_test_timing = hasattr(unified_module, 'track_test_timing')
+            unified_has_critical = unified_has_critical and has_track_test_timing
+            
+            # Check that unified class provides all critical base e2e methods
+            base_e2e_critical_methods = {"setup_method", "teardown_method", "initialize_test_environment"}
+            unified_has_base_critical = base_e2e_critical_methods <= unified_methods
+            
+            # Debug logging
+            logger.info(f"unified_has_critical: {unified_has_critical}")
+            logger.info(f"unified_has_base_critical: {unified_has_base_critical}")
+            logger.info(f"has_track_test_timing: {has_track_test_timing}")
+            logger.info(f"staging_critical_methods in unified: {staging_critical_methods <= unified_methods}")
+            logger.info(f"staging_critical_methods: {staging_critical_methods}")
+            logger.info(f"missing staging methods: {staging_critical_methods - unified_methods}")
+            logger.info(f"unified methods: {sorted(unified_methods)}")
+            
+            if unified_has_critical and unified_has_base_critical:
+                logger.info("✅ UnifiedE2ETestBase successfully provides all critical methods")
+                assert True, f"UnifiedE2ETestBase provides compatibility: {compatibility_analysis}"
+            else:
+                missing_critical = []
+                if not unified_has_critical:
+                    missing_critical.append(f"staging methods (has_track_test_timing: {has_track_test_timing}, staging_methods_check: {staging_critical_methods <= unified_methods})")
+                if not unified_has_base_critical:
+                    missing_critical.append("base E2E methods")
+                
+                pytest.fail(
+                    f"UnifiedE2ETestBase is missing critical methods!\n"
+                    f"Missing: {missing_critical}\n"
+                    f"Analysis: {compatibility_analysis}\n"
+                    f"Debug: unified_has_critical={unified_has_critical}, unified_has_base_critical={unified_has_base_critical}\n"
+                    f"This indicates the unified class needs additional methods."
+                )
+            
+        except ImportError as e:
+            pytest.skip(f"Required classes not available: {e}")
     
     def teardown_method(self):
         """Teardown after each test method."""
