@@ -244,7 +244,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Unexpected Redis error: {e}")
     
-    def test_redis_connection_pool_management(self, redis_service):
+    async def test_redis_connection_pool_management(self, redis_service):
         """Test Redis connection pool management in Docker environment."""
         test_config = {
             "ENVIRONMENT": "test",
@@ -342,7 +342,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Redis persistence test failed: {e}")
     
-    def test_redis_error_handling_and_recovery(self, redis_service):
+    async def test_redis_error_handling_and_recovery(self, redis_service):
         """Test Redis error handling and connection recovery."""
         test_config = {
             "ENVIRONMENT": "test",
