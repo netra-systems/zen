@@ -121,7 +121,18 @@ markers = [
     "skipif: Conditional test skipping",
     "xfail: Expected to fail tests",
     "parametrize: Parameterized tests",
-    "usefixtures: Tests using specific fixtures"
+    "usefixtures: Tests using specific fixtures",
+    
+    # Business and system markers
+    "agent_execution: Agent execution tests",
+    "business_critical: Business-critical functionality tests", 
+    "ssot_delegation: Single Source of Truth delegation tests",
+    "execution_tracking: Execution tracking tests",
+    "critical_type_safety: Critical type safety tests",
+    "database: Database-related tests",
+    "id_system: ID system tests",
+    "business_requirements: Business requirements tests",
+    "user_isolation: User isolation tests"
 ]
 
 # Coverage settings
