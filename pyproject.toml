@@ -1,3 +1,24 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netra-apex"
+version = "1.0.0"
+description = "Netra Apex AI Optimization Platform"
+authors = [{name = "Netra Systems", email = "dev@netra.ai"}]
+license = {text = "Proprietary"}
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+test = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["test_framework*", "shared*", "netra_backend*", "auth_service*"]
+
 [tool.pytest.ini_options]
 # Optimized pytest configuration for improved test collection
 minversion = "6.0"
