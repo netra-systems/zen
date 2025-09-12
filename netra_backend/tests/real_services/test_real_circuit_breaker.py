@@ -533,7 +533,7 @@ class TestRealWebSocketCircuitBreaker:
         async def attempt_websocket_connection():
             """Attempt WebSocket connection that will fail."""
             try:
-                async with websockets.connect(invalid_ws_url, timeout=2.0):
+                async with websockets.connect(invalid_ws_url, open_timeout=2.0):
                     return True
             except Exception as e:
                 logger.info(f"WebSocket connection failed: {e}")
