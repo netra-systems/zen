@@ -159,7 +159,7 @@ class TestClickHouseDockerEnvironmentDetection:
                 # Validation: System should handle gracefully
                 assert result['service'] == 'clickhouse'
                 assert result['required'] == False
-                assert result['status'] == 'failed'  # Failed but graceful
+                assert result['status'] == 'skipped'  # Skipped appropriately in staging
                 
                 # Should not raise exception - graceful handling
                 # This proves Docker unavailability is handled when ClickHouse is optional
@@ -246,10 +246,10 @@ class TestClickHouseDockerEnvironmentDetection:
                             result = await initialize_clickhouse(logger)
                             
                             # Validate Cloud Run environment was detected
-                            # and ClickHouse failure was handled appropriately
+                            # and ClickHouse is skipped appropriately in staging
                             assert result['service'] == 'clickhouse'
-                            assert result['status'] == 'failed'
-                            assert 'docker' in result['error'].lower() or 'cloud run' in result['error'].lower()
+                            assert result['status'] == 'skipped'
+                            # No error expected since it's properly skipped in staging
                             
                             # Should have attempted to detect environment
                             mock_detector.detect_environment_context.assert_called()

@@ -184,12 +184,12 @@ class TestStartupClickHouseEnvironmentIntegration:
                         # Validate integration results
                         assert result is not None
                         assert result['service'] == 'clickhouse'
-                        assert result['status'] == 'failed'  # Should fail gracefully
+                        assert result['status'] == 'skipped'  # Should be skipped appropriately in staging
                         assert result['required'] == False  # Not required in staging
-                        assert 'connection' in result['error'].lower()
+                        # No error expected since it's properly skipped
                         
-                        # Verify that ClickHouse setup was attempted  
-                        mock_setup.assert_called_once()
+                        # ClickHouse setup should NOT be called when skipped in staging  
+                        mock_setup.assert_not_called()
                         
                         logger.info("✓ Integration test confirmed Docker unavailability handling")
                         
@@ -230,7 +230,7 @@ class TestStartupClickHouseEnvironmentIntegration:
                         # Should not raise exception in staging
                         result = await initialize_clickhouse(logger)
                         assert result['required'] == False
-                        assert result['status'] == 'failed'  # Failed but graceful
+                        assert result['status'] == 'skipped'  # Skipped appropriately in staging
         
         # Test production environment (Docker should be required)  
         production_env = {
