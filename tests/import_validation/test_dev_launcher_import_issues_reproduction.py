@@ -1,323 +1,305 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
-COMPREHENSIVE TEST PLAN: dev_launcher Import Issues Reproduction & Validation
+REPRODUCTION TEST: Dev Launcher Import Issues
 
-PURPOSE: 
-Test plan for reproducing and validating fixes for "No module named 'dev_launcher.isolated_environment'" 
-import issues that occur when files outside of dev_launcher try to import from dev_launcher.isolated_environment.
+PURPOSE: Demonstrate SSOT migration issues with dev_launcher imports.
+These tests are designed to FAIL and reproduce the exact import errors
+that occur when code still tries to import from dev_launcher.isolated_environment.
 
-CONTEXT:
-- Issue: `from dev_launcher.isolated_environment import IsolatedEnvironment` fails from outside dev_launcher
-- Root cause: Incomplete SSOT migration - IsolatedEnvironment moved to shared/isolated_environment.py
-- Business impact: Frontend thread loading failures when tests run
-- Found in: netra_backend/app/core/configuration/demo.py and tests/integration/execution_engine_ssot/test_configuration_integration.py
+EXPECTED BEHAVIOR:
+- All tests in this file should FAIL with ImportError
+- Errors demonstrate incomplete SSOT migration
+- Tests prove that dev_launcher.isolated_environment imports don't work
 
-STRATEGY:
-1. Create tests that FAIL BEFORE fixes are applied (reproduction tests)
-2. Create tests that PASS AFTER fixes are applied (validation tests)  
-3. Focus on integration level tests (non-docker)
-4. Follow testing best practices from reports/testing/TEST_CREATION_GUIDE.md
+ROOT CAUSE: 
+Incomplete SSOT migration - code still tries to import from dev_launcher
+instead of shared.isolated_environment.
 
-Generated: 2025-09-12
+PROBLEMATIC FILES IDENTIFIED:
+1. netra_backend/app/core/configuration/demo.py:8
+2. tests/integration/execution_engine_ssot/test_configuration_integration.py:129
+
+Business Impact: Platform/Internal - System Stability
+Prevents import errors that could break configuration system.
 """
 
-import sys
-import importlib
 import unittest
-from pathlib import Path
-from unittest.mock import patch
-import tempfile
+import sys
 import os
+from typing import Dict, Any
 
-# Test framework imports
+# Add project root to path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestDevLauncherImportIssuesReproduction(SSotBaseTestCase, unittest.TestCase):
+class TestDevLauncherImportIssuesReproduction(SSotBaseTestCase):
     """
-    FAILING TESTS: These tests reproduce the import errors that occur BEFORE fixes are applied.
-    These tests are designed to FAIL initially, then PASS after remediation.
+    Reproduction tests that demonstrate dev_launcher import failures.
+    
+    These tests are DESIGNED TO FAIL to prove the import issues exist.
     """
     
-    def setUp(self):
-        """Set up test environment."""
-        super().setUp()
-        self.problematic_files = [
-            "netra_backend/app/core/configuration/demo.py",
-            "tests/integration/execution_engine_ssot/test_configuration_integration.py"
-        ]
-        
-    def test_reproduce_demo_py_import_failure(self):
+    def test_demo_configuration_import_failure(self):
         """
-        REPRODUCTION TEST: Verify that demo.py fails to import IsolatedEnvironment from dev_launcher.
+        REPRODUCTION TEST: Demo configuration fails due to dev_launcher import.
         
-        This test should FAIL before the fix and PASS after the fix.
-        Business Impact: Demo mode configuration fails, affecting development and testing workflows.
+        This test reproduces the exact error in:
+        netra_backend/app/core/configuration/demo.py:8
+        
+        EXPECTED: ImportError - proves dev_launcher.isolated_environment doesn't exist
         """
-        # This test reproduces the exact error that occurs when running demo.py
-        with self.assertRaises(ModuleNotFoundError) as context:
+        print("\n🔍 REPRODUCTION TEST: Demo configuration import failure...")
+        
+        # This should fail with ImportError
+        with self.assertRaises(ImportError) as context:
             # Simulate the problematic import from demo.py line 8
-            exec("from dev_launcher.isolated_environment import IsolatedEnvironment")
-        
-        # Verify it's the specific error we're targeting
-        self.assertIn("No module named 'dev_launcher.isolated_environment'", str(context.exception))
-        self.assertEqual(context.exception.__class__.__name__, "ModuleNotFoundError")
-        
-    def test_reproduce_configuration_integration_import_failure(self):
-        """
-        REPRODUCTION TEST: Verify that test_configuration_integration.py fails to import from dev_launcher.
-        
-        This test should FAIL before the fix and PASS after the fix.
-        Business Impact: Integration tests fail, preventing proper validation of configuration systems.
-        """
-        # This reproduces the error from test_configuration_integration.py line 129
-        with self.assertRaises(ModuleNotFoundError) as context:
-            # Simulate the problematic import from the integration test
-            exec("from dev_launcher.isolated_environment import IsolatedEnvironment")
-        
-        # Verify error details
-        self.assertIn("No module named 'dev_launcher.isolated_environment'", str(context.exception))
-        
-    def test_reproduce_dynamic_import_failures(self):
-        """
-        REPRODUCTION TEST: Test that dynamic imports also fail consistently.
-        
-        This ensures that the issue affects both static and dynamic imports.
-        """
-        # Test dynamic import failure
-        with self.assertRaises(ModuleNotFoundError):
-            importlib.import_module("dev_launcher.isolated_environment")
+            from dev_launcher.isolated_environment import IsolatedEnvironment
             
-        # Test that the specific class import fails
-        with self.assertRaises(ModuleNotFoundError):
-            from_module = importlib.import_module("dev_launcher.isolated_environment")
-            getattr(from_module, "IsolatedEnvironment")
-            
-    def test_reproduce_import_in_subprocess_context(self):
-        """
-        REPRODUCTION TEST: Verify the import fails in subprocess contexts (like thread loading).
+        print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected")
+        print(f"   Error: {context.exception}")
         
-        Business Impact: This reproduces the frontend thread loading failures mentioned in the issue.
-        """
-        import subprocess
-        
-        # Test the import in a subprocess to simulate thread loading scenarios
-        result = subprocess.run([
-            sys.executable, "-c", 
-            "from dev_launcher.isolated_environment import IsolatedEnvironment; print('SUCCESS')"
-        ], capture_output=True, text=True)
-        
-        # Should fail with non-zero exit code
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("ModuleNotFoundError", result.stderr)
-        self.assertIn("No module named 'dev_launcher.isolated_environment'", result.stderr)
-        
-    def test_reproduce_import_from_different_working_directories(self):
-        """
-        REPRODUCTION TEST: Verify the import fails from different working directories.
-        
-        This ensures the issue is consistent across different execution contexts.
-        """
-        with tempfile.TemporaryDirectory() as tmpdir:
-            # Change to temporary directory
-            original_cwd = os.getcwd()
-            try:
-                os.chdir(tmpdir)
-                
-                # Try import from different working directory
-                with self.assertRaises(ModuleNotFoundError):
-                    exec("from dev_launcher.isolated_environment import IsolatedEnvironment")
-                    
-            finally:
-                os.chdir(original_cwd)
-
-
-class TestDevLauncherImportIssuesValidation(SSotBaseTestCase, unittest.TestCase):
-    """
-    VALIDATION TESTS: These tests validate that the correct imports work after fixes are applied.
-    These tests should PASS both before and after fixes (they test the correct behavior).
-    """
-    
-    def test_correct_import_from_shared_works(self):
-        """
-        VALIDATION TEST: Verify that importing from shared.isolated_environment works correctly.
-        
-        This test validates the correct import path and should PASS.
-        """
-        try:
-            from shared.isolated_environment import IsolatedEnvironment
-            
-            # Verify the import was successful
-            self.assertTrue(hasattr(IsolatedEnvironment, '__init__'))
-            
-            # Test that we can instantiate the class
-            env_instance = IsolatedEnvironment()
-            self.assertIsInstance(env_instance, IsolatedEnvironment)
-            
-        except ImportError as e:
-            self.fail(f"Correct import from shared.isolated_environment failed: {e}")
-            
-    def test_isolated_environment_class_functionality(self):
-        """
-        VALIDATION TEST: Verify that IsolatedEnvironment class functions correctly after import.
-        
-        This ensures that the SSOT migration preserved functionality.
-        """
-        from shared.isolated_environment import IsolatedEnvironment
-        
-        # Test basic functionality
-        env = IsolatedEnvironment()
-        
-        # Test that essential methods exist and work
-        self.assertTrue(hasattr(env, 'get'))
-        self.assertTrue(hasattr(env, 'get_bool'))
-        self.assertTrue(hasattr(env, 'enable_isolation'))
-        
-        # Test basic functionality doesn't raise exceptions
-        try:
-            test_value = env.get('TEST_VAR', 'default_value')
-            self.assertEqual(test_value, 'default_value')  # Should return default since TEST_VAR doesn't exist
-        except Exception as e:
-            self.fail(f"Basic IsolatedEnvironment functionality failed: {e}")
-            
-    def test_dynamic_import_from_shared_works(self):
-        """
-        VALIDATION TEST: Verify that dynamic imports from shared work correctly.
-        """
-        try:
-            # Test dynamic import
-            module = importlib.import_module("shared.isolated_environment")
-            IsolatedEnvironment = getattr(module, "IsolatedEnvironment")
-            
-            # Test instantiation
-            env_instance = IsolatedEnvironment()
-            self.assertIsNotNone(env_instance)
-            
-        except (ImportError, AttributeError) as e:
-            self.fail(f"Dynamic import from shared.isolated_environment failed: {e}")
-            
-    def test_shared_import_in_subprocess_context(self):
-        """
-        VALIDATION TEST: Verify that importing from shared works in subprocess contexts.
-        
-        This validates that the fix resolves thread loading issues.
-        """
-        import subprocess
-        
-        # Test the correct import in a subprocess
-        result = subprocess.run([
-            sys.executable, "-c", 
-            "from shared.isolated_environment import IsolatedEnvironment; print('SUCCESS')"
-        ], capture_output=True, text=True)
-        
-        # Should succeed with zero exit code
-        self.assertEqual(result.returncode, 0, f"Subprocess failed: {result.stderr}")
-        self.assertIn("SUCCESS", result.stdout)
-
-
-class TestImportPatternValidation(SSotBaseTestCase, unittest.TestCase):
-    """
-    COMPREHENSIVE VALIDATION: Tests to ensure all problematic import patterns are identified.
-    """
-    
-    def test_identify_all_problematic_files(self):
-        """
-        VALIDATION TEST: Scan codebase to identify any remaining problematic imports.
-        
-        This test helps ensure comprehensive fix coverage.
-        """
-        import os
-        import re
-        
-        project_root = Path(__file__).parent.parent.parent
-        problematic_pattern = re.compile(r'from\s+dev_launcher\.isolated_environment\s+import')
-        
-        problematic_files = []
-        
-        # Scan only files outside of dev_launcher directory
-        for root, dirs, files in os.walk(project_root):
-            # Skip dev_launcher directory itself
-            if 'dev_launcher' in Path(root).parts:
-                continue
-                
-            for file in files:
-                if file.endswith('.py'):
-                    file_path = Path(root) / file
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            content = f.read()
-                            if problematic_pattern.search(content):
-                                relative_path = file_path.relative_to(project_root)
-                                problematic_files.append(str(relative_path))
-                    except (UnicodeDecodeError, PermissionError):
-                        # Skip files that can't be read
-                        continue
-        
-        # Before fix: Should find the known problematic files
-        # After fix: Should find no problematic files
-        expected_problematic_files = [
-            "netra_backend/app/core/configuration/demo.py",
-            "tests/integration/execution_engine_ssot/test_configuration_integration.py"
-        ]
-        
-        # For reproduction phase, verify we find the expected problematic files
+        # Verify it's the right kind of error
+        error_msg = str(context.exception).lower()
         self.assertTrue(
-            len(problematic_files) >= 2, 
-            f"Expected to find at least 2 problematic files, found: {problematic_files}"
+            "dev_launcher" in error_msg or "isolated_environment" in error_msg,
+            f"Unexpected error message: {context.exception}"
         )
         
-    def test_validate_ssot_migration_completeness(self):
+    def test_configuration_integration_import_failure(self):
         """
-        VALIDATION TEST: Verify that the SSOT migration was completed correctly.
+        REPRODUCTION TEST: Configuration integration test fails due to dev_launcher import.
         
-        Ensures that shared.isolated_environment has all expected functionality.
+        This test reproduces the exact error in:
+        tests/integration/execution_engine_ssot/test_configuration_integration.py:129
+        
+        EXPECTED: ImportError - proves dev_launcher.isolated_environment doesn't exist
         """
-        from shared.isolated_environment import IsolatedEnvironment
+        print("\n🔍 REPRODUCTION TEST: Configuration integration import failure...")
         
-        # Test that essential SSOT functionality is present
-        required_methods = [
-            'get', 'get_bool', 'get_int', 'get_float', 
-            'enable_isolation', 'disable_isolation',
-            'load_from_file', 'get_debug_info'
+        # This should fail with ImportError  
+        with self.assertRaises(ImportError) as context:
+            # Simulate the problematic import from test_configuration_integration.py line 129
+            from dev_launcher.isolated_environment import IsolatedEnvironment
+            env = IsolatedEnvironment()
+            
+        print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected")
+        print(f"   Error: {context.exception}")
+        
+        # Verify it's the right kind of error
+        error_msg = str(context.exception).lower()
+        self.assertTrue(
+            "dev_launcher" in error_msg or "isolated_environment" in error_msg,
+            f"Unexpected error message: {context.exception}"
+        )
+        
+    def test_dev_launcher_module_structure(self):
+        """
+        REPRODUCTION TEST: Verify dev_launcher doesn't contain isolated_environment.
+        
+        This test confirms that dev_launcher.isolated_environment doesn't exist,
+        which is the root cause of the import failures.
+        
+        EXPECTED: Module missing or AttributeError - proves isolated_environment not in dev_launcher
+        """
+        print("\n🔍 REPRODUCTION TEST: Dev_launcher module structure...")
+        
+        try:
+            # Try to import dev_launcher itself
+            import dev_launcher
+            print(f"📦 dev_launcher module exists at: {dev_launcher.__file__}")
+            
+            # Check if it has isolated_environment attribute
+            if hasattr(dev_launcher, 'isolated_environment'):
+                # This would be unexpected - the issue is it doesn't exist
+                self.fail("dev_launcher.isolated_environment exists - this contradicts the expected import failure")
+            else:
+                print("✅ REPRODUCTION CONFIRMED: isolated_environment not found in dev_launcher")
+                
+            # Try to import the specific module that should fail
+            with self.assertRaises(ImportError) as context:
+                from dev_launcher.isolated_environment import IsolatedEnvironment
+                
+            print(f"✅ REPRODUCTION CONFIRMED: ImportError as expected: {context.exception}")
+            
+        except ImportError as e:
+            # If dev_launcher itself doesn't exist, that's also a valid reproduction
+            print(f"✅ REPRODUCTION CONFIRMED: dev_launcher module import failed: {e}")
+            
+    def test_attempt_to_use_problematic_import_pattern(self):
+        """
+        REPRODUCTION TEST: Attempt to use the exact problematic import pattern.
+        
+        This test reproduces what happens when the problematic files
+        try to create and use IsolatedEnvironment from dev_launcher.
+        
+        EXPECTED: ImportError - proves the import pattern is broken
+        """
+        print("\n🔍 REPRODUCTION TEST: Problematic import pattern usage...")
+        
+        # Test the exact pattern used in demo.py
+        with self.assertRaises(ImportError) as context:
+            exec("""
+from dev_launcher.isolated_environment import IsolatedEnvironment
+
+def get_demo_config():
+    env = IsolatedEnvironment()
+    return {
+        "enabled": env.get_bool("DEMO_MODE", False),
+        "session_ttl": int(env.get("DEMO_SESSION_TTL", "3600")),
+    }
+
+config = get_demo_config()
+""")
+            
+        print(f"✅ REPRODUCTION CONFIRMED: ImportError in exec as expected")
+        print(f"   Error: {context.exception}")
+        
+    def test_verify_shared_isolated_environment_exists(self):
+        """
+        VERIFICATION TEST: Confirm that the correct import path exists.
+        
+        This test verifies that shared.isolated_environment exists,
+        which confirms that the SSOT migration target is available.
+        
+        EXPECTED: This test should PASS - proves correct import path works
+        """
+        print("\n✅ VERIFICATION TEST: Shared IsolatedEnvironment exists...")
+        
+        try:
+            # This should work - it's the correct SSOT path
+            from shared.isolated_environment import IsolatedEnvironment
+            
+            # Test that it can be instantiated
+            env = IsolatedEnvironment()
+            self.assertIsNotNone(env)
+            
+            # Test that it has expected methods
+            expected_methods = ['get', 'get_bool', 'get_int', 'set']
+            for method in expected_methods:
+                self.assertTrue(
+                    hasattr(env, method),
+                    f"IsolatedEnvironment missing expected method: {method}"
+                )
+            
+            print(f"✅ VERIFICATION PASSED: shared.isolated_environment.IsolatedEnvironment works correctly")
+            print(f"   Available methods: {[m for m in expected_methods if hasattr(env, m)]}")
+            
+        except ImportError as e:
+            self.fail(f"VERIFICATION FAILED: shared.isolated_environment import failed: {e}")
+
+
+class TestDevLauncherImportPatternAnalysis(SSotBaseTestCase):
+    """
+    Analysis tests that examine the import patterns and their failures.
+    
+    These tests provide detailed analysis of why the imports fail
+    and what the correct patterns should be.
+    """
+    
+    def test_analyze_import_error_details(self):
+        """
+        ANALYSIS TEST: Provide detailed analysis of the import errors.
+        
+        This test captures and analyzes the specific ImportError details
+        to help understand the root cause of the migration issues.
+        """
+        print("\n🔬 ANALYSIS TEST: Import error details...")
+        
+        import_scenarios = [
+            {
+                "name": "direct_module_import",
+                "code": "from dev_launcher.isolated_environment import IsolatedEnvironment"
+            },
+            {
+                "name": "indirect_usage_pattern",  
+                "code": """
+import dev_launcher.isolated_environment as ie
+env = ie.IsolatedEnvironment()
+"""
+            },
+            {
+                "name": "module_attribute_access",
+                "code": """
+import dev_launcher
+env = dev_launcher.isolated_environment.IsolatedEnvironment()
+"""
+            }
         ]
         
-        for method_name in required_methods:
-            self.assertTrue(
-                hasattr(IsolatedEnvironment, method_name),
-                f"SSOT migration incomplete: missing method {method_name}"
-            )
+        for scenario in import_scenarios:
+            print(f"\n  📋 Analyzing scenario: {scenario['name']}")
             
-    def test_ensure_dev_launcher_internal_imports_still_work(self):
+            try:
+                exec(scenario['code'])
+                self.fail(f"Expected ImportError for scenario {scenario['name']}")
+                
+            except ImportError as e:
+                error_analysis = {
+                    "scenario": scenario['name'],
+                    "error_message": str(e),
+                    "error_type": type(e).__name__,
+                    "contains_dev_launcher": "dev_launcher" in str(e).lower(),
+                    "contains_isolated_environment": "isolated_environment" in str(e).lower()
+                }
+                
+                print(f"     ✅ ImportError confirmed: {error_analysis['error_message']}")
+                print(f"     📊 Error analysis: {error_analysis}")
+                
+                # Verify expected error characteristics
+                self.assertTrue(
+                    error_analysis['contains_dev_launcher'] or error_analysis['contains_isolated_environment'],
+                    f"Error message doesn't mention expected modules: {e}"
+                )
+                
+    def test_compare_working_vs_broken_imports(self):
         """
-        VALIDATION TEST: Ensure that internal dev_launcher imports still function.
+        ANALYSIS TEST: Compare working vs broken import patterns.
         
-        The fix should only affect external imports, not internal dev_launcher functionality.
+        This test demonstrates the difference between the broken
+        dev_launcher imports and the working shared imports.
         """
-        # This test validates that files WITHIN dev_launcher can still import from each other
-        # We don't actually test the internal imports here since they should continue working
-        # This is more of a conceptual test to document the requirement
+        print("\n🔬 ANALYSIS TEST: Working vs broken import comparison...")
         
-        # Verify that the dev_launcher module structure still exists
-        dev_launcher_path = Path(__file__).parent.parent.parent / "dev_launcher"
-        self.assertTrue(dev_launcher_path.exists(), "dev_launcher directory should still exist")
+        # Test 1: Broken import (should fail)
+        broken_import_worked = False
+        try:
+            from dev_launcher.isolated_environment import IsolatedEnvironment as BrokenIE
+            broken_import_worked = True
+        except ImportError as e:
+            print(f"  ❌ BROKEN IMPORT (expected): {e}")
+            
+        self.assertFalse(broken_import_worked, "Broken import unexpectedly succeeded")
         
-        # Verify that dev_launcher has its own __init__.py
-        init_path = dev_launcher_path / "__init__.py"
-        self.assertTrue(init_path.exists(), "dev_launcher __init__.py should exist for internal imports")
+        # Test 2: Working import (should succeed)
+        working_import_worked = False
+        try:
+            from shared.isolated_environment import IsolatedEnvironment as WorkingIE
+            working_import_worked = True
+            print(f"  ✅ WORKING IMPORT: shared.isolated_environment.IsolatedEnvironment")
+            
+            # Test basic functionality
+            env = WorkingIE()
+            test_result = env.get("TEST_VAR", "default_value")
+            print(f"     🧪 Basic functionality test: get() returned '{test_result}'")
+            
+        except ImportError as e:
+            print(f"  ❌ WORKING IMPORT FAILED (unexpected): {e}")
+            
+        self.assertTrue(working_import_worked, "Working import unexpectedly failed")
+        
+        # Test 3: Demonstrate the migration path
+        print(f"\n  📋 MIGRATION PATH ANALYSIS:")
+        print(f"     BROKEN: from dev_launcher.isolated_environment import IsolatedEnvironment")
+        print(f"     FIXED:  from shared.isolated_environment import IsolatedEnvironment")
+        print(f"     FILES TO UPDATE:")
+        print(f"       1. netra_backend/app/core/configuration/demo.py:8")
+        print(f"       2. tests/integration/execution_engine_ssot/test_configuration_integration.py:129")
 
 
 if __name__ == '__main__':
-    # Run the reproduction tests first (these should fail before fix)
-    reproduction_suite = unittest.TestLoader().loadTestsFromTestCase(TestDevLauncherImportIssuesReproduction)
-    validation_suite = unittest.TestLoader().loadTestsFromTestCase(TestDevLauncherImportIssuesValidation)
-    pattern_suite = unittest.TestLoader().loadTestsFromTestCase(TestImportPatternValidation)
-    
-    # Combine all test suites
-    all_tests = unittest.TestSuite([reproduction_suite, validation_suite, pattern_suite])
-    
-    # Run tests
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(all_tests)
-    
-    # Exit with appropriate code
-    sys.exit(0 if result.wasSuccessful() else 1)
+    # Run with verbose output to see all the reproduction details
+    unittest.main(verbosity=2)

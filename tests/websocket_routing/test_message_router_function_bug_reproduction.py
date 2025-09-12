@@ -233,10 +233,16 @@ class TestMessageRouterFunctionBugReproduction:
         """
         CRITICAL EDGE CASE: Function handler prevents proper handlers from being reached.
         
-        This shows that even one bad function handler breaks the entire routing system.
-        EXPECTED: System fails even when proper handlers exist.
+        When a function handler is added first, it breaks the entire routing system
+        because _find_handler stops at the first handler that throws AttributeError.
         """
-        # Add proper handler first
+        # Add bad function handler FIRST (this breaks everything)
+        async def bad_handler(user_id, ws, msg):
+            return True
+            
+        message_router.add_handler(bad_handler)
+        
+        # Add proper handler after (won't be reached due to function handler failure)
         class GoodHandler:
             def can_handle(self, message_type: MessageType) -> bool:
                 return True
@@ -247,13 +253,7 @@ class TestMessageRouterFunctionBugReproduction:
         good_handler = GoodHandler()
         message_router.add_handler(good_handler)
         
-        # Add bad function handler (this breaks everything)
-        async def bad_handler(user_id, ws, msg):
-            return True
-            
-        message_router.add_handler(bad_handler)
-        
-        # Even though we have a good handler, the bad one breaks the system
+        # The bad handler breaks the system before good handler is checked
         with pytest.raises(AttributeError, match="'function' object has no attribute 'can_handle'"):
             message_router._find_handler(MessageType.AGENT_REQUEST)
         
