@@ -492,7 +492,7 @@ class AgentExecutionCore:
                 
                 # Get agent from registry with detailed error logging
                 try:
-                    agent = self._get_agent_or_error(context.agent_name)
+                    agent = await self._get_agent_or_error(context.agent_name, user_execution_context)
                     if isinstance(agent, AgentExecutionResult):
                         # Agent not found - this is a critical configuration issue
                         logger.critical(
@@ -1039,16 +1039,41 @@ class AgentExecutionCore:
         
         return callback if self.websocket_bridge else None
     
-    def _get_agent_or_error(self, agent_name: str):
-        """Get agent from registry or return error result."""
-        agent = self.registry.get(agent_name)
-        if not agent:
+    async def _get_agent_or_error(self, agent_name: str, user_execution_context: Optional['UserExecutionContext'] = None):
+        """Get agent from registry or return error result.
+        
+        CRITICAL FIX for Issue #579: Agent Execution Coroutine User ID Failures
+        - Uses registry.get_async() to properly handle async agent factories
+        - Prevents unawaited coroutine warnings and execution failures
+        - Includes coroutine detection safety checks
+        """
+        try:
+            # Use async version of get method to properly handle async factories
+            agent = await self.registry.get_async(agent_name, context=user_execution_context)
+            
+            # Safety check: Detect if we accidentally got a coroutine
+            import asyncio
+            if asyncio.iscoroutine(agent):
+                logger.error(f"CRITICAL: Registry returned unawaited coroutine for agent {agent_name} - this indicates a bug")
+                # Clean up the coroutine to prevent warnings
+                agent.close()
+                agent = None
+            
+            if not agent:
+                return AgentExecutionResult(
+                    success=False,
+                    agent_name=agent_name,
+                    error=f"Agent {agent_name} not found"
+                )
+            return agent
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent {agent_name} from registry: {str(e)}")
             return AgentExecutionResult(
                 success=False,
                 agent_name=agent_name,
-                error=f"Agent {agent_name} not found"
+                error=f"Agent {agent_name} retrieval failed: {str(e)}"
             )
-        return agent
     
     def _calculate_performance_metrics(
         self, 
