@@ -154,14 +154,12 @@ class RedisManager:
         """Establish Redis connection with fallback handling."""
         try:
             import redis.asyncio as redis
+            # MIGRATED: Use modern async Redis client with config
             self._client = redis.Redis(
                 host=self.config.redis_host,
                 port=self.config.redis_port,
                 db=self.config.redis_db,
-                password=self.config.redis_password,
-                decode_responses=True,
-                socket_timeout=10,
-                socket_connect_timeout=10
+                password=self.config.redis_password
             )
             # Test connection
             await self._client.ping()
