@@ -108,6 +108,53 @@ class MockWebSocketManager:
         self.sent_messages.clear()
         self.broadcast_messages.clear()
         self.sent_to_threads.clear()
+        # Clear Golden Path tracking
+        self.agent_started_calls.clear()
+        self.agent_thinking_calls.clear()
+        self.tool_executing_calls.clear()
+        self.tool_completed_calls.clear()
+        self.agent_completed_calls.clear()
+    
+    # Golden Path notification methods required by WebSocketNotifier validation
+    async def notify_agent_started(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_started for Golden Path compatibility."""
+        self.agent_started_calls.append({
+            **context,
+            "_test_notification_type": "agent_started",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_agent_thinking(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_thinking for Golden Path compatibility."""
+        self.agent_thinking_calls.append({
+            **context,
+            "_test_notification_type": "agent_thinking", 
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_tool_executing(self, context: Dict[str, Any]) -> None:
+        """Mock notify_tool_executing for Golden Path compatibility."""
+        self.tool_executing_calls.append({
+            **context,
+            "_test_notification_type": "tool_executing",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_tool_completed(self, context: Dict[str, Any]) -> None:
+        """Mock notify_tool_completed for Golden Path compatibility.""" 
+        self.tool_completed_calls.append({
+            **context,
+            "_test_notification_type": "tool_completed",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_agent_completed(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_completed for Golden Path compatibility."""
+        self.agent_completed_calls.append({
+            **context,
+            "_test_notification_type": "agent_completed",
+            "_test_timestamp": time.time()
+        })
 
 
 @pytest.fixture
