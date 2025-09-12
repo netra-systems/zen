@@ -1439,13 +1439,14 @@ class WebSocketSSOTRouter:
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
+            # SSOT PATTERN: Direct manager access for health checks (no user context required)
+            manager = await get_websocket_manager(user_context=None)
             health_status = {
                 "status": "healthy",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "mode": "ssot_consolidated",
                 "components": {
-                    "factory": factory is not None,
+                    "manager": manager is not None,
                     "message_router": get_message_router() is not None,
                     "connection_monitor": get_connection_monitor() is not None
                 },
@@ -1470,7 +1471,8 @@ class WebSocketSSOTRouter:
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
+            # SSOT PATTERN: Direct manager access for configuration endpoint
+            manager = await get_websocket_manager(user_context=None)
             
             return {
                 "websocket_config": {
@@ -1484,7 +1486,7 @@ class WebSocketSSOTRouter:
                     "consolidation_complete": True,
                     "competing_routes_eliminated": 4
                 },
-                "factory_available": factory is not None,
+                "manager_available": manager is not None,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
@@ -1496,7 +1498,8 @@ class WebSocketSSOTRouter:
         try:
             from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
+            # SSOT PATTERN: Direct manager access for statistics endpoint
+            manager = await get_websocket_manager(user_context=None)
             message_router = get_message_router()
             
             return {
