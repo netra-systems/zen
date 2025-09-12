@@ -1,26 +1,18 @@
 """
-WebSocket Authentication Integration Tests Package
+WebSocket Auth Integration Tests Package
 
-This package contains comprehensive integration tests for WebSocket authentication
-covering authentication flows, user context management, and security validation.
+This package contains comprehensive integration tests for WebSocket permission and authorization systems.
+These tests validate the integration between WebSocket authentication, user plan enforcement, 
+tool permissions, and rate limiting in real service environments.
 
-Test Structure:
-- test_websocket_auth_integration_flow.py: 8 Authentication Flow Tests
-- test_websocket_auth_integration_user_context.py: 6 User Context Integration Tests  
-- test_websocket_auth_integration_security.py: 6 Security and Validation Tests
+Test Categories:
+1. User Plan Integration - Validates plan tier enforcement and upgrade paths
+2. Tool Permission Authorization - Validates tool-specific permissions and access control
+3. Rate Limiting and Usage Control - Validates usage limits and billing integration
 
-Total: 20 High-Quality Integration Tests
-
-Business Value: Validates $500K+ ARR chat functionality authentication mechanisms
+Business Value:
+- Protects $500K+ ARR through proper subscription enforcement
+- Validates monetization mechanisms and plan differentiation
+- Ensures secure tool execution and usage tracking
+- Drives conversion through contextual upgrade messaging
 """
-
-# Import all test classes for easy access
-from .test_websocket_auth_integration_flow import TestWebSocketAuthenticationFlow
-from .test_websocket_auth_integration_user_context import TestWebSocketUserContextIntegration
-from .test_websocket_auth_integration_security import TestWebSocketAuthenticationSecurity
-
-__all__ = [
-    "TestWebSocketAuthenticationFlow",
-    "TestWebSocketUserContextIntegration", 
-    "TestWebSocketAuthenticationSecurity"
-]
