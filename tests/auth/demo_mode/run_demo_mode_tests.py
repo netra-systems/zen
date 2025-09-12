@@ -37,7 +37,7 @@ class DemoModeTestRunner:
         
     def setup_demo_environment(self):
         """Setup environment for demo mode testing."""
-        print("🔧 Setting up demo mode test environment...")
+        print("Setting up demo mode test environment...")
         
         # Set demo mode environment
         self.env.set_env("DEMO_MODE", "true")
@@ -48,7 +48,7 @@ class DemoModeTestRunner:
         self.env.set_env("LOG_LEVEL", "DEBUG")
         self.env.set_env("TESTING", "true")
         
-        print("✅ Demo mode environment configured")
+        print("Demo mode environment configured")
         
     def cleanup_environment(self):
         """Cleanup test environment."""
@@ -61,7 +61,7 @@ class DemoModeTestRunner:
         self.env.unset_env("LOG_LEVEL")
         self.env.unset_env("TESTING")
         
-        print("✅ Environment cleaned up")
+        print("Environment cleaned up")
         
     def run_test_module(self, test_file, description):
         """Run a specific test module."""
@@ -93,16 +93,16 @@ class DemoModeTestRunner:
             
             # Print summary
             if return_code == 0:
-                print("   ✅ UNEXPECTED PASS (Tests should fail initially)")
+                print("   UNEXPECTED PASS (Tests should fail initially)")
                 print("   ⚠️  This indicates demo features may already be implemented")
             else:
-                print("   ❌ EXPECTED FAIL (Current restrictive behavior)")
-                print("   ✅ This demonstrates need for demo mode implementation")
+                print("   EXPECTED FAIL (Current restrictive behavior)")
+                print("   This demonstrates need for demo mode implementation")
                 
             return return_code == 0
             
         except subprocess.TimeoutExpired:
-            print("   ⏰ TEST TIMEOUT (> 5 minutes)")
+            print("   TEST TIMEOUT (> 5 minutes)")
             self.test_results.append({
                 "module": test_file,
                 "description": description, 
@@ -125,8 +125,8 @@ class DemoModeTestRunner:
     
     def run_all_tests(self, verbose=False, integration_only=False):
         """Run all demo mode tests."""
-        print("🚀 Starting Demo Mode Authentication Test Suite")
-        print(f"⏰ Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("Starting Demo Mode Authentication Test Suite")
+        print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("\n" + "="*60)
         
         # Setup environment
@@ -182,13 +182,13 @@ class DemoModeTestRunner:
     def print_detailed_results(self):
         """Print detailed test results."""
         print("\n" + "="*60)
-        print("📊 DETAILED TEST RESULTS")
+        print("DETAILED TEST RESULTS")
         print("="*60)
         
         for result in self.test_results:
             print(f"\n🔍 {result['description']}")
             print(f"   Module: {result['module']}")
-            print(f"   Status: {'✅ PASS' if result['passed'] else '❌ FAIL'}")
+            print(f"   Status: {'PASS' if result['passed'] else 'FAIL'}")
             print(f"   Return Code: {result['return_code']}")
             
             if result['output']:
@@ -208,11 +208,11 @@ class DemoModeTestRunner:
         print("="*60)
         
         print(f"🎯 Expected Result: ALL TESTS SHOULD FAIL (demonstrating restrictive behavior)")
-        print(f"📊 Tests Passed: {passed_count}/{total_count}")
-        print(f"📊 Tests Failed: {total_count - passed_count}/{total_count}")
+        print(f"Tests Passed: {passed_count}/{total_count}")
+        print(f"Tests Failed: {total_count - passed_count}/{total_count}")
         
         if passed_count == 0:
-            print("\n✅ PERFECT! All tests failed as expected")
+            print("\nPERFECT! All tests failed as expected")
             print("   This demonstrates current restrictive authentication behavior")
             print("   Ready to implement demo mode features to make tests pass")
         elif passed_count < total_count:
@@ -224,7 +224,7 @@ class DemoModeTestRunner:
             print("   Demo mode features appear to be fully implemented")
             print("   Verify this is intended behavior")
         
-        print(f"\n⏰ Completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\nCompleted at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("\n🔗 Next Steps:")
         print("   1. Review failing tests to understand implementation needs")
         print("   2. Begin implementing demo mode configuration")
@@ -271,7 +271,7 @@ Examples:
     failed_tests = [r for r in results if not r['passed']]
     if len(failed_tests) == len(results):
         # All tests failed - this is expected initially
-        print("\n✅ Expected result achieved: All tests demonstrate need for demo implementation")
+        print("\nExpected result achieved: All tests demonstrate need for demo implementation")
         sys.exit(0)
     else:
         # Some tests passed - unexpected initially

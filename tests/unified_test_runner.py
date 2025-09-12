@@ -1202,6 +1202,8 @@ class UnifiedTestRunner:
             # This allows staging.env to be loaded for ClickHouse and other configurations
             env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_config')
             env.set('ENVIRONMENT', 'staging', 'staging_config')
+            env.set('NETRA_ENVIRONMENT', 'staging', 'staging_config')
+            env.set('TEST_ENV', 'staging', 'staging_config')  # Required by environment_markers.py
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -1461,6 +1463,8 @@ class UnifiedTestRunner:
                 bypass_key = result.stdout.strip()
                 env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
                 env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
+                env.set('NETRA_ENVIRONMENT', 'staging', 'staging_e2e_auth')
+                env.set('TEST_ENV', 'staging', 'staging_e2e_auth')  # Required by environment_markers.py
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
                 # CRITICAL: Enable local config file loading for staging tests
                 env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_e2e_auth')
