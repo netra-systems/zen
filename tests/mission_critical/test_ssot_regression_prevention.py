@@ -1866,10 +1866,13 @@ class TestSSOTContinuousCompliance:
                     })
         
         # Clean up test data
-        for context_id in range(num_isolated_contexts):
+        async def cleanup_context_data(context_id):
             keys_to_delete = await redis_client.keys(f"context:{context_id}:*")
             if keys_to_delete:
                 await redis_client.delete(*keys_to_delete)
+        
+        for context_id in range(num_isolated_contexts):
+            asyncio.get_event_loop().run_until_complete(cleanup_context_data(context_id))
         
         # Verify NO data leakage detected
         if leakage_violations:

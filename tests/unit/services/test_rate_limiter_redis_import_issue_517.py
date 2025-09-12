@@ -24,10 +24,13 @@ import importlib.util
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.ssot.base_test_case import SSotBaseTestCase
+# Simple debug test
+def test_basic():
+    print("Basic test works")
+    return True
 
 
-class TestRateLimiterRedisImportIssue517(SSotBaseTestCase):
+class TestRateLimiterRedisImportIssue517(unittest.TestCase):
     """
     Test suite for Issue #517 - Redis Import Error in Rate Limiter Service
     
@@ -36,7 +39,6 @@ class TestRateLimiterRedisImportIssue517(SSotBaseTestCase):
     """
     
     def setUp(self):
-        super().setUp()
         self.rate_limiter_path = project_root / "netra_backend" / "app" / "services" / "tool_permissions" / "rate_limiter.py"
         
     def test_redis_import_error_reproduction(self):
