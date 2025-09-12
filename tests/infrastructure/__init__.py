@@ -1,57 +1,66 @@
 """
-Infrastructure Tests Module
+Infrastructure Tests for Issue #485
+
+This module contains tests specifically designed to validate and resolve
+test infrastructure issues identified in Issue #485 - Golden Path Test 
+Infrastructure Missing Context.
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal - Infrastructure Integrity & Production Readiness  
-- Business Goal: Validate critical infrastructure components work correctly
-- Value Impact: Ensures production deployment stability and prevents service failures
-- Strategic Impact: Foundation for reliable platform operations supporting $500K+ ARR
-
-This module contains critical infrastructure validation tests that reproduce and validate
-fixes for production environment issues that affect the Golden Path user experience.
+- Segment: Platform Infrastructure  
+- Business Goal: Ensure reliable test infrastructure for $500K+ ARR protection
+- Value Impact: Reliable test execution enables business continuity validation
+- Strategic Impact: Foundation for all other business value validation
 
 Test Categories:
-- GCP Load Balancer header forwarding validation
-- Demo mode configuration and security testing  
-- WebSocket 1011 error reproduction and recovery testing
+- Import Path Resolution Tests: Validate reliable module imports
+- Unified Test Runner Collection Tests: Validate test discovery and collection
+- Business Value Protection Tests: Validate capability to protect $500K+ ARR
+- Existing Functionality Protection Tests: Ensure no regressions during fixes
 
-All tests follow SSOT patterns and use real services (no mocks) per CLAUDE.md requirements.
+Expected Test Behavior:
+- Phase 1-3 Tests: Should INITIALLY FAIL to demonstrate the issues
+- Phase 4 Tests: Should INITIALLY PASS to validate regression protection  
+- After Fixes: All tests should PASS
+
+Business Value Impact:
+These tests protect the foundation of our test infrastructure which enables
+validation of the $500K+ ARR business value through reliable testing.
 """
 
-# Infrastructure test markers for pytest
+__version__ = "1.0.0"
+__author__ = "Netra Platform Team" 
+__purpose__ = "Issue #485 - Golden Path Test Infrastructure Missing Context"
+
+# Test phases for Issue #485
+ISSUE_485_TEST_PHASES = {
+    "phase_1_import_path_resolution": {
+        "description": "Tests that demonstrate import path resolution issues",
+        "expected_initial_state": "FAIL",
+        "test_files": ["test_import_path_resolution_issue_485.py"]
+    },
+    "phase_2_unified_runner_collection": {
+        "description": "Tests that demonstrate unified test runner collection issues", 
+        "expected_initial_state": "FAIL",
+        "test_files": ["test_unified_test_runner_collection_issue_485.py"]
+    },
+    "phase_3_business_value_protection": {
+        "description": "Tests that demonstrate business value protection validation gaps",
+        "expected_initial_state": "FAIL", 
+        "test_files": ["test_business_value_protection_validation_issue_485.py"]
+    },
+    "phase_4_regression_protection": {
+        "description": "Tests that ensure existing functionality is preserved",
+        "expected_initial_state": "PASS",
+        "test_files": ["test_existing_functionality_protection_issue_485.py"]
+    }
+}
+
+# Infrastructure test markers for Issue #485
 INFRASTRUCTURE_TEST_MARKERS = [
     "infrastructure",
-    "real_services", 
-    "demo_mode",
-    "websocket_errors",
-    "security",
-    "gcp_staging"
+    "issue_485",
+    "import_path_resolution",
+    "test_collection",
+    "business_value_protection", 
+    "regression_protection"
 ]
-
-# Test timeout configurations (seconds)
-INFRASTRUCTURE_TEST_TIMEOUTS = {
-    "gcp_load_balancer": 60,
-    "demo_mode_config": 30,
-    "websocket_1011_reproduction": 60,
-    "security_validation": 20,
-    "connectivity_test": 45
-}
-
-# Infrastructure test environment requirements
-REQUIRED_ENV_VARS = {
-    "gcp_load_balancer_tests": [
-        "GCP_STAGING_BACKEND_URL",
-        "GCP_STAGING_WEBSOCKET_URL", 
-        "INFRASTRUCTURE_TEST_AUTH_TOKEN"
-    ],
-    "demo_mode_tests": [
-        "DEMO_MODE",
-        "ENVIRONMENT",
-        "DEMO_AUTO_USER",
-        "DEMO_USER_EMAIL"
-    ],
-    "websocket_1011_tests": [
-        "TEST_WEBSOCKET_URL",
-        "TEST_BACKEND_URL"
-    ]
-}

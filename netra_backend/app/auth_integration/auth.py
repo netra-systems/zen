@@ -998,3 +998,20 @@ class TokenRefreshResult:
         self.new_access_token = new_access_token
         self.new_refresh_token = new_refresh_token
         self.error = error
+
+
+# Issue #485 fix: Create auth_manager instance for test infrastructure access
+auth_manager = BackendAuthIntegration()
+
+# Export auth_manager for Issue #485 compatibility
+__all__ = [
+    "auth_client",
+    "get_current_user",
+    "get_optional_user", 
+    "get_auth_client",
+    "generate_access_token",
+    "BackendAuthIntegration",
+    "AuthValidationResult",
+    "TokenRefreshResult",
+    "auth_manager"  # Issue #485 fix: Missing import
+]

@@ -2864,6 +2864,74 @@ async def execute_orchestration_mode(args) -> int:
         if controller:
             await controller.shutdown()
 
+    
+    # Issue #485 fix: Add missing collection method for test infrastructure validation  
+    def collect_tests_for_category(self, category: str) -> List[str]:
+        """
+        Collect tests for a specific category.
+        
+        Args:
+            category: Test category name
+            
+        Returns:
+            List of test file paths for the category
+        """
+        try:
+            # Get category configuration
+            category_obj = self.category_system.get_category(category)
+            if not category_obj:
+                logger.warning(f"Category '{category}' not found")
+                return []
+            
+            # Get services for this category
+            services = self._get_services_for_category(category)
+            collected_tests = []
+            
+            for service in services:
+                service_config = self.test_configs.get(service)
+                if not service_config:
+                    logger.warning(f"Service '{service}' not configured")
+                    continue
+                
+                test_dir = Path(service_config["path"]) / service_config["test_dir"]
+                if not test_dir.exists():
+                    logger.warning(f"Test directory not found: {test_dir}")
+                    continue
+                
+                # Use fast path collection to avoid Docker dependencies
+                try:
+                    # Find tests matching category patterns
+                    category_patterns = getattr(category_obj, 'patterns', [f"*{category}*", f"test_{category}*"])
+                    
+                    for pattern in category_patterns:
+                        pattern_tests = self._fast_path_collect_tests(pattern, category)
+                        collected_tests.extend(pattern_tests)
+                    
+                    # Also search by directory structure
+                    category_dirs = [
+                        test_dir / category,
+                        test_dir / f"{category}_tests", 
+                        test_dir / "unit" if category == "unit" else test_dir / category
+                    ]
+                    
+                    for cat_dir in category_dirs:
+                        if cat_dir.exists():
+                            test_files = list(cat_dir.rglob("test_*.py"))
+                            collected_tests.extend([str(f) for f in test_files])
+                    
+                except Exception as e:
+                    logger.error(f"Error collecting tests for service '{service}', category '{category}': {e}")
+                    continue
+            
+            # Remove duplicates and return
+            unique_tests = list(set(collected_tests))
+            logger.info(f"Collected {len(unique_tests)} tests for category '{category}'")
+            return unique_tests
+            
+        except Exception as e:
+            logger.error(f"Error collecting tests for category '{category}': {e}")
+            return []
+
 
 def main():
     """Main entry point."""
