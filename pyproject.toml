@@ -28,6 +28,7 @@ addopts = [
     "--import-mode=importlib",  # Faster import mode
     "--cache-clear",  # Clear cache if stale
     "-p no:randomly",  # Disable random test order for consistent collection
+    "-s",  # Disable I/O capture - fixes Python 3.13.7 ValueError compatibility (Issue #561)
 ]
 
 # Asyncio settings

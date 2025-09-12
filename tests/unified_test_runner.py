@@ -311,17 +311,18 @@ class UnifiedTestRunner:
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues
+        # ISSUE #558 FIX: Use centralized pyproject.toml instead of missing service-specific pytest.ini files
         self.test_configs = {
             "backend": {
                 "path": self.project_root,  # Changed from backend_path to project_root
                 "test_dir": "netra_backend/tests",  # Updated to full path from root
-                "config": "netra_backend/pytest.ini",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
                 "command": f"{self.python_command} -m pytest"
             },
             "auth": {
                 "path": self.project_root,  # Changed from auth_path to project_root
                 "test_dir": "auth_service/tests",  # Updated to full path from root
-                "config": "auth_service/pytest.ini",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
                 "command": f"{self.python_command} -m pytest"
             },
             "frontend": {
