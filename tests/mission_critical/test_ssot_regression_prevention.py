@@ -1764,7 +1764,7 @@ class TestSSOTContinuousCompliance:
                 'session_id': f"SESSION_{context_id}_{uuid.uuid4().hex[:12]}"
             }
         
-        def isolated_context_operations(context_id):
+        async def isolated_context_operations(context_id):
             """Perform operations within an isolated context and check for leakage."""
             violations = []
             
@@ -1842,10 +1842,14 @@ class TestSSOTContinuousCompliance:
                     'error': str(e)
                 }]
         
+        # Wrapper function to run async function in ThreadPoolExecutor
+        def isolated_context_operations_wrapper(context_id):
+            return asyncio.run(isolated_context_operations(context_id))
+        
         # Execute all contexts concurrently to maximize leakage detection
         with ThreadPoolExecutor(max_workers=num_isolated_contexts) as executor:
             future_to_context = {
-                executor.submit(isolated_context_operations, context_id): context_id 
+                executor.submit(isolated_context_operations_wrapper, context_id): context_id 
                 for context_id in range(num_isolated_contexts)
             }
             
