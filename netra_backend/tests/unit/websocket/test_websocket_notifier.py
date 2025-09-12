@@ -210,21 +210,11 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
     
     def teardown_method(self, method):
         """Cleanup method for each test."""
-        # Use pytest-asyncio to handle async cleanup
+        # WebSocketNotifier doesn't have shutdown method, just clear references
         if hasattr(self, 'notifier'):
-            import asyncio
-            try:
-                # Try to run cleanup in existing event loop
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    # Schedule cleanup as a task
-                    asyncio.create_task(self.notifier.shutdown())
-                else:
-                    # Run cleanup synchronously
-                    loop.run_until_complete(self.notifier.shutdown())
-            except RuntimeError:
-                # Create new loop if needed
-                asyncio.run(self.notifier.shutdown())
+            self.notifier = None
+        if hasattr(self, 'mock_manager'):
+            self.mock_manager.clear_messages()
         super().teardown_method(method)
     
     # ============================================================================
@@ -235,7 +225,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         """Test WebSocketNotifier initialization with deprecation warning."""
         with warnings.catch_warnings(record=True) as warning_list:
             warnings.simplefilter("always")
-            notifier = WebSocketNotifier.create_for_user(self.mock_manager)
+            notifier = WebSocketNotifier.create_for_user(self.mock_manager, self.mock_exec_context)
             
             # Verify deprecation warning was issued
             self.assertEqual(len(warning_list), 1)
@@ -856,10 +846,15 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
     @pytest.mark.asyncio
     async def test_websocket_manager_none_handling(self):
         """Test handling when websocket_manager is None."""
-        # Create notifier with None manager
+        # Create notifier with None manager and execution context
+        mock_context = UserExecutionContext(
+            user_id="test_user_none",
+            thread_id="test_thread_none", 
+            run_id="test_run_none"
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier_with_none = WebSocketNotifier.create_for_user(None)
+            notifier_with_none = WebSocketNotifier.create_for_user(None, mock_context)
         
         context = AgentExecutionContext("NoneAgent", "run_none", "thread_none", "user_none")
         
@@ -878,9 +873,14 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         """Test handling of WebSocket send failures."""
         failing_manager = MockWebSocketManager(should_fail=True)
         
+        mock_context = UserExecutionContext(
+            user_id="test_user_failing",
+            thread_id="test_thread_failing", 
+            run_id="test_run_failing"
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            failing_notifier = WebSocketNotifier.create_for_user(failing_manager)
+            failing_notifier = WebSocketNotifier.create_for_user(failing_manager, mock_context)
         
         context = AgentExecutionContext("FailAgent", "run_fail", "thread_fail", "user_fail")
         
