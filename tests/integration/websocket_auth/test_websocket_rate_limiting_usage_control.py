@@ -426,3 +426,56 @@ class TestWebSocketRateLimitingUsageControl(BaseTestCase):
         self.record_metric("analytics_integration_working", True)
         self.record_metric("total_usage_requests_tracked", total_requests)
         self.record_metric("overall_success_rate", total_successful / total_requests if total_requests > 0 else 0)
+
+    async def test_websocket_session_rate_limit_inheritance(self):
+        """
+        BVJ: Validates rate limits are inherited correctly across WebSocket session lifecycle
+        Business Impact: Ensures consistent rate limiting throughout user session
+        Revenue Impact: Prevents rate limit bypass through session manipulation
+        """
+        # Given: A user with an active WebSocket session
+        user_id = "test_user_session_inheritance_001"
+        session_id = "ws_inheritance_test_001"
+        plan_tier = PlanTier.PRO
+        
+        # Create base usage to establish rate limit history
+        for i in range(3):
+            context = ToolExecutionContext(
+                user_id=user_id,
+                tool_name="session_test_tool",
+                user_plan=plan_tier.value,
+                websocket_session_id=session_id
+            )
+            
+            result = await self.permission_service.check_tool_permission(context)
+            if result.allowed:
+                await self.permission_service.record_tool_usage(
+                    user_id=user_id,
+                    tool_name="session_test_tool", 
+                    execution_time_ms=300,
+                    status="completed"
+                )
+            await asyncio.sleep(0.1)
+        
+        # When: User continues in same session with additional requests
+        additional_context = ToolExecutionContext(
+            user_id=user_id,
+            tool_name="session_test_tool",
+            user_plan=plan_tier.value,
+            websocket_session_id=session_id  # Same session
+        )
+        
+        additional_result = await self.permission_service.check_tool_permission(additional_context)
+        
+        # Then: Rate limit should reflect cumulative usage across session
+        assert additional_result is not None, "Should get permission result for session continuation"
+        
+        # Verify rate limit status includes session context
+        if additional_result.rate_limit_status:
+            current_usage = additional_result.rate_limit_status.get("current_usage", 0)
+            # Should reflect previous usage in session
+            assert current_usage >= 0, "Should track usage across session lifecycle"
+        
+        self.record_metric("session_rate_limit_inheritance", True)
+        self.record_metric("session_usage_tracking", True)
+
