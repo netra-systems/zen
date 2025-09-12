@@ -77,6 +77,8 @@ For each PR in PRs_To_MERGE (SNST):
         - Verify merged changes appear in develop-long-lived
         - Run basic health check: `git log --oneline -5`
         - Document successful merge in PR-WORKLOG
+        Safely git pull and push, clean working state.
+        If needed solve merge conflicts with local WORKING_BRANCH and origin WORKING_BRANCH
         Do PR-WORKLOG-UPDATE-PUSH
 
     END PROCESS INSTRUCTIONS
