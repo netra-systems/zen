@@ -44,6 +44,7 @@ from netra_backend.app.services.agent_websocket_bridge import create_agent_webso
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
@@ -169,13 +170,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform comprehensive analysis requiring complex tool chain: data collection -> processing -> validation -> optimization -> reporting",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform comprehensive analysis requiring complex tool chain: data collection -> processing -> validation -> optimization -> reporting"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 2: Define complex tool chain with dependencies
         track_pipeline_stage(ToolPipelineStage.TOOL_SELECTION, {})
