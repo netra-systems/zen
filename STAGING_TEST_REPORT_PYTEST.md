@@ -1,71 +1,77 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 14:24:54
+**Generated:** 2025-09-12 14:59:24
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 2 (50.0%)
-- **Failed:** 2 (50.0%)
+- **Total Tests:** 5
+- **Passed:** 3 (60.0%)
+- **Failed:** 2 (40.0%)
 - **Skipped:** 0
-- **Duration:** 4.63 seconds
-- **Pass Rate:** 50.0%
+- **Duration:** 6.03 seconds
+- **Pass Rate:** 60.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_websocket_connection_real | PASS passed | 0.518s | test_priority1_critical.py |
-| test_002_websocket_authentication_real | PASS passed | 2.834s | test_priority1_critical.py |
-| test_003_websocket_message_send_real | FAIL failed | 0.152s | test_priority1_critical.py |
-| test_004_websocket_concurrent_connections_real | FAIL failed | 0.912s | test_priority1_critical.py |
+| test_health_check | PASS passed | 0.709s | test_1_websocket_events_staging.py |
+| test_websocket_connection | PASS passed | 0.323s | test_1_websocket_events_staging.py |
+| test_api_endpoints_for_agents | PASS passed | 0.734s | test_1_websocket_events_staging.py |
+| test_websocket_event_flow_real | FAIL failed | 0.325s | test_1_websocket_events_staging.py |
+| test_concurrent_websocket_real | FAIL failed | 0.188s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_003_websocket_message_send_real
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_priority1_critical.py
-- **Duration:** 0.152s
-- **Error:** tests/e2e/staging/test_priority1_critical.py:343: in test_003_websocket_message_send_real
+### FAILED: test_websocket_event_flow_real
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 0.325s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:222: in test_websocket_event_flow_real
     async with websockets.connect(
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:587: in __aenter__
     return await self
            ^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
-    await self.connection.handshake(
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:114: in handshake
-    raise self.pro...
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: ...
 
-### FAILED: test_004_websocket_concurrent_connections_real
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_priority1_critical.py
-- **Duration:** 0.912s
-- **Error:** tests/e2e/staging/test_priority1_critical.py:523: in test_004_websocket_concurrent_connections_real
-    assert len(successful_results) == 5, "Should get results for all connections"
-E   AssertionError: Should get results for all connections
-E   assert 0 == 5
-E    +  where 0 = len([])...
+### FAILED: test_concurrent_websocket_real
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 0.188s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:376: in test_concurrent_websocket_real
+    results = await asyncio.gather(*tasks)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:350: in test_connection
+    async with websockets.connect(
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\clien...
 
 ## Pytest Output Format
 
 ```
-test_priority1_critical.py::test_001_websocket_connection_real PASSED
-test_priority1_critical.py::test_002_websocket_authentication_real PASSED
-test_priority1_critical.py::test_003_websocket_message_send_real FAILED
-test_priority1_critical.py::test_004_websocket_concurrent_connections_real FAILED
+test_1_websocket_events_staging.py::test_health_check PASSED
+test_1_websocket_events_staging.py::test_websocket_connection PASSED
+test_1_websocket_events_staging.py::test_api_endpoints_for_agents PASSED
+test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
+test_1_websocket_events_staging.py::test_concurrent_websocket_real FAILED
 
 ==================================================
-2 passed, 2 failed in 4.63s
+3 passed, 2 failed in 6.03s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 4 | 2 | 2 | 50.0% |
-| Authentication | 1 | 1 | 0 | 100.0% |
+| WebSocket | 3 | 1 | 2 | 33.3% |
+| Agent | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
