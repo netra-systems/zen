@@ -272,7 +272,7 @@ class TestUnifiedRateLimiter:
             uri = f"ws://localhost:8000/ws?token={token}"
             
             # Try to connect with short timeout
-            async with websockets.connect(uri, timeout=3) as websocket:
+            async with websockets.connect(uri, open_timeout=3) as websocket:
                 messages_sent = 0
                 rate_limited = False
                 
