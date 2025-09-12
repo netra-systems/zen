@@ -239,8 +239,8 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         # Verify real tool dispatcher integration
         assert hasattr(execution_engine, 'tool_dispatcher'), "Engine should have real tool dispatcher"
         
-        # Get available tools from real dispatcher
-        available_tools = execution_engine.get_available_tools()
+        # Get available tools from real dispatcher (async method)
+        available_tools = await execution_engine.get_available_tools()
         assert len(available_tools) > 0, "Should have real available tools"
         
         # Test real tool execution (not mocked)
