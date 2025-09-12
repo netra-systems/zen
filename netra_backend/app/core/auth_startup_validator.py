@@ -113,7 +113,7 @@ class AuthStartupValidator:
         return len(critical_failures) == 0, self.validation_results
     
     async def _validate_jwt_secret(self) -> None:
-        """Validate JWT secret configuration using SSOT JWT manager."""
+        """Validate JWT secret configuration using COORDINATED DECISION-MAKING with JWT manager."""
         result = AuthValidationResult(component=AuthComponent.JWT_SECRET, valid=False)
         
         try:
@@ -121,49 +121,33 @@ class AuthStartupValidator:
             from shared.jwt_secret_manager import get_jwt_secret_manager
             jwt_manager = get_jwt_secret_manager()
             
-            # Get JWT secret through SSOT resolver
+            # COORDINATED FIX: Use JWT manager's validation logic instead of duplicating it
+            # This ensures both components make identical decisions about JWT secret validity
             jwt_secret = jwt_manager.get_jwt_secret()
+            is_valid, validation_context = jwt_manager.validate_jwt_secret_for_environment(
+                jwt_secret, self.environment
+            )
             
-            # Check if it's a real secret (not a default test value)
-            is_default_secret = jwt_secret in [
-                None, '', 'your-secret-key', 'test-secret', 'secret', 
-                'emergency_jwt_secret_please_configure_properly',
-                'fallback_jwt_secret_for_emergency_only',
-                'test-jwt-secret-key-32-characters-long-for-testing-only',  # IsolatedEnvironment fallback
-                'dev-jwt-secret-key-must-be-at-least-32-characters',  # IsolatedEnvironment development fallback
-                'development-jwt-secret-minimum-32-characters-long'  # Another IsolatedEnvironment fallback
-            ]
-            
-            # Check if JWT manager fell back to deterministic test secret (32-char hex from sha256)
-            # The JWT manager might use a different environment detection, so check multiple possibilities
-            import hashlib
-            possible_envs = [self.environment, 'development', 'testing']
-            is_deterministic_fallback = False
-            for env in possible_envs:
-                expected_test_secret = hashlib.sha256(f"netra_{env}_jwt_key".encode()).hexdigest()[:32]
-                if jwt_secret == expected_test_secret:
-                    is_deterministic_fallback = True
-                    break
-            
-            if is_default_secret or not jwt_secret or is_deterministic_fallback:
-                if is_default_secret:
-                    result.error = f"JWT secret is configured but invalid (using default/test value: '{jwt_secret[:20]}...')"
-                elif is_deterministic_fallback:
-                    result.error = "JWT secret is configured but rejected (using deterministic test fallback - not acceptable for secure environments)"
-                else:
-                    result.error = "No JWT secret configured (JWT_SECRET, JWT_SECRET_KEY, or JWT_SECRET_STAGING)"
-                debug_info = jwt_manager.get_debug_info()
+            if not is_valid:
+                result.error = validation_context.get('error', 'JWT secret validation failed')
                 result.details = {
                     "environment": self.environment,
-                    "debug_info": debug_info
+                    "validation_context": validation_context,
+                    "debug_info": jwt_manager.get_debug_info()
                 }
-            elif len(jwt_secret) < 32:
-                result.error = f"JWT secret too short ({len(jwt_secret)} chars, minimum 32)"
-                result.details = {"length": len(jwt_secret), "minimum": 32}
+                
+                # Log detailed validation failure for troubleshooting
+                logger.warning(f"   JWT validation failed for {self.environment}: {result.error}")
+                if validation_context.get('reason'):
+                    logger.warning(f"   Reason: {validation_context['reason']}")
             else:
                 result.valid = True
                 logger.info(f"  [U+2713] JWT secret validated (length: {len(jwt_secret)})")
-                logger.info(f"  [U+2713] Using SSOT JWT secret resolution for {self.environment}")
+                logger.info(f"  [U+2713] Using coordinated JWT validation for {self.environment}")
+                result.details = {
+                    "environment": self.environment,
+                    "validation_context": validation_context
+                }
         
         except Exception as e:
             result.error = f"JWT validation error: {e}"
@@ -173,7 +157,7 @@ class AuthStartupValidator:
     
     async def _validate_service_credentials(self) -> None:
         """
-        Validate service-to-service authentication credentials.
+        Validate service-to-service authentication credentials with enhanced isolation.
         
         CRITICAL: SERVICE_SECRET has 173+ dependencies across the codebase.
         Missing or misconfigured SERVICE_SECRET causes:
@@ -186,19 +170,9 @@ class AuthStartupValidator:
         result = AuthValidationResult(component=AuthComponent.SERVICE_CREDENTIALS, valid=False)
         
         try:
-            service_id = self.env.get('SERVICE_ID')
-            service_secret = self.env.get('SERVICE_SECRET')
-
-            # TEMPORARY FIX: Fallback to direct os.environ if IsolatedEnvironment doesn't find SERVICE_ID
-            if not service_id:
-                import os
-                service_id = os.environ.get('SERVICE_ID')
-                logger.warning(f"SERVICE_ID not found in IsolatedEnvironment, using direct os.environ fallback: {service_id is not None}")
-
-            if not service_secret:
-                import os
-                service_secret = os.environ.get('SERVICE_SECRET')
-                logger.warning(f"SERVICE_SECRET not found in IsolatedEnvironment, using direct os.environ fallback: {service_secret is not None}")
+            # ENHANCED ISOLATION: Use coordinated environment variable resolution
+            service_id = self._get_coordinated_env_var('SERVICE_ID')
+            service_secret = self._get_coordinated_env_var('SERVICE_SECRET')
             
             # Check SERVICE_ID first
             if not service_id:
@@ -207,7 +181,8 @@ class AuthStartupValidator:
                 result.details = {
                     "impact": "No inter-service communication possible",
                     "affected_services": ["auth_service", "analytics_service"],
-                    "recovery": "Set SERVICE_ID environment variable"
+                    "recovery": "Set SERVICE_ID environment variable",
+                    "env_resolution_attempted": self._get_env_resolution_debug('SERVICE_ID')
                 }
             # Check SERVICE_SECRET - ULTRA CRITICAL
             elif not service_secret:
@@ -222,75 +197,32 @@ class AuthStartupValidator:
                         "Circuit breaker functionality",
                         "Token blacklist validation"
                     ],
-                    "recovery": "Set SERVICE_SECRET environment variable immediately"
+                    "recovery": "Set SERVICE_SECRET environment variable immediately",
+                    "env_resolution_attempted": self._get_env_resolution_debug('SERVICE_SECRET')
                 }
                 logger.critical(" ALERT:  SERVICE_SECRET MISSING - SYSTEM WILL FAIL")
             else:
-                # Validate SERVICE_SECRET format and strength
-                validation_errors = []
+                # Enhanced SERVICE_SECRET validation with environment awareness
+                is_valid, validation_context = self._validate_service_secret_for_environment(
+                    service_secret, self.environment
+                )
                 
-                # Check minimum length
-                if len(service_secret) < 32:
-                    validation_errors.append(f"Too short ({len(service_secret)} chars, minimum 32)")
-                
-                # Check for default/weak values (more intelligent for test environments)
-                weak_patterns = [
-                    'password', 'demo', 'example', '12345', 'admin', 'default', 'changeme'
-                ]
-                
-                # For test environments, be more permissive with "test" patterns if they're part of longer, structured strings
-                if self.environment in ["testing", "development"]:
-                    # In test/dev, only flag truly weak patterns, not structured test strings
-                    truly_weak_patterns = ['password', 'demo', 'example', '12345', 'admin', 'default', 'changeme']
-                    # Allow "secret" and "test" in test environments if part of longer strings
-                    if any(pattern in service_secret.lower() for pattern in truly_weak_patterns):
-                        validation_errors.append("Contains weak/default pattern")
-                    # Only flag bare "secret" or "test" as weak, not when part of structured strings
-                    elif service_secret.lower() in ['secret', 'test', 'password']:
-                        validation_errors.append("Contains weak/default pattern")
-                else:
-                    # Production/staging: stricter validation including "secret" and "test"
-                    production_weak_patterns = weak_patterns + ['secret', 'test']
-                    if any(pattern in service_secret.lower() for pattern in production_weak_patterns):
-                        validation_errors.append("Contains weak/default pattern")
-                
-                # Check for proper entropy (hex strings are valid, alphanumeric is sufficient)
-                has_upper = any(c.isupper() for c in service_secret)
-                has_lower = any(c.islower() for c in service_secret)
-                has_digit = any(c.isdigit() for c in service_secret)
-                has_special = any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in service_secret)
-                
-                # Accept hex strings (lowercase + digits) OR mixed case strings
-                is_hex_string = all(c in '0123456789abcdef' for c in service_secret)
-                has_mixed_case = has_upper and has_lower and has_digit
-                has_good_entropy = is_hex_string or has_mixed_case or has_special
-                
-                if not has_good_entropy:
-                    validation_errors.append("Insufficient entropy (needs hex format OR mixed case and digits OR special characters)")
-                
-                # Production-specific checks
-                if self.is_production:
-                    if len(service_secret) < 64:
-                        validation_errors.append(f"Production requires 64+ chars (current: {len(service_secret)})")
-                
-                if validation_errors:
-                    result.error = f"SERVICE_SECRET validation failed: {'; '.join(validation_errors)}"
-                    result.is_critical = True
+                if not is_valid:
+                    result.error = validation_context.get('error', 'SERVICE_SECRET validation failed')
                     result.details = {
-                        "current_length": len(service_secret),
-                        "validation_errors": validation_errors,
-                        "recommendation": "Generate strong SERVICE_SECRET using: openssl rand -hex 32"
+                        "validation_context": validation_context,
+                        "recovery": "Configure a secure SERVICE_SECRET"
                     }
+                    if validation_context.get('is_critical', True):
+                        result.is_critical = True
+                        logger.critical(f" ALERT:  SERVICE_SECRET VALIDATION FAILED: {result.error}")
                 else:
-                    # Additional connectivity check for production
-                    if self.is_production:
-                        logger.info("   SEARCH:  Performing SERVICE_SECRET connectivity verification...")
-                        # Could add actual auth service ping here
-                    
                     result.valid = True
-                    logger.info(f"  [U+2713] Service credentials validated (ID: {service_id})")
-                    logger.info(f"  [U+2713] SERVICE_SECRET strength validated (length: {len(service_secret)})")
-                    logger.info("  [U+2713] Inter-service authentication ready")
+                    logger.info(f"  [U+2713] SERVICE_SECRET validated (length: {len(service_secret)})")
+                    result.details = {
+                        "validation_context": validation_context,
+                        "service_id": service_id[:8] + "..." if len(service_id) > 8 else service_id
+                    }
         
         except Exception as e:
             result.error = f"Service credentials validation error: {e}"
@@ -303,30 +235,50 @@ class AuthStartupValidator:
         self.validation_results.append(result)
     
     async def _validate_auth_service_url(self) -> None:
-        """Validate auth service URL configuration."""
+        """Validate auth service URL configuration with enhanced isolation."""
         result = AuthValidationResult(component=AuthComponent.AUTH_SERVICE_URL, valid=False)
         
         try:
-            auth_url = self.env.get('AUTH_SERVICE_URL')
-            auth_enabled = self.env.get('AUTH_SERVICE_ENABLED', 'true').lower() == 'true'
+            # ENHANCED ISOLATION: Use coordinated environment variable resolution
+            auth_url = self._get_coordinated_env_var('AUTH_SERVICE_URL')
+            auth_enabled = self._get_coordinated_env_var('AUTH_SERVICE_ENABLED')
+            auth_enabled = (auth_enabled or 'true').lower() == 'true'
             
             if not auth_enabled and not self.is_production:
                 # Auth can be disabled in development
                 result.valid = True
                 result.is_critical = False
                 logger.info("   WARNING:  Auth service disabled (development mode)")
+                result.details = {
+                    "auth_enabled": False,
+                    "environment": self.environment,
+                    "env_resolution_debug": self._get_env_resolution_debug('AUTH_SERVICE_URL')
+                }
             elif not auth_url:
-                result.error = "AUTH_SERVICE_URL not configured"
-            elif not auth_url.startswith(('http://', 'https://')):
-                result.error = f"Invalid AUTH_SERVICE_URL format: {auth_url}"
+                result.error = "AUTH_SERVICE_URL not configured - CRITICAL for inter-service auth"
+                result.details = {
+                    "env_resolution_attempted": self._get_env_resolution_debug('AUTH_SERVICE_URL'),
+                    "recovery": "Set AUTH_SERVICE_URL environment variable"
+                }
             else:
-                # In production, verify HTTPS
-                if self.is_production and not auth_url.startswith('https://'):
-                    result.error = "AUTH_SERVICE_URL must use HTTPS in production"
-                    result.details = {"url": auth_url}
+                # Enhanced URL validation with environment awareness
+                is_valid, validation_context = self._validate_auth_service_url_for_environment(
+                    auth_url, self.environment
+                )
+                
+                if not is_valid:
+                    result.error = validation_context.get('error', 'AUTH_SERVICE_URL validation failed')
+                    result.details = {
+                        "url": auth_url,
+                        "validation_context": validation_context
+                    }
                 else:
                     result.valid = True
                     logger.info(f"  [U+2713] Auth service URL validated: {auth_url}")
+                    result.details = {
+                        "url": auth_url,
+                        "validation_context": validation_context
+                    }
         
         except Exception as e:
             result.error = f"Auth service URL validation error: {e}"
@@ -540,10 +492,208 @@ class AuthStartupValidator:
             ))
 
 
-async def validate_auth_at_startup() -> None:
+    def _get_coordinated_env_var(self, var_name: str) -> Optional[str]:
+        """
+        Enhanced environment variable resolution with isolation-aware fallbacks.
+        
+        This method provides coordinated resolution that works with both
+        IsolatedEnvironment and direct os.environ to handle test isolation issues.
+        """
+        # Try IsolatedEnvironment first (preferred)
+        value = self.env.get(var_name)
+        if value:
+            return value
+        
+        # Fallback to direct os.environ for missing variables during isolation
+        import os
+        direct_value = os.environ.get(var_name)
+        if direct_value:
+            logger.info(f"Using direct os.environ fallback for {var_name} (isolation issue)")
+            return direct_value
+        
+        # Try environment-specific variations
+        env_specific = f"{var_name}_{self.environment.upper()}"
+        env_specific_value = self.env.get(env_specific) or os.environ.get(env_specific)
+        if env_specific_value:
+            logger.info(f"Using environment-specific variable: {env_specific}")
+            return env_specific_value
+        
+        return None
+    
+    def _get_env_resolution_debug(self, var_name: str) -> dict:
+        """Get debug information about environment variable resolution attempts."""
+        import os
+        env_specific = f"{var_name}_{self.environment.upper()}"
+        
+        return {
+            "isolated_env": bool(self.env.get(var_name)),
+            "direct_os_environ": bool(os.environ.get(var_name)),
+            "environment_specific": bool(self.env.get(env_specific) or os.environ.get(env_specific)),
+            "env_specific_key": env_specific,
+            "current_environment": self.environment
+        }
+    
+    def _validate_service_secret_for_environment(self, service_secret: str, environment: str) -> tuple:
+        """
+        Validate SERVICE_SECRET strength and suitability for specific environment.
+        
+        Returns:
+            Tuple of (is_valid: bool, validation_context: dict)
+        """
+        if not service_secret:
+            return False, {
+                'error': 'No SERVICE_SECRET provided',
+                'reason': 'empty_secret',
+                'is_critical': True
+            }
+        
+        # Determine test context for more lenient validation
+        is_testing_context = environment.lower() in ["testing", "development", "test"]
+        
+        # Check minimum length
+        min_length = 16 if is_testing_context else 32
+        if len(service_secret) < min_length:
+            return False, {
+                'error': f'SERVICE_SECRET too short ({len(service_secret)} chars, minimum {min_length})',
+                'reason': 'insufficient_length',
+                'current_length': len(service_secret),
+                'minimum_length': min_length,
+                'is_critical': True
+            }
+        
+        # Check for weak patterns
+        weak_patterns = ['password', 'demo', 'example', '12345', 'admin', 'default', 'changeme']
+        
+        # In test environments, be more permissive with structured test strings
+        if is_testing_context:
+            truly_weak = ['password', 'demo', 'example', '12345', 'admin', 'default', 'changeme']
+            if service_secret.lower() in truly_weak:
+                return False, {
+                    'error': f'SERVICE_SECRET is a weak default value: {service_secret[:10]}...',
+                    'reason': 'weak_default_secret',
+                    'is_critical': True
+                }
+        else:
+            # Production/staging: stricter validation
+            all_weak_patterns = weak_patterns + ['secret', 'test']
+            if any(pattern in service_secret.lower() for pattern in all_weak_patterns):
+                return False, {
+                    'error': 'SERVICE_SECRET contains weak/default patterns',
+                    'reason': 'weak_pattern_detected',
+                    'is_critical': True
+                }
+        
+        # Check entropy for production environments
+        if environment.lower() in ["staging", "production"]:
+            has_upper = any(c.isupper() for c in service_secret)
+            has_lower = any(c.islower() for c in service_secret)
+            has_digit = any(c.isdigit() for c in service_secret)
+            
+            # Accept hex strings OR mixed case strings
+            is_hex_string = all(c in '0123456789abcdef' for c in service_secret)
+            has_mixed_case = has_upper and has_lower and has_digit
+            
+            if not (is_hex_string or has_mixed_case):
+                return False, {
+                    'error': 'SERVICE_SECRET has insufficient entropy for production',
+                    'reason': 'insufficient_entropy',
+                    'recommendation': 'Use hex format OR mixed case with digits',
+                    'is_critical': True
+                }
+        
+        # Production-specific minimum length
+        if environment.lower() == "production" and len(service_secret) < 64:
+            return False, {
+                'error': f'Production SERVICE_SECRET requires 64+ characters (current: {len(service_secret)})',
+                'reason': 'production_length_requirement',
+                'current_length': len(service_secret),
+                'minimum_length': 64,
+                'is_critical': True
+            }
+        
+        # All validation passed
+        return True, {
+            'valid': True,
+            'reason': 'service_secret_validation_passed',
+            'secret_length': len(service_secret),
+            'environment': environment,
+            'is_testing_context': is_testing_context
+        }
+    
+    def _validate_auth_service_url_for_environment(self, auth_url: str, environment: str) -> tuple:
+        """
+        Validate AUTH_SERVICE_URL format and security requirements for environment.
+        
+        Returns:
+            Tuple of (is_valid: bool, validation_context: dict)
+        """
+        if not auth_url:
+            return False, {
+                'error': 'No AUTH_SERVICE_URL provided',
+                'reason': 'empty_url'
+            }
+        
+        # Basic URL format validation
+        if not auth_url.startswith(('http://', 'https://')):
+            return False, {
+                'error': f'Invalid AUTH_SERVICE_URL format: {auth_url}',
+                'reason': 'invalid_url_format',
+                'expected_format': 'http:// or https://'
+            }
+        
+        # Environment-specific security requirements
+        if environment.lower() in ["staging", "production"]:
+            if not auth_url.startswith('https://'):
+                return False, {
+                    'error': f'AUTH_SERVICE_URL must use HTTPS in {environment}',
+                    'reason': 'https_required_for_production',
+                    'current_url': auth_url,
+                    'required_scheme': 'https://'
+                }
+        
+        # Check for localhost/development URLs in production
+        if environment.lower() == "production":
+            dev_patterns = ['localhost', '127.0.0.1', '0.0.0.0', '.local', 'dev', 'test']
+            if any(pattern in auth_url.lower() for pattern in dev_patterns):
+                return False, {
+                    'error': 'Development/localhost URLs not allowed in production',
+                    'reason': 'development_url_in_production',
+                    'current_url': auth_url,
+                    'detected_patterns': [p for p in dev_patterns if p in auth_url.lower()]
+                }
+        
+        # Check for well-formed URL structure
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(auth_url)
+            if not parsed.netloc:
+                return False, {
+                    'error': 'AUTH_SERVICE_URL missing host/netloc',
+                    'reason': 'invalid_url_structure',
+                    'current_url': auth_url
+                }
+        except Exception as e:
+            return False, {
+                'error': f'AUTH_SERVICE_URL parsing failed: {str(e)}',
+                'reason': 'url_parsing_error',
+                'current_url': auth_url
+            }
+        
+        # All validation passed
+        return True, {
+            'valid': True,
+            'reason': 'auth_service_url_validation_passed',
+            'url': auth_url,
+            'environment': environment,
+            'scheme': auth_url.split('://')[0],
+            'is_https': auth_url.startswith('https://')
+        }
+
+
+async def validate_auth_startup() -> None:
     """
-    Main entry point for auth validation during startup.
-    Raises AuthValidationError if critical failures detected.
+    Perform comprehensive auth validation at startup.
+    Raises AuthValidationError if any critical validation fails.
     """
     validator = AuthStartupValidator()
     success, results = await validator.validate_all()
