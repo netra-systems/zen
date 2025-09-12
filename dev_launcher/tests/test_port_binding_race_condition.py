@@ -7,6 +7,7 @@ The issue occurs when:
 3. Windows shows error: "only one usage of each socket address is normally permitted"
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import socket
 import subprocess
 import sys
@@ -27,7 +28,7 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import find_available_port, is_port_available
 
 
-class TestPortBindingRaceCondition(unittest.TestCase):
+class TestPortBindingRaceCondition(SSotBaseTestCase):
     """Test that reproduces the port binding race condition."""
     
     def setUp(self):

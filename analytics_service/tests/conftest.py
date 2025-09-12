@@ -181,7 +181,7 @@ async def redis_client():
     try:
         import redis.asyncio as redis
         
-        client = redis.Redis(
+        client = await get_redis_client()  # MIGRATED: was redis.Redis(
             host='localhost',
             port=6380,
             db=2,
@@ -583,7 +583,7 @@ async def clean_analytics_db(clickhouse_client, redis_client):
         clickhouse_client.command("TRUNCATE TABLE IF EXISTS prompt_analytics")
     
     if redis_client:
-        await redis_client.flushdb()
+        await await redis_client.flushdb()
     
     yield
     
@@ -593,7 +593,7 @@ async def clean_analytics_db(clickhouse_client, redis_client):
         clickhouse_client.command("TRUNCATE TABLE IF EXISTS prompt_analytics")
     
     if redis_client:
-        await redis_client.flushdb()
+        await await redis_client.flushdb()
 
 # =============================================================================
 # TEST CONTEXT MANAGERS

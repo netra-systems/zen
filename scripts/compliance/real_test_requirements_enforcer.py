@@ -18,6 +18,7 @@ SPEC Requirements Enforced:
 6. Fix System Under Test first, not tests
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import ast
 import json
 import os
@@ -150,7 +151,7 @@ class RealTestRequirementsEnforcer:
             content = file_path.read_text(encoding='utf-8')
             
             # Python test indicators
-            python_indicators = ['def test_', 'class Test', '@pytest.', 'unittest.TestCase']
+            python_indicators = ['def test_', 'class Test', '@pytest.', 'SSotBaseTestCase']
             
             # JavaScript test indicators  
             js_indicators = ['it(', 'describe(', 'test(', 'expect(']

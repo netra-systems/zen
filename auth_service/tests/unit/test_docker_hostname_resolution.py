@@ -4,6 +4,7 @@ Test Docker hostname resolution for database connections.
 This test ensures that the auth service correctly detects Docker environments
 and adjusts database hostnames accordingly.
 """
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import unittest
 import tempfile
@@ -17,7 +18,7 @@ from shared.isolated_environment import get_env
 env = get_env()
 
 
-class TestDockerHostnameResolution(unittest.TestCase):
+class TestDockerHostnameResolution(SSotBaseTestCase):
     """Test Docker environment detection and hostname resolution.
 
     Note: Docker hostname resolution only applies in development and test environments,

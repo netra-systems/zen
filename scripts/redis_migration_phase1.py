@@ -15,10 +15,10 @@ MIGRATION PATTERNS:
 OLD: import redis
 NEW: from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 
-OLD: redis.Redis()
+OLD: await get_redis_client()
 NEW: await get_redis_client()
 
-OLD: redis_client = redis.Redis(host=..., port=...)
+OLD: redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=..., port=...)
 NEW: redis_client = await get_redis_client()
 """
 
@@ -95,7 +95,7 @@ class RedisMigrationExecutor:
                     patterns['imports'].append((i, line.strip()))
                 
                 # Instantiation patterns
-                if 'redis.Redis(' in line:
+                if 'await get_redis_client()  # MIGRATED: was redis.Redis(' in line:
                     patterns['instantiations'].append((i, line.strip()))
                 elif 'Redis(' in line and 'redis' in content.lower():
                     patterns['instantiations'].append((i, line.strip()))
@@ -144,13 +144,13 @@ class RedisMigrationExecutor:
                 migration_applied = True
                 self.migration_stats['imports_replaced'] += 1
             
-            # Pattern 3: redis.Redis() instantiation
-            if 'redis.Redis(' in content:
+            # Pattern 3: await get_redis_client() instantiation
+            if 'await get_redis_client()  # MIGRATED: was redis.Redis(' in content:
                 print(f"  ├─ Adding async Redis client pattern comment")
                 # Add comment for manual review of instantiation patterns
                 content = content.replace(
-                    'redis.Redis(',
-                    '# MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context\n    redis.Redis('
+                    'await get_redis_client()  # MIGRATED: was redis.Redis(',
+                    '# MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context\n    await get_redis_client()  # MIGRATED: was redis.Redis('
                 )
                 migration_applied = True
                 self.migration_stats['usage_patterns_updated'] += 1

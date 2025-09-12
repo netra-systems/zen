@@ -12,7 +12,7 @@ import sys
 import time
 import requests
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import logging
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -154,7 +154,7 @@ class DockerServicesAuditor:
     def check_redis_connectivity(self, host: str, port: int) -> Tuple[bool, str]:
         """Test Redis connectivity"""
         try:
-            client = redis.Redis(host=host, port=port, socket_timeout=5)
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, socket_timeout=5)
             client.ping()
             return True, "Connected successfully"
         except redis.ConnectionError as e:

@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import asyncpg
 import clickhouse_driver
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import requests
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
@@ -255,7 +255,7 @@ class EnvironmentValidator:
             if redis_url:
                 r = redis.from_url(redis_url)
             else:
-                r = redis.Redis(password=redis_password)
+                r = await get_redis_client()  # MIGRATED: was redis.Redis(password=redis_password)
             
             # Test connection
             info = r.info()

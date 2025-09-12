@@ -5,6 +5,7 @@ This test ensures all recent improvements are properly integrated
 when the launcher is called without arguments.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import argparse
 import sys
 import unittest
@@ -17,7 +18,7 @@ from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
 
 
-class TestDefaultLauncherConfig(unittest.TestCase):
+class TestDefaultLauncherConfig(SSotBaseTestCase):
     """Test suite for default launcher configuration."""
     
     # Mock: Component isolation for testing without external dependencies
@@ -170,7 +171,7 @@ class TestDefaultLauncherConfig(unittest.TestCase):
         self.assertTrue(launcher.parallel_enabled)
 
 
-class TestPortAllocationImprovements(unittest.TestCase):
+class TestPortAllocationImprovements(SSotBaseTestCase):
     """Test improved port allocation functionality."""
     
     def test_find_available_port_prefers_specified_port(self):
@@ -221,7 +222,7 @@ class TestPortAllocationImprovements(unittest.TestCase):
                 mock_free.assert_called_once()
 
 
-class TestGracefulShutdownImprovements(unittest.TestCase):
+class TestGracefulShutdownImprovements(SSotBaseTestCase):
     """Test improved graceful shutdown functionality."""
     
     # Mock: Component isolation for testing without external dependencies
