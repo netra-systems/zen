@@ -22,11 +22,44 @@
 
 ## Progress Tracking
 
-### Phase 1: Discovery and Test Planning ⏳
-- [x] SSOT audit completed
+### Phase 1: Discovery and Test Planning ✅
+- [x] SSOT audit completed  
 - [x] GitHub issue created (#506)
-- [ ] Existing test discovery
-- [ ] New test plan creation
+- [x] Existing test discovery - **73+ tests identified**
+- [x] New test plan creation - **4 new test files planned**
+
+#### New SSOT Test Plan
+**1. SSOT Violation Detection** (`tests/unit/ssot/test_websocket_factory_deprecation_violations.py`)
+- Detects 49+ files using deprecated factory (SHOULD FAIL initially)
+- Enforces WebSocketManager as canonical SSOT
+
+**2. Migration Safety** (`tests/integration/ssot/test_websocket_manager_migration_safety.py`)  
+- User isolation preservation (NO DOCKER)
+- Security guarantee maintenance
+
+**3. SSOT Compliance** (`tests/mission_critical/test_ssot_websocket_compliance.py`)
+- Critical business value protection  
+- SSOT compliance enforcement
+
+**4. Golden Path Protection** (`tests/e2e/staging/test_websocket_ssot_golden_path.py`)
+- Complete user login → AI response flow validation
+- Real WebSocket testing in staging GCP
+
+#### Test Discovery Results
+**MISSION CRITICAL (8 files)**: Factory security, user isolation, Golden Path protection
+- `tests/mission_critical/test_websocket_factory_security_validation.py` - User isolation
+- `tests/e2e/golden_path/test_complete_golden_path_business_value.py` - $500K+ ARR protection
+- Resource leak detection and production scenarios (4 additional files)
+
+**HIGH RISK (17+ tests)**: Direct factory usage - WILL BREAK
+- Tests using `get_websocket_manager_factory()` directly
+- Require immediate migration to `WebSocketManager()` pattern
+
+**LOW RISK (25+ tests)**: Direct WebSocketManager usage - WILL CONTINUE WORKING
+- Already using canonical SSOT pattern
+
+**MIXED IMPACT (31+ tests)**: Factory pattern validation tests
+- Need updates to validate new direct instantiation pattern
 
 ### Phase 2: Test Implementation
 - [ ] Create failing SSOT compliance tests
