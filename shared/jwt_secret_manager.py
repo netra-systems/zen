@@ -273,6 +273,114 @@ class JWTSecretManager:
         self._cached_secret = None
         self._cached_algorithm = None
     
+    def validate_jwt_secret_for_environment(self, jwt_secret: str, environment: str) -> tuple:
+        """
+        COORDINATED VALIDATION: Determine if JWT secret is valid for specific environment.
+        
+        This method provides the single source of truth for JWT secret validation logic
+        that both JWT Manager and Auth Startup Validator use to make identical decisions.
+        
+        Args:
+            jwt_secret: The JWT secret to validate
+            environment: Environment context (development, staging, production, etc.)
+            
+        Returns:
+            Tuple of (is_valid: bool, validation_context: dict)
+        """
+        if not jwt_secret:
+            return False, {
+                'error': 'No JWT secret provided',
+                'reason': 'empty_secret',
+                'acceptable_for_environment': False
+            }
+        
+        # Determine test context
+        env = self._get_env()
+        is_testing_context = (
+            environment.lower() in ["testing", "development", "test"] or 
+            env.get("TESTING", "false").lower() == "true" or
+            env.get("PYTEST_CURRENT_TEST") is not None
+        )
+        
+        # Check for known insecure default values
+        insecure_defaults = [
+            'your-secret-key', 'test-secret', 'secret', 
+            'emergency_jwt_secret_please_configure_properly',
+            'fallback_jwt_secret_for_emergency_only'
+        ]
+        
+        if jwt_secret in insecure_defaults:
+            return False, {
+                'error': f'JWT secret is an insecure default value: {jwt_secret[:20]}...',
+                'reason': 'insecure_default',
+                'acceptable_for_environment': False
+            }
+        
+        # Check for deterministic test secrets - COORDINATED DECISION LOGIC
+        import hashlib
+        possible_envs = [environment.lower(), 'development', 'testing', 'test']
+        is_deterministic_secret = False
+        deterministic_env = None
+        
+        for env_name in possible_envs:
+            expected_deterministic = hashlib.sha256(f"netra_{env_name}_jwt_key".encode()).hexdigest()[:32]
+            if jwt_secret == expected_deterministic:
+                is_deterministic_secret = True
+                deterministic_env = env_name
+                break
+        
+        # COORDINATED DECISION: Deterministic secrets acceptable in test contexts only
+        if is_deterministic_secret:
+            if is_testing_context:
+                return True, {
+                    'valid': True,
+                    'reason': 'deterministic_secret_acceptable_in_test_context',
+                    'deterministic_environment': deterministic_env,
+                    'acceptable_for_environment': True
+                }
+            else:
+                return False, {
+                    'error': f'Deterministic JWT secret not acceptable for {environment} environment',
+                    'reason': 'deterministic_secret_in_non_test_environment',
+                    'deterministic_environment': deterministic_env,
+                    'acceptable_for_environment': False
+                }
+        
+        # Check minimum length requirements
+        min_length = 4 if is_testing_context else 32
+        if len(jwt_secret) < min_length:
+            return False, {
+                'error': f'JWT secret too short ({len(jwt_secret)} chars, minimum {min_length})',
+                'reason': 'insufficient_length',
+                'current_length': len(jwt_secret),
+                'minimum_length': min_length,
+                'acceptable_for_environment': False
+            }
+        
+        # Check for test-specific secrets in production environments
+        test_patterns = [
+            'test-jwt-secret-key-32-characters-long-for-testing-only',
+            'dev-jwt-secret-key-must-be-at-least-32-characters',
+            'development-jwt-secret-minimum-32-characters-long'
+        ]
+        
+        if jwt_secret in test_patterns and environment.lower() in ['staging', 'production']:
+            return False, {
+                'error': f'Test-specific JWT secret not acceptable for {environment} environment',
+                'reason': 'test_secret_in_production_environment',
+                'acceptable_for_environment': False
+            }
+        
+        # All validation checks passed
+        return True, {
+            'valid': True,
+            'reason': 'explicit_secret_validation_passed',
+            'secret_length': len(jwt_secret),
+            'environment': environment,
+            'is_testing_context': is_testing_context,
+            'acceptable_for_environment': True
+        }
+
     def get_debug_info(self) -> dict:
         """
         Get debug information about JWT configuration.
