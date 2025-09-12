@@ -1216,6 +1216,160 @@ class UserExecutionContext:
             metadata=child_metadata
         )
     
+    # ========================================================================
+    # DEPENDENCY ACCESS METHODS (NEW - Phase 1: ActionsToMeetGoalsSubAgent Fix)
+    # ========================================================================
+    
+    def get_dependency(self, dependency_name: str) -> Optional[Any]:
+        """Get dependency from context metadata with fallback patterns.
+        
+        This method enables agent factory methods to access dependencies that have been
+        injected into the context by AgentInstanceFactory or other infrastructure components.
+        
+        Args:
+            dependency_name: Name of the dependency ('llm_manager', 'tool_dispatcher', etc.)
+            
+        Returns:
+            Dependency instance or None if not available
+        """
+        # Check agent context first (highest priority)
+        if dependency_name in self.agent_context:
+            dependency = self.agent_context[dependency_name]
+            logger.debug(f"Found dependency '{dependency_name}' in agent_context for user {self.user_id[:8]}...")
+            return dependency
+        
+        # Check audit metadata (fallback)
+        if dependency_name in self.audit_metadata:
+            dependency = self.audit_metadata[dependency_name]
+            logger.debug(f"Found dependency '{dependency_name}' in audit_metadata for user {self.user_id[:8]}...")
+            return dependency
+        
+        # Check unified metadata property (supervisor compatibility)
+        metadata = self.metadata
+        if dependency_name in metadata:
+            dependency = metadata[dependency_name]
+            logger.debug(f"Found dependency '{dependency_name}' in unified metadata for user {self.user_id[:8]}...")
+            return dependency
+        
+        # Dependency not found
+        logger.debug(f"Dependency '{dependency_name}' not found in context for user {self.user_id[:8]}...")
+        return None
+    
+    def has_dependency(self, dependency_name: str) -> bool:
+        """Check if a dependency is available in the context.
+        
+        Args:
+            dependency_name: Name of the dependency to check
+            
+        Returns:
+            True if dependency is available, False otherwise
+        """
+        return self.get_dependency(dependency_name) is not None
+    
+    def get_llm_manager(self) -> Optional[Any]:
+        """Get LLM manager dependency from context.
+        
+        Returns:
+            LLM manager instance or None if not available
+        """
+        return self.get_dependency('llm_manager')
+    
+    def get_tool_dispatcher(self) -> Optional[Any]:
+        """Get tool dispatcher dependency from context.
+        
+        Returns:
+            Tool dispatcher instance or None if not available
+        """
+        return self.get_dependency('tool_dispatcher')
+    
+    def get_websocket_bridge(self) -> Optional[Any]:
+        """Get WebSocket bridge dependency from context.
+        
+        Returns:
+            WebSocket bridge instance or None if not available
+        """
+        return self.get_dependency('websocket_bridge')
+    
+    def set_dependency(self, dependency_name: str, dependency: Any) -> None:
+        """Set dependency in context (for infrastructure use).
+        
+        This method allows infrastructure components (like AgentInstanceFactory)
+        to inject dependencies into the context for use by factory methods.
+        
+        IMPORTANT: This method modifies the context in-place despite the frozen=True
+        dataclass. This is intentional for infrastructure dependency injection.
+        
+        Args:
+            dependency_name: Name of the dependency
+            dependency: Dependency instance to store
+        """
+        if not dependency_name or not isinstance(dependency_name, str):
+            raise ValueError("dependency_name must be a non-empty string")
+        
+        if dependency is None:
+            logger.warning(f"Setting None dependency '{dependency_name}' in context for user {self.user_id[:8]}...")
+        
+        # Store in agent_context (highest priority location)
+        # Note: We need to modify the dict in-place since the dataclass is frozen
+        self.agent_context[dependency_name] = dependency
+        logger.debug(f"Set dependency '{dependency_name}' in context for user {self.user_id[:8]}...")
+    
+    def remove_dependency(self, dependency_name: str) -> bool:
+        """Remove dependency from context.
+        
+        Args:
+            dependency_name: Name of the dependency to remove
+            
+        Returns:
+            True if dependency was removed, False if it didn't exist
+        """
+        removed = False
+        
+        # Remove from agent_context
+        if dependency_name in self.agent_context:
+            del self.agent_context[dependency_name]
+            removed = True
+            
+        # Remove from audit_metadata
+        if dependency_name in self.audit_metadata:
+            del self.audit_metadata[dependency_name]
+            removed = True
+        
+        if removed:
+            logger.debug(f"Removed dependency '{dependency_name}' from context for user {self.user_id[:8]}...")
+        
+        return removed
+    
+    def get_available_dependencies(self) -> List[str]:
+        """Get list of all available dependency names.
+        
+        Returns:
+            List of dependency names that are available in the context
+        """
+        dependencies = set()
+        
+        # Collect from agent_context
+        dependencies.update(self.agent_context.keys())
+        
+        # Collect from audit_metadata
+        dependencies.update(self.audit_metadata.keys())
+        
+        # Filter out non-dependency keys (keep only known dependency types)
+        dependency_patterns = {
+            'llm_manager', 'tool_dispatcher', 'websocket_bridge', 'database_manager',
+            'redis_client', 'clickhouse_client', 'agent_registry', 'websocket_manager'
+        }
+        
+        # Include keys that match dependency patterns
+        filtered_dependencies = []
+        for dep in dependencies:
+            if dep in dependency_patterns or dep.endswith('_manager') or dep.endswith('_dispatcher') or dep.endswith('_bridge'):
+                filtered_dependencies.append(dep)
+        
+        return sorted(filtered_dependencies)
+    
+    # ========================================================================
+
     def to_execution_context(self) -> 'ExecutionContext':
         """Convert to legacy ExecutionContext for backwards compatibility.
         

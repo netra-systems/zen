@@ -694,8 +694,10 @@ class AgentInstanceFactory:
             # Get agent class from registries or use provided class
             if agent_class:
                 AgentClass = agent_class
-                llm_manager = None
-                tool_dispatcher = None
+                # CRITICAL FIX: Use configured dependencies even when agent_class is provided directly
+                # This ensures dependency injection works in all code paths
+                llm_manager = self._llm_manager
+                tool_dispatcher = self._tool_dispatcher
             else:
                 # Try cached lookup first (if caching enabled)
                 AgentClass = None
@@ -780,15 +782,32 @@ class AgentInstanceFactory:
                 # FIRST: Check if agent has create_agent_with_context factory method (preferred)
                 if hasattr(AgentClass, 'create_agent_with_context'):
                     logger.info(f" PASS:  Using create_agent_with_context factory for {agent_name} ({agent_class_name})")
+                    
+                    # CRITICAL: Inject dependencies into context BEFORE calling factory method
+                    # This enables the factory method to access dependencies via context.get_dependency()
+                    if llm_manager is not None:
+                        user_context.set_dependency('llm_manager', llm_manager)
+                        logger.debug(f"Pre-injected llm_manager into context for {agent_name}")
+                    if tool_dispatcher is not None:
+                        user_context.set_dependency('tool_dispatcher', tool_dispatcher)
+                        logger.debug(f"Pre-injected tool_dispatcher into context for {agent_name}")
+                    if self._websocket_bridge is not None:
+                        user_context.set_dependency('websocket_bridge', self._websocket_bridge)
+                        logger.debug(f"Pre-injected websocket_bridge into context for {agent_name}")
+                    
+                    # Call factory method with dependencies available in context
                     agent = AgentClass.create_agent_with_context(user_context)
                     
-                    # CRITICAL: Inject dependencies after creation when using factory method
+                    # FALLBACK: Also inject dependencies directly as fallback for backward compatibility
+                    # This ensures agents work even if they don't use context.get_dependency() methods
                     if hasattr(agent, 'llm_manager') and llm_manager is not None:
-                        agent.llm_manager = llm_manager
-                        logger.debug(f"Injected llm_manager into {agent_name}")
+                        if agent.llm_manager is None:  # Only inject if not already set by factory
+                            agent.llm_manager = llm_manager
+                            logger.debug(f"Fallback: Injected llm_manager into {agent_name}")
                     if hasattr(agent, 'tool_dispatcher') and tool_dispatcher is not None:
-                        agent.tool_dispatcher = tool_dispatcher
-                        logger.debug(f"Injected tool_dispatcher into {agent_name}")
+                        if agent.tool_dispatcher is None:  # Only inject if not already set by factory
+                            agent.tool_dispatcher = tool_dispatcher
+                            logger.debug(f"Fallback: Injected tool_dispatcher into {agent_name}")
                     
                     # GOLDEN PATH COMPATIBILITY: Enable test mode when WebSocket bridge is unavailable
                     if not self._websocket_bridge and hasattr(agent, 'enable_websocket_test_mode'):
