@@ -742,12 +742,13 @@ class DevelopmentConfig(AppConfig):
         pass
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
-        """Load API keys from environment variables for development."""
-        # Load API keys from environment variables
+        """Load API keys and service URLs from environment variables for development."""
+        # Load API keys and service URLs from environment variables
         api_key_mappings = {
             'GEMINI_API_KEY': 'gemini_api_key',
             'ANTHROPIC_API_KEY': 'anthropic_api_key', 
             'OPENAI_API_KEY': 'openai_api_key',
+            'AUTH_SERVICE_URL': 'auth_service_url',  # CRITICAL FIX: Load AUTH_SERVICE_URL for Issue #631
         }
         
         for env_var, field_name in api_key_mappings.items():
@@ -931,12 +932,13 @@ class ProductionConfig(AppConfig):
         logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
-        """Load API keys from environment variables for production."""
-        # Load API keys from environment variables
+        """Load API keys and service URLs from environment variables for production."""
+        # Load API keys and service URLs from environment variables
         api_key_mappings = {
             'GEMINI_API_KEY': 'gemini_api_key',
             'ANTHROPIC_API_KEY': 'anthropic_api_key', 
             'OPENAI_API_KEY': 'openai_api_key',
+            'AUTH_SERVICE_URL': 'auth_service_url',  # CRITICAL FIX: Load AUTH_SERVICE_URL for Issue #631
         }
         
         for env_var, field_name in api_key_mappings.items():
@@ -1121,12 +1123,13 @@ class StagingConfig(AppConfig):
         logger.info(f"SERVICE_SECRET configured: {bool(data.get('service_secret'))}")
     
     def _load_api_keys_from_environment(self, env, data: dict) -> None:
-        """Load API keys from environment variables for staging."""
-        # Load API keys from environment variables
+        """Load API keys and service URLs from environment variables for staging."""
+        # Load API keys and service URLs from environment variables
         api_key_mappings = {
             'GEMINI_API_KEY': 'gemini_api_key',
             'ANTHROPIC_API_KEY': 'anthropic_api_key', 
             'OPENAI_API_KEY': 'openai_api_key',
+            'AUTH_SERVICE_URL': 'auth_service_url',  # CRITICAL FIX: Load AUTH_SERVICE_URL for Issue #631
         }
         
         for env_var, field_name in api_key_mappings.items():
