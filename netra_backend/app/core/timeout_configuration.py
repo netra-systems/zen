@@ -21,6 +21,7 @@ Business Value Justification (BVJ):
 """
 
 import os
+import logging
 from typing import Dict, Any
 from enum import Enum
 from dataclasses import dataclass
@@ -88,17 +89,34 @@ class CloudNativeTimeoutManager:
     """
     
     def __init__(self, default_tier: Optional[TimeoutTier] = None):
-        """Initialize timeout manager with environment detection and tier support."""
+        """Initialize timeout manager with environment detection and tier support.
+        
+        **Issue #586 Enhancement**: Comprehensive startup logging for environment detection debugging.
+        """
+        logger = logging.getLogger(__name__)
+        
         self._env = get_env()
         self._environment = self._detect_environment()
         self._default_tier = default_tier or TimeoutTier.FREE
         self._config_cache = {}
         self._tier_config_cache = {}
         
+        # **Issue #586**: Log comprehensive startup information for debugging
+        self._log_startup_environment_info(logger)
+        
     def _detect_environment(self) -> TimeoutEnvironment:
-        """Detect current environment for timeout configuration."""
+        """Detect current environment for timeout configuration.
+        
+        **Issue #586 Fix**: Enhanced GCP environment detection using multiple markers
+        to ensure staging environment is properly recognized for timeout configuration.
+        """
         # Always refresh environment to handle dynamic changes during testing
         self._env = get_env()
+        
+        logger = logging.getLogger(__name__)
+        
+        # **Issue #586 Enhancement**: Multi-marker GCP environment detection
+        gcp_markers = self._detect_gcp_environment_markers()
         
         # PRIORITY 3 FIX: Check direct os.environ first for explicit ENVIRONMENT setting
         # This allows testing to override isolated environment defaults
@@ -108,21 +126,112 @@ class CloudNativeTimeoutManager:
         else:
             env_name = self._env.get("ENVIRONMENT", "development").lower()
         
+        # Log environment detection process for debugging
+        logger.info(f"Environment detection - Direct: {direct_env}, Env name: {env_name}, "
+                   f"GCP markers: {gcp_markers}")
+        
+        # **Issue #586**: Enhanced GCP Cloud Run detection
+        if gcp_markers['is_gcp_cloud_run']:
+            if gcp_markers['project_id'] == 'netra-staging' or env_name == "staging":
+                logger.info(f"Detected GCP Cloud Run STAGING environment - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif gcp_markers['project_id'] == 'netra-production' or env_name == "production":
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            else:
+                # GCP detected but environment unclear - use project ID as fallback
+                if 'staging' in (gcp_markers['project_id'] or ''):
+                    logger.warning(f"GCP staging detected via project ID fallback: {gcp_markers['project_id']}")
+                    return TimeoutEnvironment.CLOUD_RUN_STAGING
+                elif 'production' in (gcp_markers['project_id'] or ''):
+                    logger.warning(f"GCP production detected via project ID fallback: {gcp_markers['project_id']}")
+                    return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+                else:
+                    # Unknown GCP environment - default to staging for safer timeouts
+                    logger.warning(f"Unknown GCP environment detected, defaulting to staging. "
+                                 f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
+                    return TimeoutEnvironment.CLOUD_RUN_STAGING
+        
         # Check for testing environment markers (but allow explicit overrides)
         if not direct_env and (self._env.get("PYTEST_CURRENT_TEST") or 
             self._env.get("TESTING") == "true" or 
             env_name == "testing"):
+            logger.info("Detected TESTING environment")
             return TimeoutEnvironment.TESTING
             
-        # Check for cloud environments
+        # Check for cloud environments via environment name
         if env_name == "staging":
+            logger.info("Detected STAGING environment via environment name")
             return TimeoutEnvironment.CLOUD_RUN_STAGING
         elif env_name == "production":
+            logger.info("Detected PRODUCTION environment via environment name")
             return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
         elif env_name == "testing":
+            logger.info("Detected TESTING environment via environment name")
             return TimeoutEnvironment.TESTING
         else:
+            logger.info(f"Detected LOCAL_DEVELOPMENT environment (default) - env_name: {env_name}")
             return TimeoutEnvironment.LOCAL_DEVELOPMENT
+    
+    def _detect_gcp_environment_markers(self) -> Dict[str, Any]:
+        """Detect GCP Cloud Run environment using multiple markers.
+        
+        **Issue #586 Solution**: Implements redundant detection with multiple GCP markers
+        to ensure reliable environment detection even when some markers are missing.
+        
+        Returns:
+            Dict containing GCP environment detection results
+        """
+        # GCP Cloud Run environment markers
+        k_service = self._env.get("K_SERVICE") or os.environ.get("K_SERVICE")
+        k_revision = self._env.get("K_REVISION") or os.environ.get("K_REVISION")
+        k_configuration = self._env.get("K_CONFIGURATION") or os.environ.get("K_CONFIGURATION")
+        
+        # GCP project identification
+        gcp_project_id = (self._env.get("GCP_PROJECT_ID") or 
+                         os.environ.get("GCP_PROJECT_ID") or
+                         self._env.get("GOOGLE_CLOUD_PROJECT") or 
+                         os.environ.get("GOOGLE_CLOUD_PROJECT"))
+        
+        # Additional GCP markers
+        cloud_run_service = (self._env.get("CLOUD_RUN_SERVICE") or 
+                           os.environ.get("CLOUD_RUN_SERVICE"))
+        gae_env = self._env.get("GAE_ENV") or os.environ.get("GAE_ENV")
+        function_name = self._env.get("FUNCTION_NAME") or os.environ.get("FUNCTION_NAME")
+        
+        # Cloud Run detection logic
+        is_cloud_run = bool(k_service)  # K_SERVICE is the primary Cloud Run marker
+        is_gae = bool(gae_env)
+        is_cloud_function = bool(function_name)
+        
+        # Determine if we're in GCP (any GCP service)
+        is_gcp = is_cloud_run or is_gae or is_cloud_function or bool(gcp_project_id)
+        
+        # Specifically detect Cloud Run (which is what we care about for Issue #586)
+        is_gcp_cloud_run = is_cloud_run
+        
+        markers = {
+            'is_gcp': is_gcp,
+            'is_gcp_cloud_run': is_gcp_cloud_run,
+            'is_gae': is_gae,
+            'is_cloud_function': is_cloud_function,
+            'project_id': gcp_project_id,
+            'service_name': k_service or cloud_run_service,
+            'revision': k_revision,
+            'configuration': k_configuration,
+            'markers_detected': {
+                'K_SERVICE': bool(k_service),
+                'K_REVISION': bool(k_revision),
+                'GCP_PROJECT_ID': bool(gcp_project_id),
+                'CLOUD_RUN_SERVICE': bool(cloud_run_service),
+                'GAE_ENV': bool(gae_env),
+                'FUNCTION_NAME': bool(function_name)
+            }
+        }
+        
+        return markers
     
     def get_timeout_config(self, tier: Optional[TimeoutTier] = None) -> TimeoutConfig:
         """Get timeout configuration for current environment and customer tier.
