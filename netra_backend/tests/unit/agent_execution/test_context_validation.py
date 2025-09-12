@@ -44,9 +44,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestContextValidation(SSotAsyncTestCase):
     """Unit tests for user execution context validation and security."""
     
-    def setUp(self):
+    def setup_method(self):
         """Set up test fixtures."""
-        super().setUp()
+        super().setup_method()
         self.context_manager = AgentExecutionContextManager()
         self.test_user_id = f"user_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"thread_{uuid.uuid4().hex[:8]}"
@@ -69,9 +69,9 @@ class TestContextValidation(SSotAsyncTestCase):
         self.assertEqual(valid_context.thread_id, self.test_thread_id) 
         self.assertEqual(valid_context.run_id, self.test_run_id)
         self.assertEqual(valid_context.request_id, self.test_request_id)
-        self.assertIsInstance(valid_context.created_at, datetime)
-        self.assertIsInstance(valid_context.agent_context, dict)
-        self.assertIsInstance(valid_context.audit_metadata, dict)
+        self.assertTrue(isinstance(valid_context.created_at, datetime))
+        self.assertTrue(isinstance(valid_context.agent_context, dict))
+        self.assertTrue(isinstance(valid_context.audit_metadata, dict))
     
     def test_user_execution_context_immutability(self):
         """Test that UserExecutionContext is immutable after creation."""
@@ -83,10 +83,10 @@ class TestContextValidation(SSotAsyncTestCase):
         )
         
         # Should not be able to modify fields directly (frozen=True)
-        with self.assertRaises(AttributeError):
+        with self.expect_exception(AttributeError):
             context.user_id = "modified_user_id"
             
-        with self.assertRaises(AttributeError):
+        with self.expect_exception(AttributeError):
             context.thread_id = "modified_thread_id"
             
         # Note: agent_context and audit_metadata are dicts and could be modified
@@ -108,7 +108,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for placeholder in placeholder_patterns:
-            with self.assertRaises(InvalidContextError) as context:
+            with self.expect_exception(InvalidContextError):
                 validate_user_context(
                     user_id=placeholder,
                     thread_id=self.test_thread_id,
@@ -135,7 +135,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for invalid_value in invalid_values:
-            with self.assertRaises((InvalidContextError, ValueError, TypeError)):
+            with self.expect_exception((InvalidContextError, ValueError, TypeError)):
                 validate_user_context(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id, 
@@ -158,7 +158,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for attack_type, payload in security_violations:
-            with self.assertRaises(InvalidContextError) as context:
+            with self.expect_exception(InvalidContextError):
                 validate_user_context(
                     user_id=f"user_{payload}",
                     thread_id=self.test_thread_id,
@@ -396,7 +396,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for invalid_value, expected_keyword in test_cases:
-            with self.assertRaises(InvalidContextError) as context:
+            with self.expect_exception(InvalidContextError):
                 validate_user_context(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id,
