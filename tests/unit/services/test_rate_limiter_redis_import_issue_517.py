@@ -40,6 +40,7 @@ class TestRateLimiterRedisImportIssue517(unittest.TestCase):
     
     def setUp(self):
         self.rate_limiter_path = project_root / "netra_backend" / "app" / "services" / "tool_permissions" / "rate_limiter.py"
+        print(f"Testing rate limiter at: {self.rate_limiter_path}")
         
     def test_redis_import_error_reproduction(self):
         """
@@ -48,8 +49,10 @@ class TestRateLimiterRedisImportIssue517(unittest.TestCase):
         This test reproduces the original problem by temporarily removing
         the redis import and showing the NameError occurs.
         
-        Expected: FAILURE (demonstrates the original issue exists)
+        Expected: FAILURE when imports are broken (demonstrates the original issue)
         """
+        print("Testing redis import error reproduction...")
+        
         # Read the current (fixed) rate limiter file
         with open(self.rate_limiter_path, 'r') as f:
             original_content = f.read()
@@ -78,6 +81,7 @@ class TestRateLimiterRedisImportIssue517(unittest.TestCase):
                 
             # Verify it's the exact error we expect
             self.assertIn("redis", str(context.exception).lower())
+            print(f"✓ Successfully reproduced the original NameError: {context.exception}")
             
         finally:
             # Clean up temporary file
@@ -121,6 +125,7 @@ class TestRateLimiterRedisImportIssue517(unittest.TestCase):
         try:
             rate_limiter = ToolPermissionRateLimiter(redis_client=mock_redis)
             self.assertEqual(rate_limiter.redis, mock_redis)
+            print("✓ Type annotation validation successful")
             
         except Exception as e:
             self.fail(f"Type annotation validation failed: {e}")
@@ -171,6 +176,7 @@ class TestRateLimiterRedisImportIssue517(unittest.TestCase):
         try:
             rate_limiter = ToolPermissionRateLimiter(redis_client=mock_redis)
             self.assertEqual(rate_limiter.redis, mock_redis)
+            print("✓ Mock redis client handled correctly")
             
         except NameError as e:
             self.fail(f"Redis client assignment broken: {e}")
