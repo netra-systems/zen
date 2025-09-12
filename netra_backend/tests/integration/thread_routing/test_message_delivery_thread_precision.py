@@ -86,8 +86,8 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -248,7 +248,7 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
             raise AssertionError(f"Found {len(precision_violations)} message delivery precision violations")
         
         self.logger.info(f"Message delivery precision verified: {len(message_delivery_log)} messages delivered correctly")
-        await redis_client.close()
+        await await redis_client.close()
         await db_session.close()
 
     @pytest.mark.integration
@@ -517,8 +517,8 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -570,11 +570,11 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
             }
             
             connection_key = f"websocket:connection:{thread_websocket_id}"
-            await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.hset(connection_key, mapping=connection_info)
             
             # Add to thread mapping
             thread_mapping_key = f"websocket:thread_mapping:{thread.id}"
-            await redis_client.sadd(thread_mapping_key, str(thread_websocket_id))
+            await await redis_client.sadd(thread_mapping_key, str(thread_websocket_id))
             
             websocket_thread_connections[thread.id] = {
                 "websocket_id": thread_websocket_id,
@@ -646,7 +646,7 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
             
             # Store response in Redis for WebSocket delivery
             response_key = f"websocket:pending_response:{websocket_info['websocket_id']}"
-            await redis_client.lpush(response_key, json.dumps(response_payload))
+            await await redis_client.lpush(response_key, json.dumps(response_payload))
             flow_log.append("websocket_response_queued")
             
             return {
@@ -733,7 +733,7 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
             
             # Check pending responses for this websocket
             response_key = f"websocket:pending_response:{websocket_id}"
-            pending_responses = await redis_client.lrange(response_key, 0, -1)
+            pending_responses = await await redis_client.lrange(response_key, 0, -1)
             
             # Should have responses for this thread only
             for response_json in pending_responses:
@@ -761,5 +761,5 @@ class TestMessageDeliveryThreadPrecision(BaseIntegrationTest):
         flow_success_rate = successful_flows / len(flow_results)
         self.logger.info(f"Flow success rate: {flow_success_rate:.1%} ({successful_flows}/{len(flow_results)})")
         
-        await redis_client.close()
+        await await redis_client.close()
         await db_session.close()

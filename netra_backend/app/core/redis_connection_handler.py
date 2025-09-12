@@ -122,7 +122,7 @@ class RedisConnectionHandler:
         """Get Redis client with proper connection configuration."""
         try:
             pool = self.create_connection_pool()
-            client = redis.Redis(connection_pool=pool, decode_responses=True)
+            client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool, decode_responses=True)
             
             # Test connection
             client.ping()

@@ -21,7 +21,7 @@ import pytest
 import os
 import subprocess
 import time
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import inspect
 from typing import Dict, Any, Optional
 from unittest.mock import patch, MagicMock

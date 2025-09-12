@@ -103,7 +103,7 @@ class TestSystemStartup:
         """Test Redis connectivity."""
         result = subprocess.run(
             ["python", "-c", 
-             "import redis; r=redis.Redis(host='localhost', port=6379, socket_connect_timeout=1); "
+             "import redis; r=await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, socket_connect_timeout=1); "
              "r.ping(); print('Redis connected')"],
             capture_output=True,
             text=True

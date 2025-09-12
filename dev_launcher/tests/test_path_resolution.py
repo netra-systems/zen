@@ -5,6 +5,7 @@ This test ensures that the launcher correctly identifies and validates
 the actual project directory structure, particularly the backend path.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import sys
 import tempfile
@@ -17,7 +18,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from dev_launcher.config import LauncherConfig
 
 
-class TestPathResolution(unittest.TestCase):
+class TestPathResolution(SSotBaseTestCase):
     """Test suite for path resolution issues."""
     
     def setUp(self):

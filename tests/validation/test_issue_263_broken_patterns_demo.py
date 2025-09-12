@@ -131,22 +131,6 @@ class TestSetupMethodVsSetUpIncompatibility:
     the actual failure, but shows what would happen.
     """
 
-    def setUp(self):
-        """
-        BROKEN PATTERN: Uses setUp() instead of setup_method().
-        
-        If this class inherited from SSotAsyncTestCase, this method
-        would NEVER be called because pytest calls setup_method(), not setUp().
-        """
-        self.golden_user_context = UserExecutionContext(
-            user_id="setup_test_user",
-            thread_id="setup_test_thread",
-            run_id="setup_test_run",
-            request_id="setup_test_request",
-            websocket_client_id="setup_test_ws"
-        )
-        self.setup_called = True
-
     @pytest.mark.unit
     def test_setup_vs_setup_method_difference(self):
         """
@@ -297,19 +281,6 @@ class TestOldPatternFailureSimulation:
     """
     
     # BROKEN: Using setUp() instead of setup_method()
-    def setUp(self):
-        """
-        BROKEN: This simulates the failing setUp() pattern.
-        If this class inherited from SSotAsyncTestCase, this would never be called.
-        """
-        self.golden_user_context = UserExecutionContext(
-            user_id="broken_pattern_user",
-            thread_id="broken_pattern_thread",
-            run_id="broken_pattern_run",
-            request_id="broken_pattern_request",
-            websocket_client_id="broken_pattern_ws"
-        )
-
     def test_old_pattern_simulation(self):
         """
         Simulate what the old broken test would have looked like.

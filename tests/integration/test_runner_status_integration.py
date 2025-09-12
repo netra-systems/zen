@@ -14,6 +14,7 @@ Business Value: Platform/Internal - System Stability & Development Velocity
 Ensures accurate test result reporting matches user expectations in CI/CD pipelines.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import tempfile
 import os
@@ -27,7 +28,7 @@ from tests.unified_test_runner import UnifiedTestRunner
 from test_framework.category_system import ExecutionPlan
 
 
-class TestRunnerStatusIntegration(unittest.TestCase):
+class TestRunnerStatusIntegration(SSotBaseTestCase):
     """
     Integration tests for the test runner status aggregation bug.
     
@@ -59,7 +60,7 @@ class TestRunnerStatusIntegration(unittest.TestCase):
         test_content = f'''
 import unittest
 
-class Dummy{filename.replace(".py", "").title()}Test(unittest.TestCase):
+class Dummy{filename.replace(".py", "").title()}Test(SSotBaseTestCase):
     def test_dummy(self):
         """Dummy test that {'passes' if should_pass else 'fails'}."""
         self.assertTrue({str(should_pass).lower()}, "Dummy test")

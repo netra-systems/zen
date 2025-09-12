@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -76,7 +77,7 @@
             
 
 
-# REMOVED_SYNTAX_ERROR: class TestWebSocketE2EProof(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestWebSocketE2EProof(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: """Prove the WebSocket factory pattern flow works end-to-end."""
 
 # REMOVED_SYNTAX_ERROR: def setUp(self):

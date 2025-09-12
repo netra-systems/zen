@@ -23,6 +23,7 @@ CRITICAL COMPLIANCE WITH CLAUDE.md REQUIREMENTS:
 Total Coverage: 70+ comprehensive tests across all functionality areas.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import logging
 import threading
@@ -42,7 +43,7 @@ from shared.config_builder_base import ConfigBuilderBase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestSecretManagerBuilderRealFunctionality(unittest.TestCase):
+class TestSecretManagerBuilderRealFunctionality(SSotBaseTestCase):
     """
     Test real SecretManagerBuilder functionality without business logic mocks.
     Focuses on actual business scenarios with real environment integration.

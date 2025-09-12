@@ -256,6 +256,7 @@ async def real_redis_fixture():
         real_redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
         
         # Create Redis client for real Redis
+        import redis.asyncio as redis
         redis_client = redis.Redis(
             host=redis_host,
             port=redis_port,
@@ -388,9 +389,9 @@ async def real_services_fixture(real_postgres_connection, with_test_database):
     try:
         import redis
         redis_client = redis.Redis.from_url(redis_url, socket_timeout=2)
-        redis_client.ping()
+        await redis_client.ping()
         services_available["redis"] = True
-        redis_client.close()
+        await redis_client.close()
     except Exception:
         logger.info("Redis service not reachable - tests will use URL only")
     

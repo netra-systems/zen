@@ -18,6 +18,7 @@ SSOT Violations This Module Proves:
 4. Method signature inconsistencies between manager types
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect
 import unittest
@@ -58,7 +59,7 @@ class ExpectedWebSocketManagerProtocol(Protocol):
         ...
 
 
-class TestWebSocketManagerInterfaceViolations(unittest.TestCase):
+class TestWebSocketManagerInterfaceViolations(SSotAsyncTestCase):
     """
     Tests to prove WebSocket manager interface violations exist.
     

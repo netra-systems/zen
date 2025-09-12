@@ -4,6 +4,7 @@ Autonomous Test Review System - Test Generator
 Intelligent test generation and modernization capabilities
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import re
 from datetime import datetime
 from pathlib import Path
@@ -268,7 +269,7 @@ def _save_if_changed(test_path, content, original):
 
 def _check_deprecated_patterns(content, issues):
     """Check for deprecated unittest patterns"""
-    if "self.assertEqual" in content or "unittest.TestCase" in content:
+    if "self.assertEqual" in content or "SSotAsyncTestCase" in content:
         issues.append("Uses deprecated unittest patterns")
 
 def _check_missing_assertions(content, issues):

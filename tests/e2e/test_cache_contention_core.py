@@ -155,7 +155,7 @@ class TestRedisClient:
             socket_connect_timeout=10,
             decode_responses=True
         )
-        self.client = redis.Redis(connection_pool=self.connection_pool)
+        self.client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=self.connection_pool)
         
         # Test connection
         await self.client.ping()
@@ -195,8 +195,8 @@ class TestCacheContentionSuite:
         
     async def setup_test_environment(self):
         """Setup test environment and prepare test data."""
-        await self.redis_client.connect()
-        await self.redis_client.flush_test_data()
+        await self.await redis_client.connect()
+        await self.await redis_client.flush_test_data()
         
         # Generate test data
         await self._generate_test_data()
@@ -211,7 +211,7 @@ class TestCacheContentionSuite:
             if self.test_keys and self.redis_client.client:
                 await self.redis_client.client.delete(*self.test_keys)
             
-            await self.redis_client.disconnect()
+            await self.await redis_client.disconnect()
             logger.info("Test environment cleanup complete")
         except Exception as e:
             logger.warning(f"Error during cleanup: {e}")
@@ -818,7 +818,7 @@ class TestCacheContentionSuite:
         logger.info("Starting memory pressure cache eviction test")
         
         # Fill Redis with data until memory pressure
-        initial_memory = await self.suite.redis_client.get_memory_usage()
+        initial_memory = await self.suite.await redis_client.get_memory_usage()
         target_memory = initial_memory + (50 * 1024 * 1024)  # Add 50MB
         
         keys_created = []
@@ -839,7 +839,7 @@ class TestCacheContentionSuite:
             keys_created.append(key)
             
             if counter % 100 == 0:
-                current_memory = await self.suite.redis_client.get_memory_usage()
+                current_memory = await self.suite.await redis_client.get_memory_usage()
                 
             counter += 1
             
@@ -898,7 +898,7 @@ class TestCacheContentionSuite:
         successful_operations = sum(r for r in results if isinstance(r, int))
         expected_operations = num_workers * operations_per_worker
         
-        final_memory = await self.suite.redis_client.get_memory_usage()
+        final_memory = await self.suite.await redis_client.get_memory_usage()
         
         # Check cache hit ratio under pressure
         cache_hit_ratio = self.suite.metrics.get_cache_hit_ratio()

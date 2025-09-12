@@ -247,7 +247,14 @@ class StagingTestBase:
     async def verify_health(self):
         """Verify backend health"""
         response = await self.call_api("/health")
-        assert response.status_code == 200
+        print(f"[DEBUG] Base health response status: {response.status_code}")
+        print(f"[DEBUG] Base health response headers: {dict(response.headers)}")
+        try:
+            response_text = response.text
+            print(f"[DEBUG] Base health response content: {response_text[:500]}")
+        except:
+            print("[DEBUG] Could not read response content")
+        assert response.status_code == 200, f"Base health check failed with status {response.status_code}"
         data = response.json()
         assert data["status"] == "healthy"
         return True
@@ -255,7 +262,14 @@ class StagingTestBase:
     async def verify_api_health(self):
         """Verify API health"""
         response = await self.call_api("/api/health")
-        assert response.status_code == 200
+        print(f"[DEBUG] API health response status: {response.status_code}")
+        print(f"[DEBUG] API health response headers: {dict(response.headers)}")
+        try:
+            response_text = response.text
+            print(f"[DEBUG] API health response content: {response_text[:500]}")
+        except:
+            print("[DEBUG] Could not read response content")
+        assert response.status_code == 200, f"API health check failed with status {response.status_code}"
         data = response.json()
         assert data["status"] == "healthy"
         return True

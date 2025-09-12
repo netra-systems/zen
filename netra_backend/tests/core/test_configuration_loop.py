@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 
@@ -9,7 +10,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.redis_manager import redis_manager
 
 
-class TestConfigurationLoop(unittest.TestCase):
+class TestConfigurationLoop(SSotBaseTestCase):
     """Test cases for configuration loop issue."""
     
     def setUp(self):

@@ -86,14 +86,14 @@ class TestComprehensiveRateLimiter:
         """Setup test environment with Redis and mock users."""
         # Setup Redis connection for rate limit coordination
         try:
-            self.redis_client = redis.Redis(
+            self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host='localhost', 
                 port=6379, 
                 db=0, 
                 decode_responses=True,
                 socket_connect_timeout=2
             )
-            await self.redis_client.ping()
+            await self.await redis_client.ping()
         except Exception:
             # Use None to indicate Redis unavailable - tests will simulate
             self.redis_client = None
@@ -491,9 +491,9 @@ class TestComprehensiveRateLimiter:
             try:
                 # Check if global rate limiting infrastructure exists
                 global_key = "rate_limit:global:api"
-                await self.redis_client.set(global_key, "test", ex=60)
-                exists = await self.redis_client.exists(global_key)
-                await self.redis_client.delete(global_key)
+                await self.await redis_client.set(global_key, "test", ex=60)
+                exists = await self.await redis_client.exists(global_key)
+                await self.await redis_client.delete(global_key)
                 
                 return {
                     "active": bool(exists),
@@ -691,18 +691,18 @@ class TestComprehensiveRateLimiter:
             try:
                 # Clean up test keys
                 pattern = f"rate_limit:*{self.test_session_id}*"
-                keys = await self.redis_client.keys(pattern)
+                keys = await self.await redis_client.keys(pattern)
                 if keys:
-                    await self.redis_client.delete(*keys)
+                    await self.await redis_client.delete(*keys)
                 
                 # Clean up test user keys
                 for user in self.test_users:
                     user_pattern = f"rate_limit:*{user['data']['user_id']}*"
-                    user_keys = await self.redis_client.keys(user_pattern)
+                    user_keys = await self.await redis_client.keys(user_pattern)
                     if user_keys:
-                        await self.redis_client.delete(*user_keys)
+                        await self.await redis_client.delete(*user_keys)
                 
-                await self.redis_client.aclose()
+                await self.await redis_client.aclose()
             except Exception:
                 pass  # Best effort cleanup
 

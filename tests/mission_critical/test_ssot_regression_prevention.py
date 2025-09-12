@@ -35,7 +35,7 @@ import pytest
 # Real services and isolation testing components
 import asyncpg
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import websockets
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Process, Queue
@@ -67,7 +67,7 @@ class TestSSOTRegressionPrevention:
         # Initialize REAL service connections for isolation testing
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
-        self.redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+        self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
         self.test_context = TestContext(user_id=f"test_user_{self.test_id}")
         
         # Create isolated test environment
@@ -93,7 +93,7 @@ class TestSSOTRegressionPrevention:
                 pass
         
         try:
-            self.redis_client.flushdb()
+            self.await redis_client.flushdb()
         except:
             pass
             
@@ -128,14 +128,14 @@ class TestSSOTRegressionPrevention:
                 for op_num in range(operations_per_user):
                     try:
                         # Store user-specific data
-                        self.redis_client.hset(
+                        self.await redis_client.hset(
                             f"user:{user_id}:data",
                             f"operation_{op_num}",
                             str(user_data)
                         )
                         
                         # Verify data isolation - should only see own data
-                        stored_data = self.redis_client.hget(
+                        stored_data = self.await redis_client.hget(
                             f"user:{user_id}:data",
                             f"operation_{op_num}"
                         )
@@ -152,7 +152,7 @@ class TestSSOTRegressionPrevention:
                         # Verify no cross-contamination
                         for other_user in range(num_users):
                             if other_user != user_id:
-                                other_data = self.redis_client.hget(
+                                other_data = self.await redis_client.hget(
                                     f"user:{other_user}:data",
                                     f"operation_{op_num}"
                                 )
@@ -450,7 +450,7 @@ class TestSSOTRegressionPrevention:
                     # Simulate atomic state updates
                     try:
                         # Read current state
-                        current_state = self.redis_client.get(shared_state_key)
+                        current_state = self.await redis_client.get(shared_state_key)
                         if current_state is None:
                             current_state = "0"
                         
@@ -458,7 +458,7 @@ class TestSSOTRegressionPrevention:
                         new_value = current_value + 1
                         
                         # Atomic update with race condition detection
-                        pipe = self.redis_client.pipeline()
+                        pipe = self.await redis_client.pipeline()
                         pipe.watch(shared_state_key)
                         pipe.multi()
                         pipe.set(shared_state_key, str(new_value))
@@ -477,8 +477,8 @@ class TestSSOTRegressionPrevention:
                             })
                         
                         # Verify state consistency
-                        final_state = self.redis_client.get(shared_state_key)
-                        operation_record = self.redis_client.get(f"operation:{operation_id}")
+                        final_state = self.await redis_client.get(shared_state_key)
+                        operation_record = self.await redis_client.get(f"operation:{operation_id}")
                         
                         if operation_record and f"updated_to_{final_state}" not in operation_record:
                             failures.append({
@@ -509,7 +509,7 @@ class TestSSOTRegressionPrevention:
                 }]
         
         # Initialize shared state
-        self.redis_client.set(shared_state_key, "0")
+        self.await redis_client.set(shared_state_key, "0")
         
         # Execute concurrent operations
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
@@ -531,7 +531,7 @@ class TestSSOTRegressionPrevention:
                     })
         
         # Verify final state consistency
-        final_value = int(self.redis_client.get(shared_state_key) or "0")
+        final_value = int(self.await redis_client.get(shared_state_key) or "0")
         expected_max_value = num_workers * operations_per_worker
         
         # Some race conditions are expected and handled properly
@@ -564,7 +564,7 @@ class TestSSOTRegressionPrevention:
             user_secrets[user_id] = user_secret
             
             # Store user's private data
-            self.redis_client.hset(
+            self.await redis_client.hset(
                 f"user:{user_id}:private",
                 "secret_data",
                 user_secret
@@ -572,7 +572,7 @@ class TestSSOTRegressionPrevention:
             
             # Store user's authorization token
             auth_token = f"auth_token_{user_id}_{uuid.uuid4().hex}"
-            self.redis_client.hset(
+            self.await redis_client.hset(
                 f"user:{user_id}:auth",
                 "token",
                 auth_token
@@ -589,7 +589,7 @@ class TestSSOTRegressionPrevention:
                 
                 # Attempt 1: Direct data access to other user's private data
                 try:
-                    stolen_secret = self.redis_client.hget(
+                    stolen_secret = self.await redis_client.hget(
                         f"user:{target_user_id}:private",
                         "secret_data"
                     )
@@ -608,7 +608,7 @@ class TestSSOTRegressionPrevention:
                 
                 # Attempt 2: Auth token theft
                 try:
-                    stolen_token = self.redis_client.hget(
+                    stolen_token = self.await redis_client.hget(
                         f"user:{target_user_id}:auth",
                         "token"
                     )
@@ -736,14 +736,14 @@ class TestSSOTRegressionPrevention:
                         with db_manager.get_session() as db_session:
                             # Store transaction data
                             tx_key = f"transaction:{tx_id}"
-                            self.redis_client.hset(
+                            self.await redis_client.hset(
                                 tx_key,
                                 "data",
                                 str(session_data)
                             )
                             
                             # Verify transaction isolation
-                            stored_data = self.redis_client.hget(tx_key, "data")
+                            stored_data = self.await redis_client.hget(tx_key, "data")
                             if not stored_data or str(session_id) not in stored_data:
                                 failures.append({
                                     'session_id': session_id,
@@ -754,10 +754,10 @@ class TestSSOTRegressionPrevention:
                                 })
                             
                             # Check for cross-session contamination
-                            all_tx_keys = self.redis_client.keys("transaction:*")
+                            all_tx_keys = self.await redis_client.keys("transaction:*")
                             for other_key in all_tx_keys:
                                 if tx_id not in other_key:
-                                    other_data = self.redis_client.hget(other_key, "data")
+                                    other_data = self.await redis_client.hget(other_key, "data")
                                     if other_data and str(session_id) in other_data:
                                         other_tx_id = other_key.split(":")[1]
                                         if not other_tx_id.startswith(f"tx_{session_id}_"):
@@ -771,10 +771,10 @@ class TestSSOTRegressionPrevention:
                             
                             # Simulate transaction rollback scenario
                             if tx_num % 3 == 0:  # Rollback every 3rd transaction
-                                self.redis_client.delete(tx_key)
+                                self.await redis_client.delete(tx_key)
                                 
                                 # Verify rollback isolation
-                                rollback_data = self.redis_client.hget(tx_key, "data")
+                                rollback_data = self.await redis_client.hget(tx_key, "data")
                                 if rollback_data:
                                     failures.append({
                                         'session_id': session_id,
@@ -869,13 +869,13 @@ class TestSSOTRegressionPrevention:
                         
                         # I/O-intensive operation
                         for i in range(10):
-                            self.redis_client.set(
+                            self.await redis_client.set(
                                 f"perf_test:{thread_id}:{op_num}:{i}",
                                 f"performance_data_{result}_{i}"
                             )
                             
                             # Verify data integrity
-                            retrieved = self.redis_client.get(
+                            retrieved = self.await redis_client.get(
                                 f"perf_test:{thread_id}:{op_num}:{i}"
                             )
                             
@@ -1308,7 +1308,7 @@ class TestSSOTContinuousCompliance:
         # Initialize REAL service connections for compliance testing
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
-        self.redis_client = redis.Redis(host='localhost', port=6381, decode_responses=True)
+        self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
         self.test_context = TestContext(user_id=f"compliance_user_{self.test_id}")
         
         logger.info(f"Starting continuous compliance test with REAL services: {self._testMethodName} (ID: {self.test_id})")
@@ -1316,7 +1316,7 @@ class TestSSOTContinuousCompliance:
     def tearDown(self):
         """Clean up continuous compliance test and REAL service connections."""
         try:
-            self.redis_client.flushdb()
+            self.await redis_client.flushdb()
         except:
             pass
             
@@ -1336,8 +1336,8 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                self.redis_client.set(test_key, "healthy")
-                result = self.redis_client.get(test_key)
+                self.await redis_client.set(test_key, "healthy")
+                result = self.await redis_client.get(test_key)
                 
                 if result != "healthy":
                     health_issues.append({
@@ -1347,7 +1347,7 @@ class TestSSOTContinuousCompliance:
                         'actual': result
                     })
                 
-                self.redis_client.delete(test_key)
+                self.await redis_client.delete(test_key)
             
             db_response_time = time.time() - db_start_time
             service_health['database'] = {
@@ -1378,10 +1378,10 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis operations
             test_hash = f"redis_health_{self.test_id}"
-            self.redis_client.hset(test_hash, "field1", "value1")
-            self.redis_client.hset(test_hash, "field2", "value2")
+            self.await redis_client.hset(test_hash, "field1", "value1")
+            self.await redis_client.hset(test_hash, "field2", "value2")
             
-            all_fields = self.redis_client.hgetall(test_hash)
+            all_fields = self.await redis_client.hgetall(test_hash)
             if len(all_fields) != 2 or all_fields.get("field1") != "value1":
                 health_issues.append({
                     'service': 'redis',
@@ -1391,7 +1391,7 @@ class TestSSOTContinuousCompliance:
                     'data': all_fields
                 })
             
-            self.redis_client.delete(test_hash)
+            self.await redis_client.delete(test_hash)
             
             redis_response_time = time.time() - redis_start_time
             service_health['redis'] = {
@@ -1501,15 +1501,15 @@ class TestSSOTContinuousCompliance:
             # Execute database operations
             for i in range(50):
                 key = f"regression_test_{self.test_id}_{i}"
-                self.redis_client.set(key, f"test_data_{i}")
-                result = self.redis_client.get(key)
+                self.await redis_client.set(key, f"test_data_{i}")
+                result = self.await redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
                         'operation': i,
                         'issue': 'data_persistence_failure'
                     })
-                self.redis_client.delete(key)
+                self.await redis_client.delete(key)
             
             db_time = time.time() - db_start
             regression_metrics['service_metrics']['database_50_ops'] = db_time
@@ -1580,11 +1580,11 @@ class TestSSOTContinuousCompliance:
             # Test concurrent isolation operations
             def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                self.redis_client.set(
+                self.await redis_client.set(
                     f"isolation_test:{test_id}",
                     f"data_{test_id}"
                 )
-                return self.redis_client.get(f"isolation_test:{test_id}")
+                return self.await redis_client.get(f"isolation_test:{test_id}")
             
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
@@ -1676,7 +1676,7 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            self.redis_client.ping()
+            self.await redis_client.ping()
             health_metrics['service_response_times']['redis'] = time.time() - start_time
             
             # Test Database connection
@@ -1698,7 +1698,7 @@ class TestSSOTContinuousCompliance:
             # Initialize real service components to measure load time
             test_env = IsolatedEnvironment()
             test_db = DatabaseManager()
-            test_redis = redis.Redis(host='localhost', port=6381)
+            test_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381)
             
             # Test basic operations
             test_redis.ping()
@@ -1754,13 +1754,13 @@ class TestSSOTContinuousCompliance:
                     operation_key = f"context:{context_id}:operation:{op_num}"
                     
                     # Store context-specific secret data
-                    self.redis_client.hset(
+                    self.await redis_client.hset(
                         operation_key,
                         "secret_data",
                         secrets['secret_key']
                     )
                     
-                    self.redis_client.hset(
+                    self.await redis_client.hset(
                         operation_key,
                         "private_data",
                         secrets['private_data']
@@ -1772,9 +1772,9 @@ class TestSSOTContinuousCompliance:
                             other_secrets = context_secrets[other_context]
                             
                             # Check if current context's data leaked to other context
-                            other_keys = self.redis_client.keys(f"context:{other_context}:*")
+                            other_keys = self.await redis_client.keys(f"context:{other_context}:*")
                             for other_key in other_keys:
-                                other_data = self.redis_client.hgetall(other_key)
+                                other_data = self.await redis_client.hgetall(other_key)
                                 
                                 # Check for secret leakage
                                 for field, value in other_data.items():
@@ -1792,7 +1792,7 @@ class TestSSOTContinuousCompliance:
                                         })
                             
                             # Check reverse leakage - other context data in current context
-                            current_data = self.redis_client.hgetall(operation_key)
+                            current_data = self.await redis_client.hgetall(operation_key)
                             for field, value in current_data.items():
                                 if (other_secrets['secret_key'] in str(value) or 
                                     other_secrets['private_data'] in str(value) or
@@ -1839,9 +1839,9 @@ class TestSSOTContinuousCompliance:
         
         # Clean up test data
         for context_id in range(num_isolated_contexts):
-            keys_to_delete = self.redis_client.keys(f"context:{context_id}:*")
+            keys_to_delete = self.await redis_client.keys(f"context:{context_id}:*")
             if keys_to_delete:
-                self.redis_client.delete(*keys_to_delete)
+                self.await redis_client.delete(*keys_to_delete)
         
         # Verify NO data leakage detected
         if leakage_violations:
@@ -1900,14 +1900,14 @@ class TestSSOTContinuousCompliance:
                             }
                             
                             # Store complex data
-                            self.redis_client.hset(
+                            self.await redis_client.hset(
                                 key,
                                 "complex_data",
                                 str(complex_data)
                             )
                             
                             # Immediate verification
-                            retrieved = self.redis_client.hget(key, "complex_data")
+                            retrieved = self.await redis_client.hget(key, "complex_data")
                             if not retrieved or user_data_signature not in retrieved:
                                 failures.append({
                                     'user_id': user_id,
@@ -1922,13 +1922,13 @@ class TestSSOTContinuousCompliance:
                             random_other_users = [u for u in range(num_concurrent_users) if u != user_id]
                             if random_other_users:
                                 random_user = random_other_users[operation_count % len(random_other_users)]
-                                random_keys = self.redis_client.keys(f"stress:{random_user}:*")
+                                random_keys = self.await redis_client.keys(f"stress:{random_user}:*")
                                 
                                 if random_keys:
                                     # Sample a few random keys to check for contamination
                                     sample_keys = random_keys[:min(3, len(random_keys))]
                                     for sample_key in sample_keys:
-                                        sample_data = self.redis_client.hget(sample_key, "complex_data")
+                                        sample_data = self.await redis_client.hget(sample_key, "complex_data")
                                         if sample_data and user_data_signature in sample_data:
                                             failures.append({
                                                 'user_id': user_id,
@@ -2022,13 +2022,13 @@ class TestSSOTContinuousCompliance:
         
         # Clean up stress test data
         try:
-            keys_to_delete = self.redis_client.keys("stress:*")
+            keys_to_delete = self.await redis_client.keys("stress:*")
             if keys_to_delete:
                 # Delete in batches to avoid overwhelming Redis
                 batch_size = 100
                 for i in range(0, len(keys_to_delete), batch_size):
                     batch = keys_to_delete[i:i + batch_size]
-                    self.redis_client.delete(*batch)
+                    self.await redis_client.delete(*batch)
         except Exception as e:
             logger.warning(f"Stress test cleanup warning: {e}")
         

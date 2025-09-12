@@ -394,6 +394,30 @@ class UnifiedTestRunner:
             # Configure environment
             self._configure_environment(args)
             
+            # PERFORMANCE: Skip service orchestration for fast collection
+            print(f"[DEBUG] fast_collection = {getattr(args, 'fast_collection', None)}")
+            if hasattr(args, 'fast_collection') and args.fast_collection:
+                print("[INFO] Fast collection mode - skipping service orchestration")
+                # Skip Docker and service setup
+                categories_to_run = self._determine_categories_to_run(args)
+                
+                # Use fast-path collection
+                if args.pattern:
+                    results = {}
+                    for category in categories_to_run:
+                        tests = self._fast_path_collect_tests(args.pattern, category)
+                        results[category] = {
+                            "success": True,
+                            "duration": 0.0,
+                            "output": f"Fast collection: {len(tests)} test files found",
+                            "errors": "",
+                            "test_count": len(tests)
+                        }
+                    
+                    print(f"✅ Fast collection completed: {sum(len(r.get('output', '').split()) for r in results.values())} files")
+                    return 0
+
+
             # Check service availability if real services or E2E tests are requested
             categories_to_run = self._determine_categories_to_run(args)
             e2e_categories = {'e2e', 'e2e_critical', 'cypress'}
@@ -1843,6 +1867,65 @@ class UnifiedTestRunner:
         
         return category_service_mapping.get(category_name, ["backend"])
     
+
+    def _fast_path_collect_tests(self, pattern: str, category: str) -> List[str]:
+        """Fast-path test collection bypassing heavy setup"""
+        
+        # Skip Docker/service setup for simple collection
+        if hasattr(self, '_collection_cache'):
+            cache_key = f"{pattern}:{category}"
+            if cache_key in self._collection_cache:
+                return self._collection_cache[cache_key]
+        
+        # Use simple file discovery instead of full pytest collection
+        test_files = []
+        test_dirs = [
+            self.project_root / "netra_backend" / "tests",
+            self.project_root / "tests"
+        ]
+        
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                # Use glob for fast file discovery
+                pattern_files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                test_files.extend([str(f) for f in pattern_files if f.is_file()])
+        
+        # Cache result
+        if not hasattr(self, '_collection_cache'):
+            self._collection_cache = {}
+        self._collection_cache[f"{pattern}:{category}"] = test_files
+        
+        return test_files
+
+
+
+    def _parallel_collect_tests(self, patterns: List[str]) -> Dict[str, List[str]]:
+        """Collect tests in parallel for multiple patterns"""
+        
+        def collect_single_pattern(pattern: str) -> Tuple[str, List[str]]:
+            """Collect tests for a single pattern"""
+            try:
+                tests = self._fast_path_collect_tests(pattern, "unknown")
+                return pattern, tests
+            except Exception as e:
+                print(f"Warning: Failed to collect tests for pattern {pattern}: {e}")
+                return pattern, []
+        
+        # Use ThreadPoolExecutor for I/O-bound file discovery
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(collect_single_pattern, pattern) for pattern in patterns]
+            results = {}
+            
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    pattern, tests = future.result()
+                    results[pattern] = tests
+                except Exception as e:
+                    print(f"Warning: Parallel collection failed: {e}")
+        
+        return results
+
+
     def _run_service_tests_for_category(self, service: str, category_name: str, args: argparse.Namespace) -> Dict:
         """Run tests for a specific service and category combination."""
         # Special handling for Cypress tests
@@ -3019,6 +3102,24 @@ def main():
         help="Minimal output"
     )
     
+    # Performance optimization arguments
+    parser.add_argument(
+        "--fast-collection",
+        action="store_true",
+        help="Enable fast test collection mode (skip service setup)"
+    )
+    parser.add_argument(
+        "--parallel-collection", 
+        action="store_true",
+        help="Use parallel test discovery"
+    )
+    parser.add_argument(
+        "--collection-timeout",
+        type=int,
+        default=30,
+        help="Timeout for test collection in seconds (default: 30)"
+    )
+    
     parser.add_argument(
         "--docker-pull-policy",
         choices=["always", "never", "missing"],
@@ -3334,6 +3435,35 @@ def main():
         for cat_type, count in stats['by_type'].items():
             print(f"  {cat_type:12}: {count}")
         
+        return 0
+    
+    # PERFORMANCE: Handle fast collection mode early (skip validation)
+    if hasattr(args, 'fast_collection') and args.fast_collection:
+        print("[INFO] Fast collection mode - running streamlined test discovery")
+        
+        # Create a simple runner for fast collection
+        from pathlib import Path
+        
+        # Determine test pattern 
+        pattern = getattr(args, 'pattern', '*')
+        if not pattern:
+            pattern = '*'
+        
+        # Fast test discovery
+        test_dirs = [
+            PROJECT_ROOT / "netra_backend" / "tests",
+            PROJECT_ROOT / "tests"
+        ]
+        
+        total_files = 0
+        for test_dir in test_dirs:
+            if test_dir.exists():
+                files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                valid_files = [f for f in files if f.is_file() and 'test' in f.name]
+                total_files += len(valid_files)
+                print(f"Found {len(valid_files)} test files in {test_dir.name}")
+        
+        print(f"✅ Fast collection completed: {total_files} test files discovered")
         return 0
     
     # Run validation by default unless --no-validate is specified

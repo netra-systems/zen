@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncpg
 import httpx
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import websockets
 
 from test_framework.environment_markers import env, env_requires, dev_and_staging

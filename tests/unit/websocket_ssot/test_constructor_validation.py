@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. Dependency injection pattern inconsistencies
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect
 import unittest
@@ -29,7 +30,7 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketManagerConstructorValidation(unittest.TestCase):
+class TestWebSocketManagerConstructorValidation(SSotBaseTestCase):
     """
     Tests to prove WebSocket manager constructor validation violations exist.
     

@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -66,7 +67,7 @@
             # Pytest imports for test markers - using standard pytest marks
 
 
-# REMOVED_SYNTAX_ERROR: class TestFrontendBuildErrorReporting(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestFrontendBuildErrorReporting(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for inadequate frontend build error reporting.
 
@@ -231,7 +232,7 @@
                 # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class TestShellInjectionVulnerabilities(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestShellInjectionVulnerabilities(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for shell injection vulnerabilities in Node.js scripts.
 
@@ -366,7 +367,7 @@
                         # REMOVED_SYNTAX_ERROR: "formatted_string")
 
 
-# REMOVED_SYNTAX_ERROR: class TestProcessSpawningSecurityIssues(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestProcessSpawningSecurityIssues(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for insecure process spawning patterns.
 

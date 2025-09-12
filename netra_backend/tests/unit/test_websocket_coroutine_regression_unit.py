@@ -16,6 +16,7 @@ CLAUDE.MD COMPLIANCE:
 - Tests the exact line 557 logic in WebSocket endpoint
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import inspect
 import pytest
@@ -28,7 +29,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.routes.websocket import websocket_endpoint
 
 
-class TestWebSocketCoroutineRegression(unittest.TestCase):
+class TestWebSocketCoroutineRegression(SSotAsyncTestCase):
     """
     Unit tests for WebSocket coroutine regression prevention.
     

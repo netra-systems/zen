@@ -25,6 +25,7 @@ CRITICAL TESTING AREAS:
 - Type safety enforcement for all event fields
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import json
 import pytest
 import uuid
@@ -42,7 +43,7 @@ from shared.types import (
 import unittest
 
 
-class TestWebSocketEventTypeSerialization(unittest.TestCase):
+class TestWebSocketEventTypeSerialization(SSotBaseTestCase):
     """Test JSON serialization of WebSocketEventType enums."""
     
     def test_agent_started_serialization(self):
@@ -119,7 +120,7 @@ class TestWebSocketEventTypeSerialization(unittest.TestCase):
                 self.assertEqual(WebSocketEventType(deserialized), event_type)
 
 
-class TestWebSocketMessageSerialization(unittest.TestCase):
+class TestWebSocketMessageSerialization(SSotBaseTestCase):
     """Test Pydantic WebSocketMessage model serialization."""
     
     def setUp(self):
@@ -312,7 +313,7 @@ class TestWebSocketMessageSerialization(unittest.TestCase):
         self.assertEqual(str(empty_message.user_id), "")
 
 
-class TestWebSocketEventMetadataValidation(unittest.TestCase):
+class TestWebSocketEventMetadataValidation(SSotBaseTestCase):
     """Test event metadata and typing validation."""
     
     def test_required_fields_validation(self):

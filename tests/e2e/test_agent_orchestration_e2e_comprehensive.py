@@ -68,6 +68,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.core.configuration import UnifiedConfigManager
 from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 # ============================================================================
@@ -229,6 +230,15 @@ class AgentHandoffValidator:
 
 
 class ErrorRecoveryTester:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests error recovery scenarios during agent execution."""
     
     def __init__(self):
@@ -385,6 +395,15 @@ async def orchestration_setup(real_services):
 # ============================================================================
 
 class TestCompleteAgentWorkflow(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests complete agent workflow with multiple agents, complex routing, and MANDATORY authentication."""
     
     def setup_method(self):
@@ -515,6 +534,15 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
 
 
 class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests agent handoffs and context preservation across multi-turn conversations with MANDATORY authentication."""
     
     def setup_method(self):
@@ -634,6 +662,15 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
 
 
 class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Tests error recovery scenarios during agent execution with MANDATORY authentication."""
     
     def setup_method(self):
@@ -778,6 +815,15 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
 # ============================================================================
 
 class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Performance benchmarks and production readiness validation with MANDATORY authentication."""
     
     def setup_method(self):

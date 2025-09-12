@@ -233,7 +233,7 @@ def verify_no_exceptions(results):
 async def create_test_redis_client(host="localhost", port=6379, db=1):
     """Create a test Redis client for integration testing"""
     import redis.asyncio as redis
-    client = redis.Redis(host=host, port=port, db=db, decode_responses=True)
+    client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, db=db, decode_responses=True)
     try:
         await client.ping()
         return client

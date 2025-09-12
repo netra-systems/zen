@@ -19,7 +19,7 @@ Key Features:
 - Environment-aware configuration
 """
 
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import json
 import time
 import hashlib
@@ -118,7 +118,7 @@ class ProductionFeatureFlags:
                         redis_host = self.env.get("REDIS_HOST", "localhost")
                         redis_port = int(self.env.get("REDIS_PORT", "6379"))
                         redis_db = int(self.env.get("REDIS_DB", "0"))
-                        self._redis_client = redis.Redis(
+                        self._redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                             host=redis_host,
                             port=redis_port,
                             db=redis_db,

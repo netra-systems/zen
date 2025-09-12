@@ -35,7 +35,7 @@ from shared.database_url_builder import DatabaseURLBuilder
 
 import httpx
 import pytest
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError, OperationalError

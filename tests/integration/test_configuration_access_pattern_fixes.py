@@ -116,7 +116,7 @@
             # Check Redis
             # REMOVED_SYNTAX_ERROR: try:
                 # REMOVED_SYNTAX_ERROR: import redis
-                # REMOVED_SYNTAX_ERROR: r = redis.Redis(host='localhost', port=6380, decode_responses=True)
+                # REMOVED_SYNTAX_ERROR: r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6380, decode_responses=True)
                 # REMOVED_SYNTAX_ERROR: r.ping()
                 # REMOVED_SYNTAX_ERROR: services['redis'] = True
                 # REMOVED_SYNTAX_ERROR: print(" PASS:  Redis is accessible")

@@ -17,6 +17,7 @@ DESIGNED TO FAIL INITIALLY:
 - Guides service-level Redis unification
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import pytest
 import time
@@ -24,7 +25,7 @@ from typing import Dict, List, Optional, Any, Set
 import unittest
 
 
-class TestRedisSharedPoolIntegration(unittest.TestCase):
+class TestRedisSharedPoolIntegration(SSotAsyncTestCase):
     """Integration tests validating Redis shared pool across all services.
     
     These tests are designed to FAIL initially, proving the lack of

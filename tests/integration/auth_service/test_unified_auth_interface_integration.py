@@ -47,7 +47,7 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-import redis
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 import psycopg2
 from typing import Dict, List, Any, Optional
 

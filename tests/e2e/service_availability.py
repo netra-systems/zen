@@ -306,7 +306,7 @@
                         # REMOVED_SYNTAX_ERROR: socket_timeout=self.timeout
                         
                         # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: client = redis.Redis( )
+                            # REMOVED_SYNTAX_ERROR: client = await get_redis_client()
                             # REMOVED_SYNTAX_ERROR: host=config["host"],
                             # REMOVED_SYNTAX_ERROR: port=config["port"],
                             # REMOVED_SYNTAX_ERROR: socket_connect_timeout=self.timeout,

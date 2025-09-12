@@ -27,6 +27,7 @@ STATE MANAGEMENT REQUIREMENTS:
 - Agent context must be recoverable
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import pytest
 import uuid
 import json
@@ -208,7 +209,7 @@ class StateManager:
         return len(self.state_store)
 
 
-class TestStateEntrySerialization(unittest.TestCase):
+class TestStateEntrySerialization(SSotBaseTestCase):
     """Test StateEntry serialization and deserialization."""
     
     def setUp(self):
@@ -327,7 +328,7 @@ class TestStateEntrySerialization(unittest.TestCase):
         self.assertEqual(deserialized.metadata, original_entry.metadata)
 
 
-class TestTTLExpirationLogic(unittest.TestCase):
+class TestTTLExpirationLogic(SSotBaseTestCase):
     """Test TTL (Time To Live) expiration logic for state cleanup."""
     
     def test_state_entry_expiration_check(self):
@@ -468,7 +469,7 @@ class TestTTLExpirationLogic(unittest.TestCase):
         self.assertEqual(remaining_ids, expected_ids)
 
 
-class TestStateVersioningAndConflicts(unittest.TestCase):
+class TestStateVersioningAndConflicts(SSotBaseTestCase):
     """Test state versioning and conflict resolution."""
     
     def test_version_increment(self):
@@ -570,7 +571,7 @@ class TestStateVersioningAndConflicts(unittest.TestCase):
         self.assertEqual(updated.state_data["new_field"], "value")
 
 
-class TestUserStateIsolation(unittest.TestCase):
+class TestUserStateIsolation(SSotBaseTestCase):
     """Test that state is properly isolated between users."""
     
     def test_user_state_isolation(self):

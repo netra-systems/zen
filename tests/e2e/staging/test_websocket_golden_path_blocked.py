@@ -1,4 +1,42 @@
 #!/usr/bin/env python
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """E2E STAGING TEST SUITE: WebSocket Golden Path Blocked - Issue #165 (Real GCP Services)
 
 THIS SUITE VALIDATES WEBSOCKET SCOPE BUG WITH COMPLETE E2E GOLDEN PATH TESTING.
@@ -54,6 +92,7 @@ from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 from tests.e2e.staging_test_base import StagingTestBase, staging_test, track_test_timing
 from tests.e2e.staging_test_config import get_staging_config, is_staging_available  
 from tests.helpers.auth_test_utils import TestAuthHelper
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Mission critical WebSocket events for Golden Path
 GOLDEN_PATH_EVENTS = {
@@ -66,6 +105,15 @@ GOLDEN_PATH_EVENTS = {
 
 
 class TestWebSocketGoldenPathBlocked(StagingTestBase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """
     E2E tests validating complete Golden Path failure due to WebSocket scope bug.
     

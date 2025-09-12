@@ -5,13 +5,14 @@ This module tests the health monitoring registration functionality
 for backend and frontend services.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from shared.isolated_environment import IsolatedEnvironment
 
 from dev_launcher.health_registration import HealthRegistrationHelper
 
 
-class TestHealthRegistrationHelper(unittest.TestCase):
+class TestHealthRegistrationHelper(SSotBaseTestCase):
     """Test cases for HealthRegistrationHelper."""
     
     def setUp(self):

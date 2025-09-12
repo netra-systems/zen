@@ -34,9 +34,19 @@ from test_framework.base_integration_test import (
 from test_framework.fixtures.real_services import real_services_fixture
 from test_framework.websocket_helpers import assert_websocket_events_sent
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestAgentOrchestrationBusinessIntegration(
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     ServiceOrchestrationIntegrationTest, 
     WebSocketIntegrationTest
 ):

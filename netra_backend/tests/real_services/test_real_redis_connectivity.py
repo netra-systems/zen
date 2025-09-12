@@ -58,7 +58,7 @@ class RealRedisTestHelper:
         )
         
         # Test connection
-        await self.redis_client.ping()
+        await self.await redis_client.ping()
         logger.info(f"Connected to Redis: {self.redis_url}")
         
     async def disconnect(self):
@@ -67,12 +67,12 @@ class RealRedisTestHelper:
             # Cleanup test keys
             if self.test_keys:
                 try:
-                    await self.redis_client.delete(*self.test_keys)
+                    await self.await redis_client.delete(*self.test_keys)
                     logger.info(f"Cleaned up {len(self.test_keys)} test keys")
                 except Exception as e:
                     logger.warning(f"Cleanup failed: {e}")
             
-            await self.redis_client.close()
+            await self.await redis_client.close()
             self.redis_client = None
             
     def track_key(self, key: str):
@@ -82,7 +82,7 @@ class RealRedisTestHelper:
     
     async def get_redis_info(self) -> Dict[str, Any]:
         """Get Redis server information."""
-        info = await self.redis_client.info()
+        info = await self.await redis_client.info()
         return {
             'redis_version': info.get('redis_version'),
             'connected_clients': info.get('connected_clients'),
@@ -101,19 +101,19 @@ class RealRedisTestHelper:
         test_key = f"test:basic:{int(time.time())}"
         self.track_key(test_key)
         
-        set_result = await self.redis_client.set(test_key, "test_value")
+        set_result = await self.await redis_client.set(test_key, "test_value")
         results['set'] = set_result is True
         
         # GET operation
-        get_result = await self.redis_client.get(test_key)
+        get_result = await self.await redis_client.get(test_key)
         results['get'] = get_result == "test_value"
         
         # EXISTS operation
-        exists_result = await self.redis_client.exists(test_key)
+        exists_result = await self.await redis_client.exists(test_key)
         results['exists'] = exists_result == 1
         
         # DELETE operation
-        del_result = await self.redis_client.delete(test_key)
+        del_result = await self.await redis_client.delete(test_key)
         results['delete'] = del_result == 1
         
         return results
@@ -127,40 +127,40 @@ class RealRedisTestHelper:
         hash_key = f"{base_key}:hash"
         self.track_key(hash_key)
         
-        await self.redis_client.hset(hash_key, mapping={
+        await self.await redis_client.hset(hash_key, mapping={
             "field1": "value1",
             "field2": "value2",
             "field3": json.dumps({"nested": "data"})
         })
         
-        hash_result = await self.redis_client.hgetall(hash_key)
+        hash_result = await self.await redis_client.hgetall(hash_key)
         results['hash'] = len(hash_result) == 3 and hash_result.get("field1") == "value1"
         
         # List operations
         list_key = f"{base_key}:list"
         self.track_key(list_key)
         
-        await self.redis_client.lpush(list_key, "item1", "item2", "item3")
-        list_length = await self.redis_client.llen(list_key)
-        list_items = await self.redis_client.lrange(list_key, 0, -1)
+        await self.await redis_client.lpush(list_key, "item1", "item2", "item3")
+        list_length = await self.await redis_client.llen(list_key)
+        list_items = await self.await redis_client.lrange(list_key, 0, -1)
         results['list'] = list_length == 3 and "item1" in list_items
         
         # Set operations
         set_key = f"{base_key}:set"
         self.track_key(set_key)
         
-        await self.redis_client.sadd(set_key, "member1", "member2", "member3")
-        set_size = await self.redis_client.scard(set_key)
-        is_member = await self.redis_client.sismember(set_key, "member1")
+        await self.await redis_client.sadd(set_key, "member1", "member2", "member3")
+        set_size = await self.await redis_client.scard(set_key)
+        is_member = await self.await redis_client.sismember(set_key, "member1")
         results['set'] = set_size == 3 and is_member
         
         # Sorted set operations
         zset_key = f"{base_key}:zset"
         self.track_key(zset_key)
         
-        await self.redis_client.zadd(zset_key, {"item1": 1.0, "item2": 2.0, "item3": 3.0})
-        zset_size = await self.redis_client.zcard(zset_key)
-        top_item = await self.redis_client.zrange(zset_key, -1, -1)
+        await self.await redis_client.zadd(zset_key, {"item1": 1.0, "item2": 2.0, "item3": 3.0})
+        zset_size = await self.await redis_client.zcard(zset_key)
+        top_item = await self.await redis_client.zrange(zset_key, -1, -1)
         results['zset'] = zset_size == 3 and top_item == ["item3"]
         
         return results
@@ -173,28 +173,28 @@ class RealRedisTestHelper:
         expire_key = f"test:expire:{int(time.time())}"
         self.track_key(expire_key)
         
-        await self.redis_client.set(expire_key, "expire_test")
-        await self.redis_client.expire(expire_key, 2)  # 2 second expiration
+        await self.await redis_client.set(expire_key, "expire_test")
+        await self.await redis_client.expire(expire_key, 2)  # 2 second expiration
         
         # Check TTL
-        ttl = await self.redis_client.ttl(expire_key)
+        ttl = await self.await redis_client.ttl(expire_key)
         results['ttl_set'] = 1 <= ttl <= 2
         
         # Wait for expiration
         await asyncio.sleep(2.5)
         
-        expired_value = await self.redis_client.get(expire_key)
+        expired_value = await self.await redis_client.get(expire_key)
         results['expiration'] = expired_value is None
         
         # Test SETEX (set with expiration)
         setex_key = f"test:setex:{int(time.time())}"
         self.track_key(setex_key)
         
-        await self.redis_client.setex(setex_key, 1, "setex_test")
-        immediate_value = await self.redis_client.get(setex_key)
+        await self.await redis_client.setex(setex_key, 1, "setex_test")
+        immediate_value = await self.await redis_client.get(setex_key)
         
         await asyncio.sleep(1.5)
-        expired_value = await self.redis_client.get(setex_key)
+        expired_value = await self.await redis_client.get(setex_key)
         
         results['setex'] = immediate_value == "setex_test" and expired_value is None
         
@@ -215,7 +215,7 @@ class RealRedisTestHelper:
             self.track_key(key)
             
             # Try to get from cache first
-            cached_value = await self.redis_client.get(key)
+            cached_value = await self.await redis_client.get(key)
             
             if cached_value is not None:
                 cache_hits += 1
@@ -227,7 +227,7 @@ class RealRedisTestHelper:
                     "data": f"cached_data_item_{i}",
                     "timestamp": time.time()
                 }
-                await self.redis_client.setex(key, 30, json.dumps(cache_data))
+                await self.await redis_client.setex(key, 30, json.dumps(cache_data))
             
             operations_completed += 1
         
@@ -266,15 +266,15 @@ class RealRedisConnectionPoolTest:
         """Test concurrent Redis operations through pool."""
         async def redis_operation(operation_id: int):
             """Single Redis operation."""
-            redis_client = aioredis.Redis(connection_pool=pool)
+            redis_client = aioawait get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
             
             try:
                 # Perform multiple operations
                 key = f"concurrent:test:{operation_id}:{int(time.time())}"
                 
-                await redis_client.set(key, f"data_{operation_id}")
-                value = await redis_client.get(key)
-                await redis_client.delete(key)
+                await await redis_client.set(key, f"data_{operation_id}")
+                value = await await redis_client.get(key)
+                await await redis_client.delete(key)
                 
                 return operation_id, value == f"data_{operation_id}"
                 
@@ -353,7 +353,7 @@ class TestRealRedisBasicOperations:
         logger.info(f"Redis memory usage: {redis_info.get('used_memory_human')}")
         
         # Test ping
-        ping_result = await redis_test_helper.redis_client.ping()
+        ping_result = await redis_test_helper.await redis_client.ping()
         assert ping_result is True, "Redis ping should return True"
         
         # Verify Redis is responsive
@@ -417,20 +417,20 @@ class TestRealRedisBasicOperations:
         redis_test_helper.track_key(counter_key)
         
         # Initial increment (creates key with value 1)
-        incr_result = await redis_test_helper.redis_client.incr(counter_key)
+        incr_result = await redis_test_helper.await redis_client.incr(counter_key)
         assert incr_result == 1, "First INCR should return 1"
         
         # Multiple increments
         for i in range(5):
-            incr_result = await redis_test_helper.redis_client.incr(counter_key)
+            incr_result = await redis_test_helper.await redis_client.incr(counter_key)
             assert incr_result == i + 2, f"INCR should return {i + 2}"
         
         # Test decrement
-        decr_result = await redis_test_helper.redis_client.decr(counter_key)
+        decr_result = await redis_test_helper.await redis_client.decr(counter_key)
         assert decr_result == 5, "DECR should return 5"
         
         # Test increment by value
-        incrby_result = await redis_test_helper.redis_client.incrby(counter_key, 10)
+        incrby_result = await redis_test_helper.await redis_client.incrby(counter_key, 10)
         assert incrby_result == 15, "INCRBY should return 15"
         
         logger.info("Atomic operations test completed successfully")
@@ -491,14 +491,14 @@ class TestRealRedisCacheOperations:
         }
         
         # Cache the object
-        await redis_test_helper.redis_client.setex(
+        await redis_test_helper.await redis_client.setex(
             cache_key, 
             300,  # 5 minute expiration
             json.dumps(test_object)
         )
         
         # Retrieve and verify
-        cached_json = await redis_test_helper.redis_client.get(cache_key)
+        cached_json = await redis_test_helper.await redis_client.get(cache_key)
         assert cached_json is not None, "Should retrieve cached JSON"
         
         cached_object = json.loads(cached_json)
@@ -508,7 +508,7 @@ class TestRealRedisCacheOperations:
         assert len(cached_object['metadata']['tags']) == 3, "Should have 3 tags"
         
         # Test TTL
-        ttl = await redis_test_helper.redis_client.ttl(cache_key)
+        ttl = await redis_test_helper.await redis_client.ttl(cache_key)
         assert 250 < ttl <= 300, f"TTL should be close to 300 seconds: {ttl}"
         
         logger.info("JSON caching test completed successfully")
@@ -531,7 +531,7 @@ class TestRealRedisCacheOperations:
         }
         
         # Store session with hash
-        await redis_test_helper.redis_client.hset(session_id, mapping={
+        await redis_test_helper.await redis_client.hset(session_id, mapping={
             "user_id": session_data["user_id"],
             "login_time": str(session_data["login_time"]),
             "permissions": json.dumps(session_data["permissions"]),
@@ -539,10 +539,10 @@ class TestRealRedisCacheOperations:
         })
         
         # Set session expiration (30 minutes)
-        await redis_test_helper.redis_client.expire(session_id, 1800)
+        await redis_test_helper.await redis_client.expire(session_id, 1800)
         
         # Retrieve session data
-        retrieved_session = await redis_test_helper.redis_client.hgetall(session_id)
+        retrieved_session = await redis_test_helper.await redis_client.hgetall(session_id)
         
         assert retrieved_session["user_id"] == session_data["user_id"], "User ID should match"
         assert float(retrieved_session["login_time"]) == session_data["login_time"], "Login time should match"
@@ -551,11 +551,11 @@ class TestRealRedisCacheOperations:
         assert permissions == session_data["permissions"], "Permissions should match"
         
         # Test session update (touch to extend expiration)
-        await redis_test_helper.redis_client.hset(session_id, "last_activity", str(time.time()))
-        await redis_test_helper.redis_client.expire(session_id, 1800)  # Reset expiration
+        await redis_test_helper.await redis_client.hset(session_id, "last_activity", str(time.time()))
+        await redis_test_helper.await redis_client.expire(session_id, 1800)  # Reset expiration
         
         # Verify update
-        updated_session = await redis_test_helper.redis_client.hgetall(session_id)
+        updated_session = await redis_test_helper.await redis_client.hgetall(session_id)
         assert "last_activity" in updated_session, "Should have last_activity field"
         
         logger.info("Session management test completed successfully")
@@ -573,17 +573,17 @@ class TestRealRedisConnectionPooling:
         pool = await redis_connection_pool_test.create_connection_pool(max_connections=5)
         
         # Test pool by creating Redis client
-        redis_client = aioredis.Redis(connection_pool=pool)
+        redis_client = aioawait get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
         
         # Test connection through pool
-        ping_result = await redis_client.ping()
+        ping_result = await await redis_client.ping()
         assert ping_result is True, "Should ping successfully through pool"
         
         # Test basic operation through pool
         test_key = f"pool:test:{int(time.time())}"
-        await redis_client.set(test_key, "pool_test_value")
-        value = await redis_client.get(test_key)
-        await redis_client.delete(test_key)
+        await await redis_client.set(test_key, "pool_test_value")
+        value = await await redis_client.get(test_key)
+        await await redis_client.delete(test_key)
         
         assert value == "pool_test_value", "Should perform operations through pool"
         
@@ -621,7 +621,7 @@ class TestRealRedisConnectionPooling:
         
         async def load_test_worker(worker_id: int, operations: int = 20):
             """Worker that performs multiple Redis operations."""
-            redis_client = aioredis.Redis(connection_pool=pool)
+            redis_client = aioawait get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
             operations_completed = 0
             
             for i in range(operations):
@@ -629,10 +629,10 @@ class TestRealRedisConnectionPooling:
                     key = f"load:test:{worker_id}:{i}:{int(time.time())}"
                     
                     # Mix of operations
-                    await redis_client.set(key, f"worker_{worker_id}_operation_{i}")
-                    value = await redis_client.get(key)
-                    await redis_client.expire(key, 60)
-                    await redis_client.delete(key)
+                    await await redis_client.set(key, f"worker_{worker_id}_operation_{i}")
+                    value = await await redis_client.get(key)
+                    await await redis_client.expire(key, 60)
+                    await await redis_client.delete(key)
                     
                     operations_completed += 1
                     
@@ -697,21 +697,21 @@ class TestRealRedisErrorHandlingAndRecovery:
         try:
             # Try to perform operation that might cause error
             invalid_key = "test:invalid:" + "x" * 1000000  # Very long key
-            await redis_test_helper.redis_client.set(invalid_key, "test")
+            await redis_test_helper.await redis_client.set(invalid_key, "test")
         except Exception as e:
             logger.info(f"Caught expected error: {e}")
             # This is expected behavior
         
         # Verify connection is still valid after error
-        ping_result = await redis_test_helper.redis_client.ping()
+        ping_result = await redis_test_helper.await redis_client.ping()
         assert ping_result is True, "Connection should remain valid after error"
         
         # Test normal operation after error
         test_key = f"test:recovery:{int(time.time())}"
         redis_test_helper.track_key(test_key)
         
-        await redis_test_helper.redis_client.set(test_key, "recovery_test")
-        value = await redis_test_helper.redis_client.get(test_key)
+        await redis_test_helper.await redis_client.set(test_key, "recovery_test")
+        value = await redis_test_helper.await redis_client.get(test_key)
         
         assert value == "recovery_test", "Should work normally after error handling"
         
@@ -745,7 +745,7 @@ class TestRealRedisErrorHandlingAndRecovery:
             await short_timeout_client.close()
         
         # Original connection should still work
-        ping_result = await redis_test_helper.redis_client.ping()
+        ping_result = await redis_test_helper.await redis_client.ping()
         assert ping_result is True, "Original connection should remain valid"
         
         logger.info(f"Timeout handling test completed: timeout_occurred={timeout_occurred}")
@@ -766,7 +766,7 @@ class TestRealRedisErrorHandlingAndRecovery:
         
         for i in range(50):  # 50 keys * 10KB = ~500KB
             key = f"memory:test:{i}:{int(time.time())}"
-            await redis_test_helper.redis_client.set(key, large_data)
+            await redis_test_helper.await redis_client.set(key, large_data)
             keys_created.append(key)
             redis_test_helper.track_key(key)
         
@@ -786,7 +786,7 @@ class TestRealRedisErrorHandlingAndRecovery:
         assert memory_increase > 100000, f"Should have increased memory usage: {memory_increase} bytes"
         
         # Cleanup keys manually to test memory reclamation
-        deleted_count = await redis_test_helper.redis_client.delete(*keys_created)
+        deleted_count = await redis_test_helper.await redis_client.delete(*keys_created)
         assert deleted_count == len(keys_created), "Should delete all created keys"
         
         # Get final memory stats

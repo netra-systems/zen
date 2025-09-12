@@ -42,6 +42,7 @@ from tests.clients.auth_client import AuthTestClient
 
 # Import schemas
 from netra_backend.app.schemas.user_plan import PlanTier
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class RealAgentOrchestrationCore:
@@ -258,6 +259,15 @@ class RealAgentOrchestrationCore:
 @pytest.mark.e2e
 @pytest.mark.integration
 class TestRealAgentOrchestration:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Real agent orchestration integration tests."""
     
     @pytest_asyncio.fixture

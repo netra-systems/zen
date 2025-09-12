@@ -108,19 +108,19 @@ class ServiceDiscoveryClient {
     if (environment === 'development') {
       return {
         apiUrl: 'http://localhost:8000', // Force port 8000 for backend API
-        wsUrl: 'ws://localhost:8000/ws', // Force port 8000 for WebSocket
+        wsUrl: 'ws://localhost:8000/websocket', // Force port 8000 for WebSocket
         authUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081',
       };
     } else if (environment === 'production') {
       return {
         apiUrl: 'https://api.netrasystems.ai',
-        wsUrl: 'wss://api.netrasystems.ai/ws',
+        wsUrl: 'wss://api.netrasystems.ai/websocket',
         authUrl: 'https://auth.netrasystems.ai',
       };
     } else {
       return {
         apiUrl: 'https://api.staging.netrasystems.ai',
-        wsUrl: 'wss://api.staging.netrasystems.ai/ws',
+        wsUrl: 'wss://api.staging.netrasystems.ai/websocket',
         authUrl: 'https://auth.staging.netrasystems.ai',
       };
     }

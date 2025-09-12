@@ -17,6 +17,7 @@ SSOT Violations This Module Proves:
 4. WebSocket connection stability varies by manager implementation
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import time
 import threading
@@ -63,7 +64,7 @@ class PerformanceMetrics:
         return self.memory_usage_after - self.memory_usage_before
 
 
-class TestWebSocketManagerPerformanceStability(unittest.TestCase):
+class TestWebSocketManagerPerformanceStability(SSotAsyncTestCase):
     """
     Tests to prove WebSocket manager performance and stability violations exist.
     

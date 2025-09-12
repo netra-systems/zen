@@ -192,7 +192,7 @@ async def _cleanup_test_data(self) -> None:
     """Clean up test data."""
     if self.redis_client:
         await self.redis_manager.cleanup_test_keys(self.redis_client)
-        await self.redis_client.close()
+        await self.await redis_client.close()
 
 
 async def _initialize_advanced_testers(self, auth_token: str) -> None:
@@ -321,8 +321,8 @@ async def test_comprehensive_rate_limiting_system(unified_test_harness):
     user_data = await user_manager.create_free_user()
     auth_token = user_data["access_token"]
     
-    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-    await redis_client.ping()
+    redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    await await redis_client.ping()
     
     # Initialize all test components
     api_tester = APIRateLimitTester(auth_token)
@@ -405,8 +405,8 @@ async def test_comprehensive_rate_limiting_system(unified_test_harness):
     finally:
         # Cleanup
         try:
-            await redis_client.flushdb()
-            await redis_client.close()
+            await await redis_client.flushdb()
+            await await redis_client.close()
         except Exception:
             pass
 

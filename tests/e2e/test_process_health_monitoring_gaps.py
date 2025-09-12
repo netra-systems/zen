@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
     # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
 
@@ -70,7 +71,7 @@
             # Pytest imports for test markers - using standard pytest marks
 
 
-# REMOVED_SYNTAX_ERROR: class TestProcessSupervisionGaps(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestProcessSupervisionGaps(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for gaps in process supervision after dev launcher timeout.
 
@@ -175,7 +176,7 @@
     # REMOVED_SYNTAX_ERROR: "Services should continue running after launcher timeout")
 
 
-# REMOVED_SYNTAX_ERROR: class TestHealthCheckTimingIssues(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestHealthCheckTimingIssues(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for health check timing reliability issues.
 
@@ -295,7 +296,7 @@
                     # REMOVED_SYNTAX_ERROR: "Frontend should be healthy despite database issues")
 
 
-# REMOVED_SYNTAX_ERROR: class TestErrorDiagnosticsGaps(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestErrorDiagnosticsGaps(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for inadequate error diagnostics and propagation.
 
@@ -404,7 +405,7 @@
     # REMOVED_SYNTAX_ERROR: "Should identify database as common failure point")
 
 
-# REMOVED_SYNTAX_ERROR: class TestRecoveryMechanismGaps(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestRecoveryMechanismGaps(SSotAsyncTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: Tests for missing or inadequate recovery mechanisms.
 

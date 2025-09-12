@@ -16,6 +16,7 @@ Business Value Justification:
 - Revenue Impact: Prevents $120K+ MRR blocking failures from authentication bugs
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import MagicMock, patch
 import pytest
@@ -23,7 +24,7 @@ import pytest
 from netra_backend.app.websocket_core.unified_websocket_auth import extract_e2e_context_from_websocket
 
 
-class TestWebSocketAuthScoping(unittest.TestCase):
+class TestWebSocketAuthScoping(SSotBaseTestCase):
     """Test variable scoping fixes in WebSocket authentication."""
     
     def setUp(self):

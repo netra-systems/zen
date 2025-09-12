@@ -1,3 +1,41 @@
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Comprehensive tests for critical dev launcher issues.
 
@@ -9,6 +47,7 @@ This test suite reproduces and validates fixes for:
 5. Premature error display before environment loading
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import logging
 import os
@@ -32,7 +71,7 @@ from dev_launcher.log_filter import LogFilter, LogLevel, StartupMode
 env = get_env()
 
 
-class TestCriticalDevLauncherIssues(unittest.TestCase):
+class TestCriticalDevLauncherIssues(SSotAsyncTestCase):
     """Test suite for critical dev launcher issues."""
     
     def setUp(self):
@@ -665,7 +704,7 @@ REDIS_URL=redis://localhost:6379
                 self.fail(f"Async validation should not raise exception: {e}")
 
 
-class TestStartupErrorSequenceRegression(unittest.TestCase):
+class TestStartupErrorSequenceRegression(SSotAsyncTestCase):
     """Test the sequence of startup errors and their timing."""
     
     def setUp(self):
@@ -815,7 +854,7 @@ FRONTEND_PORT=3000
 
 
 # Async test support
-class AsyncTestCase(unittest.TestCase):
+class AsyncTestCase(SSotAsyncTestCase):
     """Base class for async tests."""
     
     def setUp(self):

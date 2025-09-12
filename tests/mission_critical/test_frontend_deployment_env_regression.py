@@ -1,3 +1,4 @@
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 # REMOVED_SYNTAX_ERROR: '''
 # REMOVED_SYNTAX_ERROR:  ALERT:  MISSION CRITICAL: Frontend Deployment Environment Variables Regression Test
 # REMOVED_SYNTAX_ERROR: ===============================================================================
@@ -37,7 +38,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
 
 
-# REMOVED_SYNTAX_ERROR: class TestFrontendDeploymentEnvironmentRegression(unittest.TestCase):
+# REMOVED_SYNTAX_ERROR: class TestFrontendDeploymentEnvironmentRegression(SSotBaseTestCase):
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: CRITICAL: Tests to prevent regression of frontend deployment environment variables.
     # REMOVED_SYNTAX_ERROR: These variables have been removed multiple times causing complete frontend failure.

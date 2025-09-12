@@ -38,6 +38,7 @@ from loguru import logger
 
 from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, E2EAuthConfig
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 # Critical multi-agent orchestration events that MUST be sent
@@ -245,6 +246,15 @@ class MultiAgentOrchestrationValidator:
 
 
 class TestMultiAgentOrchestrationE2E:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """REAL Multi-Agent Orchestration E2E Test Suite - NO MOCKS, NO FAKES."""
 
     @pytest.fixture

@@ -1,5 +1,43 @@
 from shared.isolated_environment import get_env
 from shared.isolated_environment import IsolatedEnvironment
+
+# PERFORMANCE: Lazy loading for mission critical tests
+
+# PERFORMANCE: Lazy loading for mission critical tests
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
+_lazy_imports = {}
+
+def lazy_import(module_path: str, component: str = None):
+    """Lazy import pattern for performance optimization"""
+    if module_path not in _lazy_imports:
+        try:
+            module = __import__(module_path, fromlist=[component] if component else [])
+            if component:
+                _lazy_imports[module_path] = getattr(module, component)
+            else:
+                _lazy_imports[module_path] = module
+        except ImportError as e:
+            print(f"Warning: Failed to lazy load {module_path}: {e}")
+            _lazy_imports[module_path] = None
+    
+    return _lazy_imports[module_path]
+
 """
 Critical Cold Start Integration Tests
 Tests the most common and difficult initialization issues that occur during system startup.
@@ -16,7 +54,7 @@ import httpx
 from httpx import ASGITransport
 import websockets
 import json
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import subprocess
 import signal
 from typing import Dict, Any, Optional, List
@@ -783,7 +821,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
     async def test_redis_memory_eviction_during_session_storage(self):
         """Test 10.2: Active sessions evicted due to Redis memory limits."""
         # Connect to Redis
-        r = redis.Redis(host='localhost', port=6379)
+        r = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379)
         
         # Fill Redis memory with data
         for i in range(10000):

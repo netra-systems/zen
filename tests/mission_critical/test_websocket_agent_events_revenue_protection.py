@@ -54,8 +54,10 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import get_env
 
 # Import SSOT test framework
-from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
-from test_framework.ssot.websocket_golden_path_helpers import (
+from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import (
     WebSocketGoldenPathHelper,
     GoldenPathTestConfig,
     GoldenPathTestResult,
@@ -71,8 +73,8 @@ from netra_backend.app.websocket_core.event_validator import (
 )
 
 # Import real services - NO MOCKS per CLAUDE.md
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotBaseTestCase
+# CONSOLIDATED: # CONSOLIDATED: from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 
 # ============================================================================

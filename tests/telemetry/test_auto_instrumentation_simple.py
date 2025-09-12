@@ -8,12 +8,13 @@ This test is designed to:
 3. Focus only on automatic instrumentation (no manual spans)
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import sys
 import os
 from unittest.mock import patch, MagicMock
 
-class TestOpenTelemetryAutoInstrumentation(unittest.TestCase):
+class TestOpenTelemetryAutoInstrumentation(SSotBaseTestCase):
     """
     Test OpenTelemetry automatic instrumentation setup and configuration.
     

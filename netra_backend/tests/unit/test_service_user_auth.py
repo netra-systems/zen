@@ -2,11 +2,12 @@ print("Testing issue #463 service user auth")
 
 # REPRODUCE ISSUE #463: Missing SERVICE_SECRET environment variable
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import patch
 from shared.isolated_environment import get_env
 
-class TestServiceUserAuth(unittest.TestCase):
+class TestServiceUserAuth(SSotBaseTestCase):
     def test_missing_service_secret_reproduces_issue_463(self):
         """Reproduce issue #463: SERVICE_SECRET missing causes 403 auth failures"""
         with patch("shared.isolated_environment.get_env") as mock_get_env:

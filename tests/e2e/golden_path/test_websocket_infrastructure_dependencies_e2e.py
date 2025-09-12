@@ -36,7 +36,7 @@ import asyncio
 import json
 import pytest
 import time
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import asyncpg
 import websockets
 from datetime import datetime, timezone
@@ -356,7 +356,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_db = 0
             
             # Attempt Redis connection
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=redis_host,
                 port=redis_port,
                 db=redis_db,
@@ -365,18 +365,18 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
             )
             
             # Test basic Redis operation
-            redis_client.ping()
+            await redis_client.ping()
             
             # Test set/get operation
             test_key = f"websocket_test_{int(time.time())}"
-            redis_client.set(test_key, "test_value", ex=60)
-            test_value = redis_client.get(test_key)
+            await redis_client.set(test_key, "test_value", ex=60)
+            test_value = await redis_client.get(test_key)
             
             assert test_value == b"test_value", "Redis set/get operation failed"
             
             # Cleanup
-            redis_client.delete(test_key)
-            redis_client.close()
+            await redis_client.delete(test_key)
+            await redis_client.close()
             
             redis_response_time = time.time() - redis_start
             redis_available = True
@@ -642,7 +642,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_port = 6381
                 redis_db = 0
             
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host=redis_host,
                 port=redis_port,
                 db=redis_db,
@@ -650,8 +650,8 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 socket_connect_timeout=5.0
             )
             
-            redis_client.ping()
-            redis_client.close()
+            await redis_client.ping()
+            await redis_client.close()
             return True
         except Exception:
             return False

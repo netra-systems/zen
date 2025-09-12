@@ -725,7 +725,7 @@ class TestBackendToRedisIntegration:
         
         try:
             # Replace connection with a mock that simulates failures
-            failed_connection = redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
+            failed_connection = await get_redis_client()  # MIGRATED: was redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
             self.cache_manager.connection = failed_connection
             
             # Test fallback behavior
@@ -908,7 +908,7 @@ class TestCrossServiceDependencyChains:
         
         try:
             # Replace with failed connection
-            failed_redis = redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
+            failed_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='invalid_host', port=9999, socket_timeout=1)
             self.cache_manager.connection = failed_redis
             
             # System should fall back to database gracefully

@@ -16,6 +16,7 @@ Business Value: Platform/Internal - System Stability & Development Velocity
 Ensures accurate test result reporting for development workflow reliability.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 from unittest.mock import Mock, MagicMock, patch
 from dataclasses import dataclass
@@ -29,7 +30,7 @@ from tests.unified_test_runner import UnifiedTestRunner
 from test_framework.category_system import ExecutionPlan
 
 
-class TestRunnerStatusAggregationBugUnit(unittest.TestCase):
+class TestRunnerStatusAggregationBugUnit(SSotBaseTestCase):
     """
     Unit tests targeting the specific status aggregation bug in lines 579-589.
     

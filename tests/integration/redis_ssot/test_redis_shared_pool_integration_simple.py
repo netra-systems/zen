@@ -9,12 +9,13 @@ DESIGNED TO FAIL INITIALLY:
 - Uses simplified approach without async complexity
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import time
 from typing import Dict, List, Any
 
 
-class TestRedisSharedPoolIntegrationSimple(unittest.TestCase):
+class TestRedisSharedPoolIntegrationSimple(SSotBaseTestCase):
     """Simplified integration tests validating Redis shared pool across services.
     
     These tests are designed to FAIL initially, proving the lack of

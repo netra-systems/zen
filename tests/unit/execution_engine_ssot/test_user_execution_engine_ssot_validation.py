@@ -15,6 +15,7 @@ Business Impact: This test protects $500K+ ARR chat functionality by ensuring
 the SSOT consolidation doesn't break agent execution or user isolation.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import unittest
 from unittest.mock import Mock, patch, AsyncMock
@@ -38,7 +39,7 @@ except ImportError as e:
     pytest.skip(f"Backend modules not available: {e}", allow_module_level=True)
 
 
-class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
+class TestUserExecutionEngineSSoTValidation(SSotAsyncTestCase):
     """Comprehensive validation that UserExecutionEngine is a complete SSOT"""
     
     def setUp(self):

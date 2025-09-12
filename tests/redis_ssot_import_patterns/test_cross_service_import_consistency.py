@@ -24,6 +24,7 @@ This test validates:
 5. Golden Path functionality works across service boundaries
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import unittest
 import asyncio
 import json
@@ -39,7 +40,7 @@ sys.path.insert(0, str(project_root))
 
 logger = logging.getLogger(__name__)
 
-class CrossServiceImportConsistencyTest(unittest.TestCase):
+class CrossServiceImportConsistencyTest(SSotAsyncTestCase):
     """Test Redis import consistency across all services."""
     
     @classmethod
@@ -356,7 +357,7 @@ class CrossServiceImportConsistencyTest(unittest.TestCase):
         
         bypass_patterns = [
             "RedisManager()",  # Direct instantiation
-            "redis.Redis(",    # Direct Redis client creation
+            "await get_redis_client()  # MIGRATED: was redis.Redis(",    # Direct Redis client creation
             "redis.ConnectionPool(",  # Direct connection pool creation
             "class.*RedisManager",  # Custom Redis manager class
         ]

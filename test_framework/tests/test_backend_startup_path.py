@@ -3,6 +3,7 @@ Test for backend startup path issue.
 This test exposes the incorrect app directory path configuration.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import json
 import os
 import subprocess
@@ -13,7 +14,7 @@ from pathlib import Path
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestBackendStartupPath(unittest.TestCase):
+class TestBackendStartupPath(SSotBaseTestCase):
     """Test that backend server script correctly locates the app directory."""
     
     def setUp(self):

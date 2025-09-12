@@ -10,6 +10,7 @@ Tests the comprehensive functionality of the BackgroundE2EAgent including:
 - Error handling and graceful failure recovery
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import json
 import os
@@ -38,7 +39,7 @@ from test_framework.orchestration.background_e2e_agent import (
 )
 
 
-class TestBackgroundE2EAgent(unittest.TestCase):
+class TestBackgroundE2EAgent(SSotBaseTestCase):
     """Test cases for BackgroundE2EAgent core functionality"""
     
     def setUp(self):
@@ -237,7 +238,7 @@ class TestBackgroundE2EAgent(unittest.TestCase):
         self.assertEqual(recent[0]["status"], "completed")
 
 
-class TestBackgroundE2ECLIIntegration(unittest.TestCase):
+class TestBackgroundE2ECLIIntegration(SSotBaseTestCase):
     """Test CLI integration for Background E2E Agent"""
     
     def setUp(self):
@@ -361,7 +362,7 @@ class TestBackgroundE2ECLIIntegration(unittest.TestCase):
         self.assertFalse(config.use_real_llm)
 
 
-class TestBackgroundE2EAgentWithMockedServices(unittest.TestCase):
+class TestBackgroundE2EAgentWithMockedServices(SSotBaseTestCase):
     """Test BackgroundE2EAgent with mocked service dependencies"""
     
     def setUp(self):
@@ -420,7 +421,7 @@ class TestBackgroundE2EAgentWithMockedServices(unittest.TestCase):
         self.assertFalse(available)
 
 
-class TestTaskPriorityAndQueuing(unittest.TestCase):
+class TestTaskPriorityAndQueuing(SSotBaseTestCase):
     """Test task priority and queuing behavior"""
     
     def setUp(self):

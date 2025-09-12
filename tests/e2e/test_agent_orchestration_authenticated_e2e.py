@@ -25,10 +25,20 @@ import uuid
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.real_websocket_test_client import RealWebSocketTestClient
 from test_framework.ssot.real_services_test_fixtures import *
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @pytest.mark.e2e
 class TestAgentOrchestrationAuthenticatedE2E:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """E2E tests for agent orchestration with authentication."""
     
     def setup_method(self):

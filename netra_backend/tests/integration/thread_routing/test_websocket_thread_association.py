@@ -71,8 +71,8 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))  # Test port
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -119,9 +119,9 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             thread_mapping_key = f"websocket:thread_mapping:{thread_id}"
             user_mapping_key = f"websocket:user_mapping:{user_id}"
             
-            await redis_client.hset(connection_key, mapping=connection_info)
-            await redis_client.sadd(thread_mapping_key, str(websocket_id))
-            await redis_client.sadd(user_mapping_key, str(websocket_id))
+            await await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.sadd(thread_mapping_key, str(websocket_id))
+            await await redis_client.sadd(user_mapping_key, str(websocket_id))
             
             websocket_connections[websocket_id] = connection_info
             connection_thread_mapping[websocket_id] = thread_id
@@ -132,7 +132,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         for websocket_id, expected_thread_id in connection_thread_mapping.items():
             # Retrieve connection info from Redis
             connection_key = f"websocket:connection:{websocket_id}"
-            stored_connection = await redis_client.hgetall(connection_key)
+            stored_connection = await await redis_client.hgetall(connection_key)
             
             assert stored_connection, f"WebSocket connection {websocket_id} not found in Redis"
             assert stored_connection["thread_id"] == str(expected_thread_id), \
@@ -140,7 +140,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             
             # Verify reverse mapping (thread to websockets)
             thread_mapping_key = f"websocket:thread_mapping:{expected_thread_id}"
-            thread_websockets = await redis_client.smembers(thread_mapping_key)
+            thread_websockets = await await redis_client.smembers(thread_mapping_key)
             assert str(websocket_id) in thread_websockets, \
                 f"Thread {expected_thread_id} doesn't know about WebSocket {websocket_id}"
         
@@ -152,7 +152,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             
             # Get all websockets for this thread
             thread_mapping_key = f"websocket:thread_mapping:{user_thread_id}"
-            thread_websockets = await redis_client.smembers(thread_mapping_key)
+            thread_websockets = await await redis_client.smembers(thread_mapping_key)
             
             # Should contain only this user's websocket
             assert len(thread_websockets) == 1, \
@@ -164,11 +164,11 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             other_thread_ids = [tid for uid, tid in user_threads.items() if uid != user_id]
             for other_thread_id in other_thread_ids:
                 other_mapping_key = f"websocket:thread_mapping:{other_thread_id}"
-                other_websockets = await redis_client.smembers(other_mapping_key)
+                other_websockets = await await redis_client.smembers(other_mapping_key)
                 assert str(user_websocket) not in other_websockets, \
                     f"WebSocket {user_websocket} found in wrong thread {other_thread_id} - ISOLATION VIOLATION!"
         
-        await redis_client.close()
+        await await redis_client.close()
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -184,8 +184,8 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -221,16 +221,16 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             
             # Update Redis mappings
             connection_key = f"websocket:connection:{websocket_id}"
-            await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.hset(connection_key, mapping=connection_info)
             
             # Remove from old thread mapping if exists
             if hasattr(setup_websocket_thread_association, 'previous_thread'):
                 old_mapping_key = f"websocket:thread_mapping:{setup_websocket_thread_association.previous_thread}"
-                await redis_client.srem(old_mapping_key, str(websocket_id))
+                await await redis_client.srem(old_mapping_key, str(websocket_id))
             
             # Add to new thread mapping
             new_mapping_key = f"websocket:thread_mapping:{thread_id}"
-            await redis_client.sadd(new_mapping_key, str(websocket_id))
+            await await redis_client.sadd(new_mapping_key, str(websocket_id))
             
             setup_websocket_thread_association.previous_thread = thread_id
             return connection_info
@@ -256,21 +256,21 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             
             # Verify new thread association
             connection_key = f"websocket:connection:{websocket_id}"
-            stored_connection = await redis_client.hgetall(connection_key)
+            stored_connection = await await redis_client.hgetall(connection_key)
             
             assert stored_connection["thread_id"] == str(target_thread), \
                 f"WebSocket not properly associated with new thread {target_thread}"
             
             # Verify thread mapping updated
             thread_mapping_key = f"websocket:thread_mapping:{target_thread}"
-            thread_websockets = await redis_client.smembers(thread_mapping_key)
+            thread_websockets = await await redis_client.smembers(thread_mapping_key)
             assert str(websocket_id) in thread_websockets, \
                 f"Thread {target_thread} mapping not updated for WebSocket {websocket_id}"
             
             # Verify old thread mapping cleaned up (if not first switch)
             if i > 0:
                 old_thread_mapping_key = f"websocket:thread_mapping:{current_thread}"
-                old_websockets = await redis_client.smembers(old_thread_mapping_key)
+                old_websockets = await await redis_client.smembers(old_thread_mapping_key)
                 assert str(websocket_id) not in old_websockets, \
                     f"WebSocket {websocket_id} not removed from old thread {current_thread} - STATE LEAK!"
             
@@ -288,7 +288,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         
         for thread_id in thread_ids:
             mapping_key = f"websocket:thread_mapping:{thread_id}"
-            websockets = await redis_client.smembers(mapping_key)
+            websockets = await await redis_client.smembers(mapping_key)
             if str(websocket_id) in websockets:
                 active_associations.append(thread_id)
         
@@ -305,7 +305,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         # Switch times should be reasonable (under 100ms for Redis operations)
         assert max_switch_time < 100, f"Thread switching too slow: {max_switch_time:.2f}ms > 100ms"
         
-        await redis_client.close()
+        await await redis_client.close()
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -321,8 +321,8 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -369,14 +369,14 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
                     
                     # Store in Redis
                     connection_key = f"websocket:connection:{websocket_id}"
-                    await redis_client.hset(connection_key, mapping=connection_info)
+                    await await redis_client.hset(connection_key, mapping=connection_info)
                     
                     # Update mappings
                     thread_mapping_key = f"websocket:thread_mapping:{thread_id}"
                     user_mapping_key = f"websocket:user_mapping:{user_id}"
                     
-                    await redis_client.sadd(thread_mapping_key, str(websocket_id))
-                    await redis_client.sadd(user_mapping_key, str(websocket_id))
+                    await await redis_client.sadd(thread_mapping_key, str(websocket_id))
+                    await await redis_client.sadd(user_mapping_key, str(websocket_id))
         
         # Setup all users concurrently
         self.logger.info(f"Setting up {user_count} users with {threads_per_user} threads each")
@@ -391,7 +391,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         for user_id, user_threads in users_data.items():
             # Get all websockets belonging to this user
             user_mapping_key = f"websocket:user_mapping:{user_id}"
-            user_websockets = await redis_client.smembers(user_mapping_key)
+            user_websockets = await await redis_client.smembers(user_mapping_key)
             expected_user_websockets = set()
             
             for thread_websockets in user_threads.values():
@@ -409,7 +409,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             # Verify thread-level isolation within user
             for thread_id, expected_thread_websockets in user_threads.items():
                 thread_mapping_key = f"websocket:thread_mapping:{thread_id}"
-                actual_thread_websockets = await redis_client.smembers(thread_mapping_key)
+                actual_thread_websockets = await await redis_client.smembers(thread_mapping_key)
                 expected_thread_websocket_strs = {str(ws_id) for ws_id in expected_thread_websockets}
                 
                 # Check thread has correct websockets
@@ -422,7 +422,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
                 # Verify websockets in thread belong to correct user
                 for websocket_str in actual_thread_websockets:
                     connection_key = f"websocket:connection:{websocket_str}"
-                    connection_info = await redis_client.hgetall(connection_key)
+                    connection_info = await await redis_client.hgetall(connection_key)
                     
                     if connection_info.get("user_id") != str(user_id):
                         isolation_violations.append(
@@ -433,13 +433,13 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         # Check for cross-contamination between users
         for user_id in users_data.keys():
             user_mapping_key = f"websocket:user_mapping:{user_id}"
-            user_websockets = await redis_client.smembers(user_mapping_key)
+            user_websockets = await await redis_client.smembers(user_mapping_key)
             
             # Check if any other users have these websockets
             other_users = [uid for uid in users_data.keys() if uid != user_id]
             for other_user_id in other_users:
                 other_mapping_key = f"websocket:user_mapping:{other_user_id}"
-                other_websockets = await redis_client.smembers(other_mapping_key)
+                other_websockets = await await redis_client.smembers(other_mapping_key)
                 
                 overlap = user_websockets & other_websockets
                 if overlap:
@@ -454,7 +454,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             raise AssertionError(f"Found {len(isolation_violations)} isolation violations")
         
         self.logger.info(f"Multi-user isolation verified: {user_count} users, {len(all_websocket_ids)} total websockets")
-        await redis_client.close()
+        await await redis_client.close()
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -470,8 +470,8 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -500,29 +500,29 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             }
             
             connection_key = f"websocket:connection:{websocket_id}"
-            await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.hset(connection_key, mapping=connection_info)
             lifecycle_log.append("connecting")
             
             # Add to thread mapping
             thread_mapping_key = f"websocket:thread_mapping:{thread_id}"
-            await redis_client.sadd(thread_mapping_key, str(websocket_id))
+            await await redis_client.sadd(thread_mapping_key, str(websocket_id))
             
             # Phase 2: Active connection
-            await redis_client.hset(connection_key, "connection_state", ConnectionState.CONNECTED.value)
-            await redis_client.hset(connection_key, "last_activity", datetime.utcnow().isoformat())
+            await await redis_client.hset(connection_key, "connection_state", ConnectionState.CONNECTED.value)
+            await await redis_client.hset(connection_key, "last_activity", datetime.utcnow().isoformat())
             lifecycle_log.append("connected")
             
             # Simulate activity
             await asyncio.sleep(0.1)
             
             # Phase 3: Disconnection
-            await redis_client.hset(connection_key, "connection_state", ConnectionState.DISCONNECTED.value)
-            await redis_client.hset(connection_key, "disconnected_at", datetime.utcnow().isoformat())
+            await await redis_client.hset(connection_key, "connection_state", ConnectionState.DISCONNECTED.value)
+            await await redis_client.hset(connection_key, "disconnected_at", datetime.utcnow().isoformat())
             lifecycle_log.append("disconnected")
             
             # Phase 4: Cleanup
-            await redis_client.srem(thread_mapping_key, str(websocket_id))
-            await redis_client.delete(connection_key)
+            await await redis_client.srem(thread_mapping_key, str(websocket_id))
+            await await redis_client.delete(connection_key)
             lifecycle_log.append("cleaned_up")
             
             return lifecycle_log
@@ -541,7 +541,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         
         # Verify cleanup effectiveness - no lingering state
         thread_mapping_key = f"websocket:thread_mapping:{thread_id}"
-        remaining_websockets = await redis_client.smembers(thread_mapping_key)
+        remaining_websockets = await await redis_client.smembers(thread_mapping_key)
         
         assert len(remaining_websockets) == 0, \
             f"Thread mapping not cleaned up: {remaining_websockets} websockets remain"
@@ -550,7 +550,7 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
         orphaned_connections = []
         for websocket_id in lifecycle_websockets:
             connection_key = f"websocket:connection:{websocket_id}"
-            if await redis_client.exists(connection_key):
+            if await await redis_client.exists(connection_key):
                 orphaned_connections.append(websocket_id)
         
         assert len(orphaned_connections) == 0, \
@@ -571,20 +571,20 @@ class TestWebSocketThreadAssociation(BaseIntegrationTest):
             }
             
             connection_key = f"websocket:connection:{rapid_websocket}"
-            await redis_client.hset(connection_key, mapping=connection_info)
-            await redis_client.sadd(thread_mapping_key, str(rapid_websocket))
+            await await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.sadd(thread_mapping_key, str(rapid_websocket))
             
             # Quick disconnect and cleanup
-            await redis_client.srem(thread_mapping_key, str(rapid_websocket))
-            await redis_client.delete(connection_key)
+            await await redis_client.srem(thread_mapping_key, str(rapid_websocket))
+            await await redis_client.delete(connection_key)
             
             # Verify clean state between cycles
-            assert not await redis_client.exists(connection_key), \
+            assert not await await redis_client.exists(connection_key), \
                 f"Connection record not cleaned up in cycle {cycle}"
             
-            thread_websockets = await redis_client.smembers(thread_mapping_key)
+            thread_websockets = await await redis_client.smembers(thread_mapping_key)
             assert str(rapid_websocket) not in thread_websockets, \
                 f"Thread mapping not cleaned up in cycle {cycle}"
         
         self.logger.info(f"WebSocket lifecycle and cleanup verification completed successfully")
-        await redis_client.close()
+        await await redis_client.close()

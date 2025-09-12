@@ -200,13 +200,13 @@ class TestWebSocketEventDeliveryIntegration(BaseIntegrationTest):
         redis_client = None
         try:
             import redis.asyncio as redis
-            redis_client = redis.Redis(
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
                 host="localhost", 
                 port=6381,  # Test Redis port
                 db=1,
                 decode_responses=True
             )
-            await redis_client.ping()
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available for buffering test: {e}")
         
@@ -226,16 +226,16 @@ class TestWebSocketEventDeliveryIntegration(BaseIntegrationTest):
         # Buffer events in Redis (simulating network interruption)
         for i, event in enumerate(events_to_buffer):
             event_with_order = {**event, "sequence": i, "timestamp": time.time()}
-            await redis_client.lpush(buffer_key, json.dumps(event_with_order))
+            await await redis_client.lpush(buffer_key, json.dumps(event_with_order))
         
         # Verify events stored in Redis
-        buffered_count = await redis_client.llen(buffer_key)
+        buffered_count = await await redis_client.llen(buffer_key)
         assert buffered_count == 5, f"Expected 5 buffered events, got {buffered_count}"
         
         # Simulate connection recovery and event delivery
         delivered_events = []
-        while await redis_client.llen(buffer_key) > 0:
-            event_json = await redis_client.rpop(buffer_key)
+        while await await redis_client.llen(buffer_key) > 0:
+            event_json = await await redis_client.rpop(buffer_key)
             if event_json:
                 event = json.loads(event_json)
                 delivered_events.append(event)
