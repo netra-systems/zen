@@ -94,6 +94,9 @@ class SecureBackgroundTask:
 class SecureBackgroundTaskManager:
     """Secure background task manager with mandatory user context isolation."""
     
+    # Default timeout for operations (seconds)
+    DEFAULT_TIMEOUT = 30
+    
     def __init__(self, enforce_user_context: bool = True, max_tasks_per_user: int = 50):
         self.tasks: Dict[str, SecureBackgroundTask] = {}
         self._running = True
@@ -329,7 +332,7 @@ class SecureBackgroundTaskManager:
     async def wait_for_task(
         self, 
         task_id: str, 
-        timeout: Optional[float] = None,
+        timeout: Optional[float] = DEFAULT_TIMEOUT,
         user_context: Optional[UserExecutionContext] = None
     ) -> Optional[Any]:
         """Wait for a secure task to complete with user context validation."""
@@ -440,7 +443,7 @@ class SecureBackgroundTaskManager:
         if tasks_to_remove:
             logger.info(f"Cleaned up {len(tasks_to_remove)} completed tasks older than {max_age_hours} hours")
     
-    async def shutdown(self, timeout: int = 30):
+    async def shutdown(self, timeout: int = DEFAULT_TIMEOUT):
         """Shutdown secure task manager and cancel all running tasks."""
         logger.info("Shutting down SecureBackgroundTaskManager")
         self._running = False
