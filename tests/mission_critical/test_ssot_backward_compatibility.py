@@ -313,7 +313,7 @@ class TestSSOTBackwardCompatibility:
         num_concurrent_executions = 20
         mixed_execution_failures = []
         
-        def mixed_pattern_execution(execution_id):
+        async def mixed_pattern_execution(execution_id):
             """Execute both legacy and modern patterns concurrently."""
             failures = []
             
@@ -410,10 +410,14 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_mixed_execution(execution_id):
+            return asyncio.run(mixed_pattern_execution(execution_id))
+            
         # Execute mixed patterns concurrently
         with ThreadPoolExecutor(max_workers=num_concurrent_executions) as executor:
             future_to_execution = {
-                executor.submit(mixed_pattern_execution, execution_id): execution_id
+                executor.submit(run_mixed_execution, execution_id): execution_id
                 for execution_id in range(num_concurrent_executions)
             }
             
@@ -934,7 +938,7 @@ class TestSSOTLegacyMigrationHelpers:
     These tests validate tools that help migrate legacy code to SSOT patterns.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up migration helper test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -946,10 +950,10 @@ class TestSSOTLegacyMigrationHelpers:
         
         logger.info(f"Starting migration helper test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up migration helper test and REAL service connections."""
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             

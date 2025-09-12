@@ -720,7 +720,7 @@ class TestRedisDockerIntegrationEnd2End:
         # Cleanup
         manager.stop_test_redis()
     
-    def test_end_to_end_redis_integration_workflow(self, docker_environment):
+    async def test_end_to_end_redis_integration_workflow(self, docker_environment):
         """Test complete Redis integration workflow from config to operation."""
         env = get_env()
         env.enable_isolation(backup_original=True)
