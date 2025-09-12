@@ -24,7 +24,11 @@ logger = central_logger.get_logger(__name__)
 
 async def validate_websocket_token(websocket: WebSocket) -> str:
     """Validate WebSocket token from query params."""
-    token = websocket.query_params.get("token")
+    # FIVE WHYS FIX: Use QueryParams(websocket.url.query) instead of websocket.query_params
+    # Root Cause: WebSocket objects don't have query_params attribute, only url.query
+    from starlette.datastructures import QueryParams
+    query_params = QueryParams(websocket.url.query) if websocket.url.query else QueryParams("")
+    token = query_params.get("token")
     if not token:
         logger.error("No token provided in query parameters")
         await websocket.close(code=1008, reason="No token provided")
@@ -34,8 +38,11 @@ async def validate_websocket_token(websocket: WebSocket) -> str:
 
 async def accept_websocket_connection(websocket: WebSocket) -> str:
     """Validate token signature BEFORE accepting WebSocket connection."""
-    # Get token from query params first
-    token = websocket.query_params.get("token")
+    # FIVE WHYS FIX: Use QueryParams(websocket.url.query) instead of websocket.query_params
+    # Root Cause: WebSocket objects don't have query_params attribute, only url.query
+    from starlette.datastructures import QueryParams
+    query_params = QueryParams(websocket.url.query) if websocket.url.query else QueryParams("")
+    token = query_params.get("token")
     if not token:
         logger.error("No token provided in query parameters")
         # Reject at HTTP level before WebSocket upgrade

@@ -1,6 +1,7 @@
 [tool.pytest.ini_options]
 # Optimized pytest configuration for improved test collection
 minversion = "6.0"
+pythonpath = ["."]  # Add project root to Python path for test_framework imports
 testpaths = [
     "tests",
     "netra_backend/tests",
@@ -100,7 +101,8 @@ markers = [
     "skipif: Conditional test skipping",
     "xfail: Expected to fail tests",
     "parametrize: Parameterized tests",
-    "usefixtures: Tests using specific fixtures"
+    "usefixtures: Tests using specific fixtures",
+    "no_skip: Tests that should never be skipped"
 ]
 
 # Coverage settings
