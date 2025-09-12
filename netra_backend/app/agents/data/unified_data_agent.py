@@ -600,7 +600,8 @@ class UnifiedDataAgent(BaseAgent):
         self, 
         context: UserExecutionContext,
         factory: Optional[UnifiedDataAgentFactory] = None,
-        llm_manager: Optional[LLMManager] = None
+        llm_manager: Optional[LLMManager] = None,
+        name: str = "UnifiedDataAgent"
     ):
         """Initialize UnifiedDataAgent with user context.
         
@@ -608,10 +609,11 @@ class UnifiedDataAgent(BaseAgent):
             context: User execution context for isolation
             factory: Factory that created this instance
             llm_manager: Optional LLM manager for insights
+            name: Agent name (default: "UnifiedDataAgent")
         """
         # Initialize BaseAgent with modern patterns
         super().__init__(
-            name="UnifiedDataAgent",
+            name=name,
             description="Unified data analysis agent with complete isolation",
             llm_manager=llm_manager,
             enable_reliability=True,
