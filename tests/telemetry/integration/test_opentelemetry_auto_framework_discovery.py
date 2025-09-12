@@ -218,7 +218,7 @@ class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
             except:
                 pass
                 
-    def test_redis_auto_instrumentation_detection(self):
+    async def test_redis_auto_instrumentation_detection(self):
         """
         Test automatic detection and instrumentation of Redis.
         

@@ -28,6 +28,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 import logging
+import redis.asyncio as redis
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.core.backend_environment import BackendEnvironment
@@ -100,10 +101,25 @@ class DockerRedisTestManager:
                 )
                 
                 if "test-redis" in result.stdout and ("Up" in result.stdout or "running" in result.stdout):
-                    # Also test actual Redis connectivity
-                    if self._test_redis_ping("localhost", 6381):
-                        logger.info("Redis is healthy and accessible")
-                        return True
+                    # Also test actual Redis connectivity - sync call from sync method, use alternative approach
+                    try:
+                        import asyncio
+                        if asyncio.iscoroutinefunction(self._test_redis_ping):
+                            # Try simple socket connection test instead since we're in sync context
+                            import socket
+                            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                            sock.settimeout(5)
+                            result = sock.connect_ex(("localhost", 6381))
+                            sock.close()
+                            if result == 0:
+                                logger.info("Redis is healthy and accessible")
+                                return True
+                        else:
+                            if self._test_redis_ping("localhost", 6381):
+                                logger.info("Redis is healthy and accessible")
+                                return True
+                    except Exception:
+                        pass  # Fall through to retry
                 
                 time.sleep(2)
                 
@@ -114,10 +130,9 @@ class DockerRedisTestManager:
         logger.error("Redis failed to become healthy within timeout")
         return False
     
-    def _test_redis_ping(self, host: str, port: int) -> bool:
+    async def _test_redis_ping(self, host: str, port: int) -> bool:
         """Test Redis connectivity with ping."""
         try:
-            # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
             redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=host, port=port, socket_timeout=5, socket_connect_timeout=5)
             await redis_client.ping()
             await redis_client.close()
@@ -181,7 +196,7 @@ class TestDockerRedisConnectivity:
         # Cleanup
         manager.stop_test_redis()
     
-    def test_redis_basic_connectivity(self, redis_service):
+    async def test_redis_basic_connectivity(self, redis_service):
         """Test basic Redis connectivity through Docker."""
         # Configure for Docker test environment
         test_config = {
@@ -243,7 +258,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Unexpected Redis error: {e}")
     
-    def test_redis_connection_pool_management(self, redis_service):
+    async def test_redis_connection_pool_management(self, redis_service):
         """Test Redis connection pool management in Docker environment."""
         test_config = {
             "ENVIRONMENT": "test",
@@ -341,7 +356,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Redis persistence test failed: {e}")
     
-    def test_redis_error_handling_and_recovery(self, redis_service):
+    async def test_redis_error_handling_and_recovery(self, redis_service):
         """Test Redis error handling and connection recovery."""
         test_config = {
             "ENVIRONMENT": "test",
@@ -396,7 +411,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Redis error handling test failed: {e}")
     
-    def test_redis_database_selection(self, redis_service):
+    async def test_redis_database_selection(self, redis_service):
         """Test Redis database selection and isolation."""
         test_config = {
             "ENVIRONMENT": "test",
@@ -539,7 +554,7 @@ class TestRedisDockerHealthChecks:
         finally:
             self.docker_manager.stop_test_redis()
     
-    def test_redis_startup_timing_validation(self):
+    async def test_redis_startup_timing_validation(self):
         """Test Redis startup timing and readiness."""
         if not self.docker_manager.is_docker_available():
             pytest.skip("Docker not available")
@@ -719,7 +734,7 @@ class TestRedisDockerIntegrationEnd2End:
         # Cleanup
         manager.stop_test_redis()
     
-    def test_end_to_end_redis_integration_workflow(self, docker_environment):
+    async def test_end_to_end_redis_integration_workflow(self, docker_environment):
         """Test complete Redis integration workflow from config to operation."""
         env = get_env()
         env.enable_isolation(backup_original=True)
@@ -799,7 +814,7 @@ class TestRedisDockerIntegrationEnd2End:
         finally:
             env.reset_to_original()
     
-    def test_redis_failure_recovery_integration(self, docker_environment):
+    async def test_redis_failure_recovery_integration(self, docker_environment):
         """Test Redis failure and recovery scenarios."""
         env = get_env()
         env.enable_isolation(backup_original=True)

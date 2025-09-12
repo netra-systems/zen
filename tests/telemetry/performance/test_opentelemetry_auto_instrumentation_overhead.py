@@ -373,17 +373,13 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
             
             # Warmup iterations
             for _ in range(self.warmup_iterations):
-                await asyncio.get_event_loop().run_in_executor(
-                    None, operation_func, redis_client, scenario_name, 0
-                )
+                await operation_func(redis_client, scenario_name, 0)
                 
             # Measured iterations
             for i in range(self.performance_iterations):
                 start_time = time.perf_counter()
                 
-                await asyncio.get_event_loop().run_in_executor(
-                    None, operation_func, redis_client, scenario_name, i
-                )
+                await operation_func(redis_client, scenario_name, i)
                 
                 end_time = time.perf_counter()
                 execution_times.append(end_time - start_time)
@@ -398,7 +394,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
                     
         return execution_times
         
-    def _redis_simple_set_get_operation(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_simple_set_get_operation(self, redis_client, scenario_name: str, iteration: int):
         """Simple Redis SET/GET operation."""
         key = f"perf_test_{scenario_name}_{iteration}"
         value = f"test_value_{iteration}"
@@ -409,7 +405,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
         assert retrieved == value
         await redis_client.delete(key)
         
-    def _redis_pipeline_operations(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_pipeline_operations(self, redis_client, scenario_name: str, iteration: int):
         """Redis pipeline operations."""
         pipe = await redis_client.pipeline()
         
@@ -418,16 +414,16 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
             pipe.set(key, f"value_{i}", ex=60)
             pipe.get(key)
             
-        results = pipe.execute()
+        results = await pipe.execute()
         
         # Cleanup
         cleanup_pipe = await redis_client.pipeline()
         for i in range(5):
             key = f"perf_pipeline_{scenario_name}_{iteration}_{i}"
             cleanup_pipe.delete(key)
-        cleanup_pipe.execute()
+        await cleanup_pipe.execute()
         
-    def _redis_hash_operations(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_hash_operations(self, redis_client, scenario_name: str, iteration: int):
         """Redis hash operations."""
         hash_key = f"perf_hash_{scenario_name}_{iteration}"
         

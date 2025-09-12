@@ -78,12 +78,12 @@ class TestSSOTRegressionPrevention:
         
         logger.info(f"Starting regression prevention test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up regression prevention test and REAL service connections."""
         # Clean up all real service connections
         for ws_conn in self.websocket_connections.values():
             try:
-                asyncio.get_event_loop().run_until_complete(ws_conn.close())
+                await ws_conn.close()
             except:
                 pass
         
@@ -94,7 +94,7 @@ class TestSSOTRegressionPrevention:
                 pass
         
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             
@@ -1302,7 +1302,7 @@ class TestSSOTContinuousCompliance:
     These tests run continuously to ensure SSOT compliance is maintained.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up continuous compliance test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -1314,10 +1314,10 @@ class TestSSOTContinuousCompliance:
         
         logger.info(f"Starting continuous compliance test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up continuous compliance test and REAL service connections."""
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             

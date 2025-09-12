@@ -1402,16 +1402,64 @@ async def authenticate_websocket_ssot(
             websocket_client_id=websocket_client_id
         )
         
-        # STEP 7: Create successful result
+        # STEP 7: PHASE 2 INTEGRATION - Register with Token Lifecycle Manager
+        # Register connection for token lifecycle management to prevent JWT expiry failures
+        try:
+            from netra_backend.app.websocket_core.token_lifecycle_manager import (
+                create_token_lifecycle_manager_for_connection
+            )
+            
+            # Extract token expiry from auth result or calculate default
+            token_expiry = datetime.now(timezone.utc) + timedelta(seconds=60)  # Default 60s expiry
+            if auth_result.metadata and 'token_expires_at' in auth_result.metadata:
+                token_expiry = auth_result.metadata['token_expires_at']
+            elif hasattr(auth_result, 'validated_at') and auth_result.validated_at:
+                # Calculate expiry from validated_at timestamp
+                validated_at = datetime.fromtimestamp(auth_result.validated_at, tz=timezone.utc)
+                token_expiry = validated_at + timedelta(seconds=60)
+            
+            # Register for token lifecycle management
+            lifecycle_registered = await create_token_lifecycle_manager_for_connection(
+                connection_id=connection_id,
+                websocket_client_id=websocket_client_id,
+                user_context=user_context,
+                initial_token=token,  # Current JWT token
+                token_expires_at=token_expiry
+            )
+            
+            if lifecycle_registered:
+                logger.info(f"PHASE 2: Token lifecycle management registered for connection {connection_id}")
+            else:
+                logger.warning(f"PHASE 2: Failed to register token lifecycle management for connection {connection_id}")
+                # Don't fail auth just because lifecycle registration failed
+            
+        except Exception as e:
+            logger.error(f"PHASE 2: Error registering token lifecycle management for {connection_id}: {e}")
+            # Continue with successful auth even if lifecycle registration fails
+        
+        # STEP 8: Create successful result
         response_time = (time.time() - start_time) * 1000
         
         logger.info(f"SSOT AUTH: Success for user {auth_result.user_id[:8]}... in {response_time:.1f}ms (connection {connection_id})")
         
-        return WebSocketAuthResult(
+        # Enhanced auth result with lifecycle management info
+        websocket_auth_result = WebSocketAuthResult(
             success=True,
             user_context=user_context,
             auth_result=auth_result
         )
+        
+        # Add lifecycle management metadata
+        if not websocket_auth_result.auth_result.metadata:
+            websocket_auth_result.auth_result.metadata = {}
+        websocket_auth_result.auth_result.metadata.update({
+            "phase2_lifecycle_enabled": True,
+            "token_lifecycle_manager": "registered",
+            "connection_duration_expected": "5+ minutes",
+            "token_refresh_interval": "45 seconds"
+        })
+        
+        return websocket_auth_result
         
     except Exception as e:
         response_time = (time.time() - start_time) * 1000

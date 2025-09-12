@@ -104,17 +104,17 @@ class TestSSOTBackwardCompatibility:
         
         logger.info(f"Starting backward compatibility test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up backward compatibility test and REAL service connections."""
         # Clean up compatibility test data
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             
         logger.info(f"Completed backward compatibility test cleanup: {self._testMethodName} (ID: {self.test_id})")
     
-    def test_backward_compatibility_data_isolation_concurrent_legacy_modern(self):
+    async def test_backward_compatibility_data_isolation_concurrent_legacy_modern(self):
         """
         COMPATIBILITY CRITICAL: Test data isolation between legacy and modern patterns.
         Ensures legacy patterns don't contaminate modern isolation boundaries.
@@ -124,7 +124,7 @@ class TestSSOTBackwardCompatibility:
         operations_per_context = 15
         compatibility_failures = []
         
-        def legacy_pattern_operations(context_id):
+        async def legacy_pattern_operations(context_id):
             """Simulate legacy pattern operations that should still maintain isolation."""
             failures = []
             
@@ -144,20 +144,20 @@ class TestSSOTBackwardCompatibility:
                     legacy_key = f"legacy:{context_id}:operation:{op_num}"
                     
                     # Store legacy data with real services
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         legacy_key,
                         "data",
                         str(legacy_data)
                     )
                     
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         legacy_key,
                         "pattern_type",
                         "legacy_compatibility"
                     )
                     
                     # Verify legacy data isolation
-                    stored_data = await redis_client.hget(legacy_key, "data")
+                    stored_data = await self.redis_client.hget(legacy_key, "data")
                     if not stored_data or str(context_id) not in stored_data:
                         failures.append({
                             'context_id': context_id,
@@ -168,9 +168,9 @@ class TestSSOTBackwardCompatibility:
                         })
                     
                     # Verify no contamination with modern patterns
-                    modern_keys = await redis_client.keys("modern:*")
+                    modern_keys = await self.redis_client.keys("modern:*")
                     for modern_key in modern_keys:
-                        modern_data = await redis_client.hget(modern_key, "data")
+                        modern_data = await self.redis_client.hget(modern_key, "data")
                         if modern_data and legacy_data['legacy_secret'] in modern_data:
                             failures.append({
                                 'context_id': context_id,
@@ -191,7 +191,7 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
-        def modern_pattern_operations(context_id):
+        async def modern_pattern_operations(context_id):
             """Simulate modern pattern operations with strict isolation."""
             failures = []
             
@@ -212,20 +212,20 @@ class TestSSOTBackwardCompatibility:
                     modern_key = f"modern:{context_id}:operation:{op_num}"
                     
                     # Store modern data with real services
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         modern_key,
                         "data",
                         str(modern_data)
                     )
                     
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         modern_key,
                         "pattern_type",
                         "modern_isolation"
                     )
                     
                     # Verify modern data isolation
-                    stored_data = await redis_client.hget(modern_key, "data")
+                    stored_data = await self.redis_client.hget(modern_key, "data")
                     if not stored_data or str(context_id) not in stored_data:
                         failures.append({
                             'context_id': context_id,
@@ -236,9 +236,9 @@ class TestSSOTBackwardCompatibility:
                         })
                     
                     # Verify no contamination with legacy patterns
-                    legacy_keys = await redis_client.keys("legacy:*")
+                    legacy_keys = await self.redis_client.keys("legacy:*")
                     for legacy_key in legacy_keys:
-                        legacy_data = await redis_client.hget(legacy_key, "data")
+                        legacy_data = await self.redis_client.hget(legacy_key, "data")
                         if legacy_data and modern_data['modern_secret'] in legacy_data:
                             failures.append({
                                 'context_id': context_id,
@@ -259,33 +259,29 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
-        # Execute concurrent legacy and modern operations
-        with ThreadPoolExecutor(max_workers=num_legacy_contexts + num_modern_contexts) as executor:
-            # Submit legacy operations
-            legacy_futures = {
-                executor.submit(legacy_pattern_operations, context_id): f"legacy_{context_id}"
-                for context_id in range(num_legacy_contexts)
-            }
+        # Execute concurrent legacy and modern operations using asyncio
+        legacy_tasks = [legacy_pattern_operations(context_id) for context_id in range(num_legacy_contexts)]
+        modern_tasks = [modern_pattern_operations(context_id) for context_id in range(num_modern_contexts)]
+        all_tasks = legacy_tasks + modern_tasks
+        
+        try:
+            results = await asyncio.gather(*all_tasks, return_exceptions=True)
             
-            # Submit modern operations
-            modern_futures = {
-                executor.submit(modern_pattern_operations, context_id): f"modern_{context_id}"
-                for context_id in range(num_modern_contexts)
-            }
-            
-            all_futures = {**legacy_futures, **modern_futures}
-            
-            for future in as_completed(all_futures):
-                context_name = all_futures[future]
-                try:
-                    context_failures = future.result(timeout=45)
-                    compatibility_failures.extend(context_failures)
-                except Exception as e:
+            for i, result in enumerate(results):
+                context_name = f"legacy_{i}" if i < num_legacy_contexts else f"modern_{i - num_legacy_contexts}"
+                if isinstance(result, Exception):
                     compatibility_failures.append({
                         'context_name': context_name,
-                        'issue': 'future_execution_failure',
-                        'error': str(e)
+                        'issue': 'async_execution_failure',
+                        'error': str(result)
                     })
+                elif isinstance(result, list):
+                    compatibility_failures.extend(result)
+        except Exception as e:
+            compatibility_failures.append({
+                'issue': 'async_gather_failure',
+                'error': str(e)
+            })
         
         # Verify backward compatibility isolation success
         if compatibility_failures:
@@ -298,7 +294,7 @@ class TestSSOTBackwardCompatibility:
         assert len(isolation_failures) == 0, f"CRITICAL: Isolation boundaries failed: {len(isolation_failures)} cases"
         assert len(compatibility_failures) == 0, f"Backward compatibility test failed: {len(compatibility_failures)} total failures"
     
-    def test_concurrent_mixed_pattern_execution_isolation(self):
+    async def test_concurrent_mixed_pattern_execution_isolation(self):
         """
         EXECUTION CRITICAL: Test concurrent execution of mixed legacy/modern patterns.
         Verifies isolation is maintained when both patterns execute simultaneously.
@@ -306,7 +302,7 @@ class TestSSOTBackwardCompatibility:
         num_concurrent_executions = 20
         mixed_execution_failures = []
         
-        def mixed_pattern_execution(execution_id):
+        async def mixed_pattern_execution(execution_id):
             """Execute both legacy and modern patterns concurrently."""
             failures = []
             
@@ -332,20 +328,20 @@ class TestSSOTBackwardCompatibility:
                     execution_key = f"{pattern_type}_exec:{execution_id}:op:{op_num}"
                     
                     # Store execution data
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         execution_key,
                         "execution_data",
                         str(execution_data)
                     )
                     
-                    await redis_client.hset(
+                    await self.redis_client.hset(
                         execution_key,
                         "execution_pattern",
                         pattern_type
                     )
                     
                     # Immediate verification
-                    stored_data = await redis_client.hget(execution_key, "execution_data")
+                    stored_data = await self.redis_client.hget(execution_key, "execution_data")
                     if not stored_data or str(execution_id) not in stored_data:
                         failures.append({
                             'execution_id': execution_id,
@@ -358,10 +354,10 @@ class TestSSOTBackwardCompatibility:
                     
                     # Check for cross-execution contamination
                     other_pattern_type = "modern" if is_legacy else "legacy"
-                    other_keys = await redis_client.keys(f"{other_pattern_type}_exec:*")
+                    other_keys = await self.redis_client.keys(f"{other_pattern_type}_exec:*")
                     
                     for other_key in other_keys:
-                        other_data = await redis_client.hget(other_key, "execution_data")
+                        other_data = await self.redis_client.hget(other_key, "execution_data")
                         if other_data and execution_data['execution_secret'] in other_data:
                             failures.append({
                                 'execution_id': execution_id,
@@ -373,10 +369,10 @@ class TestSSOTBackwardCompatibility:
                             })
                     
                     # Check for same-pattern cross-execution contamination
-                    same_pattern_keys = await redis_client.keys(f"{pattern_type}_exec:*")
+                    same_pattern_keys = await self.redis_client.keys(f"{pattern_type}_exec:*")
                     for same_key in same_pattern_keys:
                         if execution_key != same_key:
-                            same_data = await redis_client.hget(same_key, "execution_data")
+                            same_data = await self.redis_client.hget(same_key, "execution_data")
                             if same_data and execution_data['execution_secret'] in same_data:
                                 # Extract other execution ID from key
                                 other_exec_id = same_key.split(":")[1]
@@ -391,7 +387,7 @@ class TestSSOTBackwardCompatibility:
                                     })
                     
                     # Brief pause for concurrent access stress testing
-                    time.sleep(0.001)
+                    await asyncio.sleep(0.001)
                 
                 return failures
                 
@@ -403,24 +399,26 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
-        # Execute mixed patterns concurrently
-        with ThreadPoolExecutor(max_workers=num_concurrent_executions) as executor:
-            future_to_execution = {
-                executor.submit(mixed_pattern_execution, execution_id): execution_id
-                for execution_id in range(num_concurrent_executions)
-            }
+        # Execute mixed patterns concurrently using asyncio
+        mixed_tasks = [mixed_pattern_execution(execution_id) for execution_id in range(num_concurrent_executions)]
+        
+        try:
+            results = await asyncio.gather(*mixed_tasks, return_exceptions=True)
             
-            for future in as_completed(future_to_execution):
-                execution_id = future_to_execution[future]
-                try:
-                    execution_failures = future.result(timeout=60)
-                    mixed_execution_failures.extend(execution_failures)
-                except Exception as e:
+            for execution_id, result in enumerate(results):
+                if isinstance(result, Exception):
                     mixed_execution_failures.append({
                         'execution_id': execution_id,
-                        'issue': 'mixed_execution_future_failure',
-                        'error': str(e)
+                        'issue': 'mixed_execution_async_failure',
+                        'error': str(result)
                     })
+                elif isinstance(result, list):
+                    mixed_execution_failures.extend(result)
+        except Exception as e:
+            mixed_execution_failures.append({
+                'issue': 'mixed_execution_gather_failure',
+                'error': str(e)
+            })
         
         # Analyze mixed execution results
         contamination_failures = [f for f in mixed_execution_failures if 'contamination' in f.get('issue', '')]
@@ -927,7 +925,7 @@ class TestSSOTLegacyMigrationHelpers:
     These tests validate tools that help migrate legacy code to SSOT patterns.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up migration helper test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -939,10 +937,10 @@ class TestSSOTLegacyMigrationHelpers:
         
         logger.info(f"Starting migration helper test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up migration helper test and REAL service connections."""
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             

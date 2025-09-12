@@ -218,13 +218,28 @@ class TestRedisConnectionIssues:
             try:
                 redis_client = redis.from_url("redis://localhost:6379/0")
                 
-                # Test basic operations that should fail
+                # Test basic operations that should fail - define async functions
+                async def test_ping():
+                    await redis_client.ping()
+                
+                async def test_set():
+                    await redis_client.set("test_key", "test_value")
+                
+                async def test_get():
+                    await redis_client.get("test_key")
+                
+                async def test_delete():
+                    await redis_client.delete("test_key")
+                
+                async def test_exists():
+                    await redis_client.exists("test_key")
+                
                 operations = [
-                    ("ping", lambda: await redis_client.ping()),
-                    ("set", lambda: await redis_client.set("test_key", "test_value")),
-                    ("get", lambda: await redis_client.get("test_key")),
-                    ("delete", lambda: await redis_client.delete("test_key")),
-                    ("exists", lambda: await redis_client.exists("test_key")),
+                    ("ping", test_ping),
+                    ("set", test_set),
+                    ("get", test_get),
+                    ("delete", test_delete),
+                    ("exists", test_exists),
                 ]
                 
                 for op_name, operation in operations:
