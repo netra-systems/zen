@@ -18,7 +18,7 @@ from datetime import datetime, timezone, timedelta
 import warnings
 
 from auth_service.auth_core.oauth_manager import OAuthManager
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from auth_service.auth_core.oauth.oauth_business_logic import OAuthBusinessLogic
 from auth_service.auth_core.auth_environment import get_auth_env
 
@@ -62,9 +62,8 @@ class OAuthHandler:
                     "state_token": None
                 }
             
-            # Generate secure unique state token using UnifiedIDManager
-            id_manager = UnifiedIDManager()
-            state_token = id_manager.generate_id(IDType.SESSION)
+            # Generate secure unique state token using UnifiedIdGenerator
+            state_token = UnifiedIdGenerator.generate_session_id("oauth", "web")
             
             # Get authorization URL from SSOT provider
             auth_url = google_provider.get_authorization_url(
@@ -159,10 +158,9 @@ class OAuthHandler:
             }
             security_level = security_levels.get(user_type, "basic")
             
-            # Generate secure unique IDs using UnifiedIDManager
-            id_manager = UnifiedIDManager()
-            session_id = id_manager.generate_id(IDType.SESSION)
-            user_id = id_manager.generate_id(IDType.USER)  # Would be real user ID in production
+            # Generate secure unique IDs using UnifiedIdGenerator
+            session_id = UnifiedIdGenerator.generate_session_id("oauth", "web")
+            user_id = UnifiedIdGenerator.generate_base_id("user")  # Would be real user ID in production
             
             return {
                 "session_id": session_id,

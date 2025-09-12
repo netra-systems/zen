@@ -18,7 +18,7 @@ from auth_service.auth_core.models.auth_models import User
 from auth_service.auth_core.database import AuthUserRepository
 from auth_service.auth_core.config import AuthConfig
 from auth_service.auth_core.database.connection import auth_db
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +85,8 @@ class UserService:
                 # Create user data
                 from auth_service.auth_core.database.models import AuthUser
                 
-                # Generate secure unique user ID using UnifiedIDManager
-                id_manager = UnifiedIDManager()
-                user_id = id_manager.generate_id(IDType.USER)
+                # Generate secure unique user ID using UnifiedIdGenerator
+                user_id = UnifiedIdGenerator.generate_base_id("user")
                 
                 user_data = AuthUser(
                     id=user_id,

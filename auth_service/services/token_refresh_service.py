@@ -18,7 +18,7 @@ import jwt
 from auth_service.auth_core.config import AuthConfig
 from auth_service.services.redis_service import RedisService
 from auth_service.services.jwt_service import JWTService
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from auth_service.services.user_service import UserService
 
 logger = logging.getLogger(__name__)
@@ -81,9 +81,8 @@ class TokenRefreshService:
             TokenRefreshError: If token creation fails
         """
         try:
-            # Generate secure unique token ID using UnifiedIDManager
-            id_manager = UnifiedIDManager()
-            token_id = id_manager.generate_id(IDType.TRANSACTION)
+            # Generate secure unique token ID using UnifiedIdGenerator
+            token_id = UnifiedIdGenerator.generate_base_id("token")
             refresh_token = secrets.token_urlsafe(32)
             
             # Set expiration (refresh tokens live longer than access tokens)
