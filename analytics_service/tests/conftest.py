@@ -181,12 +181,7 @@ async def redis_client():
     try:
         import redis.asyncio as redis
         
-        client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6380,
-            db=2,
-            decode_responses=True
-        )
+        client = await get_redis_client()  # MIGRATED: was redis.Redis with connection params
         
         # Test connection
         await client.ping()
