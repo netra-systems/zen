@@ -124,7 +124,7 @@ class TestSSOTBackwardCompatibility:
         operations_per_context = 15
         compatibility_failures = []
         
-        def legacy_pattern_operations(context_id):
+        async def legacy_pattern_operations(context_id):
             """Simulate legacy pattern operations that should still maintain isolation."""
             failures = []
             

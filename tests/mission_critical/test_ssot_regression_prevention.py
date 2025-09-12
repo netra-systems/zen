@@ -109,7 +109,7 @@ class TestSSOTRegressionPrevention:
         operations_per_user = 10
         isolation_failures = []
         
-        def user_database_operations(user_id):
+        async def user_database_operations(user_id):
             """Simulate database operations for a specific user."""
             failures = []
             try:

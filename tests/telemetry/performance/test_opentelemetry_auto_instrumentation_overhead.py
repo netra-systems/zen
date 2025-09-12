@@ -427,7 +427,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
             cleanup_pipe.delete(key)
         cleanup_pipe.execute()
         
-    def _redis_hash_operations(self, redis_client, scenario_name: str, iteration: int):
+    async def _redis_hash_operations(self, redis_client, scenario_name: str, iteration: int):
         """Redis hash operations."""
         hash_key = f"perf_hash_{scenario_name}_{iteration}"
         

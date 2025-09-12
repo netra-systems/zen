@@ -182,7 +182,7 @@ class TestDockerRedisConnectivity:
         # Cleanup
         manager.stop_test_redis()
     
-    def test_redis_basic_connectivity(self, redis_service):
+    async def test_redis_basic_connectivity(self, redis_service):
         """Test basic Redis connectivity through Docker."""
         # Configure for Docker test environment
         test_config = {
