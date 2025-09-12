@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DemoChat from '@/components/demo/DemoChat'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Sparkles, Zap, TrendingUp, DollarSign } from 'lucide-react'
 
-export default function DemoPage() {
+export default function SimpleDemoPage() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>('general')
 
   const industries = [

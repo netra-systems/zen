@@ -83,7 +83,10 @@
       "Bash(time python:*)",
       "Bash(gcloud auth configure-docker:*)",
       "WebFetch(domain:github.com)",
-      "Bash(gcloud run services update-traffic:*)"
+      "Bash(gcloud run services update-traffic:*)",
+      "Bash(gcloud run services update:*)",
+      "Bash(npm run build:*)",
+      "Bash(NODE_OPTIONS=--max-old-space-size=4096 npx next build)"
     ],
     "deny": [],
     "ask": []
