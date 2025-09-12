@@ -1322,7 +1322,7 @@ class TestSSOTContinuousCompliance:
     These tests run continuously to ensure SSOT compliance is maintained.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up continuous compliance test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -1334,10 +1334,10 @@ class TestSSOTContinuousCompliance:
         
         logger.info(f"Starting continuous compliance test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up continuous compliance test and REAL service connections."""
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             
