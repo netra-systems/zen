@@ -196,7 +196,7 @@ class SSOTestComponents:
         return self.saml_provider
 
 
-def create_real_jwt_token(user_id: str, permissions: List[str], email: str, expires_in: int = 3600) -> str:
+def create_real_jwt_token(user_id: str, permissions: List[str], email: Optional[str] = None, expires_in: int = 3600) -> str:
     """Create a real JWT token for testing.
     
     CRITICAL: Creates valid JWT tokens for Golden Path testing.
@@ -204,6 +204,10 @@ def create_real_jwt_token(user_id: str, permissions: List[str], email: str, expi
     """
     env = IsolatedEnvironment()
     secret = env.get("JWT_SECRET", "test_secret_key_for_integration_tests")
+    
+    # Generate intelligent default email if not provided (backwards compatibility)
+    if email is None:
+        email = f"{user_id}@test.netra.ai"
     
     now = datetime.utcnow()
     payload = {
