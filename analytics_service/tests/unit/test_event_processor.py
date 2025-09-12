@@ -226,7 +226,7 @@ class EventProcessor:
         # This would be implemented with actual Redis client
         # For testing, we simulate the operation
         if hasattr(self.redis_client, 'cache_events'):
-            await self.await redis_client.cache_events(events)
+            await redis_client.cache_events(events)
         else:
             # Simulate successful caching
             await asyncio.sleep(0.001)  # Simulate network latency

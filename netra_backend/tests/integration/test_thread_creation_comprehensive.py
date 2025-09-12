@@ -2026,7 +2026,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
             
             # Check if thread data might be cached
             cache_key = f"thread:{thread.id}"
-            cached_data = await await redis_client.get(cache_key)
+            cached_data = await redis_client.get(cache_key)
             
             if cached_data:
                 # If cached, validate consistency with database
@@ -2035,7 +2035,7 @@ class TestThreadCreationComprehensive(BaseIntegrationTest):
                 assert cached_thread["id"] == thread.id
                 assert cached_thread["name"] == thread.name
             
-            await await redis_client.close()
+            await redis_client.close()
         except (ImportError, Exception):
             # Redis not available or not configured - test passes with DB validation only
             pass

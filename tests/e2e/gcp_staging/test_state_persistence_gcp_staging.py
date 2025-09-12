@@ -85,9 +85,9 @@ class TestStatePersistenceGCPStaging(SSotAsyncTestCase):
     async def asyncTearDown(self):
         """Clean up test data from all tiers."""
         # Clean Redis test data
-        test_keys = [k for k in self.await redis_client.keys() if k.startswith("test_")]
+        test_keys = [k for k in await redis_client.keys() if k.startswith("test_")]
         if test_keys:
-            self.await redis_client.delete(*test_keys)
+            await redis_client.delete(*test_keys)
         
         await super().asyncTearDown()
 

@@ -260,10 +260,10 @@ class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
         try:
             # Check cache keys for this user/thread
             cache_pattern = f"user:{self.test_user_id}:*"
-            cache_keys = await self.await redis_client.keys(cache_pattern)
+            cache_keys = await redis_client.keys(cache_pattern)
             
             thread_pattern = f"thread:{self.test_thread_id}:*"  
-            thread_cache_keys = await self.await redis_client.keys(thread_pattern)
+            thread_cache_keys = await redis_client.keys(thread_pattern)
             
             all_cache_keys = cache_keys + thread_cache_keys
             
@@ -274,7 +274,7 @@ class TestStateSynchronizationAcrossServices(BaseIntegrationTest):
                 
                 # Check cache content for one key
                 test_key = all_cache_keys[0]
-                cached_data = await self.await redis_client.get(test_key)
+                cached_data = await redis_client.get(test_key)
                 
                 if cached_data:
                     # Parse cached data

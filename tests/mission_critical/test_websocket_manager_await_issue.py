@@ -154,8 +154,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
             "strict_mode": False
         }
         
-        # This should work when create_websocket_manager is called WITHOUT await
-        await self.handler.handle(self.user_id, test_payload)
+        # This should work when create_websocket_manager is called WITHOUT await self.handler.handle(self.user_id, test_payload)
         
         # Verify the flow completed
         self.quality_gate_service.validate_content.assert_called_once()

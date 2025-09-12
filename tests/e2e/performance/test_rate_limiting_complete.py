@@ -93,7 +93,7 @@ class TestComprehensiveRateLimiter:
                 decode_responses=True,
                 socket_connect_timeout=2
             )
-            await self.await redis_client.ping()
+            await redis_client.ping()
         except Exception:
             # Use None to indicate Redis unavailable - tests will simulate
             self.redis_client = None
@@ -491,9 +491,9 @@ class TestComprehensiveRateLimiter:
             try:
                 # Check if global rate limiting infrastructure exists
                 global_key = "rate_limit:global:api"
-                await self.await redis_client.set(global_key, "test", ex=60)
-                exists = await self.await redis_client.exists(global_key)
-                await self.await redis_client.delete(global_key)
+                await redis_client.set(global_key, "test", ex=60)
+                exists = await redis_client.exists(global_key)
+                await redis_client.delete(global_key)
                 
                 return {
                     "active": bool(exists),
@@ -691,18 +691,18 @@ class TestComprehensiveRateLimiter:
             try:
                 # Clean up test keys
                 pattern = f"rate_limit:*{self.test_session_id}*"
-                keys = await self.await redis_client.keys(pattern)
+                keys = await redis_client.keys(pattern)
                 if keys:
-                    await self.await redis_client.delete(*keys)
+                    await redis_client.delete(*keys)
                 
                 # Clean up test user keys
                 for user in self.test_users:
                     user_pattern = f"rate_limit:*{user['data']['user_id']}*"
-                    user_keys = await self.await redis_client.keys(user_pattern)
+                    user_keys = await redis_client.keys(user_pattern)
                     if user_keys:
-                        await self.await redis_client.delete(*user_keys)
+                        await redis_client.delete(*user_keys)
                 
-                await self.await redis_client.aclose()
+                await redis_client.aclose()
             except Exception:
                 pass  # Best effort cleanup
 

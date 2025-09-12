@@ -195,8 +195,8 @@ class TestCacheContentionSuite:
         
     async def setup_test_environment(self):
         """Setup test environment and prepare test data."""
-        await self.await redis_client.connect()
-        await self.await redis_client.flush_test_data()
+        await redis_client.connect()
+        await redis_client.flush_test_data()
         
         # Generate test data
         await self._generate_test_data()
@@ -211,7 +211,7 @@ class TestCacheContentionSuite:
             if self.test_keys and self.redis_client.client:
                 await self.redis_client.client.delete(*self.test_keys)
             
-            await self.await redis_client.disconnect()
+            await redis_client.disconnect()
             logger.info("Test environment cleanup complete")
         except Exception as e:
             logger.warning(f"Error during cleanup: {e}")

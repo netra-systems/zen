@@ -583,7 +583,7 @@ async def clean_analytics_db(clickhouse_client, redis_client):
         clickhouse_client.command("TRUNCATE TABLE IF EXISTS prompt_analytics")
     
     if redis_client:
-        await await redis_client.flushdb()
+        await redis_client.flushdb()
     
     yield
     
@@ -593,7 +593,7 @@ async def clean_analytics_db(clickhouse_client, redis_client):
         clickhouse_client.command("TRUNCATE TABLE IF EXISTS prompt_analytics")
     
     if redis_client:
-        await await redis_client.flushdb()
+        await redis_client.flushdb()
 
 # =============================================================================
 # TEST CONTEXT MANAGERS

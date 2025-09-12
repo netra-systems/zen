@@ -155,11 +155,11 @@ class TestUnifiedIDManagerIntegrationCore(SSotAsyncTestCase):
         """Cleanup test data from all ID management services"""
         # Clean up Redis sequences
         for sequence_name in self.test_sequences:
-            self.await redis_client.delete(f"id_sequence:{sequence_name}")
+            await redis_client.delete(f"id_sequence:{sequence_name}")
         
         # Clean up Redis ID caches
         for generated_id in self.test_generated_ids:
-            self.await redis_client.delete(f"id_cache:{generated_id}")
+            await redis_client.delete(f"id_cache:{generated_id}")
         
         # Clean up PostgreSQL data
         cursor = self.postgres_client.cursor()
@@ -799,7 +799,7 @@ class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
         # Get current sequence values from Redis
         initial_sequences = {}
         for sequence_name in ["user_id_seq", "thread_id_seq", "run_id_seq"]:
-            seq_value = self.await redis_client.get(f"id_sequence:{sequence_name}")
+            seq_value = await redis_client.get(f"id_sequence:{sequence_name}")
             if seq_value:
                 initial_sequences[sequence_name] = int(seq_value)
         
@@ -841,7 +841,7 @@ class TestDisasterRecoveryIntegration(TestUnifiedIDManagerIntegrationCore):
         # Verify sequence continuity was maintained
         final_sequences = {}
         for sequence_name in ["user_id_seq", "thread_id_seq", "run_id_seq"]:
-            seq_value = self.await redis_client.get(f"id_sequence:{sequence_name}")
+            seq_value = await redis_client.get(f"id_sequence:{sequence_name}")
             if seq_value:
                 final_sequences[sequence_name] = int(seq_value)
         

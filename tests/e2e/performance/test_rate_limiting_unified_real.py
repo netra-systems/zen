@@ -96,7 +96,7 @@ class TestUnifiedRateLimiter:
         # Connect to Redis for rate limit coordination (if available)
         try:
             self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-            await self.await redis_client.ping()
+            await redis_client.ping()
         except Exception:
             # Use mock Redis if real Redis is not available
             self.redis_client = None
@@ -339,15 +339,15 @@ class TestUnifiedRateLimiter:
             backend_key = f"rate_limit:user:{user_id}:backend"
             
             # Increment counters from both services
-            await self.await redis_client.incr(auth_key)
-            await self.await redis_client.expire(auth_key, 300)
+            await redis_client.incr(auth_key)
+            await redis_client.expire(auth_key, 300)
             
-            await self.await redis_client.incr(backend_key)
-            await self.await redis_client.expire(backend_key, 300)
+            await redis_client.incr(backend_key)
+            await redis_client.expire(backend_key, 300)
             
             # Verify coordination
-            auth_count = int(await self.await redis_client.get(auth_key) or 0)
-            backend_count = int(await self.await redis_client.get(backend_key) or 0)
+            auth_count = int(await redis_client.get(auth_key) or 0)
+            backend_count = int(await redis_client.get(backend_key) or 0)
             
             return {
                 "coordinated": auth_count > 0 and backend_count > 0,
@@ -549,17 +549,17 @@ class TestUnifiedRateLimiter:
             try:
                 # Clean up test keys
                 pattern = f"rate_limit:*{self.test_session_id}*"
-                keys = await self.await redis_client.keys(pattern)
+                keys = await redis_client.keys(pattern)
                 if keys:
-                    await self.await redis_client.delete(*keys)
+                    await redis_client.delete(*keys)
                 
                 # Clean up coordination test keys
                 coord_pattern = "rate_limit:*coord-test-*"
-                coord_keys = await self.await redis_client.keys(coord_pattern)
+                coord_keys = await redis_client.keys(coord_pattern)
                 if coord_keys:
-                    await self.await redis_client.delete(*coord_keys)
+                    await redis_client.delete(*coord_keys)
                 
-                await self.await redis_client.aclose()
+                await redis_client.aclose()
             except Exception:
                 pass  # Best effort cleanup
 

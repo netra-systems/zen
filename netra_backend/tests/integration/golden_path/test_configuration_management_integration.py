@@ -579,20 +579,20 @@ class TestConfigurationManagementIntegration(BaseIntegrationTest):
             )
             
             # Test ping
-            ping_result = await await redis_client.ping()
+            ping_result = await redis_client.ping()
             
             # Test set/get
             test_key = f"config_test_{uuid.uuid4().hex[:8]}"
             test_value = f"test_value_{time.time()}"
             
-            await await redis_client.set(test_key, test_value, ex=10)
-            retrieved_value = await await redis_client.get(test_key)
+            await redis_client.set(test_key, test_value, ex=10)
+            retrieved_value = await redis_client.get(test_key)
             
             set_get_successful = retrieved_value == test_value
             
             # Cleanup
-            await await redis_client.delete(test_key)
-            await await redis_client.aclose()
+            await redis_client.delete(test_key)
+            await redis_client.aclose()
             
             return {
                 "redis_available": True,

@@ -107,7 +107,7 @@ class TestSSOTBackwardCompatibility:
         """Clean up backward compatibility test and REAL service connections."""
         # Clean up compatibility test data
         try:
-            self.await redis_client.flushdb()
+            await redis_client.flushdb()
         except:
             pass
             
@@ -143,20 +143,20 @@ class TestSSOTBackwardCompatibility:
                     legacy_key = f"legacy:{context_id}:operation:{op_num}"
                     
                     # Store legacy data with real services
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         legacy_key,
                         "data",
                         str(legacy_data)
                     )
                     
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         legacy_key,
                         "pattern_type",
                         "legacy_compatibility"
                     )
                     
                     # Verify legacy data isolation
-                    stored_data = self.await redis_client.hget(legacy_key, "data")
+                    stored_data = await redis_client.hget(legacy_key, "data")
                     if not stored_data or str(context_id) not in stored_data:
                         failures.append({
                             'context_id': context_id,
@@ -167,9 +167,9 @@ class TestSSOTBackwardCompatibility:
                         })
                     
                     # Verify no contamination with modern patterns
-                    modern_keys = self.await redis_client.keys("modern:*")
+                    modern_keys = await redis_client.keys("modern:*")
                     for modern_key in modern_keys:
-                        modern_data = self.await redis_client.hget(modern_key, "data")
+                        modern_data = await redis_client.hget(modern_key, "data")
                         if modern_data and legacy_data['legacy_secret'] in modern_data:
                             failures.append({
                                 'context_id': context_id,
@@ -211,20 +211,20 @@ class TestSSOTBackwardCompatibility:
                     modern_key = f"modern:{context_id}:operation:{op_num}"
                     
                     # Store modern data with real services
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         modern_key,
                         "data",
                         str(modern_data)
                     )
                     
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         modern_key,
                         "pattern_type",
                         "modern_isolation"
                     )
                     
                     # Verify modern data isolation
-                    stored_data = self.await redis_client.hget(modern_key, "data")
+                    stored_data = await redis_client.hget(modern_key, "data")
                     if not stored_data or str(context_id) not in stored_data:
                         failures.append({
                             'context_id': context_id,
@@ -235,9 +235,9 @@ class TestSSOTBackwardCompatibility:
                         })
                     
                     # Verify no contamination with legacy patterns
-                    legacy_keys = self.await redis_client.keys("legacy:*")
+                    legacy_keys = await redis_client.keys("legacy:*")
                     for legacy_key in legacy_keys:
-                        legacy_data = self.await redis_client.hget(legacy_key, "data")
+                        legacy_data = await redis_client.hget(legacy_key, "data")
                         if legacy_data and modern_data['modern_secret'] in legacy_data:
                             failures.append({
                                 'context_id': context_id,
@@ -331,20 +331,20 @@ class TestSSOTBackwardCompatibility:
                     execution_key = f"{pattern_type}_exec:{execution_id}:op:{op_num}"
                     
                     # Store execution data
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         execution_key,
                         "execution_data",
                         str(execution_data)
                     )
                     
-                    self.await redis_client.hset(
+                    await redis_client.hset(
                         execution_key,
                         "execution_pattern",
                         pattern_type
                     )
                     
                     # Immediate verification
-                    stored_data = self.await redis_client.hget(execution_key, "execution_data")
+                    stored_data = await redis_client.hget(execution_key, "execution_data")
                     if not stored_data or str(execution_id) not in stored_data:
                         failures.append({
                             'execution_id': execution_id,
@@ -357,10 +357,10 @@ class TestSSOTBackwardCompatibility:
                     
                     # Check for cross-execution contamination
                     other_pattern_type = "modern" if is_legacy else "legacy"
-                    other_keys = self.await redis_client.keys(f"{other_pattern_type}_exec:*")
+                    other_keys = await redis_client.keys(f"{other_pattern_type}_exec:*")
                     
                     for other_key in other_keys:
-                        other_data = self.await redis_client.hget(other_key, "execution_data")
+                        other_data = await redis_client.hget(other_key, "execution_data")
                         if other_data and execution_data['execution_secret'] in other_data:
                             failures.append({
                                 'execution_id': execution_id,
@@ -372,10 +372,10 @@ class TestSSOTBackwardCompatibility:
                             })
                     
                     # Check for same-pattern cross-execution contamination
-                    same_pattern_keys = self.await redis_client.keys(f"{pattern_type}_exec:*")
+                    same_pattern_keys = await redis_client.keys(f"{pattern_type}_exec:*")
                     for same_key in same_pattern_keys:
                         if execution_key != same_key:
-                            same_data = self.await redis_client.hget(same_key, "execution_data")
+                            same_data = await redis_client.hget(same_key, "execution_data")
                             if same_data and execution_data['execution_secret'] in same_data:
                                 # Extract other execution ID from key
                                 other_exec_id = same_key.split(":")[1]
@@ -941,7 +941,7 @@ class TestSSOTLegacyMigrationHelpers:
     def tearDown(self):
         """Clean up migration helper test and REAL service connections."""
         try:
-            self.await redis_client.flushdb()
+            await redis_client.flushdb()
         except:
             pass
             
