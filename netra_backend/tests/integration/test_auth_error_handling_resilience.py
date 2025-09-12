@@ -38,7 +38,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
     """Integration tests for authentication error handling and resilience with real services."""
     
     @pytest.fixture(autouse=True)
-    def setup_resilience_environment(self):
+    async def setup_resilience_environment(self):
         """Setup integration environment for auth resilience testing."""
         self.env = get_env()
         self.env.enable_isolation()
@@ -61,7 +61,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         # Connect to test Redis for resilience testing
         try:
             self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, db=0, decode_responses=True)
-            await redis_client.ping()  # Verify connection
+            await self.redis_client.ping()  # Verify connection
         except Exception as e:
             pytest.skip(f"Redis not available for resilience integration tests: {e}")
         
