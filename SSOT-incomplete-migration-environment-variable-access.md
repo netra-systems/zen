@@ -45,8 +45,14 @@ value = env.get(var_name)
 - [x] **Local Tracking**: .md file created
 - [x] **Step 1.1**: Discover existing tests - COMPREHENSIVE ANALYSIS COMPLETE
 
+### ✅ COMPLETED
+- [x] **Step 0**: SSOT Audit completed - Top 3 violations identified
+- [x] **Issue Creation**: GitHub issue #596 created
+- [x] **Local Tracking**: .md file created
+- [x] **Step 1.1**: Discover existing tests - COMPREHENSIVE ANALYSIS COMPLETE
+- [x] **Step 1.2**: Plan test creation - COMPREHENSIVE 20% NEW TEST PLAN COMPLETE
+
 ### 🔄 IN PROGRESS  
-- [ ] **Step 1.2**: Plan test creation and updates
 - [ ] **Step 2**: Execute test plan (20% new SSOT tests)
 - [ ] **Step 3**: Plan SSOT remediation
 - [ ] **Step 4**: Execute remediation plan
@@ -102,6 +108,56 @@ env_specific_value = self.env.get(env_specific) or os.environ.get(env_specific) 
 - **EXTREME**: Test infrastructure itself violates SSOT patterns
 - **HIGH**: Many protecting tests have been disabled
 - **MEDIUM**: Working tests exist but need SSOT remediation
+
+## COMPREHENSIVE TEST PLAN (20% NEW SSOT TESTS)
+
+### STRATEGIC TEST ARCHITECTURE
+**Target**: Create **failing tests** that detect violations, then **pass** after remediation
+
+#### 1. VIOLATION REPRODUCTION TESTS (FAILING BY DESIGN)
+- `tests/unit/ssot/test_environment_variable_ssot_violations.py`
+  - **FAILS**: Detects mixed `self.env.get() or os.environ.get()` pattern in auth_startup_validator.py
+  - **FAILS**: Detects direct os.environ manipulation in JWT secret test setup
+- `tests/integration/ssot/test_environment_fallback_race_conditions.py`  
+  - **FAILS**: Reproduces JWT secret mismatch in Cloud Run race conditions
+  - **FAILS**: Demonstrates isolation breakdown with mixed patterns
+
+#### 2. SSOT COMPLIANCE VALIDATION TESTS (PASSING AFTER FIX)
+- `tests/integration/ssot/test_jwt_secret_ssot_compliance.py`
+  - **PASSES**: Validates IsolatedEnvironment-only JWT secret access
+  - **PASSES**: Validates consistent JWT handling between auth_service ↔ backend
+- `tests/unit/ssot/test_isolated_environment_enforcement.py`
+  - **PASSES**: Validates no os.environ in critical files
+  - **PASSES**: Comprehensive audit of 1,944+ files for SSOT compliance
+
+#### 3. GOLDEN PATH PROTECTION TESTS (CRITICAL BUSINESS VALUE)
+- `tests/integration/golden_path/test_authentication_ssot_golden_path.py`
+  - **CRITICAL**: End-to-end login → JWT → WebSocket → AI response flow
+  - **CRITICAL**: WebSocket authentication with SSOT environment handling
+  - **CRITICAL**: Multi-user auth isolation with SSOT patterns
+- `tests/mission_critical/test_auth_startup_validator_ssot.py`
+  - **CRITICAL**: Validates auth_startup_validator uses only IsolatedEnvironment
+  - **CRITICAL**: Ensures no os.environ fallback patterns
+
+#### 4. TEST INFRASTRUCTURE REMEDIATION TESTS
+- `tests/unit/test_framework/test_ssot_test_environment_setup.py`
+  - Validates mission critical tests use IsolatedEnvironment setup
+  - Tests JWT secret test setup uses SSOT patterns
+
+### TEST EXECUTION STRATEGY
+```bash
+# Phase 1: Prove violation detection (FAILURES expected)
+python tests/unified_test_runner.py --category ssot_violations --expect-failures
+
+# Phase 3: Prove remediation success (PASSES expected)  
+python tests/unified_test_runner.py --category ssot_compliance
+python tests/mission_critical/test_auth_startup_validator_ssot.py
+```
+
+### SUCCESS METRICS
+- **100% of new tests initially FAIL** (proving violation detection works)
+- **100% of tests PASS after remediation** (proving fix effectiveness)
+- **Zero Golden Path regressions** ($500K+ ARR business value protected)
 
 ## SUCCESS CRITERIA
 - [ ] All direct os.environ access replaced with IsolatedEnvironment SSOT
