@@ -41,7 +41,7 @@ const initializeAgents = (): Agent[] => [
   { id: 'optimization', name: 'Optimization Agent', icon: <Zap className="w-4 h-4" />, color: 'text-green-500' }
 ]
 
-export default function DemoChat({ industry, onInteraction, useWebSocket = false }: DemoChatProps) {
+export default function DemoChat({ industry, onInteraction, useWebSocket = true }: DemoChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)

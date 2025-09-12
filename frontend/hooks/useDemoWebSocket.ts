@@ -49,7 +49,10 @@ export function useDemoWebSocket(options: DemoWebSocketOptions = {}): DemoWebSoc
 
       // Create WebSocket URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const host = process.env.NEXT_PUBLIC_API_URL || window.location.host
+      // Use the backend API URL for WebSocket connection
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'localhost:8000'
+      // Remove protocol from API URL if present
+      const host = apiUrl.replace(/^https?:\/\//, '')
       const wsUrl = `${protocol}//${host}/api/demo/ws`
 
       // Create new WebSocket connection

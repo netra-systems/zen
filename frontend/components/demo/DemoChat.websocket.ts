@@ -14,10 +14,35 @@ export const handleWebSocketMessage = (
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setIsProcessing: (processing: boolean) => void
 ): void => {
-  if (data.type === 'agent_update') {
-    handleAgentUpdate(data, setActiveAgent)
-  } else if (data.type === 'chat_response') {
-    handleChatResponse(data, setMessages, setIsProcessing, setActiveAgent)
+  // Handle new agent events from demo WebSocket
+  switch (data.type) {
+    case 'agent_started':
+      setActiveAgent('triage')
+      setIsProcessing(true)
+      break
+    case 'agent_thinking':
+      setActiveAgent('analysis')
+      break
+    case 'tool_executing':
+      setActiveAgent('optimization')
+      break
+    case 'agent_completed':
+      if (data.response) {
+        const responseMessage = createWebSocketResponseMessage({
+          ...data,
+          response: data.response
+        })
+        setMessages(prev => [...prev, responseMessage])
+      }
+      setIsProcessing(false)
+      setActiveAgent(null)
+      break
+    case 'agent_update':
+      handleAgentUpdate(data, setActiveAgent)
+      break
+    case 'chat_response':
+      handleChatResponse(data, setMessages, setIsProcessing, setActiveAgent)
+      break
   }
 }
 
