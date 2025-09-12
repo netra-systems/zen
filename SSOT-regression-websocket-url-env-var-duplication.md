@@ -23,9 +23,46 @@ Duplicate and conflicting WebSocket URL environment variables create configurati
 - [x] Created GitHub issue #507
 - [x] Created local tracking file
 
-### ⏳ Step 1: Discover and Plan Tests (IN PROGRESS)
-- [ ] 1.1 Discover existing WebSocket configuration tests
-- [ ] 1.2 Plan new SSOT validation tests
+### ✅ Step 1.1: Discover Existing WebSocket Tests (COMPLETED)
+- [x] 1.1 Discover existing WebSocket configuration tests
+- [x] Found 46 identified tests across 6 critical areas
+- [x] Identified 3 critical SSOT violation patterns in existing tests
+- [x] Assessed test impact categories: 6 must fail, 25+ should pass, 15+ need creation
+
+#### Test Discovery Summary:
+**Existing Test Categories Found:**
+- **Environment Variable Validation**: 3 core tests with SSOT violations
+- **Golden Path Protection**: 15+ WebSocket connectivity tests  
+- **Configuration Monitoring**: 6+ drift detection tests
+- **Deployment Validation**: 4+ GCP deployment tests
+- **Authentication Integration**: 8+ WebSocket auth tests
+- **SSOT Infrastructure**: 10+ configuration tests
+
+**Critical SSOT Violations in Tests:**
+- **Pattern 1**: Dual variable definition in test setup (3 files)
+- **Pattern 2**: Deployment validation enforcing both variables (2 files)  
+- **Pattern 3**: Configuration drift monitoring both variables (1 file)
+
+### ✅ Step 1.2: Plan New SSOT Validation Tests (COMPLETED)
+- [x] Initial test planning completed
+- [x] Detailed test implementation specifications
+
+#### New SSOT Test Plan:
+**Test Distribution:**
+- **20% Unit Tests**: Environment variable SSOT validation (4 test classes)
+- **60% Integration Tests**: Real WebSocket connection validation (4 test classes) 
+- **20% E2E Tests**: Golden Path SSOT protection (2 test classes)
+
+**Key Test Classes to Create:**
+1. `TestWebSocketURLSSOTValidation` - Unit validation
+2. `TestWebSocketSSOTIntegration` - Service integration  
+3. `TestWebSocketSSOTConnectionValidation` - Real connection tests
+4. `TestWebSocketSSOTGoldenPathProtection` - E2E validation
+
+**Expected Test Outcomes:**
+- **Pre-SSOT Fix**: 6 tests must fail (dual-variable detection)
+- **Post-SSOT Fix**: 15 new SSOT tests pass, 25+ Golden Path tests pass
+- **Business Protection**: $500K+ ARR Golden Path validated via staging E2E
 
 ### ⏳ Step 2: Execute Test Plan (PENDING)
 - [ ] Create new SSOT tests for WebSocket configuration
