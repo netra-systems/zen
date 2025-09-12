@@ -46,7 +46,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             session_id=connection_id
         )
         
-        # Create WebSocket bridge adapter
+        # Create WebSocket bridge adapter that implements all required methods
         class WebSocketAdapter:
             """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
             async def send_event(self, event_type: str, data: dict):
@@ -55,12 +55,60 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
                     "timestamp": datetime.utcnow().isoformat(),
                     **data
                 })
+            
+            async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
+                await self.send_event("agent_started", {
+                    "agent": agent_name,
+                    "run_id": run_id,
+                    "message": "Starting AI analysis..."
+                })
+                
+            async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
+                await self.send_event("agent_thinking", {
+                    "agent": agent_name,
+                    "run_id": run_id,
+                    "message": reasoning or "Analyzing your request..."
+                })
+                
+            async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str = "", **kwargs):
+                await self.send_event("tool_executing", {
+                    "agent": agent_name,
+                    "run_id": run_id,
+                    "tool": tool_name,
+                    "message": f"Executing {tool_name}..."
+                })
+                
+            async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str = "", result=None, **kwargs):
+                await self.send_event("tool_completed", {
+                    "agent": agent_name,
+                    "run_id": run_id,
+                    "tool": tool_name,
+                    "message": f"Completed {tool_name}"
+                })
+                
+            async def notify_agent_completed(self, run_id: str, agent_name: str, result=None, **kwargs):
+                # Send the actual AI response here
+                response_text = "Analysis completed."
+                if result and isinstance(result, dict):
+                    if "results" in result:
+                        response_text = str(result["results"])
+                    elif "supervisor_result" in result:
+                        response_text = str(result.get("results", "Analysis completed."))
+                elif result:
+                    response_text = str(result)
+                    
+                await self.send_event("agent_completed", {
+                    "agent": agent_name,
+                    "run_id": run_id,
+                    "message": response_text
+                })
         
         ws_adapter = WebSocketAdapter()
         
-        # Initialize WebSocket bridge
+        # Initialize WebSocket bridge with the adapter as both websocket_manager and emitter
         bridge = AgentWebSocketBridge()
         bridge.websocket_manager = ws_adapter
+        bridge.emitter = ws_adapter
         
         # Get LLM manager
         config = get_config()
@@ -73,25 +121,13 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             websocket_bridge=bridge
         )
         
-        # Send initial agent_started event
-        await ws_adapter.send_event("agent_started", {
-            "agent": "Supervisor",
-            "message": "Starting AI optimization analysis..."
-        })
-        
-        # Execute the agent workflow with proper parameter name
+        # Execute the agent workflow (bridge will handle all events automatically)
         await supervisor.run(
             user_request=user_message,
             thread_id=thread_id,
             user_id=demo_user_id,
             run_id=run_id
         )
-        
-        # Send completion event
-        await ws_adapter.send_event("agent_completed", {
-            "agent": "Supervisor",
-            "message": "Analysis complete. Optimization recommendations ready."
-        })
         
     except Exception as e:
         logger.error(f"Real agent execution failed: {e}")
