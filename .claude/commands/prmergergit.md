@@ -11,7 +11,7 @@ PRs_To_MERGE = ${1 : all}
 
 Context:
     1. You must keep going until all work is fully completed.
-    2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+    2. Have sub agents use built in github tools or direct `git` or `gh` if needed. ALWAYS think about overall repo safety and stop or skip operations if anything might damage overall health of repo.
     3. Branch policy:
         3.1. ALWAYS merge PRs to the WORKING BRANCH (develop-long-lived) - NEVER to main
         3.2. When creating branches for PRs: Create REMOTE branches WITHOUT changing current working branch
