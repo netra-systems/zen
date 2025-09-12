@@ -55,10 +55,18 @@ except ImportError:
 
 # Import no-docker mode plugin for integration test management
 try:
-    from test_framework.ssot.pytest_no_docker_plugin import *
+    from test_framework.ssot.pytest_no_docker_plugin import (
+        NoDocketModePlugin,
+        pytest_configure as no_docker_pytest_configure,
+        pytest_sessionstart,
+        pytest_sessionfinish
+    )
 except ImportError:
     # Plugin not available, continue without it
-    pass
+    NoDocketModePlugin = None
+    no_docker_pytest_configure = None
+    pytest_sessionstart = None
+    pytest_sessionfinish = None
 
 # Lazy loading to prevent resource exhaustion during pytest collection
 # CRITICAL: Do NOT check environment at module level - causes Docker crash on Windows

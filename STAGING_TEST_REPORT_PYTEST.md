@@ -1,26 +1,73 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 09:32:36
+**Generated:** 2025-09-12 09:50:51
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 4
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 4 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.29 seconds
+- **Duration:** 0.13 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### NORMAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_staging_health_check_includes_background_task_timeout_info | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
+| test_staging_background_task_creation_with_timeout_validation | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
+| test_staging_startup_validation_logs_timeout_warnings | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
+| test_staging_background_task_timeout_hierarchy_validation | FAIL failed | 0.000s | test_background_task_timeout_e2e.py |
+
+## Failed Tests Details
+
+### FAILED: test_staging_health_check_includes_background_task_timeout_info
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:68: in test_staging_health_check_includes_background_task_timeout_info
+    response = self.session.get(
+               ^^^^^^^^^^^^
+E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
+
+### FAILED: test_staging_background_task_creation_with_timeout_validation
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:122: in test_staging_background_task_creation_with_timeout_validation
+    response = self.session.post(
+               ^^^^^^^^^^^^
+E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
+
+### FAILED: test_staging_startup_validation_logs_timeout_warnings
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:188: in test_staging_startup_validation_logs_timeout_warnings
+    logs_response = self.session.get(
+                    ^^^^^^^^^^^^
+E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
+
+### FAILED: test_staging_background_task_timeout_hierarchy_validation
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_background_task_timeout_e2e.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_background_task_timeout_e2e.py:247: in test_staging_background_task_timeout_hierarchy_validation
+    config_response = self.session.get(
+                      ^^^^^^^^^^^^
+E   AttributeError: 'TestBackgroundTaskTimeoutE2E' object has no attribute 'session'...
+
 ## Pytest Output Format
 
 ```
+test_background_task_timeout_e2e.py::test_staging_health_check_includes_background_task_timeout_info FAILED
+test_background_task_timeout_e2e.py::test_staging_background_task_creation_with_timeout_validation FAILED
+test_background_task_timeout_e2e.py::test_staging_startup_validation_logs_timeout_warnings FAILED
+test_background_task_timeout_e2e.py::test_staging_background_task_timeout_hierarchy_validation FAILED
 
 ==================================================
-0 passed, 0 failed in 0.29s
+0 passed, 4 failed in 0.13s
 ```
 
 ## Test Coverage Matrix
