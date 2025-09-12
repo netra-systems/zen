@@ -1,6 +1,6 @@
 ---
 description: "Run unit tests"
-argument-hint: "[focus area, defaults to all] [parallel yes or no]"
+argument-hint: "[focus area, defaults to all] [flags, defaults to parallel]"
 ---
 
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
@@ -13,7 +13,7 @@ REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 10 TIMES.
 
 PROCESS INSTRUCTIONS START SNST:
 
-    0) Run unit tests with a focus on ${1 : latest issues}, fast failure, ${2 : parallel flags}
+    0) Run unit tests with a focus on ${1 : latest issues}, fast failure, ${2 : parallel} flags
 
     1) ISSUE SEARCH AND UPDATE OR CREATION: SEARCH GITHUB ISSUES FOR EXISTING ISSUE.
 
@@ -24,7 +24,6 @@ PROCESS INSTRUCTIONS START SNST:
         ELSE: CREATE A NEW GIT ISSUE AND OUTPUT the ISSUE ID here:
 
     2) STATUS UPDATE : 
-
         AUDIT the current codebase and linked PRs (closed and open)
         with FIVE WHYS approach and assess the current state of the issue.
         2.1) Make or UPDATE a comment on the ISSUE with your learnings.
