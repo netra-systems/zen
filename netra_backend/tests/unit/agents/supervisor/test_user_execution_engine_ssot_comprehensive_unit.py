@@ -93,7 +93,8 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             run_id="run_001",
             request_id="req_001",
             websocket_client_id="ws_001",
-            metadata={"test_context": "primary_user", "user_message": "Test optimization request"}
+            agent_context={"test_context": "primary_user", "user_message": "Test optimization request"},
+            audit_metadata={"test_type": "unit_test", "isolation_test": True}
         )
         
         self.secondary_user_context = UserExecutionContext(
@@ -102,18 +103,19 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             run_id="run_002",
             request_id="req_002", 
             websocket_client_id="ws_002",
-            metadata={"test_context": "secondary_user", "user_message": "Another optimization request"}
+            agent_context={"test_context": "secondary_user", "user_message": "Another optimization request"},
+            audit_metadata={"test_type": "unit_test", "isolation_test": True}
         )
         
         # Mock infrastructure components using SSOT mock factory
         self.mock_factory = get_mock_factory()
         
-        # Create mock agent factory
-        self.mock_agent_factory = self.mock_factory.create_agent_factory()
+        # Create mock agent factory (AgentInstanceFactory interface)
+        self.mock_agent_factory = self.mock_factory.create_async_mock()
         self.mock_agent_factory.create_agent_instance = AsyncMock()
         
-        # Create mock WebSocket emitter for user-specific events
-        self.mock_websocket_emitter = self.mock_factory.create_websocket_emitter()
+        # Create mock WebSocket emitter for user-specific events (UserWebSocketEmitter interface)
+        self.mock_websocket_emitter = self.mock_factory.create_async_mock()
         self.mock_websocket_emitter.user_id = self.primary_user_context.user_id
         self.mock_websocket_emitter.thread_id = self.primary_user_context.thread_id
         self.mock_websocket_emitter.run_id = self.primary_user_context.run_id
@@ -212,7 +214,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             run_id="registry",  # Invalid placeholder value
             request_id="req_001",
             websocket_client_id="ws_001",
-            metadata={"test": "placeholder_rejection"}
+            agent_context={"test": "placeholder_rejection"}
         )
         
         # Create execution context with invalid run_id
@@ -253,8 +255,9 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
         )
         
         # Create different mocks for second user to ensure isolation
-        mock_agent_factory_2 = self.mock_factory.create_agent_factory() 
-        mock_websocket_emitter_2 = self.mock_factory.create_websocket_emitter()
+        mock_agent_factory_2 = self.mock_factory.create_async_mock() 
+        mock_agent_factory_2.create_agent_instance = AsyncMock()
+        mock_websocket_emitter_2 = self.mock_factory.create_async_mock()
         mock_websocket_emitter_2.user_id = self.secondary_user_context.user_id
         mock_websocket_emitter_2.notify_agent_started = AsyncMock(return_value=True)
         mock_websocket_emitter_2.notify_agent_thinking = AsyncMock(return_value=True)
@@ -319,7 +322,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.INITIALIZATION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            metadata={"attack_attempt": "user_context_switching"}
+            agent_context={"attack_attempt": "user_context_switching"}
         )
         
         # Act & Assert: Should reject mismatched user context
@@ -366,7 +369,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                 step=PipelineStep.EXECUTION,
                 execution_timestamp=datetime.now(timezone.utc),
                 pipeline_step_num=1,
-                metadata={"message": "Test optimization request"}
+                agent_context={"message": "Test optimization request"}
             )
             
             # Act: Execute agent
@@ -449,7 +452,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                     step=PipelineStep.EXECUTION,
                     execution_timestamp=datetime.now(timezone.utc),
                     pipeline_step_num=1,
-                    metadata={"message": "Optimize my costs using tools"}
+                    agent_context={"message": "Optimize my costs using tools"}
                 )
                 
                 # Act: Execute agent that uses tools
@@ -484,7 +487,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.EXECUTION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            metadata={"message": "This will timeout"}
+            agent_context={"message": "This will timeout"}
         )
         
         with patch('netra_backend.app.agents.supervisor.user_execution_engine.AgentExecutionCore') as mock_core_class:
@@ -546,7 +549,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.EXECUTION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            metadata={"message": "This will fail"}
+            agent_context={"message": "This will fail"}
         )
         
         with patch('netra_backend.app.agents.supervisor.user_execution_engine.AgentExecutionCore') as mock_core_class:
@@ -615,7 +618,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                     step=PipelineStep.EXECUTION,
                     execution_timestamp=datetime.now(timezone.utc),
                     pipeline_step_num=1,
-                    metadata={"message": f"Concurrent request {i}"}
+                    agent_context={"message": f"Concurrent request {i}"}
                 ))
             
             # Act: Execute all agents concurrently
@@ -1237,7 +1240,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                 step=PipelineStep.EXECUTION,
                 execution_timestamp=datetime.now(timezone.utc),
                 pipeline_step_num=1,
-                metadata={"message": "Complete lifecycle test"}
+                agent_context={"message": "Complete lifecycle test"}
             )
             
             result = await engine.execute_agent(execution_context)
