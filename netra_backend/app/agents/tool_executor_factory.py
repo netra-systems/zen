@@ -39,8 +39,8 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.websocket_core import (
     WebSocketEventEmitter,
 )
-# WebSocketEventEmitterFactory is actually UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
+# Import the correct WebSocketEmitterFactory
+from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -139,8 +139,10 @@ class ToolExecutorFactory:
             # Create WebSocket event emitter for this request if manager available
             websocket_bridge = None
             if ws_manager:
-                websocket_emitter = await WebSocketEventEmitterFactory.create_emitter(
-                    user_context, ws_manager
+                websocket_emitter = WebSocketEmitterFactory.create_emitter(
+                    manager=ws_manager,
+                    user_id=user_context.user_id,
+                    context=user_context
                 )
                 # Create adapter for backward compatibility
                 from netra_backend.app.core.tools.unified_tool_dispatcher import WebSocketBridgeAdapter
@@ -217,8 +219,10 @@ class ToolExecutorFactory:
             # Create WebSocket event emitter for this request if manager available
             websocket_emitter = None
             if ws_manager:
-                websocket_emitter = await WebSocketEventEmitterFactory.create_emitter(
-                    user_context, ws_manager
+                websocket_emitter = WebSocketEmitterFactory.create_emitter(
+                    manager=ws_manager,
+                    user_id=user_context.user_id,
+                    context=user_context
                 )
                 logger.debug(f"[U+1F50C] Created WebSocket emitter for {user_context.get_correlation_id()}")
             else:

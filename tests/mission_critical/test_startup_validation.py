@@ -122,6 +122,22 @@ def mock_app():
     """Create a mock FastAPI app with various startup states."""
     app = FastAPI()
     app.state = MagicMock()
+    
+    # Setup database with proper async context manager mock to avoid RuntimeWarnings
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar.return_value = 15  # Expected table count
+    mock_session.execute.return_value = mock_result
+    
+    # Create async context manager mock
+    async_context = AsyncMock()
+    async_context.__aenter__.return_value = mock_session
+    async_context.__aexit__.return_value = None
+    
+    mock_session_factory = MagicMock()
+    mock_session_factory.return_value = async_context
+    app.state.db_session_factory = mock_session_factory
+    
     return app
 
 
@@ -496,8 +512,22 @@ class TestServiceDependencyResolution:
         app = FastAPI()
         app.state = MagicMock()
         
+        # Setup database with proper async context manager mock to avoid RuntimeWarnings
+        mock_session = AsyncMock()
+        mock_result = MagicMock()
+        mock_result.scalar.return_value = 15  # Expected table count
+        mock_session.execute.return_value = mock_result
+        
+        # Create async context manager mock
+        async_context = AsyncMock()
+        async_context.__aenter__.return_value = mock_session
+        async_context.__aexit__.return_value = None
+        
+        mock_session_factory = MagicMock()
+        mock_session_factory.return_value = async_context
+        app.state.db_session_factory = mock_session_factory
+        
         # Setup broken dependency chain - missing Redis
-        app.state.db_session_factory = MagicMock()
         app.state.redis_manager = None  # BROKEN
         app.state.llm_manager = MagicMock()
         

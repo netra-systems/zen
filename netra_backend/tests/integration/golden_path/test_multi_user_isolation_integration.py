@@ -856,7 +856,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
             # Create isolated tool dispatcher for each user using factory
             # First create UserExecutionContext for this user
             user_context_factory = UserExecutionContextFactory()
-            user_context = user_context_factory.create_user_context(
+            user_context = user_context_factory.create_context(
                 user_id=user['id'],
                 request_id=str(uuid.uuid4()),
                 thread_id=str(uuid.uuid4()),

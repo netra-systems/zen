@@ -754,9 +754,11 @@ async def create_full_request_execution_stack(
         result = await executor.execute_agent("MyAgent", state)
     """
     # Create event emitter
-    from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
-    event_emitter = await WebSocketEventEmitterFactory.create_emitter(
-        user_context, websocket_manager
+    from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+    event_emitter = WebSocketEmitterFactory.create_emitter(
+        manager=websocket_manager,
+        user_id=user_context.user_id,
+        context=user_context
     )
     
     # Create executor with event emitter
