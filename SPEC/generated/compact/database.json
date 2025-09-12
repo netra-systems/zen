@@ -234,6 +234,7 @@
     "monitoring_id",
     "moved_to_dlq_at",
     "netra_backend.app.routes.utils.thread_handlers.generate_thread_id",
+    "next_refresh_at",
     "next_retry_at",
     "no_id",
     "normalized_id",

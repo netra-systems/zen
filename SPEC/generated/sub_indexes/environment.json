@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-11T22:48:29.971492",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 209
+    "generated_at": "2025-09-12T05:38:12.379761",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 211
   },
   "literals": {
     "AI21_API_KEY": {
@@ -1176,7 +1176,7 @@
       "value": "NETRA_SERVICE_AUTH_V1",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/core/jwt_handler.py:618"
+        "auth_service/auth_core/core/jwt_handler.py:658"
       ]
     },
     "NEXT_PUBLIC_": {
@@ -1453,7 +1453,8 @@
       "value": "PYTEST_REAL_DATABASE_TEST",
       "category": "environment",
       "locations": [
-        "netra_backend/app/db/clickhouse.py:190"
+        "netra_backend/app/db/clickhouse.py:190",
+        "netra_backend/app/db/clickhouse_backup.py:189"
       ]
     },
     "README_API_KEY": {
@@ -1482,6 +1483,7 @@
       "value": "REDIS_DB",
       "category": "environment",
       "locations": [
+        "netra_backend/app/api/health_checks.py:174",
         "netra_backend/app/core/config_dependencies.py:357",
         "netra_backend/app/core/redis_connection_handler.py:48",
         "netra_backend/app/core/redis_connection_handler.py:201",
@@ -1490,8 +1492,7 @@
         "auth_service/auth_core/redis_config_builder.py:41",
         "scripts/fetch_secrets_to_env.py:125",
         "scripts/fetch_secrets_to_env.py:169",
-        "shared/configuration/central_config_validator.py:88",
-        "shared/configuration/central_config_validator.py:930"
+        "shared/configuration/central_config_validator.py:88"
       ]
     },
     "REDIS_DISABLED": {
@@ -1515,6 +1516,8 @@
       "value": "REDIS_HOST",
       "category": "environment",
       "locations": [
+        "netra_backend/app/api/health_checks.py:171",
+        "netra_backend/app/api/health_checks.py:509",
         "netra_backend/app/core/backend_environment.py:195",
         "netra_backend/app/core/backend_environment.py:202",
         "netra_backend/app/core/backend_environment.py:207",
@@ -1522,9 +1525,7 @@
         "netra_backend/app/core/config_dependencies.py:357",
         "netra_backend/app/core/configuration/staging_validator.py:49",
         "netra_backend/app/core/configuration/staging_validator.py:175",
-        "netra_backend/app/core/environment_constants.py:95",
-        "netra_backend/app/core/network_constants.py:409",
-        "netra_backend/app/core/redis_connection_handler.py:46"
+        "netra_backend/app/core/environment_constants.py:95"
       ]
     },
     "REDIS_MAX_CONNECTIONS": {
@@ -1553,6 +1554,7 @@
       "value": "REDIS_PASSWORD",
       "category": "environment",
       "locations": [
+        "netra_backend/app/api/health_checks.py:173",
         "netra_backend/app/core/auth_constants.py:125",
         "netra_backend/app/core/config_dependencies.py:357",
         "netra_backend/app/core/environment_constants.py:97",
@@ -1561,8 +1563,7 @@
         "scripts/deploy_to_gcp_actual.py:951",
         "scripts/environment_validator.py:247",
         "scripts/fetch_secrets_to_env.py:81",
-        "scripts/fetch_secrets_to_env.py:169",
-        "scripts/staging_environment_fix.py:224"
+        "scripts/fetch_secrets_to_env.py:169"
       ]
     },
     "REDIS_POOL_MAX_CONNECTIONS": {
@@ -1579,6 +1580,7 @@
       "value": "REDIS_PORT",
       "category": "environment",
       "locations": [
+        "netra_backend/app/api/health_checks.py:172",
         "netra_backend/app/core/config_dependencies.py:351",
         "netra_backend/app/core/config_dependencies.py:357",
         "netra_backend/app/core/environment_constants.py:96",
@@ -1587,7 +1589,6 @@
         "netra_backend/app/core/redis_connection_handler.py:200",
         "netra_backend/app/core/redis_connection_handler.py:205",
         "netra_backend/app/core/redis_connection_handler.py:211",
-        "netra_backend/app/routes/health_check.py:390",
         "netra_backend/app/routes/health_check.py:390"
       ]
     },
@@ -1611,6 +1612,8 @@
       "value": "REDIS_REQUIRED",
       "category": "environment",
       "locations": [
+        "netra_backend/app/api/health_checks.py:363",
+        "netra_backend/app/api/health_checks.py:583",
         "netra_backend/app/routes/health.py:365",
         "netra_backend/app/routes/health.py:578",
         "netra_backend/app/routes/health_check.py:207",
@@ -1733,6 +1736,13 @@
         "netra_backend/app/core/environment_validator.py:46"
       ]
     },
+    "SSOT_AUTH_EXCEPTION": {
+      "value": "SSOT_AUTH_EXCEPTION",
+      "category": "environment",
+      "locations": [
+        "netra_backend/app/websocket_core/unified_websocket_auth.py:1421"
+      ]
+    },
     "TEST_AUTH_PORT": {
       "value": "TEST_AUTH_PORT",
       "category": "environment",
@@ -1783,6 +1793,13 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/websocket_core/auth_remediation.py:73"
+      ]
+    },
+    "WEBSOCKET_AUTH_DEBUG": {
+      "value": "WEBSOCKET_AUTH_DEBUG",
+      "category": "environment",
+      "locations": [
+        "netra_backend/app/websocket_core/token_lifecycle_manager.py:170"
       ]
     },
     "WEBSOCKET_AUTH_ERROR": {

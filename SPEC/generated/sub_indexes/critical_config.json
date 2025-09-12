@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-11T22:48:29.969046",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-12T05:38:12.376373",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 11
   },
   "literals": {
@@ -170,6 +170,8 @@
       "value": "REDIS_URL",
       "category": "critical_config",
       "locations": [
+        "netra_backend/app/api/health_checks.py:175",
+        "netra_backend/app/api/health_checks.py:509",
         "netra_backend/app/core/auth_constants.py:124",
         "netra_backend/app/core/config_dependencies.py:340",
         "netra_backend/app/core/configuration/environment_detector.py:265",
@@ -177,9 +179,7 @@
         "netra_backend/app/core/configuration/environment_detector.py:299",
         "netra_backend/app/core/configuration/staging_validator.py:48",
         "netra_backend/app/core/configuration/staging_validator.py:174",
-        "netra_backend/app/core/configuration_validator.py:585",
-        "netra_backend/app/core/environment_constants.py:94",
-        "netra_backend/app/core/environment_validator.py:56"
+        "netra_backend/app/core/configuration_validator.py:585"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     }
