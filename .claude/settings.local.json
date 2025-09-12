@@ -90,7 +90,13 @@
       "Bash(gcloud run revisions describe:*)",
       "Bash(cat:*)",
       "Bash(export NODE_OPTIONS=--max-old-space-size=4096)",
-      "Bash(npx next:*)"
+      "Bash(npx next:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npx next build)",
+      "Bash(gcloud builds log:*)",
+      "Bash(npm install:*)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []

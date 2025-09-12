@@ -419,11 +419,11 @@ class DatabaseManager:
                 engine_kwargs["poolclass"] = NullPool
                 logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling")
             else:
-                # Use QueuePool for better concurrent handling
-                engine_kwargs["poolclass"] = QueuePool
+                # Use AsyncAdaptedQueuePool for better concurrent handling with async engines
+                engine_kwargs["poolclass"] = AsyncAdaptedQueuePool
                 engine_kwargs["pool_size"] = pool_size
                 engine_kwargs["max_overflow"] = max_overflow
-                logger.info(f"[U+1F3CA] Using QueuePool for enhanced concurrency: pool_size={pool_size}, max_overflow={max_overflow}")
+                logger.info(f"[U+1F3CA] Using AsyncAdaptedQueuePool for enhanced async concurrency: pool_size={pool_size}, max_overflow={max_overflow}")
             
             logger.debug("Creating async database engine...")
             primary_engine = create_async_engine(

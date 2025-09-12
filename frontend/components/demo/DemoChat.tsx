@@ -48,6 +48,7 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
   const [activeAgent, setActiveAgent] = useState<string | null>(null)
   const [showOptimization, setShowOptimization] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   
   const templates = getTemplatesForIndustry(industry)
   const agents = initializeAgents()
@@ -60,6 +61,11 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
     const welcomeMessage = createWelcomeMessage(industry)
     setMessages([welcomeMessage])
   }, [industry])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSend = async (): Promise<void> => {
     if (!input.trim() || isProcessing) return
@@ -155,17 +161,22 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
   )
 
   const renderMessageList = () => (
-    <ScrollArea className="flex-1 px-6" ref={scrollAreaRef}>
-      <div className="space-y-4 py-4">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-        
-        {isProcessing && (
-          <ProcessingIndicator agents={agents} activeAgent={activeAgent} />
-        )}
-      </div>
-    </ScrollArea>
+    <div className="flex-1 overflow-hidden relative">
+      <ScrollArea className="h-full px-6">
+        <div className="space-y-4 py-4" ref={scrollAreaRef}>
+          {messages.map((message) => (
+            <MessageBubble key={message.id} message={message} />
+          ))}
+          
+          {isProcessing && (
+            <ProcessingIndicator agents={agents} activeAgent={activeAgent} />
+          )}
+          
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} className="h-1" />
+        </div>
+      </ScrollArea>
+    </div>
   )
 
   const renderMessageInput = () => (
@@ -222,21 +233,12 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = true 
   )
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="h-[600px] flex flex-col">
-          {renderChatHeader()}
-          <CardContent className="flex-1 flex flex-col p-0">
-            {renderMessageList()}
-            {renderMessageInput()}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        {renderTemplatesPanel()}
-        {showOptimization && <OptimizationReadyPanel />}
-      </div>
-    </div>
+    <Card className="h-[600px] flex flex-col overflow-hidden bg-white">
+      {renderChatHeader()}
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
+        {renderMessageList()}
+        {renderMessageInput()}
+      </CardContent>
+    </Card>
   )
 }

@@ -120,21 +120,11 @@ export default function DemoPage() {
 
           {/* Right Column - Chat */}
           <div className="lg:col-span-2">
-            <Card className="bg-white border-gray-200 h-[600px] flex flex-col">
-              <CardHeader className="border-b bg-gray-50">
-                <CardTitle className="text-xl text-gray-900">Chat with Netra AI</CardTitle>
-                <CardDescription>
-                  Ask questions about AI optimization and see our agents in action
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1 p-0">
-                <DemoChat 
-                  industry={selectedIndustry} 
-                  onInteraction={() => {}}
-                  useWebSocket={true}
-                />
-              </CardContent>
-            </Card>
+            <DemoChat 
+              industry={selectedIndustry} 
+              onInteraction={() => {}}
+              useWebSocket={true}
+            />
           </div>
         </div>
       </div>

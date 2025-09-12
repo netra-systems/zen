@@ -27,112 +27,177 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
     """Execute real agent workflow with actual AI processing.
     
     This function:
-    1. Creates proper execution context
+    1. Creates proper execution context with database session
     2. Initializes real supervisor agent
     3. Processes the message through actual agent workflow
     4. Sends real WebSocket events as agents execute
     """
     try:
-        # Create demo user context
-        demo_user_id = f"demo_{connection_id}"
-        thread_id = f"thread_{connection_id}"
-        run_id = f"run_{uuid.uuid4()}"
+        # Create demo user context - use UUID format to avoid placeholder validation issues
+        demo_user_id = f"demo-user-{uuid.uuid4()}"
+        thread_id = f"demo-thread-{uuid.uuid4()}"
+        run_id = f"demo-run-{uuid.uuid4()}"
         
-        # Create user execution context
-        user_context = UserExecutionContext(
-            user_id=demo_user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            session_id=connection_id
-        )
+        # Get database session - required for SupervisorAgent
+        from netra_backend.app.db.database_manager import DatabaseManager
+        db_manager = DatabaseManager()
         
-        # Create WebSocket bridge adapter that implements all required methods
-        class WebSocketAdapter:
-            """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
-            async def send_event(self, event_type: str, data: dict):
-                await websocket.send_json({
-                    "type": event_type,
-                    "timestamp": datetime.utcnow().isoformat(),
-                    **data
-                })
+        # Use async context manager for database session
+        async with db_manager.get_async_session() as db_session:
+            # Create user execution context with proper metadata
+            user_context = UserExecutionContext(
+                user_id=demo_user_id,
+                thread_id=thread_id,
+                run_id=run_id,
+                request_id=str(uuid.uuid4()),  # Use plain UUID format
+                db_session=db_session,
+                websocket_client_id=connection_id,
+                agent_context={"user_request": user_message, "demo_mode": True},
+                audit_metadata={"demo_session": True, "connection_id": connection_id}
+            )
             
-            async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
-                await self.send_event("agent_started", {
-                    "agent": agent_name,
-                    "run_id": run_id,
-                    "message": "Starting AI analysis..."
-                })
+            # Create WebSocket bridge adapter that implements all required methods
+            class WebSocketAdapter:
+                """Adapter to make WebSocket compatible with AgentWebSocketBridge"""
                 
-            async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
-                await self.send_event("agent_thinking", {
-                    "agent": agent_name,
-                    "run_id": run_id,
-                    "message": reasoning or "Analyzing your request..."
-                })
+                async def send_event(self, event_type: str, data: dict):
+                    """Send WebSocket event to client"""
+                    await websocket.send_json({
+                        "type": event_type,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        **data
+                    })
+                    logger.info(f"Demo WebSocket sent {event_type}: {data.get('run_id', 'unknown')}")
                 
-            async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str = "", **kwargs):
-                await self.send_event("tool_executing", {
-                    "agent": agent_name,
-                    "run_id": run_id,
-                    "tool": tool_name,
-                    "message": f"Executing {tool_name}..."
-                })
-                
-            async def notify_tool_completed(self, run_id: str, agent_name: str, tool_name: str = "", result=None, **kwargs):
-                await self.send_event("tool_completed", {
-                    "agent": agent_name,
-                    "run_id": run_id,
-                    "tool": tool_name,
-                    "message": f"Completed {tool_name}"
-                })
-                
-            async def notify_agent_completed(self, run_id: str, agent_name: str, result=None, **kwargs):
-                # Send the actual AI response here
-                response_text = "Analysis completed."
-                if result and isinstance(result, dict):
-                    if "results" in result:
-                        response_text = str(result["results"])
-                    elif "supervisor_result" in result:
-                        response_text = str(result.get("results", "Analysis completed."))
-                elif result:
-                    response_text = str(result)
+                async def notify_agent_started(self, run_id: str, agent_name: str, context=None, **kwargs):
+                    """Send agent started notification"""
+                    await self.send_event("agent_started", {
+                        "agent": agent_name,
+                        "run_id": run_id,
+                        "message": "Starting AI analysis..."
+                    })
                     
-                await self.send_event("agent_completed", {
-                    "agent": agent_name,
-                    "run_id": run_id,
-                    "message": response_text
-                })
-        
-        ws_adapter = WebSocketAdapter()
-        
-        # Initialize WebSocket bridge with the adapter as both websocket_manager and emitter
-        bridge = AgentWebSocketBridge()
-        bridge.websocket_manager = ws_adapter
-        bridge.emitter = ws_adapter
-        
-        # Get LLM manager
-        config = get_config()
-        llm_manager = LLMManager(config)
-        
-        # Import and create supervisor agent
-        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-        supervisor = SupervisorAgent(
-            llm_manager=llm_manager,
-            websocket_bridge=bridge
-        )
-        
-        # Execute the agent workflow (bridge will handle all events automatically)
-        await supervisor.run(
-            user_request=user_message,
-            thread_id=thread_id,
-            user_id=demo_user_id,
-            run_id=run_id
-        )
+                async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
+                    """Send agent thinking notification"""
+                    await self.send_event("agent_thinking", {
+                        "agent": agent_name,
+                        "run_id": run_id,
+                        "message": reasoning or "Analyzing your request..."
+                    })
+                    
+                async def notify_tool_executing(self, run_id: str, tool_name: str, agent_name: Optional[str] = None, parameters=None, **kwargs):
+                    """Send tool executing notification"""
+                    await self.send_event("tool_executing", {
+                        "agent": agent_name or "Agent",
+                        "run_id": run_id,
+                        "tool": tool_name,
+                        "message": f"Executing {tool_name}..."
+                    })
+                    
+                async def notify_tool_completed(self, run_id: str, tool_name: str, result=None, agent_name: Optional[str] = None, **kwargs):
+                    """Send tool completed notification"""
+                    await self.send_event("tool_completed", {
+                        "agent": agent_name or "Agent",
+                        "run_id": run_id,
+                        "tool": tool_name,
+                        "message": f"Completed {tool_name}"
+                    })
+                    
+                async def notify_agent_completed(self, run_id: str, agent_name: str, result=None, **kwargs):
+                    """Send agent completed notification with final result"""
+                    # Extract the response text from the result
+                    response_text = "Analysis completed."
+                    if result and isinstance(result, dict):
+                        # Look for the actual response data
+                        if "data" in result and isinstance(result["data"], dict):
+                            result_data = result["data"]
+                            if "results" in result_data:
+                                response_text = str(result_data["results"])
+                            elif "reporting" in result_data:
+                                response_text = str(result_data["reporting"])
+                        elif "results" in result:
+                            response_text = str(result["results"])
+                    elif result:
+                        response_text = str(result)
+                        
+                    await self.send_event("agent_completed", {
+                        "agent": agent_name,
+                        "run_id": run_id,
+                        "message": response_text
+                    })
+                    
+                async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
+                    """Send agent error notification"""
+                    await self.send_event("agent_error", {
+                        "agent": agent_name,
+                        "run_id": run_id,
+                        "error": error,
+                        "message": f"Error in {agent_name}: {error}"
+                    })
+            
+            # Create a custom bridge that uses our WebSocket adapter
+            class DemoWebSocketBridge(AgentWebSocketBridge):
+                """Demo WebSocket bridge that sends events directly to the demo WebSocket"""
+                
+                def __init__(self, websocket_adapter):
+                    super().__init__(user_context=user_context)
+                    self.websocket_adapter = websocket_adapter
+                
+                async def notify_agent_started(self, run_id: str, agent_name: str, **kwargs):
+                    return await self.websocket_adapter.notify_agent_started(run_id, agent_name, **kwargs)
+                    
+                async def notify_agent_thinking(self, run_id: str, agent_name: str, reasoning: str = "", **kwargs):
+                    return await self.websocket_adapter.notify_agent_thinking(run_id, agent_name, reasoning, **kwargs)
+                    
+                async def notify_tool_executing(self, run_id: str, tool_name: str, **kwargs):
+                    return await self.websocket_adapter.notify_tool_executing(run_id, tool_name, **kwargs)
+                    
+                async def notify_tool_completed(self, run_id: str, tool_name: str, **kwargs):
+                    return await self.websocket_adapter.notify_tool_completed(run_id, tool_name, **kwargs)
+                    
+                async def notify_agent_completed(self, run_id: str, agent_name: str, **kwargs):
+                    return await self.websocket_adapter.notify_agent_completed(run_id, agent_name, **kwargs)
+                    
+                async def notify_agent_error(self, run_id: str, agent_name: str, error: str, **kwargs):
+                    return await self.websocket_adapter.notify_agent_error(run_id, agent_name, error, **kwargs)
+            
+            ws_adapter = WebSocketAdapter()
+            bridge = DemoWebSocketBridge(ws_adapter)
+            
+            # Get LLM manager with user context
+            llm_manager = LLMManager(user_context)
+            
+            # Import and create supervisor agent using SSOT pattern
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
+            supervisor = SupervisorAgent(
+                llm_manager=llm_manager,
+                websocket_bridge=bridge
+            )
+                
+            # Execute using SSOT execute method with proper UserExecutionContext
+            result = await supervisor.execute(user_context, stream_updates=True)
+            
+            logger.info(f"Demo agent execution completed: {result}")
+            
+            # Database session will be automatically closed by context manager
         
     except Exception as e:
-        logger.error(f"Real agent execution failed: {e}")
-        # Fall back to simulator if real execution fails
-        await DemoAgentSimulator.simulate_agent_execution(websocket, user_message)
+        logger.error(f"Real agent execution failed: {e}", exc_info=True)
+        
+        # Send error notification to user
+        try:
+            await websocket.send_json({
+                "type": "agent_error",
+                "timestamp": datetime.utcnow().isoformat(),
+                "error": str(e),
+                "message": "Sorry, there was an issue processing your request. Please try again."
+            })
+        except Exception as ws_error:
+            logger.error(f"Failed to send error notification: {ws_error}")
+        
+        # Don't fall back to simulator - we want to fix real agent execution
+        # If you want fallback for production, you can uncomment the next line:
+        # await DemoAgentSimulator.simulate_agent_execution(websocket, user_message)
 
 class DemoAgentSimulator:
     """Simulates agent execution with proper event emissions"""
