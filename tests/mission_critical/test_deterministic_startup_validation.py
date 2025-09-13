@@ -153,7 +153,21 @@ class TestDeterministicStartupSequence:
     async def test_startup_timeout_prevention(self):
         """Test that startup doesn't hang indefinitely."""
         try:
+            import os
             from netra_backend.app.smd import StartupOrchestrator
+            
+            # Add environment isolation for external services
+            original_env = {}
+            env_vars_to_set = {
+                'DEV_MODE_DISABLE_CLICKHOUSE': 'true',
+                'CLICKHOUSE_ENABLED': 'false',
+                'DISABLE_EXTERNAL_SERVICES': 'true'
+            }
+            
+            # Set test environment variables
+            for key, value in env_vars_to_set.items():
+                original_env[key] = os.environ.get(key)
+                os.environ[key] = value
             
             app = FastAPI()
             app.state = MagicMock()
@@ -185,6 +199,13 @@ class TestDeterministicStartupSequence:
             # Verify startup completed within reasonable time
             startup_time = end_time - start_time
             assert startup_time < 2.0, f"Startup took too long: {startup_time}s"
+
+            # Restore original environment variables
+            for key, original_value in original_env.items():
+                if original_value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = original_value
 
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
@@ -404,6 +425,21 @@ class TestStartupResourceManagement:
             import gc
             import psutil
             import os
+            # ✅ FIXED: Import outside loop to prevent import deadlock (Issue #601)
+            from netra_backend.app.smd import StartupOrchestrator
+
+            # ✅ FIXED: Add environment isolation for external services (Issue #601)
+            original_env = {}
+            env_vars_to_set = {
+                'DEV_MODE_DISABLE_CLICKHOUSE': 'true',
+                'CLICKHOUSE_ENABLED': 'false',
+                'DISABLE_EXTERNAL_SERVICES': 'true'
+            }
+            
+            # Set test environment variables
+            for key, value in env_vars_to_set.items():
+                original_env[key] = os.environ.get(key)
+                os.environ[key] = value
 
             # Get initial memory usage
             process = psutil.Process(os.getpid())
@@ -412,7 +448,6 @@ class TestStartupResourceManagement:
             # Run startup multiple times
             for i in range(5):
                 try:
-                    from netra_backend.app.smd import StartupOrchestrator
                     
                     app = FastAPI()
                     app.state = MagicMock()
@@ -436,7 +471,8 @@ class TestStartupResourceManagement:
                         await asyncio.sleep(0.001)
                     orchestrator._run_comprehensive_validation = mock_validation
 
-                    await orchestrator.initialize_system()
+                    # ✅ FIXED: Add timeout protection (Issue #601)
+                    await asyncio.wait_for(orchestrator.initialize_system(), timeout=30.0)
 
                     # Force garbage collection
                     gc.collect()
@@ -452,5 +488,15 @@ class TestStartupResourceManagement:
             max_allowed_increase = 50 * 1024 * 1024  # 50MB
             assert memory_increase < max_allowed_increase, f"Memory leak detected: {memory_increase / 1024 / 1024:.2f}MB increase"
 
+            # ✅ FIXED: Restore original environment variables (Issue #601)
+            for key, original_value in original_env.items():
+                if original_value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = original_value
+
         except ImportError as e:
             pytest.skip(f"Required modules not available: {e}")
+        except asyncio.TimeoutError:
+            # ✅ FIXED: Handle timeout gracefully (Issue #601)
+            pytest.fail("Memory leak test timed out - possible infinite loop or deadlock")
