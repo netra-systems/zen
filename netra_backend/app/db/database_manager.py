@@ -45,6 +45,14 @@ from netra_backend.app.db.transaction_errors import (
     DeadlockError, ConnectionError, TransactionError, TimeoutError, 
     PermissionError, SchemaError, classify_error, is_retryable_error
 )
+from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
+
+# Expose specific exception classes for external detection (Issue #374)
+DatabaseConnectionError = ConnectionError
+DatabaseTimeoutError = TimeoutError
+DatabasePermissionError = PermissionError
+DatabaseDeadlockError = DeadlockError
+DatabaseSchemaError = SchemaError
 
 logger = logging.getLogger(__name__)
 
@@ -178,9 +186,22 @@ class TransactionEventCoordinator:
                 else:
                     failed_count += 1
                     
-            except Exception as e:
+            except (ConnectionError, TimeoutError) as e:
+                # Issue #374: Enhanced WebSocket communication errors
                 failed_count += 1
-                logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}' after commit: {e}")
+                logger.error(f" FAIL:  WebSocket communication failed for event '{event.event_type}' after commit: {type(e).__name__}: {e}")
+            except ValueError as e:
+                # Issue #374: Invalid event data or configuration
+                failed_count += 1
+                logger.error(f" FAIL:  Invalid WebSocket event data for '{event.event_type}' after commit: {e}")
+            except RuntimeError as e:
+                # Issue #374: WebSocket manager not available or not configured
+                failed_count += 1
+                logger.error(f" FAIL:  WebSocket runtime error for event '{event.event_type}' after commit: {e}")
+            except Exception as e:
+                # Issue #374: Fallback for unexpected WebSocket errors
+                failed_count += 1
+                logger.error(f" FAIL:  Unexpected WebSocket event failure '{event.event_type}' after commit: {type(e).__name__}: {e}")
                 
         self.coordination_metrics["events_sent_after_commit"] += sent_count
         self.coordination_metrics["events_failed_after_commit"] += failed_count
@@ -228,8 +249,18 @@ class TransactionEventCoordinator:
         # Send rollback notification to affected users
         try:
             await self._send_rollback_notification(rollback_notification, affected_users)
+        except (ConnectionError, TimeoutError) as e:
+            # Issue #374: WebSocket communication errors during rollback notification
+            logger.error(f" FAIL:  WebSocket communication failed during rollback notification: {type(e).__name__}: {e}")
+        except ValueError as e:
+            # Issue #374: Invalid notification data or configuration
+            logger.error(f" FAIL:  Invalid rollback notification data: {e}")
+        except RuntimeError as e:
+            # Issue #374: WebSocket manager not available during rollback
+            logger.error(f" FAIL:  WebSocket manager unavailable for rollback notification: {e}")
         except Exception as e:
-            logger.error(f" FAIL:  Failed to send rollback notification: {e}")
+            # Issue #374: Fallback for unexpected rollback notification errors
+            logger.error(f" FAIL:  Unexpected rollback notification failure: {type(e).__name__}: {e}")
             
         return rollback_notification
         
@@ -270,8 +301,21 @@ class TransactionEventCoordinator:
             logger.debug(f"[U+1F4E4] Successfully sent WebSocket event '{event.event_type}' (user: {event.user_id})")
             return True
             
+        except (ConnectionError, TimeoutError) as e:
+            # Issue #374: WebSocket communication errors
+            logger.error(f" FAIL:  WebSocket communication failed for event '{event.event_type}': {type(e).__name__}: {e}")
+            return False
+        except AttributeError as e:
+            # Issue #374: WebSocket manager missing required methods
+            logger.error(f" FAIL:  WebSocket manager method missing for event '{event.event_type}': {e}")
+            return False
+        except ValueError as e:
+            # Issue #374: Invalid event data
+            logger.error(f" FAIL:  Invalid WebSocket event data for '{event.event_type}': {e}")
+            return False
         except Exception as e:
-            logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}': {type(e).__name__}: {e}")
+            # Issue #374: Fallback for unexpected WebSocket send errors
+            logger.error(f" FAIL:  Unexpected WebSocket send failure for event '{event.event_type}': {type(e).__name__}: {e}")
             return False
             
     async def _send_rollback_notification(self, notification: RollbackNotification, affected_users: List[str]):
@@ -300,8 +344,18 @@ class TransactionEventCoordinator:
                         user_id, "transaction_rollback", rollback_event_data
                     )
                 logger.debug(f"[U+1F4E4] Sent rollback notification to user {user_id}")
+            except (ConnectionError, TimeoutError) as e:
+                # Issue #374: WebSocket communication errors for user notification
+                logger.error(f" FAIL:  WebSocket communication failed for rollback notification to user {user_id}: {type(e).__name__}: {e}")
+            except AttributeError as e:
+                # Issue #374: WebSocket manager missing send_to_user method
+                logger.error(f" FAIL:  WebSocket manager method missing for rollback notification to user {user_id}: {e}")
+            except ValueError as e:
+                # Issue #374: Invalid user ID or notification data
+                logger.error(f" FAIL:  Invalid rollback notification data for user {user_id}: {e}")
             except Exception as e:
-                logger.error(f" FAIL:  Failed to send rollback notification to user {user_id}: {e}")
+                # Issue #374: Fallback for unexpected rollback notification errors
+                logger.error(f" FAIL:  Unexpected rollback notification failure for user {user_id}: {type(e).__name__}: {e}")
                 
     def get_coordination_metrics(self) -> Dict[str, Any]:
         """Get current coordination metrics for monitoring.
@@ -442,12 +496,55 @@ class DatabaseManager:
             init_duration = time.time() - init_start_time
             logger.info(f" PASS:  DatabaseManager initialized successfully in {init_duration:.3f}s")
             
-        except Exception as e:
+        except (ConnectionError, OperationalError) as e:
+            # Issue #374: Database connection and operational errors during initialization
             init_duration = time.time() - init_start_time
-            logger.critical(f"[U+1F4A5] CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
-            logger.error(f"Database connection failure details: {type(e).__name__}: {str(e)}")
+            classified_error = classify_error(e)
+            logger.critical(f"[U+1F4A5] CRITICAL: Database connection failed during initialization after {init_duration:.3f}s")
+            logger.error(f"Database connection error: {type(classified_error).__name__}: {str(classified_error)}")
+            logger.error(f"Check database server availability, network connectivity, and credentials")
             logger.error(f"This will prevent all database operations including user data persistence")
+            raise classified_error
+        except PermissionError as e:
+            # Issue #374: Database permission/authentication errors
+            init_duration = time.time() - init_start_time
+            logger.critical(f"[U+1F4A5] CRITICAL: Database permission denied during initialization after {init_duration:.3f}s")
+            logger.error(f"Database permission error: {e}")
+            logger.error(f"Check database credentials, user permissions, and authentication configuration")
             raise
+        except ValueError as e:
+            # Issue #374: Invalid database URL or configuration
+            init_duration = time.time() - init_start_time
+            logger.critical(f"[U+1F4A5] CRITICAL: Invalid database configuration during initialization after {init_duration:.3f}s")
+            logger.error(f"Database configuration error: {e}")
+            logger.error(f"Check DATABASE_URL format and environment variables")
+            raise
+        except Exception as e:
+            # Issue #374: Fallback for unexpected initialization errors
+            init_duration = time.time() - init_start_time
+            classified_error = classify_error(e)
+            logger.critical(f"[U+1F4A5] CRITICAL: Unexpected database initialization failure after {init_duration:.3f}s")
+            logger.error(f"Database initialization error: {type(e).__name__}: {str(e)}")
+            logger.error(f"This will prevent all database operations including user data persistence")
+            
+            # Provide specific diagnostic context based on error type
+            if isinstance(classified_error, ConnectionError):
+                logger.error("DIAGNOSIS: Network connectivity or database server availability issue")
+                logger.error("ACTION: Check database server status, network connectivity, and connection parameters")
+            elif isinstance(classified_error, PermissionError):
+                logger.error("DIAGNOSIS: Database authentication or authorization failure")
+                logger.error("ACTION: Verify database credentials, user permissions, and authentication configuration")
+            elif isinstance(classified_error, TimeoutError):
+                logger.error("DIAGNOSIS: Database connection timeout - server may be overloaded or unreachable")
+                logger.error("ACTION: Check database server load, network latency, and timeout settings")
+            elif isinstance(classified_error, SchemaError):
+                logger.error("DIAGNOSIS: Database schema or configuration issue")
+                logger.error("ACTION: Verify database exists, schema is correct, and migrations are applied")
+            else:
+                logger.error("DIAGNOSIS: Unknown database initialization error")
+                logger.error("ACTION: Review database configuration and server logs for more details")
+            
+            raise classified_error
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
         """Get database engine by name with auto-initialization safety.
@@ -522,8 +619,17 @@ class DatabaseManager:
                 if not context_valid:
                     logger.warning(f"Invalid user context for session: user_id={user_id}, thread_id={thread_id}")
                     self._pool_stats['context_isolation_violations'] += 1
+            except AttributeError as e:
+                # Issue #374: User context missing required attributes
+                logger.error(f"User context missing required attributes: {e}")
+                self._pool_stats['context_isolation_violations'] += 1
+            except ValueError as e:
+                # Issue #374: Invalid user context data
+                logger.error(f"Invalid user context data: {e}")
+                self._pool_stats['context_isolation_violations'] += 1
             except Exception as e:
-                logger.error(f"Error extracting user context: {e}")
+                # Issue #374: Unexpected user context extraction error
+                logger.error(f"Unexpected user context extraction error: {type(e).__name__}: {e}")
                 self._pool_stats['context_isolation_violations'] += 1
         
         session_id = f"sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
@@ -864,9 +970,31 @@ class DatabaseManager:
             
         except Exception as e:
             total_duration = time.time() - health_check_start
+            
+            # ISSUE #374 FIX: Enhanced health check exception classification
+            classified_error = classify_error(e)
+            
             logger.critical(f"[U+1F4A5] Database health check FAILED for {engine_name} after {total_duration:.3f}s")
-            logger.error(f"Health check error details: {type(e).__name__}: {str(e)}")
+            logger.error(f"Health check error details: {type(classified_error).__name__}: {str(classified_error)}")
             logger.error(f"This indicates database connectivity issues that will affect user operations")
+            
+            # Provide specific diagnostic guidance based on error type
+            if isinstance(classified_error, ConnectionError):
+                logger.error("HEALTH DIAGNOSIS: Database connection lost or server unavailable")
+                logger.error("IMPACT: All user operations will fail until connectivity is restored")
+                logger.error("ACTION: Check database server status and network connectivity immediately")
+            elif isinstance(classified_error, TimeoutError):
+                logger.error("HEALTH DIAGNOSIS: Database queries timing out - possible performance degradation")
+                logger.error("IMPACT: User operations may fail or experience significant delays")
+                logger.error("ACTION: Check database server load and query performance")
+            elif isinstance(classified_error, PermissionError):
+                logger.error("HEALTH DIAGNOSIS: Database access permissions have changed")
+                logger.error("IMPACT: Authentication-related operations will fail")
+                logger.error("ACTION: Verify database user permissions and credentials")
+            else:
+                logger.error("HEALTH DIAGNOSIS: Unknown database health issue")
+                logger.error("IMPACT: Unpredictable database behavior may affect users")
+                logger.error("ACTION: Review database logs and consider restart")
             
             return {
                 "status": "unhealthy",

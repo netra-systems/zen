@@ -1230,11 +1230,25 @@ class MessageRouter:
         Args:
             handler: The message handler to insert
             index: Position to insert at in custom handlers (0 = highest precedence, default)
+            
+        Raises:
+            TypeError: If handler does not implement the MessageHandler protocol
         """
+        # CRITICAL FIX: Protocol validation to prevent raw function registration
+        # This prevents the 'function' object has no attribute 'can_handle' error
+        if not self._validate_handler_protocol(handler):
+            handler_type = type(handler).__name__
+            raise TypeError(
+                f"Handler {handler_type} does not implement MessageHandler protocol. "
+                f"Handler must have 'can_handle' and 'handle_message' methods. "
+                f"Raw functions are not supported - use a proper handler class instead."
+            )
+        
         try:
             self.custom_handlers.insert(index, handler)
             logger.info(f"Inserted custom handler {handler.__class__.__name__} at position {index}")
         except IndexError:
+            # CRITICAL FIX: Don't bypass validation on fallback append
             self.custom_handlers.append(handler)
             logger.warning(f"Invalid index {index}, appended {handler.__class__.__name__} to end of custom handlers")
 

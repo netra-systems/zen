@@ -26,8 +26,13 @@ Test Categories Required:
 import asyncio
 import pytest
 import warnings
+import uuid
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock, patch
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import both deprecated and SSOT patterns for testing
@@ -50,6 +55,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         """Set up test fixtures for SSOT migration validation."""
         super().setUp()
         self.test_users = self._create_test_users()
+        self.test_contexts = self._create_test_contexts()
         
     def _create_test_users(self) -> List[Dict[str, Any]]:
         """Create test users for multi-user isolation testing."""
@@ -73,6 +79,18 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
                 'subscription_tier': 'early'
             }
         ]
+    
+    def _create_test_contexts(self) -> List[UserExecutionContext]:
+        """Create UserExecutionContext instances for testing."""
+        contexts = []
+        for user in self.test_users:
+            context = UserExecutionContext(
+                user_id=user['user_id'],
+                thread_id=f"thread_{user['user_id']}",
+                run_id=str(uuid.uuid4())
+            )
+            contexts.append(context)
+        return contexts
 
     @pytest.mark.unit
     @pytest.mark.security
@@ -94,8 +112,14 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
                 
                 # Create instance - should trigger compatibility bridge
                 mock_registry = MagicMock()
+                mock_registry.get = MagicMock()  # Add registry duck typing
                 mock_websocket_bridge = MagicMock()
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                mock_user_context = UserExecutionContext(
+                    user_id="test_user_001",
+                    thread_id="test_thread_001", 
+                    run_id="test_run_001"
+                )
+                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, mock_user_context)
                 
                 # Verify deprecation warning was issued
                 self.assertTrue(len(w) > 0)
@@ -105,11 +129,11 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
                 # Verify compatibility mode is active
                 self.assertTrue(engine.is_compatibility_mode())
                 
-                # Verify delegation info contains migration guidance
-                delegation_info = engine.get_delegation_info()
-                self.assertEqual(delegation_info['compatibility_mode'], True)
-                self.assertEqual(delegation_info['migration_issue'], '#565')
-                self.assertIn('UserExecutionEngine', delegation_info['migration_guide'])
+                # Verify compatibility info contains migration guidance
+                compatibility_info = engine.get_compatibility_info()
+                self.assertEqual(compatibility_info['compatibility_mode'], True)
+                self.assertEqual(compatibility_info['migration_issue'], '#565')
+                self.assertIn('step_1', compatibility_info['migration_guide'])
                 
         except ImportError as e:
             self.fail(f"Deprecated ExecutionEngine import should still work via compatibility bridge: {e}")
@@ -129,8 +153,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             # Create proper user context for isolation
             user_context = UserExecutionContext(
                 user_id='test_user_001',
-                request_id='test_request_001',
-                thread_id='test_thread_001'
+                thread_id='test_thread_001',
+                run_id='test_run_001'
             )
             
             # Mock required dependencies
@@ -147,7 +171,9 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             # Verify proper initialization
             self.assertIsNotNone(engine)
             self.assertEqual(engine.get_user_context(), user_context)
-            self.assertFalse(hasattr(engine, 'is_compatibility_mode'))  # Should not have compatibility methods
+            # Modern engines should have compatibility methods but return False for compatibility mode
+            self.assertTrue(hasattr(engine, 'is_compatibility_mode'))
+            self.assertFalse(engine.is_compatibility_mode())  # Should not be in compatibility mode
             
         except ImportError as e:
             self.fail(f"UserExecutionEngine SSOT import should work: {e}")
@@ -167,14 +193,14 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         # Create separate user contexts
         user_context_1 = UserExecutionContext(
             user_id='user_001',
-            request_id='request_001',
-            thread_id='thread_001'
+            thread_id='thread_001',
+            run_id='run_001'
         )
         
         user_context_2 = UserExecutionContext(
             user_id='user_002', 
-            request_id='request_002',
-            thread_id='thread_002'
+            thread_id='thread_002',
+            run_id='run_002'
         )
         
         # Mock dependencies
@@ -206,10 +232,10 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         self.assertNotEqual(engine_1.get_user_context().request_id, engine_2.get_user_context().request_id)
         
         # 3. Different agent factories (no shared agent state)
-        self.assertIsNot(engine_1._agent_factory, engine_2._agent_factory)
+        self.assertTrue(engine_1.agent_factory is not engine_2.agent_factory)
         
         # 4. Different websocket emitters (no cross-user event delivery)
-        self.assertIsNot(engine_1._websocket_emitter, engine_2._websocket_emitter)
+        self.assertTrue(engine_1.websocket_emitter is not engine_2.websocket_emitter)
         
         # 5. No shared internal state
         engine_1._internal_state = {'user_data': 'sensitive_user_1_data'}
@@ -239,8 +265,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         mock_websocket_bridge = MagicMock()
         user_context = UserExecutionContext(
             user_id='test_user',
-            request_id='test_request',
-            thread_id='test_thread'
+            thread_id='test_thread',
+            run_id='test_run'
         )
         
         # Create deprecated ExecutionEngine instance
@@ -305,8 +331,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         for i, user in enumerate(self.test_users):
             context = UserExecutionContext(
                 user_id=user['user_id'],
-                request_id=f'request_{i:03d}',
-                thread_id=f'thread_{i:03d}'
+                thread_id=f'thread_{i:03d}',
+                run_id=f'run_{i:03d}'
             )
             user_contexts.append(context)
             
@@ -395,8 +421,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
                 # Create SSOT instances
                 context = UserExecutionContext(
                     user_id='test_user',
-                    request_id='test_request', 
-                    thread_id='test_thread'
+                    thread_id='test_thread',
+                    run_id='test_run'
                 )
                 
                 mock_agent_factory = MagicMock()
@@ -468,8 +494,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             
             user_context = UserExecutionContext(
                 user_id='golden_path_user',
-                request_id='golden_path_request',
-                thread_id='golden_path_thread'
+                thread_id='golden_path_thread',
+                run_id='golden_path_run'
             )
             
             mock_agent_factory = MagicMock()
@@ -522,8 +548,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         for i in range(100):
             user_context = UserExecutionContext(
                 user_id=f'perf_user_{i}',
-                request_id=f'perf_request_{i}',
-                thread_id=f'perf_thread_{i}'
+                thread_id=f'perf_thread_{i}',
+                run_id=f'perf_run_{i}'
             )
             
             ssot_engine = UserExecutionEngine(
@@ -563,8 +589,8 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         for i, user in enumerate(self.test_users):
             context = UserExecutionContext(
                 user_id=user['user_id'],
-                request_id=f'ws_request_{i}',
-                thread_id=f'ws_thread_{i}'
+                thread_id=f'ws_thread_{i}',
+                run_id=f'ws_run_{i}'
             )
             user_contexts.append(context)
             

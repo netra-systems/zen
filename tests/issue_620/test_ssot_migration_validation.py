@@ -578,9 +578,9 @@ class TestUserExecutionEngineSpecific(SSotAsyncTestCase):
             
             # Test proper constructor
             engine = UserExecutionEngine(
-                context=user_context,
-                agent_factory=mock_agent_factory,
-                websocket_emitter=mock_websocket_emitter
+                user_context,
+                mock_agent_factory,
+                mock_websocket_emitter
             )
             
             # Validate initialization
