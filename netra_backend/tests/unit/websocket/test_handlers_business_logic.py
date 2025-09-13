@@ -71,6 +71,7 @@ class TestBaseMessageHandler(SSotBaseTestCase):
     
     def setup_method(self):
         """Set up test fixtures."""
+        super().setup_method()
         self.handler = BaseMessageHandler([MessageType.PING, MessageType.PONG])
         
     def test_can_handle_supported_types(self):

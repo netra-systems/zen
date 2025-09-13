@@ -59,7 +59,7 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
         self.enterprise_user_id = "enterprise-user-999"
 
         # Create test user context for proper isolation
-        from shared.user_context.types import UserExecutionContext
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
         self.test_user_context = UserExecutionContext(
             user_id=self.regular_user_id,
             request_id="test-request-123",
