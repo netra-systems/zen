@@ -149,8 +149,8 @@ class TestIssue449UvicornMiddlewareFailures(SSotBaseTestCase):
     the issue exists. Each test isolates a specific uvicorn failure pattern.
     """
     
-    def setUp(self):
-        super().setUp()
+    def setup_method(self, method=None):
+        super().setup_method(method)
         self.conflict_simulator = UvicornMiddlewareConflictSimulator()
         self.mock_uvicorn_config = {
             "host": "127.0.0.1",
@@ -160,6 +160,7 @@ class TestIssue449UvicornMiddlewareFailures(SSotBaseTestCase):
             "ws_ping_timeout": 20.0,
             "ws_max_size": 16 * 1024 * 1024
         }
+    
     
     def test_uvicorn_protocol_transition_failure(self):
         """
@@ -318,9 +319,13 @@ class TestIssue449UvicornMiddlewareFailures(SSotBaseTestCase):
             # ASSERTION THAT SHOULD FAIL: all ASGI versions should work
             if version == "2.0":
                 # ASGI 2.0 should be supported but often fails in uvicorn
-                with self.assertRaises(KeyError):
+                try:
                     # Simulate uvicorn trying to access ASGI 3.0 fields in 2.0 scope
                     _ = websocket_scope["asgi"]["spec_version"]  # Only exists in ASGI 3.0+
+                    self.fail("ASGI 2.0 scope should not have spec_version field")
+                except KeyError:
+                    # Expected for ASGI 2.0 - this shows the compatibility issue
+                    pass
     
     def test_uvicorn_websocket_subprotocol_negotiation_failure(self):
         """

@@ -18,6 +18,7 @@ import asyncio
 import pytest
 import time
 import random
+import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any, Optional
 from unittest.mock import Mock, patch
@@ -30,6 +31,11 @@ class TestWebSocketHandshakeRaceConditionsCloudRun(SSotAsyncTestCase):
     
     This test MUST FAIL before consolidation to prove race conditions exist.
     """
+    
+    def setup_method(self, method):
+        """Set up test infrastructure."""
+        super().setup_method(method)
+        self.logger = logging.getLogger(__name__)
 
     @pytest.mark.expected_to_fail
     @pytest.mark.phase_1_pre_consolidation

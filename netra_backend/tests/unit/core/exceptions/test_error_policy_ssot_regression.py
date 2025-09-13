@@ -229,7 +229,7 @@ class TestErrorPolicySsotRegressionPrevention(SSotBaseTestCase):
         if consistency_violations:
             violation_details = "\n".join([f"  - {violation}" for violation in consistency_violations])
 
-            self.fail(
+            assert False, (
                 f"BEHAVIOR CONSISTENCY VIOLATIONS: Environment detection behavior changed after SSOT migration.\n"
                 f"Violations detected ({len(consistency_violations)}/{total_cases}):\n{violation_details}\n\n"
                 f"Consistency Rate: {consistent_cases}/{total_cases} ({(consistent_cases/total_cases)*100:.1f}%)\n"
@@ -391,7 +391,7 @@ class TestErrorPolicySsotRegressionPrevention(SSotBaseTestCase):
         if compatibility_violations:
             violation_details = "\n".join([f"  - {violation}" for violation in compatibility_violations])
 
-            self.fail(
+            assert False, (
                 f"BACKWARD COMPATIBILITY VIOLATIONS: Complex environment detection scenarios broken after SSOT migration.\n"
                 f"Violations detected ({len(compatibility_violations)}/{total_scenarios}):\n{violation_details}\n\n"
                 f"Compatibility Rate: {compatible_scenarios}/{total_scenarios} ({(compatible_scenarios/total_scenarios)*100:.1f}%)\n\n"
@@ -560,7 +560,7 @@ class TestErrorPolicySsotRegressionPrevention(SSotBaseTestCase):
         if golden_path_violations:
             violation_details = "\n".join([f"  - {violation}" for violation in golden_path_violations])
 
-            self.fail(
+            assert False, (
                 f"GOLDEN PATH FUNCTIONALITY VIOLATIONS: Critical business functionality broken after SSOT migration.\n"
                 f"Violations detected ({len(golden_path_violations)}):\n{violation_details}\n\n"
                 f"Golden Path Success Rate: {working_scenarios}/{total_scenarios} ({(working_scenarios/total_scenarios)*100:.1f}%)\n\n"
@@ -688,7 +688,7 @@ class TestErrorPolicySsotRegressionPrevention(SSotBaseTestCase):
                 for v in ssot_violations
             ])
 
-            self.fail(
+            assert False, (
                 f"SSOT REGRESSION DETECTED: ErrorPolicy contains {len(ssot_violations)} SSOT violations.\n"
                 f"Violations found:\n{violation_details}\n\n"
                 f"Compliance Score: {ssot_compliance_metrics['compliance_score']:.1f}%\n"

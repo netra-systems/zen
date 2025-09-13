@@ -142,7 +142,7 @@ class TestErrorPolicySsotCompliance(SSotBaseTestCase):
                 for call in os_getenv_calls
             ])
 
-            self.fail(
+            assert False, (
                 f"SSOT VIOLATION: ErrorPolicy contains {len(os_getenv_calls)} direct os.getenv() calls.\n"
                 f"ErrorPolicy MUST use IsolatedEnvironment.get() instead of direct os.getenv().\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -205,7 +205,7 @@ class TestErrorPolicySsotCompliance(SSotBaseTestCase):
 
         # ASSERTION: ErrorPolicy should work seamlessly with IsolatedEnvironment
         if direct_os_usage_detected:
-            self.fail(
+            assert False, (
                 "SSOT VIOLATION: ErrorPolicy is not compatible with IsolatedEnvironment.\n"
                 "This indicates direct os.getenv() usage that bypasses SSOT patterns.\n\n"
                 "Required Remediation:\n"
@@ -296,7 +296,7 @@ class TestErrorPolicySsotCompliance(SSotBaseTestCase):
         if violations_found:
             violation_details = "\n".join([f"  - {violation}" for violation in violations_found])
 
-            self.fail(
+            assert False, (
                 f"SSOT PATTERN VIOLATIONS: ErrorPolicy does not follow SSOT compliance patterns.\n"
                 f"Violations detected:\n{violation_details}\n\n"
                 f"This indicates ErrorPolicy is using direct os.getenv() instead of IsolatedEnvironment.\n\n"

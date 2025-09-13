@@ -18,15 +18,15 @@ even when Docker infrastructure is unavailable.
 import pytest
 import json
 import os
+import unittest
 from unittest.mock import Mock, patch, MagicMock
 from urllib.parse import urlparse
 
 # Import WebSocket components for validation
 from shared.isolated_environment import IsolatedEnvironment
-from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestWebSocketConfigurationValidation(SSotBaseTestCase):
+class TestWebSocketConfigurationValidation(unittest.TestCase):
     """Validate WebSocket configuration without service dependencies."""
 
     def setUp(self):
