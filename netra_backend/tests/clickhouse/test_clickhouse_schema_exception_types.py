@@ -30,7 +30,9 @@ from sqlalchemy.exc import OperationalError, ProgrammingError, IntegrityError
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.db.clickhouse_schema import ClickHouseTraceSchema
 from netra_backend.app.db.transaction_errors import (
-    TransactionError, classify_error
+    TransactionError, classify_error, TableCreationError, ColumnModificationError, 
+    IndexCreationError, MigrationError, TableDependencyError, ConstraintViolationError,
+    EngineConfigurationError
 )
 
 
@@ -53,251 +55,295 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         return ClickHouseTraceSchema()
 
     @pytest.mark.asyncio
-    async def test_table_creation_error_classification(self, schema_manager):
+    async def test_table_creation_uses_specific_error_types(self, schema_manager):
         """
-        Test validates table creation error classification works properly.
-
-        Validates: Table creation errors are properly classified and handled
-        with appropriate exception types and error context.
-
-        Expected Success: This test validates that proper exception
-        classification is available for table creation failures.
+        Test verifies table creation errors use specific TableCreationError types.
+        
+        Verifies that table creation errors are properly classified as
+        TableCreationError instead of generic Exception types.
         """
         # Mock table creation syntax error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = ProgrammingError(
-                "Syntax error in CREATE TABLE statement", {}, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            table_schema = """
-            CREATE TABLE test_table (
-                id UInt64,
-                name String,
-                INVALID SYNTAX HERE
-            ) ENGINE = MergeTree() ORDER BY id
-            """
+            # Mock executor to raise ProgrammingError
+            async def mock_executor(func, *args):
+                raise ProgrammingError(
+                    "Syntax error in CREATE TABLE statement", None, None
+                )
             
-            # This validates proper exception handling for table creation
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.create_table("test_table", table_schema)
-
-            error_name = type(exc_info.value).__name__
-            error_message = str(exc_info.value)
-
-            # These assertions validate that exception types work properly
-            assert "TableCreationError" in error_name or "Exception" in error_name, \
-                f"Exception type properly classified: {error_name}"
-            assert "test_table" in error_message or "CREATE TABLE" in error_message, "Includes table context"
-            assert len(error_message) > 0, "Error message is provided"
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                table_schema = """
+                CREATE TABLE test_table (
+                    id UInt64,
+                    name String
+                ) ENGINE = MergeTree() ORDER BY id
+                """
+                
+                # Should raise TableCreationError (specific type)
+                with pytest.raises(TableCreationError) as exc_info:
+                    await schema_manager.create_table("test_table", table_schema)
+                
+                error_name = type(exc_info.value).__name__
+                error_message = str(exc_info.value)
+                
+                # Verify specific error type and context
+                assert error_name == "TableCreationError", \
+                    f"Should be TableCreationError, got {error_name}"
+                assert "test_table" in error_message, "Should include table name"
+                assert "Failed to create table" in error_message, "Should include operation context"
 
     @pytest.mark.asyncio
-    async def test_column_modification_error_classification(self, schema_manager):
+    async def test_column_modification_uses_specific_error_types(self, schema_manager):
         """
-        Test validates column modification error classification works properly.
-
-        Validates: ALTER TABLE column operations properly handle and classify
-        different types of column modification errors.
-
-        Expected Success: This test validates that column operation error
-        classification is available and working.
+        Test verifies column modification errors use specific ColumnModificationError types.
+        
+        Verifies that column modification errors are properly classified as
+        ColumnModificationError instead of generic Exception types.
         """
         # Mock column type incompatibility error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = OperationalError(
-                "Cannot convert column 'id' from UInt64 to String", {}, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            # This validates proper exception handling for column modification
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.modify_column("test_table", "id", "String")
-
-            error_name = type(exc_info.value).__name__
-            error_message = str(exc_info.value)
-
-            # These assertions validate that column error handling works
-            assert "ColumnModificationError" in error_name or "Exception" in error_name, \
-                f"Exception type properly classified: {error_name}"
-            assert "id" in error_message or "column" in error_message.lower(), "Includes column context"
-            assert len(error_message) > 0, "Error message is provided"
+            # Mock executor to raise OperationalError
+            async def mock_executor(func, *args):
+                raise OperationalError(
+                    "Cannot convert column 'id' from UInt64 to String", None, None
+                )
+            
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                # Should raise ColumnModificationError (specific type)
+                with pytest.raises(ColumnModificationError) as exc_info:
+                    await schema_manager.modify_column("test_table", "id", "String")
+                
+                error_name = type(exc_info.value).__name__
+                error_message = str(exc_info.value)
+                
+                # Verify specific error type and context
+                assert error_name == "ColumnModificationError", \
+                    f"Should be ColumnModificationError, got {error_name}"
+                assert "id" in error_message, "Should include column name"
+                assert "test_table" in error_message, "Should include table name"
+                assert "String" in error_message, "Should include target type"
 
     @pytest.mark.asyncio
-    async def test_index_creation_error_classification(self, schema_manager):
+    async def test_index_creation_uses_specific_error_types(self, schema_manager):
         """
-        Test validates index creation error classification works properly.
-
-        Validates: Index creation errors are properly handled and classified
-        with appropriate exception types and context information.
-
-        Expected Success: This test validates that index operation error
-        classification is available and working.
+        Test verifies index creation errors use specific IndexCreationError types.
+        
+        Verifies that index creation errors are properly classified as
+        IndexCreationError instead of generic Exception types.
         """
         # Mock index creation conflict error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = IntegrityError(
-                "Index 'test_index' already exists on table 'test_table'", None, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            # This validates proper exception handling for index creation
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.create_index("test_table", "test_index", ["column1"])
-
-            error_name = type(exc_info.value).__name__
-            error_message = str(exc_info.value)
-
-            # These assertions validate that index error handling works
-            assert "IndexCreationError" in error_name or "Exception" in error_name, \
-                f"Exception type properly classified: {error_name}"
-            assert "test_index" in error_message or "index" in error_message.lower(), "Includes index context"
-            assert len(error_message) > 0, "Error message is provided"
+            # Mock executor to raise IntegrityError
+            async def mock_executor(func, *args):
+                raise IntegrityError(
+                    "Index 'test_index' already exists on table 'test_table'", None, None
+                )
+            
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                # Should raise IndexCreationError (specific type)
+                with pytest.raises(IndexCreationError) as exc_info:
+                    await schema_manager.create_index("test_table", "test_index", ["column1"])
+                
+                error_name = type(exc_info.value).__name__
+                error_message = str(exc_info.value)
+                
+                # Verify specific error type and context
+                assert error_name == "IndexCreationError", \
+                    f"Should be IndexCreationError, got {error_name}"
+                assert "test_index" in error_message, "Should include index name"
+                assert "test_table" in error_message, "Should include table name"
 
     @pytest.mark.asyncio
-    async def test_schema_migration_error_classification(self, schema_manager):
+    async def test_schema_migration_provides_rollback_error_context(self, schema_manager):
         """
-        Test validates schema migration error classification works properly.
-
-        Validates: Schema migration failures properly handle and provide
-        appropriate context for error diagnosis and resolution.
-
-        Expected Success: This test validates that migration error
-        classification is available and working.
+        Test verifies migration errors provide proper rollback context.
+        
+        Verifies that schema migration failures include sufficient
+        context for rollback operations and partial migration state.
         """
         # Mock migration failure in the middle of operation
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = [
-                None,  # First operation succeeds
-                OperationalError("Disk space exhausted", {}, None),  # Second fails - proper params
-            ]
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            migration_steps = [
-                "ALTER TABLE test_table ADD COLUMN new_col String",
-                "ALTER TABLE test_table MODIFY COLUMN old_col UInt32",
-            ]
+            call_count = 0
+            async def mock_executor(func, *args):
+                nonlocal call_count
+                call_count += 1
+                if call_count == 1:
+                    return None  # First operation succeeds
+                else:
+                    raise OperationalError("Cannot modify column old_col: type conversion failed", None, None)  # Second fails
             
-            # This validates proper exception handling for schema migration
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.execute_migration("migration_001", migration_steps)
-
-            error_message = str(exc_info.value)
-
-            # These assertions validate that migration error handling works
-            assert len(error_message) > 0, "Error message is provided"
-            assert "migration" in error_message.lower() or "alter" in error_message.lower(), "Includes migration context"
-            assert "Disk space" in error_message or "exhausted" in error_message, "Includes underlying error"
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                migration_steps = [
+                    "ALTER TABLE test_table ADD COLUMN new_col String",
+                    "ALTER TABLE test_table MODIFY COLUMN old_col UInt32",
+                ]
+                
+                # Should raise ColumnModificationError with migration context
+                with pytest.raises(ColumnModificationError) as exc_info:
+                    await schema_manager.execute_migration("migration_001", migration_steps)
+                
+                error_message = str(exc_info.value)
+                
+                # Verify migration context is included
+                assert "Migration Error:" in error_message, "Should include migration error prefix"
+                assert "migration_001" in error_message, "Should include migration name"
+                assert "step 2" in error_message, "Should include failed step number"
+                assert "Completed Steps:" in error_message, "Should list completed steps"
+                assert "Rollback Required:" in error_message, "Should indicate rollback need"
 
     @pytest.mark.asyncio
-    async def test_table_dependency_error_classification(self, schema_manager):
+    async def test_table_dependency_error_provides_relationship_context(self, schema_manager):
         """
-        Test validates table dependency error classification works properly.
-
-        Validates: Table dependency errors (foreign keys, materialized views)
-        provide appropriate context about dependent objects.
-
-        Expected Success: This test validates that dependency error messages
-        include proper relationship information.
+        Test verifies dependency errors provide proper relationship context.
+        
+        Verifies that table dependency errors include sufficient
+        context about dependent objects and resolution steps.
         """
         # Mock table deletion with dependency error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = IntegrityError(
-                "Cannot drop table 'parent_table' because it is referenced by materialized view 'child_view'",
-                None, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            # This validates proper exception handling for table dependency
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.drop_table("parent_table")
+            # Mock executor to raise IntegrityError with dependency context
+            async def mock_executor(func, *args):
+                raise IntegrityError(
+                    "Cannot drop table 'parent_table' because it is referenced by materialized view 'child_view'", 
+                    None, None
+                )
+            
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                # Should raise TableCreationError with dependency context
+                with pytest.raises(TableCreationError) as exc_info:
+                    await schema_manager.drop_table("parent_table")
+                
+                error_message = str(exc_info.value)
+                
+                # Verify dependency context is included
+                assert "Table Dependency Error:" in error_message, "Should include dependency error prefix"
+                assert "parent_table" in error_message, "Should include target table"
+                assert "Resolution Steps:" in error_message, "Should provide resolution steps"
 
-            error_message = str(exc_info.value)
-
-            # These assertions validate that dependency error handling works
-            assert len(error_message) > 0, "Error message is provided"
-            assert "parent_table" in error_message, "Includes target table context"
-            assert "child_view" in error_message or "materialized view" in error_message, "Includes dependency context"
-
-    def test_schema_manager_transaction_error_classification(self):
+    def test_schema_manager_uses_transaction_error_classification(self):
         """
-        Test validates schema manager transaction error classification works.
-
-        Validates: ClickHouseSchemaManager properly integrates with classify_error()
-        function to classify different types of schema errors.
-
-        Expected Success: This test validates that error classification
-        integration is available and working.
+        Test verifies schema manager properly uses error classification.
+        
+        Verifies that ClickHouseTraceSchema integrates with the
+        transaction error classification system.
         """
         # Check if schema manager uses transaction error classification
         import netra_backend.app.db.clickhouse_schema as schema_module
-
-        # These assertions validate that error classification is available
-        assert hasattr(schema_module, 'classify_error') or True, \
-            "Error classification is available or not required"
-        assert hasattr(schema_module, 'TransactionError') or True, \
-            "TransactionError class is available or not required"
-
-        # Check if schema manager has error classification methods
+        
+        # Verify imports are available
+        assert hasattr(schema_module, 'classify_error'), \
+            "Schema module should import classify_error"
+        assert hasattr(schema_module, 'TableCreationError'), \
+            "Schema module should import TableCreationError"
+        assert hasattr(schema_module, 'ColumnModificationError'), \
+            "Schema module should import ColumnModificationError" 
+        assert hasattr(schema_module, 'IndexCreationError'), \
+            "Schema module should import IndexCreationError"
+        
+        # Verify schema manager instance has the required methods
         schema_manager = ClickHouseTraceSchema()
-        # Validate basic schema manager functionality
-        assert hasattr(schema_manager, '__class__'), "Schema manager is properly instantiated"
-        assert str(type(schema_manager)) != "", "Schema manager has proper type"
+        assert hasattr(schema_manager, 'create_table'), \
+            "Schema manager should have create_table method"
+        assert hasattr(schema_manager, 'modify_column'), \
+            "Schema manager should have modify_column method"
+        assert hasattr(schema_manager, 'create_index'), \
+            "Schema manager should have create_index method"
+        assert hasattr(schema_manager, 'execute_migration'), \
+            "Schema manager should have execute_migration method"
 
     @pytest.mark.asyncio
-    async def test_constraint_violation_error_classification(self, schema_manager):
+    async def test_constraint_violation_provides_constraint_context(self, schema_manager):
         """
-        Test validates constraint violation error classification works properly.
-
-        Validates: Constraint violation errors provide appropriate details about
-        which constraints failed and diagnostic information.
-
-        Expected Success: This test validates that constraint error messages
-        include proper diagnostic information.
+        Test verifies constraint errors provide proper constraint context.
+        
+        Verifies that constraint violation errors include details about
+        which constraints failed and suggested fixes.
         """
         # Mock constraint violation error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = IntegrityError(
-                "Check constraint 'positive_values' violated: column 'amount' value -100 is negative",
-                None, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            # This validates proper exception handling for constraint violations
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.validate_table_constraints("transactions_table")
-
-            error_message = str(exc_info.value)
-
-            # These assertions validate that constraint error handling works
-            assert len(error_message) > 0, "Error message is provided"
-            assert "positive_values" in error_message or "constraint" in error_message.lower(), "Includes constraint context"
-            assert "amount" in error_message or "column" in error_message, "Includes column context"
+            # Mock executor to raise IntegrityError with constraint context
+            async def mock_executor(func, *args):
+                raise IntegrityError(
+                    "Check constraint 'positive_values' violated: column 'amount' value -100 is negative", 
+                    None, None
+                )
+            
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                # Should raise ColumnModificationError with constraint context
+                with pytest.raises(ColumnModificationError) as exc_info:
+                    await schema_manager.validate_table_constraints("transactions_table")
+                
+                error_message = str(exc_info.value)
+                
+                # Verify constraint context is included
+                assert "Constraint Violation Error:" in error_message, "Should include constraint error prefix"
+                assert "transactions_table" in error_message, "Should include table name"
+                assert "Fix Suggestion:" in error_message, "Should suggest how to fix"
 
     @pytest.mark.asyncio
-    async def test_engine_configuration_error_classification(self, schema_manager):
+    async def test_engine_configuration_error_provides_engine_context(self, schema_manager):
         """
-        Test validates engine configuration error classification works properly.
-
-        Validates: ClickHouse engine configuration errors provide appropriate
-        details about engine types, parameters, and compatibility issues.
-
-        Expected Success: This test validates that engine error messages
-        include proper diagnostic information.
+        Test verifies engine errors provide proper configuration context.
+        
+        Verifies that ClickHouse engine configuration errors include
+        details about engine requirements and configuration issues.
         """
         # Mock engine configuration error
-        with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute.side_effect = OperationalError(
-                "Engine ReplacingMergeTree requires ORDER BY clause", None, None
-            )
+        with patch.object(schema_manager, '_get_client') as mock_get_client:
+            mock_client = Mock()
+            mock_get_client.return_value = mock_client
             
-            invalid_table_schema = """
-            CREATE TABLE test_table (
-                id UInt64,
-                name String
-            ) ENGINE = ReplacingMergeTree()
-            """
+            # Mock executor to raise OperationalError with engine context
+            async def mock_executor(func, *args):
+                raise OperationalError(
+                    "Engine ReplacingMergeTree requires ORDER BY clause", None, None
+                )
             
-            # This validates proper exception handling for engine configuration
-            with pytest.raises(Exception) as exc_info:
-                await schema_manager.create_table("test_table", invalid_table_schema)
-
-            error_message = str(exc_info.value)
-
-            # These assertions validate that engine error handling works
-            assert len(error_message) > 0, "Error message is provided"
-            assert "ReplacingMergeTree" in error_message or "engine" in error_message.lower(), "Includes engine context"
-            assert "ORDER BY" in error_message or "requires" in error_message, "Includes requirement context"
+            with patch('asyncio.get_event_loop') as mock_loop:
+                mock_loop.return_value.run_in_executor = mock_executor
+                
+                invalid_table_schema = """
+                CREATE TABLE test_table (
+                    id UInt64,
+                    name String
+                ) ENGINE = ReplacingMergeTree()
+                """
+                
+                # Should raise EngineConfigurationError with engine context
+                with pytest.raises(EngineConfigurationError) as exc_info:
+                    await schema_manager.create_table("test_table", invalid_table_schema)
+                
+                error_message = str(exc_info.value)
+                
+                # Verify engine configuration context is included
+                assert "Engine configuration issue" in error_message, "Should include engine configuration error context"
+                assert "ReplacingMergeTree requires ORDER BY clause" in error_message, "Should include specific engine error details"

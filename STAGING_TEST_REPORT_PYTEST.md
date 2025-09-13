@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 15:44:10
+**Generated:** 2025-09-13 16:25:48
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
-- **Passed:** 0 (0.0%)
-- **Failed:** 5 (100.0%)
-- **Skipped:** 0
-- **Duration:** 91.81 seconds
-- **Pass Rate:** 0.0%
+- **Total Tests:** 7
+- **Passed:** 1 (14.3%)
+- **Failed:** 4 (57.1%)
+- **Skipped:** 2
+- **Duration:** 0.83 seconds
+- **Pass Rate:** 14.3%
 
 ## Test Results by Priority
 
@@ -19,90 +19,67 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_complete_chat_message_to_agent_response_workflow | FAIL failed | 11.247s | test_user_chat_agent_execution.py |
-| test_multi_agent_collaboration_with_tool_execution | FAIL failed | 11.290s | test_user_chat_agent_execution.py |
-| test_long_running_agent_tasks_with_progress_updates | FAIL failed | 11.305s | test_user_chat_agent_execution.py |
-| test_agent_failure_recovery_and_error_handling | FAIL failed | 42.448s | test_user_chat_agent_execution.py |
-| test_complex_business_workflows_with_multiple_agent_interactions | FAIL failed | 11.209s | test_user_chat_agent_execution.py |
+| test_auth_service_actually_works_in_staging | SKIP skipped | 0.390s | test_golden_path_validation_staging_current.py |
+| test_backend_service_actually_works_in_staging | SKIP skipped | 0.232s | test_golden_path_validation_staging_current.py |
+| test_golden_path_validator_fails_despite_working_services | FAIL failed | 0.002s | test_golden_path_validation_staging_current.py |
+| test_validator_prevents_successful_staging_deployment | FAIL failed | 0.004s | test_golden_path_validation_staging_current.py |
+| test_service_separation_is_correct_but_validator_assumes_monolith | PASS passed | 0.002s | test_golden_path_validation_staging_current.py |
+| test_staging_environment_service_architecture | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
+| test_recommended_validator_architecture_for_staging | FAIL failed | 0.000s | test_golden_path_validation_staging_current.py |
 
 ## Failed Tests Details
 
-### FAILED: test_complete_chat_message_to_agent_response_workflow
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
-- **Duration:** 11.247s
-- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:320: in test_complete_chat_message_to_agent_response_workflow
-    assert result.business_value_delivered, "No business value delivered to user"
-E   AssertionError: No business value delivered to user
-E   assert False
-E    +  where False = ChatAgentTestResult(success=True, user_id='e2e-user-5f83c683', conversation_id='thread_e2e_auth_1_0657096b', agent_responses=[{'type': 'connect', 'data': {'mode': 'main', 'user_id': 'demo-use...', 'connection_...
+### FAILED: test_golden_path_validator_fails_despite_working_services
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+- **Duration:** 0.002s
+- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:210: in test_golden_path_validator_fails_despite_working_services
+    assert result.overall_success is False, (
+E   AssertionError: ARCHITECTURAL FLAW EXPOSED IN STAGING: Golden Path Validator fails because it looks for auth tables (user_sessions) in backend database. In proper microservice setup, auth tables are in auth service database. This failure is architectural, not functional.
+E   assert True is False
+E    +  where True = <...
 
-### FAILED: test_multi_agent_collaboration_with_tool_execution
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
-- **Duration:** 11.290s
-- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:446: in test_multi_agent_collaboration_with_tool_execution
-    assert len(tool_execution_events) > 0, "No tool execution detected"
-E   AssertionError: No tool execution detected
-E   assert 0 > 0
-E    +  where 0 = len([])
+### FAILED: test_validator_prevents_successful_staging_deployment
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+- **Duration:** 0.004s
+- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:301: in test_validator_prevents_successful_staging_deployment
+    assert business_impact['validator_blocks_deployment'] is False, (
+E   AssertionError: BUSINESS IMPACT: {'validator_blocks_deployment': True, 'services_actually_work': True, 'root_cause': 'architectural_assumptions_in_validator', 'impact': 'prevents_staging_deployments'}. Validator architectural issues are blocking deployments of working services.
+E   assert True is F...
 
-During handling of the above exception, another exception occurred:
-tests\e2e\staging\test_user_chat_agent_execution.py:458: in test_multi_agent_collaboration_with_tool_execution
-    pytest.fail(f"Multi-agent collaboration wit...
+### FAILED: test_staging_environment_service_architecture
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:438: in test_staging_environment_service_architecture
+    assert validator_assumptions['conflicts_with_staging_reality'] is False, (
+E   AssertionError: STAGING REALITY vs VALIDATOR ASSUMPTIONS: Staging: {'auth_service': {'has_own_database': True, 'contains_tables': ['users', 'user_sessions', 'oauth_credentials'], 'accessible_from': ['auth_service_only']}, 'backend_service': {'has_own_database': True, 'contains_tables': ['chat_thre...
 
-### FAILED: test_long_running_agent_tasks_with_progress_updates
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
-- **Duration:** 11.305s
-- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:594: in test_long_running_agent_tasks_with_progress_updates
-    assert user_experience_metrics["regular_communication"], "Insufficient user communication during long task"
-E   AssertionError: Insufficient user communication during long task
-E   assert False
-
-During handling of the above exception, another exception occurred:
-tests\e2e\staging\test_user_chat_agent_execution.py:606: in test_long_running_agent_tasks_with_progress_updates
-    pytes...
-
-### FAILED: test_agent_failure_recovery_and_error_handling
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
-- **Duration:** 42.448s
-- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:736: in test_agent_failure_recovery_and_error_handling
-    assert user_experience_quality["graceful_handling"], "System did not handle limitations gracefully"
-E   AssertionError: System did not handle limitations gracefully
-E   assert False
-
-During handling of the above exception, another exception occurred:
-tests\e2e\staging\test_user_chat_agent_execution.py:748: in test_agent_failure_recovery_and_error_handling
-    pytest.fail(f"Agent failure...
-
-### FAILED: test_complex_business_workflows_with_multiple_agent_interactions
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
-- **Duration:** 11.209s
-- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:883: in test_complex_business_workflows_with_multiple_agent_interactions
-    assert workflow_completeness >= 0.4, f"Insufficient workflow coverage: {workflow_completeness:.1%}"
-E   AssertionError: Insufficient workflow coverage: 0.0%
-E   assert 0.0 >= 0.4
-
-During handling of the above exception, another exception occurred:
-tests\e2e\staging\test_user_chat_agent_execution.py:898: in test_complex_business_workflows_with_multiple_agent_interaction...
+### FAILED: test_recommended_validator_architecture_for_staging
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_golden_path_validation_staging_current.py
+- **Duration:** 0.000s
+- **Error:** tests/e2e/staging/test_golden_path_validation_staging_current.py:467: in test_recommended_validator_architecture_for_staging
+    assert False, (
+E   AssertionError: RECOMMENDED STAGING VALIDATOR ARCHITECTURE: {'auth_validation': {'method': 'HTTP call to auth service /health endpoint', 'validates': ['auth service availability', 'JWT capabilities'], 'database_access': 'none_from_backend'}, 'backend_validation': {'method': 'check backend database and components', 'validates': ['backend tables', 'ag...
 
 ## Pytest Output Format
 
 ```
-test_user_chat_agent_execution.py::test_complete_chat_message_to_agent_response_workflow FAILED
-test_user_chat_agent_execution.py::test_multi_agent_collaboration_with_tool_execution FAILED
-test_user_chat_agent_execution.py::test_long_running_agent_tasks_with_progress_updates FAILED
-test_user_chat_agent_execution.py::test_agent_failure_recovery_and_error_handling FAILED
-test_user_chat_agent_execution.py::test_complex_business_workflows_with_multiple_agent_interactions FAILED
+test_golden_path_validation_staging_current.py::test_auth_service_actually_works_in_staging SKIPPED
+test_golden_path_validation_staging_current.py::test_backend_service_actually_works_in_staging SKIPPED
+test_golden_path_validation_staging_current.py::test_golden_path_validator_fails_despite_working_services FAILED
+test_golden_path_validation_staging_current.py::test_validator_prevents_successful_staging_deployment FAILED
+test_golden_path_validation_staging_current.py::test_service_separation_is_correct_but_validator_assumes_monolith PASSED
+test_golden_path_validation_staging_current.py::test_staging_environment_service_architecture FAILED
+test_golden_path_validation_staging_current.py::test_recommended_validator_architecture_for_staging FAILED
 
 ==================================================
-0 passed, 5 failed in 91.81s
+1 passed, 4 failed, 2 skipped in 0.83s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
-| Agent | 5 | 0 | 5 | 0.0% |
+| Authentication | 1 | 0 | 0 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

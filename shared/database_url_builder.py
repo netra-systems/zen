@@ -475,9 +475,12 @@ class DatabaseURLBuilder:
         def __init__(self, parent):
             self.parent = parent
         
-        @property
-        def compose_url(self) -> str:
-            """URL for Docker Compose environment."""
+        def _build_compose_url_components(self) -> tuple[str, str, str, str, str]:
+            """SSOT method for Docker Compose URL component construction.
+            
+            Returns:
+                Tuple of (user, password, host, port, db) components with proper encoding
+            """
             # URL encode user and password for safety
             user = quote(self.parent.postgres_user or "postgres", safe='')
             password = quote(self.parent.postgres_password or "postgres", safe='')
@@ -485,18 +488,18 @@ class DatabaseURLBuilder:
             port = self.parent.postgres_port or "5432"
             db = self.parent.postgres_db or "netra_dev"
             
+            return user, password, host, port, db
+        
+        @property
+        def compose_url(self) -> str:
+            """URL for Docker Compose environment."""
+            user, password, host, port, db = self._build_compose_url_components()
             return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db}"
         
         @property
         def compose_sync_url(self) -> str:
             """Sync URL for Docker Compose environment."""
-            # URL encode user and password for safety
-            user = quote(self.parent.postgres_user or "postgres", safe='')
-            password = quote(self.parent.postgres_password or "postgres", safe='')
-            host = self.parent.postgres_host or "postgres"  # Docker service name
-            port = self.parent.postgres_port or "5432"
-            db = self.parent.postgres_db or "netra_dev"
-            
+            user, password, host, port, db = self._build_compose_url_components()
             return f"postgresql://{user}:{password}@{host}:{port}/{db}"
     
     class ClickHouseBuilder:

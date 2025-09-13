@@ -593,16 +593,20 @@ async def load_test_fixtures(manager: RealServicesManager, fixture_dir: Union[st
 # EXPORT ALL CLASSES
 # =============================================================================
 
+# Backward compatibility alias for tests
+RealServiceTester = RealServicesManager  # Tests expect this name
+
 __all__ = [
     'ServiceUnavailableError',
     'ServiceConfigurationError',
     'ServiceEndpoints',
     # DatabaseManager imported from SSOT location - not exported to avoid import conflicts
-    'RedisManager', 
+    'RedisManager',
     'ClickHouseManager',
     'WebSocketTestClient',
     'HTTPTestClient',
     'RealServicesManager',
+    'RealServiceTester',  # Backward compatibility
     'get_real_services',
     'skip_if_services_unavailable',
     'load_test_fixtures'

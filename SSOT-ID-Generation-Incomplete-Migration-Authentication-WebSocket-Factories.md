@@ -2,7 +2,7 @@
 
 **GitHub Issue**: #841
 **Priority**: P0 - BLOCKS GOLDEN PATH
-**Status**: In Progress - Step 0 Complete
+**Status**: In Progress - Step 1 Complete
 
 ## Issue Summary
 20+ critical files still using `uuid.uuid4()` instead of UnifiedIdGenerator SSOT, causing race conditions, ID collisions, and user isolation failures in Golden Path.
@@ -27,10 +27,38 @@
 - [x] Created tracking file
 - [x] Ready for step 1 - Test Discovery
 
-### Step 1 - Discover and Plan Tests (PENDING)
-- [ ] Find existing tests protecting against SSOT ID generation changes
-- [ ] Plan new tests to validate SSOT compliance
-- [ ] Update tracking file
+### Step 1 - Discover and Plan Tests ✅
+- [x] Find existing tests protecting against SSOT ID generation changes
+- [x] Plan new tests to validate SSOT compliance
+- [x] Update tracking file
+
+#### 1.1 Existing Tests Discovered (Must Continue to Pass):
+- **Authentication ID Tests**: 4 critical test files including Golden Path auth flows
+- **WebSocket Connection Tests**: 4 critical files including mission critical events suite ($500K+ ARR)
+- **Factory Pattern Tests**: 3 files covering user isolation and SSOT compliance
+- **ID Migration Tests**: 3 existing files designed for migration validation
+- **User Isolation Tests**: 4 files protecting multi-user security
+- **Total Coverage**: ~75 WebSocket, ~50 auth, ~30 factory pattern existing tests
+
+#### 1.2 New Test Plan Designed (20% new, 60% existing validation, 20% updates):
+**Phase 1 - Reproduction Tests (Failing Before Fix):**
+- 4 violation detection test files targeting lines 160, 1303, 594, 522, 41
+- Expected to fail before migration, pass after UnifiedIdGenerator adoption
+
+**Phase 2 - SSOT Migration Validation:**
+- 4 UnifiedIdGenerator adoption validation test files
+- Integration and E2E staging tests for cross-service consistency
+
+**Phase 3 - Business Value Protection:**
+- 2 mission critical Golden Path protection test files
+- 2 performance impact and concurrent safety test files
+
+**Test Distribution:**
+- 12 new test files (~20%)
+- 35 existing test files to validate (~60%)
+- 8 test files to update (~20%)
+
+**Success Criteria:** All uuid.uuid4() violations detected before fix, Golden Path functionality preserved after migration
 
 ### Step 2 - Execute New Test Plan (PENDING)
 - [ ] Create new SSOT validation tests

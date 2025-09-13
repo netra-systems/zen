@@ -159,11 +159,20 @@ class AuthStarter:
         # Get the appropriate URL for auth service (sync URL for psycopg2)
         database_url = builder.get_url_for_environment(sync=True)
         
-        # If no URL from builder, try to construct from services config
+        # If no URL from builder, try SSOT-compliant fallback using TCP configuration
         if not database_url:
             postgres_config = self.services_config.postgres.get_config()
             if postgres_config.get('host') and postgres_config.get('database'):
-                database_url = f"postgresql://{postgres_config.get('user', 'postgres')}:{postgres_config.get('password', 'postgres')}@{postgres_config['host']}:{postgres_config.get('port', '5432')}/{postgres_config['database']}"
+                # Create SSOT-compliant builder with service config
+                fallback_env = {
+                    'POSTGRES_HOST': postgres_config['host'],
+                    'POSTGRES_PORT': str(postgres_config.get('port', '5432')),
+                    'POSTGRES_USER': postgres_config.get('user', 'postgres'),
+                    'POSTGRES_PASSWORD': postgres_config.get('password', 'postgres'),
+                    'POSTGRES_DB': postgres_config['database']
+                }
+                fallback_builder = DatabaseURLBuilder(test_env=fallback_env)
+                database_url = fallback_builder.tcp.sync_url
         
         # Set #removed-legacyif we have one
         if database_url:
