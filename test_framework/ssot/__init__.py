@@ -110,6 +110,34 @@ from .websocket import (
     cleanup_global_websocket_utility
 )
 
+# Import SSOT WebSocket infrastructure factory and components
+from .websocket_test_infrastructure_factory import (
+    WebSocketTestInfrastructureFactory,
+    InfrastructureConfig,
+    TestInfrastructure
+)
+
+from .websocket_auth_helper import (
+    WebSocketAuthHelper,
+    TestUserContext,
+    WebSocketAuthConfig
+)
+
+from .websocket_bridge_test_helper import (
+    WebSocketBridgeTestHelper,
+    AgentExecutionContext,
+    AgentEventSimulator,
+    BridgeTestConfig
+)
+
+from .communication_metrics_collector import (
+    CommunicationMetricsCollector,
+    MetricType,
+    MetricDataPoint,
+    CommunicationSession,
+    PerformanceMetrics
+)
+
 # Import all SSOT Docker utilities
 from .docker import (
     DockerTestUtility,
@@ -449,6 +477,23 @@ __all__ = [
     "WebSocketTestMetrics",
     "get_websocket_test_utility",
     "cleanup_global_websocket_utility",
+    
+    # WebSocket infrastructure factory and components
+    "WebSocketTestInfrastructureFactory",
+    "InfrastructureConfig",
+    "TestInfrastructure",
+    "WebSocketAuthHelper",
+    "TestUserContext", 
+    "WebSocketAuthConfig",
+    "WebSocketBridgeTestHelper",
+    "AgentExecutionContext",
+    "AgentEventSimulator",
+    "BridgeTestConfig",
+    "CommunicationMetricsCollector",
+    "MetricType",
+    "MetricDataPoint",
+    "CommunicationSession",
+    "PerformanceMetrics",
     
     # Docker utilities
     "DockerTestUtility",

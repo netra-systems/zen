@@ -12,6 +12,7 @@ SSOT Compliance: Uses unified BaseTestCase patterns and real service integration
 """
 
 import asyncio
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
@@ -20,12 +21,12 @@ from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.tools.data_helper import DataHelper
 
 
-class TestDataHelperAgentCoreFunctionality(SSotAsyncTestCase):
+class TestDataHelperAgentCoreFunctionality(SSotAsyncTestCase, unittest.TestCase):
     """Test suite for Data Helper Agent core functionality."""
     
-    async def setUp(self):
+    def setUp(self):
         """Set up test fixtures."""
-        await super().setUp()
+        super().setUp()
         
         # Create mock dependencies with proper async behavior
         self.mock_llm_manager = MagicMock()

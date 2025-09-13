@@ -12,6 +12,7 @@ SSOT Compliance: Uses unified BaseTestCase patterns with real UserExecutionConte
 """
 
 import asyncio
+import unittest
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
@@ -20,12 +21,12 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
 
-class TestDataHelperAgentUserIsolation(SSotAsyncTestCase):
+class TestDataHelperAgentUserIsolation(SSotAsyncTestCase, unittest.TestCase):
     """Test suite for Data Helper Agent user isolation and factory patterns."""
     
-    async def setUp(self):
+    def setUp(self):
         """Set up test fixtures for user isolation testing."""
-        await super().setUp()
+        super().setUp()
         
         # Mock dependencies for factory pattern testing
         self.mock_llm_manager = MagicMock()
