@@ -155,8 +155,9 @@ class TestBaseAgentFactoryPatterns(SSotAsyncTestCase):
         assert "user context isolation" in agent.description
 
         # Verify: Agent was configured for user context pattern
-        assert agent.enable_reliability is True
-        assert agent.enable_execution_engine is True
+        # Note: These are private attributes in BaseAgent
+        assert agent._enable_reliability is True
+        assert agent._enable_execution_engine is True
 
     def test_agent_factory_method_context_validation(self):
         """Test factory methods validate UserExecutionContext properly."""
@@ -191,9 +192,13 @@ class TestBaseAgentFactoryPatterns(SSotAsyncTestCase):
         # Verify: Agents have separate reliability managers
         assert agent1.reliability_manager is not agent2.reliability_manager
 
-        # Verify: Both agents reference the same context (shared read-only)
-        assert agent1.user_context is self.test_context
-        assert agent2.user_context is self.test_context
+        # Verify: Both agents have the context internally stored
+        # Note: user_context property is None until explicitly set
+        # The factory method stores context in _user_context internally
+        assert hasattr(agent1, '_user_context')
+        assert hasattr(agent2, '_user_context')
+        assert agent1._user_context is self.test_context
+        assert agent2._user_context is self.test_context
 
     def test_agent_legacy_factory_with_warnings(self):
         """Test legacy factory method issues proper warnings."""
