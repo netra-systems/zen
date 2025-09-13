@@ -62,38 +62,45 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         self.schema_manager = ClickHouseTraceSchema()
 
     @pytest.mark.asyncio
-    async def test_missing_index_operation_error_type(self):
+    async def test_index_operation_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing IndexOperationError type.
-        
-        Current Problem: Index operations beyond creation (rebuild, drop, optimize) 
-        don't have a specific IndexOperationError type that's broader than IndexCreationError.
-        
-        Expected Failure: This test should fail because IndexOperationError doesn't exist
-        and current classification falls back to generic SchemaError.
+        Test validates IndexOperationError classification works correctly.
+
+        Validates: Index operations beyond creation (rebuild, drop, optimize)
+        are properly classified as IndexOperationError type.
+
+        Expected Success: This test should pass because IndexOperationError exists
+        and current classification correctly identifies index operation errors.
         """
         # Test index rebuild operation failure
         mock_error = OperationalError("Index rebuild failed: insufficient disk space for index 'test_idx'", None, None)
         
-        # Current classification should NOT produce IndexOperationError
+        # Current classification should correctly produce IndexOperationError
         classified_error = classify_error(mock_error)
+
+        # This assertion should PASS because IndexOperationError exists and works correctly
+        assert type(classified_error).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import IndexOperationError
+        assert isinstance(classified_error, IndexOperationError), \
+            "Error should be classified as IndexOperationError instance"
         
-        # This assertion should PASS because IndexOperationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be IndexOperationError)
-        assert type(classified_error).__name__ != "IndexOperationError", \
-            f"IndexOperationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import IndexOperationError (this should fail)
-        with pytest.raises(ImportError):
+        # Test that we can successfully import IndexOperationError
+        try:
             from netra_backend.app.db.transaction_errors import IndexOperationError
+            assert IndexOperationError is not None, "IndexOperationError should be importable"
+        except ImportError:
+            pytest.fail("IndexOperationError should be importable from transaction_errors")
         
         # Test index drop operation
         drop_error = IntegrityError("Cannot drop index 'primary_idx': index is referenced by materialized view", None, None)
         classified_drop = classify_error(drop_error)
         
-        # Should be IndexOperationError but isn't available
-        assert type(classified_drop).__name__ != "IndexOperationError", \
-            "IndexOperationError should not exist yet (test validates gap)"
+        # Should be classified as IndexOperationError
+        assert type(classified_drop).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError for drop operation, got {type(classified_drop).__name__}"
 
     @pytest.mark.asyncio 
     async def test_missing_migration_error_type(self):
