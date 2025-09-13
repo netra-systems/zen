@@ -586,7 +586,15 @@ class SSotBaseTestCase:
     def assertNotIsInstance(self, obj, cls, msg=None):
         """Assert that obj is not an instance of cls."""
         assert not isinstance(obj, cls), msg or f"Expected {obj} to not be instance of {cls}"
-    
+
+    def assertIs(self, first, second, msg=None):
+        """Assert that first is second (same object identity)."""
+        assert first is second, msg or f"Expected {first} is {second} (same object identity)"
+
+    def assertIsNot(self, first, second, msg=None):
+        """Assert that first is not second (different object identity)."""
+        assert first is not second, msg or f"Expected {first} is not {second} (different object identity)"
+
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.
