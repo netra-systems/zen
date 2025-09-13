@@ -12,6 +12,7 @@ import subprocess
 import sys
 import time
 import yaml
+import shutil
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -30,9 +31,9 @@ class InstanceConfig:
     name: str
     command: str
     description: str
-    allowed_tools: List[str]
+    allowed_tools: List[str] = None
     permission_mode: str = "acceptEdits"
-    output_format: str = "json"
+    output_format: str = "stream-json"  # Default to stream-json for real-time output
     session_id: Optional[str] = None
     clear_history: bool = False
     compact_history: bool = False
@@ -91,14 +92,36 @@ class ClaudeInstanceOrchestrator:
         # Join commands with semicolon for sequential execution
         command_string = "; ".join(full_command)
 
+        # Find the claude executable
+        claude_cmd = shutil.which("claude")
+        if not claude_cmd:
+            # Try common Windows paths
+            possible_paths = [
+                "claude.cmd",
+                "claude.exe",
+                "claude"
+            ]
+            for path in possible_paths:
+                if shutil.which(path):
+                    claude_cmd = path
+                    break
+
+            if not claude_cmd:
+                logger.error("Claude command not found in PATH")
+                claude_cmd = "claude"  # Fallback
+
         # New approach: slash commands can be included directly in prompt
         cmd = [
-            "claude",
+            claude_cmd,
             "-p",  # headless mode
             command_string,  # Full command sequence
             f"--output-format={config.output_format}",
             f"--permission-mode={config.permission_mode}"
         ]
+
+        # Add --verbose if using stream-json (required by Claude Code)
+        if config.output_format == "stream-json":
+            cmd.append("--verbose")
 
         if config.allowed_tools:
             cmd.append(f"--allowedTools={','.join(config.allowed_tools)}")
@@ -175,7 +198,7 @@ class ClaudeInstanceOrchestrator:
             return {"exists": False, "error": str(e)}
 
     async def run_instance(self, name: str) -> bool:
-        """Run a single Claude Code instance"""
+        """Run a single Claude Code instance asynchronously"""
         if name not in self.instances:
             logger.error(f"Instance {name} not found")
             return False
@@ -191,24 +214,29 @@ class ClaudeInstanceOrchestrator:
             cmd = self.build_claude_command(config)
             logger.info(f"Command: {' '.join(cmd)}")
 
-            # Run the Claude Code command
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
+            # Create the async process
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
                 cwd=self.workspace_dir
             )
 
-            self.processes[name] = process
             status.pid = process.pid
+            logger.info(f"Instance {name} started with PID {process.pid}")
+
+            # Read output in real-time for stream-json format
+            if config.output_format == "stream-json":
+                await self._stream_output(name, process)
 
             # Wait for completion
-            stdout, stderr = process.communicate()
+            stdout, stderr = await process.communicate()
 
             status.end_time = time.time()
-            status.output = stdout
-            status.error = stderr
+            if stdout:
+                status.output += stdout.decode() if isinstance(stdout, bytes) else stdout
+            if stderr:
+                status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
 
             if process.returncode == 0:
                 status.status = "completed"
@@ -217,7 +245,8 @@ class ClaudeInstanceOrchestrator:
             else:
                 status.status = "failed"
                 logger.error(f"Instance {name} failed with return code {process.returncode}")
-                logger.error(f"Error output: {stderr}")
+                if status.error:
+                    logger.error(f"Error output: {status.error}")
                 return False
 
         except Exception as e:
@@ -226,21 +255,58 @@ class ClaudeInstanceOrchestrator:
             logger.error(f"Exception running instance {name}: {e}")
             return False
 
-    async def run_all_instances(self) -> Dict[str, bool]:
-        """Run all instances concurrently"""
-        logger.info(f"Starting {len(self.instances)} instances concurrently")
+    async def _stream_output(self, name: str, process):
+        """Stream output in real-time for stream-json format"""
+        status = self.statuses[name]
+
+        async def read_stream(stream, prefix):
+            while True:
+                line = await stream.readline()
+                if not line:
+                    break
+                line_str = line.decode() if isinstance(line, bytes) else line
+                print(f"[{name}] {prefix}: {line_str.strip()}")
+
+                # Accumulate output
+                if prefix == "STDOUT":
+                    status.output += line_str
+                else:
+                    status.error += line_str
+
+        # Run both stdout and stderr reading concurrently
+        await asyncio.gather(
+            read_stream(process.stdout, "STDOUT"),
+            read_stream(process.stderr, "STDERR"),
+            return_exceptions=True
+        )
+
+    async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
+        """Run all instances concurrently with timeout"""
+        logger.info(f"Starting {len(self.instances)} instances concurrently (timeout: {timeout}s)")
 
         tasks = [
-            self.run_instance(name)
+            asyncio.wait_for(self.run_instance(name), timeout=timeout)
             for name in self.instances.keys()
         ]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        return {
-            name: result if isinstance(result, bool) else False
-            for name, result in zip(self.instances.keys(), results)
-        }
+        final_results = {}
+        for name, result in zip(self.instances.keys(), results):
+            if isinstance(result, asyncio.TimeoutError):
+                logger.error(f"Instance {name} timed out after {timeout}s")
+                self.statuses[name].status = "failed"
+                self.statuses[name].error = f"Timeout after {timeout}s"
+                final_results[name] = False
+            elif isinstance(result, Exception):
+                logger.error(f"Instance {name} failed with exception: {result}")
+                self.statuses[name].status = "failed"
+                self.statuses[name].error = str(result)
+                final_results[name] = False
+            else:
+                final_results[name] = result
+
+        return final_results
 
     def get_status_summary(self) -> Dict:
         """Get summary of all instance statuses"""
@@ -273,30 +339,23 @@ class ClaudeInstanceOrchestrator:
 
         logger.info(f"Results saved to {output_file}")
 
-def create_default_instances() -> List[InstanceConfig]:
+def create_default_instances(output_format: str = "stream-json") -> List[InstanceConfig]:
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            name="test_runner",
-            command="/test-real unit",
-            description="Run unit tests with real services",
-            allowed_tools=["Bash", "Read", "Write", "Glob", "Grep"],
-            permission_mode="acceptEdits"
+            name="createtestsv2",
+            command="/createtestsv2",
+            description="createtestsv2",
+            permission_mode="acceptEdits",
+            output_format=output_format
         ),
         InstanceConfig(
-            name="deployer",
-            command="/deploy-gcp staging",
-            description="Deploy to GCP staging environment",
-            allowed_tools=["Bash", "Read", "Write", "WebFetch"],
-            permission_mode="ask"
+            name="ssot",
+            command="/ssotgardener",
+            description="ssot",
+            permission_mode="acceptEdits",
+            output_format=output_format
         ),
-        InstanceConfig(
-            name="compliance_checker",
-            command="/compliance",
-            description="Check architecture compliance and SSOT violations",
-            allowed_tools=["Bash", "Read", "Glob", "Grep"],
-            permission_mode="acceptEdits"
-        )
     ]
 
 async def main():
@@ -310,6 +369,10 @@ async def main():
     parser.add_argument("--dry-run", action="store_true", help="Show commands without running")
     parser.add_argument("--list-commands", action="store_true", help="List all available slash commands and exit")
     parser.add_argument("--inspect-command", type=str, help="Inspect a specific slash command and exit")
+    parser.add_argument("--output-format", choices=["json", "stream-json"], default="stream-json",
+                       help="Output format for Claude instances (default: stream-json)")
+    parser.add_argument("--timeout", type=int, default=300,
+                       help="Timeout in seconds for each instance (default: 300)")
 
     args = parser.parse_args()
 
@@ -355,7 +418,7 @@ async def main():
         instances = [InstanceConfig(**inst) for inst in config_data["instances"]]
     else:
         logger.info("Using default instance configurations")
-        instances = create_default_instances()
+        instances = create_default_instances(args.output_format)
 
     # Add instances to orchestrator
     for instance in instances:
@@ -372,7 +435,7 @@ async def main():
     logger.info("Starting Claude Code instance orchestration")
     start_time = time.time()
 
-    results = await orchestrator.run_all_instances()
+    results = await orchestrator.run_all_instances(args.timeout)
 
     end_time = time.time()
     total_duration = end_time - start_time
