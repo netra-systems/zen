@@ -22,6 +22,9 @@ from datetime import datetime, timezone
 if TYPE_CHECKING:
     from shared.isolated_environment import IsolatedEnvironment
 
+# Import get_env for fallback when no isolated_env is provided
+from shared.isolated_environment import get_env
+
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
@@ -47,23 +50,50 @@ class ErrorEscalationPolicy(Enum):
 class ErrorPolicy:
     """
     Environment-aware error policy management for systematic remediation.
-    
+
     Provides centralized policy decisions for when warnings should be escalated
     to errors based on environment context and business impact assessment.
-    
+
     Business Value: Enables safe rollout of error escalation without disrupting
     existing functionality in development while ensuring production reliability.
     """
-    
+
     _instance: Optional['ErrorPolicy'] = None
     _environment_type: Optional[EnvironmentType] = None
     _policy_overrides: Dict[str, ErrorEscalationPolicy] = {}
-    
-    def __new__(cls) -> 'ErrorPolicy':
+    _initialized: bool = False
+    _env_accessor: Optional['IsolatedEnvironment'] = None
+
+    def __new__(cls, isolated_env: Optional['IsolatedEnvironment'] = None) -> 'ErrorPolicy':
         """Singleton pattern for consistent policy across application."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
+
+    def __init__(self, isolated_env: Optional['IsolatedEnvironment'] = None) -> None:
+        """
+        Initialize ErrorPolicy with optional IsolatedEnvironment dependency injection.
+
+        Args:
+            isolated_env: Optional IsolatedEnvironment instance for SSOT compliance.
+                         If not provided, uses shared get_env() function.
+
+        Note:
+            Maintains singleton pattern - only first initialization is effective.
+            Subsequent calls to __init__ are ignored to preserve singleton behavior.
+        """
+        # Prevent re-initialization in singleton pattern
+        if self.__class__._initialized:
+            return
+
+        # Store the environment accessor as class variable for classmethod access
+        if isolated_env is not None:
+            self.__class__._env_accessor = isolated_env
+        elif self.__class__._env_accessor is None:
+            # Only set default if not already set
+            self.__class__._env_accessor = get_env()
+
+        self.__class__._initialized = True
     
     @classmethod
     def detect_environment(cls) -> EnvironmentType:
@@ -78,9 +108,13 @@ class ErrorPolicy:
         if cls._environment_type is not None:
             return cls._environment_type
         
-        # Check explicit environment variables
-        env_var = os.getenv('ENVIRONMENT', '').lower()
-        netra_env = os.getenv('NETRA_ENV', '').lower()
+        # Check explicit environment variables - SSOT compliant
+        # Initialize environment accessor if not set
+        if cls._env_accessor is None:
+            cls._env_accessor = get_env()
+
+        env_var = cls._env_accessor.get('ENVIRONMENT', '').lower()
+        netra_env = cls._env_accessor.get('NETRA_ENV', '').lower()
         
         # Production indicators
         if any(env in ['prod', 'production'] for env in [env_var, netra_env]):
@@ -111,15 +145,19 @@ class ErrorPolicy:
     @classmethod
     def _detect_production_indicators(cls) -> bool:
         """Detect production environment through indirect indicators."""
+        # Ensure environment accessor is available
+        if cls._env_accessor is None:
+            cls._env_accessor = get_env()
+
         indicators = [
             # GCP production project
-            os.getenv('GCP_PROJECT', '').endswith('-prod'),
+            cls._env_accessor.get('GCP_PROJECT', '').endswith('-prod'),
             # Production database URLs
-            'prod' in os.getenv('DATABASE_URL', '').lower(),
+            'prod' in cls._env_accessor.get('DATABASE_URL', '').lower(),
             # Production Redis
-            'prod' in os.getenv('REDIS_URL', '').lower(),
+            'prod' in cls._env_accessor.get('REDIS_URL', '').lower(),
             # Production service discovery
-            os.getenv('SERVICE_ENV') == 'production'
+            cls._env_accessor.get('SERVICE_ENV') == 'production'
         ]
         return any(indicators)
     

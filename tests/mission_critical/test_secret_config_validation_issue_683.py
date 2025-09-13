@@ -32,14 +32,15 @@ class TestSecretConfigValidationIssue683(SSotBaseTestCase):
         super().setup_method(method)
         self.env = IsolatedEnvironment()
         # Store original environment to restore after test
-        self.original_env = self.env.copy()
+        self.original_env = self.env.get_all()
 
     def teardown_method(self, method):
         """Clean up test environment."""
         # Restore original environment
-        for key in list(self.env._env.keys()):
+        current_env = self.env.get_all()
+        for key in list(current_env.keys()):
             if key not in self.original_env:
-                del self.env._env[key]
+                self.env.set(key, None)  # Remove keys that weren't in original
         for key, value in self.original_env.items():
             self.env.set(key, value)
         super().teardown_method(method)
