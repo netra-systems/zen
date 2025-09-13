@@ -230,7 +230,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
 
             # If this fails, it demonstrates the tracking gap
 
-    def test_validation_enhancer_integration(self):
+    async def test_validation_enhancer_integration(self):
         """
         Test that the SSOT validation enhancer is properly integrated.
 
@@ -266,7 +266,7 @@ class TestWebSocketManagerValidationGapDocumentation(SSotAsyncTestCase):
     These tests serve as documentation of the current state and expected failures.
     """
 
-    def test_document_current_instantiation_behavior(self):
+    async def test_document_current_instantiation_behavior(self):
         """
         Document the current instantiation behavior to establish baseline.
 

@@ -232,6 +232,32 @@ class WebSocketAuthResult:
     error_message: Optional[str] = None
     error_code: Optional[str] = None
     
+    # Backward compatibility properties for tests
+    @property
+    def is_valid(self) -> bool:
+        """Compatibility property: Returns True if authentication was successful."""
+        return self.success
+
+    @property
+    def user_id(self) -> Optional[str]:
+        """Compatibility property: Returns user ID from user context."""
+        return self.user_context.user_id if self.user_context else None
+
+    @property
+    def email(self) -> Optional[str]:
+        """Compatibility property: Returns email from auth result."""
+        return self.auth_result.email if self.auth_result else None
+
+    @property
+    def subscription_tier(self) -> Optional[str]:
+        """Compatibility property: Returns subscription tier from user context."""
+        return self.user_context.subscription_tier if self.user_context else None
+
+    @property
+    def permissions(self) -> Optional[List[str]]:
+        """Compatibility property: Returns permissions from auth result."""
+        return self.auth_result.permissions if self.auth_result else None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for compatibility."""
         result = {
@@ -239,7 +265,7 @@ class WebSocketAuthResult:
             "error_message": self.error_message,
             "error_code": self.error_code
         }
-        
+
         if self.user_context:
             result.update({
                 "user_id": self.user_context.user_id,
@@ -247,14 +273,14 @@ class WebSocketAuthResult:
                 "thread_id": self.user_context.thread_id,
                 "run_id": self.user_context.run_id
             })
-        
+
         if self.auth_result:
             result.update({
                 "email": self.auth_result.email,
                 "permissions": self.auth_result.permissions,
                 "validated_at": self.auth_result.validated_at
             })
-            
+
         return result
 
 
@@ -1573,10 +1599,11 @@ class UnifiedWebSocketAuthenticator:
             # If no websocket provided, create a mock one for token validation
             if websocket is None:
                 from test_framework.websocket_helpers import MockWebSocketConnection
-                websocket = MockWebSocketConnection(
-                    headers={"authorization": f"Bearer {token}"},
-                    subprotocols=[f"jwt-auth.{token}"]
-                )
+                websocket = MockWebSocketConnection()
+
+                # Add token to subprotocols for extraction
+                websocket.subprotocols = [f"jwt-auth.{token}"]
+                websocket.headers = {"authorization": f"Bearer {token}"}
 
             # Delegate to SSOT function
             result = await authenticate_websocket_ssot(websocket, e2e_context=None)
@@ -1598,12 +1625,7 @@ class UnifiedWebSocketAuthenticator:
                 user_context=None,
                 auth_result=None,
                 error_message=f"Token authentication failed: {str(e)}",
-                error_code="TOKEN_AUTH_ERROR",
-                is_valid=False,
-                user_id=None,
-                email=None,
-                subscription_tier=None,
-                permissions=None
+                error_code="TOKEN_AUTH_ERROR"
             )
     
     def get_websocket_auth_stats(self) -> Dict[str, Any]:

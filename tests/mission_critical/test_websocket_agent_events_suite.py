@@ -433,7 +433,7 @@ class TestRealWebSocketComponents:
 
         # Create WebSocket emitter from manager for tool dispatcher
         from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
-        websocket_emitter = WebSocketEmitterFactory.create_for_user_context(user_context, websocket_manager)
+        websocket_emitter = WebSocketEmitterFactory.create_scoped_emitter(websocket_manager, user_context)
 
         # Test that tool dispatcher can be created and has proper integration points
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(

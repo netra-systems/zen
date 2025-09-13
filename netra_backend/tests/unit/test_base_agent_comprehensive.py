@@ -111,7 +111,7 @@ class LegacyTestAgent(BaseAgent):
         return {"status": "legacy_success"}
 
 
-class MockBaseAgentLifecycleManagement(SSotAsyncTestCase):
+class TestBaseAgentLifecycleManagement(SSotAsyncTestCase):
     """Test suite for agent lifecycle management and state transitions."""
     
     def setUp(self):
@@ -223,7 +223,7 @@ class MockBaseAgentLifecycleManagement(SSotAsyncTestCase):
         self.assertIn("can_execute", health["circuit_breaker"])
 
 
-class MockBaseAgentUserIsolation(SSotAsyncTestCase):
+class TestBaseAgentUserIsolation(SSotAsyncTestCase):
     """Test suite for user context isolation and concurrent execution."""
     
     def setUp(self):
@@ -313,7 +313,7 @@ class MockBaseAgentUserIsolation(SSotAsyncTestCase):
         await agent2.shutdown()
 
 
-class MockBaseAgentWebSocketIntegration(SSotAsyncTestCase):
+class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     """Test suite for WebSocket integration and real-time event emission."""
     
     def setUp(self):
@@ -374,7 +374,7 @@ class MockBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         self.assertTrue(True)
 
 
-class MockBaseAgentModernExecutionPatterns(SSotAsyncTestCase):
+class TestBaseAgentModernExecutionPatterns(SSotAsyncTestCase):
     """Test suite for modern execution patterns and UserExecutionContext compliance."""
     
     def setUp(self):

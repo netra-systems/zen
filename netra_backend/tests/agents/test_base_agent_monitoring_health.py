@@ -428,8 +428,8 @@ class TestBaseAgentHealthMonitoringAsync(SSotAsyncTestCase):
 
         # Verify circuit breaker state consistency
         self.assertEqual(cb_before['state'], cb_after['state'])
-        self.assertIsInstance(cb_after['failure_count'], int)
-        self.assertIsInstance(cb_after['success_count'], int)
+        self.assertIsInstance(cb_after['metrics'], dict)
+        self.assertTrue(cb_after['is_healthy'])
 
 
 if __name__ == '__main__':

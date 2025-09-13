@@ -76,7 +76,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         self.enterprise_user_context.request_id = "enterprise-request-001"
         self.enterprise_user_context.is_test = True
 
-    def test_user_context_required_for_manager_creation(self):
+    async def test_user_context_required_for_manager_creation(self):
         """
         Test that user context is required for proper isolation.
 

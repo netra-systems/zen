@@ -248,11 +248,11 @@ class TestJsonOutputSizeOptimization(SSotBaseTestCase):
         }
 
         # Test size limit enforcement - WILL FAIL until implemented
-        from tests.unified_test_runner import JsonSizeLimiter  # Doesn't exist yet
+        from tests.unified_test_runner import JsonSizeLimiter, JsonSizeExceedsLimitError
         limiter = JsonSizeLimiter(max_size_mb=1)  # 1MB limit
 
         # Should trigger size limit enforcement
-        with pytest.raises(JsonSizeExceedsLimitError):  # Custom exception doesn't exist yet
+        with pytest.raises(JsonSizeExceedsLimitError):
             limiter.validate_and_process(huge_test_data)
 
         # Test graceful handling with auto-truncation
