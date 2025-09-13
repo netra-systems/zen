@@ -22,6 +22,11 @@ async def test_staging_websocket_fallback():
     print(f"   📡 Staging WebSocket URL: {os.environ['STAGING_WEBSOCKET_URL']}")
     print(f"   🔧 Use Staging Services: {os.environ['USE_STAGING_SERVICES']}")
 
+    # Check Docker availability
+    from test_framework.websocket_helpers import is_docker_available_for_websocket
+    docker_available = is_docker_available_for_websocket()
+    print(f"   🐳 Docker Available: {docker_available}")
+
     try:
         # This should trigger staging fallback since Docker is not available
         connection = await WebSocketTestHelpers.create_test_websocket_connection(

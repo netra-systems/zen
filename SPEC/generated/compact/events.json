@@ -43,7 +43,6 @@
     "trigger_event",
     "unsubscribe",
     "validate_user_event",
-    "websocket_event",
     "websocket_send_event"
   ]
 }

@@ -1067,32 +1067,50 @@ class UnifiedWebSocketEmitter:
     def create_auth_emitter(
         cls,
         manager: 'UnifiedWebSocketManager',
-        user_context: 'UserExecutionContext'
+        user_context: Optional['UserExecutionContext'] = None,
+        user_id: Optional[str] = None,
+        thread_id: Optional[str] = None,
+        connection_id: Optional[str] = None
     ) -> 'UnifiedWebSocketEmitter':
         """Factory method for authentication-specific emitter creation.
 
+        ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns.
+
         Args:
             manager: UnifiedWebSocketManager instance
-            user_context: User execution context for auth events
+            user_context: User execution context for auth events (NEW pattern)
+            user_id: User ID (LEGACY pattern)
+            thread_id: Thread ID (LEGACY pattern)
+            connection_id: Connection ID (LEGACY pattern)
 
         Returns:
             UnifiedWebSocketEmitter: Configured emitter for auth events
 
         Raises:
-            ValueError: If user_context is invalid
+            ValueError: If neither user_context nor user_id provided
         """
-        if not user_context:
-            raise ValueError("create_auth_emitter requires valid user_context")
-
-        user_id = getattr(user_context, 'user_id', None)
-        if not user_id:
-            raise ValueError("create_auth_emitter requires user_id in user_context")
+        # ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns
+        if user_context:
+            # NEW pattern (preferred)
+            actual_user_id = user_context.user_id
+            actual_user_context = user_context
+        elif user_id:
+            # LEGACY pattern (backward compatibility)
+            actual_user_id = user_id
+            # Create minimal context for compatibility
+            actual_user_context = type('AuthContext', (), {
+                'user_id': user_id,
+                'thread_id': thread_id,
+                'connection_id': connection_id or f"auth_{user_id}"
+            })()
+        else:
+            raise ValueError("create_auth_emitter requires either user_context or user_id")
 
         # For auth emitters, use standard emitter with enhanced security context
         return cls(
             manager=manager,
-            user_id=user_id,
-            context=user_context
+            user_id=actual_user_id,
+            context=actual_user_context
         )
 
 
