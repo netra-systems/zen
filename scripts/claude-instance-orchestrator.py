@@ -3,6 +3,15 @@
 Claude Code Instance Orchestrator
 Simple orchestrator for running 3 Claude Code instances in headless mode,
 each executing specific slash commands.
+
+
+Auto runs a set of parallel claude code instance commands
+Saves having to manually sping up terminal windows
+Path towards integration and automation
+collects more data than human readable output, e.g. token use, tool use names etc
+
+IDEAS
+    Record and contrast tool use by command 
 """
 
 import asyncio
@@ -441,6 +450,20 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         InstanceConfig(
             name="ssot",
             command="/ssotgardener",
+            description="ssot",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            name="gitissueprogressorv2 goldenpath",
+            command="/gitissueprogressorv2 goldenpath",
+            description="ssot",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            name="gitissueprogressorv2 tests",
+            command="/gitissueprogressorv2 tests",
             description="ssot",
             permission_mode="acceptEdits",
             output_format=output_format
