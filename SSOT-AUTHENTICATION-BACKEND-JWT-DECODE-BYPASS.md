@@ -53,14 +53,59 @@ user_id = auth_response.user_id
 - [x] **STEP 0: DISCOVER SSOT ISSUE** - Critical authentication SSOT violation identified
 - [x] GitHub Issue #814 created with P0 priority
 - [x] Local progress tracking file created
+- [x] **STEP 1: DISCOVER AND PLAN TESTS** - Existing tests inventoried, SSOT test plan created
 
 ### 🔄 NEXT STEPS
-- [ ] **STEP 1: DISCOVER AND PLAN TESTS** - Find existing tests, plan new SSOT validation tests
 - [ ] **STEP 2: EXECUTE TEST PLAN** - Create new SSOT tests (20% new tests)
 - [ ] **STEP 3: PLAN REMEDIATION** - Plan SSOT authentication remediation
 - [ ] **STEP 4: EXECUTE REMEDIATION** - Implement auth service delegation
 - [ ] **STEP 5: TEST FIX LOOP** - Run and fix all tests until passing
 - [ ] **STEP 6: PR AND CLOSURE** - Create PR and close issue
+
+## STEP 1 RESULTS: Test Discovery and Planning
+
+### Existing Test Inventory
+**MASSIVE SSOT VIOLATIONS CONFIRMED:**
+- **50+ test files** in `netra_backend/tests/real/auth/` directly using `jwt.decode()`
+- **Production vs Test Mismatch:** Production code uses SSOT, tests bypass architecture
+- **Security Gap:** Tests validating non-SSOT patterns while production claims SSOT compliance
+
+**Comprehensive Existing Test Suite:**
+- **620+ authentication tests** in backend
+- **174+ authentication tests** in auth service
+- **290+ WebSocket authentication tests**
+- **209+ Golden Path integration tests**
+
+### New SSOT Test Plan
+**Target: ~60 new/updated tests (20% new, 60% updates, 20% validation)**
+
+**Unit Tests (20% - Non-Docker):**
+- Mock-based SSOT delegation validation
+- Auth service response validation
+- JWT validation removal confirmation
+
+**Integration Tests (60% - Non-Docker using Staging):**
+- Auth service → backend delegation validation
+- WebSocket authentication SSOT compliance
+- Message route authentication flow tests
+- Cross-service authentication consistency
+
+**E2E Tests (20% - Staging GCP Remote):**
+- Golden Path: user login → WebSocket → send message → get AI response
+- Authentication consistency across REST API and WebSocket
+- Session management across auth service and backend
+
+**Failing Tests (Reproduce SSOT Violations):**
+- Tests demonstrating current JWT bypass issue
+- Tests showing auth service vs backend auth inconsistencies
+- Tests that fail when backend decodes JWT directly
+
+### Test Strategy
+**Constraints Met:**
+- ✅ NO Docker requirements (staging/GCP only)
+- ✅ Golden Path focus (users login → get AI responses)
+- ✅ SSOT compliance validation
+- ✅ Business value protection ($500K+ ARR)
 
 ## Documentation References
 - **SSOT Audit:** `reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md`
