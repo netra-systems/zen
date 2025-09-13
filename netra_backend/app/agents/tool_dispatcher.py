@@ -39,6 +39,46 @@ class UnifiedToolDispatcherFactory:
     @staticmethod
     def create_for_request(*args, **kwargs):
         return UnifiedToolDispatcher(*args, **kwargs)
+    
+    @classmethod
+    def create_legacy_global(cls, tools: Optional[List] = None):
+        """Create legacy global tool dispatcher (DEPRECATED).
+        
+        WARNING: This method creates a dispatcher with global-like behavior that may
+        cause isolation issues in multi-user environments. This is for backward
+        compatibility only.
+        
+        Args:
+            tools: List of tools to register initially
+            
+        Returns:
+            UnifiedToolDispatcher: Legacy dispatcher instance with warnings
+        """
+        warnings.warn(
+            "create_legacy_global() creates global-like state and may cause user isolation issues. "
+            "Use UnifiedToolDispatcherFactory.create_for_request() with proper UserExecutionContext for new code.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Create a dummy UserExecutionContext for legacy compatibility
+        # This allows the RequestScopedToolDispatcher to function but with warnings
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        import uuid
+        import time
+        
+        # Create a legacy context with generic values
+        legacy_context = UserExecutionContext(
+            user_id="legacy_user",
+            thread_id=f"legacy_thread_{int(time.time())}",
+            run_id=str(uuid.uuid4())
+        )
+        
+        return cls.create_for_request(
+            user_context=legacy_context,
+            tools=tools,
+            websocket_emitter=None
+        )
 
 # Temporary type aliases for compatibility
 class ToolDispatchRequest:
@@ -50,8 +90,17 @@ class ToolDispatchResponse:
 class DispatchStrategy:
     pass
 
-def create_request_scoped_dispatcher(*args, **kwargs):
-    return UnifiedToolDispatcher(*args, **kwargs)
+# Import the original function for proper aliasing
+try:
+    from netra_backend.app.core.tools.unified_tool_dispatcher import create_request_scoped_dispatcher
+except ImportError:
+    # Fallback if unified_tool_dispatcher is not available
+    def create_request_scoped_dispatcher(*args, **kwargs):
+        return UnifiedToolDispatcher(*args, **kwargs)
+
+# Module-level logger for test compatibility
+import logging
+logger = logging.getLogger(__name__)
 
 # Import core tool models (SSOT for tool execution results)
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
@@ -142,8 +191,6 @@ if ProductionTool is not None:
 # Migration guidance notice
 def _emit_migration_notice():
     """Emit informational notice about successful migration."""
-    import logging
-    logger = logging.getLogger(__name__)
     logger.info(
         " PASS:  Tool dispatcher consolidation complete. "
         "Using netra_backend.app.core.tools.unified_tool_dispatcher as SSOT. "
