@@ -1,26 +1,46 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 12:50:53
+**Generated:** 2025-09-13 14:42:59
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 0
+- **Total Tests:** 1
 - **Passed:** 0 (0.0%)
-- **Failed:** 0 (0.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 24.17 seconds
+- **Duration:** 0.51 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
+### NORMAL Priority Tests
+
+| Test Name | Status | Duration | File |
+|-----------|--------|----------|------|
+| test_complete_golden_path_staging_environment | FAIL failed | 0.223s | test_websocket_ssot_golden_path.py |
+
+## Failed Tests Details
+
+### FAILED: test_complete_golden_path_staging_environment
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_websocket_ssot_golden_path.py
+- **Duration:** 0.223s
+- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:238: in test_complete_golden_path_staging_environment
+    auth_headers = await self._authenticate_staging_user()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_websocket_ssot_golden_path.py:100: in _authenticate_staging_user
+    "email": self.test_email,
+             ^^^^^^^^^^^^^^^
+E   AttributeError: 'TestWebSocketSSoTGoldenPathStaging' object has no attribute 'test_email'...
+
 ## Pytest Output Format
 
 ```
+test_websocket_ssot_golden_path.py::test_complete_golden_path_staging_environment FAILED
 
 ==================================================
-0 passed, 0 failed in 24.17s
+0 passed, 1 failed in 0.51s
 ```
 
 ## Test Coverage Matrix
