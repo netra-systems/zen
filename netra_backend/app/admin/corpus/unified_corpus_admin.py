@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
-from shared.isolated_environment import get_env, get_env_var
+from shared.isolated_environment import get_env
 
 # Note: BaseAgent import removed due to dependency issues
 # Note: Configuration import removed - not used in this module
