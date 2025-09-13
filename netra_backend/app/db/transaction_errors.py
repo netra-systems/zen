@@ -287,8 +287,17 @@ def _check_operational_error_retry(error: Exception, enable_deadlock_retry: bool
 
 
 def is_retryable_error(error: Exception, enable_deadlock_retry: bool, enable_connection_retry: bool) -> bool:
-    """Check if error is retryable based on configuration."""
+    """Check if error is retryable based on configuration (Enhanced for Issue #731)."""
+    # Check original DisconnectionError first
     if _is_disconnection_retryable(error, enable_connection_retry):
+        return True
+
+    # Issue #731: Check classified ConnectionError types
+    if isinstance(error, ConnectionError) and enable_connection_retry:
+        return True
+
+    # Issue #731: Check classified DeadlockError types
+    if isinstance(error, DeadlockError) and enable_deadlock_retry:
         return True
 
     return _check_operational_error_retry(error, enable_deadlock_retry, enable_connection_retry)
