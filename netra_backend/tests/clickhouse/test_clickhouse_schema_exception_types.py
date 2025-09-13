@@ -133,7 +133,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         """
         # Mock index creation conflict error
         with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute_query.side_effect = IntegrityError(
+            mock_client.execute.side_effect = IntegrityError(
                 "Index 'test_index' already exists on table 'test_table'", None, None
             )
             
@@ -163,7 +163,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         """
         # Mock migration failure in the middle of operation
         with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute_query.side_effect = [
+            mock_client.execute.side_effect = [
                 None,  # First operation succeeds
                 OperationalError("Disk space exhausted", None, None),  # Second fails
             ]
@@ -197,8 +197,8 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         """
         # Mock table deletion with dependency error
         with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute_query.side_effect = IntegrityError(
-                "Cannot drop table 'parent_table' because it is referenced by materialized view 'child_view'", 
+            mock_client.execute.side_effect = IntegrityError(
+                "Cannot drop table 'parent_table' because it is referenced by materialized view 'child_view'",
                 None, None
             )
             
@@ -251,8 +251,8 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         """
         # Mock constraint violation error
         with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute_query.side_effect = IntegrityError(
-                "Check constraint 'positive_values' violated: column 'amount' value -100 is negative", 
+            mock_client.execute.side_effect = IntegrityError(
+                "Check constraint 'positive_values' violated: column 'amount' value -100 is negative",
                 None, None
             )
             
@@ -280,7 +280,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         """
         # Mock engine configuration error
         with patch.object(schema_manager, '_client') as mock_client:
-            mock_client.execute_query.side_effect = OperationalError(
+            mock_client.execute.side_effect = OperationalError(
                 "Engine ReplacingMergeTree requires ORDER BY clause", None, None
             )
             
