@@ -430,8 +430,15 @@ async def health_backend(request: Request) -> Dict[str, Any]:
         
         # Check LLM integration
         try:
-            if app_state and hasattr(app_state, 'llm_manager') and app_state.llm_manager:
-                health_response["capabilities"]["llm_integration"] = True
+            if app_state and hasattr(app_state, 'llm_manager'):
+                # SECURITY FIX: LLM manager is intentionally None for security (user isolation)
+                # Check for factory pattern which is the correct security implementation
+                if app_state.llm_manager is not None:
+                    # Legacy pattern - actual LLM manager instance
+                    health_response["capabilities"]["llm_integration"] = True
+                elif hasattr(app_state, 'llm_manager_factory') and app_state.llm_manager_factory:
+                    # Security-compliant pattern - factory creates user-isolated instances
+                    health_response["capabilities"]["llm_integration"] = True
                 
         except Exception as llm_error:
             logger.warning(f"LLM integration check failed: {llm_error}")
