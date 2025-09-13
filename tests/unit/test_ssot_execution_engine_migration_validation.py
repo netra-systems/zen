@@ -232,10 +232,10 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         self.assertNotEqual(engine_1.get_user_context().request_id, engine_2.get_user_context().request_id)
         
         # 3. Different agent factories (no shared agent state)
-        self.assertIsNot(engine_1.agent_factory, engine_2.agent_factory)
+        self.assertTrue(engine_1.agent_factory is not engine_2.agent_factory)
         
         # 4. Different websocket emitters (no cross-user event delivery)
-        self.assertIsNot(engine_1.websocket_emitter, engine_2.websocket_emitter)
+        self.assertTrue(engine_1.websocket_emitter is not engine_2.websocket_emitter)
         
         # 5. No shared internal state
         engine_1._internal_state = {'user_data': 'sensitive_user_1_data'}
