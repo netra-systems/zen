@@ -175,74 +175,76 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             pytest.fail("TableDependencyError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_constraint_violation_error_type(self):
+    async def test_constraint_violation_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing ConstraintViolationError type.
-        
-        Current Problem: Constraint violations don't have a specific ConstraintViolationError
-        type with constraint details and diagnostic context.
-        
-        Expected Failure: This test should fail because ConstraintViolationError doesn't exist
-        and constraint violations provide insufficient diagnostic information.
+        Test validates ConstraintViolationError classification works correctly.
+
+        Validates: Constraint violations are properly classified as ConstraintViolationError
+        type with appropriate constraint details and diagnostic context.
+
+        Expected Success: This test should pass because ConstraintViolationError exists
+        and current classification correctly identifies constraint violations.
         """
         # Test constraint violation failure scenario
         constraint_error = IntegrityError(
             "Check constraint 'valid_email' violated: column 'email' value 'invalid-email' does not match pattern",
             None, None
         )
-        
-        # Current classification should NOT produce ConstraintViolationError
+
+        # Current classification should correctly produce ConstraintViolationError
         classified_error = classify_error(constraint_error)
-        
-        # This assertion should PASS because ConstraintViolationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be ConstraintViolationError)
-        assert type(classified_error).__name__ != "ConstraintViolationError", \
-            f"ConstraintViolationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import ConstraintViolationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because ConstraintViolationError exists and works correctly
+        assert type(classified_error).__name__ == "ConstraintViolationError", \
+            f"Expected ConstraintViolationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import ConstraintViolationError
+        assert isinstance(classified_error, ConstraintViolationError), \
+            "Error should be classified as ConstraintViolationError instance"
+
+        # Test that we can successfully import ConstraintViolationError
+        try:
             from netra_backend.app.db.transaction_errors import ConstraintViolationError
-        
-        # Verify constraint context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Constraint:" not in error_str, "Constraint name should not exist yet"
-        assert "Violating Value:" not in error_str, "Violating value should not exist yet"
-        assert "Constraint Rule:" not in error_str, "Constraint rule should not exist yet"
+            assert ConstraintViolationError is not None, "ConstraintViolationError should be importable"
+        except ImportError:
+            pytest.fail("ConstraintViolationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_engine_configuration_error_type(self):
+    async def test_engine_configuration_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing EngineConfigurationError type.
-        
-        Current Problem: ClickHouse engine configuration errors don't have a specific 
-        EngineConfigurationError type with engine-specific context and requirements.
-        
-        Expected Failure: This test should fail because EngineConfigurationError doesn't exist
-        and engine errors don't provide engine-specific diagnostic information.
+        Test validates EngineConfigurationError classification works correctly.
+
+        Validates: ClickHouse engine configuration errors are properly classified
+        as EngineConfigurationError type with engine-specific context and requirements.
+
+        Expected Success: This test should pass because EngineConfigurationError exists
+        and current classification correctly identifies engine configuration errors.
         """
-        # Test engine configuration failure scenario  
+        # Test engine configuration failure scenario
         engine_error = OperationalError(
             "Engine ReplacingMergeTree requires ORDER BY clause and version column",
             None, None
         )
-        
-        # Current classification should NOT produce EngineConfigurationError
+
+        # Current classification should correctly produce EngineConfigurationError
         classified_error = classify_error(engine_error)
-        
-        # This assertion should PASS because EngineConfigurationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be EngineConfigurationError)
-        assert type(classified_error).__name__ != "EngineConfigurationError", \
-            f"EngineConfigurationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import EngineConfigurationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because EngineConfigurationError exists and works correctly
+        assert type(classified_error).__name__ == "EngineConfigurationError", \
+            f"Expected EngineConfigurationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import EngineConfigurationError
+        assert isinstance(classified_error, EngineConfigurationError), \
+            "Error should be classified as EngineConfigurationError instance"
+
+        # Test that we can successfully import EngineConfigurationError
+        try:
             from netra_backend.app.db.transaction_errors import EngineConfigurationError
-        
-        # Verify engine context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Engine:" not in error_str, "Engine type should not exist yet"
-        assert "Missing Requirements:" not in error_str, "Missing requirements should not exist yet"
-        assert "Engine Configuration:" not in error_str, "Engine configuration should not exist yet"
+            assert EngineConfigurationError is not None, "EngineConfigurationError should be importable"
+        except ImportError:
+            pytest.fail("EngineConfigurationError should be importable from transaction_errors")
 
     def test_missing_exception_types_in_transaction_errors_module(self):
         """
