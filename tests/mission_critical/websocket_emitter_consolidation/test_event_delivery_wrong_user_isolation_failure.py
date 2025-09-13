@@ -18,6 +18,7 @@ import asyncio
 import pytest
 import random
 import uuid
+import logging
 from typing import Dict, List, Set, Any, Optional
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -70,9 +71,9 @@ class TestEventDeliveryWrongUserIsolationFailure(SSotAsyncTestCase):
     This test MUST FAIL before consolidation to prove isolation failures exist.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test infrastructure."""
-        super().setUp()
+        super().setup_method(method)
         self.event_tracker = UserEventTracker()
         self.emitter_instances = {}
 
