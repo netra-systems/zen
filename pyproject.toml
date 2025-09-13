@@ -91,10 +91,12 @@ markers = [
     "auth: Auth service tests",
     "frontend: Frontend tests",
     "agents: Agent-related tests",
+    "shared_components: Tests for shared component functionality",
     
     # Resource markers
     "real_llm: Requires real LLM API",
     "real_database: Requires real database",
+    "real_redis: Requires real Redis connectivity",
     "real_services: Requires external services",
     "requires_redis: Requires Redis",
     "requires_postgres: Requires PostgreSQL",

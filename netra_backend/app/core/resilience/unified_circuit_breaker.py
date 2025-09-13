@@ -11,6 +11,20 @@ from typing import Any, Dict, Optional, Callable
 from pydantic import BaseModel
 
 
+# Public API - explicit exports for clarity
+__all__ = [
+    'UnifiedCircuitBreakerState',
+    'UnifiedCircuitConfig',
+    'CircuitBreakerMetrics',
+    'UnifiedCircuitBreaker',
+    'UnifiedCircuitBreakerManager',
+    'UnifiedServiceCircuitBreakers',
+    'get_unified_circuit_breaker_manager',
+    'unified_circuit_breaker',
+    'unified_circuit_breaker_context'
+]
+
+
 class UnifiedCircuitBreakerState(str, Enum):
     """Circuit breaker states."""
     CLOSED = "closed"
