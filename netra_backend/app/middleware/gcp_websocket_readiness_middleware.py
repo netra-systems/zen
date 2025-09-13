@@ -447,42 +447,129 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
             else:
                 return True, {"error": str(e), "allowed": True}
     
-    async def _reject_websocket_connection(self, request: Request, details: Dict[str, Any]) -> Response:
+    async def _reject_websocket_connection_cloud_run_compatible(self, request: Request, details: Dict[str, Any]) -> Response:
         """
-        Reject WebSocket connection with 503 Service Unavailable.
+        Enhanced WebSocket connection rejection with Cloud Run compatibility.
         
-        CRITICAL: Returns 503 instead of allowing connection to fail with 1011.
-        This provides better error reporting and prevents client confusion.
+        CRITICAL FIX for Issue #449: Returns Cloud Run compatible error responses
+        with enhanced uvicorn middleware stack protection.
         """
         failed_services = details.get('failed_services', [])
         state = details.get('state', 'unknown')
+        error_type = details.get('error', 'service_not_ready')
         
         self.logger.warning(
-            f"[U+1F6AB] Rejecting WebSocket connection - services not ready. "
+            f"[🚫] Rejecting WebSocket connection (Issue #449 protection) - "
             f"State: {state}, Failed services: {failed_services}, "
-            f"Path: {request.url.path}"
+            f"Error: {error_type}, Path: {request.url.path}"
         )
         
-        # Return 503 Service Unavailable with detailed error
+        # Determine appropriate status code for Cloud Run
+        if error_type == 'cloud_run_timeout':
+            status_code = 408  # Request Timeout
+            retry_after = 5
+        elif error_type == 'readiness_check_timeout':
+            status_code = 503  # Service Unavailable
+            retry_after = 10
+        elif 'validation' in error_type:
+            status_code = 400  # Bad Request
+            retry_after = 0
+        else:
+            status_code = 503  # Service Unavailable
+            retry_after = 10
+        
+        # Enhanced error message with Cloud Run compatibility
         error_message = {
-            "error": "service_not_ready",
-            "message": "WebSocket service is not ready. Please try again in a few moments.",
+            "error": error_type,
+            "message": "WebSocket service is not ready. Enhanced uvicorn compatibility check failed.",
             "details": {
                 "state": state,
                 "failed_services": failed_services,
                 "environment": self.environment,
-                "retry_after_seconds": 10
+                "retry_after_seconds": retry_after,
+                "cloud_run_compatible": True,
+                "uvicorn_compatible": True,
+                "issue_reference": "#449"
             }
         }
+        
+        # Add specific details based on error type
+        if error_type == 'cloud_run_timeout':
+            error_message["details"]["cloud_run_timeout"] = self.load_balancer_timeout
+            error_message["details"]["recommendation"] = "Retry with exponential backoff"
         
         import json
         from starlette.responses import JSONResponse
         
+        # Cloud Run compatible headers
+        headers = {
+            "Retry-After": str(retry_after),
+            "X-Cloud-Run-Compatible": "true",
+            "X-uvicorn-Compatible": "true", 
+            "X-Issue-449-Fix": "enhanced-rejection"
+        }
+        
+        if retry_after > 0:
+            headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        
         return JSONResponse(
-            status_code=503,
+            status_code=status_code,
             content=error_message,
-            headers={"Retry-After": "10"}
+            headers=headers
         )
+    
+    async def _reject_websocket_connection(self, request: Request, details: Dict[str, Any]) -> Response:
+        """
+        Legacy WebSocket connection rejection - redirects to enhanced version.
+        
+        BACKWARD COMPATIBILITY: Maintained for existing code compatibility.
+        """
+        return await self._reject_websocket_connection_cloud_run_compatible(request, details)
+    
+    async def _create_uvicorn_safe_error_response(self, error_message: str, status_code: int) -> Response:
+        """
+        Create uvicorn-safe error response for Issue #449 compatibility.
+        
+        CRITICAL FIX: Ensures error responses are compatible with uvicorn
+        protocol handling and Cloud Run load balancer requirements.
+        """
+        try:
+            error_data = {
+                "error": "uvicorn_middleware_error",
+                "message": error_message,
+                "status_code": status_code,
+                "middleware": "gcp_websocket_readiness",
+                "issue_reference": "#449",
+                "cloud_run_compatible": True,
+                "uvicorn_compatible": True,
+                "timestamp": time.time()
+            }
+            
+            import json
+            from starlette.responses import JSONResponse
+            
+            headers = {
+                "X-Middleware-Error": "gcp-websocket-readiness",
+                "X-uvicorn-Compatible": "true",
+                "X-Cloud-Run-Compatible": "true",
+                "X-Issue-449-Fix": "error-response"
+            }
+            
+            return JSONResponse(
+                status_code=status_code,
+                content=error_data,
+                headers=headers
+            )
+            
+        except Exception as e:
+            self.logger.critical(f"Cannot create uvicorn-safe error response: {e}")
+            # Emergency fallback response
+            from starlette.responses import Response
+            return Response(
+                content="WebSocket middleware error",
+                status_code=status_code,
+                media_type="text/plain"
+            )
 
 
 # SSOT Middleware Factory Function
