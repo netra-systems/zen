@@ -92,7 +92,7 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 
 from netra_backend.app.websocket_core.types import MessageType, create_standard_message
 
-from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolExecutionEngine
+from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
 
 
 
