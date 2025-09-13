@@ -7,7 +7,7 @@ Enhanced for Issue #374: Database Exception Remediation
 """
 
 import asyncio
-from sqlalchemy.exc import DisconnectionError, OperationalError, InvalidRequestError
+from sqlalchemy.exc import DisconnectionError, OperationalError, InvalidRequestError, IntegrityError
 
 
 class TransactionError(Exception):
@@ -53,6 +53,51 @@ class ColumnModificationError(SchemaError):
 class IndexCreationError(SchemaError):
     """Raised when index creation/deletion operations fail."""
     pass
+
+
+class IndexOperationError(SchemaError):
+    """Raised when index operations (rebuild, drop, optimize) fail."""
+    
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class MigrationError(SchemaError):
+    """Raised when schema migration operations fail."""
+    
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class TableDependencyError(SchemaError):
+    """Raised when table dependency relationship errors occur."""
+    
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class ConstraintViolationError(SchemaError):
+    """Raised when database constraint violations occur."""
+    
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class EngineConfigurationError(SchemaError):
+    """Raised when ClickHouse engine configuration errors occur."""
+    
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
 
 
 def _has_deadlock_keywords(error_msg: str) -> bool:
@@ -116,6 +161,56 @@ def _has_index_creation_keywords(error_msg: str) -> bool:
         'index conflict', 'index definition', 'integrityerror'
     ]
     return any(keyword in error_msg for keyword in index_creation_keywords)
+
+
+def _has_index_operation_keywords(error_msg: str) -> bool:
+    """Check if error message contains index operation keywords."""
+    index_operation_keywords = [
+        'index rebuild', 'drop index', 'index optimization', 'index maintenance',
+        'index corruption', 'index repair', 'materialized view refresh',
+        'projection rebuild', 'index conflict resolution', 'insufficient disk space'
+    ]
+    return any(keyword in error_msg for keyword in index_operation_keywords)
+
+
+def _has_migration_keywords(error_msg: str) -> bool:
+    """Check if error message contains migration keywords."""
+    migration_keywords = [
+        'migration step', 'migration failed', 'rollback required', 'migration conflict',
+        'version mismatch', 'schema version', 'migration timeout', 'partial migration',
+        'migration dependency', 'schema evolution', 'step', 'of'
+    ]
+    return any(keyword in error_msg for keyword in migration_keywords)
+
+
+def _has_table_dependency_keywords(error_msg: str) -> bool:
+    """Check if error message contains table dependency keywords."""
+    table_dependency_keywords = [
+        'referenced by', 'materialized view dependency', 'foreign key constraint',
+        'table dependency', 'circular dependency', 'dependency chain',
+        'referenced table', 'dependent object', 'cascade operation', 'cannot be dropped'
+    ]
+    return any(keyword in error_msg for keyword in table_dependency_keywords)
+
+
+def _has_constraint_violation_keywords(error_msg: str) -> bool:
+    """Check if error message contains constraint violation keywords."""
+    constraint_violation_keywords = [
+        'constraint violated', 'check constraint', 'unique constraint', 'not null constraint',
+        'constraint failure', 'validation failed', 'constraint rule', 'constraint name',
+        'violating value', 'constraint definition', 'does not match pattern'
+    ]
+    return any(keyword in error_msg for keyword in constraint_violation_keywords)
+
+
+def _has_engine_configuration_keywords(error_msg: str) -> bool:
+    """Check if error message contains engine configuration keywords."""
+    engine_configuration_keywords = [
+        'engine configuration', 'mergetree', 'replacingmergetree', 'order by clause',
+        'partition by', 'engine requirements', 'engine parameters', 'engine settings',
+        'storage engine', 'table engine', 'engine validation', 'requires'
+    ]
+    return any(keyword in error_msg for keyword in engine_configuration_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
@@ -221,6 +316,41 @@ def _classify_index_creation_error(error: OperationalError, error_msg: str) -> E
     return error
 
 
+def _classify_index_operation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify index operation-related operational errors."""
+    if _has_index_operation_keywords(error_msg):
+        return IndexOperationError(f"Index operation error: {error}")
+    return error
+
+
+def _classify_migration_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify migration-related operational errors."""  
+    if _has_migration_keywords(error_msg):
+        return MigrationError(f"Migration error: {error}")
+    return error
+
+
+def _classify_table_dependency_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify table dependency-related operational errors."""
+    if _has_table_dependency_keywords(error_msg):
+        return TableDependencyError(f"Table dependency error: {error}")
+    return error
+
+
+def _classify_constraint_violation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify constraint violation-related operational errors."""
+    if _has_constraint_violation_keywords(error_msg):
+        return ConstraintViolationError(f"Constraint violation error: {error}")
+    return error
+
+
+def _classify_engine_configuration_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify engine configuration-related operational errors."""
+    if _has_engine_configuration_keywords(error_msg):
+        return EngineConfigurationError(f"Engine configuration error: {error}")
+    return error
+
+
 def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
@@ -240,7 +370,28 @@ def _attempt_error_classification(error: OperationalError, error_msg: str) -> Ex
     if classified != error:
         return classified
     
-    # Try specific schema error types first
+    # Try new specific schema error types first
+    classified = _classify_index_operation_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_migration_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_table_dependency_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_constraint_violation_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_engine_configuration_error(error, error_msg)
+    if classified != error:
+        return classified
+    
+    # Try existing schema error types
     classified = _classify_table_creation_error(error, error_msg)
     if classified != error:
         return classified
@@ -269,12 +420,20 @@ def _classify_invalid_request_error(error: InvalidRequestError) -> Exception:
     return _attempt_error_classification(error, error_msg)
 
 
+def _classify_integrity_error(error: IntegrityError) -> Exception:
+    """Classify IntegrityError into specific types."""
+    error_msg = str(error).lower()
+    return _attempt_error_classification(error, error_msg)
+
+
 def classify_error(error: Exception) -> Exception:
     """Classify and potentially wrap errors."""
     if isinstance(error, OperationalError):
         return _classify_operational_error(error)
     elif isinstance(error, InvalidRequestError):
         return _classify_invalid_request_error(error)
+    elif isinstance(error, IntegrityError):
+        return _classify_integrity_error(error)
     elif isinstance(error, asyncio.TimeoutError):
         return TimeoutError(f"Timeout error: {error}")
     return error
