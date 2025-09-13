@@ -6,6 +6,7 @@ Test error handling and recovery for real ClickHouse connections
 import pytest
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.tests.clickhouse.clickhouse_test_fixtures import get_clickhouse_config, create_clickhouse_client
+from netra_backend.app.db.transaction_errors import ConnectionError
 
 
 class TestClickHouseErrorHandling:
