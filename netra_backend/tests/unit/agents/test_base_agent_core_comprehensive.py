@@ -128,28 +128,21 @@ class TestBaseAgentCoreExecution(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_execute_method_basic_functionality(self):
-        """Test the basic execute method functionality."""
-        agent = BaseAgent(
+        """Test the basic execute method functionality using concrete agent."""
+        agent = ConcreteTestAgent(
             name="ExecuteTestAgent",
             enable_reliability=False,  # Disable for basic test
             enable_execution_engine=False
         )
 
-        # Test execute with context
-        try:
-            result = await agent.execute(context=self.user_context)
+        # Test execute method with input text
+        result = await agent.execute(input_text="test input")
 
-            # Verify result structure (BaseAgent.execute should return something)
-            # Note: BaseAgent is abstract but should handle basic execution flow
-            assert result is not None or result is None  # Allow both scenarios
-
-        except NotImplementedError:
-            # This is expected for abstract base agent
-            pytest.skip("BaseAgent.execute is abstract - implementation required in subclasses")
-        except Exception as e:
-            # Log the error for debugging but don't fail the test
-            print(f"Execute method encountered error: {e}")
-            # This might be expected behavior for abstract base class
+        # Verify result structure
+        assert result is not None
+        assert isinstance(result, str)
+        assert "test input" in result
+        assert "Test execution result" in result
 
     @pytest.mark.asyncio
     async def test_execute_with_context_method(self):
