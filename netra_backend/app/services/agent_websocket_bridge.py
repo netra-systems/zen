@@ -1567,26 +1567,33 @@ class AgentWebSocketBridge(MonitorableComponent):
             except ImportError:
                 logger.debug("Event delivery tracker not available, proceeding without tracking")
             
-            # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
-            user_id = effective_user_context.user_id
-            
-            # PHASE 4 FIX: Use centralized retry logic for critical events
-            success = await self._send_with_retry(user_id, notification, "agent_thinking", run_id)
+            # PHASE 4 FIX: Use emit_agent_event for consistent event emission pattern
+            success = await self.emit_agent_event(
+                event_type="agent_thinking",
+                data={
+                    "reasoning": reasoning,
+                    "step_number": step_number,
+                    "progress_percentage": progress_percentage,
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                },
+                run_id=run_id,
+                agent_name=agent_name
+            )
             
             # PHASE 2 FIX: Update delivery tracking
             if event_id:
                 try:
                     if success:
                         tracker.mark_event_confirmed(event_id)
-                        logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                        logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={effective_user_context.user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                     else:
-                        tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False")
+                        tracker.mark_event_failed(event_id, "WebSocket emit_agent_event returned False")
                         logger.error(f" ALERT:  EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                 except Exception as track_error:
                     logger.warning(f"Event tracking update failed: {track_error}")
             else:
                 if success:
-                    logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={user_id} (run_id={run_id}, agent={agent_name})")
+                    logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={effective_user_context.user_id} (run_id={run_id}, agent={agent_name})")
                 else:
                     logger.error(f" ALERT:  EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
             
