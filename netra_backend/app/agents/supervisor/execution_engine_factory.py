@@ -276,11 +276,11 @@ class ExecutionEngineFactory:
                 )
             
             # Create user WebSocket emitter (works with None websocket_bridge)
+            # FIX: UnifiedWebSocketEmitter doesn't use thread_id/run_id, uses context instead
             emitter = UnifiedWebSocketEmitter(
                 user_id=context.user_id,
-                thread_id=context.thread_id,
-                run_id=context.run_id,
-                websocket_bridge=websocket_bridge
+                context=context,
+                websocket_manager=websocket_bridge  # Legacy parameter name for WebSocket manager
             )
             
             logger.debug(f"Created UnifiedWebSocketEmitter for user {context.user_id} "

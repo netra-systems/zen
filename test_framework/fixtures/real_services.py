@@ -40,13 +40,39 @@ except ImportError:
     logger.warning("UnifiedDockerManager not available - using fallback")
     UnifiedDockerManager = None
 
+# Mock Redis class for fallback
+class MockRedis:
+    """Mock Redis client for testing when Redis libraries are not available."""
+    def __init__(self, *args, **kwargs):
+        self._data = {}
+    
+    async def get(self, key):
+        return self._data.get(key)
+    
+    async def set(self, key, value, *args, **kwargs):
+        self._data[key] = value
+        return True
+    
+    async def delete(self, *keys):
+        for key in keys:
+            self._data.pop(key, None)
+        return len(keys)
+    
+    async def exists(self, *keys):
+        return sum(1 for key in keys if key in self._data)
+    
+    async def close(self):
+        pass
+
 try:
     import redis.asyncio as redis
     import fakeredis.aioredis as fake_redis
+    REDIS_AVAILABLE = True
 except ImportError:
-    logger.warning("Redis libraries not available - Redis fixtures will fail")
+    logger.info("Redis libraries not available - using mock Redis for tests")
     redis = None
     fake_redis = None
+    REDIS_AVAILABLE = False
 
 
 @pytest.fixture(scope="function")

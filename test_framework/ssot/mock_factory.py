@@ -27,6 +27,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 from typing import Dict, Any, Optional, List
 from datetime import datetime, UTC
 import time
+import uuid
 
 
 class SSotMockFactory:
@@ -182,7 +183,11 @@ class SSotMockFactory:
         mock_response.choices[0].message.content = response_text
         mock_response.usage.total_tokens = 100
         
+        # FIX: Use proper async mock for LLM operations
         mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+        mock_client.agenerate = AsyncMock(return_value={"response": response_text, "usage": {"total_tokens": 100}})
+        mock_client.get_default_client = AsyncMock(return_value=mock_client)
+        
         return mock_client
 
     @staticmethod
@@ -252,6 +257,10 @@ class SSotMockFactory:
             "max_tokens": 4000,
             "supports_streaming": True
         })
+        
+        # FIX: Create default client mock properly
+        mock_default_client = SSotMockFactory.create_llm_client_mock()
+        mock_llm_manager.get_default_client = AsyncMock(return_value=mock_default_client)
         
         # Mock streaming support
         async def mock_stream_response():
@@ -502,8 +511,15 @@ class SSotMockFactory:
             return cls.create_database_session_mock()
         elif mock_type == "UserExecutionEngine":
             mock_engine = AsyncMock()
+            # FIX: Properly configure UserExecutionEngine mock
+            mock_engine.engine_id = kwargs.get('engine_id', f"engine_{uuid.uuid4().hex[:8]}")
             mock_engine.execute_agent_pipeline = AsyncMock()
             mock_engine.cleanup = AsyncMock()
+            mock_engine.is_active = AsyncMock(return_value=True)
+            mock_engine.get_user_context = AsyncMock()
+            mock_engine.created_at = time.time()
+            mock_engine.active_runs = []
+            mock_engine.get_user_execution_stats = AsyncMock(return_value={})
             return mock_engine
         elif mock_type == "WebSocketManager":
             return cls.create_websocket_manager_mock(**kwargs)
@@ -511,6 +527,13 @@ class SSotMockFactory:
             return cls.create_mock_llm_manager(**kwargs)
         elif mock_type == "AgentWebSocketBridge":
             return cls.create_mock_agent_websocket_bridge(**kwargs)
+        elif mock_type == "UnifiedWebSocketEmitter":
+            # FIX: Add UnifiedWebSocketEmitter mock support
+            mock_emitter = AsyncMock()
+            mock_emitter.emit_event = AsyncMock()
+            mock_emitter.emit_critical_event = AsyncMock()
+            mock_emitter.send_message = AsyncMock()
+            return mock_emitter
         else:
             # Generic mock for unknown types
             return AsyncMock(**kwargs)
