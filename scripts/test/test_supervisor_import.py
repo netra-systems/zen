@@ -12,7 +12,7 @@ print("=" * 60)
 # Test 1: Basic import
 print("\n1. Testing basic import...")
 try:
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     print("[PASS] Import successful from supervisor_consolidated")
 except ImportError as e:
     print(f"[FAIL] Import failed: {e}")
@@ -60,7 +60,7 @@ for attr in essential_attrs:
 print("\n4. Testing imports from various test files...")
 
 test_imports = [
-    "from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as S1",
+    "from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as S1",
     "from netra_backend.app.agents import supervisor_consolidated",
     "import netra_backend.app.agents.supervisor_consolidated",
 ]

@@ -17,7 +17,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 # Import the components we've fixed
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger
 from netra_backend.app.agents.supervisor.comprehensive_observability import ComprehensiveObservabilityManager

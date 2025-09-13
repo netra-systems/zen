@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # P0 SECURITY MIGRATION: Replaced vulnerable DeepAgentState with secure UserExecutionContext
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 

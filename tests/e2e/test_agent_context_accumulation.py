@@ -25,7 +25,7 @@ import pytest
 from test_framework.environment_isolation import get_env
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.config import get_config
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.llm.llm_manager import LLMManager

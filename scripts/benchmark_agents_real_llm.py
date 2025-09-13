@@ -79,7 +79,7 @@ class RealLLMBenchmark:
     
     async def benchmark_supervisor(self) -> AgentBenchmark:
         """Benchmark Supervisor Agent with real LLM"""
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.db.session import get_async_db
         
         benchmark = AgentBenchmark(

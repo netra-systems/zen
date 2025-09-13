@@ -27,7 +27,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
 # Removed WebSocket mock import - using real WebSocket connections per CLAUDE.md "MOCKS = Abomination"
 from test_framework.real_services import get_real_services

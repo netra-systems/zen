@@ -24,7 +24,7 @@ class TestImportTimeFactoryCompliance:
     
     def test_supervisor_agent_imports_without_websocket_bridge(self):
         """Test that SupervisorAgent can be imported and initialized without WebSocket bridge."""
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         
         # Create a minimal LLM manager for testing
@@ -83,7 +83,7 @@ class TestImportTimeFactoryCompliance:
         with patch('netra_backend.app.websocket_core.create_websocket_manager', side_effect=mock_create_websocket_manager):
             # These imports should not trigger factory calls
             from netra_backend.app.services.agent_service_factory import get_agent_service
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             
             # Factory should not have been called during import
             assert len(factory_called) == 0, "WebSocket factory was called during import - this violates architecture"
@@ -121,7 +121,7 @@ class TestImportTimeFactoryCompliance:
     def test_lazy_initialization_pattern(self):
         """Test that lazy initialization works correctly."""
         from netra_backend.app.services.agent_service_core import AgentService
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         
         # Create supervisor without WebSocket bridge
@@ -139,7 +139,7 @@ class TestImportTimeFactoryCompliance:
     @pytest.mark.asyncio
     async def test_websocket_bridge_initialization_during_execution(self):
         """Test that WebSocket bridge is properly initialized when needed."""
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         from netra_backend.app.websocket_core import create_websocket_manager

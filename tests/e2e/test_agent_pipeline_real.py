@@ -44,7 +44,7 @@ import websockets
 from shared.isolated_environment import get_env
 from test_framework.unified_docker_manager import UnifiedDockerManager, ServiceMode, EnvironmentType
 from test_framework.http_client import UnifiedHTTPClient
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
 from netra_backend.app.schemas.user_plan import PlanTier

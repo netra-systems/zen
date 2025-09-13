@@ -60,7 +60,7 @@ try:
     from netra_backend.app.agents.base.execution_context import ExecutionStatus
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-    from netra_backend.app.tools.tool_result import ToolResult, ToolStatus
+    from netra_backend.app.schemas.tool import ToolResult, ToolStatus
     from netra_backend.app.core.tools.base_tool import BaseTool
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:

@@ -78,7 +78,7 @@ from shared.types.core_types import UserID, ThreadID, ensure_user_id
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 # Import agent execution components for real testing
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher

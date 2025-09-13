@@ -29,7 +29,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Core imports
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     validate_user_context

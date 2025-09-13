@@ -182,7 +182,7 @@ class TestSSOTSupervisorDuplicationViolations(SSotAsyncTestCase):
 
         try:
             # Import consolidated implementation
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             consolidated_supervisor = ConsolidatedSupervisor(
                 llm_manager=self.mock_llm_manager,
                 websocket_bridge=self.mock_websocket_bridge
@@ -291,7 +291,7 @@ class TestSSOTSupervisorDuplicationViolations(SSotAsyncTestCase):
 
         try:
             # Test consolidated pattern execution result
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             consolidated_supervisor = ConsolidatedSupervisor(
                 llm_manager=self.mock_llm_manager,
                 websocket_bridge=self.mock_websocket_bridge

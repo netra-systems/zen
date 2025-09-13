@@ -19,7 +19,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult,
 )
 from netra_backend.app.core.interfaces_execution import ExecutionStrategy
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 

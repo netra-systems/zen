@@ -46,7 +46,7 @@ class TestSupervisorSSotViolationsExpose:
             logger.warning(f"✗ Failed to import from supervisor_ssot: {e}")
         
         try:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             imported_classes.append(("supervisor_consolidated", ConsolidatedSupervisor))
             logger.info(f"✓ Imported SupervisorAgent from supervisor_consolidated: {ConsolidatedSupervisor}")
         except ImportError as e:
@@ -97,7 +97,7 @@ class TestSupervisorSSotViolationsExpose:
             pass
             
         try:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             supervisor_classes.append(("Consolidated", ConsolidatedSupervisor))
         except ImportError:
             pass
@@ -156,7 +156,7 @@ class TestSupervisorSSotViolationsExpose:
             pass
             
         try:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             supervisor_classes.append(("Consolidated", ConsolidatedSupervisor))
         except ImportError:
             pass
@@ -249,7 +249,7 @@ class TestSupervisorSSotValidationTests:
             
             # Should fail or be aliased from consolidated location
             try:
-                from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedAgent
+                from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedAgent
                 
                 # If this succeeds, they should be the same object (alias)
                 if SupervisorAgent is ConsolidatedAgent:

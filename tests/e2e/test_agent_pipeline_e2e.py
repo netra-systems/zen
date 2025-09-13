@@ -53,7 +53,7 @@ if project_root not in sys.path:
 from shared.isolated_environment import get_env
 
 # Import core agent pipeline components
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory

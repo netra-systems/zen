@@ -145,13 +145,14 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         return UserExecutionContext(
             user_id=self.test_user_id,
             thread_id=self.test_thread_id,
-            session_id=self.test_session_id,
             run_id=self.test_run_id,
-            workspace_id=f"workspace_{uuid.uuid4().hex[:8]}",
-            metadata={
+            websocket_client_id=f"ws_conn_{uuid.uuid4().hex[:8]}",
+            agent_context={
                 "test_context": True,
                 "test_method": self.get_test_context().test_name,
-                "user_request": "Test agent state transitions during complete workflow"
+                "user_request": "Test agent state transitions during complete workflow",
+                "session_id": self.test_session_id,
+                "workspace_id": f"workspace_{uuid.uuid4().hex[:8]}"
             }
         )
     
@@ -217,15 +218,22 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         user_context = await self._create_test_user_context()
         
         state_tracker = AgentExecutionTracker(
-            user_context=user_context,
-            persistence_enabled=True
+            heartbeat_timeout=10,
+            execution_timeout=15
         )
         
         # Create agent state with proper isolation
+        agent_id = f"test_agent_{uuid.uuid4().hex[:8]}"
         agent_state = DeepAgentState(
-            agent_id=f"test_agent_{uuid.uuid4().hex[:8]}",
-            user_context=user_context,
-            initial_state=AgentFlowState.INITIALIZED.value
+            user_request="Test agent state transitions during complete workflow",
+            user_id=user_context.user_id,
+            chat_thread_id=user_context.thread_id,
+            run_id=user_context.run_id,
+            agent_context={
+                "agent_id": agent_id,
+                "current_state": AgentFlowState.INITIALIZED.value,
+                **user_context.agent_context
+            }
         )
         
         # Define expected state transition sequence for 5-event flow
@@ -244,7 +252,7 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
             transition_start = time.time()
             
             # Validate current state before transition
-            current_state = await state_tracker.get_agent_state(agent_state.agent_id)
+            current_state = await state_tracker.get_agent_state(agent_id)
             self.assertEqual(current_state.current_state, from_state.value, 
                            f"Expected state {from_state.value} before transition {i+1}")
             
@@ -333,9 +341,8 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         user_context = await self._create_test_user_context()
         
         state_tracker = AgentExecutionTracker(
-            user_context=user_context,
-            persistence_enabled=True,
-            enable_recovery=True
+            heartbeat_timeout=10,
+            execution_timeout=15
         )
         
         agent_state = DeepAgentState(
@@ -428,20 +435,21 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
             user_context = UserExecutionContext(
                 user_id=f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}",
                 thread_id=f"concurrent_thread_{i}_{uuid.uuid4().hex[:8]}",
-                session_id=f"concurrent_session_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"concurrent_run_{i}_{uuid.uuid4().hex[:8]}",
-                workspace_id=f"concurrent_workspace_{i}_{uuid.uuid4().hex[:8]}",
-                metadata={
+                websocket_client_id=f"ws_conn_{i}_{uuid.uuid4().hex[:8]}",
+                agent_context={
                     "user_index": i,
                     "test_context": True,
-                    "isolation_test": True
+                    "isolation_test": True,
+                    "session_id": f"concurrent_session_{i}_{uuid.uuid4().hex[:8]}",
+                    "workspace_id": f"concurrent_workspace_{i}_{uuid.uuid4().hex[:8]}"
                 }
             )
             user_contexts.append(user_context)
             
             state_tracker = AgentExecutionTracker(
-                user_context=user_context,
-                persistence_enabled=True
+                heartbeat_timeout=10,
+                execution_timeout=15
             )
             state_trackers.append(state_tracker)
             

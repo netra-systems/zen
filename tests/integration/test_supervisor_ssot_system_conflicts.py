@@ -248,7 +248,7 @@ class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
                 logger.warning(f"Could not create SSOT supervisor: {e}")
             
             try:
-                from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+                from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
                 consolidated_supervisor = ConsolidatedSupervisor(
                     llm_manager=llm_manager,
                     websocket_bridge=websocket_bridge
@@ -340,7 +340,7 @@ class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
             pass
             
         try:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as ConsolidatedSupervisor
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as ConsolidatedSupervisor
             supervisor_classes.append(("Consolidated", ConsolidatedSupervisor))
         except ImportError:
             pass

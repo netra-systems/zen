@@ -21,7 +21,7 @@
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.config import get_config
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
     # REMOVED_SYNTAX_ERROR: from tests.e2e.agent_response_test_utilities import ( )

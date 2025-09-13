@@ -70,7 +70,7 @@ def verify_ssot_fix():
             print("  [PASS] supervisor_agent_modern import correctly fails")
         
         # Test that new import works
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         print("  [PASS] supervisor_consolidated import works")
         print(f"  [INFO] Module: {SupervisorAgent.__module__}")
         

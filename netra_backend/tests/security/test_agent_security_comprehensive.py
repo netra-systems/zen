@@ -17,7 +17,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 
 @pytest.mark.security

@@ -38,6 +38,7 @@ from netra_backend.app.core.configuration.base import (
     is_testing,
     config_manager
 )
+from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationScope
 
 
 class TestConfigurationManagementCore(SSotBaseTestCase):

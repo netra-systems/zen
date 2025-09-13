@@ -48,7 +48,7 @@ from netra_backend.app.tools.tool_dispatcher import UnifiedToolDispatcher, creat
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, IntegrationState
 from netra_backend.app.agents.supervisor.execution_engine_factory import create_request_scoped_engine
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.base_agent import BaseAgent
 
 # WebSocket and event system imports

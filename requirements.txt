@@ -60,6 +60,8 @@ fastmcp==2.11.3
 # --- Caching ---
 # Redis client for caching and session storage.
 redis>=6.4.0
+# Fake Redis implementation for testing Redis fixtures
+fakeredis>=2.0.0
 # In-memory caching utilities
 cachetools==5.5.0
 

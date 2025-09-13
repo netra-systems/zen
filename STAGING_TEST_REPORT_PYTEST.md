@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 09:18:19
+**Generated:** 2025-09-13 11:29:49
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
 - **Total Tests:** 1
-- **Passed:** 0 (0.0%)
-- **Failed:** 1 (100.0%)
+- **Passed:** 1 (100.0%)
+- **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 8.80 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 0.18 seconds
+- **Pass Rate:** 100.0%
 
 ## Test Results by Priority
 
@@ -19,30 +19,15 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_health_check | FAIL failed | 5.546s | test_1_websocket_events_staging.py |
-
-## Failed Tests Details
-
-### FAILED: test_health_check
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 5.546s
-- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
-    await self.verify_api_health()
-tests\e2e\staging_test_base.py:274: in verify_api_health
-    assert data["status"] == "healthy"
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   AssertionError...
+| test_e2e_golden_path_metadata | PASS passed | 0.000s | test_golden_path_database_flow.py |
 
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_health_check FAILED
+test_golden_path_database_flow.py::test_e2e_golden_path_metadata PASSED
 
 ==================================================
-0 passed, 1 failed in 8.80s
+1 passed, 0 failed in 0.18s
 ```
 
 ## Test Coverage Matrix
