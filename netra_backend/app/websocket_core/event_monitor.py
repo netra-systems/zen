@@ -5,6 +5,7 @@ Monitors critical event flow and alerts when events are missing or delayed.
 """
 
 import asyncio
+import statistics
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -27,8 +28,8 @@ class EventType(Enum):
     ERROR = "error"
 
 
-class HealthStatus(Enum):
-    """System health status levels."""
+class HealthStatus(str, Enum):
+    """System health status levels - inherits from str for backward compatibility."""
     HEALTHY = "healthy"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -186,6 +187,7 @@ class ChatEventMonitor(ComponentMonitor):
         failure = {
             "thread_id": thread_id,
             "reason": reason,
+            "description": reason,  # Backward compatibility for tests
             "timestamp": time.time(),
             "details": details or {}
         }
@@ -202,6 +204,10 @@ class ChatEventMonitor(ComponentMonitor):
             f"Details: {details}"
         )
     
+    async def get_health_status(self) -> Dict[str, Any]:
+        """Alias for check_health() for backward compatibility with tests."""
+        return await self.check_health()
+
     async def check_health(self) -> Dict[str, Any]:
         """
         Check system health and return status report.
@@ -378,30 +384,31 @@ class ChatEventMonitor(ComponentMonitor):
     def _is_test_thread(self, thread_id: str) -> bool:
         """
         Identify test threads to prevent false anomaly detection.
-        
+
         Test threads created during health checks, unit tests, and system
         validation should not be monitored for anomalies as they have
         different lifecycle patterns than real user threads.
-        
+
         Args:
             thread_id: Thread identifier to check
-            
+
         Returns:
             bool: True if this is a test thread, False otherwise
         """
         if not isinstance(thread_id, str):
             return False
-            
+
         test_patterns = [
             "startup_test_",
-            "health_check_", 
+            "health_check_",
             "test_",
             "unit_test_",
             "integration_test_",
             "validation_",
-            "mock_"
+            "mock_",
+            "pytest_"  # Add pytest pattern for test detection
         ]
-        
+
         return any(thread_id.startswith(pattern) for pattern in test_patterns)
     
     def get_thread_status(self, thread_id: str) -> Dict[str, Any]:
@@ -809,6 +816,16 @@ class ChatEventMonitor(ComponentMonitor):
         except Exception as e:
             logger.error(f"Error handling health change notification from {component_id}: {e}")
     
+    def register_component(self, component_id: str, component) -> None:
+        """Backward compatibility method for register_component_for_monitoring."""
+        import asyncio
+        asyncio.create_task(self.register_component_for_monitoring(component_id, component))
+
+    def unregister_component(self, component_id: str) -> None:
+        """Backward compatibility method for remove_component_from_monitoring."""
+        import asyncio
+        asyncio.create_task(self.remove_component_from_monitoring(component_id))
+
     async def remove_component_from_monitoring(self, component_id: str) -> None:
         """
         Remove a component from monitoring.
@@ -899,6 +916,24 @@ class ChatEventMonitor(ComponentMonitor):
         summary["healthy_component_ratio"] = f"{healthy_components}/{total_components}"
         
         return summary
+
+    def get_metrics_basic(self) -> Dict[str, Any]:
+        """Get basic metrics for backward compatibility with tests."""
+        total_events = sum(
+            sum(counts.values()) for counts in self.event_counts.values()
+        )
+
+        return {
+            "total_events": total_events,
+            "active_threads": len(self.thread_start_time),
+            "silent_failures": len(self.silent_failures),
+            "avg_latency": statistics.mean(self.event_latencies) if self.event_latencies else 0.0,
+            "max_latency": max(self.event_latencies) if self.event_latencies else 0.0,
+        }
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get comprehensive metrics."""
+        return self.get_metrics_basic()
 
 
 # Backward compatibility WebSocketEventMonitor that matches test expectations

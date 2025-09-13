@@ -320,16 +320,16 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
         # PRIORITY 1: Support multiple JWT token formats (these contain actual auth tokens)
         if protocol.startswith('jwt.') and len(protocol) > 4:
             logger.debug("Found jwt.TOKEN format")
-            # Return the protocol type, not the full token for security
-            return 'jwt-auth'
+            # RFC 6455 COMPLIANCE: Return the EXACT client protocol, not a transformed name
+            return protocol
         elif protocol.startswith('jwt-auth.') and len(protocol) > 9:
             logger.debug("Found jwt-auth.TOKEN format (Issue #342 fix)")
-            # Return the protocol type, not the full token for security
-            return 'jwt-auth'
+            # RFC 6455 COMPLIANCE: Return the EXACT client protocol, not a transformed name
+            return protocol
         elif protocol.startswith('bearer.') and len(protocol) > 7:
             logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
-            # Return the protocol type, not the full token for security
-            return 'bearer'
+            # RFC 6455 COMPLIANCE: Return the EXACT client protocol, not a transformed name
+            return protocol
     
     # PRIORITY 2: Direct protocol match (only if no token-bearing protocols found)
     # Extended supported protocols for backward compatibility

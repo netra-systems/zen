@@ -62,7 +62,10 @@ class TestModeDetector:
         
         # Check pytest active execution
         if 'pytest' in sys.modules and hasattr(sys.modules['pytest'], 'main'):
-            if hasattr(sys, '_pytest_running') or os.environ.get('PYTEST_CURRENT_TEST'):
+            # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+            from shared.isolated_environment import get_env
+            env_manager = get_env()
+            if hasattr(sys, '_pytest_running') or env_manager.get('PYTEST_CURRENT_TEST'):
                 cls._cached_test_mode = True
                 return True
         
@@ -74,13 +77,19 @@ class TestModeDetector:
         ]
         
         for indicator in test_indicators:
-            value = os.environ.get(indicator, '').lower()
+            # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+            from shared.isolated_environment import get_env
+            env_manager = get_env()
+            value = env_manager.get(indicator, '').lower()
             if value in ['true', '1', 'yes', 'on']:
                 cls._cached_test_mode = True
                 return True
         
         # Check if ENVIRONMENT is set to testing
-        env_value = os.environ.get('ENVIRONMENT', '').lower()
+        # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+        from shared.isolated_environment import get_env
+        env_manager = get_env()
+        env_value = env_manager.get('ENVIRONMENT', '').lower()
         if env_value in ['test', 'testing']:
             cls._cached_test_mode = True
             return True
@@ -137,7 +146,10 @@ def test_only(reason: Optional[str] = None, allow_override: bool = False) -> Cal
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             # Check for override (dangerous but useful for debugging)
-            if allow_override and os.environ.get('FORCE_TEST_ONLY_OVERRIDE', '').lower() == 'true':
+            # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+            from shared.isolated_environment import get_env
+            env_manager = get_env()
+            if allow_override and env_manager.get('FORCE_TEST_ONLY_OVERRIDE', '').lower() == 'true':
                 logger.warning(
                     f" WARNING: [U+FE0F]  DANGEROUS: test_only override active for {func.__name__}. "
                     f"This should NEVER happen in production!"

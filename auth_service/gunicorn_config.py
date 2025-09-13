@@ -13,8 +13,11 @@ try:
     auth_env = get_auth_env()
     environment = auth_env.get_environment()
 except ImportError:
+    # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
     # Fallback for when AuthEnvironment is not available during bootstrap
-    environment = os.environ.get('ENVIRONMENT', 'development').lower()
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    environment = env_manager.get('ENVIRONMENT', 'development').lower()
     if environment not in ['production', 'staging', 'development', 'test']:
         environment = 'development'
 
@@ -23,8 +26,11 @@ try:
     port = str(auth_env.get_auth_service_port())
     host = auth_env.get_auth_service_host()
 except (NameError, AttributeError):
+    # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
     # Fallback when AuthEnvironment not available
-    port = os.environ.get('PORT', '8081')
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    port = env_manager.get('PORT', '8081')
     host = "0.0.0.0"
 
 bind = f"{host}:{port}"
@@ -32,7 +38,10 @@ backlog = 2048
 
 # Worker processes with environment-specific defaults
 try:
-    worker_count = os.environ.get('GUNICORN_WORKERS')
+    # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    worker_count = env_manager.get('GUNICORN_WORKERS')
     if not worker_count:
         if environment == 'production':
             workers = min(multiprocessing.cpu_count() * 2 + 1, 4)  # Production scaling
@@ -59,7 +68,10 @@ keepalive = 5  # Seconds to wait for requests on Keep-Alive connections
 
 # Threading with environment-specific defaults
 try:
-    thread_count = os.environ.get('GUNICORN_THREADS')
+    # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    thread_count = env_manager.get('GUNICORN_THREADS')
     if not thread_count:
         if environment == 'production':
             threads = 4  # Standard threading for production
@@ -88,8 +100,11 @@ errorlog = '-'
 try:
     loglevel = auth_env.get_log_level().lower()
 except (NameError, AttributeError):
+    # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
     # Fallback when AuthEnvironment not available
-    log_level = os.environ.get('LOG_LEVEL')
+    from shared.isolated_environment import get_env
+    env_manager = get_env()
+    log_level = env_manager.get('LOG_LEVEL')
     if not log_level:
         if environment == 'production':
             loglevel = 'warning'  # Less verbose in production
@@ -106,8 +121,11 @@ except (NameError, AttributeError):
 
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
+# SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
 # Stats - only configure if explicitly set
-statsd_host = os.environ.get('STATSD_HOST')
+from shared.isolated_environment import get_env
+env_manager = get_env()
+statsd_host = env_manager.get('STATSD_HOST')
 if statsd_host:
     statsd_prefix = 'netra.auth.gunicorn'
 else:
