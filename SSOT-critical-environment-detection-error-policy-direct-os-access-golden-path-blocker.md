@@ -33,15 +33,6 @@ Critical SSOT violation in ErrorPolicy class with 15+ direct `os.getenv()` calls
 - [x] **Step 1.2:** Test strategy planned - 45 new tests required
 - [x] **Step 2.1:** SSOT test suite created - 9 validation tests implemented
 - [x] **Step 2.2:** Test execution completed - **CONFIRMED: 15 SSOT violations detected**
-
-### ✅ Completed Steps
-- [x] **Step 0.1:** SSOT Audit completed - Critical violation identified
-- [x] **Step 0.2:** GitHub Issue #675 created
-- [x] **Step 0.3:** IND tracking document created
-- [x] **Step 1.1:** Test discovery completed - **CRITICAL FINDING: ZERO test coverage for ErrorPolicy**
-- [x] **Step 1.2:** Test strategy planned - 45 new tests required
-- [x] **Step 2.1:** SSOT test suite created - 9 validation tests implemented
-- [x] **Step 2.2:** Test execution completed - **CONFIRMED: 15 SSOT violations detected**
 - [x] **Step 3.1:** Comprehensive remediation plan created - 4-phase atomic approach
 
 ### 🔄 Current Step
@@ -72,6 +63,51 @@ python -m pytest netra_backend/tests/unit/core/exceptions/test_error_policy_ssot
 python -m pytest netra_backend/tests/integration/test_error_policy_isolated_environment.py -v
 python -m pytest netra_backend/tests/unit/core/exceptions/test_error_policy_ssot_regression.py -v
 ```
+
+## SSOT Remediation Plan (Step 3)
+
+### 🎯 Comprehensive 4-Phase Atomic Approach
+**Estimated Duration:** 3-4 hours for complete remediation
+**Risk Level:** LOW - Backward compatibility maintained, atomic rollback capability
+
+### Phase 1: Constructor Modification (30 min)
+- **Add IsolatedEnvironment injection** to ErrorPolicy constructor
+- **Maintain singleton behavior** with optional injection
+- **Preserve backward compatibility** - no breaking changes
+- **Pattern:** `def __init__(self, isolated_env: Optional[IsolatedEnvironment] = None)`
+
+### Phase 2: Method-by-Method Remediation (80 min)
+1. **detect_environment** (20 min) - Replace 2 violations (lines 82-83)
+2. **_detect_production_indicators** (20 min) - Replace 4 violations (lines 116, 118, 120, 122)
+3. **_detect_staging_indicators** (20 min) - Replace 4 violations (lines 131, 133, 135, 137)
+4. **_detect_testing_indicators** (20 min) - Replace 5 violations (lines 146, 148, 150, 152, 154)
+
+### Phase 3: Import & Cleanup (10 min)
+- **Add SSOT imports** from shared.isolated_environment
+- **Update type hints** for IsolatedEnvironment
+- **Remove legacy patterns** if any remain
+
+### Phase 4: Validation & Safety (60 min)
+- **Incremental test validation** after each method change
+- **Full test suite execution** with all 9 SSOT tests
+- **Golden path validation** in staging environment
+- **Mission critical test verification**
+
+### 🔄 Atomic Change Strategy
+**Pattern Transformation:**
+```python
+# BEFORE (VIOLATION)
+env_var = os.getenv('ENVIRONMENT', '').lower()
+
+# AFTER (SSOT COMPLIANT)
+env_var = self.isolated_env.get('ENVIRONMENT', '').lower()
+```
+
+### 🛡️ Risk Mitigation
+- **Zero performance impact** - IsolatedEnvironment has caching
+- **Thread safety preserved** - RLock implementation
+- **Rollback capability** - Git commit after each atomic change
+- **Test-driven validation** - Progressive test passage
 
 ## Technical Details
 
