@@ -323,8 +323,11 @@ class StartupValidator:
             self._add_failed_validation("Tool Validation", "Tools", str(e))
     
     async def _validate_database(self, app) -> None:
-        """Validate database connections and tables."""
+        """Validate database connections and tables with enhanced configuration validation."""
         try:
+            # ISSUE #378 FIX: Add early configuration validation before initialization checks
+            await self._validate_database_configuration_early()
+            
             if hasattr(app.state, 'db_session_factory'):
                 if app.state.db_session_factory is None:
                     if getattr(app.state, 'database_mock_mode', False):
