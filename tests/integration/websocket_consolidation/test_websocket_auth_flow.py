@@ -31,7 +31,7 @@ try:
     from netra_backend.app.websocket_core.auth import WebSocketAuthValidator
     from netra_backend.app.websocket_core.manager import UnifiedWebSocketManager
     from netra_backend.app.auth_integration.auth import BackendAuthIntegration
-    from netra_backend.app.core.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
 except ImportError as e:
     # Expected during SSOT migration - imports will be fixed during consolidation
     print(f"EXPECTED IMPORT ERROR during SSOT migration: {e}")

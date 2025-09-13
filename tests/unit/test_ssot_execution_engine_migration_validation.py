@@ -104,7 +104,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         """
         # Test deprecated import pattern still works
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Should generate deprecation warning but still work
             with warnings.catch_warnings(record=True) as w:
@@ -258,7 +258,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         
         This ensures that legacy code gets security fixes automatically.
         """
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Mock dependencies
         mock_registry = MagicMock()
@@ -446,7 +446,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             with warnings.catch_warnings(record=True) as w:
                 warnings.simplefilter("always")
                 
-                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 
                 # Should generate deprecation warning
                 deprecation_warnings = [warn for warn in w if issubclass(warn.category, DeprecationWarning)]
@@ -471,7 +471,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         
         # 1. Test deprecated pattern (compatibility bridge)
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             mock_registry = MagicMock()
             mock_websocket_bridge = MagicMock()

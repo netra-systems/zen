@@ -28,10 +28,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 # SSOT imports following SSOT_IMPORT_REGISTRY.md
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.websocket_core.auth import (
-    WebSocketAuthenticator,
-    AuthenticationResult,
-    AuthenticationError
+    WebSocketAuthenticator
 )
+from netra_backend.app.websocket_core.unified_websocket_auth import (
+    WebSocketAuthResult as AuthenticationResult
+)
+
+# Define AuthenticationError for compatibility
+class AuthenticationError(Exception):
+    """Authentication error for compatibility"""
+    pass
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID
 from shared.logging.unified_logging_ssot import get_logger

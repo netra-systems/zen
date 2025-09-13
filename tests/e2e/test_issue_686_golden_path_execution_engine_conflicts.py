@@ -84,7 +84,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         # Test Golden Path: Agent Creation with ExecutionEngine
         try:
             # Try to create an agent using the "standard" ExecutionEngine path
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # This is what most code would try to do - prefer UserExecutionEngine for user isolation
             execution_engine = UserExecutionEngine()
@@ -109,7 +109,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         # Test Golden Path: Agent Execution
         if golden_path_execution_test['agent_creation']:
             try:
-                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 # Use UserExecutionEngine for better user isolation testing
                 execution_engine = UserExecutionEngine()
                 
@@ -158,7 +158,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             for engine_name, module_path in engines_to_test:
                 try:
                     if engine_name == 'supervisor':
-                        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                         # Use UserExecutionEngine for user isolation testing
                         engine = UserExecutionEngine()
                     elif engine_name == 'unified':
@@ -197,7 +197,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         
         try:
             # Test if ExecutionEngines can deliver WebSocket events
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Use UserExecutionEngine for user isolation testing
             engine = UserExecutionEngine()
@@ -277,7 +277,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         # Test concurrent execution with different ExecutionEngines
         try:
             # Scenario 1: Both users use supervisor ExecutionEngine
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Create engines for both users (Golden Path simulation) - prefer UserExecutionEngine for isolation
             user1_engine = UserExecutionEngine()
@@ -459,7 +459,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         # Step 1: User sends request to AI agent
         try:
             # Test primary ExecutionEngine path (what most users would hit)
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Use UserExecutionEngine for user isolation testing
             primary_engine = UserExecutionEngine()
@@ -538,7 +538,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             for engine_name, module_path, class_name in engines_to_test:
                 try:
                     if engine_name == 'supervisor':
-                        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                         # Use UserExecutionEngine for user isolation testing
                         engine = UserExecutionEngine()
                     elif engine_name == 'unified':
@@ -576,7 +576,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         
         try:
             # Test WebSocket event delivery for user feedback
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Use UserExecutionEngine for user isolation testing
             engine = UserExecutionEngine()

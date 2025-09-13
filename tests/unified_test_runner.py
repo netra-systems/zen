@@ -3817,7 +3817,13 @@ def main():
         action="store_true",
         help="Use real backend services (Docker or local) for frontend tests"
     )
-    
+
+    parser.add_argument(
+        "--staging-e2e",
+        action="store_true",
+        help="Run staging-based E2E tests (Docker-independent validation of business-critical functionality)"
+    )
+
     parser.add_argument(
         "--no-docker",
         "--skip-docker",
@@ -4503,6 +4509,23 @@ def main():
     if hasattr(args, 'docker_production') and args.docker_production:
         env.set('TEST_USE_PRODUCTION_IMAGES', 'true', 'docker_args')
     
+    # Handle staging-e2e flag first (Docker-independent e2e testing)
+    if hasattr(args, 'staging_e2e') and args.staging_e2e:
+        print("[INFO] Running staging-based E2E tests (Docker-independent validation)")
+        print("[INFO] Validating business-critical $500K+ ARR functionality via staging environment")
+
+        import subprocess
+        staging_tests = [
+            "tests/e2e/staging/test_priority1_critical.py",
+            "tests/e2e/staging/test_real_agent_execution_staging.py",
+            "tests/mission_critical/test_staging_websocket_agent_events.py"
+        ]
+
+        cmd = [sys.executable, "-m", "pytest"] + staging_tests + ["-v", "--tb=short"]
+        print(f"[INFO] Executing: {' '.join(cmd)}")
+        result = subprocess.run(cmd, cwd=PROJECT_ROOT)
+        sys.exit(result.returncode)
+
     # CRITICAL: Set USE_REAL_SERVICES early BEFORE any test imports or TestRunner creation
     # This ensures environment isolation respects real services flag from the start
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \

@@ -59,7 +59,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import (
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    PipelineStep,
+    PipelineStepConfig,
     AgentExecutionStrategy
 )
 from netra_backend.app.agents.supervisor.user_execution_context import (
@@ -213,20 +213,20 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
         registry = AgentRegistry(advanced_llm_manager)
         
         # Conditional agents for pipeline testing
-        registry.register_agent("condition_check_agent", ConditionalAgent(
+        registry.register("condition_check_agent", ConditionalAgent(
             name="condition_check_agent",
             condition_func=lambda state: getattr(state, 'condition_met', False),
             execution_time=0.5
         ))
         
-        registry.register_agent("data_dependent_agent", ConditionalAgent(
-            name="data_dependent_agent", 
+        registry.register("data_dependent_agent", ConditionalAgent(
+            name="data_dependent_agent",
             condition_func=lambda state: hasattr(state, 'data_processed') and state.data_processed,
             tools=[MockToolForTesting("data_validation_tool", 1.0)],
             execution_time=2.0
         ))
         
-        registry.register_agent("optimization_conditional_agent", ConditionalAgent(
+        registry.register("optimization_conditional_agent", ConditionalAgent(
             name="optimization_conditional_agent",
             condition_func=lambda state: (
                 hasattr(state, 'analysis_complete') and state.analysis_complete and
@@ -237,13 +237,13 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
         ))
         
         # Resource tracking agents
-        registry.register_agent("memory_intensive_agent", ResourceTrackingAgent(
+        registry.register("memory_intensive_agent", ResourceTrackingAgent(
             name="memory_intensive_agent",
             memory_allocation_mb=50,
             execution_time=2.0
         ))
         
-        registry.register_agent("cpu_intensive_agent", ResourceTrackingAgent(
+        registry.register("cpu_intensive_agent", ResourceTrackingAgent(
             name="cpu_intensive_agent",
             memory_allocation_mb=20,
             execution_time=4.0
@@ -260,7 +260,7 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
             return await MockAgentForTesting.execute(retry_agent, state, run_id, is_user_facing)
         
         retry_agent.execute = retry_execute
-        registry.register_agent("retry_test_agent", retry_agent)
+        registry.register("retry_test_agent", retry_agent)
         
         yield registry
         await registry.reset_all_agents()
@@ -346,17 +346,17 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
         # Complex pipeline with conditional branching
         pipeline_steps = [
             # Step 1: Initial condition check (should pass)
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="condition_check_agent",
                 metadata={"step": 1, "condition": "initial_check"}
             ),
             # Step 2: Data dependent agent (should fail initially due to missing condition)
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="data_dependent_agent",
                 metadata={"step": 2, "condition": "data_processed", "continue_on_error": True}
             ),
             # Step 3: Optimization agent (should fail initially due to missing conditions)
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="optimization_conditional_agent",
                 metadata={"step": 3, "condition": "optimization_ready", "continue_on_error": True}
             )
@@ -929,7 +929,7 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
         
         # Register backoff tracking agent
         backoff_agent = BackoffTrackingAgent()
-        advanced_agent_registry.register_agent("backoff_tracking_agent", backoff_agent)
+        advanced_agent_registry.register("backoff_tracking_agent", backoff_agent)
         
         backoff_context = AgentExecutionContext(
             agent_name="backoff_tracking_agent",
@@ -978,7 +978,7 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
                 raise Exception(f"Always failing agent attempt {self.attempt_count}")
         
         always_failing_agent = AlwaysFailingAgent()
-        advanced_agent_registry.register_agent("always_failing_agent", always_failing_agent)
+        advanced_agent_registry.register("always_failing_agent", always_failing_agent)
         
         limit_context = AgentExecutionContext(
             agent_name="always_failing_agent",
