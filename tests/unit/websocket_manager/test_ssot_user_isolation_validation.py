@@ -115,7 +115,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, validation gap is confirmed
         pytest.fail("User ID mismatch was not detected - validation gap confirmed")
 
-    def test_cross_user_connection_contamination_detection(self):
+    async def test_cross_user_connection_contamination_detection(self):
         """
         Test that cross-user connection contamination is detected.
 
@@ -152,7 +152,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, contamination detection gap is confirmed
         pytest.fail("Cross-user connection contamination not detected - validation gap confirmed")
 
-    def test_concurrent_user_manager_instance_isolation(self):
+    async def test_concurrent_user_manager_instance_isolation(self):
         """
         Test that concurrent users get properly isolated manager instances.
 
@@ -186,7 +186,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Managers missing _user_context attribute - isolation mechanism not implemented")
 
-    def test_multiple_managers_per_user_detection(self):
+    async def test_multiple_managers_per_user_detection(self):
         """
         Test detection of multiple manager instances for the same user.
 
@@ -212,7 +212,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
             self.assertTrue(len(warning_calls) > 0,
                           "Multiple manager instances for same user not detected - validation gap confirmed")
 
-    def test_enterprise_organization_isolation(self):
+    async def test_enterprise_organization_isolation(self):
         """
         Test that enterprise users are isolated by organization.
 
@@ -257,7 +257,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Organization-level isolation not implemented - enterprise requirement gap")
 
-    def test_user_isolation_validation_history_tracking(self):
+    async def test_user_isolation_validation_history_tracking(self):
         """
         Test that user isolation validation attempts are tracked.
 
