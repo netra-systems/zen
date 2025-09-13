@@ -526,7 +526,7 @@ class AgentRequestHandler(BaseMessageHandler):
             return False
 
 
-class TestAgentHandler(BaseMessageHandler):
+class E2EAgentHandler(BaseMessageHandler):
     """Handler specifically for E2E test agent communication."""
     
     def __init__(self):
@@ -546,7 +546,7 @@ class TestAgentHandler(BaseMessageHandler):
                            message: WebSocketMessage) -> bool:
         """Handle test agent messages with expected responses."""
         try:
-            logger.info(f"TestAgentHandler received message type: {message.type} with payload: {message.payload}")
+            logger.info(f"E2EAgentHandler received message type: {message.type} with payload: {message.payload}")
             if message.type == MessageType.AGENT_TASK:
                 return await self._handle_agent_task(user_id, websocket, message)
             elif message.type == MessageType.AGENT_STATUS_REQUEST:
