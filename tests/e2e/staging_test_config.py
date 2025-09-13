@@ -274,6 +274,13 @@ def get_staging_config() -> StagingConfig:
 def is_staging_available() -> bool:
     """Check if staging environment is available"""
     import httpx
+    import os
+
+    # Override for golden path validation testing
+    if os.environ.get("BYPASS_STAGING_HEALTH_CHECK") == "true":
+        print("[TEST OVERRIDE] Bypassing staging health check for golden path validation")
+        return True
+
     try:
         response = httpx.get(STAGING_CONFIG.health_endpoint, timeout=5)
         return response.status_code == 200
