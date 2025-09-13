@@ -93,7 +93,7 @@ def _has_table_creation_keywords(error_msg: str) -> bool:
     table_creation_keywords = [
         'create table', 'table creation', 'invalid table definition',
         'engine configuration', 'partition by', 'order by', 'syntax error in create',
-        'table already exists', 'invalid engine parameters'
+        'table already exists', 'invalid engine parameters', 'engine', 'programmingerror'
     ]
     return any(keyword in error_msg for keyword in table_creation_keywords)
 
@@ -113,7 +113,7 @@ def _has_index_creation_keywords(error_msg: str) -> bool:
     index_creation_keywords = [
         'create index', 'drop index', 'index creation', 'index already exists',
         'invalid index', 'index on', 'materialized view', 'projection',
-        'index conflict', 'index definition'
+        'index conflict', 'index definition', 'integrityerror'
     ]
     return any(keyword in error_msg for keyword in index_creation_keywords)
 
@@ -200,7 +200,8 @@ def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception
 
 def _classify_table_creation_error(error: OperationalError, error_msg: str) -> Exception:
     """Classify table creation-related operational errors."""
-    if _has_table_creation_keywords(error_msg):
+    error_type_name = type(error).__name__.lower()
+    if _has_table_creation_keywords(error_msg) or _has_table_creation_keywords(error_type_name):
         return TableCreationError(f"Table creation error: {error}")
     return error
 
@@ -214,7 +215,8 @@ def _classify_column_modification_error(error: OperationalError, error_msg: str)
 
 def _classify_index_creation_error(error: OperationalError, error_msg: str) -> Exception:
     """Classify index creation-related operational errors."""
-    if _has_index_creation_keywords(error_msg):
+    error_type_name = type(error).__name__.lower()
+    if _has_index_creation_keywords(error_msg) or _has_index_creation_keywords(error_type_name):
         return IndexCreationError(f"Index creation error: {error}")
     return error
 
