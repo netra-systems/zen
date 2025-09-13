@@ -263,13 +263,12 @@ class SupervisorAgent(BaseAgent):
                 llm_manager=self._llm_manager
             )
         
-        # Create user WebSocket emitter using factory
-        from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
-        websocket_emitter = UserWebSocketEmitter(
-            context.user_id, 
-            context.thread_id, 
-            context.run_id,
-            self.websocket_bridge
+        # Create user WebSocket emitter using SSOT UnifiedWebSocketEmitter
+        from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+        websocket_emitter = UnifiedWebSocketEmitter(
+            manager=self.websocket_bridge,
+            user_id=context.user_id,
+            context=context
         )
         
         # Create and return UserExecutionEngine

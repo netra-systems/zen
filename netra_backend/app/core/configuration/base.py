@@ -325,6 +325,21 @@ class UnifiedConfigManager:
             except Exception:
                 return False
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value by key.
+
+        COMPATIBILITY METHOD: Supports UnifiedConfigurationManager.get(key, default) pattern
+        for backward compatibility during SSOT migration.
+
+        Args:
+            key: Configuration key
+            default: Default value if key not found
+
+        Returns:
+            Any: The configuration value or default
+        """
+        return self.get_config_value(key, default)
+
 
 # Global configuration manager instance
 config_manager = UnifiedConfigManager()
@@ -471,6 +486,22 @@ def validate_config_value(key: str = None) -> bool:
     return config_manager.validate_config_value(key)
 
 
+def get(key: str, default: Any = None) -> Any:
+    """Get configuration value by key.
+
+    COMPATIBILITY FUNCTION: Supports UnifiedConfigurationManager.get(key, default) pattern
+    for backward compatibility during SSOT migration.
+
+    Args:
+        key: Configuration key
+        default: Default value if key not found
+
+    Returns:
+        Any: The configuration value or default
+    """
+    return config_manager.get(key, default)
+
+
 # Export compatibility functions
 __all__ = [
     "UnifiedConfigManager",
@@ -480,6 +511,7 @@ __all__ = [
     "get_config_value",  # ConfigurationManager compatibility
     "set_config_value",  # ConfigurationManager compatibility
     "validate_config_value",  # ConfigurationManager compatibility
+    "get",  # UnifiedConfigurationManager compatibility
     "reload_unified_config",
     "validate_unified_config",
     "get_environment",

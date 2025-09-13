@@ -52,11 +52,16 @@ logger = central_logger.get_logger(__name__)
 # UserExecutionContext is now imported from user_execution_context.py
 
 
-class UserWebSocketEmitter:
-    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
-    
-    This class maintains backward compatibility while redirecting all functionality
-    to the SSOT UnifiedWebSocketEmitter implementation from the factory pattern.
+# SSOT CONSOLIDATION: Import alias to UnifiedWebSocketEmitter for backward compatibility
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+UserWebSocketEmitter = UnifiedWebSocketEmitter
+
+# SSOT CONSOLIDATION COMPLETE: All functionality now provided by UnifiedWebSocketEmitter
+
+
+class AgentInstanceFactory:
+    """
+    Factory for creating per-request agent instances with complete user isolation.
     
     Business Value: Ensures WebSocket events reach correct users, prevents notification leaks
     
