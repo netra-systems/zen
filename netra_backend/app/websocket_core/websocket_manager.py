@@ -26,7 +26,7 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketManagerMode
 )
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID,
     ensure_user_id, ensure_thread_id
@@ -37,7 +37,7 @@ from typing import Dict, Set, Optional, Any, Union
 from datetime import datetime
 import asyncio
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 # Export the SSOT unified manager as WebSocketManager for compatibility
 # This creates a direct reference to the singleton WebSocketManager class
