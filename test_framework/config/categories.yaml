@@ -337,3 +337,23 @@ categories:
     - real_environment
     - business_value
     - production_like
+  mission_critical:
+    description: Mission critical tests protecting core business functionality and system stability
+    priority: CRITICAL
+    category_type: quality
+    timeout_seconds: 600
+    estimated_duration_minutes: 8.0
+    dependencies:
+    - unit
+    requires_real_services: true
+    requires_real_llm: false
+    parallel_safe: true
+    max_parallel_instances: 4
+    network_intensive: false
+    memory_intensive: false
+    tags:
+    - mission_critical
+    - business_value
+    - core_functionality
+    - stability
+    - regression_protection

@@ -644,19 +644,11 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    # SECURITY FIX Issue #566: Use factory pattern that creates user-isolated LLM managers
-    # Instead of creating a shared singleton LLM manager that compromises cache isolation,
-    # store a factory function that creates user-isolated instances on demand
-    from netra_backend.app.llm.llm_manager import create_llm_manager
-    
-    def create_user_isolated_llm_manager(user_context=None):
-        """Factory function to create user-isolated LLM managers for secure cache isolation."""
-        return create_llm_manager(user_context)
-    
-    # Store factory function instead of shared instance to prevent cache contamination
-    app.state.llm_manager_factory = create_user_isolated_llm_manager
-    # Keep backward compatibility for startup sequences that expect app.state.llm_manager
-    app.state.llm_manager = None  # Will be created on-demand with user context
+    # SECURITY FIX: Removed global LLM manager creation - CRITICAL VULNERABILITY
+    # Global LLM managers cause conversation mixing between users due to shared cache
+    # LLM managers must be created per-request with user context for isolation
+    # Use create_llm_manager(user_context) in request handlers instead
+    app.state.llm_manager = None  # Explicitly set to None to prevent usage
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
@@ -1178,11 +1170,12 @@ def _build_supervisor_agent(app: FastAPI):
     
     # Create the proper websocket bridge instance  
     websocket_bridge = AgentWebSocketBridge()
-    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}")
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager=None (security fix)")
     
-    # CRITICAL: No tool_dispatcher - created per-request for isolation
+    # SECURITY FIX: Supervisor created without global LLM manager to prevent user data mixing
+    # LLM managers are created per-request with user context for proper isolation
     return SupervisorAgent(
-        app.state.llm_manager, 
+        None,  # No global LLM manager - created per-request with user context
         websocket_bridge  # Correct AgentWebSocketBridge instance
         # NO tool_dispatcher - created per-request
     )
