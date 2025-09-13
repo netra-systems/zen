@@ -234,10 +234,10 @@ DeprecationWarning: get_execution_tracker from execution_tracker.py is deprecate
    - **Issue #826**: failing-test-active-dev-P2-datetime-deprecation-warnings (CREATED)
    - **Issue #827**: failing-test-regression-P1-docker-resource-cleanup-failure (CREATED)
 
-2. **NEW ISSUES REQUIRING GITHUB ISSUES**:
-   - **Issue 4**: failing-test-active-dev-P2-deprecated-execution-factory
-   - **Issue 5**: failing-test-new-P3-database-integration-skipped
-   - **Issue 6**: failing-test-active-dev-P2-deprecated-imports
+2. ✅ **COMPLETED - NEW ISSUES CREATED**:
+   - ✅ **Issue #835**: failing-test-active-dev-P2-deprecated-execution-factory (CREATED)
+   - ✅ **Issue #837**: failing-test-new-P3-database-integration-skipped (CREATED)
+   - ✅ **Issue #839**: failing-test-active-dev-P2-deprecated-imports (CREATED)
 
 3. Prioritize P1 issues for immediate resolution
 4. Coordinate with infrastructure team on Docker connectivity
@@ -270,6 +270,30 @@ DeprecationWarning: get_execution_tracker from execution_tracker.py is deprecate
 - **Status**: OPEN
 - **Link**: https://github.com/netra-systems/netra-apex/issues/827
 - **Focus**: Test infrastructure stability and resource leak prevention
+
+### Issue #835: Deprecated Execution Engine Factory (NEW)
+- **Title**: failing-test-active-dev-P2-deprecated-execution-factory
+- **Priority**: P2 (Medium)
+- **Labels**: claude-code-generated-issue, P2, tech-debt, golden-path, deprecated
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/835
+- **Focus**: Replace deprecated SupervisorExecutionEngineFactory with UnifiedExecutionEngineFactory
+
+### Issue #837: Database Integration Test Coverage (NEW)
+- **Title**: failing-test-new-P3-database-integration-skipped
+- **Priority**: P3 (Low)
+- **Labels**: claude-code-generated-issue, P3, infrastructure-dependency, golden-path
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/837
+- **Focus**: Enable database connectivity for complete integration test coverage
+
+### Issue #839: Deprecated Import Warnings (NEW)
+- **Title**: failing-test-active-dev-P2-deprecated-imports
+- **Priority**: P2 (Medium)
+- **Labels**: claude-code-generated-issue, P2, tech-debt, golden-path, deprecated
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/839
+- **Focus**: Modernize import patterns throughout golden path components
 
 ## Related Documentation
 - `docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md` - Golden Path specification
