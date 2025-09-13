@@ -20,9 +20,9 @@ from netra_backend.app.websocket_core.types import ConnectionInfo
 class TestUnifiedManagerConnectionLifecycle(SSotAsyncTestCase):
     """Test connection lifecycle management in UnifiedWebSocketManager."""
 
-    async def asyncSetUp(self):
+    def setUp(self):
         """Set up test fixtures."""
-        await super().asyncSetUp()
+        super().setUp(); print("setUp called successfully")
         self.manager = UnifiedWebSocketManager()
 
         # Mock WebSocket for testing
@@ -36,19 +36,6 @@ class TestUnifiedManagerConnectionLifecycle(SSotAsyncTestCase):
         self.test_connection_id = "conn_123"
         self.test_thread_id = "thread_123"
 
-    async def asyncTearDown(self):
-        """Clean up test fixtures."""
-        # Ensure clean teardown
-        if hasattr(self.manager, '_connections'):
-            for connection in list(self.manager._connections.values()):
-                try:
-                    await self.manager.disconnect_user(
-                        connection.user_id,
-                        connection.websocket
-                    )
-                except Exception:
-                    pass  # Ignore cleanup errors
-        await super().asyncTearDown()
 
     async def test_connect_user_success(self):
         """Test successful user connection establishment."""

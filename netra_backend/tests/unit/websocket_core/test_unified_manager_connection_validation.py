@@ -21,9 +21,9 @@ from shared.types.core_types import ensure_user_id, ensure_websocket_id
 class TestUnifiedManagerConnectionValidation(SSotAsyncTestCase):
     """Test connection validation logic in UnifiedWebSocketManager."""
 
-    async def asyncSetUp(self):
+    def setUp(self):
         """Set up test fixtures."""
-        await super().asyncSetUp()
+        super().setUp()
         self.manager = UnifiedWebSocketManager()
 
         # Mock WebSocket with proper state
