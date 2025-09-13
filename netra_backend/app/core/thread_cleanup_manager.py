@@ -262,7 +262,13 @@ class ThreadCleanupManager:
         return cleaned_count
     
     def _schedule_cleanup(self) -> None:
-        """Schedule a background cleanup task."""
+        """
+        Schedule a background cleanup task.
+
+        ISSUE #704 FIX: Enhanced validation to prevent 'NoneType' object is not callable errors.
+        This method now performs comprehensive validation of the asyncio event loop and its methods
+        before attempting to use them, handling edge cases during event loop destruction/shutdown.
+        """
         if self._cleanup_scheduled:
             return
 
@@ -291,23 +297,56 @@ class ThreadCleanupManager:
             finally:
                 self._cleanup_scheduled = False
 
-        # Schedule the cleanup task with proper error handling
+        # Schedule the cleanup task with proper error handling and NoneType protection
         try:
             # Check if we have an active event loop first
             try:
                 loop = asyncio.get_running_loop()
-                # Create task in the running loop - loop is guaranteed to be valid here
-                task = loop.create_task(background_cleanup())
-                logger.debug("Background cleanup task scheduled in active event loop")
-            except RuntimeError:
-                # No running loop - try to get any loop
+                # ISSUE #704 FIX: Comprehensive validation to prevent NoneType errors
+                if (loop is not None and
+                    hasattr(loop, 'create_task') and
+                    callable(loop.create_task) and
+                    not loop.is_closed()):
+
+                    # Create task in the running loop - loop is now guaranteed to be valid
+                    task = loop.create_task(background_cleanup())
+                    logger.debug("Background cleanup task scheduled in active event loop")
+                else:
+                    # Loop is invalid or closed, raise to trigger fallback
+                    # Enhanced logging to diagnose specific conditions
+                    loop_state = "None" if loop is None else "not None"
+                    has_create_task = hasattr(loop, 'create_task') if loop else False
+                    is_callable = callable(getattr(loop, 'create_task', None)) if loop and has_create_task else False
+                    is_closed = loop.is_closed() if loop else "N/A"
+
+                    logger.warning(f"Event loop validation failed - loop: {loop_state}, "
+                                 f"has_create_task: {has_create_task}, is_callable: {is_callable}, "
+                                 f"is_closed: {is_closed}")
+                    raise RuntimeError("Event loop is invalid or closed")
+            except (RuntimeError, AttributeError):
+                # No running loop or invalid loop - try to get any loop
                 try:
                     loop = asyncio.get_event_loop()
-                    if loop is not None and loop.is_running():
+                    if (loop is not None and
+                        hasattr(loop, 'create_task') and
+                        callable(loop.create_task) and
+                        loop.is_running() and
+                        not loop.is_closed()):
+
                         task = loop.create_task(background_cleanup())
                         logger.debug("Background cleanup task scheduled in existing event loop")
                     else:
-                        raise RuntimeError("Event loop not running")
+                        # Enhanced logging for fallback loop validation failure
+                        loop_state = "None" if loop is None else "not None"
+                        has_create_task = hasattr(loop, 'create_task') if loop else False
+                        is_callable = callable(getattr(loop, 'create_task', None)) if loop and has_create_task else False
+                        is_running = loop.is_running() if loop else "N/A"
+                        is_closed = loop.is_closed() if loop else "N/A"
+
+                        logger.warning(f"Fallback event loop validation failed - loop: {loop_state}, "
+                                     f"has_create_task: {has_create_task}, is_callable: {is_callable}, "
+                                     f"is_running: {is_running}, is_closed: {is_closed}")
+                        raise RuntimeError("Event loop not running or invalid")
                 except (RuntimeError, AttributeError, ImportError):
                     # Fallback to thread-based cleanup
                     raise RuntimeError("No asyncio event loop available")
