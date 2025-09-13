@@ -328,8 +328,8 @@ class KeyManager:
     
     # ====== JWT Interface Bridge Methods ======
     # These methods provide the interface expected by Golden Path Validator
-    # ALL JWT operations delegate to UnifiedJWTValidator (SSOT preservation)
-    
+    # ALL JWT operations delegate to auth service (SSOT COMPLIANCE)
+
     async def create_access_token(
         self,
         user_id: str,
@@ -338,17 +338,31 @@ class KeyManager:
         expire_minutes: Optional[int] = None
     ) -> str:
         """
-        Create JWT access token via UnifiedJWTValidator.
-        
-        Golden Path Validator compatibility method - delegates to SSOT.
-        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        Create JWT access token via auth service delegation (SSOT).
+
+        Golden Path Validator compatibility method - delegates to auth service SSOT.
+        ALL JWT operations go through auth service client.
         """
         try:
-            from netra_backend.app.core.unified.jwt_validator import jwt_validator
-            logger.info("KeyManager.create_access_token delegating to UnifiedJWTValidator (SSOT)")
-            return await jwt_validator.create_access_token(user_id, email, permissions, expire_minutes)
+            from netra_backend.app.clients.auth_client_core import auth_client
+            logger.info("SSOT KeyManager.create_access_token delegating to auth service")
+
+            # Delegate to auth service for token creation
+            token_request = {
+                'user_id': user_id,
+                'email': email,
+                'permissions': permissions or [],
+                'expire_minutes': expire_minutes or 60
+            }
+
+            result = await auth_client.create_token(token_request)
+            if result and result.get('token'):
+                return result['token']
+            else:
+                raise ValueError("Auth service failed to create token")
+
         except Exception as e:
-            logger.error(f"JWT access token creation failed in KeyManager bridge: {e}")
+            logger.error(f"SSOT KeyManager: Token creation failed via auth service - {e}")
             raise
     
     async def verify_token(
@@ -358,29 +372,31 @@ class KeyManager:
         verify_exp: bool = True
     ) -> Optional[Dict[str, Any]]:
         """
-        Verify JWT token via UnifiedJWTValidator.
-        
-        Golden Path Validator compatibility method - delegates to SSOT.
-        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        Verify JWT token via auth service delegation (SSOT).
+
+        Golden Path Validator compatibility method - delegates to auth service SSOT.
+        ALL JWT operations go through auth service client.
         """
         try:
-            from netra_backend.app.core.unified.jwt_validator import jwt_validator
-            logger.info("KeyManager.verify_token delegating to UnifiedJWTValidator (SSOT)")
-            result = await jwt_validator.verify_token(token, token_type, verify_exp)
-            
-            # Golden Path expects dict return format, not TokenValidationResult
-            if result and result.valid:
+            from netra_backend.app.clients.auth_client_core import auth_client
+            logger.info("SSOT KeyManager.verify_token delegating to auth service")
+
+            # Delegate to auth service for token validation
+            result = await auth_client.validate_token(token)
+
+            if result and result.get('valid'):
+                # Golden Path expects dict return format
                 return {
-                    "user_id": result.user_id,
-                    "email": result.email,
-                    "permissions": result.permissions or [],
+                    "user_id": result.get('user_id'),
+                    "email": result.get('email'),
+                    "permissions": result.get('permissions', []),
                     "valid": True
                 }
             else:
                 return None
-                
+
         except Exception as e:
-            logger.error(f"JWT token verification failed in KeyManager bridge: {e}")
+            logger.error(f"SSOT KeyManager: Token verification failed via auth service - {e}")
             return None
     
     async def create_refresh_token(

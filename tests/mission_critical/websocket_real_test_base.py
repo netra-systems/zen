@@ -302,31 +302,33 @@ def _get_environment_backend_url() -> str:
 
 
 def _get_environment_websocket_url() -> str:
-    """Get WebSocket URL from environment or derive from backend URL."""
+    """Get WebSocket URL from environment with enhanced staging support (Issue #680)."""
     env = get_env()
-    
+
     # Check for service orchestrator environment variables first
     test_websocket_url = env.get('TEST_WEBSOCKET_URL', None)
     if test_websocket_url:
         return test_websocket_url
-    
+
+    # Check for staging environment variables (Issue #680 enhancement)
+    staging_websocket_url = env.get('STAGING_WEBSOCKET_URL', None)
+    if staging_websocket_url and (env.get('USE_STAGING_SERVICES') == 'true' or env.get('STAGING_ENV') == 'true'):
+        return staging_websocket_url
+
     # Check for E2E environment variables
     e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None)
     if e2e_websocket_url:
         return e2e_websocket_url
-    
+
     # Derive from backend URL
     backend_url = _get_environment_backend_url()
-    return backend_url.replace("http://", "ws://").replace("https://", "wss://")
-    
-    # Required WebSocket events for agent testing
-    required_agent_events: Set[str] = field(default_factory=lambda: {
-        "agent_started",
-        "agent_thinking", 
-        "tool_executing",
-        "tool_completed",
-        "agent_completed"
-    })
+    websocket_url = backend_url.replace("http://", "ws://").replace("https://", "wss://")
+
+    # Ensure WebSocket URL ends with /ws if not already present
+    if not websocket_url.endswith('/ws'):
+        websocket_url = f"{websocket_url}/ws"
+
+    return websocket_url
 
 
 @dataclass
