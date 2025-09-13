@@ -361,6 +361,7 @@ class TestAgentHandler(SSotBaseTestCase):
     
     def setup_method(self):
         """Set up test fixtures."""
+        super().setup_method()
         self.handler = AgentHandler()
         
     def test_handler_supports_agent_status_types(self):
@@ -395,8 +396,8 @@ class TestAgentHandler(SSotBaseTestCase):
         # Verify acknowledgment structure
         call_args = websocket.send_json.call_args[0][0]
         assert call_args["type"] == "system_message"
-        assert call_args["payload"]["status"] == "agent_message_acknowledged"
-        assert call_args["payload"]["original_type"] == "agent_response_chunk"
+        assert call_args["data"]["status"] == "agent_message_acknowledged"
+        assert call_args["data"]["original_type"] == "MessageType.AGENT_RESPONSE_CHUNK"
 
 
 @pytest.mark.unit
