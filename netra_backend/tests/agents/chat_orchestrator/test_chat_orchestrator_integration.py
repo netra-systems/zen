@@ -26,7 +26,18 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
