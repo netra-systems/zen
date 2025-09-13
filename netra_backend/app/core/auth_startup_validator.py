@@ -515,7 +515,7 @@ class AuthStartupValidator:
         # This provides fallback for edge cases where IsolatedEnvironment
         # might not have captured all variables during test context
         import os
-        direct_value = os.environ.get(var_name)
+        direct_value = self.env.get(var_name)
         if direct_value:
             logger.info(f"Using direct os.environ fallback for {var_name} (compatibility)")
             return direct_value
@@ -526,11 +526,9 @@ class AuthStartupValidator:
         """Get debug information about environment variable resolution attempts."""
         env_specific = f"{var_name}_{self.environment.upper()}"
         
-        # Check direct os.environ access for debug info
-        import os
+        # Environment variable resolution debug info (SSOT compliant)
         return {
             "isolated_env": bool(self.env.get(var_name)),
-            "os_environ_direct": bool(os.environ.get(var_name)),
             "environment_specific": bool(self.env.get(env_specific)),
             "env_specific_key": env_specific,
             "current_environment": self.environment
