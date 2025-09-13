@@ -47,7 +47,7 @@ def check_docker_health():
         print(f"[ERROR] Docker health check failed: {e}")
         return False
 
-def run_e2e_test_safely(test_file=None):
+def run_e2e_test_safely(test_file=None, skip_docker_check=False):
     """Run E2E tests with Windows-specific safety measures."""
     
     # Check platform
@@ -65,12 +65,34 @@ def run_e2e_test_safely(test_file=None):
         "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",  # Reduce plugin loading
     })
     
-    # Check Docker health
+    # Check Docker health with graceful fallback
     if not check_docker_health():
         print("\n[WARNING] Docker services are not healthy!")
-        print("Please ensure Docker Desktop is running and services are started:")
-        print("  python scripts/docker_manual.py start")
-        sys.exit(1)
+        print("Docker Desktop is not running or services are unavailable.")
+        print("\n📌 ALTERNATIVE VALIDATION OPTIONS:")
+        print("  1. Staging E2E Tests (Recommended):")
+        print("     python -m pytest tests/e2e/staging/ -v")
+        print("  2. Unit Tests (Core Functionality):")
+        print("     python tests/unified_test_runner.py --category unit")
+        print("  3. Integration Tests (Non-Docker):")
+        print("     python -m pytest tests/integration/ -k 'not docker' -v")
+        print("  4. Mission Critical Staging Tests:")
+        print("     python -m pytest tests/mission_critical/test_staging_websocket_agent_events.py -v")
+        print("\n💡 These alternatives validate business-critical $500K+ ARR functionality")
+        print("   including WebSocket chat features, auth flows, and agent execution.")
+        print("\n🔧 To use Docker-based E2E tests:")
+        print("     1. Start Docker Desktop")
+        print("     2. Run: python scripts/docker_manual.py start")
+        print("     3. Re-run this script")
+
+        # Check if skip flag is set
+        if skip_docker_check:
+            print("\n[INFO] --skip-docker-check provided, continuing without Docker validation...")
+            print("[WARNING] Tests requiring Docker services may fail")
+        else:
+            print(f"\n[INFO] Use --skip-docker-check to bypass this check (not recommended)")
+            print("[INFO] Exiting to prevent Docker-dependent test failures...")
+            sys.exit(1)
     
     # Build pytest command with safety flags
     cmd = [
@@ -155,8 +177,8 @@ def main():
     
     if args.skip_docker_check:
         os.environ["SKIP_DOCKER_TESTS"] = "false"
-    
-    sys.exit(run_e2e_test_safely(args.test_file))
+
+    sys.exit(run_e2e_test_safely(args.test_file, skip_docker_check=args.skip_docker_check))
 
 if __name__ == "__main__":
     main()

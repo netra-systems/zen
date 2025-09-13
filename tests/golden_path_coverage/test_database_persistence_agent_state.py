@@ -54,7 +54,7 @@ from netra_backend.app.services.state_persistence_optimized import OptimizedStat
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.db.clickhouse_client import ClickHouseClient
 from netra_backend.app.core.configuration.database import DatabaseConfig
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 
 class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
@@ -102,8 +102,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         # Real user execution context for state isolation
         self.user_context = UserExecutionContext(
             user_id=self.user_id,
-            conversation_id=self.conversation_id,
-            metadata={"test": True, "test_id": self.test_id}
+            thread_id=self.conversation_id,
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
         )
 
         # Real state manager with database integration
@@ -119,7 +120,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         )
 
         # Real execution engine for state integration testing
-        websocket_manager = UnifiedWebSocketManager()
+        websocket_manager = await get_websocket_manager(user_context=self.user_context)
         self.execution_engine = UserExecutionEngine(
             user_context=self.user_context,
             websocket_manager=websocket_manager,
@@ -235,8 +236,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         # Simulate session break (new execution context)
         new_user_context = UserExecutionContext(
             user_id=self.user_id,  # Same user
-            conversation_id=self.conversation_id,  # Same conversation
-            metadata={"session": 2}
+            thread_id=self.conversation_id,  # Same conversation
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
         )
         new_state_manager = StateManager(
             user_context=new_user_context,
@@ -249,7 +251,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         # Execute continuation request
         new_execution_engine = UserExecutionEngine(
             user_context=new_user_context,
-            websocket_manager=UnifiedWebSocketManager(),
+            websocket_manager=await get_websocket_manager(user_context=new_user_context),
             state_manager=new_state_manager
         )
 
@@ -354,7 +356,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         # Act: Save state through optimized persistence
         await self.optimized_persistence.save_comprehensive_state(
             user_id=self.user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             state_data=comprehensive_state
         )
 
@@ -398,7 +400,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
 
         await self.optimized_persistence.save_comprehensive_state(
             user_id=self.user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             state_data=test_state
         )
 
@@ -408,7 +410,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
             # Try to get state with Redis potentially unavailable
             fallback_state = await self.optimized_persistence.get_state_with_fallback(
                 user_id=self.user_id,
-                conversation_id=self.conversation_id
+                thread_id=self.conversation_id
             )
 
             # Assert: Should recover state from available tiers
@@ -503,8 +505,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
 
         new_user_context = UserExecutionContext(
             user_id=self.user_id,
-            conversation_id=self.conversation_id,
-            metadata={"restarted": True}
+            thread_id=self.conversation_id,
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
         )
 
         new_state_manager = StateManager(
@@ -536,7 +539,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         # Should be able to continue execution with recovered state
         new_execution_engine = UserExecutionEngine(
             user_context=new_user_context,
-            websocket_manager=UnifiedWebSocketManager(),
+            websocket_manager=await get_websocket_manager(user_context=new_user_context),
             state_manager=new_state_manager
         )
 
@@ -623,8 +626,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         for user_id in [user_1_id, user_2_id, user_3_id]:
             user_contexts[user_id] = UserExecutionContext(
                 user_id=user_id,
-                conversation_id=f"conv_{user_id}",
-                metadata={"isolation_test": True}
+                thread_id=f"conv_{user_id}",
+                run_id=f"run_{uuid.uuid4()}",
+                request_id=f"req_{uuid.uuid4()}"
             )
             state_managers[user_id] = StateManager(
                 user_context=user_contexts[user_id],
@@ -690,8 +694,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         for user_id in users:
             user_context = UserExecutionContext(
                 user_id=user_id,
-                conversation_id=f"conv_{user_id}",
-                metadata={"concurrent_test": True}
+                thread_id=f"conv_{user_id}",
+                run_id=f"run_{uuid.uuid4()}",
+                request_id=f"req_{uuid.uuid4()}"
             )
 
             state_manager = StateManager(
@@ -701,7 +706,7 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
 
             execution_engines[user_id] = UserExecutionEngine(
                 user_context=user_context,
-                websocket_manager=UnifiedWebSocketManager(),
+                websocket_manager=await get_websocket_manager(user_context=user_context),
                 state_manager=state_manager
             )
 
@@ -734,8 +739,9 @@ class TestDatabasePersistenceAgentState(SSotAsyncTestCase):
         for user_id in users:
             user_context = UserExecutionContext(
                 user_id=user_id,
-                conversation_id=f"conv_{user_id}",
-                metadata={"verification": True}
+                thread_id=f"conv_{user_id}",
+                run_id=f"run_{uuid.uuid4()}",
+                request_id=f"req_{uuid.uuid4()}"
             )
 
             state_manager = StateManager(

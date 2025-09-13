@@ -56,7 +56,7 @@ from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.core.token_validator import TokenValidator
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
@@ -223,8 +223,16 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # Create test user
         await self.auth_client.create_test_user(self.test_user_id)
 
-        # Real WebSocket manager with auth integration
-        self.websocket_manager = UnifiedWebSocketManager()
+        # Create user context for WebSocket manager
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id,
+            thread_id=f"conv_{self.test_user_id}",
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
+        )
+
+        # Real WebSocket manager with auth integration using factory function
+        self.websocket_manager = await get_websocket_manager(user_context=user_context)
         await self.websocket_manager.initialize()
 
         # Real agent registry with auth validation
@@ -284,7 +292,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # Create authenticated user context
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=jwt_token,
             metadata={"authenticated": True}
         )
@@ -324,7 +332,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # Create execution context with expiring token
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=short_lived_token,
             metadata={"expiration_test": True}
         )
@@ -375,7 +383,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         for i in range(5):
             user_context = UserExecutionContext(
                 user_id=self.test_user_id,
-                conversation_id=f"{self.conversation_id}_{i}",
+                thread_id=f"{self.conversation_id}_{i}",
                 auth_token=jwt_token,
                 metadata={"load_test": True, "instance": i}
             )
@@ -434,7 +442,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
 
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=initial_token,
             metadata={"refresh_test": True}
         )
@@ -507,7 +515,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # Create user context with OAuth token
         user_context = UserExecutionContext(
             user_id=oauth_result.get("user_id", self.test_user_id),
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=oauth_token,
             auth_method="oauth",
             metadata={"oauth_provider": "google"}
@@ -555,7 +563,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         oauth_token = oauth_result.get("access_token")
         user_context = UserExecutionContext(
             user_id=oauth_result.get("user_id", self.test_user_id),
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=oauth_token,
             auth_method="oauth",
             metadata={"scopes": ["read_data", "analyze_supply_chain", "generate_reports"]}
@@ -617,7 +625,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # Act: Execute multiple agent requests in same session
         user_context = UserExecutionContext(
             user_id=self.test_user_id,
-            conversation_id=self.conversation_id,
+            thread_id=self.conversation_id,
             auth_token=jwt_token,
             session_id=session_id,
             metadata={"session_test": True}
@@ -714,7 +722,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # User 1 execution
         context_1 = UserExecutionContext(
             user_id=user_1_id,
-            conversation_id=f"conv_1_{self.test_id}",
+            thread_id=f"conv_1_{self.test_id}",
             auth_token=token_1,
             session_id=session_1_id
         )
@@ -733,7 +741,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
         # User 2 execution (should not access user 1's data)
         context_2 = UserExecutionContext(
             user_id=user_2_id,
-            conversation_id=f"conv_2_{self.test_id}",
+            thread_id=f"conv_2_{self.test_id}",
             auth_token=token_2,
             session_id=session_2_id
         )
@@ -810,7 +818,7 @@ class TestAuthenticationIntegrationAgentWorkflows(SSotAsyncTestCase):
 
             user_context = UserExecutionContext(
                 user_id=user_id,
-                conversation_id=f"concurrent_conv_{user_index}_{self.test_id}",
+                thread_id=f"concurrent_conv_{user_index}_{self.test_id}",
                 auth_token=token,
                 metadata={"concurrent_test": True, "user_index": user_index}
             )

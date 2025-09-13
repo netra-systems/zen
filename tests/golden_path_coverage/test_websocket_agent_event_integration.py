@@ -48,7 +48,7 @@ import pytest
 from loguru import logger
 
 # Import production components (real services only)
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -171,8 +171,16 @@ class TestWebSocketAgentEventIntegration(SSotAsyncTestCase):
 
     async def setup_real_websocket_infrastructure(self):
         """Initialize real WebSocket infrastructure components."""
-        # Real WebSocket manager
-        self.websocket_manager = UnifiedWebSocketManager()
+        # Create real user execution context first
+        self.user_context = UserExecutionContext(
+            user_id=self.user_id,
+            thread_id=self.conversation_id,
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
+        )
+
+        # Real WebSocket manager using proper factory function
+        self.websocket_manager = await get_websocket_manager(user_context=self.user_context)
         await self.websocket_manager.initialize()
 
         # Real WebSocket bridge for agent integration
@@ -184,14 +192,8 @@ class TestWebSocketAgentEventIntegration(SSotAsyncTestCase):
         self.agent_registry = AgentRegistry()
         self.agent_registry.set_websocket_manager(self.websocket_manager)
 
-        # Real user execution engine
-        user_context = UserExecutionContext(
-            user_id=self.user_id,
-            conversation_id=self.conversation_id
-        )
-
         self.execution_engine = UserExecutionEngine(
-            user_context=user_context,
+            user_context=self.user_context,
             websocket_manager=self.websocket_manager
         )
 

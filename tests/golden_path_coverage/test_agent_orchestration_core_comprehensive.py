@@ -53,7 +53,7 @@ from netra_backend.app.agents.supervisor.execution_context import AgentExecution
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcherFactory
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.supervisor.state_manager import StateManager
@@ -89,19 +89,20 @@ class TestAgentOrchestrationCore(SSotAsyncTestCase):
 
     async def setup_real_services(self):
         """Initialize real service infrastructure - never mocked."""
-        # Create real WebSocket manager
-        self.websocket_manager = UnifiedWebSocketManager()
+        # Create real user execution context for isolation first
+        self.user_context = UserExecutionContext(
+            user_id=self.user_id,
+            thread_id=self.conversation_id,
+            run_id=f"run_{uuid.uuid4()}",
+            request_id=f"req_{uuid.uuid4()}"
+        )
+
+        # Create real WebSocket manager using proper factory function
+        self.websocket_manager = await get_websocket_manager(user_context=self.user_context)
 
         # Create real agent registry with WebSocket integration
         self.agent_registry = AgentRegistry()
         self.agent_registry.set_websocket_manager(self.websocket_manager)
-
-        # Create real user execution context for isolation
-        self.user_context = UserExecutionContext(
-            user_id=self.user_id,
-            conversation_id=self.conversation_id,
-            metadata={"test": True}
-        )
 
         # Create real execution engine with user isolation
         self.execution_engine = UserExecutionEngine(
