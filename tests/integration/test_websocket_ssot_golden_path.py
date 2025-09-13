@@ -89,6 +89,10 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 logger = central_logger.get_logger(__name__)
 
 
+@pytest.mark.golden_path
+@pytest.mark.no_docker
+@pytest.mark.integration
+@pytest.mark.business_critical
 class TestWebSocketSSOTGoldenPath(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:

@@ -129,13 +129,35 @@ Auth files were correctly scoped as Phase 2 work, not Phase 1 oversight.
 - Business impact: **MEDIUM** (not blocking)
 
 ### **NEXT STEPS:**
-1. **Issue Reclassification:** P0 → P2 with focused scope
-2. **Quick Remediation:** 3-file targeted fix using established patterns
-3. **Phase 2 Completion:** Close UnifiedIdGenerator migration project
+1. **Issue Reclassification:** P0 → P2 with focused scope  
+2. **Quick Remediation:** 3-file targeted fix using established patterns  
+3. **Phase 2 Completion:** Close UnifiedIdGenerator migration project  
+4. **📋 REMEDIATION PLAN COMPLETE:** See [`ISSUE_841_REMEDIATION_PLAN.md`](ISSUE_841_REMEDIATION_PLAN.md) for detailed implementation strategy
 
 ### **ARCHITECTURAL WIN:**
 🎉 **PR #591 successfully delivered** comprehensive SSOT infrastructure and eliminated majority of violations. Issue #841 represents final cleanup, not system-wide problem.
 
 ---
 
-*Analysis completed by Agent Session 2025-09-13-1725 | FIVE WHYS methodology applied | Current codebase audit completed*
+## ✅ REMEDIATION PLAN STATUS: COMPLETE
+
+**DELIVERABLE**: [`ISSUE_841_REMEDIATION_PLAN.md`](ISSUE_841_REMEDIATION_PLAN.md)
+
+**PLAN HIGHLIGHTS**:
+- **3 Critical Files**: Targeted remediation for auth.py, unified_tool_dispatcher.py, unified_websocket_auth.py
+- **File-by-File Strategy**: Independent migration with specific UnifiedIdGenerator method replacements  
+- **Business Risk Mitigation**: User isolation security, resource cleanup fixes, audit trail improvements
+- **Implementation Time**: 2-3 hours estimated completion
+- **Golden Path Protection**: $500K+ ARR functionality maintained during migration
+- **Backward Compatibility**: All changes maintain string ID format compatibility
+
+**SUCCESS CRITERIA**:
+- All violation detection tests PASS (violations eliminated)
+- WebSocket factory resource cleanup functional
+- Auth sessions include user context for security
+- No Golden Path regression
+
+---
+
+*Analysis completed by Agent Session 2025-09-13-1725 | FIVE WHYS methodology applied | Current codebase audit completed*  
+*Remediation Plan delivered by Agent Session 2025-09-13-1725 | File-by-file implementation strategy | Business value focus*

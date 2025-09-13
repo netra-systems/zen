@@ -618,7 +618,10 @@ markers = [
     # Missing markers from GitHub issue #848
     "skip_if_staging_unavailable: Skip tests when staging environment unavailable",
     "production_readiness: Tests validating production deployment readiness",
-    "concurrent_testing: Multi-user concurrent execution validation tests"
+    "concurrent_testing: Multi-user concurrent execution validation tests",
+    
+    # Golden path specific markers for issue #843
+    "goldenpath: Golden path integration tests for critical user flows"
 ]
 
 # Coverage settings

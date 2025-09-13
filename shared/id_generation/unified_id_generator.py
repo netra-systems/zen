@@ -66,6 +66,19 @@ class UnifiedIdGenerator:
     """
     
     @staticmethod
+    def generate_id(prefix: str) -> str:
+        """Simple ID generation for test compatibility.
+        
+        Args:
+            prefix: String prefix for the ID
+            
+        Returns:
+            ID string with format: prefix_random
+        """
+        random_component = uuid.uuid4().hex[:8]
+        return f"{prefix}_{random_component}"
+    
+    @staticmethod
     def generate_base_id(prefix: str = "id", include_random: bool = True, 
                         random_length: int = 8) -> str:
         """Core ID generation with triple collision protection.
