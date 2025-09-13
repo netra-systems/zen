@@ -187,6 +187,8 @@ class HealthCheckManager:
                 if redis_url:
                     client = redis.from_url(redis_url, decode_responses=True)
                 else:
+                    # Import the Redis client function
+                    from netra_backend.app.services.redis_client import get_redis_client
                     client = await get_redis_client()  # MIGRATED: was redis.Redis
                 
                 connection_start = time.time()

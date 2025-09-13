@@ -109,11 +109,15 @@ class TestContextValidation(SSotAsyncTestCase):
         
         for placeholder in placeholder_patterns:
             with self.expect_exception(InvalidContextError):
-                validate_user_context(
+                # Create context with placeholder value - validation happens during creation
+                invalid_context = UserExecutionContext(
                     user_id=placeholder,
                     thread_id=self.test_thread_id,
-                    run_id=self.test_run_id
+                    run_id=self.test_run_id,
+                    request_id=self.test_request_id
                 )
+                # Then validate the context
+                validate_user_context(invalid_context)
             
             error_msg = str(context.exception)
             self.assertIn("placeholder", error_msg.lower())
@@ -136,11 +140,15 @@ class TestContextValidation(SSotAsyncTestCase):
         
         for invalid_value in invalid_values:
             with self.expect_exception((InvalidContextError, ValueError, TypeError)):
-                validate_user_context(
+                # Create context with invalid value - validation happens during creation
+                invalid_context = UserExecutionContext(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id, 
-                    run_id=self.test_run_id
+                    run_id=self.test_run_id,
+                    request_id=self.test_request_id
                 )
+                # Then validate the context
+                validate_user_context(invalid_context)
     
     def test_context_validation_security_pattern_detection(self):
         """Test detection of security-sensitive patterns in context."""
@@ -159,11 +167,15 @@ class TestContextValidation(SSotAsyncTestCase):
         
         for attack_type, payload in security_violations:
             with self.expect_exception(InvalidContextError):
-                validate_user_context(
+                # Create context with security violation - validation happens during creation
+                invalid_context = UserExecutionContext(
                     user_id=f"user_{payload}",
                     thread_id=self.test_thread_id,
-                    run_id=self.test_run_id
+                    run_id=self.test_run_id,
+                    request_id=self.test_request_id
                 )
+                # Then validate the context
+                validate_user_context(invalid_context)
             
             error_msg = str(context.exception)
             self.assertIn("security", error_msg.lower())
@@ -352,7 +364,7 @@ class TestContextValidation(SSotAsyncTestCase):
                 thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
             )
-            validate_user_context(context.user_id, context.thread_id, context.run_id)
+            validate_user_context(context)
         
         end_time = time.time()
         total_time = end_time - start_time
@@ -397,11 +409,15 @@ class TestContextValidation(SSotAsyncTestCase):
         
         for invalid_value, expected_keyword in test_cases:
             with self.expect_exception(InvalidContextError):
-                validate_user_context(
+                # Create context with invalid value - validation happens during creation
+                invalid_context = UserExecutionContext(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id,
-                    run_id=self.test_run_id
+                    run_id=self.test_run_id,
+                    request_id=self.test_request_id
                 )
+                # Then validate the context
+                validate_user_context(invalid_context)
             
             error_msg = str(context.exception).lower()
             self.assertIn(expected_keyword, error_msg,

@@ -29,7 +29,7 @@ from typing import Dict, List, Set, Any
 import unittest.mock
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestIssue686ExecutionEngineConsolidation(SSotBaseTestCase):
