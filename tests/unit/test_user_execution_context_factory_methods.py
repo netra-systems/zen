@@ -195,7 +195,7 @@ class TestUserExecutionContextFactoryMethods:
         assert fixed_context.run_id == "test_run"
         
         # Verify context is functional
-        assert fixed_context.get_context_key() is not None
+        assert fixed_context.get_scoped_key() is not None
     
     def test_issue_674_specific_test_case(self):
         """
@@ -224,4 +224,4 @@ class TestUserExecutionContextFactoryMethods:
         assert context.run_id == "test_run"
         
         # Verify context is ready for use in concurrency tests
-        assert context.get_context_key() is not None
+        assert context.get_scoped_key() is not None

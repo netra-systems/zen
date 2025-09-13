@@ -1023,7 +1023,7 @@ class StartupOrchestrator:
     
     def _initialize_environment_context(self) -> None:
         """Initialize EnvironmentContextService - CRITICAL for Issue #402 fix."""
-        from netra_backend.app.services.environment_context_service import EnvironmentContextService
+        from netra_backend.app.core.environment_context.environment_context_service import EnvironmentContextService
         
         try:
             environment_context_service = EnvironmentContextService()
