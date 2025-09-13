@@ -47,8 +47,8 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Real ExecutionEngine components for advanced testing
-from netra_backend.app.agents.supervisor.execution_engine import (
-    ExecutionEngine,
+from netra_backend.app.agents.supervisor.user_execution_engine import (
+    UserExecutionEngine as ExecutionEngine,
     create_request_scoped_engine,
     create_execution_context_manager
 )

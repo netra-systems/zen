@@ -46,7 +46,7 @@ from netra_backend.app.core.auth_startup_validator import (
     AuthComponent, 
     AuthValidationResult,
     AuthValidationError,
-    validate_auth_at_startup
+    validate_auth_startup
 )
 from netra_backend.app.core.environment_constants import Environment
 
@@ -1460,7 +1460,7 @@ class TestAuthStartupValidatorCompleteSecurityIntegration(BaseIntegrationTest):
     
     @pytest.mark.asyncio
     async def test_auth_validator_startup_function_security_integration(self):
-        """Test validate_auth_at_startup function security integration."""
+        """Test validate_auth_startup function security integration."""
         # Test the convenience function under various security scenarios
         security_scenarios = [
             {
@@ -1497,14 +1497,14 @@ class TestAuthStartupValidatorCompleteSecurityIntegration(BaseIntegrationTest):
             with patch('netra_backend.app.core.auth_startup_validator.OAuthConfigGenerator'):
                 if scenario["should_raise_exception"]:
                     with pytest.raises(AuthValidationError) as exc_info:
-                        await validate_auth_at_startup()
+                        await validate_auth_startup()
                     
                     if "expected_exception_content" in scenario:
                         assert scenario["expected_exception_content"] in str(exc_info.value)
                 else:
                     # Should not raise exception
                     try:
-                        await validate_auth_at_startup()
+                        await validate_auth_startup()
                     except AuthValidationError as e:
                         pytest.fail(f"Should not raise exception for {scenario['name']}: {e}")
             

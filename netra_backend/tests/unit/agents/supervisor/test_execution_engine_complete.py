@@ -193,15 +193,15 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
                 websocket_bridge=self.websocket_bridge
             )
             
-    def test_factory_init_from_factory_creates_engine(self):
-        """Test internal _init_from_factory method."""
+    def test_factory_create_request_scoped_engine_creates_engine(self):
+        """Test internal create_request_scoped_engine method."""
         user_context = UserExecutionContext.from_request(
             user_id="factory_user",
             thread_id="factory_thread", 
             run_id="factory_run"
         )
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=user_context
@@ -217,13 +217,13 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         context1 = UserExecutionContext.from_request("user1", "thread1", "run1")
         context2 = UserExecutionContext.from_request("user2", "thread2", "run2")
         
-        engine1 = ExecutionEngine._init_from_factory(
+        engine1 = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=context1
         )
         
-        engine2 = ExecutionEngine._init_from_factory(
+        engine2 = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=context2
@@ -243,7 +243,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         
         # Test with None websocket_bridge
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=None,
                 user_context=user_context
@@ -255,7 +255,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         del invalid_bridge.notify_agent_started  # Remove required method
         
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=invalid_bridge,
                 user_context=user_context
@@ -272,7 +272,7 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
         
         # Should still validate that it's proper AgentWebSocketBridge instance
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=insecure_bridge,
                 user_context=user_context
@@ -286,7 +286,7 @@ class TestExecutionEngineInitialization(SSotAsyncTestCase):
     
     def create_engine(self) -> ExecutionEngine:
         """Helper to create ExecutionEngine for tests."""
-        return ExecutionEngine._init_from_factory(
+        return ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -329,7 +329,7 @@ class TestExecutionEngineInitialization(SSotAsyncTestCase):
     def test_initialization_with_and_without_user_context(self):
         """Test initialization with and without UserExecutionContext."""
         # With user context
-        with_context = ExecutionEngine._init_from_factory(
+        with_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -337,7 +337,7 @@ class TestExecutionEngineInitialization(SSotAsyncTestCase):
         self.assertIsNotNone(with_context.user_context)
         
         # Without user context
-        without_context = ExecutionEngine._init_from_factory(
+        without_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=None
@@ -726,7 +726,7 @@ class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
         self.assertFalse(success)
         
         # Test without user context
-        engine_no_context = ExecutionEngine._init_from_factory(
+        engine_no_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=None
@@ -776,7 +776,7 @@ class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
         error_bridge = MockWebSocketBridge()
         error_bridge.notify_agent_thinking = AsyncMock(side_effect=Exception("WebSocket error"))
         
-        engine_with_error_bridge = ExecutionEngine._init_from_factory(
+        engine_with_error_bridge = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=error_bridge,
             user_context=self.user_context
@@ -811,7 +811,7 @@ class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
     
     def create_engine_with_mock_core(self) -> ExecutionEngine:
         """Create engine with mocked agent core."""
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -864,7 +864,7 @@ class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
         """Test agent execution with failure scenario."""
         # Create engine with failing mock
         failing_core = MockAgentCore(should_succeed=False)
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -897,7 +897,7 @@ class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
         """Test agent execution timeout handling."""
         # Create engine with slow mock (longer than timeout)
         slow_core = MockAgentCore(should_succeed=True, execution_time=35000)  # 35 seconds
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -1594,7 +1594,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             run_id="isolation_run"
         )
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=user_context
@@ -1611,7 +1611,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
         
     def test_engine_without_user_context(self):
         """Test ExecutionEngine behavior without UserExecutionContext."""
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=None
@@ -1629,7 +1629,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
     def test_has_user_context_method(self):
         """Test has_user_context convenience method."""
         # With context
-        with_context = ExecutionEngine._init_from_factory(
+        with_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("user1", "thread1", "run1")
@@ -1637,7 +1637,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
         self.assertTrue(with_context.has_user_context())
         
         # Without context
-        without_context = ExecutionEngine._init_from_factory(
+        without_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=None
@@ -1658,7 +1658,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             )
             contexts.append(user_context)
             
-            engine = ExecutionEngine._init_from_factory(
+            engine = ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=MockWebSocketBridge(),  # Separate bridge per user
                 user_context=user_context
@@ -1694,13 +1694,13 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             metadata={"priority": "low", "source": "api"}
         )
         
-        engine1 = ExecutionEngine._init_from_factory(
+        engine1 = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=MockWebSocketBridge(),
             user_context=context1
         )
         
-        engine2 = ExecutionEngine._init_from_factory(
+        engine2 = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=MockWebSocketBridge(),
             user_context=context2
@@ -1726,13 +1726,13 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             metadata={"env": "production", "features": ["feature_a", "feature_b"]}
         )
         
-        standard_engine = ExecutionEngine._init_from_factory(
+        standard_engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=MockWebSocketBridge(),
             user_context=standard_context
         )
         
-        complex_engine = ExecutionEngine._init_from_factory(
+        complex_engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=MockWebSocketBridge(),
             user_context=complex_context
@@ -1764,7 +1764,7 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
             
         # Test engine handles context validation errors gracefully
         valid_context = UserExecutionContext.from_request("valid_user", "valid_thread", "valid_run")
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=MockWebSocketBridge(),
             user_context=valid_context
@@ -1916,7 +1916,7 @@ class TestExecutionEngineShutdownAndCleanup(SSotAsyncTestCase):
         failing_bridge = MockWebSocketBridge()
         failing_bridge.get_metrics = AsyncMock(side_effect=Exception("Bridge error"))
         
-        engine_with_failing_bridge = ExecutionEngine._init_from_factory(
+        engine_with_failing_bridge = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=failing_bridge,
             user_context=self.user_context

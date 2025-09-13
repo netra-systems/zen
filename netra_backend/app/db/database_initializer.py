@@ -30,6 +30,13 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import redis.asyncio as redis
 # Using canonical ClickHouse client
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError, OperationalError
+
+# Issue #374 FIX: Import specific database exception types for proper error handling
+from netra_backend.app.db.transaction_errors import (
+    DeadlockError, ConnectionError, TransactionError, TimeoutError, 
+    PermissionError, SchemaError, classify_error, is_retryable_error
+)
 
 logger = logging.getLogger(__name__)
 
@@ -159,8 +166,17 @@ class DatabaseInitializer:
             conn.close()
             return True
             
+        except (OperationalError, SQLAlchemyError, psycopg2.Error) as e:
+            # Issue #374 FIX: Use specific database exceptions with classification
+            classified_error = classify_error(e)
+            logger.error(f"Error creating PostgreSQL database ({type(classified_error).__name__}): {e}")
+            
+            # Check if error is retryable for potential circuit breaker decisions
+            if is_retryable_error(classified_error, True, True):
+                logger.info("Database creation error is retryable - circuit breaker may allow retry")
+            return False
         except Exception as e:
-            logger.error(f"Error creating PostgreSQL database: {e}")
+            logger.error(f"Unexpected error creating PostgreSQL database: {e}")
             return False
     
     async def _initialize_postgresql_schema(self, config: DatabaseConfig) -> bool:
@@ -204,8 +220,20 @@ class DatabaseInitializer:
             await conn.close()
             return True
             
+        except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+            # Issue #374 FIX: Classify database-specific errors for better diagnostics
+            classified_error = classify_error(e)
+            logger.error(f"PostgreSQL schema initialization failed ({type(classified_error).__name__}): {e}")
+            
+            # Only trip circuit breaker for non-retryable errors
+            if not is_retryable_error(classified_error, True, True):
+                self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
+                logger.warning("Circuit breaker tripped due to non-retryable database error")
+            else:
+                logger.info("Database error is retryable - circuit breaker remains closed")
+            return False
         except Exception as e:
-            logger.error(f"PostgreSQL schema initialization failed: {e}")
+            logger.error(f"Unexpected error during PostgreSQL schema initialization: {e}")
             self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
             return False
     
@@ -315,14 +343,21 @@ class DatabaseInitializer:
                     await conn.execute(table_sql)
                     created_tables.append(table_name)
                     logger.info(f"Created supplementary table: {table_name}")
-            except Exception as e:
+            except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                # Issue #374 FIX: Handle database-specific errors with proper classification
+                classified_error = classify_error(e)
                 error_msg = str(e).lower()
+                
                 if "already exists" in error_msg or "relation" in error_msg:
                     logger.info(f"Table '{table_name}' was created concurrently - continuing")
                     skipped_tables.append(table_name)
                 else:
-                    logger.error(f"Failed to create supplementary table '{table_name}': {e}")
-                    raise
+                    logger.error(f"Failed to create supplementary table '{table_name}' ({type(classified_error).__name__}): {e}")
+                    # Re-raise classified error for better upstream handling
+                    raise classified_error
+            except Exception as e:
+                logger.error(f"Unexpected error creating supplementary table '{table_name}': {e}")
+                raise
         
         # Add foreign key constraints safely - update existing_tables to include newly created tables
         updated_existing_tables = existing_tables.union(set(created_tables))
@@ -357,9 +392,14 @@ class DatabaseInitializer:
                             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                         """)
                         logger.info("Added foreign key constraint for sessions.user_id")
+                    except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                        # Issue #374 FIX: Classify foreign key constraint errors
+                        classified_error = classify_error(e)
+                        if "already exists" not in str(e).lower():
+                            logger.warning(f"Could not add sessions foreign key ({type(classified_error).__name__}): {e}")
                     except Exception as e:
                         if "already exists" not in str(e).lower():
-                            logger.warning(f"Could not add sessions foreign key: {e}")
+                            logger.warning(f"Unexpected error adding sessions foreign key: {e}")
             
             if 'users' in existing_tables and 'api_keys' in existing_tables:
                 # Check if foreign key already exists
@@ -380,12 +420,21 @@ class DatabaseInitializer:
                             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                         """)
                         logger.info("Added foreign key constraint for api_keys.user_id")
+                    except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                        # Issue #374 FIX: Classify foreign key constraint errors
+                        classified_error = classify_error(e)
+                        if "already exists" not in str(e).lower():
+                            logger.warning(f"Could not add api_keys foreign key ({type(classified_error).__name__}): {e}")
                     except Exception as e:
                         if "already exists" not in str(e).lower():
-                            logger.warning(f"Could not add api_keys foreign key: {e}")
+                            logger.warning(f"Unexpected error adding api_keys foreign key: {e}")
         
+        except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+            # Issue #374 FIX: Classify general foreign key errors
+            classified_error = classify_error(e)
+            logger.warning(f"Error adding foreign key constraints ({type(classified_error).__name__}): {e}")
         except Exception as e:
-            logger.warning(f"Error adding foreign key constraints: {e}")
+            logger.warning(f"Unexpected error adding foreign key constraints: {e}")
     
     async def _initialize_schema_directly(self, conn) -> None:
         """Initialize schema directly when Alembic is not present"""
@@ -684,8 +733,16 @@ class DatabaseInitializer:
                 return True
             
         except Exception as e:
-            logger.error(f"ClickHouse schema initialization failed: {e}")
-            self._trip_circuit_breaker(DatabaseType.CLICKHOUSE)
+            # Issue #374 FIX: Classify ClickHouse initialization errors 
+            classified_error = classify_error(e)
+            logger.error(f"ClickHouse schema initialization failed ({type(classified_error).__name__}): {e}")
+            
+            # Check if error is retryable before tripping circuit breaker
+            if not is_retryable_error(classified_error, True, True):
+                self._trip_circuit_breaker(DatabaseType.CLICKHOUSE)
+                logger.warning("ClickHouse circuit breaker tripped due to non-retryable error")
+            else:
+                logger.info("ClickHouse error is retryable - circuit breaker remains closed")
             return False
     
     async def _initialize_redis(self, config: DatabaseConfig) -> bool:
@@ -693,13 +750,14 @@ class DatabaseInitializer:
         try:
             # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
             client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=config.host,
-                port=config.port,
-                password=config.password if config.password else None,
-                decode_responses=True,
-                socket_connect_timeout=config.connection_timeout,
-                socket_timeout=config.query_timeout
-            )
+                # Note: get_redis_client() should handle config internally
+                # host=config.host,
+                # port=config.port,
+                # password=config.password if config.password else None,
+                # decode_responses=True,
+                # socket_connect_timeout=config.connection_timeout,
+                # socket_timeout=config.query_timeout
+            # )
             
             # Test connection
             await client.ping()
@@ -724,8 +782,16 @@ class DatabaseInitializer:
             return True
             
         except Exception as e:
-            logger.error(f"Redis initialization failed: {e}")
-            self._trip_circuit_breaker(DatabaseType.REDIS)
+            # Issue #374 FIX: Classify Redis initialization errors
+            classified_error = classify_error(e)
+            logger.error(f"Redis initialization failed ({type(classified_error).__name__}): {e}")
+            
+            # Check if error is retryable before tripping circuit breaker
+            if not is_retryable_error(classified_error, True, True):
+                self._trip_circuit_breaker(DatabaseType.REDIS)
+                logger.warning("Redis circuit breaker tripped due to non-retryable error")
+            else:
+                logger.info("Redis error is retryable - circuit breaker remains closed")
             return False
     
     async def _acquire_migration_lock(self, db_type: DatabaseType) -> bool:
@@ -755,8 +821,17 @@ class DatabaseInitializer:
                     logger.warning("Could not acquire migration lock, another process may be migrating")
                     return False
                     
+            except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                # Issue #374 FIX: Classify migration lock acquisition errors
+                classified_error = classify_error(e)
+                logger.error(f"Error acquiring migration lock ({type(classified_error).__name__}): {e}")
+                
+                # For retryable lock errors, don't fail immediately
+                if is_retryable_error(classified_error, True, True):
+                    logger.info("Migration lock error is retryable - may succeed on retry")
+                return False
             except Exception as e:
-                logger.error(f"Error acquiring migration lock: {e}")
+                logger.error(f"Unexpected error acquiring migration lock: {e}")
                 return False
         
         return True  # Other databases don't need locking for now
@@ -780,8 +855,12 @@ class DatabaseInitializer:
                 logger.info("Released migration lock")
                 await conn.close()
                 
+            except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                # Issue #374 FIX: Classify migration lock release errors
+                classified_error = classify_error(e)
+                logger.error(f"Error releasing migration lock ({type(classified_error).__name__}): {e}")
             except Exception as e:
-                logger.error(f"Error releasing migration lock: {e}")
+                logger.error(f"Unexpected error releasing migration lock: {e}")
     
     async def initialize_database(self, db_type: DatabaseType) -> bool:
         """Initialize a specific database with retry logic"""
@@ -820,8 +899,20 @@ class DatabaseInitializer:
                     logger.info(f"Successfully initialized {db_type.value}")
                     return True
                 
+            except (OperationalError, SQLAlchemyError, ConnectionError, DeadlockError, TimeoutError) as e:
+                # Issue #374 FIX: Handle specific database initialization errors
+                classified_error = classify_error(e) 
+                logger.error(f"Error initializing {db_type.value} ({type(classified_error).__name__}): {e}")
+                
+                # Log retry eligibility for diagnostics
+                if is_retryable_error(classified_error, True, True):
+                    logger.info(f"Database initialization error for {db_type.value} is retryable")
+                else:
+                    logger.warning(f"Database initialization error for {db_type.value} is not retryable")
+                    
+                await self._release_migration_lock(db_type)
             except Exception as e:
-                logger.error(f"Error initializing {db_type.value}: {e}")
+                logger.error(f"Unexpected error initializing {db_type.value}: {e}")
                 await self._release_migration_lock(db_type)
             
             # Exponential backoff
@@ -847,8 +938,20 @@ class DatabaseInitializer:
             # Initialize PostgreSQL database
             return await self.initialize_database(DatabaseType.POSTGRESQL)
             
+        except (OperationalError, SQLAlchemyError, ConnectionError, TimeoutError) as e:
+            # Issue #374 FIX: Classify PostgreSQL auto-configuration errors
+            classified_error = classify_error(e)
+            logger.error(f"Failed to initialize PostgreSQL ({type(classified_error).__name__}): {e}")
+            
+            # Provide guidance based on error type
+            if isinstance(classified_error, ConnectionError):
+                logger.error("PostgreSQL connection failed - check database server status and network connectivity")
+            elif isinstance(classified_error, TimeoutError):
+                logger.error("PostgreSQL initialization timed out - check database server performance")
+            
+            return False
         except Exception as e:
-            logger.error(f"Failed to initialize PostgreSQL: {e}")
+            logger.error(f"Unexpected error during PostgreSQL initialization: {e}")
             return False
     
     async def _configure_postgresql_from_environment(self) -> None:
@@ -972,11 +1075,12 @@ class DatabaseInitializer:
             elif db_type == DatabaseType.REDIS:
                 # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
                 client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                    host=config.host,
-                    port=config.port,
-                    password=config.password if config.password else None,
-                    socket_connect_timeout=5.0
-                )
+                    # Note: get_redis_client() should handle config internally
+                    # host=config.host,
+                    # port=config.port,
+                    # password=config.password if config.password else None,
+                    # socket_connect_timeout=5.0
+                # )
                 info = await client.info()
                 await client.close()
                 details["version"] = info.get("redis_version")
@@ -990,8 +1094,20 @@ class DatabaseInitializer:
                     details["version"] = version
                     return True, details
                 
+        except (OperationalError, SQLAlchemyError, ConnectionError, TimeoutError) as e:
+            # Issue #374 FIX: Classify health check errors for better diagnostics
+            classified_error = classify_error(e)
+            details["error"] = str(e)
+            details["error_type"] = type(classified_error).__name__
+            details["is_retryable"] = is_retryable_error(classified_error, True, True)
+            
+            logger.warning(f"Database health check failed for {db_type.value} ({type(classified_error).__name__}): {e}")
+            return False, details
         except Exception as e:
             details["error"] = str(e)
+            details["error_type"] = "UnexpectedError" 
+            details["is_retryable"] = False
+            logger.error(f"Unexpected error during health check for {db_type.value}: {e}")
             return False, details
         
         return False, details

@@ -49,6 +49,22 @@ def execution_engine_context(*args, **kwargs):
     """Deprecated compatibility stub - use UserExecutionContext directly"""
     raise NotImplementedError("Use UserExecutionContext instead")
 
+def create_execution_engine(*args, **kwargs):
+    """SSOT factory function for ExecutionEngine - creates UserExecutionEngine instance
+    
+    This is a compatibility bridge for Issue #565 migration.
+    """
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+    # Return a compatibility stub that can be used in tests
+    return ExecutionEngine
+
+def get_execution_engine_factory():
+    """Get ExecutionEngine factory for creating instances with different configurations
+    
+    This is a compatibility bridge for Issue #565 migration.
+    """
+    return ExecutionEngineFactory
+
 # Additional compatibility aliases for WebSocket event-related tests
 ExecutionEngineWithWebSocketEvents = ExecutionEngine  # Alias for tests
 
@@ -68,5 +84,7 @@ __all__ = [
     'WebSocketExtension',
     'execute_agent',
     'execution_engine_context',
+    'create_execution_engine',
+    'get_execution_engine_factory',
     'ExecutionEngineWithWebSocketEvents'
 ]

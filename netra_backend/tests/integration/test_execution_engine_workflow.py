@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock
 from dataclasses import dataclass
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.agents.supervisor.execution_engine import (
+from netra_backend.app.agents.supervisor.user_execution_engine import (
     create_request_scoped_engine,
     create_execution_context_manager
 )
