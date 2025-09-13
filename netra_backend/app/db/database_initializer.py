@@ -544,14 +544,19 @@ class DatabaseInitializer:
                     await conn.execute(table_sql)
                     created_tables.append(table_name)
                     logger.info(f"Created table: {table_name}")
-            except Exception as e:
+            except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                # Issue #374 FIX: Classify direct table creation errors
+                classified_error = classify_error(e)
                 error_msg = str(e).lower()
                 if "already exists" in error_msg or "relation" in error_msg:
                     logger.info(f"Table '{table_name}' was created concurrently by another system - continuing")
                     skipped_tables.append(table_name)
                 else:
-                    logger.error(f"Failed to create table '{table_name}': {e}")
-                    failed_tables.append((table_name, str(e)))
+                    logger.error(f"Failed to create table '{table_name}' ({type(classified_error).__name__}): {e}")
+                    failed_tables.append((table_name, f"{type(classified_error).__name__}: {str(e)}"))
+            except Exception as e:
+                logger.error(f"Unexpected error creating table '{table_name}': {e}")
+                failed_tables.append((table_name, f"UnexpectedError: {str(e)}"))
         
         # Add foreign keys separately to avoid circular dependency issues
         await self._add_direct_foreign_keys_safely(conn)
@@ -602,9 +607,14 @@ class DatabaseInitializer:
                             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                         """)
                         logger.info("Added foreign key constraint for sessions.user_id")
+                    except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                        # Issue #374 FIX: Classify direct foreign key constraint errors
+                        classified_error = classify_error(e)
+                        if "already exists" not in str(e).lower():
+                            logger.warning(f"Could not add sessions foreign key ({type(classified_error).__name__}): {e}")
                     except Exception as e:
                         if "already exists" not in str(e).lower():
-                            logger.warning(f"Could not add sessions foreign key: {e}")
+                            logger.warning(f"Unexpected error adding sessions foreign key: {e}")
             
             if 'users' in current_tables and 'api_keys' in current_tables:
                 # Check if foreign key already exists
@@ -625,12 +635,21 @@ class DatabaseInitializer:
                             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                         """)
                         logger.info("Added foreign key constraint for api_keys.user_id")
+                    except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+                        # Issue #374 FIX: Classify direct foreign key constraint errors
+                        classified_error = classify_error(e)
+                        if "already exists" not in str(e).lower():
+                            logger.warning(f"Could not add api_keys foreign key ({type(classified_error).__name__}): {e}")
                     except Exception as e:
                         if "already exists" not in str(e).lower():
-                            logger.warning(f"Could not add api_keys foreign key: {e}")
+                            logger.warning(f"Unexpected error adding api_keys foreign key: {e}")
         
+        except (OperationalError, SQLAlchemyError, asyncpg.PostgresError) as e:
+            # Issue #374 FIX: Classify direct foreign key errors
+            classified_error = classify_error(e)
+            logger.warning(f"Error adding direct foreign key constraints ({type(classified_error).__name__}): {e}")
         except Exception as e:
-            logger.warning(f"Error adding direct foreign key constraints: {e}")
+            logger.warning(f"Unexpected error adding direct foreign key constraints: {e}")
     
     async def _add_table_indexes_safely(self, conn) -> None:
         """Add indexes for better query performance"""
@@ -1163,8 +1182,21 @@ class DatabaseInitializer:
                 logger.info("Database migrations completed successfully")
                 return True
                 
+            except (OperationalError, SQLAlchemyError) as migration_error:
+                # Issue #374 FIX: Classify migration-specific database errors
+                classified_error = classify_error(migration_error)
+                logger.error(f"Migration failed ({type(classified_error).__name__}): {migration_error}")
+                
+                # Enhanced recoverable error detection using transaction_errors classification
+                if (self._is_recoverable_migration_error(migration_error) or 
+                    is_retryable_error(classified_error, True, True)):
+                    logger.info(f"Attempting migration recovery for {type(classified_error).__name__} error...")
+                    return await self._attempt_migration_recovery(alembic_cfg, classified_error)
+                else:
+                    logger.error(f"Migration error ({type(classified_error).__name__}) is not recoverable - aborting without fallback")
+                    return False
             except Exception as migration_error:
-                logger.error(f"Migration failed: {migration_error}")
+                logger.error(f"Unexpected migration error: {migration_error}")
                 
                 # Check if this is a recoverable migration error
                 if self._is_recoverable_migration_error(migration_error):
@@ -1252,8 +1284,18 @@ class DatabaseInitializer:
                 logger.info("Migration recovery successful")
                 return True
                 
+            except (OperationalError, SQLAlchemyError) as retry_error:
+                # Issue #374 FIX: Classify migration recovery errors
+                classified_retry_error = classify_error(retry_error)
+                logger.warning(f"Recovery attempt {attempt + 1} failed ({type(classified_retry_error).__name__}): {retry_error}")
+                
+                # If this is the last attempt, log the failure with classification
+                if attempt == max_retries - 1:
+                    original_classified = classify_error(original_error) if hasattr(original_error, '__module__') else original_error
+                    logger.error(f"All migration recovery attempts failed. Original error ({type(original_classified).__name__}): {original_error}")
+                    logger.error(f"Final retry error ({type(classified_retry_error).__name__}): {retry_error}")
             except Exception as retry_error:
-                logger.warning(f"Recovery attempt {attempt + 1} failed: {retry_error}")
+                logger.warning(f"Unexpected recovery attempt {attempt + 1} error: {retry_error}")
                 
                 # If this is the last attempt, log the failure
                 if attempt == max_retries - 1:
@@ -1371,10 +1413,24 @@ class DatabaseInitializer:
             return True
             
         except asyncio.TimeoutError as e:
-            logger.error(f"Index creation timed out: {e}")
-            raise
+            # Issue #374 FIX: Handle timeout as specific error type
+            timeout_error = TimeoutError(f"Index creation timed out after 60s: {e}")
+            logger.error(f"Index creation timed out: {timeout_error}")
+            raise timeout_error
+        except (OperationalError, SQLAlchemyError) as e:
+            # Issue #374 FIX: Classify database index creation errors
+            classified_error = classify_error(e)
+            logger.error(f"Failed to create database indexes ({type(classified_error).__name__}): {e}")
+            
+            # Provide specific guidance based on error type
+            if isinstance(classified_error, PermissionError):
+                logger.error("Index creation failed due to insufficient database permissions")
+            elif isinstance(classified_error, ConnectionError):
+                logger.error("Index creation failed due to database connection issues")
+                
+            raise classified_error
         except Exception as e:
-            logger.error(f"Failed to create database indexes: {e}")
+            logger.error(f"Unexpected error creating database indexes: {e}")
             raise
 
     async def _execute_index_creation(self, async_engine) -> None:
