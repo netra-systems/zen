@@ -978,7 +978,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_configuration_validation_success(self):
         """Test successful auth configuration validation."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup') as mock_validate:
+        with patch('netra_backend.app.smd.validate_auth_startup') as mock_validate:
             mock_validate.return_value = None  # Success
             
             # Should not raise exception
@@ -986,7 +986,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_configuration_validation_failure_is_fatal(self):
         """Test that auth validation failure causes fatal startup failure."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup') as mock_validate:
+        with patch('netra_backend.app.smd.validate_auth_startup') as mock_validate:
             mock_validate.side_effect = Exception("Auth validation failed - insecure configuration")
             
             # Should raise DeterministicStartupError
@@ -998,7 +998,7 @@ class TestAuthValidationAndSecurity(BaseTestCase):
     
     async def test_auth_validation_import_error_is_fatal(self):
         """Test that missing auth validator causes fatal failure."""
-        with patch('netra_backend.app.smd.validate_auth_at_startup', side_effect=ImportError("Module not found")):
+        with patch('netra_backend.app.smd.validate_auth_startup', side_effect=ImportError("Module not found")):
             
             # Should raise DeterministicStartupError
             with self.assertRaises(DeterministicStartupError) as context:
