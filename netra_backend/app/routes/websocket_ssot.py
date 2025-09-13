@@ -307,6 +307,12 @@ class WebSocketSSOTRouter:
         self.router.post("/api/v1/websocket")(self.websocket_api_create)
         self.router.get("/api/v1/websocket/protected")(self.websocket_api_protected)
         
+        # CRITICAL FIX: WebSocket protocol endpoint for /api/v1/websocket
+        # Issue: E2E tests expect WebSocket protocol at this path, not REST API
+        # This preserves both REST API functionality (via different HTTP methods) 
+        # and adds WebSocket protocol support for golden path compatibility
+        self.router.websocket("/api/v1/websocket")(self.api_websocket_endpoint)
+        
         # PERMISSIVE AUTH ENDPOINTS: Auth circuit breaker and permissiveness status
         self.router.get("/ws/auth/circuit-breaker")(self.auth_circuit_breaker_status)
         self.router.get("/ws/auth/permissiveness")(self.auth_permissiveness_status)
@@ -618,6 +624,21 @@ class WebSocketSSOTRouter:
     async def test_websocket_endpoint(self, websocket: WebSocket):
         """Test WebSocket endpoint for development."""
         await self._handle_legacy_mode(websocket)
+    
+    async def api_websocket_endpoint(self, websocket: WebSocket):
+        """
+        API WebSocket endpoint for /api/v1/websocket - CRITICAL FIX for Golden Path.
+        
+        This endpoint restores WebSocket protocol support for the /api/v1/websocket path
+        that E2E tests and frontend clients expect. Previously this path only supported 
+        REST API operations, breaking WebSocket connections.
+        
+        Uses main mode to ensure full Golden Path functionality with all 5 critical events:
+        - agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
+        
+        Business Impact: Restores $500K+ ARR chat functionality.
+        """
+        await self._handle_main_mode(websocket)
     
     async def _handle_main_mode(self, websocket: WebSocket):
         """
