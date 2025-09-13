@@ -374,9 +374,9 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         """Test WebSocket events provide real-time progress for user experience."""
         agent = WebSocketTestAgent(
             llm_manager=self.llm_manager
-        agent.set_websocket_bridge(self.websocket_bridge, "test-run-progress-001")
         )
         # FIXED: websocket_bridge set after instantiation
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-progress-001")
 
         # Execute request and capture timing
         import time
