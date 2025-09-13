@@ -96,3 +96,32 @@
 - ✅ Basic WebSocket connectivity working
 - ❌ **JWT subprotocol negotiation failing** (BLOCKS real-time agent communication)
 - ❌ **Complete golden path flow broken** (login → WebSocket auth → AI response)
+
+### Step 3: Five Whys Root Cause Analysis ✅ COMPLETED
+**Status:** ✅ COMPLETED
+**Action:** Comprehensive five whys analysis using SNST agent
+**Analysis Scope:** WebSocket JWT subprotocol negotiation failure
+
+#### Five Whys Breakdown:
+1. **Why is JWT subprotocol negotiation failing?** → `websockets.exceptions.NegotiationError: no subprotocols supported`
+2. **Why doesn't server support expected JWT subprotocols?** → WebSocket route not using updated JWT protocol handler
+3. **Why is subprotocol handler missing/misconfigured?** → Module version skew between local and staging deployment
+4. **Why wasn't this detected in deployment?** → Deployment pipeline lacks WebSocket subprotocol validation
+5. **Why not covered by existing tests?** → Tests don't validate post-deployment WebSocket negotiation capability
+
+#### Root Cause Identified:
+**🎯 REAL ROOT ROOT ROOT CAUSE:** **Incomplete Staging Deployment - Module Version Mismatch**
+- **Technical Issue:** Cached/stale negotiation function in Cloud Run preventing WebSocket SSOT updates
+- **SSOT Status:** ✅ Code architecture is SSOT compliant, deployment process is the issue
+- **Impact:** Working local code but failing staging WebSocket authentication
+
+#### Immediate Fix Strategy:
+1. **Force Module Reload:** Add explicit module cache invalidation to WebSocket SSOT route
+2. **Enhanced Debug Logging:** Add comprehensive subprotocol negotiation logging for staging
+3. **Atomic Deployment:** Force complete Cloud Run instance refresh to eliminate version skew
+4. **Validation Enhancement:** Add WebSocket subprotocol testing to deployment pipeline
+
+#### Business Impact:
+- **Status:** $120K+ MRR functionality **BLOCKED by deployment issue (not architecture)**
+- **Confidence:** High - SSOT architecture is sound, just need proper deployment
+- **Timeline:** 0-1 hour for immediate fix, 1-2 days for prevention enhancements

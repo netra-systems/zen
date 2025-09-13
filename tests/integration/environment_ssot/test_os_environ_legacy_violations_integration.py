@@ -219,13 +219,13 @@ class TestLegacyOsEnvironViolationsIntegration(SSotBaseTestCase):
 
         # Test corpus initialization
         try:
-            from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-            from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
 
             context = UserExecutionContext(
                 user_id='golden-path-user',
-                request_id='golden-request',
-                shared_data=SharedContextData()
+                thread_id='golden-path-thread',
+                run_id='golden-path-run',
+                request_id='golden-request'
             )
 
             enhanced_context = initialize_corpus_context(context)

@@ -122,14 +122,15 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
 
         # Component 3: Corpus Initialization (Critical for user data isolation)
         try:
-            from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-            from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            # SharedContextData not needed
 
             # Test user context initialization
             context = UserExecutionContext(
                 user_id='golden-path-user',
-                request_id='golden-path-request',
-                shared_data=SharedContextData()
+                thread_id='golden-path-thread',
+                run_id='golden-path-run',
+                request_id='golden-path-request'
             )
 
             enhanced_context = initialize_corpus_context(context)
@@ -307,13 +308,14 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
                 user_result['environment_detected_correctly'] = correct_detection
 
                 # Test 2: Corpus isolation for this user
-                from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-                from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                # SharedContextData not needed
 
                 context = UserExecutionContext(
                     user_id=user_id,
-                    request_id=f'isolation-test-{user_id}',
-                    shared_data=SharedContextData()
+                    thread_id=f'isolation-thread-{user_id}',
+                    run_id=f'isolation-run-{user_id}',
+                    request_id=f'isolation-test-{user_id}'
                 )
 
                 enhanced_context = initialize_corpus_context(context)
@@ -400,13 +402,14 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
                 config = WebSocketConfig.detect_and_configure_for_environment()
 
                 # Test corpus context multiple times
-                from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-                from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                # SharedContextData not needed
 
                 context = UserExecutionContext(
                     user_id=f'stability-user-{i}',
-                    request_id=f'stability-request-{i}',
-                    shared_data=SharedContextData()
+                    thread_id=f'stability-thread-{i}',
+                    run_id=f'stability-run-{i}',
+                    request_id=f'stability-request-{i}'
                 )
 
                 initialize_corpus_context(context)
@@ -501,13 +504,14 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
 
         # Simulate corpus data access
         try:
-            from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-            from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            # SharedContextData not needed
 
             context = UserExecutionContext(
                 user_id='business-continuity-user',
-                request_id='business-continuity-request',
-                shared_data=SharedContextData()
+                thread_id='business-continuity-thread',
+                run_id='business-continuity-run',
+                request_id='business-continuity-request'
             )
 
             enhanced_context = initialize_corpus_context(context)
@@ -528,8 +532,9 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
 
                 context = UserExecutionContext(
                     user_id=user_id,
-                    request_id=f'business-request-{i}',
-                    shared_data=SharedContextData()
+                    thread_id=f'business-thread-{i}',
+                    run_id=f'business-run-{i}',
+                    request_id=f'business-request-{i}'
                 )
 
                 enhanced_context = initialize_corpus_context(context)

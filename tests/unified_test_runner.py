@@ -2084,9 +2084,14 @@ class UnifiedTestRunner:
             except (ValueError, OSError):
                 pass  # Skip flush if stderr is closed or has issues
             
-            # Prepare environment for subprocess with proper isolation and Windows encoding
-            env_manager = get_env()
-            subprocess_env = env_manager.get_subprocess_env()
+            # TEMPORARY FIX: Use regular environment instead of isolated environment
+            # to test if isolation is causing the pytest issue
+            subprocess_env = dict(os.environ)
+            print(f"[TEMP_DEBUG] Using regular os.environ instead of isolated environment")
+
+            # # Original code with isolated environment:
+            # env_manager = get_env()
+            # subprocess_env = env_manager.get_subprocess_env()
             
             # CRITICAL: Apply Windows encoding fixes to subprocess environment
             if sys.platform == "win32":

@@ -111,13 +111,14 @@ class TestIssue722EnvironmentConsistency(SSotBaseTestCase):
 
             # Module 3: Corpus Admin (function-level)
             try:
-                from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-                from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                # SharedContextData not needed
 
                 context = UserExecutionContext(
                     user_id='test-user',
-                    request_id='test-request',
-                    shared_data=SharedContextData()
+                    thread_id='test-thread',
+                    run_id='test-run',
+                    request_id='test-request'
                 )
 
                 initialize_corpus_context(context, corpus_base_path=None)
@@ -257,14 +258,15 @@ class TestIssue722EnvironmentConsistency(SSotBaseTestCase):
         }
 
         try:
-            from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-            from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            # SharedContextData not needed
 
             # Test context initialization
             context = UserExecutionContext(
                 user_id='issue-722-test-user',
-                request_id='issue-722-request',
-                shared_data=SharedContextData()
+                thread_id='issue-722-thread',
+                run_id='issue-722-run',
+                request_id='issue-722-request'
             )
 
             enhanced_context = initialize_corpus_context(context)
@@ -308,13 +310,14 @@ class TestIssue722EnvironmentConsistency(SSotBaseTestCase):
 
             try:
                 # Test corpus isolation for this user
-                from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-                from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                # SharedContextData not needed
 
                 context = UserExecutionContext(
                     user_id=user_id,
-                    request_id=f'request-{user_id}',
-                    shared_data=SharedContextData()
+                    thread_id=f'thread-{user_id}',
+                    run_id=f'run-{user_id}',
+                    request_id=f'request-{user_id}'
                 )
 
                 enhanced_context = initialize_corpus_context(context)
@@ -370,14 +373,13 @@ class TestIssue722EnvironmentConsistency(SSotBaseTestCase):
                     return {'thread_id': thread_id, 'module': 'WebSocketConfig', 'result': config is not None}
 
                 elif thread_id % 4 == 2:
-                    from netra_backend.app.agents.user_context_architecture import UserExecutionContext
-                    from netra_backend.app.agents.agent_architecture_user_context import SharedContextData
+                    from netra_backend.app.services.user_execution_context import UserExecutionContext
+                    # SharedContextData not needed
 
                     context = UserExecutionContext(
                         user_id=f'thread-user-{thread_id}',
                         request_id=f'thread-request-{thread_id}',
-                        shared_data=SharedContextData()
-                    )
+                                            )
                     enhanced = initialize_corpus_context(context)
                     return {'thread_id': thread_id, 'module': 'CorpusAdmin', 'result': enhanced is not None}
 
