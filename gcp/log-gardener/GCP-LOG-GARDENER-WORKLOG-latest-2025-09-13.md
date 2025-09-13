@@ -1,18 +1,22 @@
-# GCP Log Gardener Worklog - Latest Issues
-**Generated:** 2025-09-13  
+# GCP Log Gardener Worklog - Latest Issues (UPDATED)
+**Generated:** 2025-09-13 23:30 UTC  
 **Service:** backend (netra-backend-staging)  
-**Time Range:** Last 24 hours  
-**Total Log Entries Analyzed:** 100+ entries  
-**Log Query:** `resource.type="cloud_run_revision" AND (severity>=WARNING) AND (resource.labels.service_name="backend-staging" OR jsonPayload.service="netra-service" OR labels.service="backend")`
+**Time Range:** Last 24 hours (fresh analysis)  
+**Total Log Entries Analyzed:** 50 latest entries  
+**Log Query:** `resource.type="cloud_run_revision" AND resource.labels.service_name="netra-backend-staging" AND (severity="ERROR" OR severity="WARNING" OR severity="NOTICE")`
 
-## Executive Summary
+## Executive Summary - FRESH ANALYSIS
 
-Two primary issue clusters identified from GCP logs analysis:
+**NEW CRITICAL ISSUES DISCOVERED** requiring immediate attention:
 
-1. **🚨 CRITICAL: Redis URL Deprecation Configuration Errors** (ERROR severity, recurring)
-2. **⚠️ WARNING: Service ID Whitespace Sanitization** (WARNING severity, recurring)
+1. **🚨 P0 CRITICAL: WebSocket Race Conditions** (ERROR severity, causing 1011 errors)
+2. **🔴 P2 HIGH: WebSocket SSOT Violations** (ERROR severity, factory pattern failures)
+3. **🔴 P2 HIGH: WebSocket Connection State Issues** (ERROR/WARNING severity, message loop failures)
+4. **⚠️ P4 MEDIUM: Session Middleware Missing** (WARNING severity, recurring)
+5. **ℹ️ P6 LOW: User Auto-Creation Notices** (WARNING severity, informational)
+6. **⚠️ P3 MEDIUM: Buffer Utilization Warnings** (WARNING severity, performance)
 
-Both issues appear consistently across multiple deployments throughout the 24-hour period, indicating systemic configuration problems. **Both issues have now been processed and tracked in GitHub.**
+**BUSINESS IMPACT:** Multiple WebSocket-related issues are affecting the core chat functionality (90% of platform value). These issues represent immediate threats to the Golden Path user experience.
 
 ---
 
