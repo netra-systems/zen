@@ -1144,13 +1144,39 @@ async def get_execution_engine_factory_dependency(request: Request):
 ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_dependency)]
 
 async def get_agent_instance_factory_dependency(request: Request):
-    """Get AgentInstanceFactory from app state."""
-    if not hasattr(request.app.state, 'agent_instance_factory'):
+    """
+    Create per-request AgentInstanceFactory with infrastructure from app state.
+    
+    CRITICAL: This creates a NEW factory instance for each request to ensure
+    complete user isolation. No shared state exists between requests.
+    """
+    from netra_backend.app.agents.supervisor.agent_instance_factory import create_configured_agent_factory
+    
+    # Get infrastructure components from app state (shared immutable resources)
+    if not hasattr(request.app.state, 'agent_websocket_bridge'):
         raise HTTPException(
             status_code=500,
-            detail="AgentInstanceFactory not initialized - startup failure"
+            detail="WebSocket bridge not initialized - startup failure"
         )
-    return request.app.state.agent_instance_factory
+    
+    # Create NEW factory instance for this request (no singletons)
+    try:
+        factory = await create_configured_agent_factory(
+            websocket_bridge=request.app.state.agent_websocket_bridge,
+            llm_manager=getattr(request.app.state, 'llm_manager', None),
+            agent_class_registry=getattr(request.app.state, 'agent_class_registry', None),
+            # tool_dispatcher will be created per-request in UserExecutionContext
+        )
+        
+        logger.debug(f"Created per-request AgentInstanceFactory for user isolation")
+        return factory
+        
+    except Exception as e:
+        logger.error(f"Failed to create per-request AgentInstanceFactory: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create AgentInstanceFactory: {e}"
+        )
 
 AgentInstanceFactoryDep = Annotated[Any, Depends(get_agent_instance_factory_dependency)]
 

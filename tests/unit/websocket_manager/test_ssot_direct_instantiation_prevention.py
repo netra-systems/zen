@@ -108,7 +108,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
         # If we get here without exception, the test has failed to demonstrate the gap
         pytest.fail("__new__ method bypass was allowed - validation gap confirmed")
 
-    def test_factory_function_is_required_path(self):
+    async def test_factory_function_is_required_path(self):
         """
         Test that get_websocket_manager is the only allowed creation path.
 
@@ -205,7 +205,7 @@ class TestWebSocketManagerDirectInstantiationPrevention(SSotAsyncTestCase):
                 # If it fails completely, that's also a gap (should allow in non-strict mode)
                 pytest.fail(f"Non-strict mode should allow instantiation with warnings, but got: {e}")
 
-    def test_creation_method_tracking(self):
+    async def test_creation_method_tracking(self):
         """
         Test that creation method is properly tracked for validation.
 

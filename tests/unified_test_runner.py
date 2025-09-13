@@ -445,6 +445,19 @@ class JsonVerbosityController:
                 result["overall_success"] = data["overall_success"]
             if "total_duration" in data:
                 result["total_duration"] = data["total_duration"]
+            # Include basic results info but not detailed output
+            if "detailed_results" in data and level == 2:
+                basic_results = []
+                for item in data["detailed_results"]:
+                    if isinstance(item, dict):
+                        basic_item = {
+                            key: value for key, value in item.items()
+                            if key not in ["detailed_output", "stack_trace", "metadata"]
+                        }
+                        basic_results.append(basic_item)
+                    else:
+                        basic_results.append(item)
+                result["detailed_results"] = basic_results
 
         # Level 3: Verbose (all main details)
         if level >= 3:
@@ -3451,6 +3464,82 @@ class UnifiedTestRunner:
         overall_status = " PASS:  PASSED" if report_data['overall_success'] else " FAIL:  FAILED"
         self._safe_print_unicode(f"\nOverall: {overall_status}")
         print(f"Report: {json_report}")
+
+    def _optimize_json_output(self, report_data: Dict[str, any], args: argparse.Namespace) -> Tuple[Dict[str, any], Dict[str, any]]:
+        """
+        Optimize JSON output based on configured settings.
+
+        Args:
+            report_data: Original report data
+            args: Command line arguments with optimization settings
+
+        Returns:
+            Tuple of (optimized_data, optimization_info)
+        """
+        # Initialize JSON optimizer with configured size limit
+        if self.json_optimizer is None:
+            self.json_optimizer = JsonOutputOptimizer(default_size_limit_kb=args.json_size_limit)
+
+        # Get original size metrics
+        original_metrics = self.json_optimizer.get_size_metrics(report_data)
+        original_size_kb = original_metrics.get("size_kb", 0)
+
+        optimization_info = {
+            "original_size_kb": original_size_kb,
+            "optimized": False,
+            "truncated": False,
+            "size_reduction_percent": 0.0
+        }
+
+        # Start with the original data
+        optimized_data = report_data.copy()
+
+        # Apply verbosity level filtering
+        if args.json_verbosity != 3:  # 3 is the default "verbose" level
+            optimized_data = self.json_verbosity_controller.apply_verbosity_level(
+                optimized_data, args.json_verbosity
+            )
+            optimization_info["optimized"] = True
+
+        # Apply progressive detail reduction for large test suites
+        progressive_controller = ProgressiveDetailController()
+        progressive_optimized = progressive_controller.apply_progressive_detail(optimized_data)
+        if progressive_optimized != optimized_data:
+            optimized_data = progressive_optimized
+            optimization_info["optimized"] = True
+
+        # Check if data exceeds size limit
+        if self.json_optimizer.detect_large_output(optimized_data, args.json_size_limit):
+            if args.json_auto_truncate:
+                # Apply truncation with preserved fields
+                truncator = JsonTruncator()
+                optimized_data = truncator.truncate_preserving_essentials(
+                    optimized_data,
+                    target_size_kb=args.json_size_limit,
+                    preserve_fields=args.json_preserve_fields
+                )
+                optimization_info["optimized"] = True
+                optimization_info["truncated"] = True
+            else:
+                # Check if we should raise an exception
+                final_metrics = self.json_optimizer.get_size_metrics(optimized_data)
+                if final_metrics.get("size_kb", 0) > args.json_size_limit:
+                    raise JsonSizeExceedsLimitError(
+                        f"JSON output ({final_metrics.get('size_kb', 0):.1f} KB) "
+                        f"exceeds configured limit ({args.json_size_limit} KB). "
+                        f"Use --json-auto-truncate to enable automatic size reduction."
+                    )
+
+        # Calculate final metrics and savings
+        final_metrics = self.json_optimizer.get_size_metrics(optimized_data)
+        final_size_kb = final_metrics.get("size_kb", 0)
+
+        if final_size_kb > 0 and original_size_kb > 0:
+            size_reduction = ((original_size_kb - final_size_kb) / original_size_kb) * 100
+            optimization_info["size_reduction_percent"] = max(0, size_reduction)
+            optimization_info["final_size_kb"] = final_size_kb
+
+        return optimized_data, optimization_info
 
 
 async def execute_orchestration_mode(args) -> int:

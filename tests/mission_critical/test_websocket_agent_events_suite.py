@@ -430,11 +430,15 @@ class TestRealWebSocketComponents:
         # Import and create WebSocket manager using secure factory pattern
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
         websocket_manager = await create_websocket_manager(user_context=user_context)
-        
+
+        # Create WebSocket emitter from manager for tool dispatcher
+        from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+        websocket_emitter = WebSocketEmitterFactory.create_for_user_context(user_context, websocket_manager)
+
         # Test that tool dispatcher can be created and has proper integration points
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=user_context,
-            websocket_manager=websocket_manager
+            websocket_emitter=websocket_emitter
         )
         
         # Verify initial state

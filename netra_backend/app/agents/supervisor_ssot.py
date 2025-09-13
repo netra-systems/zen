@@ -17,9 +17,8 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
-# SSOT ExecutionResult imports
-from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
-from netra_backend.app.schemas.core_enums import ExecutionStatus
+# SSOT ExecutionContext import (ExecutionResult removed for compatibility)
+from netra_backend.app.agents.base.interface import ExecutionContext
 
 # SSOT imports - use the proper service location
 from netra_backend.app.services.user_execution_context import (
@@ -157,7 +156,7 @@ class SupervisorAgent(BaseAgent):
             stream_updates: Whether to stream updates via WebSocket
             
         Returns:
-            ExecutionResult with SSOT-compliant format
+            Dict[str, Any] with execution results (SSOT-compliant format)
         """
         # Validate context using SSOT validation
         context = validate_user_context(context)
@@ -213,21 +212,18 @@ class SupervisorAgent(BaseAgent):
                 logger.info(f"[U+1F4E1] Emitted agent_completed event for run {context.run_id}")
             
             logger.info(f" PASS:  SSOT SupervisorAgent execution completed for user {context.user_id}")
-            
-            # Return SSOT ExecutionResult format
+
+            # Return Dict format for compatibility with consolidated version
             orchestration_successful = result.success if hasattr(result, 'success') else True
-            return ExecutionResult(
-                status=ExecutionStatus.COMPLETED,
-                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
-                data={
-                    "supervisor_result": "completed",
-                    "orchestration_successful": orchestration_successful,
-                    "user_isolation_verified": True,
-                    "results": result.result if hasattr(result, 'result') else result,
-                    "user_id": str(context.user_id),
-                    "run_id": str(context.run_id)
-                }
-            )
+            return {
+                "supervisor_result": "completed",
+                "orchestration_successful": orchestration_successful,
+                "user_isolation_verified": True,
+                "results": result.result if hasattr(result, 'result') else result,
+                "user_id": str(context.user_id),
+                "run_id": str(context.run_id),
+                "status": "completed"
+            }
             
         except Exception as e:
             # CRITICAL FIX: Emit error event on failure
@@ -240,21 +236,18 @@ class SupervisorAgent(BaseAgent):
                 )
                 logger.error(f"[U+1F4E1] Emitted agent_error event for run {context.run_id}: {e}")
             
-            # Return SSOT ExecutionResult for error cases
-            return ExecutionResult(
-                status=ExecutionStatus.FAILED,
-                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
-                error_message=str(e),
-                error_code=type(e).__name__,
-                data={
-                    "supervisor_result": "failed",
-                    "orchestration_successful": False,
-                    "user_isolation_verified": True,
-                    "error": str(e),
-                    "user_id": str(context.user_id),
-                    "run_id": str(context.run_id)
-                }
-            )
+            # Return Dict format for compatibility with consolidated version
+            return {
+                "supervisor_result": "failed",
+                "orchestration_successful": False,
+                "user_isolation_verified": True,
+                "error": str(e),
+                "user_id": str(context.user_id),
+                "run_id": str(context.run_id),
+                "status": "failed",
+                "error_code": type(e).__name__,
+                "error_message": str(e)
+            }
             
         finally:
             # Cleanup using SSOT cleanup

@@ -221,11 +221,19 @@ class TestBaseAgentMetadataStorage(SSotBaseTestCase):
             "tokens_used": 150
         }
 
+        # Create UserExecutionContext for proper isolation
+        user_context = UserExecutionContext(
+            user_id="test_user_meta_001",
+            thread_id="thread_meta_001",
+            run_id="run_meta_001",
+            request_id="req_meta_001"
+        )
+
         # Execute metadata storage
         agent.store_metadata_result(
+            context=user_context,
             key=metadata_key,
-            value=metadata_value,
-            request_id="req_meta_001"
+            value=metadata_value
         )
 
         # Verify storage succeeded (should not raise exception)
@@ -260,10 +268,18 @@ class TestBaseAgentMetadataStorage(SSotBaseTestCase):
             }
         }
 
+        # Create UserExecutionContext for proper isolation
+        user_context = UserExecutionContext(
+            user_id="test_user_batch_001",
+            thread_id="thread_batch_001",
+            run_id="run_batch_001",
+            request_id="req_meta_batch_001"
+        )
+
         # Execute batch metadata storage
         agent.store_metadata_batch(
-            metadata_dict=metadata_batch,
-            request_id="req_meta_batch_001"
+            context=user_context,
+            data=metadata_batch
         )
 
         # Verify batch storage succeeded
@@ -280,20 +296,28 @@ class TestBaseAgentMetadataStorage(SSotBaseTestCase):
             name="TestRetrievalAgent"
         )
 
+        # Create UserExecutionContext for proper isolation
+        user_context = UserExecutionContext(
+            user_id="test_user_get_001",
+            thread_id="thread_get_001",
+            run_id="run_get_001",
+            request_id="req_meta_get_001"
+        )
+
         # First store some metadata
         test_key = "test_retrieval_key"
         test_value = {"test_data": "test_value_123"}
 
         agent.store_metadata_result(
+            context=user_context,
             key=test_key,
-            value=test_value,
-            request_id="req_meta_get_001"
+            value=test_value
         )
 
         # Execute metadata retrieval
         retrieved_value = agent.get_metadata_value(
-            key=test_key,
-            request_id="req_meta_get_001"
+            context=user_context,
+            key=test_key
         )
 
         # Verify retrieval (may return None if storage is mock-based)
@@ -310,18 +334,34 @@ class TestBaseAgentMetadataStorage(SSotBaseTestCase):
             name="TestIsolationAgent"
         )
 
+        # Create UserExecutionContext for request A
+        context_a = UserExecutionContext(
+            user_id="test_user_iso_a",
+            thread_id="thread_iso_a",
+            run_id="run_iso_a",
+            request_id="req_isolation_a"
+        )
+
+        # Create UserExecutionContext for request B
+        context_b = UserExecutionContext(
+            user_id="test_user_iso_b",
+            thread_id="thread_iso_b",
+            run_id="run_iso_b",
+            request_id="req_isolation_b"
+        )
+
         # Store metadata for request A
         agent.store_metadata_result(
+            context=context_a,
             key="isolation_test",
-            value={"request": "A", "data": "request_a_data"},
-            request_id="req_isolation_a"
+            value={"request": "A", "data": "request_a_data"}
         )
 
         # Store metadata for request B
         agent.store_metadata_result(
+            context=context_b,
             key="isolation_test",
-            value={"request": "B", "data": "request_b_data"},
-            request_id="req_isolation_b"
+            value={"request": "B", "data": "request_b_data"}
         )
 
         # Verify isolation (methods execute without interference)

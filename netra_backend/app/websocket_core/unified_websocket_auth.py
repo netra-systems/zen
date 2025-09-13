@@ -1543,6 +1543,68 @@ class UnifiedWebSocketAuthenticator:
             stacklevel=2
         )
         return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
+
+    async def authenticate_token(self, token: str, websocket: Optional[WebSocket] = None) -> WebSocketAuthResult:
+        """
+        DEPRECATED: Direct token authentication method - use authenticate_websocket_ssot() instead.
+
+        This method provides backward compatibility for tests that call authenticate_token() directly.
+        It creates a mock WebSocket if needed and delegates to the SSOT authentication function.
+
+        Args:
+            token: JWT token to authenticate
+            websocket: Optional WebSocket connection (created if not provided)
+
+        Returns:
+            WebSocketAuthResult with authentication outcome
+        """
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.authenticate_token() is deprecated. "
+            "Use authenticate_websocket_ssot() function instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        # Update deprecated stats for backward compatibility
+        self._websocket_auth_attempts += 1
+
+        try:
+            # If no websocket provided, create a mock one for token validation
+            if websocket is None:
+                from test_framework.websocket_helpers import MockWebSocketConnection
+                websocket = MockWebSocketConnection(
+                    headers={"authorization": f"Bearer {token}"},
+                    subprotocols=[f"jwt-auth.{token}"]
+                )
+
+            # Delegate to SSOT function
+            result = await authenticate_websocket_ssot(websocket, e2e_context=None)
+
+            # Update deprecated stats
+            if result.success:
+                self._websocket_auth_successes += 1
+            else:
+                self._websocket_auth_failures += 1
+
+            return result
+
+        except Exception as e:
+            # Handle token authentication errors
+            self._websocket_auth_failures += 1
+
+            return WebSocketAuthResult(
+                success=False,
+                user_context=None,
+                auth_result=None,
+                error_message=f"Token authentication failed: {str(e)}",
+                error_code="TOKEN_AUTH_ERROR",
+                is_valid=False,
+                user_id=None,
+                email=None,
+                subscription_tier=None,
+                permissions=None
+            )
     
     def get_websocket_auth_stats(self) -> Dict[str, Any]:
         """DEPRECATED: Get authentication statistics (for backward compatibility only)."""
