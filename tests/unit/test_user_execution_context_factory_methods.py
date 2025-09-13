@@ -114,7 +114,7 @@ class TestUserExecutionContextFactoryMethods:
         assert hasattr(context, 'get_scoped_key'), "Context should have get_scoped_key method"
         
         # Test that context key can be generated
-        context_key = context.get_scoped_key()
+        context_key = context.get_scoped_key("test_component")
         assert context_key is not None, "Context should generate valid context key"
         assert isinstance(context_key, str), "Context key should be string"
     
@@ -146,7 +146,7 @@ class TestUserExecutionContextFactoryMethods:
         assert len(set(run_ids)) == 3, "All contexts should have unique run_ids"
         
         # Context keys should be unique
-        context_keys = [ctx.get_scoped_key() for ctx in contexts]
+        context_keys = [ctx.get_scoped_key("test_component") for ctx in contexts]
         assert len(set(context_keys)) == 3, "All contexts should have unique context keys"
     
     def test_error_handling_with_invalid_parameters(self):
@@ -195,7 +195,7 @@ class TestUserExecutionContextFactoryMethods:
         assert fixed_context.run_id == "test_run"
         
         # Verify context is functional
-        assert fixed_context.get_scoped_key() is not None
+        assert fixed_context.get_scoped_key("test_component") is not None
     
     def test_issue_674_specific_test_case(self):
         """
@@ -224,4 +224,4 @@ class TestUserExecutionContextFactoryMethods:
         assert context.run_id == "test_run"
         
         # Verify context is ready for use in concurrency tests
-        assert context.get_scoped_key() is not None
+        assert context.get_scoped_key("test_component") is not None
