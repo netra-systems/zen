@@ -160,12 +160,28 @@ class TestIssue642DevLauncherImportWarnings(SSotBaseTestCase):
         depend on dev_launcher, causing import failures in production-like environments.
         """
         with self._simulate_dev_launcher_unavailable():
-            # These modules should fail to import in production
-            with self.assertRaises(ImportError) as context:
-                # This import should fail in production, which is the issue
-                from netra_backend.tests.database.test_redis_connection_python312 import DatabaseConnector
-                
-            self.assertIn("dev_launcher", str(context.exception))
+            # Test that importing a module with direct dev_launcher dependency fails
+            import_failed = False
+            error_message = ""
+            
+            try:
+                # This should fail because the module has: from dev_launcher.database_connector import DatabaseConnector
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(
+                    "test_redis_connection_python312", 
+                    "netra_backend/tests/database/test_redis_connection_python312.py"
+                )
+                if spec and spec.loader:
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+            except ImportError as e:
+                import_failed = True
+                error_message = str(e)
+                logger.info(f"Import failed as expected: {e}")
+            
+            # This test demonstrates the issue - the import fails
+            self.assertTrue(import_failed, "Import should fail when dev_launcher is unavailable")
+            self.assertIn("dev_launcher", error_message, "Error should mention dev_launcher")
             
         log_content = self._get_log_content()
         
