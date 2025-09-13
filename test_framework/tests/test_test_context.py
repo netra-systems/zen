@@ -23,11 +23,13 @@ import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Set
-from shared.isolated_environment import IsolatedEnvironment
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+# Add project root for imports - MUST be before any local imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from shared.isolated_environment import IsolatedEnvironment
 
 from test_framework.test_context import (
     TestContext,
