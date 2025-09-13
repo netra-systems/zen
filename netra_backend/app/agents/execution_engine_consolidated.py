@@ -1,9 +1,9 @@
-"""DEPRECATED: Use UserExecutionEngine - this import redirects to SSOT implementation."""
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+"""DEPRECATED: Use UserExecutionEngine - this import redirects to SSOT implementation.
 
-<<<<<<< HEAD
 This file redirects to the SSOT UserExecutionEngine to maintain backwards compatibility.
 """
+
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
 # SSOT redirect for backwards compatibility - Export all key classes
 from netra_backend.app.agents.supervisor.user_execution_engine import (
