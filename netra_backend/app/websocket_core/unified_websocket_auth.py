@@ -1326,12 +1326,12 @@ async def authenticate_websocket_ssot(
         
         # STEP 4: Perform authentication with circuit breaker and retry logic
         # (consolidated from UnifiedWebSocketAuthenticator logic)
-        auth_result = await auth_service.authenticate_websocket(
-            websocket, 
+        auth_result, user_context_from_auth = await auth_service.authenticate_websocket(
+            websocket,
             e2e_context=e2e_context,
             preliminary_connection_id=connection_id
         )
-        
+
         # STEP 5: Handle authentication result
         if not auth_result.success:
             logger.warning(f"SSOT AUTH: Authentication failed for connection {connection_id}: {auth_result.error}")
