@@ -158,9 +158,8 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         
         # 4. CRITICAL FIX: Enhanced Cloud Run environment detection and state validation
         # Root cause: is_websocket_connected() incorrectly returns False in GCP Cloud Run
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # GCP Cloud Run specific WebSocket state validation
         if environment in ["staging", "production"]:
@@ -206,10 +205,9 @@ def is_websocket_connected(websocket: WebSocket) -> bool:
         # CRITICAL FIX: Enhanced error handling for connection state validation issues
         # Root cause: Connection churning causes resource accumulation
         import traceback
-        from shared.isolated_environment import get_env
-        
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Enhanced error context for debugging connection issues
         error_context = {
@@ -298,9 +296,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                     # The state machine is created asynchronously and may not exist yet for valid connections
                     logger.debug(f"No state machine found for connection {connection_id} - allowing connection to proceed")
                     # In production environments, we still need to be conservative but not block valid connections
-                    from shared.isolated_environment import get_env
-                    env = get_env()
-                    environment = env.get("ENVIRONMENT", "development").lower()
+                    from shared.isolated_environment import get_env_var
+                    environment = get_env_var("ENVIRONMENT", "development").lower()
                     
                     if environment in ["staging", "production"]:
                         # CRITICAL REGRESSION FIX: Don't block connections that are legitimately establishing
@@ -323,9 +320,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
                 # Error accessing state machine - this indicates a problem
                 logger.warning(f"Error accessing state machine for {connection_id}: {e}")
                 # In production, treat state machine errors as not ready
-                from shared.isolated_environment import get_env
-                env = get_env()
-                environment = env.get("ENVIRONMENT", "development").lower()
+                from shared.isolated_environment import get_env_var
+                environment = get_env_var("ENVIRONMENT", "development").lower()
                 
                 if environment in ["staging", "production"]:
                     logger.debug(f"Cloud environment {environment}: state machine error indicates not ready")
@@ -335,9 +331,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             # This is common during initial connection establishment before connection_id assignment
             logger.debug("No connection_id provided - using transport-only validation")
             # In production environments, log but don't block connections during legitimate setup
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             if environment in ["staging", "production"]:
                 logger.debug(f"Cloud environment {environment}: proceeding with transport validation - connection_id not yet assigned")
@@ -366,9 +361,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
             # Fall through to environment-specific logic
         
         # PHASE 4: Environment-Specific Validation with Race Condition Detection
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Initialize race condition detector for pattern tracking
         try:
@@ -407,9 +401,8 @@ def is_websocket_connected_and_ready(websocket: WebSocket, connection_id: Option
         # Log error pattern if race detector is available
         try:
             from netra_backend.app.websocket_core.race_condition_prevention import RaceConditionDetector
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             race_detector = RaceConditionDetector(environment=environment)
             race_detector.add_detected_pattern(
@@ -447,9 +440,8 @@ async def validate_websocket_handshake_completion(websocket: WebSocket, timeout_
     """
     try:
         # Environment-specific timeout configuration
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Cloud environments need longer validation due to network latency
         if environment in ["staging", "production"]:
@@ -530,9 +522,8 @@ async def safe_websocket_send(websocket: WebSocket, data: Union[Dict[str, Any], 
         return False
     
     # CRITICAL FIX: Environment-aware retry configuration
-    from shared.isolated_environment import get_env
-    env = get_env()
-    environment = env.get("ENVIRONMENT", "development").lower()
+    from shared.isolated_environment import get_env_var
+    environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Staging/production needs more aggressive retry logic due to network latency
     if environment in ["staging", "production"]:
@@ -1299,9 +1290,8 @@ async def validate_connection_with_race_detection(websocket: WebSocket, connecti
     """
     try:
         # Get environment for race condition detection
-        from shared.isolated_environment import get_env
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        from shared.isolated_environment import get_env_var
+        environment = get_env_var("ENVIRONMENT", "development").lower()
         
         # Create race condition detector
         race_detector = create_race_condition_detector(environment)
@@ -1395,11 +1385,10 @@ def _get_rate_limit_for_environment(environment: Optional[str] = None) -> Dict[s
     Returns rate limiting configuration for the specified environment.
     This is a minimal implementation for test compatibility.
     """
-    from shared.isolated_environment import get_env
-    
+    from shared.isolated_environment import get_env_var
+
     if environment is None:
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Return basic rate limiting configuration
     if environment in ["staging", "production"]:
@@ -1429,11 +1418,10 @@ def _get_staging_optimized_timeouts(environment: Optional[str] = None) -> Dict[s
     Returns timeout configuration optimized for the specified environment.
     This is a minimal implementation for test compatibility.
     """
-    from shared.isolated_environment import get_env
-    
+    from shared.isolated_environment import get_env_var
+
     if environment is None:
-        env = get_env()
-        environment = env.get("ENVIRONMENT", "development").lower()
+        environment = get_env_var("ENVIRONMENT", "development").lower()
     
     # Return environment-specific timeout configuration
     if environment == "staging":

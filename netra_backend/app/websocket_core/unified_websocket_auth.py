@@ -98,6 +98,7 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
             )
         
         # Check environment variables for E2E indicators
+        from shared.isolated_environment import get_env
         env = get_env()
         
         # CRITICAL FIX: Enhanced E2E detection for GCP staging environments
@@ -843,9 +844,8 @@ class UnifiedWebSocketAuthenticator:
             True if handshake is properly completed, False otherwise
         """
         try:
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             
             # Check basic connection state
             if not hasattr(websocket, 'client_state'):
@@ -890,9 +890,8 @@ class UnifiedWebSocketAuthenticator:
             websocket: WebSocket connection object
         """
         try:
-            from shared.isolated_environment import get_env
-            env = get_env()
-            environment = env.get("ENVIRONMENT", "development").lower()
+            from shared.isolated_environment import get_env_var
+            environment = get_env_var("ENVIRONMENT", "development").lower()
             is_cloud_run = bool(env.get("K_SERVICE"))  # Detect Cloud Run
             
             # PHASE 1 FIX: Import Windows-safe asyncio patterns
