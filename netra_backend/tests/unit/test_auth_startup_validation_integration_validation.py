@@ -26,7 +26,7 @@ from netra_backend.app.core.auth_startup_validator import (
     AuthStartupValidator,
     AuthValidationError,
     AuthComponent,
-    validate_auth_at_startup
+    validate_auth_startup
 )
 from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
@@ -101,7 +101,7 @@ class TestAuthStartupIntegration:
             
             # Test high-level startup function
             try:
-                await validate_auth_at_startup()
+                await validate_auth_startup()
                 print(f"   ✅ High-level startup validation passed")
             except AuthValidationError as e:
                 print(f"   ❌ High-level startup validation failed: {e}")
@@ -212,7 +212,7 @@ class TestAuthStartupIntegration:
                 
                 # Test high-level startup function cascade
                 try:
-                    await validate_auth_at_startup()
+                    await validate_auth_startup()
                     startup_exception = False
                 except AuthValidationError:
                     startup_exception = True
