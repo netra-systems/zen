@@ -449,6 +449,9 @@ class UserExecutionEngine(IExecutionEngine):
         # Per-user semaphore for concurrency control
         self.semaphore = asyncio.Semaphore(self.max_concurrent)
         
+        # Per-user state locks for isolation testing
+        self._user_state_locks: Dict[str, asyncio.Lock] = {}
+        
         # Engine metadata (must be set before _init_components)
         self.engine_id = f"user_engine_{context.user_id}_{context.run_id}_{int(time.time()*1000)}"
         self.created_at = datetime.now(timezone.utc)
@@ -1529,6 +1532,22 @@ class UserExecutionEngine(IExecutionEngine):
     async def get_execution_stats(self) -> Dict[str, Any]:
         """Get execution performance and health statistics."""
         return self.get_user_execution_stats()
+    
+    async def _get_user_state_lock(self, user_id: str) -> asyncio.Lock:
+        """Get or create a state lock for the specified user.
+        
+        This method provides per-user state locking for isolation testing.
+        Each user gets their own lock to prevent state interference.
+        
+        Args:
+            user_id: User identifier to get lock for
+            
+        Returns:
+            asyncio.Lock: User-specific lock for state isolation
+        """
+        if user_id not in self._user_state_locks:
+            self._user_state_locks[user_id] = asyncio.Lock()
+        return self._user_state_locks[user_id]
     
     async def shutdown(self) -> None:
         """Shutdown the execution engine and clean up resources."""

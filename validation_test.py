@@ -14,25 +14,25 @@ def test_import_fixes():
     
     try:
         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-        print("   ✅ ExecutionEngine import successful")
+        print("   [PASS] ExecutionEngine import successful")
     except ImportError as e:
-        print(f"   ❌ ExecutionEngine import failed: {e}")
+        print(f"   [FAIL] ExecutionEngine import failed: {e}")
         return False
     
     try:
         from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
-        print("   ✅ create_request_scoped_engine import successful")
+        print("   [PASS] create_request_scoped_engine import successful")
     except ImportError as e:
-        print(f"   ❌ create_request_scoped_engine import failed: {e}")
+        print(f"   [FAIL] create_request_scoped_engine import failed: {e}")
         return False
     
     print("2. Testing classmethod availability...")
     
     # Test that the classmethod exists
     if hasattr(ExecutionEngine, 'create_request_scoped_engine'):
-        print("   ✅ ExecutionEngine.create_request_scoped_engine method exists")
+        print("   [PASS] ExecutionEngine.create_request_scoped_engine method exists")
     else:
-        print("   ❌ ExecutionEngine.create_request_scoped_engine method not found")
+        print("   [FAIL] ExecutionEngine.create_request_scoped_engine method not found")
         return False
     
     return True
@@ -71,19 +71,19 @@ async def test_factory_method():
                 mock_websocket_bridge,
                 user_context
             )
-            print("   ✅ Factory method call successful")
+            print("   [PASS] Factory method call successful")
             return True
         except AttributeError as e:
             if "has no attribute 'create_request_scoped_engine'" in str(e):
-                print(f"   ❌ Factory method attribute error: {e}")
+                print(f"   [FAIL] Factory method attribute error: {e}")
                 return False
             else:
                 # Other AttributeErrors might be expected (method implementation issues)
-                print(f"   ✅ Factory method exists but has implementation issues: {e}")
+                print(f"   [PASS] Factory method exists but has implementation issues: {e}")
                 return True
         except Exception as e:
             # Other exceptions are expected - we're testing the existence of the method, not full functionality
-            print(f"   ✅ Factory method exists but has expected runtime issues: {type(e).__name__}: {e}")
+            print(f"   [PASS] Factory method exists but has expected runtime issues: {type(e).__name__}: {e}")
             return True
 
 async def test_module_function():
@@ -109,15 +109,15 @@ async def test_module_function():
         
         try:
             result = await create_request_scoped_engine(user_context)
-            print("   ✅ Module function call successful")
+            print("   [PASS] Module function call successful")
             return True
         except Exception as e:
             # Check if it's a method existence issue vs implementation issue
             if "has no attribute" in str(e) and "create_request_scoped_engine" in str(e):
-                print(f"   ❌ Module function not found: {e}")
+                print(f"   [FAIL] Module function not found: {e}")
                 return False
             else:
-                print(f"   ✅ Module function exists but has expected runtime issues: {type(e).__name__}: {e}")
+                print(f"   [PASS] Module function exists but has expected runtime issues: {type(e).__name__}: {e}")
                 return True
 
 async def main():
@@ -130,7 +130,7 @@ async def main():
     import_success = test_import_fixes()
     
     if not import_success:
-        print("\n❌ VALIDATION FAILED: Import issues remain")
+        print("\n[FAIL] VALIDATION FAILED: Import issues remain")
         return 1
     
     # Test factory method
@@ -141,9 +141,9 @@ async def main():
     
     print("\n" + "=" * 60)
     print("SUMMARY:")
-    print(f"✅ Import fixes: {'PASS' if import_success else 'FAIL'}")
-    print(f"✅ Factory method: {'PASS' if factory_success else 'FAIL'}")
-    print(f"✅ Module function: {'PASS' if module_success else 'FAIL'}")
+    print(f"[PASS] Import fixes: {'PASS' if import_success else 'FAIL'}")
+    print(f"[PASS] Factory method: {'PASS' if factory_success else 'FAIL'}")
+    print(f"[PASS] Module function: {'PASS' if module_success else 'FAIL'}")
     
     if import_success and factory_success and module_success:
         print("\n🎉 VALIDATION SUCCESSFUL: All target fixes have been implemented!")
@@ -156,7 +156,7 @@ async def main():
         print("but the reported import and method errors have been resolved.")
         return 0
     else:
-        print("\n❌ VALIDATION PARTIALLY FAILED: Some issues remain")
+        print("\n[FAIL] VALIDATION PARTIALLY FAILED: Some issues remain")
         return 1
 
 if __name__ == "__main__":
