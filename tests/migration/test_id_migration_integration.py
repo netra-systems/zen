@@ -49,9 +49,9 @@ except ImportError:
 class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
     """Integration tests for cross-service ID consistency and migration compliance."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Setup for cross-service integration tests."""
-        super().setUp()
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         
         # Integration test data
