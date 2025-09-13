@@ -42,7 +42,7 @@ Multiple execution engine implementations exist despite SSOT consolidation claim
 
 - [x] **Step 0 Complete**: SSOT Audit - Critical P0 violation identified and issue created
 - [x] **Step 1 Complete**: Discovered comprehensive test inventory - 12 execution engines found (only 1 should exist)
-- [ ] **Step 2**: Execute test plan for new SSOT tests
+- [x] **Step 2 Complete**: Created 6 new SSOT tests - ALL FAILING as expected (proving violations exist)
 - [ ] **Step 3**: Plan SSOT remediation strategy
 - [ ] **Step 4**: Execute SSOT remediation plan
 - [ ] **Step 5**: Test fix loop - validate system stability
@@ -79,13 +79,29 @@ Multiple execution engine implementations exist despite SSOT consolidation claim
 - [x] **SSOT Enforcement**: `test_execution_engine_enforcement.py` - FAILING (12 engines found)
 - [x] **Supervisor Duplication**: `test_ssot_supervisor_duplication_violations.py` - FAILING (multiple implementations)
 
-### New Tests Needed (20% - To Validate Remediation):
-- [ ] **Legacy Engine Detection**: Scan for non-SSOT execution engines
-- [ ] **Import Enforcement**: Ensure all imports redirect to UserExecutionEngine
-- [ ] **Factory Compliance**: Validate factories create only UserExecutionEngine
-- [ ] **Runtime Validation**: Monitor runtime execution engine usage
-- [ ] **WebSocket Event SSOT**: Validate events through UserExecutionEngine only
-- [ ] **Multi-User SSOT**: Concurrent users use same SSOT engine with isolation
+### New Tests Created (20% - SSOT Validation Tests):
+- [x] **Legacy Engine Detection**: `test_legacy_execution_engine_detection.py` - ❌ FAILING (123 classes, 112 violations)
+- [x] **Import Enforcement**: `test_import_enforcement.py` - ❌ FAILING (53 files with forbidden imports)
+- [x] **Factory Compliance**: `test_factory_compliance.py` - ❌ FAILING (multiple factory classes)
+- [x] **Runtime Validation**: `test_runtime_validation.py` - ❌ FAILING (multiple engine types at runtime)
+- [x] **WebSocket Event SSOT**: `test_websocket_event_ssot.py` - ❌ FAILING (events through multiple paths)
+- [x] **Multi-User SSOT**: `test_multi_user_ssot.py` - ❌ FAILING (different users get different engines)
+
+## Step 2 Results - New SSOT Tests Validation
+
+### Critical Violations Detected:
+- **123 execution engine classes** found (112 legacy violations beyond UserExecutionEngine SSOT)
+- **53 files with forbidden imports** directly importing non-SSOT engines
+- **Multiple factory implementations** creating different engine types
+- **Runtime inconsistencies** with different engines used across requests
+- **WebSocket event fragmentation** with events delivered through multiple paths
+- **User isolation failures** with different users receiving different engine types
+
+### Test Status (All Designed to FAIL Now, PASS After Remediation):
+- **Created**: 6/6 new SSOT validation tests
+- **Current Status**: ALL FAILING ❌ (proves violations exist)
+- **Expected After Step 4**: ALL PASSING ✅ (validates successful consolidation)
+- **Business Protection**: Tests prevent regression after SSOT consolidation
 
 ## Remediation Plan - DETAILED
 
