@@ -126,6 +126,7 @@ markers = [
     
     # Business and system markers
     "agent_execution: Agent execution tests",
+    "agent_execution_order: Agent execution order validation tests",
     "business_critical: Business-critical functionality tests", 
     "ssot_delegation: Single Source of Truth delegation tests",
     "execution_tracking: Execution tracking tests",
