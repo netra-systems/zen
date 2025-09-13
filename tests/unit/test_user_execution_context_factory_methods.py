@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Enables $500K+ ARR validation for concurrent user functionality
 
 CRITICAL: This test validates the root cause fix for Issue #674 where 80+ test files
-call UserExecutionContext.create_for_user() but this method doesn't exist.
+call UserExecutionContext.from_request() but this method doesn't exist.
 """
 
 import pytest

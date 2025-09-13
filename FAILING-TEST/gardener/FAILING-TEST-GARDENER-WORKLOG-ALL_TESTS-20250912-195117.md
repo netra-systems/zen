@@ -123,11 +123,26 @@
 - State checkpoint session functionality  
 - WebSocket ghost connections (functionality removed)
 
-### Issue 8: Environment Configuration - Missing JWT_SECRET
+### ✅ Issue 8: Environment Configuration - Missing JWT_SECRET - PROCESSED
 **Category:** failing-test-regression-p1-environment-config  
 **Severity:** P1 - High (Authentication critical)  
+**SNST Status:** 🔗 **UPDATED EXISTING ISSUE** - Linked to GitHub Issue #681  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/681  
+**Labels:** P0, claude-code-generated-issue, critical, golden-path, websocket  
+**Processing Date:** 2025-09-13
+
 **Discovery:** Issue #463 reproduction test found `JWT_SECRET is missing (None)`  
-**Impact:** WebSocket authentication failures in staging environment
+**Impact:** WebSocket authentication failures in staging environment  
+**Evidence:** `[✓] REPRODUCED: JWT_SECRET is missing (None). This also contributes to authentication failures`
+
+**Root Cause:** JWT_SECRET environment variable is None in staging environment, causing WebSocket authentication failures and blocking the golden path user flow (login → AI responses).
+
+**SNST Processing Results:**
+- ✅ **Found Existing Issue:** GitHub Issue #681 exactly matches this regression (JWT Configuration Crisis blocking WebSocket authentication in staging)
+- ✅ **Updated Issue:** Added specific test gardener evidence confirming JWT_SECRET=None 
+- ✅ **Priority Tagged:** P0 Critical - blocking $50K MRR WebSocket functionality
+- ✅ **Cross-Referenced:** Linked to Issue #463 (user-facing WebSocket failures) 
+- ✅ **Business Impact:** Confirmed blocking golden path validation in staging
 
 ## Next Steps
 

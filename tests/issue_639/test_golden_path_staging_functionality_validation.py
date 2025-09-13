@@ -85,7 +85,7 @@ class TestIssue639GoldenPathFunctionalityValidation(SSotAsyncTestCase):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for testing."""
-        return UserExecutionContext.create_for_user(
+        return UserExecutionContext.from_request(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
             thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
             run_id=f"test_run_{uuid.uuid4().hex[:8]}"

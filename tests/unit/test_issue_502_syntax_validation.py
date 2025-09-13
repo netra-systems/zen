@@ -140,7 +140,7 @@ class TestIssue502SyntaxValidation:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             
             # Test the factory method with the same pattern used in the golden path test
-            context = UserExecutionContext.create_for_user(
+            context = UserExecutionContext.from_request(
                 user_id="test_user_502",
                 thread_id="test_thread_502", 
                 run_id="test_run_502"
@@ -180,7 +180,7 @@ class TestIssue502SyntaxValidation:
             assert GoldenPathValidator is not None
             
             # Test that we can use both together (as in the golden path test)
-            context = UserExecutionContext.create_for_user(
+            context = UserExecutionContext.from_request(
                 user_id="test_combined",
                 thread_id="test_thread",
                 run_id="test_run"
