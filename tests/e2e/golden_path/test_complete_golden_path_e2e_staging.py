@@ -343,10 +343,12 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 "Authorization": f"Bearer {user['jwt_token']}"
             }
             
-            websocket = await websockets.connect(
+            # PHASE 2 FIX: Use WebSocket compatibility abstraction to handle parameter versions
+            from test_framework.websocket_helpers import WebSocketClientAbstraction
+            websocket = await WebSocketClientAbstraction.connect_with_compatibility(
                 websocket_url,
-                additional_headers=headers,
-                open_timeout=10.0
+                headers=headers,
+                timeout=10.0
             )
             
             self.websocket_connections.append(websocket)
@@ -573,10 +575,12 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 # Connect to staging WebSocket
                 headers = {"Authorization": f"Bearer {user_context['jwt_token']}"}
                 
-                websocket = await websockets.connect(
+                # PHASE 2 FIX: Use WebSocket compatibility abstraction to handle parameter versions
+                from test_framework.websocket_helpers import WebSocketClientAbstraction
+                websocket = await WebSocketClientAbstraction.connect_with_compatibility(
                     self.staging_config["websocket_url"],
-                    additional_headers=headers,
-                    open_timeout=10.0
+                    headers=headers,
+                    timeout=10.0
                 )
                 
                 # Send user-specific message
@@ -702,10 +706,12 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             try:
                 # Connect with timing
                 connection_start = time.time()
-                websocket = await websockets.connect(
+                # PHASE 2 FIX: Use WebSocket compatibility abstraction to handle parameter versions
+                from test_framework.websocket_helpers import WebSocketClientAbstraction
+                websocket = await WebSocketClientAbstraction.connect_with_compatibility(
                     self.staging_config["websocket_url"],
-                    additional_headers={"Authorization": f"Bearer {user['jwt_token']}"},
-                    open_timeout=10.0
+                    headers={"Authorization": f"Bearer {user['jwt_token']}"},
+                    timeout=10.0
                 )
                 connection_time = time.time() - connection_start
                 
