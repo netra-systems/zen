@@ -312,16 +312,12 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
     Returns:
         Optional[str]: Accepted subprotocol or None if no suitable protocol found
     """
-    # ISSUE #342 FIX: Extended supported protocols
-    supported_protocols = ['jwt-auth', 'jwt', 'bearer']
+    # FIVE WHYS FIX: Process token-bearing protocols FIRST (priority over simple names)
+    # This fixes the issue where ['jwt-auth', 'jwt.TOKEN'] incorrectly returned 'jwt-auth'
+    # instead of processing the actual token in 'jwt.TOKEN'
     
     for protocol in client_protocols:
-        # Check for direct protocol match
-        if protocol in supported_protocols:
-            logger.debug(f"Direct protocol match: {protocol}")
-            return protocol
-            
-        # ISSUE #342 FIX: Support multiple JWT token formats
+        # PRIORITY 1: Support multiple JWT token formats (these contain actual auth tokens)
         if protocol.startswith('jwt.') and len(protocol) > 4:
             logger.debug("Found jwt.TOKEN format")
             # Return the protocol type, not the full token for security
@@ -334,6 +330,15 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
             logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
             # Return the protocol type, not the full token for security
             return 'bearer'
+    
+    # PRIORITY 2: Direct protocol match (only if no token-bearing protocols found)
+    # Extended supported protocols for backward compatibility
+    supported_protocols = ['jwt-auth', 'jwt', 'bearer']
+    
+    for protocol in client_protocols:
+        if protocol in supported_protocols:
+            logger.debug(f"Direct protocol match: {protocol}")
+            return protocol
     
     # ISSUE #342 FIX: Improved error logging for debugging
     logger.warning(f"No supported subprotocols found in client request: {client_protocols}")
