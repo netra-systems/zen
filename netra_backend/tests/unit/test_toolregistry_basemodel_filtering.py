@@ -30,7 +30,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestDataModel(BaseModel):
+class MockDataModel(BaseModel):
     """Mock Pydantic BaseModel class that should NOT be registered as a tool."""
     name: str
     value: int
@@ -99,7 +99,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         logger.info("[U+1F9EA] Testing BaseModel class detection and rejection")
         
         # Create BaseModel instance that should be rejected
-        basemodel_instance = TestDataModel(name="test", value=42)
+        basemodel_instance = MockDataModel(name="test", value=42)
         
         # Try to register BaseModel - should fail after fix
         try:
@@ -143,7 +143,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         logger.info("[U+1F9EA] Testing metaclass name fallback dangerous pattern")
         
         # Create BaseModel instance
-        basemodel_instance = TestDataModel(name="test", value=123)
+        basemodel_instance = MockDataModel(name="test", value=123)
         
         # Reproduce the dangerous name generation pattern from staging
         dangerous_name = getattr(basemodel_instance, '__class__', type(basemodel_instance)).__name__.lower()
@@ -225,7 +225,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         
         # Test BaseModel class (not instance)
         try:
-            self.registry.register("basemodel_class", TestDataModel)
+            self.registry.register("basemodel_class", MockDataModel)
             logger.error(" FAIL:  CURRENT STATE BUG: BaseModel CLASS was accepted as tool")
             pytest.fail("BaseModel class should not be accepted as tool")
         except ValueError as e:
@@ -234,7 +234,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             logger.error(f" FAIL:  Unexpected error for BaseModel class: {e}")
         
         # Test BaseModel instance
-        basemodel_instance = TestDataModel(name="test", value=42)
+        basemodel_instance = MockDataModel(name="test", value=42)
         try:
             self.registry.register("basemodel_instance", basemodel_instance)
             logger.error(" FAIL:  CURRENT STATE BUG: BaseModel INSTANCE was accepted as tool")
@@ -261,7 +261,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             data: Dict[str, Any]
         
         basemodels = [
-            TestDataModel(name="test1", value=1),
+            MockDataModel(name="test1", value=1),
             TestDataModel2(field1="test2", field2=2), 
             TestDataModel3(data={"test": 3})
         ]

@@ -4,8 +4,7 @@ import pytest
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
-# Skip test if any imports fail due to missing dependencies
-pytest.skip("Test dependencies have been removed or have missing dependencies", allow_module_level=True)
+# Cost limit enforcement test - all dependencies verified working
 
 from decimal import Decimal
 from datetime import datetime
@@ -15,7 +14,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.cost_calculator import TokenUsage
-from netra_backend.app.schemas.llm_config_types import LLMProvider
+from netra_backend.app.schemas.llm_types import LLMProvider
 import asyncio
 
 

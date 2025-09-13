@@ -159,8 +159,8 @@ class TokenOptimizationContextManager:
         # Get overall agent summary from TokenCounter
         summary = self.token_counter.get_agent_usage_summary()
         
-        # Add current session data from context metadata
-        token_usage = context.metadata.get("token_usage", {})
+        # Add current session data from context agent_context (also accessible via metadata property)
+        token_usage = context.agent_context.get("token_usage", {})
         if token_usage:
             session_operations = token_usage.get("operations", [])
             agent_operations = [op for op in session_operations if op.get("agent") == agent_name]

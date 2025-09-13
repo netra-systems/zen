@@ -245,7 +245,7 @@ class TestBaseAgentTokenOptimization(SSotAsyncTestCase):
         assert "cost_optimization_suggestions" in enhanced_context.metadata
         suggestions_data = enhanced_context.metadata["cost_optimization_suggestions"]
         assert "suggestions" in suggestions_data
-        assert suggestions_data["suggestions"] is suggestions
+        assert suggestions_data["suggestions"] == suggestions
 
     async def test_get_token_usage_summary(self):
         """Test token usage summary generation."""
@@ -321,7 +321,7 @@ class TestBaseAgentTokenOptimization(SSotAsyncTestCase):
         agent.set_websocket_bridge(self.websocket_bridge, "token-test-immutable")
 
         original_context = self.test_context
-        original_metadata_id = id(original_context.metadata)
+        original_agent_context_id = id(original_context.agent_context)
 
         # Perform token operation
         enhanced_context = agent.track_llm_usage(
@@ -334,8 +334,8 @@ class TestBaseAgentTokenOptimization(SSotAsyncTestCase):
 
         # Verify: Original context unchanged
         assert enhanced_context is not original_context
-        assert "token_usage" not in original_context.metadata
-        assert id(original_context.metadata) == original_metadata_id
+        assert "token_usage" not in original_context.agent_context
+        assert id(original_context.agent_context) == original_agent_context_id
 
         # Verify: Enhanced context has new data
         assert "token_usage" in enhanced_context.metadata

@@ -46,8 +46,8 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from shared.types.core_types import UserID, ThreadID, RunID
 
 
-class TestBaseAgent(BaseAgent):
-    """Test agent implementation for comprehensive testing."""
+class MockBaseAgent(BaseAgent):
+    """Mock agent implementation for comprehensive testing."""
     
     def __init__(self, *args, **kwargs):
         # Add test-specific initialization
@@ -117,7 +117,7 @@ class TestBaseAgentLifecycleManagement(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.test_agent = TestBaseAgent(
+        self.test_agent = MockBaseAgent(
             name="TestLifecycleAgent",
             description="Agent for lifecycle testing",
             enable_reliability=True
@@ -245,8 +245,8 @@ class TestBaseAgentUserIsolation(SSotAsyncTestCase):
     async def test_concurrent_user_execution_isolation(self):
         """Test that concurrent users are properly isolated during execution."""
         # Create agents for concurrent users
-        agent1 = TestBaseAgent(name="ConcurrentAgent1")
-        agent2 = TestBaseAgent(name="ConcurrentAgent2")
+        agent1 = MockBaseAgent(name="ConcurrentAgent1")
+        agent2 = MockBaseAgent(name="ConcurrentAgent2")
         
         # Create isolated contexts for different users
         context1 = self.create_test_context("user123")
@@ -279,7 +279,7 @@ class TestBaseAgentUserIsolation(SSotAsyncTestCase):
     
     def test_user_context_setting_validates_context(self):
         """Test that set_user_context validates context before storing."""
-        agent = TestBaseAgent(name="ContextAgent")
+        agent = MockBaseAgent(name="ContextAgent")
         
         # Valid context should work
         valid_context = self.create_test_context("user789")
@@ -296,8 +296,8 @@ class TestBaseAgentUserIsolation(SSotAsyncTestCase):
         context2 = self.create_test_context("factory_user2")
         
         # Create agents using factory method
-        agent1 = TestBaseAgent.create_agent_with_context(context1)
-        agent2 = TestBaseAgent.create_agent_with_context(context2)
+        agent1 = MockBaseAgent.create_agent_with_context(context1)
+        agent2 = MockBaseAgent.create_agent_with_context(context2)
         
         # Verify agents have different contexts
         self.assertEqual(agent1.user_context.user_id, "factory_user1")
@@ -319,7 +319,7 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.test_agent = TestBaseAgent(name="WebSocketTestAgent")
+        self.test_agent = MockBaseAgent(name="WebSocketTestAgent")
         self.mock_bridge = Mock()
         
     async def asyncTearDown(self):
