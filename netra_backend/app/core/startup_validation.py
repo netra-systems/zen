@@ -380,6 +380,195 @@ class StartupValidator:
         except Exception as e:
             self._add_failed_validation("Database Validation", "Database", str(e))
     
+    async def _validate_database_configuration_early(self) -> None:
+        """
+        ISSUE #378 FIX: Validate database configuration BEFORE initialization attempts.
+        
+        This method performs early configuration validation to catch configuration issues
+        before they are masked by auto-initialization attempts. This prevents configuration
+        problems from being discovered too late in the execution pipeline.
+        """
+        try:
+            self.logger.info("Performing early database configuration validation...")
+            
+            # Import here to avoid circular dependencies
+            from shared.database_url_builder import DatabaseURLBuilder
+            from shared.isolated_environment import get_env
+            
+            # Get environment configuration
+            env = get_env()
+            env_dict = env.as_dict()
+            
+            # Validate required environment variables are present
+            required_vars = ["POSTGRES_HOST", "POSTGRES_PORT", "POSTGRES_DB", "POSTGRES_USER"]
+            missing_vars = []
+            empty_vars = []
+            
+            for var in required_vars:
+                if var not in env_dict or env_dict[var] is None:
+                    missing_vars.append(var)
+                elif str(env_dict[var]).strip() == "":
+                    empty_vars.append(var)
+            
+            # Check for missing or empty required variables
+            if missing_vars or empty_vars:
+                error_parts = []
+                if missing_vars:
+                    error_parts.append(f"Missing required environment variables: {', '.join(missing_vars)}")
+                if empty_vars:
+                    error_parts.append(f"Empty required environment variables: {', '.join(empty_vars)}")
+                
+                error_message = "; ".join(error_parts)
+                validation = ComponentValidation(
+                    name="Database Configuration",
+                    category="Database",
+                    expected_min=len(required_vars),
+                    actual_count=len(required_vars) - len(missing_vars) - len(empty_vars),
+                    status=ComponentStatus.CRITICAL,
+                    message=f"Configuration validation failed: {error_message}. Please set all required POSTGRES_* environment variables.",
+                    is_critical=True,
+                    metadata={
+                        "missing_vars": missing_vars,
+                        "empty_vars": empty_vars,
+                        "required_vars": required_vars
+                    }
+                )
+                self.validations.append(validation)
+                self.logger.error(f"Database configuration validation failed: {error_message}")
+                return
+            
+            # Validate configuration can build a proper URL
+            try:
+                url_builder = DatabaseURLBuilder(env_dict)
+                database_url = url_builder.get_url_for_environment(sync=False)
+                
+                if not database_url:
+                    validation = ComponentValidation(
+                        name="Database Configuration",
+                        category="Database",
+                        expected_min=1,
+                        actual_count=0,
+                        status=ComponentStatus.CRITICAL,
+                        message="Configuration validation failed: DatabaseURLBuilder could not construct valid URL from environment variables. Check POSTGRES_* environment variables format and values.",
+                        is_critical=True,
+                        metadata={"url_builder_result": None}
+                    )
+                    self.validations.append(validation)
+                    self.logger.error("Database configuration validation failed: Could not construct database URL")
+                    return
+                
+                # Parse URL to validate components
+                from urllib.parse import urlparse
+                parsed = urlparse(database_url)
+                
+                validation_issues = []
+                if not parsed.hostname or parsed.hostname.strip() == "":
+                    validation_issues.append("hostname is missing or empty")
+                if not parsed.port or parsed.port <= 0 or parsed.port > 65535:
+                    validation_issues.append(f"port is invalid ({parsed.port})")
+                if not parsed.username or parsed.username.strip() == "":
+                    validation_issues.append("username is missing or empty")
+                if not parsed.path or parsed.path.strip("/") == "":
+                    validation_issues.append("database name is missing or empty")
+                
+                if validation_issues:
+                    validation = ComponentValidation(
+                        name="Database Configuration",
+                        category="Database",
+                        expected_min=4,  # host, port, user, database
+                        actual_count=4 - len(validation_issues),
+                        status=ComponentStatus.CRITICAL,
+                        message=f"Configuration validation failed: {'; '.join(validation_issues)}. Review POSTGRES_* environment variables.",
+                        is_critical=True,
+                        metadata={
+                            "validation_issues": validation_issues,
+                            "parsed_url": {
+                                "hostname": parsed.hostname,
+                                "port": parsed.port,
+                                "username": parsed.username,
+                                "database": parsed.path.strip("/") if parsed.path else None
+                            }
+                        }
+                    )
+                    self.validations.append(validation)
+                    self.logger.error(f"Database configuration validation failed: {'; '.join(validation_issues)}")
+                    return
+                
+                # Configuration appears valid
+                validation = ComponentValidation(
+                    name="Database Configuration",
+                    category="Database",
+                    expected_min=1,
+                    actual_count=1,
+                    status=ComponentStatus.HEALTHY,
+                    message=f"Configuration validation passed: Valid database URL constructed (host: {parsed.hostname}:{parsed.port}, db: {parsed.path.strip('/')})",
+                    is_critical=True,
+                    metadata={
+                        "config_status": "valid",
+                        "database_host": parsed.hostname,
+                        "database_port": parsed.port,
+                        "database_name": parsed.path.strip("/") if parsed.path else None
+                    }
+                )
+                self.validations.append(validation)
+                self.logger.info(f"Database configuration validation passed: {parsed.hostname}:{parsed.port}/{parsed.path.strip('/')}")
+                
+            except ValueError as e:
+                validation = ComponentValidation(
+                    name="Database Configuration",
+                    category="Database",
+                    expected_min=1,
+                    actual_count=0,
+                    status=ComponentStatus.CRITICAL,
+                    message=f"Configuration validation failed: Invalid database configuration format: {e}. Check POSTGRES_* environment variables syntax.",
+                    is_critical=True,
+                    metadata={"config_error": str(e)}
+                )
+                self.validations.append(validation)
+                self.logger.error(f"Database configuration validation failed: {e}")
+            except Exception as e:
+                validation = ComponentValidation(
+                    name="Database Configuration",
+                    category="Database",
+                    expected_min=1,
+                    actual_count=0,
+                    status=ComponentStatus.CRITICAL,
+                    message=f"Configuration validation failed: Unexpected error during validation: {e}. Check database configuration setup.",
+                    is_critical=True,
+                    metadata={"unexpected_error": str(e)}
+                )
+                self.validations.append(validation)
+                self.logger.error(f"Database configuration validation failed with unexpected error: {e}")
+                
+        except ImportError as e:
+            # Missing dependencies for configuration validation
+            validation = ComponentValidation(
+                name="Database Configuration",
+                category="Database",
+                expected_min=1,
+                actual_count=0,
+                status=ComponentStatus.WARNING,
+                message=f"Configuration validation skipped: Missing dependencies: {e}. Install required database packages.",
+                is_critical=False,
+                metadata={"import_error": str(e)}
+            )
+            self.validations.append(validation)
+            self.logger.warning(f"Database configuration validation skipped due to missing dependencies: {e}")
+        except Exception as e:
+            # Fallback for unexpected configuration validation errors
+            validation = ComponentValidation(
+                name="Database Configuration",
+                category="Database",
+                expected_min=1,
+                actual_count=0,
+                status=ComponentStatus.WARNING,
+                message=f"Configuration validation error: {e}. Configuration issues may not be detected early.",
+                is_critical=False,
+                metadata={"validation_error": str(e)}
+            )
+            self.validations.append(validation)
+            self.logger.warning(f"Database configuration validation error: {e}")
+    
     async def _validate_websocket(self, app) -> None:
         """Validate WebSocket manager and connections."""
         try:

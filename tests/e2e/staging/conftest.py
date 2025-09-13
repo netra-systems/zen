@@ -139,6 +139,23 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "issue_395: mark test related to issue #395 (WebSocket auth golden path)"
     )
+    config.addinivalue_line(
+        "markers", "issue_426: mark test related to issue #426 (WebSocket subprotocol negotiation)"
+    )
+
+    # Connectivity markers
+    config.addinivalue_line(
+        "markers", "connectivity: mark test for connectivity validation"
+    )
+    config.addinivalue_line(
+        "markers", "timeout: mark test with custom timeout"
+    )
+    config.addinivalue_line(
+        "markers", "slow: mark test as slow running"
+    )
+    config.addinivalue_line(
+        "markers", "asyncio: mark test as asynchronous"
+    )
 
 def pytest_sessionstart(session):
     """Called at test session start"""
