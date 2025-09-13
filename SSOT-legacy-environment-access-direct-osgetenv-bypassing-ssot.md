@@ -83,10 +83,37 @@ Replace all `os.getenv()` calls with `get_env()` from `shared.isolated_environme
 - **BEFORE SSOT FIX**: Unit tests PASS (proving violations exist), Mission Critical shows expected behavior
 - **AFTER SSOT FIX**: Unit violation tests should FAIL (os.getenv no longer called), Mission Critical should PASS
 
+### Step 3: Plan Remediation of SSOT Violation - COMPLETED ✅
+**COMPREHENSIVE REMEDIATION PLAN CREATED**
+
+#### Key Findings:
+- **SCOPE CORRECTION**: Only **3 files** require remediation (not 4)
+- ✅ `auth_trace_logger.py` - Environment detection (Lines 284, 293, 302)
+- ✅ `unified_corpus_admin.py` - Corpus path configuration (Lines 155, 281)
+- ✅ `websocket_core/types.py` - Cloud Run detection (Lines 349-355)
+- ❌ `auth_startup_validator.py` - **ALREADY SSOT COMPLIANT** (uses `self.env.get()`)
+
+#### Risk-Based Implementation Sequence:
+1. **Lowest Risk**: Auth trace logger (logging only)
+2. **Medium Risk**: Corpus admin (user management)
+3. **Highest Risk**: WebSocket types (critical $500K+ ARR infrastructure)
+
+#### Business Value Protection Plan:
+- **$12K MRR Risk**: Authentication and user isolation stability
+- **$500K+ ARR Risk**: WebSocket chat functionality reliability
+- **Golden Path Integrity**: End-to-end user flow preservation
+
+#### Implementation Strategy:
+- **Exact line-by-line replacements** with before/after code examples
+- **Risk mitigation strategies** including rollback procedures
+- **Phase-based approach** with validation after each change
+- **Emergency procedures** for hotfix deployment if needed
+
 ### Next Steps
 1. ✅ Discover existing tests for affected files
 2. ✅ Plan SSOT-compliant test suite
 3. ✅ Create and validate 5 new SSOT tests
-4. Execute SSOT remediation plan
-5. Run test fix loop until all tests pass
-6. Create PR and close issue
+4. ✅ Create comprehensive remediation plan
+5. Execute SSOT remediation implementation
+6. Run test fix loop until all tests pass
+7. Create PR and close issue
