@@ -12,7 +12,6 @@ Business Value:
 - Supports graceful degradation and recovery strategies
 """
 
-import os
 import logging
 from enum import Enum
 from typing import Any, Dict, Optional, Union, Callable, TYPE_CHECKING
@@ -22,7 +21,7 @@ from datetime import datetime, timezone
 if TYPE_CHECKING:
     from shared.isolated_environment import IsolatedEnvironment
 
-# Import get_env for fallback when no isolated_env is provided
+# Import get_env for SSOT environment access
 from shared.isolated_environment import get_env
 
 from netra_backend.app.core.exceptions_base import NetraException
@@ -161,35 +160,43 @@ class ErrorPolicy:
         ]
         return any(indicators)
     
-    @classmethod  
+    @classmethod
     def _detect_staging_indicators(cls) -> bool:
         """Detect staging environment through indirect indicators."""
+        # Ensure environment accessor is available
+        if cls._env_accessor is None:
+            cls._env_accessor = get_env()
+
         indicators = [
             # GCP staging project
-            os.getenv('GCP_PROJECT', '').endswith('-staging'),
+            cls._env_accessor.get('GCP_PROJECT', '').endswith('-staging'),
             # Staging database URLs
-            'staging' in os.getenv('DATABASE_URL', '').lower(),
+            'staging' in cls._env_accessor.get('DATABASE_URL', '').lower(),
             # Staging Redis
-            'staging' in os.getenv('REDIS_URL', '').lower(),
+            'staging' in cls._env_accessor.get('REDIS_URL', '').lower(),
             # Staging service discovery
-            os.getenv('SERVICE_ENV') == 'staging'
+            cls._env_accessor.get('SERVICE_ENV') == 'staging'
         ]
         return any(indicators)
     
     @classmethod
     def _detect_testing_indicators(cls) -> bool:
         """Detect testing environment through indirect indicators."""
+        # Ensure environment accessor is available
+        if cls._env_accessor is None:
+            cls._env_accessor = get_env()
+
         indicators = [
             # Pytest running
-            'pytest' in os.getenv('_', '').lower(),
+            'pytest' in cls._env_accessor.get('_', '').lower(),
             # Test database ports
-            os.getenv('POSTGRES_PORT') in ['5434', '5433'],
+            cls._env_accessor.get('POSTGRES_PORT') in ['5434', '5433'],
             # Test Redis ports
-            os.getenv('REDIS_PORT') in ['6381', '6380'],
+            cls._env_accessor.get('REDIS_PORT') in ['6381', '6380'],
             # CI/CD environment
-            bool(os.getenv('CI')),
+            bool(cls._env_accessor.get('CI')),
             # Testing framework markers
-            bool(os.getenv('TESTING'))
+            bool(cls._env_accessor.get('TESTING'))
         ]
         return any(indicators)
     
