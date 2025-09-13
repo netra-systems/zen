@@ -532,10 +532,34 @@ class WebSocketTestHelpers:
         max_retries: int = 3,
         user_id: str = None
     ):
-        """Create a test WebSocket connection with proper authentication and retries"""
-        # Check if we should use mock connection (Docker not available)
+        """Create a test WebSocket connection with proper authentication and staging fallback (Issue #680)"""
+        # Enhanced Docker availability check with staging fallback
         if not is_docker_available_for_websocket():
-            print("Docker not available, using mock WebSocket connection")
+            # Check if staging services are available and configured (Issue #680)
+            from shared.isolated_environment import get_env
+            env = get_env()
+
+            use_staging_services = env.get('USE_STAGING_SERVICES') == 'true'
+            staging_websocket_url = env.get('STAGING_WEBSOCKET_URL')
+            test_websocket_url = env.get('TEST_WEBSOCKET_URL')
+
+            if use_staging_services and (staging_websocket_url or test_websocket_url):
+                print(f"🔄 Docker unavailable - attempting staging WebSocket connection (Issue #680)")
+
+                # Use staging URL if configured, otherwise use provided test URL
+                staging_url = staging_websocket_url or test_websocket_url or url
+
+                # Try to connect to staging environment
+                try:
+                    return await WebSocketTestHelpers._create_real_websocket_connection(
+                        staging_url, headers, timeout, max_retries
+                    )
+                except Exception as e:
+                    print(f"⚠️ Staging WebSocket connection failed: {e}")
+                    print("🔄 Falling back to mock WebSocket connection for development testing")
+            else:
+                print("🔄 Docker not available, staging not configured - using mock WebSocket connection")
+
             return MockWebSocketConnection(user_id=user_id)
         
         if not WEBSOCKETS_AVAILABLE:
