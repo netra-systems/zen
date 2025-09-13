@@ -42,7 +42,7 @@ FOR EACH ISSUE IN ISSUE_LIST:
         2) STATUS DECISION :
         IF the issue appears to already be resolved:
             close the issue and repeat PROCESS loop, otherwise continue to the next step.
-            If closing issue: remove tag: actively-being-worked-on
+            If closing issue: remove label: actively-being-worked-on
             update the existing comment on the ISSUE with your learnings
 
     OPTIONAL STEPS IF ISSUE IS OPEN:
@@ -101,7 +101,7 @@ FOR EACH ISSUE IN ISSUE_LIST:
     9.3) Cross link the prior generated issue so it will close on PR merge.
     9.4) **PR TARGET VALIDATION**: Ensure PR merges back to current working branch (develop-long-lived)
     9.5) Do a final update for this loop
-        If closing issue: remove tag: actively-being-worked-on
+        If closing issue: remove label: actively-being-worked-on
 
     END PROCESS INSTRUCTIONS
 
