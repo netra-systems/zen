@@ -408,7 +408,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for invalid_value, expected_keyword in test_cases:
-            with self.expect_exception(InvalidContextError):
+            with self.expect_exception(InvalidContextError) as exc_info:
                 # Create context with invalid value - validation happens during creation
                 invalid_context = UserExecutionContext(
                     user_id=invalid_value,
@@ -419,10 +419,10 @@ class TestContextValidation(SSotAsyncTestCase):
                 # Then validate the context
                 validate_user_context(invalid_context)
             
-            error_msg = str(context.exception).lower()
+            error_msg = str(exc_info.value).lower()
             self.assertIn(expected_keyword, error_msg,
                          f"Error message should contain '{expected_keyword}' for value '{invalid_value}'")
-            self.assertIn(invalid_value, str(context.exception),
+            self.assertIn(invalid_value, str(exc_info.value),
                          f"Error message should contain the invalid value '{invalid_value}'")
 
 
