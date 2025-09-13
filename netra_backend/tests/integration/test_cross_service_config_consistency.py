@@ -27,7 +27,7 @@ import tempfile
 import json
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.configuration.loader import get_configuration
 from netra_backend.app.schemas.config import DevelopmentConfig, StagingConfig, ProductionConfig
 

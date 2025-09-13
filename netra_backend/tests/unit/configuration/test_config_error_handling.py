@@ -29,7 +29,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.core.configuration.base import UnifiedConfigurationManager
 from netra_backend.app.core.configuration.validator import ConfigurationValidator
 from netra_backend.app.schemas.config import AppConfig, DevelopmentConfig, ProductionConfig
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestConfigurationValidationErrors(SSotBaseTestCase):

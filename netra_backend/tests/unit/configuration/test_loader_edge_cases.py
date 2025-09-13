@@ -32,7 +32,7 @@ from netra_backend.app.core.configuration.loader import (
     reload_configuration
 )
 from netra_backend.app.schemas.config import AppConfig
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestConfigurationLoaderEdgeCases(SSotBaseTestCase):
