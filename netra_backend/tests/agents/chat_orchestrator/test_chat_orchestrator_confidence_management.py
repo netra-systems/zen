@@ -27,7 +27,18 @@ from netra_backend.app.agents.chat_orchestrator.confidence_manager import (
     ConfidenceLevel
 )
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 
 
 class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase):

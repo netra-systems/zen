@@ -24,7 +24,18 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.chat_orchestrator.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 
 
 class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
