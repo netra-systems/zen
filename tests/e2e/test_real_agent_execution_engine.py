@@ -44,8 +44,8 @@ except ImportError:
 from shared.isolated_environment import get_env
 
 # Import execution engine components
-from netra_backend.app.agents.supervisor.execution_engine import (
-    ExecutionEngine,
+from netra_backend.app.agents.supervisor.user_execution_engine import (
+    UserExecutionEngine as ExecutionEngine,
     create_request_scoped_engine
 )
 from netra_backend.app.agents.supervisor.execution_context import (

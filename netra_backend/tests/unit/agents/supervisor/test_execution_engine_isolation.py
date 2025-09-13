@@ -35,8 +35,8 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import SSOT components for testing
-# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use ExecutionEngine with compatibility bridge for tests
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
@@ -119,7 +119,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
             """Execute agent for a specific user and track state isolation."""
             try:
                 # Create execution engine instance for this user
-                engine = ExecutionEngine._init_from_factory(
+                engine = await ExecutionEngine.create_request_scoped_engine(
                     self.mock_registry,
                     self.mock_websocket_bridge,
                     user_context
@@ -215,7 +215,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         execution_timeline = []
         
         # Create execution engine with limited concurrency
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             self.user_contexts[0]
@@ -341,7 +341,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         agent_context = self._create_test_agent_context(user_context, "timeout_test_agent")
         
         # Create engine with very short timeout for testing
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -404,7 +404,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         agent_context = self._create_test_agent_context(user_context, "error_test_agent", max_retries=0)
         
         # Create engine
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -464,7 +464,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         agent_context = self._create_test_agent_context(user_context, "emitter_test_agent")
         
         # Create engine with user context
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -536,7 +536,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         agent_context = self._create_test_agent_context(user_context, "fallback_test_agent")
         
         # Create engine with user context
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -581,7 +581,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         # Test valid context validation
         valid_agent_context = self._create_test_agent_context(user_context, "valid_agent")
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -635,7 +635,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         """Test pipeline execution with early termination scenarios."""
         user_context = self.user_contexts[0]
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -715,7 +715,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         """Test pipeline execution with continue_on_error flag."""
         user_context = self.user_contexts[0]
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -784,7 +784,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         """Test execution statistics tracking across multiple operations."""
         user_context = self.user_contexts[0]
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -830,7 +830,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         
         # Create multiple engines to simulate load
         for user_context in user_contexts:
-            engine = ExecutionEngine._init_from_factory(
+            engine = await ExecutionEngine.create_request_scoped_engine(
                 self.mock_registry,
                 self.mock_websocket_bridge,
                 user_context
@@ -893,7 +893,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         user_context = self.user_contexts[0]
         
         # Test engine with user context
-        engine_with_context = ExecutionEngine._init_from_factory(
+        engine_with_context = ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context
@@ -920,7 +920,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         assert status['global_state_warning'] is False
         
         # Test engine without user context
-        engine_without_context = ExecutionEngine._init_from_factory(
+        engine_without_context = ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             None  # No user context
@@ -947,7 +947,7 @@ class TestExecutionEngineIsolation(SSotBaseTestCase):
         user_context = self.user_contexts[0]
         agent_context = self._create_test_agent_context(user_context, "business_logic_agent", max_retries=0)
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = await ExecutionEngine.create_request_scoped_engine(
             self.mock_registry,
             self.mock_websocket_bridge,
             user_context

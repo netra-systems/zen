@@ -327,7 +327,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
     
     async def test_compatibility_bridge_user_isolation(self):
         """Test that Issue #565 compatibility bridge maintains user isolation."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         import warnings
         

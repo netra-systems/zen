@@ -55,16 +55,18 @@ from shared.isolated_environment import get_env
 sys.modules['netra_backend.app.websocket_core.get_websocket_manager'] = Mock()
 
 try:
-    # Import execution engine components
-    from netra_backend.app.agents.supervisor.execution_engine import (
-        ExecutionEngine,
+    # Import execution engine components with compatibility bridge
+    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.execution_engine_factory import (
         create_request_scoped_engine,
+    )
+    from netra_backend.app.agents.supervisor.user_execution_engine import (
         create_execution_context_manager,
         detect_global_state_usage,
     )
 except ImportError as e:
     # Skip the test file if imports fail - this is expected in some environments
-    pytest.skip(f"Skipping execution_engine tests due to import error: {e}")
+    pytest.skip(f"Skipping execution_engine tests due to import error: {e}", allow_module_level=True)
     
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -328,10 +330,10 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
             
         self.assertIn("Direct ExecutionEngine instantiation is no longer supported", str(cm.exception))
         
-    def test_factory_init_from_factory_comprehensive(self):
+    def test_factory_create_request_scoped_engine_comprehensive(self):
         """
         BVJ: Platform/Internal - Factory Pattern Validation
-        Test internal _init_from_factory method creates properly configured engine.
+        Test internal create_request_scoped_engine method creates properly configured engine.
         """
         user_context = UserExecutionContext.from_request(
             user_id="factory_test_user",
@@ -339,7 +341,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
             run_id="factory_test_run"
         )
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=user_context
@@ -382,7 +384,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
             )
             contexts.append(context)
             
-            engine = ExecutionEngine._init_from_factory(
+            engine = ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=MockWebSocketBridgeComprehensive(),
                 user_context=context
@@ -406,7 +408,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         
         # Test with None websocket_bridge
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=None,
                 user_context=user_context
@@ -424,7 +426,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
                 delattr(invalid_bridge, attr)
                 
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=invalid_bridge,
                 user_context=user_context
@@ -437,7 +439,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         # Missing other required methods
         
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine._init_from_factory(
+            ExecutionEngine.create_request_scoped_engine(
                 registry=self.registry,
                 websocket_bridge=partial_bridge,
                 user_context=user_context
@@ -455,7 +457,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         self.assertEqual(ExecutionEngine.AGENT_EXECUTION_TIMEOUT, 30.0)  # 30 seconds max for UX
         
         # Create engine and verify these limits are enforced
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("test", "test", "test")
@@ -469,7 +471,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         BVJ: Platform/Internal - Reliability & Monitoring
         Test death monitoring callbacks are properly registered during initialization.
         """
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("death_test", "thread", "run")
@@ -506,7 +508,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         Test user-specific state lock creation is thread-safe under high concurrency.
         """
         user_context = UserExecutionContext.from_request("concurrent_user", "thread", "run")
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=user_context
@@ -535,7 +537,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         BVJ: Platform/Internal - Multi-User Data Isolation
         Test comprehensive user execution state isolation and structure.
         """
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("state_user", "thread", "run")
@@ -583,7 +585,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         BVJ: Platform/Internal - Concurrent Multi-User Performance
         Test multiple users accessing their states concurrently without interference.
         """
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("concurrent_state_user", "thread", "run")
@@ -642,7 +644,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         BVJ: Platform/Internal - Input Validation & Security
         Test comprehensive UserExecutionContext validation integration.
         """
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("validation_user", "validation_thread", "validation_run")
@@ -714,7 +716,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
             metadata=metadata
         )
         
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=user_context
@@ -737,7 +739,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         Test has_user_context convenience method under various conditions.
         """
         # Test with UserExecutionContext
-        with_context = ExecutionEngine._init_from_factory(
+        with_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=UserExecutionContext.from_request("context_user", "thread", "run")
@@ -745,7 +747,7 @@ class TestExecutionEngineUserContextIntegration(AsyncBaseTestCase):
         self.assertTrue(with_context.has_user_context())
         
         # Test without UserExecutionContext  
-        without_context = ExecutionEngine._init_from_factory(
+        without_context = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=None
@@ -773,7 +775,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
             thread_id="websocket_events_thread",
             run_id="websocket_events_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -1042,7 +1044,7 @@ class TestExecutionEngineWebSocketEventsComprehensive(AsyncBaseTestCase):
         """
         # Create failing WebSocket bridge
         failing_bridge = MockWebSocketBridgeComprehensive(should_fail=True)
-        engine_with_failing_bridge = ExecutionEngine._init_from_factory(
+        engine_with_failing_bridge = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=failing_bridge,
             user_context=self.user_context
@@ -1154,7 +1156,7 @@ class TestExecutionEngineAgentExecutionComprehensive(AsyncBaseTestCase):
         
     def create_engine_with_mock_core(self, should_succeed=True, execution_time=100, failure_mode=None) -> ExecutionEngine:
         """Create engine with configurable mock agent core."""
-        engine = ExecutionEngine._init_from_factory(
+        engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -1584,7 +1586,7 @@ class TestExecutionEnginePipelineExecutionComprehensive(AsyncBaseTestCase):
             thread_id="pipeline_comprehensive_thread",
             run_id="pipeline_comprehensive_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -2080,7 +2082,7 @@ class TestExecutionEngineResourceManagementComprehensive(AsyncBaseTestCase):
             thread_id="resource_management_thread",
             run_id="resource_management_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -2213,7 +2215,7 @@ class TestExecutionEngineResourceManagementComprehensive(AsyncBaseTestCase):
         failing_bridge = MockWebSocketBridgeComprehensive()
         failing_bridge.get_metrics = AsyncMock(side_effect=ConnectionError("Bridge metrics unavailable"))
         
-        engine_with_failing_bridge = ExecutionEngine._init_from_factory(
+        engine_with_failing_bridge = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=failing_bridge,
             user_context=self.user_context
@@ -2601,7 +2603,7 @@ class TestExecutionEngineErrorHandlingAndRetryComprehensive(AsyncBaseTestCase):
             thread_id="error_handling_thread",
             run_id="error_handling_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -2928,7 +2930,7 @@ class TestExecutionEnginePipelineHelpersComprehensive(AsyncBaseTestCase):
             thread_id="pipeline_helper_thread",
             run_id="pipeline_helper_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context
@@ -3346,7 +3348,7 @@ class TestExecutionEngineValidationEdgeCasesComprehensive(AsyncBaseTestCase):
             thread_id="validation_edge_thread",
             run_id="validation_edge_run"
         )
-        self.engine = ExecutionEngine._init_from_factory(
+        self.engine = ExecutionEngine.create_request_scoped_engine(
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
             user_context=self.user_context

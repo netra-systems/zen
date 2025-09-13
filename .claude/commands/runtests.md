@@ -1,29 +1,42 @@
 ---
 description: "Run unit tests"
-argument-hint: "[focus area, defaults to all] [flags, defaults to parallel]"
+argument-hint: "[focus area, defaults to all] [test area, defaults unit] [flags, defaults to parallel]"
 ---
 
-SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
+Your goal is to run tests and remediate them.
+Use github to validate context and log progress.
 
-ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
-Have sub agents use built in github tools or direct `git` or `gh` if needed.
-ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
+Context:
+    1. SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
+    2. TEST_TYPE = Run ${2 : unit} tests. 
+        If TEST_TYPE == integration: then do non-docker integration tests
+    3. DO NOT USE DOCKER in any case to run tests.
+        If test type == e2e: test on gcp staging.
+    4. ALL Github output MUST follow @GITHUB_STYLE_GUIDE.md
+        Have sub agents use built in github tools or direct `git` or `gh` if needed.
+        ALWAYS think about overall repo safety and STOP if anything might damage overall health of repo.
 
 REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 10 TIMES.
 
 PROCESS INSTRUCTIONS START SNST:
 
-    0) Run unit tests with a focus on ${1 : latest issues}, fast failure, ${2 : parallel} flags
+    0) Run TEST_TYPE tests
+        with a focus on ${1 : latest issues}, 
+        fast failure, ${3 : parallel} flags
 
-    1) ISSUE SEARCH AND UPDATE OR CREATION: SEARCH GITHUB ISSUES FOR EXISTING ISSUE.
+    1) ISSUE SEARCH AND UPDATE OR CREATION:
+    
+        search github for existing similar issues:
 
-        IF FOUND: Make or UPDATE a comment on the ISSUE.
+        IF FOUND: 
+            Make or UPDATE a comment on the ISSUE.
             OUTPUT the ISSUE ID and comment ID here:
-            READ THE EXISTING ISSUE AND COMMENTS and return key points to master agent.
+            READ THE EXISTING ISSUE AND COMMENTS
         
-        ELSE: CREATE A NEW GIT ISSUE AND OUTPUT the ISSUE ID here:
+        ELSE: 
+            CREATE A NEW GIT ISSUE AND OUTPUT the ISSUE ID here:
 
-    2) STATUS UPDATE : 
+    2) STATUS UPDATE: 
         AUDIT the current codebase and linked PRs (closed and open)
         with FIVE WHYS approach and assess the current state of the issue.
         2.1) Make or UPDATE a comment on the ISSUE with your learnings.
@@ -36,7 +49,7 @@ PROCESS INSTRUCTIONS START SNST:
 
     4) EXECUTE THE REMEDIATION ITEM SPECIFIC PLAN: SNST :
         4.1) UPDATE the comment on the ISSUE with the results.
-        add tag: actively-being-worked-on
+        add tag: actively-being-worked-on, 
         4.2) Git commit work in conceptual batches. 
 
     5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
