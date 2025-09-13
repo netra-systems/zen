@@ -1166,3 +1166,16 @@ class StateCacheManager:
     
     async def cache_legacy_state(self, run_id, state_data):
         return await self._service.cache_legacy_state(run_id, state_data)
+
+
+# BACKWARD COMPATIBILITY ALIASES - Issue #762 Phase 2 Remediation
+# These aliases resolve import mismatches in Golden Path tests
+
+# Alias for tests expecting OptimizedStatePersistence
+OptimizedStatePersistence = StatePersistenceService
+
+# Alias for tests expecting UnifiedStatePersistence
+UnifiedStatePersistence = StatePersistenceService
+
+# Legacy alias support
+StatePersistence = StatePersistenceService

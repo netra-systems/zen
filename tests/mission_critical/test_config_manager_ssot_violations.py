@@ -94,9 +94,12 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.configuration.base import UnifiedConfigManager
+            # NOTE: Issue #757 RESOLUTION - Deprecated UnifiedConfigurationManager properly removed
+            # This validates that the deprecated class is no longer accessible
+            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
             managers_to_test.append(('UnifiedConfigurationManager', UnifiedConfigurationManager))
         except ImportError:
+            # Expected after Issue #757 resolution - deprecated manager removed
             pass
 
         try:

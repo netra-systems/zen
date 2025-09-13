@@ -131,5 +131,11 @@ __all__ = [
     # MCP Client models
     'MCPExternalServer',
     'MCPToolExecution',
-    'MCPResourceAccess'
+    'MCPResourceAccess',
+
+    # Issue #762 Phase 2: Backward compatibility aliases
+    'ChatSession'  # Alias for ResearchSession
 ]
+
+# Issue #762 Phase 2 Remediation: Add backward compatibility alias for tests
+ChatSession = ResearchSession

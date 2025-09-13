@@ -1,33 +1,26 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 11:29:49
+**Generated:** 2025-09-13 11:54:43
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 1
-- **Passed:** 1 (100.0%)
+- **Total Tests:** 0
+- **Passed:** 0 (0.0%)
 - **Failed:** 0 (0.0%)
 - **Skipped:** 0
-- **Duration:** 0.18 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 0.52 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
-
-### NORMAL Priority Tests
-
-| Test Name | Status | Duration | File |
-|-----------|--------|----------|------|
-| test_e2e_golden_path_metadata | PASS passed | 0.000s | test_golden_path_database_flow.py |
 
 ## Pytest Output Format
 
 ```
-test_golden_path_database_flow.py::test_e2e_golden_path_metadata PASSED
 
 ==================================================
-1 passed, 0 failed in 0.18s
+0 passed, 0 failed in 0.52s
 ```
 
 ## Test Coverage Matrix

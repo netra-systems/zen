@@ -1067,11 +1067,15 @@ auth_manager = BackendAuthIntegration()
 __all__ = [
     "auth_client",
     "get_current_user",
-    "get_optional_user", 
+    "get_optional_user",
     "get_auth_client",
     "generate_access_token",
     "BackendAuthIntegration",
     "AuthValidationResult",
     "TokenRefreshResult",
-    "auth_manager"  # Issue #485 fix: Missing import
+    "auth_manager",  # Issue #485 fix: Missing import
+    "unified_auth_client"  # Issue #762 Phase 2: Backward compatibility alias
 ]
+
+# Issue #762 Phase 2 Remediation: Add backward compatibility alias
+unified_auth_client = auth_client
