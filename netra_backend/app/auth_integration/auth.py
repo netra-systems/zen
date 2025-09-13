@@ -306,7 +306,7 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     
     # Demo mode: enhanced auto-creation with better email handling
     demo_config = get_backend_demo_config()
-    if demo_config.is_demo_mode():
+    if demo_config.get("enabled", False):
         # Demo mode: be more permissive with email formats
         if not email or email.startswith("user_"):
             # Try to create a more user-friendly email for demo
@@ -322,14 +322,14 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
     
     # Apply demo mode permissions if enabled
-    if demo_config.is_demo_mode():
-        demo_settings = demo_config.get_demo_config()
+    if demo_config.get("enabled", False):
+        demo_settings = demo_config
         if hasattr(user, 'role') and not user.role:
             user.role = demo_settings.get("default_user_role", "user")
             logger.info(f"🎭 DEMO MODE: Applied default role '{user.role}' to user {user_id[:8]}...")
     
     config = get_config()
-    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}..., demo_mode: {demo_config.is_demo_mode()})")
+    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}..., demo_mode: {demo_config.get('enabled', False)})")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
 
