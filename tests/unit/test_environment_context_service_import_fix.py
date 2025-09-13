@@ -45,12 +45,15 @@ class TestEnvironmentContextServiceImportFix:
         
         service = EnvironmentContextService()
         
-        # Check that key methods exist
+        # Check that key methods exist (updated to match actual interface)
         expected_methods = [
-            'configure_service',
+            'initialize',
             'get_service_configuration', 
-            'register_environment_aware_service',
-            'get_environment_context'
+            'inject_environment_context',
+            'get_environment_context',
+            'is_initialized',
+            'get_environment_type',
+            'get_service_url'
         ]
         
         for method_name in expected_methods:
