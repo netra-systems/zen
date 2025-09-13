@@ -247,7 +247,7 @@ class WebSocketBridgeFactory:
                                 user_context: Optional['UserExecutionContext'] = None,
                                 user_id: Optional[str] = None,
                                 thread_id: Optional[str] = None,
-                                connection_id: Optional[str] = None) -> 'UserWebSocketEmitter':
+                                connection_id: Optional[str] = None) -> UnifiedWebSocketEmitter:
         """Create a per-user WebSocket event emitter (SSOT redirect).
 
         ISSUE #669 REMEDIATION: Unified parameter signature supporting both new and legacy patterns.
@@ -259,7 +259,7 @@ class WebSocketBridgeFactory:
             connection_id: WebSocket connection identifier (legacy pattern)
 
         Returns:
-            UserWebSocketEmitter: SSOT-backed emitter with full compatibility
+            UnifiedWebSocketEmitter: SSOT emitter with full compatibility
         """
         if not self._unified_manager:
             raise RuntimeError("Factory not configured - call configure() first")
@@ -294,22 +294,13 @@ class WebSocketBridgeFactory:
         start_time = time.time()
 
         try:
-            logger.info(f" CYCLE:  Creating UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {actual_user_id}")
+            logger.info(f" CYCLE:  Creating UnifiedWebSocketEmitter (SSOT) for user {actual_user_id}")
 
-            # Create SSOT emitter with unified context
+            # Create SSOT emitter directly
             unified_emitter = UnifiedWebSocketEmitter(
                 manager=self._unified_manager,
                 user_id=actual_user_id,
                 context=user_context
-            )
-
-            # Wrap in compatibility layer
-            user_emitter = UserWebSocketEmitter(
-                user_id=actual_user_id,
-                thread_id=actual_thread_id,
-                connection_id=actual_connection_id,
-                unified_emitter=unified_emitter,
-                factory=self
             )
             
             # Update metrics
@@ -323,9 +314,9 @@ class WebSocketBridgeFactory:
                 correlation_id, creation_time_ms
             )
 
-            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) created for user {actual_user_id} in {creation_time_ms:.1f}ms")
+            logger.info(f" PASS:  UnifiedWebSocketEmitter (SSOT) created for user {actual_user_id} in {creation_time_ms:.1f}ms")
 
-            return user_emitter
+            return unified_emitter
 
         except Exception as e:
             creation_time_ms = (time.time() - start_time) * 1000
