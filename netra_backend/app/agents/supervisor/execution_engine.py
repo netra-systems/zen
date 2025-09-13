@@ -9,6 +9,6 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 """
 
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-from netra_backend.app.agents.supervisor.user_execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.execution_engine_factory import create_request_scoped_engine
 
 __all__ = ["ExecutionEngine", "create_request_scoped_engine"]
