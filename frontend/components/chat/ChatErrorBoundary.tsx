@@ -17,6 +17,7 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import * as Sentry from '@sentry/react';
 import { logger } from '@/lib/logger';
 import { ChatFallbackUI } from './ChatFallbackUI';
 
@@ -168,15 +169,38 @@ export class ChatErrorBoundary extends Component<Props, State> {
       this.queueErrorForRetry(errorPayload);
     });
 
-    // Secondary: Send to external monitoring if available
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
-        tags: errorPayload.tags,
-        contexts: {
-          chat_error: context
-        },
-        level: errorPayload.severity
-      });
+    // Secondary: Send to Sentry if initialized and environment appropriate
+    try {
+      const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.NODE_ENV;
+      const isProductionOrStaging = environment === 'production' || environment === 'staging';
+      
+      if (isProductionOrStaging && process.env.NEXT_PUBLIC_SENTRY_DSN) {
+        Sentry.captureException(error, {
+          tags: {
+            ...errorPayload.tags,
+            chat_component: this.props.level,
+            error_boundary: 'ChatErrorBoundary',
+          },
+          contexts: {
+            chat_error: context,
+            component_props: {
+              level: this.props.level,
+              threadId: this.props.threadId,
+              messageId: this.props.messageId,
+            },
+          },
+          level: errorPayload.severity as Sentry.SeverityLevel,
+          fingerprint: [
+            'ChatErrorBoundary',
+            this.props.level,
+            error.name,
+            error.message.split(' ')[0], // Use first word of message for grouping
+          ],
+        });
+      }
+    } catch (sentryError) {
+      // Silent fail - don't let Sentry errors break the error boundary
+      console.debug('Failed to send error to Sentry:', sentryError);
     }
   }
 

@@ -72,7 +72,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker
 
 # Advanced testing utilities
-from test_execution_engine_comprehensive_real_services import (
+from netra_backend.tests.integration.test_execution_engine_comprehensive_real_services import (
     MockToolForTesting, 
     MockAgentForTesting,
     ExecutionEngineTestContext
