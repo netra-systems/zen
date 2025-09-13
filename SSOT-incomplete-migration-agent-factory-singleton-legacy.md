@@ -64,10 +64,30 @@ Legacy singleton patterns remain in agent factory system causing:
 - **WebSocket Bridge Sharing:** Events delivered to wrong users
 - **100% failure rate:** All 10 tests fail as expected, proving violations exist
 
-### Phase 3: SSOT Remediation Planning 🔄
-- [ ] Plan singleton removal strategy
-- [ ] Plan factory pattern consolidation
-- [ ] Plan UserExecutionContext standardization
+### Phase 3: SSOT Remediation Planning ✅
+- [x] Plan singleton removal strategy (**4-phase approach: A-D over 7 weeks**)
+- [x] Plan factory pattern consolidation (**Interface standardization + consumer migration**)
+- [x] Plan UserExecutionContext standardization (**Per-user registry patterns**)
+
+#### SSOT Remediation Strategy:
+**Phase A (Weeks 1-2):** SupervisorAgent Consolidation
+- Establish `supervisor_ssot.py` as canonical SSOT implementation
+- Migrate 140+ consumers from `supervisor_consolidated.py` (10-15 files/day)
+- Standardize interfaces, eliminate duplicate methods
+
+**Phase B (Weeks 3-4):** Agent Registry De-Singletonization
+- Replace global AgentRegistry singleton with factory pattern
+- Implement UserExecutionContext-scoped registries
+- Ensure complete user isolation
+
+**Phase C (Weeks 5-6):** WebSocket Bridge Isolation
+- Leverage existing UnifiedWebSocketEmitter SSOT implementation
+- Ensure event delivery isolation per UserExecutionContext
+- Validate no cross-user event contamination
+
+**Phase D (Week 7):** Final Factory Pattern Compliance
+- Standardize all factory interfaces across agent types
+- Complete SSOT compliance validation
 
 ### Phase 4: Execute Remediation 🔄
 - [ ] Remove legacy singleton patterns
