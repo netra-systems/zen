@@ -18,6 +18,13 @@ from fastapi import FastAPI
 
 from shared.isolated_environment import get_env as get_isolated_env
 
+# ISSUE #601 FIX: Import thread cleanup manager for memory leak prevention
+from netra_backend.app.core.thread_cleanup_manager import (
+    get_thread_cleanup_manager,
+    install_thread_cleanup_hooks,
+    register_current_thread
+)
+
 # Create a wrapper for get_env to match expected signature
 _env = get_isolated_env()
 def get_env(key: str, default: str = '') -> str:
@@ -55,6 +62,11 @@ class StartupOrchestrator:
         self.app = app
         self.logger = central_logger.get_logger(__name__)
         self.start_time = time.time()
+        
+        # ISSUE #601 FIX: Initialize thread cleanup management
+        install_thread_cleanup_hooks()
+        register_current_thread()
+        self.thread_cleanup_manager = get_thread_cleanup_manager()
         
         # State tracking attributes
         self.current_phase: Optional[StartupPhase] = None
@@ -1719,6 +1731,14 @@ class StartupOrchestrator:
         self.logger.info("=" * 80)
         self.logger.info("[U+1F7E2] CHAT FUNCTIONALITY: FULLY OPERATIONAL")
         self.logger.info("=" * 80)
+        
+        # ISSUE #601 FIX: Clean up startup threads to prevent memory leaks
+        try:
+            cleanup_stats = self.thread_cleanup_manager.force_cleanup_all()
+            self.logger.info(f" CLEANUP:  Issue #601 thread cleanup completed: {cleanup_stats}")
+        except Exception as e:
+            self.logger.warning(f" WARNING:  Issue #601 thread cleanup failed: {e}")
+            # Don't fail startup due to cleanup issues
     
     def _handle_startup_failure(self, error: Exception) -> None:
         """Handle startup failure - NO RECOVERY."""
