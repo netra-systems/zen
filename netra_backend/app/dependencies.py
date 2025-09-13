@@ -46,7 +46,9 @@ from netra_backend.app.agents.supervisor.execution_factory import (
 )
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketBridgeFactory,
-    WebSocketFactoryConfig,
+    WebSocketFactoryConfig
+)
+from netra_backend.app.services.websocket_connection_pool import (
     WebSocketConnectionPool
 )
 from netra_backend.app.services.factory_adapter import (
