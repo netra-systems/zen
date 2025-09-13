@@ -1370,6 +1370,16 @@ class ClickHouseService:
         # This setter is primarily for test mocking purposes
         # In normal operation, the global cache should be used
         pass
+
+    @_cache.deleter
+    def _cache(self):
+        """
+        Cache deleter for test compatibility.
+        Allows tests to delete the cache property.
+        """
+        # This deleter is primarily for test mocking purposes
+        # In normal operation, the global cache should persist
+        pass
     
     def get_cache_stats(self, user_id: Optional[str] = None) -> Dict[str, Any]:
         """Get cache statistics.
