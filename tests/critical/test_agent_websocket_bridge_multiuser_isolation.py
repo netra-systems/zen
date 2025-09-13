@@ -46,6 +46,7 @@ from netra_backend.app.services.agent_websocket_bridge import (
     AgentWebSocketBridge,
     # REMOVED: get_agent_websocket_bridge - deprecated singleton pattern removed
 )
+# Removed unused import - websocket_manager_factory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
@@ -108,8 +109,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         user1_collector = WebSocketEventCollector(user1_id)
         user2_collector = WebSocketEventCollector(user2_id)
         
-        # Get singleton bridge (DANGEROUS)
-        bridge = await get_agent_websocket_bridge()
+        # Create bridge instance (NON-SINGLETON - fixed)
+        # This test validates that we NO LONGER use singleton pattern
+        bridge = AgentWebSocketBridge(user_context=None)
         
         # Simulate WebSocket manager with both connections
         with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
@@ -159,14 +161,14 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
             user_id="user_001",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id=f"conn_user_001"
+            websocket_client_id=f"conn_user_001"
         )
         
         user2_context = UserExecutionContext(
             user_id="user_002",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id=f"conn_user_002"
+            websocket_client_id=f"conn_user_002"
         )
         
         user1_collector = WebSocketEventCollector("user_001")
@@ -231,7 +233,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
                 user_id=user_id,
                 thread_id=f"thread_{uuid.uuid4()}",
                 run_id=f"run_{uuid.uuid4()}",
-                websocket_connection_id=f"conn_{user_id}"
+                websocket_client_id=f"conn_{user_id}"
             )
             
             collector = WebSocketEventCollector(user_id)
@@ -313,7 +315,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
             user_id="background_user",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id="conn_background"
+            websocket_client_id="conn_background"
         )
         
         collector = WebSocketEventCollector("background_user")
@@ -365,14 +367,14 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
             user_id="error_user",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id="conn_error"
+            websocket_client_id="conn_error"
         )
         
         user2_context = UserExecutionContext(
             user_id="normal_user",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id="conn_normal"
+            websocket_client_id="conn_normal"
         )
         
         error_collector = WebSocketEventCollector("error_user")
@@ -420,7 +422,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
             user_id="cleanup_user",
             thread_id=f"thread_{uuid.uuid4()}",
             run_id=f"run_{uuid.uuid4()}",
-            websocket_connection_id="conn_cleanup"
+            websocket_client_id="conn_cleanup"
         )
         
         collector = WebSocketEventCollector("cleanup_user")
@@ -492,9 +494,11 @@ class TestMigrationFromSingletonToFactory:
         # Test that both patterns work during migration period
         
         # OLD WAY (singleton - deprecated)
-        with pytest.deprecated_call():
-            singleton_bridge = await get_agent_websocket_bridge()
-            assert singleton_bridge is not None
+        # OLD WAY (singleton - deprecated) - REMOVED
+        # This function no longer exists as part of singleton removal
+        # Creating non-singleton bridge to show migration path
+        singleton_bridge = AgentWebSocketBridge(user_context=None)
+        assert singleton_bridge is not None
         
         # NEW WAY (factory)
         factory_bridge = AgentWebSocketBridge()
