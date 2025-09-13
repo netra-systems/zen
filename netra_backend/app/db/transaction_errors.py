@@ -127,7 +127,7 @@ def _has_deadlock_keywords(error_msg: str) -> bool:
 def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
     connection_keywords = [
-        'connection', 'network', 'timeout', 'broken pipe',
+        'connection', 'network', 'connection timeout', 'broken pipe',
         'queuepool limit', 'pool limit exceeded', 'connection pool'
     ]
     return any(keyword in error_msg for keyword in connection_keywords)
