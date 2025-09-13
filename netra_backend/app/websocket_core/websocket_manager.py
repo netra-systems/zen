@@ -107,9 +107,40 @@ def create_test_fallback_manager(user_context):
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
     )
 
-# Export the SSOT unified manager as WebSocketManager for compatibility
-# This creates a direct reference to the singleton WebSocketManager class
+# SSOT CONSOLIDATION: Export the unified manager as WebSocketManager
+# This is now the canonical SSOT import point for all WebSocket Manager usage
+# CRITICAL: Use this import path for all WebSocket Manager needs
 WebSocketManager = UnifiedWebSocketManager
+
+# SSOT Validation: Ensure we're truly the single source of truth
+def _validate_ssot_compliance():
+    """Validate that this is the only active WebSocket Manager implementation."""
+    import inspect
+    import sys
+
+    # Check for other WebSocket Manager implementations in the module cache
+    websocket_manager_classes = []
+    for module_name, module in sys.modules.items():
+        if 'websocket' in module_name.lower() and hasattr(module, '__dict__'):
+            for attr_name in dir(module):
+                attr = getattr(module, attr_name, None)
+                if (inspect.isclass(attr) and
+                    'websocket' in attr_name.lower() and
+                    'manager' in attr_name.lower() and
+                    attr != WebSocketManager):
+                    websocket_manager_classes.append(f"{module_name}.{attr_name}")
+
+    if websocket_manager_classes:
+        logger.warning(f"SSOT WARNING: Found other WebSocket Manager classes: {websocket_manager_classes}")
+
+    return len(websocket_manager_classes) == 0
+
+# Run SSOT validation at import time
+try:
+    _ssot_compliant = _validate_ssot_compliance()
+    logger.info(f"WebSocket Manager SSOT validation: {'PASS' if _ssot_compliant else 'WARNING'}")
+except Exception as e:
+    logger.error(f"WebSocket Manager SSOT validation failed: {e}")
 
 
 async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> UnifiedWebSocketManager:
@@ -219,18 +250,20 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 # Backward compatibility alias
 WebSocketEventEmitter = UnifiedWebSocketEmitter
 
-# Export the protocol for type checking
+# Export the protocol for type checking and SSOT compliance
 __all__ = [
-    'WebSocketManager',
+    'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
+    'UnifiedWebSocketManager',  # SSOT: Direct access to implementation
     'WebSocketConnection',
     'WebSocketManagerProtocol',
+    'WebSocketManagerMode',  # SSOT: Manager modes enum
     '_serialize_message_safely',
-    'get_websocket_manager',
-    'check_websocket_service_available',  # Phase 1 Fix 3: Service availability check
-    'create_test_user_context',  # Phase 1 Fix 3: Test context helper
-    'create_test_fallback_manager',  # Phase 1 Fix 3: Test fallback helper
-    'WebSocketEventEmitter',  # Add compatibility alias
-    'UnifiedWebSocketEmitter'  # Also export the original
+    'get_websocket_manager',  # SSOT: Factory function (preferred)
+    'check_websocket_service_available',  # Service availability check
+    'create_test_user_context',  # Test context helper
+    'create_test_fallback_manager',  # Test fallback helper
+    'WebSocketEventEmitter',  # Compatibility alias
+    'UnifiedWebSocketEmitter'  # Original emitter
 ]
 
-logger.info("WebSocket Manager module loaded - Golden Path compatible with Issue #89 remediation")
+logger.info("WebSocket Manager module loaded - SSOT consolidation active (Issue #824 remediation)")
