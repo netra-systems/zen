@@ -72,10 +72,40 @@ bool(os.getenv('TESTING'))
 All environment access must go through `IsolatedEnvironment.get_env()` method instead of direct `os.getenv()` calls.
 
 ## Test Strategy
-- **Existing Tests:** Find tests protecting ErrorPolicy environment detection
-- **New Tests:** Create tests for SSOT IsolatedEnvironment integration
-- **Integration Tests:** Verify environment detection works across all services
-- **Regression Tests:** Ensure no golden path functionality breaks
+
+### 🚨 CRITICAL DISCOVERY: ZERO ErrorPolicy Test Coverage
+**Finding:** ErrorPolicy class has **NO dedicated test coverage** despite being foundation for environment detection across ALL services.
+
+### Test Categories Required (45 Total Tests)
+1. **Unit Tests (20 tests)**: ErrorPolicy core functionality
+   - Environment detection methods
+   - Production/staging/testing environment identification
+   - Edge cases and failure modes
+   - SSOT compliance validation
+
+2. **Integration Tests (15 tests)**: ErrorPolicy + IsolatedEnvironment
+   - SSOT environment access patterns
+   - Backward compatibility validation
+   - Service integration scenarios
+   - Configuration management integration
+
+3. **E2E Tests (10 tests)**: Golden path validation
+   - Complete user login → AI response flow
+   - Staging environment validation
+   - Authentication service integration
+   - WebSocket connection validation
+
+### Test Execution Strategy
+- **No Docker Required**: Unit, integration (no Docker), E2E on staging GCP
+- **Real Services**: Integration/E2E use real databases and services
+- **SSOT Validation**: Tests verify all environment access through IsolatedEnvironment
+- **Regression Prevention**: Existing mission critical tests continue to pass
+
+### Success Criteria
+- **100% Unit Coverage**: All ErrorPolicy public methods tested
+- **Golden Path Validation**: Complete user flow works in staging
+- **SSOT Compliance**: Zero os.getenv() calls remain
+- **Regression Prevention**: All environment detection scenarios validated
 
 ## Remediation Plan
 1. **Replace os.getenv() calls** with IsolatedEnvironment.get_env()
