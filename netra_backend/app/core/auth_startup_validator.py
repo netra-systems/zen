@@ -517,7 +517,7 @@ class AuthStartupValidator:
         import os
         direct_value = self.env.get(var_name)
         if direct_value:
-            logger.info(f"Using direct os.environ fallback for {var_name} (compatibility)")
+            logger.info(f"Using isolated environment fallback for {var_name} (SSOT compliant)")
             return direct_value
         
         return None

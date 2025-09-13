@@ -1,7 +1,7 @@
 # Test Execution Guide
 
-**Last Updated:** 2025-09-12
-**Total Tests:** 16,000+ tests across 21 categories
+**Last Updated:** 2025-09-13
+**Total Tests:** 14,621+ tests across 21 categories
 
 ## Quick Start
 ```bash
@@ -28,20 +28,20 @@ python tests/unified_test_runner.py --env prod --allow-prod
 - **startup**: System initialization tests
 
 ### HIGH Priority
-- **unit**: 9,761+ individual component tests
+- **unit**: 11,325 individual component tests
 - **database**: Data persistence tests
 - **security**: Authentication and authorization tests
 - **e2e_critical**: Critical end-to-end flows
 
 ### MEDIUM Priority
-- **integration**: 4,504+ service interaction tests
+- **integration**: 757 service interaction tests
 - **api**: HTTP endpoint tests
 - **websocket**: Real-time communication tests
 - **agent**: AI agent functionality tests
 - **cypress**: Full service E2E tests
 
 ### LOW Priority
-- **e2e**: 1,909+ complete user journey tests
+- **e2e**: 1,570 complete user journey tests
 - **frontend**: React component tests
 - **performance**: Load and performance tests
 
