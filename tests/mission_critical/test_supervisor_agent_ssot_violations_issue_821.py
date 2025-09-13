@@ -32,6 +32,11 @@ class TestSupervisorAgentSSOTViolations(SSotBaseTestCase):
         super().setUp()
         self.project_root = Path(__file__).parent.parent.parent
         self.netra_backend_path = self.project_root / "netra_backend"
+        # Ensure paths exist
+        if not self.project_root.exists():
+            self.fail(f"Project root not found at: {self.project_root}")
+        if not self.netra_backend_path.exists():
+            self.fail(f"Netra backend path not found at: {self.netra_backend_path}")
 
     def test_only_one_supervisor_agent_class_definition_exists(self):
         """TEST THAT MUST FAIL: Only one SupervisorAgent class should exist in active code.
@@ -40,9 +45,11 @@ class TestSupervisorAgentSSOTViolations(SSotBaseTestCase):
         Expected to PASS only after SSOT consolidation to supervisor_ssot.py.
         """
         supervisor_classes = []
+        project_root = Path(__file__).parent.parent.parent
+        netra_backend_path = project_root / "netra_backend"
 
         # Scan for SupervisorAgent class definitions in active code (not backups)
-        for py_file in self.netra_backend_path.rglob("*.py"):
+        for py_file in netra_backend_path.rglob("*.py"):
             # Skip backup directories and test files
             if ("backup" in str(py_file).lower() or
                 "test" in py_file.name or
@@ -107,9 +114,11 @@ class TestSupervisorAgentSSOTViolations(SSotBaseTestCase):
         """
         import_violations = []
         expected_ssot_path = "netra_backend.app.agents.supervisor_ssot"
+        project_root = Path(__file__).parent.parent.parent
+        netra_backend_path = project_root / "netra_backend"
 
         # Scan for SupervisorAgent imports in active code
-        for py_file in self.netra_backend_path.rglob("*.py"):
+        for py_file in netra_backend_path.rglob("*.py"):
             # Skip backup directories
             if "backup" in str(py_file).lower():
                 continue

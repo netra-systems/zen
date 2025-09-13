@@ -35,32 +35,29 @@ class TestSupervisorAgentSSOTValidation(SSotBaseTestCase):
 
     def test_supervisor_agent_ssot_module_exists_and_importable(self):
         """Validate that the SSOT SupervisorAgent module exists and is importable."""
+        ssot_module_path = "netra_backend.app.agents.supervisor_ssot"
+        ssot_class_name = "SupervisorAgent"
+
         try:
-            module = importlib.import_module(self.ssot_module_path)
-            self.assertIsNotNone(module, f"SSOT module {self.ssot_module_path} should be importable")
+            module = importlib.import_module(ssot_module_path)
+            assert module is not None, f"SSOT module {ssot_module_path} should be importable"
 
             # Verify SupervisorAgent class exists in the module
-            supervisor_class = getattr(module, self.ssot_class_name, None)
-            self.assertIsNotNone(
-                supervisor_class,
-                f"SSOT module {self.ssot_module_path} should contain {self.ssot_class_name} class"
-            )
+            supervisor_class = getattr(module, ssot_class_name, None)
+            assert supervisor_class is not None, f"SSOT module {ssot_module_path} should contain {ssot_class_name} class"
 
             # Verify it's a proper class
-            self.assertTrue(
-                inspect.isclass(supervisor_class),
-                f"{self.ssot_class_name} should be a class"
-            )
+            assert inspect.isclass(supervisor_class), f"{ssot_class_name} should be a class"
 
             # Log success for debugging
             print(f"\n=== SSOT VALIDATION SUCCESS ===")
-            print(f"✓ SSOT module importable: {self.ssot_module_path}")
-            print(f"✓ SSOT class available: {self.ssot_class_name}")
+            print(f"✓ SSOT module importable: {ssot_module_path}")
+            print(f"✓ SSOT class available: {ssot_class_name}")
             print(f"✓ Class type valid: {type(supervisor_class)}")
             print("="*40)
 
         except ImportError as e:
-            self.fail(f"SSOT FAILURE: Cannot import SSOT module {self.ssot_module_path}: {e}")
+            assert False, f"SSOT FAILURE: Cannot import SSOT module {ssot_module_path}: {e}"
 
     def test_supervisor_agent_ssot_class_inherits_from_base_agent(self):
         """Validate that SSOT SupervisorAgent properly inherits from BaseAgent."""
