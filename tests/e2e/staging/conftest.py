@@ -38,7 +38,7 @@ class TestResultCollector:
             "failed": self.failed,
             "skipped": self.skipped,
             "errors": self.errors,
-            "duration": (self.end_time - self.start_time) if self.end_time else 0,
+            "duration": (self.end_time - self.start_time) if (self.end_time and self.start_time) else 0,
             "pass_rate": (self.passed / self.total_tests * 100) if self.total_tests > 0 else 0
         }
 
