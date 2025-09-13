@@ -92,10 +92,10 @@ class TestWebSocketManagerCircularReferenceReproduction(SSotBaseTestCase):
 
         try:
             # Import the problematic module
-            from netra_backend.app.routes.websocket_ssot import WebSocketSSotRoute
+            from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
 
             # Create instance to test
-            route_instance = WebSocketSSotRoute()
+            route_instance = WebSocketSSOTRouter()
 
             # Patch get_websocket_manager to track calls if it gets imported
             try:
@@ -304,8 +304,8 @@ class TestWebSocketManagerCircularReferenceReproduction(SSotBaseTestCase):
             """Run factory method test with timeout."""
 
             try:
-                from netra_backend.app.routes.websocket_ssot import WebSocketSSotRoute
-                route = WebSocketSSotRoute()
+                from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
+                route = WebSocketSSOTRouter()
 
                 # This is the problematic call that should be fixed
                 async def run_factory_test():
