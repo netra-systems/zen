@@ -368,8 +368,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
             engine2, context2 = engines[1]
 
             # TEST FAILS if engines are the same instance
-            self.assertIsNot(
-                engine1, engine2,
+            assert engine1 is not engine2, (
                 f"CRITICAL SSOT VIOLATION: Same engine instance returned for different users. "
                 f"Engine 1 ID: {id(engine1)}, Engine 2 ID: {id(engine2)}. "
                 f"BUSINESS IMPACT: Shared instances cause user data contamination. "
