@@ -50,7 +50,7 @@ class WebSocketTestAgent(BaseAgent):
     async def process_request(self, request: str, context: UserExecutionContext) -> Dict[str, Any]:
         """Test implementation that emits all critical WebSocket events."""
         # Emit agent_started event using correct BaseAgent methods
-        await self.emit_started(f"Processing {request}")
+        await self.emit_agent_started(f"Processing {request}")
         self.test_events_emitted.append("agent_started")
 
         # Emit agent_thinking event
@@ -282,9 +282,9 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         failing_bridge.emit_tool_event = AsyncMock(side_effect=Exception("WebSocket send failed"))
 
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=failing_bridge
+            llm_manager=self.llm_manager
         )
+        agent.set_websocket_bridge(failing_bridge, "test-run-failing-001")
 
         # Test: Agent should handle WebSocket failures gracefully
         # The business logic should complete even if WebSocket events fail
