@@ -666,6 +666,57 @@ class UnifiedTestHarnessComplete:
 
         return self.db_manager
 
+
+    def get_service_url(self, service_name: str) -> str:
+        """
+        Get service URL for the specified service.
+
+        Args:
+            service_name: Name of the service ("auth", "backend", "websocket")
+
+        Returns:
+            Complete URL for the service
+
+        CLAUDE.md Compliant:
+        - Environment-aware URL construction
+        - SSOT environment management
+        - Support for test/dev/staging environments
+        """
+        service_name = service_name.lower()
+
+        # Get base configuration from environment
+        base_host = self.env.get("BACKEND_HOST", "localhost")
+
+        # Service-specific port mapping
+        service_ports = {
+            "auth": self.env.get("AUTH_PORT", "8001"),
+            "backend": self.env.get("BACKEND_PORT", "8000"),
+            "websocket": self.env.get("BACKEND_PORT", "8000")  # WebSocket runs on backend port
+        }
+
+        # Environment-specific overrides
+        if self.env.get("ENVIRONMENT") == "test":
+            service_ports.update({
+                "auth": "8001",
+                "backend": "8000",
+                "websocket": "8000"
+            })
+        elif self.env.get("ENVIRONMENT") == "staging":
+            # Use staging URLs if available
+            staging_host = self.env.get("STAGING_HOST", base_host)
+            base_host = staging_host
+
+        if service_name not in service_ports:
+            raise ValueError(f"Unknown service: {service_name}. Supported: {list(service_ports.keys())}")
+
+        port = service_ports[service_name]
+        protocol = "https" if self.env.get("USE_HTTPS") == "true" else "http"
+
+        url = f"{protocol}://{base_host}:{port}"
+
+        logger.debug(f"Service URL for {service_name}: {url}")
+        return url
+
     
 
     async def _setup_auth_environment(self) -> None:
