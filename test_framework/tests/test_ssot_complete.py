@@ -13,12 +13,13 @@ import time
 import uuid
 from pathlib import Path
 from typing import Dict, List, Any
-from shared.isolated_environment import IsolatedEnvironment
 
-# Add project root for imports
+# Add project root for imports - MUST be before any local imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from shared.isolated_environment import IsolatedEnvironment
 
 # Import SSOT components under test
 try:
