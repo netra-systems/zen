@@ -77,7 +77,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
             start_time = time.time()
             
             # Create user context
-            user_context = UserExecutionContext(
+            user_context = UserExecutionContext.from_request_supervisor(
                 user_id=profile.user_id,
                 thread_id=profile.thread_id,
                 run_id=profile.run_id,
@@ -121,8 +121,10 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         
         for profile, result, creation_time in results:
             if isinstance(result, Exception):
+                print(f"❌ User {profile.user_id} failed: {type(result).__name__}: {result}")
                 failed_creations.append((profile, result, creation_time))
             else:
+                print(f"✅ User {profile.user_id} succeeded: {type(result).__name__}")
                 successful_creations.append((profile, result, creation_time))
         
         # Validate success rate
@@ -180,7 +182,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         
         async def execute_agent_for_user(profile: UserTestProfile) -> Dict[str, Any]:
             # Create user context
-            user_context = UserExecutionContext(
+            user_context = UserExecutionContext.from_request_supervisor(
                 user_id=profile.user_id,
                 thread_id=profile.thread_id,
                 run_id=profile.run_id,
@@ -719,7 +721,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         for i in range(num_users):
             user_id = f"persistent_user_{i}_{uuid.uuid4().hex[:8]}"
             
-            user_context = UserExecutionContext(
+            user_context = UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=f"persistent_thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"persistent_run_{i}_{uuid.uuid4().hex[:8]}",
@@ -833,7 +835,7 @@ class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
         print("🚀 Testing memory isolation between users")
         
         # Create users with different data
-        user1_context = UserExecutionContext(
+        user1_context = UserExecutionContext.from_request_supervisor(
             user_id=f"memory_user1_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread1_{uuid.uuid4().hex[:8]}",
             run_id=f"run1_{uuid.uuid4().hex[:8]}",
@@ -841,7 +843,7 @@ class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
             metadata={'secret_data': 'user1_secret', 'memory_test': True}
         )
         
-        user2_context = UserExecutionContext(
+        user2_context = UserExecutionContext.from_request_supervisor(
             user_id=f"memory_user2_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread2_{uuid.uuid4().hex[:8]}",
             run_id=f"run2_{uuid.uuid4().hex[:8]}",
