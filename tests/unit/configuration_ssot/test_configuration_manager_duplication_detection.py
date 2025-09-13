@@ -364,7 +364,7 @@ class TestConfigurationManagerCompatibilityBridge(SSotBaseTestCase):
 
         try:
             # Test duplicate manager import (should work during Phase 1)
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             duplicate_manager = UnifiedConfigurationManager()
             self.assertIsNotNone(duplicate_manager)
 

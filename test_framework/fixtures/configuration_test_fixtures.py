@@ -23,12 +23,17 @@ import threading
 import time
 
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationScope,
-    ConfigurationSource,
-    ConfigurationEntry
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 
 

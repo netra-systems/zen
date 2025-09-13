@@ -44,18 +44,17 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCa
 from shared.isolated_environment import IsolatedEnvironment
 
 # Import the REAL UnifiedConfigurationManager (not mocks)
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationScope,
-    ConfigurationSource,
-    ConfigurationStatus,
-    ConfigurationEntry,
-    ConfigurationValidationResult,
-    get_configuration_manager,
-    get_dashboard_config_manager,
-    get_data_agent_config_manager,
-    get_llm_config_manager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 
 

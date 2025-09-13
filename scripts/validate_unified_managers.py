@@ -54,7 +54,7 @@ def validate_factory_pattern():
     
     # Check ConfigurationManagerFactory
     try:
-        from netra_backend.app.core.managers.unified_configuration_manager import ConfigurationManagerFactory
+        from netra_backend.app.core.configuration.base import config_manager
         
         # Test global manager
         global_config = ConfigurationManagerFactory.get_global_manager()

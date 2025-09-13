@@ -235,7 +235,7 @@ def _has_table_not_found_keywords(error_msg: str) -> bool:
     """Check if error message contains table not found keywords."""
     table_not_found_keywords = [
         "table doesn't exist", "table does not exist", "unknown table", "no such table",
-        "table 'non_existent_table", "table 'unknown_table", "missing table"
+        "doesn't exist", "does not exist", "missing table"
     ]
     return any(keyword in error_msg for keyword in table_not_found_keywords)
 

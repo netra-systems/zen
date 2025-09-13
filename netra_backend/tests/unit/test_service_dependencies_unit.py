@@ -45,7 +45,7 @@ from netra_backend.app.core.managers.unified_lifecycle_manager import SystemLife
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager as ConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager as ConfigurationManager
 
 # Shared utilities for type safety
 from shared.types import UserID

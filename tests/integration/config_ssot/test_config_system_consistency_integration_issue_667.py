@@ -68,9 +68,18 @@ class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase, unittest
             }
             
             # Manager 3: UnifiedConfigurationManager from managers
-            from netra_backend.app.core.managers.unified_configuration_manager import (
-                get_configuration_manager, ConfigurationManagerFactory
-            )
+            from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
             global_manager = ConfigurationManagerFactory.get_global_manager()
             self.config_managers['unified_configuration_manager'] = {
                 'get_config': lambda: global_manager,  # Returns manager, not config

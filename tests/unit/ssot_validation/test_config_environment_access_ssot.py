@@ -185,7 +185,7 @@ class TestConfigEnvironmentAccessSSot(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             config_managers.append(('UnifiedConfigurationManager', UnifiedConfigurationManager))
         except ImportError:
             pass
@@ -274,7 +274,7 @@ class TestConfigEnvironmentAccessSSot(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             manager = UnifiedConfigurationManager()
             config_managers.append(('UnifiedConfigurationManager', manager))
         except Exception:

@@ -92,10 +92,18 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
 
             # Test 1: Attempt to import deprecated manager
             try:
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    UnifiedConfigurationManager as DeprecatedManager,
-                    ConfigurationManagerFactory as DeprecatedFactory
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
                 detected_managers.append("deprecated_unified_configuration_manager")
                 import_successes.append("Successfully imported deprecated manager")
 
@@ -184,9 +192,18 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
 
             # Test deprecated manager interface
             try:
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    UnifiedConfigurationManager as DeprecatedManager
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
 
                 deprecated_manager = DeprecatedManager(user_id="test_interface")
                 managers_tested['deprecated'] = deprecated_manager
@@ -377,10 +394,18 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
             # Create instances of different configuration managers
             try:
                 # Deprecated manager instances
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    UnifiedConfigurationManager as DeprecatedManager,
-                    ConfigurationManagerFactory
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
 
                 deprecated_instance = DeprecatedManager(user_id="memory_test")
                 factory_instance = ConfigurationManagerFactory.get_global_manager()
@@ -479,9 +504,18 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
 
             # Test deprecated manager performance
             try:
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    get_configuration_manager
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
 
                 deprecated_manager = get_configuration_manager()
 

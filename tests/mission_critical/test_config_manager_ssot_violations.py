@@ -94,7 +94,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             managers_to_test.append(('UnifiedConfigurationManager', UnifiedConfigurationManager))
         except ImportError:
             pass
@@ -217,7 +217,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             config_managers.append(('UnifiedConfigurationManager', UnifiedConfigurationManager()))
         except Exception:
             pass
@@ -294,7 +294,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
 
         # Check UnifiedConfigurationManager pattern
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             manager1 = UnifiedConfigurationManager()
             manager2 = UnifiedConfigurationManager()
 
