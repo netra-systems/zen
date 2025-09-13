@@ -76,7 +76,7 @@ class TestFactoryPatternSSotCompliance(SSotAsyncTestCase):
         
         logger.info(f"Starting factory pattern SSOT compliance test")
     
-    def create_user_websocket_components(self, user_id: str) -> Dict[str, Any]:
+    async def create_user_websocket_components(self, user_id: str) -> Dict[str, Any]:
         """
         Create WebSocket components for a user using factory patterns.
         
@@ -87,8 +87,9 @@ class TestFactoryPatternSSotCompliance(SSotAsyncTestCase):
         
         # Create execution context (should be unique per user)
         self.factory_call_counts['execution_context'] += 1
-        execution_context = create_isolated_execution_context(
+        execution_context = await create_isolated_execution_context(
             user_id=user_id,
+            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
             run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
         )
@@ -278,7 +279,7 @@ class TestFactoryPatternSSotCompliance(SSotAsyncTestCase):
         
         for user_id in self.test_users:
             try:
-                components = self.create_user_websocket_components(user_id)
+                components = await self.create_user_websocket_components(user_id)
                 all_user_components[user_id] = components
                 logger.info(f"Created components for user {user_id}")
             except Exception as e:

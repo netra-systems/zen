@@ -96,8 +96,9 @@ class TestConcurrentUserWebSocketFailures(SSotAsyncTestCase):
         we'll see shared state leakage.
         """
         # Create user execution context
-        context = create_isolated_execution_context(
+        context = await create_isolated_execution_context(
             user_id=user_id,
+            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
             run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
         )
