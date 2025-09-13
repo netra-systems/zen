@@ -30,7 +30,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase):
+class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase, unittest.TestCase):
     """Integration tests to validate configuration system consistency for Issue #667."""
     
     def setUp(self):
@@ -40,15 +40,15 @@ class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase):
         self.consistency_results = {}
         self.config_managers = {}
         self.auth_test_results = {}
+        
+        # Initialize the 3 configuration managers synchronously
+        self._initialize_config_managers()
     
     async def asyncSetUp(self):
         """Async setup for real service integration."""
         await super().asyncSetUp()
-        
-        # Initialize the 3 configuration managers
-        await self._initialize_config_managers()
     
-    async def _initialize_config_managers(self):
+    def _initialize_config_managers(self):
         """Initialize all 3 configuration managers for comparison testing."""
         try:
             # Manager 1: UnifiedConfigManager from base.py
