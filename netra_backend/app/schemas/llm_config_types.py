@@ -73,6 +73,15 @@ class LLMCapability(str, Enum):
     SUMMARIZATION = "summarization"
 
 
+class LLMProvider(str, Enum):
+    """LLM provider types"""
+    OPENAI = "openai"
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    MISTRAL = "mistral"
+    GEMINI = "gemini"
+
+
 class ModelEndpoint(BaseModel):
     """Model endpoint configuration"""
     url: str
