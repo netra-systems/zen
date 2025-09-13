@@ -139,39 +139,40 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             pytest.fail("MigrationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_table_dependency_error_type(self):
+    async def test_table_dependency_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing TableDependencyError type.
-        
-        Current Problem: Table dependency operations (foreign keys, materialized views)
-        don't have a specific TableDependencyError type with relationship context.
-        
-        Expected Failure: This test should fail because TableDependencyError doesn't exist
-        and dependency errors don't provide relationship information.
+        Test validates TableDependencyError classification works correctly.
+
+        Validates: Table dependency operations (foreign keys, materialized views)
+        that fail are properly classified as TableDependencyError type.
+
+        Expected Success: This test should pass because TableDependencyError exists
+        and current classification correctly identifies dependency errors.
         """
         # Test table dependency failure scenario
         dependency_error = IntegrityError(
             "Cannot drop table 'orders': referenced by materialized view 'order_analytics' and foreign key 'fk_user_orders'",
             None, None
         )
-        
-        # Current classification should NOT produce TableDependencyError
+
+        # Current classification should correctly produce TableDependencyError
         classified_error = classify_error(dependency_error)
-        
-        # This assertion should PASS because TableDependencyError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be TableDependencyError)
-        assert type(classified_error).__name__ != "TableDependencyError", \
-            f"TableDependencyError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import TableDependencyError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because TableDependencyError exists and works correctly
+        assert type(classified_error).__name__ == "TableDependencyError", \
+            f"Expected TableDependencyError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import TableDependencyError
+        assert isinstance(classified_error, TableDependencyError), \
+            "Error should be classified as TableDependencyError instance"
+
+        # Test that we can successfully import TableDependencyError
+        try:
             from netra_backend.app.db.transaction_errors import TableDependencyError
-        
-        # Verify dependency context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Dependent Objects:" not in error_str, "Dependency context should not exist yet"
-        assert "Dependency Type:" not in error_str, "Dependency type should not exist yet"
-        assert "Resolution Steps:" not in error_str, "Resolution steps should not exist yet"
+            assert TableDependencyError is not None, "TableDependencyError should be importable"
+        except ImportError:
+            pytest.fail("TableDependencyError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
     async def test_missing_constraint_violation_error_type(self):
