@@ -89,25 +89,34 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """
-        Dispatch middleware logic with WebSocket route protection.
+        Enhanced dispatch with uvicorn compatibility and Cloud Run optimization.
         
-        CRITICAL: This prevents 1011 errors by validating service readiness 
-        before allowing WebSocket connections in GCP Cloud Run.
+        CRITICAL FIX for Issue #449: Enhanced WebSocket protection with uvicorn
+        protocol validation and Cloud Run load balancer compatibility.
         """
-        # Only protect WebSocket routes in GCP environments
-        if not self._should_protect_request(request):
-            return await call_next(request)
-        
-        # For WebSocket connections, validate readiness
-        if self._is_websocket_request(request):
-            readiness_result = await self._check_websocket_readiness(request)
+        try:
+            # Phase 1: Enhanced request validation for uvicorn compatibility
+            if not await self._validate_request_for_uvicorn(request):
+                return await self._create_uvicorn_safe_error_response(
+                    "Invalid request for uvicorn processing", 400
+                )
             
-            if not readiness_result[0]:  # readiness_result is (ready: bool, details: dict)
-                # Reject WebSocket connection to prevent 1011 errors
-                return await self._reject_websocket_connection(request, readiness_result[1])
-        
-        # Proceed with request
-        return await call_next(request)
+            # Phase 2: Check if protection is needed
+            if not self._should_protect_request(request):
+                return await call_next(request)
+            
+            # Phase 3: Enhanced WebSocket handling with Cloud Run compatibility
+            if self._is_websocket_request(request):
+                return await self._handle_websocket_with_cloud_run_compatibility(request, call_next)
+            
+            # Phase 4: Normal HTTP processing
+            return await call_next(request)
+            
+        except Exception as e:
+            self.logger.error(f"Enhanced GCP middleware dispatch error: {e}", exc_info=True)
+            return await self._create_uvicorn_safe_error_response(
+                f"GCP middleware error: {e}", 500
+            )
     
     def _should_protect_request(self, request: Request) -> bool:
         """Determine if request should be protected by readiness validation."""
