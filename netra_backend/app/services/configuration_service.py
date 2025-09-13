@@ -106,5 +106,53 @@ class ConfigurationManager:
             return False
 
 
+# ============================================================================
+# SSOT CONSOLIDATION COMPATIBILITY (Issue #667)
+# ============================================================================
+
+# Import the SSOT UnifiedConfigurationManager for consolidation
+try:
+    from netra_backend.app.core.managers.unified_configuration_manager import (
+        UnifiedConfigurationManager as SSotManager,
+        ConfigurationManagerFactory as SSotFactory
+    )
+    
+    class ConfigurationManagerBackwardCompat:
+        """
+        Backward compatibility wrapper for ConfigurationManager -> SSOT UnifiedConfigurationManager.
+        Maintains the interface while delegating to the SSOT implementation.
+        """
+        
+        def __init__(self):
+            # Use SSOT factory for global manager
+            self._ssot_manager = SSotFactory.get_global_manager()
+            self.validator = ConfigurationValidator()  # Keep original validator for compatibility
+            self._config_cache = {}  # Compatibility cache
+        
+        def get_config(self, key: str, default: Any = None) -> Any:
+            """Get configuration value using SSOT."""
+            return self._ssot_manager.get(key, default)
+        
+        def set_config(self, key: str, value: Any) -> None:
+            """Set configuration value using SSOT."""
+            self._ssot_manager.set(key, value)
+            # Also update compatibility cache
+            self._config_cache[key] = value
+        
+        def validate_config(self) -> bool:
+            """Validate configuration using SSOT."""
+            validation_result = self._ssot_manager.validate_all_configurations()
+            return validation_result.is_valid
+    
+    # Replace the original ConfigurationManager with compatibility wrapper
+    _OriginalConfigurationManager = ConfigurationManager
+    ConfigurationManager = ConfigurationManagerBackwardCompat
+    
+except ImportError as e:
+    # Fallback to original implementation if SSOT not available
+    # This allows graceful degradation during migration
+    logger.warning(f"SSOT ConfigurationManager not available, using fallback: {e}")
+    pass
+
 # Alias for backward compatibility
 ConfigurationService = ConfigurationManager

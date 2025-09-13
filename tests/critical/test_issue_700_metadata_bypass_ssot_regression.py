@@ -112,12 +112,12 @@ class TestIssue700MetadataBypassSSoTRegression:
         )
         
     @pytest.mark.asyncio
-    async def test_unified_triage_agent_execute_fails_due_to_metadata_storage(self):
+    async def test_unified_triage_agent_execute_silent_metadata_failure(self):
         """
-        CRITICAL TEST: Reproduce Golden Path failure in UnifiedTriageAgent.execute()
+        CRITICAL TEST: Prove UnifiedTriageAgent.execute() silently fails to store metadata
         
-        This test proves that the UnifiedTriageAgent.execute() method will fail
-        when it tries to store triage results in metadata using the SSOT method.
+        This test proves that the UnifiedTriageAgent.execute() method appears to succeed
+        but silently fails to store critical triage metadata needed for Golden Path coordination.
         """
         # Create UnifiedTriageAgent with real context
         triage_agent = UnifiedTriageAgent(
@@ -133,20 +133,41 @@ class TestIssue700MetadataBypassSSoTRegression:
         triage_agent.emit_agent_completed = AsyncMock()
         triage_agent.emit_error = AsyncMock()
         
+        # Mock LLM to return valid response (so we can test metadata storage)
+        mock_triage_result = Mock()
+        mock_triage_result.category = "Cost Optimization"
+        mock_triage_result.data_sufficiency = "sufficient" 
+        mock_triage_result.priority = Mock(value="medium")
+        mock_triage_result.__dict__ = {"test": "data"}
+        
+        triage_agent._process_with_llm = AsyncMock(return_value=mock_triage_result)
+        triage_agent._determine_next_agents = Mock(return_value=["data", "optimization"])
+        
         # Create execution state
         state = MockExecutionState(
             original_request="Test triage request for Issue #700"
         )
         
-        # CRITICAL TEST: Execute should fail when trying to store metadata
-        with pytest.raises(AttributeError) as exc_info:
-            await triage_agent.execute(state, self.real_context)
+        # Capture initial metadata
+        initial_metadata = self.real_context.metadata.copy()
         
-        # Verify the error is about metadata storage
-        error_message = str(exc_info.value)
-        assert "metadata" in error_message.lower(), (
-            f"Error should be about metadata access, got: {error_message}"
-        )
+        # CRITICAL TEST: Execute should appear to succeed
+        result = await triage_agent.execute(state, self.real_context)
+        
+        # But none of the critical metadata is actually stored
+        after_execution = self.real_context.metadata
+        
+        # These are the critical metadata keys that Golden Path depends on
+        critical_keys = ['triage_result', 'triage_category', 'data_sufficiency', 'triage_priority', 'next_agents']
+        
+        for key in critical_keys:
+            assert key not in after_execution, (
+                f"CRITICAL: {key} should NOT be stored (proving silent failure)"
+            )
+        
+        # Verify result appears successful (silent failure)
+        assert result is not None, "Execute should return a result"
+        assert result.get('success', False), "Result should claim success"
         
     def test_mock_vs_real_context_behavior_difference(self):
         """
