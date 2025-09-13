@@ -57,9 +57,9 @@ class TestMessageRoutingLogicFailures(SSotBaseTestCase):
     messages from reaching their intended WebSocket connections.
     """
     
-    def setUp(self):
+    def setup_method(self):
         """Set up test fixtures for routing failure scenarios."""
-        super().setUp()
+        super().setup_method()
         
         # Test users with different characteristics
         self.regular_user_id = "routing-test-user-123"
@@ -330,7 +330,7 @@ class TestMessageRoutingLogicFailures(SSotBaseTestCase):
         connection_id = generate_connection_id(user_id)
         
         # Create message queue for testing
-        message_queue = MessageQueue()
+        message_queue = MessageQueue(connection_id, user_id)
         
         # Register connection
         self.connection_manager.register_connection(
@@ -356,7 +356,7 @@ class TestMessageRoutingLogicFailures(SSotBaseTestCase):
         
         # Queue messages
         for message in test_messages:
-            await message_queue.enqueue(message)
+            await message_queue.enqueue_message(message.to_dict() if hasattr(message, 'to_dict') else message.__dict__)
         
         print(f"Message queue routing test:")
         print(f"  Queued messages: {len(test_messages)}")
@@ -373,7 +373,13 @@ class TestMessageRoutingLogicFailures(SSotBaseTestCase):
                 routing_failures.append(f"Message {i}: Connection not found")
             else:
                 # Test actual message delivery
-                websocket = target_connection.get('websocket')
+                if hasattr(target_connection, 'websocket'):
+                    websocket = target_connection.websocket
+                elif isinstance(target_connection, dict):
+                    websocket = target_connection.get('websocket')
+                else:
+                    websocket = None
+                    
                 if not websocket:
                     routing_failures.append(f"Message {i}: WebSocket not available")
                 elif not hasattr(websocket, 'send_json'):
@@ -651,9 +657,9 @@ class TestMessageRoutingLogicFailures(SSotBaseTestCase):
             pytest.fail(f"CONNECTION LIFECYCLE ROUTING FAILURES: {failure_summary}. "
                        f"Connection routing fails during lifecycle transitions.")
 
-    def tearDown(self):
+    def teardown_method(self):
         """Clean up test fixtures."""
-        super().tearDown()
+        super().teardown_method()
         
         # Clear all connections
         if hasattr(self.connection_manager, 'clear_all_connections'):
