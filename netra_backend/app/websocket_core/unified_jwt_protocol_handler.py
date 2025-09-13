@@ -333,7 +333,7 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
     
     # PRIORITY 2: Direct protocol match (only if no token-bearing protocols found)
     # Extended supported protocols for backward compatibility
-    supported_protocols = ['jwt-auth', 'jwt', 'bearer']
+    supported_protocols = ['jwt-auth', 'jwt', 'bearer', 'e2e-testing']
     
     for protocol in client_protocols:
         if protocol in supported_protocols:
