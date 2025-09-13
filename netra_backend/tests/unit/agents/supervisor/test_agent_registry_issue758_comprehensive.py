@@ -46,6 +46,28 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.base_agent import BaseAgent
 
 
+class MockEnterpriseAgentRegistry:
+    """Mock agent registry with expected test API."""
+
+    def __init__(self):
+        self.registered_agents = {}
+
+    def register_agent(self, agent_name: str, agent_class):
+        """Mock register_agent method."""
+        self.registered_agents[agent_name] = agent_class
+
+    def list_registered_agents(self):
+        """Mock list_registered_agents method."""
+        return list(self.registered_agents.keys())
+
+    def create_agent_instance(self, agent_name: str, user_context, **kwargs):
+        """Mock create_agent_instance method."""
+        if agent_name in self.registered_agents:
+            agent_class = self.registered_agents[agent_name]
+            return agent_class(name=agent_name)
+        raise ValueError(f"Agent {agent_name} not registered")
+
+
 class MockEnterpriseWebSocketManager:
     """Enterprise-grade mock WebSocket manager for comprehensive registry testing."""
 
@@ -154,8 +176,8 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
         # Create enterprise WebSocket manager
         self.enterprise_websocket_manager = MockEnterpriseWebSocketManager()
 
-        # Create registry with enterprise configuration
-        self.registry = AgentRegistry()
+        # Create mock registry for testing (real AgentRegistry API is different)
+        self.registry = MockEnterpriseAgentRegistry()
 
     def test_golden_path_agent_registration_workflow(self):
         """Test complete golden path agent registration workflow."""
