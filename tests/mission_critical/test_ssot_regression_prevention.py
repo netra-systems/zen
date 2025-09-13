@@ -68,7 +68,7 @@ class TestSSOTRegressionPrevention:
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
         # Use sync redis client for non-async functions
-        from shared.isolated_environment import get_env
+        from shared.isolated_environment import get_env_var as get_env
         import redis
         self.redis_client = redis.Redis(
             host=get_env('REDIS_HOST', 'localhost'),
@@ -118,7 +118,7 @@ class TestSSOTRegressionPrevention:
                 user_db = DatabaseManager()
                 
                 # Get Redis client for this operation
-                from shared.isolated_environment import get_env
+                from shared.isolated_environment import get_env_var as get_env
                 import redis
                 redis_client = redis.Redis(
                     host=get_env('REDIS_HOST', 'localhost'),
@@ -138,7 +138,7 @@ class TestSSOTRegressionPrevention:
                 for op_num in range(operations_per_user):
                     try:
                         # Get Redis client for this operation
-                        from shared.isolated_environment import get_env
+                        from shared.isolated_environment import get_env_var as get_env
                         import redis
                         redis_client = redis.Redis(
                             host=get_env('REDIS_HOST', 'localhost'),
@@ -468,7 +468,7 @@ class TestSSOTRegressionPrevention:
             
             try:
                 # Get Redis client for this operation
-                from shared.isolated_environment import get_env
+                from shared.isolated_environment import get_env_var as get_env
                 import redis
                 redis_client = redis.Redis(
                     host=get_env('REDIS_HOST', 'localhost'),
@@ -482,7 +482,7 @@ class TestSSOTRegressionPrevention:
                     # Simulate atomic state updates
                     try:
                         # Get Redis client for this operation
-                        from shared.isolated_environment import get_env
+                        from shared.isolated_environment import get_env_var as get_env
                         import redis
                         redis_client = redis.Redis(
                             host=get_env('REDIS_HOST', 'localhost'),
@@ -553,7 +553,7 @@ class TestSSOTRegressionPrevention:
                 }]
         
         # Initialize shared state
-        from shared.isolated_environment import get_env
+        from shared.isolated_environment import get_env_var as get_env
         import redis
         redis_client = redis.Redis(
             host=get_env('REDIS_HOST', 'localhost'),
@@ -614,7 +614,7 @@ class TestSSOTRegressionPrevention:
         user_secrets = {}
         
         # Create sync redis client for this test
-        from shared.isolated_environment import get_env
+        from shared.isolated_environment import get_env_var as get_env
         import redis
         sync_redis_client = redis.Redis(
             host=get_env('REDIS_HOST', 'localhost'),
@@ -628,7 +628,7 @@ class TestSSOTRegressionPrevention:
             user_secrets[user_id] = user_secret
             
             # Get Redis client
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             redis_client = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
@@ -661,7 +661,7 @@ class TestSSOTRegressionPrevention:
                 attacker_context = TestContext(user_id=f"user_{attacker_user_id}")
                 
                 # Get Redis client for security test
-                from shared.isolated_environment import get_env
+                from shared.isolated_environment import get_env_var as get_env
                 import redis
                 redis_client = redis.Redis(
                     host=get_env('REDIS_HOST', 'localhost'),
@@ -822,7 +822,7 @@ class TestSSOTRegressionPrevention:
                         with db_manager.get_session() as db_session:
                             # Store transaction data
                             tx_key = f"transaction:{tx_id}"
-                            from shared.isolated_environment import get_env
+                            from shared.isolated_environment import get_env_var as get_env
                             import redis
                             sync_redis_client = redis.Redis(
                                 host=get_env('REDIS_HOST', 'localhost'),
@@ -965,7 +965,7 @@ class TestSSOTRegressionPrevention:
                         result = sum(hash(item) for item in large_data)
                         
                         # I/O-intensive operation - using sync redis for non-async context
-                        from shared.isolated_environment import get_env
+                        from shared.isolated_environment import get_env_var as get_env
                         import redis
                         sync_redis_client = redis.Redis(
                             host=get_env('REDIS_HOST', 'localhost'),
@@ -1418,7 +1418,7 @@ class TestSSOTContinuousCompliance:
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
         # Use sync redis client for non-async functions
-        from shared.isolated_environment import get_env
+        from shared.isolated_environment import get_env_var as get_env
         import redis
         self.redis_client = redis.Redis(
             host=get_env('REDIS_HOST', 'localhost'),
@@ -1452,7 +1452,7 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                from shared.isolated_environment import get_env
+                from shared.isolated_environment import get_env_var as get_env
                 import redis
                 sync_redis_client = redis.Redis(
                     host=get_env('REDIS_HOST', 'localhost'),
@@ -1501,7 +1501,7 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis operations
             test_hash = f"redis_health_{self.test_id}"
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             sync_redis_client = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
@@ -1629,7 +1629,7 @@ class TestSSOTContinuousCompliance:
             db_start = time.time()
             
             # Execute database operations
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             sync_redis_client = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
@@ -1717,7 +1717,7 @@ class TestSSOTContinuousCompliance:
             # Test concurrent isolation operations
             def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                from shared.isolated_environment import get_env
+                from shared.isolated_environment import get_env_var as get_env
                 import redis
                 sync_redis_client = redis.Redis(
                     host=get_env('REDIS_HOST', 'localhost'),
@@ -1823,7 +1823,7 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             sync_redis_client = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
@@ -1852,7 +1852,7 @@ class TestSSOTContinuousCompliance:
             # Initialize real service components to measure load time
             test_env = IsolatedEnvironment()
             test_db = DatabaseManager()
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             test_redis = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
@@ -1914,7 +1914,7 @@ class TestSSOTContinuousCompliance:
                     operation_key = f"context:{context_id}:operation:{op_num}"
                     
                     # Store context-specific secret data - using sync redis for non-async context
-                    from shared.isolated_environment import get_env
+                    from shared.isolated_environment import get_env_var as get_env
                     import redis
                     sync_redis_client = redis.Redis(
                         host=get_env('REDIS_HOST', 'localhost'),
@@ -2015,7 +2015,7 @@ class TestSSOTContinuousCompliance:
                     })
         
         # Clean up test data
-        from shared.isolated_environment import get_env
+        from shared.isolated_environment import get_env_var as get_env
         import redis
         cleanup_redis_client = redis.Redis(
             host=get_env('REDIS_HOST', 'localhost'),
@@ -2084,7 +2084,7 @@ class TestSSOTContinuousCompliance:
                             }
                             
                             # Store complex data - using sync redis for non-async context
-                            from shared.isolated_environment import get_env
+                            from shared.isolated_environment import get_env_var as get_env
                             import redis
                             sync_redis_client = redis.Redis(
                                 host=get_env('REDIS_HOST', 'localhost'),
@@ -2213,7 +2213,7 @@ class TestSSOTContinuousCompliance:
         
         # Clean up stress test data
         try:
-            from shared.isolated_environment import get_env
+            from shared.isolated_environment import get_env_var as get_env
             import redis
             cleanup_redis_client = redis.Redis(
                 host=get_env('REDIS_HOST', 'localhost'),
