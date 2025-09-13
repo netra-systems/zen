@@ -75,31 +75,36 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         # Create concurrent engine creation tasks
         async def create_user_engine(profile: UserTestProfile) -> Tuple[UserTestProfile, Any, float]:
             start_time = time.time()
-            
-            # Create user context
-            user_context = UserExecutionContext.from_request_supervisor(
-                user_id=profile.user_id,
-                thread_id=profile.thread_id,
-                run_id=profile.run_id,
-                request_id=profile.request_id,
-                metadata=profile.metadata
-            )
-            
-            # Create mock dependencies
-            mock_registry = Mock()
-            mock_registry.get_agents = Mock(return_value=[])
-            mock_registry.list_keys = Mock(return_value=[f'test_agent_{profile.metadata["user_index"]}'])
-            
-            mock_websocket_bridge = Mock()
-            mock_websocket_bridge.notify_agent_started = AsyncMock(return_value=True)
-            mock_websocket_bridge.notify_agent_completed = AsyncMock(return_value=True)
+            creation_time = 0.0  # Initialize to prevent UnboundLocalError
             
             try:
-                # Create UserExecutionEngine
-                engine = await UserExecutionEngine.create_execution_engine(
-                    user_context=user_context,
-                    registry=mock_registry,
-                    websocket_bridge=mock_websocket_bridge
+                # Create user context
+                user_context = UserExecutionContext.from_request_supervisor(
+                    user_id=profile.user_id,
+                    thread_id=profile.thread_id,
+                    run_id=profile.run_id,
+                    request_id=profile.request_id,
+                    metadata=profile.metadata
+                )
+                
+                # Create mock agent factory and websocket emitter
+                class MockAgentFactory:
+                    def __init__(self, user_context):
+                        self.user_context = user_context
+                        
+                class MockWebSocketEmitter:
+                    def __init__(self, user_context):
+                        self.user_context = user_context
+                    async def notify_agent_started(self, *args): return True
+                    async def notify_agent_completed(self, *args): return True
+                    async def notify_tool_executing(self, *args): return True
+                    async def notify_tool_completed(self, *args): return True
+                
+                # Create UserExecutionEngine with correct constructor
+                engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=MockAgentFactory(user_context),
+                    websocket_emitter=MockWebSocketEmitter(user_context)
                 )
                 
                 creation_time = time.time() - start_time

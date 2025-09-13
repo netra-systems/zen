@@ -513,11 +513,11 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=f"Isolation test with {test_data}",
             metadata={
                 "test_data": test_data,
                 "user_metadata": user_context.audit_metadata,
-                "isolation_test": True
+                "isolation_test": True,
+                "user_input": f"Isolation test with {test_data}"  # moved to metadata
             }
         )
         
@@ -527,7 +527,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
                 mock_result = AgentExecutionResult(
                     success=True,
                     agent_name="isolation_validation_agent",
-                    execution_time=0.8,
+                    duration=0.8,  # Changed from execution_time to duration
                     data={
                         "response": f"Processed {test_data}",
                         "user_id": user_context.user_id,
