@@ -42,8 +42,9 @@ from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBr
 class WebSocketTestAgent(BaseAgent):
     """Concrete agent for testing WebSocket integration patterns."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, llm_manager=None, name="WebSocketTestAgent", **kwargs):
+        # Always use WebSocketTestAgent as the default name for this test class
+        super().__init__(llm_manager=llm_manager, name=name, **kwargs)
         self.agent_type = "websocket_test_agent"
         self.test_events_emitted = []
 
@@ -321,11 +322,9 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
 
     async def test_websocket_concurrent_user_isolation(self):
         """Test WebSocket events maintain proper isolation between concurrent users."""
-        agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager
-        )
-        agent.set_websocket_bridge(self.websocket_bridge, "test-run-concurrent-001")
-        # FIXED: websocket_bridge set after instantiation
+        # Create separate agents for different users (proper isolation pattern)
+        agent1 = WebSocketTestAgent(llm_manager=self.llm_manager)
+        agent2 = WebSocketTestAgent(llm_manager=self.llm_manager)
 
         # Create separate contexts for different users
         user1_context = UserExecutionContext(
@@ -342,12 +341,16 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
             agent_context={"user_request": "user 2 request"}
         ).with_db_session(AsyncMock())
 
+        # Set up WebSocket bridges with proper user-specific run_ids
+        agent1.set_websocket_bridge(self.websocket_bridge, "websocket-run-1")
+        agent2.set_websocket_bridge(self.websocket_bridge, "websocket-run-2")
+
         # Execute concurrent requests
         task1 = asyncio.create_task(
-            agent.process_request("user 1 concurrent test", user1_context)
+            agent1.process_request("user 1 concurrent test", user1_context)
         )
         task2 = asyncio.create_task(
-            agent.process_request("user 2 concurrent test", user2_context)
+            agent2.process_request("user 2 concurrent test", user2_context)
         )
 
         results = await asyncio.gather(task1, task2)
