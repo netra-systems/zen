@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 19:27:09
+**Generated:** 2025-09-12 19:27:25
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
 - **Total Tests:** 6
-- **Passed:** 6 (100.0%)
-- **Failed:** 0 (0.0%)
+- **Passed:** 3 (50.0%)
+- **Failed:** 3 (50.0%)
 - **Skipped:** 0
-- **Duration:** 1.82 seconds
-- **Pass Rate:** 100.0%
+- **Duration:** 8.11 seconds
+- **Pass Rate:** 50.0%
 
 ## Test Results by Priority
 
@@ -19,32 +19,76 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_basic_functionality | PASS passed | 0.139s | test_10_critical_path_staging.py |
-| test_critical_api_endpoints | PASS passed | 0.628s | test_10_critical_path_staging.py |
-| test_end_to_end_message_flow | PASS passed | 0.000s | test_10_critical_path_staging.py |
-| test_critical_performance_targets | PASS passed | 0.000s | test_10_critical_path_staging.py |
-| test_critical_error_handling | PASS passed | 0.000s | test_10_critical_path_staging.py |
-| test_business_critical_features | PASS passed | 0.000s | test_10_critical_path_staging.py |
+| test_real_agent_discovery | PASS passed | 0.566s | test_3_agent_pipeline_staging.py |
+| test_real_agent_configuration | PASS passed | 0.445s | test_3_agent_pipeline_staging.py |
+| test_real_agent_pipeline_execution | FAIL failed | 0.835s | test_3_agent_pipeline_staging.py |
+| test_real_agent_lifecycle_monitoring | FAIL failed | 1.196s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_error_handling | FAIL failed | 1.194s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_metrics | PASS passed | 2.530s | test_3_agent_pipeline_staging.py |
+
+## Failed Tests Details
+
+### FAILED: test_real_agent_pipeline_execution
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 0.835s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:252: in test_real_agent_pipeline_execution
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self.c...
+
+### FAILED: test_real_agent_lifecycle_monitoring
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 1.196s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:404: in test_real_agent_lifecycle_monitoring
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self...
+
+### FAILED: test_real_pipeline_error_handling
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 1.194s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:498: in test_real_pipeline_error_handling
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self.co...
 
 ## Pytest Output Format
 
 ```
-test_10_critical_path_staging.py::test_basic_functionality PASSED
-test_10_critical_path_staging.py::test_critical_api_endpoints PASSED
-test_10_critical_path_staging.py::test_end_to_end_message_flow PASSED
-test_10_critical_path_staging.py::test_critical_performance_targets PASSED
-test_10_critical_path_staging.py::test_critical_error_handling PASSED
-test_10_critical_path_staging.py::test_business_critical_features PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_discovery PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_configuration PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_pipeline_execution FAILED
+test_3_agent_pipeline_staging.py::test_real_agent_lifecycle_monitoring FAILED
+test_3_agent_pipeline_staging.py::test_real_pipeline_error_handling FAILED
+test_3_agent_pipeline_staging.py::test_real_pipeline_metrics PASSED
 
 ==================================================
-6 passed, 0 failed in 1.82s
+3 passed, 3 failed in 8.11s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Performance | 1 | 1 | 0 | 100.0% |
+| Agent | 4 | 2 | 2 | 50.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
