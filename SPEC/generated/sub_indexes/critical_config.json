@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-12T21:29:06.397404",
+    "generated_at": "2025-09-13T09:21:34.657125",
     "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 11
   },
@@ -11,16 +11,16 @@
       "value": "DATABASE_URL",
       "category": "critical_config",
       "locations": [
+        "netra_backend/app/core/configuration/compatibility_shim.py:213",
+        "netra_backend/app/core/configuration/compatibility_shim.py:233",
+        "netra_backend/app/core/configuration/compatibility_shim.py:233",
         "netra_backend/app/core/configuration/environment_detector.py:297",
         "netra_backend/app/core/exceptions/error_policy.py:161",
         "netra_backend/app/core/exceptions/error_policy.py:180",
         "netra_backend/app/infrastructure/drift_detection.py:138",
         "netra_backend/app/infrastructure/drift_detection.py:309",
         "netra_backend/app/infrastructure/monitoring.py:195",
-        "netra_backend/app/services/configuration_service.py:40",
-        "netra_backend/app/services/configuration_service.py:61",
-        "netra_backend/app/services/configuration_service.py:72",
-        "netra_backend/app/services/demo/demo_session_manager.py:32"
+        "netra_backend/app/services/configuration_service.py:66"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -175,12 +175,12 @@
         "netra_backend/app/api/health_checks.py:511",
         "netra_backend/app/core/auth_constants.py:124",
         "netra_backend/app/core/config_dependencies.py:340",
+        "netra_backend/app/core/configuration/compatibility_shim.py:220",
+        "netra_backend/app/core/configuration/compatibility_shim.py:238",
         "netra_backend/app/core/configuration/environment_detector.py:265",
         "netra_backend/app/core/configuration/environment_detector.py:299",
         "netra_backend/app/core/configuration/environment_detector.py:299",
-        "netra_backend/app/core/configuration/staging_validator.py:48",
-        "netra_backend/app/core/configuration/staging_validator.py:174",
-        "netra_backend/app/core/configuration_validator.py:585"
+        "netra_backend/app/core/configuration/staging_validator.py:48"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     }

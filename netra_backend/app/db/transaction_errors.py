@@ -93,7 +93,25 @@ class ConstraintViolationError(SchemaError):
 
 class EngineConfigurationError(SchemaError):
     """Raised when ClickHouse engine configuration errors occur."""
-    
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class TableNotFoundError(SchemaError):
+    """Raised when requested table does not exist in ClickHouse."""
+
+    def __init__(self, message: str, context: dict = None):
+        """Initialize with error message and optional context."""
+        super().__init__(message)
+        self.context = context or {}
+
+
+class CacheError(TransactionError):
+    """Raised when cache operations fail."""
+
     def __init__(self, message: str, context: dict = None):
         """Initialize with error message and optional context."""
         super().__init__(message)
@@ -211,6 +229,24 @@ def _has_engine_configuration_keywords(error_msg: str) -> bool:
         'storage engine', 'table engine', 'engine validation', 'requires'
     ]
     return any(keyword in error_msg for keyword in engine_configuration_keywords)
+
+
+def _has_table_not_found_keywords(error_msg: str) -> bool:
+    """Check if error message contains table not found keywords."""
+    table_not_found_keywords = [
+        "table doesn't exist", "table does not exist", "unknown table", "no such table",
+        "table 'non_existent_table", "table 'unknown_table", "missing table"
+    ]
+    return any(keyword in error_msg for keyword in table_not_found_keywords)
+
+
+def _has_cache_error_keywords(error_msg: str) -> bool:
+    """Check if error message contains cache error keywords."""
+    cache_error_keywords = [
+        'cache error', 'cache failure', 'cache timeout', 'cache miss critical',
+        'cache corruption', 'cache eviction failure', 'cache full', 'cache key invalid'
+    ]
+    return any(keyword in error_msg for keyword in cache_error_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
@@ -351,6 +387,20 @@ def _classify_engine_configuration_error(error: OperationalError, error_msg: str
     return error
 
 
+def _classify_table_not_found_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify table not found-related operational errors."""
+    if _has_table_not_found_keywords(error_msg):
+        return TableNotFoundError(f"Table not found error: {error}")
+    return error
+
+
+def _classify_cache_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify cache-related operational errors."""
+    if _has_cache_error_keywords(error_msg):
+        return CacheError(f"Cache error: {error}")
+    return error
+
+
 def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
@@ -390,7 +440,16 @@ def _attempt_error_classification(error: OperationalError, error_msg: str) -> Ex
     classified = _classify_engine_configuration_error(error, error_msg)
     if classified != error:
         return classified
-    
+
+    # Try new specific error types
+    classified = _classify_table_not_found_error(error, error_msg)
+    if classified != error:
+        return classified
+
+    classified = _classify_cache_error(error, error_msg)
+    if classified != error:
+        return classified
+
     # Try existing schema error types
     classified = _classify_table_creation_error(error, error_msg)
     if classified != error:

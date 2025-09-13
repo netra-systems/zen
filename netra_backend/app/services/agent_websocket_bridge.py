@@ -169,6 +169,14 @@ class AgentWebSocketBridge(MonitorableComponent):
                 f"Business_context: System-level initialization for agent event infrastructure"
             )
     
+    @property
+    def user_id(self) -> Optional[str]:
+        """User ID property for backward compatibility with tests and AgentWebSocketBridge interface.
+        
+        Returns user_id from user_context if available, None otherwise.
+        This property provides compatibility for code expecting a direct user_id attribute.
+        """
+        return self.user_context.user_id if self.user_context else None
     def _initialize_configuration(self) -> None:
         """Initialize bridge configuration."""
         self.config = IntegrationConfig()
