@@ -19,6 +19,7 @@ Business Value Justification:
 import asyncio
 import gc
 import logging
+import sys
 import threading
 import time
 import weakref
@@ -265,6 +266,14 @@ class ThreadCleanupManager:
         if self._cleanup_scheduled:
             return
 
+        # Skip cleanup during Python shutdown
+        try:
+            if hasattr(sys, 'meta_path') and sys.meta_path is None:
+                return
+        except (ImportError, AttributeError):
+            # Python is shutting down, skip cleanup
+            return
+
         self._cleanup_scheduled = True
 
         async def background_cleanup():
@@ -287,12 +296,9 @@ class ThreadCleanupManager:
             # Check if we have an active event loop first
             try:
                 loop = asyncio.get_running_loop()
-                if loop is not None:
-                    # Create task in the running loop
-                    task = loop.create_task(background_cleanup())
-                    logger.debug("Background cleanup task scheduled in active event loop")
-                else:
-                    raise RuntimeError("No running loop available")
+                # Create task in the running loop - loop is guaranteed to be valid here
+                task = loop.create_task(background_cleanup())
+                logger.debug("Background cleanup task scheduled in active event loop")
             except RuntimeError:
                 # No running loop - try to get any loop
                 try:
@@ -302,11 +308,11 @@ class ThreadCleanupManager:
                         logger.debug("Background cleanup task scheduled in existing event loop")
                     else:
                         raise RuntimeError("Event loop not running")
-                except (RuntimeError, AttributeError):
+                except (RuntimeError, AttributeError, ImportError):
                     # Fallback to thread-based cleanup
                     raise RuntimeError("No asyncio event loop available")
 
-        except RuntimeError:
+        except (RuntimeError, ImportError):
             # No event loop running, cleanup immediately in thread
             def sync_cleanup():
                 try:
