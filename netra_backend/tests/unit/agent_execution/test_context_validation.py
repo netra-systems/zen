@@ -167,11 +167,15 @@ class TestContextValidation(SSotAsyncTestCase):
         
         for attack_type, payload in security_violations:
             with self.expect_exception(InvalidContextError):
-                validate_user_context(
+                # Create context with security violation - validation happens during creation
+                invalid_context = UserExecutionContext(
                     user_id=f"user_{payload}",
                     thread_id=self.test_thread_id,
-                    run_id=self.test_run_id
+                    run_id=self.test_run_id,
+                    request_id=self.test_request_id
                 )
+                # Then validate the context
+                validate_user_context(invalid_context)
             
             error_msg = str(context.exception)
             self.assertIn("security", error_msg.lower())
@@ -360,7 +364,7 @@ class TestContextValidation(SSotAsyncTestCase):
                 thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
             )
-            validate_user_context(context.user_id, context.thread_id, context.run_id)
+            validate_user_context(context)
         
         end_time = time.time()
         total_time = end_time - start_time
