@@ -98,6 +98,16 @@ class DispatchStrategy(Enum):
 # ============================================================================
 
 class UnifiedToolDispatcher:
+    """SSOT for all tool dispatching operations - consolidates deprecated execution engines.
+
+    This class is the target SSOT for Issue #686 ExecutionEngine consolidation.
+    It replaces:
+    - UnifiedToolExecutionEngine
+    - ToolExecutionEngine (from tool_dispatcher_execution.py)
+    - ToolExecutionEngine (from unified_tool_registry/execution_engine.py)
+
+    Migration from deprecated classes is supported through compatibility factory methods.
+    """
     """Unified tool dispatcher with factory-enforced request isolation.
     
     CRITICAL: Direct instantiation is FORBIDDEN. Use factory methods:
@@ -286,6 +296,105 @@ class UnifiedToolDispatcher:
                 websocket_manager = cls._create_websocket_bridge_adapter(websocket_bridge, user_context)
                 logger.info(f"Created WebSocket bridge adapter for scoped dispatcher (user: {user_context.user_id})")
         
+    @classmethod
+    async def create_from_deprecated_execution_engine(
+        cls,
+        websocket_bridge: Optional[Any] = None,
+        permission_service: Optional[Any] = None,
+        user_context: Optional['UserExecutionContext'] = None
+    ) -> 'UnifiedToolDispatcher':
+        """Create UnifiedToolDispatcher from deprecated ToolExecutionEngine patterns.
+
+        ISSUE #686 MIGRATION HELPER: This method helps migrate from deprecated execution engines:
+        - UnifiedToolExecutionEngine (from unified_tool_execution.py)
+        - ToolExecutionEngine (from tool_dispatcher_execution.py)
+        - ToolExecutionEngine (from unified_tool_registry/execution_engine.py)
+
+        Args:
+            websocket_bridge: AgentWebSocketBridge from deprecated classes
+            permission_service: ToolPermissionService from deprecated classes
+            user_context: UserExecutionContext for user isolation (recommended)
+
+        Returns:
+            UnifiedToolDispatcher: Modern SSOT replacement with same capabilities
+
+        Raises:
+            ValueError: If migration cannot proceed due to missing requirements
+        """
+        import warnings
+        warnings.warn(
+            "Migration from deprecated ExecutionEngine classes detected. "
+            "Use UnifiedToolDispatcher.create_for_user() with proper UserExecutionContext "
+            "for best security and user isolation. "
+            "This migration helper will be removed after Issue #686 completion.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        logger.warning(
+            "🔄 Issue #686 MIGRATION: Creating UnifiedToolDispatcher from deprecated ExecutionEngine pattern. "
+            "Recommendation: Update to use create_for_user() with UserExecutionContext for proper user isolation."
+        )
+
+        # If no user context provided, create anonymous context for compatibility
+        if not user_context:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            import uuid
+
+            user_context = UserExecutionContext.from_request_supervisor(
+                user_id=f"migration_compat_{uuid.uuid4().hex[:8]}",
+                thread_id=f"migration_thread_{uuid.uuid4().hex[:8]}",
+                run_id=f"migration_run_{uuid.uuid4().hex[:8]}",
+                request_id=f"migration_req_{uuid.uuid4().hex[:8]}",
+                metadata={
+                    'migration_source': 'deprecated_execution_engine',
+                    'migration_issue': '#686',
+                    'security_note': 'Anonymous context - migrate to proper user authentication',
+                    'permission_service': str(type(permission_service)) if permission_service else None
+                }
+            )
+            logger.warning(
+                f"🔄 Issue #686: Created anonymous UserExecutionContext for migration compatibility. "
+                f"User ID: {user_context.user_id}. SECURITY: Use proper user authentication."
+            )
+
+        # Create UnifiedToolDispatcher using the standard factory method
+        try:
+            dispatcher = await cls.create_for_user(
+                user_context=user_context,
+                websocket_bridge=websocket_bridge,
+                tools=[],  # Will be registered as needed
+                enable_admin_tools=False  # Default to safe permissions
+            )
+
+            # Store migration metadata for debugging
+            if hasattr(dispatcher, '_execution_metadata'):
+                dispatcher._execution_metadata.update({
+                    'migration_mode': True,
+                    'migration_issue': '#686',
+                    'original_pattern': 'ToolExecutionEngine',
+                    'permission_service_provided': permission_service is not None,
+                    'websocket_bridge_provided': websocket_bridge is not None,
+                    'user_context_generated': user_context.user_id.startswith('migration_compat_')
+                })
+
+            logger.info(
+                f"✅ Issue #686 MIGRATION SUCCESS: Created UnifiedToolDispatcher from deprecated pattern. "
+                f"User: {user_context.user_id}, WebSocket: {websocket_bridge is not None}, "
+                f"Permissions: {permission_service is not None}. Migration path available."
+            )
+
+            return dispatcher
+
+        except Exception as e:
+            logger.error(
+                f"❌ Issue #686 MIGRATION FAILED: Could not create UnifiedToolDispatcher "
+                f"from deprecated ExecutionEngine pattern: {e}. "
+                f"WebSocket: {type(websocket_bridge)}, Permissions: {type(permission_service)}. "
+                f"SOLUTION: Use proper UnifiedToolDispatcher.create_for_user() pattern."
+            )
+            raise ValueError(f"Migration from deprecated ExecutionEngine failed: {e}")
+
         # Set websocket manager if available
         if websocket_manager:
             factory.set_websocket_manager(websocket_manager)

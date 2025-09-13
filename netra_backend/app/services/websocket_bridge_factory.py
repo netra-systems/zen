@@ -242,10 +242,11 @@ class WebSocketBridgeFactory:
         
         logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
-    async def create_user_emitter(self, 
-                                user_id: str, 
-                                thread_id: str,
-                                connection_id: str) -> 'UserWebSocketEmitter':
+    async def create_user_emitter(self,
+                                user_context: Optional['UserExecutionContext'] = None,
+                                user_id: Optional[str] = None,
+                                thread_id: Optional[str] = None,
+                                connection_id: Optional[str] = None) -> 'UserWebSocketEmitter':
         """Create a per-user WebSocket event emitter (SSOT redirect).
         
         Args:
