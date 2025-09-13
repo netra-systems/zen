@@ -32,11 +32,6 @@
 - **Duration:** 2.558s
 - **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:78: in test_golden_path_user_login_to_ai_response
     assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
-<<<<<<< HEAD
-E   AssertionError: Response time should be ≤2.0s, got 2.52s
-E   assert 2.5200624465742383 <= 2.0
-E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x000001D3CDA52F90>.MAX_RESPO...
-=======
 E   AssertionError: Response time should be ≤2.0s, got 2.55s
 E   assert 2.5489602088928223 <= 2.0
 E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x0000025DAB4E6450>.MAX_RESPO...
@@ -56,7 +51,6 @@ E   assert False...
     test_user = await self._create_test_user(suffix=f"perf_{scenario['name'].lower().replace(' ', '_')}")
                       ^^^^^^^^^^^^^^^^^^^^^^
 E   AttributeError: 'TestGoldenPathPerformance' object has no attribute '_create_test_user'...
->>>>>>> de7640d5501a765fbd8e81f7ff5da5cb2d571258
 
 ## Pytest Output Format
 

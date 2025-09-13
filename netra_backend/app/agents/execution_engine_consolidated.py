@@ -3,8 +3,6 @@
 This file redirects to the SSOT UserExecutionEngine to maintain backwards compatibility.
 """
 
-from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-
 # SSOT redirect for backwards compatibility - Export all key classes
 from netra_backend.app.agents.supervisor.user_execution_engine import (
     UserExecutionEngine as ExecutionEngine,
@@ -90,6 +88,3 @@ __all__ = [
     'get_execution_engine_factory',
     'ExecutionEngineWithWebSocketEvents'
 ]
-=======
-__all__ = ["ExecutionEngine"]
->>>>>>> de7640d5501a765fbd8e81f7ff5da5cb2d571258
