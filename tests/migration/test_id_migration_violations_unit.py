@@ -32,14 +32,14 @@ from typing import List, Dict, Set, Tuple
 from unittest.mock import patch, MagicMock
 
 # Test framework imports
-from test_framework.ssot.base_test_case import SSotTestCase
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # System imports that should be migrated
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 
-class TestIDMigrationViolationsUnit(SSotTestCase):
+class TestIDMigrationViolationsUnit(SSotBaseTestCase):
     """Unit tests exposing ID generation violations across the codebase."""
     
     def setUp(self):
