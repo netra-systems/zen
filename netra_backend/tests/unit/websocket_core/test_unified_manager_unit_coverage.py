@@ -80,7 +80,7 @@ class TestUnifiedManagerCoreFunctions:
 
         message = {
             "connection_state": MockWebSocketState.OPEN,
-            "mode": TestWebSocketManagerMode.CONNECTING,
+            "mode": MockWebSocketManagerMode.CONNECTING,
             "data": "test message"
         }
 
@@ -88,7 +88,7 @@ class TestUnifiedManagerCoreFunctions:
 
         # Validate enum conversion
         assert result["connection_state"] == "open"  # String value of enum
-        assert result["mode"] == "3"  # String representation of int enum
+        assert result["mode"] == 3  # Actual enum value for non-WebSocket enums
         assert result["data"] == "test message"  # Non-enum preserved
 
     def test_serialize_message_safely_handles_datetime_objects(self):
@@ -144,7 +144,7 @@ class TestUnifiedManagerCoreFunctions:
         """Test enum key representation for integer enums."""
         # Business value: Consistent integer enum representation
 
-        int_enum = TestWebSocketManagerMode.CONNECTING
+        int_enum = MockWebSocketManagerMode.CONNECTING
         result = _get_enum_key_representation(int_enum)
 
         assert result == "3"  # Should be string of integer value
@@ -163,7 +163,7 @@ class TestWebSocketConnectionDataClass:
 
         connection = WebSocketConnection(
             connection_id="conn-123",
-            user_id="user-456",
+            user_id="test_user_456",  # Valid user_id format
             websocket=mock_websocket,
             connected_at=connection_time,
             thread_id="thread-789"
@@ -171,7 +171,7 @@ class TestWebSocketConnectionDataClass:
 
         # Validate business-critical properties
         assert connection.connection_id == "conn-123"
-        assert connection.user_id == "user-456"  # Critical for user isolation
+        assert connection.user_id == "test_user_456"  # Critical for user isolation
         assert connection.websocket == mock_websocket
         assert connection.connected_at == connection_time
         assert connection.thread_id == "thread-789"
@@ -202,7 +202,7 @@ class TestWebSocketConnectionDataClass:
 
         connection = WebSocketConnection(
             connection_id="conn-123",
-            user_id="user-456",
+            user_id="test_user_456",  # Valid user_id format
             websocket=mock_websocket,
             connected_at=datetime.now(timezone.utc),
             metadata=metadata
