@@ -697,7 +697,12 @@ class UserExecutionEngine(IExecutionEngine):
         else:
             logger.warning("Agent registry not available through factory")
             return None
-    
+
+    @property
+    def registry(self):
+        """Legacy compatibility alias for agent_registry (Issue #692)."""
+        return self.agent_registry
+
     @property
     def websocket_bridge(self):
         """Access to the websocket bridge through the emitter for test compatibility."""
