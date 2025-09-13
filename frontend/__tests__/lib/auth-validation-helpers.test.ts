@@ -692,6 +692,7 @@ describe('Auth Validation Helpers - CRITICAL BUG REPRODUCTION', () => {
     });
   });
 
+
   describe('Debug Helper Complete Coverage', () => {
     test('debugAuthState logs comprehensive auth state information', () => {
       const consoleSpy = jest.spyOn(console, 'group').mockImplementation();
