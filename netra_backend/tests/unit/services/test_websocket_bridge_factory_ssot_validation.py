@@ -25,11 +25,13 @@ from typing import Optional, Dict, Any
 
 from netra_backend.app.services.websocket_bridge_factory import (
     WebSocketBridgeFactory,
-    WebSocketFactoryConfig,
-    UserWebSocketContext,
-    WebSocketEvent,
-    ConnectionStatus
+    WebSocketFactoryConfig
 )
+from shared.types.core_types import (
+    WebSocketMessage as WebSocketEvent,
+    ConnectionState as ConnectionStatus
+)
+from netra_backend.app.services.user_execution_context import UserExecutionContext as UserWebSocketContext
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactoryError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
@@ -242,7 +244,7 @@ class TestWebSocketBridgeFactorySSotValidation:
         SSOT Issue: Multiple factory instances violate SSOT pattern.
         Expected Failure: Should enforce single factory instance or proper isolation.
         """
-        from netra_backend.app.services.websocket_bridge_factory import get_websocket_bridge_factory
+        from netra_backend.app.dependencies import get_websocket_bridge_factory
         
         # Get two instances - should be same instance (SSOT)
         factory1 = get_websocket_bridge_factory()
