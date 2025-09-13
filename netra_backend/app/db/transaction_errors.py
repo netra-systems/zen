@@ -486,8 +486,11 @@ def _classify_integrity_error(error: IntegrityError) -> Exception:
 
 
 def classify_error(error: Exception) -> Exception:
-    """Classify and potentially wrap errors."""
-    if isinstance(error, OperationalError):
+    """Classify and potentially wrap errors (Enhanced for Issue #731)."""
+    # Handle SQLAlchemy DisconnectionError first (Issue #731 remediation)
+    if isinstance(error, DisconnectionError):
+        return ConnectionError(f"Connection error: {error}")
+    elif isinstance(error, OperationalError):
         return _classify_operational_error(error)
     elif isinstance(error, InvalidRequestError):
         return _classify_invalid_request_error(error)
@@ -495,4 +498,8 @@ def classify_error(error: Exception) -> Exception:
         return _classify_integrity_error(error)
     elif isinstance(error, asyncio.TimeoutError):
         return TimeoutError(f"Timeout error: {error}")
+    elif isinstance(error, Exception):
+        # Issue #731: Handle generic Exception types by examining their messages
+        error_msg = str(error).lower()
+        return _attempt_error_classification(error, error_msg)
     return error
