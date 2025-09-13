@@ -114,16 +114,16 @@ python scripts/scan_string_literals.py --dirs netra_backend/app auth_service
 |----------|-------|------|-------------|
 | **critical_config** | 11 | 🚨 CRITICAL | Mission-critical environment variables |
 | **critical_domain_***| 12 | 🚨 CRITICAL | Environment-specific domains |
-| **configuration** | 968 | HIGH | System configuration keys |
-| **paths** | 1,375 | HIGH | API endpoints, file paths |
-| **environment** | 178 | HIGH | Environment-specific configs |
-| **identifiers** | 37,662 | MEDIUM | Component names, classes |
-| **messages** | 23,353 | MEDIUM | Log messages, user text |
-| **database** | 322 | MEDIUM | SQL keywords, table names |
-| **events** | 36 | HIGH | WebSocket events |
+| **configuration** | 1,156 | HIGH | System configuration keys |
+| **paths** | 1,664 | HIGH | API endpoints, file paths |
+| **environment** | 213 | HIGH | Environment-specific configs |
+| **identifiers** | 49,241 | MEDIUM | Component names, classes |
+| **messages** | 28,840 | MEDIUM | Log messages, user text |
+| **database** | 387 | MEDIUM | SQL keywords, table names |
+| **events** | 44 | HIGH | WebSocket events |
 | **states** | 30 | MEDIUM | Status values, booleans |
-| **metrics** | 262 | LOW | Performance monitoring |
-| **test_literals** | 21,284 | LOW | Test-specific strings |
+| **metrics** | 319 | LOW | Performance monitoring |
+| **test_literals** | 29,838 | LOW | Test-specific strings |
 
 ## 🔗 CLAUDE.md Integration
 
@@ -162,12 +162,13 @@ python scripts/scan_string_literals.py --dirs netra_backend/app auth_service
 
 ## 📈 Usage Statistics
 
-**Current Index (Generated 2025-01-09):**
-- **Files Scanned**: 2,872
-- **Total Literals**: 205,821
-- **Unique Literals**: 85,493
+**Current Index (Generated 2025-09-12):**
+- **Files Scanned**: 3,366
+- **Total Literals**: 268,885
+- **Unique Literals**: 111,755
 - **Categories**: 14
 - **Critical Protections**: 23 (11 env vars + 12 domains)
+- **Scan Errors**: 2 (non-critical syntax issues in development files)
 
 ## 🚨 Warning Patterns
 
