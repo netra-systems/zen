@@ -27,21 +27,19 @@ class RequestStatus(Enum):
 
 
 class TestCostLimitEnforcement:
-        """Test suite for cost limit enforcement functionality."""
-    
-        @pytest.fixture
-        def llm_manager(self):
-            pass
-            """Use real service instance."""
-    # TODO: Initialize real service
-            """Create LLM manager with small budget for testing."""
-            return LLMManager(daily_budget=Decimal("1.00"))  # $1 daily budget
-    
-        @pytest.mark.asyncio
-        async def test_cost_limit_blocks_expensive_request(self, llm_manager):
-            """Test that requests exceeding cost limit are blocked."""
+    """Test suite for cost limit enforcement functionality."""
+
+    @pytest.fixture
+    def llm_manager(self):
+        """Create LLM manager with small budget for testing."""
+        # TODO: Initialize real service
+        return LLMManager(daily_budget=Decimal("1.00"))  # $1 daily budget
+
+    @pytest.mark.asyncio
+    async def test_cost_limit_blocks_expensive_request(self, llm_manager):
+        """Test that requests exceeding cost limit are blocked."""
         # Initialize the manager
-            await llm_manager.initialize()
+        await llm_manager.initialize()
         
         # Create an expensive request (simulate large prompt)
         # With gpt-4, this will be 10000 * 3 = 30000 estimated tokens

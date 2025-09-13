@@ -186,7 +186,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Managers missing _user_context attribute - isolation mechanism not implemented")
 
-    def test_multiple_managers_per_user_detection(self):
+    async def test_multiple_managers_per_user_detection(self):
         """
         Test detection of multiple manager instances for the same user.
 
