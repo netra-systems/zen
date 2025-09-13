@@ -97,25 +97,27 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
     - Error handling and graceful degradation in communication failures
     """
     
-    async def setup_method(self, method):
+    def setup_method(self, method):
         """Set up test environment with real WebSocket and agent infrastructure - pytest entry point."""
-        await super().setup_method(method)
-        await self.async_setup_method(method)
-    
-    async def async_setup_method(self, method=None):
-        """Set up test environment with real WebSocket and agent infrastructure."""
-        await super().async_setup_method(method)
-        
+        # Call the parent's sync setup method
+        super().setup_method(method)
+
+        # Continue with sync initialization that doesn't require awaiting
+        self._setup_sync_components(method)
+
+    def _setup_sync_components(self, method=None):
+        """Set up sync components for test environment."""
+
         # Initialize environment for WebSocket integration testing
         self.env = get_env()
         self.set_env_var("TESTING", "true")
         self.set_env_var("TEST_ENV", "integration")
-        
+
         # Create unique test identifiers for isolation
         self.test_user_id = f"ws_user_{uuid.uuid4().hex[:8]}"
         self.test_thread_id = f"ws_thread_{uuid.uuid4().hex[:8]}"
         self.test_run_id = f"ws_run_{uuid.uuid4().hex[:8]}"
-        
+
         # Track WebSocket communication metrics
         self.communication_metrics = {
             'websocket_connections_established': 0,
@@ -124,14 +126,17 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
             'user_isolations_validated': 0,
             'communication_errors_handled': 0
         }
+
+        # Mark that async initialization is needed
+        self._async_init_pending = True
+
+        # Initialize mock infrastructure immediately for tests that need it
+        self._initialize_mock_websocket_infrastructure()
         
-        # Initialize real WebSocket infrastructure
-        await self._initialize_websocket_infrastructure()
-        
-    async def teardown_method(self, method):
+    def teardown_method(self, method):
         """Clean up WebSocket resources - pytest entry point."""
-        await self.async_teardown_method(method)
-        await super().teardown_method(method)
+        # Call the parent's sync teardown method
+        super().teardown_method(method)
     
     async def async_teardown_method(self, method=None):
         """Clean up WebSocket resources and record metrics."""
@@ -725,21 +730,30 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
 
     # === HELPER METHODS FOR WebSocket Integration Testing ===
     
+    @asynccontextmanager
     async def _get_user_execution_context(self):
         """Get user execution context from factory or mock."""
+        # Initialize async components if needed
+        if getattr(self, '_async_init_pending', False):
+            await self._initialize_websocket_infrastructure()
+            self._async_init_pending = False
+
         try:
             if hasattr(self.agent_factory, 'user_execution_scope'):
-                return self.agent_factory.user_execution_scope(
+                async with self.agent_factory.user_execution_scope(
                     user_id=self.test_user_id,
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id
-                )
+                ) as context:
+                    yield context
+                return
         except Exception:
             pass
-        
-        return self._mock_user_execution_scope(
+
+        async with self._mock_user_execution_scope(
             self.test_user_id, self.test_thread_id, self.test_run_id
-        )
+        ) as context:
+            yield context
     
     def _create_agent_state(self, user_request: str, user_id: str):
         """Create agent state with fallback for mock scenarios."""
