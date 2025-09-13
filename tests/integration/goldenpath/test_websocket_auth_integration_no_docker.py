@@ -288,7 +288,7 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -436,7 +436,7 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath  
+    @pytest.mark.golden_path  
 
     @pytest.mark.no_docker
 
@@ -586,7 +586,7 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker  
 
@@ -758,7 +758,7 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -968,7 +968,7 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 

@@ -169,7 +169,7 @@ class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
         return base_state
 
     @pytest.mark.integration
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
     @pytest.mark.no_docker
     async def test_three_tier_persistence_redis_postgres_clickhouse(self):
         """
@@ -267,7 +267,7 @@ class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
             await persistence_manager.cleanup()
 
     @pytest.mark.integration
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
     @pytest.mark.no_docker
     async def test_state_recovery_after_service_interruption(self):
         """
@@ -403,7 +403,7 @@ class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
             await persistence_manager.cleanup()
 
     @pytest.mark.integration
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
     @pytest.mark.no_docker
     async def test_concurrent_state_operations_consistency(self):
         """
@@ -562,7 +562,7 @@ class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
             await persistence_manager.cleanup()
 
     @pytest.mark.integration
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
     @pytest.mark.no_docker
     async def test_state_consistency_across_tiers(self):
         """
@@ -709,7 +709,7 @@ class TestGoldenPathStatePersistenceNonDocker(SSotAsyncTestCase):
             await persistence_manager.cleanup()
 
     @pytest.mark.integration
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
     @pytest.mark.no_docker
     async def test_state_cleanup_and_garbage_collection(self):
         """

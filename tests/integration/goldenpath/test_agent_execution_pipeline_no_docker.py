@@ -102,7 +102,7 @@ from netra_backend.app.agents.triage_agent import TriageAgent
 
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 
-from netra_backend.app.agents.apex_optimizer_agent import ApexOptimizerAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 
 
 
@@ -220,7 +220,7 @@ class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -456,7 +456,7 @@ class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -698,7 +698,7 @@ class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -1000,7 +1000,7 @@ class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
@@ -1360,7 +1360,7 @@ class TestGoldenPathAgentExecutionNonDocker(SSotAsyncTestCase):
 
     @pytest.mark.integration
 
-    @pytest.mark.goldenpath
+    @pytest.mark.golden_path
 
     @pytest.mark.no_docker
 
