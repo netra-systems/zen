@@ -328,13 +328,16 @@ class UnifiedWebSocketManager:
         # PHASE 1: Direct instantiation prevention (Issue #712)
         # Check if this is being created through proper factory pattern
         if _ssot_authorization_token is None:
-            error_msg = "Direct instantiation not allowed. Use get_websocket_manager() factory function."
+            import inspect
+            frame = inspect.currentframe()
+            caller_name = frame.f_back.f_code.co_name if frame and frame.f_back else "unknown"
+            error_msg = f"Direct instantiation not allowed. Use get_websocket_manager() factory function. Caller: {caller_name}"
             logger.error(f"SSOT VIOLATION: {error_msg}")
             raise FactoryBypassDetected(error_msg)
 
-        # Validate authorization token format (basic security)
-        if not isinstance(_ssot_authorization_token, str) or len(_ssot_authorization_token) < 10:
-            error_msg = "Invalid SSOT authorization token format"
+        # Validate authorization token format (strengthened security - PHASE 1 FIX)
+        if not isinstance(_ssot_authorization_token, str) or len(_ssot_authorization_token) < 16:
+            error_msg = f"Invalid SSOT authorization token format (length: {len(_ssot_authorization_token) if _ssot_authorization_token else 0})"
             logger.error(f"SSOT VIOLATION: {error_msg}")
             raise FactoryBypassDetected(error_msg)
 
