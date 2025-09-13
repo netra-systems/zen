@@ -2431,7 +2431,8 @@ class UnifiedTestRunner:
                     should_stop, decision = self.fail_fast_strategy.should_fail_fast(
                         current_stats=self.progress_tracker.get_current_progress() if self.progress_tracker else None
                     )
-                    if should_stop and decision:
+                    # Check if --no-phase-dependencies flag allows continuing despite failures
+                    if should_stop and decision and not getattr(args, 'no_phase_dependencies', False):
                         print(f"\1Stopping execution: {decision.reason}")
                         # Mark remaining categories as skipped
                         for remaining_phase in execution_plan.phases[phase_num + 1:]:
@@ -2444,6 +2445,9 @@ class UnifiedTestRunner:
                                     "skipped": True
                                 }
                         break
+                    elif should_stop and decision and getattr(args, 'no_phase_dependencies', False):
+                        print(f"\1Phase dependency override: Continuing despite failures ({decision.reason})")
+                        # Continue with next phase despite failures
         
         return results
     
@@ -3843,9 +3847,15 @@ def main():
     
     parser.add_argument(
         "--no-dependencies",
-        "--skip-deps", 
+        "--skip-deps",
         action="store_true",
         help="Skip dependency resolution - run only the specified categories without their dependencies"
+    )
+
+    parser.add_argument(
+        "--no-phase-dependencies",
+        action="store_true",
+        help="Allow later phases to run even if earlier phases fail (remove phase dependency restrictions)"
     )
     
     parser.add_argument(
