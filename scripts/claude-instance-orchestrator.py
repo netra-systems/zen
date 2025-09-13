@@ -225,26 +225,35 @@ class ClaudeInstanceOrchestrator:
             status.pid = process.pid
             logger.info(f"Instance {name} started with PID {process.pid}")
 
-            # Read output in real-time for stream-json format
+            # For stream-json format, stream output in parallel with process execution
             if config.output_format == "stream-json":
-                await self._stream_output(name, process)
+                # Create streaming task but don't await it yet
+                stream_task = asyncio.create_task(self._stream_output_parallel(name, process))
 
-            # Wait for completion
-            stdout, stderr = await process.communicate()
+                # Wait for process to complete
+                returncode = await process.wait()
+
+                # Now wait for streaming to complete
+                await stream_task
+            else:
+                # For non-streaming formats, use traditional communicate
+                stdout, stderr = await process.communicate()
+                returncode = process.returncode
+
+                if stdout:
+                    status.output += stdout.decode() if isinstance(stdout, bytes) else stdout
+                if stderr:
+                    status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
 
             status.end_time = time.time()
-            if stdout:
-                status.output += stdout.decode() if isinstance(stdout, bytes) else stdout
-            if stderr:
-                status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
 
-            if process.returncode == 0:
+            if returncode == 0:
                 status.status = "completed"
                 logger.info(f"Instance {name} completed successfully")
                 return True
             else:
                 status.status = "failed"
-                logger.error(f"Instance {name} failed with return code {process.returncode}")
+                logger.error(f"Instance {name} failed with return code {returncode}")
                 if status.error:
                     logger.error(f"Error output: {status.error}")
                 return False
@@ -256,7 +265,7 @@ class ClaudeInstanceOrchestrator:
             return False
 
     async def _stream_output(self, name: str, process):
-        """Stream output in real-time for stream-json format"""
+        """Stream output in real-time for stream-json format (DEPRECATED - use _stream_output_parallel)"""
         status = self.statuses[name]
 
         async def read_stream(stream, prefix):
@@ -279,6 +288,45 @@ class ClaudeInstanceOrchestrator:
             read_stream(process.stderr, "STDERR"),
             return_exceptions=True
         )
+
+    async def _stream_output_parallel(self, name: str, process):
+        """Stream output in real-time for stream-json format with proper parallel execution"""
+        status = self.statuses[name]
+
+        async def read_stream(stream, prefix):
+            try:
+                while True:
+                    line = await stream.readline()
+                    if not line:
+                        break
+                    line_str = line.decode() if isinstance(line, bytes) else line
+
+                    # Print with instance name prefix for clarity
+                    print(f"[{name}] {prefix}: {line_str.strip()}", flush=True)
+
+                    # Accumulate output in status
+                    if prefix == "STDOUT":
+                        status.output += line_str
+                    else:
+                        status.error += line_str
+            except Exception as e:
+                logger.error(f"Error reading {prefix} for instance {name}: {e}")
+
+        # Create tasks for reading both streams concurrently
+        stdout_task = asyncio.create_task(read_stream(process.stdout, "STDOUT"))
+        stderr_task = asyncio.create_task(read_stream(process.stderr, "STDERR"))
+
+        # Wait for both streams to be consumed
+        try:
+            await asyncio.gather(stdout_task, stderr_task, return_exceptions=True)
+        except Exception as e:
+            logger.error(f"Error in stream reading for instance {name}: {e}")
+        finally:
+            # Ensure streams are properly closed
+            if process.stdout and not process.stdout.at_eof():
+                process.stdout.close()
+            if process.stderr and not process.stderr.at_eof():
+                process.stderr.close()
 
     async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
         """Run all instances concurrently with timeout"""
