@@ -1,539 +1,460 @@
-#!/usr/bin/env python3
+"""Mission Critical Agent Factory SSOT Validation Tests.
+
+CRITICAL MISSION: Protect $500K+ ARR Golden Path functionality through agent factory SSOT compliance.
+
+This test suite validates that agent factory patterns follow SSOT principles and ensure
+complete user isolation. Factory pattern violations directly impact Golden Path business value.
+
+Business Impact:
+- Revenue Protection: $500K+ ARR depends on reliable agent execution
+- User Experience: Chat functionality requires proper agent isolation
+- System Stability: Factory SSOT prevents race conditions and state contamination
+- Security: User isolation prevents data leakage between sessions
+
+Test Strategy:
+1. Test FAILS with current codebase (proving factory violations exist)
+2. Validate AgentRegistry creates isolated instances per user
+3. Test WebSocket manager factory maintains user separation
+4. Ensure no shared state across concurrent users
+5. Tests PASS after proper factory SSOT consolidation
+
+Created: 2025-09-12
+Issue: #686 ExecutionEngine consolidation blocking Golden Path
+Priority: MISSION CRITICAL - Protects core business value
 """
-MISSION CRITICAL TEST SUITE: Agent Factory SSOT Validation
 
-Business Value: Platform/Internal - $500K+ ARR Golden Path Protection
-Validates ExecutionEngineFactory consolidation and ensures factory pattern follows SSOT principles.
-
-This test suite validates:
-1. ExecutionEngineFactory consolidation is correct
-2. No shared state between user sessions
-3. Factory pattern follows SSOT principles
-4. Factory initialization consistency
-5. User isolation integrity in factory-created instances
-
-P0 SSOT Factory Violations Targeted:
-- Multiple ExecutionEngineFactory implementations
-- Shared state between concurrent users through factory instances
-- Inconsistent factory initialization patterns
-
-CRITICAL: Tests must run without Docker dependency for CI/CD integration.
-
-Author: Agent Events Remediation Team
-Date: 2025-09-12
-"""
-
-import ast
-import concurrent.futures
-import glob
-import os
-import re
-import sys
+import asyncio
 import threading
 import time
 import uuid
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Any, Callable
-from dataclasses import dataclass
-from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Set, Any, Optional
+import unittest.mock
+from unittest.mock import patch, MagicMock
 
-# Add project root to path for imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
-import pytest
-from loguru import logger
-
-# Import SSOT test framework
-from test_framework.ssot.base_test_case import SSotBaseTestCase
-from shared.isolated_environment import get_env, IsolatedEnvironment
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from dev_launcher.isolated_environment import IsolatedEnvironment
 
 
-@dataclass
-class FactoryValidation:
-    """Results from factory SSOT validation."""
-    factory_class: str
-    file_path: str
-    line_number: int
-    is_production_code: bool
-    is_deprecated: bool
-    has_user_isolation: bool
-    follows_ssot_pattern: bool
+class TestAgentFactorySsotValidation(SSotAsyncTestCase):
+    """Mission critical validation of agent factory SSOT compliance."""
 
+    def setUp(self):
+        """Set up test environment for factory validation."""
+        super().setUp()
+        self.env = IsolatedEnvironment()
+        self.test_user_contexts = []
 
-@dataclass
-class UserIsolationTest:
-    """Results from user isolation testing."""
-    user_id: str
-    session_id: str
-    factory_instance_id: str
-    execution_context_id: str
-    memory_usage_mb: float
-    isolation_verified: bool
-    shared_state_detected: bool
+    def tearDown(self):
+        """Clean up test resources."""
+        super().tearDown()
+        # Clean up any created contexts
+        self.test_user_contexts.clear()
 
+    def test_agent_registry_factory_user_isolation_ssot_compliance(self):
+        """TEST FAILS: AgentRegistry factory allows shared state between users.
 
-@dataclass
-class FactoryComplianceReport:
-    """Comprehensive factory SSOT compliance report."""
-    execution_engine_factories_found: int
-    production_factories: List[FactoryValidation]
-    deprecated_factories: List[FactoryValidation]
-    user_isolation_tests: List[UserIsolationTest]
-    factory_consistency_score: float
-    shared_state_violations: int
-    ssot_compliance_score: float
-    critical_violations: List[str]
-    recommendations: List[str]
+        CRITICAL BUSINESS IMPACT: Shared state causes WebSocket events to be delivered
+        to wrong users, directly violating $500K+ ARR Golden Path user experience.
 
-
-class FactorySSotAnalyzer:
-    """Analyzes factory patterns for SSOT compliance."""
-
-    def __init__(self, project_root: Path):
-        self.project_root = project_root
-        self.factory_patterns = [
-            'ExecutionEngineFactory',
-            'UserExecutionEngineFactory',
-            'AgentFactory',
-            'WebSocketFactory'
-        ]
-        self.ssot_factory_paths = {
-            'ExecutionEngineFactory': 'netra_backend.app.agents.supervisor.user_execution_engine'
-        }
-
-    def scan_for_factory_classes(self) -> List[FactoryValidation]:
-        """Scan codebase for factory class implementations."""
-        validations = []
-
-        python_files = glob.glob(str(self.project_root / "**" / "*.py"), recursive=True)
-
-        for file_path in python_files:
-            # Skip test files, backups, and cache
-            if any(skip in file_path for skip in ['test', '__pycache__', '.git', 'backup', 'deprecated']):
-                continue
-
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-
-                # Look for factory class patterns
-                for factory_pattern in self.factory_patterns:
-                    class_pattern = rf'^class {factory_pattern}[^(]*(?:\([^)]*\))?:'
-                    matches = re.finditer(class_pattern, content, re.MULTILINE)
-
-                    for match in matches:
-                        line_number = content[:match.start()].count('\n') + 1
-
-                        validation = FactoryValidation(
-                            factory_class=factory_pattern,
-                            file_path=file_path,
-                            line_number=line_number,
-                            is_production_code=self._is_production_code(file_path),
-                            is_deprecated=('deprecated' in file_path.lower() or 'backup' in file_path.lower()),
-                            has_user_isolation=self._check_user_isolation_pattern(content, match),
-                            follows_ssot_pattern=self._check_ssot_pattern(content, match)
-                        )
-                        validations.append(validation)
-
-            except Exception as e:
-                logger.warning(f"Error scanning {file_path}: {e}")
-
-        return validations
-
-    def _is_production_code(self, file_path: str) -> bool:
-        """Check if file contains production code."""
-        return any(prod in file_path for prod in ['netra_backend/app/', 'auth_service/', 'shared/'])
-
-    def _check_user_isolation_pattern(self, content: str, match: re.Match) -> bool:
-        """Check if factory follows user isolation pattern."""
-        # Look for user_id parameters and isolation patterns
-        factory_section = content[match.start():match.start() + 2000]  # Next 2000 chars
-
-        isolation_indicators = [
-            'user_id',
-            'exec_context',
-            'UserExecutionContext',
-            'create_for_user',
-            'user_context'
-        ]
-
-        return any(indicator in factory_section for indicator in isolation_indicators)
-
-    def _check_ssot_pattern(self, content: str, match: re.Match) -> bool:
-        """Check if factory follows SSOT pattern."""
-        factory_section = content[match.start():match.start() + 2000]  # Next 2000 chars
-
-        ssot_indicators = [
-            '@classmethod',
-            'create_for_user',
-            'validate_',
-            'ensure_',
-            'SSOT'
-        ]
-
-        return any(indicator in factory_section for indicator in ssot_indicators)
-
-
-class UserIsolationSimulator:
-    """Simulates concurrent users to test factory isolation."""
-
-    def __init__(self):
-        self.shared_state_tracker = {}
-        self.isolation_results = []
-
-    def simulate_user_session(self, user_id: str) -> UserIsolationTest:
-        """Simulate a user session to test factory isolation."""
-        session_id = str(uuid.uuid4())
-        start_time = time.time()
-
+        EXPECTED FAILURE: Multiple users get same AgentRegistry instance.
+        PASSES AFTER: Each user gets isolated AgentRegistry with unique WebSocket manager.
+        """
         try:
-            # Try to import and use ExecutionEngine factory
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-
-            # Create mock execution context
-            class MockExecutionContext:
-                def __init__(self, user_id: str):
-                    self.user_id = user_id
-                    self.session_id = session_id
-                    self.agent_name = f"test_agent_{user_id}"
-                    self.run_id = str(uuid.uuid4())
-
-            exec_context = MockExecutionContext(user_id)
-
-            # Test factory instantiation (if factory method exists)
-            if hasattr(UserExecutionEngine, 'create_for_user'):
-                # Use factory method
-                factory_instance_id = str(id(UserExecutionEngine))
-                execution_context_id = str(id(exec_context))
-            else:
-                # Direct instantiation
-                factory_instance_id = "direct_instantiation"
-                execution_context_id = str(id(exec_context))
-
-            # Check for shared state
-            state_key = f"factory_{factory_instance_id}"
-            if state_key in self.shared_state_tracker:
-                shared_state_detected = True
-                logger.warning(f"Shared state detected for factory {factory_instance_id}")
-            else:
-                self.shared_state_tracker[state_key] = {
-                    'user_id': user_id,
-                    'timestamp': datetime.now(),
-                    'session_id': session_id
-                }
-                shared_state_detected = False
-
-            # Simulate memory usage
-            memory_usage_mb = 0.5  # Minimal for testing
-
-            return UserIsolationTest(
-                user_id=user_id,
-                session_id=session_id,
-                factory_instance_id=factory_instance_id,
-                execution_context_id=execution_context_id,
-                memory_usage_mb=memory_usage_mb,
-                isolation_verified=not shared_state_detected,
-                shared_state_detected=shared_state_detected
-            )
-
-        except Exception as e:
-            logger.error(f"Error simulating user session for {user_id}: {e}")
-            return UserIsolationTest(
-                user_id=user_id,
-                session_id=session_id,
-                factory_instance_id="error",
-                execution_context_id="error",
-                memory_usage_mb=0.0,
-                isolation_verified=False,
-                shared_state_detected=True
-            )
-
-
-class TestAgentFactorySSotValidation(SSotBaseTestCase):
-    """Mission Critical Test Suite: Agent Factory SSOT Validation."""
-
-    def setup_method(self, method):
-        """Setup test method with SSOT base configuration."""
-        super().setup_method(method)
-        self.project_root = Path(project_root)
-        self.analyzer = FactorySSotAnalyzer(self.project_root)
-        self.simulator = UserIsolationSimulator()
-
-    def test_execution_engine_factory_consolidation(self):
-        """Test that ExecutionEngineFactory is properly consolidated."""
-        logger.info("Testing ExecutionEngineFactory consolidation")
-
-        # Scan for all factory implementations
-        factory_validations = self.analyzer.scan_for_factory_classes()
-
-        # Filter for ExecutionEngine factories
-        execution_engine_factories = [
-            v for v in factory_validations
-            if 'ExecutionEngine' in v.factory_class and v.is_production_code
-        ]
-
-        logger.info(f"Found {len(execution_engine_factories)} ExecutionEngine factory implementations")
-
-        # Log each factory found
-        for factory in execution_engine_factories:
-            logger.info(f"  {factory.factory_class} at {factory.file_path}:{factory.line_number}")
-
-        # Check for canonical SSOT factory
-        canonical_factories = [
-            f for f in execution_engine_factories
-            if ('execution_engine_factory' in f.file_path or
-                'execution_factory' in f.file_path or
-                'user_execution_engine' in f.file_path)
-        ]
-
-        # Log all factories found for debugging
-        for factory in execution_engine_factories:
-            logger.info(f"  ExecutionEngine factory: {factory.factory_class} at {factory.file_path}:{factory.line_number}")
-
-        # FLEXIBLE ASSERTION: Allow system to work without strict factory patterns during migration
-        if len(execution_engine_factories) == 0:
-            logger.warning("No ExecutionEngine factories found - system may be using direct instantiation")
-            logger.info("✅ ExecutionEngineFactory validation passed (no factories found, allowing direct instantiation)")
-            return
-
-        # If factories exist, validate canonical SSOT factory
-        if len(canonical_factories) == 0:
-            logger.warning(f"No canonical ExecutionEngine factory found in expected locations")
-            logger.warning(f"Found factories: {[f.file_path for f in execution_engine_factories]}")
-            logger.warning("Consider consolidating to canonical SSOT location")
-
-        # ASSERTION: Should not have too many production factories (allow some flexibility during migration)
-        if len(execution_engine_factories) > 3:
-            logger.warning(f"Found {len(execution_engine_factories)} ExecutionEngine factories - consider consolidation")
-
-        logger.info("✅ ExecutionEngineFactory consolidation validated")
-
-    def test_no_shared_state_between_user_sessions(self):
-        """Test that factory-created instances don't share state between users."""
-        logger.info("Testing factory user session isolation")
-
-        # Simulate multiple concurrent users
-        user_ids = [f"user_{i}" for i in range(5)]
-        concurrent_tests = []
-
-        # Use ThreadPoolExecutor to simulate concurrent user sessions
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            # Submit user session simulations
-            futures = [
-                executor.submit(self.simulator.simulate_user_session, user_id)
-                for user_id in user_ids
-            ]
-
-            # Collect results
-            for future in concurrent.futures.as_completed(futures):
-                try:
-                    result = future.result(timeout=10)
-                    concurrent_tests.append(result)
-                except Exception as e:
-                    logger.error(f"User session simulation failed: {e}")
-
-        logger.info(f"Completed {len(concurrent_tests)} user session simulations")
-
-        # Analyze isolation results
-        successful_isolations = [t for t in concurrent_tests if t.isolation_verified]
-        shared_state_violations = [t for t in concurrent_tests if t.shared_state_detected]
-
-        logger.info(f"Successful isolations: {len(successful_isolations)}")
-        logger.info(f"Shared state violations: {len(shared_state_violations)}")
-
-        # Log any shared state violations
-        if shared_state_violations:
-            logger.error("Shared state violations detected:")
-            for violation in shared_state_violations:
-                logger.error(f"  User {violation.user_id}: Factory {violation.factory_instance_id}")
-
-        # CRITICAL ASSERTION: No shared state between users
-        assert len(shared_state_violations) == 0, (
-            f"Factory shared state violations detected: {len(shared_state_violations)}. "
-            f"Users with shared state: {[v.user_id for v in shared_state_violations]}"
-        )
-
-        logger.info("✅ Factory user session isolation validated")
-
-    def test_factory_pattern_follows_ssot_principles(self):
-        """Test that factory patterns follow SSOT principles."""
-        logger.info("Testing factory SSOT pattern compliance")
-
-        # Scan for factory implementations
-        factory_validations = self.analyzer.scan_for_factory_classes()
-        production_factories = [v for v in factory_validations if v.is_production_code]
-
-        logger.info(f"Found {len(production_factories)} production factory implementations")
-
-        # Check SSOT compliance for each factory
-        ssot_compliant_factories = [f for f in production_factories if f.follows_ssot_pattern]
-        user_isolation_factories = [f for f in production_factories if f.has_user_isolation]
-
-        logger.info(f"SSOT compliant factories: {len(ssot_compliant_factories)}")
-        logger.info(f"User isolation factories: {len(user_isolation_factories)}")
-
-        # Log non-compliant factories
-        non_compliant = [f for f in production_factories if not f.follows_ssot_pattern]
-        if non_compliant:
-            logger.warning("Non-SSOT compliant factories found:")
-            for factory in non_compliant:
-                logger.warning(f"  {factory.factory_class} at {factory.file_path}:{factory.line_number}")
-
-        # ASSERTION: At least 80% of factories should follow SSOT principles
-        if production_factories:
-            compliance_rate = len(ssot_compliant_factories) / len(production_factories)
-            assert compliance_rate >= 0.8, (
-                f"Factory SSOT compliance rate too low: {compliance_rate:.1%}. "
-                f"Must be >= 80%. Non-compliant: {[f.factory_class for f in non_compliant]}"
-            )
-
-        logger.info("✅ Factory SSOT pattern compliance validated")
-
-    def test_factory_initialization_consistency(self):
-        """Test that factory initialization is consistent across implementations."""
-        logger.info("Testing factory initialization consistency")
-
-        try:
-            # Test UserExecutionEngine factory initialization
-            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-
-            # Check if factory methods exist and are consistent
-            factory_methods = []
-
-            if hasattr(UserExecutionEngine, 'create_for_user'):
-                factory_methods.append('create_for_user')
-
-            if hasattr(UserExecutionEngine, '__init__'):
-                factory_methods.append('__init__')
-
-            logger.info(f"Factory methods found: {factory_methods}")
-
-            # ASSERTION: Must have at least one factory method
-            assert len(factory_methods) > 0, (
-                "UserExecutionEngine must have factory methods (create_for_user or __init__)"
-            )
-
-            # Test factory method signatures for consistency
-            if 'create_for_user' in factory_methods:
-                import inspect
-                signature = inspect.signature(UserExecutionEngine.create_for_user)
-                params = list(signature.parameters.keys())
-
-                logger.info(f"create_for_user signature: {params}")
-
-                # Check for user isolation parameters
-                isolation_params = ['user_id', 'exec_context', 'context']
-                has_isolation = any(param in params for param in isolation_params)
-
-                # ASSERTION: Factory method should support user isolation
-                if not has_isolation:
-                    logger.warning("create_for_user method may not support proper user isolation")
-
-            logger.info("✅ Factory initialization consistency validated")
-
+            from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         except ImportError as e:
-            pytest.skip(f"UserExecutionEngine not available for testing: {e}")
+            self.fail(f"CRITICAL FAILURE: Cannot import AgentRegistry for factory testing: {e}")
 
-    def test_generate_factory_compliance_report(self):
-        """Generate comprehensive factory SSOT compliance report."""
-        logger.info("Generating factory compliance report")
+        # Create multiple user contexts
+        user_contexts = []
+        for i in range(3):
+            context = unittest.mock.Mock()
+            context.user_id = f"test_user_{i}"
+            context.session_id = f"test_session_{i}"
+            user_contexts.append(context)
 
-        # Scan all factories
-        factory_validations = self.analyzer.scan_for_factory_classes()
-
-        # Categorize factories
-        production_factories = [v for v in factory_validations if v.is_production_code]
-        deprecated_factories = [v for v in factory_validations if v.is_deprecated]
-
-        # Run user isolation tests
-        user_isolation_tests = []
-        test_users = [f"test_user_{i}" for i in range(3)]
-
-        for user_id in test_users:
+        # Test factory creates isolated instances
+        registries = []
+        for context in user_contexts:
             try:
-                test_result = self.simulator.simulate_user_session(user_id)
-                user_isolation_tests.append(test_result)
+                # Attempt to create registry instance for user
+                if hasattr(AgentRegistry, 'create_for_user'):
+                    registry = AgentRegistry.create_for_user(context)
+                elif hasattr(AgentRegistry, 'get_instance'):
+                    registry = AgentRegistry.get_instance(context)
+                else:
+                    # Try direct instantiation
+                    registry = AgentRegistry(context)
+
+                registries.append(registry)
             except Exception as e:
-                logger.warning(f"User isolation test failed for {user_id}: {e}")
+                self.fail(
+                    f"CRITICAL FAILURE: AgentRegistry factory failed for user {context.user_id}: {e}. "
+                    f"Issue #686: Factory pattern must work for all users."
+                )
 
-        # Calculate metrics
-        execution_engine_factories = len([f for f in production_factories if 'ExecutionEngine' in f.factory_class])
-        shared_state_violations = len([t for t in user_isolation_tests if t.shared_state_detected])
+        # CRITICAL TEST: Each user must get unique registry instance
+        registry_ids = [id(registry) for registry in registries]
+        unique_ids = set(registry_ids)
 
-        # Factory consistency score
-        if production_factories:
-            ssot_compliant = len([f for f in production_factories if f.follows_ssot_pattern])
-            factory_consistency_score = (ssot_compliant / len(production_factories)) * 100
-        else:
-            factory_consistency_score = 100
-
-        # Overall SSOT compliance score
-        violation_penalty = shared_state_violations * 20  # 20 points per violation
-        ssot_compliance_score = max(0, factory_consistency_score - violation_penalty)
-
-        # Generate critical violations
-        critical_violations = []
-        if shared_state_violations > 0:
-            critical_violations.append(f"Shared state violations: {shared_state_violations}")
-        if execution_engine_factories == 0:
-            critical_violations.append("No ExecutionEngine factories found")
-
-        # Generate recommendations
-        recommendations = []
-        if shared_state_violations > 0:
-            recommendations.append("Fix shared state violations in factory implementations")
-        if factory_consistency_score < 80:
-            recommendations.append("Improve factory SSOT pattern compliance")
-
-        # Create report
-        report = FactoryComplianceReport(
-            execution_engine_factories_found=execution_engine_factories,
-            production_factories=production_factories,
-            deprecated_factories=deprecated_factories,
-            user_isolation_tests=user_isolation_tests,
-            factory_consistency_score=factory_consistency_score,
-            shared_state_violations=shared_state_violations,
-            ssot_compliance_score=ssot_compliance_score,
-            critical_violations=critical_violations,
-            recommendations=recommendations
+        # TEST FAILS if shared instances exist (SSOT violation)
+        self.assertEqual(
+            len(unique_ids), len(registries),
+            f"CRITICAL SSOT VIOLATION: AgentRegistry factory returns shared instances. "
+            f"Found {len(unique_ids)} unique instances for {len(registries)} users. "
+            f"Instance IDs: {registry_ids}. "
+            f"BUSINESS IMPACT: Shared state causes WebSocket events delivered to wrong users. "
+            f"Issue #686: Factory must create isolated instances per user for $500K+ ARR protection."
         )
 
-        # Log report
-        logger.info("Factory Compliance Report:")
-        logger.info(f"  ExecutionEngine factories: {report.execution_engine_factories_found}")
-        logger.info(f"  Production factories: {len(report.production_factories)}")
-        logger.info(f"  Deprecated factories: {len(report.deprecated_factories)}")
-        logger.info(f"  User isolation tests: {len(report.user_isolation_tests)}")
-        logger.info(f"  Factory consistency score: {report.factory_consistency_score:.1f}%")
-        logger.info(f"  Shared state violations: {report.shared_state_violations}")
-        logger.info(f"  SSOT compliance score: {report.ssot_compliance_score:.1f}%")
+        # Validate user context isolation if available
+        for i, registry in enumerate(registries):
+            if hasattr(registry, 'user_context'):
+                expected_user_id = user_contexts[i].user_id
+                actual_user_id = getattr(registry.user_context, 'user_id', None)
 
-        if report.critical_violations:
-            logger.error("Critical violations:")
-            for violation in report.critical_violations:
-                logger.error(f"  {violation}")
+                self.assertEqual(
+                    actual_user_id, expected_user_id,
+                    f"CRITICAL SSOT VIOLATION: Registry {i} has wrong user context. "
+                    f"Expected: {expected_user_id}, Got: {actual_user_id}. "
+                    f"Issue #686: User context contamination violates Golden Path isolation."
+                )
 
-        if report.recommendations:
-            logger.info("Recommendations:")
-            for rec in report.recommendations:
-                logger.info(f"  {rec}")
+    def test_websocket_manager_factory_isolation_ssot_compliance(self):
+        """TEST FAILS: WebSocket manager factory allows cross-user contamination.
 
-        # Store report for use by other tests
-        self.factory_compliance_report = report
+        CRITICAL BUSINESS IMPACT: WebSocket events sent to wrong users breaks chat
+        functionality and violates user privacy. Core Golden Path failure.
 
-        # ASSERTION: SSOT compliance score must be reasonable for Golden Path protection
-        assert report.ssot_compliance_score >= 70, (
-            f"Factory SSOT compliance score too low: {report.ssot_compliance_score:.1f}%. "
-            f"Must be >= 70% for Golden Path protection. Violations: {report.critical_violations}"
+        EXPECTED FAILURE: WebSocket managers shared between users.
+        PASSES AFTER: Each user gets isolated WebSocket manager with no cross-contamination.
+        """
+        try:
+            from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        except ImportError as e:
+            self.fail(f"CRITICAL FAILURE: Cannot import AgentRegistry for WebSocket testing: {e}")
+
+        # Create user contexts with different session IDs
+        user_contexts = []
+        for i in range(2):
+            context = unittest.mock.Mock()
+            context.user_id = f"ws_test_user_{i}"
+            context.session_id = f"ws_test_session_{i}"
+            user_contexts.append(context)
+
+        # Create mock WebSocket managers for testing
+        mock_websocket_managers = []
+
+        with patch('netra_backend.app.agents.supervisor.agent_registry.AgentWebSocketBridge') as mock_bridge:
+            # Configure mock to return different instances
+            mock_instances = [MagicMock() for _ in range(len(user_contexts))]
+            mock_bridge.side_effect = mock_instances
+            mock_websocket_managers = mock_instances
+
+            registries = []
+            for context in user_contexts:
+                try:
+                    # Create registry with WebSocket manager
+                    if hasattr(AgentRegistry, 'create_for_user'):
+                        registry = AgentRegistry.create_for_user(context)
+                    else:
+                        registry = AgentRegistry(context)
+
+                    # Set WebSocket manager if method exists
+                    if hasattr(registry, 'set_websocket_manager'):
+                        mock_ws_manager = MagicMock()
+                        mock_ws_manager.user_id = context.user_id
+                        registry.set_websocket_manager(mock_ws_manager)
+
+                    registries.append(registry)
+                except Exception as e:
+                    self.fail(
+                        f"CRITICAL FAILURE: Registry creation with WebSocket failed: {e}. "
+                        f"Issue #686: WebSocket integration must work in factory pattern."
+                    )
+
+            # CRITICAL TEST: WebSocket managers must be isolated per user
+            if len(registries) >= 2:
+                registry1, registry2 = registries[0], registries[1]
+
+                # Check if registries have WebSocket managers
+                ws_manager1 = getattr(registry1, 'websocket_manager', None)
+                ws_manager2 = getattr(registry2, 'websocket_manager', None)
+
+                if ws_manager1 is not None and ws_manager2 is not None:
+                    # TEST FAILS if same WebSocket manager shared
+                    self.assertIsNot(
+                        ws_manager1, ws_manager2,
+                        f"CRITICAL SSOT VIOLATION: WebSocket managers shared between users. "
+                        f"Manager 1 ID: {id(ws_manager1)}, Manager 2 ID: {id(ws_manager2)}. "
+                        f"BUSINESS IMPACT: WebSocket events sent to wrong users breaks Golden Path. "
+                        f"Issue #686: WebSocket isolation critical for $500K+ ARR protection."
+                    )
+
+                    # Validate user ID isolation
+                    user1_id = getattr(ws_manager1, 'user_id', None)
+                    user2_id = getattr(ws_manager2, 'user_id', None)
+
+                    if user1_id is not None and user2_id is not None:
+                        self.assertNotEqual(
+                            user1_id, user2_id,
+                            f"CRITICAL SSOT VIOLATION: WebSocket managers have same user ID. "
+                            f"Both managers report user ID: {user1_id}. "
+                            f"Issue #686: WebSocket user isolation broken."
+                        )
+
+    async def test_concurrent_agent_execution_context_isolation(self):
+        """TEST FAILS: Concurrent agent executions contaminate each other's context.
+
+        CRITICAL BUSINESS IMPACT: Race conditions in concurrent chat sessions cause
+        agent responses to be mixed up between users. Direct Golden Path failure.
+
+        EXPECTED FAILURE: Agent contexts bleed between concurrent executions.
+        PASSES AFTER: Complete isolation between concurrent user sessions.
+        """
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        except ImportError as e:
+            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for concurrency testing: {e}")
+
+        # Create multiple concurrent user contexts
+        num_concurrent_users = 3
+        user_contexts = []
+
+        for i in range(num_concurrent_users):
+            context = unittest.mock.Mock()
+            context.user_id = f"concurrent_user_{i}"
+            context.session_id = f"concurrent_session_{i}"
+            context.request_id = str(uuid.uuid4())
+            user_contexts.append(context)
+
+        # Test concurrent execution isolation
+        execution_results = {}
+
+        async def execute_for_user(user_context):
+            """Execute agent for specific user and track results."""
+            try:
+                # Create isolated execution engine for user
+                engine = UserExecutionEngine.create_from_legacy(user_context)
+
+                # Mock execution with user-specific data
+                mock_result = {
+                    'user_id': user_context.user_id,
+                    'session_id': user_context.session_id,
+                    'engine_id': id(engine),
+                    'timestamp': time.time()
+                }
+
+                # Simulate some async work
+                await asyncio.sleep(0.1)
+
+                return mock_result
+
+            except Exception as e:
+                return {'error': str(e), 'user_id': user_context.user_id}
+
+        # Execute concurrently
+        tasks = [execute_for_user(context) for context in user_contexts]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Analyze results for contamination
+        successful_results = [r for r in results if not isinstance(r, Exception) and 'error' not in r]
+
+        # TEST FAILS if any execution failed
+        self.assertEqual(
+            len(successful_results), num_concurrent_users,
+            f"CRITICAL FAILURE: {num_concurrent_users - len(successful_results)} concurrent executions failed. "
+            f"Failed results: {[r for r in results if r not in successful_results]}. "
+            f"Issue #686: Concurrent execution must work for all users."
         )
 
-        logger.info("✅ Factory compliance report generated successfully")
+        # CRITICAL TEST: Each execution must have unique engine instance
+        engine_ids = [result['engine_id'] for result in successful_results]
+        unique_engine_ids = set(engine_ids)
 
-        return report
+        # TEST FAILS if shared engine instances exist
+        self.assertEqual(
+            len(unique_engine_ids), len(successful_results),
+            f"CRITICAL SSOT VIOLATION: Shared execution engine instances in concurrent execution. "
+            f"Found {len(unique_engine_ids)} unique engines for {len(successful_results)} users. "
+            f"Engine IDs: {engine_ids}. "
+            f"BUSINESS IMPACT: Shared engines cause context contamination in chat. "
+            f"Issue #686: Engine isolation critical for Golden Path concurrent users."
+        )
+
+        # Validate user context preservation
+        for result in successful_results:
+            expected_user_id = result['user_id']
+
+            # Find matching original context
+            original_context = next(
+                (ctx for ctx in user_contexts if ctx.user_id == expected_user_id),
+                None
+            )
+
+            self.assertIsNotNone(
+                original_context,
+                f"CRITICAL FAILURE: Cannot find original context for user {expected_user_id}. "
+                f"Issue #686: User context lost during concurrent execution."
+            )
+
+    def test_agent_factory_memory_isolation_ssot_compliance(self):
+        """TEST FAILS: Agent factories create shared memory state between users.
+
+        CRITICAL BUSINESS IMPACT: Memory leaks and state contamination between users
+        causes incorrect agent responses and potential data leakage.
+
+        EXPECTED FAILURE: Agent instances share memory state.
+        PASSES AFTER: Complete memory isolation between user agent instances.
+        """
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        except ImportError as e:
+            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for memory testing: {e}")
+
+        # Create user contexts with different data
+        user_data = [
+            {'user_id': 'memory_test_user_1', 'data': 'user_1_secret_data'},
+            {'user_id': 'memory_test_user_2', 'data': 'user_2_secret_data'},
+        ]
+
+        engines = []
+
+        for user_info in user_data:
+            context = unittest.mock.Mock()
+            context.user_id = user_info['user_id']
+            context.session_id = f"session_{user_info['user_id']}"
+            context.private_data = user_info['data']
+
+            try:
+                engine = UserExecutionEngine.create_from_legacy(context)
+                engines.append((engine, context))
+            except Exception as e:
+                self.fail(
+                    f"CRITICAL FAILURE: Engine creation failed for {user_info['user_id']}: {e}. "
+                    f"Issue #686: Factory must work for all users."
+                )
+
+        # CRITICAL TEST: Engines must not share memory state
+        if len(engines) >= 2:
+            engine1, context1 = engines[0]
+            engine2, context2 = engines[1]
+
+            # TEST FAILS if engines are the same instance
+            self.assertIsNot(
+                engine1, engine2,
+                f"CRITICAL SSOT VIOLATION: Same engine instance returned for different users. "
+                f"Engine 1 ID: {id(engine1)}, Engine 2 ID: {id(engine2)}. "
+                f"BUSINESS IMPACT: Shared instances cause user data contamination. "
+                f"Issue #686: Memory isolation critical for user privacy."
+            )
+
+            # Check for shared state attributes if they exist
+            if hasattr(engine1, '__dict__') and hasattr(engine2, '__dict__'):
+                # Compare object dictionaries for shared references
+                engine1_attrs = set(id(v) for v in engine1.__dict__.values() if v is not None)
+                engine2_attrs = set(id(v) for v in engine2.__dict__.values() if v is not None)
+
+                shared_attr_ids = engine1_attrs.intersection(engine2_attrs)
+
+                # Filter out expected shared objects (like classes, modules)
+                import types
+                shared_objects = []
+                for obj_id in shared_attr_ids:
+                    # Find actual objects to check their types
+                    for attr_val in engine1.__dict__.values():
+                        if id(attr_val) == obj_id:
+                            if not isinstance(attr_val, (type, types.ModuleType, types.FunctionType)):
+                                shared_objects.append(type(attr_val).__name__)
+                            break
+
+                # TEST FAILS if non-trivial objects are shared
+                self.assertEqual(
+                    len(shared_objects), 0,
+                    f"CRITICAL SSOT VIOLATION: Engines share non-trivial objects: {shared_objects}. "
+                    f"BUSINESS IMPACT: Shared state causes user data contamination. "
+                    f"Issue #686: Complete memory isolation required for Golden Path."
+                )
+
+    def test_factory_cleanup_prevents_memory_leaks(self):
+        """TEST FAILS: Factory pattern doesn't properly clean up user resources.
+
+        CRITICAL BUSINESS IMPACT: Memory leaks in production cause system degradation
+        and eventual Golden Path service failure under load.
+
+        EXPECTED FAILURE: User resources not cleaned up after session ends.
+        PASSES AFTER: Factory implements proper cleanup and resource management.
+        """
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+        except ImportError as e:
+            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for cleanup testing: {e}")
+
+        # Track initial object count
+        import gc
+        gc.collect()  # Force garbage collection
+        initial_object_count = len(gc.get_objects())
+
+        # Create and destroy multiple user engines
+        num_test_users = 5
+        created_engines = []
+
+        for i in range(num_test_users):
+            context = unittest.mock.Mock()
+            context.user_id = f"cleanup_test_user_{i}"
+            context.session_id = f"cleanup_test_session_{i}"
+
+            try:
+                engine = UserExecutionEngine.create_from_legacy(context)
+                created_engines.append(engine)
+            except Exception as e:
+                self.fail(
+                    f"CRITICAL FAILURE: Engine creation failed during cleanup test: {e}. "
+                    f"Issue #686: Factory must work reliably."
+                )
+
+        # Clear references and force cleanup
+        engine_ids_before_cleanup = [id(engine) for engine in created_engines]
+        created_engines.clear()
+
+        # Force garbage collection
+        gc.collect()
+
+        # Check if objects were properly cleaned up
+        current_object_count = len(gc.get_objects())
+
+        # Allow some variance in object count (GC is not deterministic)
+        object_count_increase = current_object_count - initial_object_count
+        max_allowed_increase = num_test_users * 10  # Allow some overhead per user
+
+        # TEST FAILS if significant memory leak detected
+        self.assertLessEqual(
+            object_count_increase, max_allowed_increase,
+            f"CRITICAL MEMORY LEAK: Object count increased by {object_count_increase} "
+            f"after creating/destroying {num_test_users} engines. "
+            f"Initial: {initial_object_count}, Current: {current_object_count}. "
+            f"BUSINESS IMPACT: Memory leaks cause Golden Path service degradation. "
+            f"Issue #686: Factory cleanup critical for production stability."
+        )
+
+        # Verify engines are actually garbage collected
+        remaining_engines = []
+        for obj in gc.get_objects():
+            if id(obj) in engine_ids_before_cleanup:
+                remaining_engines.append(id(obj))
+
+        # TEST FAILS if engines not garbage collected
+        self.assertEqual(
+            len(remaining_engines), 0,
+            f"CRITICAL MEMORY LEAK: {len(remaining_engines)} engines not garbage collected. "
+            f"Remaining engine IDs: {remaining_engines}. "
+            f"Issue #686: Factory must allow proper engine cleanup."
+        )
 
 
-if __name__ == "__main__":
-    # Direct execution for rapid testing
-    pytest.main([__file__, "-v", "--tb=short"])
+if __name__ == '__main__':
+    # Run mission critical factory validation
+    # Expected: Tests FAIL with current codebase (proving violations exist)
+    # Expected: Tests PASS after proper factory SSOT consolidation
+    import unittest
+    unittest.main(verbosity=2)
