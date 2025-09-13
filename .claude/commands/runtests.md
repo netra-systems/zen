@@ -1,5 +1,5 @@
 ---
-description: "Run unit tests"
+description: "Run tests & remediate failing tests"
 argument-hint: "[focus area, defaults to all] [test area, defaults unit] [flags, defaults to parallel]"
 ---
 

@@ -1,5 +1,5 @@
 """Test framework redis module."""
 
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 
-__all__ = ["RedisTestManager"]
+__all__ = ["redis_manager"]

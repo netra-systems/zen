@@ -592,12 +592,16 @@ class StartupOrchestrator:
             'thread_service': 'Thread Service (manages chat threads)',
             'corpus_service': 'Corpus Service (manages knowledge base)',
             'agent_supervisor': 'Agent Supervisor (orchestrates agents)',
-            'llm_manager': 'LLM Manager (handles AI model connections)',
             'db_session_factory': 'Database Session Factory',
             'redis_manager': 'Redis Manager (handles caching)',
             # tool_dispatcher is now UserContext-based (None by design)
             # 'tool_dispatcher': 'Tool Dispatcher (executes agent tools)',
             'agent_websocket_bridge': 'WebSocket Bridge (real-time events)'
+        }
+
+        # LLM Manager uses factory pattern for user context isolation
+        factory_services = {
+            'llm_manager_factory': 'LLM Manager Factory (creates user-isolated LLM managers)',
         }
         
         # For UserContext-based pattern, verify configuration and factories
@@ -619,6 +623,17 @@ class StartupOrchestrator:
                 if service is None:
                     none_services.append(f"{service_name} ({description})")
         
+        # Check factory services (must be non-None)
+        missing_factories = []
+        none_factories = []
+        for factory_name, description in factory_services.items():
+            if not hasattr(self.app.state, factory_name):
+                missing_factories.append(f"{factory_name} ({description})")
+            else:
+                factory = getattr(self.app.state, factory_name)
+                if factory is None:
+                    none_factories.append(f"{factory_name} ({description})")
+
         # Check UserContext configurations and factories
         missing_configs = []
         none_configs = []
@@ -638,14 +653,18 @@ class StartupOrchestrator:
                 if config_value is None:
                     none_configs.append(f"{config_name} ({description})")
         
-        # Only fail if critical non-factory services are missing
-        # Factories are initialized in _initialize_factory_patterns which happens later
-        if missing_services or none_services or (missing_configs and 'tool_classes' in ' '.join(missing_configs)):
+        # Only fail if critical non-factory services are missing or factory services are missing/None
+        # Factories must be initialized before this point in the startup process
+        if missing_services or none_services or missing_factories or none_factories or (missing_configs and 'tool_classes' in ' '.join(missing_configs)):
             error_msg = "CRITICAL SERVICE VALIDATION FAILED:\n"
             if missing_services:
                 error_msg += f"  Missing services: {', '.join(missing_services)}\n"
             if none_services:
                 error_msg += f"  None services: {', '.join(none_services)}\n"
+            if missing_factories:
+                error_msg += f"  Missing factories: {', '.join(missing_factories)}\n"
+            if none_factories:
+                error_msg += f"  None factories: {', '.join(none_factories)}\n"
             if missing_configs:
                 error_msg += f"  Missing UserContext configs: {', '.join(missing_configs)}\n"
             if none_configs:

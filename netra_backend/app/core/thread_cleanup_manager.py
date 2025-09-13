@@ -19,6 +19,7 @@ Business Value Justification:
 import asyncio
 import gc
 import logging
+import sys
 import threading
 import time
 import weakref
@@ -265,6 +266,14 @@ class ThreadCleanupManager:
         if self._cleanup_scheduled:
             return
 
+        # Skip cleanup during Python shutdown
+        try:
+            if hasattr(sys, 'meta_path') and sys.meta_path is None:
+                return
+        except (ImportError, AttributeError):
+            # Python is shutting down, skip cleanup
+            return
+
         self._cleanup_scheduled = True
 
         async def background_cleanup():
@@ -287,29 +296,33 @@ class ThreadCleanupManager:
             # Check if we have an active event loop first
             try:
                 loop = asyncio.get_running_loop()
-                # Create task in the running loop
+                # Create task in the running loop - loop is guaranteed to be valid here
                 task = loop.create_task(background_cleanup())
                 logger.debug("Background cleanup task scheduled in active event loop")
             except RuntimeError:
                 # No running loop - try to get any loop
                 try:
                     loop = asyncio.get_event_loop()
-                    if loop.is_running():
+                    if loop is not None and loop.is_running():
                         task = loop.create_task(background_cleanup())
                         logger.debug("Background cleanup task scheduled in existing event loop")
                     else:
                         raise RuntimeError("Event loop not running")
-                except (RuntimeError, AttributeError):
+                except (RuntimeError, AttributeError, ImportError):
                     # Fallback to thread-based cleanup
                     raise RuntimeError("No asyncio event loop available")
 
-        except RuntimeError:
+        except (RuntimeError, ImportError):
             # No event loop running, cleanup immediately in thread
             def sync_cleanup():
-                time.sleep(5.0)
-                self.cleanup_stale_threads(max_age_minutes=5)
-                gc.collect()
-                self._cleanup_scheduled = False
+                try:
+                    time.sleep(5.0)
+                    self.cleanup_stale_threads(max_age_minutes=5)
+                    gc.collect()
+                except Exception as e:
+                    logger.error(f"Sync cleanup failed: {e}")
+                finally:
+                    self._cleanup_scheduled = False
 
             cleanup_thread = threading.Thread(target=sync_cleanup, daemon=True)
             cleanup_thread.start()

@@ -555,7 +555,16 @@ markers = [
     "websocket_threading: WebSocket threading tests",
     "websocket_unified_auth: WebSocket unified auth tests",
     "websocket_validation: WebSocket validation tests",
-    "windows_deadlock: Windows deadlock tests"
+    "windows_deadlock: Windows deadlock tests",
+
+    # Import path resolution and test framework markers
+    "ssl_configuration: SSL/TLS configuration tests",
+    "feature_flag: Feature flag controlled tests",
+    "tdd_test: Test-driven development tests",
+    "experimental_test: Experimental feature tests",
+    "experimental: Experimental feature tests (alias)",
+    "requires_feature: Tests requiring specific features",
+    "tdd: Test-driven development workflow tests"
 ]
 
 # Coverage settings
