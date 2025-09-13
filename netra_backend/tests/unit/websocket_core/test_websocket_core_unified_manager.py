@@ -92,22 +92,31 @@ class TestUnifiedWebSocketManager(SSotAsyncTestCase):
         """Setup test method using SSOT patterns."""
         super().setup_method(method)
 
-        # Create manager instance for each test
-        # Use a properly formatted SSOT token (must be exactly 64 characters for security)
-        self.manager = UnifiedWebSocketManager(
-            mode=WebSocketManagerMode.UNIFIED,
-            _ssot_authorization_token="ssot_test_token_1234567890abcdef1234567890abcdef1234567890ab"
-        )
-
-        # Mock factory for creating test objects
-        self.mock_factory = SSotMockFactory()
-
         # Test data
         self.test_user_id_1 = "test_user_001"
         self.test_user_id_2 = "test_user_002"
         self.test_connection_id_1 = f"conn_{uuid.uuid4()}"
         self.test_connection_id_2 = f"conn_{uuid.uuid4()}"
         self.test_thread_id = f"thread_{uuid.uuid4()}"
+
+        # Create UserExecutionContext for proper user isolation
+        self.user_context = UserExecutionContext(
+            user_id=self.test_user_id_1,
+            organization_id="test_org_001",
+            session_id=f"session_{uuid.uuid4()}",
+            thread_id=self.test_thread_id
+        )
+
+        # Create manager instance for each test
+        # Use a properly formatted SSOT token (must be exactly 64 characters for security)
+        self.manager = UnifiedWebSocketManager(
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=self.user_context,
+            _ssot_authorization_token="ssot_test_token_1234567890abcdef1234567890abcdef1234567890ab"
+        )
+
+        # Mock factory for creating test objects
+        self.mock_factory = SSotMockFactory()
 
     async def teardown_method(self, method):
         """Cleanup test method using SSOT patterns."""
@@ -148,8 +157,16 @@ class TestWebSocketManagerInitialization(TestUnifiedWebSocketManager):
 
     async def test_manager_initialization_unified_mode(self):
         """Test manager initializes correctly in UNIFIED mode."""
+        user_context = UserExecutionContext(
+            user_id="test_user",
+            organization_id="test_org",
+            session_id=f"session_{uuid.uuid4()}",
+            thread_id=f"thread_{uuid.uuid4()}"
+        )
+
         manager = UnifiedWebSocketManager(
             mode=WebSocketManagerMode.UNIFIED,
+            user_context=user_context,
             _ssot_authorization_token="ssot_test_token_1234567890abcdef1234567890abcdef1234567890ab"
         )
 
@@ -169,8 +186,16 @@ class TestWebSocketManagerInitialization(TestUnifiedWebSocketManager):
             WebSocketManagerMode.EMERGENCY,
             WebSocketManagerMode.DEGRADED
         ]:
+            user_context = UserExecutionContext(
+                user_id="test_user",
+                organization_id="test_org",
+                session_id=f"session_{uuid.uuid4()}",
+                thread_id=f"thread_{uuid.uuid4()}"
+            )
+
             manager = UnifiedWebSocketManager(
                 mode=deprecated_mode,
+                user_context=user_context,
                 _ssot_authorization_token="ssot_test_token_1234567890abcdef1234567890abcdef1234567890ab"
             )
 
@@ -552,8 +577,16 @@ class TestErrorHandlingAndRecovery(TestUnifiedWebSocketManager):
     async def test_graceful_degradation_mode(self):
         """Test graceful degradation when entering degraded mode."""
         # Initialize manager in degraded mode
+        user_context = UserExecutionContext(
+            user_id=self.test_user_id_1,
+            organization_id="test_org_001",
+            session_id=f"session_{uuid.uuid4()}",
+            thread_id=self.test_thread_id
+        )
+
         degraded_manager = UnifiedWebSocketManager(
             mode=WebSocketManagerMode.DEGRADED,
+            user_context=user_context,
             _ssot_authorization_token="ssot_test_token_1234567890abcdef1234567890abcdef1234567890ab",
             config={"enable_monitoring": False}
         )
