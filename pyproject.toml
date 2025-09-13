@@ -224,6 +224,7 @@ markers = [
     
     # Missing marker for auth service secret loader tests (Issue #687)
     "secret_loader: Secret loader component tests",
+    "ssot: Single Source of Truth pattern tests",
     
     # Additional comprehensive marker definitions (Issue #553 Resolution)
     "infrastructure_validation: Infrastructure validation tests",

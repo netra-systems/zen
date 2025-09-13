@@ -79,12 +79,33 @@
 2. **Lines 104, 215:** Updated function calls to use correct name
 3. **Verification:** `python3 -m pytest --collect-only` successful
 
-### Issue 3: Auth Service Secret Loader Marker Configuration Error
-**Category:** uncollectable-test-new-p2-marker-config  
+### ✅ Issue 3: Auth Service Secret Loader Marker Configuration Error - RESOLVED
+**Category:** uncollectable-test-new-p2-marker-config-secret-loader  
 **Severity:** P2 - Medium (Test configuration issue)  
+**SNST Status:** 🔗 **CREATED NEW ISSUE** - GitHub Issue #687 (CLOSED - RESOLVED)  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/687  
+**Labels:** P2, claude-code-generated-issue, infrastructure-dependency, bug  
+**Processing Date:** 2025-09-13
+
 **File:** `auth_service/tests/unit/test_secret_loader_comprehensive.py`  
 **Error:** `'secret_loader' not found in markers configuration option`  
 **Impact:** Test collection failure in auth service
+
+**Root Cause:** Missing pytest markers in pyproject.toml configuration
+- **Missing Marker 1:** `secret_loader` (used in test file line 820)
+- **Missing Marker 2:** `ssot` (used in test file line 821)
+
+**SNST Processing Results:**
+- ✅ **Created New Issue:** GitHub Issue #687 created for secret_loader marker configuration problem
+- ✅ **Applied Fix:** Added missing markers to pyproject.toml lines 226-227
+- ✅ **Verified Resolution:** Test collection now successful (34 tests collected in 0.03s)
+- ✅ **Closed Issue:** Marked as resolved with verification
+- ✅ **Business Impact:** $3M+ revenue protection auth service tests now accessible
+
+**Resolution Applied:**
+1. **Line 226:** Added `"secret_loader: Secret loader component tests"`
+2. **Line 227:** Added `"ssot: Single Source of Truth pattern tests"`
+3. **Verification:** `python3 -m pytest auth_service/tests/unit/test_secret_loader_comprehensive.py --collect-only` successful
 
 ### Issue 4: Missing User Execution Engine Function  
 **Category:** failing-test-regression-p2-execution-engine-missing  
