@@ -1,12 +1,12 @@
 """Demo session manager for handling enterprise demonstration sessions."""
 
 import json
-import os
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
     
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import IsolatedEnvironment
 
 logger = central_logger.get_logger(__name__)
 
@@ -29,7 +29,8 @@ class DemoSessionManager:
             
         if not self._pool:
             # Get database configuration from environment
-            database_url = os.environ.get("DATABASE_URL", "")
+            env = IsolatedEnvironment()
+            database_url = env.get("DATABASE_URL", "")
             
             if database_url:
                 # Parse database URL
@@ -68,11 +69,11 @@ class DemoSessionManager:
                     database = "netra"
             else:
                 # Fallback to individual environment variables
-                host = os.environ.get("DB_HOST", "localhost")
-                port = int(os.environ.get("DB_PORT", "5432"))
-                user = os.environ.get("DB_USER", "netra")
-                password = os.environ.get("DB_PASSWORD", "netra")
-                database = os.environ.get("DB_NAME", "netra")
+                host = env.get("DB_HOST", "localhost")
+                port = int(env.get("DB_PORT", "5432"))
+                user = env.get("DB_USER", "netra")
+                password = env.get("DB_PASSWORD", "netra")
+                database = env.get("DB_NAME", "netra")
             
             try:
                 self._pool = await asyncpg.create_pool(
