@@ -852,13 +852,12 @@ class AgentRegistry(BaseAgentRegistry):
             run_id=UnifiedIdGenerator.generate_base_id("websocket_run")
         )
         
-        # Create adapter for SSOT compliance
+        # SSOT CONSOLIDATION: Use WebSocket manager directly instead of adapter
         try:
-            adapter = WebSocketManagerAdapter(manager, default_context)
-            super().set_websocket_bridge(adapter)  # Use correct parent interface with adapter
-            logger.debug("Registry WebSocket adapter created for SSOT compliance")
+            super().set_websocket_bridge(manager)  # Use manager directly for SSOT compliance
+            logger.debug("Registry WebSocket manager set directly for SSOT consolidation")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket adapter: {e}")
+            logger.warning(f"Failed to set registry WebSocket manager: {e}")
         
         # Propagate to all existing user sessions asynchronously
         # We use asyncio.create_task to avoid blocking in sync context
@@ -940,13 +939,12 @@ class AgentRegistry(BaseAgentRegistry):
             run_id=UnifiedIdGenerator.generate_base_id("websocket_run_async")
         )
         
-        # Create adapter for SSOT compliance
+        # SSOT CONSOLIDATION: Use WebSocket manager directly instead of adapter
         try:
-            adapter = WebSocketManagerAdapter(manager, default_context)
-            super().set_websocket_bridge(adapter)  # Use adapter with parent interface
-            logger.debug(f"Registry WebSocket adapter created for async context - SSOT compliance")
+            super().set_websocket_bridge(manager)  # Use manager directly for SSOT compliance
+            logger.debug(f"Registry WebSocket manager set directly for async context - SSOT consolidation")
         except Exception as e:
-            logger.warning(f"Failed to create registry WebSocket adapter (async): {e}")
+            logger.warning(f"Failed to set registry WebSocket manager (async): {e}")
         
         # Propagate to all existing user sessions using factory pattern
         if self._user_sessions:
@@ -990,13 +988,10 @@ class AgentRegistry(BaseAgentRegistry):
         # Call parent implementation to maintain SSOT compliance
         super().set_websocket_bridge(bridge)
         
-        # If this is our adapter, extract the WebSocketManager for internal use
-        if isinstance(bridge, WebSocketManagerAdapter):
-            self.websocket_manager = bridge._websocket_manager
-            logger.info(" PASS:  WebSocket bridge set via adapter - SSOT interface compliance maintained")
-        else:
-            # For direct AgentWebSocketBridge instances, store and create backwards adapter if needed
-            logger.info(" PASS:  WebSocket bridge set directly - SSOT interface compliance maintained")
+        # SSOT CONSOLIDATION: Direct manager usage instead of adapter pattern
+        # Store the bridge directly as it's already the WebSocket manager
+        self.websocket_manager = bridge
+        logger.info(" PASS:  WebSocket bridge set directly - SSOT consolidation complete")
         
         # Propagate to user sessions if they exist (safely handle no event loop)
         try:
