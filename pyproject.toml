@@ -564,7 +564,16 @@ markers = [
     "experimental_test: Experimental feature tests",
     "experimental: Experimental feature tests (alias)",
     "requires_feature: Tests requiring specific features",
-    "tdd: Test-driven development workflow tests"
+    "tdd: Test-driven development workflow tests",
+    "invalid_parameters: Invalid parameters tests",
+    "core_infrastructure: Core infrastructure tests",
+    "multi_user_recovery: Multi-user recovery tests",
+    "concurrent_execution: Concurrent execution tests",
+    "monitoring_setup: Monitoring setup tests",
+    "state_validation: State validation tests",
+    "initialization_idempotency: Initialization idempotency tests",
+    "state_transitions: State transitions tests",
+    "concurrent_initialization: Concurrent initialization tests"
 ]
 
 # Coverage settings
