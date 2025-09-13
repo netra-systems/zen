@@ -201,8 +201,9 @@ class TestWebSocketEventDeliveryFailures(SSotAsyncTestCase):
         under realistic conditions where SSOT violations would manifest.
         """
         # Create user context and WebSocket components
-        execution_context = create_isolated_execution_context(
+        execution_context = await create_isolated_execution_context(
             user_id=user_id,
+            request_id=f"req_{user_id}_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread_{user_id}_{uuid.uuid4().hex[:8]}",
             run_id=f"run_{user_id}_{uuid.uuid4().hex[:8]}"
         )
