@@ -55,10 +55,10 @@ user_id = auth_response.user_id
 - [x] Local progress tracking file created
 - [x] **STEP 1: DISCOVER AND PLAN TESTS** - Existing tests inventoried, SSOT test plan created
 - [x] **STEP 2: EXECUTE TEST PLAN** - Created 12 new SSOT validation tests (20% of plan)
+- [x] **STEP 3: PLAN REMEDIATION** - Comprehensive SSOT test migration plan created
 
 ### 🔄 NEXT STEPS
-- [ ] **STEP 3: PLAN REMEDIATION** - Plan SSOT authentication remediation
-- [ ] **STEP 4: EXECUTE REMEDIATION** - Implement auth service delegation
+- [ ] **STEP 4: EXECUTE REMEDIATION** - Implement SSOT test migration plan
 - [ ] **STEP 5: TEST FIX LOOP** - Run and fix all tests until passing
 - [ ] **STEP 6: PR AND CLOSURE** - Create PR and close issue
 
@@ -148,6 +148,80 @@ user_id = auth_response.user_id
 
 ### 🚀 Revised Remediation Scope
 **Focus shifted to:** 50+ test files with JWT bypass patterns requiring SSOT migration (not production code fixes)
+
+## STEP 3 RESULTS: Comprehensive SSOT Remediation Plan
+
+### 📊 SCOPE DISCOVERY - REFINED ANALYSIS
+- **38 test files identified** (refined from 50+ estimate) with JWT decode violations
+- **113 total JWT decode violations** across unit, integration, and real tests
+- **Production code CLEAN confirmed** - SSOT already implemented in production
+- **Business risk REDUCED** - Golden Path authentication secure, test violations are coverage gaps
+
+### 🎯 MIGRATION STRATEGY - 4 PRIORITIZED BATCHES
+
+**BATCH 1: P0 CRITICAL - Golden Path Tests (8 files, 24 violations)**
+- Business Impact: Direct Golden Path user flow protection
+- Focus: Core auth flows, user isolation, WebSocket security
+- Timeline: 2-3 days (highest priority)
+
+**BATCH 2: P1 HIGH - Real Services Tests (5 files, 31 violations)**
+- Business Impact: Production behavior validation
+- Focus: Real JWT validation, token refresh, permission enforcement
+- Timeline: 2-3 days (production validation critical)
+
+**BATCH 3: P1 MEDIUM - Integration Tests (18 files, 41 violations)**
+- Business Impact: Service integration validation
+- Focus: Auth integration, middleware, session flows, WebSocket auth
+- Timeline: 4-5 days (most complex batch)
+
+**BATCH 4: P2 LOW - Unit & Support Tests (7 files, 17 violations)**
+- Business Impact: Component isolation testing
+- Focus: Unit test business logic, helpers, legacy patterns
+- Timeline: 1-2 days (simple patterns)
+
+### 🔧 SSOT MIGRATION PATTERNS
+
+**Pattern 1 - Direct JWT Decode → Auth Service Delegation:**
+```python
+# BEFORE (SSOT violation):
+decoded = jwt.decode(token, jwt_secret, algorithms=["HS256"])
+user_id = decoded["sub"]
+
+# AFTER (SSOT compliant):
+auth_response = await auth_client.validate_token(token)
+user_id = auth_response.user_id
+```
+
+**Pattern 2 - JWT + Database → Unified Auth Service:**
+```python
+# BEFORE (complex violation):
+decoded = jwt.decode(token, secret, algorithms=["HS256"])
+user = await db.execute("SELECT * FROM users WHERE id = $1", decoded["sub"])
+
+# AFTER (SSOT compliant):
+user_context = await auth_client.get_user_context(token)
+```
+
+**Pattern 3 - Mock JWT → Auth Service Mock:**
+```python
+# BEFORE (bypasses auth service):
+with patch('jwt.decode') as mock_decode:
+    mock_decode.return_value = {"sub": "test_user"}
+
+# AFTER (SSOT compliant):
+with patch('auth_client.validate_token') as mock_auth:
+    mock_auth.return_value = AuthResponse(user_id="test_user", is_valid=True)
+```
+
+### 📈 SUCCESS METRICS & RISK MITIGATION
+- **Zero JWT.decode() calls** in migrated files
+- **All tests pass** after migration
+- **Auth service delegation** for all token operations
+- **Performance**: < 10% test execution increase
+- **Rollback Plan**: Git branch per batch, automated rollback on failure
+
+### ⏱️ TIMELINE ESTIMATE: 9-13 Days Total
+**BUSINESS VALUE**: Protects $500K+ ARR by ensuring comprehensive test coverage validates the already-secure production authentication system
 
 ## Documentation References
 - **SSOT Audit:** `reports/auth/BACKEND_AUTH_SSOT_AUDIT_20250107.md`

@@ -4,11 +4,23 @@ Claude Code Instance Orchestrator
 Simple orchestrator for running 3 Claude Code instances in headless mode,
 each executing specific slash commands.
 
+Multi-platform support with enhanced Mac compatibility for local directories.
+
+Mac-specific improvements:
+- Auto-detects Claude executable in common Homebrew paths (/opt/homebrew/bin, /usr/local/bin)
+- Adds Mac-specific paths to PATH environment automatically
+- Enhanced workspace directory validation with tilde expansion
+- Better error messages for Claude installation on Mac
 
 Auto runs a set of parallel claude code instance commands
 Saves having to manually sping up terminal windows
 Path towards integration and automation
 collects more data than human readable output, e.g. token use, tool use names etc
+
+Usage Examples:
+  python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
+  python3 claude-instance-orchestrator.py --list-commands
+  python3 claude-instance-orchestrator.py --config config.json
 
 IDEAS
     Record and contrast tool use by command 
@@ -22,6 +34,8 @@ import sys
 import time
 import yaml
 import shutil
+import os
+import platform
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -103,22 +117,36 @@ class ClaudeInstanceOrchestrator:
         # Join commands with semicolon for sequential execution
         command_string = "; ".join(full_command)
 
-        # Find the claude executable
+        # Find the claude executable with Mac-specific paths
         claude_cmd = shutil.which("claude")
         if not claude_cmd:
-            # Try common Windows paths
+            # Try common paths on different platforms
             possible_paths = [
-                "claude.cmd",
-                "claude.exe",
-                "claude"
+                "claude.cmd",  # Windows
+                "claude.exe",  # Windows
+                "/opt/homebrew/bin/claude",  # Mac Homebrew ARM
+                "/usr/local/bin/claude",     # Mac Homebrew Intel
+                "~/.local/bin/claude",       # User local install
+                "/usr/bin/claude",           # System install
+                "claude"                     # Final fallback
             ]
+            
             for path in possible_paths:
-                if shutil.which(path):
+                # Expand user path if needed
+                expanded_path = Path(path).expanduser()
+                if expanded_path.exists():
+                    claude_cmd = str(expanded_path)
+                    logger.info(f"Found Claude executable at: {claude_cmd}")
+                    break
+                elif shutil.which(path):
                     claude_cmd = path
+                    logger.info(f"Found Claude executable via which: {claude_cmd}")
                     break
 
-            if not claude_cmd:
-                logger.error("Claude command not found in PATH")
+            if not claude_cmd or claude_cmd == "claude":
+                logger.warning("Claude command not found in PATH or common locations")
+                logger.warning("Please ensure Claude Code is installed and in your PATH")
+                logger.warning("Install with: npm install -g @anthropic/claude-code")
                 claude_cmd = "claude"  # Fallback
 
         # New approach: slash commands can be included directly in prompt
@@ -225,12 +253,30 @@ class ClaudeInstanceOrchestrator:
             cmd = self.build_claude_command(config)
             logger.info(f"Command: {' '.join(cmd)}")
 
+            # Create the async process with Mac-friendly environment
+            env = os.environ.copy()
+            
+            # Add common Mac paths to PATH if not present
+            if platform.system() == "Darwin":  # macOS
+                mac_paths = [
+                    "/opt/homebrew/bin",      # Homebrew ARM
+                    "/usr/local/bin",         # Homebrew Intel
+                    "/usr/bin",               # System binaries
+                    str(Path.home() / ".local" / "bin"),  # User local
+                ]
+                current_path = env.get("PATH", "")
+                for mac_path in mac_paths:
+                    if mac_path not in current_path:
+                        env["PATH"] = f"{mac_path}:{current_path}"
+                        current_path = env["PATH"]
+            
             # Create the async process
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                cwd=self.workspace_dir
+                cwd=self.workspace_dir,
+                env=env
             )
 
             status.pid = process.pid
@@ -473,7 +519,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
 async def main():
     """Main orchestrator function"""
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
-    parser.add_argument("--workspace", type=Path, default=Path.cwd(),
+    parser.add_argument("--workspace", type=str, default=None,
                        help="Workspace directory (default: current directory)")
     parser.add_argument("--output", type=Path, default=None,
                        help="Output file for results (default: auto-generated with datetime and agents)")
@@ -488,8 +534,31 @@ async def main():
 
     args = parser.parse_args()
 
+    # Determine workspace directory with better Mac compatibility
+    if args.workspace:
+        workspace = Path(args.workspace).expanduser().resolve()
+    else:
+        workspace = Path.cwd().resolve()
+    
+    # Verify workspace exists and is accessible
+    if not workspace.exists():
+        logger.error(f"Workspace directory does not exist: {workspace}")
+        sys.exit(1)
+    
+    if not workspace.is_dir():
+        logger.error(f"Workspace path is not a directory: {workspace}")
+        sys.exit(1)
+    
+    # Check if it looks like a Claude Code workspace
+    claude_dir = workspace / ".claude"
+    if not claude_dir.exists():
+        logger.warning(f"No .claude directory found in workspace: {workspace}")
+        logger.warning("This might not be a Claude Code workspace")
+    
+    logger.info(f"Using workspace: {workspace}")
+
     # Initialize orchestrator
-    orchestrator = ClaudeInstanceOrchestrator(args.workspace)
+    orchestrator = ClaudeInstanceOrchestrator(workspace)
 
     # Handle command inspection modes
     if args.list_commands:
