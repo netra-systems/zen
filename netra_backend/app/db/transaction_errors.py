@@ -198,6 +198,27 @@ def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception
     return error
 
 
+def _classify_table_creation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify table creation-related operational errors."""
+    if _has_table_creation_keywords(error_msg):
+        return TableCreationError(f"Table creation error: {error}")
+    return error
+
+
+def _classify_column_modification_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify column modification-related operational errors."""
+    if _has_column_modification_keywords(error_msg):
+        return ColumnModificationError(f"Column modification error: {error}")
+    return error
+
+
+def _classify_index_creation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify index creation-related operational errors."""
+    if _has_index_creation_keywords(error_msg):
+        return IndexCreationError(f"Index creation error: {error}")
+    return error
+
+
 def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
