@@ -66,7 +66,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         # Mock table creation syntax error
         with patch.object(schema_manager, '_client') as mock_client:
             mock_client.execute.side_effect = ProgrammingError(
-                "Syntax error in CREATE TABLE statement", None, None
+                "Syntax error in CREATE TABLE statement", {}, None
             )
             
             table_schema = """
@@ -104,7 +104,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         # Mock column type incompatibility error
         with patch.object(schema_manager, '_client') as mock_client:
             mock_client.execute.side_effect = OperationalError(
-                "Cannot convert column 'id' from UInt64 to String", None, None
+                "Cannot convert column 'id' from UInt64 to String", {}, None
             )
             
             # This validates proper exception handling for column modification
@@ -165,7 +165,7 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
         with patch.object(schema_manager, '_client') as mock_client:
             mock_client.execute.side_effect = [
                 None,  # First operation succeeds
-                OperationalError("Disk space exhausted", None, None),  # Second fails
+                OperationalError("Disk space exhausted", {}, None),  # Second fails - proper params
             ]
             
             migration_steps = [
