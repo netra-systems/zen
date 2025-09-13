@@ -206,9 +206,10 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_user_context_preservation(self):
         """Test WebSocket events preserve UserExecutionContext for proper routing."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
         )
+        # FIXED: websocket_bridge set after instantiation
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-001")
 
         # Execute with specific user context
         await agent.process_request(
@@ -245,9 +246,10 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_event_data_structure(self):
         """Test WebSocket events contain proper data structures for frontend."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
         )
+        # FIXED: websocket_bridge set after instantiation
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-data-001")
 
         await agent.process_request(
             "test event data structure",
@@ -307,9 +309,10 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_concurrent_user_isolation(self):
         """Test WebSocket events maintain proper isolation between concurrent users."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
         )
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-concurrent-001")
+        # FIXED: websocket_bridge set after instantiation
 
         # Create separate contexts for different users
         user1_context = UserExecutionContext(
@@ -370,9 +373,10 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_real_time_progress_updates(self):
         """Test WebSocket events provide real-time progress for user experience."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-progress-001")
         )
+        # FIXED: websocket_bridge set after instantiation
 
         # Execute request and capture timing
         import time
@@ -406,9 +410,9 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_business_value_event_content(self):
         """Test WebSocket events contain business-valuable information for users."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
         )
+        # FIXED: websocket_bridge set after instantiation
 
         test_request = "analyze quarterly sales performance and recommend optimizations"
 
