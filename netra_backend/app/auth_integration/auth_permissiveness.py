@@ -468,10 +468,13 @@ class RelaxedAuthValidator:
             from shared.id_generation import UnifiedIdGenerator
             
             # Use token-based user ID if available, otherwise generate one
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for user ID generation
             if token and len(token) > 10:
                 user_id = f"relaxed_{hash(token) % 10000:04d}"
             else:
-                user_id = f"relaxed_{uuid.uuid4().hex[:8]}"
+                # Generate SSOT-compliant user ID for relaxed auth
+                relaxed_user_id = UnifiedIdGenerator.generate_base_id("relaxed_user", True, 8)
+                user_id = f"relaxed_{relaxed_user_id.split('_')[-1]}"
             
             user_context = UserExecutionContext(
                 user_id=user_id,

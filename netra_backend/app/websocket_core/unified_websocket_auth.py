@@ -1300,7 +1300,9 @@ async def authenticate_websocket_ssot(
         WebSocketAuthResult with authentication outcome
     """
     start_time = time.time()
-    connection_id = preliminary_connection_id or str(uuid.uuid4())
+    # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for connection ID generation
+    from shared.id_generation import UnifiedIdGenerator
+    connection_id = preliminary_connection_id or UnifiedIdGenerator.generate_base_id("ws_conn_prelim", True, 8)
     
     logger.info(f"SSOT AUTH: Starting consolidated WebSocket authentication for connection {connection_id}")
     
