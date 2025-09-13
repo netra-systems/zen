@@ -1,77 +1,69 @@
 # SSOT-incomplete-migration-agent-factory-singleton-legacy
 
-## Issue Status: CREATED
-**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/709
+**GitHub Issue:** #709
 **Priority:** P0 CRITICAL
-**Impact:** Blocks Golden Path - User login → AI responses
+**Focus Area:** agents
+**Status:** Working on remediation
 
-## Problem Description
-Legacy singleton patterns remain in agent factory system despite factory pattern implementation, causing:
+## Problem Summary
+Legacy singleton patterns remain in agent factory system causing:
 - Cross-user state contamination
 - WebSocket event delivery failures
 - Race conditions in multi-user scenarios
-- $500K+ ARR revenue risk from chat functionality failures
+- Global state preventing proper user isolation
 
-## Evidence
-**Files Affected:**
-- `netra_backend/app/agents/supervisor/agent_instance_factory.py` - Global singleton pattern
-- `netra_backend/app/agents/supervisor/execution_engine_factory.py` - Deprecation warnings
+## Critical Files Identified
+- `netra_backend/app/agents/supervisor/agent_instance_factory.py`
+- `netra_backend/app/agents/supervisor/execution_engine_factory.py`
+- Multiple SupervisorAgent implementations detected
+- Inconsistent UserExecutionContext usage
 
-**Code Examples:**
-```python
-# LEGACY SINGLETON PATTERN STILL PRESENT
-_factory_instance: Optional[AgentInstanceFactory] = None
+## SSOT Violations Found by Audit
+1. **P0 - Duplicate SupervisorAgent implementations** (3 variants causing inconsistent behavior)
+2. **P0 - Legacy singleton patterns** in agent factories
+3. **P0 - UserExecutionContext isolation failures** (user data contamination risk)
+4. **P1 - Inconsistent factory patterns** across agent types
+5. **P1 - Mixed initialization patterns** (factory vs direct instantiation)
 
-def get_agent_instance_factory() -> AgentInstanceFactory:
-    global _factory_instance
-    if _factory_instance is None:
-        _factory_instance = AgentInstanceFactory()
-    return _factory_instance
-```
+## Progress Tracking
+
+### Phase 0: Discovery ✅
+- [x] SSOT audit completed
+- [x] Issue #709 identified as target
+- [x] Local tracking file created
+
+### Phase 1: Test Discovery and Planning 🔄
+- [ ] Discover existing tests protecting agent factories
+- [ ] Plan new SSOT validation tests
+- [ ] Plan user isolation validation tests
+
+### Phase 2: Test Creation 🔄
+- [ ] Create failing tests for SSOT violations
+- [ ] Create user isolation validation tests
+- [ ] Validate test execution (no docker required)
+
+### Phase 3: SSOT Remediation Planning 🔄
+- [ ] Plan singleton removal strategy
+- [ ] Plan factory pattern consolidation
+- [ ] Plan UserExecutionContext standardization
+
+### Phase 4: Execute Remediation 🔄
+- [ ] Remove legacy singleton patterns
+- [ ] Consolidate SupervisorAgent implementations
+- [ ] Fix UserExecutionContext violations
+
+### Phase 5: Test Validation Loop 🔄
+- [ ] Run all existing tests
+- [ ] Run new SSOT validation tests
+- [ ] Fix any breaking changes
+- [ ] Validate Golden Path functionality
+
+### Phase 6: PR and Closure 🔄
+- [ ] Create PR when all tests pass
+- [ ] Link to issue #709 for auto-close
+- [ ] Validate staging deployment
 
 ## Business Impact
 - **Revenue Risk:** $500K+ ARR from chat functionality
-- **Golden Path Blocker:** Users cannot get AI responses if agent instantiation fails
-- **User Isolation Failures:** Cross-user state contamination
-- **Race Conditions:** Global state causes WebSocket event delivery failures
-
-## Planned Remediation
-1. Complete migration from singleton to proper factory pattern
-2. Remove global state variables
-3. Implement proper user context isolation
-4. Update tests to validate user isolation
-5. Remove deprecation warnings
-
-## Test Plan Status: DISCOVERED ✅
-
-### Existing Test Coverage: 80% (EXCELLENT)
-- ✅ **Mission Critical Tests:** `test_agent_factory_ssot_validation.py` - Complete factory SSOT validation
-- ✅ **User Isolation Tests:** `test_issue_686_user_isolation_comprehensive.py` - End-to-end isolation
-- ✅ **Concurrent Testing:** `test_concurrent_user_isolation.py` - 20+ concurrent users validation
-- ✅ **Factory Pattern Tests:** Multiple unit tests for factory behavior validation
-- ✅ **WebSocket Event Tests:** Complete event delivery per user validation
-
-### Required New Tests: 20% (ACHIEVABLE)
-- [ ] **Singleton→Factory Migration Tests** - Validate transition from singleton patterns
-- [ ] **Factory Method Pattern Tests** - Ensure all agents use create_agent_with_context()
-- [ ] **SSOT Import Validation Tests** - Verify imports follow SSOT_IMPORT_REGISTRY patterns
-- [ ] **Golden Path Integration Tests** - End-to-end factory pattern validation
-- [ ] **Regression Prevention Tests** - Catch singleton pattern reintroduction
-
-### Test Strategy
-- **Phase 1:** Core SSOT validation tests (Week 1) - 5 tests
-- **Phase 2:** Integration and performance tests (Week 2) - 3 tests
-- **Phase 3:** Regression prevention tests (Week 3) - 2 tests
-- **Total:** ~10 new tests + repair 1 existing test
-
-### Success Criteria
-- ✅ **Before Fix:** Mission critical tests FAIL (showing singleton violations)
-- ✅ **After Fix:** All tests PASS with factory pattern validation
-- ✅ **Performance:** <100ms additional overhead per request
-- ✅ **Zero Cross-User Contamination:** Under 20+ concurrent user load
-
-## Progress Log
-- [2025-09-12] Issue identified via SSOT audit
-- [2025-09-12] Initial analysis and documentation
-- [2025-09-12] Test discovery completed - 80% existing coverage found, 20% new tests planned
-- [2025-09-12] HIGH CONFIDENCE - Sophisticated existing test infrastructure provides excellent foundation
+- **Golden Path:** Blocks user login → AI responses
+- **User Safety:** Cross-user state contamination prevention

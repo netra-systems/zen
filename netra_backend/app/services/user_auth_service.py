@@ -1,40 +1,41 @@
-# Shim module for backward compatibility
-# User auth consolidated into auth_client
+# DEPRECATED SHIM MODULE FOR BACKWARD COMPATIBILITY - SSOT COMPLIANT
+# All user auth operations consolidated into auth_client SSOT
 from typing import Optional, Dict, Any
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.services.auth_failover_service import AuthFailoverService
 
-# Create auth client instance
+# SSOT COMPLIANCE: Single auth client instance for all operations
 _auth_client = AuthServiceClient()
 
 class UserAuthService:
-    """Backward compatibility shim for UserAuthService."""
-    
+    """DEPRECATED: Backward compatibility shim for UserAuthService.
+
+    SSOT COMPLIANCE: This class delegates all operations to auth service SSOT.
+    New code should import auth_client directly from netra_backend.app.clients.auth_client_core
+    """
+
     @staticmethod
     async def authenticate(username: str, password: str) -> Optional[Dict[str, Any]]:
-        """Authenticate user through auth service."""
+        """DEPRECATED: Authenticate user through auth service SSOT."""
         try:
-            # FIX: Call the correct method - login() instead of authenticate()
-            # AuthServiceClient has login() method, not authenticate()
+            # SSOT DELEGATION: Use auth service client
             result = await _auth_client.login(username, password)
             return result
         except Exception as e:
             return None
-    
+
     @staticmethod
     async def validate_token(token: str) -> Optional[Dict[str, Any]]:
-        """Validate token through auth service."""
+        """SSOT: Single validate_token implementation - delegates to auth service."""
         try:
             result = await _auth_client.validate_token(token)
             return result
         except Exception as e:
             return None
 
-# Legacy function aliases
+# SSOT COMPLIANCE: Single set of legacy function aliases
 async def authenticate_user(username: str, password: str) -> Optional[Dict[str, Any]]:
-    """Legacy authenticate function."""
+    """DEPRECATED: Use UserAuthService.authenticate() or auth_client directly."""
     return await UserAuthService.authenticate(username, password)
 
-async def validate_token(token: str) -> Optional[Dict[str, Any]]:
-    """Legacy validate token function."""  
-    return await UserAuthService.validate_token(token)
+# REMOVED: Duplicate validate_token function eliminated for SSOT compliance
+# Use UserAuthService.validate_token() or auth_client.validate_token() directly

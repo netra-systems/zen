@@ -27,19 +27,19 @@ class RedisService:
     
     async def connect(self):
         """Connect to Redis."""
-        await self._redis_manager.connect()
+        await self._redis_manager.initialize()
     
     async def close(self):
         """Close Redis connection."""
-        await self._redis_manager.disconnect()
+        await self._redis_manager.shutdown()
     
     async def set(self, key: str, value: Any, ex: Optional[int] = None) -> bool:
         """Set a key-value pair in Redis."""
-        if not await self._redis_manager.ensure_connected():
+        if not self._redis_manager.is_connected:
             return False
         
         try:
-            client = self._redis_manager.get_client()
+            client = await self._redis_manager.get_client()
             if not client:
                 return False
             
@@ -53,11 +53,11 @@ class RedisService:
     
     async def get(self, key: str) -> Optional[str]:
         """Get value by key from Redis."""
-        if not await self._redis_manager.ensure_connected():
+        if not self._redis_manager.is_connected:
             return None
-        
+
         try:
-            client = self._redis_manager.get_client()
+            client = await self._redis_manager.get_client()
             if not client:
                 return None
             
@@ -68,11 +68,11 @@ class RedisService:
     
     async def delete(self, *keys: str) -> int:
         """Delete keys from Redis."""
-        if not await self._redis_manager.ensure_connected():
+        if not self._redis_manager.is_connected:
             return 0
-        
+
         try:
-            client = self._redis_manager.get_client()
+            client = await self._redis_manager.get_client()
             if not client:
                 return 0
             
@@ -82,11 +82,11 @@ class RedisService:
     
     async def keys(self, pattern: str) -> List[str]:
         """Get keys matching pattern."""
-        if not await self._redis_manager.ensure_connected():
+        if not self._redis_manager.is_connected:
             return []
-        
+
         try:
-            client = self._redis_manager.get_client()
+            client = await self._redis_manager.get_client()
             if not client:
                 return []
             

@@ -1,6 +1,20 @@
 """Configuration Service
 
-Provides configuration management services.
+⚠️  DEPRECATION WARNING - ISSUE #667 SSOT CONSOLIDATION ⚠️
+This file contains DUPLICATE configuration functionality that will be removed in a future release.
+
+CANONICAL SSOT LOCATION: netra_backend.app.core.configuration.base
+USE THIS INSTEAD: from netra_backend.app.core.configuration.base import get_unified_config
+
+Migration Guide:
+1. Replace imports from this module with imports from netra_backend.app.core.configuration.base
+2. Use get_unified_config() for configuration access instead of custom loaders
+3. All environment access should go through the canonical SSOT patterns
+
+Business Impact: Using deprecated duplicates creates technical debt and maintenance overhead.
+This migration protects the $500K+ ARR Golden Path by consolidating to proven SSOT patterns.
+
+ORIGINAL: Provides configuration management services.
 """
 
 import logging
@@ -11,9 +25,21 @@ logger = logging.getLogger(__name__)
 
 
 class EnvironmentConfigLoader:
-    """Loads configuration from environment variables."""
-    
+    """Loads configuration from environment variables.
+
+    DEPRECATED: Use netra_backend.app.core.configuration.base.get_unified_config() instead.
+    """
+
     def __init__(self):
+        # ISSUE #667: DEPRECATION WARNING for duplicate configuration service
+        warnings.warn(
+            "DEPRECATED: EnvironmentConfigLoader from netra_backend.app.services.configuration_service "
+            "is a DUPLICATE. Use netra_backend.app.core.configuration.base.get_unified_config() instead. "
+            "This duplicate will be removed in a future release. "
+            "Migration guide: https://github.com/netra-development/netra-core-generation-1/issues/667",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.config = {}
     
     def load_config(self) -> Dict[str, Any]:
@@ -129,11 +155,11 @@ class ConfigurationManager:
 # SSOT CONSOLIDATION COMPATIBILITY (Issue #667)
 # ============================================================================
 
-# Import the SSOT UnifiedConfigurationManager for consolidation
+# Import the CANONICAL SSOT UnifiedConfigurationManager for consolidation
 try:
-    from netra_backend.app.core.managers.unified_configuration_manager import (
-        UnifiedConfigurationManager as SSotManager,
-        ConfigurationManagerFactory as SSotFactory
+    from netra_backend.app.core.configuration.base import (
+        UnifiedConfigManager as SSotManager,
+        config_manager as ssot_config_manager
     )
     
     class ConfigurationManagerBackwardCompat:
@@ -143,8 +169,8 @@ try:
         """
         
         def __init__(self):
-            # Use SSOT factory for global manager
-            self._ssot_manager = SSotFactory.get_global_manager()
+            # Use CANONICAL SSOT global manager instance
+            self._ssot_manager = ssot_config_manager
             self.validator = ConfigurationValidator()  # Keep original validator for compatibility
             self._config_cache = {}  # Compatibility cache
         

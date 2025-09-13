@@ -159,26 +159,29 @@ def check_critical_secrets_only(service_name: str, project_id: str) -> Dict[str,
     # Run full validation but focus on critical secrets in results
     result = SecretConfig.validate_deployment_readiness(service_name, project_id)
 
-    # Filter results to critical secrets only
-    critical_missing = [s for s in result["missing_secrets"]
-                       if any(crit in s for crit in critical_secrets)]
-    critical_invalid = [s for s in result["invalid_secrets"]
-                       if any(crit in s for crit in critical_secrets)]
+    # Filter issues to critical secrets only
+    critical_issues = [issue for issue in result["issues"]
+                      if any(crit in issue for crit in critical_secrets)]
 
-    if not critical_missing and not critical_invalid:
+    if result["deployment_ready"] and not critical_issues:
         print(f" ✅ All critical secrets are valid and available")
+        print(f"    Critical secrets found: {result['critical_secrets_found']}/{len(critical_secrets)}")
+        print(f"    Total secrets validated: {result['secrets_validated']}")
     else:
         print(f" ❌ Critical secret issues found:")
-        for secret in critical_missing:
-            print(f"    ❌ Missing: {secret}")
-        for secret in critical_invalid:
-            print(f"    ❌ Invalid: {secret}")
+        for issue in critical_issues:
+            print(f"    ❌ {issue}")
+
+        # Show overall status
+        print(f"\n    Deployment Ready: {result['deployment_ready']}")
+        print(f"    Critical secrets found: {result['critical_secrets_found']}/{len(critical_secrets)}")
+        print(f"    Total secrets validated: {result['secrets_validated']}")
 
     return {
-        "valid": len(critical_missing) == 0 and len(critical_invalid) == 0,
+        "valid": result["deployment_ready"] and len(critical_issues) == 0,
         "critical_secrets": critical_secrets,
-        "missing_critical": critical_missing,
-        "invalid_critical": critical_invalid,
+        "critical_issues": critical_issues,
+        "deployment_result": result,
         "service_name": service_name
     }
 
