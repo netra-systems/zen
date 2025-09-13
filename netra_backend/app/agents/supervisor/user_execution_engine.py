@@ -713,7 +713,95 @@ class UserExecutionEngine(IExecutionEngine):
         else:
             logger.warning("WebSocket bridge not available")
             return None
-    
+
+    @classmethod
+    def _init_from_factory(cls, registry: 'AgentRegistry', websocket_bridge,
+                          user_context: Optional['UserExecutionContext'] = None):
+        """DEPRECATED: Legacy factory method for test compatibility.
+
+        This method provides backward compatibility for tests that expect the old
+        factory pattern. Use standard __init__ for new code.
+
+        Args:
+            registry: AgentRegistry instance (will be wrapped in factory)
+            websocket_bridge: WebSocket bridge instance (will be wrapped in emitter)
+            user_context: Optional UserExecutionContext (will create anonymous if None)
+
+        Returns:
+            UserExecutionEngine instance created with modern patterns
+
+        Raises:
+            DeprecationWarning: Warns about deprecated usage
+        """
+        import warnings
+        warnings.warn(
+            "UserExecutionEngine._init_from_factory is deprecated. "
+            "Use UserExecutionEngine(context, agent_factory, websocket_emitter) instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        # Create or convert UserExecutionContext
+        if user_context is None:
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            import uuid
+            user_context = UserExecutionContext(
+                user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+                run_id=f"test_run_{uuid.uuid4().hex[:8]}",
+                thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+                request_id=str(uuid.uuid4())
+            )
+        elif hasattr(user_context, '__class__') and 'Mock' in user_context.__class__.__name__:
+            # Convert mock object to real UserExecutionContext for compatibility
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            import uuid
+            user_context = UserExecutionContext(
+                user_id=getattr(user_context, 'user_id', f"test_user_{uuid.uuid4().hex[:8]}"),
+                run_id=getattr(user_context, 'run_id', f"test_run_{uuid.uuid4().hex[:8]}"),
+                thread_id=getattr(user_context, 'thread_id', f"test_thread_{uuid.uuid4().hex[:8]}"),
+                request_id=str(uuid.uuid4())
+            )
+
+        # Wrap registry in factory pattern (for compatibility)
+        if hasattr(registry, 'create_agent_instance'):
+            # Already a factory
+            agent_factory = registry
+        else:
+            # Need to wrap in factory pattern
+            from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+            agent_factory = AgentInstanceFactory()
+            # Set the registry after initialization (compatibility hack)
+            agent_factory._agent_registry = registry
+            # Store websocket_bridge for compatibility
+            agent_factory._websocket_bridge = websocket_bridge
+
+        # Wrap websocket_bridge in emitter pattern (for compatibility)
+        if hasattr(websocket_bridge, 'emit_user_event'):
+            # Already an emitter
+            websocket_emitter = websocket_bridge
+        else:
+            # Need to wrap in emitter pattern
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+            # UnifiedWebSocketEmitter needs a manager and user_id, not just a bridge
+            websocket_emitter = UnifiedWebSocketEmitter(
+                manager=websocket_bridge,  # Treat bridge as manager for compatibility
+                user_id=user_context.user_id,
+                context=user_context
+            )
+
+        # Create using modern constructor
+        engine = cls(user_context, agent_factory, websocket_emitter)
+
+        # Mark as created via deprecated method for debugging
+        engine._created_via_deprecated = True
+        engine._deprecated_method = '_init_from_factory'
+        engine._issue_reference = '#692'
+
+        logger.warning(f"Created UserExecutionEngine via deprecated _init_from_factory method "
+                      f"for Issue #692 compatibility. User: {user_context.user_id}")
+
+        return engine
+
     def get_available_agents(self) -> List[Any]:
         """Get available agents from registry for integration testing.
         

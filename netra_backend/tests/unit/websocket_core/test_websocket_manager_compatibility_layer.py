@@ -119,9 +119,9 @@ class TestWebSocketManagerCompatibilityLayer(SSotBaseTestCase):
         # Test that we can create instances (basic functionality)
         test_connection = WebSocketConnectionFromCompat(
             connection_id="test-conn-123",
-            user_id="test-user-456", 
+            user_id="test-user-456",
             websocket=Mock(),
-            created_at=None,  # Should auto-generate
+            connected_at=datetime.now(timezone.utc),  # Fixed: Use connected_at instead of created_at
             thread_id="test-thread-789"
         )
         
@@ -359,6 +359,7 @@ class TestWebSocketManagerCompatibilityIntegration(SSotBaseTestCase):
             connection_id="integration-test-123",
             user_id="user-456",
             websocket=Mock(),
+            connected_at=datetime.now(timezone.utc),  # Fixed: Add required connected_at parameter
             thread_id="thread-789"
         )
         
