@@ -60,6 +60,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 - Authentication test infrastructure broken
 
 ### 🚨 HIGH - Issue 3: Golden Path Concurrency Complete Failure
+**GitHub Issue:** [#674 - failing-test-concurrency-critical-golden-path-zero-percent-success-rate](https://github.com/netra-systems/netra-apex/issues/674)
 **File:** `tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py`
 **Error:** `AssertionError: Concurrent success rate too low: 0.00%`
 **Impact:** Multi-user scenarios completely failing - business scalability issue
