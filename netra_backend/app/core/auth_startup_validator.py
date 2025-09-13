@@ -504,19 +504,21 @@ class AuthStartupValidator:
         if value:
             return value
         
-        # Fallback to direct environment access for missing variables during isolation
-        # Using self.env which provides SSOT-compliant environment access
-        direct_value = self.env.get(var_name, use_fallback=True)
-        if direct_value:
-            logger.info(f"Using environment fallback for {var_name} (isolation issue)")
-            return direct_value
-        
         # Try environment-specific variations
         env_specific = f"{var_name}_{self.environment.upper()}"
-        env_specific_value = self.env.get(env_specific) or self.env.get(env_specific, use_fallback=True)
+        env_specific_value = self.env.get(env_specific)
         if env_specific_value:
             logger.info(f"Using environment-specific variable: {env_specific}")
             return env_specific_value
+        
+        # Last resort: check if variable exists in os.environ directly
+        # This provides fallback for edge cases where IsolatedEnvironment
+        # might not have captured all variables during test context
+        import os
+        direct_value = os.environ.get(var_name)
+        if direct_value:
+            logger.info(f"Using direct os.environ fallback for {var_name} (compatibility)")
+            return direct_value
         
         return None
     
@@ -524,10 +526,12 @@ class AuthStartupValidator:
         """Get debug information about environment variable resolution attempts."""
         env_specific = f"{var_name}_{self.environment.upper()}"
         
+        # Check direct os.environ access for debug info
+        import os
         return {
             "isolated_env": bool(self.env.get(var_name)),
-            "environment_fallback": bool(self.env.get(var_name, use_fallback=True)),
-            "environment_specific": bool(self.env.get(env_specific) or self.env.get(env_specific, use_fallback=True)),
+            "os_environ_direct": bool(os.environ.get(var_name)),
+            "environment_specific": bool(self.env.get(env_specific)),
             "env_specific_key": env_specific,
             "current_environment": self.environment
         }

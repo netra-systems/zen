@@ -260,7 +260,7 @@ class TestFactoryPatternSSotCompliance(SSotAsyncTestCase):
         
         return memory_issues
     
-    def test_websocket_factory_creates_shared_instances_violation(self):
+    async def test_websocket_factory_creates_shared_instances_violation(self):
         """
         FAILING TEST: Proves factory pattern violates user isolation.
         
