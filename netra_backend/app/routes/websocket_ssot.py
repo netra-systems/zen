@@ -41,6 +41,7 @@ import json
 import time
 import uuid
 from contextlib import asynccontextmanager
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple, List, Union
 from enum import Enum
@@ -532,7 +533,7 @@ class WebSocketSSOTRouter:
         - User-Agent header detection
         - Default: main mode (full functionality)
         """
-        connection_id = f"ssot_{uuid.uuid4().hex[:8]}"
+        connection_id = f"ssot_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         start_time = time.time()
         
         # CRITICAL: Log connection initiation with all context for Golden Path debugging
@@ -651,8 +652,8 @@ class WebSocketSSOTRouter:
         - Agent orchestration and tool execution
         - Emergency fallback patterns
         """
-        connection_id = f"main_{uuid.uuid4().hex[:8]}"
-        preliminary_connection_id = f"prelim_{uuid.uuid4().hex[:8]}"
+        connection_id = f"main_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        preliminary_connection_id = f"prelim_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         ws_manager = None
         
@@ -941,7 +942,7 @@ class WebSocketSSOTRouter:
         - Request-scoped context isolation
         - Health monitoring per user
         """
-        connection_id = f"factory_{uuid.uuid4().hex[:8]}"
+        connection_id = f"factory_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         websocket_manager = None
         
@@ -1041,7 +1042,7 @@ class WebSocketSSOTRouter:
         - Automatic resource cleanup on disconnect
         - Comprehensive audit logging
         """
-        connection_id = f"isolated_{uuid.uuid4().hex[:8]}"
+        connection_id = f"isolated_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         connection_scoped_manager = None
         
@@ -1096,9 +1097,9 @@ class WebSocketSSOTRouter:
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                request_id=f"isolated_req_{uuid.uuid4().hex[:8]}",
+                request_id=f"isolated_req_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}",
                 websocket_client_id=connection_id,
-                run_id=f"isolated_run_{uuid.uuid4().hex[:8]}"
+                run_id=f"isolated_run_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
             )
             
             # Step 4: Create connection-scoped manager (no shared state)
@@ -1150,7 +1151,7 @@ class WebSocketSSOTRouter:
         Simplified WebSocket handling for legacy clients that don't support
         the new modes but still need basic connectivity and messaging.
         """
-        connection_id = f"legacy_{uuid.uuid4().hex[:8]}"
+        connection_id = f"legacy_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         
         try:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
@@ -1851,7 +1852,7 @@ class WebSocketSSOTRouter:
     async def websocket_api_create(self):
         """REST API: WebSocket session preparation (POST /api/v1/websocket)"""
         try:
-            session_id = f"ws_session_{uuid.uuid4().hex[:8]}"
+            session_id = f"ws_session_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
             response_data = {
                 "session_id": session_id,
                 "websocket_url": "/ws", 

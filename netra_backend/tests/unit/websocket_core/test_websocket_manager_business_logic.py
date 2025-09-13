@@ -63,7 +63,8 @@ from test_framework.base import BaseUnitTest
 class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
     """Test WebSocketConnection business logic for individual connection management."""
     
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
         """Set up WebSocketConnection for testing."""
         # Create mock WebSocket
         self.mock_websocket = Mock()
@@ -217,8 +218,9 @@ class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
 
 class TestUnifiedWebSocketManagerBusinessLogic(BaseUnitTest):
     """Test UnifiedWebSocketManager business logic for connection management."""
-    
-    def setUp(self):
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
         """Set up UnifiedWebSocketManager for testing."""
         # Create manager instance
         self.manager = UnifiedWebSocketManager()
