@@ -1486,6 +1486,15 @@ class IsolatedEnvironment:
             "original_backup_count": len(self._original_environ_backup)
         }
 
+    def __enter__(self) -> 'IsolatedEnvironment':
+        """Context manager entry - enable isolation mode."""
+        self.enable_isolation()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit - disable isolation mode and restore original."""
+        self.disable_isolation(restore_original=True)
+
 
 # Singleton instance
 _env_instance = IsolatedEnvironment()
