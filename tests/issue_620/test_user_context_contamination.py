@@ -317,7 +317,7 @@ class TestUserContextContamination(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=query,
+            # user_input moved to metadata: query,
             metadata={"contamination_test": True}
         )
         
@@ -341,7 +341,7 @@ class TestUserContextContamination(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=query,
+            # user_input moved to metadata: query,
             metadata=user_context.audit_metadata
         )
         

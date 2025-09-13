@@ -48,8 +48,8 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="What is the weather like today?",
             metadata={
+                "user_input": "What is the weather like today?",
                 "test_case": "golden_path_protection",
                 "business_critical": True,
                 "arr_protection": "$500K+"
@@ -108,8 +108,8 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Analyze the current system status",
             metadata={
+                "user_input": "Analyze the current system status",
                 "test_case": "websocket_events_validation",
                 "requires_tools": True,
                 "websocket_critical": True
@@ -212,7 +212,7 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Test error recovery",
+            # user_input moved to metadata: "Test error recovery",
             metadata={"test_case": "error_recovery", "retry_enabled": True}
         )
         
@@ -296,7 +296,7 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
                 user_id=user_context.user_id,
                 thread_id=user_context.thread_id,
                 run_id=f"{user_context.run_id}_{operation_name}",
-                user_input=operation_query,
+                # user_input moved to metadata: operation_query,
                 metadata={
                     "operation": operation_name,
                     "data_sensitive": True,
@@ -596,7 +596,7 @@ class TestGoldenPathProtection(SSotAsyncTestCase):
                 user_id=user_context.user_id,
                 thread_id=user_context.thread_id,
                 run_id=f"{user_context.run_id}_{agent_name}",
-                user_input=f"Golden path test query for {agent_name} from user {user_id}",
+                # user_input moved to metadata: f"Golden path test query for {agent_name} from user {user_id}",
                 metadata={
                     "user_session": user_id,
                     "concurrent_test": True,

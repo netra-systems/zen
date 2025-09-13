@@ -347,8 +347,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input="Test functionality equivalence",
-            metadata={"test_type": "functionality_validation"}
+            metadata={"test_type": "functionality_validation", "user_input": "Test functionality equivalence"}
         )
         
         # Mock successful execution
@@ -356,7 +355,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             expected_result = AgentExecutionResult(
                 success=True,
                 agent_name="functionality_test_agent",
-                execution_time=1.5,
+                duration=1.5,  # Changed from execution_time to duration
                 data={
                     "response": "Functionality test successful",
                     "user_isolation": True,
