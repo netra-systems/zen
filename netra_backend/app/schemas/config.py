@@ -1458,12 +1458,10 @@ class NetraTestingConfig(AppConfig):
         
         env = get_env()
         
-        # CRITICAL FIX: For test scenarios using patch.dict(os.environ), we need to 
-        # merge isolated variables with os.environ, giving priority to os.environ
+        # SSOT FIX: For test scenarios using patch.dict(os.environ), use 
+        # IsolatedEnvironment's built-in sync method instead of direct os.environ access
+        env._sync_with_os_environ()  # Sync test patches with isolated environment
         env_dict = env.as_dict()
-        for key, value in os.environ.items():
-            if key not in env_dict or env_dict[key] != value:
-                env_dict[key] = value
         
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env_dict)

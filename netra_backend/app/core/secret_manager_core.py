@@ -49,8 +49,9 @@ class EnhancedSecretManager:
         env.set(secret_name, value, "enhanced_secret_manager")
     
     def has_secret(self, secret_name: str) -> bool:
-        """Check if secret exists."""
-        return secret_name in os.environ
+        """Check if secret exists using SSOT IsolatedEnvironment."""
+        env = get_env()
+        return env.get(secret_name) is not None
     
     def get_metadata(self, secret_name: str) -> Optional[SecretMetadata]:
         """Get secret metadata."""
