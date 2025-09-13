@@ -157,10 +157,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     async def test_user_context_preservation_single_request(self):
         """Test UserExecutionContext is preserved during single agent execution."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-001")
 
         context = self.user_contexts["user_1"]
         test_request = "test user context preservation"
@@ -187,10 +185,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     async def test_user_context_isolation_concurrent_users(self):
         """Test user context isolation between concurrent agent executions."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-concurrent")
 
         # Execute concurrent requests for different users
         tasks = []
@@ -239,10 +235,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
         # Create multiple agent instances (simulating factory pattern)
         agents = []
         for i in range(3):
-            agent = UserContextTestAgent(
-                llm_manager=self.llm_manager,
-                websocket_bridge=self.websocket_bridge
-            )
+            agent = UserContextTestAgent(llm_manager=self.llm_manager)
+            agent.set_websocket_bridge(self.websocket_bridge, f"test-run-context-factory-{i}")
             agents.append(agent)
 
         # Execute requests on different agents with different users
@@ -271,10 +265,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     async def test_user_context_memory_isolation_stress_test(self):
         """Test memory isolation under stress with many concurrent users."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-stress")
 
         # Create many user contexts for stress testing
         stress_contexts = []
@@ -324,10 +316,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     async def test_user_context_session_management(self):
         """Test UserExecutionContext session management and cleanup patterns."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-session")
 
         context = self.user_contexts["user_1"]
 
@@ -348,10 +338,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     def test_user_context_thread_safety(self):
         """Test UserExecutionContext is thread-safe in synchronous context."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-thread")
 
         # Create contexts for thread testing
         contexts = []
@@ -388,10 +376,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
 
     async def test_user_context_audit_trail_compliance(self):
         """Test UserExecutionContext provides proper audit trail for compliance."""
-        agent = UserContextTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = UserContextTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-audit")
 
         context = self.user_contexts["user_1"]
 
@@ -443,10 +429,8 @@ class TestBaseAgentUserContext(SSotAsyncTestCase):
                     "user_id": context.user_id
                 }
 
-        agent = ErrorTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        agent = ErrorTestAgent(llm_manager=self.llm_manager)
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-context-error")
 
         # Execute requests for all users concurrently
         tasks = []

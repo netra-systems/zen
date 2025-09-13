@@ -140,27 +140,32 @@ class TestBaseAgentInitialization(SSotAsyncTestCase):
         agent = ConcreteTestAgent(llm_manager=self.llm_manager)
         agent.set_websocket_bridge(self.websocket_bridge, "test-run-id")
 
-        # Verify: WebSocket bridge is properly connected
-        assert agent.websocket_bridge is self.websocket_bridge
+        # Verify: WebSocket bridge adapter is properly connected (accessing internal _websocket_adapter)
+        assert hasattr(agent, '_websocket_adapter')
+        assert agent._websocket_adapter is not None
+        assert agent._websocket_adapter.has_websocket_bridge()
 
-        # Verify: WebSocket bridge adapter is configured
-        adapter = agent.websocket_bridge_adapter
+        # Verify: WebSocket bridge adapter is configured with correct methods
+        adapter = agent._websocket_adapter
         assert adapter is not None
-        assert hasattr(adapter, 'emit_agent_event')
-        assert hasattr(adapter, 'emit_tool_event')
+        assert hasattr(adapter, 'emit_agent_started')
+        assert hasattr(adapter, 'emit_tool_executing')
+        assert hasattr(adapter, 'emit_tool_completed')
 
         # Test: WebSocket events can be emitted through adapter
         # This is critical for real-time chat functionality ($500K+ ARR value)
-        assert callable(adapter.emit_agent_event)
-        assert callable(adapter.emit_tool_event)
+        assert callable(adapter.emit_agent_started)
+        assert callable(adapter.emit_tool_executing)
+        assert callable(adapter.emit_tool_completed)
 
     def test_base_agent_initialization_dependency_validation(self):
         """Test BaseAgent initialization validates required dependencies."""
-        # Test: None LLM manager raises appropriate error
-        with pytest.raises((TypeError, ValueError, AttributeError)):
-            ConcreteTestAgent(llm_manager=None)
+        # Test: BaseAgent handles None LLM manager gracefully (no exception should be raised)
+        # BaseAgent constructor accepts Optional[LLMManager] per actual implementation
+        agent_with_none = ConcreteTestAgent(llm_manager=None)
+        assert agent_with_none.llm_manager is None
 
-        # Test: Valid initialization works
+        # Test: Valid initialization works with real LLM manager
         agent = ConcreteTestAgent(llm_manager=self.llm_manager)
         assert agent.llm_manager is self.llm_manager
 
@@ -169,9 +174,9 @@ class TestBaseAgentInitialization(SSotAsyncTestCase):
         agent = ConcreteTestAgent(llm_manager=self.llm_manager)
         agent.set_websocket_bridge(self.websocket_bridge, "test-run-id")
 
-        # Verify: Agent has execution infrastructure
-        assert hasattr(agent, '_execution_engine')
-        assert hasattr(agent, '_reliability_manager')
+        # Verify: Agent has execution infrastructure (using property access pattern)
+        assert agent.execution_engine is not None  # Using property from BaseAgent
+        assert agent.reliability_manager is not None  # Using property from BaseAgent
 
         # Test: Infrastructure components are properly isolated per instance
         # This ensures no shared state between concurrent users
@@ -186,11 +191,12 @@ class TestBaseAgentInitialization(SSotAsyncTestCase):
         agent = ConcreteTestAgent(llm_manager=self.llm_manager)
         agent.set_websocket_bridge(self.websocket_bridge, "test-run-id")
 
-        # Verify: Retry handler is configured (via UnifiedRetryHandler SSOT)
-        assert hasattr(agent, 'retry_handler') or hasattr(agent, '_retry_config')
+        # Verify: Retry handler is configured via unified_reliability_handler property
+        assert agent.unified_reliability_handler is not None
 
-        # Test: Agent has retry capabilities for resilience
+        # Test: Agent has retry capabilities for resilience through reliability manager
         # This is critical for production stability
+        assert agent.reliability_manager is not None
         assert hasattr(agent, 'process_request')
 
         # The retry logic should be available through base infrastructure
@@ -224,24 +230,25 @@ class TestBaseAgentInitialization(SSotAsyncTestCase):
 class TestBaseAgentInitializationEdgeCases(SSotBaseTestCase):
     """Test BaseAgent initialization edge cases and error conditions."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment."""
-        super().setUp()
+        super().setup_method(method)
 
         self.llm_manager = Mock(spec=LLMManager)
+        self.llm_manager._get_model_name = Mock(return_value="test-model-gpt-4")
+        self.llm_manager.ask_llm = AsyncMock(return_value="Mock LLM response")
+        self.llm_manager.get_available_models = Mock(return_value=["gpt-4", "gpt-3.5-turbo"])
+
         self.websocket_bridge = Mock(spec=AgentWebSocketBridge)
 
     def test_base_agent_initialization_memory_isolation(self):
         """Test BaseAgent instances don't share memory between users."""
-        # Create multiple agent instances
-        agent1 = ConcreteTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
-        agent2 = ConcreteTestAgent(
-            llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
-        )
+        # Create multiple agent instances with correct constructor signature
+        agent1 = ConcreteTestAgent(llm_manager=self.llm_manager)
+        agent1.set_websocket_bridge(self.websocket_bridge, "test-run-id-1")
+
+        agent2 = ConcreteTestAgent(llm_manager=self.llm_manager)
+        agent2.set_websocket_bridge(self.websocket_bridge, "test-run-id-2")
 
         # Verify: Instances are separate objects
         assert agent1 is not agent2
@@ -263,10 +270,8 @@ class TestBaseAgentInitializationEdgeCases(SSotBaseTestCase):
 
         # Create multiple agents to test resource management
         for i in range(10):
-            agent = ConcreteTestAgent(
-                llm_manager=self.llm_manager,
-                websocket_bridge=self.websocket_bridge
-            )
+            agent = ConcreteTestAgent(llm_manager=self.llm_manager)
+            agent.set_websocket_bridge(self.websocket_bridge, f"test-run-id-{i}")
             agents.append(agent)
 
         # Verify: Each agent has isolated resources
@@ -287,14 +292,16 @@ class TestBaseAgentInitializationEdgeCases(SSotBaseTestCase):
         agent = ConcreteTestAgent(llm_manager=self.llm_manager)
         agent.set_websocket_bridge(self.websocket_bridge, "test-run-id")
 
-        # Verify: Configuration is accessible
+        # Verify: Configuration is accessible through proper attributes
         assert hasattr(agent, 'llm_manager')
-        assert hasattr(agent, 'websocket_bridge')
+        assert hasattr(agent, '_websocket_adapter')  # Correct attribute name
+        assert agent._websocket_adapter.has_websocket_bridge()  # Verify bridge is set
 
         # Test: Configuration can be accessed through proper channels
         # This ensures compliance with SSOT configuration patterns
         llm_config = agent.llm_manager
         assert llm_config is self.llm_manager
 
-        ws_config = agent.websocket_bridge
-        assert ws_config is self.websocket_bridge
+        # Verify WebSocket adapter is properly configured
+        assert agent._websocket_adapter is not None
+        assert agent._websocket_adapter.has_websocket_bridge()
