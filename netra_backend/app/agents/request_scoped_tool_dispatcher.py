@@ -43,8 +43,8 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.websocket_core import (
     WebSocketEventEmitter,
 )
-# WebSocketEventEmitterFactory is actually UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
+# Import the correct WebSocketEmitterFactory class
+from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
