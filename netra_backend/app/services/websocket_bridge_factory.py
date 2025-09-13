@@ -28,6 +28,7 @@ from netra_backend.app.services.websocket_connection_pool import WebSocketConnec
 import asyncio
 import time
 import uuid
+import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
@@ -238,8 +239,21 @@ class WebSocketBridgeFactory:
         self._agent_registry = agent_registry
         self._health_monitor = health_monitor
         
-        # Get or create the unified WebSocket manager (SSOT)
-        self._unified_manager = UnifiedWebSocketManager()
+        # Get or create the unified WebSocket manager (SSOT) - Issue #712 factory pattern
+        # Create minimal user context for bridge factory operations
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+        id_manager = UnifiedIDManager()
+        bridge_context = type('BridgeUserContext', (), {
+            'user_id': id_manager.generate_id(IDType.USER, prefix='bridge'),
+            'thread_id': id_manager.generate_id(IDType.THREAD, prefix='bridge'),
+            'request_id': id_manager.generate_id(IDType.REQUEST, prefix='bridge'),
+            'is_bridge_factory': True
+        })()
+
+        self._unified_manager = UnifiedWebSocketManager(
+            user_context=bridge_context,
+            _ssot_authorization_token=secrets.token_urlsafe(16)
+        )
         
         logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
@@ -278,8 +292,20 @@ class WebSocketBridgeFactory:
 
                 logger.warning("WebSocketBridgeFactory auto-configuring for testing - not recommended for production")
 
-                # Create minimal configuration for testing
-                self._unified_manager = UnifiedWebSocketManager()
+                # Create minimal configuration for testing - Issue #712 factory pattern
+                from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+                id_manager = UnifiedIDManager()
+                test_context = type('TestUserContext', (), {
+                    'user_id': id_manager.generate_id(IDType.USER, prefix='test'),
+                    'thread_id': id_manager.generate_id(IDType.THREAD, prefix='test'),
+                    'request_id': id_manager.generate_id(IDType.REQUEST, prefix='test'),
+                    'is_test': True
+                })()
+
+                self._unified_manager = UnifiedWebSocketManager(
+                    user_context=test_context,
+                    _ssot_authorization_token=secrets.token_urlsafe(16)
+                )
                 self._connection_pool = WebSocketConnectionPool()
                 self._agent_registry = AgentRegistry() if AgentRegistry else None
                 self._health_monitor = None  # Optional for testing
