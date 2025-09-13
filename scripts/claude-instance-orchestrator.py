@@ -31,6 +31,8 @@ Features:
   - Soft startup: Configurable delay between instance launches to prevent resource contention
   - Rolling status reports: Periodic updates showing instance status, uptime, and token usage
   - Token tracking: Automatic parsing and tracking of Claude token usage per instance
+    * Total tokens, input/output tokens, cached tokens, and cache hit rates
+    * Real-time token consumption monitoring across all instances
   - Formatted output: Clear visual separation between instances with truncated lines
   - Tool call tracking: Counts tool executions across all instances
 
@@ -95,6 +97,7 @@ class InstanceStatus:
     total_tokens: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
+    cached_tokens: int = 0
     tool_calls: int = 0
 
 class ClaudeInstanceOrchestrator:
@@ -595,8 +598,9 @@ class ClaudeInstanceOrchestrator:
 
         # Show token usage summary
         total_tokens_all = sum(s.total_tokens for s in self.statuses.values())
+        total_cached_all = sum(s.cached_tokens for s in self.statuses.values())
         total_tools_all = sum(s.tool_calls for s in self.statuses.values())
-        print(f"║ Total Tokens: {total_tokens_all:,}, Total Tool Calls: {total_tools_all}")
+        print(f"║ Tokens: {total_tokens_all:,} total, {total_cached_all:,} cached | Tools: {total_tools_all}")
         print(f"║")
 
         for name, status in self.statuses.items():
@@ -620,11 +624,12 @@ class ClaudeInstanceOrchestrator:
             else:
                 time_info = "waiting"
 
-            # Create detailed line with tokens
+            # Create detailed line with tokens and cache info
             token_info = f"{status.total_tokens:,}t" if status.total_tokens > 0 else "0t"
+            cache_info = f"{status.cached_tokens:,}c" if status.cached_tokens > 0 else "0c"
             tool_info = f"{status.tool_calls}tc" if status.tool_calls > 0 else "0tc"
 
-            detail = f"  {emoji} {name:<18} {status.status:<9} {time_info:<8} {token_info:<8} {tool_info}"
+            detail = f"  {emoji} {name:<16} {status.status:<8} {time_info:<8} {token_info:<7} {cache_info:<6} {tool_info}"
 
             # Ensure the line fits within a reasonable width
             if len(detail) > 75:
@@ -647,7 +652,7 @@ class ClaudeInstanceOrchestrator:
             tokens = int(token_match.group(1) or token_match.group(2))
             status.total_tokens += tokens
 
-        # Pattern 2: Input/Output token breakdown "Input: X tokens, Output: Y tokens"
+        # Pattern 2: Input/Output/Cached token breakdown
         input_match = re.search(r'input[:\s]+(\d+)\s+tokens?', line_lower)
         if input_match:
             status.input_tokens += int(input_match.group(1))
@@ -655,6 +660,16 @@ class ClaudeInstanceOrchestrator:
         output_match = re.search(r'output[:\s]+(\d+)\s+tokens?', line_lower)
         if output_match:
             status.output_tokens += int(output_match.group(1))
+
+        # Pattern 2b: Cached tokens
+        cached_match = re.search(r'cached[:\s]+(\d+)\s+tokens?', line_lower)
+        if cached_match:
+            status.cached_tokens += int(cached_match.group(1))
+
+        # Pattern 2c: Cache hit patterns
+        cache_hit_match = re.search(r'cache\s+hit[:\s]+(\d+)\s+tokens?', line_lower)
+        if cache_hit_match:
+            status.cached_tokens += int(cache_hit_match.group(1))
 
         # Pattern 3: Total token counts "Total: X tokens"
         total_match = re.search(r'total[:\s]+(\d+)\s+tokens?', line_lower)
@@ -679,6 +694,12 @@ class ClaudeInstanceOrchestrator:
                     json_data = json.loads(json_match.group())
                     if 'tokens' in json_data and isinstance(json_data['tokens'], (int, float)):
                         status.total_tokens += int(json_data['tokens'])
+                    if 'cached_tokens' in json_data and isinstance(json_data['cached_tokens'], (int, float)):
+                        status.cached_tokens += int(json_data['cached_tokens'])
+                    if 'input_tokens' in json_data and isinstance(json_data['input_tokens'], (int, float)):
+                        status.input_tokens += int(json_data['input_tokens'])
+                    if 'output_tokens' in json_data and isinstance(json_data['output_tokens'], (int, float)):
+                        status.output_tokens += int(json_data['output_tokens'])
             except (json.JSONDecodeError, ValueError):
                 pass  # Ignore JSON parsing errors
 
@@ -737,6 +758,7 @@ class ClaudeInstanceOrchestrator:
         total_tokens = sum(status.total_tokens for status in self.statuses.values())
         total_input_tokens = sum(status.input_tokens for status in self.statuses.values())
         total_output_tokens = sum(status.output_tokens for status in self.statuses.values())
+        total_cached_tokens = sum(status.cached_tokens for status in self.statuses.values())
         total_tool_calls = sum(status.tool_calls for status in self.statuses.values())
 
         results["metadata"] = {
@@ -747,7 +769,9 @@ class ClaudeInstanceOrchestrator:
                 "total_tokens": total_tokens,
                 "input_tokens": total_input_tokens,
                 "output_tokens": total_output_tokens,
-                "total_tool_calls": total_tool_calls
+                "cached_tokens": total_cached_tokens,
+                "total_tool_calls": total_tool_calls,
+                "cache_hit_rate": round(total_cached_tokens / max(total_tokens, 1) * 100, 2)
             }
         }
 
@@ -976,11 +1000,13 @@ async def main():
     # Print summary with token usage
     summary = orchestrator.get_status_summary()
     total_tokens = sum(status.total_tokens for status in orchestrator.statuses.values())
+    total_cached = sum(status.cached_tokens for status in orchestrator.statuses.values())
     total_tool_calls = sum(status.tool_calls for status in orchestrator.statuses.values())
+    cache_rate = round(total_cached / max(total_tokens, 1) * 100, 1) if total_tokens > 0 else 0
 
     logger.info(f"Orchestration completed in {total_duration:.2f}s")
     logger.info(f"Results: {summary['completed']} completed, {summary['failed']} failed")
-    logger.info(f"Token Usage: {total_tokens:,} total tokens, {total_tool_calls} tool calls")
+    logger.info(f"Token Usage: {total_tokens:,} total ({total_cached:,} cached, {cache_rate}% hit rate), {total_tool_calls} tool calls")
 
     # Save results (will auto-generate filename if args.output is None)
     orchestrator.save_results(args.output)
@@ -998,10 +1024,12 @@ async def main():
             print(f"  Duration: {duration:.2f}s")
 
         # Show token usage
-        if status.total_tokens > 0 or status.input_tokens > 0 or status.output_tokens > 0:
+        if status.total_tokens > 0 or status.input_tokens > 0 or status.output_tokens > 0 or status.cached_tokens > 0:
             print(f"  Tokens: {status.total_tokens:,} total")
             if status.input_tokens > 0 or status.output_tokens > 0:
                 print(f"          {status.input_tokens:,} input, {status.output_tokens:,} output")
+            if status.cached_tokens > 0:
+                print(f"          {status.cached_tokens:,} cached")
 
         if status.tool_calls > 0:
             print(f"  Tool Calls: {status.tool_calls}")
