@@ -77,7 +77,7 @@ from typing import Dict, Any, List, Optional, Set
 
 from netra_backend.app.websocket_core.handlers import (
     AgentRequestHandler,
-    TestAgentHandler,
+    E2EAgentHandler,
     AgentHandler,
     MessageRouter
 )

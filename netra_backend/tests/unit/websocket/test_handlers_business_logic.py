@@ -35,7 +35,7 @@ from netra_backend.app.websocket_core.handlers import (
     TypingHandler,
     HeartbeatHandler,
     AgentRequestHandler,
-    TestAgentHandler,
+    E2EAgentHandler,
     AgentHandler,
     UserMessageHandler,
     JsonRpcHandler,

@@ -5,9 +5,17 @@
 **Time:** 14:30
 **Session ID:** failingtestsgardener-goldenpath-20250913-1430
 
+## GitHub Issues Created
+
+✅ **Issue #822**: [failing-test-regression-P1-docker-websocket-connection-failure](https://github.com/netra-systems/netra-apex/issues/822) - P1 Priority
+✅ **Issue #826**: [failing-test-active-dev-P2-datetime-deprecation-warnings](https://github.com/netra-systems/netra-apex/issues/826) - P2 Priority
+✅ **Issue #827**: [failing-test-regression-P1-docker-resource-cleanup-failure](https://github.com/netra-systems/netra-apex/issues/827) - P1 Priority
+
 ## Executive Summary
 
 This worklog documents issues discovered during golden path test execution. The golden path represents the critical user flow: users login → get AI responses back. These tests are protecting $500K+ ARR business functionality.
+
+**STATUS**: All identified issues have been tracked in GitHub with appropriate priority levels.
 
 ## Test Execution Results
 
@@ -21,7 +29,8 @@ This worklog documents issues discovered during golden path test execution. The 
 ## Issue 1: Docker Infrastructure Connection Failures
 **Severity:** P1 - HIGH (Major system component failure)
 **Category:** failing-test-regression-P1-docker-websocket-connection-failure
-**Status:** NEW
+**Status:** GITHUB ISSUE CREATED - #822
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/822
 
 ### Description
 Mission critical WebSocket tests failing due to Docker daemon connectivity issues. WebSocket connections cannot be established, blocking validation of core chat functionality.
@@ -58,7 +67,8 @@ ConnectionError: Failed to create WebSocket connection after 3 attempts: [WinErr
 ## Issue 2: DateTime Deprecation Warnings
 **Severity:** P2 - MEDIUM (Code quality/future compatibility)
 **Category:** failing-test-active-dev-P2-datetime-deprecation-warnings
-**Status:** NEW
+**Status:** GITHUB ISSUE CREATED - #826
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/826
 
 ### Description
 Multiple deprecation warnings for `datetime.datetime.utcnow()` usage across WebSocket components. This will become a breaking change in future Python versions.
@@ -82,7 +92,8 @@ DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for r
 ## Issue 3: Docker Resource Management Problems
 **Severity:** P1 - HIGH (Infrastructure stability)
 **Category:** failing-test-regression-P1-docker-resource-cleanup-failure
-**Status:** NEW
+**Status:** GITHUB ISSUE CREATED - #827
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/827
 
 ### Description
 Docker resource management failing during test teardown. Graceful shutdown processes failing, requiring force shutdowns.
@@ -133,10 +144,39 @@ The failures are primarily at the infrastructure/connection level rather than bu
 
 ## Next Steps
 
-1. Create GitHub issues for each identified problem
+1. ✅ **COMPLETED**: Create GitHub issues for each identified problem
+   - **Issue #822**: failing-test-regression-P1-docker-websocket-connection-failure (CREATED)
+   - **Issue #826**: failing-test-active-dev-P2-datetime-deprecation-warnings (CREATED)
+   - **Issue #827**: failing-test-regression-P1-docker-resource-cleanup-failure (CREATED)
 2. Prioritize P1 issues for immediate resolution
 3. Coordinate with infrastructure team on Docker connectivity
 4. Update test documentation with infrastructure requirements
+
+## GitHub Issues Created
+
+### Issue #822: Docker WebSocket Connection Failure
+- **Title**: failing-test-regression-P1-docker-websocket-connection-failure
+- **Priority**: P1 (High)
+- **Labels**: claude-code-generated-issue, P1, websocket, infrastructure-dependency, critical, golden-path
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/822
+- **Strategic Context**: Linked to resolved Issues #420 and #543 with strategic resolution precedent
+
+### Issue #826: DateTime Deprecation Warnings
+- **Title**: failing-test-active-dev-P2-datetime-deprecation-warnings
+- **Priority**: P2 (Medium)
+- **Labels**: claude-code-generated-issue, P2, tech-debt, websocket
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/826
+- **Focus**: Future Python compatibility and timezone handling consistency
+
+### Issue #827: Docker Resource Management Problems
+- **Title**: failing-test-regression-P1-docker-resource-cleanup-failure
+- **Priority**: P1 (High)
+- **Labels**: claude-code-generated-issue, P1, infrastructure-dependency, critical
+- **Status**: OPEN
+- **Link**: https://github.com/netra-systems/netra-apex/issues/827
+- **Focus**: Test infrastructure stability and resource leak prevention
 
 ## Related Documentation
 - `docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md` - Golden Path specification
