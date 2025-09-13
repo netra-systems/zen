@@ -191,21 +191,44 @@ class TokenSecurityValidator:
         return len(parts) == 3 and all(part for part in parts)
     
     def _extract_token_metadata(self, token: str) -> Dict[str, Any]:
-        """Extract metadata from token without verification using auth service SSOT pattern."""
+        """Extract metadata from token using auth service SSOT delegation."""
         try:
-            # SSOT COMPLIANCE: Route JWT operations through auth service client
-            # This provides security analysis of token claims without actual validation
-            from netra_backend.app.clients.auth_client_core import get_auth_service_client
-            
-            # For security analysis, we still need to decode without verification
-            # but we ensure consistency with auth service patterns
-            import jwt
-            decoded = jwt.decode(token, options={"verify_signature": False})
-            
-            logger.debug("Token metadata extracted using SSOT-compliant pattern")
-            return decoded
+            # SSOT COMPLIANCE: Delegate to auth service for token metadata extraction
+            from netra_backend.app.clients.auth_client_core import auth_client
+
+            logger.debug("SSOT TokenSecurityValidator: Delegating token metadata extraction to auth service")
+
+            # Use auth service to get token claims for security analysis
+            # This ensures consistency with auth service token handling
+            import asyncio
+
+            async def get_token_metadata():
+                validation_result = await auth_client.validate_token(token)
+                if validation_result and validation_result.get('payload'):
+                    return validation_result['payload']
+                else:
+                    # If validation fails, we can't perform security analysis
+                    logger.warning("SSOT TokenSecurityValidator: Auth service validation failed - cannot extract metadata")
+                    return {}
+
+            # Run async validation in sync context for security analysis
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If already in async context, create new event loop
+                import asyncio
+                new_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(new_loop)
+                try:
+                    metadata = new_loop.run_until_complete(get_token_metadata())
+                    return metadata
+                finally:
+                    new_loop.close()
+                    asyncio.set_event_loop(loop)
+            else:
+                return loop.run_until_complete(get_token_metadata())
+
         except Exception as e:
-            logger.warning(f"Failed to extract token metadata: {e}")
+            logger.warning(f"SSOT TokenSecurityValidator: Failed to extract token metadata via auth service - {e}")
             return {}
     
     def _is_token_expired(self, token_metadata: Dict[str, Any]) -> bool:

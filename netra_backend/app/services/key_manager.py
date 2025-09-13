@@ -407,17 +407,32 @@ class KeyManager:
         expire_days: Optional[int] = None
     ) -> str:
         """
-        Create JWT refresh token via UnifiedJWTValidator.
-        
-        Golden Path Validator compatibility method - delegates to SSOT.
-        ALL JWT operations go through auth service via UnifiedJWTValidator.
+        Create JWT refresh token via auth service delegation (SSOT).
+
+        Golden Path Validator compatibility method - delegates to auth service SSOT.
+        ALL JWT operations go through auth service client.
         """
         try:
-            from netra_backend.app.core.unified.jwt_validator import jwt_validator
-            logger.info("KeyManager.create_refresh_token delegating to UnifiedJWTValidator (SSOT)")
-            return await jwt_validator.create_refresh_token(user_id, expire_days)
+            from netra_backend.app.clients.auth_client_core import auth_client
+            logger.info("SSOT KeyManager.create_refresh_token delegating to auth service")
+
+            # Delegate to auth service for refresh token creation
+            token_request = {
+                'user_id': user_id,
+                'email': email,
+                'permissions': permissions or [],
+                'expire_days': expire_days or 7,
+                'token_type': 'refresh'
+            }
+
+            result = await auth_client.create_token(token_request)
+            if result and result.get('token'):
+                return result['token']
+            else:
+                raise ValueError("Auth service failed to create refresh token")
+
         except Exception as e:
-            logger.error(f"JWT refresh token creation failed in KeyManager bridge: {e}")
+            logger.error(f"SSOT KeyManager: Refresh token creation failed via auth service - {e}")
             raise
 
 

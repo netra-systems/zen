@@ -1148,6 +1148,7 @@ class ClickHouseService:
             logger.error(f"[ClickHouse] Query execution failed: {type(classified_error).__name__}: {classified_error}")
             logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
             logger.error(f"Query: {query[:100]}..." if len(query) > 100 else f"Query: {query}")
+            raise classified_error
         except SchemaError as e:
             # Issue #374: ClickHouse schema/table errors
             execute_duration = time.time() - execute_start
@@ -1155,6 +1156,7 @@ class ClickHouseService:
             logger.error(f"[ClickHouse] Schema error during query execution: {e}")
             logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
             logger.error(f"Check table existence and column names")
+            raise
         except Exception as e:
             # Issue #374: Unexpected query execution errors
             execute_duration = time.time() - execute_start
