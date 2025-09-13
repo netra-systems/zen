@@ -181,6 +181,8 @@ class SSotBaseTestCase:
             self._test_completed = False
         if not hasattr(self, '_original_env_state'):
             self._original_env_state: Optional[Dict[str, str]] = None
+        if not hasattr(self, 'logger'):
+            self.logger = logging.getLogger(self.__class__.__name__)
         
         # Start timing
         self._metrics.start_timing()
