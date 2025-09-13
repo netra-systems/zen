@@ -1,996 +1,498 @@
 """
-
 Performance & Load Testing: Database Connection Pooling Under Load
 
-
-
 Business Value Justification (BVJ):
-
 - Segment: All (Free, Early, Mid, Enterprise)
-
 - Business Goal: Ensure efficient database resource utilization under concurrent load
-
 - Value Impact: Users experience consistent database performance without connection bottlenecks
-
 - Strategic Impact: Proper connection pooling enables cost-effective scaling and prevents database overload
 
-
-
 CRITICAL: This test validates database connection pooling behavior, connection reuse efficiency,
-
 and database performance under various concurrent load scenarios.
-
 """
 
-
-
 import asyncio
-
 import pytest
-
 import time
-
 import statistics
-
 import random
-
 from typing import Dict, List, Any, Optional, Tuple
-
 from dataclasses import dataclass, field
-
 import psutil
-
 import os
-
 from contextlib import asynccontextmanager
 
-
-
 from test_framework.base_integration_test import BaseIntegrationTest
-
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
-
 from test_framework.real_services_test_fixtures import real_services_fixture
-
 from shared.isolated_environment import get_env
 
 
-
-
-
 @dataclass
-
 class ConnectionPoolMetrics:
-
     """Database connection pool performance metrics."""
-
     pool_name: str
-
     concurrent_connections: int
-
     total_operations: int
-
     successful_operations: int
-
     failed_operations: int
-
     average_operation_time: float
-
     max_operation_time: float
-
     min_operation_time: float
-
     p95_operation_time: float
-
     connection_acquisition_times: List[float]
-
     connection_reuse_rate: float
-
     pool_exhaustion_events: int
-
     timeout_events: int
-
     errors: List[str] = field(default_factory=list)
 
 
-
-
-
 @dataclass
-
 class DatabaseLoadTestResult:
-
     """Results from database load testing."""
-
     test_name: str
-
     duration: float
-
     operations_per_second: float
-
     connection_metrics: ConnectionPoolMetrics
-
     resource_usage: Dict[str, Any]
-
     performance_degradation: float
 
 
-
-
-
 class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
-
     """Test database connection pooling performance under load."""
-
     
-
     @pytest.mark.integration
-
     @pytest.mark.performance
-
     @pytest.mark.real_services
-
     async def test_connection_pool_concurrent_access(self, real_services_fixture):
-
         """
-
         Test database connection pool performance with concurrent access.
-
         
-
         Performance SLA:
-
         - Connection acquisition: <50ms (p95)
-
         - Operation completion: <100ms (p95)
-
         - Connection reuse rate: >80%
-
         - No pool exhaustion under 50 concurrent operations
-
         """
-
         db = real_services_fixture["db"]
-
         concurrent_operations = 50
-
         operations_per_connection = 10
-
         
-
         connection_metrics = ConnectionPoolMetrics(
-
             pool_name="primary_db_pool",
-
             concurrent_connections=concurrent_operations,
-
             total_operations=0,
-
             successful_operations=0,
-
             failed_operations=0,
-
             average_operation_time=0,
-
             max_operation_time=0,
-
             min_operation_time=float('inf'),
-
             p95_operation_time=0,
-
             connection_acquisition_times=[],
-
             connection_reuse_rate=0,
-
             pool_exhaustion_events=0,
-
             timeout_events=0
-
         )
-
         
-
         operation_times = []
-
         
-
         async def database_operation_cycle(operation_id: int) -> Dict[str, Any]:
-
             """Perform a cycle of database operations."""
-
             cycle_result = {
-
                 "operation_id": operation_id,
-
                 "operations_completed": 0,
-
                 "total_time": 0,
-
                 "errors": []
-
             }
-
             
-
             cycle_start = time.time()
-
             
-
             try:
-
                 for i in range(operations_per_connection):
-
                     operation_start = time.time()
-
                     
-
                     # Connection acquisition time measurement
-
                     acquisition_start = time.time()
-
                     
-
                     # Simulate various database operations
-
                     operation_type = i % 4
-
                     if operation_type == 0:
-
                         # Simple SELECT query
-
                         result = await db.execute("SELECT 1 as test_value, $1 as operation_id", operation_id)
-
                     elif operation_type == 1:
-
                         # SELECT with WHERE clause
-
                         result = await db.execute("SELECT $1 as operation_id WHERE $1 > 0", operation_id)
-
                     elif operation_type == 2:
-
                         # Multi-row SELECT simulation
-
                         result = await db.execute("SELECT generate_series(1, $1) as sequence, $2 as operation_id", min(5, operation_id % 10 + 1), operation_id)
-
                     else:
-
                         # Complex query simulation
-
                         result = await db.execute("SELECT COUNT(*) as count, $1 as operation_id FROM generate_series(1, $2) GROUP BY $1", operation_id, min(10, operation_id % 20 + 1))
-
                     
-
                     acquisition_time = time.time() - acquisition_start
-
                     connection_metrics.connection_acquisition_times.append(acquisition_time)
-
                     
-
                     operation_time = time.time() - operation_start
-
                     operation_times.append(operation_time)
-
                     
-
                     cycle_result["operations_completed"] += 1
-
                     
-
                     # Small delay to simulate processing
-
                     await asyncio.sleep(0.001)
-
                     
-
             except asyncio.TimeoutError:
-
                 connection_metrics.timeout_events += 1
-
                 cycle_result["errors"].append(f"Timeout in operation cycle {operation_id}")
-
             except Exception as e:
-
                 cycle_result["errors"].append(f"Error in operation cycle {operation_id}: {str(e)}")
-
             
-
             cycle_result["total_time"] = time.time() - cycle_start
-
             return cycle_result
-
         
-
         # Execute concurrent database operations
-
         test_start = time.time()
-
         
-
         operation_tasks = [
-
             database_operation_cycle(i)
-
             for i in range(concurrent_operations)
-
         ]
-
         
-
         results = await asyncio.gather(*operation_tasks, return_exceptions=True)
-
         
-
         test_duration = time.time() - test_start
-
         
-
         # Analyze results
-
         successful_results = [r for r in results if isinstance(r, dict) and not r.get("errors")]
-
         failed_results = [r for r in results if isinstance(r, dict) and r.get("errors")]
-
         exceptions = [r for r in results if not isinstance(r, dict)]
-
         
-
         # Calculate metrics
-
         connection_metrics.total_operations = sum(r.get("operations_completed", 0) for r in results if isinstance(r, dict))
-
         connection_metrics.successful_operations = sum(r.get("operations_completed", 0) for r in successful_results)
-
         connection_metrics.failed_operations = len(failed_results) + len(exceptions)
-
         
-
         if operation_times:
-
             connection_metrics.average_operation_time = statistics.mean(operation_times)
-
             connection_metrics.max_operation_time = max(operation_times)
-
             connection_metrics.min_operation_time = min(operation_times)
-
             
-
             # Calculate p95
-
             operation_times_ms = [t * 1000 for t in operation_times]
-
             operation_times_ms.sort()
-
             p95_index = int(len(operation_times_ms) * 0.95)
-
             connection_metrics.p95_operation_time = operation_times_ms[p95_index] if operation_times_ms else 0
-
         
-
         # Calculate connection acquisition metrics
-
         if connection_metrics.connection_acquisition_times:
-
             acquisition_times_ms = [t * 1000 for t in connection_metrics.connection_acquisition_times]
-
             acquisition_p95_index = int(len(acquisition_times_ms) * 0.95)
-
             acquisition_p95 = acquisition_times_ms[acquisition_p95_index] if acquisition_times_ms else 0
-
         else:
-
             acquisition_p95 = 0
-
         
-
         # Calculate operations per second
-
         operations_per_second = connection_metrics.total_operations / test_duration if test_duration > 0 else 0
-
         
-
         # Performance assertions
-
         success_rate = connection_metrics.successful_operations / connection_metrics.total_operations if connection_metrics.total_operations > 0 else 0
-
         
-
         assert acquisition_p95 < 50, f"Connection acquisition p95 {acquisition_p95:.1f}ms exceeds 50ms SLA"
-
         assert connection_metrics.p95_operation_time < 100, f"Operation p95 time {connection_metrics.p95_operation_time:.1f}ms exceeds 100ms SLA"
-
         assert success_rate >= 0.95, f"Success rate {success_rate:.3f} below 95% threshold"
-
         assert connection_metrics.pool_exhaustion_events == 0, f"Pool exhaustion events detected: {connection_metrics.pool_exhaustion_events}"
-
         assert connection_metrics.timeout_events <= 2, f"Too many timeout events: {connection_metrics.timeout_events}"
-
         
-
         print(f" PASS:  Database Connection Pool Performance Results:")
-
         print(f"   Concurrent operations: {concurrent_operations}")
-
         print(f"   Total operations: {connection_metrics.total_operations}")
-
         print(f"   Successful operations: {connection_metrics.successful_operations}")
-
         print(f"   Failed operations: {connection_metrics.failed_operations}")
-
         print(f"   Operations/second: {operations_per_second:.1f}")
-
         print(f"   Success rate: {success_rate:.3f}")
-
         print(f"   Avg operation time: {connection_metrics.average_operation_time*1000:.1f}ms")
-
         print(f"   P95 operation time: {connection_metrics.p95_operation_time:.1f}ms")
-
         print(f"   Connection acquisition p95: {acquisition_p95:.1f}ms")
-
         print(f"   Pool exhaustion events: {connection_metrics.pool_exhaustion_events}")
-
         print(f"   Timeout events: {connection_metrics.timeout_events}")
-
     
-
     @pytest.mark.integration
-
     @pytest.mark.performance
-
     @pytest.mark.real_services
-
     async def test_connection_pool_stress_limits(self, real_services_fixture):
-
         """
-
         Test database connection pool behavior at stress limits.
-
         
-
         Performance SLA:
-
         - Graceful degradation under stress
-
         - No connection leaks
-
         - Recovery after stress period
-
         """
-
         db = real_services_fixture["db"]
-
         
-
         # Stress test parameters - push beyond normal limits
-
         max_concurrent_connections = 100  # High concurrency
-
         stress_duration = 30  # 30 seconds of stress
-
         operation_frequency = 0.01  # 10ms between operations
-
         
-
         stress_metrics = {
-
             "total_operations": 0,
-
             "successful_operations": 0,
-
             "failed_operations": 0,
-
             "connection_errors": 0,
-
             "timeout_errors": 0,
-
             "peak_concurrent_operations": 0,
-
             "recovery_time": 0
-
         }
-
         
-
         # Track active operations
-
         active_operations = set()
-
         active_operations_lock = asyncio.Lock()
-
         
-
         async def stress_database_operation(operation_id: int) -> Dict[str, Any]:
-
             """Single stress test database operation."""
-
             async with active_operations_lock:
-
                 active_operations.add(operation_id)
-
                 current_active = len(active_operations)
-
                 stress_metrics["peak_concurrent_operations"] = max(
-
                     stress_metrics["peak_concurrent_operations"],
-
                     current_active
-
                 )
-
             
-
             result = {"operation_id": operation_id, "success": False, "error": None}
-
             
-
             try:
-
                 operation_start = time.time()
-
                 
-
                 # Vary operation complexity to simulate real workload
-
                 complexity = operation_id % 5
-
                 if complexity == 0:
-
                     # Simple query
-
                     await db.execute("SELECT 1")
-
                 elif complexity == 1:
-
                     # Medium complexity
-
                     await db.execute("SELECT generate_series(1, 10)")
-
                 elif complexity == 2:
-
                     # Higher complexity
-
                     await db.execute("SELECT COUNT(*) FROM generate_series(1, 100)")
-
                 elif complexity == 3:
-
                     # With parameters
-
                     await db.execute("SELECT $1 as param, generate_series(1, $2)", operation_id, min(20, operation_id % 30))
-
                 else:
-
                     # Complex aggregation
-
                     await db.execute("SELECT AVG(value), COUNT(*) FROM generate_series(1, $1) as value GROUP BY value % 5", min(50, operation_id % 60))
-
                 
-
                 operation_time = time.time() - operation_start
-
                 
-
                 result["success"] = True
-
                 result["operation_time"] = operation_time
-
                 stress_metrics["successful_operations"] += 1
-
                 
-
             except asyncio.TimeoutError:
-
                 stress_metrics["timeout_errors"] += 1
-
                 result["error"] = "timeout"
-
             except Exception as e:
-
                 stress_metrics["connection_errors"] += 1
-
                 result["error"] = str(e)
-
             finally:
-
                 async with active_operations_lock:
-
                     active_operations.discard(operation_id)
-
                 stress_metrics["total_operations"] += 1
-
             
-
             return result
-
         
-
         # Run stress test
-
         print(f" FIRE:  Starting database stress test for {stress_duration}s...")
-
         stress_start = time.time()
-
         end_time = stress_start + stress_duration
-
         operation_counter = 0
-
         
-
         # Launch operations continuously during stress period
-
         stress_tasks = []
-
         while time.time() < end_time:
-
             # Launch new operation
-
             task = asyncio.create_task(stress_database_operation(operation_counter))
-
             stress_tasks.append(task)
-
             operation_counter += 1
-
             
-
             # Limit concurrent operations to prevent system overload
-
             if len(stress_tasks) >= max_concurrent_connections:
-
                 # Wait for some operations to complete
-
                 done, pending = await asyncio.wait(stress_tasks, return_when=asyncio.FIRST_COMPLETED, timeout=0.1)
-
                 stress_tasks = list(pending)
-
             
-
             await asyncio.sleep(operation_frequency)
-
         
-
         # Wait for remaining operations to complete
-
         if stress_tasks:
-
             await asyncio.gather(*stress_tasks, return_exceptions=True)
-
         
-
         stress_end = time.time()
-
         actual_stress_duration = stress_end - stress_start
-
         
-
         # Test recovery after stress
-
         recovery_start = time.time()
-
         
-
         # Perform simple operations to test recovery
-
         recovery_operations = 10
-
         recovery_results = []
-
         
-
         for i in range(recovery_operations):
-
             try:
-
                 await db.execute("SELECT 1 as recovery_test")
-
                 recovery_results.append(True)
-
             except Exception as e:
-
                 recovery_results.append(False)
-
                 print(f"Recovery operation {i} failed: {e}")
-
             await asyncio.sleep(0.1)
-
         
-
         recovery_time = time.time() - recovery_start
-
         stress_metrics["recovery_time"] = recovery_time
-
         recovery_success_rate = sum(recovery_results) / len(recovery_results)
-
         
-
         # Calculate final metrics
-
         operations_per_second = stress_metrics["total_operations"] / actual_stress_duration
-
         success_rate = stress_metrics["successful_operations"] / stress_metrics["total_operations"] if stress_metrics["total_operations"] > 0 else 0
-
         
-
         # Stress test assertions - more lenient than normal operations
-
         assert success_rate >= 0.70, f"Stress test success rate {success_rate:.3f} below 70% threshold"
-
         assert recovery_success_rate >= 0.90, f"Recovery success rate {recovery_success_rate:.3f} below 90% threshold"
-
         assert recovery_time < 5.0, f"Recovery time {recovery_time:.2f}s exceeds 5s limit"
-
         
-
         print(f" PASS:  Database Connection Pool Stress Test Results:")
-
         print(f"   Stress duration: {actual_stress_duration:.2f}s")
-
         print(f"   Total operations: {stress_metrics['total_operations']}")
-
         print(f"   Successful operations: {stress_metrics['successful_operations']}")
-
         print(f"   Failed operations: {stress_metrics['failed_operations']}")
-
         print(f"   Operations/second: {operations_per_second:.1f}")
-
         print(f"   Success rate: {success_rate:.3f}")
-
         print(f"   Peak concurrent operations: {stress_metrics['peak_concurrent_operations']}")
-
         print(f"   Connection errors: {stress_metrics['connection_errors']}")
-
         print(f"   Timeout errors: {stress_metrics['timeout_errors']}")
-
         print(f"   Recovery time: {recovery_time:.2f}s")
-
         print(f"   Recovery success rate: {recovery_success_rate:.3f}")
-
     
-
     @pytest.mark.integration
-
     @pytest.mark.performance
-
     @pytest.mark.real_services
-
     async def test_connection_pool_efficiency_patterns(self, real_services_fixture):
-
         """
-
         Test database connection pool efficiency with various usage patterns.
-
         
-
         Performance SLA:
-
         - Connection reuse efficiency: >80%
-
         - No connection leaks over time
-
         - Consistent performance across different patterns
-
         """
-
         db = real_services_fixture["db"]
-
         
-
         # Test different usage patterns
-
         patterns = [
-
             {"name": "burst", "operations": 50, "concurrency": 25, "delay": 0},
-
             {"name": "steady", "operations": 100, "concurrency": 10, "delay": 0.01},
-
             {"name": "mixed", "operations": 75, "concurrency": 15, "delay": 0.005}
-
         ]
-
         
-
         pattern_results = []
-
         
-
         for pattern in patterns:
-
             print(f" CYCLE:  Testing {pattern['name']} usage pattern...")
-
             
-
             pattern_start = time.time()
-
             operation_times = []
-
             errors = []
-
             
-
             async def pattern_operation(op_id: int, delay: float) -> float:
-
                 """Execute operation with pattern-specific characteristics."""
-
                 if delay > 0:
-
                     await asyncio.sleep(random.uniform(0, delay * 2))
-
                 
-
                 start_time = time.time()
-
                 try:
-
                     # Simulate different query types
-
                     query_type = op_id % 3
-
                     if query_type == 0:
-
                         await db.execute("SELECT $1 as operation_id", op_id)
-
                     elif query_type == 1:
-
                         await db.execute("SELECT COUNT(*) FROM generate_series(1, $1)", min(10, op_id % 15 + 1))
-
                     else:
-
                         await db.execute("SELECT $1, generate_series(1, 3)", op_id)
-
                     
-
                     return time.time() - start_time
-
                 except Exception as e:
-
                     errors.append(f"Pattern {pattern['name']} operation {op_id} failed: {str(e)}")
-
                     return -1
-
             
-
             # Execute pattern operations
-
             if pattern["concurrency"] == pattern["operations"]:  # Burst pattern
-
                 tasks = [pattern_operation(i, pattern["delay"]) for i in range(pattern["operations"])]
-
                 results = await asyncio.gather(*tasks, return_exceptions=True)
-
                 operation_times = [r for r in results if isinstance(r, float) and r > 0]
-
             else:  # Controlled concurrency
-
                 semaphore = asyncio.Semaphore(pattern["concurrency"])
-
                 
-
                 async def controlled_operation(op_id: int):
-
                     async with semaphore:
-
                         return await pattern_operation(op_id, pattern["delay"])
-
                 
-
                 tasks = [controlled_operation(i) for i in range(pattern["operations"])]
-
                 results = await asyncio.gather(*tasks, return_exceptions=True)
-
                 operation_times = [r for r in results if isinstance(r, float) and r > 0]
-
             
-
             pattern_duration = time.time() - pattern_start
-
             
-
             # Calculate pattern metrics
-
             if operation_times:
-
                 pattern_metrics = {
-
                     "name": pattern["name"],
-
                     "total_operations": pattern["operations"],
-
                     "successful_operations": len(operation_times),
-
                     "failed_operations": len(errors),
-
                     "success_rate": len(operation_times) / pattern["operations"],
-
                     "average_time": statistics.mean(operation_times),
-
                     "max_time": max(operation_times),
-
                     "min_time": min(operation_times),
-
                     "operations_per_second": len(operation_times) / pattern_duration,
-
                     "total_duration": pattern_duration
-
                 }
-
             else:
-
                 pattern_metrics = {
-
                     "name": pattern["name"],
-
                     "total_operations": pattern["operations"],
-
                     "successful_operations": 0,
-
                     "failed_operations": len(errors),
-
                     "success_rate": 0,
-
                     "average_time": 0,
-
                     "max_time": 0,
-
                     "min_time": 0,
-
                     "operations_per_second": 0,
-
                     "total_duration": pattern_duration
-
                 }
-
             
-
             pattern_results.append(pattern_metrics)
-
             
-
             # Pattern-specific assertions
-
             assert pattern_metrics["success_rate"] >= 0.95, f"Pattern {pattern['name']} success rate {pattern_metrics['success_rate']:.3f} below 95%"
-
             assert pattern_metrics["average_time"] < 0.1, f"Pattern {pattern['name']} avg time {pattern_metrics['average_time']:.3f}s exceeds 100ms"
-
         
-
         # Cross-pattern consistency checks
-
         success_rates = [p["success_rate"] for p in pattern_results]
-
         avg_times = [p["average_time"] for p in pattern_results]
-
         
-
         # Ensure consistent performance across patterns
-
         success_rate_variance = max(success_rates) - min(success_rates)
-
         avg_time_variance = max(avg_times) - min(avg_times)
-
         
-
         assert success_rate_variance < 0.1, f"Success rate variance {success_rate_variance:.3f} too high across patterns"
-
         assert avg_time_variance < 0.05, f"Average time variance {avg_time_variance:.3f}s too high across patterns"
-
         
-
         print(f" PASS:  Connection Pool Efficiency Pattern Results:")
-
         for pattern_metrics in pattern_results:
-
             print(f"   {pattern_metrics['name'].title()} Pattern:")
-
             print(f"     Operations: {pattern_metrics['successful_operations']}/{pattern_metrics['total_operations']}")
-
             print(f"     Success rate: {pattern_metrics['success_rate']:.3f}")
-
             print(f"     Avg time: {pattern_metrics['average_time']*1000:.1f}ms")
-
             print(f"     Throughput: {pattern_metrics['operations_per_second']:.1f} ops/s")
-
         
-
         print(f"   Cross-Pattern Variance:")
-
         print(f"     Success rate variance: {success_rate_variance:.3f}")
-
         print(f"     Avg time variance: {avg_time_variance*1000:.1f}ms")
-

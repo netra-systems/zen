@@ -1,35 +1,58 @@
 """
-Redis Manager Module - Compatibility Layer for Integration Tests
+Redis Manager Module - DEPRECATED Compatibility Layer
+
+⚠️  DEPRECATED: Use netra_backend.app.redis_manager.redis_manager directly
 
 This module provides a compatibility layer for integration tests that expect
 a Redis manager implementation. This is a minimal implementation for test compatibility.
 
-CRITICAL ARCHITECTURAL COMPLIANCE:
-- This is a COMPATIBILITY LAYER for integration tests
-- Provides minimal implementation for test collection compatibility
-- DO NOT use in production - this is test infrastructure only
+ISSUE #849 CRITICAL FIX: This compatibility layer caused WebSocket 1011 errors
+by creating competing Redis managers that conflicted with the primary SSOT implementation.
+
+MIGRATION PATH:
+- Replace imports: from netra_backend.app.core.redis_manager import RedisManager
+- With: from netra_backend.app.redis_manager import redis_manager
 
 Business Value Justification:
-- Segment: Platform/Internal
-- Business Goal: Test Infrastructure Stability
-- Value Impact: Enables integration test collection and execution
-- Strategic Impact: Maintains test coverage during system evolution
+- Segment: Platform/Internal  
+- Business Goal: Test Infrastructure Stability + WebSocket Reliability
+- Value Impact: Eliminates WebSocket 1011 errors caused by Redis manager conflicts
+- Strategic Impact: Maintains test coverage while preventing $500K+ ARR chat functionality failures
 """
 
 from typing import Any, Dict, List, Optional, Union
-import asyncio
-import time
-import json
-from dataclasses import dataclass
+import warnings
+
+# ISSUE #849 FIX: Import SSOT Redis Manager instead of competing implementation
+try:
+    from netra_backend.app.redis_manager import (
+        RedisManager as SSotRedisManager,
+        redis_manager as ssot_redis_manager
+    )
+    SSOT_AVAILABLE = True
+except ImportError:
+    SSOT_AVAILABLE = False
+    SSotRedisManager = None
+    ssot_redis_manager = None
 
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
+# Issue deprecation warning
+warnings.warn(
+    "netra_backend.app.core.redis_manager is deprecated. "
+    "Use netra_backend.app.redis_manager.redis_manager directly to avoid WebSocket 1011 errors.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
-@dataclass
+# ISSUE #849 LEGACY CONFIG: Keep RedisConfig for backward compatibility
+from dataclasses import dataclass
+
+@dataclass  
 class RedisConfig:
-    """Redis configuration."""
+    """Redis configuration (DEPRECATED - use SSOT RedisManager)."""
     host: str = "localhost"
     port: int = 6379
     db: int = 0
@@ -40,37 +63,63 @@ class RedisConfig:
 
 class RedisManager:
     """
-    Simple Redis manager for test compatibility.
-
-    This is a minimal implementation to satisfy integration test imports.
-    Not intended for production use.
+    DEPRECATED: Redis manager compatibility wrapper.
+    
+    ISSUE #849 FIX: Redirects to SSOT Redis Manager to prevent WebSocket 1011 errors.
+    This eliminates competing Redis managers that caused startup race conditions.
     """
 
     def __init__(self, config: RedisConfig = None):
-        """Initialize Redis manager."""
+        """Initialize Redis manager (redirects to SSOT)."""
         self.config = config or RedisConfig()
-        self.connected = False
-        self.data_store: Dict[str, str] = {}  # In-memory simulation
-        self.expiry_store: Dict[str, float] = {}  # Key expiry times
-
-        logger.info("Redis manager initialized (test compatibility mode)")
+        
+        # ISSUE #849 FIX: Use SSOT Redis Manager if available
+        if SSOT_AVAILABLE:
+            self._ssot_manager = ssot_redis_manager
+            logger.info("Redis manager compatibility layer - redirecting to SSOT manager")
+        else:
+            # Fallback for isolated environments (auth service)
+            self._ssot_manager = None
+            self.connected = False
+            self.data_store: Dict[str, str] = {}  # In-memory simulation
+            self.expiry_store: Dict[str, float] = {}  # Key expiry times
+            logger.info("Redis manager initialized (fallback compatibility mode)")
 
     async def connect(self):
-        """Connect to Redis (simulated)."""
-        # Simulate connection
+        """Connect to Redis (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Redirect to SSOT manager to prevent race conditions
+            if hasattr(self._ssot_manager, 'initialize'):
+                await self._ssot_manager.initialize()
+            self.connected = self._ssot_manager.is_connected
+            return
+        
+        # Fallback simulation for isolated environments
         await asyncio.sleep(0.1)
         self.connected = True
         logger.info(f"Connected to Redis at {self.config.host}:{self.config.port} (simulated)")
 
     async def disconnect(self):
-        """Disconnect from Redis (simulated)."""
+        """Disconnect from Redis (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Redirect to SSOT manager  
+            await self._ssot_manager.shutdown()
+            self.connected = False
+            return
+        
+        # Fallback simulation
         self.connected = False
         self.data_store.clear()
         self.expiry_store.clear()
         logger.info("Disconnected from Redis (simulated)")
 
     async def set(self, key: str, value: str, ex: Optional[int] = None) -> bool:
-        """Set a key-value pair."""
+        """Set a key-value pair (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Redirect to SSOT manager to prevent conflicts
+            return await self._ssot_manager.set(key, value, ex=ex)
+        
+        # Fallback simulation
         self._check_connection()
         self.data_store[key] = value
 
@@ -81,7 +130,12 @@ class RedisManager:
         return True
 
     async def get(self, key: str) -> Optional[str]:
-        """Get a value by key."""
+        """Get a value by key (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Redirect to SSOT manager to prevent conflicts
+            return await self._ssot_manager.get(key)
+        
+        # Fallback simulation
         self._check_connection()
 
         # Check if key has expired
@@ -94,7 +148,13 @@ class RedisManager:
         return self.data_store.get(key)
 
     async def delete(self, key: str) -> int:
-        """Delete a key."""
+        """Delete a key (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Redirect to SSOT manager to prevent conflicts
+            result = await self._ssot_manager.delete(key)
+            return 1 if result else 0
+        
+        # Fallback simulation
         self._check_connection()
 
         if key in self.data_store:
@@ -173,7 +233,14 @@ class RedisManager:
         return self.connected
 
     def _check_connection(self):
-        """Check if connected."""
+        """Check if connected (redirected to SSOT or simulated)."""
+        if self._ssot_manager:
+            # ISSUE #849 FIX: Check SSOT manager connection
+            if not self._ssot_manager.is_connected:
+                raise ConnectionError("Not connected to Redis (SSOT)")
+            return
+        
+        # Fallback simulation
         if not self.connected:
             raise ConnectionError("Not connected to Redis")
 
@@ -220,11 +287,18 @@ class RedisManager:
         return result
 
 
-# Global instance for compatibility
-redis_manager = RedisManager()
+# ISSUE #849 FIX: Global instance redirects to SSOT to prevent WebSocket 1011 errors
+if SSOT_AVAILABLE:
+    # Use SSOT Redis manager instance directly
+    redis_manager = ssot_redis_manager
+    logger.info("Using SSOT Redis manager for global compatibility instance")
+else:
+    # Fallback compatibility wrapper
+    redis_manager = RedisManager()
+    logger.warning("SSOT Redis manager not available - using compatibility fallback")
 
 __all__ = [
     "RedisManager",
-    "RedisConfig",
+    "RedisConfig", 
     "redis_manager"
 ]

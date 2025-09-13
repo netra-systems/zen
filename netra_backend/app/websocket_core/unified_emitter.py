@@ -144,7 +144,7 @@ class UnifiedWebSocketEmitter:
         
         # PHASE 2: Connection pool optimization state
         self._connection_health_score = 100  # Start with perfect health
-        self._last_health_check = datetime.utcnow()
+        self._last_health_check = datetime.now(timezone.utc)
         self._consecutive_failures = 0
         self._circuit_breaker_open = False
         self._circuit_breaker_timeout = 30.0  # 30 seconds
@@ -386,7 +386,7 @@ class UnifiedWebSocketEmitter:
         if event_type in self.metrics.critical_events:
             self.metrics.critical_events[event_type] += 1
         self.metrics.total_events += 1
-        self.metrics.last_event_time = datetime.utcnow()
+        self.metrics.last_event_time = datetime.now(timezone.utc)
         
         # Add execution context if available
         if self.context:
@@ -701,7 +701,7 @@ class UnifiedWebSocketEmitter:
         Returns:
             Dictionary with metrics and statistics
         """
-        uptime = (datetime.utcnow() - self.metrics.created_at).total_seconds()
+        uptime = (datetime.now(timezone.utc) - self.metrics.created_at).total_seconds()
         
         return {
             'user_id': self.user_id,
@@ -1715,7 +1715,7 @@ class WebSocketEmitterFactory:
             return False
         
         # Check if timeout has passed
-        elapsed = (datetime.utcnow() - self._last_health_check).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - self._last_health_check).total_seconds()
         if elapsed > self._circuit_breaker_timeout:
             self._circuit_breaker_open = False
             logger.info(f"Circuit breaker timeout expired for user {self.user_id} - attempting recovery")
@@ -1735,7 +1735,7 @@ class WebSocketEmitterFactory:
             'high_throughput_mode': self._high_throughput_mode,
             'performance_mode': self.performance_mode,
             'current_buffer_size': len(self._event_buffer),
-            'events_per_minute': self.metrics.total_events / max(1, (datetime.utcnow() - self.metrics.created_at).total_seconds() / 60)
+            'events_per_minute': self.metrics.total_events / max(1, (datetime.now(timezone.utc) - self.metrics.created_at).total_seconds() / 60)
         }
     
     async def cleanup(self):
@@ -2165,7 +2165,7 @@ class WebSocketEmitterPool:
             max_age_seconds: Maximum age for inactive emitters
         """
         async with self._lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             to_remove = []
             
             for user_id, emitter in self._pool.items():

@@ -353,13 +353,14 @@ class UnifiedToolDispatcher:
         # If no user context provided, create anonymous context for compatibility
         if not user_context:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            import uuid
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for migration context IDs
+            from shared.id_generation import UnifiedIdGenerator
 
             user_context = UserExecutionContext.from_request_supervisor(
-                user_id=f"migration_compat_{uuid.uuid4().hex[:8]}",
-                thread_id=f"migration_thread_{uuid.uuid4().hex[:8]}",
-                run_id=f"migration_run_{uuid.uuid4().hex[:8]}",
-                request_id=f"migration_req_{uuid.uuid4().hex[:8]}",
+                user_id=f"migration_compat_{UnifiedIdGenerator.generate_base_id('migration', True, 8)}",
+                thread_id=f"migration_thread_{UnifiedIdGenerator.generate_base_id('thread', True, 8)}",
+                run_id=f"migration_run_{UnifiedIdGenerator.generate_base_id('run', True, 8)}",
+                request_id=f"migration_req_{UnifiedIdGenerator.generate_base_id('request', True, 8)}",
                 metadata={
                     'migration_source': 'deprecated_execution_engine',
                     'migration_issue': '#686',
