@@ -1,0 +1,47 @@
+{
+  "description": "Claude Code Instance Orchestrator Configuration - Enhanced with SDK Slash Command Support",
+  "instances": [
+    {
+      "name": "test_runner",
+      "command": "/test-real unit",
+      "description": "Run comprehensive unit tests with real services",
+      "allowed_tools": ["Bash", "Read", "Write", "Glob", "Grep"],
+      "permission_mode": "acceptEdits",
+      "output_format": "json",
+      "clear_history": true,
+      "compact_history": false,
+      "pre_commands": ["/help"]
+    },
+    {
+      "name": "compliance_checker",
+      "command": "/compliance",
+      "description": "Check SSOT compliance and architecture violations",
+      "allowed_tools": ["Bash", "Read", "Write", "Glob", "Grep"],
+      "permission_mode": "acceptEdits",
+      "output_format": "json",
+      "clear_history": true,
+      "compact_history": true,
+      "pre_commands": []
+    },
+    {
+      "name": "deployer",
+      "command": "/deploy-gcp staging",
+      "description": "Deploy to GCP staging environment with validation",
+      "allowed_tools": ["Bash", "Read", "Write", "WebFetch"],
+      "permission_mode": "ask",
+      "output_format": "json",
+      "clear_history": false,
+      "compact_history": true,
+      "pre_commands": [],
+      "session_id": "deploy_session_001"
+    }
+  ],
+  "orchestration": {
+    "concurrent_execution": true,
+    "timeout_seconds": 1800,
+    "retry_attempts": 1,
+    "save_session_state": true,
+    "command_discovery": true,
+    "validate_commands": true
+  }
+}
