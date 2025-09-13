@@ -234,14 +234,16 @@ class TestContextValidation(SSotAsyncTestCase):
         
         # Create child context
         child_context = parent_context.create_child_context(
-            child_run_id=f"child_{uuid.uuid4().hex[:8]}",
-            child_metadata={"operation": "sub_task"}
+            operation_name="sub_task",
+            additional_agent_context={"child_operation_type": "isolation_test"},
+            additional_audit_metadata={"test_scenario": "child_context_isolation"}
         )
         
-        # Should inherit parent user/thread but have new run ID
+        # Should inherit parent user/thread/run but have new request ID
         self.assertEqual(child_context.user_id, parent_context.user_id)
         self.assertEqual(child_context.thread_id, parent_context.thread_id)
-        self.assertNotEqual(child_context.run_id, parent_context.run_id)
+        self.assertEqual(child_context.run_id, parent_context.run_id)
+        self.assertNotEqual(child_context.request_id, parent_context.request_id)
         
         # Should have incremented operation depth
         self.assertEqual(child_context.operation_depth, parent_context.operation_depth + 1)
