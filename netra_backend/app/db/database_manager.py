@@ -38,6 +38,7 @@ from sqlalchemy import text
 
 from netra_backend.app.core.config import get_config
 from shared.database_url_builder import DatabaseURLBuilder
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.isolated_environment import get_env
 
 # Issue #374: Enhanced database exception handling
@@ -793,7 +794,12 @@ class DatabaseManager:
         Yields:
             tuple: (session, transaction_id) for database operations and event queuing
         """
-        transaction_id = str(uuid.uuid4())
+        # Use UnifiedIDManager for transaction ID generation
+        id_manager = UnifiedIDManager()
+        transaction_id = id_manager.generate_id(IDType.TRANSACTION, prefix="coord", context={
+            'user_id': user_id,
+            'operation_type': operation_type
+        })
         session_start_time = time.time()
         session_id = f"coord_sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"
         
