@@ -32,10 +32,23 @@ Found 4 competing WebSocket emitter implementations:
 - [x] **Real Services**: All mission critical tests use real WebSocket connections (no mocks)
 - [x] **Business Protection**: All 5 business-critical events covered (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
 
-### 1.2 PLAN ONLY: Required test updates and new tests
-- [ ] Plan failing tests to reproduce SSOT violation
-- [ ] Design tests for SSOT consolidation validation
-- [ ] Plan post-refactor test validation
+### 1.2 PLAN ONLY: Required test updates and new tests ✅ COMPLETE
+- [x] **NEW FAILING TESTS (4)**: Reproduce SSOT violations (MUST FAIL before consolidation)
+  - `test_ssot_violation_multiple_emitter_instances.py` - Multiple emitter classes violate SSOT
+  - `test_websocket_handshake_race_conditions_cloud_run.py` - Race conditions in Cloud Run  
+  - `test_event_delivery_wrong_user_isolation_failure.py` - Events to wrong users
+  - `test_critical_event_delivery_inconsistency.py` - Inconsistent critical event delivery
+- [x] **SSOT VALIDATION TESTS (3)**: Validate successful consolidation (MUST PASS after)
+  - `test_single_unified_emitter_only.py` - Only UnifiedWebSocketEmitter exists
+  - `test_all_critical_events_unified_emitter.py` - All 5 events from unified emitter
+  - `test_factory_pattern_ssot_compliance.py` - Factories create unified emitter only
+- [x] **REGRESSION PREVENTION (3)**: Ensure functionality preserved (MUST PASS after)
+  - `test_golden_path_preserved_unified_emitter.py` - Golden Path still works
+  - `test_multi_user_isolation_maintained.py` - User isolation preserved  
+  - `test_performance_maintained_or_improved.py` - Performance maintained/improved
+- [x] **EXISTING TEST UPDATES**: 15-20 imports, 5-8 factory tests, 3-5 performance tests
+- [x] **EXECUTION STRATEGY**: 5-phase validation (Pre → Consolidation → Validation → Regression → Full Suite)
+- [x] **BUSINESS PROTECTION**: $500K+ ARR protection through Golden Path validation
 
 ## Phase 2: Execute Test Plan (20% new SSOT tests)
 - [ ] Create failing tests demonstrating SSOT violation
