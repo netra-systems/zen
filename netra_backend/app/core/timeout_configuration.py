@@ -316,41 +316,41 @@ class CloudNativeTimeoutManager:
             logger.info("=" * 80)
             
             # Environment Detection Summary
-            logger.info(f"🌍 DETECTED ENVIRONMENT: {self._environment.value}")
-            logger.info(f"🎯 DEFAULT TIER: {self._default_tier.value}")
-            logger.info(f"⏱️  WEBSOCKET RECV TIMEOUT: {config.websocket_recv_timeout}s")
-            logger.info(f"🤖 AGENT EXECUTION TIMEOUT: {config.agent_execution_timeout}s")
+            logger.info(f"[ENV] DETECTED ENVIRONMENT: {self._environment.value}")
+            logger.info(f"[TIER] DEFAULT TIER: {self._default_tier.value}")
+            logger.info(f"[TIME] WEBSOCKET RECV TIMEOUT: {config.websocket_recv_timeout}s")
+            logger.info(f"[AGENT] AGENT EXECUTION TIMEOUT: {config.agent_execution_timeout}s")
             
             # GCP Environment Markers
-            logger.info(f"☁️  GCP CLOUD RUN DETECTED: {gcp_markers['is_gcp_cloud_run']}")
+            logger.info(f"[GCP] CLOUD RUN DETECTED: {gcp_markers['is_gcp_cloud_run']}")
             if gcp_markers['is_gcp_cloud_run']:
-                logger.info(f"   📋 Project ID: {gcp_markers['project_id']}")
-                logger.info(f"   🏷️  Service Name: {gcp_markers['service_name']}")
-                logger.info(f"   📝 Revision: {gcp_markers['revision']}")
+                logger.info(f"   [PROJECT] Project ID: {gcp_markers['project_id']}")
+                logger.info(f"   [SERVICE] Service Name: {gcp_markers['service_name']}")
+                logger.info(f"   [REVISION] Revision: {gcp_markers['revision']}")
             
             # Environment Variables Summary
             direct_env = os.environ.get("ENVIRONMENT")
             isolated_env = self._env.get("ENVIRONMENT", "not_set")
-            logger.info(f"🔧 ENVIRONMENT (direct): {direct_env}")
-            logger.info(f"🔧 ENVIRONMENT (isolated): {isolated_env}")
+            logger.info(f"[CONFIG] ENVIRONMENT (direct): {direct_env}")
+            logger.info(f"[CONFIG] ENVIRONMENT (isolated): {isolated_env}")
             
             # Marker Detection Details
-            logger.info("🔍 GCP MARKER DETECTION:")
+            logger.info("[DETECT] GCP MARKER DETECTION:")
             for marker, detected in gcp_markers['markers_detected'].items():
-                status = "✅" if detected else "❌"
+                status = "[OK]" if detected else "[NO]"
                 logger.info(f"   {status} {marker}: {detected}")
             
             # Timeout Hierarchy Validation
             hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
-            hierarchy_status = "✅ VALID" if hierarchy_valid else "❌ BROKEN"
+            hierarchy_status = "[VALID]" if hierarchy_valid else "[BROKEN]"
             gap = config.websocket_recv_timeout - config.agent_execution_timeout
-            logger.info(f"⚖️  TIMEOUT HIERARCHY: {hierarchy_status} (gap: {gap}s)")
+            logger.info(f"[HIERARCHY] TIMEOUT HIERARCHY: {hierarchy_status} (gap: {gap}s)")
             
             # Business Impact Assessment
             if hierarchy_valid:
-                logger.info("💰 BUSINESS IMPACT: $200K+ MRR protected with valid timeout hierarchy")
+                logger.info("[BUSINESS] IMPACT: $200K+ MRR protected with valid timeout hierarchy")
             else:
-                logger.error("💰 BUSINESS IMPACT: CRITICAL - Timeout hierarchy broken, $200K+ MRR at risk")
+                logger.error("[BUSINESS] IMPACT: CRITICAL - Timeout hierarchy broken, $200K+ MRR at risk")
             
             logger.info("=" * 80)
             

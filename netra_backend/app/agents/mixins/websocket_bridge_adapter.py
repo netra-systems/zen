@@ -8,13 +8,13 @@ BVJ: Platform/Internal | Stability | Single source of truth for agent-websocket 
 """
 
 from typing import TYPE_CHECKING, Optional, Any, Dict
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 from netra_backend.app.websocket_core.event_validator import get_websocket_validator
 
 if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-
-logger = central_logger.get_logger(__name__)
 
 
 class WebSocketBridgeAdapter:
