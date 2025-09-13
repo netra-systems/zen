@@ -58,7 +58,7 @@ class TestConfigurationConsolidationIntegration(SSotAsyncTestCase):
             managers['canonical'] = None
 
         try:
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager
             managers['mega_class'] = UnifiedConfigurationManager()
             print("✓ Mega class configuration manager initialized")
         except Exception as e:

@@ -15,7 +15,7 @@ from typing import Dict, Any
 from pathlib import Path
 
 from shared.isolated_environment import IsolatedEnvironment
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.configuration.validator import ConfigurationValidator
 # Note: EnvironmentDetector is implemented as compatibility wrapper below
 from netra_backend.app.core.configuration.startup_validator import ConfigurationStartupValidator

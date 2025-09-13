@@ -48,7 +48,7 @@ from shared.config_change_tracker import ConfigChangeTracker
 
 # Service-specific components 
 from netra_backend.app.core.backend_environment import BackendEnvironment
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.core.configuration_validator import ConfigurationValidator
 
 # Test infrastructure

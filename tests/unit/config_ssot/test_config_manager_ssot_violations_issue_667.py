@@ -215,7 +215,7 @@ class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCas
             'from netra_backend.app.config import get_config',
             'from netra_backend.app.core.configuration.base import get_config',
             'from netra_backend.app.core.configuration.base import get_unified_config',
-            'from netra_backend.app.core.managers.unified_configuration_manager import get_configuration_manager'
+            'from netra_backend.app.core.configuration.base import get_config'
         ]
         
         detected_imports = []

@@ -49,18 +49,17 @@ from contextlib import asynccontextmanager
 # ABSOLUTE IMPORTS ONLY - No relative imports
 from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import IsolatedEnvironment, get_env
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationEntry,
-    ConfigurationScope,
-    ConfigurationSource,
-    ConfigurationStatus,
-    ConfigurationValidationResult,
-    get_configuration_manager,
-    get_dashboard_config_manager,
-    get_data_agent_config_manager,
-    get_llm_config_manager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 
 

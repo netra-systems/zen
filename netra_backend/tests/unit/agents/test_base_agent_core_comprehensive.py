@@ -45,6 +45,18 @@ from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 
+class ConcreteTestAgent(BaseAgent):
+    """Concrete agent implementation for testing BaseAgent abstract methods."""
+
+    async def execute(self, input_text: str, **kwargs) -> str:
+        """Concrete implementation of abstract execute method."""
+        return f"Test execution result for: {input_text}"
+
+    def get_system_prompt(self) -> str:
+        """Return test system prompt."""
+        return "You are a test agent for comprehensive BaseAgent testing."
+
+
 class TestBaseAgentCoreExecution(SSotBaseTestCase):
     """Comprehensive tests for BaseAgent core execution methods."""
 
@@ -116,28 +128,21 @@ class TestBaseAgentCoreExecution(SSotBaseTestCase):
 
     @pytest.mark.asyncio
     async def test_execute_method_basic_functionality(self):
-        """Test the basic execute method functionality."""
-        agent = BaseAgent(
+        """Test the basic execute method functionality using concrete agent."""
+        agent = ConcreteTestAgent(
             name="ExecuteTestAgent",
             enable_reliability=False,  # Disable for basic test
             enable_execution_engine=False
         )
 
-        # Test execute with context
-        try:
-            result = await agent.execute(context=self.user_context)
+        # Test execute method with input text
+        result = await agent.execute(input_text="test input")
 
-            # Verify result structure (BaseAgent.execute should return something)
-            # Note: BaseAgent is abstract but should handle basic execution flow
-            assert result is not None or result is None  # Allow both scenarios
-
-        except NotImplementedError:
-            # This is expected for abstract base agent
-            pytest.skip("BaseAgent.execute is abstract - implementation required in subclasses")
-        except Exception as e:
-            # Log the error for debugging but don't fail the test
-            print(f"Execute method encountered error: {e}")
-            # This might be expected behavior for abstract base class
+        # Verify result structure
+        assert result is not None
+        assert isinstance(result, str)
+        assert "test input" in result
+        assert "Test execution result" in result
 
     @pytest.mark.asyncio
     async def test_execute_with_context_method(self):
@@ -413,13 +418,13 @@ class TestBaseAgentWebSocketIntegration(SSotBaseTestCase):
         # Set bridge on agent
         self.agent.set_websocket_bridge(mock_bridge, self.user_context.run_id)
 
-        # Verify bridge is set
-        assert hasattr(self.agent, '_websocket_bridge')
+        # Verify bridge is set (check via websocket adapter)
+        assert hasattr(self.agent, '_websocket_adapter')
+        assert self.agent.has_websocket_context()  # Use proper method to check bridge
 
         # Test that events can be emitted
         await self.agent.emit_agent_started(
-            context=self.user_context,
-            agent_name="WebSocketIntegrationTestAgent"
+            message="WebSocketIntegrationTestAgent started"
         )
 
         # Basic verification - no exceptions
@@ -444,14 +449,12 @@ class TestBaseAgentWebSocketIntegration(SSotBaseTestCase):
 
         await self.agent.emit_tool_executing(
             tool_name="test_tool",
-            tool_args={"param": "value"},
-            context=self.user_context
+            parameters={"param": "value"}
         )
 
         await self.agent.emit_tool_completed(
             tool_name="test_tool",
-            result={"output": "success"},
-            context=self.user_context
+            result={"output": "success"}
         )
 
         await self.agent.emit_agent_completed(

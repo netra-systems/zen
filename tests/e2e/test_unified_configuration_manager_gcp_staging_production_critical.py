@@ -72,14 +72,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.real_services_test_fixtures import real_services_fixture
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationEntry,
-    ConfigurationSource,
-    ConfigurationScope,
-    ConfigurationError,
-    get_configuration_manager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 from shared.isolated_environment import IsolatedEnvironment
 

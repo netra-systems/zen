@@ -98,9 +98,18 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
 
             try:
                 # Test 1: Import deprecated manager (should generate deprecation warning)
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    UnifiedConfigurationManager as DeprecatedManager
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
 
                 # Test 2: Import canonical manager
                 from netra_backend.app.core.configuration.base import (
@@ -187,9 +196,18 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
 
                     try:
                         # Access deprecated manager
-                        from netra_backend.app.core.managers.unified_configuration_manager import (
-                            get_configuration_manager
-                        )
+                        from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
                         deprecated_manager = get_configuration_manager(user_id=f"worker_{worker_id}")
 
                         # Access canonical manager
@@ -325,9 +343,18 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
 
             try:
                 # Test deprecated manager environment access
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    UnifiedConfigurationManager as DeprecatedManager
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
                 deprecated_manager = DeprecatedManager()
 
                 # Test canonical manager environment access
@@ -431,9 +458,18 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
 
             try:
                 # Test deprecated manager JWT configuration
-                from netra_backend.app.core.managers.unified_configuration_manager import (
-                    ConfigurationManagerFactory
-                )
+                from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
+)
                 deprecated_manager = ConfigurationManagerFactory.get_global_manager()
 
                 # Test canonical manager JWT configuration

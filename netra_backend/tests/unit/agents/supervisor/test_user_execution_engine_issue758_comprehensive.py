@@ -183,7 +183,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                 'revenue_impact': '$500K+ARR',
                 'session_id': self.test_session_id
             },
-            metadata={
+            audit_metadata={
                 'business_context': 'production_execution_engine',
                 'scalability_requirement': 'concurrent_users_100+',
                 'golden_path': True
@@ -254,7 +254,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                     'isolation_test': True,
                     'unique_data': f'user_{i}_private_data'
                 },
-                metadata={
+                audit_metadata={
                     'isolation_validation': True,
                     'user_index': i
                 }
@@ -310,7 +310,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                     'workflow_id': workflow_id,
                     'customer_tier': 'enterprise'
                 },
-                metadata={
+                audit_metadata={
                     'concurrent_execution': True,
                     'golden_path': True
                 }
@@ -327,7 +327,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
             await self.mock_websocket_bridge.notify_agent_started(
                 run_id=context.run_id,
                 agent_name=agent.name,
-                metadata={'user_id': user_id, 'workflow_id': workflow_id}
+                audit_metadata={'user_id': user_id, 'workflow_id': workflow_id}
             )
 
             await self.mock_websocket_bridge.notify_agent_completed(
@@ -370,7 +370,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                 run_id=f"lifecycle-run-{i}",
                 request_id=f"lifecycle-request-{i}",
                 agent_context={'lifecycle_test': True, 'stage': 'creation'},
-                metadata={'lifecycle_management': True}
+                audit_metadata={'lifecycle_management': True}
             )
             lifecycle_contexts.append(context)
 
@@ -419,7 +419,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                 run_id=f"memory-exec-run-{i}",
                 request_id=f"memory-exec-request-{i}",
                 agent_context={'memory_test': True, 'index': i},
-                metadata={'memory_management': True}
+                audit_metadata={'memory_management': True}
             )
 
             agent = self.mock_agent_registry.create_agent_instance(
@@ -485,7 +485,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
             run_id="websocket-exec-run",
             request_id="websocket-exec-request",
             agent_context={'websocket_test': True},
-            metadata={'websocket_integration': True}
+            audit_metadata={'websocket_integration': True}
         )
 
         # Create agent for WebSocket testing
@@ -531,7 +531,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
                     'customer_tier': 'enterprise' if i % 2 == 0 else 'premium',
                     'priority': 'high' if i < 25 else 'normal'
                 },
-                metadata={'production_readiness': True}
+                audit_metadata={'production_readiness': True}
             )
             production_contexts.append(context)
 

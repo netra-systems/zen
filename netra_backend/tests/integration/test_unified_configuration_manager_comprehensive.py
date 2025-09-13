@@ -39,15 +39,17 @@ from test_framework.fixtures.config import (
 from shared.isolated_environment import IsolatedEnvironment, get_env
 
 # Import the class under test
-from netra_backend.app.core.managers.unified_configuration_manager import (
-    UnifiedConfigurationManager,
-    ConfigurationManagerFactory,
-    ConfigurationScope,
-    ConfigurationSource,
-    ConfigurationStatus,
-    ConfigurationEntry,
-    ConfigurationValidationResult,
-    get_configuration_manager
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    get_config,
+    get_config_value,
+    set_config_value,
+    validate_config_value,
+    get_environment,
+    is_production,
+    is_development,
+    is_testing,
+    config_manager
 )
 
 

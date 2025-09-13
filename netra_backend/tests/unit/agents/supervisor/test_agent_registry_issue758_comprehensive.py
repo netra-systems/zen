@@ -144,7 +144,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
                 'revenue_impact': '$500K+ARR',
                 'session_id': self.test_session_id
             },
-            metadata={
+            audit_metadata={
                 'business_context': 'production_chat_interaction',
                 'scalability_requirement': 'concurrent_users_100+',
                 'golden_path': True
@@ -155,9 +155,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
         self.enterprise_websocket_manager = MockEnterpriseWebSocketManager()
 
         # Create registry with enterprise configuration
-        self.registry = AgentRegistry(
-            websocket_manager=self.enterprise_websocket_manager
-        )
+        self.registry = AgentRegistry()
 
     def test_golden_path_agent_registration_workflow(self):
         """Test complete golden path agent registration workflow."""
@@ -261,7 +259,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
                     'user_segment': f'segment_{i}',
                     'priority': 'high'
                 },
-                metadata={'concurrent_test': True}
+                audit_metadata={'concurrent_test': True}
             )
             enterprise_users.append(user_context)
 
@@ -308,7 +306,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
                 run_id=f"concurrent-run-{user_id}-{operation_id}",
                 request_id=f"concurrent-request-{user_id}-{operation_id}",
                 agent_context={'operation_id': operation_id},
-                metadata={'concurrent_test': True, 'golden_path': True}
+                audit_metadata={'concurrent_test': True, 'golden_path': True}
             )
 
             # Create agent
@@ -370,7 +368,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
                 run_id=f"memory-run-{i}",
                 request_id=f"memory-request-{i}",
                 agent_context={'memory_test': True},
-                metadata={'production_scale': True}
+                audit_metadata={'production_scale': True}
             )
 
             agent = self.registry.create_agent_instance(
