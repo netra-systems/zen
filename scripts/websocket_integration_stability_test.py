@@ -95,7 +95,7 @@ class WebSocketIntegrationStabilityTest:
             )
             
             # Test instantiation - this should NOT raise RuntimeError
-            execution_engine = ExecutionEngine(
+            execution_engine = UserExecutionEngine(
                 registry=registry,
                 websocket_bridge=websocket_bridge,
                 user_context=user_context

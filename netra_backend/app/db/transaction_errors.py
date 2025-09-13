@@ -121,13 +121,13 @@ class CacheError(TransactionError):
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
-    return any(keyword in error_msg for keyword in deadlock_keywords)
+    return any(keyword in error_msg.lower() for keyword in deadlock_keywords)
 
 
 def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
     connection_keywords = [
-        'connection', 'network', 'timeout', 'broken pipe',
+        'connection', 'network', 'connection timeout', 'broken pipe',
         'queuepool limit', 'pool limit exceeded', 'connection pool'
     ]
     return any(keyword in error_msg for keyword in connection_keywords)
@@ -287,8 +287,17 @@ def _check_operational_error_retry(error: Exception, enable_deadlock_retry: bool
 
 
 def is_retryable_error(error: Exception, enable_deadlock_retry: bool, enable_connection_retry: bool) -> bool:
-    """Check if error is retryable based on configuration."""
+    """Check if error is retryable based on configuration (Enhanced for Issue #731)."""
+    # Check original DisconnectionError first
     if _is_disconnection_retryable(error, enable_connection_retry):
+        return True
+
+    # Issue #731: Check classified ConnectionError types
+    if isinstance(error, ConnectionError) and enable_connection_retry:
+        return True
+
+    # Issue #731: Check classified DeadlockError types
+    if isinstance(error, DeadlockError) and enable_deadlock_retry:
         return True
 
     return _check_operational_error_retry(error, enable_deadlock_retry, enable_connection_retry)
@@ -408,11 +417,11 @@ def _attempt_error_classification(error: Exception, error_msg: str) -> Exception
     if classified != error:
         return classified
 
-    classified = _classify_timeout_error(error, error_msg)
+    classified = _classify_connection_error(error, error_msg)
     if classified != error:
         return classified
 
-    classified = _classify_connection_error(error, error_msg)
+    classified = _classify_timeout_error(error, error_msg)
     if classified != error:
         return classified
 

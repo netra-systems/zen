@@ -2896,7 +2896,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         websocket_notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter=user_context, # Placeholder - would be actual emitter
             exec_context=user_context
         )
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         
         # Test WebSocket notifier initialization in execution engine
         execution_engine.set_websocket_notifier(websocket_notifier)

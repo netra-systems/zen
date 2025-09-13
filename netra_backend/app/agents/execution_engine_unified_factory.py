@@ -23,10 +23,12 @@ if TYPE_CHECKING:
     from netra_backend.app.agents.tool_dispatcher_consolidated import UnifiedToolDispatcher
 
 from netra_backend.app.agents.execution_engine_interface import IExecutionEngine
-# SSOT MIGRATION: Direct delegation to SSOT UserExecutionEngine factory
+# SSOT MIGRATION: Direct delegation to UserExecutionEngine factory (SSOT)
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
-    ExecutionEngineFactory as SSotExecutionEngineFactory,
-    get_execution_engine_factory
+    ExecutionEngineFactory as UserExecutionEngineFactory,
+    get_execution_engine_factory as get_user_execution_engine_factory,
+    configure_execution_engine_factory,
+    user_execution_engine
 )
 from netra_backend.app.logging_config import central_logger
 
@@ -88,8 +90,8 @@ class UnifiedExecutionEngineFactory:
         
         logger.info("UnifiedExecutionEngineFactory.create_engine - delegating to SSOT factory")
         
-        # Get SSOT factory and create engine
-        factory = await get_execution_engine_factory()
+        # Get SSOT UserExecutionEngineFactory and create engine
+        factory = await get_user_execution_engine_factory()
         return await factory.create_execution_engine(user_context=user_context)
     
     @classmethod
@@ -102,7 +104,7 @@ class UnifiedExecutionEngineFactory:
         """Create user-specific execution engine - delegates to SSOT factory."""
         logger.info(f"UnifiedExecutionEngineFactory.create_user_engine - delegating to SSOT factory for user: {user_context.user_id}")
         
-        factory = await get_execution_engine_factory()
+        factory = await get_user_execution_engine_factory()
         return await factory.create_execution_engine(user_context=user_context)
     
     @classmethod
@@ -118,7 +120,7 @@ class UnifiedExecutionEngineFactory:
         
         logger.info(f"UnifiedExecutionEngineFactory.create_request_scoped_engine - delegating to SSOT factory for request: {request_id}")
         
-        factory = await get_execution_engine_factory()
+        factory = await get_user_execution_engine_factory()
         return await factory.create_execution_engine(user_context=user_context)
     
     # ============================================================================
@@ -150,8 +152,20 @@ class UnifiedExecutionEngineFactory:
 
 
 class ExecutionEngineFactory(UnifiedExecutionEngineFactory):
-    """Alias for UnifiedExecutionEngineFactory for backward compatibility."""
-    pass
+    """Alias for UnifiedExecutionEngineFactory for backward compatibility.
+
+    DEPRECATED: Use UserExecutionEngineFactory directly from supervisor.execution_engine_factory
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Issue deprecation warning when instantiating."""
+        import warnings
+        warnings.warn(
+            "ExecutionEngineFactory is deprecated. Use UserExecutionEngineFactory from "
+            "netra_backend.app.agents.supervisor.execution_engine_factory instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
 
 
 # ============================================================================

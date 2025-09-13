@@ -187,6 +187,9 @@ npm run format       # Format with Prettier
 # Run all tests
 npm test
 
+# Run auth-specific tests (including critical bug reproduction)
+npm run test:unit -- TEST_SUITE=auth
+
 # Run specific test file
 npm test ChatInterface
 
@@ -196,6 +199,21 @@ npm test -- --coverage
 # Watch mode
 npm test -- --watch
 ```
+
+#### Auth Testing Coverage
+
+The auth validation system includes comprehensive test coverage (93.73%) that reproduces and prevents critical authentication bugs:
+
+- **Critical Bug Reproduction**: Tests that reproduce the exact "token without user" bug
+- **Edge Case Validation**: Comprehensive testing of token validation, expiration, and malformed inputs
+- **Atomic Auth Updates**: Race condition prevention through atomic state updates
+- **Recovery Functions**: Enhanced auth recovery with multiple fallback strategies
+- **WebSocket Integration**: Auth validation for real-time chat functionality
+
+Key test files:
+- `__tests__/lib/auth-validation-helpers.test.ts` - Core validation logic (93.73% coverage)
+- `__tests__/auth/test_auth_complete_flow.test.tsx` - Complete auth flow integration
+- `__tests__/auth/test_simple_logout_fix.test.tsx` - Logout state management
 
 #### E2E Tests (Cypress)
 ```bash

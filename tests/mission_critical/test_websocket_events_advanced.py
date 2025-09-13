@@ -48,7 +48,7 @@
     # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
     # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: import pytest
@@ -888,7 +888,7 @@
     # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), tool_dispatcher)
     # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
 
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Simulate supervisor with sub-agents
 # REMOVED_SYNTAX_ERROR: async def run_multi_agent_flow():

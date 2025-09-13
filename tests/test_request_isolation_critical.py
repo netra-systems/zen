@@ -129,7 +129,7 @@ class TestConcurrentUserIsolation:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Create 10 concurrent users
         users = [UserContext(f"user_{i}") for i in range(10)]
@@ -186,7 +186,7 @@ class TestConcurrentUserIsolation:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track execution order and timing
         execution_order = []
@@ -304,7 +304,7 @@ class TestWebSocketEventIsolation:
         registry = AgentRegistry()
         registry.set_websocket_bridge(websocket_bridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Execute agents for each user concurrently
         async def execute_for_user(user_id: str):
@@ -490,7 +490,7 @@ class TestGlobalStateExecutionPath:
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
         # Single global engine (as in production)
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track conflicts
         conflicts = []
@@ -608,7 +608,7 @@ class TestThreadUserContextMixing:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Track context confusion
         context_issues = []
@@ -755,7 +755,7 @@ class TestScalabilityLimits:
         registry = AgentRegistry()
         websocket_bridge = Mock(spec=AgentWebSocketBridge)
         
-        engine = ExecutionEngine(registry, websocket_bridge)
+        engine = UserExecutionEngine(registry, websocket_bridge)
         
         # Simulate 10 concurrent users (2x the business target)
         start_time = time.time()

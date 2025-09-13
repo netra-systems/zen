@@ -303,7 +303,7 @@ class TestSingletonPatternPrevention:
             )
             
             # Create isolated execution engine
-            engine = ExecutionEngine(user_context=user_context)
+            engine = UserExecutionEngine(user_context=user_context)
             engines.append(engine)
         
         # Verify isolation

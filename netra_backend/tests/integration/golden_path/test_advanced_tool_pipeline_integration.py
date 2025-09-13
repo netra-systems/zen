@@ -139,7 +139,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             user_context=auth_context,
             websocket_manager=websocket_manager
         )
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        enhanced_tool_engine = UserExecutionEngine()
         
         # Track tool executions and pipeline progress
         tool_executions = []
@@ -507,7 +507,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             max_concurrent_executions=3
         )
         
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        enhanced_tool_engine = UserExecutionEngine()
         
         # Track error scenarios and recovery attempts
         error_scenarios = []
@@ -846,7 +846,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             max_concurrent_executions=3
         )
         
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        enhanced_tool_engine = UserExecutionEngine()
         
         # Track parallel execution metrics
         parallel_executions = []
@@ -1207,7 +1207,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             max_concurrent_executions=3
         )
         
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        enhanced_tool_engine = UserExecutionEngine()
         
         # Track dynamic selection decisions
         selection_decisions = []
@@ -1548,7 +1548,7 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
             max_concurrent_executions=3
         )
         
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        enhanced_tool_engine = UserExecutionEngine()
         
         # Track timeout and circuit breaker events
         timeout_events = []

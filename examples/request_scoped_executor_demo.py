@@ -342,7 +342,7 @@ async def main():
         print("   [U+2022] Factory patterns available for easy integration")
         
         print("\n[U+1F527] Integration Guide:")
-        print("   1. Replace ExecutionEngine(registry, websocket) with:")
+        print("   1. Replace UserExecutionEngine(registry, websocket) with:")
         print("      RequestScopedAgentExecutor(user_context, event_emitter, registry)")
         print("   2. Create per-request instead of singleton instances")
         print("   3. Use UserExecutionContext to carry user state")

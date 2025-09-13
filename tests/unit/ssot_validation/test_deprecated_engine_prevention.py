@@ -62,7 +62,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
                 
                 # Try to instantiate ExecutionEngine
                 try:
-                    engine = ExecutionEngine(mock_registry, mock_bridge, self.user_context)
+                    engine = UserExecutionEngine(mock_registry, mock_bridge, self.user_context)
                     
                     # Check if deprecation warning was issued
                     deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]

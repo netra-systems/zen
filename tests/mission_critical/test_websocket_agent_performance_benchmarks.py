@@ -250,7 +250,7 @@ class RealAgentPerformanceTester:
         websocket_notifier.send_event = performance_monitored_event_sender
         
         # Create execution engine with performance monitoring
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         execution_engine.set_websocket_notifier(websocket_notifier)
         
         # Create agent context

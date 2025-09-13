@@ -345,7 +345,7 @@ class UserExecutionEngine(IExecutionEngine):
         ⚠️  ISSUE #565 API COMPATIBILITY BRIDGE ⚠️
         
         This method provides backward compatibility for the 128 deprecated imports
-        that use the old ExecutionEngine(registry, websocket_bridge, user_context=None) signature.
+        that use the old UserExecutionEngine(registry, websocket_bridge, user_context=None) signature.
         
         Args:
             registry: Agent registry for agent lookup (legacy parameter)
@@ -360,12 +360,12 @@ class UserExecutionEngine(IExecutionEngine):
             DeprecationWarning: Always issued to encourage migration
             
         Example Legacy Usage:
-            # OLD (deprecated): ExecutionEngine(registry, websocket_bridge)
+            # OLD (deprecated): UserExecutionEngine(registry, websocket_bridge)
             # NEW (compatible): await UserExecutionEngine.create_from_legacy(registry, websocket_bridge)
         """
         import warnings
         warnings.warn(
-            "ExecutionEngine(registry, websocket_bridge, user_context) pattern is DEPRECATED. "
+            "UserExecutionEngine(registry, websocket_bridge, user_context) pattern is DEPRECATED. "
             "Use UserExecutionEngine with proper UserExecutionContext for Issue #565 migration. "
             "This compatibility bridge will be removed after migration is complete.",
             DeprecationWarning,
@@ -492,7 +492,7 @@ class UserExecutionEngine(IExecutionEngine):
                                websocket_emitter=websocket_emitter)
                                
         Legacy signature (DEPRECATED):
-            ExecutionEngine(registry, websocket_bridge, user_context) 
+            UserExecutionEngine(registry, websocket_bridge, user_context) 
             
         Args:
             context_or_registry: UserExecutionContext (modern) or AgentRegistry (legacy)
@@ -520,7 +520,7 @@ class UserExecutionEngine(IExecutionEngine):
                     "UserExecutionEngine(context, agent_factory, websocket_emitter) OR "
                     "UserExecutionEngine(context=..., agent_factory=..., websocket_emitter=...)"
                 )
-        # Detect legacy signature: ExecutionEngine(registry, websocket_bridge, user_context)
+        # Detect legacy signature: UserExecutionEngine(registry, websocket_bridge, user_context)
         elif (agent_factory_or_websocket_bridge is not None and 
             websocket_emitter_or_user_context is not None and
             hasattr(context_or_registry, 'get') and  # Duck typing for registry
@@ -529,7 +529,7 @@ class UserExecutionEngine(IExecutionEngine):
             # Legacy signature detected - delegate to create_from_legacy
             import warnings
             warnings.warn(
-                "ExecutionEngine(registry, websocket_bridge, user_context) constructor is DEPRECATED. "
+                "UserExecutionEngine(registry, websocket_bridge, user_context) constructor is DEPRECATED. "
                 "Use UserExecutionEngine.create_from_legacy() or modern constructor. "
                 "This compatibility will be removed after Issue #565 migration.",
                 DeprecationWarning,

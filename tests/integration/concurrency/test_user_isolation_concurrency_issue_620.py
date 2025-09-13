@@ -361,7 +361,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
             # Create engine via compatibility bridge
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", DeprecationWarning)
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+                engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
             
             engines.append(engine)
         

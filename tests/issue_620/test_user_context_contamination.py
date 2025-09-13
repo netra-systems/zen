@@ -175,7 +175,7 @@ class TestUserContextContamination(SSotAsyncTestCase):
             logger.info("Using deprecated ExecutionEngine for contamination test")
             
             for context in user_contexts:
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, context)
+                engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, context)
                 engines.append(engine)
                 
         except ImportError:
@@ -266,13 +266,13 @@ class TestUserContextContamination(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Create first engine and populate with user1 data
-            engine1 = ExecutionEngine(mock_registry, mock_websocket_bridge, user1_context)
+            engine1 = UserExecutionEngine(mock_registry, mock_websocket_bridge, user1_context)
             
             # Execute some operations that might populate shared state
             await self._populate_engine_state(engine1, user1_context, "USER1_HISTORY_DATA")
             
             # Create second engine for different user
-            engine2 = ExecutionEngine(mock_registry, mock_websocket_bridge, user2_context)
+            engine2 = UserExecutionEngine(mock_registry, mock_websocket_bridge, user2_context)
             
             # Check if user2's engine has access to user1's state
             user1_history_visible = await self._check_history_visibility(engine2, "USER1_HISTORY_DATA")

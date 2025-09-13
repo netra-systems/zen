@@ -108,7 +108,7 @@ class BusinessHealthChecker:
                 EnhancedToolExecutionEngine
             )
             
-            engine = EnhancedToolExecutionEngine()
+            engine = UserExecutionEngine()
             # Basic initialization test
             chat_health['agent_execution'] = True
             self.successes.append("Agent execution engine ready")

@@ -150,10 +150,11 @@ class TestTransactionErrorClassification:
         classified = classify_error(value_error)
         assert classified is value_error  # Should be the same object
         
-        # Test that DisconnectionError passes through
+        # Test that DisconnectionError is classified as ConnectionError (Issue #731 enhancement)
         disconnection_error = DisconnectionError("Connection lost", None, None)
         classified = classify_error(disconnection_error)
-        assert classified is disconnection_error
+        assert isinstance(classified, ConnectionError)
+        assert "Connection lost" in str(classified)
     
     @pytest.mark.unit
     def test_error_priority_classification(self):

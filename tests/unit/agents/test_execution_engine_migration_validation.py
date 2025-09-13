@@ -74,7 +74,7 @@ class TestExecutionEngineMigrationValidation:
         self, user_context, mock_agent_registry, mock_websocket_bridge
     ):
         """Test that ExecutionEngine properly integrates UserExecutionContext."""
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge,
             user_context=user_context
@@ -213,7 +213,7 @@ class TestExecutionEngineMigrationValidation:
         self, user_context, mock_agent_registry, mock_websocket_bridge
     ):
         """Test that WebSocket events are preserved after migration."""
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge,
             user_context=user_context

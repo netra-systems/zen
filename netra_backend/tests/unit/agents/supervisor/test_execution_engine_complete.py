@@ -155,14 +155,14 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
     def test_direct_construction_blocked(self):
         """Test that direct ExecutionEngine construction raises RuntimeError."""
         with self.expect_exception(RuntimeError, "Direct ExecutionEngine instantiation is no longer supported") as exc_info:
-            ExecutionEngine(self.registry, self.websocket_bridge)
+            UserExecutionEngine(self.registry, self.websocket_bridge)
             
         assert "create_request_scoped_engine" in str(exc_info.value)
         
     def test_direct_construction_error_message_details(self):
         """Test detailed error message for direct construction."""
         with self.expect_exception(RuntimeError, "user isolation") as exc_info:
-            ExecutionEngine(self.registry, self.websocket_bridge, None)
+            UserExecutionEngine(self.registry, self.websocket_bridge, None)
             
         error_msg = str(exc_info.value)
         assert "concurrent execution safety" in error_msg

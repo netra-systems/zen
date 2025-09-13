@@ -122,7 +122,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             factory = get_agent_instance_factory()
             
             # Create isolated execution engine for user context
-            execution_engine = ExecutionEngine(
+            execution_engine = UserExecutionEngine(
                 user_context=user_context,
                 websocket_manager=UnifiedWebSocketManager()
             )
@@ -369,7 +369,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
         """Helper method for REAL user isolation testing (no simulation)."""
         # CRITICAL: Execute REAL agent with user isolation
         factory = get_agent_instance_factory()
-        execution_engine = ExecutionEngine(user_context=user_context)
+        execution_engine = UserExecutionEngine(user_context=user_context)
         registry = AgentRegistry()
         
         try:
@@ -506,7 +506,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             # Start REAL long-running task with factory patterns
             start_time = time.time()
             factory = get_agent_instance_factory()
-            execution_engine = ExecutionEngine(user_context=user_context)
+            execution_engine = UserExecutionEngine(user_context=user_context)
             
             # Start real agent execution in background
             execution_task = asyncio.create_task(
@@ -592,7 +592,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
         async with self.ws_utility.connected_client(user_id=self.test_user_id) as client:
             # Execute REAL agent operations to test sequencing (not simulated)
             factory = get_agent_instance_factory()
-            execution_engine = ExecutionEngine(user_context=user_context)
+            execution_engine = UserExecutionEngine(user_context=user_context)
             registry = AgentRegistry()
             
             # Execute real agent with complex workflow
@@ -771,7 +771,7 @@ class TestAgentWebSocketIntegration(BaseIntegrationTest):
             
             # CRITICAL: Use real agent execution for performance testing
             factory = get_agent_instance_factory()
-            execution_engine = ExecutionEngine(user_context=user_context)
+            execution_engine = UserExecutionEngine(user_context=user_context)
             registry = AgentRegistry()
             
             agent_result = await registry.execute_agent(

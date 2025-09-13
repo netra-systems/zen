@@ -348,7 +348,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
                 """Execute agent task with strict user isolation."""
                 
                 # Create user-specific execution engine
-                execution_engine = ExecutionEngine(
+                execution_engine = UserExecutionEngine(
                     user_id=user_data['id'],
                     organization_id=user_data['organization_id']
                 )
@@ -658,7 +658,7 @@ class TestMultiUserIsolationIntegration(BaseIntegrationTest):
             users.append(user)
             
             # Create isolated execution engine for each user
-            engine = ExecutionEngine(
+            engine = UserExecutionEngine(
                 user_id=user['id'],
                 organization_id=user['organization_id'],
                 isolation_context=f"engine-{user['id']}"

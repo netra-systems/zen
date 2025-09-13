@@ -132,7 +132,7 @@ class TestGoldenPathExecutionEngineStagingE2E(BaseE2ETest):
         mock_websocket_bridge = AsyncMock()
         
         # Import and create deprecated engine - should trigger compatibility bridge
-        deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+        deprecated_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         # Validate compatibility bridge is active
         self.assertTrue(deprecated_engine.is_compatibility_mode())

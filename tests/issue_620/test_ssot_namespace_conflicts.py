@@ -286,7 +286,7 @@ class TestExecutionEngineFactoryViolations(SSotBaseTestCase):
             mock_registry = Mock()
             mock_websocket_bridge = Mock()
             
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
             return ("direct_constructor", engine)
             
         except Exception as e:

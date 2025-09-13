@@ -203,7 +203,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
         POST-CONSOLIDATION EXPECTED: PASS (Factory uses AgentExecutionTracker)
         """
         try:
-            from netra_backend.app.core.user_execution_engine import UserExecutionEngineFactory
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngineFactory
         except ImportError:
             self.skip("UserExecutionEngineFactory not available")
             

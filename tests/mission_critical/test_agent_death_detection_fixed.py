@@ -49,7 +49,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.redis_manager import redis_manager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Import the new components
@@ -243,7 +243,7 @@
                                                 # REMOVED_SYNTAX_ERROR: mock_websocket_bridge.notify_agent_death = AsyncMock(return_value=True)
 
                                                 # Create execution engine
-                                                # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                                                # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
 
                                                 # Verify tracker is initialized
                                                 # REMOVED_SYNTAX_ERROR: assert engine.execution_tracker is not None

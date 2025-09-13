@@ -309,7 +309,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         Test that direct ExecutionEngine construction is blocked with helpful error message.
         """
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine(self.registry, self.websocket_bridge)
+            UserExecutionEngine(self.registry, self.websocket_bridge)
             
         error_message = str(cm.exception)
         # Verify error message contains all required guidance
@@ -326,7 +326,7 @@ class TestExecutionEngineConstructionComprehensive(AsyncBaseTestCase):
         user_context = UserExecutionContext.from_request("user", "thread", "run")
         
         with self.assertRaises(RuntimeError) as cm:
-            ExecutionEngine(self.registry, self.websocket_bridge, user_context)
+            UserExecutionEngine(self.registry, self.websocket_bridge, user_context)
             
         self.assertIn("Direct ExecutionEngine instantiation is no longer supported", str(cm.exception))
         

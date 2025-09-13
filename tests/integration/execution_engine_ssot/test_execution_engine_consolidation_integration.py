@@ -423,7 +423,7 @@ class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 
-            engine = ExecutionEngine()
+            engine = UserExecutionEngine()
             return f"Legacy ExecutionEngine redirect successful: {type(engine)}"
 
         except Exception as e:

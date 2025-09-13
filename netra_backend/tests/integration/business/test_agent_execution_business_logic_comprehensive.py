@@ -48,7 +48,7 @@ class TestAgentExecutionBusinessLogicComprehensive(SSotBaseTestCase):
     async def setup_agent_system(self) -> tuple:
         """Set up agent execution system with business logic components."""
         agent_registry = get_agent_registry()
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         quality_validator = AgentQualityValidator()
         usage_tracker = UsageTracker()
         
