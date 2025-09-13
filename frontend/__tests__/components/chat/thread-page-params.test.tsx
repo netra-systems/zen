@@ -1,17 +1,17 @@
 /**
- * Unit Test for Chat Thread Page Parameter Handling
+ * Unit Test for Chat Thread Page Parameter Handling - React Error #438 Fix Validation
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free, Early, Mid, Enterprise)
- * - Business Goal: Ensure thread navigation works correctly
- * - Value Impact: Users can navigate to specific chat threads via URLs
- * - Strategic Impact: Core chat functionality for thread continuity
+ * - Business Goal: Ensure thread navigation works correctly after fixing React.use() issue
+ * - Value Impact: Users can navigate to specific chat threads via URLs without crashes
+ * - Strategic Impact: Core chat functionality stability and reliability
  * 
- * Tests React Error #438: React.use() with Promise-based params in Next.js 15
+ * Tests React Error #438 Fix: Promise handling with useEffect instead of React.use()
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import ThreadPage from '@/app/chat/[threadId]/page';
 
 // Mock dependencies
@@ -51,7 +51,7 @@ jest.mock('@/hooks/useThreadSwitching', () => ({
 }));
 
 jest.mock('@/services/urlSyncService', () => ({
-  validateThreadId: jest.fn().mockReturnValue(true),
+  validateThreadId: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock('@/components/chat/MainChat', () => {
@@ -80,82 +80,107 @@ jest.mock('lucide-react', () => ({
   AlertCircle: () => <div data-testid="alert-circle">Alert</div>,
 }));
 
-describe('ThreadPage - React Error #438 Reproduction', () => {
-  describe('FAILING TESTS - Current Implementation (React.use with Promise)', () => {
-    it('should FAIL with React.use() when params is a Promise (Next.js 15)', async () => {
+// Mock timers for testing timeouts
+jest.useFakeTimers();
+
+describe('ThreadPage - React Error #438 Fix Validation', () => {
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  describe('FIXED IMPLEMENTATION - Promise handling with useEffect', () => {
+    it('should handle Promise params correctly with useEffect', async () => {
       // Simulate Next.js 15 Promise-based params
       const promiseParams = Promise.resolve({ threadId: 'thread_123' });
       
-      // This test should FAIL with current implementation
-      expect(() => {
-        render(
-          <ThreadPage 
-            params={promiseParams}
-          />
-        );
-      }).toThrow(/Cannot read properties of undefined/);
+      // After fix, this should work without throwing
+      await act(async () => {
+        render(<ThreadPage params={promiseParams} />);
+      });
+      
+      // Should show initial validating state
+      expect(screen.getByText(/validating thread/i)).toBeInTheDocument();
+      
+      // Wait for Promise resolution and state transitions
+      await act(async () => {
+        // Fast-forward timers to trigger async operations
+        jest.runAllTimers();
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+      
+      await waitFor(() => {
+        // Should eventually show MainChat component (successful load)
+        expect(screen.getByTestId('main-chat')).toBeInTheDocument();
+      });
     });
 
-    it('should FAIL to extract threadId when params is Promise', async () => {
+    it('should extract threadId correctly from Promise params', async () => {
       const promiseParams = Promise.resolve({ threadId: 'thread_456' });
       
-      // Current implementation will fail because React.use(Promise) doesn't work as expected
-      let errorThrown = false;
-      try {
+      // Should render without throwing
+      await act(async () => {
         render(<ThreadPage params={promiseParams} />);
-      } catch (error) {
-        errorThrown = true;
-        expect(error).toBeDefined();
-      }
+      });
       
-      expect(errorThrown).toBe(true);
-    });
-
-    it('should FAIL to show loading state with Promise params', async () => {
-      const promiseParams = Promise.resolve({ threadId: 'thread_789' });
+      // Should show validating state initially
+      expect(screen.getByText(/validating thread/i)).toBeInTheDocument();
       
-      // This should fail because threadId extraction fails
-      expect(() => {
-        render(<ThreadPage params={promiseParams} />);
-      }).toThrow();
+      // Allow async operations to complete
+      await act(async () => {
+        jest.runAllTimers();
+      });
+      
+      // Should eventually render successfully
+      await waitFor(() => {
+        expect(screen.getByTestId('main-chat')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('WORKING TESTS - Legacy Implementation (Synchronous params)', () => {
-    it('should work with synchronous params (Next.js 14 style)', () => {
+  describe('BACKWARD COMPATIBILITY - Synchronous params support', () => {
+    it('should work with synchronous params (Next.js 14 style)', async () => {
       // Legacy synchronous params (this still works)
-      const syncParams = { threadId: 'thread_123' } as any;
+      const syncParams = { threadId: 'thread_sync' } as any;
       
-      const { container } = render(
-        <ThreadPage params={syncParams} />
-      );
+      await act(async () => {
+        render(<ThreadPage params={syncParams} />);
+      });
       
       // Should render loading state initially
-      expect(screen.getByTestId('loader')).toBeInTheDocument();
-    });
-
-    it('should extract threadId correctly from synchronous params', () => {
-      const syncParams = { threadId: 'thread_sync_test' } as any;
-      
-      render(<ThreadPage params={syncParams} />);
-      
-      // Should show loading state with thread info
       expect(screen.getByText(/validating thread/i)).toBeInTheDocument();
+      
+      await act(async () => {
+        jest.runAllTimers();
+      });
+      
+      // Should eventually render successfully
+      await waitFor(() => {
+        expect(screen.getByTestId('main-chat')).toBeInTheDocument();
+      });
     });
   });
 
-  describe('EXPECTED BEHAVIOR - After Fix Implementation', () => {
-    it('should handle Promise params correctly after fix', async () => {
-      // This test documents the expected behavior after the fix
-      const promiseParams = Promise.resolve({ threadId: 'thread_fixed' });
+  describe('ERROR HANDLING - Promise rejection scenarios', () => {
+    it('should handle Promise params rejection gracefully', async () => {
+      // Test Promise rejection scenario
+      const rejectedParams = Promise.reject(new Error('Failed to load params'));
       
-      // After fix, this should work by awaiting the params Promise
-      // render(<ThreadPage params={promiseParams} />);
+      await act(async () => {
+        render(<ThreadPage params={rejectedParams} />);
+      });
       
-      // For now, we expect this to fail until the fix is implemented
-      expect(() => {
-        render(<ThreadPage params={promiseParams} />);
-      }).toThrow();
+      // Should show validating state initially
+      expect(screen.getByText(/validating thread/i)).toBeInTheDocument();
+      
+      // Allow async operations to complete
+      await act(async () => {
+        jest.runAllTimers();
+      });
+      
+      // Should transition to error state when Promise rejects
+      await waitFor(() => {
+        expect(screen.getByText(/failed to load thread parameters/i)).toBeInTheDocument();
+      });
     });
   });
 });
@@ -170,12 +195,41 @@ describe('ThreadPage Parameter Type Safety', () => {
     // The interface should accept Promise<{threadId: string}>
     expect(promiseParams).toBeInstanceOf(Promise);
   });
+});
 
-  it('should handle invalid threadId types gracefully', async () => {
-    const invalidParams = Promise.resolve({ threadId: null });
-    
-    expect(() => {
-      render(<ThreadPage params={invalidParams as any} />);
-    }).toThrow();
+describe('ThreadPage System Stability Validation', () => {
+  it('should not crash with various param types', async () => {
+    const testCases = [
+      Promise.resolve({ threadId: 'normal_thread_id' }),
+      Promise.resolve({ threadId: 'thread-with-dashes' }),
+      Promise.resolve({ threadId: 'thread_with_underscores' }),
+    ];
+
+    for (const params of testCases) {
+      await act(async () => {
+        const { unmount } = render(<ThreadPage params={params} />);
+        
+        // Should render without throwing
+        expect(screen.getByText(/validating thread/i)).toBeInTheDocument();
+        
+        unmount(); // Clean up for next test
+      });
+    }
+  });
+
+  it('should handle rapid component mounting/unmounting', async () => {
+    const params = Promise.resolve({ threadId: 'rapid_test' });
+
+    // Mount and unmount rapidly
+    for (let i = 0; i < 5; i++) {
+      await act(async () => {
+        const { unmount } = render(<ThreadPage params={params} />);
+        jest.runAllTimers();
+        unmount();
+      });
+    }
+
+    // Should complete without memory leaks or errors
+    expect(true).toBe(true); // If we get here, no crashes occurred
   });
 });

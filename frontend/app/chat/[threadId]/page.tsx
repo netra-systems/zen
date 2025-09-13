@@ -46,16 +46,20 @@ const ThreadPage: React.FC<ThreadPageProps> = ({ params }) => {
   const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
   const { switchToThread } = useThreadSwitching();
   
-  // Handle Promise-based params from Next.js 15
+  // Handle Promise-based params from Next.js 15 or synchronous params from Next.js 14
   useEffect(() => {
-    params
-      .then(({ threadId }) => {
-        setThreadId(threadId);
-      })
-      .catch((error) => {
+    const resolveParams = async () => {
+      try {
+        // Check if params is a Promise
+        const resolvedParams = await Promise.resolve(params);
+        setThreadId(resolvedParams.threadId);
+      } catch (error) {
         setErrorMessage('Failed to load thread parameters');
         setLoadingState('error');
-      });
+      }
+    };
+    
+    resolveParams();
   }, [params]);
   
   useEffect(() => {
@@ -101,7 +105,8 @@ const initializeThread = async (
   }
   
   // Validate thread ID format
-  if (!validateThreadId(threadId)) {
+  const isValid = await validateThreadId(threadId);
+  if (!isValid) {
     handleInvalidThread(setLoadingState, setErrorMessage, router);
     return;
   }
