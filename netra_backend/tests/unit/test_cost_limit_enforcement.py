@@ -4,8 +4,7 @@ import pytest
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from shared.isolated_environment import IsolatedEnvironment
 
-# Skip test if any imports fail due to missing dependencies
-pytest.skip("Test dependencies have been removed or have missing dependencies", allow_module_level=True)
+# All required dependencies are now available - no skip needed
 
 from decimal import Decimal
 from datetime import datetime
@@ -27,7 +26,7 @@ class RequestStatus(Enum):
     FAILED = "failed"
 
 
-    class TestCostLimitEnforcement:
+class TestCostLimitEnforcement:
         """Test suite for cost limit enforcement functionality."""
     
         @pytest.fixture
