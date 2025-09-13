@@ -42,9 +42,9 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 class TestIDMigrationViolationsUnit(SSotBaseTestCase):
     """Unit tests exposing ID generation violations across the codebase."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Setup for violation detection tests."""
-        super().setUp()
+        super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         self.violation_count = 0
         
@@ -145,7 +145,7 @@ class TestIDMigrationViolationsUnit(SSotBaseTestCase):
             f"🚨 Compliance status: {((files_scanned - len(violation_summary)) / files_scanned * 100):.1f}%"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     def test_auth_service_specific_violations_EXPECT_FAILURE(self):
         """
@@ -215,7 +215,7 @@ class TestIDMigrationViolationsUnit(SSotBaseTestCase):
             f"📊 Auth files checked: {violation_files_checked}"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     def test_websocket_system_legacy_patterns_EXPECT_FAILURE(self):
         """
@@ -323,7 +323,7 @@ class TestIDMigrationViolationsUnit(SSotBaseTestCase):
             "   - Maintain user context embedding for routing"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     def test_user_execution_context_violations_EXPECT_FAILURE(self):
         """
@@ -405,7 +405,7 @@ class TestIDMigrationViolationsUnit(SSotBaseTestCase):
             "   - Ensure thread/run ID relationship embedding"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     def test_cross_service_id_format_consistency_EXPECT_FAILURE(self):
         """
@@ -531,7 +531,7 @@ class TestIDMigrationViolationsUnit(SSotBaseTestCase):
             "   - Implement service-wide ID validation contracts"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     def tearDown(self):
         """Cleanup and summary after violation detection."""
