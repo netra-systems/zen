@@ -25,6 +25,9 @@ class DatabaseURLBuilder:
     - development.default_url
     - test.memory_url
     - docker.compose_url
+    - clickhouse.http_url
+    - clickhouse.https_url
+    - clickhouse.native_url
     """
     
     def __init__(self, env_vars: Dict[str, Any]):
@@ -42,6 +45,7 @@ class DatabaseURLBuilder:
         self.docker = self.DockerBuilder(self)
         self.staging = self.StagingBuilder(self)
         self.production = self.ProductionBuilder(self)
+        self.clickhouse = self.ClickHouseBuilder(self)
     
     def is_docker_environment(self) -> bool:
         """
@@ -108,6 +112,38 @@ class DatabaseURLBuilder:
     def postgres_url(self) -> Optional[str]:
         """Get PostgreSQL URL from environment variables."""
         return self.env.get("POSTGRES_URL")
+    
+    # ===== CLICKHOUSE ENVIRONMENT VARIABLE PROPERTIES =====
+    
+    @property
+    def clickhouse_host(self) -> Optional[str]:
+        """Get ClickHouse host from environment variables."""
+        return self.env.get("CLICKHOUSE_HOST")
+    
+    @property
+    def clickhouse_port(self) -> Optional[str]:
+        """Get ClickHouse port from environment variables."""
+        return self.env.get("CLICKHOUSE_PORT") or "8123"
+    
+    @property
+    def clickhouse_user(self) -> Optional[str]:
+        """Get ClickHouse user from environment variables."""
+        return self.env.get("CLICKHOUSE_USER")
+    
+    @property
+    def clickhouse_password(self) -> Optional[str]:
+        """Get ClickHouse password from environment variables."""
+        return self.env.get("CLICKHOUSE_PASSWORD")
+    
+    @property
+    def clickhouse_database(self) -> Optional[str]:
+        """Get ClickHouse database name from environment variables."""
+        return self.env.get("CLICKHOUSE_DATABASE")
+    
+    @property
+    def clickhouse_url(self) -> Optional[str]:
+        """Get ClickHouse URL from environment variables."""
+        return self.env.get("CLICKHOUSE_URL")
     
     def apply_docker_hostname_resolution(self, host: str) -> str:
         """
@@ -463,6 +499,97 @@ class DatabaseURLBuilder:
             
             return f"postgresql://{user}:{password}@{host}:{port}/{db}"
     
+    class ClickHouseBuilder:
+        """Build ClickHouse environment URLs."""
+        
+        def __init__(self, parent):
+            self.parent = parent
+        
+        @property
+        def has_config(self) -> bool:
+            """Check if ClickHouse configuration is available."""
+            return bool(self.parent.clickhouse_host and self.parent.clickhouse_user)
+        
+        @property
+        def http_url(self) -> Optional[str]:
+            """HTTP URL for ClickHouse connection."""
+            if not self.has_config:
+                return None
+            
+            # Apply Docker hostname resolution (adapted for ClickHouse)
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.clickhouse_host)
+            
+            # URL encode user and password for safety
+            user = quote(self.parent.clickhouse_user, safe='') if self.parent.clickhouse_user else ""
+            password_part = f":{quote(self.parent.clickhouse_password, safe='')}" if self.parent.clickhouse_password else ""
+            database = self.parent.clickhouse_database or "default"
+            port = self.parent.clickhouse_port or "8123"
+            
+            return f"http://{user}{password_part}@{resolved_host}:{port}/{database}"
+        
+        @property
+        def https_url(self) -> Optional[str]:
+            """HTTPS URL for ClickHouse connection with SSL."""
+            if not self.has_config:
+                return None
+            
+            # Apply Docker hostname resolution (adapted for ClickHouse)
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.clickhouse_host)
+            
+            # URL encode user and password for safety
+            user = quote(self.parent.clickhouse_user, safe='') if self.parent.clickhouse_user else ""
+            password_part = f":{quote(self.parent.clickhouse_password, safe='')}" if self.parent.clickhouse_password else ""
+            database = self.parent.clickhouse_database or "default"
+            port = self.parent.clickhouse_port or "8443"  # Default HTTPS port
+            
+            return f"https://{user}{password_part}@{resolved_host}:{port}/{database}"
+        
+        @property
+        def native_url(self) -> Optional[str]:
+            """Native protocol URL for ClickHouse connection."""
+            if not self.has_config:
+                return None
+            
+            # Apply Docker hostname resolution (adapted for ClickHouse)
+            resolved_host = self.parent.apply_docker_hostname_resolution(self.parent.clickhouse_host)
+            
+            # URL encode user and password for safety
+            user = quote(self.parent.clickhouse_user, safe='') if self.parent.clickhouse_user else ""
+            password_part = f":{quote(self.parent.clickhouse_password, safe='')}" if self.parent.clickhouse_password else ""
+            database = self.parent.clickhouse_database or "default"
+            native_port = "9000"  # Default native port
+            
+            return f"clickhouse://{user}{password_part}@{resolved_host}:{native_port}/{database}"
+        
+        @property
+        def auto_url(self) -> Optional[str]:
+            """Auto-select best URL for ClickHouse based on environment."""
+            if not self.has_config:
+                return None
+            
+            # For staging/production, prefer HTTPS
+            if self.parent.environment in ["staging", "production"]:
+                return self.https_url
+            
+            # For development/test, use HTTP
+            return self.http_url
+        
+        @property
+        def compose_url(self) -> Optional[str]:
+            """URL for Docker Compose ClickHouse environment."""
+            if not self.has_config:
+                return None
+            
+            # URL encode user and password for safety
+            user = quote(self.parent.clickhouse_user or "default", safe='')
+            password = quote(self.parent.clickhouse_password or "", safe='')
+            host = self.parent.clickhouse_host or "clickhouse"  # Docker service name
+            port = "8123"  # HTTP port in Docker
+            database = self.parent.clickhouse_database or "default"
+            
+            password_part = f":{password}" if password else ""
+            return f"http://{user}{password_part}@{host}:{port}/{database}"
+    
     class StagingBuilder:
         """Build staging environment URLs."""
         
@@ -622,14 +749,20 @@ class DatabaseURLBuilder:
             "environment": self.environment,
             "has_cloud_sql": self.cloud_sql.is_cloud_sql,
             "has_tcp_config": self.tcp.has_config,
+            "has_clickhouse_config": self.clickhouse.has_config,
             "postgres_host": self.postgres_host,
             "postgres_db": self.postgres_db,
+            "clickhouse_host": self.clickhouse_host,
+            "clickhouse_database": self.clickhouse_database,
             "available_urls": {
                 "cloud_sql_async": self.cloud_sql.async_url is not None,
                 "cloud_sql_sync": self.cloud_sql.sync_url is not None,
                 "tcp_async": self.tcp.async_url is not None,
                 "tcp_sync": self.tcp.sync_url is not None,
                 "tcp_async_ssl": self.tcp.async_url_with_ssl is not None,
+                "clickhouse_http": self.clickhouse.http_url is not None,
+                "clickhouse_https": self.clickhouse.https_url is not None,
+                "clickhouse_native": self.clickhouse.native_url is not None,
                 "auto_url": self.get_url_for_environment() is not None,
             }
         }
