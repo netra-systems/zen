@@ -73,6 +73,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 - Indicates fundamental scaling/isolation issues
 
 ### 🚨 HIGH - Issue 4: Performance SLA Complete Failure
+**GitHub Issue:** [#677 - failing-test-performance-sla-critical-golden-path-zero-successful-runs](https://github.com/netra-systems/netra-apex/issues/677)
 **File:** `tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py`
 **Error:** `AssertionError: At least one performance run should succeed`
 **Impact:** System performance not meeting basic requirements
@@ -115,7 +116,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 1. **P0**: WebSocket service infrastructure repair
 2. **P0**: Authentication helper dependency resolution
 3. **P0**: Concurrent user execution fixes
-4. **P1**: Performance SLA compliance restoration
+4. **P1**: Performance SLA compliance restoration (#677)
 5. **P2**: WebSocket protocol parameter updates
 6. **P3**: Deprecated import cleanup
 
@@ -127,7 +128,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 3. **Concurrent User Fix**: Debug and resolve 0% concurrent success rate issue
 
 ### Short Term (P1 - High)
-1. **Performance Validation**: Identify and resolve performance SLA failures
+1. **Performance Validation**: Identify and resolve performance SLA failures (#677)
 2. **Infrastructure Health Check**: Comprehensive service availability validation
 
 ### Medium Term (P2-P3)
