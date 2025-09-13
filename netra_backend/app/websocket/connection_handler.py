@@ -27,7 +27,8 @@ Architecture:
 
 import asyncio
 import json
-import uuid
+# import uuid - replaced with UnifiedIDManager for Issue #89
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, Set, List
 from dataclasses import dataclass, field
@@ -142,7 +143,11 @@ class ConnectionHandler:
             user_id: Authenticated user ID this handler serves
             connection_id: Optional connection ID (generated if not provided)
         """
-        self.connection_id = connection_id or f"conn_{user_id}_{uuid.uuid4().hex[:8]}"
+        # Issue #89 Fix: Use UnifiedIDManager for connection ID generation
+        if connection_id is None:
+            id_manager = UnifiedIDManager()
+            connection_id = id_manager.generate_id(IDType.WEBSOCKET, prefix=f"conn_{user_id}")
+        self.connection_id = connection_id
         self.context = ConnectionContext(
             connection_id=self.connection_id,
             user_id=user_id,

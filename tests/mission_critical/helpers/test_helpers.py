@@ -1,46 +1,59 @@
 """
-Mission Critical Test Helper Utilities
+Mission Critical Test Helpers
 
-This module provides specialized utilities for mission critical tests including:
-- GitHub integration test helpers
-- Business value validation utilities
-- SSOT compliance verification
-- Performance and reliability testing helpers
+Comprehensive test helper utilities for mission critical functionality testing.
+Provides specialized utilities for GitHub integration, WebSocket event validation,
+SSOT compliance checking, and business value assessment.
+
+Business Value Justification (BVJ):
+- Segment: Platform/Internal
+- Business Goal: Testing Infrastructure & Quality Assurance
+- Value Impact: Enables comprehensive validation of mission critical systems
+- Strategic Impact: Foundation for reliable GitHub integration and business continuity
+
+Key Capabilities:
+1. GitHub Integration Test Utilities
+2. WebSocket Event Validation
+3. SSOT Compliance Verification
+4. Business Value Assessment
+5. Performance & Reliability Testing
 """
 
-import asyncio
 import time
+import asyncio
 import uuid
-from typing import Any, Dict, List, Optional, Union
-from unittest.mock import Mock, patch
+from datetime import datetime, timezone
+from typing import Dict, Any, Optional, List, Union
+from unittest.mock import Mock, MagicMock
+import json
 
-# Test framework imports
-from test_framework.ssot.base_test_case import SSotBaseTestCase, SSotAsyncTestCase
-
-# Business logic imports
-from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from shared.isolated_environment import IsolatedEnvironment
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 class MissionCriticalTestHelper:
     """
-    Central helper class for mission critical test infrastructure.
+    Mission Critical Test Helper providing comprehensive testing utilities.
 
-    Provides utilities for:
-    - Business value validation testing
-    - SSOT compliance verification
-    - GitHub integration testing
-    - WebSocket event validation
-    - Performance and reliability testing
+    CRITICAL: This class provides essential test infrastructure for mission critical
+    functionality validation including GitHub integration, WebSocket events, and
+    business value protection.
+
+    Business Impact:
+    - Enables reliable GitHub integration testing
+    - Validates $500K+ ARR functionality protection
+    - Ensures mission critical test infrastructure reliability
     """
 
     def __init__(self):
-        """Initialize mission critical test helper."""
-        self.isolated_env = IsolatedEnvironment()
+        """Initialize test helper with SSOT compliance."""
+        self.env = IsolatedEnvironment()
         self.id_manager = UnifiedIDManager()
+        self._test_data_cache = {}
 
-    # GitHub Integration Helpers
+    # ==========================================
+    # GitHub Integration Test Utilities
+    # ==========================================
 
     def create_github_test_context(self, issue_number: Optional[int] = None) -> Dict[str, Any]:
         """Create a standardized GitHub test context."""
@@ -223,13 +236,14 @@ class MissionCriticalTestHelper:
         start_memory = self._get_memory_usage()
 
         try:
-            result = await async_func(*args, **kwargs)
+            result = await async_function(*args, **kwargs)
             success = True
             error = None
         except Exception as e:
             result = None
             success = False
             error = str(e)
+<<<<<<< HEAD
 
         end_time = time.time()
         end_memory = self._get_memory_usage()
@@ -347,3 +361,181 @@ class MissionCriticalTestHelper:
 
 # Backwards compatibility alias
 TestHelper = MissionCriticalTestHelper
+=======
+        
+        end_time = time.time()
+        end_memory = self._get_memory_usage()
+        
+        return {
+            "execution_time_ms": (end_time - start_time) * 1000,
+            "memory_delta_mb": (end_memory - start_memory) / 1024 / 1024,
+            "success": success,
+            "error": error,
+            "result": result,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    
+    def track_memory_usage(self, test_duration_seconds: int = 60) -> Dict[str, Any]:
+        """
+        Track memory usage over test duration.
+        
+        Args:
+            test_duration_seconds: Duration to track memory
+            
+        Returns:
+            Memory usage tracking results
+        """
+        memory_samples = []
+        start_time = time.time()
+        
+        while (time.time() - start_time) < test_duration_seconds:
+            memory_samples.append({
+                "timestamp": time.time(),
+                "memory_mb": self._get_memory_usage() / 1024 / 1024
+            })
+            time.sleep(1)  # Sample every second
+        
+        if memory_samples:
+            memory_values = [sample["memory_mb"] for sample in memory_samples]
+            return {
+                "samples": memory_samples,
+                "min_memory_mb": min(memory_values),
+                "max_memory_mb": max(memory_values),
+                "avg_memory_mb": sum(memory_values) / len(memory_values),
+                "memory_growth_mb": memory_values[-1] - memory_values[0],
+                "duration_seconds": test_duration_seconds
+            }
+        
+        return {"error": "No memory samples collected"}
+    
+    def generate_test_data(self, 
+                          data_type: str, 
+                          count: int = 1, 
+                          **options) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        """
+        Generate test data for various testing scenarios.
+        
+        Args:
+            data_type: Type of test data to generate
+            count: Number of data items to generate
+            **options: Additional generation options
+            
+        Returns:
+            Generated test data
+        """
+        generators = {
+            "websocket_event": self._generate_websocket_event,
+            "github_issue": self._generate_github_issue_data,
+            "user_context": self._generate_user_context,
+            "error_context": self._generate_error_context
+        }
+        
+        if data_type not in generators:
+            raise ValueError(f"Unsupported data type: {data_type}")
+        
+        generator = generators[data_type]
+        
+        if count == 1:
+            return generator(**options)
+        else:
+            return [generator(**options) for _ in range(count)]
+    
+    # ==========================================
+    # Private Helper Methods
+    # ==========================================
+    
+    def _get_github_test_config(self) -> Dict[str, Any]:
+        """Get GitHub test configuration."""
+        return {
+            "enabled": self.env.get("GITHUB_INTEGRATION_ENABLED", "true").lower() == "true",
+            "token": self.env.get("GITHUB_TEST_TOKEN", "test_token"),
+            "repo_owner": self.env.get("GITHUB_TEST_REPO_OWNER", "test_owner"),
+            "repo_name": self.env.get("GITHUB_TEST_REPO_NAME", "test_repo"),
+            "test_mode": True
+        }
+    
+    def _analyze_event_timing(self, event_sequence: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Analyze timing of event sequence."""
+        if len(event_sequence) < 2:
+            return {"error": "Insufficient events for timing analysis"}
+        
+        timings = []
+        for i in range(1, len(event_sequence)):
+            prev_time = event_sequence[i-1].get("timestamp", 0)
+            curr_time = event_sequence[i].get("timestamp", 0)
+            if prev_time and curr_time:
+                timings.append(curr_time - prev_time)
+        
+        if timings:
+            return {
+                "average_interval_ms": sum(timings) / len(timings),
+                "min_interval_ms": min(timings),
+                "max_interval_ms": max(timings),
+                "total_duration_ms": event_sequence[-1].get("timestamp", 0) - event_sequence[0].get("timestamp", 0)
+            }
+        
+        return {"error": "No valid timestamps found"}
+    
+    def _detect_duplicate_implementations(self, module_path: str) -> List[str]:
+        """Detect duplicate implementations (placeholder)."""
+        # In real implementation, would scan for duplicate code patterns
+        return []
+    
+    def _detect_relative_imports(self, module_path: str) -> List[str]:
+        """Detect relative imports (placeholder)."""
+        # In real implementation, would scan for relative import patterns
+        return []
+    
+    def _get_memory_usage(self) -> int:
+        """Get current memory usage in bytes."""
+        import psutil
+        import os
+        process = psutil.Process(os.getpid())
+        return process.memory_info().rss
+    
+    def _generate_websocket_event(self, event_type: str = "agent_started", **options) -> Dict[str, Any]:
+        """Generate WebSocket event test data."""
+        return {
+            "type": event_type,
+            "timestamp": time.time() * 1000,  # milliseconds
+            "data": options.get("data", {}),
+            "user_id": options.get("user_id", f"test_user_{self.id_manager.generate_id(IDType.USER, prefix='test')}"),
+            "thread_id": options.get("thread_id", f"test_thread_{self.id_manager.generate_id(IDType.THREAD, prefix='test')}")
+        }
+    
+    def _generate_github_issue_data(self, issue_type: str = "test", **options) -> Dict[str, Any]:
+        """Generate GitHub issue test data."""
+        return {
+            "title": options.get("title", f"Test Issue - {issue_type}"),
+            "body": options.get("body", f"Test issue for {issue_type} validation"),
+            "labels": options.get("labels", ["test", issue_type]),
+            "priority": options.get("priority", "P2"),
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "test_context": True
+        }
+    
+    def _generate_user_context(self, **options) -> Dict[str, Any]:
+        """Generate user context test data."""
+        return {
+            "user_id": options.get("user_id", self.id_manager.generate_id(IDType.USER, prefix="test")),
+            "thread_id": options.get("thread_id", self.id_manager.generate_id(IDType.THREAD, prefix="test")),
+            "request_id": options.get("request_id", self.id_manager.generate_id(IDType.REQUEST, prefix="test")),
+            "is_test": True,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+    
+    def _generate_error_context(self, error_type: str = "test_error", **options) -> Dict[str, Any]:
+        """Generate error context test data."""
+        return {
+            "error_type": error_type,
+            "error_message": options.get("message", f"Test error: {error_type}"),
+            "stack_trace": options.get("stack_trace", "Test stack trace"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "severity": options.get("severity", "medium"),
+            "test_context": True
+        }
+
+
+# Export the main class
+__all__ = ["MissionCriticalTestHelper"]
+>>>>>>> cdea15a02690c975bfdc4f90e6fe0f9d9b18ad7d

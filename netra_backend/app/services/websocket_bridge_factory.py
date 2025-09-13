@@ -178,6 +178,7 @@ class WebSocketFactoryConfig:
             enable_event_batching=env.get('WEBSOCKET_ENABLE_BATCHING', 'true').lower() == 'true',
         )
 
+# SSOT CONSOLIDATION COMPLETE: All functionality provided by UnifiedWebSocketEmitter
 
 class WebSocketBridgeFactory:
     """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketManager + UnifiedWebSocketEmitter
@@ -242,50 +243,71 @@ class WebSocketBridgeFactory:
         
         logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
-    async def create_user_emitter(self, 
-                                user_id: str, 
-                                thread_id: str,
-                                connection_id: str) -> 'UserWebSocketEmitter':
+    async def create_user_emitter(self,
+                                user_context: Optional['UserExecutionContext'] = None,
+                                user_id: Optional[str] = None,
+                                thread_id: Optional[str] = None,
+                                connection_id: Optional[str] = None) -> 'UserWebSocketEmitter':
         """Create a per-user WebSocket event emitter (SSOT redirect).
-        
+
+        ISSUE #669 REMEDIATION: Unified parameter signature supporting both new and legacy patterns.
+
         Args:
-            user_id: Unique user identifier
-            thread_id: Thread identifier for WebSocket routing
-            connection_id: WebSocket connection identifier
-            
+            user_context: User execution context (preferred new pattern)
+            user_id: Unique user identifier (legacy pattern)
+            thread_id: Thread identifier for WebSocket routing (legacy pattern)
+            connection_id: WebSocket connection identifier (legacy pattern)
+
         Returns:
             UserWebSocketEmitter: SSOT-backed emitter with full compatibility
         """
         if not self._unified_manager:
             raise RuntimeError("Factory not configured - call configure() first")
-        
+
+        # ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns
+        if user_context:
+            # NEW pattern (preferred)
+            actual_user_id = user_context.user_id
+            actual_thread_id = getattr(user_context, 'thread_id', None)
+            actual_connection_id = getattr(user_context, 'connection_id', None)
+            if not actual_connection_id:
+                actual_connection_id = f"conn_{actual_user_id}_{actual_thread_id}"
+        elif user_id and thread_id:
+            # LEGACY pattern (backward compatibility)
+            actual_user_id = user_id
+            actual_thread_id = thread_id
+            actual_connection_id = connection_id or f"conn_{user_id}_{thread_id}"
+            # Create minimal context for compatibility
+            user_context = type('Context', (), {
+                'user_id': user_id,
+                'thread_id': thread_id,
+                'connection_id': actual_connection_id
+            })()
+        else:
+            raise ValueError("Either user_context or (user_id + thread_id) required")
+
         # MONITORING: Track bridge initialization start
         correlation_id = self.notification_monitor.track_bridge_initialization_started(
-            user_id, thread_id, connection_id
+            actual_user_id, actual_thread_id, actual_connection_id
         )
-        
+
         start_time = time.time()
-        
+
         try:
-            logger.info(f" CYCLE:  Creating UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {user_id}")
-            
-            # Create SSOT emitter with legacy compatibility
+            logger.info(f" CYCLE:  Creating UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {actual_user_id}")
+
+            # Create SSOT emitter with unified context
             unified_emitter = UnifiedWebSocketEmitter(
                 manager=self._unified_manager,
-                user_id=user_id,
-                # Create minimal context for emitter
-                context=type('Context', (), {
-                    'user_id': user_id,
-                    'thread_id': thread_id,
-                    'connection_id': connection_id
-                })()
+                user_id=actual_user_id,
+                context=user_context
             )
-            
+
             # Wrap in compatibility layer
             user_emitter = UserWebSocketEmitter(
-                user_id=user_id,
-                thread_id=thread_id,
-                connection_id=connection_id,
+                user_id=actual_user_id,
+                thread_id=actual_thread_id,
+                connection_id=actual_connection_id,
                 unified_emitter=unified_emitter,
                 factory=self
             )
@@ -295,25 +317,25 @@ class WebSocketBridgeFactory:
             self._factory_metrics['emitters_active'] += 1
             
             creation_time_ms = (time.time() - start_time) * 1000
-            
+
             # MONITORING: Track successful bridge initialization
             self.notification_monitor.track_bridge_initialization_success(
                 correlation_id, creation_time_ms
             )
-            
-            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) created for user {user_id} in {creation_time_ms:.1f}ms")
-            
+
+            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) created for user {actual_user_id} in {creation_time_ms:.1f}ms")
+
             return user_emitter
-            
+
         except Exception as e:
             creation_time_ms = (time.time() - start_time) * 1000
-            
+
             # MONITORING: Track failed bridge initialization
             self.notification_monitor.track_bridge_initialization_failed(
                 correlation_id, str(e), creation_time_ms
             )
-            
-            logger.error(f" FAIL:  Failed to create WebSocket emitter (SSOT) for user {user_id}: {e}")
+
+            logger.error(f" FAIL:  Failed to create WebSocket emitter (SSOT) for user {actual_user_id}: {e}")
             raise RuntimeError(f"WebSocket emitter creation failed: {e}")
     
     async def cleanup_user_context(self, user_id: str, connection_id: str) -> None:

@@ -29,14 +29,14 @@ import sys
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase):
+class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCase):
     """Unit tests to detect configuration manager SSOT violations for Issue #667."""
     
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.detected_managers: List[Dict[str, Any]] = []
-        self.violation_details: Dict[str, Any] = {}
+        self.detected_managers = []
+        self.violation_details = {}
     
     def test_multiple_configuration_manager_classes_exist(self):
         """

@@ -220,11 +220,125 @@ class UnifiedConfigManager:
     
     def is_testing(self) -> bool:
         """Check if running in testing environment.
-        
+
         Returns:
             bool: True if testing
         """
         return self._get_environment() == "testing"
+
+    def get_config_value(self, key: str, default: Any = None) -> Any:
+        """Get a specific configuration value by key path.
+
+        COMPATIBILITY METHOD: Supports ConfigurationManager.get_config(key, default) pattern
+        for backward compatibility during SSOT migration.
+
+        Args:
+            key: Dot-separated key path (e.g., 'database.url', 'security.jwt_secret')
+            default: Default value if key not found
+
+        Returns:
+            Any: The configuration value or default
+        """
+        try:
+            config = self.get_config()
+
+            # Handle dot-separated key paths
+            keys = key.split('.')
+            value = config
+
+            for k in keys:
+                if hasattr(value, k):
+                    value = getattr(value, k)
+                elif isinstance(value, dict) and k in value:
+                    value = value[k]
+                else:
+                    self._get_logger().debug(f"Configuration key '{key}' not found, returning default: {default}")
+                    return default
+
+            return value
+        except Exception as e:
+            self._get_logger().error(f"Error getting configuration value for key '{key}': {e}")
+            return default
+
+    def set_config_value(self, key: str, value: Any) -> None:
+        """Set a configuration value by key path.
+
+        COMPATIBILITY METHOD: Supports ConfigurationManager.set_config(key, value) pattern
+        for backward compatibility during SSOT migration.
+
+        NOTE: This sets values in the current config instance but does not persist
+        changes to environment variables or configuration files.
+
+        Args:
+            key: Configuration key path
+            value: Value to set
+        """
+        try:
+            config = self.get_config()
+
+            # Handle dot-separated key paths for setting
+            keys = key.split('.')
+            current = config
+
+            # Navigate to the parent object
+            for k in keys[:-1]:
+                if hasattr(current, k):
+                    current = getattr(current, k)
+                elif isinstance(current, dict):
+                    if k not in current:
+                        current[k] = {}
+                    current = current[k]
+                else:
+                    self._get_logger().warning(f"Cannot set configuration key '{key}' - invalid path")
+                    return
+
+            # Set the final value
+            final_key = keys[-1]
+            if hasattr(current, final_key):
+                setattr(current, final_key, value)
+            elif isinstance(current, dict):
+                current[final_key] = value
+            else:
+                self._get_logger().warning(f"Cannot set configuration key '{key}' - invalid target")
+
+            self._get_logger().debug(f"Set configuration value '{key}' = {value}")
+        except Exception as e:
+            self._get_logger().error(f"Error setting configuration value for key '{key}': {e}")
+
+    def validate_config_value(self, key: str = None) -> bool:
+        """Validate configuration value or entire configuration.
+
+        COMPATIBILITY METHOD: Supports ConfigurationManager.validate_config() pattern
+
+        Args:
+            key: Optional specific key to validate (if None, validates entire config)
+
+        Returns:
+            bool: True if valid
+        """
+        if key is None:
+            return self.validate_config_integrity()
+        else:
+            try:
+                value = self.get_config_value(key)
+                return value is not None
+            except Exception:
+                return False
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value by key.
+
+        COMPATIBILITY METHOD: Supports UnifiedConfigurationManager.get(key, default) pattern
+        for backward compatibility during SSOT migration.
+
+        Args:
+            key: Configuration key
+            default: Default value if key not found
+
+        Returns:
+            Any: The configuration value or default
+        """
+        return self.get_config_value(key, default)
 
 
 # Global configuration manager instance
@@ -316,16 +430,76 @@ def is_testing() -> bool:
 # CRITICAL GOLDEN PATH COMPATIBILITY FUNCTION
 def get_config() -> AppConfig:
     """Get the application configuration - Golden Path compatibility function.
-    
+
     COMPATIBILITY LAYER: This function provides backward compatibility for Golden Path tests
     that expect a get_config() function. Re-exports get_unified_config() functionality.
-    
+
     Business Impact: Enables Golden Path test execution protecting $500K+ ARR
-    
+
     Returns:
         AppConfig: The application configuration
     """
     return get_unified_config()
+
+
+# CONFIGURATION MANAGER COMPATIBILITY FUNCTIONS
+def get_config_value(key: str, default: Any = None) -> Any:
+    """Get a specific configuration value by key path.
+
+    COMPATIBILITY FUNCTION: Supports ConfigurationManager.get_config(key, default) pattern
+    for backward compatibility during SSOT migration.
+
+    Args:
+        key: Dot-separated key path (e.g., 'database.url', 'security.jwt_secret')
+        default: Default value if key not found
+
+    Returns:
+        Any: The configuration value or default
+    """
+    return config_manager.get_config_value(key, default)
+
+
+def set_config_value(key: str, value: Any) -> None:
+    """Set a configuration value by key path.
+
+    COMPATIBILITY FUNCTION: Supports ConfigurationManager.set_config(key, value) pattern
+    for backward compatibility during SSOT migration.
+
+    Args:
+        key: Configuration key path
+        value: Value to set
+    """
+    return config_manager.set_config_value(key, value)
+
+
+def validate_config_value(key: str = None) -> bool:
+    """Validate configuration value or entire configuration.
+
+    COMPATIBILITY FUNCTION: Supports ConfigurationManager.validate_config() pattern
+
+    Args:
+        key: Optional specific key to validate (if None, validates entire config)
+
+    Returns:
+        bool: True if valid
+    """
+    return config_manager.validate_config_value(key)
+
+
+def get(key: str, default: Any = None) -> Any:
+    """Get configuration value by key.
+
+    COMPATIBILITY FUNCTION: Supports UnifiedConfigurationManager.get(key, default) pattern
+    for backward compatibility during SSOT migration.
+
+    Args:
+        key: Configuration key
+        default: Default value if key not found
+
+    Returns:
+        Any: The configuration value or default
+    """
+    return config_manager.get(key, default)
 
 
 # Export compatibility functions
@@ -334,7 +508,11 @@ __all__ = [
     "config_manager",
     "get_unified_config",
     "get_config",  # Golden Path compatibility
-    "reload_unified_config", 
+    "get_config_value",  # ConfigurationManager compatibility
+    "set_config_value",  # ConfigurationManager compatibility
+    "validate_config_value",  # ConfigurationManager compatibility
+    "get",  # UnifiedConfigurationManager compatibility
+    "reload_unified_config",
     "validate_unified_config",
     "get_environment",
     "is_production",

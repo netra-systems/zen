@@ -572,7 +572,47 @@ class UserExecutionContext:
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
-    
+
+    @classmethod
+    def create_for_user(
+        cls,
+        user_id: str,
+        thread_id: str,
+        run_id: str,
+        **kwargs
+    ) -> 'UserExecutionContext':
+        """Factory method to create context for user with minimal required parameters.
+
+        This is a simplified factory method that tests and other code expect.
+        It provides a clean interface for creating UserExecutionContext instances
+        with just the essential user, thread, and run identifiers.
+
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            run_id: Run identifier
+            **kwargs: Additional optional parameters passed to from_request()
+
+        Returns:
+            New UserExecutionContext instance
+
+        Raises:
+            InvalidContextError: If any required parameters are invalid
+
+        Example:
+            context = UserExecutionContext.create_for_user(
+                user_id="user123",
+                thread_id="thread456",
+                run_id="run789"
+            )
+        """
+        return cls.from_request(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            **kwargs
+        )
+
     @classmethod
     def from_websocket_request(
         cls,

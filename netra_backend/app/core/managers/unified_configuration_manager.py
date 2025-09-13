@@ -1255,7 +1255,164 @@ def get_configuration_manager(
     return ConfigurationManagerFactory.get_manager(user_id, service_name)
 
 
-# Legacy compatibility functions for migrating from old managers
+# ============================================================================
+# COMPATIBILITY LAYER FOR SSOT CONSOLIDATION (Issue #667)
+# ============================================================================
+
+class ConfigurationManagerCompatibility:
+    """
+    Compatibility layer for consolidating the 3 configuration managers:
+    1. UnifiedConfigManager (netra_backend/app/core/configuration/base.py)
+    2. ConfigurationManager (netra_backend/app/services/configuration_service.py) 
+    3. UnifiedConfigurationManager (this class - the SSOT)
+    
+    Provides interface compatibility while directing all operations to the SSOT.
+    """
+    
+    def __init__(self, manager: UnifiedConfigurationManager):
+        self._ssot_manager = manager
+    
+    # ConfigurationService.ConfigurationManager interface compatibility
+    def get_config(self, key: str, default: Any = None) -> Any:
+        """Compatibility for ConfigurationService.ConfigurationManager.get_config()"""
+        return self._ssot_manager.get(key, default)
+    
+    def set_config(self, key: str, value: Any) -> None:
+        """Compatibility for ConfigurationService.ConfigurationManager.set_config()"""
+        self._ssot_manager.set(key, value)
+    
+    def validate_config(self) -> bool:
+        """Compatibility for ConfigurationService.ConfigurationManager.validate_config()"""
+        validation_result = self._ssot_manager.validate_all_configurations()
+        return validation_result.is_valid
+    
+    # UnifiedConfigManager (base.py) interface compatibility  
+    def get_unified_config(self):
+        """Compatibility for base.py UnifiedConfigManager.get_config()"""
+        # Return AppConfig-like object with database/redis configs
+        db_config = self._ssot_manager.get_database_config()
+        redis_config = self._ssot_manager.get_redis_config()
+        
+        # Create a config-like object
+        class CompatConfig:
+            def __init__(self, db_config, redis_config):
+                self.database_url = db_config.get('url')
+                self.database_pool_size = db_config.get('pool_size', 10)
+                self.redis_url = redis_config.get('url')
+                # Add other common config attributes as needed
+                
+        return CompatConfig(db_config, redis_config)
+    
+    def reload_config(self, force: bool = False):
+        """Compatibility for base.py UnifiedConfigManager.reload_config()"""
+        # Clear cache and return updated config
+        if force:
+            self._ssot_manager.clear_cache()
+        return self.get_unified_config()
+    
+    def validate_config_integrity(self) -> bool:
+        """Compatibility for base.py UnifiedConfigManager.validate_config_integrity()"""
+        return self.validate_config()
+    
+    def get_environment_name(self) -> str:
+        """Compatibility for base.py UnifiedConfigManager.get_environment_name()"""
+        return self._ssot_manager.environment or 'development'
+    
+    def is_production(self) -> bool:
+        """Compatibility for base.py UnifiedConfigManager.is_production()"""
+        return self.get_environment_name() == 'production'
+    
+    def is_development(self) -> bool:
+        """Compatibility for base.py UnifiedConfigManager.is_development()"""
+        return self.get_environment_name() == 'development'
+    
+    def is_testing(self) -> bool:
+        """Compatibility for base.py UnifiedConfigManager.is_testing()"""
+        return self.get_environment_name() == 'testing'
+
+
+# Add compatibility methods directly to UnifiedConfigurationManager
+def _add_compatibility_methods(cls):
+    """Add compatibility methods to UnifiedConfigurationManager for Issue #667 consolidation."""
+    
+    # ConfigurationService.ConfigurationManager compatibility
+    def get_config_compat(self, key: str, default: Any = None) -> Any:
+        """COMPATIBILITY: ConfigurationService.ConfigurationManager.get_config()"""
+        return self.get(key, default)
+    
+    def set_config_compat(self, key: str, value: Any) -> None:
+        """COMPATIBILITY: ConfigurationService.ConfigurationManager.set_config()"""
+        self.set(key, value)
+    
+    def validate_config_compat(self) -> bool:
+        """COMPATIBILITY: ConfigurationService.ConfigurationManager.validate_config()"""
+        validation_result = self.validate_all_configurations()
+        return validation_result.is_valid
+    
+    # UnifiedConfigManager (base.py) compatibility
+    def get_unified_config_compat(self):
+        """COMPATIBILITY: base.py UnifiedConfigManager.get_config()"""
+        db_config = self.get_database_config()
+        redis_config = self.get_redis_config()
+        
+        class CompatConfig:
+            def __init__(self, db_config, redis_config, security_config):
+                self.database_url = db_config.get('url')
+                self.database_pool_size = db_config.get('pool_size', 10)
+                self.redis_url = redis_config.get('url')
+                self.service_secret = security_config.get('jwt_secret')
+                
+        return CompatConfig(db_config, redis_config, self.get_security_config())
+    
+    def reload_config_compat(self, force: bool = False):
+        """COMPATIBILITY: base.py UnifiedConfigManager.reload_config()"""
+        if force:
+            self.clear_cache()
+        return self.get_unified_config_compat()
+    
+    def validate_config_integrity_compat(self) -> bool:
+        """COMPATIBILITY: base.py UnifiedConfigManager.validate_config_integrity()"""
+        validation_result = self.validate_all_configurations()
+        return validation_result.is_valid
+    
+    def get_environment_name_compat(self) -> str:
+        """COMPATIBILITY: base.py UnifiedConfigManager.get_environment_name()"""
+        return self.environment or 'development'
+    
+    def is_production_compat(self) -> bool:
+        """COMPATIBILITY: base.py UnifiedConfigManager.is_production()"""
+        return self.get_environment_name_compat() == 'production'
+    
+    def is_development_compat(self) -> bool:
+        """COMPATIBILITY: base.py UnifiedConfigManager.is_development()"""
+        return self.get_environment_name_compat() == 'development'
+    
+    def is_testing_compat(self) -> bool:
+        """COMPATIBILITY: base.py UnifiedConfigManager.is_testing()"""
+        return self.get_environment_name_compat() == 'testing'
+    
+    # Add methods as instance methods
+    cls.get_config = get_config_compat
+    cls.set_config = set_config_compat
+    cls.validate_config = validate_config_compat
+    cls.get_unified_config = get_unified_config_compat
+    cls.reload_config = reload_config_compat
+    cls.validate_config_integrity = validate_config_integrity_compat
+    cls.get_environment_name = get_environment_name_compat
+    cls.is_production = is_production_compat
+    cls.is_development = is_development_compat
+    cls.is_testing = is_testing_compat
+    
+    return cls
+
+# Apply compatibility methods to UnifiedConfigurationManager
+UnifiedConfigurationManager = _add_compatibility_methods(UnifiedConfigurationManager)
+
+
+# ============================================================================
+# LEGACY COMPATIBILITY FACTORY FUNCTIONS
+# ============================================================================
+
 def get_dashboard_config_manager() -> UnifiedConfigurationManager:
     """Legacy compatibility for DashboardConfigManager."""
     return get_configuration_manager(service_name="dashboard")
@@ -1269,3 +1426,20 @@ def get_data_agent_config_manager() -> UnifiedConfigurationManager:
 def get_llm_config_manager() -> UnifiedConfigurationManager:
     """Legacy compatibility for LLMManagerConfig."""
     return get_configuration_manager(service_name="llm")
+
+
+# Issue #667 SSOT consolidation compatibility functions
+def create_unified_config_manager_compat() -> UnifiedConfigurationManager:
+    """COMPATIBILITY: Create UnifiedConfigManager (base.py) compatible instance."""
+    return ConfigurationManagerFactory.get_global_manager()
+
+
+def create_configuration_manager_compat() -> UnifiedConfigurationManager:
+    """COMPATIBILITY: Create ConfigurationManager (services) compatible instance.""" 
+    return ConfigurationManagerFactory.get_global_manager()
+
+
+# Export compatibility aliases for Issue #667 consolidation
+UnifiedConfigManager = UnifiedConfigurationManager  # Alias for base.py compatibility
+ConfigurationManager = UnifiedConfigurationManager  # Alias for services compatibility
+ConfigurationService = UnifiedConfigurationManager  # Full service compatibility

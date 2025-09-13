@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime, timezone
 
-from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -31,10 +31,10 @@ class TokenOptimizationConfigManager:
     """
     
     def __init__(self):
-        """Initialize with existing UnifiedConfigurationManager (SSOT pattern)."""
-        
+        """Initialize with existing UnifiedConfigManager (SSOT pattern)."""
+
         # Use existing configuration manager (SSOT compliance)
-        self.config_manager = UnifiedConfigurationManager()
+        self.config_manager = UnifiedConfigManager()
         
         # Cache configuration to avoid repeated lookups
         self._config_cache = {}

@@ -176,8 +176,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    networks:
-      - default
     restart: unless-stopped
     deploy:
       resources:
@@ -269,8 +267,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
-    networks:
-      - default
     restart: unless-stopped
     deploy:
       resources:
