@@ -63,7 +63,8 @@ from test_framework.base import BaseUnitTest
 class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
     """Test WebSocketConnection business logic for individual connection management."""
     
-    def setUp(self):
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
         """Set up WebSocketConnection for testing."""
         # Create mock WebSocket
         self.mock_websocket = Mock()
@@ -79,11 +80,12 @@ class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
         self.thread_id = "thread-456"
         self.connection_id = "conn-789"
         
-        # Create WebSocket connection
+        # Create WebSocket connection with required connected_at parameter
         self.connection = WebSocketConnection(
             connection_id=self.connection_id,
             user_id=self.user_id,
             websocket=self.mock_websocket,
+            connected_at=datetime.now(timezone.utc),
             thread_id=self.thread_id
         )
 
@@ -217,8 +219,9 @@ class TestWebSocketConnectionBusinessLogic(BaseUnitTest):
 
 class TestUnifiedWebSocketManagerBusinessLogic(BaseUnitTest):
     """Test UnifiedWebSocketManager business logic for connection management."""
-    
-    def setUp(self):
+
+    @pytest.fixture(autouse=True)
+    def setup_method(self):
         """Set up UnifiedWebSocketManager for testing."""
         # Create manager instance
         self.manager = UnifiedWebSocketManager()

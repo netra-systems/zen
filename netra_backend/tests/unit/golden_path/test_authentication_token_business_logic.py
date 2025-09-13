@@ -32,6 +32,7 @@ from enum import Enum
 
 # Import business logic components for testing
 from test_framework.base import BaseTestCase
+from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.types.core_types import (
     UserID, SessionID, ensure_user_id
 )
@@ -202,16 +203,22 @@ class AuthenticationTokenManager:
                 validation_result["validation_errors"].append("Token has been revoked")
                 return validation_result
             
-            # Business Rule 2: Decode and validate JWT structure
-            # SSOT NOTE: This validation method needs proper JWT validation with expiration
-            # checking to test business validation rules. Using jwt.decode with verification
-            # for business logic validation while other token content checks use SSOT patterns.
-            decoded_payload = jwt.decode(
-                jwt_token, 
-                self.secret_key, 
-                algorithms=[self.token_algorithm],
-                options={"verify_exp": True}
-            )
+            # Business Rule 2: Decode and validate JWT structure using SSOT auth service
+            # SSOT COMPLIANT: Use auth helper for token validation to follow architectural patterns
+            auth_helper = E2EAuthHelper()
+            decoded_payload = auth_helper._decode_token(jwt_token)
+
+            # Validate that token was successfully decoded (SSOT auth service validation)
+            if not decoded_payload or not isinstance(decoded_payload, dict):
+                validation_result["validation_errors"].append("Invalid token format or structure")
+                return validation_result
+
+            # Validate token expiration using SSOT-compatible timestamp checking
+            if "exp" in decoded_payload:
+                current_time = datetime.now(timezone.utc).timestamp()
+                if decoded_payload["exp"] < current_time:
+                    validation_result["validation_errors"].append("Token has expired")
+                    return validation_result
             
             # Business Rule 3: Validate required business claims are present
             required_claims = ["user_id", "email", "tier", "permissions", "session_id", "business_context"]

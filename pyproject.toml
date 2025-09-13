@@ -601,7 +601,19 @@ markers = [
     "state_validation: State validation tests",
     "initialization_idempotency: Initialization idempotency tests",
     "state_transitions: State transitions tests",
-    "concurrent_initialization: Concurrent initialization tests"
+    "concurrent_initialization: Concurrent initialization tests",
+
+    # Additional missing markers causing collection failures
+    "stress_test: Stress testing under high load conditions",
+    "websocket_continuation: WebSocket event continuation after failures",
+    "auth_coordination: Authentication coordination and handoff tests",
+    "tool_handoffs: Tool execution handoff between agents",
+    "tool_timeout: Tool execution timeout handling tests",
+    "tool_execution: Tool execution tests",
+    "issue_463: Issue #463 specific tests",
+    "issue_465: Issue #465 specific tests",
+    "issue_426_cluster: Issue #426 cluster specific tests",
+    "real_services_not_required: Tests that do not require real external services"
 ]
 
 # Coverage settings
