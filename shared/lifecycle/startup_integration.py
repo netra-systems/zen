@@ -240,8 +240,8 @@ class StartupIntegration:
         
         try:
             # Import and run auth validation
-            from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
-            await validate_auth_at_startup()
+            from netra_backend.app.core.auth_startup_validator import validate_auth_startup
+            await validate_auth_startup()
             
             if self.app:
                 # Store validation success on app state

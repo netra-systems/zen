@@ -174,14 +174,14 @@ async def test_auth_startup_validator_production_requirements():
 @pytest.mark.asyncio
 async def test_validate_auth_at_startup_raises_on_failure():
     """Test that validate_auth_at_startup raises AuthValidationError on critical failures."""
-    from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+    from netra_backend.app.core.auth_startup_validator import validate_auth_startup
     
     # Clear JWT secret manager cache before test
     get_jwt_secret_manager().clear_cache()
     
     with patch.dict(os.environ, {'ENVIRONMENT': 'development', 'TESTING': '', 'PYTEST_CURRENT_TEST': ''}, clear=True):  # Minimal environment
         with pytest.raises(AuthValidationError) as exc_info:
-            await validate_auth_at_startup()
+            await validate_auth_startup()
         
         assert "Critical auth validation failures" in str(exc_info.value)
 
