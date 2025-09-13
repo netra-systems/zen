@@ -129,7 +129,7 @@ class StartupValidator:
         
     async def validate_startup(self, app) -> Tuple[bool, Dict[str, Any]]:
         """
-        Perform comprehensive startup validation.
+        Perform comprehensive startup validation with timeout protection.
         Returns (success, report) tuple.
         """
         self.logger.info("=" * 60)
@@ -139,21 +139,41 @@ class StartupValidator:
         import time
         self.start_time = time.time()
         
-        # Run all validations
-        await self._validate_agents(app)
-        await self._validate_tools(app)
-        await self._validate_database(app)
-        await self._validate_websocket(app)
-        await self._validate_services(app)
-        await self._validate_middleware(app)
-        await self._validate_background_tasks(app)
-        await self._validate_monitoring(app)
+        # ISSUE #601 FIX: Add timeout protection to each validation step to prevent infinite loops
+        validation_timeout = 5.0  # 5 seconds per validation step
         
-        # CRITICAL: Validate communication paths for chat functionality
-        await self._validate_critical_paths(app)
-        
-        # CRITICAL: Validate service dependencies for systematic service resolution
-        await self._validate_service_dependencies(app)
+        try:
+            # Run all validations with individual timeouts
+            await asyncio.wait_for(self._validate_agents(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_tools(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_database(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_websocket(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_services(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_middleware(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_background_tasks(app), timeout=validation_timeout)
+            await asyncio.wait_for(self._validate_monitoring(app), timeout=validation_timeout)
+            
+            # CRITICAL: Validate communication paths for chat functionality
+            await asyncio.wait_for(self._validate_critical_paths(app), timeout=validation_timeout)
+            
+            # CRITICAL: Validate service dependencies for systematic service resolution
+            await asyncio.wait_for(self._validate_service_dependencies(app), timeout=validation_timeout)
+            
+        except asyncio.TimeoutError as e:
+            self.logger.error(f"TIMEOUT: Startup validation step timed out after {validation_timeout} seconds")
+            # Add timeout validation result
+            from netra_backend.app.core.startup_validation import ComponentValidation, ComponentStatus
+            timeout_validation = ComponentValidation(
+                name="Startup Validation Timeout",
+                category="System",
+                expected_min=1,
+                actual_count=0,
+                status=ComponentStatus.FAILED,
+                message=f"Startup validation timed out after {validation_timeout} seconds - possible infinite loop",
+                is_critical=True,
+                metadata={"timeout_error": str(e), "timeout_seconds": validation_timeout}
+            )
+            self.validations.append(timeout_validation)
         
         self.end_time = time.time()
         

@@ -6,6 +6,7 @@ This module is the single source of truth for WebSocket connection management.
 import asyncio
 import json
 import time
+import weakref
 from enum import Enum
 from typing import Dict, Optional, Set, Any, List, Union
 from dataclasses import dataclass
@@ -249,10 +250,19 @@ class WebSocketConnection:
 
 
 class RegistryCompat:
-    """Compatibility registry for legacy tests."""
+    """Compatibility registry for legacy tests with circular reference prevention."""
     
     def __init__(self, manager):
-        self.manager = manager
+        # ISSUE #601 FIX: Use weakref to prevent circular reference manager <-> registry
+        self._manager_ref = weakref.ref(manager)
+    
+    @property 
+    def manager(self):
+        """Get manager from weak reference, preventing circular reference memory leaks."""
+        manager = self._manager_ref()
+        if manager is None:
+            raise RuntimeError("WebSocket manager has been garbage collected")
+        return manager
     
     async def register_connection(self, user_id: str, connection_info):
         """Register a connection for test compatibility."""
@@ -335,7 +345,10 @@ class UnifiedWebSocketManager:
         # SSOT CONSOLIDATION: Always use unified initialization
         self._initialize_unified_mode()
         
-        # Add compatibility registry for legacy tests
+        # ISSUE #601 FIX: Use WeakValueDictionary for connection pools to prevent memory leaks
+        self._connection_pool = weakref.WeakValueDictionary()
+        
+        # Add compatibility registry for legacy tests (no circular reference with weakref)
         self.registry = RegistryCompat(self)
         
         # Add compatibility for legacy tests expecting connection_manager
@@ -785,7 +798,30 @@ class UnifiedWebSocketManager:
                         logger.warning(f"PHASE 2: Error cleaning up token lifecycle for connection {validated_connection_id}: {e}")
                         # Don't fail connection removal due to lifecycle cleanup errors
                     
-                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup and Phase 2 lifecycle cleanup (thread-safe)")
+                    # ISSUE #601 FIX: Explicit event handler cleanup to prevent memory leaks
+                    try:
+                        # Clean up event handlers and references for this connection
+                        if hasattr(connection.websocket, '_event_handlers'):
+                            connection.websocket._event_handlers.clear()
+                        
+                        # Clean up any circular references in the connection object
+                        if hasattr(connection, 'metadata') and connection.metadata:
+                            # Remove any parent/child references in metadata
+                            for key in list(connection.metadata.keys()):
+                                if 'parent' in key.lower() or 'child' in key.lower() or 'ref' in key.lower():
+                                    connection.metadata.pop(key, None)
+                        
+                        # Remove from connection pool weak references
+                        if validated_connection_id in self._connection_pool:
+                            del self._connection_pool[validated_connection_id]
+                            
+                        logger.debug(f"ISSUE #601: Event handler cleanup completed for connection {validated_connection_id}")
+                        
+                    except Exception as e:
+                        logger.warning(f"ISSUE #601: Error during event handler cleanup for connection {validated_connection_id}: {e}")
+                        # Don't fail connection removal due to cleanup errors
+                    
+                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup, Phase 2 lifecycle cleanup, and Issue #601 memory leak prevention (thread-safe)")
     
     def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
         """Get a specific connection with type validation."""

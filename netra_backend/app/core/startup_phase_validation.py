@@ -74,7 +74,7 @@ class StartupPhaseValidator:
                            target_phase: ContractPhase,
                            skip_enforcement: bool = False) -> PhaseValidationResult:
         """
-        Validate specific startup phase with comprehensive service dependency logging
+        Validate specific startup phase with comprehensive service dependency logging and timeout protection
         
         Args:
             app_state: FastAPI app.state object
@@ -91,10 +91,32 @@ class StartupPhaseValidator:
         await self._log_phase_service_dependencies(target_phase, app_state)
         
         try:
-            # Validate contracts for this phase
-            contract_results = self.contract_validator.validate_app_state_contracts(
-                app_state, target_phase
-            )
+            # ISSUE #601 FIX: Add timeout protection to prevent infinite loops in contract validation
+            try:
+                contract_results = await asyncio.wait_for(
+                    asyncio.coroutine(lambda: self.contract_validator.validate_app_state_contracts(
+                        app_state, target_phase
+                    ))(),
+                    timeout=15.0  # 15 second timeout for contract validation
+                )
+            except asyncio.TimeoutError:
+                logger.error(f"TIMEOUT: Contract validation for {target_phase.value} timed out after 15 seconds")
+                # Create timeout error result
+                duration = time.time() - start_time
+                phase_result = PhaseValidationResult(
+                    phase=target_phase,
+                    success=False,
+                    duration_seconds=duration,
+                    components_validated=0,
+                    errors=[f"Contract validation timeout after 15 seconds for phase {target_phase.value}"],
+                    warnings=[],
+                    business_impact=["Critical startup timeout - system may have infinite loop or deadlock"]
+                )
+                self.validation_history.append(phase_result)
+                
+                if not skip_enforcement:
+                    raise StartupValidationError(f"Phase {target_phase.value} validation timeout")
+                return phase_result
             
             # Create phase result
             duration = time.time() - start_time
