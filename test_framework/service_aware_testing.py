@@ -237,10 +237,14 @@ def fallback_to_staging(*service_names):
     return decorator
 
 
+# Backward compatibility alias for tests
+ServiceAwareTesting = ServiceAwareTestManager  # Tests expect this name
+
 # Export main components
 __all__ = [
     'ServiceAwareTestManager',
-    'ServiceAvailability', 
+    'ServiceAwareTesting',  # Backward compatibility
+    'ServiceAvailability',
     'TestExecutionStrategy',
     'requires_services',
     'fallback_to_staging'

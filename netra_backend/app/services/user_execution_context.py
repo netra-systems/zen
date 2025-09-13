@@ -36,6 +36,7 @@ from contextlib import asynccontextmanager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import IsolatedEnvironment
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,7 +106,7 @@ class UserExecutionContext:
     user_id: str
     thread_id: str  
     run_id: str
-    request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    request_id: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("user_request"))
     
     # Session and connection management
     db_session: Optional['AsyncSession'] = field(default=None, repr=False, compare=False)
@@ -124,7 +125,7 @@ class UserExecutionContext:
     cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
     # ISSUE #414 FIX: Enhanced isolation and memory leak prevention
-    _isolation_token: str = field(default_factory=lambda: str(uuid.uuid4()), repr=False, compare=False)
+    _isolation_token: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("isolation_token"), repr=False, compare=False)
     _memory_refs: List[Any] = field(default_factory=list, repr=False, compare=False)
     _validation_fingerprint: Optional[str] = field(default=None, repr=False, compare=False)
     
@@ -524,7 +525,7 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             agent_context=agent_context or {},
             audit_metadata=audit_metadata or {}
         )
@@ -566,7 +567,7 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=db_session,
             websocket_client_id=websocket_client_id,
             agent_context=agent_context or {},
@@ -727,7 +728,7 @@ class UserExecutionContext:
             InvalidContextError: If required data is missing or invalid
         """
         # Generate request ID
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         # Extract audit information from request
         audit_metadata = {
@@ -815,7 +816,7 @@ class UserExecutionContext:
             user_id=self.user_id,
             thread_id=self.thread_id,
             run_id=self.run_id,
-            request_id=str(uuid.uuid4()),
+            request_id=UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=self.db_session,
             websocket_client_id=self.websocket_client_id,
             created_at=datetime.now(timezone.utc),
@@ -1193,7 +1194,7 @@ class UserExecutionContext:
             user_id=user_id,
             thread_id=thread_id,
             run_id=run_id,
-            request_id=request_id or str(uuid.uuid4()),
+            request_id=request_id or UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=db_session,
             websocket_client_id=websocket_connection_id,  # Map supervisor field name
             agent_context=agent_context,
@@ -1250,7 +1251,7 @@ class UserExecutionContext:
             user_id=self.user_id,
             thread_id=self.thread_id,
             run_id=self.run_id,
-            request_id=str(uuid.uuid4()),
+            request_id=UnifiedIdGenerator.generate_base_id("user_request"),
             db_session=self.db_session,
             websocket_connection_id=self.websocket_client_id,
             metadata=child_metadata
@@ -2263,7 +2264,7 @@ class UserContextManager:
         id_manager = UnifiedIDManager()
         thread_id = id_manager.generate_thread_id()
         run_id = id_manager.generate_run_id()
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         context = UserExecutionContext.from_request(
             user_id=user_id,
@@ -2449,7 +2450,7 @@ class UserContextManager:
         # Create context with transaction
         thread_id = f"tx_thread_{int(time.time())}"
         run_id = f"tx_run_{int(time.time())}"
-        request_id = str(uuid.uuid4())
+        request_id = UnifiedIdGenerator.generate_base_id("user_request")
         
         context = UserExecutionContext.from_request(
             user_id=user_id,

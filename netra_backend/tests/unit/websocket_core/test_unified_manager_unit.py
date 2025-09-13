@@ -105,7 +105,8 @@ class TestUnifiedWebSocketManagerCore:
     @pytest.mark.asyncio
     async def test_handles_multiple_connections_per_user(self, websocket_manager):
         """Test manager properly handles multiple connections for same user."""
-        user_id = "multi_conn_user_789"
+        from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+        user_id = get_id_manager().generate_id(IDType.USER)
         
         # Create multiple mock WebSockets
         mock_ws1 = AsyncMock()
@@ -149,7 +150,8 @@ class TestUnifiedWebSocketManagerCore:
     
     def test_gets_user_connections(self, websocket_manager):
         """Test retrieving all connections for a user."""
-        user_id = "test_user_multi"
+        from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+        user_id = get_id_manager().generate_id(IDType.USER)
         connection_ids = {"conn_1", "conn_2", "conn_3"}
         
         # Arrange
@@ -381,7 +383,8 @@ class TestUnifiedWebSocketManagerCompatibility:
     @pytest.mark.asyncio
     async def test_legacy_connect_user_method(self, websocket_manager, mock_websocket):
         """Test legacy connect_user method creates proper connection."""
-        user_id = "legacy_user_123"
+        from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+        user_id = get_id_manager().generate_id(IDType.USER)
         
         # Act
         conn_info = await websocket_manager.connect_user(user_id, mock_websocket)
@@ -398,10 +401,11 @@ class TestUnifiedWebSocketManagerCompatibility:
         assert user_id in websocket_manager._user_connections
         assert conn_info.connection_id in websocket_manager.connection_registry
     
-    @pytest.mark.asyncio 
+    @pytest.mark.asyncio
     async def test_legacy_disconnect_user_method(self, websocket_manager, mock_websocket):
         """Test legacy disconnect_user method removes connection."""
-        user_id = "legacy_disconnect_user"
+        from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+        user_id = get_id_manager().generate_id(IDType.USER)
         
         # Connect first
         conn_info = await websocket_manager.connect_user(user_id, mock_websocket)
@@ -455,7 +459,8 @@ class TestUnifiedWebSocketManagerCompatibility:
     @pytest.mark.asyncio
     async def test_find_connection_method(self, websocket_manager, mock_websocket):
         """Test find_connection method locates connections properly."""
-        user_id = "find_test_user"
+        from netra_backend.app.core.unified_id_manager import get_id_manager, IDType
+        user_id = get_id_manager().generate_id(IDType.USER)
         
         # Connect user
         conn_info = await websocket_manager.connect_user(user_id, mock_websocket)

@@ -670,21 +670,78 @@ class AppConfig(BaseModel):
 
     def get_database_url(self) -> str:
         """Get the database URL for PostgreSQL connection.
+        
+        Uses SSOT DatabaseURLBuilder for consistent URL construction.
+        Maintains backward compatibility with existing database connections.
+
+        SSOT compliant implementation using DatabaseURLBuilder for URL construction.
+        Maintains backward compatibility with existing functionality.
 
         Returns:
             str: Database connection URL
         """
         if self.database_url:
             return self.database_url
-        # Fallback to construct from environment variables
+
+        try:
+            # Use SSOT DatabaseURLBuilder with sync format for compatibility
+            from shared.database_url_builder import DatabaseURLBuilder
+            from shared.isolated_environment import get_env
+            import logging
+
+            logger = logging.getLogger(__name__)
+            builder = DatabaseURLBuilder(get_env().get_all())
+            url = builder.get_url_for_environment(sync=True)
+
+            if url:
+                logger.info("Database URL constructed via SSOT DatabaseURLBuilder")
+                return url
+            else:
+                # Fallback if SSOT builder returns None
+                return self._fallback_manual_url_construction()
+
+        except ImportError as e:
+            import logging
+            logging.getLogger(__name__).warning(f"SSOT DatabaseURLBuilder not available: {e}")
+            return self._fallback_manual_url_construction()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"SSOT database URL construction failed: {e}")
+            return self._fallback_manual_url_construction()
+
+    def _fallback_manual_url_construction(self) -> str:
+        """Fallback manual URL construction for emergency compatibility."""
         from shared.isolated_environment import get_env
+        import logging
+        logger = logging.getLogger(__name__)
         env = get_env()
+
+        try:
+            # Use SSOT DatabaseURLBuilder with current environment
+            url_builder = DatabaseURLBuilder(env)
+
+            # Get environment-appropriate URL in sync mode (matching original behavior)
+            ssot_url = url_builder.get_url_for_environment(sync=True)
+
+            if ssot_url:
+                logger.debug(f"Using SSOT DatabaseURLBuilder for URL construction: {DatabaseURLBuilder.mask_url_for_logging(ssot_url)}")
+                return ssot_url
+            else:
+                logger.warning("SSOT DatabaseURLBuilder returned None, using fallback construction")
+
+        except Exception as e:
+            logger.warning(f"SSOT DatabaseURLBuilder failed: {e}, using fallback construction")
+
+        # Backward compatibility fallback - maintains exact original behavior
         host = env.get('POSTGRES_HOST', 'localhost')
         port = env.get('POSTGRES_PORT', '5432')
         user = env.get('POSTGRES_USER', 'postgres')
         password = env.get('POSTGRES_PASSWORD', '')
         database = env.get('POSTGRES_DB', 'postgres')
-        return f"postgresql://{user}:{password}@{host}:{port}/{database}"
+
+        fallback_url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        logger.info(f"Using fallback URL construction: {DatabaseURLBuilder.mask_url_for_logging(fallback_url)}")
+        return fallback_url
 
     def get_clickhouse_url(self) -> str:
         """Get the ClickHouse database URL.
@@ -1458,12 +1515,10 @@ class NetraTestingConfig(AppConfig):
         
         env = get_env()
         
-        # CRITICAL FIX: For test scenarios using patch.dict(os.environ), we need to 
-        # merge isolated variables with os.environ, giving priority to os.environ
+        # SSOT FIX: For test scenarios using patch.dict(os.environ), use 
+        # IsolatedEnvironment's built-in sync method instead of direct os.environ access
+        env._sync_with_os_environ()  # Sync test patches with isolated environment
         env_dict = env.as_dict()
-        for key, value in os.environ.items():
-            if key not in env_dict or env_dict[key] != value:
-                env_dict[key] = value
         
         # Use DatabaseURLBuilder as the SINGLE SOURCE OF TRUTH
         builder = DatabaseURLBuilder(env_dict)

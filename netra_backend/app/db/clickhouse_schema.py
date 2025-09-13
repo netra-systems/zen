@@ -583,7 +583,13 @@ class ClickHouseTraceSchema:
                     elif isinstance(classified_error, IndexCreationError):
                         raise IndexCreationError(error_message) from e
                     else:
-                        raise classified_error.__class__(error_message) from e
+                        # For other classified errors, raise them with context
+                        if hasattr(classified_error, 'context'):
+                            # It's a custom schema error, create new instance with message
+                            raise classified_error.__class__(error_message) from e
+                        else:
+                            # It's a SQLAlchemy or other error, just raise the classified error
+                            raise classified_error from e
             
             logger.info(f"Migration {migration_name}: All {len(migration_steps)} steps completed successfully")
             return True

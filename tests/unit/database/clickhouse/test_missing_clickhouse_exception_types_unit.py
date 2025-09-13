@@ -62,260 +62,266 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         self.schema_manager = ClickHouseTraceSchema()
 
     @pytest.mark.asyncio
-    async def test_missing_index_operation_error_type(self):
+    async def test_index_operation_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing IndexOperationError type.
-        
-        Current Problem: Index operations beyond creation (rebuild, drop, optimize) 
-        don't have a specific IndexOperationError type that's broader than IndexCreationError.
-        
-        Expected Failure: This test should fail because IndexOperationError doesn't exist
-        and current classification falls back to generic SchemaError.
+        Test validates IndexOperationError classification works correctly.
+
+        Validates: Index operations beyond creation (rebuild, drop, optimize)
+        are properly classified as IndexOperationError type.
+
+        Expected Success: This test should pass because IndexOperationError exists
+        and current classification correctly identifies index operation errors.
         """
         # Test index rebuild operation failure
         mock_error = OperationalError("Index rebuild failed: insufficient disk space for index 'test_idx'", None, None)
         
-        # Current classification should NOT produce IndexOperationError
+        # Current classification should correctly produce IndexOperationError
         classified_error = classify_error(mock_error)
+
+        # This assertion should PASS because IndexOperationError exists and works correctly
+        assert type(classified_error).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import IndexOperationError
+        assert isinstance(classified_error, IndexOperationError), \
+            "Error should be classified as IndexOperationError instance"
         
-        # This assertion should PASS because IndexOperationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be IndexOperationError)
-        assert type(classified_error).__name__ != "IndexOperationError", \
-            f"IndexOperationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import IndexOperationError (this should fail)
-        with pytest.raises(ImportError):
+        # Test that we can successfully import IndexOperationError
+        try:
             from netra_backend.app.db.transaction_errors import IndexOperationError
+            assert IndexOperationError is not None, "IndexOperationError should be importable"
+        except ImportError:
+            pytest.fail("IndexOperationError should be importable from transaction_errors")
         
         # Test index drop operation
         drop_error = IntegrityError("Cannot drop index 'primary_idx': index is referenced by materialized view", None, None)
         classified_drop = classify_error(drop_error)
         
-        # Should be IndexOperationError but isn't available
-        assert type(classified_drop).__name__ != "IndexOperationError", \
-            "IndexOperationError should not exist yet (test validates gap)"
+        # Should be classified as IndexOperationError
+        assert type(classified_drop).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError for drop operation, got {type(classified_drop).__name__}"
 
-    @pytest.mark.asyncio 
-    async def test_missing_migration_error_type(self):
+    @pytest.mark.asyncio
+    async def test_migration_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing MigrationError type.
-        
-        Current Problem: Migration operations don't have a specific MigrationError type
-        that provides rollback context and partial completion status.
-        
-        Expected Failure: This test should fail because MigrationError doesn't exist
-        and migration failures don't provide adequate rollback information.
+        Test validates MigrationError classification works correctly.
+
+        Validates: Migration operations that fail are properly classified
+        as MigrationError type with appropriate context information.
+
+        Expected Success: This test should pass because MigrationError exists
+        and current classification correctly identifies migration errors.
         """
         # Test migration failure scenario
         migration_error = OperationalError(
             "Migration failed at step 3 of 5: ALTER TABLE users ADD CONSTRAINT check_age CHECK (age >= 0)",
             None, None
         )
-        
-        # Current classification should NOT produce MigrationError
+
+        # Current classification should correctly produce MigrationError
         classified_error = classify_error(migration_error)
-        
-        # This assertion should PASS because MigrationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be MigrationError)
-        assert type(classified_error).__name__ != "MigrationError", \
-            f"MigrationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import MigrationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because MigrationError exists and works correctly
+        assert type(classified_error).__name__ == "MigrationError", \
+            f"Expected MigrationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import MigrationError
+        assert isinstance(classified_error, MigrationError), \
+            "Error should be classified as MigrationError instance"
+
+        # Test that we can successfully import MigrationError
+        try:
             from netra_backend.app.db.transaction_errors import MigrationError
-        
-        # Verify migration context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Migration:" not in error_str, "Migration context should not exist yet"
-        assert "Step:" not in error_str, "Step context should not exist yet" 
-        assert "Rollback Required:" not in error_str, "Rollback context should not exist yet"
+            assert MigrationError is not None, "MigrationError should be importable"
+        except ImportError:
+            pytest.fail("MigrationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_table_dependency_error_type(self):
+    async def test_table_dependency_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing TableDependencyError type.
-        
-        Current Problem: Table dependency operations (foreign keys, materialized views)
-        don't have a specific TableDependencyError type with relationship context.
-        
-        Expected Failure: This test should fail because TableDependencyError doesn't exist
-        and dependency errors don't provide relationship information.
+        Test validates TableDependencyError classification works correctly.
+
+        Validates: Table dependency operations (foreign keys, materialized views)
+        that fail are properly classified as TableDependencyError type.
+
+        Expected Success: This test should pass because TableDependencyError exists
+        and current classification correctly identifies dependency errors.
         """
         # Test table dependency failure scenario
         dependency_error = IntegrityError(
             "Cannot drop table 'orders': referenced by materialized view 'order_analytics' and foreign key 'fk_user_orders'",
             None, None
         )
-        
-        # Current classification should NOT produce TableDependencyError
+
+        # Current classification should correctly produce TableDependencyError
         classified_error = classify_error(dependency_error)
-        
-        # This assertion should PASS because TableDependencyError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be TableDependencyError)
-        assert type(classified_error).__name__ != "TableDependencyError", \
-            f"TableDependencyError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import TableDependencyError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because TableDependencyError exists and works correctly
+        assert type(classified_error).__name__ == "TableDependencyError", \
+            f"Expected TableDependencyError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import TableDependencyError
+        assert isinstance(classified_error, TableDependencyError), \
+            "Error should be classified as TableDependencyError instance"
+
+        # Test that we can successfully import TableDependencyError
+        try:
             from netra_backend.app.db.transaction_errors import TableDependencyError
-        
-        # Verify dependency context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Dependent Objects:" not in error_str, "Dependency context should not exist yet"
-        assert "Dependency Type:" not in error_str, "Dependency type should not exist yet"
-        assert "Resolution Steps:" not in error_str, "Resolution steps should not exist yet"
+            assert TableDependencyError is not None, "TableDependencyError should be importable"
+        except ImportError:
+            pytest.fail("TableDependencyError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_constraint_violation_error_type(self):
+    async def test_constraint_violation_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing ConstraintViolationError type.
-        
-        Current Problem: Constraint violations don't have a specific ConstraintViolationError
-        type with constraint details and diagnostic context.
-        
-        Expected Failure: This test should fail because ConstraintViolationError doesn't exist
-        and constraint violations provide insufficient diagnostic information.
+        Test validates ConstraintViolationError classification works correctly.
+
+        Validates: Constraint violations are properly classified as ConstraintViolationError
+        type with appropriate constraint details and diagnostic context.
+
+        Expected Success: This test should pass because ConstraintViolationError exists
+        and current classification correctly identifies constraint violations.
         """
         # Test constraint violation failure scenario
         constraint_error = IntegrityError(
             "Check constraint 'valid_email' violated: column 'email' value 'invalid-email' does not match pattern",
             None, None
         )
-        
-        # Current classification should NOT produce ConstraintViolationError
+
+        # Current classification should correctly produce ConstraintViolationError
         classified_error = classify_error(constraint_error)
-        
-        # This assertion should PASS because ConstraintViolationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be ConstraintViolationError)
-        assert type(classified_error).__name__ != "ConstraintViolationError", \
-            f"ConstraintViolationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import ConstraintViolationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because ConstraintViolationError exists and works correctly
+        assert type(classified_error).__name__ == "ConstraintViolationError", \
+            f"Expected ConstraintViolationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import ConstraintViolationError
+        assert isinstance(classified_error, ConstraintViolationError), \
+            "Error should be classified as ConstraintViolationError instance"
+
+        # Test that we can successfully import ConstraintViolationError
+        try:
             from netra_backend.app.db.transaction_errors import ConstraintViolationError
-        
-        # Verify constraint context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Constraint:" not in error_str, "Constraint name should not exist yet"
-        assert "Violating Value:" not in error_str, "Violating value should not exist yet"
-        assert "Constraint Rule:" not in error_str, "Constraint rule should not exist yet"
+            assert ConstraintViolationError is not None, "ConstraintViolationError should be importable"
+        except ImportError:
+            pytest.fail("ConstraintViolationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_engine_configuration_error_type(self):
+    async def test_engine_configuration_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing EngineConfigurationError type.
-        
-        Current Problem: ClickHouse engine configuration errors don't have a specific 
-        EngineConfigurationError type with engine-specific context and requirements.
-        
-        Expected Failure: This test should fail because EngineConfigurationError doesn't exist
-        and engine errors don't provide engine-specific diagnostic information.
+        Test validates EngineConfigurationError classification works correctly.
+
+        Validates: ClickHouse engine configuration errors are properly classified
+        as EngineConfigurationError type with engine-specific context and requirements.
+
+        Expected Success: This test should pass because EngineConfigurationError exists
+        and current classification correctly identifies engine configuration errors.
         """
-        # Test engine configuration failure scenario  
+        # Test engine configuration failure scenario
         engine_error = OperationalError(
             "Engine ReplacingMergeTree requires ORDER BY clause and version column",
             None, None
         )
-        
-        # Current classification should NOT produce EngineConfigurationError
-        classified_error = classify_error(engine_error)
-        
-        # This assertion should PASS because EngineConfigurationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be EngineConfigurationError)
-        assert type(classified_error).__name__ != "EngineConfigurationError", \
-            f"EngineConfigurationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import EngineConfigurationError (this should fail)
-        with pytest.raises(ImportError):
-            from netra_backend.app.db.transaction_errors import EngineConfigurationError
-        
-        # Verify engine context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Engine:" not in error_str, "Engine type should not exist yet"
-        assert "Missing Requirements:" not in error_str, "Missing requirements should not exist yet"
-        assert "Engine Configuration:" not in error_str, "Engine configuration should not exist yet"
 
-    def test_missing_exception_types_in_transaction_errors_module(self):
+        # Current classification should correctly produce EngineConfigurationError
+        classified_error = classify_error(engine_error)
+
+        # This assertion should PASS because EngineConfigurationError exists and works correctly
+        assert type(classified_error).__name__ == "EngineConfigurationError", \
+            f"Expected EngineConfigurationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import EngineConfigurationError
+        assert isinstance(classified_error, EngineConfigurationError), \
+            "Error should be classified as EngineConfigurationError instance"
+
+        # Test that we can successfully import EngineConfigurationError
+        try:
+            from netra_backend.app.db.transaction_errors import EngineConfigurationError
+            assert EngineConfigurationError is not None, "EngineConfigurationError should be importable"
+        except ImportError:
+            pytest.fail("EngineConfigurationError should be importable from transaction_errors")
+
+    def test_exception_types_in_transaction_errors_module(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing exception types in transaction_errors module.
-        
-        Current Problem: The 5 missing exception types are not defined in the transaction_errors
-        module, preventing proper error classification and handling.
-        
-        Expected Failure: This test should fail because the missing exception types
-        cannot be imported from the transaction_errors module.
+        Test validates that all exception types are properly defined in transaction_errors module.
+
+        Validates: All exception types (both existing and previously missing) are available
+        for import from the transaction_errors module.
+
+        Expected Success: This test should pass because all exception types exist
+        and can be imported from the transaction_errors module.
         """
         import netra_backend.app.db.transaction_errors as errors_module
-        
-        # Test that missing exception types are not available
-        missing_types = [
+
+        # Test that all exception types are now available
+        all_types = [
             'IndexOperationError',
-            'MigrationError', 
+            'MigrationError',
             'TableDependencyError',
             'ConstraintViolationError',
-            'EngineConfigurationError'
-        ]
-        
-        for error_type in missing_types:
-            # These assertions should PASS because the types don't exist (demonstrating the gap)
-            assert not hasattr(errors_module, error_type), \
-                f"transaction_errors module should not define {error_type} yet (demonstrating gap)"
-        
-        # Verify that existing types are available (positive control)
-        existing_types = [
+            'EngineConfigurationError',
             'TableCreationError',
-            'ColumnModificationError', 
+            'ColumnModificationError',
             'IndexCreationError'
         ]
-        
-        for error_type in existing_types:
+
+        for error_type in all_types:
+            # These assertions should PASS because all types exist and are properly defined
             assert hasattr(errors_module, error_type), \
                 f"transaction_errors module should define {error_type}"
 
-    def test_classify_error_missing_keyword_detection(self):
+            # Verify we can actually get the class
+            error_class = getattr(errors_module, error_type)
+            assert error_class is not None, f"{error_type} should not be None"
+
+    def test_classify_error_keyword_detection(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing keyword detection for new exception types.
-        
-        Current Problem: The classify_error function doesn't have keyword detection
-        for the 5 missing exception types, so they fall back to generic errors.
-        
-        Expected Failure: This test should fail because keyword detection functions
-        for the missing exception types don't exist.
+        Test validates keyword detection for all exception types works correctly.
+
+        Validates: The classify_error function has proper keyword detection for all
+        exception types and correctly classifies specific error messages.
+
+        Expected Success: This test should pass because keyword detection functions
+        exist and properly classify errors to their specific exception types.
         """
         import netra_backend.app.db.transaction_errors as errors_module
-        
-        # Test that missing keyword detection functions are not available
-        missing_detection_functions = [
+
+        # Test that keyword detection functions are available
+        detection_functions = [
             '_has_index_operation_keywords',
             '_has_migration_keywords',
-            '_has_table_dependency_keywords', 
+            '_has_table_dependency_keywords',
             '_has_constraint_violation_keywords',
             '_has_engine_configuration_keywords'
         ]
-        
-        for func_name in missing_detection_functions:
-            # These assertions should PASS because the functions don't exist (demonstrating the gap)
-            assert not hasattr(errors_module, func_name), \
-                f"transaction_errors module should not define {func_name} yet (demonstrating gap)"
-        
-        # Test specific error messages that should trigger missing types
+
+        for func_name in detection_functions:
+            # These assertions should PASS because the functions exist and are working
+            assert hasattr(errors_module, func_name), \
+                f"transaction_errors module should define {func_name}"
+
+        # Test specific error messages that should trigger specific types
         test_cases = [
-            ("Index rebuild failed due to insufficient disk space", "index_operation"),
-            ("Migration step 3 of 7 failed during execution", "migration"),
-            ("Table cannot be dropped due to materialized view dependency", "table_dependency"),
-            ("Check constraint 'age_positive' violated by value -5", "constraint_violation"),
-            ("Engine MergeTree requires ORDER BY clause for table creation", "engine_configuration")
+            ("Index rebuild failed due to insufficient disk space", "IndexOperationError"),
+            ("Migration step 3 of 7 failed during execution", "MigrationError"),
+            ("Table cannot be dropped due to materialized view dependency", "TableDependencyError"),
+            ("Check constraint 'age_positive' violated by value -5", "ConstraintViolationError"),
+            ("Engine MergeTree requires ORDER BY clause for table creation", "EngineConfigurationError")
         ]
-        
-        for error_msg, expected_category in test_cases:
+
+        for error_msg, expected_type in test_cases:
             mock_error = OperationalError(error_msg, None, None)
             classified = classify_error(mock_error)
-            
-            # All should currently fall back to generic errors or existing types (not the specific missing types)
+
+            # All should be correctly classified to their specific types
             current_type = type(classified).__name__
-            allowed_types = ['OperationalError', 'SchemaError', 'TransactionError', 'TableCreationError', 'ColumnModificationError', 'IndexCreationError']
-            assert current_type in allowed_types, \
-                f"Error '{error_msg}' should fall back to existing types, got {current_type}"
+            assert current_type == expected_type, \
+                f"Error '{error_msg}' should be classified as {expected_type}, got {current_type}"
 
     def test_schema_manager_missing_specific_error_handling_methods(self):
         """

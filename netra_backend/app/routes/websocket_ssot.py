@@ -41,6 +41,7 @@ import json
 import time
 import uuid
 from contextlib import asynccontextmanager
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Tuple, List, Union
 from enum import Enum
@@ -64,10 +65,13 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.monitoring.gcp_error_reporter import gcp_reportable, set_request_context, clear_request_context
 
 # WebSocket core components (unified across all patterns)
-from netra_backend.app.websocket_core import (
+# PHASE 1 FIX: Import from canonical SSOT sources instead of __init__.py to prevent circular references
+from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
-    MessageRouter,
     get_websocket_manager,
+)
+from netra_backend.app.websocket_core import (
+    MessageRouter,
     get_message_router,
     WebSocketHeartbeat,
     get_connection_monitor,
@@ -532,7 +536,7 @@ class WebSocketSSOTRouter:
         - User-Agent header detection
         - Default: main mode (full functionality)
         """
-        connection_id = f"ssot_{uuid.uuid4().hex[:8]}"
+        connection_id = f"ssot_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         start_time = time.time()
         
         # CRITICAL: Log connection initiation with all context for Golden Path debugging
@@ -651,8 +655,8 @@ class WebSocketSSOTRouter:
         - Agent orchestration and tool execution
         - Emergency fallback patterns
         """
-        connection_id = f"main_{uuid.uuid4().hex[:8]}"
-        preliminary_connection_id = f"prelim_{uuid.uuid4().hex[:8]}"
+        connection_id = f"main_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        preliminary_connection_id = f"prelim_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         ws_manager = None
         
@@ -941,7 +945,7 @@ class WebSocketSSOTRouter:
         - Request-scoped context isolation
         - Health monitoring per user
         """
-        connection_id = f"factory_{uuid.uuid4().hex[:8]}"
+        connection_id = f"factory_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         websocket_manager = None
         
@@ -1041,7 +1045,7 @@ class WebSocketSSOTRouter:
         - Automatic resource cleanup on disconnect
         - Comprehensive audit logging
         """
-        connection_id = f"isolated_{uuid.uuid4().hex[:8]}"
+        connection_id = f"isolated_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         user_context = None
         connection_scoped_manager = None
         
@@ -1096,9 +1100,9 @@ class WebSocketSSOTRouter:
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                request_id=f"isolated_req_{uuid.uuid4().hex[:8]}",
+                request_id=f"isolated_req_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}",
                 websocket_client_id=connection_id,
-                run_id=f"isolated_run_{uuid.uuid4().hex[:8]}"
+                run_id=f"isolated_run_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
             )
             
             # Step 4: Create connection-scoped manager (no shared state)
@@ -1150,7 +1154,7 @@ class WebSocketSSOTRouter:
         Simplified WebSocket handling for legacy clients that don't support
         the new modes but still need basic connectivity and messaging.
         """
-        connection_id = f"legacy_{uuid.uuid4().hex[:8]}"
+        connection_id = f"legacy_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
         
         try:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
@@ -1198,31 +1202,16 @@ class WebSocketSSOTRouter:
             await self._cleanup_connection(websocket, None, None, "legacy")
     
     async def _create_websocket_manager(self, user_context):
-        """Create WebSocket manager with emergency fallback."""
-        try:
-            # SSOT MIGRATION: Direct WebSocketManager instantiation replaces factory pattern
-            manager = await get_websocket_manager(user_context)
-            return manager
-        except Exception as e:
-            logger.error(f"WebSocket manager creation failed: {e}")
-            return self._create_emergency_websocket_manager(user_context)
+        """Create WebSocket manager using SSOT factory pattern.
+
+        PHASE 1 FIX: Removed emergency fallback since circular reference issue is resolved.
+        The proper factory pattern now works correctly with SSOT authorization tokens.
+        """
+        # SSOT MIGRATION: Use proper factory pattern from websocket_manager.py
+        manager = await get_websocket_manager(user_context)
+        logger.info(f"WebSocket manager created successfully for user {getattr(user_context, 'user_id', 'unknown')}")
+        return manager
     
-    def _create_emergency_websocket_manager(self, user_context):
-        """Create emergency WebSocket manager for graceful degradation."""
-        logger.warning("Creating emergency WebSocket manager")
-        
-        class EmergencyWebSocketManager:
-            def __init__(self, user_context):
-                self.user_context = user_context
-                self.connections = {}
-            
-            async def send_message(self, user_id: str, message: Dict[str, Any]):
-                logger.info(f"Emergency manager: message to {user_id[:8]}")
-                
-            async def remove_connection(self, connection_id: str):
-                logger.info(f"Emergency manager: removing connection {connection_id}")
-        
-        return EmergencyWebSocketManager(user_context)
     
     def _validate_websocket_component_health(self, user_context) -> Dict[str, Any]:
         """Validate health of WebSocket components."""
@@ -1678,8 +1667,6 @@ class WebSocketSSOTRouter:
     async def websocket_health_check(self):
         """WebSocket health check endpoint."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for health checks (no user context required)
             manager = await get_websocket_manager(user_context=None)
             health_status = {
@@ -1710,8 +1697,6 @@ class WebSocketSSOTRouter:
     async def get_websocket_config(self):
         """Get WebSocket configuration."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for configuration endpoint
             manager = await get_websocket_manager(user_context=None)
             
@@ -1737,8 +1722,6 @@ class WebSocketSSOTRouter:
     async def websocket_detailed_stats(self):
         """Get detailed WebSocket statistics."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-            
             # SSOT PATTERN: Direct manager access for statistics endpoint
             manager = await get_websocket_manager(user_context=None)
             message_router = get_message_router()
@@ -1851,7 +1834,7 @@ class WebSocketSSOTRouter:
     async def websocket_api_create(self):
         """REST API: WebSocket session preparation (POST /api/v1/websocket)"""
         try:
-            session_id = f"ws_session_{uuid.uuid4().hex[:8]}"
+            session_id = f"ws_session_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
             response_data = {
                 "session_id": session_id,
                 "websocket_url": "/ws", 

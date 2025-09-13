@@ -51,8 +51,8 @@ class TestAuthenticationBusinessLogic:
         assert isinstance(token, str), "JWT token must be string"
         assert len(token.split('.')) == 3, "JWT must have 3 parts (header.payload.signature)"
         
-        # Decode without verification to check claims
-        decoded = jwt.decode(token, options={"verify_signature": False})
+        # SSOT: Use auth helper for token decoding instead of direct JWT decode
+        decoded = auth_helper._decode_token(token)
         
         # Business Rule: Required claims for user identification
         assert decoded["sub"] == user_id, "Token must contain correct user ID"
@@ -73,7 +73,8 @@ class TestAuthenticationBusinessLogic:
             exp_minutes=exp_minutes
         )
         
-        decoded = jwt.decode(token, options={"verify_signature": False})
+        # SSOT: Use auth helper for token decoding
+        decoded = auth_helper._decode_token(token)
         
         # Calculate expected expiration
         issued_at = datetime.fromtimestamp(decoded["iat"], tz=timezone.utc)
@@ -190,8 +191,9 @@ class TestAuthenticationBusinessLogic:
             permissions=["read", "write", "admin", "premium_features"]
         )
         
-        economy_claims = jwt.decode(economy_user_token, options={"verify_signature": False})
-        premium_claims = jwt.decode(premium_user_token, options={"verify_signature": False})
+        # SSOT: Use auth helper for token decoding
+        economy_claims = auth_helper._decode_token(economy_user_token)
+        premium_claims = auth_helper._decode_token(premium_user_token)
         
         # Business Rule: Permission levels should reflect user tiers
         assert "read" in economy_claims["permissions"], "All users should have read access"
@@ -250,8 +252,9 @@ class TestAuthenticationBusinessLogic:
         assert user1_token != user2_token, "Different users must have different tokens"
         
         # Business Rule: Users should have isolated claims
-        user1_claims = jwt.decode(user1_token, options={"verify_signature": False})
-        user2_claims = jwt.decode(user2_token, options={"verify_signature": False})
+        # SSOT: Use auth helper for token decoding
+        user1_claims = auth_helper_user1._decode_token(user1_token)
+        user2_claims = auth_helper_user2._decode_token(user2_token)
         
         assert user1_claims["sub"] != user2_claims["sub"], "Users must have different IDs"
         assert user1_claims["email"] != user2_claims["email"], "Users must have different emails"
@@ -341,7 +344,8 @@ class TestAuthenticationValidationBusinessRules:
         )
         
         # Business Rule: Valid tokens should pass validation
-        decoded = jwt.decode(valid_token, options={"verify_signature": False})
+        # SSOT: Use auth helper for token decoding
+        decoded = auth_helper._decode_token(valid_token)
         
         # Check all required business claims
         required_claims = ["sub", "email", "permissions", "iat", "exp", "type", "iss"]
@@ -404,7 +408,8 @@ class TestAuthenticationValidationBusinessRules:
                 permissions=permissions
             )
             
-            decoded = jwt.decode(token, options={"verify_signature": False})
+            # SSOT: Use auth helper for token decoding
+            decoded = auth_helper._decode_token(token)
             
             # Business Rule: Permissions should be preserved exactly
             assert decoded["permissions"] == permissions, \
@@ -460,7 +465,8 @@ class TestAuthenticationValidationBusinessRules:
         
         # Business Rule: Each token should have correct isolated data
         for i, token in enumerate(tokens):
-            decoded = jwt.decode(token, options={"verify_signature": False})
+            # SSOT: Use auth helper for token decoding
+            decoded = auth_helpers[0]._decode_token(token)
             assert decoded["sub"] == f"concurrent-user-{i}", f"Token {i} should have correct user ID"
             assert decoded["email"] == f"user{i}@example.com", f"Token {i} should have correct email"
 

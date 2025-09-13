@@ -49,15 +49,15 @@ from netra_backend.app.websocket_core.unified_emitter import (
 def create_websocket_manager(user_context=None):
     """
     COMPATIBILITY WRAPPER: Provides create_websocket_manager for backward compatibility.
-    
+
     DEPRECATED: Use WebSocketManager(user_context=user_context) directly instead.
-    
+
     Args:
         user_context: Required UserExecutionContext for proper isolation
-    
+
     Returns:
         WebSocketManager instance
-        
+
     Raises:
         ValueError: If user_context is None (import-time initialization not allowed)
     """
@@ -67,7 +67,7 @@ def create_websocket_manager(user_context=None):
         DeprecationWarning,
         stacklevel=2
     )
-    
+
     if user_context is None:
         # CRITICAL: Import-time initialization violates User Context Architecture
         raise ValueError(
@@ -75,29 +75,48 @@ def create_websocket_manager(user_context=None):
             "Import-time initialization is prohibited. Use request-scoped factory pattern instead. "
             "See User Context Architecture documentation for proper implementation."
         )
-    
-    return WebSocketManager(user_context=user_context)
+
+    # PHASE 1 FIX: Use the proper factory function from websocket_manager.py
+    # This ensures the SSOT authorization token is properly provided
+    import asyncio
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_websocket_manager_factory
+
+    # Since this is a sync function but the factory is async, we need to handle this properly
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If we're already in an async context, we can't use run_until_complete
+            # This is a legacy compatibility issue - recommend using async version
+            raise RuntimeError(
+                "create_websocket_manager cannot be called from async context. "
+                "Use 'await get_websocket_manager(user_context)' instead."
+            )
+        else:
+            return loop.run_until_complete(_get_websocket_manager_factory(user_context))
+    except RuntimeError:
+        # No event loop running, create one
+        return asyncio.run(_get_websocket_manager_factory(user_context))
 
 # Backward compatibility function using factory pattern
 async def get_websocket_manager(user_context=None):
     """
     SECURITY MIGRATION: Compatibility wrapper for get_websocket_manager.
-    
+
     IMPORTANT: This function now uses the secure factory pattern instead
     of a singleton to prevent multi-user data leakage.
-    
+
     ARCHITECTURE COMPLIANCE: Import-time initialization is prohibited.
     WebSocket managers must be created per-request with valid UserExecutionContext.
-    
+
     Args:
         user_context: Required UserExecutionContext for proper isolation
-    
+
     Returns:
         WebSocketManager instance
-        
+
     Raises:
         ValueError: If user_context is None (import-time initialization not allowed)
-    
+
     Note: For new code, use WebSocketManager(user_context=user_context) directly.
     """
     if user_context is None:
@@ -107,8 +126,11 @@ async def get_websocket_manager(user_context=None):
             "Import-time initialization is prohibited. Use request-scoped factory pattern instead. "
             "See User Context Architecture documentation for proper implementation."
         )
-    
-    return WebSocketManager(user_context=user_context)
+
+    # PHASE 1 FIX: Use the proper factory function from websocket_manager.py
+    # This ensures the SSOT authorization token is properly provided
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_websocket_manager_factory
+    return await _get_websocket_manager_factory(user_context)
 
 from netra_backend.app.websocket_core.migration_adapter import (
     get_legacy_websocket_manager,
