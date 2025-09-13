@@ -47,6 +47,13 @@ from netra_backend.app.db.transaction_errors import (
 )
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 
+# Expose specific exception classes for external detection (Issue #374)
+DatabaseConnectionError = ConnectionError
+DatabaseTimeoutError = TimeoutError
+DatabasePermissionError = PermissionError
+DatabaseDeadlockError = DeadlockError
+DatabaseSchemaError = SchemaError
+
 logger = logging.getLogger(__name__)
 
 
@@ -515,10 +522,29 @@ class DatabaseManager:
         except Exception as e:
             # Issue #374: Fallback for unexpected initialization errors
             init_duration = time.time() - init_start_time
+            classified_error = classify_error(e)
             logger.critical(f"[U+1F4A5] CRITICAL: Unexpected database initialization failure after {init_duration:.3f}s")
             logger.error(f"Database initialization error: {type(e).__name__}: {str(e)}")
             logger.error(f"This will prevent all database operations including user data persistence")
-            raise
+            
+            # Provide specific diagnostic context based on error type
+            if isinstance(classified_error, ConnectionError):
+                logger.error("DIAGNOSIS: Network connectivity or database server availability issue")
+                logger.error("ACTION: Check database server status, network connectivity, and connection parameters")
+            elif isinstance(classified_error, PermissionError):
+                logger.error("DIAGNOSIS: Database authentication or authorization failure")
+                logger.error("ACTION: Verify database credentials, user permissions, and authentication configuration")
+            elif isinstance(classified_error, TimeoutError):
+                logger.error("DIAGNOSIS: Database connection timeout - server may be overloaded or unreachable")
+                logger.error("ACTION: Check database server load, network latency, and timeout settings")
+            elif isinstance(classified_error, SchemaError):
+                logger.error("DIAGNOSIS: Database schema or configuration issue")
+                logger.error("ACTION: Verify database exists, schema is correct, and migrations are applied")
+            else:
+                logger.error("DIAGNOSIS: Unknown database initialization error")
+                logger.error("ACTION: Review database configuration and server logs for more details")
+            
+            raise classified_error
     
     def get_engine(self, name: str = 'primary') -> AsyncEngine:
         """Get database engine by name with auto-initialization safety.
@@ -944,9 +970,31 @@ class DatabaseManager:
             
         except Exception as e:
             total_duration = time.time() - health_check_start
+            
+            # ISSUE #374 FIX: Enhanced health check exception classification
+            classified_error = classify_error(e)
+            
             logger.critical(f"[U+1F4A5] Database health check FAILED for {engine_name} after {total_duration:.3f}s")
-            logger.error(f"Health check error details: {type(e).__name__}: {str(e)}")
+            logger.error(f"Health check error details: {type(classified_error).__name__}: {str(classified_error)}")
             logger.error(f"This indicates database connectivity issues that will affect user operations")
+            
+            # Provide specific diagnostic guidance based on error type
+            if isinstance(classified_error, ConnectionError):
+                logger.error("HEALTH DIAGNOSIS: Database connection lost or server unavailable")
+                logger.error("IMPACT: All user operations will fail until connectivity is restored")
+                logger.error("ACTION: Check database server status and network connectivity immediately")
+            elif isinstance(classified_error, TimeoutError):
+                logger.error("HEALTH DIAGNOSIS: Database queries timing out - possible performance degradation")
+                logger.error("IMPACT: User operations may fail or experience significant delays")
+                logger.error("ACTION: Check database server load and query performance")
+            elif isinstance(classified_error, PermissionError):
+                logger.error("HEALTH DIAGNOSIS: Database access permissions have changed")
+                logger.error("IMPACT: Authentication-related operations will fail")
+                logger.error("ACTION: Verify database user permissions and credentials")
+            else:
+                logger.error("HEALTH DIAGNOSIS: Unknown database health issue")
+                logger.error("IMPACT: Unpredictable database behavior may affect users")
+                logger.error("ACTION: Review database logs and consider restart")
             
             return {
                 "status": "unhealthy",

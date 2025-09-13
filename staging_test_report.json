@@ -1,0 +1,774 @@
+{
+  "summary": {
+    "total_tests": 21,
+    "passed": 18,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 1,
+    "success_rate": 85.71428571428571,
+    "average_response_time_ms": 190
+  },
+  "by_service": {
+    "frontend": {
+      "PASS": 5,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "backend": {
+      "PASS": 8,
+      "FAIL": 1,
+      "ERROR": 0,
+      "SKIP": 1
+    },
+    "auth": {
+      "PASS": 4,
+      "FAIL": 1,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "integration": {
+      "PASS": 1,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    }
+  },
+  "staging_urls": {
+    "frontend": "https://app.staging.netrasystems.ai",
+    "backend": "https://api.staging.netrasystems.ai",
+    "auth": "https://auth.staging.netrasystems.ai"
+  },
+  "detailed_results": [
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 369,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://app.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Accept-Encoding",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Content-Type": "application/json",
+          "Expires": "0",
+          "Pragma": "no-cache",
+          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Server": "Google Frontend",
+          "Via": "1.1 google",
+          "Content-Encoding": "gzip",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+          "Transfer-Encoding": "chunked"
+        },
+        "response_time_ms": 369,
+        "response_data": {
+          "status": "healthy",
+          "service": "frontend",
+          "version": "1.0.0",
+          "environment": "staging",
+          "timestamp": "2025-09-13T00:58:05.472Z",
+          "uptime": 51691.40437546,
+          "memory": {
+            "used": 37,
+            "total": 45,
+            "rss": 100
+          },
+          "dependencies": {
+            "backend": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "netra-ai-platform",
+                "version": "1.0.0",
+                "timestamp": 1757725085.3618274
+              }
+            },
+            "auth": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": "2025-09-13T00:58:05.456419+00:00",
+                "uptime_seconds": 2239.278742,
+                "database_status": "connected",
+                "environment": "staging"
+              }
+            }
+          },
+          "checks": {
+            "response_time_ms": 203,
+            "environment_config": "ok",
+            "memory_usage": "ok"
+          },
+          "urls": {
+            "api": "https://api.staging.netrasystems.ai",
+            "websocket": "wss://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+          }
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 86,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://app.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Accept-Encoding",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Expires": "0",
+          "Pragma": "no-cache",
+          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Content-Type": "text/html",
+          "Server": "Google Frontend",
+          "Via": "1.1 google",
+          "Transfer-Encoding": "chunked",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 86
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 95,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://app.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "content-security-policy": "default-src 'self' https://*.staging.netrasystems.ai; script-src 'self' 'unsafe-inline' blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://tagmanager.google.com https://www.clarity.ms https://scripts.clarity.ms https://*.clarity.ms; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://*.staging.netrasystems.ai; img-src 'self' data: blob: https://*.staging.netrasystems.ai https://www.googletagmanager.com https://*.clarity.ms https://c.bing.com; connect-src 'self' https://*.staging.netrasystems.ai wss://*.staging.netrasystems.ai https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://stats.g.doubleclick.net https://*.clarity.ms https://prodregistryv2.org https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://featureassets.org https://cloudflare-dns.com; font-src 'self' data: https://*.staging.netrasystems.ai; media-src 'self' https://*.staging.netrasystems.ai; frame-src 'self' https://*.staging.netrasystems.ai https://accounts.google.com https://www.googletagmanager.com",
+          "x-frame-options": "DENY",
+          "x-content-type-options": "nosniff",
+          "referrer-policy": "strict-origin-when-cross-origin",
+          "strict-transport-security": "max-age=31536000; includeSubDomains",
+          "x-xss-protection": "1; mode=block",
+          "Vary": "RSC, Next-Router-State-Tree, Next-Router-Prefetch",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization, X-API-Key",
+          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Max-Age": "86400",
+          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Content-Type": "text/html",
+          "Server": "Google Frontend",
+          "Content-Length": "0",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 95
+      }
+    },
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 150,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "api-version": "current",
+          "x-cloud-trace-context": "00686729a8f6bf19e709184ad38a8e60",
+          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "99",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 150,
+        "response_data": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757725085.8116772
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 143,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "api-version": "current",
+          "x-cloud-trace-context": "65e644bd3df61754e709184ad38a804e",
+          "Content-Length": "99",
+          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Server": "Google Frontend",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 143
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 84,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "x-cloud-trace-context": "7b7ce3e82f089f26e709184ad38a892d",
+          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "42",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 84
+      }
+    },
+    {
+      "test_name": "health_endpoint_get_method",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 417,
+      "error_message": null,
+      "details": {
+        "method": "GET",
+        "url": "https://auth.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "0f8f418a36fc085c7d591b66aee9b372",
+          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "193",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 417,
+        "response_data": {
+          "status": "healthy",
+          "service": "auth-service",
+          "version": "1.0.0",
+          "timestamp": "2025-09-13T00:58:06.445744+00:00",
+          "uptime_seconds": 2240.268063,
+          "database_status": "connected",
+          "environment": "staging"
+        }
+      }
+    },
+    {
+      "test_name": "health_endpoint_head_method",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 90,
+      "error_message": null,
+      "details": {
+        "method": "HEAD",
+        "url": "https://auth.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "39efc430778473237d591b66aee9b8c6",
+          "Content-Length": "193",
+          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Server": "Google Frontend",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 90
+      }
+    },
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "auth",
+      "status": "FAIL",
+      "duration_ms": 76,
+      "error_message": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://auth.staging.netrasystems.ai/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "HEAD",
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "ade7f4c24839b0a77d591b66aee9b8c2",
+          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 76,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "frontend_service_dependencies",
+      "service": "integration",
+      "status": "PASS",
+      "duration_ms": 176,
+      "error_message": null,
+      "details": {
+        "frontend_response": {
+          "status": "healthy",
+          "service": "frontend",
+          "version": "1.0.0",
+          "environment": "staging",
+          "timestamp": "2025-09-13T00:58:06.799Z",
+          "uptime": 51692.730480638,
+          "memory": {
+            "used": 38,
+            "total": 46,
+            "rss": 101
+          },
+          "dependencies": {
+            "backend": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "netra-ai-platform",
+                "version": "1.0.0",
+                "timestamp": 1757725086.777256
+              }
+            },
+            "auth": {
+              "status": "healthy",
+              "details": {
+                "status": "healthy",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": "2025-09-13T00:58:06.776931+00:00",
+                "uptime_seconds": 2240.599251,
+                "database_status": "connected",
+                "environment": "staging"
+              }
+            }
+          },
+          "checks": {
+            "response_time_ms": 39,
+            "environment_config": "ok",
+            "memory_usage": "ok"
+          },
+          "urls": {
+            "api": "https://api.staging.netrasystems.ai",
+            "websocket": "wss://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+          }
+        },
+        "backend_status": "healthy",
+        "auth_status": "healthy"
+      }
+    },
+    {
+      "test_name": "api_endpoint_api_health",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 424,
+      "error_message": null,
+      "details": {
+        "endpoint": "/api/health",
+        "url": "https://api.staging.netrasystems.ai/api/health",
+        "status_code": 200,
+        "response_time_ms": 424,
+        "response_data": {
+          "status": "healthy",
+          "timestamp": "2025-09-13T00:58:07.222904+00:00",
+          "uptime_seconds": 67.95751881599426,
+          "checks": {
+            "postgresql": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 82.78,
+              "error": null
+            },
+            "redis": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 11.46,
+              "error": null
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 34.19,
+              "error": null
+            }
+          },
+          "database_details": {
+            "postgresql": {
+              "status": "healthy",
+              "details": {
+                "engine": "primary",
+                "connection_pool": "active",
+                "avg_response_time": 82.78
+              },
+              "checked_at": "2025-09-13T00:58:07.139988"
+            },
+            "redis": {
+              "status": "healthy",
+              "details": {
+                "redis_version": "7.2.4",
+                "memory_usage": "4.05M",
+                "connected_clients": 10,
+                "avg_response_time": 11.46
+              },
+              "checked_at": "2025-09-13T00:58:07.142828"
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "details": {
+                "clickhouse_version": "25.6.2.6054",
+                "http_status": 200,
+                "avg_response_time": 34.19
+              },
+              "checked_at": "2025-09-13T00:58:07.143277"
+            }
+          },
+          "version": "1.0.0",
+          "environment": "staging"
+        }
+      }
+    },
+    {
+      "test_name": "api_endpoint_api_v1_status",
+      "service": "backend",
+      "status": "SKIP",
+      "duration_ms": 83,
+      "error_message": null,
+      "details": {
+        "endpoint": "/api/v1/status",
+        "url": "https://api.staging.netrasystems.ai/api/v1/status",
+        "status_code": 404,
+        "response_time_ms": 83
+      }
+    },
+    {
+      "test_name": "api_endpoint_health",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 83,
+      "error_message": null,
+      "details": {
+        "endpoint": "/health",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "response_time_ms": 83,
+        "response_data": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757725087.392621
+        }
+      }
+    },
+    {
+      "test_name": "api_endpoint_root",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 88,
+      "error_message": null,
+      "details": {
+        "endpoint": "/",
+        "url": "https://api.staging.netrasystems.ai/",
+        "status_code": 200,
+        "response_time_ms": 88,
+        "response_data": {
+          "message": "Welcome to Netra API"
+        }
+      }
+    },
+    {
+      "test_name": "cors_configuration",
+      "service": "backend",
+      "status": "FAIL",
+      "duration_ms": 125,
+      "error_message": null,
+      "details": {
+        "status_code": 400,
+        "cors_headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
+          "access-control-max-age": "3600"
+        },
+        "response_headers": {
+          "Vary": "Origin",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "Access-Control-Max-Age": "3600",
+          "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
+          "Access-Control-Allow-Credentials": "true",
+          "Content-Type": "text/plain; charset=utf-8",
+          "x-cloud-trace-context": "30bb01f863b8901e693a1b9a5e9bacc0",
+          "Date": "Sat, 13 Sep 2025 00:58:07 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "22",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        }
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 161,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 161,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 331,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 331,
+        "average_response_time_ms": 264,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 282
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 178
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 324
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 330
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 210
+          }
+        ]
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 132,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 132,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 282,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 282,
+        "average_response_time_ms": 163,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 132
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 147
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 122
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 282
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 132
+          }
+        ]
+      }
+    },
+    {
+      "test_name": "single_request_performance",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 140,
+      "error_message": null,
+      "details": {
+        "response_time_ms": 140,
+        "threshold_ms": 2000,
+        "status_code": 200
+      }
+    },
+    {
+      "test_name": "concurrent_requests_performance",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 468,
+      "error_message": null,
+      "details": {
+        "concurrent_requests": 5,
+        "successful_requests": 5,
+        "failed_requests": 0,
+        "total_time_ms": 468,
+        "average_response_time_ms": 262,
+        "results": [
+          {
+            "request_id": 0,
+            "status_code": 200,
+            "response_time_ms": 468
+          },
+          {
+            "request_id": 1,
+            "status_code": 200,
+            "response_time_ms": 265
+          },
+          {
+            "request_id": 2,
+            "status_code": 200,
+            "response_time_ms": 204
+          },
+          {
+            "request_id": 3,
+            "status_code": 200,
+            "response_time_ms": 205
+          },
+          {
+            "request_id": 4,
+            "status_code": 200,
+            "response_time_ms": 172
+          }
+        ]
+      }
+    }
+  ],
+  "critical_issues": [
+    {
+      "test_name": "health_endpoint_options_method",
+      "service": "auth",
+      "error": null,
+      "details": {
+        "method": "OPTIONS",
+        "url": "https://auth.staging.netrasystems.ai/health",
+        "status_code": 405,
+        "headers": {
+          "Allow": "HEAD",
+          "Content-Type": "application/json",
+          "x-service-name": "auth-service",
+          "x-service-version": "1.0.0",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-xss-protection": "1; mode=block",
+          "x-cloud-trace-context": "ade7f4c24839b0a77d591b66aee9b8c2",
+          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "31",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 76,
+        "expected_support": "OPTIONS should be supported for health endpoints"
+      }
+    },
+    {
+      "test_name": "cors_configuration",
+      "service": "backend",
+      "error": null,
+      "details": {
+        "status_code": 400,
+        "cors_headers": {
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "access-control-allow-headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
+          "access-control-max-age": "3600"
+        },
+        "response_headers": {
+          "Vary": "Origin",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
+          "Access-Control-Max-Age": "3600",
+          "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
+          "Access-Control-Allow-Credentials": "true",
+          "Content-Type": "text/plain; charset=utf-8",
+          "x-cloud-trace-context": "30bb01f863b8901e693a1b9a5e9bacc0",
+          "Date": "Sat, 13 Sep 2025 00:58:07 GMT",
+          "Server": "Google Frontend",
+          "Content-Length": "22",
+          "Via": "1.1 google",
+          "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        }
+      }
+    }
+  ]
+}
