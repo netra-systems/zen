@@ -18,9 +18,14 @@
 
 ## Discovered Issues for SNST Processing
 
-### Issue 1: Database ClickHouse Exception Specificity Failures
+### ✅ Issue 1: Database ClickHouse Exception Specificity Failures - PROCESSED
 **Category:** failing-test-regression-p1-clickhouse-exception-handling  
 **Severity:** P1 - High (Database layer critical infrastructure)  
+**SNST Status:** 🔗 **UPDATED EXISTING ISSUE** - Linked to GitHub Issue #673  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/673  
+**Labels:** P1, claude-code-generated-issue, failing-test-regression  
+**Processing Date:** 2025-09-13
+
 **Files Affected:**
 - `netra_backend/tests/clickhouse/test_clickhouse_exception_specificity.py`
 - `netra_backend/tests/clickhouse/test_clickhouse_schema_exception_types.py`
@@ -38,6 +43,13 @@
 10. `test_index_creation_lacks_specific_error_handling` - AssertionError: Should be IndexCreationError, got AttributeError
 
 **Root Cause:** ClickHouseService class missing expected methods and proper exception classification system.
+
+**SNST Processing Results:**
+- ✅ **Found Existing Issue:** GitHub Issue #673 exactly matches this regression
+- ✅ **Updated Issue:** Added detailed failing test analysis and API gap confirmation
+- ✅ **Priority Tagged:** Applied P1 label for critical database infrastructure impact
+- ✅ **Linked Documentation:** Referenced this worklog and test files
+- ✅ **Business Impact:** $15K MRR analytics functionality validation confirmed blocked
 
 ### Issue 2: Unit Test Collection Import Error - Auth Startup Validator
 **Category:** uncollectable-test-regression-p1-auth-import-missing  
