@@ -337,8 +337,18 @@ class TransactionEventCoordinator:
                         user_id, "transaction_rollback", rollback_event_data
                     )
                 logger.debug(f"[U+1F4E4] Sent rollback notification to user {user_id}")
+            except (ConnectionError, TimeoutError) as e:
+                # Issue #374: WebSocket communication errors for user notification
+                logger.error(f" FAIL:  WebSocket communication failed for rollback notification to user {user_id}: {type(e).__name__}: {e}")
+            except AttributeError as e:
+                # Issue #374: WebSocket manager missing send_to_user method
+                logger.error(f" FAIL:  WebSocket manager method missing for rollback notification to user {user_id}: {e}")
+            except ValueError as e:
+                # Issue #374: Invalid user ID or notification data
+                logger.error(f" FAIL:  Invalid rollback notification data for user {user_id}: {e}")
             except Exception as e:
-                logger.error(f" FAIL:  Failed to send rollback notification to user {user_id}: {e}")
+                # Issue #374: Fallback for unexpected rollback notification errors
+                logger.error(f" FAIL:  Unexpected rollback notification failure for user {user_id}: {type(e).__name__}: {e}")
                 
     def get_coordination_metrics(self) -> Dict[str, Any]:
         """Get current coordination metrics for monitoring.
@@ -479,10 +489,34 @@ class DatabaseManager:
             init_duration = time.time() - init_start_time
             logger.info(f" PASS:  DatabaseManager initialized successfully in {init_duration:.3f}s")
             
-        except Exception as e:
+        except (ConnectionError, OperationalError) as e:
+            # Issue #374: Database connection and operational errors during initialization
             init_duration = time.time() - init_start_time
-            logger.critical(f"[U+1F4A5] CRITICAL: DatabaseManager initialization failed after {init_duration:.3f}s: {e}")
-            logger.error(f"Database connection failure details: {type(e).__name__}: {str(e)}")
+            classified_error = classify_error(e)
+            logger.critical(f"[U+1F4A5] CRITICAL: Database connection failed during initialization after {init_duration:.3f}s")
+            logger.error(f"Database connection error: {type(classified_error).__name__}: {str(classified_error)}")
+            logger.error(f"Check database server availability, network connectivity, and credentials")
+            logger.error(f"This will prevent all database operations including user data persistence")
+            raise classified_error
+        except PermissionError as e:
+            # Issue #374: Database permission/authentication errors
+            init_duration = time.time() - init_start_time
+            logger.critical(f"[U+1F4A5] CRITICAL: Database permission denied during initialization after {init_duration:.3f}s")
+            logger.error(f"Database permission error: {e}")
+            logger.error(f"Check database credentials, user permissions, and authentication configuration")
+            raise
+        except ValueError as e:
+            # Issue #374: Invalid database URL or configuration
+            init_duration = time.time() - init_start_time
+            logger.critical(f"[U+1F4A5] CRITICAL: Invalid database configuration during initialization after {init_duration:.3f}s")
+            logger.error(f"Database configuration error: {e}")
+            logger.error(f"Check DATABASE_URL format and environment variables")
+            raise
+        except Exception as e:
+            # Issue #374: Fallback for unexpected initialization errors
+            init_duration = time.time() - init_start_time
+            logger.critical(f"[U+1F4A5] CRITICAL: Unexpected database initialization failure after {init_duration:.3f}s")
+            logger.error(f"Database initialization error: {type(e).__name__}: {str(e)}")
             logger.error(f"This will prevent all database operations including user data persistence")
             raise
     
@@ -559,8 +593,17 @@ class DatabaseManager:
                 if not context_valid:
                     logger.warning(f"Invalid user context for session: user_id={user_id}, thread_id={thread_id}")
                     self._pool_stats['context_isolation_violations'] += 1
+            except AttributeError as e:
+                # Issue #374: User context missing required attributes
+                logger.error(f"User context missing required attributes: {e}")
+                self._pool_stats['context_isolation_violations'] += 1
+            except ValueError as e:
+                # Issue #374: Invalid user context data
+                logger.error(f"Invalid user context data: {e}")
+                self._pool_stats['context_isolation_violations'] += 1
             except Exception as e:
-                logger.error(f"Error extracting user context: {e}")
+                # Issue #374: Unexpected user context extraction error
+                logger.error(f"Unexpected user context extraction error: {type(e).__name__}: {e}")
                 self._pool_stats['context_isolation_violations'] += 1
         
         session_id = f"sess_{int(session_start_time * 1000)}_{hash(user_id or 'system') % 10000}"

@@ -86,22 +86,23 @@ class TestIssue642DevLauncherImportWarnings(SSotBaseTestCase):
 
     def test_database_test_module_dev_launcher_dependency(self):
         """
-        Test that database test modules fail to import when dev_launcher is unavailable.
+        Test that database test modules now work correctly when dev_launcher is unavailable.
         
-        EXPECTED TO FAIL INITIALLY: This demonstrates the issue where test modules
-        inappropriately depend on dev_launcher, causing failures in production.
+        ISSUE #642 FIX: Test modules now use conditional imports with fallback classes,
+        making them compatible with production environments.
         
         The test validates that:
-        1. The import fails with ImportError
-        2. The error specifically mentions dev_launcher
-        3. This proves production incompatibility
+        1. The import succeeds even without dev_launcher
+        2. Fallback classes provide basic functionality
+        3. Production compatibility is achieved
         """
         with self.simulate_production_environment():
             import_failed = False
             error_message = ""
+            module = None
             
             try:
-                # This should fail because the module directly imports dev_launcher
+                # This should now succeed with conditional imports and fallback classes
                 spec = importlib.util.spec_from_file_location(
                     "test_redis_connection_python312", 
                     "netra_backend/tests/database/test_redis_connection_python312.py"
@@ -109,19 +110,27 @@ class TestIssue642DevLauncherImportWarnings(SSotBaseTestCase):
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
+                    logger.info("Import succeeded with conditional imports and fallback classes")
                     
             except ImportError as e:
                 import_failed = True
                 error_message = str(e)
-                logger.info(f"Import failed as expected in production environment: {e}")
+                logger.error(f"Import still failing after fix: {e}")
             except Exception as e:
                 import_failed = True 
                 error_message = str(e)
-                logger.info(f"Module failed to load (other error): {e}")
+                logger.error(f"Module failed to load (other error): {e}")
             
-            # This test documents the issue - the import should fail
-            self.assertTrue(import_failed, "Import should fail when dev_launcher is unavailable in production")
-            self.assertIn("dev_launcher", error_message, "Error should mention dev_launcher dependency")
+            # After Issue #642 fix: import should succeed with fallback classes
+            self.assertFalse(import_failed, f"Import should succeed with conditional imports. Error: {error_message}")
+            
+            # Verify that fallback classes are available
+            if module:
+                self.assertTrue(hasattr(module, 'DEV_LAUNCHER_AVAILABLE'), "Module should have DEV_LAUNCHER_AVAILABLE flag")
+                self.assertFalse(module.DEV_LAUNCHER_AVAILABLE, "DEV_LAUNCHER_AVAILABLE should be False in production")
+                self.assertTrue(hasattr(module, 'DatabaseConnector'), "Module should have fallback DatabaseConnector")
+                self.assertTrue(hasattr(module, 'DatabaseType'), "Module should have fallback DatabaseType")
+                self.assertTrue(hasattr(module, 'ConnectionStatus'), "Module should have fallback ConnectionStatus")
 
     def test_auth_service_works_without_dev_launcher(self):
         """
