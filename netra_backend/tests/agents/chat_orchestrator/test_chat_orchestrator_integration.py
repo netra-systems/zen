@@ -46,9 +46,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class TestChatOrchestratorIntegration(SSotAsyncTestCase):
     """Comprehensive integration tests for ChatOrchestrator with real services."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with real services for integration testing."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize real services for integration testing
         self.llm_manager = LLMManager()
@@ -362,9 +362,9 @@ class TestChatOrchestratorIntegration(SSotAsyncTestCase):
 class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase):
     """Specialized tests for WebSocket event integration during orchestration."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for WebSocket event testing."""
-        await super().setUp()
+        super().setUp()
 
         # Create minimal orchestrator setup for WebSocket testing
         self.llm_manager = LLMManager()

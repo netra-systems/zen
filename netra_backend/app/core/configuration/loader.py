@@ -70,10 +70,16 @@ class ConfigurationLoader:
         }
         
         config_class = config_classes.get(environment, DevelopmentConfig)
-        
+
         try:
             self._logger.info(f"Creating {config_class.__name__} for environment: {environment}")
-            config = config_class()
+            # If the environment is unknown, use DevelopmentConfig but preserve original environment name
+            if environment not in config_classes:
+                # Use DevelopmentConfig behavior but set environment to original value
+                config = config_class()
+                config.environment = environment
+            else:
+                config = config_class()
             return config
         except Exception as e:
             self._logger.error(f"Failed to create config for {environment}: {e}")

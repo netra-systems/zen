@@ -41,9 +41,9 @@ from netra_backend.app.services.monitoring.metrics_service import MetricsService
 class TestChatOrchestratorModelCascade(SSotAsyncTestCase):
     """Comprehensive tests for ChatOrchestrator model cascade business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with model cascade and dependencies."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize real LLM manager and mock dependencies
         self.llm_manager = LLMManager()
@@ -476,9 +476,9 @@ class TestChatOrchestratorModelCascade(SSotAsyncTestCase):
 class TestModelCascadeErrorHandling(SSotAsyncTestCase):
     """Specialized tests for model cascade error handling scenarios."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for error handling tests."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize with minimal dependencies for error testing
         self.llm_manager = LLMManager()

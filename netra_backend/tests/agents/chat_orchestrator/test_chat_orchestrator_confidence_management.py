@@ -17,6 +17,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real service integration, no mocks for 
 
 import hashlib
 import pytest
+import unittest
 from unittest.mock import patch
 from typing import Dict, Any
 
@@ -44,9 +45,9 @@ class AgentState:
 class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase):
     """Comprehensive tests for ChatOrchestrator confidence management business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with confidence manager."""
-        await super().setUp()
+        super().setUp()
 
         self.confidence_manager = ConfidenceManager()
 
@@ -334,17 +335,17 @@ class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase):
             self.assertEqual(should_escalate, expected_escalation,
                            f"Confidence {confidence} for {intent.value} escalation mismatch")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
-        await super().tearDown()
+        super().tearDown()
 
 
 class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase):
     """Specialized tests for cache key generation edge cases."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for cache key testing."""
-        await super().setUp()
+        super().setUp()
         self.confidence_manager = ConfidenceManager()
 
     def test_cache_key_with_empty_context(self):
@@ -412,6 +413,6 @@ class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase):
         self.assertEqual(len(unique_keys), len(keys),
                         "All generated keys should be unique")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up cache key test environment."""
-        await super().tearDown()
+        super().tearDown()

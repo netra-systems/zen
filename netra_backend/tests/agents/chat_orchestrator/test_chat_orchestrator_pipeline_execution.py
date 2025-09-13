@@ -41,9 +41,9 @@ class AgentState:
 class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
     """Comprehensive tests for ChatOrchestrator pipeline execution business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with pipeline executor and mock orchestrator."""
-        await super().setUp()
+        super().setUp()
 
         # Create mock orchestrator with required components
         self.mock_orchestrator = MagicMock()
@@ -379,9 +379,9 @@ class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
 class TestPipelineExecutorAgentRouting(SSotAsyncTestCase):
     """Specialized tests for agent routing logic within pipeline execution."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for agent routing tests."""
-        await super().setUp()
+        super().setUp()
 
         # Create mock orchestrator with minimal setup
         self.mock_orchestrator = MagicMock()
