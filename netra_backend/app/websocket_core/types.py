@@ -19,6 +19,7 @@ from pydantic import BaseModel, Field
 
 # Import UnifiedIdGenerator for SSOT ID generation
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+from shared.isolated_environment import get_env
 
 
 class WebSocketConnectionState(str, Enum):
@@ -342,17 +343,16 @@ class WebSocketConfig(BaseModel):
     @classmethod
     def detect_and_configure_for_environment(cls) -> 'WebSocketConfig':
         """Detect environment and return optimized configuration."""
-        import os
-        
+
         # Detect Cloud Run environment
         is_cloud_run = any([
-            os.getenv('K_SERVICE'),  # Cloud Run service name
-            os.getenv('K_REVISION'),  # Cloud Run revision
-            os.getenv('GOOGLE_CLOUD_PROJECT'),  # GCP project
-            'run.app' in os.getenv('GAE_APPLICATION', ''),  # Cloud Run domain
+            get_env('K_SERVICE'),  # Cloud Run service name
+            get_env('K_REVISION'),  # Cloud Run revision
+            get_env('GOOGLE_CLOUD_PROJECT'),  # GCP project
+            'run.app' in get_env('GAE_APPLICATION', ''),  # Cloud Run domain
         ])
-        
-        environment = os.getenv('ENVIRONMENT', 'development')
+
+        environment = get_env('ENVIRONMENT', 'development')
         
         if is_cloud_run or environment in ['staging', 'production']:
             # Use Cloud Run optimized settings for production environments
