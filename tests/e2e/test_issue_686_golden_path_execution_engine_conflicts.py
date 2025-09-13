@@ -31,6 +31,7 @@ import asyncio
 import json
 from unittest.mock import patch, MagicMock, AsyncMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 
 
 class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
