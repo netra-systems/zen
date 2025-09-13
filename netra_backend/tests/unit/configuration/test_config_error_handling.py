@@ -38,7 +38,7 @@ class TestConfigurationValidationErrors(SSotBaseTestCase):
     def setup_method(self, method):
         """Set up test environment for each test method."""
         super().setup_method(method)
-        self.config_manager = UnifiedConfigurationManager()
+        self.config_manager = UnifiedConfigManager()
 
     def test_database_url_validation_failure(self):
         """Test behavior when database URL validation fails."""
@@ -399,7 +399,7 @@ class TestConfigurationManagerErrors(SSotBaseTestCase):
     def setup_method(self, method):
         """Set up test environment for each test method."""
         super().setup_method(method)
-        self.config_manager = UnifiedConfigurationManager()
+        self.config_manager = UnifiedConfigManager()
 
     def test_config_manager_initialization_errors(self):
         """Test configuration manager initialization error scenarios."""
