@@ -51,8 +51,8 @@ import websockets
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Real service clients
-from tests.clients.websocket_client import WebSocketClient
-from tests.helpers.auth_helper import create_test_user_with_jwt, get_test_frontend_url
+from tests.clients.websocket_client import WebSocketTestClient as WebSocketClient
+from test_framework.helpers.auth_helpers import create_test_user_with_jwt, get_test_frontend_url
 
 # Environment isolation
 from shared.isolated_environment import IsolatedEnvironment

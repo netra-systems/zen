@@ -782,40 +782,59 @@ CMD ["npm", "start"]
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
-        # Create cloudbuild.yaml using Kaniko for better caching and BuildKit support
-        cloudbuild_config = {
-            "steps": [{
-                "name": "gcr.io/kaniko-project/executor:latest",
-                "args": [
-                    "--dockerfile=" + service.dockerfile,
-                    "--destination=" + image_tag,
-                    "--cache=true",
-                    "--cache-ttl=24h",
-                    "--cache-repo=gcr.io/" + self.project_id + "/cache",
-                    "--compressed-caching=false",
-                    "--use-new-run",  # Enable BuildKit-style RUN --mount support
-                    "--snapshot-mode=redo",
-                    "--build-arg", f"BUILD_ENV={self.project_id.replace('netra-', '')}",
-                    "--build-arg", f"ENVIRONMENT={self.project_id.replace('netra-', '')}"
-                ]
-            }],
-            "options": {
-                "logging": "CLOUD_LOGGING_ONLY",
-                "machineType": "E2_HIGHCPU_8"
+        # Check if a pre-existing cloudbuild file exists for this service
+        existing_cloudbuild_file = self.project_root / f"cloudbuild-{service.name}.yaml"
+        if existing_cloudbuild_file.exists():
+            print(f"  Using existing Cloud Build config: {existing_cloudbuild_file}")
+            cloudbuild_file = existing_cloudbuild_file
+        else:
+            # Create cloudbuild.yaml using Kaniko for better caching and BuildKit support
+            cloudbuild_config = {
+                "steps": [{
+                    "name": "gcr.io/kaniko-project/executor:latest",
+                    "args": [
+                        "--dockerfile=" + service.dockerfile,
+                        "--destination=" + image_tag,
+                        "--cache=true",
+                        "--cache-ttl=24h",
+                        "--cache-repo=gcr.io/" + self.project_id + "/cache",
+                        "--compressed-caching=false",
+                        "--use-new-run",  # Enable BuildKit-style RUN --mount support
+                        "--snapshot-mode=redo",
+                        "--build-arg", f"BUILD_ENV={self.project_id.replace('netra-', '')}",
+                        "--build-arg", f"ENVIRONMENT={self.project_id.replace('netra-', '')}"
+                    ]
+                }],
+                "options": {
+                    "logging": "CLOUD_LOGGING_ONLY",
+                    "machineType": "E2_HIGHCPU_8"
+                }
             }
-        }
+            
+            # Use a temp file name to avoid overwriting existing configs
+            cloudbuild_file = self.project_root / f"cloudbuild-{service.name}-temp.yaml"
+            with open(cloudbuild_file, 'w') as f:
+                yaml.dump(cloudbuild_config, f)
         
-        cloudbuild_file = self.project_root / f"cloudbuild-{service.name}.yaml"
-        with open(cloudbuild_file, 'w') as f:
-            yaml.dump(cloudbuild_config, f)
-        
+        # Build the gcloud command
         cmd = [
             self.gcloud_cmd, "builds", "submit",
             "--config", str(cloudbuild_file),
-            "--timeout", "45m",  # Increased timeout for dependency installation
-            "--machine-type", "e2-highcpu-8",
-            "."
+            "--project", self.project_id
         ]
+        
+        # Only add timeout and machine-type if we're using a generated config
+        # (existing configs may have these settings embedded)
+        if not existing_cloudbuild_file.exists():
+            cmd.extend([
+                "--timeout", "45m",  # Increased timeout for dependency installation
+                "--machine-type", "e2-highcpu-8"
+            ])
+        else:
+            # For existing configs, use a longer timeout to be safe
+            cmd.extend(["--timeout", "60m"])
+        
+        cmd.append(".")
         
         print(f"  Building image: {image_tag}")
         print(f"  Note: Cloud Build is slower. Use --build-local for faster builds.")
@@ -1816,8 +1835,8 @@ CMD ["npm", "start"]
             
             print(f"Validating OAuth configuration for {environment} environment...")
             
-            # Run OAuth validation
-            validator = OAuthDeploymentValidator(environment)
+            # Run OAuth validation in deployment context
+            validator = OAuthDeploymentValidator(environment, deployment_context=True)
             success, report = validator.validate_all()
             
             # Print validation report

@@ -14,7 +14,7 @@ class StagingConfig:
     # Backend URLs - Using proper staging domain (cross-linked to GCP backends)
     backend_url: str = "https://api.staging.netrasystems.ai"
     api_url: str = "https://api.staging.netrasystems.ai/api"
-    websocket_url: str = "wss://api.staging.netrasystems.ai/ws"
+    websocket_url: str = "wss://api.staging.netrasystems.ai/api/v1/websocket"
     
     # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
     base_url: str = "https://api.staging.netrasystems.ai"

@@ -145,10 +145,12 @@ class ToolDispatcherFactory:
             
             # Set WebSocket manager if available
             if ws_manager:
-                # Create WebSocket emitter for this request
-                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitterFactory
-                websocket_emitter = await WebSocketEventEmitterFactory.create_emitter(
-                    user_context, ws_manager
+                # Create WebSocket emitter for this request using the correct factory
+                from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+                websocket_emitter = WebSocketEmitterFactory.create_emitter(
+                    manager=ws_manager,
+                    user_id=user_context.user_id,
+                    context=user_context
                 )
                 dispatcher.websocket_emitter = websocket_emitter
                 self._metrics['websocket_events_enabled'] += 1

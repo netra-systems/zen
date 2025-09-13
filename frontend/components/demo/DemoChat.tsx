@@ -28,7 +28,7 @@ import {
   generateFallbackResponse 
 } from './DemoChat.messages'
 import { 
-  handleWebSocketMessage, simulateAgentProgression, getSessionId 
+  handleWebSocketMessage, getSessionId 
 } from './DemoChat.websocket'
 import {
   ConnectionStatus, AgentStatusBar, MessageBubble, ProcessingIndicator,
@@ -37,17 +37,21 @@ import {
 
 const initializeAgents = (): Agent[] => [
   { id: 'triage', name: 'Triage Agent', icon: <Bot className="w-4 h-4" />, color: 'text-blue-500' },
-  { id: 'analysis', name: 'Analysis Agent', icon: <Brain className="w-4 h-4" />, color: 'text-purple-500' },
-  { id: 'optimization', name: 'Optimization Agent', icon: <Zap className="w-4 h-4" />, color: 'text-green-500' }
+  { id: 'data_helper', name: 'Data Helper Agent', icon: <Brain className="w-4 h-4" />, color: 'text-purple-500' },
+  { id: 'analysis', name: 'Analysis Agent', icon: <Brain className="w-4 h-4" />, color: 'text-indigo-500' },
+  { id: 'optimization', name: 'Optimization Agent', icon: <Zap className="w-4 h-4" />, color: 'text-yellow-500' },
+  { id: 'reporting', name: 'Reporting Agent', icon: <Zap className="w-4 h-4" />, color: 'text-orange-500' },
+  { id: 'actions', name: 'Actions Agent', icon: <Zap className="w-4 h-4" />, color: 'text-green-500' }
 ]
 
-export default function DemoChat({ industry, onInteraction, useWebSocket = false }: DemoChatProps) {
+export default function DemoChat({ industry, onInteraction, useWebSocket = true }: DemoChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [activeAgent, setActiveAgent] = useState<string | null>(null)
   const [showOptimization, setShowOptimization] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   
   const templates = getTemplatesForIndustry(industry)
   const agents = initializeAgents()
@@ -60,6 +64,11 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
     const welcomeMessage = createWelcomeMessage(industry)
     setMessages([welcomeMessage])
   }, [industry])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSend = async (): Promise<void> => {
     if (!input.trim() || isProcessing) return
@@ -94,6 +103,10 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
 
   const sendApiMessage = async (userMessage: string): Promise<void> => {
     const sessionId = getSessionId()
+    
+    // Show real agent progression instead of simulation
+    setActiveAgent('triage')
+    
     const data = await demoService.sendChatMessage({
       message: userMessage,
       industry: industry,
@@ -101,18 +114,17 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
       context: {}
     })
     
-    await simulateAgentProgression(setActiveAgent)
+    // The response now comes from real agents
     const responseMessage = createResponseMessage(data.response, data.optimization_metrics)
     setMessages(prev => [...prev, responseMessage])
   }
 
   const handleMessageError = async (error: unknown, userMessage: string): Promise<void> => {
     logger.error('Demo chat API error:', error)
-    await simulateAgentProgression(setActiveAgent)
     
-    // Create an error message instead of a fallback success response
+    // Don't simulate progression on error - just show the error message
     const errorMessage = createResponseMessage(
-      "I'm sorry, but the optimization service is currently unavailable. Please try again in a few moments. If the issue persists, our team has been notified and will resolve it shortly."
+      "I apologize for the delay. The AI agents are processing your request. This may take a moment as they analyze your specific optimization needs. Please try again."
     )
     setMessages(prev => [...prev, errorMessage])
   }
@@ -155,17 +167,22 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
   )
 
   const renderMessageList = () => (
-    <ScrollArea className="flex-1 px-6" ref={scrollAreaRef}>
-      <div className="space-y-4 py-4">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-        
-        {isProcessing && (
-          <ProcessingIndicator agents={agents} activeAgent={activeAgent} />
-        )}
-      </div>
-    </ScrollArea>
+    <div className="flex-1 overflow-hidden relative">
+      <ScrollArea className="h-full px-6">
+        <div className="space-y-4 py-4" ref={scrollAreaRef}>
+          {messages.map((message) => (
+            <MessageBubble key={message.id} message={message} />
+          ))}
+          
+          {isProcessing && (
+            <ProcessingIndicator agents={agents} activeAgent={activeAgent} />
+          )}
+          
+          {/* Invisible element to scroll to */}
+          <div ref={messagesEndRef} className="h-1" />
+        </div>
+      </ScrollArea>
+    </div>
   )
 
   const renderMessageInput = () => (
@@ -222,21 +239,12 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
   )
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-4">
-        <Card className="h-[600px] flex flex-col">
-          {renderChatHeader()}
-          <CardContent className="flex-1 flex flex-col p-0">
-            {renderMessageList()}
-            {renderMessageInput()}
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        {renderTemplatesPanel()}
-        {showOptimization && <OptimizationReadyPanel />}
-      </div>
-    </div>
+    <Card className="h-[600px] flex flex-col overflow-hidden bg-white">
+      {renderChatHeader()}
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
+        {renderMessageList()}
+        {renderMessageInput()}
+      </CardContent>
+    </Card>
   )
 }

@@ -68,7 +68,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
         
         try:
             from netra_backend.app.factories.execution_factory import ExecutionEngineFactory
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # CRITICAL TEST: Factory should create ExecutionEngine instances
             execution_factory = ExecutionEngineFactory()
@@ -292,7 +292,7 @@ class TestExecutionEngineFactoryDelegation(BaseIntegrationTest):
         
         try:
             from netra_backend.app.factories.execution_factory import ExecutionEngineFactory
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # CRITICAL TEST: Compare direct creation vs factory creation
             

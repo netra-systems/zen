@@ -32,6 +32,10 @@ from netra_backend.app.llm.observability import (
 )
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.reporting.templates import ReportTemplates
+from netra_backend.app.core.serialization_sanitizer import (
+    SerializableAgentResult,
+    sanitize_agent_result
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -455,6 +459,94 @@ class ReportingSubAgent(BaseAgent):
             sections=sections,
             metadata=data.get("metadata", {})
         )
+    
+    def create_clean_reporting_result(self, result: Dict[str, Any], 
+                                    context: UserExecutionContext) -> SerializableAgentResult:
+        """Create clean, serializable reporting result for Issue #585 fix.
+        
+        Args:
+            result: Raw reporting result data
+            context: User execution context
+            
+        Returns:
+            SerializableAgentResult: Clean result safe for Redis caching
+        """
+        try:
+            # Extract report content safely
+            report_content = result.get("report", "")
+            if not isinstance(report_content, str):
+                report_content = str(report_content)
+            
+            # Extract sections data
+            sections = result.get("sections", [])
+            clean_sections = []
+            for i, section in enumerate(sections):
+                if isinstance(section, dict):
+                    clean_sections.append({
+                        "section_id": section.get("section_id", f"section_{i}"),
+                        "title": section.get("title", f"Section {i}"),
+                        "content": str(section.get("content", "")),
+                        "section_type": section.get("section_type", "standard")
+                    })
+                else:
+                    clean_sections.append({
+                        "section_id": f"section_{i}",
+                        "title": f"Section {i}",
+                        "content": str(section),
+                        "section_type": "standard"
+                    })
+            
+            # Extract recommendations from various places
+            recommendations = []
+            if "next_steps" in result:
+                next_steps = result["next_steps"]
+                if isinstance(next_steps, list):
+                    recommendations.extend([str(step) for step in next_steps])
+                else:
+                    recommendations.append(str(next_steps))
+            
+            if "recommendations" in result:
+                recs = result["recommendations"]
+                if isinstance(recs, list):
+                    recommendations.extend([str(r) for r in recs])
+                else:
+                    recommendations.append(str(recs))
+            
+            # Create clean output data
+            output_data = {
+                "report_content": report_content,
+                "sections": clean_sections,
+                "total_sections": len(clean_sections),
+                "has_recommendations": len(recommendations) > 0,
+                "report_type": result.get("report_type", "analysis"),
+                "completion_status": result.get("completion_status", "completed")
+            }
+            
+            # Create clean result
+            return SerializableAgentResult(
+                success=True,
+                agent_name="ReportingSubAgent",
+                duration=0.0,  # Duration tracking handled elsewhere
+                output_data=output_data,
+                recommendations=recommendations,
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id,
+                execution_timestamp=context.created_at.isoformat()
+            )
+            
+        except Exception as e:
+            logger.error(f"Error creating clean reporting result: {e}")
+            # Return minimal safe result
+            return SerializableAgentResult(
+                success=False,
+                agent_name="ReportingSubAgent",
+                duration=0.0,
+                error=f"Result sanitization error: {str(e)}",
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id
+            )
 
     async def _generate_full_report(self, context: UserExecutionContext, 
                                    data_assessment: Dict[str, Any], 

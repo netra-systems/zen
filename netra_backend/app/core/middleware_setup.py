@@ -2,6 +2,7 @@
 Middleware configuration module.
 Handles CORS, session, and other middleware setup for FastAPI.
 """
+import json
 import logging
 import os
 from typing import Any, Callable
@@ -585,19 +586,53 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
                         logger.error("Failed to pass through non-HTTP scope safely")
         
         def _validate_http_scope(self, scope: Scope) -> bool:
-            """Validate HTTP scope to prevent 'URL' object attribute errors."""
+            """Validate HTTP scope to prevent 'URL' object attribute errors.
+            
+            CRITICAL FIX for Issue #517: Enhanced ASGI scope validation to prevent
+            WebSocket HTTP 500 errors caused by malformed ASGI scopes.
+            """
             try:
-                # Check required HTTP scope components
+                # Phase 1: Basic scope structure validation
+                if not isinstance(scope, dict):
+                    logger.warning(f"Invalid scope type: {type(scope)} - expected dict")
+                    return False
+                
+                # Phase 2: Check required HTTP scope components
                 required_keys = ["method", "path", "query_string", "headers"]
                 for key in required_keys:
                     if key not in scope:
                         logger.warning(f"Missing required HTTP scope key: {key}")
                         return False
                 
+                # Phase 3: Validate individual components
+                # Validate method
+                method = scope.get("method")
+                if not isinstance(method, str) or not method:
+                    logger.warning(f"Invalid method in HTTP scope: {method}")
+                    return False
+                
                 # Validate path is string-like
                 path = scope.get("path")
                 if not isinstance(path, str):
                     logger.warning(f"Invalid path type in HTTP scope: {type(path)}")
+                    return False
+                
+                # Validate query_string is bytes-like
+                query_string = scope.get("query_string")
+                if not isinstance(query_string, (bytes, str)):
+                    logger.warning(f"Invalid query_string type in HTTP scope: {type(query_string)}")
+                    return False
+                
+                # Validate headers is list of tuples
+                headers = scope.get("headers")
+                if not isinstance(headers, list):
+                    logger.warning(f"Invalid headers type in HTTP scope: {type(headers)}")
+                    return False
+                
+                # Phase 4: Additional validation for common failure patterns
+                # Check for URL object accidentally passed as scope
+                if hasattr(scope, 'query_params'):
+                    logger.error("ASGI scope contains URL object attributes - malformed scope detected")
                     return False
                 
                 return True
@@ -607,21 +642,42 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
                 return False
         
         async def _send_safe_http_response(self, send: Send, scope: Scope, error_message: str = None) -> None:
-            """Send a safe HTTP response for invalid scopes."""
+            """Send a safe HTTP response for invalid scopes.
+            
+            CRITICAL FIX for Issue #517: Enhanced error response handling to prevent
+            WebSocket HTTP 500 errors by providing appropriate status codes.
+            """
             try:
+                # Determine appropriate status code based on error type
+                status_code = 400  # Bad Request for malformed scopes
+                if error_message and "websocket" in error_message.lower():
+                    status_code = 426  # Upgrade Required for WebSocket protocol issues
+                elif error_message and "auth" in error_message.lower():
+                    status_code = 401  # Unauthorized for auth issues
+                
+                # Create appropriate error response
+                error_detail = error_message or "Invalid request scope"
+                response_data = {
+                    "error": "asgi_scope_validation_failed",
+                    "message": error_detail,
+                    "status_code": status_code,
+                    "issue_reference": "#517"
+                }
+                response_body = json.dumps(response_data)
+                content_length = str(len(response_body.encode("utf-8")))
+                
                 # Send HTTP response start
                 await send({
                     "type": "http.response.start",
-                    "status": 400,
+                    "status": status_code,
                     "headers": [
                         (b"content-type", b"application/json"),
-                        (b"content-length", b"77"),  # Length of JSON response below
+                        (b"content-length", content_length.encode()),
+                        (b"x-asgi-scope-error", b"true"),
                     ],
                 })
                 
                 # Send HTTP response body
-                error_detail = error_message or "Invalid request scope"
-                response_body = f'{{"error": "scope_validation_failed", "message": "{error_detail}"}}'
                 await send({
                     "type": "http.response.body",
                     "body": response_body.encode("utf-8"),

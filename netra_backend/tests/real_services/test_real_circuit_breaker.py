@@ -33,7 +33,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.environment_isolation import get_test_env_manager
 from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.external_api_client import HTTPError
 
 
@@ -533,7 +533,7 @@ class TestRealWebSocketCircuitBreaker:
         async def attempt_websocket_connection():
             """Attempt WebSocket connection that will fail."""
             try:
-                async with websockets.connect(invalid_ws_url, timeout=2.0):
+                async with websockets.connect(invalid_ws_url, open_timeout=2.0):
                     return True
             except Exception as e:
                 logger.info(f"WebSocket connection failed: {e}")

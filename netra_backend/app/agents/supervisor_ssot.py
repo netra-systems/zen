@@ -303,7 +303,8 @@ class SupervisorAgent(BaseAgent):
             thread_id=thread_id,
             run_id=run_id,
             request_id=UnifiedIdGenerator.generate_base_id("req"),
-            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id)
+            websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(user_id),
+            metadata={"user_request": user_request}
         )
         
         # Execute using SSOT pattern

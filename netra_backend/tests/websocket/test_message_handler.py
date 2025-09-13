@@ -19,7 +19,7 @@ from test_framework.environment_isolation import IsolatedEnvironment
 
 # Production components
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
 @pytest.mark.asyncio
@@ -321,7 +321,7 @@ class TestMessageRoutingReal:
     
     async def test_message_routing_real_websocket(self):
         """Test message routing capabilities with real WebSocket connections."""
-        from netra_backend.app.websocket_core import WebSocketManager
+        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         
         # Setup real WebSocket connections for different types
         ws_manager = WebSocketManager()

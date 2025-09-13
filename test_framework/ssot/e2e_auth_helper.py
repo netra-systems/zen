@@ -772,6 +772,52 @@ class E2EAuthHelper:
         
         return token
     
+    async def create_authenticated_test_user(
+        self,
+        user_id: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        tier: Optional[str] = None,
+        permissions: Optional[List[str]] = None,
+        force_new: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Create authenticated test user - MISSING METHOD FIX for Issue #622.
+        
+        This method was missing and causing 13 E2E tests to fail with AttributeError.
+        E2E tests expect this method to exist on E2EAuthHelper instances.
+        
+        This is an alias/wrapper around authenticate_test_user() for backward compatibility,
+        handling the common pattern where tests pass user_id as the first argument.
+        
+        Args:
+            user_id: Optional user ID (commonly passed as first positional arg by tests)
+            email: User email (uses config default if not provided)
+            password: User password (uses config default if not provided)
+            tier: User tier/role ("free", "early", "mid", "enterprise")
+            permissions: User permissions (auto-generated based on tier if not provided)
+            force_new: Force new authentication even if cached token exists
+            
+        Returns:
+            Dict containing complete authentication result with "success" key
+        """
+        # Handle the common case where tests pass user_id as first positional argument
+        if user_id and not email:
+            # Generate email from user_id for test consistency
+            email = f"{user_id}@test.example.com"
+        elif not email:
+            # Use default email if neither user_id nor email provided
+            email = self.config.test_user_email
+        
+        # Delegate to existing authenticate_test_user method (which already works correctly)
+        return await self.authenticate_test_user(
+            email=email,
+            password=password,
+            tier=tier,
+            permissions=permissions,
+            force_new=force_new
+        )
+
     async def authenticate_test_user(
         self,
         email: Optional[str] = None,

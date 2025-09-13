@@ -149,7 +149,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 
 # 🚨 SECURITY RISK - DO NOT USE:
-from netra_backend.app.models.user_execution_context import UserExecutionContext  # Limited security
+from netra_backend.app.services.user_execution_context import UserExecutionContext  # Limited security
 from netra_backend.app.agents.supervisor.user_execution_context import UserExecutionContext  # Deprecated
 from netra_backend.app.agents.state import DeepAgentState  # CRITICAL VULNERABILITY
 ```

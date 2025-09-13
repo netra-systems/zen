@@ -112,23 +112,12 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
 # Expose application port
 EXPOSE 8000
 
-# Optimized startup for Cloud Run staging deployment
+# Simplified startup for Cloud Run staging deployment
 # Cloud SQL migrations should be run separately, not at container startup
-# This follows the pattern of the non-Alpine GCP deployment
-CMD ["sh", "-c", "\
-    echo '[Staging] Starting Alpine-optimized backend service on Cloud Run...' && \
-    echo '[Staging] Memory limit: 512MB, Workers: ${WORKERS:-1} (DEBUG MODE)' && \
-    echo '[Staging] Starting Gunicorn with uvicorn workers...' && \
-    exec gunicorn netra_backend.app.main:app \
-        -w ${WORKERS:-1} \
-        -k uvicorn.workers.UvicornWorker \
-        --bind 0.0.0.0:${PORT:-8000} \
-        --timeout ${TIMEOUT:-300} \
-        --graceful-timeout 30 \
-        --max-requests 2000 \
-        --max-requests-jitter 200 \
-        --access-logfile - \
-        --error-logfile - \
-        --log-level ${LOG_LEVEL:-info} \
-        --worker-tmp-dir /tmp \
-        --preload"]
+CMD ["gunicorn", "netra_backend.app.main:app", \
+     "-w", "1", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "300", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-"]

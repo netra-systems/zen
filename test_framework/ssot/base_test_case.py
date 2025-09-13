@@ -563,6 +563,20 @@ class SSotBaseTestCase:
         """Assert that first <= second."""
         assert first <= second, msg or f"Expected {first} <= {second}"
     
+    def assertAlmostEqual(self, first, second, places=7, msg=None, delta=None):
+        """Assert that first and second are approximately equal within tolerance."""
+        if delta is not None:
+            # If delta is specified, use it directly
+            diff = abs(first - second)
+            assert diff <= delta, msg or f"Expected {first} ≈ {second} (delta={delta}), but difference was {diff}"
+        else:
+            # Use places parameter (number of decimal places)
+            if places is None:
+                places = 7
+            tolerance = 10**(-places)
+            diff = abs(first - second)
+            assert diff <= tolerance, msg or f"Expected {first} ≈ {second} (places={places}), but difference was {diff}"
+    
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.
@@ -647,6 +661,40 @@ class SSotBaseTestCase:
         """Async context manager for temporary environment variables."""
         with self.temp_env_vars(**kwargs):
             yield
+
+
+
+    # === E2E AUTHENTICATION SUPPORT ===
+    
+    async def create_authenticated_test_user(self, **kwargs):
+        """
+        Create authenticated test user for E2E tests.
+        
+        This method provides SSOT compatibility for E2E tests that need authenticated users.
+        It delegates to the centralized E2EAuthHelper to ensure consistent authentication.
+        
+        Args:
+            **kwargs: Additional arguments passed to E2EAuthHelper.create_authenticated_user()
+                     Common options: name, email, permissions, environment
+        
+        Returns:
+            AuthenticatedUser: Created user with JWT token and authentication data
+            
+        Example:
+            user = await self.create_authenticated_test_user(
+                name="Test User",
+                email="test@example.com", 
+                permissions=["read", "write"]
+            )
+        """
+        try:
+            from test_framework.ssot.e2e_auth_helper import create_authenticated_user
+            return await create_authenticated_user(**kwargs)
+        except ImportError as e:
+            raise ImportError(
+                f"E2E authentication helper not available: {e}. "
+                f"Ensure test_framework.ssot.e2e_auth_helper is accessible."
+            )
 
 
 class SSotAsyncTestCase(SSotBaseTestCase):

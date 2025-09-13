@@ -17,6 +17,7 @@ from datetime import datetime, timedelta, UTC
 from auth_service.auth_core.config import AuthConfig
 from auth_service.services.redis_service import RedisService
 from auth_service.services.jwt_service import JWTService
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,8 @@ class SessionService:
             Session information including session ID and expiration
         """
         try:
-            # Generate unique session ID
-            session_id = str(uuid.uuid4())
+            # Generate secure unique session ID using UnifiedIdGenerator
+            session_id = UnifiedIdGenerator.generate_session_id(user_id, "web")
             
             # Set expiration time
             if expires_in is None:

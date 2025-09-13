@@ -25,7 +25,7 @@ from netra_backend.app.core.auth_startup_validator import (
     AuthComponent, 
     AuthValidationResult,
     AuthValidationError,
-    validate_auth_at_startup
+    validate_auth_startup
 )
 from netra_backend.app.core.environment_constants import Environment
 
@@ -1470,7 +1470,7 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
         
         with patch('netra_backend.app.core.auth_startup_validator.OAuthConfigGenerator'):
             # Should not raise exception
-            await validate_auth_at_startup()
+            await validate_auth_startup()
     
     @pytest.mark.asyncio
     async def test_validate_auth_at_startup_critical_failure_raises_exception(self):
@@ -1482,7 +1482,7 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
         
         with patch('netra_backend.app.core.auth_startup_validator.OAuthConfigGenerator'):
             with pytest.raises(AuthValidationError) as exc_info:
-                await validate_auth_at_startup()
+                await validate_auth_startup()
                 
             assert "Critical auth validation failures" in str(exc_info.value)
             assert "service_credentials" in str(exc_info.value).lower()
@@ -1499,7 +1499,7 @@ class TestAuthStartupValidatorConvenienceFunction(BaseIntegrationTest):
         
         with patch('netra_backend.app.core.auth_startup_validator.OAuthConfigGenerator'):
             # Should not raise exception despite warnings
-            await validate_auth_at_startup()
+            await validate_auth_startup()
 
 
 class TestAuthStartupValidatorEnvironmentIntegration(BaseIntegrationTest):

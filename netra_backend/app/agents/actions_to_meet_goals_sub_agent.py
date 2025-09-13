@@ -338,13 +338,30 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
         This method enables the agent to be created through AgentInstanceFactory
         with proper user context isolation, avoiding deprecated global tool_dispatcher warnings.
         
+        PHASE 1 FIX: Now uses context.get_dependency() methods to access required dependencies
+        that have been injected by AgentInstanceFactory before factory method execution.
+        
         Args:
             context: User execution context for isolation
             
         Returns:
-            ActionsToMeetGoalsSubAgent: Configured agent instance without deprecated warnings
+            ActionsToMeetGoalsSubAgent: Configured agent instance with proper dependencies
         """
-        # Create agent without tool_dispatcher parameter to avoid deprecation warning
-        # Note: This agent requires LLMManager and ToolDispatcher but doesn't pass tool_dispatcher to BaseAgent
-        # so we need to provide them via the registry or dependencies
-        return cls(llm_manager=None, tool_dispatcher=None)
+        # Get dependencies from context (injected by AgentInstanceFactory)
+        llm_manager = context.get_llm_manager()
+        tool_dispatcher = context.get_tool_dispatcher()
+        
+        # Log dependency availability for debugging
+        if llm_manager is None:
+            logger.warning(f"create_agent_with_context: LLM manager not available in context for user {context.user_id[:8]}...")
+        else:
+            logger.debug(f"create_agent_with_context: LLM manager available for user {context.user_id[:8]}...")
+            
+        if tool_dispatcher is None:
+            logger.debug(f"create_agent_with_context: Tool dispatcher not available in context for user {context.user_id[:8]}...")
+        else:
+            logger.debug(f"create_agent_with_context: Tool dispatcher available for user {context.user_id[:8]}...")
+        
+        # Create agent with dependencies from context
+        # Note: AgentInstanceFactory will also inject dependencies after creation as fallback
+        return cls(llm_manager=llm_manager, tool_dispatcher=tool_dispatcher)

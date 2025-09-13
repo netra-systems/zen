@@ -43,7 +43,9 @@ from netra_backend.app.services.agent_websocket_bridge import create_agent_webso
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
-from netra_backend.app.tools.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.factories.tool_dispatcher_factory import get_tool_dispatcher_factory
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
@@ -112,16 +114,32 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_tool_chain_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        tool_dispatcher = ToolDispatcher()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        # Use factory method for proper user isolation
+        tool_dispatcher_factory = get_tool_dispatcher_factory()
+        tool_dispatcher = await tool_dispatcher_factory.create_for_request(
+            user_context=auth_context,
+            websocket_manager=websocket_manager
+        )
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track tool executions and pipeline progress
         tool_executions = []
@@ -152,13 +170,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform comprehensive analysis requiring complex tool chain: data collection -> processing -> validation -> optimization -> reporting",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform comprehensive analysis requiring complex tool chain: data collection -> processing -> validation -> optimization -> reporting"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 2: Define complex tool chain with dependencies
         track_pipeline_stage(ToolPipelineStage.TOOL_SELECTION, {})
@@ -463,15 +488,26 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_error_recovery_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track error scenarios and recovery attempts
         error_scenarios = []
@@ -490,13 +526,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Test error recovery mechanisms with various tool failure scenarios",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Test error recovery mechanisms with various tool failure scenarios"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Test various error scenarios
         error_test_cases = [
@@ -784,15 +827,26 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_parallel_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track parallel execution metrics
         parallel_executions = []
@@ -811,13 +865,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform parallel analysis across multiple domains with intelligent result aggregation",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform parallel analysis across multiple domains with intelligent result aggregation"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Define parallel tool execution groups
         parallel_tool_groups = {
@@ -1127,15 +1188,26 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_dynamic_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track dynamic selection decisions
         selection_decisions = []
@@ -1155,13 +1227,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Perform intelligent analysis with dynamic tool selection based on data characteristics and optimization opportunities",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Perform intelligent analysis with dynamic tool selection based on data characteristics and optimization opportunities"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Define adaptive analysis scenarios
         analysis_scenarios = [
@@ -1450,15 +1529,26 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_timeout_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track timeout and circuit breaker events
         timeout_events = []
@@ -1478,13 +1568,20 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         thread_id = ThreadID(str(uuid.uuid4()))
         run_id = RunID(str(uuid.uuid4()))
         
-        agent_execution = await execution_engine.start_agent_execution(
-            user_id=user_id,
-            thread_id=thread_id,
-            run_id=run_id,
-            message_content="Test tool timeout and circuit breaker resilience patterns",
-            execution_context=auth_context
+        # Create agent execution context
+        agent_context = AgentExecutionContext(
+            user_id=str(user_id),
+            thread_id=str(thread_id),
+            run_id=str(run_id),
+            agent_name="supervisor_agent",
+            request_id=str(uuid.uuid4()),
+            metadata={
+                "message": "Test tool timeout and circuit breaker resilience patterns"
+            }
         )
+        
+        # Execute agent with user context
+        agent_execution = await execution_engine.execute_agent(agent_context, auth_context)
         
         # Phase 1: Test various timeout scenarios
         timeout_test_cases = [

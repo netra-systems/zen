@@ -1,15 +1,20 @@
 @import "tailwindcss";
 @import "../styles/connection-status.css";
 
-/* Ensure full height for layout inheritance */
+/* Reset default styles */
 html, body {
-  height: 100%;
   margin: 0;
   padding: 0;
 }
 
-/* Prevent horizontal overflow on mobile */
+/* Allow vertical scrolling, prevent horizontal overflow on mobile */
 html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  min-height: 100vh;
   overflow-x: hidden;
 }
 

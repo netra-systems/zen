@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(pytest.console_main())
+                     ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\config\__init__.py", line 201, in console_main
+    code = main()
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\config\__init__.py", line 156, in main
+    config = _prepareconfig(args, plugins)
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\config\__init__.py", line 347, in _prepareconfig
+    config._ensure_unconfigure()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\config\__init__.py", line 1131, in _ensure_unconfigure
+    self._cleanup_stack.close()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 619, in __exit__
+    raise exc
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+       ~~^^^^^^^^^^^^^^
+  File "C:\Program Files\Python313\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+    ~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\capture.py", line 778, in stop_global_capturing
+    self._global_capturing.pop_outerr_to_orig()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\capture.py", line 659, in pop_outerr_to_orig
+    out, err = self.readouterr()
+               ~~~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\capture.py", line 706, in readouterr
+    out = self.out.snap() if self.out else ""
+          ~~~~~~~~~~~~~^^
+  File "C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\_pytest\capture.py", line 591, in snap
+    self.tmpfile.seek(0)
+    ~~~~~~~~~~~~~~~~~^^^
+ValueError: I/O operation on closed file.

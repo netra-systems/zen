@@ -21,6 +21,8 @@ htmlcov/
 
 # Test output files
 junit.xml
+pytest_output.txt
+*_output.txt
 
 # Dev launcher cache
 .dev_cache/
@@ -148,3 +150,4 @@ google-cloud-cli-darwin-arm.tar.gz
 # Health check reports
 staging_health_check_*.json
 deploy-sa-key-staging.json
+PR-WORKLOG-*.md

@@ -80,7 +80,7 @@ except ImportError:
     ServicesUserContext = None
 
 try:
-    from netra_backend.app.models.user_execution_context import UserExecutionContext as ModelsUserContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext as ModelsUserContext
 except ImportError:
     ModelsUserContext = None
 
@@ -91,7 +91,7 @@ except ImportError:
 
 # Import golden path components (if available without Docker)
 try:
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 except ImportError:
     ExecutionEngine = None
 

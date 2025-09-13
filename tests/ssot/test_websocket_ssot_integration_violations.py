@@ -65,7 +65,7 @@ class TestWebSocketSSotIntegrationViolations(SSotAsyncTestCase):
         # Test different communication patterns currently in use
         try:
             from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Test direct manager-agent communication
             manager = UnifiedWebSocketManager()

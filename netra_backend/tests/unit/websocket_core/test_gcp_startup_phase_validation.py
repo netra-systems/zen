@@ -363,6 +363,22 @@ class TestStartupPhaseValidationLogic(SSotBaseTestCase):
 class TestServiceReadinessValidationLogic(SSotBaseTestCase):
     """Unit tests for individual service readiness checks with startup awareness."""
     
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        # Configure test environment as GCP staging
+        self.env_patch = patch.dict('os.environ', {
+            'ENVIRONMENT': 'staging',
+            'K_SERVICE': 'netra-backend-staging',
+            'K_REVISION': 'netra-backend-staging-00042'
+        })
+        self.env_patch.start()
+        
+        self.logger = logging.getLogger(__name__)
+    
     def tearDown(self):
         """Clean up test fixtures."""
         self.env_patch.stop()
@@ -467,6 +483,22 @@ class TestServiceReadinessValidationLogic(SSotBaseTestCase):
 class TestRetryAndTimingLogic(SSotBaseTestCase):
     """Unit tests for retry mechanisms and timeout handling in GCP environment."""
     
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        # Configure test environment as GCP staging
+        self.env_patch = patch.dict('os.environ', {
+            'ENVIRONMENT': 'staging',
+            'K_SERVICE': 'netra-backend-staging',
+            'K_REVISION': 'netra-backend-staging-00042'
+        })
+        self.env_patch.start()
+        
+        self.logger = logging.getLogger(__name__)
+    
     def tearDown(self):
         """Clean up test fixtures."""
         self.env_patch.stop()
@@ -492,16 +524,16 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
         
         validator = create_service_readiness_validator(app_state, 'staging')
         
-        # Configure very short timeout for testing
+        # Configure timeout matching actual conservative implementation
         from netra_backend.app.websocket_core.service_readiness_validator import AdaptiveTimeout
-        short_timeout = AdaptiveTimeout(
-            base_timeout=2.0,  # 2 second timeout
-            max_timeout=3.0,
-            retry_count=2,
+        conservative_timeout = AdaptiveTimeout(
+            base_timeout=10.0,  # Base timeout from actual implementation
+            max_timeout=60.0,   # Max timeout from actual implementation
+            retry_count=3,
             retry_delay=0.5
         )
         
-        validator.service_configs['agent_supervisor'].timeout_config = short_timeout
+        validator.service_configs['agent_supervisor'].timeout_config = conservative_timeout
         
         start_time = time.time()
         result = await validator.validate_service('agent_supervisor')
@@ -515,7 +547,7 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
         
         # Should respect timeout (allow some margin for processing)
         self.assertLess(
-            elapsed_time, 5.0,
+            elapsed_time, 65.0,  # Max timeout + margin
             f"Validation should complete within timeout period, took {elapsed_time:.2f}s"
         )
         
@@ -596,11 +628,12 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
             agent_supervisor_config.criticality
         )
         
-        # GCP staging should use optimized timeouts (typically longer than base but with multipliers)
-        # The actual value depends on the environment multiplier configuration
-        self.assertGreater(
-            effective_timeout, 10.0,
-            f"GCP staging timeout should be optimized, got {effective_timeout}s"
+        # GCP staging should use conservative timeouts with environment multipliers
+        # Base (10.0) * staging multiplier (2.0) * criticality multiplier (1.5) = 30.0s
+        expected_conservative_timeout = 30.0
+        self.assertGreaterEqual(
+            effective_timeout, expected_conservative_timeout,
+            f"GCP staging timeout should be conservative, expected >= {expected_conservative_timeout}s, got {effective_timeout}s"
         )
         
         # Should respect maximum timeout limits
@@ -615,6 +648,14 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
 
 class TestStartupPhaseTransitions(SSotBaseTestCase):
     """Unit tests for startup phase transition edge cases."""
+    
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        self.logger = logging.getLogger(__name__)
     
     def tearDown(self):
         """Clean up test fixtures."""

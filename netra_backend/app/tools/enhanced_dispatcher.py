@@ -62,7 +62,7 @@ class EnhancedToolDispatcher(UnifiedToolDispatcher):
         super().__init__(*args, **kwargs)
     
     @classmethod
-    def create_for_user(cls, user_context: "UserExecutionContext", **kwargs) -> "EnhancedToolDispatcher":
+    async def create_for_user(cls, user_context: "UserExecutionContext", **kwargs) -> "EnhancedToolDispatcher":
         """Create enhanced dispatcher for user with deprecation warning."""
         warnings.warn(
             "EnhancedToolDispatcher.create_for_user() is deprecated. Use "
@@ -70,8 +70,8 @@ class EnhancedToolDispatcher(UnifiedToolDispatcher):
             DeprecationWarning,
             stacklevel=2
         )
-        # Delegate to SSOT implementation
-        instance = UnifiedToolDispatcher.create_for_user(user_context, **kwargs)
+        # Delegate to SSOT implementation - CRITICAL FIX: await async method
+        instance = await UnifiedToolDispatcher.create_for_user(user_context, **kwargs)
         # Return as EnhancedToolDispatcher type for compatibility
         instance.__class__ = cls
         return instance

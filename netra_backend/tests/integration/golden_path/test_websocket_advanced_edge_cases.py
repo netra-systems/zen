@@ -45,7 +45,9 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection_manager import WebSocketConnectionManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 
@@ -92,7 +94,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_recovery_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize WebSocket components
         websocket_manager = WebSocketManager()
@@ -281,13 +283,23 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_ordering_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         websocket_manager = WebSocketManager()
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         # Track message ordering
         sent_messages = []
@@ -450,7 +462,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_large_msg_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         websocket_manager = WebSocketManager()
@@ -641,7 +653,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_concurrent_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         websocket_manager = WebSocketManager()
@@ -872,15 +884,15 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Standard user
         standard_context = await create_authenticated_user_context("test_auth_standard")
-        standard_user_id = UserID(str(uuid.uuid4()))
+        standard_user_id = standard_context.user_id  # Use the same user_id from auth_context
         
         # User with expiring token
         expiring_context = await auth_helper.create_expiring_auth_context("test_auth_expiring", expires_in_seconds=10)
-        expiring_user_id = UserID(str(uuid.uuid4()))
+        expiring_user_id = expiring_context.user_id  # Use the same user_id from auth_context
         
         # User with invalid token (for negative testing)
         invalid_context = auth_helper.create_invalid_auth_context("test_auth_invalid")
-        invalid_user_id = UserID(str(uuid.uuid4()))
+        invalid_user_id = invalid_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components
         websocket_manager = WebSocketManager()
@@ -1083,7 +1095,7 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         
         # Create authenticated user context
         auth_context = await create_authenticated_user_context("test_backpressure_user")
-        user_id = UserID(str(uuid.uuid4()))
+        user_id = auth_context.user_id  # Use the same user_id from auth_context
         
         # Initialize components with limited queue capacity
         websocket_manager = WebSocketManager(max_queue_size=50)  # Small queue for testing

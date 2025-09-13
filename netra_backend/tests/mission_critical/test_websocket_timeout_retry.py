@@ -42,7 +42,7 @@ import pytest
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
-from netra_backend.app.websocket_core import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 

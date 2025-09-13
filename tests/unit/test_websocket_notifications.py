@@ -138,7 +138,7 @@
             # Removed problematic line: @pytest.mark.asyncio
             # Removed problematic line: async def test_enhanced_execution_engine_sends_notifications():
                 # REMOVED_SYNTAX_ERROR: """Test that enhanced execution engine sends proper notifications."""
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
 
                 # Create mocks

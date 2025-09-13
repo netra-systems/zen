@@ -2123,3 +2123,86 @@ class WebSocketEmitterPool:
                 await emitter.cleanup()
             self._pool.clear()
             logger.info("WebSocketEmitterPool shutdown complete")
+
+
+# Add factory methods to UnifiedWebSocketEmitter class
+# These are added at the module level to extend the existing class
+def _add_factory_methods_to_unified_emitter():
+    """Add factory methods to UnifiedWebSocketEmitter class for Issue #582 remediation."""
+    
+    @classmethod
+    def create_for_user(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_context: 'UserExecutionContext'
+    ) -> 'UnifiedWebSocketEmitter':
+        """
+        Factory method to create UnifiedWebSocketEmitter for a user.
+        
+        This method provides the factory pattern interface expected by
+        WebSocket bridge components and other factory consumers.
+        
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_context: User execution context with user_id
+            
+        Returns:
+            UnifiedWebSocketEmitter: Configured instance for the user
+            
+        Raises:
+            ValueError: If required parameters are missing or invalid
+        """
+        if not user_context:
+            raise ValueError("UnifiedWebSocketEmitter.create_for_user requires valid user_context")
+        
+        user_id = getattr(user_context, 'user_id', None)
+        if not user_id:
+            raise ValueError("UnifiedWebSocketEmitter.create_for_user requires user_id in user_context")
+        
+        # Delegate to WebSocketEmitterFactory.create_scoped_emitter
+        return WebSocketEmitterFactory.create_scoped_emitter(
+            manager=manager,
+            context=user_context
+        )
+    
+    @classmethod
+    def for_user(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_id: str,
+        context: Optional['UserExecutionContext'] = None
+    ) -> 'UnifiedWebSocketEmitter':
+        """
+        Factory method to create UnifiedWebSocketEmitter for a specific user ID.
+        
+        This method provides a simplified factory interface when only user_id is available.
+        
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_id: Target user ID
+            context: Optional execution context
+            
+        Returns:
+            UnifiedWebSocketEmitter: Configured instance for the user
+            
+        Raises:
+            ValueError: If required parameters are missing or invalid
+        """
+        if not user_id:
+            raise ValueError("UnifiedWebSocketEmitter.for_user requires valid user_id")
+        
+        # Delegate to WebSocketEmitterFactory.create_emitter
+        return WebSocketEmitterFactory.create_emitter(
+            manager=manager,
+            user_id=user_id,
+            context=context
+        )
+    
+    # Attach methods to the class
+    UnifiedWebSocketEmitter.create_for_user = create_for_user
+    UnifiedWebSocketEmitter.for_user = for_user
+    
+    logger.info("Factory methods added to UnifiedWebSocketEmitter - Issue #582 remediation complete")
+
+# Apply the factory methods
+_add_factory_methods_to_unified_emitter()

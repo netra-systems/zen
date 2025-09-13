@@ -503,5 +503,68 @@ __all__ = [
     'validate_test_environment',
     
     # Patches
-    'create_test_environment_patch'
+    'create_test_environment_patch',
+    
+    # Issue #485 fix: Missing class export
+    'EnvironmentIsolation'
 ]
+
+
+# Issue #485 fix: Add EnvironmentIsolation class for test infrastructure validation
+class EnvironmentIsolation:
+    """
+    Environment isolation for test infrastructure validation.
+    
+    This class provides isolation capabilities required by Issue #485 test
+    infrastructure to validate business value protection systems.
+    """
+    
+    def __init__(self, test_id: Optional[str] = None):
+        """Initialize environment isolation."""
+        self.test_id = test_id or f"test_{id(self)}"
+        self.manager = get_test_env_manager()
+        self._isolation_active = False
+        
+    def enable_isolation(self):
+        """Enable environment isolation."""
+        self._isolation_active = True
+        if hasattr(self.manager.env, 'enable_isolation'):
+            self.manager.env.enable_isolation()
+        logger.debug(f"Environment isolation enabled for {self.test_id}")
+    
+    def disable_isolation(self):
+        """Disable environment isolation."""
+        self._isolation_active = False
+        if hasattr(self.manager.env, 'disable_isolation'):
+            self.manager.env.disable_isolation()
+        logger.debug(f"Environment isolation disabled for {self.test_id}")
+    
+    def get_env(self, key: str, default: Any = None) -> Any:
+        """Get environment variable with isolation."""
+        return self.manager.env.get(key, default)
+    
+    def set_env(self, key: str, value: str):
+        """Set environment variable with isolation."""
+        self.manager.set_test_var(key, value)
+    
+    @contextmanager
+    def isolated_environment(self):
+        """Context manager for isolated environment."""
+        self.enable_isolation()
+        try:
+            yield self
+        finally:
+            self.disable_isolation()
+    
+    def validate_isolation(self) -> bool:
+        """Validate that isolation is working correctly."""
+        return self._isolation_active and self.manager.isolation_enabled
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for validation."""
+        return {
+            "test_id": self.test_id,
+            "isolation_active": self._isolation_active,
+            "manager_isolation_enabled": self.manager.isolation_enabled,
+            "isolated_vars_count": len(self.manager.isolated_vars)
+        }

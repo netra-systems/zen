@@ -81,7 +81,7 @@ class TestWebSocketE2Eer:
         except Exception as e:
             # Fallback to test endpoint if main endpoint fails
             test_url = "ws://localhost:8000/ws/test"
-            ws = await websockets.connect(test_url, timeout=10.0)
+            ws = await websockets.connect(test_url, open_timeout=10.0)
         
         conn_id = str(uuid.uuid4())
         self.connections[conn_id] = ws

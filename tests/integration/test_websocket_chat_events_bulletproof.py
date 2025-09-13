@@ -38,7 +38,8 @@ if project_root not in sys.path:
 # Import production components
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# SECURITY FIX: Use UserExecutionEngine SSOT instead of deprecated ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.unified_tool_execution import (
     UnifiedToolExecutionEngine,

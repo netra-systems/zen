@@ -98,6 +98,7 @@
     "events_sent_count",
     "events_sent_total",
     "evidence_count",
+    "execution_count",
     "existing_connections_count",
     "exporters_count",
     "extraction_count",

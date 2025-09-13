@@ -43,7 +43,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 # Import verified production components per SSOT_IMPORT_REGISTRY.md
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry, UserAgentSession
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge

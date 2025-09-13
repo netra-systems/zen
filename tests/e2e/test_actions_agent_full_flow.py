@@ -51,7 +51,7 @@ except ImportError:
     from netra_backend.app.agents.data_helper_agent import DataHelperAgent as ActionsAgent
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager

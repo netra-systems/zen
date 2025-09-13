@@ -344,6 +344,10 @@ class UnifiedWebSocketManager:
         self.active_connections = {}  # Compatibility mapping
         self.connection_registry = {}  # Registry for connection objects
         
+        # Event listener support for testing
+        self.on_event_emitted: Optional[callable] = None
+        self._event_listeners: List[callable] = []
+        
         logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
     
     def _initialize_unified_mode(self):
@@ -395,6 +399,49 @@ class UnifiedWebSocketManager:
         self._background_tasks = {}
         
         logger.info(f"Isolated mode initialized for user context")
+    
+    def add_event_listener(self, listener: callable) -> None:
+        """Add an event listener for WebSocket events.
+        
+        This method provides compatibility with test frameworks that expect
+        event listener functionality for capturing WebSocket events during testing.
+        
+        Args:
+            listener: Callable that will receive event data when events are emitted
+        """
+        if listener not in self._event_listeners:
+            self._event_listeners.append(listener)
+            logger.debug(f"Added WebSocket event listener: {listener}")
+    
+    def remove_event_listener(self, listener: callable) -> None:
+        """Remove an event listener.
+        
+        Args:
+            listener: Callable to remove from the event listeners list
+        """
+        if listener in self._event_listeners:
+            self._event_listeners.remove(listener)
+            logger.debug(f"Removed WebSocket event listener: {listener}")
+    
+    def _notify_event_listeners(self, event: Dict[str, Any]) -> None:
+        """Notify all event listeners about a WebSocket event.
+        
+        Args:
+            event: Event data to send to listeners
+        """
+        # Call the on_event_emitted callback if set (for compatibility with existing tests)
+        if self.on_event_emitted:
+            try:
+                self.on_event_emitted(**event)
+            except Exception as e:
+                logger.warning(f"Error in on_event_emitted callback: {e}")
+        
+        # Call all registered event listeners
+        for listener in self._event_listeners:
+            try:
+                listener(event)
+            except Exception as e:
+                logger.warning(f"Error in event listener {listener}: {e}")
     
     def _initialize_emergency_mode(self, config: Dict[str, Any]):
         """Initialize emergency mode for service continuity."""
@@ -750,6 +797,24 @@ class UnifiedWebSocketManager:
         validated_user_id = ensure_user_id(user_id)
         return self._user_connections.get(validated_user_id, set()).copy()
     
+    def get_connection_thread_id(self, connection_id: Union[str, ConnectionID]) -> Optional[str]:
+        """Get the thread_id for a specific connection."""
+        connection = self.get_connection(connection_id)
+        return connection.thread_id if connection else None
+    
+    def get_user_connections_by_thread(self, user_id: Union[str, UserID], thread_id: str) -> Set[str]:
+        """Get all connections for a user filtered by thread_id."""
+        validated_user_id = ensure_user_id(user_id)
+        user_connections = self._user_connections.get(validated_user_id, set())
+        
+        thread_connections = set()
+        for conn_id in user_connections:
+            connection = self.get_connection(conn_id)
+            if connection and connection.thread_id == thread_id:
+                thread_connections.add(conn_id)
+        
+        return thread_connections
+    
     async def wait_for_connection(self, user_id: str, timeout: float = 5.0, check_interval: float = 0.1) -> bool:
         """
         Wait for a WebSocket connection to be established for a user.
@@ -1072,6 +1137,17 @@ class UnifiedWebSocketManager:
                 
                 try:
                     await self.send_to_user(user_id, message)
+                    
+                    # Notify event listeners for testing/monitoring
+                    event_data = {
+                        "event_type": event_type,
+                        "user_id": str(user_id),
+                        "data": data,
+                        "timestamp": message.get("timestamp"),
+                        "critical": True
+                    }
+                    self._notify_event_listeners(event_data)
+                    
                     # Success! Return immediately
                     return
                 except Exception as e:
@@ -1223,7 +1299,8 @@ class UnifiedWebSocketManager:
                     'connection_id': conn_id,
                     'active': is_active,
                     'connected_at': connection.connected_at.isoformat(),
-                    'metadata': connection.metadata or {}
+                    'metadata': connection.metadata or {},
+                    'thread_id': connection.thread_id
                 })
         
         return {
@@ -1234,13 +1311,14 @@ class UnifiedWebSocketManager:
             'connections': connection_details
         }
     
-    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None) -> Any:
+    async def connect_user(self, user_id: str, websocket: Any, connection_id: str = None, thread_id: str = None) -> Any:
         """Legacy compatibility method for connecting a user.
         
         Args:
             user_id: User identifier
             websocket: WebSocket connection
             connection_id: Optional preliminary connection ID to preserve state machine continuity
+            thread_id: Optional thread context to preserve thread isolation
         """
         from datetime import datetime
         
@@ -1262,7 +1340,8 @@ class UnifiedWebSocketManager:
             connection_id=final_connection_id,
             user_id=user_id,
             websocket=websocket,
-            connected_at=datetime.now()
+            connected_at=datetime.now(),
+            thread_id=thread_id
         )
         await self.add_connection(connection)
         
@@ -2512,6 +2591,77 @@ class UnifiedWebSocketManager:
         """
         # Use existing broadcast method
         await self.broadcast(message)
+    
+    async def send_message(self, connection_id: str, message: dict) -> bool:
+        """
+        Send direct message to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method is required by WebSocket 
+        manager interface validation tests and agent event delivery in Golden Path.
+        Missing this method blocks agent events (agent_started, agent_thinking, 
+        tool_executing, tool_completed, agent_completed) affecting $500K+ ARR.
+        
+        Args:
+            connection_id: Unique connection identifier  
+            message: Message payload to send
+            
+        Returns:
+            bool: Success status of message delivery
+        """
+        try:
+            # Validate connection exists
+            connection = self.get_connection(connection_id)
+            if not connection:
+                logger.warning(f"send_message failed: connection {connection_id} not found")
+                return False
+            
+            if not connection.websocket:
+                logger.warning(f"send_message failed: connection {connection_id} has no websocket")
+                return False
+            
+            # Safely serialize message for WebSocket transmission
+            safe_message = _serialize_message_safely(message)
+            
+            # Send message via WebSocket
+            await connection.websocket.send_json(safe_message)
+            
+            logger.debug(f"✅ Message sent successfully to connection {connection_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ send_message failed for connection {connection_id}: {e}")
+            return False
+    
+    async def send_event(self, connection_id: str, event_type: str, event_data: dict) -> bool:
+        """
+        Send event to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method provides standard event 
+        interface expected by WebSocket validation tests and agent systems.
+        
+        Args:
+            connection_id: Unique connection identifier
+            event_type: Type of event being sent
+            event_data: Event payload data
+            
+        Returns:
+            bool: Success status of event delivery
+        """
+        try:
+            # Create event message structure
+            event_message = {
+                "type": event_type,
+                "data": event_data,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "connection_id": connection_id
+            }
+            
+            # Use send_message for actual delivery
+            return await self.send_message(connection_id, event_message)
+            
+        except Exception as e:
+            logger.error(f"❌ send_event failed for connection {connection_id}, event {event_type}: {e}")
+            return False
     
     async def broadcast_system_message(self, message: Dict[str, Any]) -> None:
         """

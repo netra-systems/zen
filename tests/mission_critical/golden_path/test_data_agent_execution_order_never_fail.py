@@ -59,7 +59,7 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType
 
 # Import real agent execution components - NO MOCKS
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge

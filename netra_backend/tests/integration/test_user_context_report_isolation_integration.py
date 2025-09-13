@@ -23,7 +23,7 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message, MessageType
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import IsolatedEnvironment
 

@@ -55,8 +55,8 @@ sys.modules['netra_backend.app.websocket_core.get_websocket_manager'] = Mock()
 
 try:
     # Import execution engine components (absolute imports only)
-    from netra_backend.app.agents.supervisor.execution_engine import (
-        ExecutionEngine,
+    from netra_backend.app.agents.supervisor.user_execution_engine import (
+    UserExecutionEngine as ExecutionEngine,
         create_request_scoped_engine,
         create_execution_context_manager,
         detect_global_state_usage,
@@ -70,7 +70,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.core.agent_execution_tracker import ExecutionState
 except ImportError as e:
-    pytest.skip(f"Skipping execution_engine tests due to import error: {e}")
+    pytest.skip(f"Skipping execution_engine tests due to import error: {e}", allow_module_level=True)
 
 
 class MockUserExecutionContext:

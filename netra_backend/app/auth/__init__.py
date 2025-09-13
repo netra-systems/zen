@@ -14,6 +14,31 @@ NOTE: Tests expect this location (app.auth) instead of app.services.auth.
 This package provides compatibility imports.
 """
 
+from enum import Enum
+from typing import Dict, Optional, Any
+from dataclasses import dataclass
+from datetime import datetime
+
+
+class AuthMethodType(Enum):
+    """Authentication method types."""
+    JWT_BEARER = "jwt_bearer"
+    OAUTH2 = "oauth2"
+    API_KEY = "api_key"
+    SESSION = "session"
+
+
+@dataclass
+class SecurityAuditEvent:
+    """Security audit event for logging authentication activities."""
+    event_type: str
+    user_id: Optional[str] = None
+    method: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    success: bool = True
+    error_message: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
 # Import from the canonical auth service implementation
 try:
     from netra_backend.app.services.auth import *
@@ -27,6 +52,7 @@ except ImportError:
     # Fallback minimal implementations if services not available
     from typing import Dict, Optional, Any
     from dataclasses import dataclass
+    from enum import Enum
     
     @dataclass
     class AuthenticationResult:
@@ -39,6 +65,7 @@ except ImportError:
     class AuthenticationError(Exception):
         """Basic authentication error."""
         pass
+    
     
     class UnifiedAuthenticationService:
         """Basic authentication service."""

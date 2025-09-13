@@ -42,6 +42,9 @@ class BackgroundTask:
 class BackgroundTaskManager:
     """Manages background tasks and their lifecycle."""
     
+    # Default timeout for operations (seconds)
+    DEFAULT_TIMEOUT = 30
+    
     def __init__(self):
         self.tasks: Dict[str, BackgroundTask] = {}
         self._running = True
@@ -114,7 +117,7 @@ class BackgroundTaskManager:
         
         return False
     
-    async def wait_for_task(self, task_id: str, timeout: Optional[float] = None) -> Optional[Any]:
+    async def wait_for_task(self, task_id: str, timeout: Optional[float] = DEFAULT_TIMEOUT) -> Optional[Any]:
         """Wait for a task to complete."""
         if task_id not in self.tasks:
             return None
@@ -148,7 +151,7 @@ class BackgroundTaskManager:
         return [task for task in self.tasks.values() 
                 if task.status == TaskStatus.RUNNING]
     
-    async def shutdown(self, timeout: int = 30):
+    async def shutdown(self, timeout: int = DEFAULT_TIMEOUT):
         """Shutdown task manager and cancel all running tasks."""
         logger.info("Shutting down BackgroundTaskManager")
         self._running = False

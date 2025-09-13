@@ -87,6 +87,8 @@ The Netra Core system implements a **Factory-based, request-scoped architecture*
 - Docker & Docker Compose
 - PostgreSQL 15+
 - Redis (for caching)
+- Node.js 18+ (for frontend)
+- gcloud CLI (for GCP deployment)
 
 ### Installation
 
@@ -112,6 +114,28 @@ python netra_backend/manage.py migrate
 # Start the application
 docker-compose up
 ```
+
+### 🚀 Quick Demo Launch
+
+For a quick staging demo with automatic setup:
+
+```bash
+# Using Claude Code command (recommended)
+/run-demo
+
+# Or using the Python script directly
+python scripts/staging_demo_setup.py --frontend gcp  # Use GCP frontend
+python scripts/staging_demo_setup.py --frontend localhost  # Use local frontend
+```
+
+This command handles all setup including:
+- GCP authentication
+- Environment configuration
+- Secret Manager access verification
+- Service health checks
+- Automatic browser launch
+
+See [Staging Demo Setup Guide](./docs/STAGING_DEMO_SETUP.md) for detailed instructions.
 
 ## 📖 Documentation
 

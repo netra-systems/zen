@@ -644,11 +644,7 @@ class UnifiedTestRunner:
         # Determine if Docker is actually needed based on test categories
         if not self._docker_required_for_tests(args, running_e2e):
             print("[INFO] Docker not required for selected test categories")
-            return
-        
-        # Determine if Docker is actually needed based on test categories
-        if not self._docker_required_for_tests(args, running_e2e):
-            print("[INFO] Docker not required for selected test categories")
+            print("[INFO] Skipping all Docker operations (initialization, health checks, service management)")
             return
             
         # First, try to use the simple Docker manager for automatic startup
@@ -757,6 +753,10 @@ class UnifiedTestRunner:
         
         # Acquire environment with locking
         try:
+            if not self.docker_manager:
+                print("[ERROR] Docker manager not initialized - this should not happen")
+                return
+                
             self.docker_environment, self.docker_ports = self.docker_manager.acquire_environment()
             print(f"[INFO] Acquired Docker environment: {self.docker_environment}")
             
@@ -799,6 +799,9 @@ class UnifiedTestRunner:
                 
                 try:
                     # Check if containers exist but are unhealthy
+                    if not self.docker_manager:
+                        print("  Docker manager not available for container detection")
+                        continue
                     existing_containers = self.docker_manager._detect_existing_dev_containers()
                     if existing_containers:
                         print(f"  Found {len(existing_containers)} existing containers")
@@ -807,13 +810,16 @@ class UnifiedTestRunner:
                         print("  Attempting to restart unhealthy services...")
                         for service in existing_containers.keys():
                             try:
-                                self.docker_manager.restart_service(service)
+                                if self.docker_manager:
+                                    self.docker_manager.restart_service(service)
+                                else:
+                                    print(f"    Warning: Docker manager not available to restart {service}")
                             except Exception as restart_err:
                                 print(f"    Warning: Could not restart {service}: {restart_err}")
                         
                         # Wait for services with longer timeout
                         print(f"  Waiting up to {30 + attempt * 10}s for services to become healthy...")
-                        if self.docker_manager.wait_for_services(timeout=30 + attempt * 10):
+                        if self.docker_manager and self.docker_manager.wait_for_services(timeout=30 + attempt * 10):
                             print("\n PASS:  Docker services recovered successfully!")
                             return  # Recovery successful
                     
@@ -823,11 +829,16 @@ class UnifiedTestRunner:
                         
                         # Clean up any stale resources first
                         try:
-                            self.docker_manager.cleanup_stale_resources()
+                            if self.docker_manager:
+                                self.docker_manager.cleanup_stale_resources()
                         except Exception:
                             pass  # Ignore cleanup errors
                         
                         # Try to start services again
+                        if not self.docker_manager:
+                            print("  Docker manager not available for service startup")
+                            continue
+                            
                         if env_type == "test":
                             # First try normal environment
                             success = self.docker_manager.start_test_environment(
@@ -1498,18 +1509,21 @@ class UnifiedTestRunner:
         required_services = []
         
         # Per CLAUDE.md - real services are required for dev/staging and E2E
-        if args.real_services or args.env in ['dev', 'staging'] or running_e2e:
+        # But for staging environment, skip local service checks (use remote staging services)
+        if args.real_services or args.env in ['dev'] or (running_e2e and args.env != 'staging'):
             required_services.extend(['postgresql', 'redis'])
             # Add clickhouse if available in docker ports
             if hasattr(self, 'docker_ports') and self.docker_ports and 'clickhouse' in self.docker_ports:
                 required_services.append('clickhouse')
+        elif args.env == 'staging':
+            print("[INFO] Staging environment: using remote staging services, skipping local service checks")
             
         # Per CLAUDE.md - real LLM is required for E2E and dev/staging
         if args.real_llm or running_e2e or args.env in ['dev', 'staging']:
             required_services.append('llm')
             
-        # Check Docker availability for containerized services
-        if args.env in ['dev', 'staging'] or running_e2e:
+        # Check Docker availability for containerized services, but skip for staging with --no-docker
+        if args.env in ['dev'] or (running_e2e and args.env != 'staging'):
             # Try to detect if Docker is available and running
             try:
                 import subprocess
@@ -1522,6 +1536,8 @@ class UnifiedTestRunner:
                     required_services.append('docker')
             except (subprocess.SubprocessError, FileNotFoundError):
                 print("[WARNING] Docker not available - tests may fail if they require containerized services")
+        elif args.env == 'staging':
+            print("[INFO] Staging environment: using remote staging services, Docker check skipped")
         
         if not required_services:
             return
@@ -1558,22 +1574,37 @@ class UnifiedTestRunner:
         
         Returns True if Docker is needed, False if tests can run without Docker.
         """
-        # Skip Docker if explicitly disabled via command line
+        # Skip Docker if explicitly disabled via command line (highest priority)
         if hasattr(args, 'no_docker') and args.no_docker:
             print("[INFO] Docker explicitly disabled via --no-docker flag")
+            # Special handling for staging environment with --prefer-staging
+            if args.env == 'staging' and hasattr(args, 'prefer_staging') and args.prefer_staging:
+                print("[INFO] Staging environment with --prefer-staging: using remote services instead of Docker")
+                return False
+            # Special handling for staging environment  
+            elif args.env == 'staging':
+                print("[INFO] Staging environment: using remote staging services instead of Docker")
+                return False
+            # For other environments with --no-docker, truly disable Docker
             return False
         
-        # Always require Docker if explicitly requested
+        # Always require Docker if explicitly requested (but --no-docker overrides this above)
         if args.real_services:
             return True
         
-        # E2E tests always need Docker
+        # E2E tests need Docker UNLESS running in staging with remote services
         if running_e2e:
+            if args.env == 'staging':
+                print("[INFO] E2E tests in staging environment: using remote staging services")
+                return False
             return True
         
-        # Dev/staging environments need real services per CLAUDE.md
-        if args.env in ['dev', 'staging']:
+        # Dev environments need Docker, staging can use remote services per Issue #548 fix
+        if args.env == 'dev':
             return True
+        elif args.env == 'staging':
+            print("[INFO] Staging environment: using remote staging services, Docker not required")
+            return False
         
         # Get categories to run
         categories_to_run = self._determine_categories_to_run(args)
@@ -2864,6 +2895,74 @@ async def execute_orchestration_mode(args) -> int:
     finally:
         if controller:
             await controller.shutdown()
+
+    
+    # Issue #485 fix: Add missing collection method for test infrastructure validation  
+    def collect_tests_for_category(self, category: str) -> List[str]:
+        """
+        Collect tests for a specific category.
+        
+        Args:
+            category: Test category name
+            
+        Returns:
+            List of test file paths for the category
+        """
+        try:
+            # Get category configuration
+            category_obj = self.category_system.get_category(category)
+            if not category_obj:
+                logger.warning(f"Category '{category}' not found")
+                return []
+            
+            # Get services for this category
+            services = self._get_services_for_category(category)
+            collected_tests = []
+            
+            for service in services:
+                service_config = self.test_configs.get(service)
+                if not service_config:
+                    logger.warning(f"Service '{service}' not configured")
+                    continue
+                
+                test_dir = Path(service_config["path"]) / service_config["test_dir"]
+                if not test_dir.exists():
+                    logger.warning(f"Test directory not found: {test_dir}")
+                    continue
+                
+                # Use fast path collection to avoid Docker dependencies
+                try:
+                    # Find tests matching category patterns
+                    category_patterns = getattr(category_obj, 'patterns', [f"*{category}*", f"test_{category}*"])
+                    
+                    for pattern in category_patterns:
+                        pattern_tests = self._fast_path_collect_tests(pattern, category)
+                        collected_tests.extend(pattern_tests)
+                    
+                    # Also search by directory structure
+                    category_dirs = [
+                        test_dir / category,
+                        test_dir / f"{category}_tests", 
+                        test_dir / "unit" if category == "unit" else test_dir / category
+                    ]
+                    
+                    for cat_dir in category_dirs:
+                        if cat_dir.exists():
+                            test_files = list(cat_dir.rglob("test_*.py"))
+                            collected_tests.extend([str(f) for f in test_files])
+                    
+                except Exception as e:
+                    logger.error(f"Error collecting tests for service '{service}', category '{category}': {e}")
+                    continue
+            
+            # Remove duplicates and return
+            unique_tests = list(set(collected_tests))
+            logger.info(f"Collected {len(unique_tests)} tests for category '{category}'")
+            return unique_tests
+            
+        except Exception as e:
+            logger.error(f"Error collecting tests for category '{category}': {e}")
+            return []
 
 
 def main():

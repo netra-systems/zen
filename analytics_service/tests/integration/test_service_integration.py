@@ -368,7 +368,7 @@ class TestWebSocketServiceIntegration:
         analytics_ws_url = isolated_test_env.get("ANALYTICS_WEBSOCKET_URL")
         
         try:
-            async with websockets.connect(analytics_ws_url, timeout=5) as websocket:
+            async with websockets.connect(analytics_ws_url, open_timeout=5) as websocket:
                 # Send test analytics event
                 test_event = {
                     "type": "real_time_metric",
@@ -405,7 +405,7 @@ class TestWebSocketServiceIntegration:
         backend_ws_url = isolated_test_env.get("WEBSOCKET_URL")
         
         try:
-            async with websockets.connect(f"{backend_ws_url}/analytics", timeout=5) as websocket:
+            async with websockets.connect(f"{backend_ws_url}/analytics", open_timeout=5) as websocket:
                 # Subscribe to analytics notifications
                 subscribe_message = {
                     "type": "subscribe",

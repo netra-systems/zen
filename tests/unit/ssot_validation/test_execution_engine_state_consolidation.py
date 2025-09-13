@@ -417,7 +417,7 @@ class TestExecutionEngineStateConsolidation(SSotBaseTestCase):
                 engines_to_test = []
                 
                 try:
-                    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                     engines_to_test.append(('SupervisorExecutionEngine', ExecutionEngine))
                 except ImportError:
                     pass

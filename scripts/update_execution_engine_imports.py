@@ -36,7 +36,7 @@ class ImportUpdater:
                 'from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory as ExecutionEngineFactory',
             
             # Legacy execution engine imports -> Interface + adapter  
-            'from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine':
+            'from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine':
                 'from netra_backend.app.agents.execution_engine_legacy_adapter import ExecutionEngineFactory',
             
             # Consolidated engine direct imports -> Interface

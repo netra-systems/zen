@@ -322,7 +322,7 @@ class TestExecutionEngineGoldenPathProtection(SSotBaseTestCase):
             
             # Try fallback engines during transition
             try:
-                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 engines_available.append("ExecutionEngine")
             except ImportError:
                 pass

@@ -452,7 +452,7 @@ class TestAuthenticatedUserLoadPerformanceE2E(BaseE2ETest):
             # Connect with authentication
             ws_url_with_auth = f"{self.websocket_url}?token={user['access_token']}"
             
-            async with websockets.connect(ws_url_with_auth, timeout=10) as websocket:
+            async with websockets.connect(ws_url_with_auth, open_timeout=10) as websocket:
                 connection_end = time.time()
                 connection_time = connection_end - connection_start
                 

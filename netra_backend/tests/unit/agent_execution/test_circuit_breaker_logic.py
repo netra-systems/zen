@@ -22,6 +22,7 @@ import time
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
 from unittest.mock import Mock, patch
+from freezegun import freeze_time
 
 # SSOT imports as per SSOT_IMPORT_REGISTRY.md
 from netra_backend.app.core.agent_execution_tracker import (
@@ -37,9 +38,9 @@ from test_framework.ssot.base_test_case import SSotBaseTestCase
 class TestCircuitBreakerLogic(SSotBaseTestCase):
     """Unit tests for circuit breaker logic and state transitions."""
     
-    def setUp(self):
+    def setup_method(self):
         """Set up test fixtures."""
-        super().setUp()
+        super().setup_method()
         self.timeout_config = TimeoutConfig()
         self.tracker = AgentExecutionTracker()
         self.test_user_id = f"user_{uuid.uuid4().hex[:8]}"
@@ -125,9 +126,7 @@ class TestCircuitBreakerLogic(SSotBaseTestCase):
         recovery_timeout = self.timeout_config.recovery_timeout  # 30.0 seconds
         future_time = datetime.now(timezone.utc) + timedelta(seconds=recovery_timeout + 1)
         
-        with patch('datetime.datetime') as mock_datetime:
-            mock_datetime.now.return_value = future_time
-            
+        with freeze_time(future_time):
             # Should transition to HALF_OPEN
             self.assertTrue(circuit_breaker.can_execute())
             self.assertEqual(circuit_breaker.state, CircuitBreakerState.HALF_OPEN)
@@ -261,9 +260,7 @@ class TestCircuitBreakerLogic(SSotBaseTestCase):
         future_time = datetime.now(timezone.utc) + timedelta(
             seconds=self.timeout_config.recovery_timeout + 1
         )
-        with patch('datetime.datetime') as mock_datetime:
-            mock_datetime.now.return_value = future_time
-            
+        with freeze_time(future_time):
             self.assertTrue(circuit_breaker.can_execute())
             self.assertEqual(circuit_breaker.state, CircuitBreakerState.HALF_OPEN)
         

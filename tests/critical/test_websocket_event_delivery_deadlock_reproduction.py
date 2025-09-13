@@ -570,7 +570,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         
         # Test 3: WebSocket connectivity
         try:
-            async with websockets.connect(config.websocket_url, timeout=10) as ws:
+            async with websockets.connect(config.websocket_url, open_timeout=10) as ws:
                 infrastructure_status["websocket_connectivity"] = True
                 print(" SEARCH:  WebSocket connection: SUCCESS")
                 

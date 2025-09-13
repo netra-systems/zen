@@ -1,4 +1,3 @@
-from shared.isolated_environment import get_env
 #!/usr/bin/env python3
 """
 Pre-deployment OAuth Validation Script
@@ -23,6 +22,8 @@ from typing import Dict, List, Optional, Tuple
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from shared.isolated_environment import get_env
+
 try:
     # Google Cloud Secret Manager (optional)
     from google.cloud import secretmanager
@@ -39,8 +40,9 @@ class OAuthValidationError(Exception):
 class OAuthDeploymentValidator:
     """Validates OAuth configuration for deployment environments."""
     
-    def __init__(self, environment: str):
+    def __init__(self, environment: str, deployment_context: bool = False):
         self.environment = environment.lower()
+        self.deployment_context = deployment_context  # True when validating for actual deployment
         self.validation_errors: List[str] = []
         self.validation_warnings: List[str] = []
         self.project_id = get_env().get("GCP_PROJECT_ID") or "netra-staging"
@@ -48,6 +50,7 @@ class OAuthDeploymentValidator:
         print(f"OAuth Deployment Validator")
         print(f"Environment: {self.environment}")
         print(f"GCP Project: {self.project_id}")
+        print(f"Context: {'Deployment' if deployment_context else 'Development'}")
         print("=" * 60)
     
     def validate_environment_variables(self) -> Dict[str, Optional[str]]:
@@ -90,8 +93,11 @@ class OAuthDeploymentValidator:
             missing_required = [var for var in required_vars if not env_vars_to_check.get(var)]
             missing_preferred = [var for var in preferred_vars if not env_vars_to_check.get(var)]
             
-            if missing_required:
-                self.validation_errors.extend([f"{var} is required for {self.environment}" for var in missing_required])
+            # In deployment context, environment variables are optional if Secret Manager has them
+            if not self.deployment_context and missing_required:
+                self.validation_errors.extend([f"{var} is required for {self.environment} (non-deployment context)" for var in missing_required])
+            elif self.deployment_context and missing_required:
+                self.validation_warnings.extend([f"{var} missing locally - will validate via Secret Manager" for var in missing_required])
             
             if missing_preferred:
                 self.validation_warnings.extend([f"{var} is preferred for {self.environment}" for var in missing_preferred])
@@ -366,11 +372,16 @@ def main():
         action="store_true",
         help="Treat warnings as errors (fail deployment)"
     )
+    parser.add_argument(
+        "--deployment-context",
+        action="store_true",
+        help="Run in deployment context (relaxed validation for missing env vars)"
+    )
     
     args = parser.parse_args()
     
     # Run validation
-    validator = OAuthDeploymentValidator(args.environment)
+    validator = OAuthDeploymentValidator(args.environment, deployment_context=args.deployment_context)
     success, report = validator.validate_all()
     
     # Print report

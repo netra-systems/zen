@@ -21,6 +21,7 @@ Business Value Justification (BVJ):
 """
 
 import os
+import logging
 from typing import Dict, Any
 from enum import Enum
 from dataclasses import dataclass
@@ -88,17 +89,34 @@ class CloudNativeTimeoutManager:
     """
     
     def __init__(self, default_tier: Optional[TimeoutTier] = None):
-        """Initialize timeout manager with environment detection and tier support."""
+        """Initialize timeout manager with environment detection and tier support.
+        
+        **Issue #586 Enhancement**: Comprehensive startup logging for environment detection debugging.
+        """
+        logger = logging.getLogger(__name__)
+        
         self._env = get_env()
         self._environment = self._detect_environment()
         self._default_tier = default_tier or TimeoutTier.FREE
         self._config_cache = {}
         self._tier_config_cache = {}
         
+        # **Issue #586**: Log comprehensive startup information for debugging
+        self._log_startup_environment_info(logger)
+        
     def _detect_environment(self) -> TimeoutEnvironment:
-        """Detect current environment for timeout configuration."""
+        """Detect current environment for timeout configuration.
+        
+        **Issue #586 Fix**: Enhanced GCP environment detection using multiple markers
+        to ensure staging environment is properly recognized for timeout configuration.
+        """
         # Always refresh environment to handle dynamic changes during testing
         self._env = get_env()
+        
+        logger = logging.getLogger(__name__)
+        
+        # **Issue #586 Enhancement**: Multi-marker GCP environment detection
+        gcp_markers = self._detect_gcp_environment_markers()
         
         # PRIORITY 3 FIX: Check direct os.environ first for explicit ENVIRONMENT setting
         # This allows testing to override isolated environment defaults
@@ -108,21 +126,236 @@ class CloudNativeTimeoutManager:
         else:
             env_name = self._env.get("ENVIRONMENT", "development").lower()
         
+        # Log environment detection process for debugging
+        logger.info(f"Environment detection - Direct: {direct_env}, Env name: {env_name}, "
+                   f"GCP markers: {gcp_markers}")
+        
+        # **Issue #586**: Enhanced GCP Cloud Run detection with proper precedence
+        if gcp_markers['is_gcp_cloud_run']:
+            # PRIORITY FIX: GCP Cloud Run markers take precedence over ENVIRONMENT variable
+            # when there's a conflict, use GCP project ID and service name as authoritative
+            
+            # Direct project ID mapping (highest precedence)
+            if gcp_markers['project_id'] == 'netra-staging':
+                logger.info(f"Detected GCP Cloud Run STAGING environment via project ID - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif gcp_markers['project_id'] == 'netra-production':
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via project ID - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            
+            # Service name inference (second precedence) 
+            elif gcp_markers['service_name'] and 'staging' in gcp_markers['service_name']:
+                logger.info(f"Detected GCP Cloud Run STAGING environment via service name - Service: {gcp_markers['service_name']}, "
+                           f"Project: {gcp_markers['project_id']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif gcp_markers['service_name'] and 'production' in gcp_markers['service_name']:
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via service name - Service: {gcp_markers['service_name']}, "
+                           f"Project: {gcp_markers['project_id']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+                
+            # Project ID substring matching (third precedence)
+            elif 'staging' in (gcp_markers['project_id'] or ''):
+                logger.info(f"Detected GCP Cloud Run STAGING environment via project ID pattern - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif 'production' in (gcp_markers['project_id'] or ''):
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via project ID pattern - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            
+            # Environment variable confirmation (lowest precedence for Cloud Run)
+            elif env_name == "staging":
+                logger.info(f"Detected GCP Cloud Run STAGING environment via environment variable - Env: {env_name}, "
+                           f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif env_name == "production":
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via environment variable - Env: {env_name}, "
+                           f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            else:
+                # Unknown GCP environment - default to staging for safer timeouts
+                logger.warning(f"Unknown GCP Cloud Run environment detected, defaulting to staging for safety. "
+                             f"Project: {gcp_markers['project_id']}, Service: {gcp_markers['service_name']}, Env var: {env_name}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+        
         # Check for testing environment markers (but allow explicit overrides)
         if not direct_env and (self._env.get("PYTEST_CURRENT_TEST") or 
             self._env.get("TESTING") == "true" or 
             env_name == "testing"):
+            logger.info("Detected TESTING environment")
             return TimeoutEnvironment.TESTING
             
-        # Check for cloud environments
+        # Check for cloud environments via environment name
         if env_name == "staging":
+            logger.info("Detected STAGING environment via environment name")
             return TimeoutEnvironment.CLOUD_RUN_STAGING
         elif env_name == "production":
+            logger.info("Detected PRODUCTION environment via environment name")
             return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
         elif env_name == "testing":
+            logger.info("Detected TESTING environment via environment name")
             return TimeoutEnvironment.TESTING
         else:
+            logger.info(f"Detected LOCAL_DEVELOPMENT environment (default) - env_name: {env_name}")
             return TimeoutEnvironment.LOCAL_DEVELOPMENT
+    
+    def _detect_gcp_environment_markers(self) -> Dict[str, Any]:
+        """Detect GCP Cloud Run environment using multiple markers.
+        
+        **Issue #586 Solution**: Implements redundant detection with multiple GCP markers
+        to ensure reliable environment detection even when some markers are missing.
+        
+        Returns:
+            Dict containing GCP environment detection results
+        """
+        # GCP Cloud Run environment markers
+        k_service = self._env.get("K_SERVICE") or os.environ.get("K_SERVICE")
+        k_revision = self._env.get("K_REVISION") or os.environ.get("K_REVISION")
+        k_configuration = self._env.get("K_CONFIGURATION") or os.environ.get("K_CONFIGURATION")
+        
+        # GCP project identification
+        gcp_project_id = (self._env.get("GCP_PROJECT_ID") or 
+                         os.environ.get("GCP_PROJECT_ID") or
+                         self._env.get("GOOGLE_CLOUD_PROJECT") or 
+                         os.environ.get("GOOGLE_CLOUD_PROJECT"))
+        
+        # Additional GCP markers
+        cloud_run_service = (self._env.get("CLOUD_RUN_SERVICE") or 
+                           os.environ.get("CLOUD_RUN_SERVICE"))
+        gae_env = self._env.get("GAE_ENV") or os.environ.get("GAE_ENV")
+        function_name = self._env.get("FUNCTION_NAME") or os.environ.get("FUNCTION_NAME")
+        
+        # Cloud Run detection logic
+        is_cloud_run = bool(k_service)  # K_SERVICE is the primary Cloud Run marker
+        is_gae = bool(gae_env)
+        is_cloud_function = bool(function_name)
+        
+        # Determine if we're in GCP (any GCP service)
+        is_gcp = is_cloud_run or is_gae or is_cloud_function or bool(gcp_project_id)
+        
+        # Specifically detect Cloud Run (which is what we care about for Issue #586)
+        is_gcp_cloud_run = is_cloud_run
+        
+        markers = {
+            'is_gcp': is_gcp,
+            'is_gcp_cloud_run': is_gcp_cloud_run,
+            'is_gae': is_gae,
+            'is_cloud_function': is_cloud_function,
+            'project_id': gcp_project_id,
+            'service_name': k_service or cloud_run_service,
+            'revision': k_revision,
+            'configuration': k_configuration,
+            'markers_detected': {
+                'K_SERVICE': bool(k_service),
+                'K_REVISION': bool(k_revision),
+                'GCP_PROJECT_ID': bool(gcp_project_id),
+                'CLOUD_RUN_SERVICE': bool(cloud_run_service),
+                'GAE_ENV': bool(gae_env),
+                'FUNCTION_NAME': bool(function_name)
+            }
+        }
+        
+        return markers
+    
+    def _calculate_cold_start_buffer(self, environment: str, gcp_markers: Dict[str, Any]) -> float:
+        """Calculate cold start buffer for Cloud Run deployments.
+        
+        **Issue #586 Solution**: Implements cold start buffer calculations for GCP Cloud Run
+        to prevent timeout failures during service startup and cold start conditions.
+        
+        Args:
+            environment: Environment name (staging, production, development)
+            gcp_markers: GCP environment markers from _detect_gcp_environment_markers()
+            
+        Returns:
+            float: Cold start buffer in seconds
+        """
+        if not gcp_markers.get('is_gcp_cloud_run'):
+            return 0.0  # No buffer needed for non-Cloud Run environments
+        
+        # Base cold start buffers by environment
+        base_buffers = {
+            'staging': 3.0,     # Staging cold start overhead
+            'production': 5.0,  # Production cold start overhead (more conservative)
+            'development': 2.0  # Local development with Cloud Run
+        }
+        
+        base_buffer = base_buffers.get(environment.lower(), 2.0)
+        
+        # Additional buffer for complex services
+        service_name = gcp_markers.get('service_name') or ''
+        if 'backend' in service_name.lower():
+            base_buffer += 1.0  # Backend services need more time for initialization
+        
+        # Additional buffer for high-tier services requiring longer startup
+        project_id = gcp_markers.get('project_id') or ''
+        if 'production' in project_id.lower():
+            base_buffer += 1.0  # Production gets extra safety buffer
+        
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Cold start buffer calculated: {base_buffer}s for {environment} "
+                    f"(service: {service_name}, project: {project_id})")
+        
+        return base_buffer
+    
+    def _log_startup_environment_info(self, logger: logging.Logger) -> None:
+        """Log comprehensive environment detection information at startup.
+        
+        **Issue #586**: Provides detailed logging to debug environment detection issues
+        and validate that the correct timeout configuration is being used.
+        """
+        try:
+            # Get current environment detection results
+            gcp_markers = self._detect_gcp_environment_markers()
+            config = self.get_timeout_config()
+            
+            logger.info("=" * 80)
+            logger.info("CloudNativeTimeoutManager - Issue #586 Enhanced Environment Detection")
+            logger.info("=" * 80)
+            
+            # Environment Detection Summary
+            logger.info(f"🌍 DETECTED ENVIRONMENT: {self._environment.value}")
+            logger.info(f"🎯 DEFAULT TIER: {self._default_tier.value}")
+            logger.info(f"⏱️  WEBSOCKET RECV TIMEOUT: {config.websocket_recv_timeout}s")
+            logger.info(f"🤖 AGENT EXECUTION TIMEOUT: {config.agent_execution_timeout}s")
+            
+            # GCP Environment Markers
+            logger.info(f"☁️  GCP CLOUD RUN DETECTED: {gcp_markers['is_gcp_cloud_run']}")
+            if gcp_markers['is_gcp_cloud_run']:
+                logger.info(f"   📋 Project ID: {gcp_markers['project_id']}")
+                logger.info(f"   🏷️  Service Name: {gcp_markers['service_name']}")
+                logger.info(f"   📝 Revision: {gcp_markers['revision']}")
+            
+            # Environment Variables Summary
+            direct_env = os.environ.get("ENVIRONMENT")
+            isolated_env = self._env.get("ENVIRONMENT", "not_set")
+            logger.info(f"🔧 ENVIRONMENT (direct): {direct_env}")
+            logger.info(f"🔧 ENVIRONMENT (isolated): {isolated_env}")
+            
+            # Marker Detection Details
+            logger.info("🔍 GCP MARKER DETECTION:")
+            for marker, detected in gcp_markers['markers_detected'].items():
+                status = "✅" if detected else "❌"
+                logger.info(f"   {status} {marker}: {detected}")
+            
+            # Timeout Hierarchy Validation
+            hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
+            hierarchy_status = "✅ VALID" if hierarchy_valid else "❌ BROKEN"
+            gap = config.websocket_recv_timeout - config.agent_execution_timeout
+            logger.info(f"⚖️  TIMEOUT HIERARCHY: {hierarchy_status} (gap: {gap}s)")
+            
+            # Business Impact Assessment
+            if hierarchy_valid:
+                logger.info("💰 BUSINESS IMPACT: $200K+ MRR protected with valid timeout hierarchy")
+            else:
+                logger.error("💰 BUSINESS IMPACT: CRITICAL - Timeout hierarchy broken, $200K+ MRR at risk")
+            
+            logger.info("=" * 80)
+            
+        except Exception as e:
+            logger.error(f"Failed to log startup environment info: {e}", exc_info=True)
     
     def get_timeout_config(self, tier: Optional[TimeoutTier] = None) -> TimeoutConfig:
         """Get timeout configuration for current environment and customer tier.
@@ -175,55 +408,79 @@ class CloudNativeTimeoutManager:
             return self._apply_tier_enhancements(base_config, tier)
     
     def _get_base_staging_config(self, tier: TimeoutTier) -> TimeoutConfig:
-        """Get base staging configuration."""
+        """Get base staging configuration with Issue #586 cold start buffer integration."""
+        # Calculate cold start buffer for Cloud Run staging environment
+        gcp_markers = self._detect_gcp_environment_markers()
+        cold_start_buffer = self._calculate_cold_start_buffer('staging', gcp_markers)
+        
+        # Base timeouts with cold start buffer applied
+        base_websocket_recv = 15.0  # Issue #586 remedy: 15s base timeout
+        base_agent_execution = 12.0  # Must be < WebSocket recv timeout
+        
+        # Apply cold start buffer
+        websocket_recv_with_buffer = base_websocket_recv + cold_start_buffer
+        agent_execution_with_buffer = base_agent_execution + cold_start_buffer
+        
         return TimeoutConfig(
-            # CRITICAL FIX: WebSocket timeouts for Cloud Run staging (35s > 30s agent)
-            websocket_connection_timeout=60,  # Connection establishment
-            websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s  ->  35s
-            websocket_send_timeout=30,
-            websocket_heartbeat_timeout=90,
+            # ISSUE #586 FIX: WebSocket timeouts with cold start buffer for Cloud Run staging
+            websocket_connection_timeout=60,                      # Connection establishment with buffer
+            websocket_recv_timeout=int(websocket_recv_with_buffer),  # 15s base + cold start buffer
+            websocket_send_timeout=12 + int(cold_start_buffer),   # Send timeout with buffer
+            websocket_heartbeat_timeout=90,                       # Heartbeat remains high
             
-            # Agent execution timeouts (must be < WebSocket recv timeout)
-            agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s  ->  30s 
-            agent_thinking_timeout=25,
-            agent_tool_timeout=20,
-            agent_completion_timeout=15,
+            # Agent execution timeouts (must be < WebSocket recv timeout) with cold start buffer
+            agent_execution_timeout=int(agent_execution_with_buffer),  # 12s base + cold start buffer
+            agent_thinking_timeout=10 + int(cold_start_buffer),   # Thinking with buffer
+            agent_tool_timeout=8 + int(cold_start_buffer),        # Tool execution with buffer
+            agent_completion_timeout=6 + int(cold_start_buffer),  # Completion with buffer
             
-            # HTTP timeouts for Cloud Run
+            # HTTP timeouts for Cloud Run with cold start consideration
             http_request_timeout=30,
             http_connection_timeout=15,
             
-            # Test timeouts for staging environment
-            test_default_timeout=60,
-            test_integration_timeout=90,
-            test_e2e_timeout=120,
+            # Test timeouts for staging environment - Issue #586 optimized
+            test_default_timeout=30 + int(cold_start_buffer),     # INCREASED for Cloud Run tests
+            test_integration_timeout=45 + int(cold_start_buffer),
+            test_e2e_timeout=60 + int(cold_start_buffer),
             
             tier=tier
         )
     
     def _get_base_production_config(self, tier: TimeoutTier) -> TimeoutConfig:
-        """Get base production configuration."""
+        """Get base production configuration with Issue #586 cold start buffer integration."""
+        # Calculate cold start buffer for Cloud Run production environment
+        gcp_markers = self._detect_gcp_environment_markers()
+        cold_start_buffer = self._calculate_cold_start_buffer('production', gcp_markers)
+        
+        # Base timeouts with conservative production values
+        base_websocket_recv = 30.0  # Production base timeout
+        base_agent_execution = 25.0  # Must be < WebSocket recv timeout
+        
+        # Apply cold start buffer
+        websocket_recv_with_buffer = base_websocket_recv + cold_start_buffer
+        agent_execution_with_buffer = base_agent_execution + cold_start_buffer
+        
         return TimeoutConfig(
-            # Production WebSocket timeouts (slightly higher for reliability)
-            websocket_connection_timeout=90,
-            websocket_recv_timeout=45,        # Production: 45s > 40s agent
-            websocket_send_timeout=40, 
-            websocket_heartbeat_timeout=120,
+            # ISSUE #586 FIX: Production WebSocket timeouts with cold start buffer
+            websocket_connection_timeout=90,                      # Conservative connection timeout
+            websocket_recv_timeout=int(websocket_recv_with_buffer),  # 30s base + cold start buffer
+            websocket_send_timeout=25 + int(cold_start_buffer),   # Send timeout with buffer
+            websocket_heartbeat_timeout=120,                      # Long heartbeat for stability
             
-            # Production agent timeouts (must be < WebSocket recv timeout)
-            agent_execution_timeout=40,       # Production: longer for complex tasks
-            agent_thinking_timeout=35,
-            agent_tool_timeout=30,
-            agent_completion_timeout=20,
+            # Production agent timeouts (must be < WebSocket recv timeout) with cold start buffer
+            agent_execution_timeout=int(agent_execution_with_buffer),  # 25s base + cold start buffer
+            agent_thinking_timeout=20 + int(cold_start_buffer),   # Thinking with buffer
+            agent_tool_timeout=18 + int(cold_start_buffer),       # Tool execution with buffer
+            agent_completion_timeout=15 + int(cold_start_buffer), # Completion with buffer
             
             # Production HTTP timeouts
             http_request_timeout=45,
             http_connection_timeout=20,
             
-            # Production test timeouts (if tests run in prod)
-            test_default_timeout=90,
-            test_integration_timeout=150,
-            test_e2e_timeout=180,
+            # Production test timeouts (if tests run in prod) with cold start buffer
+            test_default_timeout=90 + int(cold_start_buffer),
+            test_integration_timeout=150 + int(cold_start_buffer),
+            test_e2e_timeout=180 + int(cold_start_buffer),
             
             tier=tier
         )
@@ -463,13 +720,21 @@ class CloudNativeTimeoutManager:
     def get_timeout_hierarchy_info(self) -> Dict[str, Any]:
         """Get timeout hierarchy information for debugging/validation.
         
+        **Issue #586 Enhancement**: Includes comprehensive environment detection information
+        for debugging environment detection issues.
+        
         Returns:
-            Dict[str, Any]: Timeout hierarchy details and validation
+            Dict[str, Any]: Timeout hierarchy details and validation with enhanced diagnostics
         """
         config = self.get_timeout_config()
+        gcp_markers = self._detect_gcp_environment_markers()
         
         # Validate hierarchy: WebSocket > Agent
         hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
+        
+        # Environment detection diagnostics
+        direct_env = os.environ.get("ENVIRONMENT")
+        isolated_env = self._env.get("ENVIRONMENT", "not_set")
         
         return {
             "environment": self._environment.value,
@@ -478,7 +743,27 @@ class CloudNativeTimeoutManager:
             "hierarchy_valid": hierarchy_valid,
             "hierarchy_gap": config.websocket_recv_timeout - config.agent_execution_timeout,
             "business_impact": "$200K+ MRR reliability" if hierarchy_valid else "CRITICAL: Hierarchy broken",
-            "config": config
+            "config": config,
+            # Issue #586 enhanced diagnostics
+            "environment_detection": {
+                "detected_environment": self._environment.value,
+                "environment_sources": {
+                    "direct": direct_env,
+                    "isolated": isolated_env
+                },
+                "gcp_detection": {
+                    "is_gcp_cloud_run": gcp_markers['is_gcp_cloud_run'],
+                    "project_id": gcp_markers['project_id'],
+                    "service_name": gcp_markers['service_name'],
+                    "markers_detected": gcp_markers['markers_detected']
+                }
+            },
+            "tier_info": {
+                "default_tier": self._default_tier.value,
+                "config_tier": config.tier.value if config.tier else None,
+                "streaming_timeout": config.streaming_timeout,
+                "streaming_phase_timeout": config.streaming_phase_timeout
+            }
         }
     
     def validate_timeout_hierarchy(self) -> bool:
@@ -600,10 +885,38 @@ def validate_timeout_hierarchy() -> bool:
 def get_timeout_hierarchy_info() -> Dict[str, Any]:
     """Get timeout hierarchy information for debugging.
     
+    **Issue #586**: Includes enhanced environment detection diagnostics.
+    
     Returns:
         Dict[str, Any]: Complete hierarchy information and validation status
     """
     return _get_timeout_manager().get_timeout_hierarchy_info()
+
+def get_environment_detection_info() -> Dict[str, Any]:
+    """Get detailed environment detection information for Issue #586 debugging.
+    
+    **Issue #586 Solution**: Provides comprehensive environment detection diagnostics
+    to help debug and validate GCP environment detection.
+    
+    Returns:
+        Dict[str, Any]: Complete environment detection diagnostics
+    """
+    manager = _get_timeout_manager()
+    gcp_markers = manager._detect_gcp_environment_markers()
+    
+    return {
+        "detected_environment": manager._environment.value,
+        "environment_sources": {
+            "direct": os.environ.get("ENVIRONMENT"),
+            "isolated": manager._env.get("ENVIRONMENT", "not_set")
+        },
+        "gcp_markers": gcp_markers,
+        "timeout_values": {
+            "websocket_recv_timeout": manager.get_websocket_recv_timeout(),
+            "agent_execution_timeout": manager.get_agent_execution_timeout()
+        },
+        "hierarchy_validation": manager.validate_timeout_hierarchy()
+    }
 
 def reset_timeout_manager() -> None:
     """Reset timeout manager for testing purposes."""
@@ -626,5 +939,6 @@ __all__ = [
     "get_streaming_timeout",
     "get_streaming_phase_timeout",
     "validate_timeout_hierarchy",
-    "get_timeout_hierarchy_info"
+    "get_timeout_hierarchy_info",
+    "get_environment_detection_info"  # Issue #586
 ]

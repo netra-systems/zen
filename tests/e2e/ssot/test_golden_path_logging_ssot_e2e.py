@@ -105,7 +105,6 @@ class TestGoldenPathLoggingSSOTE2E(SSotAsyncTestCase):
     @classmethod
     def setup_class(cls):
         """Set up E2E test environment."""
-        super().setup_class()
         
         # Verify staging environment
         env = IsolatedEnvironment.get_instance()

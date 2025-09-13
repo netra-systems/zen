@@ -219,7 +219,7 @@ class CrossServiceJWTValidator:
             ws_url = f"{self.websocket_url.replace('http', 'ws')}/ws?token={token}"
             
             try:
-                async with websockets.connect(ws_url, timeout=3) as websocket:
+                async with websockets.connect(ws_url, open_timeout=3) as websocket:
                     # Send a test message
                     test_message = {
                         "type": "ping",

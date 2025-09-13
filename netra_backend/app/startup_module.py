@@ -659,6 +659,41 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     app.state.clickhouse_client = None  # Will be initialized on-demand
 
 
+async def _should_check_docker_containers(logger: logging.Logger) -> bool:
+    """
+    Determine if Docker container checking should be performed based on environment.
+    
+    Uses CloudEnvironmentDetector to identify Cloud Run environments where Docker
+    commands are not available and should be skipped.
+    
+    Returns:
+        bool: True if Docker checks should be performed, False to skip in Cloud Run
+    """
+    try:
+        # Use CloudEnvironmentDetector for reliable environment detection
+        from netra_backend.app.core.environment_context.cloud_environment_detector import (
+            get_cloud_environment_detector, CloudPlatform
+        )
+        
+        detector = get_cloud_environment_detector()
+        context = await detector.detect_environment_context()
+        
+        # Skip Docker checks in Cloud Run environment
+        if context.cloud_platform == CloudPlatform.CLOUD_RUN:
+            logger.info(f"Detected Cloud Run environment ({context.environment_type.value}) - skipping Docker container checks")
+            logger.debug(f"Environment context: platform={context.cloud_platform.value}, service={context.service_name}")
+            return False
+        
+        # Perform Docker checks in local/development environments
+        logger.debug(f"Detected {context.cloud_platform.value} platform - Docker container checks enabled")
+        return True
+        
+    except Exception as e:
+        # If environment detection fails, default to checking Docker (safer for local dev)
+        logger.warning(f"Environment detection failed: {e} - defaulting to Docker checks enabled")
+        return True
+
+
 async def initialize_clickhouse(logger: logging.Logger) -> dict:
     """Initialize ClickHouse with clear status reporting and handle failures appropriately.
     
@@ -686,39 +721,45 @@ async def initialize_clickhouse(logger: logging.Logger) -> dict:
     
     # CRITICAL FIX: Check if ClickHouse is required based on environment
     from shared.isolated_environment import get_env
-    import subprocess
     clickhouse_required = (
         config.environment == "production" or
         get_env().get("CLICKHOUSE_REQUIRED", "false").lower() == "true"
     )
     result["required"] = clickhouse_required
     
-    # Check if ClickHouse container is running (for better error reporting)
-    try:
-        # Use docker only
-        cmd = 'docker'
+    # Check if Docker container checking should be performed
+    should_check_docker = await _should_check_docker_containers(logger)
+    
+    if should_check_docker:
+        # Check if ClickHouse container is running (for better error reporting)
         try:
-            result_cmd = subprocess.run(
-                [cmd, 'ps', '--format', '{{.Names}}'],
-                capture_output=True,
-                text=True,
-                timeout=2
-            )
-            if result_cmd.returncode == 0:
-                running_containers = result_cmd.stdout.strip().split('\n')
-                clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
-                if not clickhouse_running:
-                    logger.warning("=" * 80)
-                    logger.warning("CLICKHOUSE CONTAINER NOT RUNNING")
-                    logger.warning("=" * 80)
-                    logger.warning(f"No ClickHouse container found. To start:")
-                    logger.warning(f"  {cmd} start <clickhouse-container-name>")
-                    logger.warning(f"Or use: python scripts/docker_manual.py start")
-                    logger.warning("=" * 80)
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            logger.warning("Docker not available - cannot check ClickHouse container status")
-    except Exception:
-        pass  # Ignore container check errors
+            import subprocess
+            # Use docker only
+            cmd = 'docker'
+            try:
+                result_cmd = subprocess.run(
+                    [cmd, 'ps', '--format', '{{.Names}}'],
+                    capture_output=True,
+                    text=True,
+                    timeout=2
+                )
+                if result_cmd.returncode == 0:
+                    running_containers = result_cmd.stdout.strip().split('\n')
+                    clickhouse_running = any('clickhouse' in name.lower() for name in running_containers)
+                    if not clickhouse_running:
+                        logger.warning("=" * 80)
+                        logger.warning("CLICKHOUSE CONTAINER NOT RUNNING")
+                        logger.warning("=" * 80)
+                        logger.warning(f"No ClickHouse container found. To start:")
+                        logger.warning(f"  {cmd} start <clickhouse-container-name>")
+                        logger.warning(f"Or use: python scripts/docker_manual.py start")
+                        logger.warning("=" * 80)
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                logger.warning("Docker not available - cannot check ClickHouse container status")
+        except Exception:
+            pass  # Ignore container check errors
+    else:
+        logger.info("Skipping Docker container checks in Cloud Run environment")
     
     # CRITICAL FIX: Make ClickHouse optional in development and staging when not explicitly required
     if config.environment in ["development", "staging"] and not clickhouse_required:

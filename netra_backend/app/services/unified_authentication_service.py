@@ -562,8 +562,12 @@ class UnifiedAuthenticationService:
                 return normalized_token
             
             # FALLBACK: Query parameter (for testing compatibility)
-            if hasattr(websocket, 'query_params'):
-                token = websocket.query_params.get("token")
+            # FIVE WHYS FIX: Use QueryParams(websocket.url.query) instead of websocket.query_params
+            # Root Cause: WebSocket objects don't have query_params attribute, only url.query
+            if hasattr(websocket, 'url') and websocket.url and websocket.url.query:
+                from starlette.datastructures import QueryParams
+                query_params = QueryParams(websocket.url.query)
+                token = query_params.get("token")
                 if token:
                     logger.debug("UNIFIED AUTH: JWT token found in query parameters (fallback)")
                     return token

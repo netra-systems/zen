@@ -4,7 +4,7 @@
 
 ## 📋 Overview
 
-This index catalogues all 38 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
+This index catalogues all 39 custom Claude Code slash commands available for the Netra Apex project. These commands automate repetitive tasks and enforce project standards, particularly the **NO MOCKS** policy and real service testing requirements.
 
 **Location**: [`.claude/commands/`](../.claude/commands/) directory
 
@@ -16,6 +16,7 @@ This index catalogues all 38 custom Claude Code slash commands available for the
 - [`/test-real`](#test-real) - Run tests with real services
 - [`/websocket-test`](#websocket-test) - Test mission-critical WebSocket events
 - [`/canary`](#canary) - Standardized system health diagnostics
+- [`/run-demo`](#run-demo) - Setup and launch staging demo instantly
 
 ### 🔧 Standard Development (5-30 minutes)
 - [`/tdd`](#tdd) - Execute complete TDD workflow with real services
@@ -58,6 +59,7 @@ This index catalogues all 38 custom Claude Code slash commands available for the
 - [`/failingtestsgardener`](#failingtestsgardener) - Collect test issues and create GitHub issues
 - [`/gcploggardener`](#gcploggardener) - GCP log issue collector and GitHub issue creator
 - [`/testgardener`](#testgardener) - Test management and organization
+- [`/run-demo`](#run-demo) - Setup and launch staging demo with flexible frontend
 
 ---
 
@@ -708,6 +710,45 @@ This index catalogues all 38 custom Claude Code slash commands available for the
 
 ---
 
+#### `/run-demo`
+**Purpose**: Setup and launch Netra Apex staging demo with flexible frontend deployment  
+**Usage**: `/run-demo`  
+**Key Features**:
+- **Automatic GCP Authentication**: Handles gcloud authentication seamlessly
+- **Environment Configuration**: Sets up all required environment variables for staging
+- **Secret Manager Access**: Verifies access to JWT, OpenAI API key, database, and Redis secrets
+- **Service Health Checks**: Validates backend and frontend Cloud Run services are running
+- **Flexible Frontend**: Choose between GCP deployment or local development server
+- **Browser Launch**: Automatically opens frontend in default browser after setup
+- **Connectivity Testing**: Verifies all services are accessible before launching
+
+**Frontend Modes**:
+- **GCP Cloud Run**: Uses deployed frontend-staging service (production-like)
+- **Localhost**: Runs frontend locally on port 3000 (for development)
+
+**Process Flow**:
+1. Authenticate with gcloud if needed
+2. Set GCP project to netra-staging
+3. Configure environment variables
+4. Check Secret Manager access
+5. Validate Cloud Run services status
+6. Deploy services if not running (optional)
+7. Start local frontend if localhost mode selected
+8. Test connectivity to all services
+9. Open browser to frontend URL
+
+**Examples**:
+```bash
+/run-demo    # Interactive prompt for frontend mode selection
+```
+
+**Service URLs**:
+- Backend: https://backend-staging-906714043974.us-central1.run.app
+- Frontend (GCP): https://frontend-staging-906714043974.us-central1.run.app
+- Frontend (Local): http://localhost:3000
+
+---
+
 #### `/testgardener`
 **Purpose**: Test management and organization  
 **Usage**: `/testgardener [focus-area]`  
@@ -799,6 +840,7 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 ```bash
 /docker-rebuild              # Fresh start
 /compliance                  # Check standards  
+/run-demo                   # Launch staging demo
 /tdd feature module         # New feature with TDD
 /test-real                  # Run tests
 /pre-commit                 # Before committing
@@ -859,7 +901,7 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 | Duration | Commands | Purpose |
 |----------|----------|---------|
-| **< 5 min** | `/docker-rebuild`, `/compliance`, `/test-real`, `/websocket-test`, `/canary` | Quick checks and rebuilds |
+| **< 5 min** | `/docker-rebuild`, `/compliance`, `/test-real`, `/websocket-test`, `/canary`, `/run-demo` | Quick checks, rebuilds, and demo launch |
 | **5-30 min** | `/tdd`, `/agent-test`, `/pre-commit`, `/deploy-gcp`, `/debug-error` | Standard development tasks |  
 | **1-4 hours** | `/analyze-repository`, `/run-*-tests`, `/audit-*-logs`, `/test-create` | Analysis and testing |
 | **8-30+ hours** | `/ultimate-test-deploy-loop`, `/audit-staging-logs-gcp-loop`, `/test-create-integration`, `/test-create-unit-coverage`, `/ssotgardener`, `/gitcommitgardener`, `/gitissueprogressor`, `/audit-gcp-error-loop` | **Mission Critical & Repository Maintenance** - Long-running operations |
@@ -891,4 +933,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-01-11 | Commands: 37 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*
+*Last Updated: 2025-01-12 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*

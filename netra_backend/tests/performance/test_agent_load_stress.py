@@ -6,7 +6,7 @@ Tests concurrent agent requests, resource isolation, and performance degradation
 """
 
 from netra_backend.app.monitoring.metrics_collector import PerformanceMetric
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 # Test framework import - using pytest fixtures instead
 from pathlib import Path
 import sys
@@ -25,7 +25,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import psutil
 import pytest
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

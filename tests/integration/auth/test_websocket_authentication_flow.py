@@ -19,7 +19,7 @@ import uuid
 import base64
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.services.user_execution_context import UserExecutionContext

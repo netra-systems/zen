@@ -282,6 +282,108 @@ class WebSocketSSOTRouter:
             logger.error(f"Error during WebSocket subprotocol negotiation: {e}")
             return None
 
+    def _safe_get_query_params(self, websocket: WebSocket) -> Dict[str, Any]:
+        """
+        Safely extract query parameters from WebSocket URL with ASGI scope protection.
+        
+        CRITICAL FIX for Issue #517: Prevents 'URL' object has no attribute 'query_params' errors
+        by providing comprehensive ASGI scope validation and safe fallback handling.
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            Dict[str, Any]: Query parameters dict or empty dict if extraction fails
+        """
+        try:
+            # Phase 1: Validate websocket object structure
+            if not hasattr(websocket, 'url') or websocket.url is None:
+                logger.warning("WebSocket object missing URL attribute - ASGI scope may be malformed")
+                return {}
+                
+            # Phase 2: Check if URL has query_params attribute (proper FastAPI WebSocket)
+            if hasattr(websocket.url, 'query_params'):
+                query_params = websocket.url.query_params
+                if query_params is not None:
+                    return dict(query_params)
+                else:
+                    return {}
+            
+            # Phase 3: Fallback to URL parsing for malformed ASGI scopes
+            elif hasattr(websocket.url, 'query'):
+                from urllib.parse import parse_qs
+                raw_query = getattr(websocket.url, 'query', '')
+                if raw_query:
+                    parsed = parse_qs(raw_query)
+                    # Flatten single-item lists for cleaner output
+                    return {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
+                else:
+                    return {}
+                    
+            # Phase 4: Handle URL object cases
+            else:
+                logger.warning("WebSocket URL object lacks query_params attribute - applying safe extraction")
+                # Try to convert URL to string and parse manually
+                url_str = str(websocket.url)
+                if '?' in url_str:
+                    from urllib.parse import urlparse, parse_qs
+                    parsed_url = urlparse(url_str)
+                    parsed_params = parse_qs(parsed_url.query)
+                    return {k: v[0] if len(v) == 1 else v for k, v in parsed_params.items()}
+                else:
+                    return {}
+                    
+        except AttributeError as e:
+            logger.error(f"ASGI scope AttributeError in query params extraction: {e}")
+            return {}
+        except Exception as e:
+            logger.error(f"Unexpected error in safe query params extraction: {e}")
+            return {}
+
+    def _safe_get_websocket_path(self, websocket: WebSocket) -> str:
+        """
+        Safely extract path from WebSocket URL with ASGI scope protection.
+        
+        CRITICAL FIX for Issue #517: Prevents URL attribute access failures
+        by providing comprehensive ASGI scope validation and safe fallback handling.
+        
+        Args:
+            websocket: WebSocket connection object
+            
+        Returns:
+            str: URL path or "/ws" fallback if extraction fails
+        """
+        try:
+            # Phase 1: Validate websocket object structure
+            if not hasattr(websocket, 'url') or websocket.url is None:
+                logger.warning("WebSocket object missing URL attribute - using fallback path")
+                return "/ws"
+                
+            # Phase 2: Check if URL has path attribute
+            if hasattr(websocket.url, 'path'):
+                path = websocket.url.path
+                if path and isinstance(path, str):
+                    return path
+                else:
+                    logger.warning("WebSocket URL path is empty or invalid - using fallback")
+                    return "/ws"
+            
+            # Phase 3: Fallback to URL parsing for malformed ASGI scopes
+            else:
+                logger.warning("WebSocket URL object lacks path attribute - applying safe extraction")
+                # Try to convert URL to string and parse manually
+                url_str = str(websocket.url)
+                from urllib.parse import urlparse
+                parsed_url = urlparse(url_str)
+                return parsed_url.path or "/ws"
+                    
+        except AttributeError as e:
+            logger.error(f"ASGI scope AttributeError in path extraction: {e}")
+            return "/ws"
+        except Exception as e:
+            logger.error(f"Unexpected error in safe path extraction: {e}")
+            return "/ws"
+
     def _get_connection_mode(
         self, 
         websocket: WebSocket,
@@ -305,7 +407,7 @@ class WebSocketSSOTRouter:
                 logger.warning(f"Invalid WebSocket mode '{mode}', defaulting to MAIN")
         
         # URL path-based detection
-        path = websocket.url.path
+        path = self._safe_get_websocket_path(websocket)
         if "/factory" in path:
             return WebSocketMode.FACTORY
         elif "/isolated" in path:
@@ -351,8 +453,8 @@ class WebSocketSSOTRouter:
         connection_context = {
             "connection_id": connection_id,
             "websocket_url": str(websocket.url),
-            "path": websocket.url.path,
-            "query_params": dict(QueryParams(websocket.url.query)) if websocket.url.query else {},
+            "path": self._safe_get_websocket_path(websocket),
+            "query_params": self._safe_get_query_params(websocket),
             "mode_parameter": mode,
             "user_agent": user_agent,
             "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
@@ -387,7 +489,7 @@ class WebSocketSSOTRouter:
                     "unsupported_mode": str(connection_mode),
                     "available_modes": [mode.value for mode in WebSocketMode],
                     "mode_parameter": mode,
-                    "path": websocket.url.path,
+                    "path": self._safe_get_websocket_path(websocket),
                     "user_agent": user_agent,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "golden_path_impact": "CRITICAL - Connection rejected due to invalid mode"
@@ -409,7 +511,7 @@ class WebSocketSSOTRouter:
                 "error_message": str(e),
                 "connection_duration_seconds": round(connection_duration, 3),
                 "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
-                "path": websocket.url.path,
+                "path": self._safe_get_websocket_path(websocket),
                 "user_agent": user_agent,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "golden_path_impact": "CRITICAL - Connection failed completely"
@@ -511,13 +613,23 @@ class WebSocketSSOTRouter:
                 logger.warning("No app_state available for GCP readiness validation - proceeding")
             
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            # If client sends subprotocols, server MUST respond with one or reject the connection
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[MAIN MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[MAIN MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: PERMISSIVE AUTH REMEDIATION (with circuit breaker protection)
@@ -752,13 +864,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[FACTORY MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[FACTORY MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[FACTORY MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[FACTORY MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 3: Create isolated WebSocket manager via factory pattern
@@ -827,13 +948,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[ISOLATED MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[ISOLATED MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[ISOLATED MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[ISOLATED MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: SSOT Authentication with audit logging
@@ -925,13 +1055,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[LEGACY MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[LEGACY MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[LEGACY MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[LEGACY MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: Send legacy compatibility confirmation

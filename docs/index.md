@@ -60,6 +60,12 @@
 - [API Dual Channel Explanation](./API_DUAL_CHANNEL_EXPLANATION.md) - API security patterns
 - [Go-Live Acceptance Criteria](./ACCEPTANCE_CRITERIA_GO_LIVE_CHECKLIST.md) - Production readiness
 
+### 🚀 Deployment & Demo
+
+- **[Staging Demo Setup Guide](./STAGING_DEMO_SETUP.md)** 🆕 - **QUICK START**: Complete guide for launching staging demo with automated setup
+- **[⚡ /run-demo Command](./COMMAND_INDEX.md#run-demo)** 🚀 - **INSTANT DEMO**: One-command staging demo launch with flexible frontend options
+- [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Full deployment documentation
+
 ### 🚨 Error Reporting & Monitoring
 
 - **[GCP Error Reporting Architecture](./GCP_ERROR_REPORTING_ARCHITECTURE.md)** 🆕 - **CRITICAL**: Comprehensive GCP error reporting integration for production visibility

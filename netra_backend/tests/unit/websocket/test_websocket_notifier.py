@@ -47,6 +47,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # Import system under test
 from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.registry import AgentStatus
 
@@ -59,6 +60,12 @@ class MockWebSocketManager:
         self.sent_messages: List[Dict[str, Any]] = []
         self.broadcast_messages: List[Dict[str, Any]] = []
         self.sent_to_threads: Dict[str, List[Dict[str, Any]]] = {}
+        # Golden Path notification tracking
+        self.agent_started_calls: List[Dict[str, Any]] = []
+        self.agent_thinking_calls: List[Dict[str, Any]] = []
+        self.tool_executing_calls: List[Dict[str, Any]] = []
+        self.tool_completed_calls: List[Dict[str, Any]] = []
+        self.agent_completed_calls: List[Dict[str, Any]] = []
     
     async def send_to_thread(self, thread_id: str, message: Dict[str, Any]) -> bool:
         """Mock send_to_thread method."""
@@ -101,6 +108,53 @@ class MockWebSocketManager:
         self.sent_messages.clear()
         self.broadcast_messages.clear()
         self.sent_to_threads.clear()
+        # Clear Golden Path tracking
+        self.agent_started_calls.clear()
+        self.agent_thinking_calls.clear()
+        self.tool_executing_calls.clear()
+        self.tool_completed_calls.clear()
+        self.agent_completed_calls.clear()
+    
+    # Golden Path notification methods required by WebSocketNotifier validation
+    async def notify_agent_started(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_started for Golden Path compatibility."""
+        self.agent_started_calls.append({
+            **context,
+            "_test_notification_type": "agent_started",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_agent_thinking(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_thinking for Golden Path compatibility."""
+        self.agent_thinking_calls.append({
+            **context,
+            "_test_notification_type": "agent_thinking", 
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_tool_executing(self, context: Dict[str, Any]) -> None:
+        """Mock notify_tool_executing for Golden Path compatibility."""
+        self.tool_executing_calls.append({
+            **context,
+            "_test_notification_type": "tool_executing",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_tool_completed(self, context: Dict[str, Any]) -> None:
+        """Mock notify_tool_completed for Golden Path compatibility.""" 
+        self.tool_completed_calls.append({
+            **context,
+            "_test_notification_type": "tool_completed",
+            "_test_timestamp": time.time()
+        })
+    
+    async def notify_agent_completed(self, context: Dict[str, Any]) -> None:
+        """Mock notify_agent_completed for Golden Path compatibility."""
+        self.agent_completed_calls.append({
+            **context,
+            "_test_notification_type": "agent_completed",
+            "_test_timestamp": time.time()
+        })
 
 
 @pytest.fixture
@@ -138,31 +192,29 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         self.env.set("ENVIRONMENT", "test", source="websocket_notifier_test")
         self.env.set("WEBSOCKET_TIMEOUT", "5", source="websocket_notifier_test")
         
-        # Initialize mock manager and notifier for each test
+        # Initialize mock manager and execution context for each test
         self.mock_manager = MockWebSocketManager()
+        
+        # Create mock UserExecutionContext with required parameters
+        self.mock_exec_context = UserExecutionContext(
+            user_id="test_user_websocket_notifier",
+            thread_id="test_thread_websocket_notifier", 
+            run_id="test_run_websocket_notifier",
+            websocket_client_id="test_ws_client_websocket_notifier"
+        )
         
         # Suppress deprecation warning during testing
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            self.notifier = WebSocketNotifier.create_for_user(self.mock_manager)
+            self.notifier = WebSocketNotifier.create_for_user(self.mock_manager, self.mock_exec_context)
     
     def teardown_method(self, method):
         """Cleanup method for each test."""
-        # Use pytest-asyncio to handle async cleanup
+        # WebSocketNotifier doesn't have shutdown method, just clear references
         if hasattr(self, 'notifier'):
-            import asyncio
-            try:
-                # Try to run cleanup in existing event loop
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    # Schedule cleanup as a task
-                    asyncio.create_task(self.notifier.shutdown())
-                else:
-                    # Run cleanup synchronously
-                    loop.run_until_complete(self.notifier.shutdown())
-            except RuntimeError:
-                # Create new loop if needed
-                asyncio.run(self.notifier.shutdown())
+            self.notifier = None
+        if hasattr(self, 'mock_manager'):
+            self.mock_manager.clear_messages()
         super().teardown_method(method)
     
     # ============================================================================
@@ -173,7 +225,7 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         """Test WebSocketNotifier initialization with deprecation warning."""
         with warnings.catch_warnings(record=True) as warning_list:
             warnings.simplefilter("always")
-            notifier = WebSocketNotifier.create_for_user(self.mock_manager)
+            notifier = WebSocketNotifier.create_for_user(self.mock_manager, self.mock_exec_context)
             
             # Verify deprecation warning was issued
             self.assertEqual(len(warning_list), 1)
@@ -794,10 +846,15 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
     @pytest.mark.asyncio
     async def test_websocket_manager_none_handling(self):
         """Test handling when websocket_manager is None."""
-        # Create notifier with None manager
+        # Create notifier with None manager and execution context
+        mock_context = UserExecutionContext(
+            user_id="test_user_none",
+            thread_id="test_thread_none", 
+            run_id="test_run_none"
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            notifier_with_none = WebSocketNotifier.create_for_user(None)
+            notifier_with_none = WebSocketNotifier.create_for_user(None, mock_context)
         
         context = AgentExecutionContext("NoneAgent", "run_none", "thread_none", "user_none")
         
@@ -816,9 +873,14 @@ class TestWebSocketNotifierUnit(SSotAsyncTestCase, unittest.TestCase):
         """Test handling of WebSocket send failures."""
         failing_manager = MockWebSocketManager(should_fail=True)
         
+        mock_context = UserExecutionContext(
+            user_id="test_user_failing",
+            thread_id="test_thread_failing", 
+            run_id="test_run_failing"
+        )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            failing_notifier = WebSocketNotifier.create_for_user(failing_manager)
+            failing_notifier = WebSocketNotifier.create_for_user(failing_manager, mock_context)
         
         context = AgentExecutionContext("FailAgent", "run_fail", "thread_fail", "user_fail")
         

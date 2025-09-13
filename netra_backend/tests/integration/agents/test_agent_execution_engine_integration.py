@@ -48,7 +48,8 @@ from shared.isolated_environment import get_env
 # Real infrastructure imports (NO MOCKS per CLAUDE.md)
 from netra_backend.app.database.session_manager import DatabaseSessionManager
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+# ISSUE #565 SSOT MIGRATION: Use UserExecutionEngine with compatibility bridge
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     get_execution_engine_factory,
     ExecutionEngineFactory

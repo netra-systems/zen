@@ -19,6 +19,10 @@ from netra_backend.app.agents.utils import extract_json_from_response
 # DatabaseSessionManager removed - use SSOT database module get_db() instead
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.core.serialization_sanitizer import (
+    SerializableAgentResult,
+    sanitize_agent_result
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -365,6 +369,86 @@ class OptimizationsCoreSubAgent(BaseAgent):
     def _get_optimization_type(self, data: Dict[str, Any]) -> str:
         """Extract optimization type from data with fallback."""
         return data.get("optimization_type", data.get("type", "general"))
+    
+    def create_clean_optimization_result(self, result: Dict[str, Any], 
+                                       context: UserExecutionContext) -> SerializableAgentResult:
+        """Create clean, serializable optimization result for Issue #585 fix.
+        
+        Args:
+            result: Raw optimization result data
+            context: User execution context
+            
+        Returns:
+            SerializableAgentResult: Clean result safe for Redis caching
+        """
+        try:
+            # Extract optimization-specific data
+            optimization_insights = []
+            if "optimizations" in result:
+                for opt in result["optimizations"]:
+                    if isinstance(opt, dict):
+                        optimization_insights.append({
+                            "type": opt.get("type", "general"),
+                            "description": opt.get("description", ""),
+                            "impact": opt.get("impact", "unknown"),
+                            "confidence": opt.get("confidence_score", 0.0)
+                        })
+                    else:
+                        optimization_insights.append({
+                            "description": str(opt),
+                            "type": "general",
+                            "confidence": 0.5
+                        })
+            
+            # Extract cost analysis
+            cost_analysis = {}
+            if "cost_savings" in result:
+                cost_analysis["estimated_savings"] = result["cost_savings"]
+            if "performance_improvement" in result:
+                cost_analysis["performance_gain"] = result["performance_improvement"] 
+            if "confidence_score" in result:
+                cost_analysis["confidence"] = result["confidence_score"]
+                
+            # Extract recommendations
+            recommendations = []
+            if "recommendations" in result:
+                recs = result["recommendations"]
+                if isinstance(recs, list):
+                    recommendations = [str(r) for r in recs]
+                else:
+                    recommendations = [str(recs)]
+            
+            # Create clean result
+            return SerializableAgentResult(
+                success=True,
+                agent_name="OptimizationsCoreSubAgent",
+                duration=0.0,  # Duration tracking handled elsewhere
+                optimization_insights=optimization_insights,
+                cost_analysis=cost_analysis,
+                recommendations=recommendations,
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id,
+                execution_timestamp=context.created_at.isoformat(),
+                output_data={
+                    "optimization_type": result.get("optimization_type", "general"),
+                    "total_optimizations": len(optimization_insights),
+                    "has_cost_savings": bool(cost_analysis)
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Error creating clean optimization result: {e}")
+            # Return minimal safe result
+            return SerializableAgentResult(
+                success=False,
+                agent_name="OptimizationsCoreSubAgent", 
+                duration=0.0,
+                error=f"Result sanitization error: {str(e)}",
+                user_id=context.user_id,
+                thread_id=context.thread_id,
+                run_id=context.run_id
+            )
     
     # WebSocket Event Methods for Streaming Support
     
