@@ -1922,8 +1922,17 @@ class UnifiedTestRunner:
         
         for test_dir in test_dirs:
             if test_dir.exists():
-                # Use glob for fast file discovery
-                pattern_files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                # Use glob for fast file discovery with safe pattern
+                if pattern == '*':
+                    glob_pattern = "**/*test*.py"
+                else:
+                    clean_pattern = pattern.replace('*', '')
+                    if clean_pattern:
+                        glob_pattern = f"**/*{clean_pattern}*.py"
+                    else:
+                        glob_pattern = "**/*test*.py"
+
+                pattern_files = list(test_dir.rglob(glob_pattern))
                 test_files.extend([str(f) for f in pattern_files if f.is_file()])
         
         # Cache result
@@ -3548,21 +3557,32 @@ def main():
         # Create a simple runner for fast collection
         from pathlib import Path
         
-        # Determine test pattern 
+        # Determine test pattern
         pattern = getattr(args, 'pattern', '*')
         if not pattern:
             pattern = '*'
-        
+
+        # Create proper glob pattern - avoid creating invalid patterns like "**.py"
+        if pattern == '*':
+            glob_pattern = "**/*test*.py"
+        else:
+            # Clean pattern and create safe glob
+            clean_pattern = pattern.replace('*', '')
+            if clean_pattern:
+                glob_pattern = f"**/*{clean_pattern}*.py"
+            else:
+                glob_pattern = "**/*test*.py"
+
         # Fast test discovery
         test_dirs = [
             PROJECT_ROOT / "netra_backend" / "tests",
             PROJECT_ROOT / "tests"
         ]
-        
+
         total_files = 0
         for test_dir in test_dirs:
             if test_dir.exists():
-                files = list(test_dir.rglob(f"*{pattern.replace('*', '')}*.py"))
+                files = list(test_dir.rglob(glob_pattern))
                 valid_files = [f for f in files if f.is_file() and 'test' in f.name]
                 total_files += len(valid_files)
                 print(f"Found {len(valid_files)} test files in {test_dir.name}")
