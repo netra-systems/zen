@@ -576,6 +576,23 @@ def get_staging_secret(secret_name: str, project_id: str = "netra-staging") -> s
     Business Impact: $500K+ ARR depends on staging JWT authentication
     """
     try:
+        # ISSUE #699 FIX: Ensure proper authentication before accessing GSM
+        import sys
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent
+        sys.path.insert(0, str(project_root))
+
+        try:
+            from scripts.gcp_auth_config import GCPAuthConfig
+            auth_success = GCPAuthConfig.ensure_authentication()
+            if not auth_success:
+                raise ValueError(
+                    f"GCP authentication setup failed. Cannot retrieve secret '{secret_name}'. "
+                    f"This affects $500K+ ARR staging functionality."
+                )
+        except ImportError:
+            logger.warning("Could not import GCPAuthConfig, proceeding with existing credentials")
+
         # Import Google Secret Manager client
         from google.cloud import secretmanager
 
@@ -643,6 +660,24 @@ def validate_gsm_access(project_id: str = "netra-staging") -> Dict[str, Any]:
         Dictionary with validation results and diagnostic information
     """
     try:
+        # ISSUE #699 FIX: Ensure proper authentication before accessing GSM
+        import sys
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent
+        sys.path.insert(0, str(project_root))
+
+        try:
+            from scripts.gcp_auth_config import GCPAuthConfig
+            auth_success = GCPAuthConfig.ensure_authentication()
+            if not auth_success:
+                return {
+                    "valid": False,
+                    "error": "GCP authentication setup failed",
+                    "message": "Could not configure service account authentication"
+                }
+        except ImportError:
+            logger.warning("Could not import GCPAuthConfig, proceeding with existing credentials")
+
         from google.cloud import secretmanager
 
         client = secretmanager.SecretManagerServiceClient()
