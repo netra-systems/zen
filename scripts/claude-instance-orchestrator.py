@@ -445,6 +445,20 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             permission_mode="acceptEdits",
             output_format=output_format
         ),
+        InstanceConfig(
+            name="gitissueprogressorv2 goldenpath",
+            command="/gitissueprogressorv2 goldenpath",
+            description="ssot",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            name="gitissueprogressorv2 tests",
+            command="/gitissueprogressorv2 tests",
+            description="ssot",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
     ]
 
 async def main():
