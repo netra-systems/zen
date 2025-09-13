@@ -1,94 +1,53 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 19:27:25
+**Generated:** 2025-09-12 19:38:04
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 6
-- **Passed:** 3 (50.0%)
-- **Failed:** 3 (50.0%)
+- **Total Tests:** 1
+- **Passed:** 0 (0.0%)
+- **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 8.11 seconds
-- **Pass Rate:** 50.0%
+- **Duration:** 31.40 seconds
+- **Pass Rate:** 0.0%
 
 ## Test Results by Priority
 
-### NORMAL Priority Tests
+### CRITICAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_real_agent_discovery | PASS passed | 0.566s | test_3_agent_pipeline_staging.py |
-| test_real_agent_configuration | PASS passed | 0.445s | test_3_agent_pipeline_staging.py |
-| test_real_agent_pipeline_execution | FAIL failed | 0.835s | test_3_agent_pipeline_staging.py |
-| test_real_agent_lifecycle_monitoring | FAIL failed | 1.196s | test_3_agent_pipeline_staging.py |
-| test_real_pipeline_error_handling | FAIL failed | 1.194s | test_3_agent_pipeline_staging.py |
-| test_real_pipeline_metrics | PASS passed | 2.530s | test_3_agent_pipeline_staging.py |
+| test_001_websocket_connection_real | FAIL failed | 30.394s | test_priority1_critical.py |
 
 ## Failed Tests Details
 
-### FAILED: test_real_agent_pipeline_execution
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
-- **Duration:** 0.835s
-- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_3_agent_pipeline_staging.py:252: in test_real_agent_pipeline_execution
-    async with websockets.connect(
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
-    await self.c...
-
-### FAILED: test_real_agent_lifecycle_monitoring
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
-- **Duration:** 1.196s
-- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_3_agent_pipeline_staging.py:404: in test_real_agent_lifecycle_monitoring
-    async with websockets.connect(
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
-    await self...
-
-### FAILED: test_real_pipeline_error_handling
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
-- **Duration:** 1.194s
-- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests/e2e/staging/test_3_agent_pipeline_staging.py:498: in test_real_pipeline_error_handling
-    async with websockets.connect(
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
-    await self.co...
+### FAILED: test_001_websocket_connection_real
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_priority1_critical.py
+- **Duration:** 30.394s
+- **Error:** ..\..\..\..\AppData\Roaming\Python\Python312\site-packages\httpx\_transports\default.py:101: in map_httpcore_exceptions
+    yield
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\httpx\_transports\default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\httpcore\_async\connection_pool.py:256: in handle_async_request
+    raise exc from Non...
 
 ## Pytest Output Format
 
 ```
-test_3_agent_pipeline_staging.py::test_real_agent_discovery PASSED
-test_3_agent_pipeline_staging.py::test_real_agent_configuration PASSED
-test_3_agent_pipeline_staging.py::test_real_agent_pipeline_execution FAILED
-test_3_agent_pipeline_staging.py::test_real_agent_lifecycle_monitoring FAILED
-test_3_agent_pipeline_staging.py::test_real_pipeline_error_handling FAILED
-test_3_agent_pipeline_staging.py::test_real_pipeline_metrics PASSED
+test_priority1_critical.py::test_001_websocket_connection_real FAILED
 
 ==================================================
-3 passed, 3 failed in 8.11s
+0 passed, 1 failed in 31.40s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| Agent | 4 | 2 | 2 | 50.0% |
+| WebSocket | 1 | 0 | 1 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
