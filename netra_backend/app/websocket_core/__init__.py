@@ -22,14 +22,21 @@ warnings.warn(
     stacklevel=2
 )
 
-from netra_backend.app.websocket_core.websocket_manager import (
-    WebSocketManager,
+# PHASE 1 UPDATE: Import directly from unified_manager.py (SSOT) 
+from netra_backend.app.websocket_core.unified_manager import (
+    UnifiedWebSocketManager,
     WebSocketConnection,
-    WebSocketManagerProtocol,
     _serialize_message_safely
 )
-# Backward compatibility alias
-UnifiedWebSocketManager = WebSocketManager
+
+# Compatibility alias
+WebSocketManager = UnifiedWebSocketManager
+
+# Import protocol for type checking
+try:
+    from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+except ImportError:
+    WebSocketManagerProtocol = None
 
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter,
