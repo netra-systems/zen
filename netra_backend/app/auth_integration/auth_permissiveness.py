@@ -593,11 +593,17 @@ class DemoAuthValidator:
         # Create consistent demo user ID
         demo_user_id = "demo-user-001"
         
+        # Fix Issue #803: Replace separate generate_base_id() calls with unified method
+        # This eliminates counter mismatch between thread_id and run_id that causes websocket cleanup issues
+        thread_id, run_id, request_id = UnifiedIdGenerator.generate_user_context_ids(
+            user_id=demo_user_id, operation="demo_auth"
+        )
+        
         user_context = UserExecutionContext(
             user_id=demo_user_id,
-            thread_id=UnifiedIdGenerator.generate_base_id("demo_thread"),
-            run_id=UnifiedIdGenerator.generate_base_id("demo_run"),
-            request_id=UnifiedIdGenerator.generate_base_id("demo_req"),
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
             websocket_client_id=UnifiedIdGenerator.generate_websocket_client_id(demo_user_id),
             agent_context={
                 "auth_level": "demo",
