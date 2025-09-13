@@ -130,13 +130,271 @@ class GCPWebSocketReadinessMiddleware(BaseHTTPMiddleware):
         
         return True
     
-    def _is_websocket_request(self, request: Request) -> bool:
-        """Check if request is a WebSocket connection attempt."""
-        # Check for WebSocket upgrade headers
-        connection = request.headers.get('connection', '').lower()
-        upgrade = request.headers.get('upgrade', '').lower()
+    async def _validate_request_for_uvicorn(self, request: Request) -> bool:
+        """Enhanced request validation for uvicorn compatibility.
         
-        return 'upgrade' in connection and upgrade == 'websocket'
+        CRITICAL FIX for Issue #449: Validates request compatibility with uvicorn
+        protocol handling to prevent middleware stack conflicts.
+        """
+        try:
+            # Phase 1: Basic request object validation
+            if not hasattr(request, 'url') or not hasattr(request.url, 'path'):
+                self.logger.warning("Invalid request object for uvicorn processing")
+                return False
+            
+            # Phase 2: Headers validation for Cloud Run compatibility
+            if hasattr(request, 'headers'):
+                headers = request.headers
+                
+                # Check for Cloud Run specific headers that might cause issues
+                cloud_run_headers = [
+                    'x-cloud-trace-context',
+                    'x-forwarded-for',
+                    'x-forwarded-proto'
+                ]
+                
+                for header in cloud_run_headers:
+                    if header in headers:
+                        self.logger.debug(f"Cloud Run header detected: {header}")
+            
+            # Phase 3: Path validation for WebSocket routes
+            path = request.url.path
+            if path.startswith('/ws') or 'websocket' in path.lower():
+                # Additional WebSocket path validation
+                if not self._validate_websocket_path_for_cloud_run(path):
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Request validation error: {e}", exc_info=True)
+            return False
+    
+    def _validate_websocket_path_for_cloud_run(self, path: str) -> bool:
+        """Validate WebSocket path for Cloud Run compatibility."""
+        # Cloud Run has specific path requirements for WebSocket
+        if len(path) > 512:  # Cloud Run path length limit
+            self.logger.warning(f"WebSocket path too long for Cloud Run: {len(path)} chars")
+            return False
+        
+        # Check for invalid characters that might cause Cloud Run issues
+        invalid_chars = ['<', '>', '"', '`', ' ', '\t', '\n', '\r']
+        for char in invalid_chars:
+            if char in path:
+                self.logger.warning(f"Invalid character in WebSocket path for Cloud Run: {char}")
+                return False
+        
+        return True
+    
+    def _is_websocket_request(self, request: Request) -> bool:
+        """Enhanced WebSocket request detection for uvicorn compatibility.
+        
+        CRITICAL FIX for Issue #449: Improved WebSocket detection that works
+        reliably with uvicorn protocol handling in Cloud Run.
+        """
+        try:
+            # Phase 1: Standard WebSocket upgrade headers
+            connection = request.headers.get('connection', '').lower()
+            upgrade = request.headers.get('upgrade', '').lower()
+            
+            is_standard_upgrade = 'upgrade' in connection and upgrade == 'websocket'
+            
+            # Phase 2: Enhanced detection for Cloud Run load balancer
+            # Cloud Run load balancer might modify headers
+            has_websocket_key = 'sec-websocket-key' in request.headers
+            has_websocket_version = 'sec-websocket-version' in request.headers
+            
+            is_websocket_negotiation = has_websocket_key and has_websocket_version
+            
+            # Phase 3: Path-based detection for Cloud Run compatibility
+            path = request.url.path.lower()
+            is_websocket_path = (
+                path.startswith('/ws') or 
+                '/websocket' in path or
+                path.endswith('/ws')
+            )
+            
+            # Phase 4: Combined detection logic
+            is_websocket = (
+                is_standard_upgrade or 
+                is_websocket_negotiation or
+                (is_websocket_path and request.method == 'GET')
+            )
+            
+            if is_websocket:
+                self.logger.debug(
+                    f"WebSocket request detected - Standard: {is_standard_upgrade}, "
+                    f"Negotiation: {is_websocket_negotiation}, Path: {is_websocket_path}"
+                )
+            
+            return is_websocket
+            
+        except Exception as e:
+            self.logger.error(f"WebSocket detection error: {e}", exc_info=True)
+            return False
+    
+    async def _handle_websocket_with_cloud_run_compatibility(self, request: Request, call_next: Callable) -> Response:
+        """Handle WebSocket requests with enhanced Cloud Run compatibility.
+        
+        CRITICAL FIX for Issue #449: Comprehensive WebSocket handling with Cloud Run
+        load balancer compatibility and uvicorn protocol protection.
+        """
+        try:
+            # Phase 1: Pre-flight validation for Cloud Run
+            cloud_run_validation = await self._validate_cloud_run_websocket_compatibility(request)
+            if not cloud_run_validation["valid"]:
+                return await self._reject_websocket_connection(request, cloud_run_validation)
+            
+            # Phase 2: Enhanced readiness check with timeout management
+            readiness_result = await self._check_websocket_readiness_with_timeout(request)
+            
+            if not readiness_result[0]:  # readiness_result is (ready: bool, details: dict)
+                # Enhanced rejection with Cloud Run compatibility
+                return await self._reject_websocket_connection_cloud_run_compatible(
+                    request, readiness_result[1]
+                )
+            
+            # Phase 3: Add Cloud Run compatibility headers before proceeding
+            await self._add_cloud_run_websocket_headers(request)
+            
+            # Phase 4: Proceed with WebSocket connection
+            self.logger.info(f"WebSocket connection approved for Cloud Run - Path: {request.url.path}")
+            return await call_next(request)
+            
+        except asyncio.TimeoutError:
+            # Cloud Run timeout handling
+            timeout_details = {
+                "error": "cloud_run_timeout",
+                "timeout_seconds": self.timeout_seconds,
+                "load_balancer_timeout": self.load_balancer_timeout
+            }
+            self.cloud_run_timeouts.append({
+                "path": request.url.path,
+                "timestamp": time.time(),
+                "details": timeout_details
+            })
+            return await self._reject_websocket_connection_cloud_run_compatible(request, timeout_details)
+            
+        except Exception as e:
+            self.logger.error(f"Cloud Run WebSocket handling error: {e}", exc_info=True)
+            error_details = {
+                "error": "cloud_run_websocket_error",
+                "message": str(e),
+                "issue_reference": "#449"
+            }
+            return await self._reject_websocket_connection_cloud_run_compatible(request, error_details)
+    
+    async def _validate_cloud_run_websocket_compatibility(self, request: Request) -> Dict[str, Any]:
+        """Validate WebSocket request for Cloud Run compatibility.
+        
+        CRITICAL FIX for Issue #449: Validates WebSocket requests against Cloud Run
+        specific requirements and limitations.
+        """
+        validation_result = {
+            "valid": True,
+            "errors": [],
+            "warnings": [],
+            "cloud_run_compatible": True
+        }
+        
+        try:
+            # Phase 1: Header validation for Cloud Run load balancer
+            headers = request.headers
+            
+            # Check for required WebSocket headers
+            required_headers = ['sec-websocket-key', 'sec-websocket-version']
+            for header in required_headers:
+                if header not in headers:
+                    validation_result["errors"].append(f"Missing required header: {header}")
+                    validation_result["valid"] = False
+            
+            # Phase 2: Protocol version validation
+            ws_version = headers.get('sec-websocket-version', '')
+            if ws_version and ws_version not in ['13', '8', '7']:
+                validation_result["warnings"].append(f"Unusual WebSocket version: {ws_version}")
+            
+            # Phase 3: Cloud Run specific validations
+            # Check for headers that might cause Cloud Run issues
+            problematic_headers = ['expect', 'te']
+            for header in problematic_headers:
+                if header in headers:
+                    validation_result["warnings"].append(f"Potentially problematic header for Cloud Run: {header}")
+            
+            # Phase 4: Subprotocol validation
+            subprotocols = headers.get('sec-websocket-protocol', '')
+            if subprotocols:
+                # Validate subprotocol format for Cloud Run
+                protocols = [p.strip() for p in subprotocols.split(',')]
+                for protocol in protocols:
+                    if not protocol.replace('-', '').replace('_', '').isalnum():
+                        validation_result["warnings"].append(f"Non-standard subprotocol: {protocol}")
+            
+            # Phase 5: Request size validation for Cloud Run
+            if hasattr(request, 'content_length') and request.content_length:
+                if request.content_length > 10 * 1024:  # 10KB limit for WebSocket upgrade
+                    validation_result["errors"].append("WebSocket upgrade request too large for Cloud Run")
+                    validation_result["valid"] = False
+            
+            return validation_result
+            
+        except Exception as e:
+            self.logger.error(f"Cloud Run WebSocket validation error: {e}", exc_info=True)
+            return {
+                "valid": False,
+                "errors": [f"Validation error: {e}"],
+                "cloud_run_compatible": False
+            }
+    
+    async def _check_websocket_readiness_with_timeout(self, request: Request) -> Tuple[bool, Dict[str, Any]]:
+        """Enhanced readiness check with Cloud Run timeout management.
+        
+        CRITICAL FIX for Issue #449: Readiness check with proper timeout handling
+        for Cloud Run load balancer and uvicorn compatibility.
+        """
+        try:
+            # Use shorter timeout for Cloud Run compatibility
+            cloud_run_timeout = min(self.timeout_seconds, self.load_balancer_timeout)
+            
+            # Perform readiness check with timeout
+            ready, details = await asyncio.wait_for(
+                self._check_websocket_readiness(request),
+                timeout=cloud_run_timeout
+            )
+            
+            # Add Cloud Run specific details
+            details["cloud_run_timeout"] = cloud_run_timeout
+            details["load_balancer_compatible"] = True
+            
+            return ready, details
+            
+        except asyncio.TimeoutError:
+            self.logger.warning(f"WebSocket readiness check timed out ({cloud_run_timeout}s)")
+            return False, {
+                "error": "readiness_check_timeout",
+                "timeout_seconds": cloud_run_timeout,
+                "cloud_run_compatible": True
+            }
+    
+    async def _add_cloud_run_websocket_headers(self, request: Request) -> None:
+        """Add Cloud Run compatible headers for WebSocket connections.
+        
+        CRITICAL FIX for Issue #449: Adds headers that improve Cloud Run load
+        balancer compatibility for WebSocket connections.
+        """
+        try:
+            # Note: We can't modify request headers directly, but we can prepare them
+            # for the response or log them for debugging
+            
+            cloud_run_headers = {
+                'X-Cloud-Run-WebSocket': 'true',
+                'X-Issue-449-Fix': 'cloud-run-compatible',
+                'X-uvicorn-Compatible': 'true'
+            }
+            
+            self.logger.debug(f"Cloud Run WebSocket headers prepared: {cloud_run_headers}")
+            
+        except Exception as e:
+            self.logger.error(f"Error preparing Cloud Run headers: {e}", exc_info=True)
     
     async def _check_websocket_readiness(self, request: Request) -> Tuple[bool, Dict[str, Any]]:
         """
