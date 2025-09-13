@@ -98,6 +98,10 @@ class MockEnterpriseAgentRegistry:
         """Get all agent instances created for a specific user."""
         return self.created_instances.get(user_id, [])
 
+    def get(self, agent_name: str, default=None):
+        """Get agent class by name (required for duck typing compatibility)."""
+        return self.registered_agents.get(agent_name, default)
+
     def get_isolation_metrics(self) -> Dict[str, Any]:
         """Get metrics for validating user isolation."""
         return {
@@ -198,18 +202,20 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
         self.mock_agent_registry.register_agent('enterprise_test_agent', BaseAgent)
         self.mock_agent_registry.register_agent('concurrent_test_agent', BaseAgent)
 
-        # Create execution engine
+        # Create execution engine with legacy signature (registry, websocket_bridge, user_context)
         self.execution_engine = UserExecutionEngine(
-            agent_registry=self.mock_agent_registry,
-            websocket_bridge=self.mock_websocket_bridge
+            self.mock_agent_registry,
+            self.mock_websocket_bridge,
+            self.enterprise_context
         )
 
     def test_user_execution_engine_instantiation_enterprise(self):
         """Test UserExecutionEngine instantiation with enterprise components."""
-        # Test basic instantiation
+        # Test basic instantiation with legacy signature
         engine = UserExecutionEngine(
-            agent_registry=self.mock_agent_registry,
-            websocket_bridge=self.mock_websocket_bridge
+            self.mock_agent_registry,
+            self.mock_websocket_bridge,
+            self.enterprise_context
         )
 
         assert engine is not None, "Execution engine instantiation failed"
@@ -327,7 +333,7 @@ class TestUserExecutionEngineGoldenPath(SSotBaseTestCase):
             await self.mock_websocket_bridge.notify_agent_started(
                 run_id=context.run_id,
                 agent_name=agent.name,
-                audit_metadata={'user_id': user_id, 'workflow_id': workflow_id}
+                metadata={'user_id': user_id, 'workflow_id': workflow_id}
             )
 
             await self.mock_websocket_bridge.notify_agent_completed(
