@@ -92,7 +92,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, validation gap is confirmed
         pytest.fail("Manager creation without user context was allowed - validation gap confirmed")
 
-    def test_manager_user_context_isolation_validation(self):
+    async def test_manager_user_context_isolation_validation(self):
         """
         Test that manager validates user context matches operation user.
 
