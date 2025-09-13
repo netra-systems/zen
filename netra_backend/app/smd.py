@@ -207,6 +207,10 @@ class StartupOrchestrator:
         self._validate_environment()
         self.logger.info("  [U+2713] Step 2: Environment validated")
         
+        # Step 2.5: Environment context service initialization (FIX for Issue #402)
+        self._initialize_environment_context()
+        self.logger.info("  [U+2713] Step 2.5: Environment context service initialized")
+        
         # Step 3: Database migrations (non-critical)
         try:
             await self._run_migrations()
@@ -1016,6 +1020,20 @@ class StartupOrchestrator:
             raise DeterministicStartupError("Key manager initialization failed")
         
         self.app.state.key_manager = key_manager
+    
+    def _initialize_environment_context(self) -> None:
+        """Initialize EnvironmentContextService - CRITICAL for Issue #402 fix."""
+        from netra_backend.app.services.environment_context_service import EnvironmentContextService
+        
+        try:
+            environment_context_service = EnvironmentContextService()
+            self.app.state.environment_context_service = environment_context_service
+            self.logger.info("EnvironmentContextService initialized successfully")
+        except Exception as e:
+            self.logger.error(f"Failed to initialize EnvironmentContextService: {e}")
+            # Don't raise exception to allow fallback ServiceDependencyChecker to work
+            # This maintains system stability while logging the issue
+            self.app.state.environment_context_service = None
     
     def _initialize_llm_manager(self) -> None:
         """Initialize LLM manager - CRITICAL."""
