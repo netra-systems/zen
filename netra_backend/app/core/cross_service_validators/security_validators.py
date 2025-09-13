@@ -329,8 +329,8 @@ class TokenValidationValidator(BaseValidator):
                     message="Service-to-service token validation working correctly",
                     service_pair="backend-auth",
                     details={
-                        "service_id": service_payload["service_id"],
-                        "permissions": service_payload["permissions"]
+                        "service_id": "backend-service",
+                        "token_source": "auth_service"
                     }
                 ))
             else:
@@ -340,7 +340,7 @@ class TokenValidationValidator(BaseValidator):
                     severity=ValidationSeverity.HIGH,
                     message="Service-to-service token validation failed",
                     service_pair="backend-auth",
-                    details={"service_id": service_payload["service_id"]}
+                    details={"service_id": "backend-service"}
                 ))
                 
         except Exception as e:

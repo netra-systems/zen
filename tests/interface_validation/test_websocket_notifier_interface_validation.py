@@ -139,7 +139,8 @@ class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
                     f"{first_sig['impl']} has {first_sig['params']}, " \
                     f"{other_sig['impl']} has {other_sig['params']}"
 
-        self.fail("Expected interface signature mismatches - if this passes, interfaces may have been fixed")
+        import pytest
+        pytest.fail("Expected interface signature mismatches - if this passes, interfaces may have been fixed")
 
     async def test_factory_method_compatibility(self):
         """
@@ -225,7 +226,7 @@ class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
                 assert first_type == emitter_type, \
                     f"Factory methods return incompatible types: {emitter_types}"
 
-        self.fail("Expected factory method incompatibilities - if this passes, factories may be compatible")
+        pytest.fail("Expected factory method incompatibilities - if this passes, factories may be compatible")
 
     def test_websocket_test_framework_interface_consistency(self):
         """
@@ -273,7 +274,7 @@ class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
         assert len(failed_params) == 0, \
             f"Test framework doesn't support expected WebSocket parameters: {failed_params}"
 
-        self.fail("Expected test framework interface mismatches - if this passes, framework may be consistent")
+        pytest.fail("Expected test framework interface mismatches - if this passes, framework may be consistent")
 
     def test_ssot_compliance_across_websocket_implementations(self):
         """
@@ -327,7 +328,7 @@ class TestWebSocketNotifierInterfaceValidation(SSotBaseTestCase):
                 f"SSOT compliance failure for {aspect}: {score:.1%} compliance, expected {minimum_compliance:.1%}. " \
                 f"Non-compliant implementations: {[impl for impl, result in ssot_compliance_results.items() if not result[aspect]]}"
 
-        self.fail("Expected SSOT compliance issues - if this passes, implementations may be SSOT compliant")
+        pytest.fail("Expected SSOT compliance issues - if this passes, implementations may be SSOT compliant")
 
 
 class TestWebSocketBridgeInterfaceIntegration(SSotBaseTestCase):
@@ -401,7 +402,7 @@ class TestWebSocketBridgeInterfaceIntegration(SSotBaseTestCase):
             assert bridge_type == factory_type, \
                 f"Bridge and factory create incompatible emitter types: {bridge_type} vs {factory_type}"
 
-        self.fail("Expected bridge integration issues - if this passes, integration may be working")
+        pytest.fail("Expected bridge integration issues - if this passes, integration may be working")
 
     async def test_websocket_event_delivery_interface_consistency(self):
         """
@@ -446,7 +447,7 @@ class TestWebSocketBridgeInterfaceIntegration(SSotBaseTestCase):
         assert len(failed_events) == 0, \
             f"Critical WebSocket events failed delivery due to interface issues: {failed_events}"
 
-        self.fail("Expected event delivery interface issues - if this passes, event delivery may be working")
+        pytest.fail("Expected event delivery interface issues - if this passes, event delivery may be working")
 
 
 if __name__ == "__main__":

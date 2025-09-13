@@ -281,7 +281,7 @@ class WebSocketBridgeFactory:
                 # Create minimal configuration for testing
                 self._unified_manager = UnifiedWebSocketManager()
                 self._connection_pool = WebSocketConnectionPool()
-                self._agent_registry = AgentRegistry()
+                self._agent_registry = AgentRegistry() if AgentRegistry else None
                 self._health_monitor = None  # Optional for testing
 
             except Exception as e:
