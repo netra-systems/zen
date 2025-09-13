@@ -411,6 +411,7 @@ class ChatEventMonitor(ComponentMonitor):
             "health_check_",
             "test_",
             "unit_test_",
+            "unittest_",  # Add unittest pattern for test detection
             "integration_test_",
             "validation_",
             "mock_",
