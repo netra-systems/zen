@@ -16,6 +16,7 @@
     "emit_agent_event",
     "emit_critical_event",
     "emit_event",
+    "emit_user_event",
     "error",
     "failed_event",
     "filtered_by_event",

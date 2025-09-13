@@ -12,6 +12,7 @@ from netra_backend.app.websocket_core.unified_websocket_auth import (
     WebSocketAuthResult,
     get_websocket_authenticator
 )
+from netra_backend.app.websocket_core.auth import WebSocketAuthenticator, AuthHandler
 from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.asyncio
@@ -62,3 +63,20 @@ class TestWebSocketAuthAsync:
         assert authenticator is not None
         # Should have the deprecated warning but still be functional
         assert hasattr(authenticator, 'get_websocket_auth_stats')
+
+    async def test_compatibility_layer_authenticator(self):
+        """Test the compatibility layer WebSocketAuthenticator"""
+        # Test that the compatibility layer class exists and can be instantiated
+        authenticator = WebSocketAuthenticator()
+        assert authenticator is not None
+        # Should delegate to SSOT implementation
+        assert hasattr(authenticator, 'get_websocket_auth_stats')
+
+    async def test_compatibility_layer_auth_handler(self):
+        """Test the compatibility layer AuthHandler"""
+        # Test that the AuthHandler class exists and can be instantiated
+        handler = AuthHandler()
+        assert handler is not None
+        # Should have basic auth handler methods
+        assert hasattr(handler, 'connect')
+        assert hasattr(handler, 'disconnect')

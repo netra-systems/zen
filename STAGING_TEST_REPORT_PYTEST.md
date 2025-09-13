@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 04:37:29
+**Generated:** 2025-09-13 09:18:19
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 0.90 seconds
+- **Duration:** 8.80 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,29 +19,30 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_staging_gsm_access_validation_end_to_end | FAIL failed | 0.138s | test_deployment_validation.py |
+| test_health_check | FAIL failed | 5.546s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_staging_gsm_access_validation_end_to_end
-- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_deployment_validation.py
-- **Duration:** 0.138s
-- **Error:** /opt/homebrew/lib/python3.13/site-packages/google/auth/_default.py:131: in load_credentials_from_file
-    info = json.load(file_obj)
-           ^^^^^^^^^^^^^^^^^^^
-/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/__init__.py:293: in load
-    return loads(fp.read(),
-/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/json/__init__.py:346: in loads
-    return _default_decoder.decode(s)
-           ^^^^...
+### FAILED: test_health_check
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 5.546s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
+    await self.verify_api_health()
+tests\e2e\staging_test_base.py:274: in verify_api_health
+    assert data["status"] == "healthy"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError...
 
 ## Pytest Output Format
 
 ```
-test_deployment_validation.py::test_staging_gsm_access_validation_end_to_end FAILED
+test_1_websocket_events_staging.py::test_health_check FAILED
 
 ==================================================
-0 passed, 1 failed in 0.90s
+0 passed, 1 failed in 8.80s
 ```
 
 ## Test Coverage Matrix
