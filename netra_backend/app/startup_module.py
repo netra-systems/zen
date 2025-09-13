@@ -644,9 +644,11 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    # SSOT FIX: Use factory pattern for LLM manager creation
-    from netra_backend.app.llm.llm_manager import create_llm_manager
-    app.state.llm_manager = create_llm_manager()
+    # SECURITY FIX: Removed global LLM manager creation - CRITICAL VULNERABILITY
+    # Global LLM managers cause conversation mixing between users due to shared cache
+    # LLM managers must be created per-request with user context for isolation
+    # Use create_llm_manager(user_context) in request handlers instead
+    app.state.llm_manager = None  # Explicitly set to None to prevent usage
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
@@ -1168,11 +1170,12 @@ def _build_supervisor_agent(app: FastAPI):
     
     # Create the proper websocket bridge instance  
     websocket_bridge = AgentWebSocketBridge()
-    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager={app.state.llm_manager}")
+    logger.debug(f"Creating supervisor with dependencies: db_session_factory={app.state.db_session_factory}, llm_manager=None (security fix)")
     
-    # CRITICAL: No tool_dispatcher - created per-request for isolation
+    # SECURITY FIX: Supervisor created without global LLM manager to prevent user data mixing
+    # LLM managers are created per-request with user context for proper isolation
     return SupervisorAgent(
-        app.state.llm_manager, 
+        None,  # No global LLM manager - created per-request with user context
         websocket_bridge  # Correct AgentWebSocketBridge instance
         # NO tool_dispatcher - created per-request
     )

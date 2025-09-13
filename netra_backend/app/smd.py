@@ -222,11 +222,13 @@ class StartupOrchestrator:
             raise DeterministicStartupError("Key manager initialization failed")
         self.logger.info("  [U+2713] Step 5: Key manager initialized")
         
-        # Step 6: LLM Manager (CRITICAL)
+        # Step 6: LLM Manager (SECURITY FIX - set to None)
         self._initialize_llm_manager()
-        if not hasattr(self.app.state, 'llm_manager') or self.app.state.llm_manager is None:
-            raise DeterministicStartupError("LLM manager initialization failed")
-        self.logger.info("  [U+2713] Step 6: LLM manager initialized")
+        # SECURITY NOTE: LLM manager is intentionally None to prevent user data mixing
+        # LLM managers are created per-request with user context for proper isolation
+        if not hasattr(self.app.state, 'llm_manager'):
+            raise DeterministicStartupError("LLM manager state not initialized")
+        self.logger.info("  [U+2713] Step 6: LLM manager state initialized (None for security)")
         
         # Step 7: Apply startup fixes (CRITICAL)
         await self._apply_startup_fixes()
@@ -532,7 +534,7 @@ class StartupOrchestrator:
         critical_checks = [
             (hasattr(self.app.state, 'db_session_factory') and self.app.state.db_session_factory is not None, "Database"),
             (hasattr(self.app.state, 'redis_manager') and self.app.state.redis_manager is not None, "Redis"),
-            (hasattr(self.app.state, 'llm_manager') and self.app.state.llm_manager is not None, "LLM Manager"),
+            (hasattr(self.app.state, 'llm_manager'), "LLM Manager State"),  # SECURITY FIX: Only check state exists, not value
             (hasattr(self.app.state, 'agent_websocket_bridge') and self.app.state.agent_websocket_bridge is not None, "AgentWebSocketBridge"),
             (hasattr(self.app.state, 'agent_supervisor') and self.app.state.agent_supervisor is not None, "Agent Supervisor"),
             (hasattr(self.app.state, 'thread_service') and self.app.state.thread_service is not None, "Thread Service"),
@@ -1014,9 +1016,11 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        # SSOT FIX: Use factory pattern for LLM manager creation
-        from netra_backend.app.llm.llm_manager import create_llm_manager
-        self.app.state.llm_manager = create_llm_manager()
+        # SECURITY FIX: Removed global LLM manager creation - CRITICAL VULNERABILITY
+        # Global LLM managers cause conversation mixing between users due to shared cache
+        # LLM managers must be created per-request with user context for isolation
+        # Use create_llm_manager(user_context) in request handlers instead
+        self.app.state.llm_manager = None  # Explicitly set to None to prevent usage
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:
@@ -1165,10 +1169,11 @@ class StartupOrchestrator:
             raise DeterministicStartupError("AgentWebSocketBridge not available for supervisor initialization")
         
         # Create supervisor with bridge for proper WebSocket integration
-        # Note: SupervisorAgent uses UserExecutionContext pattern - no database sessions in constructor
+        # SECURITY FIX: SupervisorAgent created without global LLM manager to prevent user data mixing
+        # LLM managers are created per-request with user context for proper isolation
         # SupervisorAgent expects 2 args: llm_manager and websocket_bridge (no tool_dispatcher)
         supervisor = SupervisorAgent(
-            self.app.state.llm_manager,
+            None,  # No global LLM manager - created per-request with user context
             agent_websocket_bridge
         )
         
