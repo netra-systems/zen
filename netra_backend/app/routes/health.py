@@ -17,6 +17,13 @@ from netra_backend.app.core.health import (
     HealthLevel,
     HealthResponseBuilder,
 )
+from netra_backend.app.core.health.environment_health_config import (
+    get_environment_health_config,
+    is_service_enabled,
+    get_service_timeout,
+    ServiceCriticality,
+    HealthFailureMode
+)
 from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
@@ -384,16 +391,26 @@ async def _check_redis_connection() -> None:
 async def health_backend(request: Request) -> Dict[str, Any]:
     """
     Backend service health endpoint for Golden Path validation.
-    
+
     Validates agent execution capabilities, tool system, LLM integration,
     and WebSocket functionality specifically for the Golden Path user flow.
+
+    ISSUE #690 REMEDIATION: Uses environment-aware health configuration to prevent
+    staging deployment failures from LLM service unavailability.
     """
     from datetime import UTC, datetime
+
+    # Get environment-specific health configuration
+    config = unified_config_manager.get_config()
+    environment = config.environment
+    health_config = get_environment_health_config(environment)
+
     health_response = {
         "service": "backend-service",
         "version": "1.0.0",
         "timestamp": datetime.now(UTC).isoformat(),
         "status": "healthy",
+        "environment": environment,
         "capabilities": {
             "agent_execution": False,
             "tool_system": False,
@@ -401,6 +418,8 @@ async def health_backend(request: Request) -> Dict[str, Any]:
             "websocket_integration": False,
             "database_connectivity": False
         },
+        "service_criticality": {},
+        "degraded_services": [],
         "golden_path_ready": False
     }
     
@@ -428,20 +447,68 @@ async def health_backend(request: Request) -> Dict[str, Any]:
         except Exception as tool_error:
             logger.warning(f"Tool system check failed: {tool_error}")
         
-        # Check LLM integration
-        try:
-            if app_state and hasattr(app_state, 'llm_manager'):
-                # SECURITY FIX: LLM manager is intentionally None for security (user isolation)
-                # Check for factory pattern which is the correct security implementation
-                if app_state.llm_manager is not None:
-                    # Legacy pattern - actual LLM manager instance
+        # Check LLM integration with environment-aware resilience
+        llm_service_config = health_config.get_service_config("llm", environment)
+        if llm_service_config and is_service_enabled("llm", environment):
+            try:
+                # ISSUE #690 REMEDIATION: Use resilient LLM factory for staging environment
+                from netra_backend.app.llm.staging_resilient_factory import get_resilient_llm_factory
+
+                factory = get_resilient_llm_factory(environment)
+                factory_health = await asyncio.wait_for(
+                    factory.health_check(),
+                    timeout=get_service_timeout("llm", environment)
+                )
+
+                if factory_health.get("status") == "healthy":
                     health_response["capabilities"]["llm_integration"] = True
-                elif hasattr(app_state, 'llm_manager_factory') and app_state.llm_manager_factory:
-                    # Security-compliant pattern - factory creates user-isolated instances
-                    health_response["capabilities"]["llm_integration"] = True
-                
-        except Exception as llm_error:
-            logger.warning(f"LLM integration check failed: {llm_error}")
+                    health_response["service_criticality"]["llm"] = llm_service_config.criticality.value
+                elif llm_service_config.criticality in [ServiceCriticality.OPTIONAL]:
+                    # LLM is optional - don't fail health check but note degradation
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": factory_health.get("status", "unknown"),
+                        "mode": factory_health.get("mode", "unknown"),
+                        "message": llm_service_config.graceful_fallback_message
+                    })
+                    health_response["service_criticality"]["llm"] = "optional_degraded"
+                else:
+                    # LLM is important/critical but unavailable
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["service_criticality"]["llm"] = f"{llm_service_config.criticality.value}_failed"
+
+            except asyncio.TimeoutError:
+                # LLM service timed out
+                if llm_service_config.failure_mode == HealthFailureMode.GRACEFUL_DEGRADE:
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": "timeout",
+                        "message": "LLM service timed out - graceful degradation active"
+                    })
+                else:
+                    logger.warning(f"LLM integration timeout after {get_service_timeout('llm', environment)}s")
+                    health_response["capabilities"]["llm_integration"] = False
+
+            except Exception as llm_error:
+                # Handle LLM errors based on environment configuration
+                if llm_service_config.failure_mode in [HealthFailureMode.GRACEFUL_DEGRADE, HealthFailureMode.IGNORE]:
+                    logger.warning(f"LLM integration check failed (graceful degradation): {llm_error}")
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": "error",
+                        "error": str(llm_error),
+                        "message": llm_service_config.graceful_fallback_message
+                    })
+                else:
+                    logger.error(f"LLM integration check failed: {llm_error}")
+                    health_response["capabilities"]["llm_integration"] = False
+        else:
+            # LLM service disabled in this environment
+            health_response["capabilities"]["llm_integration"] = True  # Consider as "working" if disabled
+            health_response["service_criticality"]["llm"] = "disabled"
         
         # Check WebSocket integration for agent events
         try:

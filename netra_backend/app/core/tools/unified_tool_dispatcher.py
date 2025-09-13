@@ -453,3 +453,97 @@ class UnifiedToolDispatcher:
             "Original UnifiedToolDispatcher implementation not available. "
             "ToolDispatcherFactory must be used for all dispatcher creation."
         )
+
+
+# ============================================================================
+# FACTORY FOR COMPATIBILITY
+# ============================================================================
+
+class UnifiedToolDispatcherFactory:
+    """Factory for creating UnifiedToolDispatcher instances with proper isolation."""
+
+    @classmethod
+    async def create_for_user(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_bridge: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None,
+        enable_admin_tools: bool = False
+    ) -> 'UnifiedToolDispatcher':
+        """Create dispatcher for user - delegates to migration helper."""
+        return await UnifiedToolDispatcher.create_from_deprecated_execution_engine(
+            websocket_bridge=websocket_bridge,
+            user_context=user_context
+        )
+
+    @classmethod
+    async def create_for_request(
+        cls,
+        user_context: 'UserExecutionContext',
+        websocket_manager: Optional[Any] = None,
+        tools: Optional[List['BaseTool']] = None
+    ) -> 'UnifiedToolDispatcher':
+        """Create request-scoped dispatcher."""
+        return await UnifiedToolDispatcher.create_from_deprecated_execution_engine(
+            websocket_bridge=websocket_manager,
+            user_context=user_context
+        )
+
+    @classmethod
+    async def create_for_admin(
+        cls,
+        user_context: 'UserExecutionContext',
+        db: Any,
+        user: Any,
+        websocket_manager: Optional[Any] = None,
+        permission_service: Any = None
+    ) -> 'UnifiedToolDispatcher':
+        """Create admin dispatcher."""
+        return await UnifiedToolDispatcher.create_from_deprecated_execution_engine(
+            websocket_bridge=websocket_manager,
+            permission_service=permission_service,
+            user_context=user_context
+        )
+
+
+# ============================================================================
+# CONTEXT MANAGER FOR COMPATIBILITY
+# ============================================================================
+
+@asynccontextmanager
+async def create_request_scoped_dispatcher(
+    user_context: 'UserExecutionContext',
+    websocket_manager: Optional[Any] = None,
+    tools: Optional[List['BaseTool']] = None
+):
+    """Context manager for request-scoped tool dispatcher with automatic cleanup."""
+    dispatcher = await UnifiedToolDispatcherFactory.create_for_request(
+        user_context=user_context,
+        websocket_manager=websocket_manager,
+        tools=tools
+    )
+
+    try:
+        yield dispatcher
+    finally:
+        if hasattr(dispatcher, 'cleanup'):
+            await dispatcher.cleanup()
+
+
+# ============================================================================
+# EXPORTS
+# ============================================================================
+
+__all__ = [
+    # Core classes
+    'UnifiedToolDispatcher',
+    'UnifiedToolDispatcherFactory',
+
+    # Data models
+    'ToolDispatchRequest',
+    'ToolDispatchResponse',
+    'DispatchStrategy',
+
+    # Context managers
+    'create_request_scoped_dispatcher',
+]
