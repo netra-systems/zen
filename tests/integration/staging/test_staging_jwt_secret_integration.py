@@ -71,7 +71,16 @@ class TestStagingJWTSecretIntegration(SSotAsyncTestCase):
         BUSINESS IMPACT: Without GSM integration, staging authentication
         will fail and block $500K+ ARR validation.
         """
-        with self.patch_environment(self.staging_env):
+        staging_env = {
+            'ENVIRONMENT': 'staging',
+            'GCP_PROJECT': 'netra-staging',
+            'K_SERVICE': 'netra-backend-staging',
+            'K_REVISION': 'netra-backend-staging-00001-abc',
+            'K_CONFIGURATION': 'netra-backend-staging',
+            'PORT': '8080'
+        }
+
+        with self.patch_environment(staging_env):
             jwt_manager = get_jwt_secret_manager()
 
             # Clear cache to force fresh GSM lookup
@@ -388,7 +397,8 @@ class TestStagingJWTSecretIntegration(SSotAsyncTestCase):
 
     def patch_environment(self, env_vars: Dict[str, str]):
         """Helper method to patch environment variables."""
-        return self.patch('os.environ', env_vars)
+        from unittest.mock import patch
+        return patch.dict('os.environ', env_vars)
 
     def tearDown(self):
         """Clean up after integration tests."""
