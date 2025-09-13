@@ -564,9 +564,9 @@ class AgentRegistry(BaseAgentRegistry):
                         import uuid
                         user_context = UserExecutionContext(
                             user_id=user_id,
-                            request_id=str(uuid.uuid4()),
+                            request_id=UnifiedIdGenerator.generate_base_id("session_request"),
                             thread_id=f"session_thread_{user_id}",
-                            run_id=f"session_run_{user_id}_{uuid.uuid4().hex[:8]}"
+                            run_id=UnifiedIdGenerator.generate_base_id(f"session_run_{user_id[:8]}")
                         )
                         await user_session.set_websocket_manager(self.websocket_manager, user_context)
                         logger.debug(f"Set WebSocket manager on new user session for {user_id}")
@@ -1516,9 +1516,9 @@ class AgentRegistry(BaseAgentRegistry):
                 import uuid
                 user_context = UserExecutionContext(
                     user_id="test_agent_creation_system",
-                    request_id=f"register_{name}_{uuid.uuid4().hex[:8]}",
+                    request_id=UnifiedIdGenerator.generate_base_id(f"register_{name}"),
                     thread_id=f"test_registry_thread_{name}",
-                    run_id=f"register_run_{name}_{uuid.uuid4().hex[:8]}"
+                    run_id=UnifiedIdGenerator.generate_base_id(f"register_run_{name}")
                 )
             
             # SSOT: Use factory to create properly isolated tool dispatcher
