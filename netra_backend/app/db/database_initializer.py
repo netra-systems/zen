@@ -175,8 +175,20 @@ class DatabaseInitializer:
             if is_retryable_error(classified_error, True, True):
                 logger.info("Database creation error is retryable - circuit breaker may allow retry")
             return False
+        except ValueError as e:
+            # Issue #374: Invalid database configuration
+            logger.error(f"Invalid PostgreSQL database configuration: {e}")
+            logger.error("Check DATABASE_URL format and connection parameters")
+            return False
+        except ImportError as e:
+            # Issue #374: Missing database driver or dependencies
+            logger.error(f"Missing PostgreSQL database dependencies: {e}")
+            logger.error("Check psycopg2 installation and asyncpg availability")
+            return False
         except Exception as e:
-            logger.error(f"Unexpected error creating PostgreSQL database: {e}")
+            # Issue #374: Unexpected database creation errors
+            logger.error(f"Unexpected PostgreSQL database creation error: {type(e).__name__}: {e}")
+            logger.error("Manual database creation may be required")
             return False
     
     async def _initialize_postgresql_schema(self, config: DatabaseConfig) -> bool:
@@ -232,8 +244,22 @@ class DatabaseInitializer:
             else:
                 logger.info("Database error is retryable - circuit breaker remains closed")
             return False
+        except ValueError as e:
+            # Issue #374: Invalid schema configuration
+            logger.error(f"Invalid PostgreSQL schema configuration: {e}")
+            logger.error("Check table definitions and migration scripts")
+            self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
+            return False
+        except ImportError as e:
+            # Issue #374: Missing migration or schema dependencies
+            logger.error(f"Missing PostgreSQL schema dependencies: {e}")
+            logger.error("Check Alembic installation and migration files")
+            self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
+            return False
         except Exception as e:
-            logger.error(f"Unexpected error during PostgreSQL schema initialization: {e}")
+            # Issue #374: Unexpected schema initialization errors
+            logger.error(f"Unexpected PostgreSQL schema initialization error: {type(e).__name__}: {e}")
+            logger.error("Schema creation may require manual intervention")
             self._trip_circuit_breaker(DatabaseType.POSTGRESQL)
             return False
     
@@ -355,8 +381,20 @@ class DatabaseInitializer:
                     logger.error(f"Failed to create supplementary table '{table_name}' ({type(classified_error).__name__}): {e}")
                     # Re-raise classified error for better upstream handling
                     raise classified_error
+            except ValueError as e:
+                # Issue #374: Invalid table definition or SQL syntax
+                logger.error(f"Invalid table definition for '{table_name}': {e}")
+                logger.error("Check SQL syntax and column definitions in schema")
+                raise
+            except ImportError as e:
+                # Issue #374: Missing database modules or dependencies
+                logger.error(f"Missing database dependencies for table '{table_name}': {e}")
+                logger.error("Check asyncpg and SQLAlchemy installation")
+                raise
             except Exception as e:
-                logger.error(f"Unexpected error creating supplementary table '{table_name}': {e}")
+                # Issue #374: Unexpected table creation errors
+                logger.error(f"Unexpected error creating supplementary table '{table_name}': {type(e).__name__}: {e}")
+                logger.error("Manual table creation may be required")
                 raise
         
         # Add foreign key constraints safely - update existing_tables to include newly created tables
