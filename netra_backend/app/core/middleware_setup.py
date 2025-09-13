@@ -738,13 +738,19 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
                         logger.warning("Invalid HTTP scope detected - applying protective measures")
                         await self._send_safe_http_response(send, scope)
                         return
-                    
+
                     # Normal HTTP processing with scope protection
                     await super().__call__(scope, receive, send)
                     return
-                    
+
+                elif scope_type == "lifespan":
+                    # Phase 3: ASGI 3.0 lifespan events (startup/shutdown)
+                    logger.debug("Lifespan event detected - processing normally")
+                    await self.app(scope, receive, send)
+                    return
+
                 else:
-                    # Phase 3: Unknown scope type protection
+                    # Phase 4: Unknown scope type protection
                     logger.warning(f"Unknown ASGI scope type: {scope_type} - passing through safely")
                     await self.app(scope, receive, send)
                     return
