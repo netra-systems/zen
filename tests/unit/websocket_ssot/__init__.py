@@ -1,2 +1,1 @@
 """WebSocket SSOT unit tests package."""
-
