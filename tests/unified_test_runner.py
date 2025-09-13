@@ -262,9 +262,38 @@ except ImportError:
         # Fallback: check if pytest can load the cov plugin
         import subprocess
         import sys
-        result = subprocess.run([sys.executable, "-m", "pytest", "--help"], 
-                              capture_output=True, text=True, timeout=10)
-        PYTEST_COV_AVAILABLE = "--cov" in result.stdout
+        import shutil
+        import platform
+
+        # Use platform-aware Python command detection (same logic as _detect_python_command)
+        if platform.system() == 'Windows':
+            python_commands = ['python', 'py', 'python3']
+        else:
+            python_commands = ['python3', 'python', 'py']
+
+        # Find a working Python command
+        python_cmd = None
+        for cmd in python_commands:
+            if shutil.which(cmd):
+                try:
+                    version_result = subprocess.run(
+                        [cmd, '--version'], capture_output=True, text=True, timeout=5
+                    )
+                    if version_result.returncode == 0 and 'Python 3' in version_result.stdout:
+                        python_cmd = cmd
+                        break
+                except:
+                    continue
+
+        if python_cmd:
+            result = subprocess.run([python_cmd, "-m", "pytest", "--help"],
+                                  capture_output=True, text=True, timeout=10)
+            PYTEST_COV_AVAILABLE = "--cov" in result.stdout
+        else:
+            # Final fallback to sys.executable
+            result = subprocess.run([sys.executable, "-m", "pytest", "--help"],
+                                  capture_output=True, text=True, timeout=10)
+            PYTEST_COV_AVAILABLE = "--cov" in result.stdout
     except Exception:
         PYTEST_COV_AVAILABLE = False
 
@@ -2028,7 +2057,9 @@ class UnifiedTestRunner:
         # Debug output
         if args.verbose:
             print(f"[DEBUG] Running command for {service}: {cmd}")
-        
+            print(f"[DEBUG] Python command used: {self.python_command}")
+            print(f"[DEBUG] Working directory: {config['path']}")
+
         # Execute tests with timeout
         start_time = time.time()
         # Set timeout based on service type and category
@@ -2080,6 +2111,13 @@ class UnifiedTestRunner:
                     'PYTHONDONTWRITEBYTECODE': '1',  # Prevent .pyc files during testing
                 })
                 
+                # DEBUG: Log subprocess details
+                print(f"[SUBPROCESS_DEBUG] Command: {cmd}")
+                print(f"[SUBPROCESS_DEBUG] Working dir: {config['path']}")
+                print(f"[SUBPROCESS_DEBUG] Environment PATH first 100 chars: {subprocess_env.get('PATH', 'NOT_SET')[:100]}...")
+                print(f"[SUBPROCESS_DEBUG] Environment PYTHON: {subprocess_env.get('PYTHON', 'NOT_SET')}")
+                print(f"[SUBPROCESS_DEBUG] Environment PYTHONPATH: {subprocess_env.get('PYTHONPATH', 'NOT_SET')}")
+
                 # CRITICAL: Use explicit encoding and error handling for Windows Unicode issues
                 process = subprocess.Popen(
                     cmd,
@@ -2107,6 +2145,11 @@ class UnifiedTestRunner:
                     process.stdin.close()
                     stdout, stderr = process.communicate(timeout=timeout_seconds)
                     returncode = process.returncode
+
+                    # DEBUG: Log subprocess results
+                    print(f"[SUBPROCESS_DEBUG] Return code: {returncode}")
+                    print(f"[SUBPROCESS_DEBUG] Stdout (first 200 chars): {stdout[:200]!r}")
+                    print(f"[SUBPROCESS_DEBUG] Stderr (first 200 chars): {stderr[:200]!r}")
                 except subprocess.TimeoutExpired:
                     # Clean up hanging process on timeout
                     cleanup_subprocess(process, timeout=5)

@@ -101,7 +101,7 @@ class TestAuthTraceLoggerSsotViolations(SSotBaseTestCase):
         by setting different values in IsolatedEnvironment vs os.environ.
         """
         # Set up IsolatedEnvironment with one value
-        self.isolated_env.set('ENVIRONMENT', 'development')
+        self.set_env_var('ENVIRONMENT', 'development')
 
         # Set up actual os.environ with different value
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}):
@@ -147,7 +147,7 @@ class TestAuthTraceLoggerSsotViolations(SSotBaseTestCase):
         - AFTER FIX: Should PASS (methods use IsolatedEnvironment)
         """
         # Set environment through IsolatedEnvironment
-        self.isolated_env.set('ENVIRONMENT', 'development')
+        self.set_env_var('ENVIRONMENT', 'development')
 
         # This should work correctly after SSOT fix is implemented
         # The test validates the expected behavior post-fix
