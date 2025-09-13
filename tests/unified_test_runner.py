@@ -894,7 +894,13 @@ class UnifiedTestRunner:
         
         # Initialize test execution tracker
         self.test_tracker = TestExecutionTracker(self.project_root) if TestExecutionTracker else None
-        
+
+        # Initialize JSON output optimization system
+        self.json_optimizer = None  # Will be initialized with args when needed
+        self.json_verbosity_controller = JsonVerbosityController()
+        self.json_formatter = JsonFormatter()
+        self.json_field_filter = JsonFieldFilter()
+
         # Initialize Cypress runner lazily to avoid Docker issues during init
         self.cypress_runner = None
         
@@ -3385,10 +3391,47 @@ class UnifiedTestRunner:
             if progress_data:
                 report_data["progress_tracking"] = progress_data
         
-        # Save JSON report
+        # Save JSON report with optimization
         json_report = report_dir / f"test_report_{timestamp}.json"
-        with open(json_report, "w") as f:
-            json.dump(report_data, f, indent=2, default=str)
+        optimized_data, optimization_info = self._optimize_json_output(report_data, args)
+
+        try:
+            with open(json_report, "w") as f:
+                if args.json_format == "compact":
+                    json_content = self.json_formatter.format_compact(optimized_data)
+                elif args.json_format == "pretty":
+                    json_content = self.json_formatter.format_pretty(optimized_data)
+                else:  # auto
+                    json_content = self.json_formatter.format_auto(optimized_data, args.json_size_limit)
+
+                f.write(json_content)
+
+            # Log optimization results if significant changes were made
+            if optimization_info.get("optimized", False):
+                original_size = optimization_info.get("original_size_kb", 0)
+                final_size = optimization_info.get("final_size_kb", 0)
+                savings = optimization_info.get("size_reduction_percent", 0)
+                print(f"\nJSON Optimization Applied:")
+                print(f"  Original size: {original_size:.1f} KB")
+                print(f"  Optimized size: {final_size:.1f} KB")
+                print(f"  Size reduction: {savings:.1f}%")
+                if optimization_info.get("truncated", False):
+                    print(f"  Applied truncation to stay within {args.json_size_limit} KB limit")
+
+        except JsonSizeExceedsLimitError as e:
+            if args.json_auto_truncate:
+                print(f"WARNING: JSON output exceeded size limit, auto-truncating: {e}")
+                # Try again with auto-truncation
+                limiter = JsonSizeLimiter(max_size_mb=args.json_size_limit / 1024)
+                truncated_data = limiter.process_with_auto_truncation(report_data)
+                with open(json_report, "w") as f:
+                    json_content = self.json_formatter.format_compact(truncated_data)
+                    f.write(json_content)
+                print(f"JSON report auto-truncated and saved to: {json_report}")
+            else:
+                print(f"ERROR: JSON output exceeded size limit: {e}")
+                print(f"Use --json-auto-truncate to enable automatic truncation")
+                raise
         
         # Print summary
         print(f"\1{'='*60}")
@@ -3844,10 +3887,46 @@ def main():
         action="store_true",
         help="Generate JSON test report"
     )
-    
+
+    # JSON Output Optimization Arguments
+    parser.add_argument(
+        "--json-verbosity",
+        type=int,
+        choices=[1, 2, 3, 4, 5],
+        default=2,
+        help="JSON output verbosity level (1=minimal, 2=standard, 3=verbose, 4=debug, 5=full)"
+    )
+
+    parser.add_argument(
+        "--json-size-limit",
+        type=int,
+        default=100,
+        help="JSON output size limit in KB (default: 100KB)"
+    )
+
+    parser.add_argument(
+        "--json-auto-truncate",
+        action="store_true",
+        help="Automatically truncate large JSON outputs instead of failing"
+    )
+
+    parser.add_argument(
+        "--json-format",
+        choices=["compact", "pretty", "auto"],
+        default="auto",
+        help="JSON formatting mode (compact=minimal size, pretty=readable, auto=size-based)"
+    )
+
+    parser.add_argument(
+        "--json-preserve-fields",
+        nargs="*",
+        default=["summary", "overall_success", "total_duration", "failed_tests"],
+        help="Fields to preserve when truncating JSON (space-separated list)"
+    )
+
     parser.add_argument(
         "--html-output",
-        action="store_true", 
+        action="store_true",
         help="Generate HTML test report"
     )
     

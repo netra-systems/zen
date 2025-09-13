@@ -69,16 +69,16 @@ class TokenOptimizationContextManager:
             operation_type=operation_type
         )
         
-        # Create enhanced metadata WITHOUT mutating original
-        enhanced_metadata = self._create_enhanced_metadata(
-            context.metadata,
+        # Create enhanced agent_context WITHOUT mutating original
+        enhanced_agent_context = self._create_enhanced_metadata(
+            context.agent_context,
             tracking_result,
             agent_name,
             operation_type
         )
-        
-        # Return new context with enhanced metadata (immutable pattern)
-        return replace(context, metadata=enhanced_metadata)
+
+        # Return new context with enhanced agent_context (immutable pattern)
+        return replace(context, agent_context=enhanced_agent_context)
     
     def optimize_prompt_for_context(
         self,
@@ -104,15 +104,15 @@ class TokenOptimizationContextManager:
             target_reduction_percent=target_reduction
         )
         
-        # Create enhanced metadata with optimization data
-        enhanced_metadata = self._add_optimization_data(
-            context.metadata,
+        # Create enhanced agent_context with optimization data
+        enhanced_agent_context = self._add_optimization_data(
+            context.agent_context,
             agent_name,
             optimization_result
         )
-        
+
         # Return enhanced context and optimized prompt
-        enhanced_context = replace(context, metadata=enhanced_metadata)
+        enhanced_context = replace(context, agent_context=enhanced_agent_context)
         return enhanced_context, optimization_result["optimized_prompt"]
     
     def add_cost_suggestions(
@@ -132,14 +132,14 @@ class TokenOptimizationContextManager:
         # Get suggestions from existing TokenCounter
         suggestions = self.token_counter.get_optimization_suggestions()
         
-        # Create enhanced metadata with suggestions
-        enhanced_metadata = self._add_suggestions_data(
-            context.metadata,
+        # Create enhanced agent_context with suggestions
+        enhanced_agent_context = self._add_suggestions_data(
+            context.agent_context,
             agent_name,
             suggestions
         )
-        
-        return replace(context, metadata=enhanced_metadata)
+
+        return replace(context, agent_context=enhanced_agent_context)
     
     def get_token_usage_summary(
         self,
@@ -158,8 +158,8 @@ class TokenOptimizationContextManager:
         # Get overall agent summary from TokenCounter
         summary = self.token_counter.get_agent_usage_summary()
         
-        # Add current session data from context metadata
-        token_usage = context.metadata.get("token_usage", {})
+        # Add current session data from context agent_context
+        token_usage = context.agent_context.get("token_usage", {})
         if token_usage:
             session_operations = token_usage.get("operations", [])
             agent_operations = [op for op in session_operations if op.get("agent") == agent_name]
@@ -299,9 +299,9 @@ class TokenOptimizationContextManager:
             "initialized_at": datetime.now(timezone.utc).isoformat()
         }
         
-        # Enhance metadata with optimization config
-        enhanced_metadata = base_context.metadata.copy()
-        enhanced_metadata["token_optimization"] = token_optimization_config
-        
-        # Return new context with enhanced metadata
-        return replace(base_context, metadata=enhanced_metadata)
+        # Enhance agent_context with optimization config
+        enhanced_agent_context = base_context.agent_context.copy()
+        enhanced_agent_context["token_optimization"] = token_optimization_config
+
+        # Return new context with enhanced agent_context
+        return replace(base_context, agent_context=enhanced_agent_context)

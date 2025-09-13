@@ -422,9 +422,9 @@ class TestRealWebSocketComponents:
         """Test that tool dispatcher integrates with WebSocket properly."""
         # Create user context for proper isolation
         user_context = UserExecutionContext(
-            user_id="test_user",
-            run_id="test_run", 
-            thread_id="test_thread"
+            user_id="test-user-123",
+            run_id="test-run-456",
+            thread_id="test-thread-789"
         )
         
         # Import and create WebSocket manager using secure factory pattern
@@ -452,9 +452,9 @@ class TestRealWebSocketComponents:
         
         # Create user context for proper isolation
         user_context = UserExecutionContext(
-            user_id="test_user", 
-            run_id="test_run",
-            thread_id="test_thread"
+            user_id="test-user-456",
+            run_id="test-run-789",
+            thread_id="test-thread-123"
         )
         
         # Use real LLM manager instead of mock

@@ -56,7 +56,7 @@ from netra_backend.app.agents.supervisor.agent_execution_context_manager import 
     AgentExecutionContextManager as ExecutionContextManager,
     # RequestExecutionScope,  # This class doesn't exist, commenting out for now
 )
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 # SSOT COMPLIANCE FIX: Import UserExecutionContext from services (SSOT) instead of models
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     validate_user_context
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (

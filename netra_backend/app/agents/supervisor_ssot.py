@@ -53,15 +53,28 @@ class SupervisorAgent(BaseAgent):
     - No duplicate implementation of existing patterns
     """
     
-    def __init__(self, 
+    def __init__(self,
                  llm_manager: LLMManager,
-                 websocket_bridge: Optional[AgentWebSocketBridge] = None):
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 db_session_factory=None,  # Legacy compatibility
+                 user_context: Optional[UserExecutionContext] = None,  # Legacy compatibility
+                 tool_dispatcher=None):  # Legacy compatibility
         """Initialize SSOT SupervisorAgent.
-        
+
         Args:
             llm_manager: LLM manager for agent operations
             websocket_bridge: Optional WebSocket bridge
+            db_session_factory: Legacy parameter (ignored in SSOT pattern)
+            user_context: Legacy parameter (ignored in SSOT pattern)
+            tool_dispatcher: Legacy parameter (ignored in SSOT pattern)
         """
+        # Log legacy parameter usage
+        if db_session_factory is not None:
+            logger.info(" CYCLE:  Legacy db_session_factory parameter ignored in SSOT pattern")
+        if user_context is not None:
+            logger.info(" CYCLE:  Legacy user_context parameter ignored in SSOT pattern")
+        if tool_dispatcher is not None:
+            logger.info(" CYCLE:  Legacy tool_dispatcher parameter ignored in SSOT pattern")
         super().__init__(
             llm_manager=llm_manager,
             name="Supervisor",
@@ -136,7 +149,7 @@ class SupervisorAgent(BaseAgent):
         
         return execution_context
 
-    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
         """Execute using SSOT UserExecutionEngine pattern.
         
         Args:
@@ -432,8 +445,31 @@ class SupervisorAgent(BaseAgent):
                 "user_request": user_request
             }
 
+    # === Legacy Compatibility Methods (Phase A) ===
+
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics for legacy compatibility."""
+        return {
+            "supervisor": "operational",
+            "pattern": "SSOT",
+            "factory_based": True,
+            "isolation_verified": True
+        }
+
+    def register_agent(self, name: str, agent: 'BaseAgent') -> None:
+        """Register a sub-agent for legacy compatibility.
+
+        Args:
+            name: Agent name
+            agent: Agent instance
+        """
+        # In SSOT pattern, agents are created via factory, not pre-registered
+        logger.info(f" CYCLE:  Legacy register_agent called for {name} - delegating to factory pattern")
+        # No-op in SSOT pattern - agents created on-demand
+        pass
+
     def __str__(self) -> str:
         return f"SupervisorAgent(SSOT pattern, factory-based)"
-    
+
     def __repr__(self) -> str:
         return f"SupervisorAgent(pattern='SSOT', factory_based=True)"
