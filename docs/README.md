@@ -62,6 +62,11 @@
 - **[subagents-doc.md](agents/subagents-doc.md)** - Additional subagent details
 - **[MCP_IMPLEMENTATION_REPORT.md](reports/MCP_IMPLEMENTATION_REPORT.md)** - Model Context Protocol implementation
 
+### Claude Code Automation & Orchestration
+- **[Claude Instance Orchestrator](../README-claude-orchestrator.md)** ⭐ - **NEW** - Multi-instance Claude Code orchestration with SDK features
+- **[Claude Orchestration Plan](../claude-code-instances-plan.md)** - Architecture design and implementation strategy
+- **[COMMAND_INDEX.md](COMMAND_INDEX.md)** 📋 - Complete slash commands reference (39 commands)
+
 ### Business & Revenue
 - **[REVENUE_TRACKING.md](business/REVENUE_TRACKING.md)** ⭐ - **NEW** - Complete revenue tracking and ROI methodology
 - **[Business Metrics Integration](business/REVENUE_TRACKING.md#business-metrics-monitoring)** - Customer value analytics

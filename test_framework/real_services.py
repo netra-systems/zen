@@ -448,7 +448,7 @@ class RealServicesManager:
     async def ensure_all_services_available(self):
         """Ensure all required services are available."""
         services_to_check = [
-            ("PostgreSQL", self.postgres.connect),
+            ("PostgreSQL", self.postgres.health_check),
             ("Redis", self.redis.connect),
             ("ClickHouse", self.clickhouse.connect),
         ]

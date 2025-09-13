@@ -29,7 +29,7 @@ try:
     from netra_backend.app.websocket_core.manager import get_websocket_manager
     from netra_backend.app.db.database_manager import get_database_manager
     from netra_backend.app.auth_integration.auth import get_auth_integration
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
     # Import shared service utilities
     from shared.types.core_types import UserID, SessionID, ExecutionID

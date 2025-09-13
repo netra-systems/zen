@@ -29,9 +29,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 try:
     # SSOT imports - these should work after consolidation
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-    from netra_backend.app.core.user_execution_context import UserExecutionContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
     from netra_backend.app.agents.factory import AgentFactory
     from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher

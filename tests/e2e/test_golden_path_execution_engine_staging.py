@@ -43,7 +43,7 @@ except ImportError as e:
 
 # Compatibility bridge import for backward compatibility testing  
 try:
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     DEPRECATED_EXECUTION_ENGINE_AVAILABLE = True
 except ImportError as e:
     DEPRECATED_EXECUTION_ENGINE_AVAILABLE = False
