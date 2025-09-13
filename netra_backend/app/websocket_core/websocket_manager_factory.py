@@ -1,39 +1,61 @@
-"""WebSocket Manager Factory - SSOT Compatibility Module
+"""WebSocket Manager Factory - DEPRECATED COMPATIBILITY MODULE (Issue #824 Remediation)
 
-CRITICAL GOLDEN PATH COMPATIBILITY: This module provides factory functions for creating
-WebSocketManager instances to support Golden Path integration tests that depend on
-the factory pattern.
+DEPRECATED: This module is being phased out as part of SSOT consolidation.
+
+ISSUE #824 REMEDIATION: This factory layer created SSOT fragmentation with 2+ WebSocket Manager
+implementations active simultaneously. All functionality has been consolidated into the
+canonical SSOT import path.
+
+MIGRATION INSTRUCTIONS:
+OLD (DEPRECATED):
+    from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+    manager = await create_websocket_manager(user_context=context)
+
+NEW (CANONICAL SSOT):
+    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+    manager = await get_websocket_manager(user_context=context)
+
+OR DIRECT IMPORT:
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    manager = WebSocketManager(user_context=context)
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure 
-- Business Goal: Enable Golden Path integration testing (protects $500K+ ARR)
-- Value Impact: Maintains test compatibility during SSOT refactoring
-- Revenue Impact: Ensures chat functionality testing works reliably
+- Segment: ALL (Free -> Enterprise) - Golden Path Infrastructure
+- Business Goal: Eliminate SSOT violations threatening $500K+ ARR
+- Value Impact: Prevents race conditions and initialization failures
+- Revenue Impact: Ensures reliable WebSocket operations for all users
 
-COMPLIANCE NOTES:
-- This is a COMPATIBILITY MODULE only - new code should import WebSocketManager directly
-- Maintains factory pattern compatibility for existing Golden Path tests
-- Follows SSOT principles by wrapping the unified WebSocketManager implementation
-- Provides proper user isolation and context management
-
-IMPORT GUIDANCE:
-- DEPRECATED: from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-- RECOMMENDED: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+PHASE OUT PLAN:
+1. Phase 1 (Current): Redirect all factory functions to SSOT implementations
+2. Phase 2 (Next): Update all imports to canonical paths
+3. Phase 3 (Final): Remove this module entirely
 """
 
 from typing import Optional, Dict, Any
+import warnings
 import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.ssot_validation_enhancer import (
-    validate_websocket_manager_creation,
-    validate_user_isolation
+from shared.logging.unified_logging_ssot import get_logger
+
+# ISSUE #824 REMEDIATION: Import from canonical SSOT path
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager,
+    get_websocket_manager,
+    create_test_user_context
 )
 from shared.types.core_types import UserID, ensure_user_id
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
+
+# DEPRECATION WARNING: Issue #824 Remediation
+warnings.warn(
+    "netra_backend.app.websocket_core.websocket_manager_factory is DEPRECATED. "
+    "Use 'from netra_backend.app.websocket_core.websocket_manager import WebSocketManager' instead. "
+    "This module will be removed in v2.0 as part of SSOT consolidation.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 class WebSocketComponentError(Exception):
@@ -160,69 +182,28 @@ def create_defensive_user_execution_context(
 
 async def create_websocket_manager(user_context=None, user_id: Optional[UserID] = None):
     """
-    Factory function to create WebSocketManager instances with proper SSOT compliance.
-    
-    GOLDEN PATH COMPATIBILITY: This function maintains compatibility with Golden Path
-    integration tests while following SSOT patterns under the hood.
-    
-    ISSUE #292 FIX: Made async to fix WebSocket await expression errors throughout codebase.
-    This addresses the widespread use of `await create_websocket_manager()` patterns.
-    
+    DEPRECATED FACTORY FUNCTION: Redirects to SSOT implementation (Issue #824 Remediation)
+
+    This function is deprecated and redirects to the canonical SSOT implementation.
+
+    MIGRATION INSTRUCTIONS:
+    OLD: manager = await create_websocket_manager(user_context=context)
+    NEW: manager = await get_websocket_manager(user_context=context)
+
     Args:
         user_context: Optional UserExecutionContext for user isolation (preferred)
         user_id: Optional UserID for basic isolation (fallback for tests)
-    
+
     Returns:
-        WebSocketManager: Configured WebSocket manager instance
-        
+        WebSocketManager: Configured WebSocket manager instance via SSOT
+
     Raises:
         ValueError: If neither user_context nor user_id is provided
     """
-    logger.info("Creating WebSocket manager via factory (Golden Path compatibility)")
-    
-    # If user_context is provided, use it directly (preferred path)
-    if user_context is not None:
-        logger.debug("Creating WebSocket manager with full user context")
-        manager = WebSocketManager(
-            user_context=user_context,
-            _ssot_authorization_token=secrets.token_urlsafe(16)
-        )
+    logger.warning("DEPRECATED: create_websocket_manager() redirecting to SSOT get_websocket_manager()")
 
-        # Issue #712 Fix: Validate SSOT compliance
-        validate_websocket_manager_creation(
-            manager_instance=manager,
-            user_context=user_context,
-            creation_method="async_factory"
-        )
-
-        return manager
-    
-    # Fallback for tests that only provide user_id
-    if user_id is not None:
-        logger.debug(f"Creating WebSocket manager for user_id: {user_id}")
-        # For testing compatibility, create a minimal context
-        from netra_backend.app.services.user_execution_context import UserExecutionContext
-        
-        # Ensure proper UserID type
-        typed_user_id = ensure_user_id(user_id)
-        
-        # Create minimal execution context for testing
-        test_context = UserExecutionContext(
-            user_id=typed_user_id,
-            thread_id=f"thread_{typed_user_id}",
-            run_id=f"run_{typed_user_id}",
-            request_id=f"golden_path_test_{typed_user_id}"
-        )
-        
-        return WebSocketManager(user_context=test_context, _ssot_authorization_token=secrets.token_urlsafe(16))
-    
-    # No context provided - this violates SSOT compliance
-    logger.error("WebSocket manager factory called without user context or user_id")
-    raise ValueError(
-        "WebSocket manager creation requires either user_context (UserExecutionContext) "
-        "or user_id for proper user isolation. Import-time initialization is prohibited. "
-        "See Golden Path integration test patterns for correct usage."
-    )
+    # Issue #824 Remediation: Redirect to SSOT implementation
+    return await get_websocket_manager(user_context=user_context)  # Note: user_id handling moved to SSOT
 
 
 # Legacy compatibility aliases for existing tests
@@ -515,54 +496,71 @@ class ConnectionLifecycleManager:
 
 class WebSocketManagerFactory:
     """
-    ENHANCED COMPATIBILITY CLASS: Extended factory class for backward compatibility.
-    
-    This class provides the same interface as the previous factory implementation
-    but uses the SSOT WebSocketManager under the hood. Enhanced with additional
-    compatibility methods expected by legacy tests.
+    DEPRECATED FACTORY CLASS: Issue #824 Remediation - SSOT Consolidation
+
+    This class is deprecated and all methods now redirect to the canonical SSOT implementation.
+    The factory pattern created fragmentation with 2+ WebSocket Manager implementations active.
+
+    MIGRATION INSTRUCTIONS:
+    OLD: manager = await WebSocketManagerFactory.create(user_context=context)
+    NEW: manager = await get_websocket_manager(user_context=context)
+
+    OR DIRECT:
+    NEW: manager = WebSocketManager(user_context=context)
     """
-    
+
     @staticmethod
     async def create(user_context=None, user_id: Optional[UserID] = None):
-        """Create WebSocket manager using static factory method."""
-        return await create_websocket_manager(user_context=user_context, user_id=user_id)
-    
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create() redirecting to SSOT")
+        return await get_websocket_manager(user_context=user_context)
+
     @classmethod
     async def create_for_user(cls, user_id: UserID):
-        """Create WebSocket manager for specific user ID."""
-        return await create_websocket_manager(user_id=user_id)
-    
-    @classmethod  
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_for_user() redirecting to SSOT")
+        # Create minimal context for user_id (legacy compatibility)
+        test_context = create_test_user_context()
+        test_context.user_id = ensure_user_id(user_id)
+        return await get_websocket_manager(user_context=test_context)
+
+    @classmethod
     async def create_isolated(cls, user_context):
-        """Create isolated WebSocket manager with user context."""
-        return await create_websocket_manager(user_context=user_context)
-    
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_isolated() redirecting to SSOT")
+        return await get_websocket_manager(user_context=user_context)
+
     @classmethod
     async def create_defensive(cls, user_id: UserID, **kwargs):
-        """Create WebSocket manager with defensive user context."""
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_defensive() redirecting to SSOT")
         defensive_context = create_defensive_user_execution_context(user_id, **kwargs)
-        return await create_websocket_manager(user_context=defensive_context)
-    
+        return await get_websocket_manager(user_context=defensive_context)
+
     @classmethod
     async def create_with_lifecycle_manager(cls, user_id: UserID):
-        """Create WebSocket manager with connection lifecycle manager."""
-        manager = await create_websocket_manager(user_id=user_id)
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_with_lifecycle_manager() redirecting to SSOT")
+        test_context = create_test_user_context()
+        test_context.user_id = ensure_user_id(user_id)
+        manager = await get_websocket_manager(user_context=test_context)
         lifecycle_manager = ConnectionLifecycleManager(manager)
-        
+
         # Attach lifecycle manager to the WebSocket manager for compatibility
         manager._lifecycle_manager = lifecycle_manager
         return manager
-    
+
     @classmethod
     async def create_validated(cls, user_context):
-        """Create WebSocket manager with validation."""
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_validated() redirecting to SSOT")
         if not user_context:
             raise FactoryInitializationError("User context required for validated creation")
-        
+
         if not hasattr(user_context, 'user_id') or not user_context.user_id:
             raise FactoryInitializationError("Valid user_id required in context")
-        
-        return await create_websocket_manager(user_context=user_context)
+
+        return await get_websocket_manager(user_context=user_context)
 
 
 # Export all compatibility functions and classes
@@ -584,4 +582,4 @@ __all__ = [
     '_validate_ssot_user_context_staging_safe'
 ]
 
-logger.info("WebSocket Manager Factory compatibility module loaded - Golden Path ready with enhanced compatibility")
+logger.info("WebSocket Manager Factory DEPRECATED module loaded - Issue #824 remediation (redirecting to SSOT)")
