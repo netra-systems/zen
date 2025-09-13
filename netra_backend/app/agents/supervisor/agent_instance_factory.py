@@ -42,6 +42,7 @@ from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBrid
 from netra_backend.app.websocket_core import (
     WebSocketEmitterPool,
 )
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
 # WebSocket exceptions module was deleted - using standard exceptions
 from netra_backend.app.logging_config import central_logger
@@ -51,10 +52,6 @@ logger = central_logger.get_logger(__name__)
 
 # UserExecutionContext is now imported from user_execution_context.py
 
-
-# SSOT CONSOLIDATION: Import alias to UnifiedWebSocketEmitter for backward compatibility
-from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-UserWebSocketEmitter = UnifiedWebSocketEmitter
 
 # SSOT CONSOLIDATION COMPLETE: All functionality now provided by UnifiedWebSocketEmitter
 
@@ -86,8 +83,8 @@ class AgentInstanceFactory:
         self._event_count = 0
         self._last_event_time = None
         
-        logger.info(f" CYCLE:  UserWebSocketEmitter (factory pattern)  ->  AgentWebSocketBridge  ->  UnifiedWebSocketEmitter for user={user_id}, run={run_id}")
-        logger.debug(f"Factory UserWebSocketEmitter initialized with bridge type: {type(websocket_bridge).__name__}")
+        logger.info(f" CYCLE:  UnifiedWebSocketEmitter (factory pattern)  ->  AgentWebSocketBridge  ->  UnifiedWebSocketEmitter for user={user_id}, run={run_id}")
+        logger.debug(f"Factory UnifiedWebSocketEmitter initialized with bridge type: {type(websocket_bridge).__name__}")
     
     async def notify_agent_started(self, agent_name: str, context: Optional[Dict[str, Any]] = None) -> bool:
         """Send agent started notification for this specific user."""
@@ -123,7 +120,7 @@ class AgentInstanceFactory:
             
             # LOUD FAILURE: Convert generic exceptions to specific ones
             raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"Agent communication failure from UnifiedWebSocketEmitter to {agent_name}: {str(e)} "
                 f"(user: {self.user_id})"
             )
     
@@ -163,7 +160,7 @@ class AgentInstanceFactory:
             logger.error(f" ALERT:  AGENT COMMUNICATION FAILURE: {error_msg}")
             
             raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"Agent communication failure from UnifiedWebSocketEmitter to {agent_name}: {str(e)} "
                 f"(user: {self.user_id})"
             )
     
@@ -198,7 +195,7 @@ class AgentInstanceFactory:
         except Exception as e:
             logger.error(f" ALERT:  TOOL NOTIFICATION FAILURE: Exception in notify_tool_executing for user {self.user_id}: {e}")
             raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"Agent communication failure from UnifiedWebSocketEmitter to {agent_name}: {str(e)} "
                 f"(user: {self.user_id})"
             )
     
@@ -235,7 +232,7 @@ class AgentInstanceFactory:
         except Exception as e:
             logger.error(f" ALERT:  TOOL NOTIFICATION FAILURE: Exception in notify_tool_completed for user {self.user_id}: {e}")
             raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"Agent communication failure from UnifiedWebSocketEmitter to {agent_name}: {str(e)} "
                 f"(user: {self.user_id})"
             )
     
@@ -270,7 +267,7 @@ class AgentInstanceFactory:
         except Exception as e:
             logger.error(f" ALERT:  AGENT COMPLETION FAILURE: Exception in notify_agent_completed for user {self.user_id}: {e}")
             raise RuntimeError(
-                f"Agent communication failure from UserWebSocketEmitter to {agent_name}: {str(e)} "
+                f"Agent communication failure from UnifiedWebSocketEmitter to {agent_name}: {str(e)} "
                 f"(user: {self.user_id})"
             )
     
@@ -1120,7 +1117,7 @@ class AgentInstanceFactory:
             logger.debug(f"Created semaphore for user {user_id} (max: {self._max_concurrent_per_user})")
             return semaphore
     
-    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UserWebSocketEmitter:
+    async def _create_emitter(self, user_id: str, thread_id: str, run_id: str) -> UnifiedWebSocketEmitter:
         """Create WebSocket emitter with optional pooling."""
         if self._performance_config.enable_emitter_pooling:
             # Initialize emitter pool if needed
@@ -1143,8 +1140,8 @@ class AgentInstanceFactory:
                 logger.warning(f"Failed to access emitter pool, falling back to direct creation: {e}")
         
         # Create new instance (backward compatible)
-        # This maintains 100% compatibility with existing UserWebSocketEmitter
-        return UserWebSocketEmitter(
+        # This maintains 100% compatibility with existing UnifiedWebSocketEmitter
+        return UnifiedWebSocketEmitter(
             user_id, thread_id, run_id, self._websocket_bridge
         )
     
