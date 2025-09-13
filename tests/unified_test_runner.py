@@ -9059,7 +9059,6 @@ def main():
     # This ensures environment isolation respects real services flag from the start
 
     running_e2e = (args.category in ['e2e', 'websocket', 'agent'] if args.category else False) or \
-
                   (args.categories and any(cat in ['e2e', 'websocket', 'agent'] for cat in args.categories))
 
     
