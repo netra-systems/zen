@@ -126,7 +126,7 @@ class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
     
     async def test_websocket_events_delivered_via_compatibility_bridge(self):
         """Test that ExecutionEngine (via Issue #565 compatibility bridge) delivers WebSocket events."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
         import warnings

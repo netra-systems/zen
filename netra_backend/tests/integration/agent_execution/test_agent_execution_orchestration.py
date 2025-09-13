@@ -29,8 +29,8 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Core imports
-from netra_backend.app.agents.supervisor.execution_engine import (
-    ExecutionEngine,
+from netra_backend.app.agents.supervisor.user_execution_engine import (
+    UserExecutionEngine as ExecutionEngine,
     create_request_scoped_engine
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
