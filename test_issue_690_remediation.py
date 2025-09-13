@@ -42,16 +42,16 @@ async def test_staging_environment_configuration():
     assert llm_config.criticality == ServiceCriticality.OPTIONAL, f"LLM should be optional in staging, got {llm_config.criticality}"
     assert llm_config.failure_mode == HealthFailureMode.GRACEFUL_DEGRADE, f"LLM should gracefully degrade in staging, got {llm_config.failure_mode}"
 
-    print("✅ LLM service correctly configured as optional with graceful degradation in staging")
+    print("PASS: LLM service correctly configured as optional with graceful degradation in staging")
 
     # Test staging allows partial startup
     assert staging_config.allow_partial_startup == True, "Staging should allow partial startup"
-    print("✅ Staging environment allows partial startup")
+    print("PASS: Staging environment allows partial startup")
 
     # Test timeout configuration
     llm_timeout = get_service_timeout("llm", "staging")
     assert llm_timeout <= 15.0, f"LLM timeout should be reduced in staging, got {llm_timeout}s"
-    print(f"✅ LLM timeout appropriately reduced to {llm_timeout}s in staging")
+    print(f"PASS: LLM timeout appropriately reduced to {llm_timeout}s in staging")
 
     return True
 

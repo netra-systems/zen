@@ -37,9 +37,9 @@ from netra_backend.app.services.user_execution_context import (
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    get_agent_instance_factory,
-    UserWebSocketEmitter
+    get_agent_instance_factory
 )
+from netra_backend.app.services.websocket_bridge_factory import UserWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
