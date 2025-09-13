@@ -287,14 +287,17 @@ class ThreadCleanupManager:
             # Check if we have an active event loop first
             try:
                 loop = asyncio.get_running_loop()
-                # Create task in the running loop
-                task = loop.create_task(background_cleanup())
-                logger.debug("Background cleanup task scheduled in active event loop")
+                if loop is not None:
+                    # Create task in the running loop
+                    task = loop.create_task(background_cleanup())
+                    logger.debug("Background cleanup task scheduled in active event loop")
+                else:
+                    raise RuntimeError("No running loop available")
             except RuntimeError:
                 # No running loop - try to get any loop
                 try:
                     loop = asyncio.get_event_loop()
-                    if loop.is_running():
+                    if loop is not None and loop.is_running():
                         task = loop.create_task(background_cleanup())
                         logger.debug("Background cleanup task scheduled in existing event loop")
                     else:
@@ -306,10 +309,14 @@ class ThreadCleanupManager:
         except RuntimeError:
             # No event loop running, cleanup immediately in thread
             def sync_cleanup():
-                time.sleep(5.0)
-                self.cleanup_stale_threads(max_age_minutes=5)
-                gc.collect()
-                self._cleanup_scheduled = False
+                try:
+                    time.sleep(5.0)
+                    self.cleanup_stale_threads(max_age_minutes=5)
+                    gc.collect()
+                except Exception as e:
+                    logger.error(f"Sync cleanup failed: {e}")
+                finally:
+                    self._cleanup_scheduled = False
 
             cleanup_thread = threading.Thread(target=sync_cleanup, daemon=True)
             cleanup_thread.start()

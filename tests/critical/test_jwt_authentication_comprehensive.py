@@ -65,7 +65,7 @@ from shared.isolated_environment import get_env, IsolatedEnvironment
 from test_framework.test_context import TestContext, create_test_context
 from test_framework.websocket_helpers import WebSocketTestHelpers
 from test_framework.database.test_database_manager import DatabaseTestManager
-from test_framework.redis_test_utils.test_redis_manager import RedisTestManager
+from netra_backend.app.redis_manager import redis_manager
 
 # Docker infrastructure for real services
 from tests.mission_critical.websocket_real_test_base import (

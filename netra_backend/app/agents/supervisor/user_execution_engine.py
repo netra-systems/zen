@@ -1849,6 +1849,34 @@ class UserExecutionEngine(IExecutionEngine):
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+
+async def create_request_scoped_engine(context: UserExecutionContext) -> UserExecutionEngine:
+    """Create request-scoped execution engine - compatibility function for test imports.
+
+    This function provides backward compatibility for tests that import create_request_scoped_engine
+    from the user_execution_engine module. It delegates to the SSOT implementation in the
+    execution_engine_factory module.
+
+    Args:
+        context: User execution context for user isolation
+
+    Returns:
+        UserExecutionEngine: Isolated engine for the user
+
+    Note:
+        This is a compatibility function. The canonical implementation is in execution_engine_factory.
+        Tests should ideally import from execution_engine_factory, but this function ensures
+        backward compatibility for existing test imports.
+    """
+    # Delegate to the SSOT implementation in execution_engine_factory
+    from netra_backend.app.agents.supervisor.execution_engine_factory import create_request_scoped_engine as factory_create_request_scoped_engine
+
+    logger.info(f"🔄 COMPATIBILITY: create_request_scoped_engine() called from user_execution_engine module. "
+               f"Delegating to execution_engine_factory SSOT implementation for user {context.user_id}")
+
+    # Use the canonical factory implementation
+    return await factory_create_request_scoped_engine(context)
+
 @asynccontextmanager
 async def create_execution_context_manager(
     registry: 'AgentRegistry',
