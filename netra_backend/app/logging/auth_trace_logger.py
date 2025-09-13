@@ -27,7 +27,7 @@ import time
 import traceback
 
 from netra_backend.app.logging_config import central_logger
-from shared.isolated_environment import get_env
+from shared.isolated_environment import get_env_var
 
 logger = central_logger.get_logger(__name__)
 
@@ -281,7 +281,7 @@ class AuthTraceLogger:
     def _is_development_env(self) -> bool:
         """Check if running in development environment."""
         try:
-            env = get_env('ENVIRONMENT', '').lower()
+            env = get_env_var('ENVIRONMENT', '').lower()
             return env in ['development', 'dev', 'local']
         except Exception:
             return False
@@ -289,7 +289,7 @@ class AuthTraceLogger:
     def _is_staging_env(self) -> bool:
         """Check if running in staging environment."""
         try:
-            env = get_env('ENVIRONMENT', '').lower()
+            env = get_env_var('ENVIRONMENT', '').lower()
             return env in ['staging', 'stage']
         except Exception:
             return False
@@ -297,7 +297,7 @@ class AuthTraceLogger:
     def _is_production_env(self) -> bool:
         """Check if running in production environment."""
         try:
-            env = get_env('ENVIRONMENT', '').lower()
+            env = get_env_var('ENVIRONMENT', '').lower()
             return env in ['production', 'prod']
         except Exception:
             return False

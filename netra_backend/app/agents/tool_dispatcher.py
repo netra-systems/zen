@@ -38,6 +38,9 @@ from netra_backend.app.agents.request_scoped_tool_dispatcher import (
 class UnifiedToolDispatcherFactory:
     @staticmethod
     def create_for_request(*args, **kwargs):
+        # Fix parameter name mapping: websocket_manager -> websocket_emitter
+        if 'websocket_manager' in kwargs:
+            kwargs['websocket_emitter'] = kwargs.pop('websocket_manager')
         return UnifiedToolDispatcher(*args, **kwargs)
     
     @classmethod
