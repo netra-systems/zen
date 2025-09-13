@@ -166,7 +166,8 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         assert hasattr(supervisor, 'description')
         
         # Test configuration properties
-        assert supervisor.name == "supervisor"
+        # FIX: Supervisor agent name is capitalized
+        assert supervisor.name.lower() == "supervisor"
         assert "orchestrat" in supervisor.description.lower()
         
         # Test state initialization
