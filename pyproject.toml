@@ -222,6 +222,9 @@ markers = [
     "health_checks: Health check and service status tests",
     "ssot_violation: SSOT violation detection and remediation tests",
     
+    # Missing marker for auth service secret loader tests (Issue #687)
+    "secret_loader: Secret loader component tests",
+    
     # Additional comprehensive marker definitions (Issue #553 Resolution)
     "infrastructure_validation: Infrastructure validation tests",
     "sessionmiddleware: Session middleware tests",
