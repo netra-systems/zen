@@ -104,7 +104,8 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
             from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_websocket_manager_creation
             validate_websocket_manager_creation(
                 manager_instance=manager,
-                user_context=user_context or test_context,
+                user_context=user_context,
+                _ssot_authorization_token=secrets.token_urlsafe(16) or test_context,
                 creation_method="get_websocket_manager"
             )
         except ImportError:

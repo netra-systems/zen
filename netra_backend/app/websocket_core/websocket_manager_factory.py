@@ -22,6 +22,7 @@ IMPORT GUIDANCE:
 """
 
 from typing import Optional, Dict, Any
+import secrets
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from netra_backend.app.logging_config import central_logger
@@ -182,7 +183,10 @@ async def create_websocket_manager(user_context=None, user_id: Optional[UserID] 
     # If user_context is provided, use it directly (preferred path)
     if user_context is not None:
         logger.debug("Creating WebSocket manager with full user context")
-        manager = WebSocketManager(user_context=user_context)
+        manager = WebSocketManager(
+            user_context=user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(16)
+        )
 
         # Issue #712 Fix: Validate SSOT compliance
         validate_websocket_manager_creation(
@@ -210,7 +214,7 @@ async def create_websocket_manager(user_context=None, user_id: Optional[UserID] 
             request_id=f"golden_path_test_{typed_user_id}"
         )
         
-        return WebSocketManager(user_context=test_context)
+        return WebSocketManager(user_context=test_context, _ssot_authorization_token=secrets.token_urlsafe(16))
     
     # No context provided - this violates SSOT compliance
     logger.error("WebSocket manager factory called without user context or user_id")
@@ -258,7 +262,10 @@ def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] =
     # If user_context is provided, use it directly (preferred path)
     if user_context is not None:
         logger.debug("Creating WebSocket manager with full user context (sync)")
-        manager = WebSocketManager(user_context=user_context)
+        manager = WebSocketManager(
+            user_context=user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(16)
+        )
 
         # Issue #712 Fix: Validate SSOT compliance
         validate_websocket_manager_creation(
@@ -286,7 +293,7 @@ def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] =
             request_id=f"golden_path_test_{typed_user_id}"
         )
         
-        return WebSocketManager(user_context=test_context)
+        return WebSocketManager(user_context=test_context, _ssot_authorization_token=secrets.token_urlsafe(16))
     
     # No context provided - this violates SSOT compliance
     logger.error("WebSocket manager sync factory called without user context or user_id")

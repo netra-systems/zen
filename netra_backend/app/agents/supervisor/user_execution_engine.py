@@ -741,7 +741,7 @@ class UserExecutionEngine(IExecutionEngine):
             stacklevel=2
         )
 
-        # Create or convert UserExecutionContext
+        # Create UserExecutionContext if not provided
         if user_context is None:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
             import uuid
@@ -749,7 +749,7 @@ class UserExecutionEngine(IExecutionEngine):
                 user_id=f"test_user_{uuid.uuid4().hex[:8]}",
                 run_id=f"test_run_{uuid.uuid4().hex[:8]}",
                 thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
-                request_id=str(uuid.uuid4())
+                metadata={'created_via': '_init_from_factory', 'issue': '#692'}
             )
         elif hasattr(user_context, '__class__') and 'Mock' in user_context.__class__.__name__:
             # Convert mock object to real UserExecutionContext for compatibility
@@ -759,7 +759,7 @@ class UserExecutionEngine(IExecutionEngine):
                 user_id=getattr(user_context, 'user_id', f"test_user_{uuid.uuid4().hex[:8]}"),
                 run_id=getattr(user_context, 'run_id', f"test_run_{uuid.uuid4().hex[:8]}"),
                 thread_id=getattr(user_context, 'thread_id', f"test_thread_{uuid.uuid4().hex[:8]}"),
-                request_id=str(uuid.uuid4())
+                metadata={'created_via': '_init_from_factory', 'issue': '#692'}
             )
 
         # Wrap registry in factory pattern (for compatibility)
