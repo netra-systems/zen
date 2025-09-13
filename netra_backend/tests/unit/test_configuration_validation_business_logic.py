@@ -21,7 +21,7 @@ from typing import Dict, Any, List
 
 from shared.isolated_environment import IsolatedEnvironment, get_env
 from netra_backend.app.config import config_manager
-from netra_backend.app.core.configuration.environment_detector import EnvironmentDetector
+from netra_backend.app.core.environment_constants import EnvironmentDetector
 
 
 class TestConfigurationValidationBusinessLogic:

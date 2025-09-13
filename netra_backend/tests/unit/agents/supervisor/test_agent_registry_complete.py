@@ -56,7 +56,7 @@ from netra_backend.app.agents.supervisor.agent_registry import (
     get_agent_registry
 )
 
-from netra_backend.app.agents.supervisor.user_execution_context import (
+from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     InvalidContextError
 )
