@@ -62,108 +62,117 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         self.schema_manager = ClickHouseTraceSchema()
 
     @pytest.mark.asyncio
-    async def test_missing_index_operation_error_type(self):
+    async def test_index_operation_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing IndexOperationError type.
-        
-        Current Problem: Index operations beyond creation (rebuild, drop, optimize) 
-        don't have a specific IndexOperationError type that's broader than IndexCreationError.
-        
-        Expected Failure: This test should fail because IndexOperationError doesn't exist
-        and current classification falls back to generic SchemaError.
+        Test validates IndexOperationError classification works correctly.
+
+        Validates: Index operations beyond creation (rebuild, drop, optimize)
+        are properly classified as IndexOperationError type.
+
+        Expected Success: This test should pass because IndexOperationError exists
+        and current classification correctly identifies index operation errors.
         """
         # Test index rebuild operation failure
         mock_error = OperationalError("Index rebuild failed: insufficient disk space for index 'test_idx'", None, None)
         
-        # Current classification should NOT produce IndexOperationError
+        # Current classification should correctly produce IndexOperationError
         classified_error = classify_error(mock_error)
+
+        # This assertion should PASS because IndexOperationError exists and works correctly
+        assert type(classified_error).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import IndexOperationError
+        assert isinstance(classified_error, IndexOperationError), \
+            "Error should be classified as IndexOperationError instance"
         
-        # This assertion should PASS because IndexOperationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be IndexOperationError)
-        assert type(classified_error).__name__ != "IndexOperationError", \
-            f"IndexOperationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import IndexOperationError (this should fail)
-        with pytest.raises(ImportError):
+        # Test that we can successfully import IndexOperationError
+        try:
             from netra_backend.app.db.transaction_errors import IndexOperationError
+            assert IndexOperationError is not None, "IndexOperationError should be importable"
+        except ImportError:
+            pytest.fail("IndexOperationError should be importable from transaction_errors")
         
         # Test index drop operation
         drop_error = IntegrityError("Cannot drop index 'primary_idx': index is referenced by materialized view", None, None)
         classified_drop = classify_error(drop_error)
         
-        # Should be IndexOperationError but isn't available
-        assert type(classified_drop).__name__ != "IndexOperationError", \
-            "IndexOperationError should not exist yet (test validates gap)"
+        # Should be classified as IndexOperationError
+        assert type(classified_drop).__name__ == "IndexOperationError", \
+            f"Expected IndexOperationError for drop operation, got {type(classified_drop).__name__}"
 
-    @pytest.mark.asyncio 
-    async def test_missing_migration_error_type(self):
+    @pytest.mark.asyncio
+    async def test_migration_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing MigrationError type.
-        
-        Current Problem: Migration operations don't have a specific MigrationError type
-        that provides rollback context and partial completion status.
-        
-        Expected Failure: This test should fail because MigrationError doesn't exist
-        and migration failures don't provide adequate rollback information.
+        Test validates MigrationError classification works correctly.
+
+        Validates: Migration operations that fail are properly classified
+        as MigrationError type with appropriate context information.
+
+        Expected Success: This test should pass because MigrationError exists
+        and current classification correctly identifies migration errors.
         """
         # Test migration failure scenario
         migration_error = OperationalError(
             "Migration failed at step 3 of 5: ALTER TABLE users ADD CONSTRAINT check_age CHECK (age >= 0)",
             None, None
         )
-        
-        # Current classification should NOT produce MigrationError
+
+        # Current classification should correctly produce MigrationError
         classified_error = classify_error(migration_error)
-        
-        # This assertion should PASS because MigrationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be MigrationError)
-        assert type(classified_error).__name__ != "MigrationError", \
-            f"MigrationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import MigrationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because MigrationError exists and works correctly
+        assert type(classified_error).__name__ == "MigrationError", \
+            f"Expected MigrationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import MigrationError
+        assert isinstance(classified_error, MigrationError), \
+            "Error should be classified as MigrationError instance"
+
+        # Test that we can successfully import MigrationError
+        try:
             from netra_backend.app.db.transaction_errors import MigrationError
-        
-        # Verify migration context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Migration:" not in error_str, "Migration context should not exist yet"
-        assert "Step:" not in error_str, "Step context should not exist yet" 
-        assert "Rollback Required:" not in error_str, "Rollback context should not exist yet"
+            assert MigrationError is not None, "MigrationError should be importable"
+        except ImportError:
+            pytest.fail("MigrationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
-    async def test_missing_table_dependency_error_type(self):
+    async def test_table_dependency_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing TableDependencyError type.
-        
-        Current Problem: Table dependency operations (foreign keys, materialized views)
-        don't have a specific TableDependencyError type with relationship context.
-        
-        Expected Failure: This test should fail because TableDependencyError doesn't exist
-        and dependency errors don't provide relationship information.
+        Test validates TableDependencyError classification works correctly.
+
+        Validates: Table dependency operations (foreign keys, materialized views)
+        that fail are properly classified as TableDependencyError type.
+
+        Expected Success: This test should pass because TableDependencyError exists
+        and current classification correctly identifies dependency errors.
         """
         # Test table dependency failure scenario
         dependency_error = IntegrityError(
             "Cannot drop table 'orders': referenced by materialized view 'order_analytics' and foreign key 'fk_user_orders'",
             None, None
         )
-        
-        # Current classification should NOT produce TableDependencyError
+
+        # Current classification should correctly produce TableDependencyError
         classified_error = classify_error(dependency_error)
-        
-        # This assertion should PASS because TableDependencyError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be TableDependencyError)
-        assert type(classified_error).__name__ != "TableDependencyError", \
-            f"TableDependencyError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import TableDependencyError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because TableDependencyError exists and works correctly
+        assert type(classified_error).__name__ == "TableDependencyError", \
+            f"Expected TableDependencyError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import TableDependencyError
+        assert isinstance(classified_error, TableDependencyError), \
+            "Error should be classified as TableDependencyError instance"
+
+        # Test that we can successfully import TableDependencyError
+        try:
             from netra_backend.app.db.transaction_errors import TableDependencyError
-        
-        # Verify dependency context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Dependent Objects:" not in error_str, "Dependency context should not exist yet"
-        assert "Dependency Type:" not in error_str, "Dependency type should not exist yet"
-        assert "Resolution Steps:" not in error_str, "Resolution steps should not exist yet"
+            assert TableDependencyError is not None, "TableDependencyError should be importable"
+        except ImportError:
+            pytest.fail("TableDependencyError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
     async def test_missing_constraint_violation_error_type(self):

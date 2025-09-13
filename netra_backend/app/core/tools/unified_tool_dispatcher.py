@@ -534,10 +534,14 @@ async def create_request_scoped_dispatcher(
 # EXPORTS
 # ============================================================================
 
+# Backward compatibility alias for tests
+RequestScopedToolDispatcher = UnifiedToolDispatcher  # Tests expect this name
+
 __all__ = [
     # Core classes
     'UnifiedToolDispatcher',
     'UnifiedToolDispatcherFactory',
+    'RequestScopedToolDispatcher',  # Backward compatibility
 
     # Data models
     'ToolDispatchRequest',
