@@ -7,16 +7,17 @@ import { getUnifiedApiConfig } from '@/lib/unified-api-config'
 import { corsJsonResponse, corsEmptyResponse, handleOptions } from '@/lib/cors-utils'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     threadId: string;
-  };
+  }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const config = getUnifiedApiConfig();
     const url = new URL(request.url);
-    const backendUrl = `${config.urls.api}/api/threads/${params.threadId}${url.search}`;
+    const resolvedParams = await params;
+    const backendUrl = `${config.urls.api}/api/threads/${resolvedParams.threadId}${url.search}`;
     
     // Forward the request to the backend
     const response = await fetch(backendUrl, {
@@ -30,12 +31,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!response.ok) {
-      console.warn(`Backend thread ${params.threadId} GET failed: ${response.status} ${response.statusText}`);
+      console.warn(`Backend thread ${resolvedParams.threadId} GET failed: ${response.status} ${response.statusText}`);
       return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
-        threadId: params.threadId,
+        threadId: resolvedParams.threadId,
         source: 'frontend-proxy'
       }, request, { status: response.status });
     }
@@ -44,11 +45,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
-    console.error(`Thread ${params.threadId} GET proxy error:`, error);
+    const resolvedParams = await params;
+    console.error(`Thread ${resolvedParams.threadId} GET proxy error:`, error);
     return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
-      threadId: params.threadId,
+      threadId: resolvedParams.threadId,
       source: 'frontend-proxy'
     }, request, { status: 503 });
   }
@@ -57,7 +59,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const config = getUnifiedApiConfig();
-    const backendUrl = `${config.urls.api}/api/threads/${params.threadId}`;
+    const resolvedParams = await params;
+    const backendUrl = `${config.urls.api}/api/threads/${resolvedParams.threadId}`;
     const body = await request.json();
     
     // Forward the request to the backend
@@ -73,12 +76,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!response.ok) {
-      console.warn(`Backend thread ${params.threadId} PUT failed: ${response.status} ${response.statusText}`);
+      console.warn(`Backend thread ${resolvedParams.threadId} PUT failed: ${response.status} ${response.statusText}`);
       return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
-        threadId: params.threadId,
+        threadId: resolvedParams.threadId,
         source: 'frontend-proxy'
       }, request, { status: response.status });
     }
@@ -87,11 +90,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
-    console.error(`Thread ${params.threadId} PUT proxy error:`, error);
+    const resolvedParams = await params;
+    console.error(`Thread ${resolvedParams.threadId} PUT proxy error:`, error);
     return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
-      threadId: params.threadId,
+      threadId: resolvedParams.threadId,
       source: 'frontend-proxy'
     }, request, { status: 503 });
   }
@@ -100,7 +104,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const config = getUnifiedApiConfig();
-    const backendUrl = `${config.urls.api}/api/threads/${params.threadId}`;
+    const resolvedParams = await params;
+    const backendUrl = `${config.urls.api}/api/threads/${resolvedParams.threadId}`;
     
     // Forward the request to the backend
     const response = await fetch(backendUrl, {
@@ -113,12 +118,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!response.ok) {
-      console.warn(`Backend thread ${params.threadId} DELETE failed: ${response.status} ${response.statusText}`);
+      console.warn(`Backend thread ${resolvedParams.threadId} DELETE failed: ${response.status} ${response.statusText}`);
       return corsJsonResponse({
         error: 'Backend service unavailable',
         status: response.status,
         statusText: response.statusText,
-        threadId: params.threadId,
+        threadId: resolvedParams.threadId,
         source: 'frontend-proxy'
       }, request, { status: response.status });
     }
@@ -132,11 +137,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return corsJsonResponse(data, request, { status: response.status });
     
   } catch (error) {
-    console.error(`Thread ${params.threadId} DELETE proxy error:`, error);
+    console.error(`Thread ${resolvedParams.threadId} DELETE proxy error:`, error);
     return corsJsonResponse({
       error: 'Proxy error',
       message: error instanceof Error ? error.message : 'Unknown error',
-      threadId: params.threadId,
+      threadId: resolvedParams.threadId,
       source: 'frontend-proxy'
     }, request, { status: 503 });
   }
