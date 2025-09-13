@@ -22,23 +22,21 @@ class TestMessageRouterAsync:
     async def test_message_router_initialization(self):
         """Test MessageRouter initialization"""
         assert self.router is not None
-        assert hasattr(self.router, 'handlers')
-        assert isinstance(self.router.handlers, dict)
+        assert hasattr(self.router, 'custom_handlers')
+        assert hasattr(self.router, 'builtin_handlers')
+        assert isinstance(self.router.custom_handlers, list)
+        assert isinstance(self.router.builtin_handlers, list)
+        assert len(self.router.builtin_handlers) > 0  # Should have built-in handlers
 
     async def test_add_handler(self):
-        """Test adding a message handler"""
+        """Test adding a custom message handler"""
         error_handler = ErrorHandler()
-        self.router.add_handler(MessageType.ERROR_MESSAGE, error_handler)
+        self.router.add_handler(error_handler)
 
-        assert MessageType.ERROR_MESSAGE in self.router.handlers
-        assert self.router.handlers[MessageType.ERROR_MESSAGE] == error_handler
+        assert error_handler in self.router.custom_handlers
 
     async def test_route_message(self):
         """Test routing a message to appropriate handler"""
-        # Add handler
-        error_handler = ErrorHandler()
-        self.router.add_handler(MessageType.ERROR_MESSAGE, error_handler)
-
         # Create mock WebSocket and message
         mock_websocket = Mock()
         error_message = WebSocketMessage(
@@ -46,7 +44,7 @@ class TestMessageRouterAsync:
             payload={"error_code": "TEST", "error_message": "Test error"}
         )
 
-        # Route the message
+        # Route the message (should find built-in ErrorHandler)
         result = await self.router.route_message("test_user", mock_websocket, error_message)
 
         # Should route successfully
