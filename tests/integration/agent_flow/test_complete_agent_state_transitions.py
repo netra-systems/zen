@@ -218,8 +218,8 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         user_context = await self._create_test_user_context()
         
         state_tracker = AgentExecutionTracker(
-            user_context=user_context,
-            persistence_enabled=True
+            heartbeat_timeout=10,
+            execution_timeout=15
         )
         
         # Create agent state with proper isolation
@@ -334,9 +334,8 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         user_context = await self._create_test_user_context()
         
         state_tracker = AgentExecutionTracker(
-            user_context=user_context,
-            persistence_enabled=True,
-            enable_recovery=True
+            heartbeat_timeout=10,
+            execution_timeout=15
         )
         
         agent_state = DeepAgentState(
@@ -442,8 +441,8 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
             user_contexts.append(user_context)
             
             state_tracker = AgentExecutionTracker(
-                user_context=user_context,
-                persistence_enabled=True
+                heartbeat_timeout=10,
+                execution_timeout=15
             )
             state_trackers.append(state_tracker)
             

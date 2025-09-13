@@ -2003,18 +2003,26 @@ class AgentWebSocketBridge(MonitorableComponent):
             except ImportError:
                 logger.debug("Event delivery tracker not available, proceeding without tracking")
             
-            # PHASE 1 FIX: Use user_id directly for WebSocket routing (no thread_id resolution needed)
-            user_id = effective_user_context.user_id
-            
-            # PHASE 4 FIX: Use centralized retry logic for critical events - CRITICAL EVENT
-            success = await self._send_with_retry(user_id, notification, "agent_completed", run_id)
+            # PHASE 4 FIX: Use emit_agent_event for consistent event emission pattern
+            success = await self.emit_agent_event(
+                event_type="agent_completed",
+                data={
+                    "status": "completed",
+                    "result": self._sanitize_result(result) if result else {},
+                    "execution_time_ms": execution_time_ms,
+                    "message": f"{agent_name} has completed processing your request",
+                    "timestamp": datetime.now(timezone.utc).isoformat()
+                },
+                run_id=run_id,
+                agent_name=agent_name
+            )
             
             # PHASE 2 FIX: Update delivery tracking
             if event_id:
                 try:
                     if success:
                         tracker.mark_event_confirmed(event_id)
-                        logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                        logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={effective_user_context.user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                     else:
                         tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False - CRITICAL EVENT FAILURE")
                         logger.error(f" ALERT:  EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}] - CRITICAL EVENT")
@@ -2022,7 +2030,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.warning(f"Event tracking update failed for critical event: {track_error}")
             else:
                 if success:
-                    logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={user_id} (run_id={run_id}, agent={agent_name})")
+                    logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={effective_user_context.user_id} (run_id={run_id}, agent={agent_name})")
                 else:
                     logger.error(f" ALERT:  EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) - CRITICAL EVENT")
             
