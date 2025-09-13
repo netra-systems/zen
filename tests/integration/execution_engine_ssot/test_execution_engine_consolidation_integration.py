@@ -421,7 +421,7 @@ class TestExecutionEngineConsolidationIntegration(SSotAsyncTestCase):
     async def _test_legacy_redirect_performance(self):
         """Test legacy redirect performance."""
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
             engine = UserExecutionEngine()
             return f"Legacy ExecutionEngine redirect successful: {type(engine)}"

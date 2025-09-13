@@ -187,6 +187,49 @@ Results are saved in JSON format with detailed status for each instance:
 }
 ```
 
+### Recent JSON Output Example
+
+Here's a real example from the latest orchestrator run (`claude_instances_results.json`):
+
+```json
+{
+  "total_instances": 2,
+  "completed": 0,
+  "failed": 2,
+  "running": 0,
+  "pending": 0,
+  "instances": {
+    "createtestsv2": {
+      "name": "createtestsv2",
+      "pid": 23800,
+      "status": "failed",
+      "start_time": 1757789022.615357,
+      "end_time": null,
+      "output": "{\"type\":\"system\",\"subtype\":\"init\",\"cwd\":\"C:\\\\GitHub\\\\netra-apex\",\"session_id\":\"42b51f5b-984b-4061-8a84-54d8819ae8f2\",\"tools\":[\"Task\",\"Bash\",\"Glob\",\"Grep\",\"ExitPlanMode\",\"Read\",\"Edit\",\"MultiEdit\",\"Write\",\"NotebookEdit\",\"WebFetch\",\"TodoWrite\",\"WebSearch\",\"BashOutput\",\"KillShell\"],\"mcp_servers\":[],\"model\":\"claude-opus-4-1-20250805\",\"permissionMode\":\"acceptEdits\",\"slash_commands\":[\"audit-docker-logs\",\"action\",\"websocket-test\",\"compliance\",\"docker-rebuild\",\"analyze-repository\",\"run-demo\",\"agent-test\",\"test-create-integration\",\"tdd\",\"ssotgardener\",\"ssot-regression-check\",\"scope-work\",\"runtests\",\"run-unit-frontend-tests\",\"test-real\",\"audit-gcp-logs\",\"test-fix-REMOVED_SYNTAX_ERROR\",\"test-create-unit-coverage\",\"audit-gcp-error-loop\",\"testgardener\",\"audit-staging-logs-gcp-loop\",\"test-update-e2e-fix-fakes\",\"canary\",\"ultimate-test-deploy-loop\",\"debug-error\",\"issuemergesamegardener\",\"createtestsv2\",\"issuecrush\",\"gitissueprogressorv2\",\"gitcommitgardener\",\"pre-commit\",\"prmergergit\",\"priority-test-create\",\"refreshgardener\",\"refresh-upate-tests\",\"README\",\"deploy-gcp\",\"e2e-fix-directly\",\"failingtestsgardener\",\"gcploggardener\"],\"apiKeySource\":\"none\",\"output_style\":\"default\",\"uuid\":\"b2dae2fa-6727-437b-a661-785cb4f5e934\"}",
+      "error": "Timeout after 30s"
+    },
+    "ssot": {
+      "name": "ssot",
+      "pid": 43352,
+      "status": "failed",
+      "start_time": 1757789022.6223094,
+      "end_time": null,
+      "output": "{\"type\":\"system\",\"subtype\":\"init\"...[truncated for display]",
+      "error": "Timeout after 30s"
+    }
+  }
+}
+```
+
+**Key Fields Explained:**
+- `total_instances`: Number of instances configured
+- `completed/failed/running/pending`: Status counts across all instances
+- `instances[].pid`: Process ID for tracking
+- `instances[].start_time`: Unix timestamp when instance started
+- `instances[].output`: Real-time stream-json output from Claude Code
+- `instances[].error`: Any error messages or timeout information
+- `instances[].duration`: Calculated duration when completed
+
 ## Key Features
 
 - **Concurrent Execution**: All instances run in parallel

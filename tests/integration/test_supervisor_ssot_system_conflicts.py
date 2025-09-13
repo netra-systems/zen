@@ -156,7 +156,7 @@ class TestSupervisorSystemLevelSSotConflicts(SSotBaseTestCase):
         
         # Check general ExecutionEngine patterns
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Look for supervisor execution methods
             if hasattr(ExecutionEngine, 'execute_supervisor') or hasattr(ExecutionEngine, 'supervisor_execute'):

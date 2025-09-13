@@ -23,14 +23,14 @@ import pytest
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-from netra_backend.app.core.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID, ExecutionID, ThreadID
 
 # Import real services for integration testing (no mocks allowed)
 try:
     from netra_backend.app.core.app_state import get_app_state
     from netra_backend.app.websocket_core.manager import get_websocket_manager
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.db.database_manager import get_database_manager
 except ImportError as e:
     pytest.skip(f"Real services not available for integration testing: {e}", allow_module_level=True)

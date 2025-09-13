@@ -865,7 +865,7 @@ class RealWebSocketTestBase:
         if self.services_started:
             logger.info("Stopping Docker services...")
             try:
-                await self.docker_manager.stop_services()
+                await self.docker_manager.graceful_shutdown()
                 self.services_started = False
             except Exception as e:
                 logger.warning(f"Error stopping Docker services: {e}")
