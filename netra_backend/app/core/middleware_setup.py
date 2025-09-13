@@ -168,14 +168,14 @@ def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
         
         # Only add middleware in GCP environments
         if is_gcp:
-            # GCP environments need longer timeout due to Cloud SQL connection delays
-            timeout_seconds = 90.0 if environment == 'staging' else 60.0
+            # Enhanced timeout for Issue #449 Cloud Run compatibility
+            timeout_seconds = 90.0 if environment == 'staging' else 75.0  # Enhanced timeouts
             
             app.add_middleware(
                 GCPWebSocketReadinessMiddleware,
                 timeout_seconds=timeout_seconds
             )
-            logger.info(f"GCP WebSocket readiness middleware added for {environment} environment (timeout: {timeout_seconds}s)")
+            logger.info(f"Enhanced GCP WebSocket readiness middleware added for {environment} environment (Issue #449, timeout: {timeout_seconds}s)")
         else:
             logger.debug(f"GCP WebSocket readiness middleware skipped for {environment} environment")
             
