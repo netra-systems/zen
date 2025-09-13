@@ -17,6 +17,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import argparse
+from datetime import datetime
 
 # Setup logging
 logging.basicConfig(
@@ -58,6 +59,7 @@ class ClaudeInstanceOrchestrator:
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
         self.processes: Dict[str, subprocess.Popen] = {}
+        self.start_datetime = datetime.now()
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -378,9 +380,41 @@ class ClaudeInstanceOrchestrator:
 
         return summary
 
-    def save_results(self, output_file: Path):
-        """Save results to JSON file"""
+    def generate_output_filename(self, base_filename: str = None) -> Path:
+        """Generate output filename with datetime and agent names"""
+        if base_filename is None:
+            base_filename = "claude_instances_results"
+
+        # Format datetime as YYYYMMDD_HHMMSS
+        datetime_str = self.start_datetime.strftime("%Y%m%d_%H%M%S")
+
+        # Get agent names, clean them for filename
+        agent_names = []
+        for name in self.instances.keys():
+            # Clean name for filename (remove special characters)
+            clean_name = "".join(c for c in name if c.isalnum() or c in "_-")
+            agent_names.append(clean_name)
+
+        agents_str = "_".join(sorted(agent_names))
+
+        # Create filename: base_DATETIME_agents.json
+        filename = f"{base_filename}_{datetime_str}_{agents_str}.json"
+
+        return Path(filename)
+
+    def save_results(self, output_file: Path = None):
+        """Save results to JSON file with datetime and agent names"""
+        if output_file is None:
+            output_file = self.generate_output_filename()
+
         results = self.get_status_summary()
+
+        # Add metadata to results
+        results["metadata"] = {
+            "start_datetime": self.start_datetime.isoformat(),
+            "agents": list(self.instances.keys()),
+            "generated_filename": str(output_file)
+        }
 
         with open(output_file, 'w') as f:
             json.dump(results, f, indent=2)
@@ -391,8 +425,15 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            name="createtestsv2",
-            command="/createtestsv2",
+            name="/createtestsv2 goldenpath, unit",
+            command="/createtestsv2 goldenpath, unit",
+            description="createtestsv2",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            name="createtestsv2, goldenpath, integration",
+            command="/createtestsv2 goldenpath, integration",
             description="createtestsv2",
             permission_mode="acceptEdits",
             output_format=output_format
@@ -411,8 +452,8 @@ async def main():
     parser = argparse.ArgumentParser(description="Claude Code Instance Orchestrator")
     parser.add_argument("--workspace", type=Path, default=Path.cwd(),
                        help="Workspace directory (default: current directory)")
-    parser.add_argument("--output", type=Path, default=Path("claude_instances_results.json"),
-                       help="Output file for results (default: claude_instances_results.json)")
+    parser.add_argument("--output", type=Path, default=None,
+                       help="Output file for results (default: auto-generated with datetime and agents)")
     parser.add_argument("--config", type=Path, help="Custom instance configuration file")
     parser.add_argument("--dry-run", action="store_true", help="Show commands without running")
     parser.add_argument("--list-commands", action="store_true", help="List all available slash commands and exit")
@@ -493,7 +534,7 @@ async def main():
     logger.info(f"Orchestration completed in {total_duration:.2f}s")
     logger.info(f"Results: {summary['completed']} completed, {summary['failed']} failed")
 
-    # Save results
+    # Save results (will auto-generate filename if args.output is None)
     orchestrator.save_results(args.output)
 
     # Print detailed results
@@ -514,7 +555,9 @@ async def main():
         if status.error:
             print(f"  Errors: {status.error[:200]}...")
 
-    print(f"\nFull results saved to: {args.output}")
+    # Show the actual filename used (important when auto-generated)
+    final_output_file = args.output or orchestrator.generate_output_filename()
+    print(f"\nFull results saved to: {final_output_file}")
 
     # Exit with appropriate code
     sys.exit(0 if summary['failed'] == 0 else 1)
