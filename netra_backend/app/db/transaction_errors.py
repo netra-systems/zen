@@ -147,7 +147,7 @@ def _has_permission_keywords(error_msg: str) -> bool:
 
 def _has_schema_keywords(error_msg: str) -> bool:
     """Check if error message contains schema keywords."""
-    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
+    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column', 'already exists']
     return any(keyword in error_msg for keyword in schema_keywords)
 
 
