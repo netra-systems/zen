@@ -2968,32 +2968,56 @@ class AgentWebSocketBridge(MonitorableComponent):
     # ===================== FACTORY METHODS FOR USER ISOLATION =====================
     # CRITICAL SECURITY: These methods create per-request emitters to prevent user data leakage
     
-    async def create_user_emitter(self, user_context: 'UserExecutionContext') -> 'WebSocketEventEmitter':
+    async def create_user_emitter(self,
+                                user_context: Optional['UserExecutionContext'] = None,
+                                user_id: Optional[str] = None,
+                                thread_id: Optional[str] = None,
+                                connection_id: Optional[str] = None) -> 'WebSocketEventEmitter':
         """Create WebSocketEventEmitter for specific user context with complete isolation.
-        
+
         SECURITY CRITICAL: Use this method for new code to prevent cross-user event leakage.
         This replaces the singleton notification methods with per-request isolated emitters.
-        
+
+        ISSUE #669 REMEDIATION: Unified parameter signature supporting both new and legacy patterns.
+
         Args:
-            user_context: User execution context with validated user information
-            
+            user_context: User execution context (preferred new pattern)
+            user_id: Unique user identifier (legacy pattern)
+            thread_id: Thread identifier for WebSocket routing (legacy pattern)
+            connection_id: WebSocket connection identifier (legacy pattern)
+
         Returns:
             WebSocketEventEmitter: Isolated emitter bound to user context
-            
+
         Raises:
-            ValueError: If user_context is invalid or WebSocket manager unavailable
-            
+            ValueError: If parameters are invalid or WebSocket manager unavailable
+
         Example:
-            # Create per-user emitter (RECOMMENDED)
+            # Create per-user emitter (RECOMMENDED - new pattern)
             emitter = await bridge.create_user_emitter(user_context)
-            
+
+            # Create per-user emitter (LEGACY - backward compatibility)
+            emitter = await bridge.create_user_emitter(user_id="123", thread_id="456", connection_id="789")
+
             # Send events to specific user only - validated against context
             await emitter.emit_agent_started("MyAgent", {"query": "user query"})
-            
+
             # Automatic cleanup when emitter goes out of scope
         """
-        if not user_context:
-            raise ValueError("user_context is required for creating user emitter")
+        # ISSUE #669 REMEDIATION: Support both new and legacy parameter patterns
+        if user_context:
+            # NEW pattern (preferred)
+            actual_user_context = user_context
+        elif user_id and thread_id:
+            # LEGACY pattern (backward compatibility)
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            actual_user_context = UserExecutionContext(
+                user_id=user_id,
+                thread_id=thread_id,
+                connection_id=connection_id or f"conn_{user_id}_{thread_id}"
+            )
+        else:
+            raise ValueError("Either user_context or (user_id + thread_id) required")
         
         try:
             from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
@@ -3003,15 +3027,15 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 2 FEATURE FLAG: Check if SSOT consolidation is enabled
             config = get_config()
             ssot_enabled = config.ws_config.ssot_consolidation_enabled
-            
+
             if ssot_enabled:
-                logger.info(f"[U+1F680] PHASE 2 ACTIVE: SSOT consolidation enabled for user {user_context.user_id}")
+                logger.info(f"[U+1F680] PHASE 2 ACTIVE: SSOT consolidation enabled for user {actual_user_context.user_id}")
             else:
-                logger.debug(f" PIN:  PHASE 2 INACTIVE: Using standard emitter for user {user_context.user_id}")
-            
+                logger.debug(f" PIN:  PHASE 2 INACTIVE: Using standard emitter for user {actual_user_context.user_id}")
+
             # Validate user context before creating emitter
-            validated_context = validate_user_context(user_context)
-            
+            validated_context = validate_user_context(actual_user_context)
+
             # Create isolated WebSocket manager for this user context
             isolated_manager = WebSocketManager(user_context=validated_context)
             

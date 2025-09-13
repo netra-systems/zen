@@ -26,6 +26,7 @@ Usage:
 from unittest.mock import AsyncMock, MagicMock, Mock
 from typing import Dict, Any, Optional, List
 from datetime import datetime, UTC
+import time
 
 
 class SSotMockFactory:
@@ -373,17 +374,25 @@ class SSotMockFactory:
         user_id: str = "test_user",
         thread_id: str = "test_thread",
         run_id: str = "test_run",
-        request_id: str = "test_request"
+        request_id: str = "test_request",
+        websocket_client_id: Optional[str] = None,
+        connection_id: Optional[str] = None,
+        **kwargs
     ) -> MagicMock:
         """
         Create a standardized user execution context mock for testing.
-        
+
+        ISSUE #669 REMEDIATION: Added websocket_client_id parameter for interface consistency.
+
         Args:
             user_id: Mock user identifier
             thread_id: Mock thread identifier
             run_id: Mock run identifier
             request_id: Mock request identifier
-            
+            websocket_client_id: WebSocket client identifier (ISSUE #669 fix)
+            connection_id: Optional connection identifier
+            **kwargs: Additional arguments for extensibility
+
         Returns:
             MagicMock configured for user context testing
         """
@@ -396,7 +405,54 @@ class SSotMockFactory:
         mock_context.created_at = datetime.now(UTC)
         mock_context.get_state = MagicMock(return_value={})
         mock_context.set_state = MagicMock()
+
+        # ISSUE #669 REMEDIATION: Handle websocket_client_id parameter
+        if websocket_client_id and not connection_id:
+            connection_id = websocket_client_id
+
+        mock_context.connection_id = connection_id or f"conn_{user_id}_{thread_id}"
+        mock_context.websocket_client_id = websocket_client_id or mock_context.connection_id
+
+        # Add any additional kwargs as attributes
+        for key, value in kwargs.items():
+            setattr(mock_context, key, value)
+
         return mock_context
+
+    @staticmethod
+    def create_isolated_execution_context(
+        user_id: str,
+        thread_id: str,
+        websocket_client_id: Optional[str] = None,
+        connection_id: Optional[str] = None,
+        **kwargs
+    ) -> MagicMock:
+        """
+        Create isolated execution context mock for testing.
+
+        ISSUE #669 REMEDIATION: Added websocket_client_id parameter support that
+        was missing and causing test failures.
+
+        Args:
+            user_id: User identifier
+            thread_id: Thread identifier
+            websocket_client_id: WebSocket client identifier (ISSUE #669 fix)
+            connection_id: Optional connection identifier
+            **kwargs: Additional arguments for extensibility
+
+        Returns:
+            MagicMock: Mock execution context with expected interface
+        """
+        # Delegate to create_mock_user_context with the new parameter
+        return SSotMockFactory.create_mock_user_context(
+            user_id=user_id,
+            thread_id=thread_id,
+            run_id=f"run_{user_id}_{thread_id}_{int(time.time() * 1000)}",
+            request_id=f"req_{user_id}_{thread_id}_{int(time.time() * 1000)}",
+            websocket_client_id=websocket_client_id,
+            connection_id=connection_id,
+            **kwargs
+        )
 
     @classmethod
     def create_mock_suite(cls, mock_types: List[str]) -> Dict[str, Any]:

@@ -41,7 +41,8 @@ import asyncio
 import json
 import logging
 import time
-import uuid
+# import uuid - replaced with UnifiedIDManager for Issue #89
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List, Set, Union, Tuple
 from dataclasses import dataclass, field
@@ -294,7 +295,9 @@ class WebSocketEventMessage:
         if self.timestamp is None:
             self.timestamp = datetime.now(timezone.utc)
         if self.message_id is None:
-            self.message_id = f"msg_{uuid.uuid4().hex[:8]}"
+            # Issue #89 Fix: Use UnifiedIDManager for message ID generation
+            id_manager = UnifiedIDManager()
+            self.message_id = id_manager.generate_id(IDType.REQUEST, prefix="msg")
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
