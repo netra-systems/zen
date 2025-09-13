@@ -52,9 +52,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class InstanceConfig:
     """Configuration for a Claude Code instance"""
-    name: str
     command: str
-    description: str
+    name: Optional[str] = None
+    description: Optional[str] = None
     allowed_tools: List[str] = None
     permission_mode: str = "acceptEdits"
     output_format: str = "stream-json"  # Default to stream-json for real-time output
@@ -62,6 +62,13 @@ class InstanceConfig:
     clear_history: bool = False
     compact_history: bool = False
     pre_commands: List[str] = None  # Commands to run before main command
+
+    def __post_init__(self):
+        """Set defaults after initialization"""
+        if self.name is None:
+            self.name = self.command
+        if self.description is None:
+            self.description = f"Execute {self.command}"
 
 @dataclass
 class InstanceStatus:
@@ -518,40 +525,95 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
-            name="/createtestsv2 goldenpath, unit",
             command="/createtestsv2 goldenpath, unit",
-            description="createtestsv2",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            name="createtestsv2, goldenpath, integration",
             command="/createtestsv2 goldenpath, integration",
-            description="createtestsv2",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            name="ssot",
+            command="/createtestsv2 goldenpath, e2e",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/ssotgardener",
-            description="ssot",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            name="gitissueprogressorv2 goldenpath",
+            command="/ssotgardener agents",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/gitissueprogressorv2 goldenpath",
-            description="ssot",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
         InstanceConfig(
-            name="gitissueprogressorv2 tests",
-            command="/gitissueprogressorv2 tests",
-            description="ssot",
+            command="/gitissueprogressorv2 p0",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
+        InstanceConfig(
+            command="/gitissueprogressorv2 agents",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gitissueprogressorv2 tests p0",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gitissueprogressorv2 tests p1",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/failingtestsgardener goldenpath",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gcploggardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/testgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/runtests all, unit",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/runtests all, integration",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/runtests goldenpath, e2e gcp",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/prmergergit",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gitcommitgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        )
     ]
 
 async def main():
