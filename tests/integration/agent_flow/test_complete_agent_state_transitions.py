@@ -145,13 +145,14 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         return UserExecutionContext(
             user_id=self.test_user_id,
             thread_id=self.test_thread_id,
-            session_id=self.test_session_id,
             run_id=self.test_run_id,
-            workspace_id=f"workspace_{uuid.uuid4().hex[:8]}",
-            metadata={
+            websocket_client_id=f"ws_conn_{uuid.uuid4().hex[:8]}",
+            agent_context={
                 "test_context": True,
                 "test_method": self.get_test_context().test_name,
-                "user_request": "Test agent state transitions during complete workflow"
+                "user_request": "Test agent state transitions during complete workflow",
+                "session_id": self.test_session_id,
+                "workspace_id": f"workspace_{uuid.uuid4().hex[:8]}"
             }
         )
     
@@ -428,13 +429,14 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
             user_context = UserExecutionContext(
                 user_id=f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}",
                 thread_id=f"concurrent_thread_{i}_{uuid.uuid4().hex[:8]}",
-                session_id=f"concurrent_session_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"concurrent_run_{i}_{uuid.uuid4().hex[:8]}",
-                workspace_id=f"concurrent_workspace_{i}_{uuid.uuid4().hex[:8]}",
-                metadata={
+                websocket_client_id=f"ws_conn_{i}_{uuid.uuid4().hex[:8]}",
+                agent_context={
                     "user_index": i,
                     "test_context": True,
-                    "isolation_test": True
+                    "isolation_test": True,
+                    "session_id": f"concurrent_session_{i}_{uuid.uuid4().hex[:8]}",
+                    "workspace_id": f"concurrent_workspace_{i}_{uuid.uuid4().hex[:8]}"
                 }
             )
             user_contexts.append(user_context)
