@@ -32,10 +32,21 @@ Legacy singleton patterns remain in agent factory system causing:
 - [x] Issue #709 identified as target
 - [x] Local tracking file created
 
-### Phase 1: Test Discovery and Planning 🔄
-- [ ] Discover existing tests protecting agent factories
-- [ ] Plan new SSOT validation tests
-- [ ] Plan user isolation validation tests
+### Phase 1: Test Discovery and Planning ✅
+- [x] Discover existing tests protecting agent factories (**23 critical tests identified**)
+- [x] Plan new SSOT validation tests (**6 new test files planned, 30-42h effort**)
+- [x] Plan user isolation validation tests (**Cross-user contamination focus**)
+
+#### Test Discovery Results:
+- **23 Critical Tests** must continue passing during SSOT refactor
+- **80%+ coverage** in factory patterns, user isolation, WebSocket integration
+- **Key gaps:** Cross-user contamination testing, singleton vs factory validation
+
+#### New Test Plan:
+- **60% Unit tests** (no Docker) - Fast development feedback
+- **30% Integration tests** (selective services) - Real-world validation
+- **10% E2E Staging tests** - Business value protection
+- **Strategy:** 20% failing tests (prove violations) + 60% validation + 20% performance
 
 ### Phase 2: Test Creation 🔄
 - [ ] Create failing tests for SSOT violations
