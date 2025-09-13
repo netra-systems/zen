@@ -1467,7 +1467,47 @@ def create_configuration_manager_compat() -> UnifiedConfigurationManager:
     return ConfigurationManagerFactory.get_global_manager()
 
 
-# Export compatibility aliases for Issue #667 consolidation
-UnifiedConfigManager = UnifiedConfigurationManager  # Alias for base.py compatibility
-ConfigurationManager = UnifiedConfigurationManager  # Alias for services compatibility
-ConfigurationService = UnifiedConfigurationManager  # Full service compatibility
+# ============================================================================
+# ISSUE #667: REDIRECT TO SSOT COMPATIBILITY SHIM  
+# ============================================================================
+
+# Import and re-export from the compatibility shim for complete SSOT migration
+try:
+    from netra_backend.app.core.configuration.compatibility_shim import (
+        UnifiedConfigurationManager as SSotUnifiedConfigurationManager,
+        ConfigurationManager as SSotConfigurationManager,
+        ConfigurationManagerFactory as SSotConfigurationManagerFactory,
+        get_configuration_manager as ssot_get_configuration_manager,
+        get_dashboard_config_manager as ssot_get_dashboard_config_manager,
+        get_data_agent_config_manager as ssot_get_data_agent_config_manager,
+        get_llm_config_manager as ssot_get_llm_config_manager
+    )
+    
+    # Replace all deprecated exports with SSOT compatibility wrappers
+    UnifiedConfigurationManager = SSotUnifiedConfigurationManager
+    ConfigurationManagerFactory = SSotConfigurationManagerFactory
+    get_configuration_manager = ssot_get_configuration_manager
+    get_dashboard_config_manager = ssot_get_dashboard_config_manager
+    get_data_agent_config_manager = ssot_get_data_agent_config_manager
+    get_llm_config_manager = ssot_get_llm_config_manager
+    
+    # Export compatibility aliases for Issue #667 consolidation
+    UnifiedConfigManager = SSotUnifiedConfigurationManager  # Alias for base.py compatibility
+    ConfigurationManager = SSotConfigurationManager  # Alias for services compatibility
+    ConfigurationService = SSotUnifiedConfigurationManager  # Full service compatibility
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("Issue #667: Successfully migrated MEGA CLASS to SSOT configuration management with compatibility layer")
+    
+except ImportError as e:
+    # Fallback to original MEGA CLASS implementation if compatibility shim not available
+    # This allows graceful degradation during migration but issues deprecation warnings
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(f"SSOT compatibility shim not available, using deprecated MEGA CLASS: {e}")
+    
+    # Export compatibility aliases (fallback to original MEGA CLASS)
+    UnifiedConfigManager = UnifiedConfigurationManager  # Alias for base.py compatibility
+    ConfigurationManager = UnifiedConfigurationManager  # Alias for services compatibility
+    ConfigurationService = UnifiedConfigurationManager  # Full service compatibility

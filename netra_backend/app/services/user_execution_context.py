@@ -2354,7 +2354,7 @@ class UserContextManager:
             event_data: Event data
         """
         try:
-            from netra_backend.app.websocket_core.notifier import WebSocketNotifier
+            from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
             
             notifier = WebSocketNotifier()
             await notifier.send_event(user_id, event_name, event_data)

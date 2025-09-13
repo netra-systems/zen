@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "netra-staging",
+  "private_key_id": "a9301a84541430a1a10828d452c7f2976c4242e1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCt2XpLzzwN5DNn\nYUtHrspazV3w16WXjfuWzBHYVMcnTG25rAuPSpWaBuHlAceO/XxjplrpSfFU4CIG\nEzX1Blu4q1aj3hC0P01zk68wFgueM15PDBx0pMdkG2O0XSWxjz2POY0a370AxS44\nIxYOVVyhhTT65dsiocMoCRr75bocIW+9sE4FkthiqumRN3o/f1GMPP9kRey7L2U8\nHA+kdLhPsFlHWnb8hLj55FRHhGvNwmbEiLYnr2Pd9gt72quRr8vlq40+2raIuOUo\nQQ0veUVBOKUBsDeSIz5Z5lZi2jCX7IMhc3XgBdK81eY9vn0d7COwz8acxjwDipVf\npnKtlS81AgMBAAECggEADZP5sIU/cOv6FNCynGcQhb4voFwjYjPJatoblFxuD98b\nscpNaSlfh6pnxxGtbaOq163vlfQREyU3Rbyx3zuE0JFMlhtbDXeP5nSU1J9gKcC5\nf1iC5McAOLdyloIblnjey2UouhOFSOkIRq5SLm091nKs3uIIIbYQeTvEKFjlVoV9\nCcockRnWexnPeTxzti/1p9M5S/BR0zhmqjNSa/5FRxlt9CZYB8+X2zJkVVCZnFlY\nxHFvnbAXlIDlrfF7vnQkhdYQ6nwlAUjbdrfipHZTwa7LTpap8j5Myv1mOHjraSiW\nWJX4a4MkEVz7c8DLMfdDVodRCMjaAZbzLL34Ja5wMQKBgQD0wsjigNgSg56XqJdA\nidnhCEdYvp9sfPM6x9ZNWExrCrUuRW4KQOXbQ9JCgmHZlsw9IWzN/0Z91VvBEq12\nkIHUVK3afD4hWmt0sDANi0ZFAtiotlm574mGQJcQd5peWUsK46bnI327/g8IAqkg\nvzWnQ2IWEsshKh4MqHC1aDmBBQKBgQC11R19/OroO94Zam2SheMQfcfS6NaSZ4sh\nhHk1cVh48kXbWjMiokHi2jBidyM7v1sI5IvOQttO+XqTsGiznzh6vtHwsyVhIewx\nEYqaCZ7XNxMV6VIN8TW8SRi7GGRsu8YXk6tjx5PTWfNaJR11EnkWUnaZ9xZtVEj/\nnSy3pjsMcQKBgQC2Q7LaUP4WU2MvJoFzsvPHyqVupY0MecOauyOPtzg44eFn0pYO\nFqPUcx3JH1SEdvIid5iRkg5JOC+6iBEaYKP9nQ1VzP1rUu0AGQ+/lj4+t87lW91X\nQ9RSYBjeT2Jp7e6e7kXki55e9uL0oR6W3yyyINCTBW20hauY23oK7NEdjQKBgDs4\nwxdCpbunrAm5GSDszGyVmtx9i005vh3XiKa4WOljdw8fTKJOGIlrKPEY/ne6Nksq\nLMKsEcOiC6NIhIFkLUAFIFl174m4Q7YjkXHkCkDsJiIv0NLLqgW+BPkC08p6SeVp\n6htgaCwhEtpcVkDIGHoFt60jxcEr/26JYYQa9wZxAoGBAJiNMlBtKd+N1BApEwKS\n6R8IGSFTHgg/p2lZOqQtOG9uN8ufl+eKzJtUIadD51IzScsrPCFw6f37JIsiDDFa\nWiP6Uz8PcI1kAiI9JsahRXgT6wDdcY9K2oZJbOCE8yKUSdJtoHzHKLDo0y8ohzR6\n+J8eDcV7i6qwfWzsKM+UnOyp\n-----END PRIVATE KEY-----\n",
+  "client_email": "github-staging-deployer@netra-staging.iam.gserviceaccount.com",
+  "client_id": "116665916765493557084",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/github-staging-deployer%40netra-staging.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

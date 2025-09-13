@@ -20,14 +20,13 @@ Business Value Justification (BVJ):
 - Revenue Impact: Maintains AI processing reliability for all customer tiers
 """
 
-import os
 import logging
 from typing import Dict, Any
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
 
-from shared.isolated_environment import get_env
+from shared.isolated_environment import get_env, IsolatedEnvironment
 
 class TimeoutTier(Enum):
     """Customer tiers for timeout configuration."""
@@ -118,9 +117,10 @@ class CloudNativeTimeoutManager:
         # **Issue #586 Enhancement**: Multi-marker GCP environment detection
         gcp_markers = self._detect_gcp_environment_markers()
         
-        # PRIORITY 3 FIX: Check direct os.environ first for explicit ENVIRONMENT setting
+        # PRIORITY 3 FIX: Check direct environment first for explicit ENVIRONMENT setting
         # This allows testing to override isolated environment defaults
-        direct_env = os.environ.get("ENVIRONMENT")
+        env = IsolatedEnvironment()
+        direct_env = env.get("ENVIRONMENT")
         if direct_env:
             env_name = direct_env.lower()
         else:
@@ -211,21 +211,22 @@ class CloudNativeTimeoutManager:
             Dict containing GCP environment detection results
         """
         # GCP Cloud Run environment markers
-        k_service = self._env.get("K_SERVICE") or os.environ.get("K_SERVICE")
-        k_revision = self._env.get("K_REVISION") or os.environ.get("K_REVISION")
-        k_configuration = self._env.get("K_CONFIGURATION") or os.environ.get("K_CONFIGURATION")
+        env = IsolatedEnvironment()
+        k_service = self._env.get("K_SERVICE") or env.get("K_SERVICE")
+        k_revision = self._env.get("K_REVISION") or env.get("K_REVISION")
+        k_configuration = self._env.get("K_CONFIGURATION") or env.get("K_CONFIGURATION")
         
         # GCP project identification
         gcp_project_id = (self._env.get("GCP_PROJECT_ID") or 
-                         os.environ.get("GCP_PROJECT_ID") or
+                         env.get("GCP_PROJECT_ID") or
                          self._env.get("GOOGLE_CLOUD_PROJECT") or 
-                         os.environ.get("GOOGLE_CLOUD_PROJECT"))
+                         env.get("GOOGLE_CLOUD_PROJECT"))
         
         # Additional GCP markers
         cloud_run_service = (self._env.get("CLOUD_RUN_SERVICE") or 
-                           os.environ.get("CLOUD_RUN_SERVICE"))
-        gae_env = self._env.get("GAE_ENV") or os.environ.get("GAE_ENV")
-        function_name = self._env.get("FUNCTION_NAME") or os.environ.get("FUNCTION_NAME")
+                           env.get("CLOUD_RUN_SERVICE"))
+        gae_env = self._env.get("GAE_ENV") or env.get("GAE_ENV")
+        function_name = self._env.get("FUNCTION_NAME") or env.get("FUNCTION_NAME")
         
         # Cloud Run detection logic
         is_cloud_run = bool(k_service)  # K_SERVICE is the primary Cloud Run marker
@@ -329,7 +330,8 @@ class CloudNativeTimeoutManager:
                 logger.info(f"   [REVISION] Revision: {gcp_markers['revision']}")
             
             # Environment Variables Summary
-            direct_env = os.environ.get("ENVIRONMENT")
+            env = IsolatedEnvironment()
+            direct_env = env.get("ENVIRONMENT")
             isolated_env = self._env.get("ENVIRONMENT", "not_set")
             logger.info(f"[CONFIG] ENVIRONMENT (direct): {direct_env}")
             logger.info(f"[CONFIG] ENVIRONMENT (isolated): {isolated_env}")
@@ -733,7 +735,8 @@ class CloudNativeTimeoutManager:
         hierarchy_valid = config.websocket_recv_timeout > config.agent_execution_timeout
         
         # Environment detection diagnostics
-        direct_env = os.environ.get("ENVIRONMENT")
+        env = IsolatedEnvironment()
+        direct_env = env.get("ENVIRONMENT")
         isolated_env = self._env.get("ENVIRONMENT", "not_set")
         
         return {
@@ -907,7 +910,7 @@ def get_environment_detection_info() -> Dict[str, Any]:
     return {
         "detected_environment": manager._environment.value,
         "environment_sources": {
-            "direct": os.environ.get("ENVIRONMENT"),
+            "direct": IsolatedEnvironment().get("ENVIRONMENT"),
             "isolated": manager._env.get("ENVIRONMENT", "not_set")
         },
         "gcp_markers": gcp_markers,

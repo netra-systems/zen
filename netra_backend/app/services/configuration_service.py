@@ -155,43 +155,24 @@ class ConfigurationManager:
 # SSOT CONSOLIDATION COMPATIBILITY (Issue #667)
 # ============================================================================
 
-# Import the CANONICAL SSOT UnifiedConfigurationManager for consolidation
+# Import the comprehensive compatibility shim for seamless migration
 try:
-    from netra_backend.app.core.configuration.base import (
-        UnifiedConfigManager as SSotManager,
-        config_manager as ssot_config_manager
+    from netra_backend.app.core.configuration.compatibility_shim import (
+        ConfigurationManager as SSotConfigurationManager,
+        EnvironmentConfigLoader as SSotEnvironmentConfigLoader,
+        ConfigurationValidator as SSotConfigurationValidator
     )
     
-    class ConfigurationManagerBackwardCompat:
-        """
-        Backward compatibility wrapper for ConfigurationManager -> SSOT UnifiedConfigurationManager.
-        Maintains the interface while delegating to the SSOT implementation.
-        """
-        
-        def __init__(self):
-            # Use CANONICAL SSOT global manager instance
-            self._ssot_manager = ssot_config_manager
-            self.validator = ConfigurationValidator()  # Keep original validator for compatibility
-            self._config_cache = {}  # Compatibility cache
-        
-        def get_config(self, key: str, default: Any = None) -> Any:
-            """Get configuration value using SSOT."""
-            return self._ssot_manager.get(key, default)
-        
-        def set_config(self, key: str, value: Any) -> None:
-            """Set configuration value using SSOT."""
-            self._ssot_manager.set(key, value)
-            # Also update compatibility cache
-            self._config_cache[key] = value
-        
-        def validate_config(self) -> bool:
-            """Validate configuration using SSOT."""
-            validation_result = self._ssot_manager.validate_all_configurations()
-            return validation_result.is_valid
-    
-    # Replace the original ConfigurationManager with compatibility wrapper
+    # Replace deprecated classes with SSOT compatibility wrappers
     _OriginalConfigurationManager = ConfigurationManager
-    ConfigurationManager = ConfigurationManagerBackwardCompat
+    _OriginalEnvironmentConfigLoader = EnvironmentConfigLoader
+    _OriginalConfigurationValidator = ConfigurationValidator
+    
+    ConfigurationManager = SSotConfigurationManager
+    EnvironmentConfigLoader = SSotEnvironmentConfigLoader
+    ConfigurationValidator = SSotConfigurationValidator
+    
+    logger.info("Issue #667: Successfully migrated to SSOT configuration management with compatibility layer")
     
 except ImportError as e:
     # Fallback to original implementation if SSOT not available
