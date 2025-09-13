@@ -38,10 +38,29 @@ Replace all `os.getenv()` calls with `get_env()` from `shared.isolated_environme
 - ✅ Created progress tracker file
 - ✅ Identified 4 affected files with specific line numbers
 
-### Step 1: Discover and Plan Tests - IN PROGRESS
-- [ ] Discover existing tests protecting against breaking changes
-- [ ] Plan new SSOT tests to reproduce violation
-- [ ] Follow TEST_CREATION_GUIDE.md best practices
+### Step 1: Discover and Plan Tests - COMPLETED ✅
+- ✅ Discovered existing tests protecting against breaking changes
+- ✅ Planned new SSOT tests to reproduce violation
+- ✅ Followed TEST_CREATION_GUIDE.md best practices
+
+#### Test Discovery Results:
+**EXCELLENT EXISTING COVERAGE (60%)**:
+- `auth_trace_logger.py`: 14 test files with comprehensive coverage
+- `unified_corpus_admin.py`: 3 tests including SSOT violation tests (323 lines)
+- `websocket_core/types.py`: 50+ test files with extensive WebSocket coverage
+- `auth_startup_validator.py`: 15+ tests including SSOT violation tests (236 lines)
+
+**NEW SSOT TESTS PLANNED (20%)**:
+1. `tests/unit/logging/test_auth_trace_logger_ssot_violations.py` - Prove os.environ violations at lines 284,293,302
+2. `tests/unit/websocket_core/test_websocket_types_ssot_violations.py` - Prove os.environ violations at lines 349-355
+3. `tests/integration/environment_ssot/test_os_environ_legacy_violations_integration.py` - Integration test for all 4 files
+
+**VALIDATION TESTS PLANNED (20%)**:
+1. `tests/mission_critical/test_issue_722_ssot_fix_validation.py` - Prove Golden Path works after fixes
+2. `tests/integration/test_issue_722_environment_consistency.py` - Prove no regressions across all modules
+
+**Test Execution Strategy**: Non-Docker (unit + integration + e2e staging)
+**Expected Pattern**: 6 FAILURES before fix (proving violation) → ALL PASS after fix
 
 ### Next Steps
 1. Discover existing tests for affected files
