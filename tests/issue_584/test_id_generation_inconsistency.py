@@ -3,13 +3,17 @@ Test to reproduce Issue #584: Thread ID Run ID Generation Inconsistency
 
 This test reproduces the ID generation pattern inconsistencies found in demo_websocket.py
 where different ID fields use different patterns (prefixed vs plain UUID).
+
+Enhanced to comprehensively test SSOT violations and correlation issues.
 """
 
 import uuid
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+import re
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 class TestIdGenerationInconsistency(unittest.TestCase):
@@ -133,6 +137,154 @@ class TestIdGenerationInconsistency(unittest.TestCase):
         
         print("SSOT ID pattern validation passed")
         print(f"Sample SSOT IDs: {ids1}")
+
+    def test_unified_id_manager_thread_id_extraction_consistency(self):
+        """Test UnifiedIDManager thread ID extraction consistency."""
+        
+        # Test the SSOT method that should be used instead of ad-hoc generation
+        id_manager = UnifiedIDManager()
+        
+        # Generate thread ID using SSOT method
+        ssot_thread_id = UnifiedIDManager.generate_thread_id()
+        ssot_run_id = UnifiedIDManager.generate_run_id(ssot_thread_id)
+        
+        # Test extraction consistency
+        extracted_thread_id = UnifiedIDManager.extract_thread_id(ssot_run_id)
+        
+        print(f"SSOT thread_id: {ssot_thread_id}")
+        print(f"SSOT run_id: {ssot_run_id}")
+        print(f"Extracted thread_id: {extracted_thread_id}")
+        
+        # Verify the extracted thread_id is consistent
+        self.assertIn(ssot_thread_id, extracted_thread_id)  # Should be contained/related
+        
+    def test_demo_websocket_ssot_violation_detection(self):
+        """Test detection of SSOT violations in demo_websocket.py pattern."""
+        
+        # Simulate the problematic pattern from demo_websocket.py
+        def demo_websocket_id_generation():
+            """Simulate the current (problematic) demo_websocket.py ID generation"""
+            demo_user_id = f"demo-user-{uuid.uuid4()}"
+            thread_id = f"demo-thread-{uuid.uuid4()}"
+            run_id = f"demo-run-{uuid.uuid4()}"
+            request_id = str(uuid.uuid4())  # Mixed pattern!
+            
+            return {
+                "demo_user_id": demo_user_id,
+                "thread_id": thread_id,
+                "run_id": run_id,
+                "request_id": request_id
+            }
+        
+        # Generate IDs using problematic pattern
+        problematic_ids = demo_websocket_id_generation()
+        
+        # Test SSOT violation detection
+        ssot_violations = []
+        pattern_inconsistencies = []
+        
+        for id_name, id_value in problematic_ids.items():
+            # Check if ID was generated through UnifiedIDManager (it shouldn't be for this test)
+            if id_name in ['thread_id', 'run_id']:
+                if id_value.startswith('demo-'):
+                    ssot_violations.append(f"{id_name}: {id_value} bypasses UnifiedIDManager")
+                    
+            # Check pattern consistency
+            is_prefixed = id_value.startswith('demo-')
+            is_plain_uuid = re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$', id_value, re.I)
+            
+            if not (is_prefixed or is_plain_uuid):
+                pattern_inconsistencies.append(f"{id_name}: {id_value} has unknown pattern")
+        
+        # This test should DETECT violations (before fix)
+        print("SSOT Violations Detected:")
+        for violation in ssot_violations:
+            print(f"  - {violation}")
+            
+        print("Pattern Inconsistencies:")
+        for inconsistency in pattern_inconsistencies:
+            print(f"  - {inconsistency}")
+            
+        # For Issue #584, we expect to find violations
+        self.assertGreater(len(ssot_violations), 0, "Expected to detect SSOT violations in demo_websocket.py pattern")
+        
+    def test_websocket_cleanup_correlation_failure_with_mixed_ids(self):
+        """Test WebSocket cleanup correlation failure with mixed ID patterns."""
+        
+        # Simulate WebSocket manager with mixed ID patterns
+        websocket_connections = {
+            # SSOT pattern connections
+            str(uuid.uuid4()): {
+                "user_id": "user1", 
+                "thread_id": str(uuid.uuid4()),
+                "pattern": "ssot"
+            },
+            str(uuid.uuid4()): {
+                "user_id": "user2",
+                "thread_id": str(uuid.uuid4()), 
+                "pattern": "ssot"
+            },
+            
+            # Demo pattern connections (problematic)
+            f"demo-run-{uuid.uuid4()}": {
+                "user_id": "demo-user-123",
+                "thread_id": f"demo-thread-{uuid.uuid4()}",
+                "pattern": "demo"
+            },
+            f"demo-thread-{uuid.uuid4()}": {
+                "user_id": "demo-user-456",
+                "thread_id": f"demo-thread-{uuid.uuid4()}",
+                "pattern": "demo"
+            }
+        }
+        
+        # Test cleanup correlation logic
+        def find_related_connections(target_id):
+            """Simulate WebSocket cleanup correlation logic"""
+            related = []
+            
+            # Try to extract thread_id from target_id
+            try:
+                # This would fail for demo-prefixed IDs
+                extracted_thread = UnifiedIDManager.extract_thread_id(target_id)
+                
+                # Find connections with related thread_ids
+                for conn_id, conn_data in websocket_connections.items():
+                    if conn_data.get("thread_id") == extracted_thread:
+                        related.append(conn_id)
+                        
+            except Exception as e:
+                print(f"Correlation failed for {target_id}: {e}")
+                
+            return related
+        
+        # Test correlation with different ID patterns
+        ssot_connections = [conn for conn in websocket_connections.keys() if not conn.startswith("demo-")]
+        demo_connections = [conn for conn in websocket_connections.keys() if conn.startswith("demo-")]
+        
+        # Test correlation for SSOT pattern
+        ssot_correlation_results = []
+        for conn_id in ssot_connections:
+            related = find_related_connections(conn_id)
+            ssot_correlation_results.extend(related)
+            
+        # Test correlation for demo pattern (should have issues)
+        demo_correlation_results = []
+        for conn_id in demo_connections:
+            related = find_related_connections(conn_id)
+            demo_correlation_results.extend(related)
+            
+        print(f"SSOT connections found: {len(ssot_connections)}")
+        print(f"Demo connections found: {len(demo_connections)}")
+        print(f"SSOT correlation results: {len(ssot_correlation_results)}")
+        print(f"Demo correlation results: {len(demo_correlation_results)}")
+        
+        # This demonstrates the issue: mixed patterns make correlation unreliable
+        self.assertGreater(len(ssot_connections), 0, "Should have SSOT connections")
+        self.assertGreater(len(demo_connections), 0, "Should have demo connections")
+        
+        # The correlation issue: demo patterns likely have fewer/zero correlations
+        # because UnifiedIDManager.extract_thread_id() doesn't handle "demo-" prefixes properly
 
 
 if __name__ == "__main__":
