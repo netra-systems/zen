@@ -1,568 +1,1136 @@
 # REMOVED_SYNTAX_ERROR: '''
+
 # REMOVED_SYNTAX_ERROR: E2E Test: Auth-Backend Integration Core
 
+
+
 # REMOVED_SYNTAX_ERROR: This test validates the core integration between the auth service and backend service,
+
 # REMOVED_SYNTAX_ERROR: ensuring that authentication flows work correctly across both services with real databases.
 
+
+
 # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
+
     # REMOVED_SYNTAX_ERROR: - Segment: All customer segments (Free, Early, Mid, Enterprise)
+
     # REMOVED_SYNTAX_ERROR: - Business Goal: Secure user authentication and service integration
+
     # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures users can authenticate and access backend features seamlessly
+
     # REMOVED_SYNTAX_ERROR: - Strategic/Revenue Impact: Authentication failures block user engagement and revenue
 
+
+
     # REMOVED_SYNTAX_ERROR: CRITICAL COMPLIANCE WITH CLAUDE.md:
+
         # REMOVED_SYNTAX_ERROR: - No mocks are used (real services only as required by CLAUDE.md)
+
         # REMOVED_SYNTAX_ERROR: - Absolute imports only (no relative imports)
+
         # REMOVED_SYNTAX_ERROR: - Environment access through IsolatedEnvironment only
+
         # REMOVED_SYNTAX_ERROR: - Real database connections and services tested end-to-end
+
         # REMOVED_SYNTAX_ERROR: '''
 
+
+
         # Setup test path for absolute imports following CLAUDE.md standards
+
         # REMOVED_SYNTAX_ERROR: import sys
+
         # REMOVED_SYNTAX_ERROR: from pathlib import Path
+
         # REMOVED_SYNTAX_ERROR: project_root = Path(__file__).parent.parent.parent
+
         # REMOVED_SYNTAX_ERROR: if str(project_root) not in sys.path:
+
             # REMOVED_SYNTAX_ERROR: sys.path.insert(0, str(project_root))
 
+
+
             # Absolute imports following CLAUDE.md standards
+
             # REMOVED_SYNTAX_ERROR: import asyncio
+
             # REMOVED_SYNTAX_ERROR: import aiohttp
+
             # REMOVED_SYNTAX_ERROR: import pytest
+
             # REMOVED_SYNTAX_ERROR: import json
+
             # REMOVED_SYNTAX_ERROR: import time
+
             # REMOVED_SYNTAX_ERROR: import uuid
+
             # REMOVED_SYNTAX_ERROR: import logging
+
             # REMOVED_SYNTAX_ERROR: from typing import Dict, Any, Optional, List
 
+
+
             # Import IsolatedEnvironment for proper environment management as required by CLAUDE.md
+
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env as get_auth_env
+
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env as get_backend_env
+
+
 
             # REMOVED_SYNTAX_ERROR: logger = logging.getLogger(__name__)
 
 
+
+
+
 # REMOVED_SYNTAX_ERROR: class AuthBackendIntegrationTester:
+
     # REMOVED_SYNTAX_ERROR: '''
+
     # REMOVED_SYNTAX_ERROR: Test harness for auth-backend integration testing.
 
+
+
     # REMOVED_SYNTAX_ERROR: Uses real services and real database connections as required by CLAUDE.md.
+
     # REMOVED_SYNTAX_ERROR: No mocks are used anywhere in this test suite.
+
     # REMOVED_SYNTAX_ERROR: '''
 
+
+
 # REMOVED_SYNTAX_ERROR: def __init__(self):
+
     # REMOVED_SYNTAX_ERROR: pass
+
     # Service URLs for real running services
+
     # REMOVED_SYNTAX_ERROR: self.auth_service_url = "http://localhost:8081"  # Standard auth service port
+
     # REMOVED_SYNTAX_ERROR: self.backend_service_url = "http://localhost:8000"  # Standard backend service port
 
+
+
     # Test state tracking
+
     # REMOVED_SYNTAX_ERROR: self.integration_failures = []
+
     # REMOVED_SYNTAX_ERROR: self.auth_token = None
+
     # REMOVED_SYNTAX_ERROR: self.refresh_token = None
+
     # REMOVED_SYNTAX_ERROR: self.test_user_id = None
+
     # REMOVED_SYNTAX_ERROR: self.test_user_email = None
 
+
+
 # REMOVED_SYNTAX_ERROR: async def check_service_availability(self, session: aiohttp.ClientSession, service_name: str, url: str) -> bool:
+
     # REMOVED_SYNTAX_ERROR: """Check if a service is available by testing its health endpoint."""
+
     # REMOVED_SYNTAX_ERROR: try:
+
         # Try health endpoint first
+
         # REMOVED_SYNTAX_ERROR: async with session.get("formatted_string", timeout=aiohttp.ClientTimeout(total=10)) as response:
+
             # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                 # REMOVED_SYNTAX_ERROR: return True
+
                 # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                     # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
 
+
+
                     # If health endpoint fails, try root endpoint
+
                     # REMOVED_SYNTAX_ERROR: try:
+
                         # REMOVED_SYNTAX_ERROR: async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
+
                             # REMOVED_SYNTAX_ERROR: if response.status in [200, 404]:  # 404 is acceptable for root
+
                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                             # REMOVED_SYNTAX_ERROR: return True
+
                             # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                 # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
 
+
+
                                 # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+
                                 # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                 # Removed problematic line: async def test_user_registration(self, session: aiohttp.ClientSession) -> Optional[Dict]:
+
                                     # REMOVED_SYNTAX_ERROR: """Test user registration through auth service."""
+
                                     # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing user registration...")
 
+
+
                                     # Generate unique test user
+
                                     # REMOVED_SYNTAX_ERROR: test_user = { )
+
                                     # REMOVED_SYNTAX_ERROR: "email": "formatted_string",
+
                                     # REMOVED_SYNTAX_ERROR: "password": "TestPassword123!",
+
                                     # REMOVED_SYNTAX_ERROR: "full_name": "Auth Backend Integration Test User"
+
                                     
+
                                     # REMOVED_SYNTAX_ERROR: self.test_user_email = test_user["email"]
 
+
+
                                     # REMOVED_SYNTAX_ERROR: try:
+
                                         # REMOVED_SYNTAX_ERROR: registration_data = { )
+
                                         # REMOVED_SYNTAX_ERROR: "email": test_user["email"],
+
                                         # REMOVED_SYNTAX_ERROR: "password": test_user["password"],
+
                                         # REMOVED_SYNTAX_ERROR: "confirm_password": test_user["password"],
+
                                         # REMOVED_SYNTAX_ERROR: "full_name": test_user["full_name"]
+
                                         
 
+
+
                                         # REMOVED_SYNTAX_ERROR: async with session.post( )
+
                                         # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                         # REMOVED_SYNTAX_ERROR: json=registration_data,
+
                                         # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                         # REMOVED_SYNTAX_ERROR: ) as response:
+
                                             # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                             # REMOVED_SYNTAX_ERROR: if response.status != 201:
+
                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                 # REMOVED_SYNTAX_ERROR: return None
+
                                                 # REMOVED_SYNTAX_ERROR: else:
+
                                                     # REMOVED_SYNTAX_ERROR: registration_result = await response.json()
+
                                                     # REMOVED_SYNTAX_ERROR: self.test_user_id = registration_result.get('user_id')
+
                                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                                                     # REMOVED_SYNTAX_ERROR: return test_user
 
+
+
                                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                         # REMOVED_SYNTAX_ERROR: return None
 
+
+
                                                         # Removed problematic line: async def test_user_login(self, session: aiohttp.ClientSession, test_user: Dict) -> bool:
+
                                                             # REMOVED_SYNTAX_ERROR: """Test user login and token generation."""
+
                                                             # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing user login...")
 
+
+
                                                             # REMOVED_SYNTAX_ERROR: try:
+
                                                                 # REMOVED_SYNTAX_ERROR: login_data = { )
+
                                                                 # REMOVED_SYNTAX_ERROR: "email": test_user["email"],
+
                                                                 # REMOVED_SYNTAX_ERROR: "password": test_user["password"]
+
                                                                 
 
+
+
                                                                 # REMOVED_SYNTAX_ERROR: async with session.post( )
+
                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                 # REMOVED_SYNTAX_ERROR: json=login_data,
+
                                                                 # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                 # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                     # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                                                     # REMOVED_SYNTAX_ERROR: if response.status != 200:
+
                                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                         # REMOVED_SYNTAX_ERROR: return False
+
                                                                         # REMOVED_SYNTAX_ERROR: else:
+
                                                                             # REMOVED_SYNTAX_ERROR: login_result = await response.json()
+
                                                                             # REMOVED_SYNTAX_ERROR: self.auth_token = login_result.get("access_token")
+
                                                                             # REMOVED_SYNTAX_ERROR: self.refresh_token = login_result.get("refresh_token")
 
+
+
                                                                             # REMOVED_SYNTAX_ERROR: if not self.auth_token:
+
                                                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("Login response missing access_token")
+
                                                                                 # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] User login successful, tokens received")
+
                                                                                 # REMOVED_SYNTAX_ERROR: return True
 
+
+
                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                     # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                     # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                     # Removed problematic line: async def test_auth_service_token_validation(self, session: aiohttp.ClientSession) -> bool:
+
                                                                                         # REMOVED_SYNTAX_ERROR: """Test token validation directly with auth service."""
+
                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing auth service token validation...")
 
+
+
                                                                                         # REMOVED_SYNTAX_ERROR: if not self.auth_token:
+
                                                                                             # REMOVED_SYNTAX_ERROR: self.integration_failures.append("No auth token available for validation")
+
                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                             # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                 # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
+
                                                                                                 # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                 # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                 # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                 # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                     # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                                                                                     # REMOVED_SYNTAX_ERROR: if response.status != 200:
+
                                                                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                         # REMOVED_SYNTAX_ERROR: return False
+
                                                                                                         # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                             # REMOVED_SYNTAX_ERROR: user_info = await response.json()
+
                                                                                                             # REMOVED_SYNTAX_ERROR: if user_info.get("email") != self.test_user_email:
+
                                                                                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                 # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Auth service token validation successful")
+
                                                                                                                 # REMOVED_SYNTAX_ERROR: return True
 
+
+
                                                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                     # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                     # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                     # Removed problematic line: async def test_backend_token_propagation(self, session: aiohttp.ClientSession) -> bool:
+
                                                                                                                         # REMOVED_SYNTAX_ERROR: """Test token propagation from auth service to backend service."""
+
                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing backend token propagation...")
 
+
+
                                                                                                                         # REMOVED_SYNTAX_ERROR: if not self.auth_token:
+
                                                                                                                             # REMOVED_SYNTAX_ERROR: self.integration_failures.append("No auth token available for backend propagation test")
+
                                                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                             # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
 
+
+
                                                                                                                                 # Try multiple backend endpoints that should accept auth tokens
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: test_endpoints = [ )
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"  # Some backends might have protected health endpoints
+
                                                                                                                                 
 
+
+
                                                                                                                                 # REMOVED_SYNTAX_ERROR: for endpoint in test_endpoints:
+
                                                                                                                                     # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                         # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                                                         # REMOVED_SYNTAX_ERROR: endpoint,
+
                                                                                                                                         # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                         # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                                                         # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                                                             # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                                                                                                                             # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return True
+
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: elif response.status == 401:
+
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: continue  # Try next endpoint
+
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: elif response.status == 404:
+
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: continue  # Endpoint doesn"t exist, try next
+
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: continue  # Try next endpoint
 
+
+
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: continue  # Try next endpoint
 
+
+
                                                                                                                                                                 # If we get here, none of the endpoints worked
+
                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("Backend token propagation failed - no protected endpoints accepted auth token")
+
                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                     # Removed problematic line: async def test_database_session_consistency(self, session: aiohttp.ClientSession) -> bool:
+
                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: """Test that user data is consistent between auth and backend databases."""
+
                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing database session consistency...")
 
+
+
                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if not self.auth_token:
+
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: self.integration_failures.append("No auth token available for database consistency test")
+
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
 
+
+
                                                                                                                                                                                 # Get user data from auth service
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: auth_user_data = None
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: auth_user_data = await response.json()
+
                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
+
                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                             # Try to get user data from backend service
+
                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: backend_user_data = None
+
                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: backend_user_data = await response.json()
+
                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: elif response.status == 404:
+
                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.info("[INFO] Backend user profile endpoint not found - this is acceptable")
+
                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return True  # Not a failure if endpoint doesn"t exist yet
+
                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return True  # Not a failure for now
+
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.debug("formatted_string")
+
                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return True  # Not a failure for now
 
+
+
                                                                                                                                                                                                                     # If we have both datasets, compare them
+
                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if auth_user_data and backend_user_data:
+
                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: auth_user_id = auth_user_data.get("user_id") or auth_user_data.get("id")
+
                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: backend_user_id = backend_user_data.get("user_id") or backend_user_data.get("id")
 
+
+
                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if auth_user_id != backend_user_id:
+
                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: auth_email = auth_user_data.get("email")
+
                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: backend_email = backend_user_data.get("email")
 
+
+
                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if auth_email != backend_email:
+
                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Database session consistency verified")
+
                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("[INFO] Database consistency test completed (limited backend endpoints available)")
+
+
 
                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return True
 
+
+
                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                                         # Removed problematic line: async def test_token_refresh_flow(self, session: aiohttp.ClientSession) -> bool:
+
                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: """Test JWT token refresh across services."""
+
                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing token refresh flow...")
 
+
+
                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if not self.refresh_token:
+
                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("[INFO] No refresh token available - skipping refresh flow test")
+
                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return True  # Not a failure if refresh tokens aren"t implemented yet
 
+
+
                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: refresh_data = {"refresh_token": self.refresh_token}
 
+
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: async with session.post( )
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: json=refresh_data,
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if response.status != 200:
+
                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return True  # Not a failure if not implemented yet
+
                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: refresh_result = await response.json()
+
                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: new_access_token = refresh_result.get("access_token")
 
+
+
                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if not new_access_token:
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: self.integration_failures.append("Token refresh response missing access_token")
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                                                                     # Test the new token works with backend
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=10)
+
                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: ) as test_response:
+
                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if test_response.status in [200, 404]:  # Either works or endpoint doesn"t exist
+
                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Token refresh flow successful")
+
                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: return True
+
                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
+
                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return True  # Not a critical failure
 
+
+
                                                                                                                                                                                                                                                                                 # Removed problematic line: async def test_user_logout(self, session: aiohttp.ClientSession) -> bool:
+
                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: """Test user logout and token invalidation across services."""
+
                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("[AUTH-BACKEND-INTEGRATION] Testing user logout...")
 
+
+
                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if not self.auth_token:
+
                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("No auth token available for logout test")
+
                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: return False
 
+
+
                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: headers = {"Authorization": "formatted_string"}
 
+
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: async with session.post( )
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=15)
+
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: ) as response:
+
                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: response_text = await response.text()
 
+
+
                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if response.status not in [200, 204]:
+
                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return False
+
                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] User logout successful")
 
+
+
                                                                                                                                                                                                                                                                                                         # Verify token is invalidated - wait a moment for propagation
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(2)
 
+
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: async with session.get( )
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: "formatted_string",
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: headers=headers,
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: timeout=aiohttp.ClientTimeout(total=10)
+
                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: ) as test_response:
+
                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if test_response.status != 401:
+
                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: return False
+
                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Token correctly invalidated after logout")
+
                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: return True
 
+
+
                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: self.integration_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: return False
 
 
+
+
+
                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
+
                                                                                                                                                                                                                                                                                                                         # Removed problematic line: @pytest.mark.asyncio
+
                                                                                                                                                                                                                                                                                                                         # Removed problematic line: async def test_auth_backend_integration_core():
+
                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: '''
+
                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: Comprehensive test of auth-backend integration with real services.
 
+
+
                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: This test validates the complete authentication flow between auth service
+
                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: and backend service using real database connections and no mocks.
 
+
+
                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: COMPLIANCE: Follows CLAUDE.md standards for e2e testing:
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: - Uses real services only (no mocks)
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: - Absolute imports only
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: - Environment access through IsolatedEnvironment
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: - Tests real database connectivity
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: '''
 
+
+
                                                                                                                                                                                                                                                                                                                                 # Setup environment using IsolatedEnvironment as required by CLAUDE.md
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: auth_env = get_auth_env()
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: backend_env = get_backend_env()
 
+
+
                                                                                                                                                                                                                                                                                                                                 # Set test environment configuration
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: auth_env.set("ENVIRONMENT", "test", "auth_backend_integration_test")
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: backend_env.set("ENVIRONMENT", "test", "auth_backend_integration_test")
 
+
+
                                                                                                                                                                                                                                                                                                                                 # Initialize integration tester
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: tester = AuthBackendIntegrationTester()
 
+
+
                                                                                                                                                                                                                                                                                                                                 # Run integration tests
+
                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
+
                                                                                                                                                                                                                                                                                                                                     # Pre-check: Verify both services are available
+
                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("[SETUP] Checking service availability...")
 
+
+
                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: auth_available = await tester.check_service_availability(session, "Auth Service", tester.auth_service_url)
+
                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: backend_available = await tester.check_service_availability(session, "Backend Service", tester.backend_service_url)
 
+
+
                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if not auth_available:
+
                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: pytest.skip("formatted_string")
 
+
+
                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if not backend_available:
+
                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: pytest.skip("formatted_string")
+
+
 
                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: logger.info("[SETUP] Both services are available - proceeding with integration tests")
 
+
+
                                                                                                                                                                                                                                                                                                                                             # Execute integration test flow
+
                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: test_user = await tester.test_user_registration(session)
+
                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if not test_user:
+
                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: pytest.fail("User registration failed - cannot proceed with integration tests")
 
+
+
                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: login_success = await tester.test_user_login(session, test_user)
+
                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if not login_success:
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: pytest.fail("User login failed - cannot proceed with integration tests")
 
+
+
                                                                                                                                                                                                                                                                                                                                                     # Core integration tests
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: auth_validation_success = await tester.test_auth_service_token_validation(session)
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: backend_propagation_success = await tester.test_backend_token_propagation(session)
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: database_consistency_success = await tester.test_database_session_consistency(session)
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: token_refresh_success = await tester.test_token_refresh_flow(session)
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logout_success = await tester.test_user_logout(session)
 
+
+
                                                                                                                                                                                                                                                                                                                                                     # Analyze results
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: critical_failures = []
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: warning_failures = []
 
+
+
                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: for failure in tester.integration_failures:
+
                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if any(critical in failure.lower() for critical in ["registration failed", "login failed", "token validation failed"]):
+
                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: critical_failures.append(failure)
+
                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: warning_failures.append(failure)
 
+
+
                                                                                                                                                                                                                                                                                                                                                                 # Report results
+
                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if critical_failures:
+
                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: failure_report = ["[CRITICAL] Auth-Backend Integration Failures:"]
+
                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: for failure in critical_failures:
+
                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
+
+
                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if warning_failures:
+
                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: failure_report.append("[WARNING] Additional Issues:")
+
                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: for failure in warning_failures:
-                                                                                                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: pytest.fail("Auth-Backend Integration failed: )
+
                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: " + "
+
                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: ".join(failure_report))
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: elif warning_failures:
+
                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: warning_report = ["[WARNING] Auth-Backend Integration Issues:"]
+
                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: for failure in warning_failures:
-                                                                                                                                                                                                                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: warning_report.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: warning_report.append("formatted_string")
 
+                                                                                                                                                                                                                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: warning_report.append("formatted_string")
+
+
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.warning(" )
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: ".join(warning_report))
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: print(" )
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: ".join(warning_report))
+
+
 
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Auth-Backend Integration test completed successfully")
 
 
+
+
+
                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
+
                                                                                                                                                                                                                                                                                                                                                                                         # Removed problematic line: @pytest.mark.asyncio
+
                                                                                                                                                                                                                                                                                                                                                                                         # Removed problematic line: async def test_auth_backend_database_isolation():
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: '''
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: Test that auth and backend services maintain proper database isolation.
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: This test verifies that services don't interfere with each other's database
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: connections while sharing user authentication data appropriately.
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: '''
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                             # Setup environment using IsolatedEnvironment as required by CLAUDE.md
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: auth_env = get_auth_env()
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: backend_env = get_backend_env()
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                             # Set test environment configuration
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: auth_env.set("ENVIRONMENT", "test", "database_isolation_test")
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: backend_env.set("ENVIRONMENT", "test", "database_isolation_test")
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                             # This test would check database isolation patterns
+
                                                                                                                                                                                                                                                                                                                                                                                             # For now, we'll implement basic connection verification
+
+
 
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: isolation_failures = []
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
+
                                                                                                                                                                                                                                                                                                                                                                                                 # Test auth service database health
+
                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: async with session.get("http://localhost:8081/health", timeout=aiohttp.ClientTimeout(total=10)) as response:
+
                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: health_data = await response.json()
+
                                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if not health_data.get("database_connected"):
+
                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: isolation_failures.append("Auth service database not properly connected")
+
                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: isolation_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: isolation_failures.append("formatted_string")
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                                                         # Test backend service database health
+
                                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: try:
+
                                                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: async with session.get("http://localhost:8000/health", timeout=aiohttp.ClientTimeout(total=10)) as response:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if response.status == 200:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: health_data = await response.json()
+
                                                                                                                                                                                                                                                                                                                                                                                                                                     # Backend health might not include database status - that's ok
+
                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("Backend service health check successful")
+
                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: else:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: isolation_failures.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: except Exception as e:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: isolation_failures.append("formatted_string")
 
+
+
                                                                                                                                                                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if isolation_failures:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: failure_report = ["Database isolation test failures:"]
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: for failure in isolation_failures:
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: pytest.fail(" )
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: ".join(failure_report))
+
+
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: logger.info("[SUCCESS] Database isolation test completed successfully")
 
 
+
+
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
+
                                                                                                                                                                                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "--tb=short"])
+

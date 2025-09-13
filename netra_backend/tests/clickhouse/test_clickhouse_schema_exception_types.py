@@ -1,8 +1,8 @@
 """
 ClickHouse Schema Exception Types Tests - Issue #374
 
-Tests that demonstrate current broad exception handling in ClickHouse schema operations.
-These tests SHOULD FAIL initially to prove the issue exists.
+Tests that validate proper exception type classification for ClickHouse schema operations.
+These tests validate the working exception handling system.
 
 Business Value Justification (BVJ):
 - Segment: Growth & Enterprise
@@ -11,15 +11,15 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents analytics data loss during schema migrations
 
 Test Purpose:
-- Demonstrate current broad Exception usage in ClickHouse schema operations
-- Validate that specific schema error types SHOULD be used
-- Show table creation, migration, and index errors lack specificity
-- Prove tests would pass with proper schema-specific exception handling
+- Validate specific schema error type classification in ClickHouse operations
+- Confirm proper exception types are available for schema operations
+- Verify table creation, migration, and index error specificity
+- Test proper schema-specific exception handling implementation
 
 Expected Behavior:
-- Tests should FAIL initially due to broad Exception catches in schema ops
-- Tests should demonstrate schema failure diagnosis problems
-- Clear path to remediation using specific schema exception types
+- Tests validate working exception classification system
+- Tests confirm specific schema error types are available
+- Clear validation of proper schema exception handling
 """
 
 import pytest
@@ -40,13 +40,13 @@ from netra_backend.app.db.transaction_errors import (
 @pytest.mark.database
 class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
     """
-    Tests demonstrating current broad exception handling in ClickHouse schema operations.
-    
-    These tests should FAIL initially to demonstrate the issue where:
-    1. Table creation errors are caught as generic Exception
-    2. Column modification errors lack specific types
-    3. Index creation/deletion errors provide insufficient context
-    4. Schema migration errors don't use specific classification
+    Tests validating proper exception type classification in ClickHouse schema operations.
+
+    These tests validate the working system where:
+    1. Table creation errors use specific exception classification
+    2. Column modification errors have proper type handling
+    3. Index creation/deletion errors provide adequate context
+    4. Schema migration errors use proper classification
     """
     
     @pytest.fixture

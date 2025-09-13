@@ -450,8 +450,8 @@ def validate_websocket_component_health() -> Dict[str, Any]:
         }
 
 
-# For compatibility with any tests that expect the manager class directly
-IsolatedWebSocketManager = WebSocketManager
+# SSOT CONSOLIDATION: Removed IsolatedWebSocketManager alias to reduce redundancy
+# Use WebSocketManager directly for consistency
 
 
 # ===== ADDITIONAL COMPATIBILITY CLASSES AND FUNCTIONS =====
@@ -571,7 +571,7 @@ __all__ = [
     'create_websocket_manager_sync',
     'get_websocket_manager_factory', 
     'WebSocketManagerFactory',
-    'IsolatedWebSocketManager',
+    # 'IsolatedWebSocketManager',  # REMOVED: SSOT consolidation - use WebSocketManager directly
     'create_defensive_user_execution_context',
     'ConnectionLifecycleManager',
     'FactoryInitializationError',
