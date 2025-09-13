@@ -57,7 +57,6 @@ secrets:
   # Redis Secrets
   REDIS_HOST: redis-host-staging:latest
   REDIS_PORT: redis-port-staging:latest
-  REDIS_URL: redis-url-staging:latest
   REDIS_PASSWORD: redis-password-staging:latest
   
   # Security Secrets
@@ -111,7 +110,6 @@ validation:
     - postgres-password-staging
     - redis-host-staging
     - redis-port-staging
-    - redis-url-staging
     - redis-password-staging
     - jwt-secret-staging
     - jwt-secret-key-staging
