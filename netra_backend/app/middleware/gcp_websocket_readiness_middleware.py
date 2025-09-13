@@ -1,24 +1,30 @@
 """
-GCP WebSocket Readiness Middleware - SSOT Route Protection
+GCP WebSocket Readiness Middleware - Enhanced for Issue #449 uvicorn Compatibility
 
 MISSION CRITICAL: Prevents 1011 WebSocket errors by blocking WebSocket connections
 until all required services are ready in GCP Cloud Run environment.
 
+ISSUE #449 ENHANCEMENTS - PHASE 3: GCP Cloud Run Compatibility
+- Enhanced uvicorn protocol compatibility for Cloud Run WebSocket handling
+- Improved timeout and header management for Cloud Run load balancers
+- Advanced protocol negotiation error recovery
+- Enhanced error handling for uvicorn middleware stack conflicts
+
 ROOT CAUSE FIX: GCP Cloud Run accepts WebSocket connections immediately after 
 container start, but before backend services are fully initialized. This middleware
-checks service readiness before allowing WebSocket connections.
+checks service readiness and provides enhanced uvicorn compatibility.
 
 SSOT COMPLIANCE:
 - Uses existing GCP WebSocket initialization validator
 - Integrates with FastAPI middleware patterns
 - Uses shared.isolated_environment for environment detection
-- Follows existing error handling patterns
+- Enhanced for uvicorn protocol handling compatibility
 
 Business Value Justification:  
-- Segment: Platform/Internal
-- Business Goal: Platform Stability & Chat Value Delivery
-- Value Impact: Eliminates 1011 WebSocket errors preventing chat functionality
-- Strategic Impact: Enables reliable WebSocket connections in production GCP environment
+- Segment: Platform/Internal ($500K+ ARR protection)
+- Business Goal: Platform Stability & Chat Value Delivery  
+- Value Impact: Eliminates WebSocket uvicorn middleware failures in Cloud Run
+- Strategic Impact: Enables reliable WebSocket connections with enhanced protocol handling
 """
 
 import asyncio

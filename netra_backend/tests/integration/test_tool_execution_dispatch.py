@@ -25,6 +25,7 @@ from pydantic import Field
 from langchain_core.tools import BaseTool
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.fixtures.websocket_manager_mock import MockWebSocketNotifier as BaseWebSocketNotifier
 from netra_backend.app.core.tools.unified_tool_dispatcher import (
     UnifiedToolDispatcher,
     UnifiedToolDispatcherFactory, 
