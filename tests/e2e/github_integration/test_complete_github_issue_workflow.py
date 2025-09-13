@@ -11,7 +11,7 @@ import asyncio
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from test_framework.ssot.base_test_case import BaseTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from shared.isolated_environment import IsolatedEnvironment
 
@@ -19,26 +19,32 @@ from shared.isolated_environment import IsolatedEnvironment
 @pytest.mark.e2e
 @pytest.mark.github_integration
 @pytest.mark.authenticated
-class TestCompleteGitHubIssueWorkflowE2E(BaseTestCase):
+class TestCompleteGitHubIssueWorkflowE2E(SSotAsyncTestCase):
     """E2E test for complete GitHub issue creation and management workflow."""
 
-    async def setup_method(self):
+    def setup_method(self, method):
         """Set up E2E test with real authentication and services."""
-        await super().setup_method()
+        super().setup_method(method)
         
-        # CRITICAL: All E2E tests must use real authentication per CLAUDE.md
-        self.auth_helper = E2EAuthHelper()
-        self.authenticated_user = await self.auth_helper.create_authenticated_test_user()
-        
+        # Setup sync components  
         self.env = IsolatedEnvironment()
         self.github_token = self.env.get("GITHUB_TOKEN_TEST")
         self.test_repo = self.env.get("GITHUB_TEST_REPO", "netra-systems/test-repo")
         
         if not self.github_token:
             pytest.skip("GITHUB_TOKEN_TEST not configured for E2E testing")
+    
+    async def _setup_auth(self):
+        """Setup authentication - called from test methods."""
+        # CRITICAL: All E2E tests must use real authentication per CLAUDE.md
+        self.auth_helper = E2EAuthHelper()
+        self.authenticated_user = await self.auth_helper.create_authenticated_test_user()
 
     async def test_end_to_end_error_to_github_issue_flow(self):
         """Test complete flow from error detection to GitHub issue creation."""
+        # Setup authentication
+        await self._setup_auth()
+        
         # Simulate a real error occurring in the system
         system_error = {
             "error_type": "ImportError",
@@ -111,6 +117,9 @@ class TestCompleteGitHubIssueWorkflowE2E(BaseTestCase):
 
     async def test_multi_error_batch_processing_e2e(self):
         """Test processing multiple errors and creating corresponding GitHub issues."""
+        # Setup authentication
+        await self._setup_auth()
+        
         multiple_errors = [
             {
                 "error_type": "ConnectionError", 
@@ -181,6 +190,9 @@ class TestCompleteGitHubIssueWorkflowE2E(BaseTestCase):
 
     async def test_github_issue_progress_tracking_e2e(self):
         """Test complete issue progress tracking from creation to resolution."""
+        # Setup authentication
+        await self._setup_auth()
+        
         test_error = {
             "error_type": "APIError",
             "message": "External API rate limit exceeded",
@@ -269,25 +281,31 @@ class TestCompleteGitHubIssueWorkflowE2E(BaseTestCase):
 @pytest.mark.github_integration
 @pytest.mark.claude_commands
 @pytest.mark.authenticated
-class TestClaudeCommandGitHubIntegrationE2E(BaseTestCase):
+class TestClaudeCommandGitHubIntegrationE2E(SSotAsyncTestCase):
     """E2E test for Claude command integration with GitHub operations."""
 
-    async def setup_method(self):
+    def setup_method(self, method):
         """Set up E2E test with authenticated Claude command context."""
-        await super().setup_method()
+        super().setup_method(method)
         
-        # CRITICAL: Must use real authentication
-        self.auth_helper = E2EAuthHelper()
-        self.authenticated_user = await self.auth_helper.create_authenticated_test_user()
-        
+        # Setup sync components
         self.env = IsolatedEnvironment()
         self.github_token = self.env.get("GITHUB_TOKEN_TEST")
         
         if not self.github_token:
             pytest.skip("GITHUB_TOKEN_TEST not configured")
+    
+    async def _setup_auth(self):
+        """Setup authentication - called from test methods."""
+        # CRITICAL: Must use real authentication
+        self.auth_helper = E2EAuthHelper()
+        self.authenticated_user = await self.auth_helper.create_authenticated_test_user()
 
     async def test_claude_create_github_issue_command_e2e(self):
         """Test creating GitHub issues through Claude commands."""
+        # Setup authentication
+        await self._setup_auth()
+        
         claude_command = """
         create github issue for error: "DatabaseConnectionError: Failed to connect to PostgreSQL"
         service: netra_backend
@@ -333,6 +351,9 @@ class TestClaudeCommandGitHubIntegrationE2E(BaseTestCase):
 
     async def test_claude_search_and_update_github_issues_e2e(self):
         """Test searching and updating GitHub issues through Claude commands."""
+        # Setup authentication
+        await self._setup_auth()
+        
         # First create a test issue to search for and update
         setup_command = 'create github issue for error: "Test search and update functionality"'
         
@@ -397,26 +418,32 @@ class TestClaudeCommandGitHubIntegrationE2E(BaseTestCase):
 @pytest.mark.github_integration
 @pytest.mark.multi_user
 @pytest.mark.authenticated
-class TestGitHubIntegrationMultiUserE2E(BaseTestCase):
+class TestGitHubIntegrationMultiUserE2E(SSotAsyncTestCase):
     """E2E test for GitHub integration in multi-user scenarios."""
 
-    async def setup_method(self):
+    def setup_method(self, method):
         """Set up multi-user E2E test scenario."""
-        await super().setup_method()
+        super().setup_method(method)
         
-        # CRITICAL: Create multiple authenticated users
-        self.auth_helper = E2EAuthHelper()
-        self.user_1 = await self.auth_helper.create_authenticated_test_user()
-        self.user_2 = await self.auth_helper.create_authenticated_test_user()
-        
+        # Setup sync components
         self.env = IsolatedEnvironment()
         self.github_token = self.env.get("GITHUB_TOKEN_TEST")
         
         if not self.github_token:
             pytest.skip("GITHUB_TOKEN_TEST not configured")
+    
+    async def _setup_auth(self):
+        """Setup authentication - called from test methods."""
+        # CRITICAL: Create multiple authenticated users
+        self.auth_helper = E2EAuthHelper()
+        self.user_1 = await self.auth_helper.create_authenticated_test_user()
+        self.user_2 = await self.auth_helper.create_authenticated_test_user()
 
     async def test_multi_user_github_issue_isolation_e2e(self):
         """Test that GitHub issues are properly isolated per user context."""
+        # Setup authentication
+        await self._setup_auth()
+        
         # User 1 creates an issue
         user_1_error = {
             "error_type": "ValidationError",

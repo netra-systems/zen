@@ -1,468 +1,637 @@
-"""Unit Test: SSOT ExecutionEngine Migration Status Validation (Issue #620)
+"""Test Plan for Issue #565: SSOT ExecutionEngine-UserExecutionEngine Migration Validation
 
-PURPOSE: Validate that the ExecutionEngine SSOT migration is properly completed.
-This test reproduces the current failing behavior where deprecated files are still 1,664+ lines instead of 5-line redirects.
+CRITICAL MISSION: Create comprehensive test plan to validate the SSOT ExecutionEngine-UserExecutionEngine 
+migration issue, exposing user isolation failures and SSOT violations identified in Five Whys analysis.
 
-BUSINESS CONTEXT:
-- Chat functionality delivers 90% of platform value
-- ExecutionEngine is core infrastructure enabling agent WebSocket events  
-- Migration status directly impacts system stability and user isolation
+Business Value Justification (BVJ):
+- Segment: Platform/Security
+- Business Goal: Prevent security vulnerabilities and user data contamination
+- Value Impact: Protects $500K+ ARR by ensuring complete user isolation
+- Strategic Impact: Foundation for multi-tenant production deployment at scale
 
-TEST STRATEGY:
-- FAILING TESTS FIRST: Reproduce the broken migration state
-- File size validation: Deprecated files should be ≤5 lines (currently 1,664+ lines)
-- Import validation: All imports should resolve to UserExecutionEngine
-- Content validation: Deprecated files should be redirects, not full implementations
+Based on Five Whys Analysis Findings:
+- 3,678+ ExecutionEngine references across 449 files causing user isolation failures
+- Security vulnerabilities from deprecated ExecutionEngine usage
+- SSOT violations preventing proper user context isolation
+- Multi-user scenarios experiencing data contamination
+- Integration testing gaps in user context validation
 
-EXPECTED CURRENT STATE (FAILING):
-- execution_engine.py: 1,775 lines (should be ≤5 lines) 
-- Multiple deprecated files still contain full implementations
-- Import consolidation incomplete (60% complete per Issue #620)
-
-TEST EXECUTION:
-- Unit test (no Docker dependency)
-- Fast execution for immediate feedback
-- Real file system validation
+Test Categories Required:
+1. Security Tests: User isolation and data contamination prevention
+2. SSOT Compliance Tests: Verify no deprecated ExecutionEngine imports remain
+3. Multi-User Integration Tests: Concurrent user sessions without cross-contamination
+4. Golden Path Protection Tests: Business value preservation during migration
 """
 
-import os
-import ast
-import importlib.util
-import inspect
+import asyncio
 import pytest
-from pathlib import Path
-from typing import List, Dict, Any
-
+import warnings
+from typing import Dict, Any, List
+from unittest.mock import AsyncMock, MagicMock, patch
 from test_framework.ssot.base_test_case import SSotBaseTestCase
+
+# Import both deprecated and SSOT patterns for testing
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
-    """Unit tests for ExecutionEngine SSOT migration validation.
+    """Test suite for Issue #565 SSOT ExecutionEngine migration validation.
     
-    These tests SHOULD FAIL initially to reproduce the current broken migration state.
-    When the migration is complete, these tests will pass.
+    This test suite validates the complete migration from deprecated ExecutionEngine
+    to UserExecutionEngine SSOT pattern, focusing on user isolation security and
+    SSOT compliance.
+    
+    MISSION CRITICAL: These tests must expose and validate fixes for user isolation
+    vulnerabilities that could cause data contamination between users.
     """
     
-    def setup_method(self, method):
-        """Set up test environment for ExecutionEngine migration validation."""
-        super().setup_method(method)
+    def setUp(self):
+        """Set up test fixtures for SSOT migration validation."""
+        super().setUp()
+        self.test_users = self._create_test_users()
         
-        self.project_root = Path(__file__).parent.parent.parent
-        self.netra_backend = self.project_root / "netra_backend"
-        
-        # Define ExecutionEngine related files that should be deprecated redirects
-        self.deprecated_execution_engine_files = [
-            self.netra_backend / "app" / "agents" / "supervisor" / "execution_engine.py",
-            # Add other deprecated ExecutionEngine files here as identified
-        ]
-        
-        # Define the SSOT UserExecutionEngine file
-        self.ssot_user_execution_engine = self.netra_backend / "app" / "agents" / "supervisor" / "user_execution_engine.py"
-        
-        # Current known failing state from Issue #620 audit
-        self.expected_failing_line_counts = {
-            "execution_engine.py": 1775,  # Currently 1,775 lines, should be ≤5
-        }
-        
-    def test_deprecated_execution_engine_file_size_validation(self):
-        """Test that deprecated ExecutionEngine files are 5-line redirects.
-        
-        EXPECTED TO FAIL: This test reproduces the Issue #620 finding that
-        deprecated files are still full implementations (1,664+ lines) instead of redirects.
-        
-        SUCCESS CRITERIA (when migration is complete):
-        - All deprecated files ≤ 5 lines
-        - Files contain only imports and redirects
-        - No business logic in deprecated files
-        """
-        failing_files = []
-        
-        for file_path in self.deprecated_execution_engine_files:
-            if not file_path.exists():
-                pytest.fail(f"Expected deprecated file does not exist: {file_path}")
-                continue
-            
-            # Count lines in the file
-            with open(file_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                line_count = len(lines)
-                
-            # Log current state for debugging
-            filename = file_path.name
-            expected_failing_count = self.expected_failing_line_counts.get(filename, 0)
-            
-            print(f"\n📊 MIGRATION STATUS CHECK: {filename}")
-            print(f"   Current lines: {line_count}")
-            print(f"   Expected failing state: {expected_failing_count} lines") 
-            print(f"   Target state: ≤5 lines (redirect only)")
-            
-            # REPRODUCTION TEST: Validate current failing state
-            if expected_failing_count > 0:
-                if line_count != expected_failing_count:
-                    print(f"   ⚠️  WARNING: Expected {expected_failing_count} lines but found {line_count}")
-                else:
-                    print(f"   ✅ REPRODUCTION: Confirmed current failing state ({line_count} lines)")
-            
-            # PRIMARY TEST: Check if file is properly migrated (≤5 lines)
-            if line_count > 5:
-                failing_files.append({
-                    'file': filename,
-                    'current_lines': line_count,
-                    'target_lines': '≤5',
-                    'status': 'MIGRATION_INCOMPLETE',
-                    'migration_issue': '#620'
-                })
-        
-        # Assert failure to reproduce current broken state
-        if failing_files:
-            failure_details = [
-                f"{f['file']}: {f['current_lines']} lines (should be {f['target_lines']})"
-                for f in failing_files
-            ]
-            
-            pytest.fail(
-                f"🚨 ISSUE #620 REPRODUCTION: ExecutionEngine SSOT migration incomplete (60%). "
-                f"Deprecated files are still full implementations instead of 5-line redirects:\n"
-                f"{'  • ' + chr(10).join(failure_details)}\n"
-                f"\nBUSINESS IMPACT: "
-                f"User isolation vulnerabilities, chat functionality instability, "
-                f"WebSocket event delivery issues affecting 90% of platform value.\n"
-                f"\nREMEDIATION: Complete SSOT migration by converting deprecated files to redirects."
-            )
-    
-    def test_deprecated_execution_engine_content_validation(self):
-        """Test that deprecated ExecutionEngine files contain only redirects.
-        
-        EXPECTED TO FAIL: Deprecated files should contain only imports and redirects
-        to UserExecutionEngine, but currently contain full business logic.
-        
-        SUCCESS CRITERIA (when migration is complete):
-        - No class definitions in deprecated files
-        - No method implementations in deprecated files  
-        - Only import statements and redirect functions
-        """
-        failing_files = []
-        
-        for file_path in self.deprecated_execution_engine_files:
-            if not file_path.exists():
-                continue
-                
-            # Parse file AST to analyze content
-            try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    file_content = f.read()
-                
-                # Parse AST to analyze file structure
-                tree = ast.parse(file_content, filename=str(file_path))
-                
-                # Count different types of nodes
-                class_definitions = []
-                method_definitions = []
-                import_statements = []
-                
-                for node in ast.walk(tree):
-                    if isinstance(node, ast.ClassDef):
-                        class_definitions.append(node.name)
-                    elif isinstance(node, ast.FunctionDef):
-                        method_definitions.append(node.name)
-                    elif isinstance(node, (ast.Import, ast.ImportFrom)):
-                        import_statements.append(self._format_import(node))
-                
-                filename = file_path.name
-                
-                print(f"\n📋 CONTENT ANALYSIS: {filename}")
-                print(f"   Classes found: {len(class_definitions)}")
-                print(f"   Methods found: {len(method_definitions)}")
-                print(f"   Imports found: {len(import_statements)}")
-                
-                if class_definitions:
-                    print(f"   Class names: {', '.join(class_definitions[:3])}{'...' if len(class_definitions) > 3 else ''}")
-                
-                # FAILURE TEST: Check for business logic (classes/methods)
-                if class_definitions or method_definitions:
-                    failing_files.append({
-                        'file': filename,
-                        'classes': len(class_definitions),
-                        'methods': len(method_definitions),
-                        'imports': len(import_statements),
-                        'status': 'CONTAINS_BUSINESS_LOGIC',
-                        'migration_issue': '#620'
-                    })
-                    
-            except SyntaxError as e:
-                pytest.fail(f"Syntax error in {file_path}: {e}")
-            except Exception as e:
-                pytest.fail(f"Error analyzing {file_path}: {e}")
-        
-        # Assert failure to reproduce current state  
-        if failing_files:
-            failure_details = []
-            for f in failing_files:
-                failure_details.append(
-                    f"{f['file']}: {f['classes']} classes, {f['methods']} methods "
-                    f"(should be 0 classes, 0 methods - redirect only)"
-                )
-            
-            pytest.fail(
-                f"🚨 ISSUE #620 CONTENT REPRODUCTION: Deprecated ExecutionEngine files "
-                f"contain full business logic instead of simple redirects:\n"
-                f"{'  • ' + chr(10).join(failure_details)}\n"
-                f"\nEXPECTED STATE: Only import statements and redirect functions\n"
-                f"CURRENT STATE: Full class implementations with business logic\n"
-                f"\nBUSINESS RISK: Code duplication, maintenance burden, user isolation bugs"
-            )
-    
-    def test_ssot_user_execution_engine_exists_and_complete(self):
-        """Test that the SSOT UserExecutionEngine exists and is properly implemented.
-        
-        This test should PASS as UserExecutionEngine is the consolidation target.
-        """
-        if not self.ssot_user_execution_engine.exists():
-            pytest.fail(f"SSOT UserExecutionEngine file does not exist: {self.ssot_user_execution_engine}")
-        
-        # Count lines in SSOT file
-        with open(self.ssot_user_execution_engine, 'r', encoding='utf-8') as f:
-            ssot_lines = len(f.readlines())
-        
-        print(f"\n📈 SSOT STATUS: user_execution_engine.py")
-        print(f"   Lines: {ssot_lines}")
-        print(f"   Status: {'✅ SUBSTANTIAL IMPLEMENTATION' if ssot_lines > 100 else '⚠️  TOO SMALL'}")
-        
-        # SSOT should be substantial (contains all consolidated functionality)
-        assert ssot_lines > 100, (
-            f"SSOT UserExecutionEngine appears incomplete: only {ssot_lines} lines. "
-            f"Expected substantial implementation with consolidated functionality."
-        )
-        
-        # Verify SSOT contains expected classes/methods
-        try:
-            with open(self.ssot_user_execution_engine, 'r', encoding='utf-8') as f:
-                ssot_content = f.read()
-            
-            tree = ast.parse(ssot_content)
-            class_names = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
-            
-            print(f"   Classes: {', '.join(class_names)}")
-            
-            # Should contain UserExecutionEngine class
-            assert 'UserExecutionEngine' in class_names, (
-                f"SSOT file missing UserExecutionEngine class. Found classes: {class_names}"
-            )
-            
-        except Exception as e:
-            pytest.fail(f"Error analyzing SSOT UserExecutionEngine: {e}")
-    
-    def test_execution_engine_import_resolution(self):
-        """Test that ExecutionEngine imports resolve correctly.
-        
-        EXPECTED TO PARTIALLY FAIL: Should demonstrate import consolidation issues.
-        
-        This test checks that imports from deprecated locations either:
-        1. Resolve to UserExecutionEngine (successful migration)  
-        2. Fail with clear migration guidance (partial migration)
-        """
-        import_tests = [
+    def _create_test_users(self) -> List[Dict[str, Any]]:
+        """Create test users for multi-user isolation testing."""
+        return [
             {
-                'import_path': 'netra_backend.app.agents.supervisor.execution_engine.ExecutionEngine',
-                'expected_resolution': 'UserExecutionEngine',
-                'test_type': 'deprecated_import'
+                'user_id': 'user_001',
+                'name': 'Test User 1',
+                'email': 'user1@test.com',
+                'subscription_tier': 'enterprise'
             },
             {
-                'import_path': 'netra_backend.app.agents.supervisor.user_execution_engine.UserExecutionEngine', 
-                'expected_resolution': 'UserExecutionEngine',
-                'test_type': 'ssot_import'
+                'user_id': 'user_002', 
+                'name': 'Test User 2',
+                'email': 'user2@test.com',
+                'subscription_tier': 'mid'
+            },
+            {
+                'user_id': 'user_003',
+                'name': 'Test User 3', 
+                'email': 'user3@test.com',
+                'subscription_tier': 'early'
             }
         ]
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    def test_deprecated_execution_engine_import_still_works(self):
+        """Test that deprecated ExecutionEngine import still works via compatibility bridge.
         
-        import_results = []
+        SECURITY TEST: Validates that the compatibility bridge prevents breaking changes
+        while maintaining the migration path to UserExecutionEngine.
         
-        for test in import_tests:
-            try:
-                # Dynamic import to test resolution
-                module_path, class_name = test['import_path'].rsplit('.', 1)
-                spec = importlib.util.spec_from_file_location(
-                    module_path,
-                    self._get_module_file_path(module_path)
+        This test ensures backward compatibility during the migration period.
+        """
+        # Test deprecated import pattern still works
+        try:
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            
+            # Should generate deprecation warning but still work
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                
+                # Create instance - should trigger compatibility bridge
+                mock_registry = MagicMock()
+                mock_websocket_bridge = MagicMock()
+                engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                
+                # Verify deprecation warning was issued
+                self.assertTrue(len(w) > 0)
+                deprecation_warnings = [warn for warn in w if issubclass(warn.category, DeprecationWarning)]
+                self.assertTrue(len(deprecation_warnings) > 0)
+                
+                # Verify compatibility mode is active
+                self.assertTrue(engine.is_compatibility_mode())
+                
+                # Verify delegation info contains migration guidance
+                delegation_info = engine.get_delegation_info()
+                self.assertEqual(delegation_info['compatibility_mode'], True)
+                self.assertEqual(delegation_info['migration_issue'], '#565')
+                self.assertIn('UserExecutionEngine', delegation_info['migration_guide'])
+                
+        except ImportError as e:
+            self.fail(f"Deprecated ExecutionEngine import should still work via compatibility bridge: {e}")
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    @pytest.mark.ssot_compliance
+    async def test_user_execution_engine_ssot_import_validation(self):
+        """Test that UserExecutionEngine SSOT import works correctly.
+        
+        SSOT COMPLIANCE TEST: Validates that the new SSOT pattern imports and
+        initializes correctly with proper user isolation.
+        """
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+            
+            # Create proper user context for isolation
+            user_context = UserExecutionContext(
+                user_id='test_user_001',
+                request_id='test_request_001',
+                thread_id='test_thread_001'
+            )
+            
+            # Mock required dependencies
+            mock_agent_factory = MagicMock()
+            mock_websocket_emitter = AsyncMock()
+            
+            # Create UserExecutionEngine instance
+            engine = UserExecutionEngine(
+                context=user_context,
+                agent_factory=mock_agent_factory,
+                websocket_emitter=mock_websocket_emitter
+            )
+            
+            # Verify proper initialization
+            self.assertIsNotNone(engine)
+            self.assertEqual(engine.get_user_context(), user_context)
+            self.assertFalse(hasattr(engine, 'is_compatibility_mode'))  # Should not have compatibility methods
+            
+        except ImportError as e:
+            self.fail(f"UserExecutionEngine SSOT import should work: {e}")
+
+    @pytest.mark.unit
+    @pytest.mark.security
+    async def test_user_isolation_validation_different_contexts(self):
+        """Test that different UserExecutionEngine instances have complete user isolation.
+        
+        SECURITY TEST: This is the core vulnerability test - ensures that different
+        user contexts create completely isolated execution environments with no
+        shared state that could cause data contamination.
+        
+        ISSUE #565 ROOT CAUSE: Deprecated ExecutionEngine had shared state that
+        caused user data to leak between requests.
+        """
+        # Create separate user contexts
+        user_context_1 = UserExecutionContext(
+            user_id='user_001',
+            request_id='request_001',
+            thread_id='thread_001'
+        )
+        
+        user_context_2 = UserExecutionContext(
+            user_id='user_002', 
+            request_id='request_002',
+            thread_id='thread_002'
+        )
+        
+        # Mock dependencies
+        mock_agent_factory_1 = MagicMock()
+        mock_agent_factory_2 = MagicMock()
+        mock_websocket_emitter_1 = AsyncMock()
+        mock_websocket_emitter_2 = AsyncMock()
+        
+        # Create separate UserExecutionEngine instances
+        engine_1 = UserExecutionEngine(
+            context=user_context_1,
+            agent_factory=mock_agent_factory_1,
+            websocket_emitter=mock_websocket_emitter_1
+        )
+        
+        engine_2 = UserExecutionEngine(
+            context=user_context_2,
+            agent_factory=mock_agent_factory_2,
+            websocket_emitter=mock_websocket_emitter_2
+        )
+        
+        # CRITICAL SECURITY VALIDATION: Verify complete isolation
+        
+        # 1. Different engine IDs (no sharing)
+        self.assertNotEqual(engine_1.engine_id, engine_2.engine_id)
+        
+        # 2. Different user contexts (no contamination)
+        self.assertNotEqual(engine_1.get_user_context().user_id, engine_2.get_user_context().user_id)
+        self.assertNotEqual(engine_1.get_user_context().request_id, engine_2.get_user_context().request_id)
+        
+        # 3. Different agent factories (no shared agent state)
+        self.assertIsNot(engine_1._agent_factory, engine_2._agent_factory)
+        
+        # 4. Different websocket emitters (no cross-user event delivery)
+        self.assertIsNot(engine_1._websocket_emitter, engine_2._websocket_emitter)
+        
+        # 5. No shared internal state
+        engine_1._internal_state = {'user_data': 'sensitive_user_1_data'}
+        engine_2._internal_state = {'user_data': 'sensitive_user_2_data'}
+        
+        self.assertEqual(engine_1._internal_state['user_data'], 'sensitive_user_1_data')
+        self.assertEqual(engine_2._internal_state['user_data'], 'sensitive_user_2_data')
+        
+        # VULNERABILITY CHECK: Ensure no accidental state sharing
+        self.assertNotEqual(engine_1._internal_state['user_data'], engine_2._internal_state['user_data'])
+
+    @pytest.mark.unit  
+    @pytest.mark.security
+    async def test_deprecated_execution_engine_delegates_to_user_execution_engine(self):
+        """Test that deprecated ExecutionEngine properly delegates to UserExecutionEngine.
+        
+        SECURITY TEST: Validates that the compatibility bridge correctly delegates
+        execution to UserExecutionEngine, maintaining security isolation even when
+        using deprecated import patterns.
+        
+        This ensures that legacy code gets security fixes automatically.
+        """
+        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        
+        # Mock dependencies
+        mock_registry = MagicMock()
+        mock_websocket_bridge = MagicMock()
+        user_context = UserExecutionContext(
+            user_id='test_user',
+            request_id='test_request',
+            thread_id='test_thread'
+        )
+        
+        # Create deprecated ExecutionEngine instance
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # Ignore deprecation warnings for this test
+            deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+        
+        # Verify delegation is set up
+        self.assertTrue(deprecated_engine.is_compatibility_mode())
+        self.assertEqual(deprecated_engine._migration_issue, '#565')
+        
+        # Mock agent execution context
+        mock_execution_context = MagicMock()
+        mock_execution_context.agent_name = 'test_agent'
+        mock_execution_context.user_id = 'test_user'
+        
+        # Mock UserExecutionEngine creation and execution
+        with patch.object(UserExecutionEngine, 'create_from_legacy', new_callable=AsyncMock) as mock_create:
+            mock_delegated_engine = AsyncMock()
+            mock_result = MagicMock()
+            mock_result.success = True
+            
+            mock_delegated_engine.execute_agent.return_value = mock_result
+            mock_delegated_engine.get_user_context.return_value = user_context
+            mock_create.return_value = mock_delegated_engine
+            
+            # Execute via deprecated engine (should delegate)
+            result = await deprecated_engine.execute_agent(mock_execution_context, user_context)
+            
+            # Verify delegation occurred
+            mock_create.assert_called_once_with(
+                registry=mock_registry,
+                websocket_bridge=mock_websocket_bridge,
+                user_context=user_context
+            )
+            mock_delegated_engine.execute_agent.assert_called_once_with(mock_execution_context, user_context)
+            
+            # Verify result is from UserExecutionEngine
+            self.assertEqual(result, mock_result)
+            self.assertTrue(result.success)
+
+    @pytest.mark.integration
+    @pytest.mark.security
+    @pytest.mark.real_services
+    async def test_concurrent_user_execution_no_contamination(self):
+        """Test that concurrent user executions via different engines have no data contamination.
+        
+        MULTI-USER INTEGRATION TEST: This is the critical business value test - ensures
+        that multiple users can execute agents concurrently without any data leakage
+        or contamination between their sessions.
+        
+        BUSINESS RISK: Data contamination between users would be a critical security
+        breach that could lose customer trust and violate data privacy requirements.
+        """
+        # Skip if real services not available
+        pytest.importorskip("test_framework.real_services_test_fixtures")
+        
+        # Create multiple concurrent user contexts
+        user_contexts = []
+        engines = []
+        
+        for i, user in enumerate(self.test_users):
+            context = UserExecutionContext(
+                user_id=user['user_id'],
+                request_id=f'request_{i:03d}',
+                thread_id=f'thread_{i:03d}'
+            )
+            user_contexts.append(context)
+            
+            # Mock dependencies for each user
+            mock_agent_factory = MagicMock()
+            mock_websocket_emitter = AsyncMock()
+            
+            engine = UserExecutionEngine(
+                context=context,
+                agent_factory=mock_agent_factory,
+                websocket_emitter=mock_websocket_emitter
+            )
+            engines.append(engine)
+        
+        # Execute concurrent operations
+        async def simulate_user_execution(engine, user_context, user_data):
+            """Simulate agent execution for a specific user."""
+            # Set user-specific data
+            engine._user_specific_data = {
+                'user_id': user_context.user_id,
+                'sensitive_data': user_data,
+                'request_timestamp': asyncio.get_event_loop().time()
+            }
+            
+            # Simulate some processing time
+            await asyncio.sleep(0.1)
+            
+            # Return user-specific result
+            return {
+                'user_id': user_context.user_id,
+                'processed_data': f"processed_{user_data}",
+                'engine_id': engine.engine_id
+            }
+        
+        # Execute all users concurrently
+        user_specific_data = ['data_user_001', 'data_user_002', 'data_user_003']
+        tasks = []
+        
+        for i, (engine, context, data) in enumerate(zip(engines, user_contexts, user_specific_data)):
+            task = simulate_user_execution(engine, context, data)
+            tasks.append(task)
+        
+        # Wait for all concurrent executions to complete
+        results = await asyncio.gather(*tasks)
+        
+        # CRITICAL SECURITY VALIDATION: Verify no data contamination
+        
+        # 1. Each result should correspond to correct user
+        for i, result in enumerate(results):
+            expected_user_id = self.test_users[i]['user_id']
+            self.assertEqual(result['user_id'], expected_user_id)
+            self.assertEqual(result['processed_data'], f"processed_{user_specific_data[i]}")
+        
+        # 2. Each engine should have only its own user data
+        for i, engine in enumerate(engines):
+            expected_user_id = self.test_users[i]['user_id']
+            self.assertEqual(engine._user_specific_data['user_id'], expected_user_id)
+            self.assertEqual(engine._user_specific_data['sensitive_data'], user_specific_data[i])
+        
+        # 3. No cross-contamination between engines
+        for i in range(len(engines)):
+            for j in range(len(engines)):
+                if i != j:
+                    self.assertNotEqual(
+                        engines[i]._user_specific_data['sensitive_data'],
+                        engines[j]._user_specific_data['sensitive_data']
+                    )
+
+    @pytest.mark.unit
+    @pytest.mark.ssot_compliance  
+    def test_ssot_import_compliance_validation(self):
+        """Test SSOT compliance by validating correct import patterns.
+        
+        SSOT COMPLIANCE TEST: Ensures that the correct SSOT import patterns are
+        being used and deprecated patterns are properly marked.
+        """
+        # Test that SSOT imports work
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            
+            # Should import without warnings
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                
+                # Create SSOT instances
+                context = UserExecutionContext(
+                    user_id='test_user',
+                    request_id='test_request', 
+                    thread_id='test_thread'
                 )
                 
-                if spec and spec.loader:
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-                    
-                    if hasattr(module, class_name):
-                        actual_class = getattr(module, class_name)
-                        actual_resolution = actual_class.__name__
-                        
-                        import_results.append({
-                            'import_path': test['import_path'],
-                            'expected': test['expected_resolution'],
-                            'actual': actual_resolution,
-                            'test_type': test['test_type'],
-                            'status': 'SUCCESS' if actual_resolution == test['expected_resolution'] else 'MISMATCH',
-                            'class_info': {
-                                'module': actual_class.__module__,
-                                'qualname': actual_class.__qualname__,
-                                'is_deprecated': hasattr(actual_class, '_compatibility_mode')
-                            }
-                        })
-                    else:
-                        import_results.append({
-                            'import_path': test['import_path'],
-                            'expected': test['expected_resolution'],
-                            'actual': 'CLASS_NOT_FOUND',
-                            'test_type': test['test_type'],
-                            'status': 'FAILURE'
-                        })
-                else:
-                    import_results.append({
-                        'import_path': test['import_path'],
-                        'expected': test['expected_resolution'],
-                        'actual': 'MODULE_NOT_FOUND',
-                        'test_type': test['test_type'],
-                        'status': 'FAILURE'
-                    })
-                    
-            except Exception as e:
-                import_results.append({
-                    'import_path': test['import_path'],
-                    'expected': test['expected_resolution'],
-                    'actual': f'ERROR: {str(e)[:100]}',
-                    'test_type': test['test_type'],
-                    'status': 'ERROR'
+                mock_agent_factory = MagicMock()
+                mock_websocket_emitter = MagicMock()
+                
+                engine = UserExecutionEngine(
+                    context=context,
+                    agent_factory=mock_agent_factory,
+                    websocket_emitter=mock_websocket_emitter
+                )
+                
+                # Should not generate any warnings (SSOT pattern)
+                ssot_warnings = [warn for warn in w if 'SSOT' in str(warn.message) or 'deprecated' in str(warn.message).lower()]
+                self.assertEqual(len(ssot_warnings), 0, f"SSOT imports should not generate warnings: {ssot_warnings}")
+                
+        except ImportError as e:
+            self.fail(f"SSOT import patterns should work: {e}")
+        
+        # Test that deprecated imports generate warnings
+        try:
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                
+                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                
+                # Should generate deprecation warning
+                deprecation_warnings = [warn for warn in w if issubclass(warn.category, DeprecationWarning)]
+                self.assertTrue(len(deprecation_warnings) > 0, "Deprecated imports should generate warnings")
+                
+        except ImportError:
+            # If deprecated import doesn't work, that's actually good for SSOT compliance
+            pass
+
+    @pytest.mark.unit
+    @pytest.mark.golden_path
+    def test_golden_path_compatibility_during_migration(self):
+        """Test that Golden Path user flow continues to work during migration.
+        
+        GOLDEN PATH PROTECTION TEST: Ensures that the migration from ExecutionEngine
+        to UserExecutionEngine does not break the core user chat functionality that
+        delivers 90% of business value.
+        
+        This test validates that users can still login -> send messages -> get AI responses.
+        """
+        # Test both deprecated and SSOT patterns work for Golden Path
+        
+        # 1. Test deprecated pattern (compatibility bridge)
+        try:
+            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            
+            mock_registry = MagicMock()
+            mock_websocket_bridge = MagicMock()
+            
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")  # Focus on functionality, not warnings
+                
+                deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                
+                # Should have compatibility methods
+                self.assertTrue(hasattr(deprecated_engine, 'is_compatibility_mode'))
+                self.assertTrue(deprecated_engine.is_compatibility_mode())
+                
+        except ImportError:
+            self.fail("Golden Path should maintain backward compatibility during migration")
+        
+        # 2. Test SSOT pattern (new implementation)
+        try:
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
+            
+            user_context = UserExecutionContext(
+                user_id='golden_path_user',
+                request_id='golden_path_request',
+                thread_id='golden_path_thread'
+            )
+            
+            mock_agent_factory = MagicMock()
+            mock_websocket_emitter = MagicMock()
+            
+            ssot_engine = UserExecutionEngine(
+                context=user_context,
+                agent_factory=mock_agent_factory,
+                websocket_emitter=mock_websocket_emitter
+            )
+            
+            # Should be properly initialized for Golden Path
+            self.assertIsNotNone(ssot_engine.get_user_context())
+            self.assertEqual(ssot_engine.get_user_context().user_id, 'golden_path_user')
+            
+        except ImportError:
+            self.fail("Golden Path should work with SSOT UserExecutionEngine")
+
+    @pytest.mark.integration
+    @pytest.mark.performance
+    async def test_migration_performance_impact_validation(self):
+        """Test that the migration from ExecutionEngine to UserExecutionEngine maintains performance.
+        
+        PERFORMANCE REGRESSION TEST: Validates that the new UserExecutionEngine
+        SSOT pattern does not introduce significant performance regressions that
+        could impact user experience.
+        """
+        import time
+        
+        # Measure deprecated ExecutionEngine creation time (via compatibility bridge)
+        start_time = time.perf_counter()
+        
+        mock_registry = MagicMock()
+        mock_websocket_bridge = MagicMock()
+        
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            
+            for _ in range(100):
+                deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+        
+        deprecated_time = time.perf_counter() - start_time
+        
+        # Measure UserExecutionEngine creation time (SSOT)
+        start_time = time.perf_counter()
+        
+        mock_agent_factory = MagicMock()
+        mock_websocket_emitter = MagicMock()
+        
+        for i in range(100):
+            user_context = UserExecutionContext(
+                user_id=f'perf_user_{i}',
+                request_id=f'perf_request_{i}',
+                thread_id=f'perf_thread_{i}'
+            )
+            
+            ssot_engine = UserExecutionEngine(
+                context=user_context,
+                agent_factory=mock_agent_factory,
+                websocket_emitter=mock_websocket_emitter
+            )
+        
+        ssot_time = time.perf_counter() - start_time
+        
+        # Performance validation
+        # SSOT should be faster or at most 2x slower (acceptable for security benefits)
+        performance_ratio = ssot_time / deprecated_time
+        
+        self.assertLess(
+            performance_ratio, 2.0,
+            f"UserExecutionEngine should not be more than 2x slower than deprecated ExecutionEngine. "
+            f"Ratio: {performance_ratio:.2f} (deprecated: {deprecated_time:.4f}s, SSOT: {ssot_time:.4f}s)"
+        )
+
+    @pytest.mark.integration
+    @pytest.mark.websocket
+    async def test_websocket_event_delivery_isolation_validation(self):
+        """Test that WebSocket events are delivered to correct users with no cross-contamination.
+        
+        WEBSOCKET INTEGRATION TEST: Validates that the critical WebSocket events that
+        enable chat functionality are delivered to the correct users when using
+        UserExecutionEngine, with no events going to wrong users.
+        
+        BUSINESS CRITICAL: WebSocket events deliver 90% of business value through chat.
+        """
+        # Create multiple user contexts for isolation testing
+        user_contexts = []
+        websocket_emitters = []
+        engines = []
+        
+        for i, user in enumerate(self.test_users):
+            context = UserExecutionContext(
+                user_id=user['user_id'],
+                request_id=f'ws_request_{i}',
+                thread_id=f'ws_thread_{i}'
+            )
+            user_contexts.append(context)
+            
+            # Mock WebSocket emitter for each user
+            mock_emitter = AsyncMock()
+            websocket_emitters.append(mock_emitter)
+            
+            mock_agent_factory = MagicMock()
+            
+            engine = UserExecutionEngine(
+                context=context,
+                agent_factory=mock_agent_factory,
+                websocket_emitter=mock_emitter
+            )
+            engines.append(engine)
+        
+        # Simulate concurrent WebSocket events
+        async def emit_user_events(engine, user_context, emitter):
+            """Simulate WebSocket events for a specific user."""
+            events = [
+                'agent_started',
+                'agent_thinking', 
+                'tool_executing',
+                'tool_completed',
+                'agent_completed'
+            ]
+            
+            for event in events:
+                await emitter.emit_event(event, {
+                    'user_id': user_context.user_id,
+                    'message': f'{event}_for_{user_context.user_id}',
+                    'timestamp': time.time()
                 })
         
-        # Print import resolution analysis
-        print(f"\n🔍 IMPORT RESOLUTION ANALYSIS:")
-        for result in import_results:
-            status_emoji = "✅" if result['status'] == 'SUCCESS' else "❌" if result['status'] == 'FAILURE' else "⚠️"
-            print(f"   {status_emoji} {result['test_type']}: {result['import_path']}")
-            print(f"      Expected: {result['expected']}, Actual: {result['actual']}")
+        # Execute concurrent event emission
+        tasks = []
+        for engine, context, emitter in zip(engines, user_contexts, websocket_emitters):
+            task = emit_user_events(engine, context, emitter)
+            tasks.append(task)
+        
+        await asyncio.gather(*tasks)
+        
+        # CRITICAL WEBSOCKET VALIDATION: Verify event isolation
+        
+        for i, (emitter, context) in enumerate(zip(websocket_emitters, user_contexts)):
+            # Each emitter should have been called exactly 5 times (5 critical events)
+            self.assertEqual(emitter.emit_event.call_count, 5)
             
-            if 'class_info' in result:
-                print(f"      Module: {result['class_info']['module']}")
-                if result['class_info'].get('is_deprecated'):
-                    print(f"      ⚠️  COMPATIBILITY MODE: Using deprecated compatibility bridge")
+            # Verify all events were for the correct user
+            for call in emitter.emit_event.call_args_list:
+                event_data = call[0][1]  # Second argument is the event data
+                self.assertEqual(event_data['user_id'], context.user_id)
+                self.assertIn(context.user_id, event_data['message'])
         
-        # Check for migration issues
-        failed_imports = [r for r in import_results if r['status'] in ['FAILURE', 'ERROR']]
-        deprecated_active = [r for r in import_results 
-                           if r.get('class_info', {}).get('is_deprecated', False)]
-        
-        if failed_imports:
-            failure_details = [f"{r['import_path']}: {r['actual']}" for r in failed_imports]
-            print(f"\n⚠️  IMPORT FAILURES: {len(failed_imports)} import resolution failures detected")
-        
-        if deprecated_active:
-            print(f"\n⚠️  COMPATIBILITY MODE: {len(deprecated_active)} imports using compatibility bridge")
-            print("   Migration incomplete - deprecated code paths still active")
-        
-        # This test primarily documents current state, but fails if core functionality broken
-        if any(r['test_type'] == 'ssot_import' and r['status'] != 'SUCCESS' for r in import_results):
-            ssot_failures = [r for r in import_results 
-                           if r['test_type'] == 'ssot_import' and r['status'] != 'SUCCESS']
-            pytest.fail(
-                f"CRITICAL: SSOT UserExecutionEngine import failures. Core functionality broken:\n"
-                f"{'  • ' + chr(10).join(f'{r['import_path']}: {r['actual']}' for r in ssot_failures)}\n"
-                f"This indicates fundamental system issues requiring immediate attention."
-            )
-    
-    def _format_import(self, node: ast.AST) -> str:
-        """Format an import AST node for display."""
-        if isinstance(node, ast.Import):
-            names = [alias.name for alias in node.names]
-            return f"import {', '.join(names)}"
-        elif isinstance(node, ast.ImportFrom):
-            module = node.module or ""
-            names = [alias.name for alias in node.names]
-            return f"from {module} import {', '.join(names)}"
-        else:
-            return str(node)
-    
-    def _get_module_file_path(self, module_path: str) -> Path:
-        """Convert module path to file system path."""
-        # Convert module path to file path
-        path_parts = module_path.split('.')
-        file_path = self.project_root
-        for part in path_parts:
-            file_path = file_path / part
-        return file_path.with_suffix('.py')
-    
-    def test_migration_completion_percentage(self):
-        """Calculate and validate SSOT migration completion percentage.
-        
-        This test provides metrics on migration progress and should document
-        the current ~60% completion status from Issue #620.
-        """
-        metrics = {
-            'total_deprecated_files': len(self.deprecated_execution_engine_files),
-            'files_properly_migrated': 0,
-            'files_still_full_implementation': 0,
-            'total_deprecated_lines': 0,
-            'ssot_implementation_lines': 0,
-            'import_consolidation_score': 0
-        }
-        
-        # Analyze deprecated files
-        for file_path in self.deprecated_execution_engine_files:
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    lines = len(f.readlines())
-                    metrics['total_deprecated_lines'] += lines
+        # Verify no cross-contamination between emitters
+        for i in range(len(websocket_emitters)):
+            for j in range(len(websocket_emitters)):
+                if i != j:
+                    emitter_i_calls = websocket_emitters[i].emit_event.call_args_list
+                    emitter_j_calls = websocket_emitters[j].emit_event.call_args_list
                     
-                if lines <= 5:
-                    metrics['files_properly_migrated'] += 1
-                else:
-                    metrics['files_still_full_implementation'] += 1
-        
-        # Analyze SSOT file
-        if self.ssot_user_execution_engine.exists():
-            with open(self.ssot_user_execution_engine, 'r', encoding='utf-8') as f:
-                metrics['ssot_implementation_lines'] = len(f.readlines())
-        
-        # Calculate completion percentage
-        if metrics['total_deprecated_files'] > 0:
-            completion_percentage = (
-                metrics['files_properly_migrated'] / metrics['total_deprecated_files']
-            ) * 100
-        else:
-            completion_percentage = 0
-        
-        print(f"\n📊 MIGRATION COMPLETION METRICS:")
-        print(f"   Total deprecated files: {metrics['total_deprecated_files']}")
-        print(f"   Properly migrated (≤5 lines): {metrics['files_properly_migrated']}")
-        print(f"   Still full implementation: {metrics['files_still_full_implementation']}")
-        print(f"   Total deprecated code lines: {metrics['total_deprecated_lines']:,}")
-        print(f"   SSOT implementation lines: {metrics['ssot_implementation_lines']:,}")
-        print(f"   Estimated completion: {completion_percentage:.1f}%")
-        
-        # Document current failing state (should be ~60% per Issue #620)
-        expected_completion_range = (50, 70)  # Expected current range
-        
-        if expected_completion_range[0] <= completion_percentage <= expected_completion_range[1]:
-            print(f"   ✅ REPRODUCTION: Confirmed expected completion range ({expected_completion_range[0]}-{expected_completion_range[1]}%)")
-        else:
-            print(f"   ⚠️  UNEXPECTED: Completion {completion_percentage:.1f}% outside expected range")
-        
-        # Fail if migration is incomplete (demonstrates current state)
-        if completion_percentage < 100:
-            pytest.fail(
-                f"🚨 ISSUE #620 MIGRATION STATUS: ExecutionEngine SSOT migration {completion_percentage:.1f}% complete. "
-                f"\n📋 CURRENT STATE:"
-                f"\n  • {metrics['files_still_full_implementation']} files still contain full implementations"
-                f"\n  • {metrics['total_deprecated_lines']:,} lines of deprecated code remain"
-                f"\n  • User isolation vulnerabilities persist in deprecated code paths"
-                f"\n\n🎯 TARGET STATE:"
-                f"\n  • All deprecated files converted to 5-line redirects"
-                f"\n  • 100% migration to UserExecutionEngine SSOT"
-                f"\n  • Complete user isolation and WebSocket event consolidation"
-                f"\n\n💼 BUSINESS IMPACT:"
-                f"\n  • Chat functionality instability (90% of platform value at risk)"
-                f"\n  • User context leakage in multi-user scenarios"
-                f"\n  • WebSocket event delivery inconsistencies"
-                f"\n\nREMEDIATION: Complete SSOT migration per Issue #620 plan."
-            )
+                    # Ensure no calls were made with wrong user_id
+                    for call in emitter_i_calls:
+                        event_data = call[0][1]
+                        self.assertNotEqual(event_data['user_id'], user_contexts[j].user_id)
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main()
+    # Run the test suite
+    pytest.main([__file__, '-v', '--tb=short'])

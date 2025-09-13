@@ -577,6 +577,14 @@ class SSotBaseTestCase:
             diff = abs(first - second)
             assert diff <= tolerance, msg or f"Expected {first} ≈ {second} (places={places}), but difference was {diff}"
     
+    def assertIsInstance(self, obj, cls, msg=None):
+        """Assert that obj is an instance of cls."""
+        assert isinstance(obj, cls), msg or f"Expected {obj} to be instance of {cls}, got {type(obj)}"
+    
+    def assertNotIsInstance(self, obj, cls, msg=None):
+        """Assert that obj is not an instance of cls."""
+        assert not isinstance(obj, cls), msg or f"Expected {obj} to not be instance of {cls}"
+    
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.

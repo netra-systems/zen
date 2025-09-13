@@ -5,7 +5,24 @@ Follows SSOT compliance for environment variable access.
 """
 
 from typing import Dict, Any, Optional
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
+
+
+def _get_bool(env: IsolatedEnvironment, key: str, default: bool = False) -> bool:
+    """Helper function to convert environment variable to boolean.
+    
+    Args:
+        env: IsolatedEnvironment instance
+        key: Environment variable name
+        default: Default boolean value
+        
+    Returns:
+        Boolean value parsed from environment variable
+    """
+    value = env.get(key, str(default).lower())
+    if isinstance(value, str):
+        return value.lower() in ['true', '1', 'yes', 'on']
+    return bool(value)
 
 
 def get_backend_demo_config() -> Dict[str, Any]:
@@ -21,8 +38,8 @@ def get_backend_demo_config() -> Dict[str, Any]:
         "session_ttl": int(env.get("DEMO_SESSION_TTL", "3600")),
         "max_sessions": int(env.get("MAX_DEMO_SESSIONS", "100")),
         "refresh_interval": int(env.get("DEMO_DATA_REFRESH_INTERVAL", "300")),
-        "auto_create_users": env.get_bool("DEMO_AUTO_CREATE_USERS", False),
-        "permissive_auth": env.get_bool("DEMO_PERMISSIVE_AUTH", False)
+        "auto_create_users": _get_bool(env, "DEMO_AUTO_CREATE_USERS", False),
+        "permissive_auth": _get_bool(env, "DEMO_PERMISSIVE_AUTH", False)
     }
 
 
@@ -38,7 +55,7 @@ def is_demo_mode() -> bool:
 def _is_demo_mode() -> bool:
     """Internal helper to check demo mode status."""
     env = IsolatedEnvironment()
-    return env.get_bool("DEMO_MODE", False) or env.get_bool("ENABLE_DEMO_MODE", False)
+    return _get_bool(env, "DEMO_MODE", False) or _get_bool(env, "ENABLE_DEMO_MODE", False)
 
 
 def get_demo_config() -> Dict[str, Any]:
@@ -57,7 +74,7 @@ def get_demo_config() -> Dict[str, Any]:
         },
         "data_generation": {
             "refresh_interval": int(env.get("DEMO_DATA_REFRESH_INTERVAL", "300")),
-            "synthetic_data": env.get_bool("DEMO_SYNTHETIC_DATA", True)
+            "synthetic_data": _get_bool(env, "DEMO_SYNTHETIC_DATA", True)
         }
     }
 
@@ -71,9 +88,9 @@ def get_auth_config() -> Dict[str, Any]:
     env = IsolatedEnvironment()
     
     return {
-        "permissive_mode": env.get_bool("DEMO_PERMISSIVE_AUTH", False),
-        "auto_create_users": env.get_bool("DEMO_AUTO_CREATE_USERS", False),
-        "bypass_jwt_validation": env.get_bool("DEMO_BYPASS_JWT", False),
+        "permissive_mode": _get_bool(env, "DEMO_PERMISSIVE_AUTH", False),
+        "auto_create_users": _get_bool(env, "DEMO_AUTO_CREATE_USERS", False),
+        "bypass_jwt_validation": _get_bool(env, "DEMO_BYPASS_JWT", False),
         "demo_user_prefix": env.get("DEMO_USER_PREFIX", "demo-user"),
         "demo_session_secret": env.get("DEMO_SESSION_SECRET", "demo-secret-key")
     }
@@ -120,10 +137,10 @@ def get_demo_feature_flags() -> Dict[str, bool]:
     is_demo = _is_demo_mode()
     
     return {
-        "synthetic_data_generation": is_demo and env.get_bool("DEMO_SYNTHETIC_DATA", True),
-        "auto_user_creation": is_demo and env.get_bool("DEMO_AUTO_CREATE_USERS", False),
-        "permissive_authentication": is_demo and env.get_bool("DEMO_PERMISSIVE_AUTH", False),
-        "mock_external_services": is_demo and env.get_bool("DEMO_MOCK_SERVICES", True),
-        "enhanced_logging": is_demo and env.get_bool("DEMO_ENHANCED_LOGGING", True),
-        "rate_limit_bypass": is_demo and env.get_bool("DEMO_BYPASS_RATE_LIMITS", False)
+        "synthetic_data_generation": is_demo and _get_bool(env, "DEMO_SYNTHETIC_DATA", True),
+        "auto_user_creation": is_demo and _get_bool(env, "DEMO_AUTO_CREATE_USERS", False),
+        "permissive_authentication": is_demo and _get_bool(env, "DEMO_PERMISSIVE_AUTH", False),
+        "mock_external_services": is_demo and _get_bool(env, "DEMO_MOCK_SERVICES", True),
+        "enhanced_logging": is_demo and _get_bool(env, "DEMO_ENHANCED_LOGGING", True),
+        "rate_limit_bypass": is_demo and _get_bool(env, "DEMO_BYPASS_RATE_LIMITS", False)
     }

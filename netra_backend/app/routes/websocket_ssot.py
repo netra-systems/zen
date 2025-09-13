@@ -175,6 +175,86 @@ async def get_current_user_401(credentials: HTTPAuthorizationCredentials = Depen
         raise HTTPException(status_code=401, detail="Authentication required")
 
 
+class AgentBridgeHandler:
+    """Handler for agent WebSocket bridge messages that implements MessageHandler protocol.
+    
+    CRITICAL FIX: This class properly implements the MessageHandler protocol with can_handle method,
+    replacing the raw async function that was causing 'function' object has no attribute 'can_handle' errors.
+    
+    Business Value:
+    - Enables proper agent message routing in Golden Path user flow
+    - Maintains user isolation guarantees through UserExecutionContext
+    - Supports all 5 critical WebSocket events required for chat functionality
+    """
+    
+    def __init__(self, agent_bridge, user_context):
+        """Initialize handler with agent bridge and user context.
+        
+        Args:
+            agent_bridge: The agent WebSocket bridge instance
+            user_context: UserExecutionContext for proper user isolation
+        """
+        self.agent_bridge = agent_bridge
+        self.user_context = user_context
+        self.supported_types = [
+            MessageType.USER_MESSAGE,
+            MessageType.CHAT,
+            MessageType.AGENT_REQUEST,
+            MessageType.START_AGENT,
+            MessageType.AGENT_TASK
+        ]
+        logger.info(f"AgentBridgeHandler initialized for user {user_context.user_id if user_context else 'unknown'} with {len(self.supported_types)} message types")
+    
+    def can_handle(self, message_type: MessageType) -> bool:
+        """Check if handler can process this message type.
+        
+        CRITICAL FIX: This method was missing from the raw async function,
+        causing the MessageRouter to fail when trying to find handlers.
+        
+        Args:
+            message_type: The message type to check
+            
+        Returns:
+            bool: True if this handler supports the message type
+        """
+        can_handle_result = message_type in self.supported_types
+        logger.debug(f"AgentBridgeHandler.can_handle({message_type}) = {can_handle_result}")
+        return can_handle_result
+    
+    async def handle_message(self, user_id: str, websocket: WebSocket, message) -> bool:
+        """Handle agent messages through the bridge.
+        
+        Args:
+            user_id: User ID from the WebSocket connection
+            websocket: The WebSocket connection
+            message: The message to process (Dict or WebSocketMessage)
+            
+        Returns:
+            bool: True if message was handled successfully
+        """
+        try:
+            # Ensure user context matches
+            if self.user_context and self.user_context.user_id != user_id:
+                logger.warning(f"User ID mismatch: handler={self.user_context.user_id}, message={user_id}")
+            
+            # Convert WebSocketMessage to dict if needed
+            message_dict = message.model_dump() if hasattr(message, 'model_dump') else message
+            if hasattr(message, 'payload'):
+                message_dict = message.payload
+            
+            logger.info(f"AgentBridgeHandler processing {message_dict.get('type', 'unknown')} for user {user_id[:8]}...")
+            
+            # Delegate to agent bridge
+            result = await self.agent_bridge.handle_message(message_dict)
+            
+            logger.info(f"AgentBridgeHandler completed processing for user {user_id[:8]}... result: {result}")
+            return bool(result)
+            
+        except Exception as e:
+            logger.error(f"AgentBridgeHandler error for user {user_id}: {e}")
+            return False
+
+
 class WebSocketMode(Enum):
     """WebSocket operation modes supporting all previous route patterns."""
     MAIN = "main"           # Full-featured main endpoint (replaces /ws)
@@ -1151,12 +1231,12 @@ class WebSocketSSOTRouter:
                 # Fix: create_agent_websocket_bridge is synchronous, not async
                 agent_bridge = create_agent_websocket_bridge(user_context)
                 
-                # Register handler with router
-                async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
-                    return await agent_bridge.handle_message(message)
+                # CRITICAL FIX: Create proper handler class implementing MessageHandler protocol
+                # BUG WAS: Raw async function lacking 'can_handle' method caused routing failures
+                handler = AgentBridgeHandler(agent_bridge, user_context)
                 
-                message_router.add_handler(agent_handler)
-                logger.info("Agent handlers registered successfully")
+                message_router.add_handler(handler)
+                logger.info(f"Agent handlers registered successfully: {handler.__class__.__name__}")
         except Exception as e:
             logger.error(f"Agent handler setup failed: {e}")
     

@@ -1,5 +1,7 @@
-"""DEPRECATED: Use UserExecutionEngine from netra_backend.app.agents.supervisor.user_execution_engine
+"""DEPRECATED: Use UserExecutionEngine - this import redirects to SSOT implementation."""
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
+<<<<<<< HEAD
 This file redirects to the SSOT UserExecutionEngine to maintain backwards compatibility.
 """
 
@@ -88,3 +90,6 @@ __all__ = [
     'get_execution_engine_factory',
     'ExecutionEngineWithWebSocketEvents'
 ]
+=======
+__all__ = ["ExecutionEngine"]
+>>>>>>> de7640d5501a765fbd8e81f7ff5da5cb2d571258

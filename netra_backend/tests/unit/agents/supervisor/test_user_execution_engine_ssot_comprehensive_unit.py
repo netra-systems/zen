@@ -214,7 +214,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             run_id="registry",  # Invalid placeholder value
             request_id="req_001",
             websocket_client_id="ws_001",
-            agent_context={"test": "placeholder_rejection"}
+            metadata={"test": "placeholder_rejection"}
         )
         
         # Create execution context with invalid run_id
@@ -322,7 +322,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.INITIALIZATION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            agent_context={"attack_attempt": "user_context_switching"}
+            metadata={"attack_attempt": "user_context_switching"}
         )
         
         # Act & Assert: Should reject mismatched user context
@@ -369,7 +369,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                 step=PipelineStep.EXECUTION,
                 execution_timestamp=datetime.now(timezone.utc),
                 pipeline_step_num=1,
-                agent_context={"message": "Test optimization request"}
+                metadata={"message": "Test optimization request"}
             )
             
             # Act: Execute agent
@@ -452,7 +452,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                     step=PipelineStep.EXECUTION,
                     execution_timestamp=datetime.now(timezone.utc),
                     pipeline_step_num=1,
-                    agent_context={"message": "Optimize my costs using tools"}
+                    metadata={"message": "Optimize my costs using tools"}
                 )
                 
                 # Act: Execute agent that uses tools
@@ -487,7 +487,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.EXECUTION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            agent_context={"message": "This will timeout"}
+            metadata={"message": "This will timeout"}
         )
         
         with patch('netra_backend.app.agents.supervisor.user_execution_engine.AgentExecutionCore') as mock_core_class:
@@ -549,7 +549,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
             step=PipelineStep.EXECUTION,
             execution_timestamp=datetime.now(timezone.utc),
             pipeline_step_num=1,
-            agent_context={"message": "This will fail"}
+            metadata={"message": "This will fail"}
         )
         
         with patch('netra_backend.app.agents.supervisor.user_execution_engine.AgentExecutionCore') as mock_core_class:
@@ -618,7 +618,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                     step=PipelineStep.EXECUTION,
                     execution_timestamp=datetime.now(timezone.utc),
                     pipeline_step_num=1,
-                    agent_context={"message": f"Concurrent request {i}"}
+                    metadata={"message": f"Concurrent request {i}"}
                 ))
             
             # Act: Execute all agents concurrently
@@ -1240,7 +1240,7 @@ class TestUserExecutionEngineSSotComprehensiveUnit(SSotAsyncTestCase):
                 step=PipelineStep.EXECUTION,
                 execution_timestamp=datetime.now(timezone.utc),
                 pipeline_step_num=1,
-                agent_context={"message": "Complete lifecycle test"}
+                metadata={"message": "Complete lifecycle test"}
             )
             
             result = await engine.execute_agent(execution_context)

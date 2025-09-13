@@ -473,7 +473,7 @@ class TestDataGenerator:
             user_id=user_context.user_id,
             thread_id=user_context.thread_id,
             run_id=user_context.run_id,
-            user_input=user_input,
+            # user_input moved to metadata: user_input,
             audit_metadata=default_metadata
         )
     

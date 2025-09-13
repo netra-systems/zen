@@ -75,31 +75,36 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         # Create concurrent engine creation tasks
         async def create_user_engine(profile: UserTestProfile) -> Tuple[UserTestProfile, Any, float]:
             start_time = time.time()
-            
-            # Create user context
-            user_context = UserExecutionContext(
-                user_id=profile.user_id,
-                thread_id=profile.thread_id,
-                run_id=profile.run_id,
-                request_id=profile.request_id,
-                metadata=profile.metadata
-            )
-            
-            # Create mock dependencies
-            mock_registry = Mock()
-            mock_registry.get_agents = Mock(return_value=[])
-            mock_registry.list_keys = Mock(return_value=[f'test_agent_{profile.metadata["user_index"]}'])
-            
-            mock_websocket_bridge = Mock()
-            mock_websocket_bridge.notify_agent_started = AsyncMock(return_value=True)
-            mock_websocket_bridge.notify_agent_completed = AsyncMock(return_value=True)
+            creation_time = 0.0  # Initialize to prevent UnboundLocalError
             
             try:
-                # Create UserExecutionEngine
-                engine = await UserExecutionEngine.create_execution_engine(
-                    user_context=user_context,
-                    registry=mock_registry,
-                    websocket_bridge=mock_websocket_bridge
+                # Create user context
+                user_context = UserExecutionContext.from_request_supervisor(
+                    user_id=profile.user_id,
+                    thread_id=profile.thread_id,
+                    run_id=profile.run_id,
+                    request_id=profile.request_id,
+                    metadata=profile.metadata
+                )
+                
+                # Create mock agent factory and websocket emitter
+                class MockAgentFactory:
+                    def __init__(self, user_context):
+                        self.user_context = user_context
+                        
+                class MockWebSocketEmitter:
+                    def __init__(self, user_context):
+                        self.user_context = user_context
+                    async def notify_agent_started(self, *args): return True
+                    async def notify_agent_completed(self, *args): return True
+                    async def notify_tool_executing(self, *args): return True
+                    async def notify_tool_completed(self, *args): return True
+                
+                # Create UserExecutionEngine with correct constructor
+                engine = UserExecutionEngine(
+                    context=user_context,
+                    agent_factory=MockAgentFactory(user_context),
+                    websocket_emitter=MockWebSocketEmitter(user_context)
                 )
                 
                 creation_time = time.time() - start_time
@@ -121,8 +126,10 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         
         for profile, result, creation_time in results:
             if isinstance(result, Exception):
+                print(f"❌ User {profile.user_id} failed: {type(result).__name__}: {result}")
                 failed_creations.append((profile, result, creation_time))
             else:
+                print(f"✅ User {profile.user_id} succeeded: {type(result).__name__}")
                 successful_creations.append((profile, result, creation_time))
         
         # Validate success rate
@@ -180,7 +187,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         
         async def execute_agent_for_user(profile: UserTestProfile) -> Dict[str, Any]:
             # Create user context
-            user_context = UserExecutionContext(
+            user_context = UserExecutionContext.from_request_supervisor(
                 user_id=profile.user_id,
                 thread_id=profile.thread_id,
                 run_id=profile.run_id,
@@ -719,7 +726,7 @@ class TestUserIsolationConcurrencyIssue620(BaseIntegrationTest):
         for i in range(num_users):
             user_id = f"persistent_user_{i}_{uuid.uuid4().hex[:8]}"
             
-            user_context = UserExecutionContext(
+            user_context = UserExecutionContext.from_request_supervisor(
                 user_id=user_id,
                 thread_id=f"persistent_thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"persistent_run_{i}_{uuid.uuid4().hex[:8]}",
@@ -833,7 +840,7 @@ class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
         print("🚀 Testing memory isolation between users")
         
         # Create users with different data
-        user1_context = UserExecutionContext(
+        user1_context = UserExecutionContext.from_request_supervisor(
             user_id=f"memory_user1_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread1_{uuid.uuid4().hex[:8]}",
             run_id=f"run1_{uuid.uuid4().hex[:8]}",
@@ -841,7 +848,7 @@ class TestConcurrencyRegressionPrevention(BaseIntegrationTest):
             metadata={'secret_data': 'user1_secret', 'memory_test': True}
         )
         
-        user2_context = UserExecutionContext(
+        user2_context = UserExecutionContext.from_request_supervisor(
             user_id=f"memory_user2_{uuid.uuid4().hex[:8]}",
             thread_id=f"thread2_{uuid.uuid4().hex[:8]}",
             run_id=f"run2_{uuid.uuid4().hex[:8]}",
