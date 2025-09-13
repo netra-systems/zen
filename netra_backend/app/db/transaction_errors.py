@@ -237,7 +237,21 @@ def _attempt_error_classification(error: OperationalError, error_msg: str) -> Ex
     classified = _classify_permission_error(error, error_msg)
     if classified != error:
         return classified
+    
+    # Try specific schema error types first
+    classified = _classify_table_creation_error(error, error_msg)
+    if classified != error:
+        return classified
         
+    classified = _classify_column_modification_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_index_creation_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    # Fall back to general schema error
     return _classify_schema_error(error, error_msg)
 
 
