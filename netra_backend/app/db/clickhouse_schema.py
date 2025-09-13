@@ -9,6 +9,12 @@ from datetime import datetime
 import logging
 from pathlib import Path
 
+# Import transaction error handling for specific error types
+from netra_backend.app.db.transaction_errors import (
+    TableCreationError, ColumnModificationError, IndexCreationError,
+    classify_error
+)
+
 # Try to import ClickHouse driver, use no-op if not available
 try:
     from clickhouse_driver import Client
