@@ -185,7 +185,7 @@ class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
             "   - Implement ID format conversion layer if needed"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_websocket_user_context_id_consistency_EXPECT_FAILURE(self):
         """
@@ -312,7 +312,7 @@ class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
             "   - Test multi-user isolation in real scenarios"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_database_persistence_id_format_consistency_EXPECT_FAILURE(self):
         """
@@ -460,7 +460,7 @@ class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
             "   - Add database indexing optimized for structured ID patterns"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     async def test_real_time_communication_id_routing_EXPECT_FAILURE(self):
         """
@@ -591,7 +591,7 @@ class TestIDMigrationCrossServiceIntegration(SSotAsyncTestCase):
             "   - Test multi-user scenarios thoroughly"
         ])
         
-        self.fail("\n".join(report_lines))
+        pytest.fail("\n".join(report_lines))
 
     # Helper methods for validation
     
