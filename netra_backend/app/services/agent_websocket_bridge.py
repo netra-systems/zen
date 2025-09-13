@@ -2296,7 +2296,51 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             logger.error(f" ALERT:  SSOT EMISSION EXCEPTION: emit_agent_event delegation failed (event_type={event_type}, run_id={run_id}): {e}")
             return False
-    
+
+    async def emit_event(self, context, event_type: str, event_data: Dict[str, Any]) -> bool:
+        """
+        Simplified event emission interface for unit tests and basic usage.
+
+        This method provides a simplified interface that accepts a user execution context
+        directly, making it easier for unit tests to emit events without complex setup.
+
+        Args:
+            context: UserExecutionContext containing user/thread/request IDs
+            event_type: Type of event to emit
+            event_data: Event payload data
+
+        Returns:
+            bool: True if event was successfully sent
+        """
+        try:
+            if not self._websocket_manager:
+                logger.warning(f"EMISSION BLOCKED: WebSocket manager unavailable for {event_type}")
+                return False
+
+            # Build message structure expected by WebSocket manager
+            message = {
+                "type": event_type,
+                "data": event_data,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "thread_id": context.thread_id,
+                "user_id": context.user_id,
+                "message_id": f"msg_{datetime.now().timestamp()}"
+            }
+
+            # Send directly to WebSocket manager
+            success = await self._websocket_manager.send_to_thread(context.thread_id, message)
+
+            if success:
+                logger.debug(f"EMISSION SUCCESS: {event_type} -> thread={context.thread_id}")
+            else:
+                logger.error(f"EMISSION FAILED: {event_type} send failed for thread={context.thread_id}")
+
+            return success
+
+        except Exception as e:
+            logger.error(f"EMISSION EXCEPTION: emit_event failed (event_type={event_type}): {e}")
+            return False
+
     def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
         """
         Validate WebSocket event context to ensure proper user isolation.
@@ -3358,14 +3402,20 @@ class WebSocketNotifier:
         
     async def send_agent_thinking(self, exec_context, message: str):
         """Send agent thinking event via WebSocket emitter."""
-        if hasattr(self.emitter, 'notify_agent_thinking'):
-            await self.emitter.notify_agent_thinking(
-                exec_context.agent_name,
-                message,
-                step_number=1  # Default step number
-            )
-        else:
-            central_logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
+        try:
+            if hasattr(self.emitter, 'notify_agent_thinking'):
+                await self.emitter.notify_agent_thinking(
+                    exec_context.agent_name,
+                    message,
+                    step_number=1  # Default step number
+                )
+                return True
+            else:
+                logger.warning(f"Emitter does not support notify_agent_thinking: {type(self.emitter)}")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to send agent_thinking event: {e}")
+            return False
 
     async def send_agent_started(self, exec_context, agent_name: str = None):
         """Send agent started event via WebSocket emitter.
@@ -3387,11 +3437,14 @@ class WebSocketNotifier:
                     run_id=getattr(exec_context, 'run_id', None),
                     thread_id=getattr(exec_context, 'thread_id', None)
                 )
-                central_logger.info(f"Agent started event sent for {agent} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                logger.info(f"Agent started event sent for {agent} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                return True
             else:
-                central_logger.warning(f"Emitter does not support notify_agent_started: {type(self.emitter)}")
+                logger.warning(f"Emitter does not support notify_agent_started: {type(self.emitter)}")
+                return False
         except Exception as e:
-            central_logger.error(f"Failed to send agent_started event for {agent}: {e}")
+            logger.error(f"Failed to send agent_started event for {agent}: {e}")
+            return False
 
     async def send_tool_executing(self, exec_context, tool_name: str, tool_purpose: str = None, 
                                 estimated_duration_ms: int = None, parameters_summary: str = None):
@@ -3418,11 +3471,14 @@ class WebSocketNotifier:
                     estimated_duration_ms=estimated_duration_ms,
                     parameters_summary=parameters_summary
                 )
-                central_logger.info(f"Tool executing event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                logger.info(f"Tool executing event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                return True
             else:
-                central_logger.warning(f"Emitter does not support notify_tool_executing: {type(self.emitter)}")
+                logger.warning(f"Emitter does not support notify_tool_executing: {type(self.emitter)}")
+                return False
         except Exception as e:
-            central_logger.error(f"Failed to send tool_executing event for {tool_name}: {e}")
+            logger.error(f"Failed to send tool_executing event for {tool_name}: {e}")
+            return False
 
     async def send_tool_completed(self, exec_context, tool_name: str, result: Dict[str, Any]):
         """Send tool completed event via WebSocket emitter.
@@ -3444,11 +3500,14 @@ class WebSocketNotifier:
                     thread_id=getattr(exec_context, 'thread_id', None),
                     agent_name=getattr(exec_context, 'agent_name', 'UnknownAgent')
                 )
-                central_logger.info(f"Tool completed event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                logger.info(f"Tool completed event sent for {tool_name} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                return True
             else:
-                central_logger.warning(f"Emitter does not support notify_tool_completed: {type(self.emitter)}")
+                logger.warning(f"Emitter does not support notify_tool_completed: {type(self.emitter)}")
+                return False
         except Exception as e:
-            central_logger.error(f"Failed to send tool_completed event for {tool_name}: {e}")
+            logger.error(f"Failed to send tool_completed event for {tool_name}: {e}")
+            return False
 
     async def send_agent_completed(self, exec_context, result: Dict[str, Any], execution_time_ms: float = None):
         """Send agent completed event via WebSocket emitter.
@@ -3470,11 +3529,14 @@ class WebSocketNotifier:
                     thread_id=getattr(exec_context, 'thread_id', None),
                     execution_time_ms=execution_time_ms
                 )
-                central_logger.info(f"Agent completed event sent for {getattr(exec_context, 'agent_name', 'UnknownAgent')} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                logger.info(f"Agent completed event sent for {getattr(exec_context, 'agent_name', 'UnknownAgent')} (run_id={getattr(exec_context, 'run_id', 'unknown')})")
+                return True
             else:
-                central_logger.warning(f"Emitter does not support notify_agent_completed: {type(self.emitter)}")
+                logger.warning(f"Emitter does not support notify_agent_completed: {type(self.emitter)}")
+                return False
         except Exception as e:
-            central_logger.error(f"Failed to send agent_completed event for {getattr(exec_context, 'agent_name', 'UnknownAgent')}: {e}")
+            logger.error(f"Failed to send agent_completed event for {getattr(exec_context, 'agent_name', 'UnknownAgent')}: {e}")
+            return False
 
 
     async def _emit_with_retry(
