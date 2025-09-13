@@ -12,6 +12,16 @@ from typing import Dict, Optional
 from netra_backend.app.core.exceptions_service import ServiceError
 
 
+# Public API - explicit exports for clarity
+__all__ = [
+    'CircuitState',
+    'CircuitBreakerState',  # Alias for compatibility
+    'CircuitConfig',
+    'CircuitMetrics',
+    'CircuitBreakerOpenError'
+]
+
+
 class CircuitState(Enum):
     """Circuit breaker states with clear semantics."""
     CLOSED = "closed"     # Normal operation
