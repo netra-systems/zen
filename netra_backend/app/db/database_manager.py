@@ -45,6 +45,7 @@ from netra_backend.app.db.transaction_errors import (
     DeadlockError, ConnectionError, TransactionError, TimeoutError, 
     PermissionError, SchemaError, classify_error, is_retryable_error
 )
+from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -178,9 +179,22 @@ class TransactionEventCoordinator:
                 else:
                     failed_count += 1
                     
-            except Exception as e:
+            except (ConnectionError, TimeoutError) as e:
+                # Issue #374: Enhanced WebSocket communication errors
                 failed_count += 1
-                logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}' after commit: {e}")
+                logger.error(f" FAIL:  WebSocket communication failed for event '{event.event_type}' after commit: {type(e).__name__}: {e}")
+            except ValueError as e:
+                # Issue #374: Invalid event data or configuration
+                failed_count += 1
+                logger.error(f" FAIL:  Invalid WebSocket event data for '{event.event_type}' after commit: {e}")
+            except RuntimeError as e:
+                # Issue #374: WebSocket manager not available or not configured
+                failed_count += 1
+                logger.error(f" FAIL:  WebSocket runtime error for event '{event.event_type}' after commit: {e}")
+            except Exception as e:
+                # Issue #374: Fallback for unexpected WebSocket errors
+                failed_count += 1
+                logger.error(f" FAIL:  Unexpected WebSocket event failure '{event.event_type}' after commit: {type(e).__name__}: {e}")
                 
         self.coordination_metrics["events_sent_after_commit"] += sent_count
         self.coordination_metrics["events_failed_after_commit"] += failed_count
@@ -228,8 +242,18 @@ class TransactionEventCoordinator:
         # Send rollback notification to affected users
         try:
             await self._send_rollback_notification(rollback_notification, affected_users)
+        except (ConnectionError, TimeoutError) as e:
+            # Issue #374: WebSocket communication errors during rollback notification
+            logger.error(f" FAIL:  WebSocket communication failed during rollback notification: {type(e).__name__}: {e}")
+        except ValueError as e:
+            # Issue #374: Invalid notification data or configuration
+            logger.error(f" FAIL:  Invalid rollback notification data: {e}")
+        except RuntimeError as e:
+            # Issue #374: WebSocket manager not available during rollback
+            logger.error(f" FAIL:  WebSocket manager unavailable for rollback notification: {e}")
         except Exception as e:
-            logger.error(f" FAIL:  Failed to send rollback notification: {e}")
+            # Issue #374: Fallback for unexpected rollback notification errors
+            logger.error(f" FAIL:  Unexpected rollback notification failure: {type(e).__name__}: {e}")
             
         return rollback_notification
         
@@ -270,8 +294,21 @@ class TransactionEventCoordinator:
             logger.debug(f"[U+1F4E4] Successfully sent WebSocket event '{event.event_type}' (user: {event.user_id})")
             return True
             
+        except (ConnectionError, TimeoutError) as e:
+            # Issue #374: WebSocket communication errors
+            logger.error(f" FAIL:  WebSocket communication failed for event '{event.event_type}': {type(e).__name__}: {e}")
+            return False
+        except AttributeError as e:
+            # Issue #374: WebSocket manager missing required methods
+            logger.error(f" FAIL:  WebSocket manager method missing for event '{event.event_type}': {e}")
+            return False
+        except ValueError as e:
+            # Issue #374: Invalid event data
+            logger.error(f" FAIL:  Invalid WebSocket event data for '{event.event_type}': {e}")
+            return False
         except Exception as e:
-            logger.error(f" FAIL:  Failed to send WebSocket event '{event.event_type}': {type(e).__name__}: {e}")
+            # Issue #374: Fallback for unexpected WebSocket send errors
+            logger.error(f" FAIL:  Unexpected WebSocket send failure for event '{event.event_type}': {type(e).__name__}: {e}")
             return False
             
     async def _send_rollback_notification(self, notification: RollbackNotification, affected_users: List[str]):
