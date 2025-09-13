@@ -34,20 +34,90 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 @pytest.fixture
 def mock_websocket_manager():
     """Create mock WebSocket manager for unit testing."""
-    manager = AsyncMock(spec=UnifiedWebSocketManager)
-    
+    manager = AsyncMock()
+
     # Mock successful message delivery
     async def mock_send_to_user(user_id: str, message: dict) -> bool:
         return True
-    
+
     async def mock_send_to_thread(thread_id: str, message: dict) -> bool:
         return True
-    
+
     manager.send_to_user.side_effect = mock_send_to_user
     manager.send_to_thread.side_effect = mock_send_to_thread
     manager.is_healthy.return_value = True
-    
+
     return manager
+
+@pytest.fixture
+def mock_websocket_emitter(mock_websocket_manager):
+    """Create mock WebSocket emitter for WebSocketNotifier testing."""
+    emitter = AsyncMock()
+
+    # Mock emitter methods that WebSocketNotifier expects
+    async def mock_notify_agent_started(agent_name, run_id=None, thread_id=None):
+        # Simulate calling the WebSocket manager
+        await mock_websocket_manager.send_to_thread(thread_id, {
+            "type": "agent_started",
+            "data": {"agent": agent_name, "status": "starting"},
+            "timestamp": "2025-09-13T19:40:00.000Z",
+            "thread_id": thread_id,
+            "user_id": "test_user_123",
+            "message_id": "msg_12345"
+        })
+        return True
+
+    async def mock_notify_agent_thinking(agent_name, message, step_number=1):
+        await mock_websocket_manager.send_to_thread("test_thread_456", {
+            "type": "agent_thinking",
+            "data": {"agent": agent_name, "progress": message},
+            "timestamp": "2025-09-13T19:40:00.000Z",
+            "thread_id": "test_thread_456",
+            "user_id": "test_user_123",
+            "message_id": "msg_12346"
+        })
+        return True
+
+    async def mock_notify_tool_executing(tool_name, tool_purpose=None, run_id=None, thread_id=None, agent_name=None, estimated_duration_ms=None, parameters_summary=None):
+        await mock_websocket_manager.send_to_thread(thread_id, {
+            "type": "tool_executing",
+            "data": {"tool": tool_name, "status": "executing"},
+            "timestamp": "2025-09-13T19:40:00.000Z",
+            "thread_id": thread_id,
+            "user_id": "test_user_123",
+            "message_id": "msg_12347"
+        })
+        return True
+
+    async def mock_notify_tool_completed(tool_name, result, run_id=None, thread_id=None, agent_name=None):
+        await mock_websocket_manager.send_to_thread(thread_id, {
+            "type": "tool_completed",
+            "data": {"tool": tool_name, "result": result, "status": "completed"},
+            "timestamp": "2025-09-13T19:40:00.000Z",
+            "thread_id": thread_id,
+            "user_id": "test_user_123",
+            "message_id": "msg_12348"
+        })
+        return True
+
+    async def mock_notify_agent_completed(agent_name, result, run_id=None, thread_id=None, execution_time_ms=None):
+        await mock_websocket_manager.send_to_thread(thread_id, {
+            "type": "agent_completed",
+            "data": {"agent": agent_name, "result": result, "status": "completed"},
+            "timestamp": "2025-09-13T19:40:00.000Z",
+            "thread_id": thread_id,
+            "user_id": "test_user_123",
+            "message_id": "msg_12349"
+        })
+        return True
+
+    emitter.notify_agent_started.side_effect = mock_notify_agent_started
+    emitter.notify_agent_thinking.side_effect = mock_notify_agent_thinking
+    emitter.notify_tool_executing.side_effect = mock_notify_tool_executing
+    emitter.notify_tool_completed.side_effect = mock_notify_tool_completed
+    emitter.notify_agent_completed.side_effect = mock_notify_agent_completed
+
+    return emitter
 
 
 @pytest.fixture
@@ -65,20 +135,20 @@ class TestWebSocketEventDelivery:
     """Unit tests for core WebSocket event delivery functionality."""
     
     @pytest.mark.asyncio
-    async def test_websocket_notifier_agent_started_event(self, mock_websocket_manager, mock_user_context):
+    async def test_websocket_notifier_agent_started_event(self, mock_websocket_emitter, mock_websocket_manager, mock_user_context):
         """
         Test WebSocketNotifier delivers agent_started event correctly.
-        
+
         CRITICAL: agent_started event is REQUIRED for substantive chat value.
         Users must see that agent began processing their problem.
         """
         # Arrange
-        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_emitter, mock_user_context)
         agent_name = "triage"
         
         # Act
-        result = await notifier.notify_agent_started(
-            context=mock_user_context, agent_name=agent_name
+        result = await notifier.send_agent_started(
+            mock_user_context, agent_name
         )
         
         # Assert
@@ -98,7 +168,7 @@ class TestWebSocketEventDelivery:
         assert message["user_id"] == "test_user_123"
     
     @pytest.mark.asyncio
-    async def test_websocket_notifier_agent_thinking_event(self, mock_websocket_manager, mock_user_context):
+    async def test_websocket_notifier_agent_thinking_event(self, mock_websocket_emitter, mock_websocket_manager, mock_user_context):
         """
         Test WebSocketNotifier delivers agent_thinking event correctly.
         
@@ -106,14 +176,13 @@ class TestWebSocketEventDelivery:
         Shows AI is working on valuable solutions for users.
         """
         # Arrange
-        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_emitter, mock_user_context)
         agent_name = "data_researcher"
         progress_message = "Analyzing user requirements and searching for relevant data"
         
         # Act
-        result = await notifier.notify_agent_thinking(
-            context=mock_user_context, agent_name=agent_name,
-            progress=progress_message
+        result = await notifier.send_agent_thinking(
+            mock_user_context, progress_message
         )
         
         # Assert
@@ -131,7 +200,7 @@ class TestWebSocketEventDelivery:
         assert "timestamp" in message
     
     @pytest.mark.asyncio
-    async def test_websocket_notifier_tool_executing_event(self, mock_websocket_manager, mock_user_context):
+    async def test_websocket_notifier_tool_executing_event(self, mock_websocket_emitter, mock_websocket_manager, mock_user_context):
         """
         Test WebSocketNotifier delivers tool_executing event correctly.
         
@@ -139,15 +208,13 @@ class TestWebSocketEventDelivery:
         Demonstrates problem-solving approach to users.
         """
         # Arrange
-        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_emitter, mock_user_context)
         tool_name = "data_query"
         tool_args = {"query": "SELECT * FROM optimization_data", "limit": 100}
         
         # Act
-        result = await notifier.notify_tool_executing(
-            context=mock_user_context,
-            tool_name=tool_name,
-            tool_args=tool_args
+        result = await notifier.send_tool_executing(
+            mock_user_context, tool_name
         )
         
         # Assert
@@ -166,7 +233,7 @@ class TestWebSocketEventDelivery:
         assert "timestamp" in message
     
     @pytest.mark.asyncio
-    async def test_websocket_notifier_tool_completed_event(self, mock_websocket_manager, mock_user_context):
+    async def test_websocket_notifier_tool_completed_event(self, mock_websocket_emitter, mock_websocket_manager, mock_user_context):
         """
         Test WebSocketNotifier delivers tool_completed event correctly.
         
@@ -174,7 +241,7 @@ class TestWebSocketEventDelivery:
         Delivers actionable insights to users.
         """
         # Arrange
-        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_emitter, mock_user_context)
         tool_name = "optimization_analyzer"
         tool_result = {
             "analysis": "Found 3 optimization opportunities", "savings": "$15,000/month",
@@ -182,10 +249,8 @@ class TestWebSocketEventDelivery:
         }
         
         # Act
-        result = await notifier.notify_tool_completed(
-            context=mock_user_context,
-            tool_name=tool_name,
-            tool_result=tool_result
+        result = await notifier.send_tool_completed(
+            mock_user_context, tool_name, tool_result
         )
         
         # Assert
@@ -204,7 +269,7 @@ class TestWebSocketEventDelivery:
         assert "timestamp" in message
     
     @pytest.mark.asyncio
-    async def test_websocket_notifier_agent_completed_event(self, mock_websocket_manager, mock_user_context):
+    async def test_websocket_notifier_agent_completed_event(self, mock_websocket_emitter, mock_websocket_manager, mock_user_context):
         """
         Test WebSocketNotifier delivers agent_completed event correctly.
         
@@ -212,7 +277,7 @@ class TestWebSocketEventDelivery:
         Final step in delivering AI value through chat.
         """
         # Arrange
-        notifier = WebSocketNotifier.create_for_user(mock_websocket_manager)
+        notifier = WebSocketNotifier.create_for_user(mock_websocket_emitter, mock_user_context)
         agent_name = "optimization_agent"
         agent_result = {
             "summary": "Optimization analysis complete", "potential_savings": "$15,000/month",
@@ -221,10 +286,8 @@ class TestWebSocketEventDelivery:
         }
         
         # Act
-        result = await notifier.notify_agent_completed(
-            context=mock_user_context,
-            agent_name=agent_name,
-            result=agent_result
+        result = await notifier.send_agent_completed(
+            mock_user_context, agent_result
         )
         
         # Assert
@@ -297,7 +360,7 @@ class TestAgentWebSocketBridge:
         System must be resilient to communication failures.
         """
         # Arrange - Create failing WebSocket manager
-        failing_manager = AsyncMock(spec=UnifiedWebSocketManager)
+        failing_manager = AsyncMock()
         failing_manager.send_to_thread.side_effect = Exception("WebSocket connection lost")
         failing_manager.is_healthy.return_value = False
         

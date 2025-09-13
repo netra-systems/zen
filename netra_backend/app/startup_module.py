@@ -1392,20 +1392,22 @@ def log_startup_complete(start_time: float, logger: logging.Logger) -> None:
 async def initialize_monitoring_integration(handlers: dict = None) -> bool:
     """
     Initialize monitoring integration between ChatEventMonitor and AgentWebSocketBridge.
-    
-    CRITICAL FIX: Now accepts handlers parameter to ensure monitoring is initialized
-    AFTER handlers are registered, preventing "ZERO handlers" warnings during startup.
-    
+
+    ARCHITECTURE: WebSocket handlers are registered per-connection, not during startup.
+    Zero handlers during startup is EXPECTED and CORRECT behavior - this indicates
+    proper per-connection architecture implementation.
+
     This function connects the ChatEventMonitor with the AgentWebSocketBridge to enable
     comprehensive monitoring coverage where the monitor can audit the bridge without
     creating tight coupling.
-    
+
     CRITICAL DESIGN: Both components work independently if integration fails.
     The system continues operating even if monitoring integration is not available.
-    
+
     Args:
-        handlers: Dictionary of registered handlers (ensures monitoring happens after registration)
-    
+        handlers: Optional dictionary of registered handlers (mainly used during testing)
+                 None/empty during startup is expected for per-connection architecture
+
     Returns:
         bool: True if integration successful, False if integration failed but components
               are still operating independently
@@ -1413,12 +1415,17 @@ async def initialize_monitoring_integration(handlers: dict = None) -> bool:
     logger = central_logger.get_logger(__name__)
     
     try:
-        # CRITICAL FIX: Log handler registration status at monitoring initialization
+        # ARCHITECTURE CLARIFICATION: WebSocket handlers are registered per-connection, not during startup
+        # This is the correct design - handlers need active WebSocket connections to function
         handler_count = len(handlers) if handlers else 0
-        logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
-        
+
         if handler_count == 0:
-            logger.warning(" WARNING: [U+FE0F] Monitoring initialized with zero handlers - may indicate registration timing issue")
+            # This is EXPECTED during startup - handlers are registered per-connection
+            logger.info("Monitoring initialized during startup - handlers will be registered per WebSocket connection")
+            logger.debug("Per-connection handler architecture: Zero startup handlers is expected and correct")
+        else:
+            # If handlers are provided (e.g., during testing), log their count
+            logger.info(f"Initializing monitoring integration with {handler_count} registered handlers...")
         
         # Import monitoring components
         from netra_backend.app.websocket_core.event_monitor import chat_event_monitor

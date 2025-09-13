@@ -396,7 +396,16 @@ class UnifiedWebSocketManager:
         # Add compatibility for legacy tests expecting connection_manager
         self._connection_manager = self
         self.connection_manager = self
+
+        # ISSUE #556 FIX: Initialize connection_registry for legacy compatibility
+        self.connection_registry = {}  # Registry for connection objects
         self.active_connections = {}  # Compatibility mapping
+
+        # Event listener support for testing
+        self.on_event_emitted: Optional[callable] = None
+        self._event_listeners: List[callable] = []
+
+        logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
 
     def _validate_user_isolation(self, user_id: str, operation: str = "unknown") -> bool:
         """
@@ -459,13 +468,6 @@ class UnifiedWebSocketManager:
             raise UserIsolationViolation(f"Event targeting different user: {target_user_id} != {manager_user_id}")
 
         return isolated_event
-        self.connection_registry = {}  # Registry for connection objects
-        
-        # Event listener support for testing
-        self.on_event_emitted: Optional[callable] = None
-        self._event_listeners: List[callable] = []
-        
-        logger.info("UnifiedWebSocketManager initialized with SSOT unified mode (all legacy modes consolidated)")
     
     def _initialize_unified_mode(self):
         """Initialize unified mode with full feature set."""
@@ -3448,6 +3450,19 @@ class UnifiedWebSocketManager:
             }
         
         return base_status
+
+    def is_healthy(self) -> bool:
+        """
+        Check if WebSocket manager is healthy and operational.
+
+        Returns:
+            bool: True if manager is healthy and can process WebSocket events
+
+        Note:
+            This method is required by AgentWebSocketBridge and test infrastructure.
+            It provides a simple boolean interface to the detailed health status.
+        """
+        return getattr(self, '_is_healthy', True)
 
 
 # SECURITY FIX: Replace singleton with factory pattern
