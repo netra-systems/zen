@@ -198,7 +198,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         # Should be classified as IndexOperationError
 
         assert type(classified_drop).__name__ == "IndexOperationError", \
-
             f"Expected IndexOperationError for drop operation, got {type(classified_drop).__name__}"
 
 
