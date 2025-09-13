@@ -1,0 +1,225 @@
+{
+  "timestamp": "2025-09-13T04:24:51.313330",
+  "summary": {
+    "total_tests": 17,
+    "passed": 15,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 2
+  },
+  "results": [
+    {
+      "test_name": "Backend Health Check",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 147,
+      "error_message": null,
+      "details": {
+        "health_status": "healthy"
+      },
+      "response_time_ms": 147,
+      "status_code": 200
+    },
+    {
+      "test_name": "Auth Health Check",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 159,
+      "error_message": null,
+      "details": {
+        "health_status": "healthy"
+      },
+      "response_time_ms": 159,
+      "status_code": 200
+    },
+    {
+      "test_name": "Frontend Health Check",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 167,
+      "error_message": null,
+      "details": {
+        "health_status": "healthy"
+      },
+      "response_time_ms": 167,
+      "status_code": 200
+    },
+    {
+      "test_name": "Backend OpenAPI Docs",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 77,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 77,
+      "status_code": 200
+    },
+    {
+      "test_name": "Backend Health Details",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 86,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 86,
+      "status_code": 200
+    },
+    {
+      "test_name": "Auth Service Info",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 290,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 290,
+      "status_code": 200
+    },
+    {
+      "test_name": "Frontend Homepage Access",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 92,
+      "error_message": null,
+      "details": {
+        "content_length": 500,
+        "has_html": true,
+        "has_title": false
+      },
+      "response_time_ms": 92,
+      "status_code": 200
+    },
+    {
+      "test_name": "Static Asset: /favicon.ico",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 76,
+      "error_message": null,
+      "details": {
+        "asset_exists": true
+      },
+      "response_time_ms": 76,
+      "status_code": 200
+    },
+    {
+      "test_name": "Static Asset: /robots.txt",
+      "service": "frontend",
+      "status": "PASS",
+      "duration_ms": 83,
+      "error_message": null,
+      "details": {
+        "asset_exists": true
+      },
+      "response_time_ms": 83,
+      "status_code": 200
+    },
+    {
+      "test_name": "Static Asset: /_next/static/",
+      "service": "frontend",
+      "status": "SKIP",
+      "duration_ms": 181,
+      "error_message": null,
+      "details": {
+        "asset_exists": false
+      },
+      "response_time_ms": 181,
+      "status_code": 404
+    },
+    {
+      "test_name": "Auth Health Check",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 91,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 91,
+      "status_code": 200
+    },
+    {
+      "test_name": "OAuth Config",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 71,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 71,
+      "status_code": 404
+    },
+    {
+      "test_name": "Auth Service Info",
+      "service": "auth",
+      "status": "PASS",
+      "duration_ms": 70,
+      "error_message": null,
+      "details": {
+        "endpoint_accessible": true
+      },
+      "response_time_ms": 70,
+      "status_code": 404
+    },
+    {
+      "test_name": "CORS Configuration",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 77,
+      "error_message": null,
+      "details": {
+        "cors_enabled": true
+      },
+      "response_time_ms": 77,
+      "status_code": 200
+    },
+    {
+      "test_name": "WebSocket Endpoint Reachability",
+      "service": "websocket",
+      "status": "SKIP",
+      "duration_ms": 76,
+      "error_message": null,
+      "details": {
+        "unexpected_status": 503
+      },
+      "response_time_ms": 76,
+      "status_code": 503
+    },
+    {
+      "test_name": "WebSocket Connection Test",
+      "service": "websocket",
+      "status": "PASS",
+      "duration_ms": 717,
+      "error_message": null,
+      "details": {
+        "connection_successful": true,
+        "received_response": "TEXT"
+      },
+      "response_time_ms": null,
+      "status_code": null
+    },
+    {
+      "test_name": "Service Communication Check",
+      "service": "backend",
+      "status": "PASS",
+      "duration_ms": 81,
+      "error_message": null,
+      "details": {
+        "backend_health": true,
+        "health_response": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757762691.3007727
+        }
+      },
+      "response_time_ms": 81,
+      "status_code": 200
+    }
+  ]
+}

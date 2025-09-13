@@ -78,6 +78,7 @@ class TokenOptimizationContextManager:
         )
 
         # Return new context with enhanced agent_context (immutable pattern)
+        # CRITICAL: UserExecutionContext uses agent_context field, not metadata parameter
         return replace(context, agent_context=enhanced_agent_context)
     
     def optimize_prompt_for_context(
@@ -157,8 +158,8 @@ class TokenOptimizationContextManager:
         """
         # Get overall agent summary from TokenCounter
         summary = self.token_counter.get_agent_usage_summary()
-        
-        # Add current session data from context agent_context
+
+        # Add current session data from context agent_context (also accessible via metadata property)
         token_usage = context.agent_context.get("token_usage", {})
         if token_usage:
             session_operations = token_usage.get("operations", [])

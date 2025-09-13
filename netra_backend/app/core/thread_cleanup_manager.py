@@ -265,8 +265,9 @@ class ThreadCleanupManager:
         """
         Schedule a background cleanup task with comprehensive NoneType validation.
 
-        ISSUE #704 FIX: This method now includes comprehensive validation to prevent
-        'NoneType' object is not callable errors during event loop edge cases.
+        ISSUE #704 FIX: Enhanced validation to prevent 'NoneType' object is not callable errors.
+        This method now performs comprehensive validation of the asyncio event loop and its methods
+        before attempting to use them, handling edge cases during event loop destruction/shutdown.
         """
         if self._cleanup_scheduled:
             return

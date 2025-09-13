@@ -2,8 +2,7 @@
 
 import pytest
 
-# Skip test - file has indentation issues and not related to Issue #722 SSOT validation
-pytest.skip("Test file has indentation issues - skipping to focus on Issue #722 validation", allow_module_level=True)
+# Cost limit enforcement test - all dependencies verified working
 
 from decimal import Decimal
 from datetime import datetime
@@ -13,7 +12,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.cost_calculator import TokenUsage
-from netra_backend.app.schemas.llm_config_types import LLMProvider
+from netra_backend.app.schemas.llm_types import LLMProvider
 import asyncio
 
 
