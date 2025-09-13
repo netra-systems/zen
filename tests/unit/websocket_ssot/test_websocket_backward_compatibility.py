@@ -66,7 +66,7 @@ class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
         self.captured_warnings: List[str] = []
 
     @pytest.mark.unit
-    @pytest.mark.migration_safety
+    # @pytest.mark.migration_safety - marker commented out for test execution
     def test_legacy_import_paths_maintain_compatibility(self):
         """
         MIGRATION SAFETY TEST: Verify legacy import paths continue working.
@@ -129,7 +129,7 @@ class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
         logger.info(f"Backward compatibility maintained for {compatible_count}/{len(legacy_imports)} legacy imports")
 
     @pytest.mark.unit
-    @pytest.mark.migration_safety
+    # @pytest.mark.migration_safety - marker commented out for test execution
     def test_websocket_manager_interface_consistency(self):
         """
         MIGRATION SAFETY TEST: Verify consistent interfaces across implementations.
@@ -200,7 +200,7 @@ class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
         logger.info("Interface consistency maintained across available WebSocket Manager implementations")
 
     @pytest.mark.unit
-    @pytest.mark.migration_safety
+    # @pytest.mark.migration_safety - marker commented out for test execution
     def test_websocket_manager_graceful_degradation(self):
         """
         MIGRATION SAFETY TEST: Verify graceful degradation when multiple implementations exist.
@@ -281,7 +281,7 @@ class TestWebSocketBackwardCompatibility(BaseIntegrationTest):
         logger.info(f"Graceful degradation validated for {len(degradation_scenarios)} scenarios")
 
     @pytest.mark.unit
-    @pytest.mark.migration_safety
+    # @pytest.mark.migration_safety - marker commented out for test execution
     def test_websocket_manager_migration_performance_impact(self):
         """
         MIGRATION SAFETY TEST: Verify SSOT consolidation doesn't degrade performance.

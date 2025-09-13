@@ -156,8 +156,9 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         )
         
         # ISSUE #414 FIX: Track token session to prevent reuse
-        import uuid
-        session_id = str(uuid.uuid4())
+        # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for session ID generation
+        from shared.id_generation import UnifiedIdGenerator
+        session_id = UnifiedIdGenerator.generate_session_id(user_id, "auth_validation")
         _active_token_sessions[token_hash] = {
             'user_id': user_id,
             'session_id': session_id,
