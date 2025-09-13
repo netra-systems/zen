@@ -29,7 +29,7 @@ from netra_backend.app.dependencies import get_user_execution_context
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     from netra_backend.app.llm.client_unified import ResilientLLMClient
 
 logger = central_logger.get_logger(__name__)
@@ -139,7 +139,7 @@ async def create_supervisor_core(
             return db_session
         
         # Create isolated SupervisorAgent using factory method
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         
         # Extract LLM manager from client if needed
         if hasattr(llm_client, '_llm_manager'):

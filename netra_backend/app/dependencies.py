@@ -58,7 +58,7 @@ from netra_backend.app.services.factory_adapter import (
 )
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor_consolidated import (
+    from netra_backend.app.agents.supervisor_ssot import (
         SupervisorAgent as Supervisor,
     )
     from netra_backend.app.services.agent_service import AgentService

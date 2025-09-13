@@ -196,7 +196,7 @@ async def _initialize_agent_supervisor_ssot(app: FastAPI, logger: logging.Logger
         
         logger.info("Initializing agent supervisor using SSOT patterns...")
         
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.services.agent_service import AgentService
         from netra_backend.app.services.thread_service import ThreadService
         from netra_backend.app.services.corpus_service import CorpusService

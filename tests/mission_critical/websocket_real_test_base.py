@@ -275,7 +275,7 @@ class RealWebSocketTestConfig:
     connection_timeout: float = 15.0
     event_timeout: float = 10.0
     max_retries: int = 5
-    docker_startup_timeout: float = 120.0
+    docker_startup_timeout: float = 30.0  # ISSUE #773: Reduced from 120s to prevent 2-minute hangs
 
 
 def _get_environment_backend_url() -> str:
@@ -435,25 +435,72 @@ class RealWebSocketTestBase:
     async def setup_docker_services(self) -> bool:
         """
         Set up Docker services for testing.
-        
+
         Returns:
             True if services started successfully
         """
         if self.services_started:
             return True
-        
+
         # ISSUE #420 RESOLUTION: Skip Docker startup if staging fallback configured
         env = get_env()
         staging_mode = env.get("TEST_MODE") == "staging_fallback"
         use_staging = env.get("USE_STAGING_SERVICES", "false").lower() == "true"
-        
+
         if staging_mode or use_staging:
             logger.info("ISSUE #420 STRATEGIC RESOLUTION: Skipping Docker startup, using staging services directly")
             self.services_started = True
             return True
-        
+
+        # ISSUE #773: Fast-fail Docker detection (2s timeout instead of 120s hang)
+        if not self.docker_manager.is_docker_available_fast():
+            logger.warning("ISSUE #773: Docker unavailable, attempting staging fallback")
+
+            # Check for staging environment variables
+            staging_backend_url = env.get("STAGING_BACKEND_URL")
+            staging_websocket_url = env.get("STAGING_WEBSOCKET_URL")
+
+            if staging_backend_url and staging_websocket_url:
+                logger.info("ISSUE #773: Using staging services as Docker fallback")
+                # Update configuration to use staging URLs
+                self.config.backend_url = staging_backend_url
+                self.config.websocket_url = staging_websocket_url
+                self.services_started = True
+                return True
+            else:
+                logger.error("ISSUE #773: Docker unavailable and no staging fallback configured")
+                return False
+
+        # ISSUE #773: Additional safeguard - try to detect common Docker startup issues early
+        # Check if compose file exists and services are properly defined
+        try:
+            logger.info("ISSUE #773: Performing basic Docker service validation...")
+            # This will fail fast if fundamental issues exist (compose file, service definitions, etc.)
+            compose_result = await self.docker_manager._check_service_definitions(["backend", "auth"])
+            if not compose_result:
+                logger.warning("ISSUE #773: Service definitions invalid, attempting staging fallback...")
+                # Same fallback logic as Docker unavailable case
+                staging_backend_url = env.get("STAGING_BACKEND_URL")
+                staging_websocket_url = env.get("STAGING_WEBSOCKET_URL")
+
+                if staging_backend_url and staging_websocket_url:
+                    logger.info("ISSUE #773: Using staging services due to service definition issues")
+                    self.config.backend_url = staging_backend_url
+                    self.config.websocket_url = staging_websocket_url
+                    self.services_started = True
+                    return True
+                else:
+                    logger.error("ISSUE #773: Service definitions invalid and no staging fallback configured")
+                    return False
+        except AttributeError:
+            # Method doesn't exist, skip this validation
+            logger.debug("ISSUE #773: Service definition validation not available, proceeding with normal startup")
+        except Exception as validation_error:
+            logger.warning(f"ISSUE #773: Service validation failed: {validation_error}, proceeding with normal startup")
+            # Continue with normal startup if validation fails
+
         logger.info("Starting Docker services for WebSocket testing...")
-        
+
         try:
             # Start backend and auth services
             services_to_start = ["backend", "auth"]
@@ -463,20 +510,20 @@ class RealWebSocketTestBase:
                 wait_healthy=True
             )
             
-            # Wait for services to be healthy
-            max_health_wait = self.config.docker_startup_timeout
+            # Wait for services to be healthy - ISSUE #773: Reduced timeout and faster health checks
+            max_health_wait = self.config.docker_startup_timeout  # Now 30s instead of 120s
             health_start = time.time()
-            
+
             while time.time() - health_start < max_health_wait:
                 if await ensure_websocket_service_ready(
                     base_url=self.config.backend_url,
-                    max_wait=10.0
+                    max_wait=5.0  # ISSUE #773: Reduced from 10s to 5s for faster feedback
                 ):
                     self.services_started = True
                     logger.info("Docker services are healthy and ready")
                     return True
-                
-                await asyncio.sleep(2.0)
+
+                await asyncio.sleep(1.0)  # ISSUE #773: Reduced from 2s to 1s for faster iterations
             
             logger.error(f"Services did not become healthy within {max_health_wait}s")
             return False

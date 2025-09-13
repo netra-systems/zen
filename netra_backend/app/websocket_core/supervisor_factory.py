@@ -34,7 +34,7 @@ from netra_backend.app.websocket_core.context import WebSocketContext
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 logger = central_logger.get_logger(__name__)
 

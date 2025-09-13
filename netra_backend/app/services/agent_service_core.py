@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 
 from netra_backend.app import schemas
-from netra_backend.app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_ssot import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.logging_config import central_logger
