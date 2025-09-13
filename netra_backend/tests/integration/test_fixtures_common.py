@@ -79,7 +79,7 @@ async def test_database():
         ws_manager = WebSocketManager()
 
     # Mock: Generic component isolation for controlled unit testing
-        cache_service = RedisTestManager().get_client()
+        cache_service = redis_manager
 
     # Mock: Async component isolation for testing without real async operations
         cache_service.get = AsyncMock(return_value=None)

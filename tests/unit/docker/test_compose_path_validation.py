@@ -504,11 +504,8 @@ class TestDockerComposePathValidation(SSotBaseTestCase):
 # Test configuration
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.docker_infrastructure,
-    pytest.mark.path_validation,
-    pytest.mark.issue_443,
-    pytest.mark.issue_426_cluster,
-    pytest.mark.no_docker_required
+    pytest.mark.backend,
+    pytest.mark.fast
 ]
 
 

@@ -64,7 +64,7 @@ try:
     from netra_backend.app.agents.state import DeepAgentState
     from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-    from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolExecutionEngine
+    from netra_backend.app.tools.enhanced_dispatcher import EnhancedToolDispatcher
     from netra_backend.app.db.database_manager import DatabaseManager
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:
@@ -95,6 +95,11 @@ class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
     - Error handling and graceful degradation
     """
     
+    async def setup_method(self, method):
+        """Set up test environment with real agent execution infrastructure - pytest entry point."""
+        await super().setup_method(method)
+        await self.async_setup_method(method)
+    
     async def async_setup_method(self, method=None):
         """Set up test environment with real agent execution infrastructure."""
         await super().async_setup_method(method)
@@ -121,6 +126,11 @@ class TestAgentExecutionFlowIntegration(SSotAsyncTestCase):
         # Initialize real infrastructure components
         await self._initialize_real_agent_infrastructure()
         
+    async def teardown_method(self, method):
+        """Clean up test resources - pytest entry point."""
+        await self.async_teardown_method(method)
+        await super().teardown_method(method)
+    
     async def async_teardown_method(self, method=None):
         """Clean up test resources and record business metrics."""
         try:

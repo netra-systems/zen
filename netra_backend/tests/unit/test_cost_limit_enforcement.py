@@ -1,8 +1,6 @@
 """Unit tests for cost limit enforcement in LLM manager."""
 
 import pytest
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-from shared.isolated_environment import IsolatedEnvironment
 
 # Cost limit enforcement test - all dependencies verified working
 

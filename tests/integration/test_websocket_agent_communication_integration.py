@@ -97,6 +97,11 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
     - Error handling and graceful degradation in communication failures
     """
     
+    async def setup_method(self, method):
+        """Set up test environment with real WebSocket and agent infrastructure - pytest entry point."""
+        await super().setup_method(method)
+        await self.async_setup_method(method)
+    
     async def async_setup_method(self, method=None):
         """Set up test environment with real WebSocket and agent infrastructure."""
         await super().async_setup_method(method)
@@ -123,6 +128,11 @@ class TestWebSocketAgentCommunicationIntegration(SSotAsyncTestCase):
         # Initialize real WebSocket infrastructure
         await self._initialize_websocket_infrastructure()
         
+    async def teardown_method(self, method):
+        """Clean up WebSocket resources - pytest entry point."""
+        await self.async_teardown_method(method)
+        await super().teardown_method(method)
+    
     async def async_teardown_method(self, method=None):
         """Clean up WebSocket resources and record metrics."""
         try:

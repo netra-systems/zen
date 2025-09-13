@@ -82,7 +82,7 @@ def mock_services_config() -> ServicesConfiguration:
     
     # Create mock redis service
     # Mock: Redis external service isolation for fast, reliable tests without network dependency
-    mock_redis = RedisTestManager().get_client()
+    mock_redis = redis_manager
     mock_redis.mode = ResourceMode.SHARED
     mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
     config.redis = mock_redis
@@ -206,7 +206,7 @@ class TestEndpointValidation:
         
         # Create mock redis service
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = RedisTestManager().get_client()
+        mock_redis = redis_manager
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         
@@ -227,7 +227,7 @@ class TestEndpointValidation:
         
         # Create mock redis service
         # Mock: Redis external service isolation for fast, reliable tests without network dependency
-        mock_redis = RedisTestManager().get_client()
+        mock_redis = redis_manager
         mock_redis.mode = ResourceMode.LOCAL
         config.redis = mock_redis
         

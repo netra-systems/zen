@@ -92,7 +92,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, validation gap is confirmed
         pytest.fail("Manager creation without user context was allowed - validation gap confirmed")
 
-    def test_manager_user_context_isolation_validation(self):
+    async def test_manager_user_context_isolation_validation(self):
         """
         Test that manager validates user context matches operation user.
 
@@ -115,7 +115,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, validation gap is confirmed
         pytest.fail("User ID mismatch was not detected - validation gap confirmed")
 
-    def test_cross_user_connection_contamination_detection(self):
+    async def test_cross_user_connection_contamination_detection(self):
         """
         Test that cross-user connection contamination is detected.
 
@@ -152,7 +152,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, contamination detection gap is confirmed
         pytest.fail("Cross-user connection contamination not detected - validation gap confirmed")
 
-    def test_concurrent_user_manager_instance_isolation(self):
+    async def test_concurrent_user_manager_instance_isolation(self):
         """
         Test that concurrent users get properly isolated manager instances.
 
@@ -186,7 +186,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Managers missing _user_context attribute - isolation mechanism not implemented")
 
-    def test_multiple_managers_per_user_detection(self):
+    async def test_multiple_managers_per_user_detection(self):
         """
         Test detection of multiple manager instances for the same user.
 
@@ -212,7 +212,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
             self.assertTrue(len(warning_calls) > 0,
                           "Multiple manager instances for same user not detected - validation gap confirmed")
 
-    def test_enterprise_organization_isolation(self):
+    async def test_enterprise_organization_isolation(self):
         """
         Test that enterprise users are isolated by organization.
 
@@ -257,7 +257,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Organization-level isolation not implemented - enterprise requirement gap")
 
-    def test_user_isolation_validation_history_tracking(self):
+    async def test_user_isolation_validation_history_tracking(self):
         """
         Test that user isolation validation attempts are tracked.
 
@@ -298,7 +298,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
             # This gap indicates isolation tracking isn't implemented
             print("WARNING: Isolation-specific validation tracking not implemented")
 
-    def test_strict_mode_user_isolation_enforcement(self):
+    async def test_strict_mode_user_isolation_enforcement(self):
         """
         Test that strict mode properly enforces user isolation violations.
 
@@ -324,7 +324,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         # If we get here without exception, strict mode isn't working
         pytest.fail("Strict mode did not enforce user isolation - validation gap confirmed")
 
-    def test_user_isolation_with_websocket_events(self):
+    async def test_user_isolation_with_websocket_events(self):
         """
         Test that WebSocket events are properly isolated per user.
 
@@ -367,7 +367,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("WebSocket event isolation mechanism not found - implementation gap")
 
-    def test_user_context_cleanup_on_manager_destruction(self):
+    async def test_user_context_cleanup_on_manager_destruction(self):
         """
         Test that user context is properly cleaned up when manager is destroyed.
 
