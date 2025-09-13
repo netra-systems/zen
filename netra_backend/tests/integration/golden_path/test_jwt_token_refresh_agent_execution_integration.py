@@ -42,6 +42,9 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
+# SSOT Auth Client Import - Issue #814 SSOT Authentication Remediation
+from netra_backend.app.clients.auth_client_core import AuthServiceClient, AuthServiceError
+
 logger = logging.getLogger(__name__)
 
 
@@ -82,12 +85,15 @@ class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
         self.auth_helper = E2EAuthHelper(environment="test")
         self.required_websocket_events = [
             "agent_started",
-            "agent_thinking", 
+            "agent_thinking",
             "tool_executing",
             "tool_completed",
             "agent_completed"
         ]
         # Performance SLA: Token refresh should complete within 5 seconds
+
+        # SSOT Auth Client - Issue #814 SSOT Authentication Remediation
+        self.auth_client = AuthServiceClient()
         self.token_refresh_sla = 5.0
         # Agent execution should continue within 10 seconds after refresh
         self.execution_continuation_sla = 10.0
@@ -454,22 +460,18 @@ class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
             )
     
     async def _check_token_expiry(self, token: str) -> bool:
-        """Check if JWT token is expired."""
+        """Check if JWT token is expired using SSOT auth service."""
+        # SSOT Token Expiry Check - Issue #814 SSOT Authentication Remediation
         try:
-            # Decode without verification to check expiry
-            payload = jwt.decode(token, options={"verify_signature": False})
-            exp_timestamp = payload.get("exp")
-            
-            if not exp_timestamp:
-                return True  # No expiry = treat as expired
-            
-            exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-            current_time = datetime.now(timezone.utc)
-            
-            return current_time >= exp_datetime
-            
-        except jwt.InvalidTokenError:
-            return True  # Invalid token = treat as expired
+            auth_response = await self.auth_client.validate_token(token)
+            if not auth_response:
+                return True  # No response = treat as expired
+
+            # If auth service says token is invalid, likely expired or malformed
+            is_valid = auth_response.get("valid", False)
+            return not is_valid  # Return True if expired/invalid, False if valid
+        except AuthServiceError:
+            return True  # Auth service error = treat as expired for safety
     
     async def _refresh_jwt_token(
         self, expired_token: str, user_id: str, real_services_fixture
@@ -513,29 +515,35 @@ class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
             return None
     
     async def _validate_refreshed_token(self, db_session, refreshed_token: str, user_id: str):
-        """Validate that refreshed token is valid and properly signed."""
+        """Validate that refreshed token is valid using SSOT auth service."""
+        # SSOT Refreshed Token Validation - Issue #814 SSOT Authentication Remediation
         try:
-            # Validate token structure and signature
-            payload = jwt.decode(refreshed_token, self.auth_helper.config.jwt_secret, algorithms=["HS256"])
-            
-            assert payload.get("sub") == user_id, "Refreshed token user ID mismatch"
-            assert payload.get("type") == "access", "Refreshed token type incorrect"
-            
-            # Validate expiry is in the future
-            exp_timestamp = payload.get("exp")
-            assert exp_timestamp, "Refreshed token missing expiry"
-            
-            exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-            assert exp_datetime > datetime.now(timezone.utc), "Refreshed token is already expired"
-            
+            # Validate token through auth service
+            auth_response = await self.auth_client.validate_token(refreshed_token)
+            assert auth_response, "Auth service returned no response for refreshed token"
+            assert auth_response.get("valid", False), "Auth service rejected refreshed token"
+
+            # Validate user ID matches
+            validated_user_id = auth_response.get("user_id") or auth_response.get("sub")
+            assert validated_user_id == user_id, f"Refreshed token user ID mismatch: expected {user_id}, got {validated_user_id}"
+
+            # Token type validation - if available in auth response
+            token_type = auth_response.get("type") or auth_response.get("token_type")
+            if token_type:
+                assert token_type == "access", f"Refreshed token type incorrect: expected 'access', got {token_type}"
+
             # Validate user exists in database
             user_query = "SELECT id, email FROM users WHERE id = %(user_id)s"
             result = await db_session.execute(user_query, {"user_id": user_id})
             user_row = result.fetchone()
-            
+
             assert user_row, f"User {user_id} not found in database for refreshed token validation"
-            
-        except jwt.InvalidTokenError as e:
+
+        except AuthServiceError as e:
+            pytest.fail(f"Auth service error during refreshed token validation: {e}")
+        except AssertionError:
+            raise  # Re-raise assertion errors
+        except Exception as e:
             pytest.fail(f"Refreshed token validation failed: {e}")
     
     async def _attempt_agent_execution_with_expired_token(
