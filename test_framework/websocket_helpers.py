@@ -27,6 +27,15 @@ try:
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
 
+# Import logger for WebSocket compatibility debugging
+try:
+    from netra_backend.app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+except ImportError:
+    # Fallback for environments where backend logging isn't available
+    import logging
+    logger = logging.getLogger(__name__)
+
 try:
     import httpx
     HTTPX_AVAILABLE = True  
@@ -230,7 +239,7 @@ class WebSocketClientAbstraction:
             "ping_timeout": kwargs.get("ping_timeout", 10),
             "close_timeout": kwargs.get("close_timeout", 5),
             "max_size": kwargs.get("max_size", 2**20),
-            "timeout": timeout
+            "open_timeout": timeout  # Fixed: use open_timeout instead of timeout
         }
         
         # Add subprotocols if provided
