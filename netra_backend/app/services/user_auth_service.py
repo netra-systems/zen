@@ -37,5 +37,13 @@ async def authenticate_user(username: str, password: str) -> Optional[Dict[str, 
     """DEPRECATED: Use UserAuthService.authenticate() or auth_client directly."""
     return await UserAuthService.authenticate(username, password)
 
-# REMOVED: Duplicate validate_token function eliminated for SSOT compliance
-# Use UserAuthService.validate_token() or auth_client.validate_token() directly
+# BACKWARD COMPATIBILITY: Legacy validate_token function for test compatibility
+async def validate_token(token: str) -> Optional[Dict[str, Any]]:
+    """DEPRECATED: Use UserAuthService.validate_token() or auth_client directly.
+
+    SSOT COMPLIANCE: This function delegates to UserAuthService.validate_token()
+    which in turn delegates to auth_client for single source of truth.
+
+    Maintained for backward compatibility during SSOT migration.
+    """
+    return await UserAuthService.validate_token(token)
