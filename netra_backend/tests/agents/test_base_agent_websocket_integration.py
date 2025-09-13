@@ -136,6 +136,7 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         """Test WebSocket bridge adapter is properly initialized."""
         agent = WebSocketTestAgent(llm_manager=self.llm_manager)
         agent.set_websocket_bridge(self.websocket_bridge, "test-run-websocket-001")
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-bridge-001")
 
         # Verify: WebSocket bridge adapter exists and is configured
         assert hasattr(agent, '_websocket_adapter')
@@ -155,9 +156,10 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
     async def test_websocket_event_emission_all_critical_events(self):
         """Test all 5 critical WebSocket events are emitted correctly."""
         agent = WebSocketTestAgent(
-            llm_manager=self.llm_manager,
-            # FIXED: websocket_bridge set after instantiation
+            llm_manager=self.llm_manager
         )
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-events-001")
+        # FIXED: websocket_bridge set after instantiation
 
         # Execute agent request which should emit all critical events
         result = await agent.process_request(
