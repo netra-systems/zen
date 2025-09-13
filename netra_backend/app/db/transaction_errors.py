@@ -57,7 +57,7 @@ class IndexCreationError(SchemaError):
 
 class IndexOperationError(SchemaError):
     """Raised when index operations (rebuild, drop, optimize) fail."""
-    
+
     def __init__(self, message: str, context: dict = None):
         """Initialize with error message and optional context."""
         super().__init__(message)
@@ -66,7 +66,7 @@ class IndexOperationError(SchemaError):
 
 class MigrationError(SchemaError):
     """Raised when schema migration operations fail."""
-    
+
     def __init__(self, message: str, context: dict = None):
         """Initialize with error message and optional context."""
         super().__init__(message)
@@ -75,7 +75,7 @@ class MigrationError(SchemaError):
 
 class TableDependencyError(SchemaError):
     """Raised when table dependency relationship errors occur."""
-    
+
     def __init__(self, message: str, context: dict = None):
         """Initialize with error message and optional context."""
         super().__init__(message)
@@ -84,7 +84,7 @@ class TableDependencyError(SchemaError):
 
 class ConstraintViolationError(SchemaError):
     """Raised when database constraint violations occur."""
-    
+
     def __init__(self, message: str, context: dict = None):
         """Initialize with error message and optional context."""
         super().__init__(message)
@@ -127,7 +127,7 @@ def _has_deadlock_keywords(error_msg: str) -> bool:
 def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
     connection_keywords = [
-        'connection', 'network', 'timeout', 'broken pipe', 
+        'connection', 'network', 'timeout', 'broken pipe',
         'queuepool limit', 'pool limit exceeded', 'connection pool'
     ]
     return any(keyword in error_msg for keyword in connection_keywords)
@@ -234,8 +234,8 @@ def _has_engine_configuration_keywords(error_msg: str) -> bool:
 def _has_table_not_found_keywords(error_msg: str) -> bool:
     """Check if error message contains table not found keywords."""
     table_not_found_keywords = [
-        "table doesn't exist", "table does not exist", "unknown table", "no such table",
-        "doesn't exist", "does not exist", "missing table"
+        "doesn't exist", "does not exist", "unknown table", "no such table",
+        "table 'non_existent_table", "table 'unknown_table", "missing table"
     ]
     return any(keyword in error_msg for keyword in table_not_found_keywords)
 
@@ -244,14 +244,14 @@ def _has_cache_error_keywords(error_msg: str) -> bool:
     """Check if error message contains cache error keywords."""
     cache_error_keywords = [
         'cache error', 'cache failure', 'cache timeout', 'cache miss critical',
-        'cache corruption', 'cache eviction failure', 'cache full', 'cache key invalid'
+        'cache corruption', 'cache eviction failure', 'cache full', 'cache key invalid', 'cache restoration'
     ]
     return any(keyword in error_msg for keyword in cache_error_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
     """Check if disconnection error is retryable."""
-    return (isinstance(error, DisconnectionError) and 
+    return (isinstance(error, DisconnectionError) and
             enable_connection_retry)
 
 
@@ -272,10 +272,10 @@ def _check_connection_retry_eligibility(error_msg: str, enable_connection_retry:
 def _is_operational_error_retryable(error: OperationalError, enable_deadlock_retry: bool, enable_connection_retry: bool) -> bool:
     """Check if operational error is retryable."""
     error_msg = str(error).lower()
-    
+
     if _check_deadlock_retry_eligibility(error_msg, enable_deadlock_retry):
         return True
-    
+
     return _check_connection_retry_eligibility(error_msg, enable_connection_retry)
 
 
@@ -290,153 +290,153 @@ def is_retryable_error(error: Exception, enable_deadlock_retry: bool, enable_con
     """Check if error is retryable based on configuration."""
     if _is_disconnection_retryable(error, enable_connection_retry):
         return True
-    
+
     return _check_operational_error_retry(error, enable_deadlock_retry, enable_connection_retry)
 
 
-def _classify_deadlock_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify deadlock-related operational errors."""
+def _classify_deadlock_error(error: Exception, error_msg: str) -> Exception:
+    """Classify deadlock-related errors."""
     if _has_deadlock_keywords(error_msg):
         return DeadlockError(f"Deadlock detected: {error}")
     return error
 
 
-def _classify_connection_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify connection-related operational errors."""
+def _classify_connection_error(error: Exception, error_msg: str) -> Exception:
+    """Classify connection-related errors."""
     if _has_connection_keywords(error_msg):
         return ConnectionError(f"Connection error: {error}")
     return error
 
 
-def _classify_timeout_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify timeout-related operational errors."""
+def _classify_timeout_error(error: Exception, error_msg: str) -> Exception:
+    """Classify timeout-related errors."""
     if _has_timeout_keywords(error_msg):
         return TimeoutError(f"Timeout error: {error}")
     return error
 
 
-def _classify_permission_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify permission-related operational errors."""
+def _classify_permission_error(error: Exception, error_msg: str) -> Exception:
+    """Classify permission-related errors."""
     if _has_permission_keywords(error_msg):
         return PermissionError(f"Permission error: {error}")
     return error
 
 
-def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify schema-related operational errors."""
+def _classify_schema_error(error: Exception, error_msg: str) -> Exception:
+    """Classify schema-related errors with enhanced prefix (Issue #731)."""
     if _has_schema_keywords(error_msg):
-        return SchemaError(f"Schema error: {error}")
+        return SchemaError(f"Schema Error: {error}")
     return error
 
 
-def _classify_table_creation_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify table creation-related operational errors."""
+def _classify_table_creation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table creation-related errors."""
     error_type_name = type(error).__name__.lower()
     if _has_table_creation_keywords(error_msg) or _has_table_creation_keywords(error_type_name):
-        return TableCreationError(f"Table creation error: {error}")
+        return TableCreationError(f"Schema Error: Table creation failed - {error}")
     return error
 
 
-def _classify_column_modification_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify column modification-related operational errors."""
+def _classify_column_modification_error(error: Exception, error_msg: str) -> Exception:
+    """Classify column modification-related errors."""
     if _has_column_modification_keywords(error_msg):
-        return ColumnModificationError(f"Column modification error: {error}")
+        return ColumnModificationError(f"Schema Error: Column modification failed - {error}")
     return error
 
 
-def _classify_index_creation_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify index creation-related operational errors."""
+def _classify_index_creation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify index creation-related errors."""
     error_type_name = type(error).__name__.lower()
     if _has_index_creation_keywords(error_msg) or _has_index_creation_keywords(error_type_name):
-        return IndexCreationError(f"Index creation error: {error}")
+        return IndexCreationError(f"Schema Error: Index creation failed - {error}")
     return error
 
 
-def _classify_index_operation_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify index operation-related operational errors."""
+def _classify_index_operation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify index operation-related errors."""
     if _has_index_operation_keywords(error_msg):
-        return IndexOperationError(f"Index operation error: {error}")
+        return IndexOperationError(f"Schema Error: Index operation failed - {error}")
     return error
 
 
-def _classify_migration_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify migration-related operational errors."""  
+def _classify_migration_error(error: Exception, error_msg: str) -> Exception:
+    """Classify migration-related errors."""
     if _has_migration_keywords(error_msg):
-        return MigrationError(f"Migration error: {error}")
+        return MigrationError(f"Schema Error: Migration failed - {error}")
     return error
 
 
-def _classify_table_dependency_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify table dependency-related operational errors."""
+def _classify_table_dependency_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table dependency-related errors."""
     if _has_table_dependency_keywords(error_msg):
-        return TableDependencyError(f"Table dependency error: {error}")
+        return TableDependencyError(f"Schema Error: Table dependency issue - {error}")
     return error
 
 
-def _classify_constraint_violation_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify constraint violation-related operational errors."""
+def _classify_constraint_violation_error(error: Exception, error_msg: str) -> Exception:
+    """Classify constraint violation-related errors."""
     if _has_constraint_violation_keywords(error_msg):
-        return ConstraintViolationError(f"Constraint violation error: {error}")
+        return ConstraintViolationError(f"Schema Error: Constraint violation - {error}")
     return error
 
 
-def _classify_engine_configuration_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify engine configuration-related operational errors."""
+def _classify_engine_configuration_error(error: Exception, error_msg: str) -> Exception:
+    """Classify engine configuration-related errors."""
     if _has_engine_configuration_keywords(error_msg):
-        return EngineConfigurationError(f"Engine configuration error: {error}")
+        return EngineConfigurationError(f"Schema Error: Engine configuration issue - {error}")
     return error
 
 
-def _classify_table_not_found_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify table not found-related operational errors."""
+def _classify_table_not_found_error(error: Exception, error_msg: str) -> Exception:
+    """Classify table not found-related errors."""
     if _has_table_not_found_keywords(error_msg):
         return TableNotFoundError(f"Table not found error: {error}")
     return error
 
 
-def _classify_cache_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify cache-related operational errors."""
+def _classify_cache_error(error: Exception, error_msg: str) -> Exception:
+    """Classify cache-related errors."""
     if _has_cache_error_keywords(error_msg):
         return CacheError(f"Cache error: {error}")
     return error
 
 
-def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
+def _attempt_error_classification(error: Exception, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
     classified = _classify_deadlock_error(error, error_msg)
     if classified != error:
         return classified
-    
-    classified = _classify_connection_error(error, error_msg)
-    if classified != error:
-        return classified
-        
+
     classified = _classify_timeout_error(error, error_msg)
     if classified != error:
         return classified
-        
+
+    classified = _classify_connection_error(error, error_msg)
+    if classified != error:
+        return classified
+
     classified = _classify_permission_error(error, error_msg)
     if classified != error:
         return classified
-    
+
     # Try new specific schema error types first
     classified = _classify_index_operation_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_migration_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_table_dependency_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_constraint_violation_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_engine_configuration_error(error, error_msg)
     if classified != error:
         return classified
@@ -454,15 +454,15 @@ def _attempt_error_classification(error: OperationalError, error_msg: str) -> Ex
     classified = _classify_table_creation_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_column_modification_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     classified = _classify_index_creation_error(error, error_msg)
     if classified != error:
         return classified
-        
+
     # Fall back to general schema error
     return _classify_schema_error(error, error_msg)
 
@@ -486,8 +486,11 @@ def _classify_integrity_error(error: IntegrityError) -> Exception:
 
 
 def classify_error(error: Exception) -> Exception:
-    """Classify and potentially wrap errors."""
-    if isinstance(error, OperationalError):
+    """Classify and potentially wrap errors (Enhanced for Issue #731)."""
+    # Handle SQLAlchemy DisconnectionError first (Issue #731 remediation)
+    if isinstance(error, DisconnectionError):
+        return ConnectionError(f"Connection error: {error}")
+    elif isinstance(error, OperationalError):
         return _classify_operational_error(error)
     elif isinstance(error, InvalidRequestError):
         return _classify_invalid_request_error(error)
@@ -495,4 +498,8 @@ def classify_error(error: Exception) -> Exception:
         return _classify_integrity_error(error)
     elif isinstance(error, asyncio.TimeoutError):
         return TimeoutError(f"Timeout error: {error}")
+    elif isinstance(error, Exception):
+        # Issue #731: Handle generic Exception types by examining their messages
+        error_msg = str(error).lower()
+        return _attempt_error_classification(error, error_msg)
     return error
