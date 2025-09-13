@@ -11,8 +11,10 @@ and ensure consistency across the entire codebase.
 Usage:
     from netra_backend.app.core.network_constants import ServicePorts, DatabaseConstants, HostConstants
     
-    # Use constants instead of hardcoded strings
-    database_url = f"postgresql://user:pass@{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}/db"
+    # Use SSOT DatabaseURLBuilder instead of manual construction
+    from shared.database_url_builder import DatabaseURLBuilder
+    builder = DatabaseURLBuilder()
+    database_url = builder.development.auto_url  # SSOT-compliant approach
 """
 
 from typing import Dict, Final, Optional
