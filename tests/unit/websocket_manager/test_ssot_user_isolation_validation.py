@@ -212,7 +212,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
             self.assertTrue(len(warning_calls) > 0,
                           "Multiple manager instances for same user not detected - validation gap confirmed")
 
-    def test_enterprise_organization_isolation(self):
+    async def test_enterprise_organization_isolation(self):
         """
         Test that enterprise users are isolated by organization.
 
@@ -257,7 +257,7 @@ class TestWebSocketManagerUserIsolationValidation(SSotAsyncTestCase):
         else:
             pytest.fail("Organization-level isolation not implemented - enterprise requirement gap")
 
-    def test_user_isolation_validation_history_tracking(self):
+    async def test_user_isolation_validation_history_tracking(self):
         """
         Test that user isolation validation attempts are tracked.
 

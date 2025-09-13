@@ -43,25 +43,25 @@ class TestCostLimitEnforcement:
         
         # Create an expensive request (simulate large prompt)
         # With gpt-4, this will be 10000 * 3 = 30000 estimated tokens
-            large_prompt = "test " * 10000  # Very large prompt  
-            request_id = await llm_manager.create_request(
+        large_prompt = "test " * 10000  # Very large prompt
+        request_id = await llm_manager.create_request(
             prompt=large_prompt,
             model=LLMModel.GEMINI_2_5_FLASH.value
-            )
+        )
         
         # Process the request - should be blocked
-            result = await llm_manager.process_request(request_id)
-        
-            assert result is not None
-            assert result.status == RequestStatus.FAILED
-            assert "Cost limit exceeded" in result.error
-            assert ("unbounded API costs" in result.error or "estimated tokens" in result.error)
-    
-            @pytest.mark.asyncio
-            async def test_cost_limit_allows_cheap_request(self, llm_manager):
-                """Test that requests within cost limit are allowed."""
+        result = await llm_manager.process_request(request_id)
+
+        assert result is not None
+        assert result.status == RequestStatus.FAILED
+        assert "Cost limit exceeded" in result.error
+        assert ("unbounded API costs" in result.error or "estimated tokens" in result.error)
+
+    @pytest.mark.asyncio
+    async def test_cost_limit_allows_cheap_request(self, llm_manager):
+        """Test that requests within cost limit are allowed."""
         # Initialize the manager
-                await llm_manager.initialize()
+        await llm_manager.initialize()
         
         # Create a cheap request
                 small_prompt = "Hello, world!"
