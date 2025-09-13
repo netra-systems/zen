@@ -245,7 +245,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         # This assertion should PASS because MigrationError exists and works correctly
 
         assert type(classified_error).__name__ == "MigrationError", \
-
             f"Expected MigrationError, got {type(classified_error).__name__}"
 
 
@@ -255,7 +254,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         from netra_backend.app.db.transaction_errors import MigrationError
 
         assert isinstance(classified_error, MigrationError), \
-
             "Error should be classified as MigrationError instance"
 
 
