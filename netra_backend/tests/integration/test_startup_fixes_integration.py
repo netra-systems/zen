@@ -256,17 +256,18 @@ class TestRealServiceIntegrationRobust:
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_redis_manager_integration(self):
-        """Test integration with RedisTestManager."""
+        """Test integration with redis_manager SSOT pattern."""
         start_time = time.time()
-        
+
         try:
-            redis_manager = RedisTestManager()
-            assert redis_manager is not None, "RedisTestManager should be instantiable"
+            assert redis_manager is not None, "redis_manager should be available"
+            # Test that redis_manager is properly initialized
+            assert hasattr(redis_manager, 'ping') or callable(redis_manager), "redis_manager should have redis interface"
         except ImportError as e:
-            pytest.skip(f"RedisTestManager not available: {e}")
-        
+            pytest.skip(f"redis_manager not available: {e}")
+
         execution_time = time.time() - start_time
-        assert execution_time >= 0.0 and execution_time < 10.0, f"Redis manager creation timing: {execution_time}s"
+        assert execution_time >= 0.0 and execution_time < 10.0, f"Redis manager validation timing: {execution_time}s"
 
     @pytest.mark.integration
     @pytest.mark.asyncio
