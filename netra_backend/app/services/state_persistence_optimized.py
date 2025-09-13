@@ -15,5 +15,9 @@ from netra_backend.app.services.state_persistence import (
     OptimizedStatePersistence  # This is an alias to StatePersistenceService
 )
 
+# Backward compatibility aliases
+StatePersistenceOptimized = OptimizedStatePersistence  # Test compatibility
+OptimizedStatePersistenceService = StatePersistenceService  # Test compatibility
+
 # Re-export for backward compatibility
-__all__ = ['OptimizedStatePersistence', 'StatePersistenceService', 'StateCacheManager']
+__all__ = ['OptimizedStatePersistence', 'StatePersistenceService', 'StateCacheManager', 'StatePersistenceOptimized', 'OptimizedStatePersistenceService']

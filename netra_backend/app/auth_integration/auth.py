@@ -1063,6 +1063,9 @@ class TokenRefreshResult:
 # Issue #485 fix: Create auth_manager instance for test infrastructure access
 auth_manager = BackendAuthIntegration()
 
+# Backward compatibility alias for integration tests
+AuthIntegrationService = BackendAuthIntegration  # Tests expect this name
+
 # Export auth_manager for Issue #485 compatibility
 __all__ = [
     "auth_client",
@@ -1074,7 +1077,8 @@ __all__ = [
     "AuthValidationResult",
     "TokenRefreshResult",
     "auth_manager",  # Issue #485 fix: Missing import
-    "unified_auth_client"  # Issue #762 Phase 2: Backward compatibility alias
+    "unified_auth_client",  # Issue #762 Phase 2: Backward compatibility alias
+    "AuthIntegrationService"  # Backward compatibility for tests
 ]
 
 # Issue #762 Phase 2 Remediation: Add backward compatibility alias
