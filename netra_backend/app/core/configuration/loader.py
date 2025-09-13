@@ -159,9 +159,9 @@ class ConfigurationLoader:
                 "url": config.redis_url if hasattr(config, 'redis_url') else None
             },
             "llm": {
-                "provider": config.llm_configs.default.provider if hasattr(config, 'llm_configs') else None,
-                "model": config.llm_configs.default.model if hasattr(config, 'llm_configs') else None,
-                "api_key": config.llm_configs.default.api_key if hasattr(config, 'llm_configs') else None
+                "provider": config.llm_configs.get("default", {}).provider if hasattr(config, 'llm_configs') and config.llm_configs else None,
+                "model": config.llm_configs.get("default", {}).model_name if hasattr(config, 'llm_configs') and config.llm_configs else None,
+                "api_key": config.llm_configs.get("default", {}).api_key if hasattr(config, 'llm_configs') and config.llm_configs else None
             },
             "auth": {
                 "url": config.auth_service_url if hasattr(config, 'auth_service_url') else None,
