@@ -150,14 +150,41 @@
 2. **Helper Modules:** Move to dedicated `test_helpers/` directory
 3. **Pytest Config:** Add exclusions to `pyproject.toml` for specific helper classes
 
-### Issue 6: Deprecation Warnings - Logging and Import Patterns
+### ✅ Issue 6: Deprecation Warnings - Logging and Import Patterns - PROCESSED
 **Category:** failing-test-active-dev-p3-deprecation-cleanup  
 **Severity:** P3 - Low (Technical debt)  
-**Pattern:** Multiple deprecation warnings for:
-- `shared.logging.unified_logger_factory` usage  
-- WebSocket import paths  
-- Pydantic class-based config  
-- Environment detector usage  
+**SNST Status:** 🔗 **UPDATED EXISTING ISSUE** - Linked to GitHub Issue #416  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/416  
+**Labels:** P3, claude-code-generated-issue, tech-debt, websocket  
+**Processing Date:** 2025-09-13
+
+**Deprecation Patterns Confirmed:**
+- `shared.logging.unified_logger_factory` usage requiring migration to `unified_logging_ssot`
+- WebSocket import paths requiring canonical SSOT registry paths  
+- Pydantic class-based config requiring ConfigDict migration (V2→V3 compatibility)
+- Environment detector usage requiring environment_constants migration
+
+**Root Cause Analysis:** Multiple API deprecations across different subsystems:
+1. **Logging Migration:** 10+ files using deprecated unified_logger_factory imports
+2. **WebSocket Imports:** Non-canonical import paths bypassing SSOT registry
+3. **Pydantic V2 Migration:** 11+ models using deprecated class Config patterns
+4. **Environment Detection:** Import paths using deprecated environment_detector module
+
+**SNST Processing Results:**
+- ✅ **Found Existing Issue:** GitHub Issue #416 exactly matches deprecation cleanup requirements
+- ✅ **Updated Issue:** Added environment_detector deprecation pattern and latest gardener evidence
+- ✅ **Priority Tagged:** P3 (Low) - Technical debt cleanup with no functional impact
+- ✅ **Technical Analysis:** Consolidated 6 distinct deprecation patterns requiring systematic migration
+- ✅ **Migration Strategy:** 6-phase approach covering all deprecated API patterns
+- ✅ **Business Impact:** Developer experience improvement through cleaner console output
+
+**Migration Phases Required:**
+1. **Logging System:** unified_logger_factory → unified_logging_ssot
+2. **WebSocket Imports:** Direct imports → SSOT canonical paths  
+3. **WebSocket Factory:** get_websocket_manager_factory → create_websocket_manager
+4. **Pydantic Config:** class Config → ConfigDict (V3 compatibility)
+5. **DateTime:** datetime.utcnow() → datetime.now(timezone.utc)
+6. **Environment Detection:** environment_detector → environment_constants  
 
 ### ✅ Issue 7: Missing Dependencies and Removed Modules - PROCESSED
 **Category:** failing-test-regression-p2-missing-dependencies  
