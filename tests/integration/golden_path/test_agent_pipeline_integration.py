@@ -43,7 +43,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 from netra_backend.app.services.agent_service_core import AgentService
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext

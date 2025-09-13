@@ -67,7 +67,7 @@
         # REMOVED_SYNTAX_ERROR: register_shared_object,
         # REMOVED_SYNTAX_ERROR: clear_shared_objects
         
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.triage.unified_triage_agent import TriageSubAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler

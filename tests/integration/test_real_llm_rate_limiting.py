@@ -6,7 +6,7 @@ import pytest
 
 # NOTE: Assuming the agent implementation lives in a path like this.
 # This will likely need to be adjusted.
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from shared.isolated_environment import get_env
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager

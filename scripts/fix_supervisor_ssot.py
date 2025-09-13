@@ -32,7 +32,7 @@ def main():
     
     # Test that we can import the supervisor
     try:
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         print("SUCCESS: SupervisorAgent imports correctly")
         
         # Test basic instantiation

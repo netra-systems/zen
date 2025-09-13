@@ -44,7 +44,7 @@ class SmokeTester:
             ("Backend Imports", "python -c \"from netra_backend.app.main import app; print('[U+2713] FastAPI app imports successfully')\""),
             ("Database Config", "python -c \"from netra_backend.app.db.postgres import get_engine; print('[U+2713] Database connection configured')\""),
             ("Redis Manager", "python -c \"from netra_backend.app.redis_manager import RedisManager; print('[U+2713] Redis manager available')\""),
-            ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent; print('[U+2713] Supervisor agent loads')\""),
+            ("Supervisor Agent", "python -c \"from netra_backend.app.agents.supervisor_ssot import SupervisorAgent; print('[U+2713] Supervisor agent loads')\""),
             ("Agent Service", "python -c \"from netra_backend.app.services.agent_service import AgentService; print('[U+2713] Agent service available')\""),
             ("Tool Dispatcher", "python -c \"from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('[U+2713] Tool dispatcher functional')\""),
             ("WebSocket Manager", "python -c \"from netra_backend.app.websocket_core.manager import WebSocketManager; print('[U+2713] WebSocket manager loads')\""),

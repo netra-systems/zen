@@ -87,7 +87,7 @@ async def test_supervisor():
     try:
         # Create supervisor with all dependencies
         async with db_manager.get_session() as db_session:
-            from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+            from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             print("[OK] Supervisor import successful")
             
             supervisor = SupervisorAgent(

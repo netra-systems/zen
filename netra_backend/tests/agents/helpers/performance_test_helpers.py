@@ -9,7 +9,7 @@ import uuid
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 def create_benchmark_supervisor(infrastructure, index):
     """Create supervisor for benchmarking"""

@@ -148,7 +148,7 @@ async def real_websocket_manager():
 async def real_agent_setup():
     """Setup REAL agent infrastructure for E2E pipeline tests - NO MOCKING ALLOWED."""
     try:
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
         from netra_backend.app.db.database_manager import DatabaseManager

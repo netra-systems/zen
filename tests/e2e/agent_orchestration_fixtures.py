@@ -30,7 +30,7 @@ async def real_supervisor_agent():
     Uses REAL services, NO MOCKS allowed in e2e tests
     """
     # Absolute imports per CLAUDE.md requirements
-    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     from netra_backend.app.dependencies import get_db_session
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.websocket_core import get_websocket_manager

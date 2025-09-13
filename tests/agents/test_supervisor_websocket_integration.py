@@ -39,7 +39,7 @@ Business Value Justification (BVJ):
 
 from datetime import datetime, timezone
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager

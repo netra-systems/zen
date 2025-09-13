@@ -33,9 +33,9 @@ def main():
     replacements = [
         # Fix supervisor agent imports
         (r'from netra_backend\.app\.agents\.supervisor\.supervisor_agent import SupervisorAgent',
-         'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent'),
+         'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent'),
         (r'from netra_backend\.app\.agents\.supervisor import SupervisorAgent',
-         'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent'),
+         'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent'),
          
         # Fix unified harness imports
         (r'from tests\.e2e\.unified_e2e_harness import UnifiedTestHarness',

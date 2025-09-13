@@ -174,7 +174,7 @@ class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
             
             # Try Consolidated supervisor creation
             try:
-                from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+                from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
                 from netra_backend.app.llm.llm_manager import LLMManager
                 
                 mock_llm_manager = Mock(spec=LLMManager)
@@ -397,7 +397,7 @@ class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
                     )
                     
                 elif supervisor_type == "Consolidated":
-                    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+                    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
                     from netra_backend.app.llm.llm_manager import LLMManager
                     
                     mock_llm_manager = Mock(spec=LLMManager)
@@ -482,7 +482,7 @@ class TestSupervisorGoldenPathReliability(SSotAsyncTestCase):
                 if supervisor_type == "SSOT":
                     from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
                 elif supervisor_type == "Consolidated":
-                    from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+                    from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
                 else:
                     continue
                 

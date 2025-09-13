@@ -43,7 +43,7 @@
             # Core imports for Phase 0 migration
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.user_execution_context import UserExecutionContext
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import ( )
             # REMOVED_SYNTAX_ERROR: RequestScopedContext,
             # REMOVED_SYNTAX_ERROR: RequestScopedDbDep,

@@ -27,7 +27,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
 from netra_backend.app.schemas.user_plan import PlanTier
 from tests.e2e.config import TEST_USERS, TestDataFactory

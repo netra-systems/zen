@@ -52,7 +52,7 @@
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.types import WebSocketMessage, MessageType
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handlers import MessageHandlerService
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handler_base import MessageHandlerBase
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient

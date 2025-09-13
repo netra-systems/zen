@@ -542,7 +542,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
         """Test 7.1: Agent execution fails due to missing GEMINI_API_KEY."""
         # Remove API key
             
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         
@@ -592,7 +592,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:8083
             
         Database.execute = failing_execute
         
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import get_config
         

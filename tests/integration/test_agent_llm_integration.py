@@ -34,7 +34,7 @@
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.main import app
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_service import AgentService
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import get_agent_supervisor, get_llm_manager

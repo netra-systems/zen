@@ -223,7 +223,7 @@ class WebSocketBridgeE2EValidator:
         """Create minimal startup components for testing."""
         from netra_backend.app.services.agent_websocket_bridge import get_agent_websocket_bridge
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import settings
         

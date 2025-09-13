@@ -39,7 +39,7 @@ from test_framework.ssot.base import BaseTestCase
 from shared.isolated_environment import get_env
 
 # Import target class and dependencies
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.services.user_execution_context import UserExecutionContext, InvalidContextError
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.llm.llm_manager import LLMManager

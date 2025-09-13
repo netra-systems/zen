@@ -75,7 +75,7 @@
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # Import the classes under test
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_context import ( )
         # REMOVED_SYNTAX_ERROR: UserExecutionContext,
         # REMOVED_SYNTAX_ERROR: InvalidContextError,

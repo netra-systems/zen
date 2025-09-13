@@ -26,9 +26,9 @@ def fix_supervisor_imports(file_path: Path) -> bool:
         # Fix supervisor.agent import to supervisor_consolidated
         replacements = [
             ('from netra_backend.app.agents.supervisor.agent import SupervisorAgent',
-             'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent'),
+             'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent'),
             ('from netra_backend.app.agents.supervisor.agent import',
-             'from netra_backend.app.agents.supervisor_consolidated import'),
+             'from netra_backend.app.agents.supervisor_ssot import'),
             # Fix PerformanceMetric imports
             ('from netra_backend.app.monitoring.models import PerformanceMetric',
              'from netra_backend.app.schemas.monitoring import PerformanceMetric'),

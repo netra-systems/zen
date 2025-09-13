@@ -1349,15 +1349,23 @@ class AgentWebSocketBridge(MonitorableComponent):
             if trace_context:
                 notification["trace"] = trace_context
             
-            # PHASE 3 FIX: Use user_id directly for WebSocket routing with concurrent user support
-            user_id = effective_user_context.user_id
-            print(f"DEBUG: notify_agent_started - run_id={run_id}, user_id={user_id}")
+            # PHASE 3 FIX: Use thread_id for WebSocket routing as expected by tests
+            # First try to get thread_id from context, then resolve from run_id
+            thread_id = getattr(effective_user_context, 'thread_id', None)
+            if not thread_id:
+                thread_id = await self._resolve_thread_id_from_run_id(run_id)
+            
+            if not thread_id:
+                logger.error(f" ALERT:  EMISSION BLOCKED: Cannot resolve thread_id for run_id={run_id}")
+                return False
+                
+            print(f"DEBUG: notify_agent_started - run_id={run_id}, thread_id={thread_id}")
             
             # PHASE 3 FIX: Log routing decision for concurrent user debugging
             if user_context and self.user_context and user_context != self.user_context:
                 logger.debug(
-                    f" CYCLE:  CONCURRENT_USER_ROUTING: Using provided user_context (user={user_id}) instead of "
-                    f"bridge default (user={self.user_context.user_id}) for run_id={run_id}"
+                    f" CYCLE:  CONCURRENT_USER_ROUTING: Using provided user_context (thread={thread_id}) instead of "
+                    f"bridge default for run_id={run_id}"
                 )
             
             # PHASE 2 FIX: Track event delivery with retry capability (if available)
@@ -1367,9 +1375,9 @@ class AgentWebSocketBridge(MonitorableComponent):
                     tracker = get_event_delivery_tracker()
                     event_id = tracker.track_event(
                         event_type="agent_started",
-                        user_id=user_id,
+                        user_id=effective_user_context.user_id,
                         run_id=run_id,
-                        thread_id=getattr(effective_user_context, 'thread_id', None),
+                        thread_id=thread_id,
                         data=notification,
                         priority=EventPriority.CRITICAL,  # Agent start is critical for UX
                         timeout_s=30.0,
@@ -1388,13 +1396,13 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             for attempt in range(max_retries):
                 try:
-                    success = await self._websocket_manager.send_to_user(user_id, notification)
-                    print(f"DEBUG: notify_agent_started - send_to_user success={success} (attempt {attempt + 1}/{max_retries})")
+                    success = await self._websocket_manager.send_to_thread(thread_id, notification)
+                    print(f"DEBUG: notify_agent_started - send_to_thread success={success} (attempt {attempt + 1}/{max_retries})")
                     
                     if success:
                         break  # Success! Exit retry loop
                     else:
-                        last_error = "WebSocket send_to_user returned False"
+                        last_error = "WebSocket send_to_thread returned False"
                         if attempt < max_retries - 1:  # Don't delay after last attempt
                             logger.warning(f" WARNING: [U+FE0F] RETRY: agent_started delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
                             await asyncio.sleep(retry_delay)

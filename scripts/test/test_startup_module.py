@@ -35,7 +35,7 @@ async def test_startup_module():
             import_found = False
             with open('netra_backend/app/startup_module.py', 'r') as f:
                 content = f.read()
-                if 'from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent' in content:
+                if 'from netra_backend.app.agents.supervisor_ssot import SupervisorAgent' in content:
                     print("[PASS] Import statement found in startup_module.py")
                     import_found = True
                 else:
@@ -58,7 +58,7 @@ async def test_startup_module():
         mock_tool_dispatcher = Mock()
         
         # Import and create
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
         
         supervisor = SupervisorAgent(
             db_session=mock_db_session,
