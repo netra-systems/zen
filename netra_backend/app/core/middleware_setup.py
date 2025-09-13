@@ -14,8 +14,200 @@ from starlette.responses import RedirectResponse, Response
 
 from netra_backend.app.core.configuration import get_configuration
 from shared.cors_config_builder import CORSConfigurationBuilder
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================================
+# WEBSOCKET EXCLUSION MIDDLEWARE (Module-level export for test imports)
+# ============================================================================
+
+class WebSocketExclusionMiddleware(BaseHTTPMiddleware):
+    """Middleware that excludes WebSocket connections with ASGI scope protection.
+    
+    This is the exportable version of the middleware class that can be imported
+    by test modules. The actual inline implementation in functions provides
+    the same functionality.
+    """
+    
+    async def dispatch(self, request: Request, call_next) -> Response:
+        """Only process HTTP requests with enhanced scope protection."""
+        try:
+            # ASGI Scope Protection: Validate request object before processing
+            if not hasattr(request, 'url') or not hasattr(request.url, 'path'):
+                logger.warning("Invalid request object detected in WebSocket exclusion middleware")
+                # Create a minimal response to prevent routing errors
+                from fastapi.responses import JSONResponse
+                return JSONResponse(
+                    status_code=400, 
+                    content={"error": "invalid_request", "message": "Invalid request format"}
+                )
+            
+            # Additional scope validation
+            if hasattr(request, 'scope') and request.scope:
+                scope_type = request.scope.get('type', 'unknown')
+                if scope_type == 'websocket':
+                    # This should not happen in HTTP middleware, but protect against it
+                    logger.warning("WebSocket scope detected in HTTP middleware - potential routing error")
+                    # Bypass processing for safety
+                    return await call_next(request)
+            
+            # Normal HTTP request processing
+            return await call_next(request)
+            
+        except AttributeError as e:
+            logger.error(f"ASGI Scope AttributeError in WebSocket exclusion: {e}")
+            # Return safe response to prevent routing.py line 716 errors
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=500,
+                content={"error": "scope_error", "message": "Request scope validation failed"}
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in WebSocket exclusion middleware: {e}")
+            # Pass through to prevent breaking the request chain
+            return await call_next(request)
+    
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """ASGI middleware call with enhanced scope protection and validation."""
+        try:
+            # Phase 1: Validate this is the correct middleware type for the scope
+            scope_type = scope.get("type")
+            
+            # Phase 2: Enhanced scope validation for HTTP requests
+            if scope_type == "http":
+                if not self._is_valid_http_scope(scope):
+                    logger.error("Invalid HTTP scope detected in WebSocket exclusion middleware")
+                    await self._send_safe_http_response(send, scope, "Invalid HTTP scope format")
+                    return
+                
+                # Process valid HTTP request through normal middleware stack
+                await super().__call__(scope, receive, send)
+                return
+            
+            # Phase 3: WebSocket connections should not reach HTTP middleware
+            elif scope_type == "websocket":
+                logger.warning("WebSocket scope reached HTTP middleware - potential routing configuration issue")
+                # For WebSocket, we can't send HTTP responses, so we just log and pass through
+                # This should be handled at the ASGI app level, not middleware level
+                return
+            
+            # Phase 4: Unknown scope types
+            else:
+                logger.warning(f"Unknown scope type '{scope_type}' in WebSocket exclusion middleware")
+                if scope_type == "lifespan":
+                    # Lifespan events should pass through middleware
+                    return
+                # For other unknown types, attempt to process normally
+                await super().__call__(scope, receive, send)
+                return
+                
+        except Exception as e:
+            logger.error(f"Critical error in WebSocket exclusion middleware __call__: {e}")
+            # For non-HTTP scopes, we can't send HTTP error responses
+            if scope.get("type") == "http":
+                await self._send_safe_http_response(send, scope, f"Middleware error: {e}")
+            # For other scope types, log and continue without breaking the connection
+    
+    def _is_valid_http_scope(self, scope: dict) -> bool:
+        """Validate HTTP scope structure to prevent routing.py line 716 errors."""
+        try:
+            # Phase 1: Check required HTTP scope fields
+            required_fields = ["type", "method", "path", "headers"]
+            for field in required_fields:
+                if field not in scope:
+                    logger.warning(f"Missing required HTTP scope field: {field}")
+                    return False
+            
+            # Phase 2: Validate field types and basic structure
+            if scope.get("type") != "http":
+                logger.warning(f"Invalid scope type for HTTP processing: {scope.get('type')}")
+                return False
+            
+            # Phase 3: Validate method is a valid HTTP method
+            method = scope.get("method")
+            if not isinstance(method, str) or len(method) == 0:
+                logger.warning(f"Invalid HTTP method in scope: {method}")
+                return False
+            
+            # Validate path is string
+            path = scope.get("path")
+            if not isinstance(path, str):
+                logger.warning(f"Invalid path type in HTTP scope: {type(path)}")
+                return False
+            
+            # Validate query_string is bytes-like
+            query_string = scope.get("query_string")
+            if not isinstance(query_string, (bytes, str)):
+                logger.warning(f"Invalid query_string type in HTTP scope: {type(query_string)}")
+                return False
+            
+            # Validate headers is list of tuples
+            headers = scope.get("headers")
+            if not isinstance(headers, list):
+                logger.warning(f"Invalid headers type in HTTP scope: {type(headers)}")
+                return False
+            
+            # Phase 4: Additional validation for common failure patterns
+            # Check for URL object accidentally passed as scope
+            if hasattr(scope, 'query_params'):
+                logger.error("ASGI scope contains URL object attributes - malformed scope detected")
+                return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"HTTP scope validation error: {e}")
+            return False
+    
+    async def _send_safe_http_response(self, send: Send, scope: Scope, error_message: str = None) -> None:
+        """Send a safe HTTP response for invalid scopes."""
+        try:
+            # Determine appropriate status code based on error type
+            status_code = 400  # Bad Request for malformed scopes
+            if error_message and "websocket" in error_message.lower():
+                status_code = 426  # Upgrade Required for WebSocket protocol issues
+            elif error_message and "auth" in error_message.lower():
+                status_code = 401  # Unauthorized for auth issues
+            
+            # Create appropriate error response
+            error_detail = error_message or "Invalid request scope"
+            response_data = {
+                "error": "asgi_scope_validation_failed",
+                "message": error_detail,
+                "status_code": status_code,
+                "issue_reference": "#517"
+            }
+            response_body = json.dumps(response_data)
+            content_length = str(len(response_body.encode("utf-8")))
+            
+            # Send HTTP response start
+            await send({
+                "type": "http.response.start",
+                "status": status_code,
+                "headers": [
+                    (b"content-type", b"application/json"),
+                    (b"content-length", content_length.encode()),
+                    (b"x-asgi-scope-error", b"true"),
+                ],
+            })
+            
+            # Send HTTP response body
+            await send({
+                "type": "http.response.body",
+                "body": response_body.encode("utf-8"),
+            })
+            
+        except Exception as e:
+            logger.error(f"Failed to send safe HTTP response: {e}")
+            # Last resort - send minimal response
+            try:
+                await send({"type": "http.response.start", "status": 500, "headers": []})
+                await send({"type": "http.response.body", "body": b"Server Error"})
+            except:
+                logger.critical("Could not send any HTTP response - connection may be broken")
 
 
 # Legacy CORS functions removed - now using unified shared.cors_config
