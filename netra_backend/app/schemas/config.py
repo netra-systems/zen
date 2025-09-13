@@ -670,21 +670,58 @@ class AppConfig(BaseModel):
 
     def get_database_url(self) -> str:
         """Get the database URL for PostgreSQL connection.
+        
+        Uses SSOT DatabaseURLBuilder for consistent URL construction.
+        Maintains backward compatibility with existing database connections.
 
         Returns:
             str: Database connection URL
         """
         if self.database_url:
             return self.database_url
-        # Fallback to construct from environment variables
+        
+        try:
+            # Use SSOT DatabaseURLBuilder with sync format for compatibility
+            from shared.database_url_builder import DatabaseURLBuilder
+            from shared.isolated_environment import get_env
+            import logging
+            
+            logger = logging.getLogger(__name__)
+            builder = DatabaseURLBuilder(get_env().get_all())
+            url = builder.get_url_for_environment(sync=True)
+            
+            if url:
+                logger.info("Database URL constructed via SSOT DatabaseURLBuilder")
+                return url
+            else:
+                # Fallback if SSOT builder returns None
+                return self._fallback_manual_url_construction()
+                
+        except ImportError as e:
+            import logging
+            logging.getLogger(__name__).warning(f"SSOT DatabaseURLBuilder not available: {e}")
+            return self._fallback_manual_url_construction()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"SSOT database URL construction failed: {e}")
+            return self._fallback_manual_url_construction()
+
+    def _fallback_manual_url_construction(self) -> str:
+        """Fallback manual URL construction for emergency compatibility."""
         from shared.isolated_environment import get_env
+        import logging
+        
+        logger = logging.getLogger(__name__)
         env = get_env()
         host = env.get('POSTGRES_HOST', 'localhost')
         port = env.get('POSTGRES_PORT', '5432')
         user = env.get('POSTGRES_USER', 'postgres')
         password = env.get('POSTGRES_PASSWORD', '')
         database = env.get('POSTGRES_DB', 'postgres')
-        return f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        
+        url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        logger.warning("Using fallback manual database URL construction")
+        return url
 
     def get_clickhouse_url(self) -> str:
         """Get the ClickHouse database URL.
