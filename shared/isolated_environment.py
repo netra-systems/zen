@@ -595,6 +595,19 @@ class IsolatedEnvironment:
         """
         return self.enable_isolation(backup_original, refresh_vars)
     
+    def enable(self, backup_original: bool = True, refresh_vars: bool = True) -> None:
+        """
+        Compatibility method - enables isolation mode for WebSocket tests.
+        
+        This method provides backward compatibility for tests expecting an enable()
+        method on IsolatedEnvironment instances. Delegates to enable_isolation().
+        
+        Args:
+            backup_original: Whether to backup current os.environ state
+            refresh_vars: Whether to refresh isolated vars from current os.environ state
+        """
+        return self.enable_isolation(backup_original, refresh_vars)
+
     def disable_isolation(self, restore_original: bool = False) -> None:
         """
         Disable isolation mode and optionally restore original environment.

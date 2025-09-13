@@ -43,7 +43,7 @@ Multiple execution engine implementations exist despite SSOT consolidation claim
 - [x] **Step 0 Complete**: SSOT Audit - Critical P0 violation identified and issue created
 - [x] **Step 1 Complete**: Discovered comprehensive test inventory - 12 execution engines found (only 1 should exist)
 - [x] **Step 2 Complete**: Created 6 new SSOT tests - ALL FAILING as expected (proving violations exist)
-- [ ] **Step 3**: Plan SSOT remediation strategy
+- [x] **Step 3 Complete**: Detailed 5-phase remediation plan - systematic low-risk consolidation strategy
 - [ ] **Step 4**: Execute SSOT remediation plan
 - [ ] **Step 5**: Test fix loop - validate system stability
 - [ ] **Step 6**: Create PR and close issue
@@ -103,26 +103,52 @@ Multiple execution engine implementations exist despite SSOT consolidation claim
 - **Expected After Step 4**: ALL PASSING ✅ (validates successful consolidation)
 - **Business Protection**: Tests prevent regression after SSOT consolidation
 
-## Remediation Plan - DETAILED
+## Remediation Plan - 5-Phase Strategy
 
-### Phase 1: Pre-Remediation Validation (2 hours)
-- [x] **Run Mission Critical Suite**: Must maintain 100% pass rate
-- [x] **Validate Foundation Tests**: UserExecutionEngine base functionality
-- [x] **Confirm Failing Tests**: Prove SSOT violations exist
+### Phase 1: Low-Risk Infrastructure Cleanup (2 hours, MINIMAL IMPACT)
+- [ ] **Remove Backup Files**: `execution_engine_consolidated.backup_*`, `execution_engine.backup_*`
+- [ ] **Risk Level**: MINIMAL (backup files, no active usage)
+- [ ] **Validation**: Mission critical tests every 30 minutes
+- [ ] **Rollback**: Git restore if any issues
 
-### Phase 2: SSOT Consolidation (6 hours)
-1. **Merge Unique Functionality**: `execution_engine_consolidated.py` → UserExecutionEngine
-2. **Extract Interface**: `execution_engine_interface.py` → implement in UserExecutionEngine
-3. **Remove Legacy Adapter**: `execution_engine_legacy_adapter.py` after migration
-4. **Integrate MCP**: `mcp_execution_engine.py` → UserExecutionEngine MCP support
-5. **Merge Request Scoping**: `request_scoped_execution_engine.py` → UserExecutionEngine
-6. **Consolidate Factories**: All factories → single UserExecutionEngineFactory
+### Phase 2: Factory Consolidation (3 hours, LOW-MEDIUM RISK)
+- [ ] **Consolidate Factories**: Merge into single UserExecutionEngineFactory
+- [ ] **Target Files**: `execution_engine_unified_factory.py`, `core/managers/execution_engine_factory.py`
+- [ ] **Import Updates**: Update 27+ test files importing old factories
+- [ ] **Validation**: Factory creation tests + mission critical suite
 
-### Phase 3: Post-Remediation Validation (2 hours)
-- [ ] **Mission Critical Suite**: Must maintain 100% pass rate
-- [ ] **SSOT Enforcement Tests**: Should change from FAILING to PASSING
-- [ ] **E2E Golden Path**: Full end-to-end validation
-- [ ] **Performance**: Ensure no degradation from consolidation
+### Phase 3: Adapter and Interface Cleanup (4 hours, MEDIUM RISK)
+- [ ] **Keep Interface**: `execution_engine_interface.py` (IExecutionEngine)
+- [ ] **Remove Adapters**: SupervisorExecutionEngineAdapter, ConsolidatedExecutionEngineWrapper
+- [ ] **Update Imports**: 53+ files with forbidden imports → UserExecutionEngine
+- [ ] **Validation**: Import enforcement tests start passing
+
+### Phase 4: Tool Engine Integration (3 hours, HIGH BUSINESS RISK)
+- [ ] **High-Risk Consolidation**: UnifiedToolExecutionEngine, ToolExecutionEngine
+- [ ] **Critical Validation**: Tool execution must maintain WebSocket events
+- [ ] **WebSocket Events**: Ensure tool_executing + tool_completed events preserved
+- [ ] **Business Risk**: Direct impact on user tool response delivery
+
+### Phase 5: Core Engine Consolidation (4 hours, HIGHEST BUSINESS RISK)
+- [ ] **Most Critical**: `supervisor/execution_engine.py` → merge into UserExecutionEngine
+- [ ] **BaseExecutionEngine**: Extract reusable patterns to UserExecutionEngine
+- [ ] **Backward Compatibility**: Maintain API compatibility during transition
+- [ ] **Intensive Testing**: Full E2E + Golden Path validation required
+
+### Success Validation (After Each Phase):
+- [ ] **Mission Critical**: `test_websocket_agent_events_suite.py` PASSES
+- [ ] **Golden Path**: End-to-end user response delivery working
+- [ ] **WebSocket Events**: All 5 critical events delivered to users
+- [ ] **User Isolation**: Multi-user scenarios continue working
+- [ ] **Performance**: Metrics maintained
+
+### Final Validation (All 6 Tests FAILING → PASSING):
+- [ ] `test_legacy_execution_engine_detection.py` → PASSING (1 engine found)
+- [ ] `test_import_enforcement.py` → PASSING (0 forbidden imports)
+- [ ] `test_factory_compliance.py` → PASSING (1 factory class)
+- [ ] `test_runtime_validation.py` → PASSING (consistent engine type)
+- [ ] `test_websocket_event_ssot.py` → PASSING (single event path)
+- [ ] `test_multi_user_ssot.py` → PASSING (same engine for all users)
 
 ## Files Requiring Changes - SPECIFIC
 

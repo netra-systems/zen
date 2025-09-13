@@ -85,6 +85,11 @@ class TestAuthenticatedCompleteUserJourneyBusinessValue(SSotAsyncTestCase):
         self._auth_helper = None
         self._websocket_helper = None
         self._user_context = None
+    
+    @pytest.fixture(autouse=True)
+    async def auto_async_setup(self):
+        """Auto-executed async setup fixture - CRITICAL FIX for Issue #764."""
+        await self.async_setup_method()
         
     async def async_setup_method(self, method=None):
         """Async setup with mandatory authentication initialization."""
