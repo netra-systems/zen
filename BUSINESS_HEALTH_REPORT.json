@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-09-12T16:35:35.763342",
-  "overall_score": 19,
+  "timestamp": "2025-09-13T09:55:44.693131",
+  "overall_score": 23,
   "chat_score": 20.0,
   "chat_components": {
     "websocket_events": false,
@@ -15,12 +15,12 @@
   ],
   "warnings": [
     "Docker setup: 'UnifiedDockerManager' object has no attribute 'check_docker_status'",
-    "Config issues: Environment",
     "LLM connectivity: No module named 'netra_backend.app.services.llm_client'",
     "Chat flow test: SupervisorAgent.__init__() missing 1 required positional argument: 'llm_manager'"
   ],
   "successes": [
+    "Configuration valid (development)",
     "User isolation working",
-    "All 5242 test files valid"
+    "All 5524 test files valid"
   ]
 }
