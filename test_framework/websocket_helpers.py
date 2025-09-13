@@ -562,20 +562,31 @@ class WebSocketTestHelpers:
 
             return MockWebSocketConnection(user_id=user_id)
         
+        # Use real WebSocket connection for Docker environment
+        return await WebSocketTestHelpers._create_real_websocket_connection(url, headers, timeout, max_retries)
+
+    @staticmethod
+    async def _create_real_websocket_connection(
+        url: str,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: float = 10.0,
+        max_retries: int = 3
+    ):
+        """Create a real WebSocket connection with retry logic and compatibility handling"""
         if not WEBSOCKETS_AVAILABLE:
             raise pytest.skip("websockets library not available")
-        
+
         # Extract JWT token from headers for subprotocol authentication
         auth_token = None
         subprotocols = []
-        
+
         if headers and "Authorization" in headers:
             auth_header = headers["Authorization"]
             if auth_header.startswith("Bearer "):
                 auth_token = auth_header.replace("Bearer ", "")
                 # Use jwt-auth subprotocol for authentication
                 subprotocols = ["jwt-auth"]
-        
+
         last_error = None
         for attempt in range(max_retries):
             try:
@@ -620,13 +631,13 @@ class WebSocketTestHelpers:
                             ),
                             timeout=timeout
                         )
-                
+
                 # Test basic connectivity by sending a ping
                 await connection.ping()
-                
+
                 return connection
-                
-            except (websockets.exceptions.ConnectionClosedError, 
+
+            except (websockets.exceptions.ConnectionClosedError,
                    websockets.exceptions.InvalidStatus,
                    asyncio.TimeoutError) as e:
                 last_error = e
@@ -637,7 +648,7 @@ class WebSocketTestHelpers:
             except Exception as e:
                 last_error = e
                 break
-        
+
         error_msg = f"Failed to create WebSocket connection after {max_retries} attempts: {last_error}"
         raise ConnectionError(error_msg)
     
