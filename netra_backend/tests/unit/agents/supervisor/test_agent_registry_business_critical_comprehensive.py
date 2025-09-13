@@ -78,7 +78,6 @@ from netra_backend.app.agents.supervisor.agent_registry import (
     AgentRegistry,
     UserAgentSession, 
     AgentLifecycleManager,
-    WebSocketManagerAdapter,
     get_agent_registry
 )
 
@@ -520,6 +519,7 @@ class TestWebSocketIntegration(SSotAsyncTestCase):
             run_id=f"run_{uuid.uuid4().hex[:8]}"
         )
 
+    @pytest.mark.skip(reason="WebSocketManagerAdapter removed in SSOT consolidation - Issue #762")
     async def test_websocket_manager_adapter_functionality(self):
         """CRITICAL: Validates WebSocketManagerAdapter provides all required notification methods.
         
@@ -655,6 +655,7 @@ class TestWebSocketIntegration(SSotAsyncTestCase):
         self.assertNotEqual(session1._websocket_bridge, session2._websocket_bridge, 
                           "Users must have isolated WebSocket bridges")
 
+    @pytest.mark.skip(reason="WebSocketManagerAdapter removed in SSOT consolidation - Issue #762")
     async def test_websocket_adapter_graceful_degradation(self):
         """CRITICAL: Validates graceful degradation when WebSocket methods are missing.
         

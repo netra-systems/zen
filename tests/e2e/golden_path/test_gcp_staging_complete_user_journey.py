@@ -64,7 +64,7 @@ class TestGCPStagingCompleteUserJourney(BaseE2ETest):
     """
 
     @pytest.fixture(autouse=True)
-    def setup_staging_environment(self):
+    async def setup_staging_environment(self):
         """Set up GCP staging environment configuration."""
         self.staging_base_url = "https://staging.netra.ai"
         self.staging_websocket_url = "wss://staging.netra.ai/ws"

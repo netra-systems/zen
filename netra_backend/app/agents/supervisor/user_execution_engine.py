@@ -581,21 +581,41 @@ class UserExecutionEngine(IExecutionEngine):
         # Create UserExecutionContext if not provided
         if user_context is None:
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            import uuid
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for agent execution fallback IDs
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            
+            # Generate consistent test user ID and context IDs using SSOT pattern
+            test_user_id = UnifiedIdGenerator.generate_base_id("test_user", True, 8)
+            thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(
+                test_user_id, "agent_execution_fallback"
+            )
+            
             user_context = UserExecutionContext(
-                user_id=f"test_user_{uuid.uuid4().hex[:8]}",
-                run_id=f"test_run_{uuid.uuid4().hex[:8]}",
-                thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+                user_id=test_user_id,
+                run_id=run_id,
+                thread_id=thread_id,
                 metadata={'created_via': '_init_from_factory', 'issue': '#692'}
             )
         elif hasattr(user_context, '__class__') and 'Mock' in user_context.__class__.__name__:
             # Convert mock object to real UserExecutionContext for compatibility
             from netra_backend.app.services.user_execution_context import UserExecutionContext
-            import uuid
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for mock conversion fallback IDs
+            from shared.id_generation.unified_id_generator import UnifiedIdGenerator
+            
+            # Generate fallback user ID if not available from mock
+            fallback_user_id = getattr(user_context, 'user_id', None)
+            if not fallback_user_id:
+                fallback_user_id = UnifiedIdGenerator.generate_base_id("test_user", True, 8)
+            
+            # Generate context IDs using SSOT pattern for mock conversion
+            thread_id, run_id, _ = UnifiedIdGenerator.generate_user_context_ids(
+                fallback_user_id, "mock_conversion_fallback"
+            )
+            
             user_context = UserExecutionContext(
-                user_id=getattr(user_context, 'user_id', f"test_user_{uuid.uuid4().hex[:8]}"),
-                run_id=getattr(user_context, 'run_id', f"test_run_{uuid.uuid4().hex[:8]}"),
-                thread_id=getattr(user_context, 'thread_id', f"test_thread_{uuid.uuid4().hex[:8]}"),
+                user_id=fallback_user_id,
+                run_id=getattr(user_context, 'run_id', run_id),
+                thread_id=getattr(user_context, 'thread_id', thread_id),
                 metadata={'created_via': '_init_from_factory', 'issue': '#692'}
             )
 

@@ -69,6 +69,10 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_START = "agent_start"  # Alias for compatibility
+    AGENT_COMPLETE = "agent_complete"  # Alias for compatibility
+    TOOL_EXECUTE = "tool_execute"  # Alias for compatibility  
+    TOOL_COMPLETE = "tool_complete"  # Alias for compatibility
     AGENT_REQUEST = "agent_request"
     AGENT_TASK = "agent_task"
     AGENT_TASK_ACK = "agent_task_ack"
@@ -550,13 +554,34 @@ def get_frontend_message_type(message_type: Union[str, MessageType]) -> str:
     return normalized.value
 
 
-def create_standard_message(msg_type: Union[str, MessageType], 
-                          payload: Dict[str, Any],
+def create_standard_message(msg_type: Union[str, MessageType] = None, 
+                          payload: Dict[str, Any] = None,
                           user_id: Optional[str] = None,
-                          thread_id: Optional[str] = None) -> WebSocketMessage:
+                          thread_id: Optional[str] = None,
+                          message_type: Optional[Union[str, MessageType]] = None,
+                          content: Optional[Dict[str, Any]] = None,
+                          **kwargs) -> WebSocketMessage:
     """Create standardized WebSocket message with strict validation."""
     import time
     import uuid
+    
+    # Handle backward compatibility for message_type parameter
+    if message_type is not None:
+        if msg_type is not None:
+            raise ValueError("Cannot specify both msg_type and message_type parameters")
+        msg_type = message_type
+    
+    # Handle backward compatibility for content parameter (alias for payload)
+    if content is not None:
+        if payload is not None:
+            raise ValueError("Cannot specify both payload and content parameters")
+        payload = content
+    
+    # Validate required parameters
+    if msg_type is None:
+        raise ValueError("msg_type (or message_type) is required")
+    if payload is None:
+        payload = {}
     
     # Phase 2 Fix 2b: Strengthen JSON schema validation
     # Validate message type first (this will raise proper errors now)
@@ -663,9 +688,10 @@ def create_error_message(error_code: str,
     )
 
 
-def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, Any]],
+def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, Any]] = None,
                          data: Optional[Dict[str, Any]] = None,
                          correlation_id: Optional[str] = None,
+                         content: Optional[Dict[str, Any]] = None,
                          **kwargs) -> ServerMessage:
     """
     Create standardized server message with hybrid signature support.
@@ -694,6 +720,16 @@ def create_server_message(msg_type_or_dict: Union[str, MessageType, Dict[str, An
         ValueError: If arguments are invalid or ambiguous
     """
     import time
+    
+    # Handle content-only pattern (used by tests)
+    if msg_type_or_dict is None and content is not None:
+        # Default to SYSTEM_MESSAGE for content-only calls
+        msg_type_or_dict = MessageType.SYSTEM_MESSAGE
+        data = content
+    
+    # Handle backward compatibility for content parameter
+    if content is not None and data is None and not isinstance(msg_type_or_dict, dict):
+        data = content
     
     # PATTERN DETECTION: Legacy vs Standard calling patterns
     if isinstance(msg_type_or_dict, dict):
