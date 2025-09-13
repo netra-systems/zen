@@ -36,6 +36,7 @@ from contextlib import asynccontextmanager
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
 from netra_backend.app.logging_config import central_logger
 from shared.isolated_environment import IsolatedEnvironment
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -105,7 +106,7 @@ class UserExecutionContext:
     user_id: str
     thread_id: str  
     run_id: str
-    request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    request_id: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("user_request"))
     
     # Session and connection management
     db_session: Optional['AsyncSession'] = field(default=None, repr=False, compare=False)
@@ -124,7 +125,7 @@ class UserExecutionContext:
     cleanup_callbacks: List[Callable] = field(default_factory=list, repr=False, compare=False)
     
     # ISSUE #414 FIX: Enhanced isolation and memory leak prevention
-    _isolation_token: str = field(default_factory=lambda: str(uuid.uuid4()), repr=False, compare=False)
+    _isolation_token: str = field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("isolation_token"), repr=False, compare=False)
     _memory_refs: List[Any] = field(default_factory=list, repr=False, compare=False)
     _validation_fingerprint: Optional[str] = field(default=None, repr=False, compare=False)
     

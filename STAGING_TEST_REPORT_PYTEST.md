@@ -1,16 +1,16 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 15:42:26
+**Generated:** 2025-09-13 15:44:10
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 8
+- **Total Tests:** 5
 - **Passed:** 0 (0.0%)
-- **Failed:** 6 (75.0%)
-- **Skipped:** 2
-- **Duration:** 2.90 seconds
+- **Failed:** 5 (100.0%)
+- **Skipped:** 0
+- **Duration:** 91.81 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,91 +19,82 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_complete_golden_path_staging_environment | FAIL failed | 0.370s | test_websocket_ssot_golden_path.py |
-| test_websocket_connection_staging_reliability | FAIL failed | 0.286s | test_websocket_ssot_golden_path.py |
-| test_ai_agent_response_quality_staging | FAIL failed | 0.220s | test_websocket_ssot_golden_path.py |
-| test_multi_user_staging_scenarios | FAIL failed | 0.612s | test_websocket_ssot_golden_path.py |
-| test_staging_performance_regression | FAIL failed | 0.213s | test_websocket_ssot_golden_path.py |
-| test_staging_deployment_confidence_validation | FAIL failed | 0.215s | test_websocket_ssot_golden_path.py |
-| test_concurrent_user_load_staging | SKIP skipped | 0.000s | test_websocket_ssot_golden_path.py |
-| test_memory_usage_staging_validation | SKIP skipped | 0.000s | test_websocket_ssot_golden_path.py |
+| test_complete_chat_message_to_agent_response_workflow | FAIL failed | 11.247s | test_user_chat_agent_execution.py |
+| test_multi_agent_collaboration_with_tool_execution | FAIL failed | 11.290s | test_user_chat_agent_execution.py |
+| test_long_running_agent_tasks_with_progress_updates | FAIL failed | 11.305s | test_user_chat_agent_execution.py |
+| test_agent_failure_recovery_and_error_handling | FAIL failed | 42.448s | test_user_chat_agent_execution.py |
+| test_complex_business_workflows_with_multiple_agent_interactions | FAIL failed | 11.209s | test_user_chat_agent_execution.py |
 
 ## Failed Tests Details
 
-### FAILED: test_complete_golden_path_staging_environment
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.370s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:238: in test_complete_golden_path_staging_environment
-    auth_headers = await self._authenticate_staging_user()
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_websocket_ssot_golden_path.py:100: in _authenticate_staging_user
-    "email": self.test_email,
-             ^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketSSoTGoldenPathStaging' object has no attribute 'test_email'...
+### FAILED: test_complete_chat_message_to_agent_response_workflow
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
+- **Duration:** 11.247s
+- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:320: in test_complete_chat_message_to_agent_response_workflow
+    assert result.business_value_delivered, "No business value delivered to user"
+E   AssertionError: No business value delivered to user
+E   assert False
+E    +  where False = ChatAgentTestResult(success=True, user_id='e2e-user-5f83c683', conversation_id='thread_e2e_auth_1_0657096b', agent_responses=[{'type': 'connect', 'data': {'mode': 'main', 'user_id': 'demo-use...', 'connection_...
 
-### FAILED: test_websocket_connection_staging_reliability
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.286s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:296: in test_websocket_connection_staging_reliability
-    auth_headers = await self._authenticate_staging_user()
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_websocket_ssot_golden_path.py:100: in _authenticate_staging_user
-    "email": self.test_email,
-             ^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketSSoTGoldenPathStaging' object has no attribute 'test_email'...
+### FAILED: test_multi_agent_collaboration_with_tool_execution
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
+- **Duration:** 11.290s
+- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:446: in test_multi_agent_collaboration_with_tool_execution
+    assert len(tool_execution_events) > 0, "No tool execution detected"
+E   AssertionError: No tool execution detected
+E   assert 0 > 0
+E    +  where 0 = len([])
 
-### FAILED: test_ai_agent_response_quality_staging
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.220s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:361: in test_ai_agent_response_quality_staging
-    auth_headers = await self._authenticate_staging_user()
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_websocket_ssot_golden_path.py:100: in _authenticate_staging_user
-    "email": self.test_email,
-             ^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketSSoTGoldenPathStaging' object has no attribute 'test_email'...
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_user_chat_agent_execution.py:458: in test_multi_agent_collaboration_with_tool_execution
+    pytest.fail(f"Multi-agent collaboration wit...
 
-### FAILED: test_multi_user_staging_scenarios
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.612s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:492: in test_multi_user_staging_scenarios
-    assert success_rate >= 0.8, \
-E   AssertionError: Multi-user success rate too low in staging: 0.00
-E   assert 0.0 >= 0.8...
+### FAILED: test_long_running_agent_tasks_with_progress_updates
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
+- **Duration:** 11.305s
+- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:594: in test_long_running_agent_tasks_with_progress_updates
+    assert user_experience_metrics["regular_communication"], "Insufficient user communication during long task"
+E   AssertionError: Insufficient user communication during long task
+E   assert False
 
-### FAILED: test_staging_performance_regression
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.213s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:521: in test_staging_performance_regression
-    auth_headers = await self._authenticate_staging_user()
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_websocket_ssot_golden_path.py:100: in _authenticate_staging_user
-    "email": self.test_email,
-             ^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketSSoTGoldenPathStaging' object has no attribute 'test_email'...
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_user_chat_agent_execution.py:606: in test_long_running_agent_tasks_with_progress_updates
+    pytes...
 
-### FAILED: test_staging_deployment_confidence_validation
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_ssot_golden_path.py
-- **Duration:** 0.215s
-- **Error:** tests\e2e\staging\test_websocket_ssot_golden_path.py:664: in test_staging_deployment_confidence_validation
-    assert system_health_score >= 1.0, \
-E   AssertionError: System health insufficient for deployment: 0.00 < 1.0
-E   assert 0.0 >= 1.0...
+### FAILED: test_agent_failure_recovery_and_error_handling
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
+- **Duration:** 42.448s
+- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:736: in test_agent_failure_recovery_and_error_handling
+    assert user_experience_quality["graceful_handling"], "System did not handle limitations gracefully"
+E   AssertionError: System did not handle limitations gracefully
+E   assert False
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_user_chat_agent_execution.py:748: in test_agent_failure_recovery_and_error_handling
+    pytest.fail(f"Agent failure...
+
+### FAILED: test_complex_business_workflows_with_multiple_agent_interactions
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_user_chat_agent_execution.py
+- **Duration:** 11.209s
+- **Error:** tests\e2e\staging\test_user_chat_agent_execution.py:883: in test_complex_business_workflows_with_multiple_agent_interactions
+    assert workflow_completeness >= 0.4, f"Insufficient workflow coverage: {workflow_completeness:.1%}"
+E   AssertionError: Insufficient workflow coverage: 0.0%
+E   assert 0.0 >= 0.4
+
+During handling of the above exception, another exception occurred:
+tests\e2e\staging\test_user_chat_agent_execution.py:898: in test_complex_business_workflows_with_multiple_agent_interaction...
 
 ## Pytest Output Format
 
 ```
-test_websocket_ssot_golden_path.py::test_complete_golden_path_staging_environment FAILED
-test_websocket_ssot_golden_path.py::test_websocket_connection_staging_reliability FAILED
-test_websocket_ssot_golden_path.py::test_ai_agent_response_quality_staging FAILED
-test_websocket_ssot_golden_path.py::test_multi_user_staging_scenarios FAILED
-test_websocket_ssot_golden_path.py::test_staging_performance_regression FAILED
-test_websocket_ssot_golden_path.py::test_staging_deployment_confidence_validation FAILED
-test_websocket_ssot_golden_path.py::test_concurrent_user_load_staging SKIPPED
-test_websocket_ssot_golden_path.py::test_memory_usage_staging_validation SKIPPED
+test_user_chat_agent_execution.py::test_complete_chat_message_to_agent_response_workflow FAILED
+test_user_chat_agent_execution.py::test_multi_agent_collaboration_with_tool_execution FAILED
+test_user_chat_agent_execution.py::test_long_running_agent_tasks_with_progress_updates FAILED
+test_user_chat_agent_execution.py::test_agent_failure_recovery_and_error_handling FAILED
+test_user_chat_agent_execution.py::test_complex_business_workflows_with_multiple_agent_interactions FAILED
 
 ==================================================
-0 passed, 6 failed, 2 skipped in 2.90s
+0 passed, 5 failed in 91.81s
 ```
 
 ## Test Coverage Matrix
@@ -111,8 +102,7 @@ test_websocket_ssot_golden_path.py::test_memory_usage_staging_validation SKIPPED
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
 | WebSocket | 1 | 0 | 1 | 0.0% |
-| Agent | 1 | 0 | 1 | 0.0% |
-| Performance | 1 | 0 | 1 | 0.0% |
+| Agent | 5 | 0 | 5 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
