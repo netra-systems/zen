@@ -70,7 +70,7 @@ try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.core.agent_execution_tracker import ExecutionState
 except ImportError as e:
-    pytest.skip(f"Skipping execution_engine tests due to import error: {e}")
+    pytest.skip(f"Skipping execution_engine tests due to import error: {e}", allow_module_level=True)
 
 
 class MockUserExecutionContext:
