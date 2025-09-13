@@ -130,9 +130,9 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
             f"Expected single module for SSOT compliance but found multiple modules causing inconsistent behavior."
         )
         
-        self.logger.critical(f"Found UserWebSocketEmitter in {len(set(module_paths))} different modules")
+        print(f"Found UserWebSocketEmitter in {len(set(module_paths))} different modules")
         for path in set(module_paths):
-            self.logger.critical(f"  - {path}")
+            print(f"  - {path}")
 
     @pytest.mark.expected_to_fail
     @pytest.mark.phase_1_pre_consolidation
@@ -171,7 +171,7 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
         )
         
         for module, params in signatures:
-            self.logger.critical(f"UserWebSocketEmitter in {module} has params: {params}")
+            print(f"UserWebSocketEmitter in {module} has params: {params}")
 
     @pytest.mark.expected_to_fail  
     @pytest.mark.phase_1_pre_consolidation
