@@ -364,12 +364,13 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                     concurrent_user_test['user_engine_properly_isolated'] = True
             
             elif hasattr(UserExecutionEngine, 'create_from_legacy'):
-                # Test legacy creation method
-                user1_isolated_engine = UserExecutionEngine.create_from_legacy(
-                    mock_websocket_manager=None, user_context=user1_context
+                # Test legacy creation method (correct signature: registry, websocket_bridge, user_context)
+                mock_registry = MagicMock()
+                user1_isolated_engine = await UserExecutionEngine.create_from_legacy(
+                    mock_registry, None, user_context=user1_context
                 )
-                user2_isolated_engine = UserExecutionEngine.create_from_legacy(
-                    mock_websocket_manager=None, user_context=user2_context
+                user2_isolated_engine = await UserExecutionEngine.create_from_legacy(
+                    mock_registry, None, user_context=user2_context
                 )
                 
                 if user1_isolated_engine is user2_isolated_engine:
