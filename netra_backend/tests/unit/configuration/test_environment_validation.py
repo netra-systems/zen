@@ -26,7 +26,7 @@ import pytest
 from typing import Dict, Any, Optional
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 from netra_backend.app.core.configuration.environment_detector import EnvironmentDetector
 from netra_backend.app.core.configuration.environment import EnvironmentManager
 
