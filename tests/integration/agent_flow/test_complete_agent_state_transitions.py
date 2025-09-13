@@ -223,10 +223,17 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
         )
         
         # Create agent state with proper isolation
+        agent_id = f"test_agent_{uuid.uuid4().hex[:8]}"
         agent_state = DeepAgentState(
-            agent_id=f"test_agent_{uuid.uuid4().hex[:8]}",
-            user_context=user_context,
-            initial_state=AgentFlowState.INITIALIZED.value
+            user_request="Test agent state transitions during complete workflow",
+            user_id=user_context.user_id,
+            chat_thread_id=user_context.thread_id,
+            run_id=user_context.run_id,
+            agent_context={
+                "agent_id": agent_id,
+                "current_state": AgentFlowState.INITIALIZED.value,
+                **user_context.agent_context
+            }
         )
         
         # Define expected state transition sequence for 5-event flow
@@ -245,7 +252,7 @@ class TestCompleteAgentStateTransitions(SSotAsyncTestCase):
             transition_start = time.time()
             
             # Validate current state before transition
-            current_state = await state_tracker.get_agent_state(agent_state.agent_id)
+            current_state = await state_tracker.get_agent_state(agent_id)
             self.assertEqual(current_state.current_state, from_state.value, 
                            f"Expected state {from_state.value} before transition {i+1}")
             
