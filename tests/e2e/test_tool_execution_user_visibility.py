@@ -20,6 +20,12 @@ Tests cover:
 5. Multi-tool execution sequence visibility
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import asyncio
 import json
 import pytest

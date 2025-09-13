@@ -6,7 +6,7 @@
     "errors": 0,
     "skipped": 1,
     "success_rate": 85.71428571428571,
-    "average_response_time_ms": 190
+    "average_response_time_ms": 170
   },
   "by_service": {
     "frontend": {
@@ -44,7 +44,7 @@
       "test_name": "health_endpoint_get_method",
       "service": "frontend",
       "status": "PASS",
-      "duration_ms": 369,
+      "duration_ms": 260,
       "error_message": null,
       "details": {
         "method": "GET",
@@ -62,25 +62,25 @@
           "Content-Type": "application/json",
           "Expires": "0",
           "Pragma": "no-cache",
-          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Server": "Google Frontend",
           "Via": "1.1 google",
           "Content-Encoding": "gzip",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
           "Transfer-Encoding": "chunked"
         },
-        "response_time_ms": 369,
+        "response_time_ms": 260,
         "response_data": {
           "status": "healthy",
           "service": "frontend",
           "version": "1.0.0",
           "environment": "staging",
-          "timestamp": "2025-09-13T00:58:05.472Z",
-          "uptime": 51691.40437546,
+          "timestamp": "2025-09-13T01:16:16.314Z",
+          "uptime": 52782.246115173,
           "memory": {
-            "used": 37,
-            "total": 45,
-            "rss": 100
+            "used": 38,
+            "total": 40,
+            "rss": 96
           },
           "dependencies": {
             "backend": {
@@ -89,7 +89,7 @@
                 "status": "healthy",
                 "service": "netra-ai-platform",
                 "version": "1.0.0",
-                "timestamp": 1757725085.3618274
+                "timestamp": 1757726176.309893
               }
             },
             "auth": {
@@ -98,15 +98,15 @@
                 "status": "healthy",
                 "service": "auth-service",
                 "version": "1.0.0",
-                "timestamp": "2025-09-13T00:58:05.456419+00:00",
-                "uptime_seconds": 2239.278742,
+                "timestamp": "2025-09-13T01:16:16.293649+00:00",
+                "uptime_seconds": 3330.115969,
                 "database_status": "connected",
                 "environment": "staging"
               }
             }
           },
           "checks": {
-            "response_time_ms": 203,
+            "response_time_ms": 77,
             "environment_config": "ok",
             "memory_usage": "ok"
           },
@@ -123,7 +123,7 @@
       "test_name": "health_endpoint_head_method",
       "service": "frontend",
       "status": "PASS",
-      "duration_ms": 86,
+      "duration_ms": 96,
       "error_message": null,
       "details": {
         "method": "HEAD",
@@ -140,21 +140,21 @@
           "Cache-Control": "no-cache, no-store, must-revalidate",
           "Expires": "0",
           "Pragma": "no-cache",
-          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Content-Type": "text/html",
           "Server": "Google Frontend",
           "Via": "1.1 google",
           "Transfer-Encoding": "chunked",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 86
+        "response_time_ms": 96
       }
     },
     {
       "test_name": "health_endpoint_options_method",
       "service": "frontend",
       "status": "PASS",
-      "duration_ms": 95,
+      "duration_ms": 98,
       "error_message": null,
       "details": {
         "method": "OPTIONS",
@@ -172,21 +172,21 @@
           "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Max-Age": "86400",
-          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Content-Type": "text/html",
           "Server": "Google Frontend",
           "Content-Length": "0",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 95
+        "response_time_ms": 98
       }
     },
     {
       "test_name": "health_endpoint_get_method",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 150,
+      "duration_ms": 187,
       "error_message": null,
       "details": {
         "method": "GET",
@@ -195,19 +195,19 @@
         "headers": {
           "Content-Type": "application/json",
           "api-version": "current",
-          "x-cloud-trace-context": "00686729a8f6bf19e709184ad38a8e60",
-          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "x-cloud-trace-context": "41e0f305faca20e8dfdbbc47ba4e75ce",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Server": "Google Frontend",
           "Content-Length": "99",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 150,
+        "response_time_ms": 187,
         "response_data": {
           "status": "healthy",
           "service": "netra-ai-platform",
           "version": "1.0.0",
-          "timestamp": 1757725085.8116772
+          "timestamp": 1757726176.7033029
         }
       }
     },
@@ -215,7 +215,7 @@
       "test_name": "health_endpoint_head_method",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 143,
+      "duration_ms": 93,
       "error_message": null,
       "details": {
         "method": "HEAD",
@@ -224,21 +224,21 @@
         "headers": {
           "Content-Type": "application/json",
           "api-version": "current",
-          "x-cloud-trace-context": "65e644bd3df61754e709184ad38a804e",
+          "x-cloud-trace-context": "5bb183b2a5560910dfdbbc47ba4e73d9",
           "Content-Length": "99",
-          "Date": "Sat, 13 Sep 2025 00:58:05 GMT",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Server": "Google Frontend",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 143
+        "response_time_ms": 93
       }
     },
     {
       "test_name": "health_endpoint_options_method",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 84,
+      "duration_ms": 95,
       "error_message": null,
       "details": {
         "method": "OPTIONS",
@@ -246,21 +246,21 @@
         "status_code": 200,
         "headers": {
           "Content-Type": "application/json",
-          "x-cloud-trace-context": "7b7ce3e82f089f26e709184ad38a892d",
-          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "x-cloud-trace-context": "6f4d41569b40b96edfdbbc47ba4e7c61",
+          "Date": "Sat, 13 Sep 2025 01:16:16 GMT",
           "Server": "Google Frontend",
           "Content-Length": "42",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 84
+        "response_time_ms": 95
       }
     },
     {
       "test_name": "health_endpoint_get_method",
       "service": "auth",
       "status": "PASS",
-      "duration_ms": 417,
+      "duration_ms": 179,
       "error_message": null,
       "details": {
         "method": "GET",
@@ -273,20 +273,20 @@
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "x-xss-protection": "1; mode=block",
-          "x-cloud-trace-context": "0f8f418a36fc085c7d591b66aee9b372",
-          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "x-cloud-trace-context": "9ce9295f64c6f64699c924746da10b57",
+          "Date": "Sat, 13 Sep 2025 01:16:17 GMT",
           "Server": "Google Frontend",
           "Content-Length": "193",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 417,
+        "response_time_ms": 179,
         "response_data": {
           "status": "healthy",
           "service": "auth-service",
           "version": "1.0.0",
-          "timestamp": "2025-09-13T00:58:06.445744+00:00",
-          "uptime_seconds": 2240.268063,
+          "timestamp": "2025-09-13T01:16:17.064006+00:00",
+          "uptime_seconds": 3330.886325,
           "database_status": "connected",
           "environment": "staging"
         }
@@ -296,7 +296,7 @@
       "test_name": "health_endpoint_head_method",
       "service": "auth",
       "status": "PASS",
-      "duration_ms": 90,
+      "duration_ms": 114,
       "error_message": null,
       "details": {
         "method": "HEAD",
@@ -309,21 +309,21 @@
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "x-xss-protection": "1; mode=block",
-          "x-cloud-trace-context": "39efc430778473237d591b66aee9b8c6",
+          "x-cloud-trace-context": "faa5a58131c6187799c924746da10f7e",
           "Content-Length": "193",
-          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "Date": "Sat, 13 Sep 2025 01:16:17 GMT",
           "Server": "Google Frontend",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 90
+        "response_time_ms": 114
       }
     },
     {
       "test_name": "health_endpoint_options_method",
       "service": "auth",
       "status": "FAIL",
-      "duration_ms": 76,
+      "duration_ms": 92,
       "error_message": null,
       "details": {
         "method": "OPTIONS",
@@ -337,14 +337,14 @@
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "x-xss-protection": "1; mode=block",
-          "x-cloud-trace-context": "ade7f4c24839b0a77d591b66aee9b8c2",
-          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "x-cloud-trace-context": "aea167716362c59f99c924746da10237",
+          "Date": "Sat, 13 Sep 2025 01:16:17 GMT",
           "Server": "Google Frontend",
           "Content-Length": "31",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 76,
+        "response_time_ms": 92,
         "expected_support": "OPTIONS should be supported for health endpoints"
       }
     },
@@ -352,7 +352,7 @@
       "test_name": "frontend_service_dependencies",
       "service": "integration",
       "status": "PASS",
-      "duration_ms": 176,
+      "duration_ms": 188,
       "error_message": null,
       "details": {
         "frontend_response": {
@@ -360,12 +360,12 @@
           "service": "frontend",
           "version": "1.0.0",
           "environment": "staging",
-          "timestamp": "2025-09-13T00:58:06.799Z",
-          "uptime": 51692.730480638,
+          "timestamp": "2025-09-13T01:16:17.465Z",
+          "uptime": 52783.396520676,
           "memory": {
             "used": 38,
-            "total": 46,
-            "rss": 101
+            "total": 40,
+            "rss": 95
           },
           "dependencies": {
             "backend": {
@@ -374,7 +374,7 @@
                 "status": "healthy",
                 "service": "netra-ai-platform",
                 "version": "1.0.0",
-                "timestamp": 1757725086.777256
+                "timestamp": 1757726177.4467206
               }
             },
             "auth": {
@@ -383,15 +383,15 @@
                 "status": "healthy",
                 "service": "auth-service",
                 "version": "1.0.0",
-                "timestamp": "2025-09-13T00:58:06.776931+00:00",
-                "uptime_seconds": 2240.599251,
+                "timestamp": "2025-09-13T01:16:17.451281+00:00",
+                "uptime_seconds": 3331.273601,
                 "database_status": "connected",
                 "environment": "staging"
               }
             }
           },
           "checks": {
-            "response_time_ms": 39,
+            "response_time_ms": 30,
             "environment_config": "ok",
             "memory_usage": "ok"
           },
@@ -410,34 +410,34 @@
       "test_name": "api_endpoint_api_health",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 424,
+      "duration_ms": 343,
       "error_message": null,
       "details": {
         "endpoint": "/api/health",
         "url": "https://api.staging.netrasystems.ai/api/health",
         "status_code": 200,
-        "response_time_ms": 424,
+        "response_time_ms": 343,
         "response_data": {
           "status": "healthy",
-          "timestamp": "2025-09-13T00:58:07.222904+00:00",
-          "uptime_seconds": 67.95751881599426,
+          "timestamp": "2025-09-13T01:16:17.797265+00:00",
+          "uptime_seconds": 244.84432435035706,
           "checks": {
             "postgresql": {
               "status": "healthy",
               "connected": true,
-              "response_time_ms": 82.78,
+              "response_time_ms": 101.46,
               "error": null
             },
             "redis": {
               "status": "healthy",
               "connected": true,
-              "response_time_ms": 11.46,
+              "response_time_ms": 17.92,
               "error": null
             },
             "clickhouse": {
               "status": "healthy",
               "connected": true,
-              "response_time_ms": 34.19,
+              "response_time_ms": 41.96,
               "error": null
             }
           },
@@ -447,9 +447,9 @@
               "details": {
                 "engine": "primary",
                 "connection_pool": "active",
-                "avg_response_time": 82.78
+                "avg_response_time": 101.46
               },
-              "checked_at": "2025-09-13T00:58:07.139988"
+              "checked_at": "2025-09-13T01:16:17.695636"
             },
             "redis": {
               "status": "healthy",
@@ -457,18 +457,18 @@
                 "redis_version": "7.2.4",
                 "memory_usage": "4.05M",
                 "connected_clients": 10,
-                "avg_response_time": 11.46
+                "avg_response_time": 17.92
               },
-              "checked_at": "2025-09-13T00:58:07.142828"
+              "checked_at": "2025-09-13T01:16:17.700653"
             },
             "clickhouse": {
               "status": "healthy",
               "details": {
                 "clickhouse_version": "25.6.2.6054",
                 "http_status": 200,
-                "avg_response_time": 34.19
+                "avg_response_time": 41.96
               },
-              "checked_at": "2025-09-13T00:58:07.143277"
+              "checked_at": "2025-09-13T01:16:17.701103"
             }
           },
           "version": "1.0.0",
@@ -480,31 +480,31 @@
       "test_name": "api_endpoint_api_v1_status",
       "service": "backend",
       "status": "SKIP",
-      "duration_ms": 83,
+      "duration_ms": 96,
       "error_message": null,
       "details": {
         "endpoint": "/api/v1/status",
         "url": "https://api.staging.netrasystems.ai/api/v1/status",
         "status_code": 404,
-        "response_time_ms": 83
+        "response_time_ms": 96
       }
     },
     {
       "test_name": "api_endpoint_health",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 83,
+      "duration_ms": 106,
       "error_message": null,
       "details": {
         "endpoint": "/health",
         "url": "https://api.staging.netrasystems.ai/health",
         "status_code": 200,
-        "response_time_ms": 83,
+        "response_time_ms": 106,
         "response_data": {
           "status": "healthy",
           "service": "netra-ai-platform",
           "version": "1.0.0",
-          "timestamp": 1757725087.392621
+          "timestamp": 1757726178.018656
         }
       }
     },
@@ -512,13 +512,13 @@
       "test_name": "api_endpoint_root",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 88,
+      "duration_ms": 110,
       "error_message": null,
       "details": {
         "endpoint": "/",
         "url": "https://api.staging.netrasystems.ai/",
         "status_code": 200,
-        "response_time_ms": 88,
+        "response_time_ms": 110,
         "response_data": {
           "message": "Welcome to Netra API"
         }
@@ -528,7 +528,7 @@
       "test_name": "cors_configuration",
       "service": "backend",
       "status": "FAIL",
-      "duration_ms": 125,
+      "duration_ms": 139,
       "error_message": null,
       "details": {
         "status_code": 400,
@@ -545,8 +545,8 @@
           "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
           "Access-Control-Allow-Credentials": "true",
           "Content-Type": "text/plain; charset=utf-8",
-          "x-cloud-trace-context": "30bb01f863b8901e693a1b9a5e9bacc0",
-          "Date": "Sat, 13 Sep 2025 00:58:07 GMT",
+          "x-cloud-trace-context": "68a5a71759e7a3713b4440afe6297e8b",
+          "Date": "Sat, 13 Sep 2025 01:16:18 GMT",
           "Server": "Google Frontend",
           "Content-Length": "22",
           "Via": "1.1 google",
@@ -558,10 +558,10 @@
       "test_name": "single_request_performance",
       "service": "frontend",
       "status": "PASS",
-      "duration_ms": 161,
+      "duration_ms": 233,
       "error_message": null,
       "details": {
-        "response_time_ms": 161,
+        "response_time_ms": 233,
         "threshold_ms": 2000,
         "status_code": 200
       }
@@ -570,39 +570,39 @@
       "test_name": "concurrent_requests_performance",
       "service": "frontend",
       "status": "PASS",
-      "duration_ms": 331,
+      "duration_ms": 227,
       "error_message": null,
       "details": {
         "concurrent_requests": 5,
         "successful_requests": 5,
         "failed_requests": 0,
-        "total_time_ms": 331,
-        "average_response_time_ms": 264,
+        "total_time_ms": 227,
+        "average_response_time_ms": 209,
         "results": [
           {
             "request_id": 0,
             "status_code": 200,
-            "response_time_ms": 282
+            "response_time_ms": 215
           },
           {
             "request_id": 1,
             "status_code": 200,
-            "response_time_ms": 178
+            "response_time_ms": 166
           },
           {
             "request_id": 2,
             "status_code": 200,
-            "response_time_ms": 324
+            "response_time_ms": 227
           },
           {
             "request_id": 3,
             "status_code": 200,
-            "response_time_ms": 330
+            "response_time_ms": 215
           },
           {
             "request_id": 4,
             "status_code": 200,
-            "response_time_ms": 210
+            "response_time_ms": 223
           }
         ]
       }
@@ -611,10 +611,10 @@
       "test_name": "single_request_performance",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 132,
+      "duration_ms": 138,
       "error_message": null,
       "details": {
-        "response_time_ms": 132,
+        "response_time_ms": 138,
         "threshold_ms": 2000,
         "status_code": 200
       }
@@ -623,39 +623,39 @@
       "test_name": "concurrent_requests_performance",
       "service": "backend",
       "status": "PASS",
-      "duration_ms": 282,
+      "duration_ms": 467,
       "error_message": null,
       "details": {
         "concurrent_requests": 5,
         "successful_requests": 5,
         "failed_requests": 0,
-        "total_time_ms": 282,
-        "average_response_time_ms": 163,
+        "total_time_ms": 467,
+        "average_response_time_ms": 212,
         "results": [
           {
             "request_id": 0,
             "status_code": 200,
-            "response_time_ms": 132
+            "response_time_ms": 156
           },
           {
             "request_id": 1,
             "status_code": 200,
-            "response_time_ms": 147
+            "response_time_ms": 152
           },
           {
             "request_id": 2,
             "status_code": 200,
-            "response_time_ms": 122
+            "response_time_ms": 156
           },
           {
             "request_id": 3,
             "status_code": 200,
-            "response_time_ms": 282
+            "response_time_ms": 133
           },
           {
             "request_id": 4,
             "status_code": 200,
-            "response_time_ms": 132
+            "response_time_ms": 466
           }
         ]
       }
@@ -664,10 +664,10 @@
       "test_name": "single_request_performance",
       "service": "auth",
       "status": "PASS",
-      "duration_ms": 140,
+      "duration_ms": 139,
       "error_message": null,
       "details": {
-        "response_time_ms": 140,
+        "response_time_ms": 139,
         "threshold_ms": 2000,
         "status_code": 200
       }
@@ -676,39 +676,39 @@
       "test_name": "concurrent_requests_performance",
       "service": "auth",
       "status": "PASS",
-      "duration_ms": 468,
+      "duration_ms": 170,
       "error_message": null,
       "details": {
         "concurrent_requests": 5,
         "successful_requests": 5,
         "failed_requests": 0,
-        "total_time_ms": 468,
-        "average_response_time_ms": 262,
+        "total_time_ms": 170,
+        "average_response_time_ms": 156,
         "results": [
           {
             "request_id": 0,
             "status_code": 200,
-            "response_time_ms": 468
+            "response_time_ms": 148
           },
           {
             "request_id": 1,
             "status_code": 200,
-            "response_time_ms": 265
+            "response_time_ms": 166
           },
           {
             "request_id": 2,
             "status_code": 200,
-            "response_time_ms": 204
+            "response_time_ms": 148
           },
           {
             "request_id": 3,
             "status_code": 200,
-            "response_time_ms": 205
+            "response_time_ms": 170
           },
           {
             "request_id": 4,
             "status_code": 200,
-            "response_time_ms": 172
+            "response_time_ms": 148
           }
         ]
       }
@@ -731,14 +731,14 @@
           "x-content-type-options": "nosniff",
           "x-frame-options": "DENY",
           "x-xss-protection": "1; mode=block",
-          "x-cloud-trace-context": "ade7f4c24839b0a77d591b66aee9b8c2",
-          "Date": "Sat, 13 Sep 2025 00:58:06 GMT",
+          "x-cloud-trace-context": "aea167716362c59f99c924746da10237",
+          "Date": "Sat, 13 Sep 2025 01:16:17 GMT",
           "Server": "Google Frontend",
           "Content-Length": "31",
           "Via": "1.1 google",
           "Alt-Svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
         },
-        "response_time_ms": 76,
+        "response_time_ms": 92,
         "expected_support": "OPTIONS should be supported for health endpoints"
       }
     },
@@ -761,8 +761,8 @@
           "Access-Control-Allow-Headers": "Accept, Accept-Language, Authorization, Content-Language, Content-Type, Origin, Referer, User-Agent, X-Request-ID, X-Requested-With, X-Service-Name, X-Test-Environment, X-Test-Session, X-Test-Type, X-Trace-ID",
           "Access-Control-Allow-Credentials": "true",
           "Content-Type": "text/plain; charset=utf-8",
-          "x-cloud-trace-context": "30bb01f863b8901e693a1b9a5e9bacc0",
-          "Date": "Sat, 13 Sep 2025 00:58:07 GMT",
+          "x-cloud-trace-context": "68a5a71759e7a3713b4440afe6297e8b",
+          "Date": "Sat, 13 Sep 2025 01:16:18 GMT",
           "Server": "Google Frontend",
           "Content-Length": "22",
           "Via": "1.1 google",

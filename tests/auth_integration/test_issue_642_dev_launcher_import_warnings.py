@@ -21,6 +21,12 @@ EXPECTED TEST BEHAVIOR:
 Business Value: Platform/Stability - Clean production deployments, proper dependency management
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import pytest
 import sys
 import os
