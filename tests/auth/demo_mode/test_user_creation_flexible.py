@@ -41,7 +41,7 @@ class TestUserCreationFlexible(SSotAsyncTestCase):
         """Setup for user creation tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
         
         # Mock auth service for testing
         self.auth_service = AuthService()

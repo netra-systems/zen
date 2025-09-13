@@ -42,7 +42,7 @@ class TestCircuitBreakerRelaxed(SSotAsyncTestCase):
         """Setup for circuit breaker tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
         
         # Get circuit breaker for testing
         self.circuit_breaker = get_circuit_breaker("auth_service")

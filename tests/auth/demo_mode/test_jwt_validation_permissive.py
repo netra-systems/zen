@@ -43,7 +43,7 @@ class TestJWTValidationPermissive(SSotAsyncTestCase):
         """Setup for JWT validation tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
         
         # Standard JWT secret for testing
         self.jwt_secret = "demo_test_secret_key_for_testing_only"

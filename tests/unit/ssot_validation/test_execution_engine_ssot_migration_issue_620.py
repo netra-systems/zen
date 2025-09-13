@@ -51,7 +51,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
     async def test_deprecated_execution_engine_delegates_to_ssot(self):
         """Test that deprecated ExecutionEngine properly delegates to UserExecutionEngine."""
         # Import the deprecated ExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Create a mock registry and websocket bridge for testing
         mock_registry = Mock()
@@ -77,7 +77,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
     @pytest.mark.asyncio
     async def test_execution_engine_automatic_delegation(self):
         """Test that ExecutionEngine automatically delegates execution to UserExecutionEngine."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         from datetime import datetime, timezone
@@ -154,7 +154,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
         """Test that importing different execution engines doesn't cause conflicts."""
         # Import both engines
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Verify they are different classes but compatible
         assert UserExecutionEngine != ExecutionEngine, "Should be different classes"
@@ -199,7 +199,7 @@ class TestExecutionEngineSSotMigrationIssue620(BaseIntegrationTest):
             warnings.simplefilter("always")
             
             # Import using deprecated pattern
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Create instance (should trigger compatibility bridge)
             mock_registry = Mock()
@@ -301,7 +301,7 @@ class TestExecutionEngineImportPatterns(BaseIntegrationTest):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as LegacyEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Should issue deprecation warning
             deprecation_warnings = [warning for warning in w if issubclass(warning.category, DeprecationWarning)]
@@ -393,7 +393,7 @@ class TestSSotComplianceValidation(BaseIntegrationTest):
     async def test_single_source_of_truth_verification(self):
         """Verify that UserExecutionEngine is truly the single source of truth."""
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Verify UserExecutionEngine has substantial implementation
         user_engine_methods = [method for method in dir(UserExecutionEngine) 

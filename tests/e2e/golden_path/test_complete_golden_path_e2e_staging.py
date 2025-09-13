@@ -110,19 +110,26 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         """Setup test environment for staging E2E tests."""
         super().setup_method(method)
         
+        # Load staging E2E environment variables
+        from pathlib import Path
+        staging_env_file = Path.cwd() / ".env.staging.e2e"
+        if staging_env_file.exists():
+            env_manager = get_env()
+            env_manager.load_from_file(staging_env_file, source="staging_e2e_config")
+        
         # Staging environment configuration
         self.staging_config = {
-            "base_url": get_env("STAGING_BASE_URL", "https://staging.netra.ai"),
-            "websocket_url": get_env("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws"),
-            "api_url": get_env("STAGING_API_URL", "https://staging.netra.ai/api"),
-            "auth_url": get_env("STAGING_AUTH_URL", "https://staging.netra.ai/auth")
+            "base_url": get_env().get("STAGING_BASE_URL", "https://staging.netra.ai"),
+            "websocket_url": get_env().get("STAGING_WEBSOCKET_URL", "wss://staging.netra.ai/ws"),
+            "api_url": get_env().get("STAGING_API_URL", "https://staging.netra.ai/api"),
+            "auth_url": get_env().get("STAGING_AUTH_URL", "https://staging.netra.ai/auth")
         }
         
         # Test user credentials for staging
         self.test_users = [
             {
-                "email": get_env("TEST_USER_EMAIL", "test@netra.ai"),
-                "password": get_env("TEST_USER_PASSWORD", "test_password"),
+                "email": get_env().get("TEST_USER_EMAIL", "test@netra.ai"),
+                "password": get_env().get("TEST_USER_PASSWORD", "test_password"),
                 "user_id": None,  # Will be set after authentication
                 "jwt_token": None  # Will be set after authentication
             }

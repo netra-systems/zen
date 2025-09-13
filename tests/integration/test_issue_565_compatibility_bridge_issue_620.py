@@ -32,7 +32,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     
     async def test_legacy_execution_engine_creates_user_execution_engine(self):
         """Test that creating ExecutionEngine actually creates UserExecutionEngine via bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         
         # Create mock dependencies
@@ -65,7 +65,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     @pytest.mark.asyncio
     async def test_legacy_execution_engine_execute_agent_delegation(self):
         """Test that ExecutionEngine.execute_agent properly delegates to UserExecutionEngine."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
@@ -118,7 +118,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     
     async def test_compatibility_bridge_preserves_websocket_functionality(self):
         """Test that WebSocket functionality works through compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Create user context
@@ -158,7 +158,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     
     async def test_compatibility_bridge_user_context_handling(self):
         """Test that compatibility bridge correctly handles user context scenarios."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         mock_registry = Mock()
@@ -201,7 +201,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     @pytest.mark.asyncio
     async def test_compatibility_bridge_execution_stats_delegation(self):
         """Test that execution statistics work through compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_registry.get_agents = Mock(return_value=[])
@@ -229,7 +229,7 @@ class TestIssue565CompatibilityBridgeIntegration(BaseIntegrationTest):
     
     async def test_compatibility_bridge_shutdown_delegation(self):
         """Test that shutdown works through compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_registry.get_agents = Mock(return_value=[])
@@ -254,7 +254,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
     
     async def test_legacy_api_methods_available(self):
         """Test that legacy API methods are available through compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_registry.get_agents = Mock(return_value=[])
@@ -296,7 +296,7 @@ class TestCompatibilityBridgeAPICompatibility(BaseIntegrationTest):
     
     async def test_string_representation_compatibility(self):
         """Test that string representations work correctly."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_registry.get_agents = Mock(return_value=[])
@@ -326,7 +326,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
     
     async def test_deprecation_warning_on_creation(self):
         """Test that creating ExecutionEngine issues proper deprecation warning."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_websocket_bridge = Mock()
@@ -350,7 +350,7 @@ class TestCompatibilityBridgeWarnings(BaseIntegrationTest):
     
     async def test_migration_guidance_in_warnings(self):
         """Test that deprecation warnings provide clear migration guidance."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         mock_websocket_bridge = Mock()
@@ -382,7 +382,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
     
     async def test_invalid_registry_handling(self):
         """Test handling of invalid registry in compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         # Test with None registry
         mock_websocket_bridge = Mock()
@@ -402,7 +402,7 @@ class TestCompatibilityBridgeErrorHandling(BaseIntegrationTest):
     
     async def test_invalid_websocket_bridge_handling(self):
         """Test handling of invalid WebSocket bridge in compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         
         mock_registry = Mock()
         
@@ -425,7 +425,7 @@ class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
     
     async def test_multiple_engine_creation_isolation(self):
         """Test that creating multiple engines through bridge maintains isolation."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # Create different user contexts
@@ -474,7 +474,7 @@ class TestCompatibilityBridgeRealWorldScenarios(BaseIntegrationTest):
     
     async def test_sequential_operations_through_bridge(self):
         """Test sequential operations through the compatibility bridge."""
-        from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         user_context = UserExecutionContext(

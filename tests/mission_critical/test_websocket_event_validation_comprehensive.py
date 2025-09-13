@@ -269,7 +269,7 @@ class TestComprehensiveWebSocketEventValidation:
     @pytest.fixture
     def backend_url(self):
         """Get backend WebSocket URL for testing."""
-        return get_env("BACKEND_WEBSOCKET_URL", "ws://localhost:8000")
+        return get_env().get("BACKEND_WEBSOCKET_URL", "ws://localhost:8000")
     
     @pytest.fixture
     async def authenticated_websocket_client(self, backend_url):

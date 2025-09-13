@@ -29,7 +29,7 @@ from collections import deque
 import queue
 
 from test_framework.base_integration_test import BaseIntegrationTest
-from netra_backend.app.agents.supervisor.execution_engine import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.core.config import get_config
 

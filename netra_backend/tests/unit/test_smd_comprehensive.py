@@ -829,11 +829,11 @@ class TestEnvironmentConfigurationIsolation(BaseTestCase):
     def test_get_env_wrapper_function(self):
         """Test that get_env wrapper function works correctly."""
         # Test with default value
-        result = get_env("NONEXISTENT_KEY", "default_value")
+        result = get_env().get("NONEXISTENT_KEY", "default_value")
         self.assertEqual(result, "default_value")
         
         # Test with empty string default (should return default)
-        result = get_env("NONEXISTENT_KEY", "")
+        result = get_env().get("NONEXISTENT_KEY", "")
         self.assertEqual(result, "")
     
     def test_environment_isolation_in_get_env(self):
@@ -842,7 +842,7 @@ class TestEnvironmentConfigurationIsolation(BaseTestCase):
         from netra_backend.app.smd import get_env as test_get_env
         
         # Test with existing environment variable or default
-        result = test_get_env("TEST_KEY", "default")
+        result = test_get_env().get("TEST_KEY", "default")
         
         # Should return the default if key doesn't exist
         self.assertIsInstance(result, str)
