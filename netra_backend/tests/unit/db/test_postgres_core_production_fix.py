@@ -830,7 +830,7 @@ class TestDifficultEdgeCases:
                 
         except MemoryError:
             # If we get memory error, that's expected - but no mock fallback should occur
-            pytest.skip("Insufficient memory for test, but no mock fallback detected")
+            pytest.skip("Insufficient memory for test, but no mock fallback detected", allow_module_level=True)
         finally:
             # Clear memory pressure
             memory_pressure.clear()

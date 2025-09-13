@@ -130,10 +130,10 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         
         # Test auth validation module import and execution
         try:
-            from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+            from netra_backend.app.core.auth_startup_validator import validate_auth_startup
             
             # Mock the actual validation to avoid external dependencies in unit test
-            with patch('netra_backend.app.core.auth_startup_validator.validate_auth_at_startup', new_callable=AsyncMock) as mock_validate:
+            with patch('netra_backend.app.core.auth_startup_validator.validate_auth_startup', new_callable=AsyncMock) as mock_validate:
                 mock_validate.return_value = True  # Simulates successful validation
                 
                 # Execute auth validation

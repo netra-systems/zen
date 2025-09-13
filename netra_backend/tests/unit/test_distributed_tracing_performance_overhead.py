@@ -33,7 +33,7 @@ class TestDistributedTracingPerformanceOverhead:
         # TODO: Initialize real service
         """Setup tracer optimized for performance testing."""
         if not OPENTELEMETRY_AVAILABLE:
-            pytest.skip("OpenTelemetry not available - skipping tracing tests")
+            pytest.skip("OpenTelemetry not available - skipping tracing tests", allow_module_level=True)
         provider = TracerProvider()
         trace.set_tracer_provider(provider)
         return trace.get_tracer("performance_monitor")
@@ -94,7 +94,7 @@ class TestDistributedTracingPerformanceOverhead:
         traced_cv = statistics.stdev(traced_times) / statistics.mean(traced_times)
         
         if baseline_cv > 0.5 or traced_cv > 0.5:
-            pytest.skip(f"Performance measurement too variable (baseline CV: {baseline_cv:.2f}, traced CV: {traced_cv:.2f})")
+            pytest.skip(f"Performance measurement too variable (baseline CV: {baseline_cv:.2f}, traced CV: {traced_cv:.2f})", allow_module_level=True)
         
         assert overhead_ratio < threshold, (
             f"Tracing overhead {overhead_ratio:.2%} exceeds {threshold:.0%} limit "

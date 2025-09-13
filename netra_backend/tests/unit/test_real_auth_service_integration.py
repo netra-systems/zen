@@ -89,7 +89,7 @@ real_auth_fixture = RealAuthServiceTestFixture()
 async def ensure_auth_service():
     """Ensure auth service is available for all tests"""
     if not await real_auth_fixture.is_auth_service_available():
-        pytest.skip("Auth service not available - skipping real integration tests")
+        pytest.skip("Auth service not available - skipping real integration tests", allow_module_level=True)
     
     yield
     

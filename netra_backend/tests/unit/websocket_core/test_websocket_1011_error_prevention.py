@@ -285,7 +285,7 @@ def websocket_1011_prevention_context():
     )
     
     if get_connection_state_machine is None or ApplicationConnectionState is None:
-        pytest.skip("WebSocket 1011 prevention fixes not active - critical components unavailable")
+        pytest.skip("WebSocket 1011 prevention fixes not active - critical components unavailable", allow_module_level=True)
     
     return {
         'state_machine_function': get_connection_state_machine,
