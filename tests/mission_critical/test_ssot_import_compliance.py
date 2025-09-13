@@ -13,7 +13,6 @@ This test suite validates:
 5. Import path consistency across services
 
 P0 SSOT Import Violations Targeted:
-- Production code importing from scripts/websocket_notifier_rollback_utility.py
 - Multiple import paths for same SSOT classes
 - Circular dependencies causing import failures
 
@@ -77,7 +76,6 @@ class ImportAnalyzer:
     def __init__(self, project_root: Path):
         self.project_root = project_root
         self.rollback_patterns = [
-            'websocket_notifier_rollback_utility',
             'rollback_utility',
             'emergency_rollback'
         ]

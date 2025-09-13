@@ -13,7 +13,6 @@ This test suite validates:
 5. No circular dependencies or import violations
 
 P0 SSOT Violations Detected:
-- scripts/websocket_notifier_rollback_utility.py (rollback utility - should be excluded from production)
 - agent_websocket_bridge.py:3209 (canonical SSOT source)
 
 CRITICAL: Tests must run without Docker dependency for CI/CD integration.
@@ -82,7 +81,6 @@ class TestSSotWebSocketNotifierValidation(SSotBaseTestCase):
         self.project_root = Path(project_root)
         self.validation_results: List[WebSocketNotifierValidation] = []
         self.known_exclusions = {
-            'scripts/websocket_notifier_rollback_utility.py',  # Emergency rollback utility
             '.backup_pre_factory_migration',  # Backup files
             '.backup_pre_ssot_migration',     # Backup files
             '.deprecated_backup',             # Deprecated files
