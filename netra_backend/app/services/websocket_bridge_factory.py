@@ -484,7 +484,7 @@ _websocket_bridge_factory: Optional[WebSocketBridgeFactory] = None
 
 def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
     """Get or create the singleton WebSocketBridgeFactory instance (SSOT redirect).
-    
+
     Returns:
         WebSocketBridgeFactory: The singleton factory instance (SSOT-backed)
     """
@@ -493,3 +493,25 @@ def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
         _websocket_bridge_factory = WebSocketBridgeFactory()
         logger.info(" PASS:  WebSocketBridgeFactory singleton created (SSOT redirect mode)")
     return _websocket_bridge_factory
+
+
+# SSOT COMPATIBILITY ALIASES: Export expected names for backwards compatibility
+# These aliases redirect to the SSOT implementations while maintaining test compatibility
+
+# Primary exports that tests expect
+UserWebSocketEmitter = UnifiedWebSocketEmitter  # SSOT redirect alias
+WebSocketBridgeFactory = WebSocketBridgeFactory  # Self-reference for clarity
+
+# Export the factory function
+__all__ = [
+    'UserWebSocketEmitter',           # -> UnifiedWebSocketEmitter
+    'WebSocketBridgeFactory',         # Main factory class
+    'get_websocket_bridge_factory',   # Factory singleton getter
+    'UserWebSocketContext',           # User context data class
+    'WebSocketEvent',                # Event structure
+    'ConnectionStatus',              # Connection status enum
+    'ConnectionNotFound',            # Exception class
+    'ConnectionClosed',             # Exception class
+    'UnifiedWebSocketEmitter',       # Direct SSOT access
+    'UnifiedWebSocketManager',       # Direct SSOT access
+]
