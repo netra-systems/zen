@@ -1159,18 +1159,24 @@ class ClickHouseService:
             logger.error(f"Check table existence and column names")
             raise
         except Exception as e:
-            # Issue #374: Unexpected query execution errors
+            # Issue #374: Classify all unexpected query execution errors using transaction_errors
             execute_duration = time.time() - execute_start
             self._metrics["failures"] += 1
-            logger.error(f"[ClickHouse] Unexpected query execution error: {type(e).__name__}: {e}")
+            
+            # CRITICAL FIX: Use classify_error for all exceptions
+            classified_error = classify_error(e)
+            error_type_name = type(classified_error).__name__
+            
+            logger.error(f"[ClickHouse] Query execution error classified as {error_type_name}: {classified_error}")
             logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
             
             logger.critical(f"[U+1F4A5] ClickHouse EXECUTION FAILED for user {user_id or 'system'} after {execute_duration:.3f}s")
             logger.error(f"Context: {operation_context}, Query type: {query_type.upper()}")
-            logger.error(f"Error details: {type(e).__name__}: {str(e)}")
+            logger.error(f"Error details: {error_type_name}: {str(classified_error)}")
             logger.error(f"ANALYTICS IMPACT: User {user_id or 'system'} data operation failed - {operation_context}")
             
-            raise
+            # Raise the classified error instead of the original generic exception
+            raise classified_error
     
     async def _execute_with_circuit_breaker(self, query: str, params: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Execute query with circuit breaker protection.
@@ -1183,6 +1189,11 @@ class ClickHouseService:
         async def _execute():
             if not self._client:
                 await self.initialize()
+            
+            # CRITICAL FIX: Check if client is still None after initialization (connection failed)
+            if not self._client:
+                raise ConnectionError("ClickHouse client not available - connection failed during initialization")
+                
             return await self._client.execute(query, params)
         
         try:
@@ -1272,12 +1283,13 @@ class ClickHouseService:
         
         raise last_exception
     
-    async def batch_insert(self, table_name: str, data: List[Dict[str, Any]]) -> bool:
+    async def batch_insert(self, table_name: str, data: List[Dict[str, Any]], user_id: Optional[str] = None) -> bool:
         """Insert batch of data into ClickHouse table.
 
         Args:
             table_name: Name of the table to insert into
             data: List of dictionaries representing rows to insert
+            user_id: Optional user identifier for context and logging
 
         Returns:
             bool: True if insertion successful, False otherwise
@@ -1285,17 +1297,22 @@ class ClickHouseService:
         if not self._client:
             await self.initialize()
 
+        # CRITICAL FIX: Check if client is still None after initialization (connection failed)
+        if not self._client:
+            logger.warning(f"[ClickHouse] Batch insert skipped for {table_name} - ClickHouse client not available")
+            return False
+
         # Check for mock/NoOp clients
         try:
             from test_framework.fixtures.clickhouse_fixtures import MockClickHouseDatabase
             if isinstance(self._client, (MockClickHouseDatabase, NoOpClickHouseClient)):
                 # Mock implementation - just log the operation
-                logger.info(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows")
+                logger.info(f"[MOCK ClickHouse] Batch insert to {table_name}: {len(data)} rows (user: {user_id or 'system'})")
                 return True
         except ImportError:
             if isinstance(self._client, NoOpClickHouseClient):
                 # NoOp implementation - just log the operation
-                logger.info(f"[NoOp ClickHouse] Batch insert to {table_name}: {len(data)} rows")
+                logger.info(f"[NoOp ClickHouse] Batch insert to {table_name}: {len(data)} rows (user: {user_id or 'system'})")
                 return True
 
         # For real implementation, we'll use a simple INSERT query
@@ -1314,12 +1331,36 @@ class ClickHouseService:
 
             # Execute insert for each row (basic implementation)
             for row in data:
-                await self.execute(query, row, user_id=None)  # Inserts typically don't need user-specific caching
+                await self.execute(query, row, user_id=user_id, operation_context=f"batch_insert:{table_name}")
 
             return True
+        except (DeadlockError, TimeoutError, PermissionError, SchemaError, TableCreationError, ColumnModificationError, IndexCreationError) as e:
+            # Issue #673: Re-raise classified specific transaction errors for proper test handling
+            # These errors should propagate to callers for proper exception testing and handling
+            logger.error(f"[ClickHouse] Batch insert {type(e).__name__} for table {table_name}: {e}")
+            raise
+        except (ConnectionError, OperationalError) as e:
+            # Issue #374: Database connection and operational errors in batch insert
+            classified_error = classify_error(e)
+            logger.error(f"[ClickHouse] Batch insert database error for table {table_name}: {type(classified_error).__name__}: {classified_error}")
+            
+            # For connection-related classified errors, re-raise if they're specific transaction errors
+            if isinstance(classified_error, (DeadlockError, TimeoutError, PermissionError, SchemaError, TableCreationError, ColumnModificationError, IndexCreationError)):
+                raise classified_error
+            else:
+                # For generic connection errors, return False for graceful handling
+                return False
         except Exception as e:
-            logger.error(f"[ClickHouse] Batch insert failed for table {table_name}: {e}")
-            return False
+            # Issue #374: Classify unexpected errors using transaction_errors
+            classified_error = classify_error(e)
+            logger.error(f"[ClickHouse] Batch insert failed for table {table_name}: {type(classified_error).__name__}: {classified_error}")
+            
+            # Re-raise classified specific transaction errors for proper handling
+            if isinstance(classified_error, (DeadlockError, TimeoutError, PermissionError, SchemaError, TableCreationError, ColumnModificationError, IndexCreationError)):
+                raise classified_error
+            else:
+                # For unclassified errors, return False for graceful handling
+                return False
 
     async def insert_data(self, table_name: str, data: List[Dict[str, Any]], user_id: str = None) -> bool:
         """
@@ -1328,12 +1369,12 @@ class ClickHouseService:
         Args:
             table_name: Name of the table to insert into
             data: List of dictionaries representing rows to insert
-            user_id: Optional user ID for multi-user isolation (currently unused)
+            user_id: Optional user ID for multi-user isolation and context
 
         Returns:
             bool: True if insertion successful, False otherwise
         """
-        return await self.batch_insert(table_name, data)
+        return await self.batch_insert(table_name, data, user_id=user_id)
     
     async def cleanup(self) -> None:
         """Cleanup method (alias for close) for test compatibility."""
