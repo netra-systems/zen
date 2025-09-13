@@ -344,10 +344,70 @@ class BaseAgent(ABC):
             # Following SPEC/learnings/websocket_json_serialization.xml
             value = value.model_dump(mode='json', exclude_none=True)
         
-        context.metadata[key] = value
+        # ISSUE #700 FIX: Use agent_context instead of read-only metadata property
+        # UserExecutionContext.metadata is a read-only property that returns copies,
+        # causing silent failures when attempting to store metadata
+        if hasattr(context, 'agent_context') and isinstance(context.agent_context, dict):
+            # Use agent_context for new UserExecutionContext pattern (SSOT compliant)
+            context.agent_context[key] = value
+            storage_location = "agent_context"
+        elif hasattr(context, 'metadata'):
+            # Legacy fallback: attempt direct metadata assignment
+            # This may silently fail with read-only properties, but preserves compatibility
+            try:
+                # Test if metadata is writable by doing a test assignment
+                test_key = f"_test_writable_{id(self)}"
+                context.metadata[test_key] = True
+                # If test succeeded, remove test key and store actual value
+                if test_key in context.metadata:
+                    del context.metadata[test_key]
+                    context.metadata[key] = value
+                    storage_location = "metadata"
+                else:
+                    # Silent failure detected - metadata property returns copies
+                    self.logger.warning(
+                        f"ISSUE #700: context.metadata assignment silently failed for {self.name}. "
+                        f"Context type: {type(context).__name__}. "
+                        f"This indicates UserExecutionContext.metadata is read-only."
+                    )
+                    # Fallback: store in audit_metadata if available
+                    if hasattr(context, 'audit_metadata'):
+                        context.audit_metadata[key] = value
+                        storage_location = "audit_metadata (fallback)"
+                    else:
+                        self.logger.error(
+                            f"CRITICAL: Cannot store metadata '{key}' in context {type(context).__name__}. "
+                            f"No writable metadata storage available."
+                        )
+                        return
+            except (AttributeError, TypeError) as e:
+                self.logger.error(
+                    f"Failed to store metadata '{key}' in context {type(context).__name__}: {e}"
+                )
+                return
+        else:
+            # No metadata storage available
+            self.logger.error(
+                f"CRITICAL: Context {type(context).__name__} has no metadata storage. "
+                f"Cannot store key '{key}' for agent {self.name}."
+            )
+            return
         
-        # Log for observability
-        self.logger.debug(f"{self.name} stored metadata: {key}")
+        # Log for observability and debugging
+        self.logger.debug(f"{self.name} stored metadata '{key}' in {storage_location}")
+        
+        # Verify storage succeeded (for Issue #700 debugging)
+        if hasattr(context, 'agent_context') and key in context.agent_context:
+            pass  # Success
+        elif hasattr(context, 'metadata') and key in context.metadata:
+            pass  # Success
+        elif hasattr(context, 'audit_metadata') and key in context.audit_metadata:
+            pass  # Success
+        else:
+            self.logger.warning(
+                f"VERIFICATION FAILED: Metadata key '{key}' not found after storage attempt. "
+                f"This may indicate Issue #700 metadata bypass regression."
+            )
     
     def store_metadata_batch(self, context: UserExecutionContext, 
                             data: Dict[str, Any], ensure_serializable: bool = True) -> None:

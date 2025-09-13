@@ -17,6 +17,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = central_logger.get_logger(__name__)
 
@@ -36,7 +37,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
         # Create demo user context using UnifiedIDManager SSOT methods
         # ISSUE #584 FIX: Use SSOT ID generation instead of ad-hoc prefixed UUIDs
         from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-        
+
         id_manager = UnifiedIDManager()
         demo_user_id = id_manager.generate_id(IDType.USER, context={"demo": True})
         thread_id = UnifiedIDManager.generate_thread_id()

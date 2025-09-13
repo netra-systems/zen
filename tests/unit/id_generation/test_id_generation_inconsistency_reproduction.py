@@ -34,6 +34,11 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
         super().setUp()
         self.id_manager = UnifiedIDManager()
 
+    def setUpMethod(self, method):
+        """Set up test environment for pytest compatibility."""
+        super().setUp() if hasattr(super(), 'setUp') else None
+        self.id_manager = UnifiedIDManager()
+
     def test_demo_websocket_legacy_uuid_patterns(self):
         """Reproduce legacy UUID pattern that bypasses SSOT.
 
@@ -73,7 +78,8 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
         legacy_run_id = f"demo-run-{uuid.uuid4()}"
 
         # SSOT METHOD (correct)
-        ssot_thread_id = self.id_manager.generate_id(IDType.THREAD, prefix="demo")
+        id_manager = UnifiedIDManager()
+        ssot_thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
         ssot_run_id = UnifiedIDManager.generate_run_id(ssot_thread_id)
 
         # EXPECT: Clear distinction between SSOT and legacy formats
@@ -135,11 +141,12 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
                         "Legacy UUID generation should produce unique IDs")
 
         # Generate multiple IDs using SSOT pattern
+        id_manager = UnifiedIDManager()
         ssot_ids = []
         for i in range(100):
-            thread_id = self.id_manager.generate_id(IDType.THREAD, prefix="demo")
+            thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
             run_id = UnifiedIDManager.generate_run_id(thread_id)
-            user_id = self.id_manager.generate_id(IDType.USER, prefix="demo")
+            user_id = id_manager.generate_id(IDType.USER, prefix="demo")
             ssot_ids.extend([user_id, thread_id, run_id])
 
         # Validate uniqueness
@@ -157,18 +164,28 @@ class TestIDGenerationInconsistency(SSotBaseTestCase):
         if not id_value:
             return False
 
-        # Legacy pattern: prefix-{uuid}
+        # Legacy pattern: prefix-{uuid} (like demo-user-{uuid4})
         parts = id_value.split('-')
-        if len(parts) < 2:
+        if len(parts) < 6:  # UUID has 5 segments, plus prefix makes 6 total
             return False
 
-        # Last parts should be UUID segments
-        uuid_part = '-'.join(parts[1:])
+        # Should start with a meaningful prefix
+        if not parts[0] or len(parts[0]) < 3:
+            return False
+
+        # Last 5 parts should form a valid UUID when joined
+        uuid_part = '-'.join(parts[-5:])
         try:
             uuid.UUID(uuid_part)
             return True
         except ValueError:
-            return False
+            # Also check if the full suffix (excluding first part) is a UUID
+            uuid_part = '-'.join(parts[1:])
+            try:
+                uuid.UUID(uuid_part)
+                return True
+            except ValueError:
+                return False
 
     def _is_ssot_compliant_format(self, id_value: str) -> bool:
         """Check if ID follows SSOT compliant format."""
@@ -228,11 +245,17 @@ class TestSSOTIDManagerCompliance(SSotBaseTestCase):
         super().setUp()
         self.id_manager = UnifiedIDManager()
 
+    def setUpMethod(self, method):
+        """Set up test environment for pytest compatibility."""
+        super().setUp() if hasattr(super(), 'setUp') else None
+        self.id_manager = UnifiedIDManager()
+
     def test_unified_id_manager_thread_run_correlation(self):
         """Validate SSOT generates correlated IDs."""
 
         # Use UnifiedIDManager for both thread_id and run_id
-        thread_id = self.id_manager.generate_id(IDType.THREAD, prefix="demo")
+        id_manager = UnifiedIDManager()
+        thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
         run_id = UnifiedIDManager.generate_run_id(thread_id)
 
         # EXPECT: Correlated, consistent formats
@@ -253,13 +276,14 @@ class TestSSOTIDManagerCompliance(SSotBaseTestCase):
         """Validate UnifiedIDManager meets all contracts."""
 
         # Test basic ID generation contracts
-        user_id = self.id_manager.generate_id(IDType.USER, prefix="test")
-        thread_id = self.id_manager.generate_id(IDType.THREAD, prefix="test")
+        id_manager = UnifiedIDManager()
+        user_id = id_manager.generate_id(IDType.USER, prefix="test")
+        thread_id = id_manager.generate_id(IDType.THREAD, prefix="test")
         run_id = UnifiedIDManager.generate_run_id(thread_id)
 
         # EXPECT: All contracts pass
-        self.assertTrue(self.id_manager.is_valid_id(user_id, IDType.USER))
-        self.assertTrue(self.id_manager.is_valid_id(thread_id, IDType.THREAD))
+        self.assertTrue(id_manager.is_valid_id(user_id, IDType.USER))
+        self.assertTrue(id_manager.is_valid_id(thread_id, IDType.THREAD))
 
         # VALIDATE: SSOT compliance verified
         self.assertTrue(UnifiedIDManager.validate_run_id(run_id))
@@ -268,7 +292,7 @@ class TestSSOTIDManagerCompliance(SSotBaseTestCase):
         self.assertTrue(parsed_run_id['valid'])
 
         # Test contract compliance
-        metadata = self.id_manager.get_id_metadata(user_id)
+        metadata = id_manager.get_id_metadata(user_id)
         self.assertIsNotNone(metadata)
         self.assertEqual(metadata.id_type, IDType.USER)
 
@@ -293,7 +317,8 @@ class TestSSOTIDManagerCompliance(SSotBaseTestCase):
 
     def _validate_ssot_format(self, id_value: str) -> bool:
         """Validate SSOT format compliance."""
-        return self.id_manager._validate_structured_format(id_value)
+        id_manager = UnifiedIDManager()
+        return id_manager._validate_structured_format(id_value)
 
     def _validate_correlation(self, extracted_thread_id: str, actual_thread_id: str, run_id: str) -> bool:
         """Validate ID correlation logic."""
@@ -311,7 +336,8 @@ class TestSSOTIDManagerCompliance(SSotBaseTestCase):
 
     def _validate_id_format_compatible(self, id_value: str) -> bool:
         """Validate ID format compatibility."""
-        return self.id_manager.is_valid_id_format_compatible(id_value)
+        id_manager = UnifiedIDManager()
+        return id_manager.is_valid_id_format_compatible(id_value)
 
     def _is_compatible_pattern(self, thread_id: str, run_id: str) -> bool:
         """Check if patterns are compatible for cleanup."""

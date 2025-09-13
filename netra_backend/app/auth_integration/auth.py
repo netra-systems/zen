@@ -329,9 +329,69 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
             logger.info(f"🎭 DEMO MODE: Applied default role '{user.role}' to user {user_id[:8]}...")
     
     config = get_config()
-    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}..., demo_mode: {demo_config.get('enabled', False)})")
+
+    # Issue #487: Enhanced institutional domain classification for business intelligence
+    email_domain = user.email.split('@')[-1] if '@' in user.email else "unknown"
+    domain_classification = _classify_domain_for_analytics(email_domain)
+
+    logger.warning(f"[🔑] USER AUTO-CREATED: Created user {user.email} from JWT claims "
+                  f"(env: {config.environment}, user_id: {user_id[:8]}..., "
+                  f"demo_mode: {demo_config.get('enabled', False)}, "
+                  f"domain: {email_domain}, domain_type: {domain_classification})")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
+
+def _classify_domain_for_analytics(domain: str) -> str:
+    """
+    Classify email domain for business intelligence and analytics purposes.
+
+    This function supports Issue #487: Institutional Domain Classification Enhancement
+    by providing structured domain classification for business development insights.
+
+    Args:
+        domain: Email domain (e.g., 'cornell.edu', 'gmail.com')
+
+    Returns:
+        str: Domain classification ('institutional', 'corporate', 'consumer', 'unknown')
+    """
+    domain = domain.lower()
+
+    # Educational/Research institutions - high value for partnerships
+    educational_domains = {
+        'cornell.edu', 'mit.edu', 'stanford.edu', 'harvard.edu', 'yale.edu',
+        'princeton.edu', 'caltech.edu', 'berkeley.edu', 'cmu.edu',
+        'columbia.edu', 'uchicago.edu', 'upenn.edu', 'dartmouth.edu',
+        'brown.edu', 'northwestern.edu', 'duke.edu', 'vanderbilt.edu',
+        'rice.edu', 'emory.edu', 'georgetown.edu', 'wustl.edu',
+        'ox.ac.uk', 'cam.ac.uk', 'imperial.ac.uk', 'ucl.ac.uk',
+        'toronto.ca', 'ubc.ca', 'mcgill.ca',
+        'anu.edu.au', 'sydney.edu.au', 'melbourne.edu.au',
+        'ethz.ch', 'epfl.ch', 'u-tokyo.ac.jp', 'kyoto-u.ac.jp'
+    }
+
+    # Corporate domains - business customers
+    corporate_domains = {
+        'enterprise.com', 'corp.com', 'business.com',
+        'acme.com', 'bigcorp.com', 'enterprise.net', 'corporate.org'
+    }
+
+    # Consumer domains - individual users
+    consumer_domains = {
+        'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com',
+        'icloud.com', 'protonmail.com', 'mail.com'
+    }
+
+    if domain in educational_domains:
+        return 'institutional'
+    elif domain in corporate_domains:
+        return 'corporate'
+    elif domain in consumer_domains:
+        return 'consumer'
+    elif domain.endswith('.edu') or domain.endswith('.ac.uk') or domain.endswith('.edu.au'):
+        return 'institutional'  # Generic educational domain patterns
+    else:
+        return 'unknown'
+
 
 async def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),

@@ -168,14 +168,14 @@ def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
         
         # Only add middleware in GCP environments
         if is_gcp:
-            # GCP environments need longer timeout due to Cloud SQL connection delays
-            timeout_seconds = 90.0 if environment == 'staging' else 60.0
+            # Enhanced timeout for Issue #449 Cloud Run compatibility
+            timeout_seconds = 90.0 if environment == 'staging' else 75.0  # Enhanced timeouts
             
             app.add_middleware(
                 GCPWebSocketReadinessMiddleware,
                 timeout_seconds=timeout_seconds
             )
-            logger.info(f"GCP WebSocket readiness middleware added for {environment} environment (timeout: {timeout_seconds}s)")
+            logger.info(f"Enhanced GCP WebSocket readiness middleware added for {environment} environment (Issue #449, timeout: {timeout_seconds}s)")
         else:
             logger.debug(f"GCP WebSocket readiness middleware skipped for {environment} environment")
             
@@ -738,13 +738,19 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
                         logger.warning("Invalid HTTP scope detected - applying protective measures")
                         await self._send_safe_http_response(send, scope)
                         return
-                    
+
                     # Normal HTTP processing with scope protection
                     await super().__call__(scope, receive, send)
                     return
-                    
+
+                elif scope_type == "lifespan":
+                    # Phase 3: ASGI 3.0 lifespan events (startup/shutdown)
+                    logger.debug("Lifespan event detected - processing normally")
+                    await self.app(scope, receive, send)
+                    return
+
                 else:
-                    # Phase 3: Unknown scope type protection
+                    # Phase 4: Unknown scope type protection
                     logger.warning(f"Unknown ASGI scope type: {scope_type} - passing through safely")
                     await self.app(scope, receive, send)
                     return

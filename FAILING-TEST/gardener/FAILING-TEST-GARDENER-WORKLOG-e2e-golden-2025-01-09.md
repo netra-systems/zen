@@ -98,12 +98,15 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 - API compatibility issue with current WebSocket implementation
 
 ### ⚠️ LOW - Issue 6: Deprecated Import Warnings
+**GitHub Issue:** [#416 - [TECH-DEBT] failing-test-regression-P3-deprecation-warnings-cleanup](https://github.com/netra-systems/netra-apex/issues/416)
 **Files:** Multiple test files
 **Impact:** Code quality and future compatibility
 **Details:**
 - Deprecated logging imports across multiple modules
 - Pydantic v2 migration warnings
 - WebSocket manager import path deprecations
+
+**Status:** Consolidated under existing issue #416 for comprehensive deprecation cleanup
 
 ## Business Impact Assessment
 

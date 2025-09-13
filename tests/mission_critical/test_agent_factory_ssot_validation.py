@@ -33,7 +33,7 @@ import unittest.mock
 from unittest.mock import patch, MagicMock
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 class TestAgentFactorySsotValidation(SSotAsyncTestCase):

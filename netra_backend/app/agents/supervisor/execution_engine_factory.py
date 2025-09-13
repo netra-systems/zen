@@ -37,9 +37,10 @@ from netra_backend.app.services.user_execution_context import (
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    get_agent_instance_factory
+    get_agent_instance_factory,
+    AgentInstanceFactory
 )
-from netra_backend.app.services.websocket_bridge_factory import UserWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.logging_config import central_logger
 
@@ -251,7 +252,7 @@ class ExecutionEngineFactory:
     
     async def _create_user_websocket_emitter(self, 
                                             context: UserExecutionContext,
-                                            agent_factory) -> UserWebSocketEmitter:
+                                            agent_factory) -> UnifiedWebSocketEmitter:
         """Create user WebSocket emitter using websocket bridge (if available).
         
         Args:
@@ -259,7 +260,7 @@ class ExecutionEngineFactory:
             agent_factory: Agent instance factory (unused now, kept for compatibility)
             
         Returns:
-            UserWebSocketEmitter: User-specific WebSocket emitter
+            UnifiedWebSocketEmitter: User-specific WebSocket emitter
             
         Raises:
             ExecutionEngineFactoryError: If emitter creation fails
@@ -270,24 +271,24 @@ class ExecutionEngineFactory:
             
             if not websocket_bridge:
                 logger.warning(
-                    f" WARNING: [U+FE0F] Creating UserWebSocketEmitter for user {context.user_id} without WebSocket bridge. "
+                    f" WARNING: [U+FE0F] Creating UnifiedWebSocketEmitter for user {context.user_id} without WebSocket bridge. "
                     f"WebSocket events will be disabled (test/degraded mode)."
                 )
             
             # Create user WebSocket emitter (works with None websocket_bridge)
-            emitter = UserWebSocketEmitter(
+            emitter = UnifiedWebSocketEmitter(
                 user_id=context.user_id,
                 thread_id=context.thread_id,
                 run_id=context.run_id,
                 websocket_bridge=websocket_bridge
             )
             
-            logger.debug(f"Created UserWebSocketEmitter for user {context.user_id} "
+            logger.debug(f"Created UnifiedWebSocketEmitter for user {context.user_id} "
                         f"(bridge available: {websocket_bridge is not None})")
             return emitter
             
         except Exception as e:
-            logger.error(f"Failed to create UserWebSocketEmitter: {e}")
+            logger.error(f"Failed to create UnifiedWebSocketEmitter: {e}")
             raise ExecutionEngineFactoryError(f"WebSocket emitter creation failed: {e}")
     
     @asynccontextmanager

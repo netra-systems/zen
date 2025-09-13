@@ -40,6 +40,21 @@ class SchemaError(TransactionError):
     pass
 
 
+class TableCreationError(SchemaError):
+    """Raised when table creation operations fail."""
+    pass
+
+
+class ColumnModificationError(SchemaError):
+    """Raised when column modification operations fail."""
+    pass
+
+
+class IndexCreationError(SchemaError):
+    """Raised when index creation/deletion operations fail."""
+    pass
+
+
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
@@ -71,6 +86,36 @@ def _has_schema_keywords(error_msg: str) -> bool:
     """Check if error message contains schema keywords."""
     schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
     return any(keyword in error_msg for keyword in schema_keywords)
+
+
+def _has_table_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains table creation keywords."""
+    table_creation_keywords = [
+        'create table', 'table creation', 'invalid table definition',
+        'engine configuration', 'partition by', 'order by', 'syntax error in create',
+        'table already exists', 'invalid engine parameters', 'engine', 'programmingerror'
+    ]
+    return any(keyword in error_msg for keyword in table_creation_keywords)
+
+
+def _has_column_modification_keywords(error_msg: str) -> bool:
+    """Check if error message contains column modification keywords."""
+    column_modification_keywords = [
+        'alter table', 'column modification', 'cannot convert column',
+        'invalid column type', 'type conversion', 'add column', 'modify column',
+        'drop column', 'column constraint', 'incompatible types'
+    ]
+    return any(keyword in error_msg for keyword in column_modification_keywords)
+
+
+def _has_index_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains index creation keywords."""
+    index_creation_keywords = [
+        'create index', 'drop index', 'index creation', 'index already exists',
+        'invalid index', 'index on', 'materialized view', 'projection',
+        'index conflict', 'index definition', 'integrityerror'
+    ]
+    return any(keyword in error_msg for keyword in index_creation_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
@@ -153,6 +198,29 @@ def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception
     return error
 
 
+def _classify_table_creation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify table creation-related operational errors."""
+    error_type_name = type(error).__name__.lower()
+    if _has_table_creation_keywords(error_msg) or _has_table_creation_keywords(error_type_name):
+        return TableCreationError(f"Table creation error: {error}")
+    return error
+
+
+def _classify_column_modification_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify column modification-related operational errors."""
+    if _has_column_modification_keywords(error_msg):
+        return ColumnModificationError(f"Column modification error: {error}")
+    return error
+
+
+def _classify_index_creation_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify index creation-related operational errors."""
+    error_type_name = type(error).__name__.lower()
+    if _has_index_creation_keywords(error_msg) or _has_index_creation_keywords(error_type_name):
+        return IndexCreationError(f"Index creation error: {error}")
+    return error
+
+
 def _attempt_error_classification(error: OperationalError, error_msg: str) -> Exception:
     """Attempt to classify error, returning original if no match."""
     # Try each classification in priority order
@@ -171,7 +239,21 @@ def _attempt_error_classification(error: OperationalError, error_msg: str) -> Ex
     classified = _classify_permission_error(error, error_msg)
     if classified != error:
         return classified
+    
+    # Try specific schema error types first
+    classified = _classify_table_creation_error(error, error_msg)
+    if classified != error:
+        return classified
         
+    classified = _classify_column_modification_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    classified = _classify_index_creation_error(error, error_msg)
+    if classified != error:
+        return classified
+        
+    # Fall back to general schema error
     return _classify_schema_error(error, error_msg)
 
 

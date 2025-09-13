@@ -15,7 +15,7 @@ from shared.isolated_environment import get_env
 # SSOT: Import SERVICE_ID constant
 from shared.constants.service_identifiers import SERVICE_ID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 from netra_backend.app.schemas.auth_types import (
     AuthConfigResponse,
@@ -69,10 +69,48 @@ SECRET_CONFIG: List[SecretReference] = [
 ]
 
 class RedisConfig(BaseModel):
-    host: str = 'redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com'
-    port: int = 10504
+    host: str = 'localhost'
+    port: int = 6379
     username: str = "default"
     password: Optional[str] = None
+    db: int = 0
+    ssl: bool = False
+
+    def __init__(self, **data):
+        # Load from environment if not provided in data
+        env = get_env()
+
+        # Map environment variables to field names if not already in data
+        env_mappings = {
+            'host': 'REDIS_HOST',
+            'port': 'REDIS_PORT',
+            'username': 'REDIS_USERNAME',
+            'password': 'REDIS_PASSWORD',
+            'db': 'REDIS_DB',
+            'ssl': 'REDIS_SSL'
+        }
+
+        for field_name, env_var in env_mappings.items():
+            if field_name not in data:
+                env_value = env.get(env_var)
+                if env_value is not None:
+                    # Convert types as needed
+                    if field_name == 'port':
+                        try:
+                            data[field_name] = int(env_value)
+                        except (ValueError, TypeError):
+                            pass
+                    elif field_name == 'db':
+                        try:
+                            data[field_name] = int(env_value)
+                        except (ValueError, TypeError):
+                            pass
+                    elif field_name == 'ssl':
+                        data[field_name] = env_value.lower() in ('true', '1', 'yes', 'on')
+                    else:
+                        data[field_name] = env_value
+
+        super().__init__(**data)
 
 class GoogleCloudConfig(BaseModel):
     project_id: str = "cryptic-net-466001-n0"
@@ -1228,7 +1266,40 @@ class StagingConfig(AppConfig):
         redis_url = env.get('REDIS_URL')
         if redis_url:
             data['redis_url'] = redis_url
-        
+
+        # Load Redis configuration for staging
+        redis_host = env.get('REDIS_HOST')
+        redis_port = env.get('REDIS_PORT')
+        redis_password = env.get('REDIS_PASSWORD')
+        redis_db = env.get('REDIS_DB')
+        redis_ssl = env.get('REDIS_SSL')
+
+        # Ensure we have redis configuration dictionary
+        if 'redis' not in data:
+            data['redis'] = {}
+
+        # Load Redis configuration values if available
+        if redis_host:
+            data['redis']['host'] = redis_host
+        if redis_port:
+            try:
+                data['redis']['port'] = int(redis_port)
+            except (ValueError, TypeError):
+                pass
+        if redis_password:
+            data['redis']['password'] = redis_password
+        if redis_db:
+            try:
+                data['redis']['db'] = int(redis_db)
+            except (ValueError, TypeError):
+                pass
+        if redis_ssl:
+            data['redis']['ssl'] = redis_ssl.lower() in ('true', '1', 'yes', 'on')
+
+        # If we have any Redis configuration, create RedisConfig with our data
+        if redis_host or redis_port or redis_password or redis_db or redis_ssl:
+            data['redis'] = RedisConfig(**data['redis'])
+
         # Load ClickHouse configuration for staging
         clickhouse_host = env.get('CLICKHOUSE_HOST')
         clickhouse_port = env.get('CLICKHOUSE_PORT')
