@@ -3,6 +3,15 @@
 Claude Code Instance Orchestrator
 Simple orchestrator for running 3 Claude Code instances in headless mode,
 each executing specific slash commands.
+
+
+Auto runs a set of parallel claude code instance commands
+Saves having to manually sping up terminal windows
+Path towards integration and automation
+collects more data than human readable output, e.g. token use, tool use names etc
+
+IDEAS
+    Record and contrast tool use by command 
 """
 
 import asyncio
