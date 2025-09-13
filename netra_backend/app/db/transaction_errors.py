@@ -40,6 +40,21 @@ class SchemaError(TransactionError):
     pass
 
 
+class TableCreationError(SchemaError):
+    """Raised when table creation operations fail."""
+    pass
+
+
+class ColumnModificationError(SchemaError):
+    """Raised when column modification operations fail."""
+    pass
+
+
+class IndexCreationError(SchemaError):
+    """Raised when index creation/deletion operations fail."""
+    pass
+
+
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
@@ -71,6 +86,36 @@ def _has_schema_keywords(error_msg: str) -> bool:
     """Check if error message contains schema keywords."""
     schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
     return any(keyword in error_msg for keyword in schema_keywords)
+
+
+def _has_table_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains table creation keywords."""
+    table_creation_keywords = [
+        'create table', 'table creation', 'invalid table definition',
+        'engine configuration', 'partition by', 'order by', 'syntax error in create',
+        'table already exists', 'invalid engine parameters'
+    ]
+    return any(keyword in error_msg for keyword in table_creation_keywords)
+
+
+def _has_column_modification_keywords(error_msg: str) -> bool:
+    """Check if error message contains column modification keywords."""
+    column_modification_keywords = [
+        'alter table', 'column modification', 'cannot convert column',
+        'invalid column type', 'type conversion', 'add column', 'modify column',
+        'drop column', 'column constraint', 'incompatible types'
+    ]
+    return any(keyword in error_msg for keyword in column_modification_keywords)
+
+
+def _has_index_creation_keywords(error_msg: str) -> bool:
+    """Check if error message contains index creation keywords."""
+    index_creation_keywords = [
+        'create index', 'drop index', 'index creation', 'index already exists',
+        'invalid index', 'index on', 'materialized view', 'projection',
+        'index conflict', 'index definition'
+    ]
+    return any(keyword in error_msg for keyword in index_creation_keywords)
 
 
 def _is_disconnection_retryable(error: Exception, enable_connection_retry: bool) -> bool:
