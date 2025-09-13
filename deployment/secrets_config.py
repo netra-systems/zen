@@ -350,6 +350,181 @@ class SecretConfig:
         print(f"Critical secrets: {len(critical_secrets)}")
         print(f"{'='*60}\n")
 
+    @classmethod
+    def validate_deployment_readiness(cls, service_name: str, project_id: str = "netra-staging") -> Dict[str, Any]:
+        """
+        Validate all secrets exist in GSM and meet quality requirements for deployment.
+
+        This is the core method that bridges SecretConfig definitions to deployment validation.
+
+        Args:
+            service_name: Name of the service to validate
+            project_id: GCP project ID (default: netra-staging)
+
+        Returns:
+            Dictionary with validation results:
+            {
+                "deployment_ready": bool,
+                "service_name": str,
+                "project_id": str,
+                "secrets_validated": int,
+                "critical_secrets_found": int,
+                "issues": List[str],
+                "deployment_fragment": str
+            }
+        """
+        logger.info(f"🔍 Validating deployment readiness for {service_name} in {project_id}")
+
+        result = {
+            "deployment_ready": False,
+            "service_name": service_name,
+            "project_id": project_id,
+            "secrets_validated": 0,
+            "critical_secrets_found": 0,
+            "issues": [],
+            "deployment_fragment": ""
+        }
+
+        try:
+            # Get all required secrets for the service
+            all_secrets = cls.get_all_service_secrets(service_name)
+            critical_secrets = set(cls.CRITICAL_SECRETS.get(service_name, []))
+
+            logger.info(f"Checking {len(all_secrets)} secrets ({len(critical_secrets)} critical)")
+
+            validated_secrets = 0
+            critical_found = 0
+            issues = []
+
+            # Validate each secret
+            for secret_name in all_secrets:
+                try:
+                    # Attempt to retrieve the secret from GSM
+                    secret_value = get_staging_secret(secret_name, project_id)
+
+                    # Validate secret quality
+                    quality_issue = cls._validate_secret_quality(secret_name, secret_value)
+                    if quality_issue:
+                        issues.append(f"Quality issue with {secret_name}: {quality_issue}")
+                        if secret_name in critical_secrets:
+                            # Critical secret quality issues block deployment
+                            continue
+
+                    validated_secrets += 1
+                    if secret_name in critical_secrets:
+                        critical_found += 1
+
+                    logger.debug(f"✅ {secret_name}: OK ({len(secret_value)} chars)")
+
+                except Exception as e:
+                    error_msg = f"Failed to validate {secret_name}: {str(e)}"
+                    issues.append(error_msg)
+                    logger.warning(error_msg)
+
+                    # Critical secret failures block deployment
+                    if secret_name in critical_secrets:
+                        issues.append(f"CRITICAL SECRET MISSING: {secret_name}")
+
+            # Update result
+            result["secrets_validated"] = validated_secrets
+            result["critical_secrets_found"] = critical_found
+            result["issues"] = issues
+
+            # Generate deployment fragment if validation successful
+            if validated_secrets > 0:
+                try:
+                    result["deployment_fragment"] = cls.generate_deployment_command_fragment(service_name, "staging")
+                except Exception as e:
+                    issues.append(f"Failed to generate deployment fragment: {e}")
+
+            # Determine deployment readiness
+            # Must have all critical secrets and no blocking issues
+            has_all_critical = critical_found == len(critical_secrets)
+            has_some_secrets = validated_secrets > 0
+            no_critical_issues = not any("CRITICAL SECRET MISSING" in issue for issue in issues)
+
+            result["deployment_ready"] = has_all_critical and has_some_secrets and no_critical_issues
+
+            logger.info(
+                f"🎯 Deployment readiness for {service_name}: {result['deployment_ready']} "
+                f"({validated_secrets}/{len(all_secrets)} secrets, "
+                f"{critical_found}/{len(critical_secrets)} critical)"
+            )
+
+            return result
+
+        except Exception as e:
+            error_msg = f"Deployment readiness validation failed: {e}"
+            logger.error(error_msg)
+            result["issues"].append(error_msg)
+            return result
+
+    @classmethod
+    def generate_deployment_command_fragment(cls, service_name: str, environment: str = "staging") -> str:
+        """
+        Generate the complete --set-secrets fragment for gcloud run deploy.
+
+        This method creates the deployment command fragment that bridges
+        SecretConfig definitions to actual GCP deployment commands.
+
+        Args:
+            service_name: Name of the service
+            environment: Environment (staging, production)
+
+        Returns:
+            Complete --set-secrets parameter string for gcloud run deploy
+        """
+        logger.info(f"🚀 Generating deployment command fragment for {service_name} ({environment})")
+
+        try:
+            # Use the existing generate_secrets_string method
+            secrets_string = cls.generate_secrets_string(service_name)
+
+            if not secrets_string:
+                raise ValueError(f"No secrets configured for service '{service_name}'")
+
+            # The fragment is ready to use with gcloud run deploy
+            fragment = f"--set-secrets {secrets_string}"
+
+            logger.info(
+                f"✅ Generated {len(fragment)} character deployment fragment for {service_name}"
+            )
+
+            return fragment
+
+        except Exception as e:
+            error_msg = f"Failed to generate deployment fragment for {service_name}: {e}"
+            logger.error(error_msg)
+            raise ValueError(error_msg) from e
+
+    @classmethod
+    def _validate_secret_quality(cls, secret_name: str, secret_value: str) -> Optional[str]:
+        """
+        Validate secret quality (length, format, placeholders).
+
+        Args:
+            secret_name: Name of the secret
+            secret_value: Value of the secret
+
+        Returns:
+            Error message if validation fails, None if OK
+        """
+        # JWT secrets must be at least 32 characters
+        if "JWT" in secret_name.upper():
+            if len(secret_value) < 32:
+                return f"JWT secret must be at least 32 characters (got {len(secret_value)})"
+
+        # General secrets should be non-empty
+        if not secret_value or secret_value.isspace():
+            return "Secret is empty or whitespace only"
+
+        # Check for placeholder values
+        placeholder_indicators = ["placeholder", "example", "test", "dummy", "changeme"]
+        if any(indicator in secret_value.lower() for indicator in placeholder_indicators):
+            return f"Secret appears to be a placeholder: {secret_value[:20]}..."
+
+        return None
+
 
 # Convenience functions for direct access
 def get_backend_secrets_string() -> str:

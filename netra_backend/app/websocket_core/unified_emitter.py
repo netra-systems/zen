@@ -1032,6 +1032,69 @@ class UnifiedWebSocketEmitter:
             
         return False
 
+    @classmethod
+    def create_user_emitter(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_context: 'UserExecutionContext'
+    ) -> 'UnifiedWebSocketEmitter':
+        """Factory method for user-specific emitter creation.
+
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_context: User execution context for isolation
+
+        Returns:
+            UnifiedWebSocketEmitter: Configured emitter for the user
+
+        Raises:
+            ValueError: If user_context is invalid
+        """
+        if not user_context:
+            raise ValueError("create_user_emitter requires valid user_context")
+
+        user_id = getattr(user_context, 'user_id', None)
+        if not user_id:
+            raise ValueError("create_user_emitter requires user_id in user_context")
+
+        return cls(
+            manager=manager,
+            user_id=user_id,
+            context=user_context
+        )
+
+    @classmethod
+    def create_auth_emitter(
+        cls,
+        manager: 'UnifiedWebSocketManager',
+        user_context: 'UserExecutionContext'
+    ) -> 'UnifiedWebSocketEmitter':
+        """Factory method for authentication-specific emitter creation.
+
+        Args:
+            manager: UnifiedWebSocketManager instance
+            user_context: User execution context for auth events
+
+        Returns:
+            UnifiedWebSocketEmitter: Configured emitter for auth events
+
+        Raises:
+            ValueError: If user_context is invalid
+        """
+        if not user_context:
+            raise ValueError("create_auth_emitter requires valid user_context")
+
+        user_id = getattr(user_context, 'user_id', None)
+        if not user_id:
+            raise ValueError("create_auth_emitter requires user_id in user_context")
+
+        # For auth emitters, use standard emitter with enhanced security context
+        return cls(
+            manager=manager,
+            user_id=user_id,
+            context=user_context
+        )
+
 
 class AuthenticationWebSocketEmitter(UnifiedWebSocketEmitter):
     """

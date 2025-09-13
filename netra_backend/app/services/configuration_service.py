@@ -4,6 +4,7 @@ Provides configuration management services.
 """
 
 import logging
+import warnings
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,9 @@ class EnvironmentConfigLoader:
     
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from environment."""
-        import os
-        return dict(os.environ)
+        from shared.isolated_environment import IsolatedEnvironment
+        env = IsolatedEnvironment()
+        return env.get_all()
     
     def get_database_config(self) -> Dict[str, Any]:
         """Get database configuration using DatabaseURLBuilder SSOT."""
@@ -81,9 +83,26 @@ class ConfigurationValidator:
 
 
 class ConfigurationManager:
-    """Manages application configuration."""
-    
+    """Manages application configuration.
+
+    DEPRECATION WARNING: This class is deprecated as part of Issue #667 SSOT remediation.
+    Please migrate to netra_backend.app.core.configuration.base.UnifiedConfigManager
+    for the Single Source of Truth configuration management.
+
+    Migration Guide:
+    - Replace: from netra_backend.app.services.configuration_service import ConfigurationManager
+    - With: from netra_backend.app.core.configuration.base import UnifiedConfigManager
+    - Use: get_config_value(key, default) instead of get_config(key, default)
+    """
+
     def __init__(self):
+        warnings.warn(
+            "ConfigurationManager is deprecated (Issue #667). "
+            "Use netra_backend.app.core.configuration.base.UnifiedConfigManager instead. "
+            "See migration guide for details.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.validator = ConfigurationValidator()
         self._config_cache: Dict[str, Any] = {}
     

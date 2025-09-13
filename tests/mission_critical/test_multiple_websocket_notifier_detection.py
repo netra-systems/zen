@@ -353,7 +353,7 @@ class TestMultipleWebSocketNotifierDetection(SSotBaseTestCase):
                 logger.error(f"  - {violation['type']}: {violation.get('class_name', violation.get('pattern', 'unknown'))}")
                 logger.error(f"    Severity: {violation['severity']}")
                 logger.error(f"    Duplicates: {violation['duplicate_count']}")
-                logger.error(f"    Files: {violation['file_count']}")
+                logger.error(f"    Files: {violation.get('file_count', 'unknown')}")
         
         # Log specific duplicate groups for debugging
         if duplicate_groups:

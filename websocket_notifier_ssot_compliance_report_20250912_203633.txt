@@ -1,0 +1,29 @@
+================================================================================
+WebSocketNotifier SSOT Compliance Validation Report
+================================================================================
+Overall Compliance Score: 90.0%
+Target Compliance Score: 85.0%
+ FAIL:  COMPLIANCE STATUS: FAIL
+Total Violations Found: 1
+
+Violation Breakdown by Severity:
+   FAIL:  CRITICAL: 1 (threshold: 0)
+   PASS:  HIGH: 0 (threshold: 2)
+   PASS:  MEDIUM: 0 (threshold: 10)
+   PASS:  LOW: 0 (threshold: 50)
+
+Violation Breakdown by Type:
+  [U+1F4CB] INTERFACE_CONSISTENCY: 1 violations
+
+Critical and High Severity Violations:
+  CRITICAL: /Users/anthony/Desktop/netra-apex/netra_backend/app/services/agent_websocket_bridge.py:1
+    Type: INTERFACE_CONSISTENCY
+    Description: Canonical implementation file not found
+
+SSOT Implementation Status:
+  [U+1F4C1] Canonical File: /Users/anthony/Desktop/netra-apex/netra_backend/app/services/agent_websocket_bridge.py
+  [U+1F4CB] Canonical Import: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier
+   FAIL:  Canonical implementation missing
+
+Recommendations:
+   ALERT:  URGENT: Address critical violations immediately

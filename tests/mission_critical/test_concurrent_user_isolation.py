@@ -63,13 +63,13 @@ class ConcurrentUserContext:
     end_time: Optional[float] = None
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def isolated_env():
     """Isolated environment for concurrent testing."""
     return IsolatedEnvironment()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 async def redis_client(isolated_env):
     """Real Redis client for concurrent testing."""
     redis_url = isolated_env.get('REDIS_URL', 'redis://localhost:6381')
@@ -85,7 +85,7 @@ async def redis_client(isolated_env):
     await client.close()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 async def database_engine(isolated_env):
     """Real database engine for concurrent testing."""
     database_url = isolated_env.get('DATABASE_URL', 'postgresql+asyncpg://netra:netra@localhost:5434/netra_test')
@@ -96,7 +96,7 @@ async def database_engine(isolated_env):
     await engine.dispose()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 async def backend_client(isolated_env):
     """Real backend client for concurrent testing."""
     backend_url = isolated_env.get('BACKEND_URL', 'http://localhost:8000')

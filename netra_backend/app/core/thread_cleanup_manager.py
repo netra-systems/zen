@@ -264,27 +264,45 @@ class ThreadCleanupManager:
         """Schedule a background cleanup task."""
         if self._cleanup_scheduled:
             return
-        
+
         self._cleanup_scheduled = True
-        
+
         async def background_cleanup():
             try:
                 await asyncio.sleep(5.0)  # Wait 5 seconds before cleanup
-                
+
                 # Clean up stale threads
                 self.cleanup_stale_threads(max_age_minutes=5)
-                
+
                 # Force garbage collection
                 gc.collect()
-                
+
             except Exception as e:
                 logger.error(f"Background thread cleanup failed: {e}")
             finally:
                 self._cleanup_scheduled = False
-        
-        # Schedule the cleanup task
+
+        # Schedule the cleanup task with proper error handling
         try:
-            asyncio.create_task(background_cleanup())
+            # Check if we have an active event loop first
+            try:
+                loop = asyncio.get_running_loop()
+                # Create task in the running loop
+                task = loop.create_task(background_cleanup())
+                logger.debug("Background cleanup task scheduled in active event loop")
+            except RuntimeError:
+                # No running loop - try to get any loop
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        task = loop.create_task(background_cleanup())
+                        logger.debug("Background cleanup task scheduled in existing event loop")
+                    else:
+                        raise RuntimeError("Event loop not running")
+                except (RuntimeError, AttributeError):
+                    # Fallback to thread-based cleanup
+                    raise RuntimeError("No asyncio event loop available")
+
         except RuntimeError:
             # No event loop running, cleanup immediately in thread
             def sync_cleanup():
@@ -292,9 +310,10 @@ class ThreadCleanupManager:
                 self.cleanup_stale_threads(max_age_minutes=5)
                 gc.collect()
                 self._cleanup_scheduled = False
-            
+
             cleanup_thread = threading.Thread(target=sync_cleanup, daemon=True)
             cleanup_thread.start()
+            logger.debug("Background cleanup scheduled in separate thread (no event loop)")
     
     def force_cleanup_all(self) -> Dict[str, int]:
         """
