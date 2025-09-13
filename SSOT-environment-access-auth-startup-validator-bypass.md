@@ -66,3 +66,31 @@ direct_value = self.env.get(var_name)
 **Previous Issues Resolved:** #667 Configuration Manager SSOT (Complete)  
 **System Health Impact:** Critical for maintaining 89%+ system health  
 **Focus Area:** Environment access patterns and authentication reliability
+
+### GitHub Issue Created
+**Issue #716:** https://github.com/netra-systems/netra-apex/issues/716
+
+## Test Discovery & Planning (Step 1)
+
+### ✅ Test Discovery Complete
+**Existing Test Coverage:** 17 files discovered covering AuthStartupValidator functionality
+- **Unit Tests:** 8 files targeting auth validation logic and environment patterns
+- **Integration Tests:** 4 files covering cross-service auth flows  
+- **E2E Tests:** 3 files protecting Golden Path user experience
+- **Mission Critical:** 2 files safeguarding business value
+
+### Critical Test Gaps Identified
+- Existing tests use incorrect method names for SSOT violation detection
+- Missing line-specific violation targeting (lines 518, 533)
+- No post-fix regression validation coverage
+- Insufficient environment consistency testing across dev/staging/prod
+
+### Test Plan Summary
+**Phase 1 (60% effort):** Update existing tests with correct method names and enhanced environment validation
+**Phase 2 (20% effort):** Create new Issue #716-specific SSOT compliance tests  
+**Phase 3 (20% effort):** Add E2E staging validation for Golden Path protection
+
+### Test Execution Strategy
+- **Pre-Fix:** Run failing tests to prove SSOT violations exist
+- **Post-Fix:** Run passing tests to validate SSOT compliance achieved
+- **Golden Path Validation:** Ensure user login → AI response flow protected
