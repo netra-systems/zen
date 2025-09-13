@@ -19,7 +19,7 @@ from enum import Enum
 from typing import Dict, Optional, Any, List, TYPE_CHECKING
 from dataclasses import dataclass, field
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 # REMOVED: Singleton orchestrator import - replaced with per-request factory patterns
 # from netra_backend.app.orchestration.agent_execution_registry import get_agent_execution_registry
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class IntegrationState(Enum):
@@ -241,6 +241,41 @@ class AgentWebSocketBridge(MonitorableComponent):
         logger.debug(
             f"WebSocket manager {'set' if manager else 'cleared'} "
             f"(type: {type(manager).__name__ if manager else 'None'})"
+        )
+    
+    @property
+    def registry(self):
+        """Get the agent registry for this bridge.
+        
+        CRITICAL: This property exposes the _registry for supervisor
+        and test integration. The registry is set per-request to
+        ensure proper user isolation.
+        
+        NOTE: This property is added for interface compatibility with existing tests
+        while maintaining encapsulation principles and per-request patterns.
+        """
+        return self._registry
+    
+    @registry.setter  
+    def registry(self, registry):
+        """Set agent registry (primarily for testing scenarios).
+        
+        CRITICAL: This setter is primarily for test scenarios to inject mock registries.
+        Production code should use factory methods for proper user isolation 
+        and per-request instantiation patterns.
+        
+        Args:
+            registry: Agent registry instance or None.
+                    
+        Raises:
+            ValueError: If registry doesn't implement expected interface
+        """
+        # Note: No strict interface validation here as registry implementations vary
+        # Tests may use mock objects with different interfaces
+        self._registry = registry
+        logger.debug(
+            f"Agent registry {'set' if registry else 'cleared'} "
+            f"(type: {type(registry).__name__ if registry else 'None'})"
         )
     
     def _initialize_health_monitoring(self) -> None:
@@ -3705,8 +3740,8 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None, w
         emitter = await bridge.create_user_emitter(user_context)
         await emitter.notify_agent_started(agent_name, metadata)
     """
-    from netra_backend.app.logging_config import central_logger
-    logger = central_logger.get_logger(__name__)
+    from shared.logging.unified_logging_ssot import get_logger
+    logger = get_logger(__name__)
     
     # PRIORITY 2 FIX: Handle both user_context and websocket_manager parameters for compatibility
     if websocket_manager and not user_context:

@@ -12,7 +12,7 @@ from typing import Dict, Optional, Set, Any, List, Union
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
     ensure_user_id, ensure_thread_id, ensure_websocket_id
@@ -21,7 +21,7 @@ from shared.types.core_types import (
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 # Import the protocol after it's defined to avoid circular imports
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class WebSocketManagerMode(Enum):
@@ -3478,10 +3478,10 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     
     This function was causing User A to see User B's messages.
     """
-    from netra_backend.app.logging_config import central_logger
+    from shared.logging.unified_logging_ssot import get_logger
     import inspect
     
-    logger = central_logger.get_logger(__name__)
+    logger = get_logger(__name__)
     
     # Get caller information for debugging
     frame = inspect.currentframe()
