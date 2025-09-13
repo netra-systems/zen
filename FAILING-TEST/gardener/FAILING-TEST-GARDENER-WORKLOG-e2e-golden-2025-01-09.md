@@ -32,6 +32,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 ## Detailed Issue Breakdown
 
 ### 🚨 CRITICAL - Issue 1: WebSocket Service Infrastructure Down
+**GitHub Issue:** [#666 - failing-test-websocket-service-infrastructure-critical-golden-path-chat-unavailable](https://github.com/netra-systems/netra-apex/issues/666)
 **File:** Multiple golden path WebSocket tests
 **Error:** `[WinError 1225] The remote computer refused the network connection`
 **Impact:** Complete failure of core chat functionality - this is 90% of platform value
