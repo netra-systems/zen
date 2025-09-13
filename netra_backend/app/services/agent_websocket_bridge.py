@@ -3087,7 +3087,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 user_id=user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                websocket_connection_id=websocket_connection_id
+                websocket_client_id=websocket_connection_id
             )
             
             # Create bridge instance and return emitter

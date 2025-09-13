@@ -116,7 +116,10 @@ class WindowsEncodingManager:
         Returns:
             Dict[str, str]: Environment variables that should be used for subprocesses
         """
-        env = os.environ.copy()
+        # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+        from shared.isolated_environment import get_env
+        env_manager = get_env()
+        env = env_manager.get_subprocess_env()
         
         if self.is_windows:
             # Force UTF-8 for Python subprocesses
@@ -187,7 +190,10 @@ class WindowsEncodingManager:
         env = self.setup_subprocess_env()
         for key, value in env.items():
             if key.startswith('PYTHON') or key.startswith('L'):
-                os.environ[key] = value
+                # SSOT FIX: Use IsolatedEnvironment for setting environment variables
+                from shared.isolated_environment import get_env
+                env_manager = get_env()
+                env_manager.set(key, value, "windows_encoding_setup")
         
         # Setup console
         if not self.setup_console():
@@ -214,7 +220,10 @@ class WindowsEncodingManager:
             Dict[str, str]: Environment with encoding variables set
         """
         if base_env is None:
-            base_env = os.environ.copy()
+            # SSOT FIX: Use IsolatedEnvironment instead of direct os.environ access
+            from shared.isolated_environment import get_env
+            env_manager = get_env()
+            base_env = env_manager.get_subprocess_env()
         else:
             base_env = base_env.copy()
         

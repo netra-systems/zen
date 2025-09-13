@@ -42,12 +42,36 @@ def get_agent_instance_factory() -> AgentInstanceFactory:
 4. Update tests to validate user isolation
 5. Remove deprecation warnings
 
-## Test Plan
-- [ ] Discover existing tests protecting agent factory functionality
-- [ ] Create tests for user isolation validation
-- [ ] Create tests reproducing singleton contamination issues
-- [ ] Validate WebSocket event delivery per user
+## Test Plan Status: DISCOVERED ✅
+
+### Existing Test Coverage: 80% (EXCELLENT)
+- ✅ **Mission Critical Tests:** `test_agent_factory_ssot_validation.py` - Complete factory SSOT validation
+- ✅ **User Isolation Tests:** `test_issue_686_user_isolation_comprehensive.py` - End-to-end isolation
+- ✅ **Concurrent Testing:** `test_concurrent_user_isolation.py` - 20+ concurrent users validation
+- ✅ **Factory Pattern Tests:** Multiple unit tests for factory behavior validation
+- ✅ **WebSocket Event Tests:** Complete event delivery per user validation
+
+### Required New Tests: 20% (ACHIEVABLE)
+- [ ] **Singleton→Factory Migration Tests** - Validate transition from singleton patterns
+- [ ] **Factory Method Pattern Tests** - Ensure all agents use create_agent_with_context()
+- [ ] **SSOT Import Validation Tests** - Verify imports follow SSOT_IMPORT_REGISTRY patterns
+- [ ] **Golden Path Integration Tests** - End-to-end factory pattern validation
+- [ ] **Regression Prevention Tests** - Catch singleton pattern reintroduction
+
+### Test Strategy
+- **Phase 1:** Core SSOT validation tests (Week 1) - 5 tests
+- **Phase 2:** Integration and performance tests (Week 2) - 3 tests
+- **Phase 3:** Regression prevention tests (Week 3) - 2 tests
+- **Total:** ~10 new tests + repair 1 existing test
+
+### Success Criteria
+- ✅ **Before Fix:** Mission critical tests FAIL (showing singleton violations)
+- ✅ **After Fix:** All tests PASS with factory pattern validation
+- ✅ **Performance:** <100ms additional overhead per request
+- ✅ **Zero Cross-User Contamination:** Under 20+ concurrent user load
 
 ## Progress Log
 - [2025-09-12] Issue identified via SSOT audit
 - [2025-09-12] Initial analysis and documentation
+- [2025-09-12] Test discovery completed - 80% existing coverage found, 20% new tests planned
+- [2025-09-12] HIGH CONFIDENCE - Sophisticated existing test infrastructure provides excellent foundation

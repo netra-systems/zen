@@ -1,6 +1,23 @@
 """
-UnifiedConfigurationManager - SSOT for All Configuration Operations
+DEPRECATED: UnifiedConfigurationManager - This is a DUPLICATE of the canonical SSOT
 
+⚠️  DEPRECATION WARNING - ISSUE #667 SSOT CONSOLIDATION ⚠️
+This file is a DUPLICATE configuration manager that will be removed in a future release.
+
+CANONICAL SSOT LOCATION: netra_backend.app.core.configuration.base.UnifiedConfigManager
+USE THIS INSTEAD: from netra_backend.app.core.configuration.base import UnifiedConfigManager, get_unified_config
+
+Migration Guide:
+1. Replace imports: from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+   WITH: from netra_backend.app.core.configuration.base import UnifiedConfigManager
+
+2. The canonical version provides the same API with additional compatibility methods.
+3. All Golden Path functionality is preserved and enhanced in the canonical version.
+
+Business Impact: Using deprecated duplicates creates technical debt and maintenance overhead.
+This migration protects the $500K+ ARR Golden Path by consolidating to proven SSOT patterns.
+
+ORIGINAL DOCUMENTATION (DEPRECATED):
 Business Value Justification (BVJ):
 - Segment: Platform/Internal - Development Velocity, Risk Reduction
 - Business Goal: Consistent configuration management across all services and environments
@@ -26,6 +43,7 @@ MISSION_CRITICAL_NAMED_VALUES: Validates against critical values index.
 
 import os
 import threading
+import warnings
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from enum import Enum
@@ -212,7 +230,7 @@ class UnifiedConfigurationManager:
     ):
         """
         Initialize unified configuration manager.
-        
+
         Args:
             user_id: User ID for user-specific configurations
             environment: Environment name (dev, staging, prod)
@@ -221,6 +239,16 @@ class UnifiedConfigurationManager:
             enable_caching: Enable configuration caching
             cache_ttl: Cache time-to-live in seconds
         """
+        # ISSUE #667: DEPRECATION WARNING for duplicate configuration manager
+        warnings.warn(
+            "DEPRECATED: UnifiedConfigurationManager from netra_backend.app.core.managers.unified_configuration_manager "
+            "is a DUPLICATE. Use netra_backend.app.core.configuration.base.UnifiedConfigManager instead. "
+            "This duplicate will be removed in a future release. "
+            "Migration guide: https://github.com/netra-development/netra-core-generation-1/issues/667",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.user_id = user_id
         self.service_name = service_name
         self.enable_validation = enable_validation

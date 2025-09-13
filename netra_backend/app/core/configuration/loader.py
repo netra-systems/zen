@@ -11,7 +11,9 @@ from functools import lru_cache
 from typing import Any, Dict, Optional
 
 # Circular import prevention - UnifiedConfigManager is defined in base.py
-from netra_backend.app.logging_config import central_logger as logger
+from shared.logging.unified_logging_ssot import get_logger
+
+logger = get_logger(__name__)
 from netra_backend.app.schemas.config import AppConfig
 
 

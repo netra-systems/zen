@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-12T20:40:36.883882",
-    "root_directory": "C:\\GitHub\\netra-apex",
-    "total_literals": 1653
+    "generated_at": "2025-09-12T21:29:07.119697",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
+    "total_literals": 1664
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -78,13 +78,13 @@
         "netra_backend/app/services/factory_status/metrics_collectors.py:154",
         "scripts/aggressive_syntax_fix.py:23",
         "scripts/check_schema_imports.py:265",
+        "scripts/check_uuid_ssot_compliance.py:51",
         "scripts/compliance/find_top_mocks.py:42",
         "scripts/detect_deepagentstate_usage.py:46",
         "scripts/final_syntax_fix.py:75",
         "scripts/find_ssot_violations.py:185",
         "scripts/find_ssot_violations.py:202",
-        "scripts/fix_remaining_syntax_errors.py:192",
-        "scripts/fix_route_trailing_slashes.py:91"
+        "scripts/fix_remaining_syntax_errors.py:192"
       ]
     },
     "**/*.pyc": {
@@ -169,11 +169,32 @@
         "scripts/ssot_migration_automation.py:161"
       ]
     },
+    "**/migration_*.py": {
+      "value": "**/migration_*.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:57"
+      ]
+    },
     "**/package.json": {
       "value": "**/package.json",
       "category": "paths",
       "locations": [
         "netra_backend/app/agents/github_analyzer/config_parser.py:138"
+      ]
+    },
+    "**/scripts/check_*.py": {
+      "value": "**/scripts/check_*.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:59"
+      ]
+    },
+    "**/scripts/scan_*.py": {
+      "value": "**/scripts/scan_*.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:58"
       ]
     },
     "**/test*.py": {
@@ -194,6 +215,13 @@
         "scripts/update_execution_engine_imports.py:67"
       ]
     },
+    "**/test_*uuid*.py": {
+      "value": "**/test_*uuid*.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:56"
+      ]
+    },
     "**/test_golden_path*.py": {
       "value": "**/test_golden_path*.py",
       "category": "paths",
@@ -206,6 +234,13 @@
       "category": "paths",
       "locations": [
         "scripts/update_execution_engine_imports.py:68"
+      ]
+    },
+    "**/unified_id_*.py": {
+      "value": "**/unified_id_*.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:60"
       ]
     },
     "*/.pytest_cache/*": {
@@ -549,6 +584,13 @@
         "scripts/fast_100_iterations.py:57"
       ]
     },
+    "/1000": {
+      "value": "/1000",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/websocket_core/unified_manager.py:2992"
+      ]
+    },
     "/100:": {
       "value": "/100:",
       "category": "paths",
@@ -671,14 +713,14 @@
       "value": "/5 startup fixes applied - some functionality may be degraded",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1551"
+        "netra_backend/app/smd.py:1570"
       ]
     },
     "/5 startup fixes applied with": {
       "value": "/5 startup fixes applied with",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1549"
+        "netra_backend/app/smd.py:1568"
       ]
     },
     "/5 successful": {
@@ -692,7 +734,7 @@
       "value": "/5 successful,",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1499"
+        "netra_backend/app/smd.py:1518"
       ]
     },
     "/50+ tests)": {
@@ -713,7 +755,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1752"
+        "netra_backend/app/smd.py:1771"
       ]
     },
     "/8 tests": {
@@ -757,8 +799,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:505",
-        "netra_backend/app/services/agent_websocket_bridge.py:2915",
-        "netra_backend/app/services/websocket_bridge_factory.py:586"
+        "netra_backend/app/services/agent_websocket_bridge.py:2915"
       ]
     },
     "/Users/anthony/Desktop/netra-apex": {
@@ -1186,7 +1227,7 @@
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1687"
+        "netra_backend/app/smd.py:1706"
       ]
     },
     "/api/agents/start": {
@@ -1216,21 +1257,21 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1690"
+        "netra_backend/app/smd.py:1709"
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1689"
+        "netra_backend/app/smd.py:1708"
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1688"
+        "netra_backend/app/smd.py:1707"
       ]
     },
     "/api/auth": {
@@ -1337,7 +1378,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/demo.py:30",
-        "netra_backend/app/routes/demo_simple.py:9"
+        "netra_backend/app/routes/demo_simple.py:9",
+        "netra_backend/app/routes/demo_websocket.py:24"
       ]
     },
     "/api/demo/reports/": {
@@ -3138,7 +3180,7 @@
         "netra_backend/app/core/telemetry_bootstrap.py:280",
         "netra_backend/app/core/telemetry_config.py:64",
         "netra_backend/app/core/telemetry_config.py:136",
-        "netra_backend/app/schemas/config.py:455"
+        "netra_backend/app/schemas/config.py:493"
       ]
     },
     "/health-score": {
@@ -3365,9 +3407,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/services/agent_websocket_bridge.py:2915",
-        "netra_backend/app/services/agent_websocket_bridge.py:2915",
-        "netra_backend/app/services/websocket_bridge_factory.py:586",
-        "netra_backend/app/services/websocket_bridge_factory.py:586"
+        "netra_backend/app/services/agent_websocket_bridge.py:2915"
       ]
     },
     "/industry/{industry}/templates": {
@@ -6655,6 +6695,13 @@
         "scripts/validate_network_constants.py:3"
       ]
     },
+    "Next Steps:\n1. Run mission critical tests to validate functionality\n2. Measure test collection performance improvement\n3. Update Issue #450 with migration results\n4. Validate Issue #489 performance improvement\n\nRollback Instructions:\n  python scripts/issue_450_redis_import_migration.py --rollback": {
+      "value": "Next Steps:\n1. Run mission critical tests to validate functionality\n2. Measure test collection performance improvement\n3. Update Issue #450 with migration results\n4. Validate Issue #489 performance improvement\n\nRollback Instructions:\n  python scripts/issue_450_redis_import_migration.py --rollback",
+      "category": "paths",
+      "locations": [
+        "scripts/issue_450_redis_import_migration.py:266"
+      ]
+    },
     "Node.js not found. Please install Node.js 18+ from https://nodejs.org/": {
       "value": "Node.js not found. Please install Node.js 18+ from https://nodejs.org/",
       "category": "paths",
@@ -6979,6 +7026,13 @@
       "category": "paths",
       "locations": [
         "scripts/check_id_generation_ssot_compliance.py:2"
+      ]
+    },
+    "SSOT UUID Compliance Checker for Issue #584 Prevention\n\nThis script checks for direct uuid.uuid4() usage that bypasses SSOT patterns,\nhelping prevent future instances of Issue #584 (ID generation inconsistencies).\n\nUsage:\n    python scripts/check_uuid_ssot_compliance.py [--fix] [--path PATH]\n\nReturns:\n    0: No violations found\n    1: Violations found (or fix applied)\n    2: Error occurred": {
+      "value": "SSOT UUID Compliance Checker for Issue #584 Prevention\n\nThis script checks for direct uuid.uuid4() usage that bypasses SSOT patterns,\nhelping prevent future instances of Issue #584 (ID generation inconsistencies).\n\nUsage:\n    python scripts/check_uuid_ssot_compliance.py [--fix] [--path PATH]\n\nReturns:\n    0: No violations found\n    1: Violations found (or fix applied)\n    2: Error occurred",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:2"
       ]
     },
     "SSOT Violation Tests Verification Script\n\nThis script verifies that all 5 SSOT violation reproduction tests are properly created\nand can be executed to expose WebSocket auth bypass violations.\n\nUsage:\n    python scripts/verify_ssot_violation_tests.py": {
@@ -8528,6 +8582,13 @@
       "category": "paths",
       "locations": [
         "scripts/create_additional_shims.py:31"
+      ]
+    },
+    "netra_backend/app/core/unified_id_manager.py": {
+      "value": "netra_backend/app/core/unified_id_manager.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:66"
       ]
     },
     "netra_backend/app/core/websocket_message_handler.py": {
@@ -10756,6 +10817,13 @@
         "netra_backend/app/middleware/path_traversal_protection.py:31"
       ]
     },
+    "shared/id_generation/unified_id_generator.py": {
+      "value": "shared/id_generation/unified_id_generator.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:67"
+      ]
+    },
     "shared/isolated_environment.py": {
       "value": "shared/isolated_environment.py",
       "category": "paths",
@@ -12219,6 +12287,13 @@
       "locations": [
         "scripts/migrate_mock_to_usercontext.py:176",
         "scripts/validate_migration_readiness.py:28"
+      ]
+    },
+    "tests/unit/id_generation/test_id_generation_inconsistency_reproduction.py": {
+      "value": "tests/unit/id_generation/test_id_generation_inconsistency_reproduction.py",
+      "category": "paths",
+      "locations": [
+        "scripts/check_uuid_ssot_compliance.py:68"
       ]
     },
     "tests/unit/scripts/test_deploy_to_gcp.py": {

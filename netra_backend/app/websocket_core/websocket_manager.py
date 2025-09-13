@@ -108,13 +108,21 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
         return fallback_manager
 
 
+# Import UnifiedWebSocketEmitter for compatibility
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Backward compatibility alias
+WebSocketEventEmitter = UnifiedWebSocketEmitter
+
 # Export the protocol for type checking
 __all__ = [
     'WebSocketManager',
     'WebSocketConnection',
     'WebSocketManagerProtocol',
     '_serialize_message_safely',
-    'get_websocket_manager'
+    'get_websocket_manager',
+    'WebSocketEventEmitter',  # Add compatibility alias
+    'UnifiedWebSocketEmitter'  # Also export the original
 ]
 
 logger.info("WebSocket Manager module loaded - Golden Path compatible with Issue #89 remediation")

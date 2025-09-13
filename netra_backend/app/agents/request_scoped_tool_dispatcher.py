@@ -40,12 +40,10 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext,
     validate_user_context
 )
-from netra_backend.app.websocket_core import (
-    WebSocketEventEmitter,
-)
-# Import the correct WebSocketEmitterFactory class
-from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
-from netra_backend.app.logging_config import central_logger
+# Import the correct WebSocketEventEmitter and WebSocketEmitterFactory classes
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
+from shared.logging.unified_logging_ssot import get_logger
+
 from netra_backend.app.schemas.tool import (
     SimpleToolPayload,
     ToolInput,
@@ -53,7 +51,7 @@ from netra_backend.app.schemas.tool import (
     ToolStatus,
 )
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class RequestScopedToolDispatcher:

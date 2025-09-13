@@ -933,4 +933,4 @@ All test commands enforce the **NO MOCKS** policy from CLAUDE.md:
 
 ---
 
-*Last Updated: 2025-01-12 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*
+*Last Updated: 2025-09-12 | Commands: 39 | Categories: 6 | Mission Critical Commands: 8 | Repository Maintenance Commands: 6*

@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-12T20:40:36.534934",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-12T21:29:06.397404",
+    "root_directory": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1",
     "total_literals": 11
   },
   "literals": {
@@ -45,16 +45,16 @@
       "value": "GOOGLE_CLIENT_ID",
       "category": "critical_config",
       "locations": [
+        "netra_backend/app/core/auth_startup_validator.py:294",
         "netra_backend/app/core/config_dependencies.py:567",
         "netra_backend/app/core/config_dependencies.py:699",
-        "netra_backend/app/schemas/config.py:993",
-        "netra_backend/app/schemas/config.py:1185",
+        "netra_backend/app/schemas/config.py:1031",
+        "netra_backend/app/schemas/config.py:1223",
         "auth_service/auth_core/config.py:128",
         "scripts/audit_staging_oauth_secrets.py:106",
         "scripts/demonstrate_config_protection.py:94",
         "scripts/environment_validator.py:285",
-        "scripts/environment_validator_core.py:66",
-        "scripts/fetch_secrets_to_env.py:64"
+        "scripts/environment_validator_core.py:66"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -62,16 +62,16 @@
       "value": "GOOGLE_CLIENT_SECRET",
       "category": "critical_config",
       "locations": [
+        "netra_backend/app/core/auth_startup_validator.py:295",
         "netra_backend/app/core/config_dependencies.py:692",
         "netra_backend/app/core/config_dependencies.py:573",
-        "netra_backend/app/schemas/config.py:994",
-        "netra_backend/app/schemas/config.py:1188",
+        "netra_backend/app/schemas/config.py:1032",
+        "netra_backend/app/schemas/config.py:1226",
         "auth_service/auth_core/config.py:140",
         "scripts/audit_staging_oauth_secrets.py:107",
         "scripts/environment_validator.py:286",
         "scripts/environment_validator_core.py:71",
-        "scripts/fetch_secrets_to_env.py:65",
-        "scripts/fetch_secrets_to_env.py:164"
+        "scripts/fetch_secrets_to_env.py:65"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },

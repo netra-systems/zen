@@ -16,9 +16,23 @@ class SystemManagementHandlers:
     
     async def _system_configurator_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for system_configurator tool"""
-        from netra_backend.app.services.configuration_service import (
-            ConfigurationService,
-        )
+        # ISSUE #667: Use canonical SSOT configuration instead of duplicate
+        from netra_backend.app.core.configuration.base import config_manager
+
+        # Create a compatible wrapper for the existing API
+        class ConfigurationService:
+            def __init__(self, db):
+                self.db = db
+                self.config_manager = config_manager
+
+            def get_config(self, key: str, default=None):
+                return self.config_manager.get_config_value(key, default)
+
+            def set_config(self, key: str, value):
+                return self.config_manager.set_config_value(key, value)
+
+            def validate_config(self, key: str = None):
+                return self.config_manager.validate_config_value(key)
         config_service = ConfigurationService(self.db)
         action = arguments['action']
         return await self._execute_configuration_action(config_service, action, arguments, user)

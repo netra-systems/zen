@@ -5,6 +5,8 @@
     "- no send method or user_id",
     "... with client_id",
     "4. Update gtm_config.json with the correct account_id",
+    "Added foreign key constraint for api_keys.user_id",
+    "Added foreign key constraint for sessions.user_id",
     "Both websocket_client_id and websocket_connection_id provided - using websocket_client_id",
     "Cannot create UserExecutionContext: invalid auth_result or missing user_id",
     "Data assessment for run_id",

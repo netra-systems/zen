@@ -1011,7 +1011,7 @@ async def get_request_scoped_supervisor(
             thread_id=context.thread_id,
             run_id=context.run_id,
             db_session=db_session,
-            websocket_connection_id=context.websocket_connection_id,
+            websocket_client_id=context.websocket_connection_id,  # Note: context.websocket_connection_id is a property alias for websocket_client_id
             llm_client=llm_client,
             websocket_bridge=websocket_bridge,
             tool_dispatcher=tool_dispatcher
