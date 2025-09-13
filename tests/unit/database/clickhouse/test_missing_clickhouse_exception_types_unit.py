@@ -159,9 +159,7 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
 
 
         # This assertion should PASS because IndexOperationError exists and works correctly
-
         assert type(classified_error).__name__ == "IndexOperationError", \
-
             f"Expected IndexOperationError, got {type(classified_error).__name__}"
 
 
@@ -171,7 +169,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         from netra_backend.app.db.transaction_errors import IndexOperationError
 
         assert isinstance(classified_error, IndexOperationError), \
-
             "Error should be classified as IndexOperationError instance"
 
         
