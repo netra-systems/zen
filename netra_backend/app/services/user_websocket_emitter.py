@@ -29,34 +29,12 @@ from datetime import datetime, timezone
 logger = central_logger.get_logger(__name__)
 
 
-class UserWebSocketEmitter:
-    """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketEmitter
-    
-    This class maintains backward compatibility while redirecting all functionality
-    to the SSOT UnifiedWebSocketEmitter implementation. This ensures no breaking
-    changes for existing code while consolidating to a single emitter implementation.
-    
-    Business Value: Maintains existing integrations while enabling SSOT benefits.
-    """
-    
-    def __init__(self, context: UserExecutionContext, router: WebSocketEventRouter, 
-                 connection_id: Optional[str] = None):
-        """Initialize compatibility wrapper around UnifiedWebSocketEmitter.
-        
-        Args:
-            context: User execution context with validated IDs
-            router: WebSocket event router for infrastructure
-            connection_id: Optional specific connection ID to target
-        """
-        logger.info(f" CYCLE:  UserWebSocketEmitter redirecting to UnifiedWebSocketEmitter for user {context.user_id[:8]}...")
-        
-        # Get the WebSocket manager from the router
-        websocket_manager = getattr(router, 'websocket_manager', None)
-        if not websocket_manager:
-            raise ValueError("WebSocketEventRouter must have websocket_manager for SSOT integration")
-        
-        # Create the SSOT emitter with backward compatibility
-        self._unified_emitter = UnifiedWebSocketEmitter(
+# SSOT CONSOLIDATION: Import alias to UnifiedWebSocketEmitter
+# This maintains backward compatibility while achieving Single Source of Truth
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+
+# Import alias for backward compatibility
+UserWebSocketEmitter = UnifiedWebSocketEmitter
             manager=websocket_manager,
             user_id=context.user_id,
             context=context
