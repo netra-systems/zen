@@ -716,10 +716,27 @@ class SSotAsyncTestCase(SSotBaseTestCase):
     
     @pytest.fixture
     def event_loop(self):
-        """Provide event loop for async tests."""
+        """
+        Provide event loop for async tests.
+        
+        FIX: Ensure proper event loop lifecycle to prevent false positives
+        where async code appears to execute but doesn't actually run.
+        """
         loop = asyncio.new_event_loop()
-        yield loop
-        loop.close()
+        asyncio.set_event_loop(loop)
+        try:
+            yield loop
+        finally:
+            # Ensure all pending tasks are completed before closing
+            try:
+                # Get all pending tasks and wait for completion
+                pending_tasks = [task for task in asyncio.all_tasks(loop) if not task.done()]
+                if pending_tasks:
+                    loop.run_until_complete(asyncio.gather(*pending_tasks, return_exceptions=True))
+            except Exception as e:
+                logger.warning(f"Error cleaning up async tasks: {e}")
+            finally:
+                loop.close()
     
     def setup_method(self, method=None):
         """Setup method for async tests - calls parent sync setup."""
