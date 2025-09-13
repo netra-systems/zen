@@ -1,76 +1,204 @@
 """
-Test to reproduce Issue #584: Thread ID Run ID Generation Inconsistency
+Test to verify Issue #584: Thread ID Run ID Generation Inconsistency has been resolved
 
-This test reproduces the ID generation pattern inconsistencies found in demo_websocket.py
-where different ID fields use different patterns (prefixed vs plain UUID).
+This test verifies that demo_websocket.py now uses SSOT ID generation patterns
+and detects if the SSOT violation is reintroduced.
 """
 
 import uuid
 import unittest
-from unittest.mock import Mock
+import re
+from unittest.mock import Mock, patch
+from typing import Optional
 
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 
 class TestIdGenerationInconsistency(unittest.TestCase):
-    """Test ID generation pattern inconsistencies in Issue #584."""
-    
-    def test_demo_websocket_id_generation_patterns(self):
-        """Reproduce the inconsistent ID generation patterns from demo_websocket.py."""
-        
-        # Pattern 1: Prefixed UUIDs (as used in demo_websocket.py lines 37-39)
-        demo_user_id = f"demo-user-{uuid.uuid4()}"
-        thread_id = f"demo-thread-{uuid.uuid4()}"
-        run_id = f"demo-run-{uuid.uuid4()}"
-        
-        # Pattern 2: Plain UUID (as used in demo_websocket.py line 52)
-        request_id = str(uuid.uuid4())
-        
-        # Pattern 3: SSOT UserExecutionContext generation (expected pattern)
-        context = UserExecutionContext(
-            user_id="test-user",
-            run_id=str(uuid.uuid4()),
-            thread_id=str(uuid.uuid4())
-        )
-        
-        # Verify inconsistency patterns
-        print(f"Prefixed demo_user_id: {demo_user_id}")
-        print(f"Prefixed thread_id: {thread_id}")
-        print(f"Prefixed run_id: {run_id}")
-        print(f"Plain request_id: {request_id}")
-        print(f"SSOT context run_id: {context.run_id}")
-        print(f"SSOT context thread_id: {context.thread_id}")
-        
-        # Assert the patterns are different
-        self.assertTrue(demo_user_id.startswith("demo-user-"))
-        self.assertTrue(thread_id.startswith("demo-thread-"))
-        self.assertTrue(run_id.startswith("demo-run-"))
-        self.assertFalse(request_id.startswith("demo-"))  # Plain UUID
-        self.assertFalse(context.run_id.startswith("demo-"))  # SSOT pattern
-        self.assertFalse(context.thread_id.startswith("demo-"))  # SSOT pattern
-        
-        # Show the issue: WebSocket cleanup correlation would be affected
-        # because prefixed IDs wouldn't match SSOT IDs
-        mock_websocket_manager = Mock()
-        mock_websocket_manager.active_connections = {
-            context.run_id: {"user_id": "test-user", "status": "active"},  # SSOT pattern
-            run_id: {"user_id": demo_user_id, "status": "active"}  # Demo pattern
+    """Test ID generation pattern compliance for Issue #584."""
+
+    def test_demo_websocket_uses_ssot_id_generation(self):
+        """Verify demo_websocket.py now uses SSOT ID generation patterns."""
+
+        # Test current SSOT implementation in demo_websocket.py
+        id_manager = UnifiedIDManager()
+
+        # Generate IDs using the SSOT pattern (as fixed in demo_websocket.py)
+        demo_user_id = id_manager.generate_id(IDType.USER, prefix="demo")
+        thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
+
+        # Verify SSOT compliance patterns
+        self.assertTrue(self._is_ssot_compliant_id(demo_user_id, "user"))
+        self.assertTrue(self._is_ssot_compliant_id(thread_id, "thread"))
+        self.assertTrue(self._is_ssot_compliant_run_id(run_id))
+
+        # Verify no legacy prefixed UUID patterns
+        self.assertFalse(demo_user_id.startswith("demo-user-"))
+        self.assertFalse(thread_id.startswith("demo-thread-"))
+        self.assertFalse(run_id.startswith("demo-run-"))
+
+        print(f"✅ SSOT compliant demo_user_id: {demo_user_id}")
+        print(f"✅ SSOT compliant thread_id: {thread_id}")
+        print(f"✅ SSOT compliant run_id: {run_id}")
+
+    def test_detect_legacy_uuid_pattern_violation(self):
+        """Test that would fail if legacy UUID patterns were reintroduced."""
+
+        # Simulate the OLD problematic patterns that should NOT be used
+        legacy_demo_user_id = f"demo-user-{uuid.uuid4()}"
+        legacy_thread_id = f"demo-thread-{uuid.uuid4()}"
+        legacy_run_id = f"demo-run-{uuid.uuid4()}"
+
+        # These patterns should be detected as violations
+        self.assertTrue(self._is_legacy_violation(legacy_demo_user_id))
+        self.assertTrue(self._is_legacy_violation(legacy_thread_id))
+        self.assertTrue(self._is_legacy_violation(legacy_run_id))
+
+        print(f"❌ Legacy violation detected: {legacy_demo_user_id}")
+        print(f"❌ Legacy violation detected: {legacy_thread_id}")
+        print(f"❌ Legacy violation detected: {legacy_run_id}")
+
+    def test_websocket_cleanup_correlation_with_ssot_ids(self):
+        """Test WebSocket cleanup correlation logic works correctly with SSOT IDs."""
+
+        # Generate SSOT-compliant IDs
+        id_manager = UnifiedIDManager()
+        user1_id = id_manager.generate_id(IDType.USER, prefix="demo")
+        user2_id = id_manager.generate_id(IDType.USER, prefix="demo")
+
+        thread1_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
+        thread2_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
+
+        run1_id = UnifiedIDManager.generate_run_id(thread1_id)
+        run2_id = UnifiedIDManager.generate_run_id(thread2_id)
+
+        # Simulate active connections with SSOT patterns
+        active_connections = {
+            run1_id: {"type": "ssot", "user_id": user1_id},
+            run2_id: {"type": "ssot", "user_id": user2_id},
         }
-        
-        # Cleanup correlation would fail because IDs don't match
-        ssot_connections = [conn_id for conn_id in mock_websocket_manager.active_connections.keys() 
-                           if not conn_id.startswith("demo-")]
-        demo_connections = [conn_id for conn_id in mock_websocket_manager.active_connections.keys() 
-                           if conn_id.startswith("demo-")]
-        
-        self.assertEqual(len(ssot_connections), 1)
-        self.assertEqual(len(demo_connections), 1)
-        print(f"SSOT connections: {ssot_connections}")
-        print(f"Demo connections: {demo_connections}")
-        
-        # This demonstrates the correlation issue - two different ID patterns
-        # would make cleanup correlation complex and error-prone
-        
+
+        # Test cleanup correlation - all should be SSOT pattern
+        ssot_pattern_count = 0
+        legacy_pattern_count = 0
+
+        for conn_id, conn_data in active_connections.items():
+            if self._is_legacy_violation(conn_id):
+                legacy_pattern_count += 1
+            else:
+                ssot_pattern_count += 1
+
+        # Assert all are SSOT pattern (no legacy violations)
+        self.assertEqual(ssot_pattern_count, 2)
+        self.assertEqual(legacy_pattern_count, 0)
+
+        print(f"✅ All connections use SSOT pattern: {ssot_pattern_count}")
+        print(f"✅ No legacy violations found: {legacy_pattern_count}")
+
+    def _is_ssot_compliant_id(self, id_value: str, expected_type: str) -> bool:
+        """Check if ID follows SSOT UnifiedIDManager pattern."""
+        if not id_value:
+            return False
+
+        # SSOT pattern: [prefix_]idtype_counter_uuid8
+        parts = id_value.split('_')
+        if len(parts) < 3:
+            return False
+
+        # Should contain expected type
+        if expected_type not in id_value:
+            return False
+
+        # Last part should be 8-character hex (UUID part)
+        uuid_part = parts[-1]
+        if len(uuid_part) != 8:
+            return False
+
+        # Check if it's hex
+        try:
+            int(uuid_part, 16)
+            return True
+        except ValueError:
+            return False
+
+    def _is_ssot_compliant_run_id(self, run_id: str) -> bool:
+        """Check if run_id follows SSOT pattern."""
+        if not run_id:
+            return False
+
+        # Run ID should follow UnifiedIDManager.generate_run_id pattern
+        return run_id.startswith("run_") and len(run_id.split('_')) >= 4
+
+    def _is_legacy_violation(self, id_value: str) -> bool:
+        """Detect legacy UUID pattern violations."""
+        if not id_value:
+            return False
+
+        # Check for problematic patterns like "demo-user-{uuid}"
+        legacy_patterns = [
+            r'^demo-user-[a-f0-9-]{36}$',
+            r'^demo-thread-[a-f0-9-]{36}$',
+            r'^demo-run-[a-f0-9-]{36}$',
+        ]
+
+        for pattern in legacy_patterns:
+            if re.match(pattern, id_value):
+                return True
+        return False
+
+    def test_demo_websocket_source_code_compliance(self):
+        """Test that demo_websocket.py source code uses SSOT patterns and no legacy UUID."""
+
+        # Read the demo_websocket.py source code
+        import os
+        demo_websocket_path = os.path.join(
+            os.path.dirname(__file__),
+            "..", "..", "netra_backend", "app", "routes", "demo_websocket.py"
+        )
+
+        # Verify file exists
+        self.assertTrue(os.path.exists(demo_websocket_path),
+                       f"demo_websocket.py not found at {demo_websocket_path}")
+
+        with open(demo_websocket_path, 'r') as f:
+            source_code = f.read()
+
+        # Check for SSOT compliance imports
+        self.assertIn("from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType",
+                     source_code, "Missing SSOT UnifiedIDManager import")
+
+        # Check for SSOT usage patterns
+        self.assertIn("id_manager = UnifiedIDManager()", source_code,
+                     "Missing UnifiedIDManager instantiation")
+        self.assertIn("id_manager.generate_id(IDType.USER", source_code,
+                     "Missing SSOT USER ID generation")
+        self.assertIn("id_manager.generate_id(IDType.THREAD", source_code,
+                     "Missing SSOT THREAD ID generation")
+
+        # Check for legacy violation patterns that should NOT exist
+        legacy_violations = [
+            'f"demo-user-{uuid.uuid4()}"',
+            'f"demo-thread-{uuid.uuid4()}"',
+            'f"demo-run-{uuid.uuid4()}"',
+            "demo_user_id = f\"demo-user-{uuid.uuid4()}\"",
+            "thread_id = f\"demo-thread-{uuid.uuid4()}\"",
+            "run_id = f\"demo-run-{uuid.uuid4()}\""
+        ]
+
+        for violation_pattern in legacy_violations:
+            self.assertNotIn(violation_pattern, source_code,
+                           f"SSOT VIOLATION DETECTED: Found legacy pattern '{violation_pattern}' in demo_websocket.py")
+
+        # Verify the fix is in place
+        self.assertIn("# ISSUE #584 FIX", source_code,
+                     "Missing Issue #584 fix comment documentation")
+
+        print("✅ demo_websocket.py source code compliance verified")
+        print("✅ No legacy UUID patterns found")
+        print("✅ SSOT UnifiedIDManager usage confirmed")
+
     def test_websocket_cleanup_correlation_with_mismatched_ids(self):
         """Test WebSocket cleanup correlation logic with mismatched vs SSOT IDs."""
         

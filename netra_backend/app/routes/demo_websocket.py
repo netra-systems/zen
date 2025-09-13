@@ -17,6 +17,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,10 +34,12 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
     4. Sends real WebSocket events as agents execute
     """
     try:
-        # Create demo user context - use UUID format to avoid placeholder validation issues
-        demo_user_id = f"demo-user-{uuid.uuid4()}"
-        thread_id = f"demo-thread-{uuid.uuid4()}"
-        run_id = f"demo-run-{uuid.uuid4()}"
+        # Create demo user context using SSOT ID generation patterns
+        # ISSUE #584 FIX: Replace legacy UUID patterns with UnifiedIDManager SSOT compliance
+        id_manager = UnifiedIDManager()
+        demo_user_id = id_manager.generate_id(IDType.USER, prefix="demo")
+        thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
+        run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Get database session - required for SupervisorAgent
         from netra_backend.app.db.database_manager import DatabaseManager
@@ -49,7 +52,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
                 user_id=demo_user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                request_id=str(uuid.uuid4()),  # Use plain UUID format
+                request_id=id_manager.generate_id(IDType.REQUEST, prefix="demo"),  # Use SSOT format
                 db_session=db_session,
                 websocket_client_id=connection_id,
                 agent_context={"user_request": user_message, "demo_mode": True},
