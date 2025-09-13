@@ -68,7 +68,7 @@ class StagingTestSuite:
     def __init__(self, test_name: str = "StagingTest"):
         """Initialize staging test suite"""
         self.test_name = test_name
-        self.staging_url = get_env("STAGING_URL", "https://staging.netra.ai")
+        self.staging_url = get_env().get("STAGING_URL", "https://staging.netra.ai")
         self.auth_token = None
         self.test_data = {}
         self.cleanup_tasks = []

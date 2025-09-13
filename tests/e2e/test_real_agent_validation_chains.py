@@ -790,7 +790,7 @@ if __name__ == "__main__":
     ]
     
     # Add staging marker if running against staging
-    if get_env("E2E_TEST_ENV", "local") == "staging":
+    if get_env().get("E2E_TEST_ENV", "local") == "staging":
         args.append("-m")
         args.append("staging")
         print(f"Running tests against STAGING environment: {get_e2e_config().backend_url}")

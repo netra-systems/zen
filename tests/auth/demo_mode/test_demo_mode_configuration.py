@@ -38,7 +38,7 @@ class TestDemoModeConfiguration(SSotAsyncTestCase):
         """Setup for demo mode configuration tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get_env().get("DEMO_MODE", "false")
 
     def teardown_method(self, method):
         """Cleanup after demo mode configuration tests."""

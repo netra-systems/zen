@@ -470,7 +470,7 @@ class TestToolExecutionUserVisibilityE2E(SSotAsyncTestCase):
         EXPECTED TO FAIL: Missing confirmation system in staging deployment.
         """
         # Skip if not in staging environment
-        env = get_env("ENVIRONMENT", "local")
+        env = get_env().get("ENVIRONMENT", "local")
         if env != "staging":
             pytest.skip("Staging test - run with ENVIRONMENT=staging")
         

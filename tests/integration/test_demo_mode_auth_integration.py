@@ -44,7 +44,7 @@ class TestDemoModeAuthIntegration(SSotAsyncTestCase):
         """Setup for integration tests."""
         super().setup_method(method)
         self.env = IsolatedEnvironment()
-        self.original_demo_mode = self.env.get_env("DEMO_MODE", "false")
+        self.original_demo_mode = self.env.get("DEMO_MODE", "false")
         
         # Setup service instances
         self.auth_service = AuthService()

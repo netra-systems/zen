@@ -73,9 +73,9 @@ class TestWebSocketUserIDValidationE2E(BaseE2ETest):
     def auth_config(self) -> E2EAuthConfig:
         """Create E2E auth configuration for testing."""
         return E2EAuthConfig(
-            auth_service_url=get_env("TEST_AUTH_SERVICE_URL", "http://localhost:8083"),
-            backend_url=get_env("TEST_BACKEND_URL", "http://localhost:8002"),  
-            websocket_url=get_env("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws"),
+            auth_service_url=get_env().get("TEST_AUTH_SERVICE_URL", "http://localhost:8083"),
+            backend_url=get_env().get("TEST_BACKEND_URL", "http://localhost:8002"),  
+            websocket_url=get_env().get("TEST_WEBSOCKET_URL", "ws://localhost:8002/ws"),
             test_user_email="e2e_validation_test@example.com",
             test_user_password="secure_test_password_123",
             timeout=30.0
