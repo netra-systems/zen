@@ -1700,8 +1700,9 @@ def create_authenticated_user_context(
     from netra_backend.app.core.unified_id_manager import IDType
     
     # Create user context with SSOT pattern matching UserExecutionContext signature
+    # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for fallback user ID
     user_context = UserExecutionContext(
-        user_id=getattr(auth_result, 'user_id', str(uuid.uuid4())),
+        user_id=getattr(auth_result, 'user_id', UnifiedIdGenerator.generate_base_id('fallback_user', True, 8)),
         thread_id=resolved_thread_id,
         run_id=id_manager.generate_run_id(resolved_thread_id),
         websocket_client_id=id_manager.generate_id(IDType.WEBSOCKET, prefix="ws", context={"test": True}),
@@ -1749,8 +1750,9 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
             
         # For backward compatibility with tests, handle "valid" tokens specially
         if "valid" in token.lower() and len(token) > 10:
+            # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for test user ID
             return {
-                'sub': str(uuid.uuid4()),
+                'sub': UnifiedIdGenerator.generate_base_id('test_user', True, 8),
                 'email': 'test@enterprise.com', 
                 'exp': 9999999999,  # Far future for tests
                 'permissions': ['execute_agents']
