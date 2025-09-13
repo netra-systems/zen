@@ -2,7 +2,7 @@
 
 **GitHub Issue**: #841
 **Priority**: P0 - BLOCKS GOLDEN PATH
-**Status**: In Progress - Step 1 Complete
+**Status**: In Progress - Step 2 Complete
 
 ## Issue Summary
 20+ critical files still using `uuid.uuid4()` instead of UnifiedIdGenerator SSOT, causing race conditions, ID collisions, and user isolation failures in Golden Path.
@@ -60,10 +60,35 @@
 
 **Success Criteria:** All uuid.uuid4() violations detected before fix, Golden Path functionality preserved after migration
 
-### Step 2 - Execute New Test Plan (PENDING)
-- [ ] Create new SSOT validation tests
-- [ ] Run non-docker tests only
-- [ ] Verify tests fail appropriately before fix
+### Step 2 - Execute New Test Plan ✅
+- [x] Create new SSOT validation tests
+- [x] Run non-docker tests only
+- [x] Verify tests fail appropriately before fix
+
+#### 2.1 Test Implementation Complete (12 New Test Files):
+**Phase 1 - Violation Detection (4 files - DESIGNED TO FAIL):**
+- `tests/unit/id_generation/test_auth_session_uuid4_violations.py` - ✅ Detects auth.py:160 violations
+- `tests/unit/id_generation/test_websocket_uuid4_violations.py` - ✅ Detects WebSocket connection issues
+- `tests/unit/id_generation/test_factory_uuid4_violations.py` - ✅ Detects factory pattern violations
+- `tests/unit/id_generation/test_audit_models_uuid4_violations.py` - ✅ Detects audit trail violations
+
+**Phase 2 - SSOT Migration Validation (4 files):**
+- `tests/integration/id_generation/test_unified_id_generator_adoption.py`
+- `tests/integration/id_generation/test_id_format_consistency_validation.py`
+- `tests/integration/id_generation/test_cross_service_id_consistency.py`
+- `tests/integration/id_generation/test_structured_id_patterns.py`
+
+**Phase 3 - Business Value Protection (4 files):**
+- `tests/mission_critical/test_golden_path_id_migration_protection.py`
+- `tests/mission_critical/test_websocket_routing_reliability_post_migration.py`
+- `tests/e2e/staging/test_id_format_consistency_e2e.py`
+- `tests/integration/id_generation/test_migration_performance_impact.py`
+
+#### 2.2 Test Validation Results:
+- ✅ Phase 1 tests successfully detect current uuid.uuid4() violations
+- ✅ All target locations (160, 1303, 594, 522, 41) covered
+- ✅ API mismatches confirm migration scope identified
+- ✅ $500K+ ARR Golden Path protection implemented
 
 ### Step 3 - Plan SSOT Remediation (PENDING)
 - [ ] Plan UnifiedIdGenerator migration strategy
