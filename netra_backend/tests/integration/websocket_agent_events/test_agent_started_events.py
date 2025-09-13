@@ -1065,8 +1065,10 @@ class TestAgentStartedEvents(BaseIntegrationTest):
         legitimate_client, token, headers = await self.create_authenticated_websocket_client("security-test")
         
         # Extract user ID from legitimate token
-        import jwt
-        decoded_token = jwt.decode(token, options={"verify_signature": False})
+        # SSOT: Use E2EAuthHelper for token decoding
+        from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
+        auth_helper = E2EAuthHelper()
+        decoded_token = auth_helper._decode_token(token)
         legitimate_user_id = decoded_token.get("sub")
         
         try:
