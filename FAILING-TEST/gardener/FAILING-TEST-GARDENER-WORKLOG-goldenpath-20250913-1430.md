@@ -5,9 +5,17 @@
 **Time:** 14:30
 **Session ID:** failingtestsgardener-goldenpath-20250913-1430
 
+## GitHub Issues Created
+
+✅ **Issue #822**: [failing-test-regression-P1-docker-websocket-connection-failure](https://github.com/netra-systems/netra-apex/issues/822) - P1 Priority
+✅ **Issue #826**: [failing-test-active-dev-P2-datetime-deprecation-warnings](https://github.com/netra-systems/netra-apex/issues/826) - P2 Priority
+✅ **Issue #827**: [failing-test-regression-P1-docker-resource-cleanup-failure](https://github.com/netra-systems/netra-apex/issues/827) - P1 Priority
+
 ## Executive Summary
 
 This worklog documents issues discovered during golden path test execution. The golden path represents the critical user flow: users login → get AI responses back. These tests are protecting $500K+ ARR business functionality.
+
+**STATUS**: All identified issues have been tracked in GitHub with appropriate priority levels.
 
 ## Test Execution Results
 
