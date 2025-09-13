@@ -21,6 +21,18 @@ Usage Examples:
   python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
   python3 claude-instance-orchestrator.py --list-commands
   python3 claude-instance-orchestrator.py --config config.json
+  python3 claude-instance-orchestrator.py --startup-delay 2.0  # 2 second delay between launches
+  python3 claude-instance-orchestrator.py --startup-delay 0.5  # 0.5 second delay between launches
+  python3 claude-instance-orchestrator.py --max-line-length 1000  # Longer output lines
+  python3 claude-instance-orchestrator.py --status-report-interval 60  # Status reports every 60s
+  python3 claude-instance-orchestrator.py --quiet  # Minimal output, errors only
+
+Features:
+  - Soft startup: Configurable delay between instance launches to prevent resource contention
+  - Rolling status reports: Periodic updates showing instance status, uptime, and token usage
+  - Token tracking: Automatic parsing and tracking of Claude token usage per instance
+  - Formatted output: Clear visual separation between instances with truncated lines
+  - Tool call tracking: Counts tool executions across all instances
 
 IDEAS
     Record and contrast tool use by command 
@@ -80,17 +92,26 @@ class InstanceStatus:
     end_time: Optional[float] = None
     output: str = ""
     error: str = ""
+    total_tokens: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    tool_calls: int = 0
 
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
-    def __init__(self, workspace_dir: Path, max_console_lines: int = 5):
+    def __init__(self, workspace_dir: Path, max_console_lines: int = 5, startup_delay: float = 1.0, max_line_length: int = 500, status_report_interval: int = 30):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
         self.processes: Dict[str, subprocess.Popen] = {}
         self.start_datetime = datetime.now()
         self.max_console_lines = max_console_lines  # Max lines to show per instance
+        self.startup_delay = startup_delay  # Delay between instance launches in seconds
+        self.max_line_length = max_line_length  # Max characters per line in console output
+        self.status_report_interval = status_report_interval  # Seconds between status reports
+        self.last_status_report = time.time()
+        self.status_report_task = None  # For the rolling status report task
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -361,6 +382,19 @@ class ClaudeInstanceOrchestrator:
         recent_lines_buffer = []
         line_count = 0
 
+        def format_instance_line(content: str, prefix: str = "") -> str:
+            """Format a line with clear instance separation and truncation"""
+            # Truncate content to max_line_length
+            if len(content) > self.max_line_length:
+                content = content[:self.max_line_length-3] + "..."
+
+            # Create clear visual separation
+            instance_header = f"╔═[{name}]" + "═" * (20 - len(name) - 4) if len(name) < 16 else f"╔═[{name}]═"
+            if prefix:
+                instance_header += f" {prefix} "
+
+            return f"{instance_header}\n║ {content}\n╚" + "═" * (len(instance_header) - 1)
+
         async def read_stream(stream, prefix):
             nonlocal line_count
             try:
@@ -371,8 +405,11 @@ class ClaudeInstanceOrchestrator:
                     line_str = line.decode() if isinstance(line, bytes) else line
                     line_count += 1
 
-                    # Add to rolling buffer
-                    display_line = f"[{name}] {line_str.strip()}"
+                    # Clean the line
+                    clean_line = line_str.strip()
+
+                    # Add to rolling buffer with formatted display
+                    display_line = format_instance_line(clean_line, prefix)
                     recent_lines_buffer.append(display_line)
 
                     # Keep only the most recent lines
@@ -386,20 +423,24 @@ class ClaudeInstanceOrchestrator:
                         should_display = (
                             line_count % 10 == 0 or  # Every 10th line
                             prefix == "STDERR" or    # All error lines
-                            "completed" in line_str.lower() or
-                            "error" in line_str.lower() or
-                            "failed" in line_str.lower()
+                            "completed" in clean_line.lower() or
+                            "error" in clean_line.lower() or
+                            "failed" in clean_line.lower() or
+                            "success" in clean_line.lower()
                         )
 
                         if should_display:
-                            print(f"[{name}] Line {line_count}: {line_str.strip()}", flush=True)
+                            print(f"\n{display_line}\n", flush=True)
                     elif prefix == "STDERR":
                         # In quiet mode, still show errors
-                        print(f"[{name}] ERROR: {line_str.strip()}", flush=True)
+                        error_display = format_instance_line(clean_line, "ERROR")
+                        print(f"\n{error_display}\n", flush=True)
 
                     # Accumulate output in status (keep full output for saving)
                     if prefix == "STDOUT":
                         status.output += line_str
+                        # Parse token usage from Claude output if present
+                        self._parse_token_usage(clean_line, status)
                     else:
                         status.error += line_str
             except Exception as e:
@@ -417,12 +458,20 @@ class ClaudeInstanceOrchestrator:
         finally:
             # Show final summary of recent lines for this instance
             if recent_lines_buffer and self.max_console_lines > 0:
-                print(f"\n[{name}] FINAL OUTPUT (last {len(recent_lines_buffer)} lines of {line_count} total):")
-                for i, line in enumerate(recent_lines_buffer, 1):
-                    print(f"  {i}: {line}")
+                final_header = f"╔═══ FINAL OUTPUT [{name}] ═══╗"
+                print(f"\n{final_header}")
+                print(f"║ Last {len(recent_lines_buffer)} lines of {line_count} total")
+                print(f"║ Status: {status.status}")
+                if status.start_time:
+                    duration = time.time() - status.start_time
+                    print(f"║ Duration: {duration:.1f}s")
+                print("╚" + "═" * (len(final_header) - 2) + "╝\n")
 
-            # Always show completion message
-            print(f"[{name}] Completed with {line_count} total lines. Full output saved to results file.\n")
+            # Always show completion message with clear formatting
+            completion_msg = f"🏁 [{name}] COMPLETED - {line_count} lines processed, output saved"
+            print(f"\n{'='*60}")
+            print(f"{completion_msg}")
+            print(f"{'='*60}\n")
 
             # Ensure streams are properly closed
             if process.stdout and not process.stdout.at_eof():
@@ -431,15 +480,36 @@ class ClaudeInstanceOrchestrator:
                 process.stderr.close()
 
     async def run_all_instances(self, timeout: int = 300) -> Dict[str, bool]:
-        """Run all instances concurrently with timeout"""
-        logger.info(f"Starting {len(self.instances)} instances concurrently (timeout: {timeout}s)")
+        """Run all instances with configurable soft startup delay between launches"""
+        instance_names = list(self.instances.keys())
+        logger.info(f"Starting {len(instance_names)} instances with {self.startup_delay}s delay between launches (timeout: {timeout}s each)")
 
-        tasks = [
-            asyncio.wait_for(self.run_instance(name), timeout=timeout)
-            for name in self.instances.keys()
-        ]
+        # Create tasks with staggered startup
+        tasks = []
+        for i, name in enumerate(instance_names):
+            # Calculate delay for this instance (i * startup_delay seconds)
+            delay = i * self.startup_delay
+            if delay > 0:
+                logger.info(f"Instance '{name}' will start in {delay}s")
+
+            # Create a task that waits for its turn, then starts the instance
+            task = asyncio.create_task(self._run_instance_with_delay(name, delay, timeout))
+            tasks.append(task)
+
+        # Start the rolling status report task if we have instances to monitor
+        if len(tasks) > 0 and not self.max_console_lines == 0:  # Don't show status in quiet mode
+            self.status_report_task = asyncio.create_task(self._rolling_status_reporter())
+            tasks.append(self.status_report_task)
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Stop the status reporter
+        if self.status_report_task and not self.status_report_task.done():
+            self.status_report_task.cancel()
+            try:
+                await self.status_report_task
+            except asyncio.CancelledError:
+                pass
 
         final_results = {}
         for name, result in zip(self.instances.keys(), results):
@@ -457,6 +527,160 @@ class ClaudeInstanceOrchestrator:
                 final_results[name] = result
 
         return final_results
+
+    async def _run_instance_with_delay(self, name: str, delay: float, timeout: int) -> bool:
+        """Run an instance after a specified delay"""
+        if delay > 0:
+            logger.info(f"Waiting {delay}s before starting instance '{name}'")
+            await asyncio.sleep(delay)
+
+        logger.info(f"Now starting instance '{name}' (after {delay}s delay)")
+        return await asyncio.wait_for(self.run_instance(name), timeout=timeout)
+
+    async def _rolling_status_reporter(self):
+        """Provide periodic status updates for all running instances"""
+        try:
+            while True:
+                await asyncio.sleep(self.status_report_interval)
+                await self._print_status_report()
+        except asyncio.CancelledError:
+            # Final status report when cancelled
+            await self._print_status_report(final=True)
+            raise
+        except Exception as e:
+            logger.error(f"Error in status reporter: {e}")
+
+    async def _print_status_report(self, final: bool = False):
+        """Print a formatted status report of all instances"""
+        if not self.statuses:
+            return
+
+        current_time = time.time()
+        report_type = "FINAL STATUS" if final else "STATUS REPORT"
+
+        # Create status summary
+        status_counts = {"pending": 0, "running": 0, "completed": 0, "failed": 0}
+        instance_details = []
+
+        for name, status in self.statuses.items():
+            status_counts[status.status] += 1
+
+            # Calculate uptime/duration
+            if status.start_time:
+                if status.end_time:
+                    duration = status.end_time - status.start_time
+                    time_info = f"{duration:.1f}s"
+                else:
+                    uptime = current_time - status.start_time
+                    time_info = f"{uptime:.1f}s uptime"
+            else:
+                time_info = "not started"
+
+            # Status emoji
+            emoji_map = {
+                "pending": "⏳",
+                "running": "🏃",
+                "completed": "✅",
+                "failed": "❌"
+            }
+            emoji = emoji_map.get(status.status, "❓")
+
+            instance_details.append(f"  {emoji} {name:<20} {status.status:<10} {time_info}")
+
+        # Print the report
+        header = f"╔═══ {report_type} [{datetime.now().strftime('%H:%M:%S')}] ═══╗"
+        print(f"\n{header}")
+        print(f"║ Total: {len(self.statuses)} instances")
+        print(f"║ Running: {status_counts['running']}, Completed: {status_counts['completed']}, Failed: {status_counts['failed']}, Pending: {status_counts['pending']}")
+
+        # Show token usage summary
+        total_tokens_all = sum(s.total_tokens for s in self.statuses.values())
+        total_tools_all = sum(s.tool_calls for s in self.statuses.values())
+        print(f"║ Total Tokens: {total_tokens_all:,}, Total Tool Calls: {total_tools_all}")
+        print(f"║")
+
+        for name, status in self.statuses.items():
+            # Status emoji
+            emoji_map = {
+                "pending": "⏳",
+                "running": "🏃",
+                "completed": "✅",
+                "failed": "❌"
+            }
+            emoji = emoji_map.get(status.status, "❓")
+
+            # Calculate uptime/duration
+            if status.start_time:
+                if status.end_time:
+                    duration = status.end_time - status.start_time
+                    time_info = f"{duration:.1f}s"
+                else:
+                    uptime = current_time - status.start_time
+                    time_info = f"{uptime:.1f}s up"
+            else:
+                time_info = "waiting"
+
+            # Create detailed line with tokens
+            token_info = f"{status.total_tokens:,}t" if status.total_tokens > 0 else "0t"
+            tool_info = f"{status.tool_calls}tc" if status.tool_calls > 0 else "0tc"
+
+            detail = f"  {emoji} {name:<18} {status.status:<9} {time_info:<8} {token_info:<8} {tool_info}"
+
+            # Ensure the line fits within a reasonable width
+            if len(detail) > 75:
+                detail = detail[:72] + "..."
+            print(f"║{detail}")
+
+        footer = "╚" + "═" * (len(header) - 2) + "╝"
+        print(f"{footer}\n")
+
+    def _parse_token_usage(self, line: str, status: InstanceStatus):
+        """Parse token usage information from Claude output lines"""
+        line_lower = line.lower()
+
+        # Look for various token usage patterns in Claude output
+        import re
+
+        # Pattern 1: "Used X tokens" or "X tokens used"
+        token_match = re.search(r'(?:used|consumed)\s+(\d+)\s+tokens?|(?:(\d+)\s+tokens?\s+(?:used|consumed))', line_lower)
+        if token_match:
+            tokens = int(token_match.group(1) or token_match.group(2))
+            status.total_tokens += tokens
+
+        # Pattern 2: Input/Output token breakdown "Input: X tokens, Output: Y tokens"
+        input_match = re.search(r'input[:\s]+(\d+)\s+tokens?', line_lower)
+        if input_match:
+            status.input_tokens += int(input_match.group(1))
+
+        output_match = re.search(r'output[:\s]+(\d+)\s+tokens?', line_lower)
+        if output_match:
+            status.output_tokens += int(output_match.group(1))
+
+        # Pattern 3: Total token counts "Total: X tokens"
+        total_match = re.search(r'total[:\s]+(\d+)\s+tokens?', line_lower)
+        if total_match:
+            total_tokens = int(total_match.group(1))
+            # Only update if this is larger than current total (avoid double counting)
+            if total_tokens > status.total_tokens:
+                status.total_tokens = total_tokens
+
+        # Pattern 4: Tool calls - look for tool execution indicators
+        if any(phrase in line_lower for phrase in ['tool call', 'executing tool', 'calling tool', 'tool execution']):
+            status.tool_calls += 1
+
+        # Pattern 5: JSON format token usage (for stream-json output)
+        if 'tokens' in line_lower and '{' in line and '}' in line:
+            try:
+                # Try to extract JSON and parse token info
+                import json
+                # Look for JSON-like structures containing token info
+                json_match = re.search(r'\{[^{}]*"tokens"[^{}]*\}', line)
+                if json_match:
+                    json_data = json.loads(json_match.group())
+                    if 'tokens' in json_data and isinstance(json_data['tokens'], (int, float)):
+                        status.total_tokens += int(json_data['tokens'])
+            except (json.JSONDecodeError, ValueError):
+                pass  # Ignore JSON parsing errors
 
     def get_status_summary(self) -> Dict:
         """Get summary of all instance statuses"""
@@ -509,11 +733,22 @@ class ClaudeInstanceOrchestrator:
 
         results = self.get_status_summary()
 
-        # Add metadata to results
+        # Add metadata to results including token summary
+        total_tokens = sum(status.total_tokens for status in self.statuses.values())
+        total_input_tokens = sum(status.input_tokens for status in self.statuses.values())
+        total_output_tokens = sum(status.output_tokens for status in self.statuses.values())
+        total_tool_calls = sum(status.tool_calls for status in self.statuses.values())
+
         results["metadata"] = {
             "start_datetime": self.start_datetime.isoformat(),
             "agents": list(self.instances.keys()),
-            "generated_filename": str(output_file)
+            "generated_filename": str(output_file),
+            "token_usage": {
+                "total_tokens": total_tokens,
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "total_tool_calls": total_tool_calls
+            }
         }
 
         with open(output_file, 'w') as f:
@@ -635,6 +870,12 @@ async def main():
                        help="Maximum recent lines to show per instance on console (default: 5)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
+    parser.add_argument("--startup-delay", type=float, default=1.0,
+                       help="Delay in seconds between launching each instance (default: 1.0)")
+    parser.add_argument("--max-line-length", type=int, default=500,
+                       help="Maximum characters per line in console output (default: 500)")
+    parser.add_argument("--status-report-interval", type=int, default=30,
+                       help="Seconds between rolling status reports (default: 30)")
 
     args = parser.parse_args()
 
@@ -663,7 +904,13 @@ async def main():
 
     # Initialize orchestrator with console output settings
     max_lines = 0 if args.quiet else args.max_console_lines
-    orchestrator = ClaudeInstanceOrchestrator(workspace, max_console_lines=max_lines)
+    orchestrator = ClaudeInstanceOrchestrator(
+        workspace,
+        max_console_lines=max_lines,
+        startup_delay=args.startup_delay,
+        max_line_length=args.max_line_length,
+        status_report_interval=args.status_report_interval
+    )
 
     # Handle command inspection modes
     if args.list_commands:
@@ -726,10 +973,14 @@ async def main():
     end_time = time.time()
     total_duration = end_time - start_time
 
-    # Print summary
+    # Print summary with token usage
     summary = orchestrator.get_status_summary()
+    total_tokens = sum(status.total_tokens for status in orchestrator.statuses.values())
+    total_tool_calls = sum(status.tool_calls for status in orchestrator.statuses.values())
+
     logger.info(f"Orchestration completed in {total_duration:.2f}s")
     logger.info(f"Results: {summary['completed']} completed, {summary['failed']} failed")
+    logger.info(f"Token Usage: {total_tokens:,} total tokens, {total_tool_calls} tool calls")
 
     # Save results (will auto-generate filename if args.output is None)
     orchestrator.save_results(args.output)
@@ -745,6 +996,15 @@ async def main():
         if status.start_time and status.end_time:
             duration = status.end_time - status.start_time
             print(f"  Duration: {duration:.2f}s")
+
+        # Show token usage
+        if status.total_tokens > 0 or status.input_tokens > 0 or status.output_tokens > 0:
+            print(f"  Tokens: {status.total_tokens:,} total")
+            if status.input_tokens > 0 or status.output_tokens > 0:
+                print(f"          {status.input_tokens:,} input, {status.output_tokens:,} output")
+
+        if status.tool_calls > 0:
+            print(f"  Tool Calls: {status.tool_calls}")
 
         if status.output:
             print(f"  Output Preview: {status.output[:200]}...")
