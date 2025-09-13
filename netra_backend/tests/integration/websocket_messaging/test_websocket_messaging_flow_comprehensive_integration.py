@@ -54,7 +54,8 @@ from netra_backend.app.websocket_core.types import (
     create_standard_message,
     create_error_message
 )
-from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory
+# SSOT IMPORT UPDATE - Phase 2C: Use SSOT UserExecutionEngineFactory directly
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # SSOT imports for environment and configuration

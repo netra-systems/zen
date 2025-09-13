@@ -695,6 +695,32 @@ async def configure_execution_engine_factory(
         return _factory_instance
 
 
+# COMPATIBILITY ALIASES for legacy import patterns
+class RequestScopedExecutionEngineFactory(ExecutionEngineFactory):
+    """Legacy alias for ExecutionEngineFactory - backward compatibility only."""
+    pass
+
+
+# Legacy function alias
+async def create_execution_engine_factory(
+    websocket_bridge: 'AgentWebSocketBridge',
+    database_session_manager=None,
+    redis_manager=None
+) -> ExecutionEngineFactory:
+    """Create execution engine factory - legacy alias for configure_execution_engine_factory."""
+    import warnings
+    warnings.warn(
+        "create_execution_engine_factory is deprecated. Use configure_execution_engine_factory instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return await configure_execution_engine_factory(
+        websocket_bridge=websocket_bridge,
+        database_session_manager=database_session_manager,
+        redis_manager=redis_manager
+    )
+
+
 # Context manager function for easy usage
 @asynccontextmanager
 async def user_execution_engine(context: UserExecutionContext) -> AsyncGenerator[UserExecutionEngine, None]:

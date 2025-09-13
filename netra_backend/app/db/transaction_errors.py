@@ -147,7 +147,7 @@ def _has_permission_keywords(error_msg: str) -> bool:
 
 def _has_schema_keywords(error_msg: str) -> bool:
     """Check if error message contains schema keywords."""
-    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column']
+    schema_keywords = ['does not exist', 'no such table', 'no such column', 'syntax error', 'invalid column', 'already exists']
     return any(keyword in error_msg for keyword in schema_keywords)
 
 
@@ -317,10 +317,12 @@ def _classify_connection_error(error: Exception, error_msg: str) -> Exception:
     return error
 
 
-def _classify_timeout_error(error: Exception, error_msg: str) -> Exception:
-    """Classify timeout-related errors."""
+def _classify_timeout_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify timeout-related operational errors with performance context (Issue #731)."""
     if _has_timeout_keywords(error_msg):
-        return TimeoutError(f"Timeout error: {error}")
+        # Add performance context for business debugging
+        enhanced_message = f"Performance Issue: Timeout error: {error}"
+        return TimeoutError(enhanced_message)
     return error
 
 
@@ -331,8 +333,8 @@ def _classify_permission_error(error: Exception, error_msg: str) -> Exception:
     return error
 
 
-def _classify_schema_error(error: Exception, error_msg: str) -> Exception:
-    """Classify schema-related errors with enhanced diagnostic context (Issue #731)."""
+def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception:
+    """Classify schema-related operational errors with enhanced diagnostic context (Issue #731)."""
     if _has_schema_keywords(error_msg):
         # Extract diagnostic information for enhanced context
         enhanced_message = f"Schema Error: {error}"
