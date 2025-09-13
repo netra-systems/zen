@@ -23,7 +23,7 @@ import unittest
 import tempfile
 import os
 import time
-from unittest.mock import patch, MagicMock, side_effect
+from unittest.mock import patch, MagicMock
 import subprocess
 from pathlib import Path
 import json
