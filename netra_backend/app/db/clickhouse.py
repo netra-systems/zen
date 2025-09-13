@@ -24,7 +24,8 @@ from netra_backend.app.logging_config import central_logger as logger
 from shared.isolated_environment import get_env
 from netra_backend.app.db.transaction_errors import (
     DeadlockError, ConnectionError, TransactionError, TimeoutError, 
-    PermissionError, SchemaError, classify_error, is_retryable_error
+    PermissionError, SchemaError, TableCreationError, ColumnModificationError, 
+    IndexCreationError, classify_error, is_retryable_error
 )
 from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 # test_decorator removed - production code must not depend on test_framework
