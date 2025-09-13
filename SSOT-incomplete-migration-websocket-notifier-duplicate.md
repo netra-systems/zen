@@ -47,10 +47,17 @@ The following 5 business-critical WebSocket events must work reliably:
 - [x] **SSOT Violation Confirmed**: Additional duplicate in `agent_websocket_bridge.py:3209`
 - [x] **Deployment Confidence**: HIGH - tests provide excellent rollback criteria
 
-### 🔄 Step 1.2: Test Planning (Current)
-- [ ] Plan 20% new SSOT-specific validation tests
-- [ ] Strategy for 60% existing test validation
-- [ ] 20% validation work scope definition
+### ✅ Step 1.2: Test Strategy Planning Complete (2025-09-12)
+- [x] **20% NEW SSOT Tests**: 3 targeted validation tests planned
+  - `test_ssot_websocket_notifier_validation.py` - Detect duplicate implementations
+  - `test_ssot_import_compliance.py` - Prevent regression to duplicate imports
+  - `test_agent_factory_ssot_validation.py` - Validate ExecutionEngineFactory consistency
+- [x] **60% EXISTING Validation**: Comprehensive baseline and incremental testing strategy
+  - Mission critical suite protection
+  - WebSocket functionality regression tests
+  - Agent integration validation
+- [x] **20% VALIDATION Work**: 3-phase execution with rollback criteria defined
+- [x] **Risk Mitigation**: Low-risk remediation plan with comprehensive protection
 
 ### ⏳ Upcoming Steps
 - [ ] Step 2: Execute test plan for new SSOT tests
