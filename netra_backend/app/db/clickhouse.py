@@ -63,27 +63,36 @@ class ClickHouseCache:
     
     def get(self, user_id: Optional[str], query: str, params: Optional[Dict[str, Any]] = None) -> Optional[List[Dict[str, Any]]]:
         """Get cached result if not expired.
-        
+
         Args:
             user_id: User identifier for cache isolation. None will use "system" for backward compatibility.
             query: SQL query string
             params: Optional query parameters
-            
+
         Returns:
             Cached result if found and not expired, None otherwise
+
+        Raises:
+            CacheError: When cache operations fail (Issue #731)
         """
-        key = self._generate_key(user_id, query, params)
-        entry = self.cache.get(key)
-        
-        if entry and time.time() < entry["expires_at"]:
-            self._hits += 1
-            logger.debug(f"ClickHouse cache hit for query: {query[:50]}... (user: {user_id or 'system'})")
-            return entry["result"]
-        elif entry:
-            del self.cache[key]
-        
-        self._misses += 1
-        return None
+        try:
+            key = self._generate_key(user_id, query, params)
+            entry = self.cache.get(key)
+
+            if entry and time.time() < entry["expires_at"]:
+                self._hits += 1
+                logger.debug(f"ClickHouse cache hit for query: {query[:50]}... (user: {user_id or 'system'})")
+                return entry["result"]
+            elif entry:
+                del self.cache[key]
+
+            self._misses += 1
+            return None
+        except Exception as e:
+            # Issue #731: Raise CacheError for cache operation failures
+            error_message = f"Cache operation failed: {str(e)}"
+            from netra_backend.app.db.transaction_errors import CacheError
+            raise CacheError(error_message, context={"user_id": user_id, "query": query[:100]})
     
     def set(self, user_id: Optional[str], query: str, result: List[Dict[str, Any]], params: Optional[Dict[str, Any]] = None, ttl: float = 300) -> None:
         """Cache query result with TTL.

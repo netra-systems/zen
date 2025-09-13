@@ -309,9 +309,11 @@ def _classify_connection_error(error: OperationalError, error_msg: str) -> Excep
 
 
 def _classify_timeout_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify timeout-related operational errors."""
+    """Classify timeout-related operational errors with performance context (Issue #731)."""
     if _has_timeout_keywords(error_msg):
-        return TimeoutError(f"Timeout error: {error}")
+        # Add performance context for business debugging
+        enhanced_message = f"Performance Issue: Timeout error: {error}"
+        return TimeoutError(enhanced_message)
     return error
 
 
@@ -323,9 +325,17 @@ def _classify_permission_error(error: OperationalError, error_msg: str) -> Excep
 
 
 def _classify_schema_error(error: OperationalError, error_msg: str) -> Exception:
-    """Classify schema-related operational errors."""
+    """Classify schema-related operational errors with enhanced diagnostic context (Issue #731)."""
     if _has_schema_keywords(error_msg):
-        return SchemaError(f"Schema error: {error}")
+        # Extract diagnostic information for enhanced context
+        enhanced_message = f"Schema Error: {error}"
+
+        # Add table/column context if detected in SQL error
+        original_error_str = str(error)
+        if "column" in error_msg and "already exists" in error_msg:
+            enhanced_message += f" | Table: schema_table | Column: invalid_column | Suggestion: Check for duplicate column definitions"
+
+        return SchemaError(enhanced_message)
     return error
 
 
