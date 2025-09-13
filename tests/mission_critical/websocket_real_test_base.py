@@ -499,7 +499,30 @@ class RealWebSocketTestBase:
         
         self.test_contexts.append(test_context)
         return test_context
-    
+
+    async def create_test_context_with_user_context(
+        self,
+        user_context: TestUserContext
+    ) -> TestContext:
+        """
+        Create a TestContext with existing user context.
+
+        Args:
+            user_context: Existing TestUserContext to use
+
+        Returns:
+            TestContext with real WebSocket capabilities
+        """
+        # Create TestContext with provided user context
+        test_context = TestContext(
+            user_context=user_context,
+            websocket_timeout=self.config.connection_timeout,
+            event_timeout=self.config.event_timeout
+        )
+
+        self.test_contexts.append(test_context)
+        return test_context
+
     async def validate_agent_events(
         self,
         test_context: TestContext,

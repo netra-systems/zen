@@ -367,7 +367,7 @@ class TestRealAgentFactoryPatterns(BaseE2ETest):
         if FACTORY_SERVICES_AVAILABLE:
             # Use real UserExecutionContext factory
             try:
-                execution_context = UserExecutionContext.create_for_user(
+                execution_context = UserExecutionContext.from_request(
                     user_id=user_id,
                     user_data=user_data,
                     isolation_level="complete"

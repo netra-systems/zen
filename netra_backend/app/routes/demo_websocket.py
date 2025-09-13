@@ -34,11 +34,13 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
     4. Sends real WebSocket events as agents execute
     """
     try:
-        # Create demo user context using SSOT ID generation patterns
-        # ISSUE #584 FIX: Replace legacy UUID patterns with UnifiedIDManager SSOT compliance
+        # Create demo user context using UnifiedIDManager SSOT methods
+        # ISSUE #584 FIX: Use SSOT ID generation instead of ad-hoc prefixed UUIDs
+        from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
+
         id_manager = UnifiedIDManager()
-        demo_user_id = id_manager.generate_id(IDType.USER, prefix="demo")
-        thread_id = id_manager.generate_id(IDType.THREAD, prefix="demo")
+        demo_user_id = id_manager.generate_id(IDType.USER, context={"demo": True})
+        thread_id = UnifiedIDManager.generate_thread_id()
         run_id = UnifiedIDManager.generate_run_id(thread_id)
         
         # Get database session - required for SupervisorAgent
@@ -52,7 +54,7 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
                 user_id=demo_user_id,
                 thread_id=thread_id,
                 run_id=run_id,
-                request_id=id_manager.generate_id(IDType.REQUEST, prefix="demo"),  # Use SSOT format
+                request_id=id_manager.generate_id(IDType.REQUEST, context={"demo": True}),
                 db_session=db_session,
                 websocket_client_id=connection_id,
                 agent_context={"user_request": user_message, "demo_mode": True},

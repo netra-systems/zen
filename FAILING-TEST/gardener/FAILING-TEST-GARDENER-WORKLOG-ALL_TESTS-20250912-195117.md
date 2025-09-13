@@ -51,12 +51,33 @@
 - ✅ **Linked Documentation:** Referenced this worklog and test files
 - ✅ **Business Impact:** $15K MRR analytics functionality validation confirmed blocked
 
-### Issue 2: Unit Test Collection Import Error - Auth Startup Validator
+### ✅ Issue 2: Unit Test Collection Import Error - Auth Startup Validator - RESOLVED
 **Category:** uncollectable-test-regression-p1-auth-import-missing  
 **Severity:** P1 - High (Blocking test collection)  
+**SNST Status:** 🔗 **UPDATED EXISTING ISSUE** - Linked to GitHub Issue #676  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/676 (CLOSED - RESOLVED)
+**Labels:** P1, claude-code-generated-issue, bug  
+**Processing Date:** 2025-09-13
+
 **File:** `netra_backend/tests/unit/test_auth_startup_validation_integration_validation.py:25`  
 **Error:** `ImportError: cannot import name 'validate_auth_at_startup' from 'netra_backend.app.core.auth_startup_validator'`  
 **Impact:** Prevents unit test collection, interrupts test suite execution
+
+**Root Cause:** Function name mismatch between test expectations and actual implementation
+- **Test Expected:** `validate_auth_at_startup` (INCORRECT)
+- **Actual Function:** `validate_auth_startup` (line 692 in auth_startup_validator.py)
+
+**SNST Processing Results:**
+- ✅ **Found Existing Issue:** GitHub Issue #676 exactly matches this regression
+- ✅ **Updated Issue:** Added context from failing test gardener workflow
+- ✅ **Applied Fix:** Corrected function name in import and function calls
+- ✅ **Verified Resolution:** Test collection now successful (4 tests collected)
+- ✅ **Closed Issue:** Marked as resolved with verification
+
+**Resolution Applied:**
+1. **Line 29:** Fixed import statement `validate_auth_at_startup` → `validate_auth_startup`
+2. **Lines 104, 215:** Updated function calls to use correct name
+3. **Verification:** `python3 -m pytest --collect-only` successful
 
 ### Issue 3: Auth Service Secret Loader Marker Configuration Error
 **Category:** uncollectable-test-new-p2-marker-config  
@@ -102,11 +123,26 @@
 - State checkpoint session functionality  
 - WebSocket ghost connections (functionality removed)
 
-### Issue 8: Environment Configuration - Missing JWT_SECRET
+### ✅ Issue 8: Environment Configuration - Missing JWT_SECRET - PROCESSED
 **Category:** failing-test-regression-p1-environment-config  
 **Severity:** P1 - High (Authentication critical)  
+**SNST Status:** 🔗 **UPDATED EXISTING ISSUE** - Linked to GitHub Issue #681  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/681  
+**Labels:** P0, claude-code-generated-issue, critical, golden-path, websocket  
+**Processing Date:** 2025-09-13
+
 **Discovery:** Issue #463 reproduction test found `JWT_SECRET is missing (None)`  
-**Impact:** WebSocket authentication failures in staging environment
+**Impact:** WebSocket authentication failures in staging environment  
+**Evidence:** `[✓] REPRODUCED: JWT_SECRET is missing (None). This also contributes to authentication failures`
+
+**Root Cause:** JWT_SECRET environment variable is None in staging environment, causing WebSocket authentication failures and blocking the golden path user flow (login → AI responses).
+
+**SNST Processing Results:**
+- ✅ **Found Existing Issue:** GitHub Issue #681 exactly matches this regression (JWT Configuration Crisis blocking WebSocket authentication in staging)
+- ✅ **Updated Issue:** Added specific test gardener evidence confirming JWT_SECRET=None 
+- ✅ **Priority Tagged:** P0 Critical - blocking $50K MRR WebSocket functionality
+- ✅ **Cross-Referenced:** Linked to Issue #463 (user-facing WebSocket failures) 
+- ✅ **Business Impact:** Confirmed blocking golden path validation in staging
 
 ## Next Steps
 
