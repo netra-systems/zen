@@ -6,6 +6,12 @@ These tests validate that the migration resolves all SSOT violations.
 Business Impact: Validates $500K+ ARR security fixes and user isolation improvements.
 """
 
+# Enable direct Python execution by adding project root to sys.path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.absolute()
+sys.path.insert(0, str(PROJECT_ROOT))
+
 import asyncio
 import inspect
 import time
