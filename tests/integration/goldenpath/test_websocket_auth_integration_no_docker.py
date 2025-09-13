@@ -50,6 +50,11 @@ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketMan
 from netra_backend.app.websocket_core.unified_websocket_auth import UnifiedWebSocketAuth
 
 
+@pytest.mark.golden_path
+@pytest.mark.no_docker
+@pytest.mark.integration
+@pytest.mark.business_critical
+@pytest.mark.real_services
 class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
     """
     Golden Path WebSocket Authentication Integration Tests - NO DOCKER
@@ -59,12 +64,12 @@ class TestGoldenPathWebSocketAuthNonDocker(SSotAsyncTestCase):
     dependencies to ensure compatibility with GCP staging environments.
     """
 
-    async def async_setup_method(self, method=None):
+    def setup_method(self, method=None):
         """Setup test environment with real services - NO DOCKER."""
-        await super().async_setup_method(method)
+        super().setup_method(method)
         
         self.env = get_env()
-        self.test_user_id_base = UnifiedIdGenerator.generate_user_id()
+        self.test_user_id_base = UnifiedIdGenerator.generate_base_id("user")
         
         # Real JWT configuration for golden path
         self.jwt_secret = self.env.get("JWT_SECRET_KEY", "golden_path_jwt_secret_integration_testing")
