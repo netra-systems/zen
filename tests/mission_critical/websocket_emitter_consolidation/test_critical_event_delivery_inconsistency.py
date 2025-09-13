@@ -116,9 +116,9 @@ class TestCriticalEventDeliveryInconsistency(SSotAsyncTestCase):
     This test MUST FAIL before consolidation to prove event inconsistency exists.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test infrastructure."""
-        super().setUp()
+        super().setup_method(method)
         self.event_tracker = CriticalEventTracker()
 
     @pytest.mark.expected_to_fail
