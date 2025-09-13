@@ -68,27 +68,34 @@ def require_docker_services() -> None:
 def require_docker_services_smart() -> None:
     """Smart Docker services requirement with robust staging environment fallback.
 
-    CRITICAL FIX for Issue #680: Enhanced staging validation following Issue #420 strategic resolution.
-    Business Impact: Protects $500K+ ARR validation coverage through staging environment.
+    CRITICAL FIX for Issue #773: Enhanced service pre-validation to prevent 2-minute hangs in Cloud Run.
+    Business Impact: Protects $500K+ ARR validation coverage with 45-second timeout compatibility.
 
     Flow:
     1. Check Docker availability (fast, 2s timeout)
-    2. If Docker available: proceed with local services
-    3. If Docker unavailable: activate enhanced staging environment fallback
-    4. Load staging configuration from .env.staging.e2e
-    5. Validate staging environment health with proper URLs
-    6. Configure test environment for staging validation with all 5 WebSocket events
+    2. If Docker available: validate service health (max 10s timeout) 
+    3. If services healthy: proceed with local validation
+    4. If Docker unavailable or services unhealthy: activate staging fallback (max 15s)
+    5. Load staging configuration from .env.staging.e2e
+    6. Validate staging environment health with proper URLs
+    7. Configure test environment for staging validation with all 5 WebSocket events
     """
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
 
-        # Phase 1: Fast Docker availability check
+        # Phase 1: Fast Docker availability check (2s timeout)
         if manager.is_docker_available_fast():
-            logger.info("✅ Docker available - proceeding with local service validation")
-            return
+            logger.info("✅ Docker available - validating service health")
+            
+            # Phase 1.5: Service health pre-validation (Issue #773)
+            if validate_local_service_health_fast():
+                logger.info("✅ Local services healthy - proceeding with local validation")
+                return
+            else:
+                logger.warning("⚠️ Docker available but services unhealthy - falling back to staging")
 
-        # Phase 2: Enhanced staging environment fallback activation (Issue #680)
-        logger.warning("🔄 Docker unavailable - activating enhanced staging environment fallback (Issue #680)")
+        # Phase 2: Enhanced staging environment fallback activation (Issues #680, #773)
+        logger.warning("🔄 Docker unavailable or unhealthy - activating enhanced staging environment fallback (Issues #680, #773)")
 
         env = get_env()
 
@@ -129,14 +136,21 @@ def require_docker_services_smart() -> None:
         os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
         os.environ["VALIDATE_WEBSOCKET_EVENTS"] = "true"  # Ensure WebSocket events are validated
         os.environ["REQUIRE_ALL_AGENT_EVENTS"] = "true"  # Require all 5 critical events
+        
+        # Issue #773: Set graceful degradation flags
+        os.environ["GRACEFUL_SERVICE_DEGRADATION"] = "true"
+        os.environ["FAST_TIMEOUT_MODE"] = "true"
+        os.environ["CLOUD_RUN_COMPATIBLE"] = "true"
 
     except Exception as e:
-        logger.error(f"❌ ISSUE #680: Enhanced smart Docker check failed: {e}")
+        logger.error(f"❌ ISSUES #680, #773: Enhanced smart Docker check failed: {e}")
         pytest.skip(f"Neither Docker nor staging environment available: {e}")
 
 
 def validate_staging_environment_health(websocket_url: str) -> bool:
     """Validate staging environment is healthy and responsive.
+    
+    Issue #773: Enhanced with fast timeout to prevent hangs.
     
     Args:
         websocket_url: WebSocket URL to check for connectivity
@@ -155,17 +169,17 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
                 if "/ws" in http_url:
                     http_url = http_url.replace("/ws", "/health")
                 
-                # Try basic HTTP health check first
+                # Try basic HTTP health check first (Issue #773: reduced timeout)
                 import requests
-                response = requests.get(http_url, timeout=10)
+                response = requests.get(http_url, timeout=5)  # Issue #773: Reduced from 10s
                 if response.status_code == 200:
                     logger.info(f"Staging environment HTTP health check passed: {http_url}")
                     return True
                     
-                # Fallback to WebSocket connectivity test
+                # Fallback to WebSocket connectivity test (Issue #773: reduced timeouts)
                 import asyncio
                 try:
-                    async with websockets.connect(websocket_url, ping_timeout=10, close_timeout=10) as websocket:
+                    async with websockets.connect(websocket_url, ping_timeout=5, close_timeout=5) as websocket:  # Issue #773: Reduced from 10s
                         await websocket.ping()
                         logger.info(f"Staging environment WebSocket health check passed: {websocket_url}")
                         return True
@@ -185,10 +199,42 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
                 logger.warning(f"Staging health check failed: {health_error}")
                 return False
         
-        return asyncio.run(health_check())
+        # Issue #773: Add asyncio timeout wrapper for entire health check
+        return asyncio.run(asyncio.wait_for(health_check(), timeout=10.0))
         
+    except asyncio.TimeoutError:
+        logger.warning("Staging environment health check timed out (10s) - proceeding anyway")
+        return False
     except Exception as e:
         logger.error(f"Staging health check failed: {e}")
+        return False
+
+
+def validate_local_service_health_fast() -> bool:
+    """Fast validation of local service health to prevent Issue #773 timeout hangs.
+    
+    Performs rapid health checks on critical services with aggressive timeouts.
+    Prevents 2-minute hangs by failing fast when services are unresponsive.
+    
+    Returns:
+        True if local services are healthy and responsive, False otherwise
+    """
+    try:
+        manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
+        
+        # Check if critical containers are running (5s timeout)
+        critical_services = ['backend', 'auth-service', 'redis', 'postgres']
+        
+        for service in critical_services:
+            if not manager._is_service_healthy("dedicated", service, timeout=2):
+                logger.warning(f"Service {service} failed health check - falling back to staging")
+                return False
+                
+        logger.info("✅ All critical services passed health check")
+        return True
+        
+    except Exception as e:
+        logger.warning(f"Service health check failed: {e} - falling back to staging")
         return False
 
 
