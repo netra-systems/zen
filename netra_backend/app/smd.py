@@ -207,8 +207,8 @@ class StartupOrchestrator:
         self._validate_environment()
         self.logger.info("  [U+2713] Step 2: Environment validated")
         
-        # Step 2.5: Environment context service initialization (FIX for Issue #402)
-        self._initialize_environment_context()
+        # Step 2.5: Environment context service initialization (FIX for Issue #402 and #403)
+        await self._initialize_environment_context()
         self.logger.info("  [U+2713] Step 2.5: Environment context service initialized")
         
         # Step 3: Database migrations (non-critical)
@@ -1040,14 +1040,15 @@ class StartupOrchestrator:
         
         self.app.state.key_manager = key_manager
     
-    def _initialize_environment_context(self) -> None:
-        """Initialize EnvironmentContextService - CRITICAL for Issue #402 fix."""
-        from netra_backend.app.core.environment_context.environment_context_service import EnvironmentContextService
-        
+    async def _initialize_environment_context(self) -> None:
+        """Initialize EnvironmentContextService - CRITICAL for Issue #402 and #403 fix."""
+        from netra_backend.app.core.environment_context import initialize_environment_context
+
         try:
-            environment_context_service = EnvironmentContextService()
+            # Use the proper async initialization function that includes environment detection
+            environment_context_service = await initialize_environment_context()
             self.app.state.environment_context_service = environment_context_service
-            self.logger.info("EnvironmentContextService initialized successfully")
+            self.logger.info("EnvironmentContextService initialized successfully with environment detection")
         except Exception as e:
             self.logger.error(f"Failed to initialize EnvironmentContextService: {e}")
             # Don't raise exception to allow fallback ServiceDependencyChecker to work

@@ -62,8 +62,8 @@ class SecretConfig:
             "redis": [
                 "REDIS_HOST",
                 "REDIS_PORT",
-                "REDIS_URL",
                 "REDIS_PASSWORD"
+                # REDIS_URL removed - deprecated in favor of component-based configuration
             ],
             "ai_services": [
                 "OPENAI_API_KEY",
@@ -100,8 +100,8 @@ class SecretConfig:
             "redis": [
                 "REDIS_HOST",
                 "REDIS_PORT",
-                "REDIS_URL",
                 "REDIS_PASSWORD"
+                # REDIS_URL removed - deprecated in favor of component-based configuration
             ]
         },
         "frontend": {
@@ -146,8 +146,8 @@ class SecretConfig:
         # Redis
         "REDIS_HOST": "redis-host-staging",
         "REDIS_PORT": "redis-port-staging",
-        "REDIS_URL": "redis-url-staging",
         "REDIS_PASSWORD": "redis-password-staging",
+        # REDIS_URL removed - deprecated in favor of component-based configuration
 
         # AI Services
         "OPENAI_API_KEY": "openai-api-key-staging",
@@ -309,7 +309,7 @@ class SecretConfig:
             "JWT_SECRET_KEY": "Key for signing JWT tokens (CRITICAL - required for authentication)",
             "SERVICE_SECRET": "Secret for inter-service authentication",
             "POSTGRES_PASSWORD": "PostgreSQL database password (CRITICAL - required for database access)",
-            "REDIS_URL": "Redis connection URL for caching and sessions",
+            # "REDIS_URL": "Redis connection URL for caching and sessions - DEPRECATED",
             "FERNET_KEY": "Symmetric encryption key for data encryption",
             "GOOGLE_CLIENT_ID": "Google OAuth client ID (simplified naming for backend)",
             "GOOGLE_CLIENT_SECRET": "Google OAuth client secret (simplified naming for backend)",

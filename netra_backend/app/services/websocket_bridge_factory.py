@@ -239,21 +239,9 @@ class WebSocketBridgeFactory:
         self._agent_registry = agent_registry
         self._health_monitor = health_monitor
         
-        # Get or create the unified WebSocket manager (SSOT) - Issue #712 factory pattern
-        # Create minimal user context for bridge factory operations
-        from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-        id_manager = UnifiedIDManager()
-        bridge_context = type('BridgeUserContext', (), {
-            'user_id': id_manager.generate_id(IDType.USER, prefix='bridge'),
-            'thread_id': id_manager.generate_id(IDType.THREAD, prefix='bridge'),
-            'request_id': id_manager.generate_id(IDType.REQUEST, prefix='bridge'),
-            'is_bridge_factory': True
-        })()
-
-        self._unified_manager = UnifiedWebSocketManager(
-            user_context=bridge_context,
-            _ssot_authorization_token=secrets.token_urlsafe(16)
-        )
+        # Unified WebSocket manager will be created on-demand with proper user context
+        # SECURITY FIX: Do not directly instantiate to prevent factory bypass detection
+        self._unified_manager = None
         
         logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
@@ -276,9 +264,10 @@ class WebSocketBridgeFactory:
             UnifiedWebSocketEmitter: SSOT emitter with full compatibility
         """
         if not self._unified_manager:
-            # Auto-configure for testing if not already configured
+            # Create WebSocket manager using proper factory pattern with user context
+            # SECURITY FIX: Use create_websocket_manager instead of direct instantiation
             try:
-                from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
                 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
                 # Try different registry import paths
@@ -290,25 +279,21 @@ class WebSocketBridgeFactory:
                     except ImportError:
                         AgentRegistry = None  # Use None if not available
 
-                logger.warning("WebSocketBridgeFactory auto-configuring for testing - not recommended for production")
+                logger.warning("WebSocketBridgeFactory auto-configuring - creating manager with user context")
 
-                # Create minimal configuration for testing - Issue #712 factory pattern
-                from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
-                id_manager = UnifiedIDManager()
-                test_context = type('TestUserContext', (), {
-                    'user_id': id_manager.generate_id(IDType.USER, prefix='test'),
-                    'thread_id': id_manager.generate_id(IDType.THREAD, prefix='test'),
-                    'request_id': id_manager.generate_id(IDType.REQUEST, prefix='test'),
-                    'is_test': True
-                })()
+                # Use proper factory pattern with user context (if available)
+                if user_context:
+                    self._unified_manager = await create_websocket_manager(user_context)
+                else:
+                    # For testing without user context, create minimal context
+                    test_context = type('TestContext', (), {'user_id': 'test_user', 'thread_id': 'test_thread'})()
+                    self._unified_manager = await create_websocket_manager(test_context)
 
-                self._unified_manager = UnifiedWebSocketManager(
-                    user_context=test_context,
-                    _ssot_authorization_token=secrets.token_urlsafe(16)
-                )
-                self._connection_pool = WebSocketConnectionPool()
-                self._agent_registry = AgentRegistry() if AgentRegistry else None
-                self._health_monitor = None  # Optional for testing
+                # Auto-configure other components if needed
+                if not self._connection_pool:
+                    self._connection_pool = WebSocketConnectionPool()
+                if not self._agent_registry and AgentRegistry:
+                    self._agent_registry = AgentRegistry()
 
             except Exception as e:
                 raise RuntimeError(f"Factory not configured - call configure() first. Auto-configuration failed: {e}")
