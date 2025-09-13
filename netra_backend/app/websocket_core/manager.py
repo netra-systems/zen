@@ -16,8 +16,10 @@ Business Justification:
 - Supports mission-critical Golden Path user flow ($500K+ ARR dependency)
 """
 
-# Import directly from unified_manager.py (SSOT) - Phase 1 consolidation
-from netra_backend.app.websocket_core.unified_manager import (
+# ISSUE #824 REMEDIATION: Import from canonical SSOT path
+# OLD: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+# NEW: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketConnection,
     _serialize_message_safely,
