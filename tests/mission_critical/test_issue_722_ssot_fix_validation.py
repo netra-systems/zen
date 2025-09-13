@@ -110,8 +110,9 @@ class TestIssue722SsotFixValidation(SSotAsyncTestCase):
             # Validate configuration is created and has expected properties
             config_valid = (
                 config is not None and
-                hasattr(config, 'host') and
-                hasattr(config, 'port')
+                hasattr(config, 'max_connections_per_user') and
+                hasattr(config, 'heartbeat_interval_seconds') and
+                config.max_connections_per_user > 0
             )
 
             golden_path_components['websocket_config']['status'] = 'working' if config_valid else 'failed'

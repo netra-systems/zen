@@ -87,13 +87,15 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
 
             manager = UnifiedWebSocketManager(
                 mode=WebSocketManagerMode.ISOLATED,
-                user_context=test_context
+                user_context=test_context,
+                _ssot_authorization_token=secrets.token_urlsafe(16)
             )
         else:
             # Production mode with proper user context
             manager = UnifiedWebSocketManager(
                 mode=mode,
-                user_context=user_context
+                user_context=user_context,
+                _ssot_authorization_token=secrets.token_urlsafe(16)
             )
 
         # Issue #712 Fix: Validate SSOT compliance
@@ -101,7 +103,8 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
             from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_websocket_manager_creation
             validate_websocket_manager_creation(
                 manager_instance=manager,
-                user_context=user_context or test_context,
+                user_context=user_context,
+                _ssot_authorization_token=secrets.token_urlsafe(16) or test_context,
                 creation_method="get_websocket_manager"
             )
         except ImportError:
@@ -115,7 +118,11 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
         logger.error(f"Failed to create WebSocket manager: {e}")
         # For integration tests, we need to return a working manager even if there are issues
         # This ensures tests can run while still following security patterns
-        fallback_manager = UnifiedWebSocketManager(mode=WebSocketManagerMode.EMERGENCY)
+        fallback_manager = UnifiedWebSocketManager(
+            mode=WebSocketManagerMode.EMERGENCY,
+            user_context=test_context if 'test_context' in locals() else user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(16)
+        )
         logger.warning("Created emergency fallback WebSocket manager for test continuity")
         return fallback_manager
 

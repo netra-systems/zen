@@ -48,10 +48,10 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         
         # Define the 4 critical files with specific violation lines from Issue #722
         cls.critical_files_with_violations = {
-            "/Users/anthony/Desktop/netra-apex/netra_backend/app/logging/auth_trace_logger.py": [284, 293, 302],
-            "/Users/anthony/Desktop/netra-apex/netra_backend/app/admin/corpus/unified_corpus_admin.py": [155, 281],
-            "/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/types.py": [349, 350, 351, 352],
-            "/Users/anthony/Desktop/netra-apex/netra_backend/app/core/auth_startup_validator.py": [518, 520]
+            "netra_backend/app/logging/auth_trace_logger.py": [284, 293, 302],
+            "netra_backend/app/admin/corpus/unified_corpus_admin.py": [155, 281],
+            "netra_backend/app/websocket_core/types.py": [349, 350, 351, 352],
+            "netra_backend/app/core/auth_startup_validator.py": [518, 520]
         }
 
     def test_auth_trace_logger_environment_access_violations(self):
@@ -64,7 +64,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         These violations cause environment detection inconsistencies in
         development vs staging vs production environments.
         """
-        file_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend/app/logging/auth_trace_logger.py")
+        file_path = Path("netra_backend/app/logging/auth_trace_logger.py")
         expected_violation_lines = [284, 293, 302]
         
         violations = self._detect_os_environ_violations_in_file(file_path, expected_violation_lines)
@@ -87,7 +87,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         
         These violations cause corpus path inconsistencies across environments.
         """
-        file_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend/app/admin/corpus/unified_corpus_admin.py")
+        file_path = Path("netra_backend/app/admin/corpus/unified_corpus_admin.py")
         expected_violation_lines = [155, 281]
         
         violations = self._detect_os_environ_violations_in_file(file_path, expected_violation_lines)
@@ -110,7 +110,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         
         These violations cause WebSocket connection inconsistencies in Cloud Run.
         """
-        file_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend/app/websocket_core/types.py")
+        file_path = Path("netra_backend/app/websocket_core/types.py")
         expected_violation_lines = [349, 350, 351, 352]  # Cloud Run detection lines
         
         violations = self._detect_os_environ_violations_in_file(file_path, expected_violation_lines)
@@ -133,7 +133,7 @@ class TestIssue722SSOTViolations(SSotBaseTestCase):
         
         These violations cause auth configuration inconsistencies.
         """
-        file_path = Path("/Users/anthony/Desktop/netra-apex/netra_backend/app/core/auth_startup_validator.py")
+        file_path = Path("netra_backend/app/core/auth_startup_validator.py")
         expected_violation_lines = [518, 520]  # Fallback access lines
         
         violations = self._detect_os_environ_violations_in_file(file_path, expected_violation_lines)
