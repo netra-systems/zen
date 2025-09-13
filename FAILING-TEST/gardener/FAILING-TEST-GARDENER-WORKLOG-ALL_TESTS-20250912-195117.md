@@ -107,12 +107,16 @@
 2. **Line 227:** Added `"ssot: Single Source of Truth pattern tests"`
 3. **Verification:** `python3 -m pytest auth_service/tests/unit/test_secret_loader_comprehensive.py --collect-only` successful
 
-### Issue 4: Missing User Execution Engine Function  
+### Issue 4: Missing User Execution Engine Function ✅ PROCESSED  
 **Category:** failing-test-regression-p2-execution-engine-missing  
 **Severity:** P2 - Medium (Skipped tests, not blocking)  
 **File:** `netra_backend/tests/unit/agents/test_execution_engine_comprehensive.py:73`  
 **Error:** `cannot import name 'create_request_scoped_engine' from 'netra_backend.app.agents.supervisor.user_execution_engine'`  
-**Impact:** Execution engine tests skipped due to missing function
+**Impact:** Execution engine tests skipped due to missing function  
+**GitHub Issue:** [#692](https://github.com/netra-systems/netra-apex/issues/692) - failing-test-regression-p2-execution-engine-missing-function  
+**Related:** Issue #686 (P0 SSOT execution engine migration)  
+**Technical Analysis:** Function exists in `execution_engine_factory.py:721` but import path discrepancy causing test failures  
+**Status:** Tracked in GitHub with comprehensive investigation plan and resolution criteria
 
 ### Issue 5: Test Collection Warnings - Constructor Issues
 **Category:** failing-test-new-p3-test-class-constructors  
