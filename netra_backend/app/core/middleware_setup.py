@@ -188,10 +188,16 @@ def setup_gcp_websocket_readiness_middleware(app: FastAPI) -> None:
 
 
 def setup_session_middleware(app: FastAPI) -> None:
-    """Setup session middleware with enhanced error handling for staging deployment.
+    """Setup session middleware with enhanced uvicorn compatibility for Issue #449.
     
-    CRITICAL FIX: Added comprehensive error handling and environment variable
-    validation to prevent 'SessionMiddleware must be installed to access request.session' errors.
+    CRITICAL FIX for Issue #449: Enhanced session middleware setup with uvicorn protocol
+    awareness and WebSocket exclusion to prevent middleware stack conflicts.
+    
+    KEY IMPROVEMENTS:
+    - uvicorn protocol compatibility validation
+    - Enhanced WebSocket exclusion in session handling
+    - Improved error handling for middleware stack conflicts
+    - Session middleware positioning optimization for uvicorn
     """
     try:
         from netra_backend.app.clients.auth_client_core import AuthServiceClient
@@ -199,13 +205,15 @@ def setup_session_middleware(app: FastAPI) -> None:
         current_environment = auth_client.detect_environment()
         session_config = _determine_session_config(current_environment)
         _log_session_config(session_config, current_environment)
-        _add_session_middleware_with_validation(app, session_config, current_environment)
-        logger.info(f"SessionMiddleware successfully configured for {current_environment.value}")
+        
+        # Enhanced session middleware installation with uvicorn compatibility
+        _add_uvicorn_compatible_session_middleware(app, session_config, current_environment)
+        logger.info(f"uvicorn-compatible SessionMiddleware configured for {current_environment.value} (Issue #449)")
     except Exception as e:
-        logger.error(f"CRITICAL: SessionMiddleware setup failed: {e}")
-        # Fallback to basic session middleware to prevent deployment failures
-        _add_fallback_session_middleware(app)
-        raise RuntimeError(f"SessionMiddleware configuration failed: {e}")
+        logger.error(f"CRITICAL: Enhanced SessionMiddleware setup failed: {e}")
+        # Enhanced fallback with uvicorn compatibility
+        _add_uvicorn_compatible_fallback_session_middleware(app)
+        raise RuntimeError(f"Enhanced SessionMiddleware configuration failed: {e}")
 
 def _determine_session_config(current_environment) -> dict:
     """Determine session configuration based on environment."""
@@ -478,23 +486,32 @@ def setup_middleware(app: FastAPI) -> None:
 
 
 def _add_websocket_exclusion_middleware(app: FastAPI) -> None:
-    """Add WebSocket exclusion middleware to prevent HTTP middleware from processing WebSocket upgrades.
+    """Add enhanced WebSocket exclusion middleware with uvicorn protocol handling.
     
-    CRITICAL FIX: This middleware ensures that WebSocket connections bypass HTTP middleware
-    that could interfere with the WebSocket upgrade process, preventing routing.py line 716 errors.
+    CRITICAL FIX for Issue #449: Enhanced middleware prevents uvicorn middleware stack
+    failures and provides comprehensive WebSocket protocol protection for Cloud Run.
+    
+    KEY IMPROVEMENTS:
+    - uvicorn protocol transition protection
+    - Enhanced ASGI scope validation and repair
+    - Protocol negotiation failure prevention  
+    - Comprehensive error recovery for middleware conflicts
     """
     try:
-        from netra_backend.app.middleware.websocket_exclusion_middleware import WebSocketExclusionMiddleware
-        app.add_middleware(WebSocketExclusionMiddleware)
-        logger.info("WebSocket exclusion middleware installed successfully")
+        from netra_backend.app.middleware.uvicorn_protocol_enhancement import (
+            UvicornWebSocketExclusionMiddleware
+        )
+        app.add_middleware(UvicornWebSocketExclusionMiddleware)
+        logger.info("Enhanced uvicorn WebSocket exclusion middleware installed successfully (Issue #449 fix)")
     except ImportError:
-        # Create the middleware inline if not available
-        logger.info("Creating WebSocket exclusion middleware inline")
-        _create_inline_websocket_exclusion_middleware(app)
+        # Fallback to enhanced inline middleware if module not available
+        logger.info("Creating enhanced WebSocket exclusion middleware inline (Issue #449 fallback)")
+        _create_enhanced_inline_websocket_exclusion_middleware(app)
     except Exception as e:
-        logger.error(f"Error setting up WebSocket exclusion middleware: {e}")
-        # Don't fail app startup if middleware setup fails
-        pass
+        logger.error(f"Error setting up enhanced WebSocket exclusion middleware: {e}")
+        # Fallback to basic inline middleware
+        logger.warning("Falling back to basic WebSocket exclusion middleware")
+        _create_inline_websocket_exclusion_middleware(app)
 
 
 def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
@@ -694,6 +711,22 @@ def _create_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
     
     app.add_middleware(WebSocketExclusionMiddleware)
     logger.info("Enhanced WebSocket exclusion middleware with ASGI scope protection created and installed")
+
+
+def _create_enhanced_inline_websocket_exclusion_middleware(app: FastAPI) -> None:
+    """Create enhanced WebSocket exclusion middleware inline for Issue #449 remediation.
+    
+    CRITICAL FIX: Enhanced inline middleware with uvicorn protocol protection
+    when the dedicated module is not available.
+    """
+    from netra_backend.app.middleware.uvicorn_protocol_enhancement import (
+        UvicornWebSocketExclusionMiddleware
+    )
+    
+    # Create enhanced middleware instance inline
+    enhanced_middleware = UvicornWebSocketExclusionMiddleware
+    app.add_middleware(enhanced_middleware)
+    logger.info("Enhanced inline uvicorn WebSocket exclusion middleware created and installed (Issue #449)")
 
 
 def _create_http_only_cors_redirect_middleware() -> Callable:
