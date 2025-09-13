@@ -209,7 +209,8 @@ class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
             self.record_metric("integration_test_complete", True)
 
         except Exception as e:
-            self.fail(f"Integration test between helper classes failed: {e}")
+            self.record_metric("integration_test_error", str(e))
+            self.assertTrue(False, f"Integration test between helper classes failed: {e}")
 
     def test_fix_resolves_original_failing_pattern(self):
         """
@@ -245,7 +246,8 @@ class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
             self.record_metric("original_pattern_replication_success", True)
 
         except Exception as e:
-            self.fail(f"Original failing pattern simulation failed: {e}")
+            self.record_metric("original_pattern_error", str(e))
+            self.assertTrue(False, f"Original failing pattern simulation failed: {e}")
 
 
 if __name__ == "__main__":

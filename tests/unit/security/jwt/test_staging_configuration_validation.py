@@ -20,6 +20,7 @@ Business Value: $500K+ ARR depends on staging authentication infrastructure
 
 import pytest
 import logging
+import unittest
 from unittest.mock import patch, MagicMock, mock_open
 import os
 import json
@@ -37,7 +38,7 @@ from shared.isolated_environment import get_env
 logger = logging.getLogger(__name__)
 
 
-class TestStagingConfigurationValidation(SSotBaseTestCase):
+class TestStagingConfigurationValidation(SSotBaseTestCase, unittest.TestCase):
     """
     Test staging configuration validation components.
 
