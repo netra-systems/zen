@@ -5,6 +5,12 @@ This module provides the foundational framework for progressive error escalation
 across development, staging, and production environments while maintaining
 business value protection and backward compatibility.
 
+SSOP Compliance:
+- Uses SSOT pattern with IsolatedEnvironment for all environment access
+- Eliminates direct os.getenv() usage in favor of shared.isolated_environment.get_env()
+- Maintains singleton pattern for consistent policy across application
+- Supports dependency injection for testing while maintaining production safety
+
 Business Value:
 - Enables progressive error escalation (dev warnings -> staging errors -> prod failures)
 - Protects business-critical flows in production while allowing development flexibility
@@ -25,7 +31,7 @@ if TYPE_CHECKING:
 from shared.isolated_environment import get_env
 
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 class EnvironmentType(Enum):
