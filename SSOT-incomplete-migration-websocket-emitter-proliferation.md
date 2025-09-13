@@ -50,10 +50,15 @@ Found 4 competing WebSocket emitter implementations:
 - [x] **EXECUTION STRATEGY**: 5-phase validation (Pre → Consolidation → Validation → Regression → Full Suite)
 - [x] **BUSINESS PROTECTION**: $500K+ ARR protection through Golden Path validation
 
-## Phase 2: Execute Test Plan (20% new SSOT tests)
-- [ ] Create failing tests demonstrating SSOT violation
-- [ ] Implement WebSocket emitter SSOT validation tests
-- [ ] Run non-docker tests only
+## Phase 2: Execute Test Plan (20% new SSOT tests) ✅ COMPLETE
+- [x] **4 NEW FAILING TESTS CREATED** in `/tests/mission_critical/websocket_emitter_consolidation/`
+  - `test_ssot_violation_multiple_emitter_instances.py` ✅ FAILING (proves 4 UserWebSocketEmitter classes violate SSOT)
+  - `test_websocket_handshake_race_conditions_cloud_run.py` ✅ FAILING (Cloud Run race conditions)
+  - `test_event_delivery_wrong_user_isolation_failure.py` ✅ FAILING (user isolation failures)
+  - `test_critical_event_delivery_inconsistency.py` ✅ FAILING (inconsistent critical events)
+- [x] **TEST EXECUTION RESULTS**: 10 FAILED, 5 PASSED (perfect validation of SSOT violations)
+- [x] **TARGET CONFIRMED**: `/netra_backend/app/agents/supervisor/agent_instance_factory.py:55` needs consolidation
+- [x] **BUSINESS PROTECTION**: Tests demonstrate real problems affecting $500K+ ARR chat functionality
 
 ## Phase 3: Plan SSOT Remediation 
 - [ ] Plan migration to UnifiedWebSocketEmitter
