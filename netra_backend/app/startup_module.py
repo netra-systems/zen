@@ -644,9 +644,19 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
     """Setup security and LLM services."""
     app.state.key_manager = key_manager
     app.state.security_service = SecurityService(key_manager)
-    # SSOT FIX: Use factory pattern for LLM manager creation
+    # SECURITY FIX Issue #566: Use factory pattern that creates user-isolated LLM managers
+    # Instead of creating a shared singleton LLM manager that compromises cache isolation,
+    # store a factory function that creates user-isolated instances on demand
     from netra_backend.app.llm.llm_manager import create_llm_manager
-    app.state.llm_manager = create_llm_manager()
+    
+    def create_user_isolated_llm_manager(user_context=None):
+        """Factory function to create user-isolated LLM managers for secure cache isolation."""
+        return create_llm_manager(user_context)
+    
+    # Store factory function instead of shared instance to prevent cache contamination
+    app.state.llm_manager_factory = create_user_isolated_llm_manager
+    # Keep backward compatibility for startup sequences that expect app.state.llm_manager
+    app.state.llm_manager = None  # Will be created on-demand with user context
     
     # CRITICAL FIX: Set ClickHouse availability flag based on configuration
     config = get_config()
