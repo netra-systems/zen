@@ -63,7 +63,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         except ImportError as e:
-            self.fail(f"CRITICAL FAILURE: Cannot import AgentRegistry for factory testing: {e}")
+            raise AssertionError(f"CRITICAL FAILURE: Cannot import AgentRegistry for factory testing: {e}")
 
         # Create multiple user contexts
         user_contexts = []
@@ -88,7 +88,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
 
                 registries.append(registry)
             except Exception as e:
-                self.fail(
+                raise AssertionError(
                     f"CRITICAL FAILURE: AgentRegistry factory failed for user {context.user_id}: {e}. "
                     f"Issue #686: Factory pattern must work for all users."
                 )
@@ -137,15 +137,19 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         # Create user contexts with different session IDs
         user_contexts = []
         for i in range(2):
-            context = unittest.mock.Mock()
-            context.user_id = f"ws_test_user_{i}"
-            context.session_id = f"ws_test_session_{i}"
+            # Create real UserExecutionContext for websocket test
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            context = UserExecutionContext.create_for_user(
+                user_id=f"ws_test_user_{i}",
+                thread_id=f"ws_thread_{i}",
+                run_id=f"ws_run_{i}_{uuid.uuid4().hex[:8]}"
+            )
             user_contexts.append(context)
 
         # Create mock WebSocket managers for testing
         mock_websocket_managers = []
 
-        with patch('netra_backend.app.agents.supervisor.agent_registry.AgentWebSocketBridge') as mock_bridge:
+        with patch('netra_backend.app.services.agent_websocket_bridge.AgentWebSocketBridge') as mock_bridge:
             # Configure mock to return different instances
             mock_instances = [MagicMock() for _ in range(len(user_contexts))]
             mock_bridge.side_effect = mock_instances
@@ -183,8 +187,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
 
                 if ws_manager1 is not None and ws_manager2 is not None:
                     # TEST FAILS if same WebSocket manager shared
-                    self.assertIsNot(
-                        ws_manager1, ws_manager2,
+                    assert ws_manager1 is not ws_manager2, (
                         f"CRITICAL SSOT VIOLATION: WebSocket managers shared between users. "
                         f"Manager 1 ID: {id(ws_manager1)}, Manager 2 ID: {id(ws_manager2)}. "
                         f"BUSINESS IMPACT: WebSocket events sent to wrong users breaks Golden Path. "
@@ -222,10 +225,13 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         user_contexts = []
 
         for i in range(num_concurrent_users):
-            context = unittest.mock.Mock()
-            context.user_id = f"concurrent_user_{i}"
-            context.session_id = f"concurrent_session_{i}"
-            context.request_id = str(uuid.uuid4())
+            # Create real UserExecutionContext for proper validation
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            context = UserExecutionContext.create_for_user(
+                user_id=f"concurrent_user_{i}",
+                thread_id=f"thread_{i}",
+                run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
+            )
             user_contexts.append(context)
 
         # Test concurrent execution isolation
@@ -234,8 +240,16 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         async def execute_for_user(user_context):
             """Execute agent for specific user and track results."""
             try:
-                # Create isolated execution engine for user
-                engine = UserExecutionEngine.create_from_legacy(user_context)
+                # Create mock registry and websocket bridge for isolated execution
+                mock_registry = unittest.mock.Mock()
+                mock_websocket_bridge = unittest.mock.Mock()
+
+                # Create isolated execution engine for user with proper parameters
+                engine = await UserExecutionEngine.create_from_legacy(
+                    registry=mock_registry,
+                    websocket_bridge=mock_websocket_bridge,
+                    user_context=user_context
+                )
 
                 # Mock execution with user-specific data
                 mock_result = {
@@ -298,7 +312,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
                 f"Issue #686: User context lost during concurrent execution."
             )
 
-    def test_agent_factory_memory_isolation_ssot_compliance(self):
+    async def test_agent_factory_memory_isolation_ssot_compliance(self):
         """TEST FAILS: Agent factories create shared memory state between users.
 
         CRITICAL BUSINESS IMPACT: Memory leaks and state contamination between users
@@ -321,16 +335,29 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         engines = []
 
         for user_info in user_data:
-            context = unittest.mock.Mock()
-            context.user_id = user_info['user_id']
-            context.session_id = f"session_{user_info['user_id']}"
-            context.private_data = user_info['data']
+            # Create real UserExecutionContext with test data
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            context = UserExecutionContext.create_for_user(
+                user_id=user_info['user_id'],
+                thread_id=f"thread_{user_info['user_id']}",
+                run_id=f"run_{user_info['user_id']}_{uuid.uuid4().hex[:8]}",
+                private_data=user_info['data']  # Pass test data as keyword arg
+            )
 
             try:
-                engine = UserExecutionEngine.create_from_legacy(context)
+                # Create mock registry and websocket bridge for test
+                mock_registry = unittest.mock.Mock()
+                mock_websocket_bridge = unittest.mock.Mock()
+
+                # Create execution engine with proper parameters
+                engine = await UserExecutionEngine.create_from_legacy(
+                    registry=mock_registry,
+                    websocket_bridge=mock_websocket_bridge,
+                    user_context=context
+                )
                 engines.append((engine, context))
             except Exception as e:
-                self.fail(
+                raise AssertionError(
                     f"CRITICAL FAILURE: Engine creation failed for {user_info['user_id']}: {e}. "
                     f"Issue #686: Factory must work for all users."
                 )
@@ -376,7 +403,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
                     f"Issue #686: Complete memory isolation required for Golden Path."
                 )
 
-    def test_factory_cleanup_prevents_memory_leaks(self):
+    async def test_factory_cleanup_prevents_memory_leaks(self):
         """TEST FAILS: Factory pattern doesn't properly clean up user resources.
 
         CRITICAL BUSINESS IMPACT: Memory leaks in production cause system degradation
@@ -400,15 +427,28 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         created_engines = []
 
         for i in range(num_test_users):
-            context = unittest.mock.Mock()
-            context.user_id = f"cleanup_test_user_{i}"
-            context.session_id = f"cleanup_test_session_{i}"
+            # Create real UserExecutionContext for cleanup test
+            from netra_backend.app.services.user_execution_context import UserExecutionContext
+            context = UserExecutionContext.create_for_user(
+                user_id=f"cleanup_test_user_{i}",
+                thread_id=f"cleanup_thread_{i}",
+                run_id=f"cleanup_run_{i}_{uuid.uuid4().hex[:8]}"
+            )
 
             try:
-                engine = UserExecutionEngine.create_from_legacy(context)
+                # Create mock registry and websocket bridge for cleanup test
+                mock_registry = unittest.mock.Mock()
+                mock_websocket_bridge = unittest.mock.Mock()
+
+                # Create execution engine with proper parameters
+                engine = await UserExecutionEngine.create_from_legacy(
+                    registry=mock_registry,
+                    websocket_bridge=mock_websocket_bridge,
+                    user_context=context
+                )
                 created_engines.append(engine)
             except Exception as e:
-                self.fail(
+                raise AssertionError(
                     f"CRITICAL FAILURE: Engine creation failed during cleanup test: {e}. "
                     f"Issue #686: Factory must work reliably."
                 )

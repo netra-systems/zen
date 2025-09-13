@@ -96,6 +96,18 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
                 user_context=user_context
             )
 
+        # Issue #712 Fix: Validate SSOT compliance
+        try:
+            from netra_backend.app.websocket_core.ssot_validation_enhancer import validate_websocket_manager_creation
+            validate_websocket_manager_creation(
+                manager_instance=manager,
+                user_context=user_context or test_context,
+                creation_method="get_websocket_manager"
+            )
+        except ImportError:
+            # Validation enhancer not available - continue without validation
+            logger.debug("SSOT validation enhancer not available")
+
         logger.info(f"WebSocket manager created successfully with mode={mode.value}")
         return manager
 
