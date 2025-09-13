@@ -108,7 +108,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for placeholder in placeholder_patterns:
-            with self.expect_exception(InvalidContextError):
+            with self.expect_exception(InvalidContextError) as exc_info:
                 # Create context with placeholder value - validation happens during creation
                 invalid_context = UserExecutionContext(
                     user_id=placeholder,
@@ -119,7 +119,7 @@ class TestContextValidation(SSotAsyncTestCase):
                 # Then validate the context
                 validate_user_context(invalid_context)
             
-            error_msg = str(context.exception)
+            error_msg = str(exc_info.value)
             self.assertIn("placeholder", error_msg.lower())
             self.assertIn(placeholder, error_msg)
     
@@ -166,7 +166,7 @@ class TestContextValidation(SSotAsyncTestCase):
         ]
         
         for attack_type, payload in security_violations:
-            with self.expect_exception(InvalidContextError):
+            with self.expect_exception(InvalidContextError) as exc_info:
                 # Create context with security violation - validation happens during creation
                 invalid_context = UserExecutionContext(
                     user_id=f"user_{payload}",
@@ -177,7 +177,7 @@ class TestContextValidation(SSotAsyncTestCase):
                 # Then validate the context
                 validate_user_context(invalid_context)
             
-            error_msg = str(context.exception)
+            error_msg = str(exc_info.value)
             self.assertIn("security", error_msg.lower())
     
     def test_context_isolation_between_users(self):
