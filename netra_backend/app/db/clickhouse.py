@@ -22,7 +22,11 @@ from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 from netra_backend.app.logging_config import central_logger as logger
 from shared.isolated_environment import get_env
-from netra_backend.app.db.transaction_errors import (    DeadlockError, ConnectionError, TransactionError,    TimeoutError, PermissionError, SchemaError, classify_error, is_retryable_error)
+from netra_backend.app.db.transaction_errors import (
+    DeadlockError, ConnectionError, TransactionError, TimeoutError, 
+    PermissionError, SchemaError, classify_error, is_retryable_error
+)
+from sqlalchemy.exc import SQLAlchemyError, OperationalError, IntegrityError
 # test_decorator removed - production code must not depend on test_framework
 
 
@@ -356,8 +360,18 @@ def _extract_clickhouse_config(config):
                         self.password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
                         if self.password:
                             logger.info("[ClickHouse Staging Config] Loaded password from GCP Secret Manager")
+                    except ImportError as e:
+                        # Issue #374: SecretManager module not available
+                        logger.warning(f"[ClickHouse Staging Config] SecretManager not available: {e}")
+                    except PermissionError as e:
+                        # Issue #374: GCP Secret Manager access denied
+                        logger.warning(f"[ClickHouse Staging Config] GCP Secret Manager access denied: {e}")
+                    except ValueError as e:
+                        # Issue #374: Invalid secret name or configuration
+                        logger.warning(f"[ClickHouse Staging Config] Invalid secret configuration: {e}")
                     except Exception as e:
-                        logger.warning(f"[ClickHouse Staging Config] Could not load password from secrets: {e}")
+                        # Issue #374: Unexpected secret loading error
+                        logger.warning(f"[ClickHouse Staging Config] Unexpected secret loading error: {type(e).__name__}: {e}")
                 
                 logger.info(f"[ClickHouse Staging Config] Using host={self.host}, port={self.port}, secure={self.secure}")
         
@@ -400,8 +414,21 @@ def _extract_clickhouse_config(config):
                         self.password = secret_manager.get_secret("CLICKHOUSE_PASSWORD") or ""
                         if self.password:
                             logger.info("[ClickHouse Production Config] Loaded password from GCP Secret Manager")
+                    except ImportError as e:
+                        # Issue #374: SecretManager module not available in production
+                        logger.error(f"[ClickHouse Production Config] SecretManager not available: {e}")
+                        raise
+                    except PermissionError as e:
+                        # Issue #374: GCP Secret Manager access denied in production
+                        logger.error(f"[ClickHouse Production Config] GCP Secret Manager access denied: {e}")
+                        raise
+                    except ValueError as e:
+                        # Issue #374: Invalid secret name or configuration in production
+                        logger.error(f"[ClickHouse Production Config] Invalid secret configuration: {e}")
+                        raise
                     except Exception as e:
-                        logger.error(f"[ClickHouse Production Config] Failed to load password: {e}")
+                        # Issue #374: Unexpected secret loading error in production
+                        logger.error(f"[ClickHouse Production Config] Unexpected secret loading error: {type(e).__name__}: {e}")
                         raise
                 
                 logger.info(f"[ClickHouse Production Config] Using host={self.host}, port={self.port}, secure={self.secure}")
@@ -558,8 +585,21 @@ async def get_clickhouse_client(bypass_manager: bool = False, service_context: O
             # CRITICAL FIX: Catch recursion error and fall back to direct connection
             logger.error("[ClickHouse] Recursion detected in connection manager, using direct connection")
             pass
+        except ImportError as e:
+            # Issue #374: Connection manager module not available
+            logger.warning(f"[ClickHouse] Connection manager module not available, using direct connection: {e}")
+            pass
+        except AttributeError as e:
+            # Issue #374: Connection manager missing required methods
+            logger.warning(f"[ClickHouse] Connection manager method missing, using direct connection: {e}")
+            pass
+        except ValueError as e:
+            # Issue #374: Invalid connection manager configuration
+            logger.warning(f"[ClickHouse] Invalid connection manager configuration, using direct connection: {e}")
+            pass
         except Exception as e:
-            logger.warning(f"[ClickHouse] Connection manager failed, falling back to direct connection: {e}")
+            # Issue #374: Unexpected connection manager error
+            logger.warning(f"[ClickHouse] Unexpected connection manager error, using direct connection: {type(e).__name__}: {e}")
             pass
     
     # Fallback to direct connection (backward compatibility)
@@ -848,7 +888,22 @@ async def _create_real_client(service_context: Optional[Dict[str, Any]] = None):
     try:
         async for c in _connect_and_yield_client(config, use_secure):
             yield c
+    except (ConnectionError, TimeoutError, OperationalError) as e:
+        # Issue #374: Database connection and operational errors
+        classified_error = classify_error(e)
+        logger.error(f"[ClickHouse] Database connection failed: {type(classified_error).__name__}: {classified_error}")
+        _handle_connection_error(classified_error, service_context)
+    except PermissionError as e:
+        # Issue #374: ClickHouse authentication/permission errors
+        logger.error(f"[ClickHouse] Permission denied: {e}")
+        _handle_connection_error(e, service_context)
+    except ValueError as e:
+        # Issue #374: Invalid configuration or parameters
+        logger.error(f"[ClickHouse] Configuration error: {e}")
+        _handle_connection_error(e, service_context)
     except Exception as e:
+        # Issue #374: Unexpected connection errors
+        logger.error(f"[ClickHouse] Unexpected connection error: {type(e).__name__}: {e}")
         _handle_connection_error(e, service_context)
         
         # Context-aware error behavior - don't log duplicate ERROR for optional services
@@ -1085,9 +1140,27 @@ class ClickHouseService:
                 _clickhouse_cache.set(user_id, query, result, params, ttl=300)
             
             return result
-        except Exception as e:
+        except (ConnectionError, TimeoutError, OperationalError) as e:
+            # Issue #374: Database connection and operational errors in query execution
             execute_duration = time.time() - execute_start
             self._metrics["failures"] += 1
+            classified_error = classify_error(e)
+            logger.error(f"[ClickHouse] Query execution failed: {type(classified_error).__name__}: {classified_error}")
+            logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
+            logger.error(f"Query: {query[:100]}..." if len(query) > 100 else f"Query: {query}")
+        except SchemaError as e:
+            # Issue #374: ClickHouse schema/table errors
+            execute_duration = time.time() - execute_start
+            self._metrics["failures"] += 1
+            logger.error(f"[ClickHouse] Schema error during query execution: {e}")
+            logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
+            logger.error(f"Check table existence and column names")
+        except Exception as e:
+            # Issue #374: Unexpected query execution errors
+            execute_duration = time.time() - execute_start
+            self._metrics["failures"] += 1
+            logger.error(f"[ClickHouse] Unexpected query execution error: {type(e).__name__}: {e}")
+            logger.error(f"Query duration: {execute_duration:.3f}s, User: {user_id or 'system'}")
             
             logger.critical(f"[U+1F4A5] ClickHouse EXECUTION FAILED for user {user_id or 'system'} after {execute_duration:.3f}s")
             logger.error(f"Context: {operation_context}, Query type: {query_type.upper()}")
