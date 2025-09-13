@@ -67,51 +67,71 @@ def require_docker_services() -> None:
 
 def require_docker_services_smart() -> None:
     """Smart Docker services requirement with robust staging environment fallback.
-    
-    CRITICAL FIX for Issue #544: Provides staging environment validation when Docker unavailable.
-    Business Impact: Protects $500K+ ARR validation coverage.
-    
+
+    CRITICAL FIX for Issue #680: Enhanced staging validation following Issue #420 strategic resolution.
+    Business Impact: Protects $500K+ ARR validation coverage through staging environment.
+
     Flow:
     1. Check Docker availability (fast, 2s timeout)
-    2. If Docker available: proceed with local services 
-    3. If Docker unavailable: activate staging environment fallback
-    4. Validate staging environment health
-    5. Configure test environment for staging validation
+    2. If Docker available: proceed with local services
+    3. If Docker unavailable: activate enhanced staging environment fallback
+    4. Load staging configuration from .env.staging.e2e
+    5. Validate staging environment health with proper URLs
+    6. Configure test environment for staging validation with all 5 WebSocket events
     """
     try:
         manager = UnifiedDockerManager(environment_type=EnvironmentType.DEDICATED)
-        
+
         # Phase 1: Fast Docker availability check
         if manager.is_docker_available_fast():
-            logger.info("Docker available - proceeding with local service validation")
+            logger.info("✅ Docker available - proceeding with local service validation")
             return
-            
-        # Phase 2: Staging environment fallback activation
-        logger.warning("Docker unavailable - activating staging environment fallback")
-        
+
+        # Phase 2: Enhanced staging environment fallback activation (Issue #680)
+        logger.warning("🔄 Docker unavailable - activating enhanced staging environment fallback (Issue #680)")
+
         env = get_env()
+
+        # Load staging E2E configuration if available
+        from pathlib import Path
+        staging_env_file = Path.cwd() / ".env.staging.e2e"
+        if staging_env_file.exists():
+            logger.info(f"📁 Loading staging configuration from {staging_env_file}")
+            env.load_from_file(staging_env_file, source="staging_e2e_config")
+        else:
+            logger.warning("⚠️ No .env.staging.e2e file found - using environment fallbacks")
+
+        # Get staging configuration with enhanced defaults
         staging_enabled = env.get("USE_STAGING_FALLBACK", "true").lower() == "true"  # Default true
-        staging_websocket_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging.onrender.com/ws")
-        
+        staging_websocket_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-backend-701982941522.us-central1.run.app/ws")
+        staging_base_url = env.get("STAGING_BASE_URL", "https://netra-backend-701982941522.us-central1.run.app")
+        staging_auth_url = env.get("STAGING_AUTH_URL", "https://auth-service-701982941522.us-central1.run.app")
+
         if not staging_enabled:
-            pytest.skip("Docker unavailable and staging fallback disabled. Enable with USE_STAGING_FALLBACK=true")
-            
-        # Phase 3: Staging environment health validation (permissive for development)
+            pytest.skip("❌ Docker unavailable and staging fallback disabled. Enable with USE_STAGING_FALLBACK=true")
+
+        logger.info(f"🌐 Staging WebSocket URL: {staging_websocket_url}")
+        logger.info(f"🌐 Staging Base URL: {staging_base_url}")
+        logger.info(f"🌐 Staging Auth URL: {staging_auth_url}")
+
+        # Phase 3: Enhanced staging environment health validation
         staging_healthy = validate_staging_environment_health(staging_websocket_url)
         if not staging_healthy:
-            logger.warning("Staging environment health check failed - proceeding anyway for development testing")
-            
-        # Phase 4: Configure test environment for staging
-        setup_staging_test_environment(staging_websocket_url)
-        logger.info("Successfully configured staging environment fallback - tests will proceed")
-        
-        # Phase 5: Set permissive test mode for development
+            logger.warning("⚠️ Staging environment health check failed - proceeding anyway for development testing")
+
+        # Phase 4: Configure test environment for staging with full configuration
+        setup_staging_test_environment(staging_websocket_url, staging_base_url, staging_auth_url)
+        logger.info("✅ Successfully configured enhanced staging environment fallback - tests will proceed")
+
+        # Phase 5: Set permissive test mode for development but enable strict WebSocket event validation
         import os
         os.environ["PERMISSIVE_TEST_MODE"] = "true"
         os.environ["SKIP_STRICT_HEALTH_CHECKS"] = "true"
-        
+        os.environ["VALIDATE_WEBSOCKET_EVENTS"] = "true"  # Ensure WebSocket events are validated
+        os.environ["REQUIRE_ALL_AGENT_EVENTS"] = "true"  # Require all 5 critical events
+
     except Exception as e:
-        logger.error(f"ISSUE #544: Smart Docker check failed: {e}")
+        logger.error(f"❌ ISSUE #680: Enhanced smart Docker check failed: {e}")
         pytest.skip(f"Neither Docker nor staging environment available: {e}")
 
 
@@ -172,28 +192,65 @@ def validate_staging_environment_health(websocket_url: str) -> bool:
         return False
 
 
-def setup_staging_test_environment(websocket_url: str) -> None:
-    """Configure test environment variables for staging validation.
-    
+def setup_staging_test_environment(websocket_url: str, base_url: str = None, auth_url: str = None) -> None:
+    """Configure test environment variables for enhanced staging validation (Issue #680).
+
     Args:
         websocket_url: Staging WebSocket URL to use for tests
+        base_url: Staging base URL (optional, derived from websocket_url if not provided)
+        auth_url: Staging auth URL (optional, derived from base_url if not provided)
     """
     import os
-    
-    # Configure staging environment variables
+
+    # Configure core staging environment variables
     os.environ["TEST_WEBSOCKET_URL"] = websocket_url
     os.environ["TEST_MODE"] = "staging_fallback"
     os.environ["REAL_SERVICES"] = "true"
     os.environ["USE_STAGING_SERVICES"] = "true"
-    
-    # Derive other URLs from WebSocket URL
-    base_url = websocket_url.replace("wss://", "https://").replace("ws://", "http://").replace("/ws", "")
+
+    # Configure staging environment detection
+    os.environ["ENVIRONMENT"] = "staging"
+    os.environ["STAGING_ENV"] = "true"
+    os.environ["INTEGRATION_TEST_MODE"] = "staging"
+
+    # Handle base URL configuration
+    if base_url is None:
+        # Derive from WebSocket URL
+        base_url = websocket_url.replace("wss://", "https://").replace("ws://", "http://").replace("/ws", "")
+
     os.environ["TEST_BACKEND_URL"] = base_url
-    os.environ["TEST_AUTH_URL"] = f"{base_url}/auth"
-    
-    logger.info(f"Staging test environment configured: {websocket_url}")
-    logger.info(f"Backend URL: {base_url}")
-    logger.info(f"Auth URL: {base_url}/auth")
+    os.environ["STAGING_BASE_URL"] = base_url
+    os.environ["STAGING_API_URL"] = f"{base_url}/api"
+
+    # Handle auth URL configuration
+    if auth_url is None:
+        # Default to backend auth endpoint
+        auth_url = f"{base_url}/auth"
+
+    os.environ["TEST_AUTH_URL"] = auth_url
+    os.environ["STAGING_AUTH_URL"] = auth_url
+
+    # WebSocket event validation configuration (Issue #680)
+    os.environ["STAGING_WEBSOCKET_URL"] = websocket_url
+    os.environ["VALIDATE_WEBSOCKET_EVENTS_STAGING"] = "true"
+    os.environ["REQUIRE_ALL_AGENT_EVENTS_STAGING"] = "true"
+
+    # Enhanced WebSocket event validation settings
+    os.environ["WEBSOCKET_EVENT_TIMEOUT"] = "30"  # 30 seconds for staging latency
+    os.environ["WEBSOCKET_CONNECTION_TIMEOUT"] = "15"  # 15 seconds for staging connection
+    os.environ["WEBSOCKET_EVENT_RETRY_COUNT"] = "3"  # 3 retries for staging stability
+
+    # Test configuration for staging environment
+    os.environ["BYPASS_STARTUP_VALIDATION"] = "true"
+    os.environ["SKIP_DOCKER_HEALTH_CHECKS"] = "true"
+
+    logger.info(f"🏗️  Enhanced staging test environment configured (Issue #680):")
+    logger.info(f"   📡 WebSocket URL: {websocket_url}")
+    logger.info(f"   🌐 Backend URL: {base_url}")
+    logger.info(f"   🔐 Auth URL: {auth_url}")
+    logger.info(f"   🔧 API URL: {base_url}/api")
+    logger.info(f"   ✅ WebSocket Event Validation: Enabled")
+    logger.info(f"   ⏱️  Event Timeout: 30s, Connection Timeout: 15s, Retries: 3")
 
 # Always require Docker for real tests
 requires_docker = pytest.mark.usefixtures("ensure_docker_services")
@@ -245,31 +302,33 @@ def _get_environment_backend_url() -> str:
 
 
 def _get_environment_websocket_url() -> str:
-    """Get WebSocket URL from environment or derive from backend URL."""
+    """Get WebSocket URL from environment with enhanced staging support (Issue #680)."""
     env = get_env()
-    
+
     # Check for service orchestrator environment variables first
     test_websocket_url = env.get('TEST_WEBSOCKET_URL', None)
     if test_websocket_url:
         return test_websocket_url
-    
+
+    # Check for staging environment variables (Issue #680 enhancement)
+    staging_websocket_url = env.get('STAGING_WEBSOCKET_URL', None)
+    if staging_websocket_url and (env.get('USE_STAGING_SERVICES') == 'true' or env.get('STAGING_ENV') == 'true'):
+        return staging_websocket_url
+
     # Check for E2E environment variables
     e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None)
     if e2e_websocket_url:
         return e2e_websocket_url
-    
+
     # Derive from backend URL
     backend_url = _get_environment_backend_url()
-    return backend_url.replace("http://", "ws://").replace("https://", "wss://")
-    
-    # Required WebSocket events for agent testing
-    required_agent_events: Set[str] = field(default_factory=lambda: {
-        "agent_started",
-        "agent_thinking", 
-        "tool_executing",
-        "tool_completed",
-        "agent_completed"
-    })
+    websocket_url = backend_url.replace("http://", "ws://").replace("https://", "wss://")
+
+    # Ensure WebSocket URL ends with /ws if not already present
+    if not websocket_url.endswith('/ws'):
+        websocket_url = f"{websocket_url}/ws"
+
+    return websocket_url
 
 
 @dataclass

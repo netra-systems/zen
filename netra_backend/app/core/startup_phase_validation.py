@@ -29,7 +29,13 @@ from netra_backend.app.core.app_state_contracts import (
     AppStateContractViolation,
     enforce_app_state_contracts
 )
+from netra_backend.app.core.health.environment_health_config import (
+    get_environment_health_config,
+    ServiceCriticality,
+    HealthFailureMode
+)
 from netra_backend.app.logging_config import central_logger
+from shared.isolated_environment import get_env
 
 logger = central_logger.get_logger(__name__)
 
@@ -64,11 +70,15 @@ class StartupPhaseValidator:
     all components are properly initialized before dependent components.
     """
     
-    def __init__(self):
+    def __init__(self, environment: Optional[str] = None):
+        self.environment = environment or get_env().get('ENVIRONMENT', 'development')
+        self.health_config = get_environment_health_config(self.environment)
         self.contract_validator = AppStateContractValidator()
         self.current_phase = None
         self.completed_phases = []
         self.validation_history = []
+
+        logger.info(f"ISSUE #690 REMEDIATION: Startup validator initialized for {self.environment} environment")
         
     async def validate_phase(self, app_state: Any, 
                            target_phase: ContractPhase,
@@ -118,17 +128,22 @@ class StartupPhaseValidator:
                     raise StartupValidationError(f"Phase {target_phase.value} validation timeout")
                 return phase_result
             
-            # Create phase result
+            # ISSUE #690 REMEDIATION: Apply environment-aware validation logic
+            environment_adjusted_result = self._apply_environment_validation_rules(
+                contract_results, target_phase, app_state
+            )
+
+            # Create phase result with environment adjustments
             duration = time.time() - start_time
             phase_result = PhaseValidationResult(
                 phase=target_phase,
-                success=contract_results["valid"],
+                success=environment_adjusted_result["valid"],
                 duration_seconds=duration,
-                components_validated=contract_results["total_contracts"],
-                errors=contract_results["critical_errors"],
-                warnings=contract_results["warnings"],
+                components_validated=environment_adjusted_result["total_contracts"],
+                errors=environment_adjusted_result["critical_errors"],
+                warnings=environment_adjusted_result["warnings"],
                 business_impact=[
-                    impact["impact"] for impact in contract_results.get("business_impact", [])
+                    impact["impact"] for impact in environment_adjusted_result.get("business_impact", [])
                 ]
             )
             
@@ -339,11 +354,123 @@ class StartupPhaseValidator:
         else:
             return "LOW - No critical impact expected"
     
+    def _apply_environment_validation_rules(
+        self,
+        contract_results: Dict[str, Any],
+        phase: ContractPhase,
+        app_state: Any
+    ) -> Dict[str, Any]:
+        """
+        Apply environment-specific validation rules to contract results.
+
+        ISSUE #690 REMEDIATION: Allows staging environment to proceed with degraded
+        services when they are configured as optional.
+        """
+        adjusted_result = contract_results.copy()
+
+        # Get phase-required services and their environment configurations
+        phase_services = self._get_phase_required_services(phase)
+        available_services = self._get_available_services(app_state)
+
+        # Categorize errors by service criticality in this environment
+        critical_errors = []
+        degraded_warnings = []
+        ignored_errors = []
+
+        for error in contract_results.get("critical_errors", []):
+            error_handled = False
+
+            # Check if this error relates to a specific service
+            for service in phase_services:
+                if service.lower() in error.lower():
+                    service_config = self.health_config.get_service_config(service, self.environment)
+
+                    if service_config:
+                        if service_config.criticality == ServiceCriticality.OPTIONAL:
+                            # Optional service - convert error to warning
+                            warning_msg = f"Optional service {service} unavailable: {error}"
+                            degraded_warnings.append(warning_msg)
+                            logger.warning(f"ISSUE #690: Converting error to warning for optional service {service}: {error}")
+                            error_handled = True
+                            break
+                        elif service_config.failure_mode == HealthFailureMode.GRACEFUL_DEGRADE:
+                            # Graceful degradation - convert to warning
+                            warning_msg = f"Service {service} degraded: {error}"
+                            degraded_warnings.append(warning_msg)
+                            logger.warning(f"ISSUE #690: Graceful degradation for service {service}: {error}")
+                            error_handled = True
+                            break
+                        elif service_config.failure_mode == HealthFailureMode.IGNORE:
+                            # Ignore error completely
+                            ignored_errors.append(f"Ignored service {service}: {error}")
+                            logger.info(f"ISSUE #690: Ignoring error for service {service}: {error}")
+                            error_handled = True
+                            break
+
+            if not error_handled:
+                # Keep as critical error
+                critical_errors.append(error)
+
+        # Update the result
+        adjusted_result["critical_errors"] = critical_errors
+        adjusted_result["warnings"] = (
+            contract_results.get("warnings", []) +
+            degraded_warnings
+        )
+
+        # Add environment adjustment metadata
+        adjustment_info = {
+            "environment": self.environment,
+            "degraded_services": len(degraded_warnings),
+            "ignored_errors": len(ignored_errors),
+            "remaining_critical": len(critical_errors),
+            "allow_partial_startup": self.health_config.allow_partial_startup
+        }
+
+        # Determine if validation should pass based on environment rules
+        if len(critical_errors) == 0:
+            # No critical errors - pass
+            adjusted_result["valid"] = True
+        elif self.health_config.allow_partial_startup and len(critical_errors) < contract_results.get("total_contracts", 1):
+            # Partial startup allowed and some services working
+            adjusted_result["valid"] = True
+            degraded_warnings.append(f"Partial startup allowed in {self.environment} environment")
+            logger.warning(f"ISSUE #690: Allowing partial startup in {self.environment} with {len(critical_errors)} critical errors")
+        else:
+            # Hard failure
+            adjusted_result["valid"] = False
+
+        # Add business impact for environment adjustments
+        environment_business_impact = []
+        if degraded_warnings:
+            environment_business_impact.append({
+                "impact": f"Services running in degraded mode in {self.environment} environment"
+            })
+        if ignored_errors:
+            environment_business_impact.append({
+                "impact": f"Some service failures ignored per {self.environment} environment configuration"
+            })
+
+        adjusted_result["business_impact"] = (
+            contract_results.get("business_impact", []) +
+            environment_business_impact
+        )
+
+        adjusted_result["environment_adjustment"] = adjustment_info
+
+        logger.info(
+            f"ISSUE #690: Environment validation adjustment for {phase.value} in {self.environment}: "
+            f"critical_errors={len(critical_errors)}, degraded_warnings={len(degraded_warnings)}, "
+            f"result_valid={adjusted_result['valid']}"
+        )
+
+        return adjusted_result
+
     def _get_service_health_summary(self, available_services: Dict[str, Any]) -> str:
         """Get summary of service health status."""
         total_services = len(available_services)
         healthy_services = sum(1 for svc in available_services.values() if svc is not None)
-        
+
         if total_services == 0:
             return "no_services_registered"
         elif healthy_services == total_services:
@@ -491,11 +618,11 @@ class StartupPhaseValidator:
 _startup_validator = None
 
 
-def get_startup_validator() -> StartupPhaseValidator:
-    """Get global startup validator instance"""
+def get_startup_validator(environment: Optional[str] = None) -> StartupPhaseValidator:
+    """Get global startup validator instance for the specified environment"""
     global _startup_validator
     if _startup_validator is None:
-        _startup_validator = StartupPhaseValidator()
+        _startup_validator = StartupPhaseValidator(environment)
     return _startup_validator
 
 

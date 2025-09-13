@@ -26,6 +26,18 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     def __init__(self, websocket_manager: Optional['WebSocketManager'] = None):
         """Initialize with unified tool execution engine."""
         self._core_engine = UnifiedToolExecutionEngine(websocket_manager)
+
+        # Store deprecation metadata for debugging
+        self._deprecated = True
+        self._migration_issue = "#686"
+        self._ssot_replacement = "UnifiedToolDispatcher"
+
+        # MIGRATION HELPER: Add method to assist migration to UnifiedToolDispatcher
+        self._migration_helper = {
+            'new_pattern': 'await UnifiedToolDispatcher.create_from_deprecated_execution_engine(websocket_manager, None, user_context)',
+            'best_practice': 'await UnifiedToolDispatcher.create_for_user(user_context)',
+            'migration_guide': 'Issue #686 ExecutionEngine consolidation'
+        }
     
     async def execute_tool_with_input(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
         """Execute tool and return typed result"""

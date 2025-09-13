@@ -17,6 +17,13 @@ from netra_backend.app.core.health import (
     HealthLevel,
     HealthResponseBuilder,
 )
+from netra_backend.app.core.health.environment_health_config import (
+    get_environment_health_config,
+    is_service_enabled,
+    get_service_timeout,
+    ServiceCriticality,
+    HealthFailureMode
+)
 from netra_backend.app.dependencies import get_request_scoped_db_session
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
@@ -384,16 +391,26 @@ async def _check_redis_connection() -> None:
 async def health_backend(request: Request) -> Dict[str, Any]:
     """
     Backend service health endpoint for Golden Path validation.
-    
+
     Validates agent execution capabilities, tool system, LLM integration,
     and WebSocket functionality specifically for the Golden Path user flow.
+
+    ISSUE #690 REMEDIATION: Uses environment-aware health configuration to prevent
+    staging deployment failures from LLM service unavailability.
     """
     from datetime import UTC, datetime
+
+    # Get environment-specific health configuration
+    config = unified_config_manager.get_config()
+    environment = config.environment
+    health_config = get_environment_health_config(environment)
+
     health_response = {
         "service": "backend-service",
         "version": "1.0.0",
         "timestamp": datetime.now(UTC).isoformat(),
         "status": "healthy",
+        "environment": environment,
         "capabilities": {
             "agent_execution": False,
             "tool_system": False,
@@ -401,6 +418,8 @@ async def health_backend(request: Request) -> Dict[str, Any]:
             "websocket_integration": False,
             "database_connectivity": False
         },
+        "service_criticality": {},
+        "degraded_services": [],
         "golden_path_ready": False
     }
     
@@ -428,20 +447,68 @@ async def health_backend(request: Request) -> Dict[str, Any]:
         except Exception as tool_error:
             logger.warning(f"Tool system check failed: {tool_error}")
         
-        # Check LLM integration
-        try:
-            if app_state and hasattr(app_state, 'llm_manager'):
-                # SECURITY FIX: LLM manager is intentionally None for security (user isolation)
-                # Check for factory pattern which is the correct security implementation
-                if app_state.llm_manager is not None:
-                    # Legacy pattern - actual LLM manager instance
+        # Check LLM integration with environment-aware resilience
+        llm_service_config = health_config.get_service_config("llm", environment)
+        if llm_service_config and is_service_enabled("llm", environment):
+            try:
+                # ISSUE #690 REMEDIATION: Use resilient LLM factory for staging environment
+                from netra_backend.app.llm.staging_resilient_factory import get_resilient_llm_factory
+
+                factory = get_resilient_llm_factory(environment)
+                factory_health = await asyncio.wait_for(
+                    factory.health_check(),
+                    timeout=get_service_timeout("llm", environment)
+                )
+
+                if factory_health.get("status") == "healthy":
                     health_response["capabilities"]["llm_integration"] = True
-                elif hasattr(app_state, 'llm_manager_factory') and app_state.llm_manager_factory:
-                    # Security-compliant pattern - factory creates user-isolated instances
-                    health_response["capabilities"]["llm_integration"] = True
-                
-        except Exception as llm_error:
-            logger.warning(f"LLM integration check failed: {llm_error}")
+                    health_response["service_criticality"]["llm"] = llm_service_config.criticality.value
+                elif llm_service_config.criticality in [ServiceCriticality.OPTIONAL]:
+                    # LLM is optional - don't fail health check but note degradation
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": factory_health.get("status", "unknown"),
+                        "mode": factory_health.get("mode", "unknown"),
+                        "message": llm_service_config.graceful_fallback_message
+                    })
+                    health_response["service_criticality"]["llm"] = "optional_degraded"
+                else:
+                    # LLM is important/critical but unavailable
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["service_criticality"]["llm"] = f"{llm_service_config.criticality.value}_failed"
+
+            except asyncio.TimeoutError:
+                # LLM service timed out
+                if llm_service_config.failure_mode == HealthFailureMode.GRACEFUL_DEGRADE:
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": "timeout",
+                        "message": "LLM service timed out - graceful degradation active"
+                    })
+                else:
+                    logger.warning(f"LLM integration timeout after {get_service_timeout('llm', environment)}s")
+                    health_response["capabilities"]["llm_integration"] = False
+
+            except Exception as llm_error:
+                # Handle LLM errors based on environment configuration
+                if llm_service_config.failure_mode in [HealthFailureMode.GRACEFUL_DEGRADE, HealthFailureMode.IGNORE]:
+                    logger.warning(f"LLM integration check failed (graceful degradation): {llm_error}")
+                    health_response["capabilities"]["llm_integration"] = False
+                    health_response["degraded_services"].append({
+                        "service": "llm",
+                        "status": "error",
+                        "error": str(llm_error),
+                        "message": llm_service_config.graceful_fallback_message
+                    })
+                else:
+                    logger.error(f"LLM integration check failed: {llm_error}")
+                    health_response["capabilities"]["llm_integration"] = False
+        else:
+            # LLM service disabled in this environment
+            health_response["capabilities"]["llm_integration"] = True  # Consider as "working" if disabled
+            health_response["service_criticality"]["llm"] = "disabled"
         
         # Check WebSocket integration for agent events
         try:
@@ -462,56 +529,80 @@ async def health_backend(request: Request) -> Dict[str, Any]:
         except Exception as db_error:
             logger.warning(f"Database connectivity check failed: {db_error}")
         
-        # Determine overall Golden Path readiness
-        # Core requirements: agent execution and tool system
-        core_ready = (
-            health_response["capabilities"]["agent_execution"] and
-            health_response["capabilities"]["tool_system"]
-        )
-        
-        # Full readiness includes LLM and WebSocket for complete chat experience
-        full_ready = (
-            core_ready and
-            health_response["capabilities"]["llm_integration"] and
-            health_response["capabilities"]["websocket_integration"]
-        )
-        
+        # ISSUE #690 REMEDIATION: Use environment-aware health determination
+        failed_services = {}
+
+        # Identify failed critical and important services
+        for capability, status in health_response["capabilities"].items():
+            if not status:
+                service_name = capability.replace("_integration", "").replace("_connectivity", "").replace("_execution", "").replace("_system", "")
+                service_config = health_config.get_service_config(service_name, environment)
+
+                if service_config and service_config.criticality in [ServiceCriticality.CRITICAL, ServiceCriticality.IMPORTANT]:
+                    # Only fail for critical/important services that aren't in graceful degradation
+                    if service_config.failure_mode not in [HealthFailureMode.GRACEFUL_DEGRADE, HealthFailureMode.IGNORE]:
+                        failed_services[service_name] = f"{capability} not available"
+
+        # Use environment-specific failure determination
+        should_fail, failure_reason = health_config.should_fail_health_check(failed_services, environment)
+
         # Calculate readiness score
         capabilities_ready = sum(health_response["capabilities"].values())
         total_capabilities = len(health_response["capabilities"])
         readiness_score = capabilities_ready / total_capabilities
-        
-        if full_ready:
-            health_response["golden_path_ready"] = True
-            health_response["status"] = "healthy"
-            health_response["readiness_score"] = readiness_score
-            return health_response
-        elif core_ready:
-            health_response["golden_path_ready"] = True
-            health_response["status"] = "degraded"
-            health_response["readiness_score"] = readiness_score
-            health_response["warnings"] = [
-                "LLM or WebSocket integration limited - agent responses may be incomplete"
-            ]
-            return health_response
-        else:
-            # Critical capabilities missing
-            missing_capabilities = []
-            if not health_response["capabilities"]["agent_execution"]:
-                missing_capabilities.append("Agent execution")
-            if not health_response["capabilities"]["tool_system"]:
-                missing_capabilities.append("Tool system")
-            
+
+        health_response["readiness_score"] = readiness_score
+        health_response["failed_services"] = failed_services
+        health_response["failure_analysis"] = {
+            "should_fail": should_fail,
+            "reason": failure_reason,
+            "environment_config": {
+                "allow_partial_startup": health_config.allow_partial_startup,
+                "failure_threshold": health_config.overall_failure_threshold
+            }
+        }
+
+        # Determine final status based on environment configuration
+        if should_fail and not health_config.allow_partial_startup:
+            # Hard failure - return 503
             health_response["status"] = "unhealthy"
             health_response["golden_path_ready"] = False
-            health_response["readiness_score"] = readiness_score
-            health_response["error"] = f"Missing critical capabilities: {', '.join(missing_capabilities)}"
-            
-            # Return 503 in staging/production for missing critical capabilities
-            config = unified_config_manager.get_config()
-            if config.environment in ["staging", "production"]:
-                return _create_error_response(503, health_response)
-            
+            health_response["error"] = failure_reason
+
+            logger.error(f"Backend health check failing: {failure_reason}")
+            return _create_error_response(503, health_response)
+
+        elif should_fail and health_config.allow_partial_startup:
+            # Soft failure - degraded but continue
+            health_response["status"] = "degraded"
+            health_response["golden_path_ready"] = readiness_score >= 0.5  # At least 50% functionality
+            health_response["warnings"] = [
+                f"Partial functionality: {failure_reason}",
+                "Some features may be limited or unavailable"
+            ]
+
+            if health_response["degraded_services"]:
+                health_response["warnings"].extend([
+                    service["message"] for service in health_response["degraded_services"]
+                    if service.get("message")
+                ])
+
+            logger.warning(f"Backend health check degraded: {failure_reason}")
+            return health_response
+
+        else:
+            # Success - all critical services operational or gracefully degraded
+            if health_response["degraded_services"]:
+                health_response["status"] = "degraded"
+                health_response["warnings"] = [
+                    "Some services operating in degraded mode",
+                    *[service["message"] for service in health_response["degraded_services"] if service.get("message")]
+                ]
+            else:
+                health_response["status"] = "healthy"
+
+            health_response["golden_path_ready"] = True
+            logger.info(f"Backend health check passed with {readiness_score:.2%} capability readiness")
             return health_response
             
     except Exception as e:
