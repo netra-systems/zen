@@ -1022,11 +1022,19 @@ class StartupOrchestrator:
         from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.services.security_service import SecurityService
         
-        # SECURITY FIX: Removed global LLM manager creation - CRITICAL VULNERABILITY
-        # Global LLM managers cause conversation mixing between users due to shared cache
-        # LLM managers must be created per-request with user context for isolation
-        # Use create_llm_manager(user_context) in request handlers instead
-        self.app.state.llm_manager = None  # Explicitly set to None to prevent usage
+        # SECURITY FIX Issue #566: Use factory pattern for user-isolated LLM managers
+        # Instead of creating shared singleton that compromises cache isolation,
+        # store factory function that creates user-isolated instances on demand
+        from netra_backend.app.llm.llm_manager import create_llm_manager
+        
+        def create_user_isolated_llm_manager(user_context=None):
+            """Factory function to create user-isolated LLM managers for secure cache isolation."""
+            return create_llm_manager(user_context)
+        
+        # Store factory function instead of shared instance to prevent cache contamination
+        self.app.state.llm_manager_factory = create_user_isolated_llm_manager
+        # Keep backward compatibility for startup sequences that expect app.state.llm_manager
+        self.app.state.llm_manager = None  # Will be created on-demand with user context
         self.app.state.security_service = SecurityService(self.app.state.key_manager)
     
     def _initialize_tool_registry(self) -> None:

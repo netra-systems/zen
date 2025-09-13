@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 17:13:14
+**Generated:** 2025-09-12 19:27:25
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
-- **Passed:** 2 (40.0%)
-- **Failed:** 3 (60.0%)
+- **Total Tests:** 6
+- **Passed:** 3 (50.0%)
+- **Failed:** 3 (50.0%)
 - **Skipped:** 0
-- **Duration:** 16.05 seconds
-- **Pass Rate:** 40.0%
+- **Duration:** 8.11 seconds
+- **Pass Rate:** 50.0%
 
 ## Test Results by Priority
 
@@ -19,58 +19,76 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_golden_path_user_login_to_ai_response | FAIL failed | 2.558s | test_golden_path_user_flow_issue_620.py |
-| test_golden_path_concurrent_users | PASS passed | 2.550s | test_golden_path_user_flow_issue_620.py |
-| test_golden_path_websocket_event_sequence | PASS passed | 2.544s | test_golden_path_user_flow_issue_620.py |
-| test_golden_path_error_recovery | FAIL failed | 7.567s | test_golden_path_user_flow_issue_620.py |
-| test_golden_path_response_time_benchmark | FAIL failed | 0.000s | test_golden_path_user_flow_issue_620.py |
+| test_real_agent_discovery | PASS passed | 0.566s | test_3_agent_pipeline_staging.py |
+| test_real_agent_configuration | PASS passed | 0.445s | test_3_agent_pipeline_staging.py |
+| test_real_agent_pipeline_execution | FAIL failed | 0.835s | test_3_agent_pipeline_staging.py |
+| test_real_agent_lifecycle_monitoring | FAIL failed | 1.196s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_error_handling | FAIL failed | 1.194s | test_3_agent_pipeline_staging.py |
+| test_real_pipeline_metrics | PASS passed | 2.530s | test_3_agent_pipeline_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_golden_path_user_login_to_ai_response
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
-- **Duration:** 2.558s
-- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:78: in test_golden_path_user_login_to_ai_response
-    assert response_time <= self.MAX_RESPONSE_TIME_SECONDS, f"Response time should be ≤{self.MAX_RESPONSE_TIME_SECONDS}s, got {response_time:.2f}s"
-E   AssertionError: Response time should be ≤2.0s, got 2.55s
-E   assert 2.5489602088928223 <= 2.0
-E    +  where 2.0 = <tests.e2e.staging.test_golden_path_user_flow_issue_620.TestGoldenPathUserFlowIssue620 object at 0x0000025DAB4E6450>.MAX_RESPO...
+### FAILED: test_real_agent_pipeline_execution
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 0.835s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:252: in test_real_agent_pipeline_execution
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self.c...
 
-### FAILED: test_golden_path_error_recovery
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
-- **Duration:** 7.567s
-- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:302: in test_golden_path_error_recovery
-    assert recovery_success, "System should recover and handle valid request after error"
-E   AssertionError: System should recover and handle valid request after error
-E   assert False...
+### FAILED: test_real_agent_lifecycle_monitoring
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 1.196s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:404: in test_real_agent_lifecycle_monitoring
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self...
 
-### FAILED: test_golden_path_response_time_benchmark
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_golden_path_user_flow_issue_620.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_golden_path_user_flow_issue_620.py:531: in test_golden_path_response_time_benchmark
-    test_user = await self._create_test_user(suffix=f"perf_{scenario['name'].lower().replace(' ', '_')}")
-                      ^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestGoldenPathPerformance' object has no attribute '_create_test_user'...
+### FAILED: test_real_pipeline_error_handling
+- **File:** /Users/anthony/Desktop/netra-apex/tests/e2e/staging/test_3_agent_pipeline_staging.py
+- **Duration:** 1.194s
+- **Error:** tests/e2e/staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/e2e/staging/test_3_agent_pipeline_staging.py:498: in test_real_pipeline_error_handling
+    async with websockets.connect(
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+/opt/homebrew/lib/python3.13/site-packages/websockets/asyncio/client.py:543: in __await_impl__
+    await self.co...
 
 ## Pytest Output Format
 
 ```
-test_golden_path_user_flow_issue_620.py::test_golden_path_user_login_to_ai_response FAILED
-test_golden_path_user_flow_issue_620.py::test_golden_path_concurrent_users PASSED
-test_golden_path_user_flow_issue_620.py::test_golden_path_websocket_event_sequence PASSED
-test_golden_path_user_flow_issue_620.py::test_golden_path_error_recovery FAILED
-test_golden_path_user_flow_issue_620.py::test_golden_path_response_time_benchmark FAILED
+test_3_agent_pipeline_staging.py::test_real_agent_discovery PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_configuration PASSED
+test_3_agent_pipeline_staging.py::test_real_agent_pipeline_execution FAILED
+test_3_agent_pipeline_staging.py::test_real_agent_lifecycle_monitoring FAILED
+test_3_agent_pipeline_staging.py::test_real_pipeline_error_handling FAILED
+test_3_agent_pipeline_staging.py::test_real_pipeline_metrics PASSED
 
 ==================================================
-2 passed, 3 failed in 16.05s
+3 passed, 3 failed in 8.11s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 1 | 0 | 100.0% |
-| Performance | 1 | 0 | 1 | 0.0% |
+| Agent | 4 | 2 | 2 | 50.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
