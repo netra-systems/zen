@@ -65,9 +65,9 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         Expected Failure: This test should fail because current code doesn't
         classify connection errors using TransactionConnectionError.
         """
-        # Mock ClickHouse database to raise connection error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        # Mock ClickHouse client to raise connection error
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "connection timeout", None, None
             )
             
@@ -90,9 +90,9 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         Expected Failure: This test should fail because current code doesn't
         provide specific exception types for different query failures.
         """
-        # Mock ClickHouse database to raise table not found error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        # Mock ClickHouse client to raise table not found error
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Table 'non_existent_table' doesn't exist", None, None
             )
             
@@ -122,8 +122,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         don't include enough diagnostic information.
         """
         # Mock schema operation failure
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Column 'invalid_column' already exists", None, None
             )
             
@@ -163,8 +163,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
             {"id": 2, "name": "test2"},
         ]
         
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "deadlock detected during bulk insert", None, None
             )
             
@@ -209,8 +209,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         implement proper retry logic with error classification.
         """
         # Mock retryable connection error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = DisconnectionError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = DisconnectionError(
                 "network error", None, None
             )
             
@@ -278,8 +278,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         classify performance-related query failures.
         """
         # Mock performance-related error
-        with patch.object(clickhouse_client, '_database') as mock_db:
-            mock_db.execute_query.side_effect = OperationalError(
+        with patch.object(clickhouse_client, '_client') as mock_client:
+            mock_client.execute.side_effect = OperationalError(
                 "Query execution timeout exceeded", None, None
             )
             
