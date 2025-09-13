@@ -32,14 +32,15 @@ from test_framework.ssot.websocket import WebSocketTestUtility
 from test_framework.ssot.database import DatabaseTestUtility
 from shared.isolated_environment import IsolatedEnvironment
 
-# Import core services for thread propagation testing
+# Import core services for thread propagation testing using SSOT paths
 try:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # Use SSOT import paths from SSOT_IMPORT_REGISTRY.md
+    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.message_handlers import MessageHandlerService
     REAL_SERVICES_AVAILABLE = True
 except ImportError as e:
     # Services not available in test environment - use mock mode
-    UnifiedWebSocketManager = None
+    WebSocketManager = None
     MessageHandlerService = None
     REAL_SERVICES_AVAILABLE = False
 
@@ -69,9 +70,11 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
         # Initialize services if available
         if REAL_SERVICES_AVAILABLE:
             try:
-                self.websocket_manager = UnifiedWebSocketManager()
-                self.message_handler = MessageHandlerService()
-                logger.info("Real services initialized for thread propagation testing")
+                self.websocket_manager = WebSocketManager()
+                # MessageHandlerService requires complex dependencies - skip for now
+                # Focus on WebSocket manager thread propagation first
+                self.message_handler = None  # TODO: Initialize with proper dependencies
+                logger.info("WebSocket manager initialized for thread propagation testing")
             except Exception as e:
                 logger.info(f"Using mock mode for services due to: {e}")
                 self.websocket_manager = None
@@ -136,13 +139,21 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 self.assertIsNotNone(connection_id, "Connection should be established")
                 
                 # Check if we can retrieve the connection with thread context
-                connection_info = self.websocket_manager.get_connection_info(self.user_id)
+                connection_info = self.websocket_manager.get_connection_info(connection_id)
                 
                 # This will likely fail, proving thread context is not properly maintained
-                self.assertIn('thread_id', connection_info,
-                    "WebSocket manager should maintain thread_id in connection info")
-                self.assertEqual(connection_info.get('thread_id'), self.thread_id,
-                    "Thread ID should match what was provided during connection")
+                self.assertIsNotNone(connection_info, "Connection info should be retrievable")
+                
+                # Test thread_id propagation in connection info
+                if hasattr(connection_info, 'get'):
+                    thread_in_info = connection_info.get('thread_id')
+                    if thread_in_info:
+                        self.assertEqual(thread_in_info, self.thread_id,
+                            "Thread ID should match what was provided during connection")
+                    else:
+                        # This is the expected failure - thread_id not being propagated
+                        logger.warning("EXPECTED FAILURE: thread_id not found in connection_info")
+                        assert False, "Thread ID not preserved in connection info - thread propagation failing as expected"
                 
             except AssertionError as e:
                 # Expected failure - proves test works

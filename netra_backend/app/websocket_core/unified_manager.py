@@ -850,6 +850,132 @@ class UnifiedWebSocketManager:
                 thread_connections.add(conn_id)
         
         return thread_connections
+
+    # =================== COMPATIBILITY METHODS FOR ISSUE #618 ===================
+    # These methods provide compatibility with legacy test signatures that expect
+    # register_connection(connection_id, user_id, websocket) pattern
+    
+    def register_connection(self, connection_id: str, user_id: str, websocket: Any) -> None:
+        """
+        ISSUE #618 FIX: Compatibility method for legacy test patterns.
+        
+        This synchronous method provides compatibility with tests that expect:
+        register_connection(connection_id, user_id, websocket)
+        
+        The async add_connection method is the preferred SSOT method for new code.
+        """
+        from netra_backend.app.websocket_core.connection_manager import ConnectionInfo
+        
+        # Create ConnectionInfo object for compatibility
+        connection_info = ConnectionInfo(connection_id=connection_id, user_id=user_id)
+        connection_info.websocket = websocket
+        connection_info.connected_at = datetime.now(timezone.utc)
+        
+        # Convert to WebSocketConnection and add to manager
+        websocket_conn = WebSocketConnection(
+            connection_id=connection_id,
+            user_id=user_id,
+            websocket=websocket,
+            connected_at=connection_info.connected_at,
+            metadata={"source": "legacy_test_compatibility"}
+        )
+        
+        # Store in synchronous collections for immediate access
+        self._connections[connection_id] = websocket_conn
+        
+        if user_id not in self._user_connections:
+            self._user_connections[user_id] = set()
+        self._user_connections[user_id].add(connection_id)
+        
+        # Store connection info for legacy test access patterns
+        if not hasattr(self, '_connection_infos'):
+            self._connection_infos = {}
+        self._connection_infos[connection_id] = {
+            'connection_id': connection_id,
+            'user_id': user_id,
+            'websocket': websocket,
+            'connected_at': connection_info.connected_at,
+            'is_active': True
+        }
+        
+        logger.debug(f"Legacy compatibility: Registered connection {connection_id} for user {user_id}")
+    
+    def unregister_connection(self, connection_id: str) -> None:
+        """
+        ISSUE #618 FIX: Synchronous compatibility method for connection removal.
+        
+        Provides compatibility with legacy test patterns that expect synchronous unregistration.
+        """
+        # Remove from main connections
+        connection = self._connections.pop(connection_id, None)
+        
+        if connection:
+            # Remove from user connections
+            user_id = connection.user_id
+            if user_id in self._user_connections:
+                self._user_connections[user_id].discard(connection_id)
+                if not self._user_connections[user_id]:
+                    del self._user_connections[user_id]
+        
+        # Remove from legacy connection info store
+        if hasattr(self, '_connection_infos'):
+            self._connection_infos.pop(connection_id, None)
+        
+        logger.debug(f"Legacy compatibility: Unregistered connection {connection_id}")
+    
+    def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
+        """
+        ISSUE #618 FIX: Compatibility method for legacy connection info access.
+        
+        Tests expect to access connection metadata through get_connection_info.
+        """
+        if hasattr(self, '_connection_infos') and connection_id in self._connection_infos:
+            return self._connection_infos[connection_id]
+        
+        # Fallback to standard connection if available
+        connection = self.get_connection(connection_id)
+        if connection:
+            return {
+                'connection_id': connection.connection_id,
+                'user_id': connection.user_id,
+                'websocket': connection.websocket,
+                'connected_at': connection.connected_at,
+                'is_active': True
+            }
+        
+        return None
+    
+    def get_connections_for_user(self, user_id: str) -> List[Dict[str, Any]]:
+        """
+        ISSUE #618 FIX: Compatibility method for user connection lookup.
+        
+        Tests expect this method to return a list of connection objects/dicts.
+        """
+        connections = []
+        user_connection_ids = self.get_user_connections(user_id)
+        
+        for conn_id in user_connection_ids:
+            conn_info = self.get_connection_info(conn_id)
+            if conn_info:
+                connections.append(conn_info)
+        
+        return connections
+
+    def clear_all_connections(self) -> None:
+        """
+        ISSUE #618 FIX: Compatibility method for test cleanup.
+        
+        Clears all connections for test isolation.
+        """
+        self._connections.clear()
+        self._user_connections.clear()
+        
+        if hasattr(self, '_connection_infos'):
+            self._connection_infos.clear()
+        
+        logger.debug("Legacy compatibility: Cleared all connections")
+    
+    # =================== END COMPATIBILITY METHODS ===================
     
     async def wait_for_connection(self, user_id: str, timeout: float = 5.0, check_interval: float = 0.1) -> bool:
         """

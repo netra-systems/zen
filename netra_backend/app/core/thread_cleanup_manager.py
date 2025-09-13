@@ -300,35 +300,50 @@ class ThreadCleanupManager:
         """
         Force cleanup of all tracked threads.
         
+        DEADLOCK FIX (Issue #601): Extract thread IDs while holding lock,
+        then release lock before calling cleanup operations to avoid nested lock acquisition.
+        
         Returns:
             Dictionary with cleanup statistics
         """
+        # Step 1: Extract thread IDs while holding the lock (minimal critical section)
         with self._cleanup_lock:
             thread_ids = list(self._tracked_threads.keys())
-            
-            success_count = 0
-            failure_count = 0
-            
-            for thread_id in thread_ids:
-                if self.cleanup_thread_locals(thread_id):
-                    success_count += 1
-                else:
-                    failure_count += 1
-            
-            # Force garbage collection
-            gc.collect()
-            
-            stats = {
-                'threads_processed': len(thread_ids),
-                'cleanup_successful': success_count,
-                'cleanup_failed': failure_count,
-                'total_created': self._total_threads_created,
-                'total_cleaned': self._total_threads_cleaned,
-                'cleanup_failures': self._cleanup_failures
-            }
-            
-            logger.info(f"Force cleanup completed: {stats}")
-            return stats
+            initial_created = self._total_threads_created
+            initial_cleaned = self._total_threads_cleaned
+            initial_failures = self._cleanup_failures
+        
+        # Step 2: Perform cleanup operations WITHOUT holding the lock
+        # This prevents deadlock since cleanup_thread_locals() can now acquire the lock
+        success_count = 0
+        failure_count = 0
+        
+        for thread_id in thread_ids:
+            if self.cleanup_thread_locals(thread_id):
+                success_count += 1
+            else:
+                failure_count += 1
+        
+        # Step 3: Force garbage collection (no lock needed)
+        gc.collect()
+        
+        # Step 4: Gather final statistics (acquire lock briefly for consistency)
+        with self._cleanup_lock:
+            final_created = self._total_threads_created
+            final_cleaned = self._total_threads_cleaned
+            final_failures = self._cleanup_failures
+        
+        stats = {
+            'threads_processed': len(thread_ids),
+            'cleanup_successful': success_count,
+            'cleanup_failed': failure_count,
+            'total_created': final_created,
+            'total_cleaned': final_cleaned,
+            'cleanup_failures': final_failures
+        }
+        
+        logger.info(f"Force cleanup completed: {stats}")
+        return stats
     
     def get_statistics(self) -> Dict[str, Any]:
         """
