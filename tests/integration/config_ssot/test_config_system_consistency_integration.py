@@ -438,3 +438,40 @@ class TestConfigSystemConsistencyIntegration(BaseIntegrationTest):
             f"configuration manager is used. This creates unpredictable system behavior "
             f"and affects service reliability during deployment and scaling."
         )
+
+    def test_configuration_manager_duplicate_detection_failure(self):
+        """
+        EXPECTED TO FAIL - Multiple configuration managers should not coexist.
+
+        This test verifies that multiple configuration managers exist,
+        which is the core SSOT violation that must be fixed.
+        """
+        # Count how many configuration managers were successfully initialized
+        initialized_managers = len(self.config_managers)
+
+        # Log the managers found for diagnosis
+        self.logger.info(f"Configuration managers detected: {list(self.config_managers.keys())}")
+
+        # CRITICAL ASSERTION: Should fail if multiple managers exist
+        assert initialized_managers <= 1, (
+            f"MULTIPLE CONFIGURATION MANAGERS DETECTED: {initialized_managers} managers initialized. "
+            f"Found managers: {list(self.config_managers.keys())}. "
+            f"SSOT violation: Only ONE configuration manager should exist in the system. "
+            f"Multiple managers create configuration inconsistencies, race conditions, "
+            f"and system reliability issues that directly impact the $500K+ ARR Golden Path. "
+            f"This test is EXPECTED TO FAIL until Issue #667 SSOT consolidation is complete."
+        )
+
+    def tearDown(self):
+        """Clean up test environment."""
+        super().tearDown()
+
+        # Clear any configuration caches
+        for manager in self.config_managers.values():
+            if hasattr(manager, 'clear_cache'):
+                try:
+                    manager.clear_cache()
+                except Exception as e:
+                    self.logger.debug(f"Cache clear failed: {e}")
+
+        self.config_managers.clear()
