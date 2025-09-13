@@ -1095,14 +1095,13 @@ class UnifiedToolExecutionEngine:
         
         if user_key not in self._user_emitters:
             try:
-                # Create UserWebSocketEmitter for this specific user context
-                from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+                # Create UnifiedWebSocketEmitter for this specific user context (SSOT)
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
                 
-                user_emitter = UserWebSocketEmitter(
+                user_emitter = UnifiedWebSocketEmitter(
+                    manager=self.websocket_bridge,
                     user_id=user_context.user_id,
-                    thread_id=user_context.thread_id,
-                    run_id=user_context.run_id,
-                    websocket_bridge=self.websocket_bridge
+                    context=user_context
                 )
                 
                 self._user_emitters[user_key] = user_emitter

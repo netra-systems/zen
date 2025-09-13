@@ -306,23 +306,21 @@ class UserExecutionEngine(IExecutionEngine):
             if websocket_bridge and hasattr(agent_factory, 'set_websocket_bridge'):
                 agent_factory.set_websocket_bridge(websocket_bridge)
                 
-            # Create UserWebSocketEmitter from websocket_bridge if provided
+            # Create UnifiedWebSocketEmitter from websocket_bridge if provided
             if websocket_bridge:
-                from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
-                websocket_emitter = UserWebSocketEmitter(
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+                websocket_emitter = UnifiedWebSocketEmitter(
+                    manager=websocket_bridge,
                     user_id=user_context.user_id,
-                    thread_id=user_context.thread_id,
-                    run_id=user_context.run_id,
-                    websocket_bridge=websocket_bridge
+                    context=user_context
                 )
             else:
                 # Create minimal websocket emitter for tests
-                from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
-                websocket_emitter = UserWebSocketEmitter(
+                from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+                websocket_emitter = UnifiedWebSocketEmitter(
+                    manager=None,
                     user_id=user_context.user_id,
-                    thread_id=user_context.thread_id,
-                    run_id=user_context.run_id,
-                    websocket_bridge=None  # Tests often don't need real WebSocket
+                    context=user_context  # Tests often don't need real WebSocket
                 )
             
             # Create UserExecutionEngine with proper parameters (positional args)
@@ -427,16 +425,15 @@ class UserExecutionEngine(IExecutionEngine):
             logger.debug("🔄 Created AgentInstanceFactory for compatibility mode")
             
             # 3. Create websocket emitter - Use a compatibility wrapper instead
-            # For compatibility, we'll use UserWebSocketEmitter from agent_instance_factory
-            from netra_backend.app.agents.supervisor.agent_instance_factory import UserWebSocketEmitter
+            # Use UnifiedWebSocketEmitter directly for SSOT compliance
+            from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
             
             if hasattr(websocket_bridge, 'notify_agent_started'):
-                # Create compatibility wrapper that uses the AgentWebSocketBridge
-                websocket_emitter = UserWebSocketEmitter(
+                # Create UnifiedWebSocketEmitter that uses the AgentWebSocketBridge
+                websocket_emitter = UnifiedWebSocketEmitter(
+                    manager=websocket_bridge,
                     user_id=user_context.user_id,
-                    thread_id=user_context.thread_id,
-                    run_id=user_context.run_id,
-                    websocket_bridge=websocket_bridge
+                    context=user_context
                 )
                 logger.debug("🔄 Created UserWebSocketEmitter from legacy websocket_bridge")
             else:

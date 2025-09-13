@@ -118,16 +118,37 @@
 **Technical Analysis:** Function exists in `execution_engine_factory.py:721` but import path discrepancy causing test failures  
 **Status:** Tracked in GitHub with comprehensive investigation plan and resolution criteria
 
-### Issue 5: Test Collection Warnings - Constructor Issues
+### ✅ Issue 5: Test Collection Warnings - Constructor Issues - PROCESSED
 **Category:** failing-test-new-p3-test-class-constructors  
 **Severity:** P3 - Low (Warnings, not blocking)  
-**Files:**
-- `netra_backend/tests/unit/test_base_agent_comprehensive.py:49`
-- `netra_backend/tests/unit/test_toolregistry_basemodel_filtering.py:33`
-- Multiple WebSocket test files
+**SNST Status:** 🔗 **CREATED NEW ISSUE** - GitHub Issue #698  
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/698  
+**Labels:** P3, claude-code-generated-issue, tech-debt  
+**Processing Date:** 2025-09-13
+
+**Files Affected:**
+- `netra_backend/tests/unit/test_base_agent_comprehensive.py:49` - TestBaseAgent (helper class)
+- `netra_backend/tests/unit/test_toolregistry_basemodel_filtering.py:33` - TestDataModel (Pydantic model)
 
 **Pattern:** `PytestCollectionWarning: cannot collect test class 'TestXxx' because it has a __init__ constructor`  
-**Impact:** Test classes not being collected due to constructor pattern
+**Impact:** Pytest collection warnings for helper classes with "Test" prefix that have constructors
+
+**Root Cause Analysis:** 
+1. **TestBaseAgent:** Helper class extending BaseAgent for test purposes, not actual test class
+2. **TestDataModel:** Pydantic BaseModel used as test data, inherits `__init__` from BaseModel
+3. **Naming Convention Issue:** Classes named with "Test" prefix trigger pytest collection attempts
+
+**SNST Processing Results:**
+- ✅ **Created New Issue:** GitHub Issue #698 for pytest collection warning cleanup
+- ✅ **Priority Tagged:** P3 (Low) - Technical debt, no functional impact
+- ✅ **Technical Analysis:** Identified helper classes vs actual test classes
+- ✅ **Resolution Options:** Rename classes, move to helpers, or configure pytest exclusions
+- ✅ **Business Impact:** Improves developer experience by reducing warning noise
+
+**Resolution Recommendations:**
+1. **Rename Classes:** `TestBaseAgent` → `MockBaseAgent`, `TestDataModel` → `SampleDataModel`
+2. **Helper Modules:** Move to dedicated `test_helpers/` directory
+3. **Pytest Config:** Add exclusions to `pyproject.toml` for specific helper classes
 
 ### Issue 6: Deprecation Warnings - Logging and Import Patterns
 **Category:** failing-test-active-dev-p3-deprecation-cleanup  
