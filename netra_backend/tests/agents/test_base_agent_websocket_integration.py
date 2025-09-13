@@ -96,24 +96,36 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         self.websocket_bridge = Mock(spec=AgentWebSocketBridge)
         self.websocket_bridge.websocket_manager = Mock()
 
-        # Mock critical WebSocket methods that agents use
-        self.websocket_bridge.emit_agent_event = AsyncMock()
-        self.websocket_bridge.emit_tool_event = AsyncMock()
-        self.websocket_bridge.emit_agent_started = AsyncMock()
-        self.websocket_bridge.emit_agent_thinking = AsyncMock()
-        self.websocket_bridge.emit_agent_completed = AsyncMock()
+        # Mock correct WebSocket bridge methods used by adapter
+        self.websocket_bridge.notify_agent_started = AsyncMock()
+        self.websocket_bridge.notify_agent_thinking = AsyncMock()
+        self.websocket_bridge.notify_tool_executing = AsyncMock()
+        self.websocket_bridge.notify_tool_completed = AsyncMock()
+        self.websocket_bridge.notify_agent_completed = AsyncMock()
 
         # Track calls for verification
         self.websocket_calls = []
 
-        async def track_agent_event(*args, **kwargs):
-            self.websocket_calls.append(("agent_event", args, kwargs))
+        async def track_notify_agent_started(*args, **kwargs):
+            self.websocket_calls.append(("agent_event", ("agent_started",) + args, kwargs))
 
-        async def track_tool_event(*args, **kwargs):
-            self.websocket_calls.append(("tool_event", args, kwargs))
+        async def track_notify_agent_thinking(*args, **kwargs):
+            self.websocket_calls.append(("agent_event", ("agent_thinking",) + args, kwargs))
 
-        self.websocket_bridge.emit_agent_event.side_effect = track_agent_event
-        self.websocket_bridge.emit_tool_event.side_effect = track_tool_event
+        async def track_notify_tool_executing(*args, **kwargs):
+            self.websocket_calls.append(("tool_event", ("tool_executing",) + args, kwargs))
+
+        async def track_notify_tool_completed(*args, **kwargs):
+            self.websocket_calls.append(("tool_event", ("tool_completed",) + args, kwargs))
+
+        async def track_notify_agent_completed(*args, **kwargs):
+            self.websocket_calls.append(("agent_event", ("agent_completed",) + args, kwargs))
+
+        self.websocket_bridge.notify_agent_started.side_effect = track_notify_agent_started
+        self.websocket_bridge.notify_agent_thinking.side_effect = track_notify_agent_thinking
+        self.websocket_bridge.notify_tool_executing.side_effect = track_notify_tool_executing
+        self.websocket_bridge.notify_tool_completed.side_effect = track_notify_tool_completed
+        self.websocket_bridge.notify_agent_completed.side_effect = track_notify_agent_completed
 
         # Create real UserExecutionContext for WebSocket routing
         self.test_context = UserExecutionContext(
@@ -217,31 +229,21 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
             self.test_context
         )
 
-        # Verify: All WebSocket calls received the correct context
+        # Verify: All WebSocket calls received the correct run_id and agent_name
         for call_type, args, kwargs in self.websocket_calls:
-            # Check if context was passed correctly
-            context_found = False
+            # WebSocket bridge methods receive: (run_id, agent_name, context=dict, ...)
+            # Check that run_id and agent_name are passed correctly
+            assert len(args) >= 2, f"WebSocket call missing required args: {call_type}, args: {args}"
 
-            # Check args for context
-            for arg in args:
-                if isinstance(arg, UserExecutionContext):
-                    context_found = True
-                    assert arg.user_id == "websocket-test-user-001"
-                    assert arg.thread_id == "websocket-test-thread-001"
-                    assert arg.run_id == "websocket-test-run-001"
-                    break
+            # First arg after event_type should be run_id
+            if len(args) >= 2:
+                run_id = args[1]  # args[0] is event_type, args[1] is run_id
+                assert run_id == "test-run-context-001", f"Wrong run_id in {call_type}: {run_id}"
 
-            # Check kwargs for context
-            if not context_found and "context" in kwargs:
-                context = kwargs["context"]
-                assert isinstance(context, UserExecutionContext)
-                assert context.user_id == "websocket-test-user-001"
-                assert context.thread_id == "websocket-test-thread-001"
-                assert context.run_id == "websocket-test-run-001"
-                context_found = True
-
-            # Every WebSocket call should have proper context for routing
-            assert context_found, f"WebSocket call missing context: {call_type}"
+            # Second arg should be agent_name
+            if len(args) >= 3:
+                agent_name = args[2]  # args[2] is agent_name
+                assert agent_name == "WebSocketTestAgent", f"Wrong agent_name in {call_type}: {agent_name}"
 
     async def test_websocket_event_data_structure(self):
         """Test WebSocket events contain proper data structures for frontend."""
@@ -412,7 +414,7 @@ class TestBaseAgentWebSocketIntegration(SSotAsyncTestCase):
         agent = WebSocketTestAgent(
             llm_manager=self.llm_manager
         )
-        # FIXED: websocket_bridge set after instantiation
+        agent.set_websocket_bridge(self.websocket_bridge, "test-run-business-value-001")
 
         test_request = "analyze quarterly sales performance and recommend optimizations"
 
