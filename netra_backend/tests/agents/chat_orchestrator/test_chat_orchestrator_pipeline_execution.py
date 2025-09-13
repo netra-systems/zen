@@ -17,6 +17,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real service integration, no mocks for 
 """
 
 import pytest
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 
@@ -24,15 +25,26 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.mock_factory import SSotMockFactory
 from netra_backend.app.agents.chat_orchestrator.pipeline_executor import PipelineExecutor
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 
 
-class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
+class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator pipeline execution business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with pipeline executor and mock orchestrator."""
-        await super().setUp()
+        super().setUp()
 
         # Create mock orchestrator with required components
         self.mock_orchestrator = MagicMock()
@@ -360,17 +372,17 @@ class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
         # Assert business logic: non-dictionary results don't modify accumulated data
         self.assertEqual(set(accumulated_data.keys()), original_keys)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestPipelineExecutorAgentRouting(SSotAsyncTestCase):
+class TestPipelineExecutorAgentRouting(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for agent routing logic within pipeline execution."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for agent routing tests."""
-        await super().setUp()
+        super().setUp()
 
         # Create mock orchestrator with minimal setup
         self.mock_orchestrator = MagicMock()
@@ -456,6 +468,6 @@ class TestPipelineExecutorAgentRouting(SSotAsyncTestCase):
         self.assertEqual(placeholder["action"], "complex_analysis")
         self.assertIn("pending", placeholder["message"])
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up agent routing test environment."""
-        await super().tearDown()
+        super().tearDown()

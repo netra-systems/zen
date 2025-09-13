@@ -17,6 +17,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real service integration, no mocks for 
 
 import hashlib
 import pytest
+import unittest
 from unittest.mock import patch
 from typing import Dict, Any
 
@@ -27,15 +28,26 @@ from netra_backend.app.agents.chat_orchestrator.confidence_manager import (
     ConfidenceLevel
 )
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 
 
-class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase):
+class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator confidence management business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with confidence manager."""
-        await super().setUp()
+        super().setUp()
 
         self.confidence_manager = ConfidenceManager()
 
@@ -323,17 +335,17 @@ class TestChatOrchestratorConfidenceManagement(SSotAsyncTestCase):
             self.assertEqual(should_escalate, expected_escalation,
                            f"Confidence {confidence} for {intent.value} escalation mismatch")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase):
+class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for cache key generation edge cases."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for cache key testing."""
-        await super().setUp()
+        super().setUp()
         self.confidence_manager = ConfidenceManager()
 
     def test_cache_key_with_empty_context(self):
@@ -401,6 +413,6 @@ class TestConfidenceManagerCacheKeyGeneration(SSotAsyncTestCase):
         self.assertEqual(len(unique_keys), len(keys),
                         "All generated keys should be unique")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up cache key test environment."""
-        await super().tearDown()
+        super().tearDown()

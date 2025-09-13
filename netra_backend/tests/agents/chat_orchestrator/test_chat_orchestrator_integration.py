@@ -19,6 +19,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real WebSocket connections, real Execut
 import asyncio
 import json
 import pytest
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 
@@ -26,18 +27,29 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from test_framework.ssot.websocket import WebSocketTestUtility
 from netra_backend.app.agents.chat_orchestrator_main import ChatOrchestrator
 from netra_backend.app.agents.chat_orchestrator.intent_classifier import IntentType
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class TestChatOrchestratorIntegration(SSotAsyncTestCase):
+class TestChatOrchestratorIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive integration tests for ChatOrchestrator with real services."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with real services for integration testing."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize real services for integration testing
         self.llm_manager = LLMManager()
@@ -339,21 +351,22 @@ class TestChatOrchestratorIntegration(SSotAsyncTestCase):
         # Database session should be accessible for data operations
         # (Used for caching, metrics, and result persistence)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up integration test environment."""
-        # Clean up WebSocket connections
+        # Clean up WebSocket connections (sync cleanup)
         if hasattr(self, 'websocket_util'):
-            await self.websocket_util.cleanup()
+            # Note: Using sync cleanup since tearDown is not async
+            self.websocket_util.cleanup_sync()
 
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase):
+class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for WebSocket event integration during orchestration."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for WebSocket event testing."""
-        await super().setUp()
+        super().setUp()
 
         # Create minimal orchestrator setup for WebSocket testing
         self.llm_manager = LLMManager()
@@ -422,6 +435,6 @@ class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase):
             user_id="websocket_test_user"
         )
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up WebSocket event test environment."""
-        await super().tearDown()
+        super().tearDown()

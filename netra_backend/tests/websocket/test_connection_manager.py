@@ -18,7 +18,7 @@ from test_framework.real_services import get_real_services, WebSocketTestClient
 from test_framework.environment_isolation import IsolatedEnvironment
 
 # Production components
-from netra_backend.app.websocket.connection_manager import ConnectionManager
+from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 
@@ -30,7 +30,7 @@ class TestConnectionManagerRealConnections:
     async def setup_real_services(self):
         """Setup real services infrastructure for all tests."""
         self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env.enable_isolation()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -43,7 +43,7 @@ class TestConnectionManagerRealConnections:
         
         # Cleanup
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env.disable_isolation(restore_original=True)
     
     async def create_real_websocket_connection(self, conn_id: str) -> WebSocketTestClient:
         """Create a real WebSocket connection for testing."""
@@ -265,7 +265,7 @@ class TestWebSocketAgentEventsReal:
     async def setup_agent_services(self):
         """Setup for agent event tests."""
         self.env = IsolatedEnvironment()
-        self.env.enable()
+        self.env.enable_isolation()
         
         self.real_services = get_real_services()
         await self.real_services.ensure_all_services_available()
@@ -274,7 +274,7 @@ class TestWebSocketAgentEventsReal:
         yield
         
         await self.real_services.close_all()
-        self.env.disable(restore_original=True)
+        self.env.disable_isolation(restore_original=True)
     
     async def test_agent_event_flow_real_websocket(self):
         """Test complete agent event flow with real WebSocket connections."""

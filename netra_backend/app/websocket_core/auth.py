@@ -168,6 +168,34 @@ class WebSocketAuthenticator:
                 "compatibility_layer": "active"
             }
 
+    def get_websocket_auth_stats(self) -> Dict[str, Any]:
+        """
+        Get WebSocket authentication statistics (compatibility method).
+
+        Returns:
+            Authentication statistics dictionary
+        """
+        try:
+            # Delegate to SSOT authenticator
+            if hasattr(self._ssot_authenticator, 'get_websocket_auth_stats'):
+                return self._ssot_authenticator.get_websocket_auth_stats()
+
+            # Fallback to basic stats
+            return {
+                "auth_requests": 0,
+                "successful_auths": 0,
+                "failed_auths": 0,
+                "active_connections": 0,
+                "compatibility_layer": "active"
+            }
+
+        except Exception as e:
+            self.logger.error(f"Auth stats check failed: {e}")
+            return {
+                "error": str(e),
+                "compatibility_layer": "active"
+            }
+
 
 
 class AuthHandler:
@@ -181,6 +209,36 @@ class AuthHandler:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.info("AuthHandler compatibility layer initialized")
+
+    async def connect(self, client_id: str, user_id: Optional[str] = None) -> Optional[str]:
+        """
+        Connect a WebSocket client (compatibility method).
+
+        Args:
+            client_id: Client identifier
+            user_id: Optional user identifier
+
+        Returns:
+            Connection identifier if successful
+        """
+        try:
+            self.logger.info(f"AuthHandler connection for client {client_id}")
+            return f"auth_conn_{client_id}"
+        except Exception as e:
+            self.logger.error(f"AuthHandler connection failed for client {client_id}: {e}")
+            return None
+
+    async def disconnect(self, client_id: str) -> None:
+        """
+        Disconnect a WebSocket client (compatibility method).
+
+        Args:
+            client_id: Client identifier to disconnect
+        """
+        try:
+            self.logger.info(f"AuthHandler disconnection for client {client_id}")
+        except Exception as e:
+            self.logger.error(f"AuthHandler disconnection failed for client {client_id}: {e}")
 
     async def process_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """

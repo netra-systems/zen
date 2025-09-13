@@ -19,6 +19,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real LLM manager integration, minimal m
 
 import asyncio
 import pytest
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 from decimal import Decimal
@@ -38,12 +39,12 @@ from netra_backend.app.services.analytics.cost_tracker import CostTracker
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 
 
-class TestChatOrchestratorModelCascade(SSotAsyncTestCase):
+class TestChatOrchestratorModelCascade(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator model cascade business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with model cascade and dependencies."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize real LLM manager and mock dependencies
         self.llm_manager = LLMManager()
@@ -468,17 +469,17 @@ class TestChatOrchestratorModelCascade(SSotAsyncTestCase):
         self.assertGreater(cost_medium, 0.0, "Medium tier cost should be positive")
         self.assertGreater(cost_large, 0.0, "Large tier cost should be positive")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestModelCascadeErrorHandling(SSotAsyncTestCase):
+class TestModelCascadeErrorHandling(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for model cascade error handling scenarios."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment for error handling tests."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize with minimal dependencies for error testing
         self.llm_manager = LLMManager()
@@ -520,6 +521,6 @@ class TestModelCascadeErrorHandling(SSotAsyncTestCase):
             self.assertEqual(model_name, "gpt-3.5-turbo",
                            "Should fall back to default model when no models available")
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up error handling test environment."""
-        await super().tearDown()
+        super().tearDown()

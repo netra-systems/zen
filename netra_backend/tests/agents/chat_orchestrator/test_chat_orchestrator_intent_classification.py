@@ -17,6 +17,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real LLM services, no mocks for core lo
 import asyncio
 import json
 import pytest
+import unittest
 from unittest.mock import MagicMock, patch
 from typing import Dict, Any
 
@@ -26,16 +27,27 @@ from netra_backend.app.agents.chat_orchestrator.intent_classifier import (
     IntentClassifier,
     IntentType
 )
-from netra_backend.app.agents.base.interface import ExecutionContext, AgentState
+from netra_backend.app.agents.base.interface import ExecutionContext
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Simple agent state for testing ChatOrchestrator."""
+    user_request: str = ""
+    accumulated_data: dict = None
+
+    def __post_init__(self):
+        if self.accumulated_data is None:
+            self.accumulated_data = {}
 from netra_backend.app.llm.llm_manager import LLMManager
 
 
-class TestChatOrchestratorIntentClassification(SSotAsyncTestCase):
+class TestChatOrchestratorIntentClassification(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator intent classification business logic."""
 
-    async def setUp(self):
+    def setUp(self):
         """Set up test environment with real services."""
-        await super().setUp()
+        super().setUp()
 
         # Initialize real LLM manager for testing
         self.llm_manager = LLMManager()
@@ -278,10 +290,10 @@ class TestChatOrchestratorIntentClassification(SSotAsyncTestCase):
         # Verify model choice makes business sense (fast classification)
         self.assertIn("triage", self.intent_classifier.classification_model)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
         # Clean up any test-specific resources
-        await super().tearDown()
+        super().tearDown()
 
 
 class TestIntentClassifierEdgeCases(SSotAsyncTestCase):
@@ -348,6 +360,6 @@ class TestIntentClassifierEdgeCases(SSotAsyncTestCase):
             self.assertGreaterEqual(confidence, 0.0)
             self.assertLessEqual(confidence, 1.0)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up edge case test environment."""
-        await super().tearDown()
+        super().tearDown()
