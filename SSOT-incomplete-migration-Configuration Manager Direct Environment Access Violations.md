@@ -34,15 +34,46 @@ Multiple services are accessing environment variables directly via `os.environ` 
 - [x] Created local tracking file (this document)
 - [x] **Status:** COMPLETE - Ready for Step 1
 
-### Step 1: Discover and Plan Tests 🔄 NEXT
-- [ ] 1.1 DISCOVER EXISTING: Find existing tests protecting configuration access patterns
-- [ ] 1.2 PLAN ONLY: Plan for creating/updating tests for SSOT configuration compliance
-- [ ] **Status:** PENDING - Need to spawn sub-agent
+### Step 1: Discover and Plan Tests ✅ COMPLETE
+- [x] 1.1 DISCOVER EXISTING: Found 1,709+ configuration-related test files with strong SSOT foundation
+- [x] 1.2 PLAN ONLY: Planned comprehensive test strategy (20% new, 60% existing updates, 20% validation)
+- [x] **Status:** COMPLETE - Test strategy ready for execution
 
-### Step 2: Execute Test Plan for New SSOT Tests 📋 PENDING
-- [ ] Create new tests for SSOT configuration compliance
+#### Step 1 Key Discoveries
+**Existing Test Infrastructure:**
+- 1,709+ configuration-related test files discovered
+- Strong SSOT testing foundation with compliance validation patterns
+- Robust environment management testing using `IsolatedEnvironment`
+- Comprehensive configuration manager tests protecting core functionality
+
+**Critical Protection Gaps:**
+- ❌ No specific tests for 3 target violation files
+- ❌ Missing SSOT compliance validation for environment access in target files
+- ❌ No integration tests for corpus administration configuration patterns
+
+**Test Strategy Planned:**
+- ~20% New Tests (4-5 files): SSOT compliance validation
+- ~60% Existing Tests (15-20 files): Updates for SSOT validation
+- ~20% Validation Tests (3-4 files): Golden Path and deployment validation
+- No Docker dependencies required
+
+### Step 2: Execute Test Plan for New SSOT Tests 🔄 NEXT
+- [ ] Create new tests for SSOT configuration compliance validation
 - [ ] Validate test failures reproduce the violations
-- [ ] **Status:** PENDING
+- [ ] Execute test plan for 5 key test files identified
+- [ ] **Status:** READY - Need to spawn sub-agent for execution
+
+#### Step 2 Target Test Files
+**Mission Critical Tests:**
+1. `tests/mission_critical/test_ssot_configuration_compliance_violations.py`
+
+**Unit Tests:**
+2. `tests/unit/logging/test_auth_trace_logger_ssot_compliance.py`
+3. `tests/unit/middleware/test_error_recovery_middleware_ssot_compliance.py`
+4. `tests/unit/admin/corpus/test_unified_corpus_admin_ssot_compliance.py`
+
+**Integration Tests:**
+5. `tests/integration/test_ssot_configuration_access_integration.py`
 
 ### Step 3: Plan Remediation of SSOT 📋 PENDING
 - [ ] Plan replacement of direct `os.environ` with `IsolatedEnvironment`
