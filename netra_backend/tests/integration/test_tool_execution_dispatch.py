@@ -128,12 +128,27 @@ class MockDataProcessingTool(BaseTool):
             return json.dumps({"status": "error", "error": str(e)})
 
 
-class MockWebSocketNotifier:
-    """Mock WebSocket notifier for tool execution events."""
+class MockWebSocketNotifier(BaseWebSocketNotifier):
+    """SSOT-compliant WebSocket notifier extending canonical test framework mock.
+    
+    This class eliminates SSOT violation by extending the canonical MockWebSocketNotifier
+    from test_framework.fixtures.websocket_manager_mock instead of duplicating functionality.
+    
+    SSOT Fix: Issue #680 - Consolidates 1 of 148+ duplicate implementations.
+    """
     
     def __init__(self):
+        super().__init__()  # Initialize canonical SSOT base
         self.tool_events = []
         self.error_events = []
+        
+    @classmethod
+    def create_for_user(cls):
+        """Factory method for user-scoped notifier creation.
+        
+        Added for backwards compatibility with existing test usage.
+        """
+        return cls()
         
     async def notify_tool_executing(self, run_id: str, agent_name: str, tool_name: str, parameters: Dict[str, Any]):
         """Mock tool execution start notification."""
