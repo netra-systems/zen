@@ -251,7 +251,7 @@ class WebSocketBridgeLifecycleAuditor:
         
         # Create execution engine with first bridge (for single-user tests)
         first_bridge = list(self.bridge_instances.values())[0]
-        self.execution_engine = ExecutionEngine(self.registry, first_bridge)
+        self.execution_engine = UserExecutionEngine(self.registry, first_bridge)
         
         return self.execution_engine, self.registry, self.bridge_instances
     

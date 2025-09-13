@@ -500,7 +500,7 @@ def lazy_import(module_path: str, component: str = None):
     # REMOVED_SYNTAX_ERROR: registry.set_websocket_manager(ws_manager)
 
     # Create execution engine
-    # REMOVED_SYNTAX_ERROR: execution_engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: execution_engine = UserExecutionEngine(registry, ws_manager)
 
     # Create execution context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
@@ -628,7 +628,7 @@ def lazy_import(module_path: str, component: str = None):
                 # REMOVED_SYNTAX_ERROR: registry.register("multi_tool_agent", test_agent)
 
                 # Create execution engine
-                # REMOVED_SYNTAX_ERROR: execution_engine = ExecutionEngine(registry, ws_manager)
+                # REMOVED_SYNTAX_ERROR: execution_engine = UserExecutionEngine(registry, ws_manager)
 
                 # Create execution context
                 # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

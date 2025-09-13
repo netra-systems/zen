@@ -47,7 +47,7 @@ class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
         
         # Get real agent registry and execution engine
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         # Create realistic execution context
         user_id = UserID("lifecycle_integration_user")
@@ -110,7 +110,7 @@ class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         # Create context with database requirements
         user_id = UserID("db_integration_user")
@@ -200,7 +200,7 @@ class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
         start_time = time.time()
         
         async def execute_single_agent(context, engine_instance):
-            execution_engine = ExecutionEngine(agent_registry=engine_instance)
+            execution_engine = UserExecutionEngine(agent_registry=engine_instance)
             try:
                 result = await execution_engine.execute_agent(context)
                 return {
@@ -259,7 +259,7 @@ class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         # Create context for error testing
         user_id = UserID("error_recovery_user")
@@ -352,7 +352,7 @@ class TestAgentExecutionLifecycleIntegration(BaseIntegrationTest):
         await bridge.ensure_integration()
         
         agent_registry = bridge.get_orchestrator().agent_registry
-        execution_engine = ExecutionEngine(agent_registry=agent_registry)
+        execution_engine = UserExecutionEngine(agent_registry=agent_registry)
         
         user_id = UserID("performance_monitoring_user")
         thread_id = ThreadID("perf_thread_001")

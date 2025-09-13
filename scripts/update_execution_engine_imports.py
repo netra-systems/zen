@@ -146,7 +146,7 @@ class ImportUpdater:
         # Update common test patterns
         test_patterns = [
             (r'ExecutionEngine\(\s*registry\s*,\s*websocket_bridge\s*\)',
-             'ExecutionEngineFactory.create_adapted_engine(ExecutionEngine(registry, websocket_bridge))'),
+             'ExecutionEngineFactory.create_adapted_engine(UserExecutionEngine(registry, websocket_bridge))'),
             
             (r'execution_engine\.execute_agent\(',
              'execution_engine.execute_agent('),

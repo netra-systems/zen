@@ -67,7 +67,7 @@ class TestAgentExecutionStateFlow:
     @pytest.fixture
     def execution_engine(self, mock_agent_registry):
         """Create execution engine with mocked dependencies."""
-        engine = ExecutionEngine(agent_registry=mock_agent_registry)
+        engine = UserExecutionEngine(agent_registry=mock_agent_registry)
         return engine
 
     @pytest.mark.unit
@@ -222,8 +222,8 @@ class TestAgentExecutionStateFlow:
         CRITICAL: State contamination between users would be catastrophic.
         """
         # Arrange: Create multiple execution engines and contexts
-        engine1 = ExecutionEngine(agent_registry=mock_agent_registry)
-        engine2 = ExecutionEngine(agent_registry=mock_agent_registry)
+        engine1 = UserExecutionEngine(agent_registry=mock_agent_registry)
+        engine2 = UserExecutionEngine(agent_registry=mock_agent_registry)
         
         context1 = Mock(spec=AgentExecutionContext)
         context1.user_id = UserID("concurrent_user_1")

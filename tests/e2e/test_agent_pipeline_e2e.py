@@ -537,7 +537,7 @@ class AgentPipelineE2ETest:
         
         try:
             # Use execution engine for standardized execution
-            execution_engine = ExecutionEngine(
+            execution_engine = UserExecutionEngine(
                 agent_registry=self.agent_registry,
                 websocket_bridge=self.websocket_bridge,
                 user_context=user_context

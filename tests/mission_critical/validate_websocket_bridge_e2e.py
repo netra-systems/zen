@@ -399,7 +399,7 @@ class WebSocketBridgeE2EValidator:
             tool_dispatcher = ToolDispatcher(tools=[], websocket_bridge=bridge)
             
             registry = AgentRegistry(llm_manager, tool_dispatcher)
-            engine = ExecutionEngine(registry, bridge)
+            engine = UserExecutionEngine(registry, bridge)
             
             # Test engine has the bridge
             if hasattr(engine, 'websocket_bridge') and engine.websocket_bridge is not None:

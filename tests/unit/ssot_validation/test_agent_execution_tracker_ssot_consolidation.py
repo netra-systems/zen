@@ -389,7 +389,7 @@ class TestAgentExecutionTrackerSSOTConsolidation(SSotBaseTestCase):
         """
         try:
             # Check if execution engine factory uses consolidated tracker
-            from netra_backend.app.core.user_execution_engine import UserExecutionEngineFactory
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngineFactory
             
             # Check factory implementation
             import inspect

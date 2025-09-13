@@ -167,7 +167,7 @@ class TestWebSocketEventDeliveryIssue620(BaseIntegrationTest):
         # Create ExecutionEngine via compatibility bridge (should delegate to UserExecutionEngine)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Verify it's using compatibility bridge
         assert engine.is_compatibility_mode(), "Should be in compatibility mode"

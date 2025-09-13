@@ -497,7 +497,7 @@ class TestWebSocketAgentEventsCore:
         try:
             # Setup real agent execution environment
             agent_registry = AgentRegistry()
-            execution_engine = ExecutionEngine()
+            execution_engine = UserExecutionEngine()
             
             # Mock execution context
             execution_context = MagicMock()

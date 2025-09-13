@@ -110,7 +110,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine initialization SSOT patterns."""
         
         # Create engine with all components
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=test_engine_config,
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge,
@@ -161,7 +161,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
             enable_websocket_events=True
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config_with_all,
             registry=mock_agent_registry
         )
@@ -204,7 +204,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine coordination with UserExecutionContext."""
         
         # Create engine with user context
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=test_engine_config,
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge,
@@ -250,7 +250,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine WebSocket event coordination patterns."""
         
         # Create engine with WebSocket coordination
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=test_engine_config,
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge
@@ -340,7 +340,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine request-scoped coordination patterns."""
         
         # Create base engine
-        base_engine = ExecutionEngine(
+        base_engine = UserExecutionEngine(
             registry=mock_agent_registry,
             user_context=test_user_context
         )
@@ -392,7 +392,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine error handling coordination patterns."""
         
         # Create engine for error testing
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             registry=mock_agent_registry,
             websocket_bridge=mock_websocket_bridge
         )
@@ -440,7 +440,7 @@ class TestExecutionEngineCoordination(BaseIntegrationTest):
         """Test ExecutionEngine maintains coordination safety under concurrent operations."""
         
         # Create engine for concurrent testing
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             registry=mock_agent_registry,
             user_context=test_user_context,
             config=EngineConfig(max_concurrent_agents=3)

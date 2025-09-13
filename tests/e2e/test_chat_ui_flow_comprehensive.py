@@ -248,7 +248,7 @@
 
         # Initialize agent registry and execution engine
         # REMOVED_SYNTAX_ERROR: self.agent_registry = AgentRegistry()
-        # REMOVED_SYNTAX_ERROR: self.execution_engine = ExecutionEngine()
+        # REMOVED_SYNTAX_ERROR: self.execution_engine = UserExecutionEngine()
 
         # CRITICAL: Set up WebSocket integration per CLAUDE.md Section 6.2
         # REMOVED_SYNTAX_ERROR: self.agent_registry.set_websocket_manager(self.websocket_manager)

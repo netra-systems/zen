@@ -393,7 +393,7 @@
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced with WebSocket notifications - REGRESSION!"
 
     # Create execution engine
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Create execution context
     # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )
@@ -729,7 +729,7 @@
     # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced - complete journey will fail"
 
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Simulate complete user chat session
     # REMOVED_SYNTAX_ERROR: user_message = "Hi! Can you check the current system status and let me know if everything is running smoothly? I want to make sure our services are healthy."

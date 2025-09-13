@@ -137,7 +137,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
                 mock_registry = Mock()
                 mock_websocket_bridge = Mock()
                 
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, context)
+                engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, context)
                 engines.append(engine)
         
         logger.info(f"Created {len(engines)} isolated engine instances")
@@ -243,7 +243,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # If this import works, test that it delegates properly
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
             
             # Should either be UserExecutionEngine or delegate to it
             if hasattr(engine, '_delegation_active'):
@@ -345,7 +345,7 @@ class TestSSotMigrationValidation(SSotAsyncTestCase):
             
             mock_registry = Mock()
             mock_websocket_bridge = Mock()
-            engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Test 1: Basic agent execution
         agent_context = AgentExecutionContext(

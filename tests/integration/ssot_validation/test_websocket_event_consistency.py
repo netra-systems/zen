@@ -239,7 +239,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             mock_bridge.notify_tool_executing = capture_bridge_tool_executing
             
             # Create legacy engine with user context
-            legacy_engine = ExecutionEngine(mock_registry, mock_bridge, self.user_context)
+            legacy_engine = UserExecutionEngine(mock_registry, mock_bridge, self.user_context)
             
             # Test legacy engine WebSocket event sending
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, PipelineStep

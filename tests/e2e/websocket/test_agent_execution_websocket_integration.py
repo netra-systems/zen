@@ -320,7 +320,7 @@ class RealAgentExecutionWebSocketIntegrator:
         self.agent_registry.set_websocket_manager(websocket_manager)
         
         # Create execution engine with WebSocket integration
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         execution_engine.set_websocket_notifier(websocket_notifier)
         
         # Create agent execution context

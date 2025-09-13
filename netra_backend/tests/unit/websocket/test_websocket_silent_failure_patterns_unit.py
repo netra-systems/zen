@@ -148,7 +148,7 @@ class TestWebSocketSilentFailurePatternsUnit(SSotAsyncTestCase):
         completely breaking visibility into agent execution.
         """
         # Arrange: Create execution engine with failing WebSocket bridge
-        engine = ExecutionEngine()
+        engine = UserExecutionEngine()
         
         # Mock WebSocket bridge to fail
         mock_bridge = Mock()

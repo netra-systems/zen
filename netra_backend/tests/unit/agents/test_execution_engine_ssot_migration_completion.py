@@ -151,7 +151,7 @@ class TestExecutionEngineSSotMigrationCompletion(SSotBaseTestCase):
             r'import\s+netra_backend\.app\.agents\.supervisor\.execution_engine',
             
             # Aliased imports that might mask the violation
-            r'from\s+.*\.execution_engine\s+import\s+ExecutionEngine(?!\s+as\s+\w+)',
+            r'from\s+.*\.execution_engine\s+import\s+UserExecutionEngine(?!\s+as\s+\w+)',
             
             # Factory imports from deprecated path
             r'from\s+netra_backend\.app\.agents\.supervisor\.execution_engine\s+import.*factory',

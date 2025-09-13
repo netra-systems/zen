@@ -57,7 +57,7 @@ class TestAgentContextIsolationIntegration:
                 user_registries[user_id] = registry
                 
                 # Create isolated execution engine
-                engine = EnhancedToolExecutionEngine(
+                engine = UserExecutionEngine(
                     user_id=user_id,
                     database_client=db_client
                 )
@@ -166,7 +166,7 @@ class TestAgentContextIsolationIntegration:
             registry_1 = AgentRegistry()
             await registry_1.initialize_for_user(user_1, sensitive_context)
             
-            engine_1 = EnhancedToolExecutionEngine(
+            engine_1 = UserExecutionEngine(
                 user_id=user_1,
                 database_client=db_client
             )
@@ -191,7 +191,7 @@ class TestAgentContextIsolationIntegration:
             registry_2 = AgentRegistry()
             await registry_2.initialize_for_user(user_2, clean_context)
             
-            engine_2 = EnhancedToolExecutionEngine(
+            engine_2 = UserExecutionEngine(
                 user_id=user_2,
                 database_client=db_client
             )
@@ -309,7 +309,7 @@ class TestAgentContextIsolationIntegration:
                 registry = AgentRegistry()
                 await registry.initialize_for_user(user_id, {"session": i})
                 
-                engine = EnhancedToolExecutionEngine(
+                engine = UserExecutionEngine(
                     user_id=user_id,
                     database_client=db_client
                 )

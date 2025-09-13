@@ -177,7 +177,7 @@ class TestDemoModeAuthIntegration(SSotAsyncTestCase):
             
             # This would integrate with actual agent execution system
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            execution_engine = ExecutionEngine()
+            execution_engine = UserExecutionEngine()
             
             result = await execution_engine.execute_with_demo_user(
                 agent_request,

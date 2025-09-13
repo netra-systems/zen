@@ -408,7 +408,7 @@ class TestActionsAgentSupervisorIntegration:
         # Create execution infrastructure
         tool_dispatcher = ToolDispatcher()
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine(agent_registry, self.websocket_capture)
+        execution_engine = UserExecutionEngine(agent_registry, self.websocket_capture)
         
         # Get ActionsAgent
         actions_agent = agent_registry.get_agent('actions')

@@ -161,7 +161,7 @@
                     # Removed problematic line: async def test_no_none_user_id_in_execution(self):
                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Execution MUST NOT proceed with None user_id"""
                         # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+                        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
 
                         # Try to execute with None user_id
                         # REMOVED_SYNTAX_ERROR: with pytest.raises((ValueError, AttributeError, TypeError)) as exc_info:
@@ -228,7 +228,7 @@
                     # Removed problematic line: async def test_concurrent_user_context_isolation(self):
                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Concurrent users MUST have isolated contexts"""
                         # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+                        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
 
                         # REMOVED_SYNTAX_ERROR: user1_context = AgentExecutionContext( )
                         # REMOVED_SYNTAX_ERROR: agent_name="test_agent",
@@ -355,7 +355,7 @@
     # Removed problematic line: @pytest.mark.asyncio
     # Removed problematic line: async def test_execution_requires_valid_context(self):
         # REMOVED_SYNTAX_ERROR: """CRITICAL: Execution MUST require valid context"""
-        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
 
         # REMOVED_SYNTAX_ERROR: invalid_contexts = [ )
         # None user_id
@@ -396,7 +396,7 @@
                     # Removed problematic line: async def test_execution_context_propagation(self):
                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Context MUST propagate through execution chain"""
                         # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+                        # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
 
                         # Track context through execution
                         # REMOVED_SYNTAX_ERROR: context_chain = []
@@ -562,7 +562,7 @@
                                                             # Removed problematic line: async def test_stress_concurrent_users_no_context_mixing(self):
                                                                 # REMOVED_SYNTAX_ERROR: """CRITICAL: Stress test - 20 concurrent users with no context mixing"""
                                                                 # REMOVED_SYNTAX_ERROR: pass
-                                                                # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine()
+                                                                # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine()
                                                                 # REMOVED_SYNTAX_ERROR: registry = AgentRegistry()
 
                                                                 # Create 20 unique user contexts

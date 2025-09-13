@@ -86,7 +86,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
             # This is what most code would try to do
-            execution_engine = ExecutionEngine()
+            execution_engine = UserExecutionEngine()
             
             # Check if ExecutionEngine can handle user requests
             can_handle_user_request = (
@@ -109,7 +109,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         if golden_path_execution_test['agent_creation']:
             try:
                 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-                execution_engine = ExecutionEngine()
+                execution_engine = UserExecutionEngine()
                 
                 # Mock agent request
                 mock_agent_request = {
@@ -157,7 +157,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                 try:
                     if engine_name == 'supervisor':
                         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-                        engine = ExecutionEngine()
+                        engine = UserExecutionEngine()
                     elif engine_name == 'unified':
                         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
                         engine = UnifiedToolExecutionEngine()
@@ -196,7 +196,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test if ExecutionEngines can deliver WebSocket events
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
-            engine = ExecutionEngine()
+            engine = UserExecutionEngine()
             
             # Check WebSocket event capabilities
             for expected_event in self.expected_golden_path_events:
@@ -276,8 +276,8 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
             # Create engines for both users (Golden Path simulation)
-            user1_engine = ExecutionEngine()
-            user2_engine = ExecutionEngine()
+            user1_engine = UserExecutionEngine()
+            user2_engine = UserExecutionEngine()
             
             # Check if engines are properly isolated
             engines_are_identical = user1_engine is user2_engine
@@ -447,7 +447,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test primary ExecutionEngine path (what most users would hit)
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
-            primary_engine = ExecutionEngine()
+            primary_engine = UserExecutionEngine()
             
             # Mock comprehensive agent request
             agent_request = {
@@ -524,7 +524,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                 try:
                     if engine_name == 'supervisor':
                         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
-                        engine = ExecutionEngine()
+                        engine = UserExecutionEngine()
                     elif engine_name == 'unified':
                         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
                         engine = UnifiedToolExecutionEngine()
@@ -562,7 +562,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test WebSocket event delivery for user feedback
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
-            engine = ExecutionEngine()
+            engine = UserExecutionEngine()
             
             # Mock WebSocket event tracking
             for expected_event in self.expected_golden_path_events:

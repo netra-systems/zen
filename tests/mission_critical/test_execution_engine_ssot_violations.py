@@ -92,8 +92,8 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             # Create two "different user" ExecutionEngine instances
-            engine1 = ExecutionEngine()
-            engine2 = ExecutionEngine() 
+            engine1 = UserExecutionEngine()
+            engine2 = UserExecutionEngine() 
             
             # Check if they share the same global state
             # This is a VIOLATION - each user should have isolated state
@@ -212,7 +212,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
             
             # Test 1: Direct instantiation should not be allowed
             try:
-                engine = ExecutionEngine()
+                engine = UserExecutionEngine()
                 # If we can directly instantiate, that's a factory pattern violation
                 self.fail(
                     "FACTORY PATTERN VIOLATION: ExecutionEngine allows direct instantiation. "
@@ -245,8 +245,8 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
             
             # Test 3: Check for singleton pattern violations
             try:
-                instance1 = ExecutionEngine()
-                instance2 = ExecutionEngine()
+                instance1 = UserExecutionEngine()
+                instance2 = UserExecutionEngine()
                 
                 if instance1 is instance2:
                     self.fail(
@@ -286,7 +286,7 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase, unittest.TestCase):
             execution_engines = []
             for i in range(10):
                 try:
-                    engine = ExecutionEngine()
+                    engine = UserExecutionEngine()
                     execution_engines.append(engine)
                     
                     # Simulate some execution state

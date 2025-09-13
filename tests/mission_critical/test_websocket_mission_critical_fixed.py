@@ -128,7 +128,7 @@ def lazy_import(module_path: str, component: str = None):
         # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
         # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
         # CRITICAL: Add project root to Python path for imports
@@ -321,7 +321,7 @@ def lazy_import(module_path: str, component: str = None):
     # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), ToolDispatcher())
     # REMOVED_SYNTAX_ERROR: ws_manager = WebSocketManager()
 
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
     # Verify WebSocket components
     # REMOVED_SYNTAX_ERROR: assert hasattr(engine, 'websocket_notifier'), "CRITICAL: Missing websocket_notifier"
@@ -491,7 +491,7 @@ def lazy_import(module_path: str, component: str = None):
             # REMOVED_SYNTAX_ERROR: registry.register("mission_critical_agent", test_agent)
 
             # Create execution engine
-            # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, ws_manager)
+            # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, ws_manager)
 
             # Create context and state
             # REMOVED_SYNTAX_ERROR: context = AgentExecutionContext( )

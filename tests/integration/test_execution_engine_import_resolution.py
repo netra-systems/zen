@@ -133,7 +133,7 @@ class TestExecutionEngineImportResolution(SSotAsyncTestCase):
                     print(f"   ✅ Legacy factory initialization successful")
                 else:
                     # Direct initialization (old pattern)
-                    engine = ExecutionEngine(
+                    engine = UserExecutionEngine(
                         registry=mock_registry,
                         websocket_bridge=mock_websocket_bridge,
                         user_context=self.user_contexts[0]

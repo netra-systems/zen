@@ -523,7 +523,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
             max_concurrent_agents=20
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
@@ -581,7 +581,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
         bridges = []
         for user in users:
             bridge = RealMockWebSocketBridge()
-            engine = ExecutionEngine(
+            engine = UserExecutionEngine(
                 config=config,
                 registry=self.registry,
                 websocket_bridge=bridge,
@@ -638,7 +638,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
             enable_metrics=True
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
@@ -679,7 +679,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
             enable_fallback=True
         )
         
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -711,7 +711,7 @@ class TestExecutionEngineBusinessScenarios(AsyncBaseTestCase):
         Test ExecutionEngine tracks performance metrics for SLA compliance.
         """
         config = EngineConfig(enable_metrics=True)
-        engine = ExecutionEngine(config=config, registry=self.registry)
+        engine = UserExecutionEngine(config=config, registry=self.registry)
         
         await engine.initialize()
         
@@ -759,7 +759,7 @@ class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
         self.user_context = RealMockUserExecutionContext("scoped_user_789")
         self.websocket_bridge = RealMockWebSocketBridge()
         
-        self.base_engine = ExecutionEngine(
+        self.base_engine = UserExecutionEngine(
             config=EngineConfig(enable_user_features=True, enable_websocket_events=True),
             registry=self.registry,
             websocket_bridge=self.websocket_bridge,
@@ -778,7 +778,7 @@ class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
         scoped_engines = []
         
         for req_id in request_ids:
-            scoped_engine = RequestScopedExecutionEngine(self.base_engine, req_id)
+            scoped_engine = UserExecutionEngine(self.base_engine, req_id)
             scoped_engines.append(scoped_engine)
             
         # Execute concurrently in different request scopes
@@ -815,7 +815,7 @@ class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
         
         # Use multiple scoped engines with context managers
         for i in range(3):
-            async with RequestScopedExecutionEngine(self.base_engine, f"ctx_req_{i}") as scoped_engine:
+            async with UserExecutionEngine(self.base_engine, f"ctx_req_{i}") as scoped_engine:
                 result = await scoped_engine.execute("scoped_agent", f"context_task_{i}")
                 execution_results.append(result)
                 
@@ -840,8 +840,8 @@ class TestRequestScopedExecutionEngineAdvanced(AsyncBaseTestCase):
         self.registry.register_agent("failing_scoped", RealMockAgent("failing_scoped", 0.1, should_fail=True))
         
         # Create scoped engines for success and failure scenarios
-        success_engine = RequestScopedExecutionEngine(self.base_engine, "success_req")
-        failure_engine = RequestScopedExecutionEngine(self.base_engine, "failure_req")
+        success_engine = UserExecutionEngine(self.base_engine, "success_req")
+        failure_engine = UserExecutionEngine(self.base_engine, "failure_req")
         
         try:
             # Execute in parallel - one success, one failure
@@ -991,7 +991,7 @@ class TestWebSocketEventIntegrationAdvanced(AsyncBaseTestCase):
         CRITICAL: Test complete WebSocket event flow with proper timing for chat UX.
         """
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge
@@ -1041,7 +1041,7 @@ class TestWebSocketEventIntegrationAdvanced(AsyncBaseTestCase):
         unreliable_bridge = RealMockWebSocketBridge(fail_probability=0.5)
         
         config = EngineConfig(enable_websocket_events=True)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=unreliable_bridge
@@ -1080,7 +1080,7 @@ class TestWebSocketEventIntegrationAdvanced(AsyncBaseTestCase):
             user_context = RealMockUserExecutionContext(f"isolated_user_{i}")
             config = EngineConfig(enable_websocket_events=True, enable_user_features=True)
             
-            engine = ExecutionEngine(
+            engine = UserExecutionEngine(
                 config=config,
                 registry=self.registry,
                 websocket_bridge=bridge,
@@ -1123,7 +1123,7 @@ class TestWebSocketEventIntegrationAdvanced(AsyncBaseTestCase):
         Test WebSocket event system maintains performance under high load.
         """
         config = EngineConfig(enable_websocket_events=True, max_concurrent_agents=20)
-        engine = ExecutionEngine(
+        engine = UserExecutionEngine(
             config=config,
             registry=self.registry,
             websocket_bridge=self.websocket_bridge

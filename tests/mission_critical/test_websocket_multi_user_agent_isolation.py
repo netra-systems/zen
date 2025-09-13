@@ -187,7 +187,7 @@ class RealAgentExecutionIsolationTest:
         websocket_notifier.send_event = isolated_event_capture
         
         # Create isolated execution engine
-        execution_engine = ExecutionEngine()
+        execution_engine = UserExecutionEngine()
         execution_engine.set_websocket_notifier(websocket_notifier)
         
         # Create isolated agent context

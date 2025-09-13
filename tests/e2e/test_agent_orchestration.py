@@ -138,7 +138,7 @@ class RealAgentOrchestrationTester:
         # WebSocket manager will be created with factory pattern during async initialization
         self.websocket_manager = None
         self.agent_registry = AgentRegistry()
-        self.execution_engine = ExecutionEngine()
+        self.execution_engine = UserExecutionEngine()
         self.websocket_notifier = None  # Will be set during async init
         self.bridge = AgentWebSocketBridge.get_instance()
         

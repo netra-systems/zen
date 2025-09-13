@@ -1410,7 +1410,7 @@ Priority: CRITICAL
 
     # Initialize agent components
     # REMOVED_SYNTAX_ERROR: self.agent_registry = AgentRegistry()
-    # REMOVED_SYNTAX_ERROR: self.execution_engine = ExecutionEngine()
+    # REMOVED_SYNTAX_ERROR: self.execution_engine = UserExecutionEngine()
 
     # Set up WebSocket integration
     # REMOVED_SYNTAX_ERROR: notifier = WebSocketNotifier.create_for_user(self.ws_manager)

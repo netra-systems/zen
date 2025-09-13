@@ -425,7 +425,7 @@ class MockExecutionEngineFactory:
         mock_registry = MockExecutionEngineFactory.create_mock_agent_registry()
         mock_bridge = MockExecutionEngineFactory.create_mock_websocket_bridge()
         
-        engine = ExecutionEngine(mock_registry, mock_bridge, user_context)
+        engine = UserExecutionEngine(mock_registry, mock_bridge, user_context)
         return engine
 
 

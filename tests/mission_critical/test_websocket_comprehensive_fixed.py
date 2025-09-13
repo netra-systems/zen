@@ -234,7 +234,7 @@
 
     # Create registry and engine
     # REMOVED_SYNTAX_ERROR: registry = AgentRegistry(), ToolDispatcher())
-    # REMOVED_SYNTAX_ERROR: engine = ExecutionEngine(registry, self.ws_manager)
+    # REMOVED_SYNTAX_ERROR: engine = UserExecutionEngine(registry, self.ws_manager)
 
     # Verify WebSocket components
     # REMOVED_SYNTAX_ERROR: assert hasattr(engine, 'websocket_notifier'), "ExecutionEngine missing websocket_notifier"

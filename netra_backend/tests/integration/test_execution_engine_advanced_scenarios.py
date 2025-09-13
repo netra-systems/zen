@@ -491,7 +491,7 @@ class TestExecutionEngineAdvancedScenarios(SSotAsyncTestCase):
         
         # Test 1: Verify direct instantiation is blocked
         try:
-            direct_engine = ExecutionEngine(advanced_agent_registry, websocket_bridge_with_failures)
+            direct_engine = UserExecutionEngine(advanced_agent_registry, websocket_bridge_with_failures)
             assert False, "Direct ExecutionEngine instantiation should be blocked"
         except RuntimeError as e:
             assert "Direct ExecutionEngine instantiation is no longer supported" in str(e), (

@@ -206,7 +206,7 @@ class TestUserIsolationConsistency(SSotAsyncTestCase):
             # Create engines with different user contexts
             for context in self.user_contexts[:2]:  # Test 2 users
                 try:
-                    engine = ExecutionEngine(mock_registry, mock_bridge, context)
+                    engine = UserExecutionEngine(mock_registry, mock_bridge, context)
                     engines.append((engine, context))
                 except Exception as e:
                     self.isolation_violations[f"legacy_engine_creation_{context.user_id}"] = str(e)

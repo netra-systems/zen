@@ -458,7 +458,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             mock_registry = Mock()
             websocket_bridge = self._create_monitored_websocket_bridge(monitor)
             
-            engine = ExecutionEngine(mock_registry, websocket_bridge, user_context)
+            engine = UserExecutionEngine(mock_registry, websocket_bridge, user_context)
             logger.info("Created ExecutionEngine for WebSocket testing")
             return engine
             
@@ -717,7 +717,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             
         except ImportError:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            engine = ExecutionEngine(Mock(), websocket_bridge, user_context)
+            engine = UserExecutionEngine(Mock(), websocket_bridge, user_context)
             return engine
     
     def _create_user_isolated_websocket_bridge(self, monitor: WebSocketEventMonitor, 
@@ -793,7 +793,7 @@ class TestWebSocketEventIntegrity(SSotAsyncTestCase):
             return engine
         except ImportError:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
-            engine = ExecutionEngine(Mock(), error_bridge, user_context)
+            engine = UserExecutionEngine(Mock(), error_bridge, user_context)
             return engine
     
     def _create_error_recovery_websocket_bridge(self, monitor: WebSocketEventMonitor):

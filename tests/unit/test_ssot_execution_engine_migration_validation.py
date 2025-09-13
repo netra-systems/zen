@@ -119,7 +119,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
                     thread_id="test_thread_001", 
                     run_id="test_run_001"
                 )
-                engine = ExecutionEngine(mock_registry, mock_websocket_bridge, mock_user_context)
+                engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, mock_user_context)
                 
                 # Verify deprecation warning was issued
                 self.assertTrue(len(w) > 0)
@@ -272,7 +272,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
         # Create deprecated ExecutionEngine instance
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")  # Ignore deprecation warnings for this test
-            deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
+            deprecated_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge, user_context)
         
         # Verify delegation is set up
         self.assertTrue(deprecated_engine.is_compatibility_mode())
@@ -479,7 +479,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")  # Focus on functionality, not warnings
                 
-                deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                deprecated_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
                 
                 # Should have compatibility methods
                 self.assertTrue(hasattr(deprecated_engine, 'is_compatibility_mode'))
@@ -535,7 +535,7 @@ class TestSSotExecutionEngineMigrationValidation(SSotBaseTestCase):
             warnings.simplefilter("ignore")
             
             for _ in range(100):
-                deprecated_engine = ExecutionEngine(mock_registry, mock_websocket_bridge)
+                deprecated_engine = UserExecutionEngine(mock_registry, mock_websocket_bridge)
         
         deprecated_time = time.perf_counter() - start_time
         
