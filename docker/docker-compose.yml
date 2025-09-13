@@ -121,7 +121,7 @@ services:
         aliases:
           - auth
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/auth.Dockerfile
       args:
         BUILD_ENV: development
@@ -194,7 +194,7 @@ services:
         aliases:
           - backend
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/backend.Dockerfile
       args:
         BUILD_ENV: development
@@ -280,7 +280,7 @@ services:
   dev-frontend:
     image: netra-dev-frontend:latest
     build:
-      context: .
+      context: ..
       dockerfile: ./dockerfiles/frontend.Dockerfile
       args:
         BUILD_ENV: development

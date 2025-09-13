@@ -18,6 +18,10 @@ ALL Github content must follow @GITHUB_STYLE_GUIDE.md
 - **All work performed on**: develop-long-lived
 - **PR target**: develop-long-lived (current working branch) - NEVER main
 
+Issue Exclusion List (IEL): generally do not create issues for the following cases:
+    1. IEL: merge conflicts
+    2. IEL: local env specific issues
+
 
 FOR EACH ISSUE IN ISSUE_LIST:
 

@@ -17,8 +17,9 @@ class EnvironmentConfigLoader:
     
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from environment."""
-        import os
-        return dict(os.environ)
+        from shared.isolated_environment import IsolatedEnvironment
+        env = IsolatedEnvironment()
+        return env.get_all()
     
     def get_database_config(self) -> Dict[str, Any]:
         """Get database configuration using DatabaseURLBuilder SSOT."""
