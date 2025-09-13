@@ -19,6 +19,7 @@ Business Value: $500K+ ARR depends on staging environment authentication
 
 import pytest
 import logging
+import unittest
 from unittest.mock import patch, MagicMock
 import sys
 from typing import Dict, Any
@@ -33,7 +34,7 @@ from shared.jwt_secret_manager import JWTSecretManager, get_jwt_secret_manager
 logger = logging.getLogger(__name__)
 
 
-class TestJWTSecretManagerStaging(SSotBaseTestCase):
+class TestJWTSecretManagerStaging(SSotBaseTestCase, unittest.TestCase):
     """
     Test JWT Secret Manager staging configuration.
 

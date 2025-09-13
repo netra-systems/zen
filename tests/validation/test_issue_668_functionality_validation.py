@@ -75,7 +75,9 @@ class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
             self.record_metric("e2e_auth_helper_methods_verified", methods_found)
 
         except Exception as e:
-            self.fail(f"E2EAuthHelper instantiation or method validation failed: {e}")
+            self.record_metric("e2e_auth_helper_instantiation_error", str(e))
+            # Use assertion instead of fail
+            self.assertTrue(False, f"E2EAuthHelper instantiation or method validation failed: {e}")
 
     def test_e2e_websocket_auth_helper_functionality(self):
         """
@@ -113,7 +115,8 @@ class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
             self.record_metric("websocket_auth_helper_instantiation_success", True)
 
         except Exception as e:
-            self.fail(f"E2EWebSocketAuthHelper functionality validation failed: {e}")
+            self.record_metric("websocket_auth_helper_error", str(e))
+            self.assertTrue(False, f"E2EWebSocketAuthHelper functionality validation failed: {e}")
 
     async def test_create_authenticated_user_context_function_execution(self):
         """
@@ -162,7 +165,7 @@ class TestIssue668FunctionalityValidation(SSotAsyncTestCase):
                     self.record_metric("create_authenticated_user_context_minimal_error", str(e2))
                     # Still record as functional since the import works
             else:
-                self.fail(f"create_authenticated_user_context execution failed with TypeError: {e}")
+                self.assertTrue(False, f"create_authenticated_user_context execution failed with TypeError: {e}")
         except Exception as e:
             # Function might have environmental requirements
             self.record_metric("create_authenticated_user_context_env_error", str(e))

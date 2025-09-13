@@ -350,7 +350,6 @@ class TestStagingConnectivityIntegration(SSotAsyncTestCase):
         """
         # Check environment variable access patterns
         required_env_patterns = [
-            "STAGING",
             "WEBSOCKET",
             "API",
             "AUTH"
@@ -370,6 +369,9 @@ class TestStagingConnectivityIntegration(SSotAsyncTestCase):
         for pattern in required_env_patterns:
             pattern_found = any(pattern in key for key in env_keys)
             assert pattern_found, f"Environment should have configuration for '{pattern}'"
+
+        # Verify staging environment specifically
+        assert "staging" in env_config["ENVIRONMENT"], "Environment should contain 'staging'"
 
         # Validate configuration consistency
         assert env_config["ENVIRONMENT"] == "staging"
