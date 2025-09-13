@@ -38,7 +38,7 @@ import httpx
 from loguru import logger
 
 # Import real production components - NO MOCKS
-from netra_backend.app.services.user_websocket_emitter import UserWebSocketEmitter
+from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 from netra_backend.app.services.websocket_bridge_factory import WebSocketBridgeFactory, WebSocketFactoryConfig
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 from netra_backend.app.services.websocket_event_router import WebSocketEventRouter
@@ -198,7 +198,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         event_router = real_websocket_infrastructure["event_router"]
         
         # Create real UserWebSocketEmitter with authenticated context
-        emitter = UserWebSocketEmitter(
+        emitter = UnifiedWebSocketEmitter(
             context=context,
             router=event_router,
             connection_id=f"conn_{uuid.uuid4().hex[:8]}"
@@ -242,7 +242,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         connection_id = await connection_pool.add_connection(context.user_id, websocket)
         
         # Create emitter with real WebSocket connection
-        emitter = UserWebSocketEmitter(
+        emitter = UnifiedWebSocketEmitter(
             context=context,
             router=event_router,
             connection_id=connection_id
@@ -301,7 +301,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         connection_pool = real_websocket_infrastructure["connection_pool"]
         connection_id = await connection_pool.add_connection(context.user_id, websocket)
         
-        emitter = UserWebSocketEmitter(
+        emitter = UnifiedWebSocketEmitter(
             context=context,
             router=event_router, 
             connection_id=connection_id
@@ -389,7 +389,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         connection_pool = real_websocket_infrastructure["connection_pool"]
         connection_id = await connection_pool.add_connection(context.user_id, websocket)
         
-        emitter = UserWebSocketEmitter(
+        emitter = UnifiedWebSocketEmitter(
             context=context,
             router=event_router,
             connection_id=connection_id
@@ -471,7 +471,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
                 
                 # Register connection and create emitter
                 connection_id = await connection_pool.add_connection(context.user_id, websocket)
-                emitter = UserWebSocketEmitter(
+                emitter = UnifiedWebSocketEmitter(
                     context=context,
                     router=event_router,
                     connection_id=connection_id
@@ -542,7 +542,7 @@ class TestUserWebSocketEmitterReal(SSotBaseTestCase):
         event_router = real_websocket_infrastructure["event_router"]
         
         # Create emitter without real WebSocket connection (simulates connection failure)
-        emitter = UserWebSocketEmitter(
+        emitter = UnifiedWebSocketEmitter(
             context=context,
             router=event_router,
             connection_id="nonexistent_connection"

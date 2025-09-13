@@ -47,29 +47,42 @@ class TestIssue700MetadataBypassSSoTRegression:
         self.mock_llm_manager = Mock()
         self.mock_tool_dispatcher = Mock()
         
-    def test_userexecutioncontext_missing_metadata_attribute(self):
+    def test_userexecutioncontext_metadata_property_is_read_only_copy(self):
         """
-        CRITICAL TEST: Verify UserExecutionContext lacks metadata attribute
+        CRITICAL TEST: Verify UserExecutionContext metadata property is read-only
         
-        This test proves that the SSOT regression exists - UserExecutionContext
-        does not have the metadata field that BaseAgent.store_metadata_result expects.
+        This test proves that the SSOT regression exists - UserExecutionContext.metadata
+        is a property that returns a copy, making assignments appear to work but
+        actually fail silently.
         """
-        # ASSERTION 1: UserExecutionContext should NOT have metadata attribute
-        assert not hasattr(self.real_context, 'metadata'), (
-            "CRITICAL: UserExecutionContext has metadata attribute - regression may be fixed"
+        # ASSERTION 1: UserExecutionContext HAS metadata attribute (it's a property)
+        assert hasattr(self.real_context, 'metadata'), (
+            "UserExecutionContext should have metadata property"
         )
         
-        # ASSERTION 2: UserExecutionContext has other metadata fields but not 'metadata'
-        assert hasattr(self.real_context, 'agent_context'), "Should have agent_context"
-        assert hasattr(self.real_context, 'audit_metadata'), "Should have audit_metadata"
+        # ASSERTION 2: But assignments to metadata don't persist
+        initial_metadata = self.real_context.metadata.copy()
+        self.real_context.metadata['test_key'] = 'test_value'
         
-    def test_base_agent_store_metadata_result_fails_with_real_context(self):
+        # The assignment appears to succeed but doesn't persist
+        after_assignment = self.real_context.metadata
+        assert 'test_key' not in after_assignment, (
+            "CRITICAL: metadata assignment should NOT persist (proves the regression)"
+        )
+        
+        # ASSERTION 3: metadata is a fresh copy each time
+        metadata1 = self.real_context.metadata
+        metadata2 = self.real_context.metadata 
+        assert metadata1 is not metadata2, (
+            "metadata property should return new copy each time"
+        )
+        
+    def test_base_agent_store_metadata_result_silent_failure(self):
         """
-        CRITICAL TEST: Reproduce AttributeError in BaseAgent.store_metadata_result
+        CRITICAL TEST: Prove BaseAgent.store_metadata_result silently fails
         
-        This test proves that BaseAgent.store_metadata_result will fail when
-        used with a real UserExecutionContext because it tries to access
-        context.metadata which doesn't exist.
+        This test proves that BaseAgent.store_metadata_result appears to work
+        but silently fails because it assigns to a temporary copy that gets discarded.
         """
         # Create a minimal BaseAgent to test the method
         base_agent = BaseAgent(
@@ -77,18 +90,25 @@ class TestIssue700MetadataBypassSSoTRegression:
             name="TestAgent"
         )
         
-        # CRITICAL TEST: This should raise AttributeError
-        with pytest.raises(AttributeError) as exc_info:
-            base_agent.store_metadata_result(
-                context=self.real_context,
-                key="test_key", 
-                value="test_value"
-            )
+        # CRITICAL TEST: This appears to succeed but silently fails
+        initial_metadata = self.real_context.metadata.copy()
         
-        # Verify the error is about missing metadata attribute
-        error_message = str(exc_info.value)
-        assert "metadata" in error_message.lower(), (
-            f"Error should mention 'metadata' attribute, got: {error_message}"
+        # This call should NOT raise an exception (appears to work)
+        base_agent.store_metadata_result(
+            context=self.real_context,
+            key="test_key", 
+            value="test_value"
+        )
+        
+        # But the value is NOT actually stored
+        after_storage = self.real_context.metadata
+        assert "test_key" not in after_storage, (
+            "CRITICAL: store_metadata_result should silently fail (key not found)"
+        )
+        
+        # Verify the metadata didn't change at all
+        assert after_storage == initial_metadata, (
+            "Metadata should be unchanged after 'successful' storage call"
         )
         
     @pytest.mark.asyncio

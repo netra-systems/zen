@@ -298,7 +298,7 @@ class AgentInstanceFactory:
     async def cleanup(self) -> None:
         """Clean up WebSocket emitter resources."""
         try:
-            logger.debug(f"Cleaning up UserWebSocketEmitter for user {self.user_id} "
+            logger.debug(f"Cleaning up UnifiedWebSocketEmitter for user {self.user_id} "
                         f"(sent {self._event_count} events)")
             
             # Log final statistics
@@ -311,7 +311,7 @@ class AgentInstanceFactory:
             self.websocket_bridge = None
             
         except Exception as e:
-            logger.error(f"Error cleaning up UserWebSocketEmitter for user {self.user_id}: {e}")
+            logger.error(f"Error cleaning up UnifiedWebSocketEmitter for user {self.user_id}: {e}")
     
     def get_emitter_status(self) -> Dict[str, Any]:
         """Get emitter status for monitoring."""
@@ -1133,7 +1133,7 @@ class AgentInstanceFactory:
             # Note: For now we maintain backward compatibility by creating regular emitters
             # The pooling infrastructure is in place for future optimization
             try:
-                # Future: Implement full pooling when UserWebSocketEmitter is adapted
+                # Future: Implement full pooling when UnifiedWebSocketEmitter is adapted
                 # For now, the pool exists but we create compatible instances
                 logger.debug(f"WebSocket emitter pool available but not yet fully integrated")
             except Exception as e:

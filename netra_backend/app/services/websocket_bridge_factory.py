@@ -178,6 +178,7 @@ class WebSocketFactoryConfig:
             enable_event_batching=env.get('WEBSOCKET_ENABLE_BATCHING', 'true').lower() == 'true',
         )
 
+# SSOT CONSOLIDATION COMPLETE: All functionality provided by UnifiedWebSocketEmitter
 
 class WebSocketBridgeFactory:
     """LEGACY COMPATIBILITY WRAPPER - Redirects to UnifiedWebSocketManager + UnifiedWebSocketEmitter
