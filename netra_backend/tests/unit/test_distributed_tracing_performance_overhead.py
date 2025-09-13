@@ -33,7 +33,7 @@ class TestDistributedTracingPerformanceOverhead:
         # TODO: Initialize real service
         """Setup tracer optimized for performance testing."""
         if not OPENTELEMETRY_AVAILABLE:
-            pytest.skip("OpenTelemetry not available - skipping tracing tests")
+            pytest.skip("OpenTelemetry not available - skipping tracing tests", allow_module_level=True)
         provider = TracerProvider()
         trace.set_tracer_provider(provider)
         return trace.get_tracer("performance_monitor")

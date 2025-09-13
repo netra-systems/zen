@@ -47,7 +47,7 @@ class TestUserSessionIsolation(BaseUnitTest):
         """Set up test environment."""
         super().setUp()
         if not SQLALCHEMY_AVAILABLE:
-            pytest.skip("SQLAlchemy not available for session testing")
+            pytest.skip("SQLAlchemy not available for session testing", allow_module_level=True)
 
     @pytest.mark.unit
     async def test_user_execution_context_creates_isolated_sessions(self):

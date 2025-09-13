@@ -217,7 +217,7 @@ class TestSessionMetricsSSotValidation:
     def test_shared_session_metrics_structure(self):
         """Test the structure of SharedSessionMetrics for comparison."""
         if not SHARED_SESSION_METRICS_AVAILABLE:
-            pytest.skip("SharedSessionMetrics not available")
+            pytest.skip("SharedSessionMetrics not available", allow_module_level=True)
         
         # Create instance with default values
         shared_metrics = SharedSessionMetrics()

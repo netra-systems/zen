@@ -44,7 +44,7 @@ class TestWebSocketStateSerialization:
             assert _serialize_message_safely(WebSocketState.DISCONNECTED) == "disconnected"
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
     
     def test_fastapi_websocket_state_serialization(self):
         """Test FastAPI WebSocketState enum serialization."""
@@ -57,7 +57,7 @@ class TestWebSocketStateSerialization:
             assert _serialize_message_safely(WebSocketState.DISCONNECTED) == "disconnected"
             
         except ImportError:
-            pytest.skip("FastAPI WebSocketState not available")
+            pytest.skip("FastAPI WebSocketState not available", allow_module_level=True)
     
     def test_websocket_state_in_dictionary(self):
         """Test WebSocketState serialization when embedded in dictionary."""
@@ -82,7 +82,7 @@ class TestWebSocketStateSerialization:
             assert '"connection_state": "connected"' in json_str
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
     
     def test_websocket_state_in_nested_structure(self):
         """Test WebSocketState serialization in complex nested structure."""
@@ -119,7 +119,7 @@ class TestWebSocketStateSerialization:
             assert json_str is not None
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
 
 
 class TestGeneralSerialization:
@@ -239,7 +239,7 @@ class TestConnectionDiagnostics:
             assert '"websocket_state": "connected"' in json_str
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
     
     def test_diagnostics_with_no_websocket(self):
         """Test diagnostics when websocket is None."""
@@ -296,7 +296,7 @@ class TestSerializationPerformance:
             assert json_str is not None
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
     
     def test_circular_reference_prevention(self):
         """Test that circular references don't cause infinite recursion."""
@@ -363,7 +363,7 @@ class TestOriginalBugReproduction:
             assert final_json is not None
             
         except ImportError:
-            pytest.skip("Starlette WebSocketState not available")
+            pytest.skip("Starlette WebSocketState not available", allow_module_level=True)
 
 
 if __name__ == "__main__":

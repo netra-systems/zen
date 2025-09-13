@@ -178,7 +178,7 @@ class TestAgentRegistryInterfaceViolations:
         child_method = getattr(AgentRegistry, 'set_websocket_manager', None)
         
         if not parent_method or not child_method:
-            pytest.skip("Required methods not found for parameter count validation")
+            pytest.skip("Required methods not found for parameter count validation", allow_module_level=True)
         
         parent_sig = inspect.signature(parent_method)
         child_sig = inspect.signature(child_method)

@@ -72,7 +72,7 @@ class TestMigrationSafetyValidation(BaseUnitTest):
         """Set up test environment."""
         super().setUp()
         if not SQLALCHEMY_AVAILABLE:
-            pytest.skip("SQLAlchemy not available for migration testing")
+            pytest.skip("SQLAlchemy not available for migration testing", allow_module_level=True)
 
     @pytest.mark.unit
     def test_migration_scripts_preserve_user_isolation_constraints(self):

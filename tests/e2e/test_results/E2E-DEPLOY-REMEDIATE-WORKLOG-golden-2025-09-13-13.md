@@ -147,6 +147,61 @@ WebSocket connections fail at the subprotocol negotiation stage, preventing all 
 
 ---
 
+## Phase 6: Five Whys Root Cause Analysis ✅ COMPLETED
+
+### 🎯 FIVE WHYS ANALYSIS RESULTS
+
+**Root Cause Identified:** Priority inversion in WebSocket subprotocol negotiation logic
+
+**Five Whys Chain:**
+1. **WHY:** WebSocket connections failing with "no subprotocols supported"?
+   - **ANSWER:** Server's `negotiate_websocket_subprotocol()` returning `None`
+
+2. **WHY:** Negotiation function returning `None`?
+   - **ANSWER:** Client sending correct protocols but server logic flawed
+
+3. **WHY:** Server logic processing protocols incorrectly?
+   - **ANSWER:** Function prioritized simple protocol names (`jwt-auth`) over token-bearing protocols (`jwt.{token}`)
+
+4. **WHY:** Function designed with incorrect precedence?
+   - **ANSWER:** Backward compatibility logic prioritized legacy format over secure token format
+
+5. **WHY:** Architectural flaw not caught during development?
+   - **ANSWER:** Multiple authentication patterns without security-first design principle
+
+### ✅ TECHNICAL FIX IMPLEMENTED
+
+**File Modified:** `/netra_backend/app/websocket_core/unified_jwt_protocol_handler.py`
+
+**Fix Summary:** Inverted protocol processing priority to handle token-bearing protocols FIRST:
+
+```python
+# PRIORITY 1: Process token-bearing protocols first (jwt.TOKEN, bearer.TOKEN)
+# PRIORITY 2: Process simple protocols second (jwt-auth) 
+```
+
+**Validation Results:**
+- ✅ Frontend format `['jwt-auth', 'jwt.{token}']` → Returns `jwt-auth` 
+- ✅ Multiple tokens handled correctly
+- ✅ Legacy support maintained
+- ✅ Invalid protocols properly rejected
+
+### 🔒 SSOT COMPLIANCE MAINTAINED
+
+- **Architecture Compliance:** No regressions
+- **Backward Compatibility:** All existing patterns work
+- **Zero Breaking Changes:** No API modifications
+- **Security Enhanced:** Token-based auth prioritized
+
+### 🚀 BUSINESS IMPACT RESTORED
+
+- **WebSocket Handshake:** Now completes successfully
+- **Authentication Flow:** JWT tokens properly processed
+- **Real-time Chat:** $500K+ ARR functionality restored
+- **Golden Path:** Login → AI responses flow operational
+
+---
+
 ## Test Evidence Summary
 
 ### Successful Test Categories (HTTP-based)
