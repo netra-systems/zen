@@ -1,0 +1,669 @@
+{
+  "summary": {
+    "total_tests": 19,
+    "reproduced_failures": 1,
+    "unexpected_successes": 9,
+    "errors": 9,
+    "reproduction_status": "PARTIAL_REPRODUCTION",
+    "staging_environment_working": true
+  },
+  "issue_618_assessment": {
+    "backend_503_reproduced": false,
+    "websocket_timeout_reproduced": false,
+    "golden_path_failures_reproduced": false,
+    "dependency_failures_reproduced": true
+  },
+  "detailed_results": [
+    {
+      "test_name": "backend_503_check_health",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 410,
+      "details": {
+        "endpoint": "/health",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "api-version": "current",
+          "x-cloud-trace-context": "2b16ae44908cd04446199c6c35bf31d1;o=1",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "99",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 410,
+        "response_json": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757726291.4272912
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.437027"
+    },
+    {
+      "test_name": "backend_503_check_api_health",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 211,
+      "details": {
+        "endpoint": "/api/health",
+        "url": "https://api.staging.netrasystems.ai/api/health",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "6d9ef9042bb157e846199c6c35bf3eaa",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "947",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 211,
+        "response_json": {
+          "status": "healthy",
+          "timestamp": "2025-09-13T01:18:11.638111+00:00",
+          "uptime_seconds": 57.789286613464355,
+          "checks": {
+            "postgresql": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 104.89,
+              "error": null
+            },
+            "redis": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 13.84,
+              "error": null
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 53.88,
+              "error": null
+            }
+          },
+          "database_details": {
+            "postgresql": {
+              "status": "healthy",
+              "details": {
+                "engine": "primary",
+                "connection_pool": "active",
+                "avg_response_time": 104.89
+              },
+              "checked_at": "2025-09-13T01:18:11.532985"
+            },
+            "redis": {
+              "status": "healthy",
+              "details": {
+                "redis_version": "7.2.4",
+                "memory_usage": "4.07M",
+                "connected_clients": 10,
+                "avg_response_time": 13.84
+              },
+              "checked_at": "2025-09-13T01:18:11.537535"
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "details": {
+                "clickhouse_version": "25.6.2.6054",
+                "http_status": 200,
+                "avg_response_time": 53.88
+              },
+              "checked_at": "2025-09-13T01:18:11.538041"
+            }
+          },
+          "version": "1.0.0",
+          "environment": "staging"
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.648365"
+    },
+    {
+      "test_name": "backend_503_check_api_v1_chat",
+      "status": "OTHER_ERROR",
+      "duration_ms": 86,
+      "details": {
+        "endpoint": "/api/v1/chat",
+        "url": "https://api.staging.netrasystems.ai/api/v1/chat",
+        "status_code": 404,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "d84ca5faa49abd4c46199c6c35bf3349",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "22",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 86,
+        "response_json": {
+          "detail": "Not Found"
+        }
+      },
+      "error": "Unexpected status code: 404",
+      "timestamp": "2025-09-12T18:18:11.735231"
+    },
+    {
+      "test_name": "backend_503_check_api_v1_agents",
+      "status": "OTHER_ERROR",
+      "duration_ms": 99,
+      "details": {
+        "endpoint": "/api/v1/agents",
+        "url": "https://api.staging.netrasystems.ai/api/v1/agents",
+        "status_code": 404,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "8538308917825dbc46199c6c35bf359e",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "22",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 99,
+        "response_json": {
+          "detail": "Not Found"
+        }
+      },
+      "error": "Unexpected status code: 404",
+      "timestamp": "2025-09-12T18:18:11.834899"
+    },
+    {
+      "test_name": "backend_503_check_root",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 83,
+      "details": {
+        "endpoint": "/",
+        "url": "https://api.staging.netrasystems.ai/",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "f2b60f1630d7936646199c6c35bf3665",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "34",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 83,
+        "response_json": {
+          "message": "Welcome to Netra API"
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.918319"
+    },
+    {
+      "test_name": "backend_503_check_ws",
+      "status": "OTHER_ERROR",
+      "duration_ms": 79,
+      "details": {
+        "endpoint": "/ws",
+        "url": "https://api.staging.netrasystems.ai/ws",
+        "status_code": 404,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "252e20eb9b2aab0a46199c6c35bf3981",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "22",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 79,
+        "response_json": {
+          "detail": "Not Found"
+        }
+      },
+      "error": "Unexpected status code: 404",
+      "timestamp": "2025-09-12T18:18:11.997960"
+    },
+    {
+      "test_name": "websocket_handshake_basic_connection_no_auth",
+      "status": "ERROR",
+      "duration_ms": 19,
+      "details": {
+        "scenario": "basic_connection_no_auth",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018156"
+    },
+    {
+      "test_name": "websocket_handshake_connection_with_invalid_auth",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "connection_with_invalid_auth",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018438"
+    },
+    {
+      "test_name": "websocket_handshake_connection_with_custom_headers",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "connection_with_custom_headers",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018622"
+    },
+    {
+      "test_name": "websocket_handshake_short_timeout_connection",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "short_timeout_connection",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018841"
+    },
+    {
+      "test_name": "golden_path_frontend_load",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 173,
+      "details": {
+        "step": "frontend_load",
+        "description": "User loads frontend application",
+        "status_code": 200,
+        "response_time_ms": 173
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.197986"
+    },
+    {
+      "test_name": "golden_path_auth_check",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 193,
+      "details": {
+        "step": "auth_check",
+        "description": "Frontend checks auth service availability",
+        "status_code": 200,
+        "response_time_ms": 193
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.391926"
+    },
+    {
+      "test_name": "golden_path_backend_api_check",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 160,
+      "details": {
+        "step": "backend_api_check",
+        "description": "Frontend checks backend API availability",
+        "status_code": 200,
+        "response_time_ms": 160
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.552263"
+    },
+    {
+      "test_name": "golden_path_websocket_connection_attempt",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 697,
+      "details": {
+        "step": "websocket_connection_attempt",
+        "description": "Frontend attempts to establish WebSocket connection",
+        "connection_established": true
+      },
+      "error": "WebSocket step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.249561"
+    },
+    {
+      "test_name": "golden_path_chat_initialization",
+      "status": "OTHER_ERROR",
+      "duration_ms": 90,
+      "details": {
+        "step": "chat_initialization",
+        "description": "User initiates chat session",
+        "status_code": 404
+      },
+      "error": "Golden Path step failed with status: 404",
+      "timestamp": "2025-09-12T18:18:13.402512"
+    },
+    {
+      "test_name": "dependency_frontend_to_backend",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 153,
+      "details": {
+        "test": "frontend_to_backend",
+        "description": "Frontend trying to reach backend API",
+        "source": "frontend",
+        "target": "backend",
+        "status_code": 200
+      },
+      "error": "Service dependency working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.566545"
+    },
+    {
+      "test_name": "dependency_frontend_to_auth",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 129,
+      "details": {
+        "test": "frontend_to_auth",
+        "description": "Frontend trying to reach auth service",
+        "source": "frontend",
+        "target": "auth",
+        "status_code": 200
+      },
+      "error": "Service dependency working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.696471"
+    },
+    {
+      "test_name": "dependency_backend_to_auth",
+      "status": "OTHER_ERROR",
+      "duration_ms": 77,
+      "details": {
+        "test": "backend_to_auth",
+        "description": "Backend trying to validate auth token",
+        "source": "backend",
+        "target": "auth",
+        "status_code": 404
+      },
+      "error": "Dependency failed with status: 404",
+      "timestamp": "2025-09-12T18:18:13.773505"
+    },
+    {
+      "test_name": "dependency_websocket_backend_routing",
+      "status": "REPRODUCED",
+      "duration_ms": 0,
+      "details": {
+        "test": "websocket_backend_routing",
+        "description": "WebSocket routing to backend services",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "Successfully reproduced WebSocket dependency failure: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:13.773892"
+    }
+  ],
+  "critical_failures": [
+    {
+      "test_name": "websocket_handshake_basic_connection_no_auth",
+      "status": "ERROR",
+      "duration_ms": 19,
+      "details": {
+        "scenario": "basic_connection_no_auth",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018156"
+    },
+    {
+      "test_name": "websocket_handshake_connection_with_invalid_auth",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "connection_with_invalid_auth",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018438"
+    },
+    {
+      "test_name": "websocket_handshake_connection_with_custom_headers",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "connection_with_custom_headers",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018622"
+    },
+    {
+      "test_name": "websocket_handshake_short_timeout_connection",
+      "status": "ERROR",
+      "duration_ms": 0,
+      "details": {
+        "scenario": "short_timeout_connection",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "WebSocket connection error: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:12.018841"
+    },
+    {
+      "test_name": "dependency_websocket_backend_routing",
+      "status": "REPRODUCED",
+      "duration_ms": 0,
+      "details": {
+        "test": "websocket_backend_routing",
+        "description": "WebSocket routing to backend services",
+        "error_type": "TypeError",
+        "error_details": "BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+      },
+      "error": "Successfully reproduced WebSocket dependency failure: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'",
+      "timestamp": "2025-09-12T18:18:13.773892"
+    }
+  ],
+  "unexpected_successes": [
+    {
+      "test_name": "backend_503_check_health",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 410,
+      "details": {
+        "endpoint": "/health",
+        "url": "https://api.staging.netrasystems.ai/health",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "api-version": "current",
+          "x-cloud-trace-context": "2b16ae44908cd04446199c6c35bf31d1;o=1",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "99",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 410,
+        "response_json": {
+          "status": "healthy",
+          "service": "netra-ai-platform",
+          "version": "1.0.0",
+          "timestamp": 1757726291.4272912
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.437027"
+    },
+    {
+      "test_name": "backend_503_check_api_health",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 211,
+      "details": {
+        "endpoint": "/api/health",
+        "url": "https://api.staging.netrasystems.ai/api/health",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "6d9ef9042bb157e846199c6c35bf3eaa",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "947",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 211,
+        "response_json": {
+          "status": "healthy",
+          "timestamp": "2025-09-13T01:18:11.638111+00:00",
+          "uptime_seconds": 57.789286613464355,
+          "checks": {
+            "postgresql": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 104.89,
+              "error": null
+            },
+            "redis": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 13.84,
+              "error": null
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "connected": true,
+              "response_time_ms": 53.88,
+              "error": null
+            }
+          },
+          "database_details": {
+            "postgresql": {
+              "status": "healthy",
+              "details": {
+                "engine": "primary",
+                "connection_pool": "active",
+                "avg_response_time": 104.89
+              },
+              "checked_at": "2025-09-13T01:18:11.532985"
+            },
+            "redis": {
+              "status": "healthy",
+              "details": {
+                "redis_version": "7.2.4",
+                "memory_usage": "4.07M",
+                "connected_clients": 10,
+                "avg_response_time": 13.84
+              },
+              "checked_at": "2025-09-13T01:18:11.537535"
+            },
+            "clickhouse": {
+              "status": "healthy",
+              "details": {
+                "clickhouse_version": "25.6.2.6054",
+                "http_status": 200,
+                "avg_response_time": 53.88
+              },
+              "checked_at": "2025-09-13T01:18:11.538041"
+            }
+          },
+          "version": "1.0.0",
+          "environment": "staging"
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.648365"
+    },
+    {
+      "test_name": "backend_503_check_root",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 83,
+      "details": {
+        "endpoint": "/",
+        "url": "https://api.staging.netrasystems.ai/",
+        "status_code": 200,
+        "headers": {
+          "content-type": "application/json",
+          "x-cloud-trace-context": "f2b60f1630d7936646199c6c35bf3665",
+          "date": "Sat, 13 Sep 2025 01:18:11 GMT",
+          "server": "Google Frontend",
+          "content-length": "34",
+          "via": "1.1 google",
+          "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000"
+        },
+        "response_time_ms": 83,
+        "response_json": {
+          "message": "Welcome to Netra API"
+        }
+      },
+      "error": "Backend is working (unexpected - Issue #618 reports 503 errors)",
+      "timestamp": "2025-09-12T18:18:11.918319"
+    },
+    {
+      "test_name": "golden_path_frontend_load",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 173,
+      "details": {
+        "step": "frontend_load",
+        "description": "User loads frontend application",
+        "status_code": 200,
+        "response_time_ms": 173
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.197986"
+    },
+    {
+      "test_name": "golden_path_auth_check",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 193,
+      "details": {
+        "step": "auth_check",
+        "description": "Frontend checks auth service availability",
+        "status_code": 200,
+        "response_time_ms": 193
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.391926"
+    },
+    {
+      "test_name": "golden_path_backend_api_check",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 160,
+      "details": {
+        "step": "backend_api_check",
+        "description": "Frontend checks backend API availability",
+        "status_code": 200,
+        "response_time_ms": 160
+      },
+      "error": "Golden Path step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:12.552263"
+    },
+    {
+      "test_name": "golden_path_websocket_connection_attempt",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 697,
+      "details": {
+        "step": "websocket_connection_attempt",
+        "description": "Frontend attempts to establish WebSocket connection",
+        "connection_established": true
+      },
+      "error": "WebSocket step working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.249561"
+    },
+    {
+      "test_name": "dependency_frontend_to_backend",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 153,
+      "details": {
+        "test": "frontend_to_backend",
+        "description": "Frontend trying to reach backend API",
+        "source": "frontend",
+        "target": "backend",
+        "status_code": 200
+      },
+      "error": "Service dependency working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.566545"
+    },
+    {
+      "test_name": "dependency_frontend_to_auth",
+      "status": "UNEXPECTED_SUCCESS",
+      "duration_ms": 129,
+      "details": {
+        "test": "frontend_to_auth",
+        "description": "Frontend trying to reach auth service",
+        "source": "frontend",
+        "target": "auth",
+        "status_code": 200
+      },
+      "error": "Service dependency working (unexpected for Issue #618)",
+      "timestamp": "2025-09-12T18:18:13.696471"
+    }
+  ]
+}
