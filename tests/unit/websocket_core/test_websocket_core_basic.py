@@ -146,16 +146,16 @@ class TestWebSocketCoreTypes(SSotAsyncTestCase):
         ]
 
         for test_id in test_ids:
-            with self.subTest(websocket_id=test_id):
-                user_context = UserExecutionContext(
-                    user_id="type_test_user",
-                    thread_id="type_test_thread",
-                    run_id="type_test_run",
-                    websocket_client_id=test_id
-                )
+            # Test each ID individually (subTest not available in SSotAsyncTestCase)
+            user_context = UserExecutionContext(
+                user_id="type_test_user",
+                thread_id="type_test_thread",
+                run_id="type_test_run",
+                websocket_client_id=test_id
+            )
 
-                self.assertEqual(user_context.websocket_client_id, test_id)
-                self.assertIsInstance(user_context.websocket_client_id, str)
+            self.assertEqual(user_context.websocket_client_id, test_id)
+            self.assertIsInstance(user_context.websocket_client_id, str)
 
     async def test_websocket_context_validation(self):
         """Test WebSocket context validation."""
@@ -263,13 +263,19 @@ class TestWebSocketErrorHandling(SSotAsyncTestCase):
 
     async def test_invalid_user_context_handling(self):
         """Test handling of invalid user context scenarios."""
-        # Test empty user ID
-        with self.assertRaises((ValueError, TypeError)):
+        # Test empty user ID - should raise InvalidContextError
+        from netra_backend.app.services.user_execution_context import InvalidContextError
+        try:
             UserExecutionContext(
                 user_id="",  # Empty user ID should fail
                 thread_id="test_thread",
                 run_id="test_run"
             )
+            # If we get here, validation failed to catch empty user_id
+            self.fail("Empty user_id should have been rejected")
+        except InvalidContextError:
+            # Expected behavior - empty user_id correctly rejected
+            pass
 
     async def test_none_values_handling(self):
         """Test handling of None values in WebSocket context."""
