@@ -79,7 +79,7 @@ from test_framework.ssot.mock_factory import SSotMockFactory
 # Agent core imports
 from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
 
@@ -190,11 +190,10 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
     async def test_execution_engine_factory_user_isolation_patterns(self):
         """
         BVJ: All segments | User Isolation | Ensures proper user context isolation
-        Test ExecutionEngineFactory creates properly isolated execution environments.
+        Test UnifiedExecutionEngineFactory creates properly isolated execution environments.
         """
         # Create WebSocket bridge for factory
         websocket_bridge = AgentWebSocketBridge()
-        factory = ExecutionEngineFactory(websocket_bridge=websocket_bridge)
         
         # Create contexts for different users
         user1_context = UserExecutionContext(
@@ -208,9 +207,15 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
             run_id=str(uuid.uuid4())
         )
         
-        # Create execution engines for different users
-        engine1 = await factory.create_for_user(user1_context)
-        engine2 = await factory.create_for_user(user2_context)
+        # Create execution engines for different users using modern UserExecutionEngine.create_execution_engine method
+        engine1 = await UserExecutionEngine.create_execution_engine(
+            user_context=user1_context, 
+            websocket_bridge=websocket_bridge
+        )
+        engine2 = await UserExecutionEngine.create_execution_engine(
+            user_context=user2_context, 
+            websocket_bridge=websocket_bridge
+        )
         
         # Verify engines are different instances
         assert engine1 is not engine2, "Engines should be separate instances"
@@ -237,20 +242,20 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         assert engine2.get_agent_state(test_key) == user2_value
         assert engine1.get_agent_state(test_key) != engine2.get_agent_state(test_key)
         
-        # Test execution isolation
+        # Test execution isolation using agent result storage
         execution_data1 = {"message": "user1_message", "type": "analysis"}
         execution_data2 = {"message": "user2_message", "type": "optimization"}
         
-        engine1.set_execution_state("current_task", execution_data1)
-        engine2.set_execution_state("current_task", execution_data2)
+        engine1.set_agent_result("current_task", execution_data1)
+        engine2.set_agent_result("current_task", execution_data2)
         
-        retrieved_data1 = engine1.get_execution_state("current_task")
-        retrieved_data2 = engine2.get_execution_state("current_task")
+        retrieved_data1 = engine1.get_agent_result("current_task")
+        retrieved_data2 = engine2.get_agent_result("current_task")
         
         assert retrieved_data1["message"] == "user1_message"
         assert retrieved_data2["message"] == "user2_message"
         
-        logger.info(" PASS:  ExecutionEngineFactory user isolation validation passed")
+        logger.info(" PASS:  UnifiedExecutionEngineFactory user isolation validation passed")
 
     @pytest.mark.unit
     @pytest.mark.golden_path

@@ -14,11 +14,13 @@ Usage:
     from netra_backend.app.schemas.audit_models import CorpusAuditRecord, CorpusAuditMetadata
 """
 
-import uuid
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+# ISSUE #841 SSOT FIX: Import UnifiedIdGenerator for audit record ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 # Import enums from the dedicated module
 from netra_backend.app.schemas.core_enums import CorpusAuditAction, CorpusAuditStatus
@@ -38,7 +40,8 @@ class CorpusAuditMetadata(BaseModel):
 
 class CorpusAuditRecord(BaseModel):
     """Unified corpus audit record - single source of truth."""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    # ISSUE #841 SSOT FIX: Use UnifiedIdGenerator for audit record ID generation
+    id: str = Field(default_factory=lambda: UnifiedIdGenerator.generate_base_id("audit", True, 8))
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     user_id: Optional[str] = None
     action: CorpusAuditAction
