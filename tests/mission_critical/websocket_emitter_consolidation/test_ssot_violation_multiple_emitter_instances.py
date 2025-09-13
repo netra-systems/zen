@@ -56,17 +56,18 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
             except (UnicodeDecodeError, OSError):
                 continue
         
-        # THIS ASSERTION MUST FAIL to prove SSOT violation exists
-        self.assertGreater(
+        # THIS ASSERTION WILL FAIL to prove SSOT violation exists
+        # (Before consolidation, we expect > 1 class, so this assertion should fail)
+        self.assertEqual(
             len(emitter_classes_found), 1,
-            f"SSOT VIOLATION: Found {len(emitter_classes_found)} UserWebSocketEmitter classes: {emitter_classes_found}. "
-            f"Expected exactly 1 for SSOT compliance. This violates Single Source of Truth principle."
+            f"SSOT VIOLATION DETECTED: Found {len(emitter_classes_found)} UserWebSocketEmitter classes: {emitter_classes_found}. "
+            f"Expected exactly 1 for SSOT compliance but found multiple classes violating Single Source of Truth principle."
         )
         
         # Log the specific violations for debugging
-        self.logger.critical(f"SSOT VIOLATION DETECTED: {len(emitter_classes_found)} UserWebSocketEmitter classes found")
+        print(f"SSOT VIOLATION DETECTED: {len(emitter_classes_found)} UserWebSocketEmitter classes found")
         for emitter_path in emitter_classes_found:
-            self.logger.critical(f"  - {emitter_path}")
+            print(f"  - {emitter_path}")
 
     @pytest.mark.expected_to_fail
     @pytest.mark.phase_1_pre_consolidation
@@ -94,11 +95,12 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
             except ImportError:
                 self.logger.info(f"Failed to import UserWebSocketEmitter from {import_path}")
         
-        # THIS ASSERTION MUST FAIL to prove import fragmentation exists
-        self.assertGreater(
+        # THIS ASSERTION WILL FAIL to prove import fragmentation exists  
+        # (Before consolidation, we expect > 1 import path, so this assertion should fail)
+        self.assertEqual(
             len(successful_imports), 1,
-            f"SSOT VIOLATION: UserWebSocketEmitter can be imported from {len(successful_imports)} paths: {successful_imports}. "
-            f"Expected exactly 1 canonical import path for SSOT compliance."
+            f"SSOT VIOLATION DETECTED: UserWebSocketEmitter can be imported from {len(successful_imports)} paths: {successful_imports}. "
+            f"Expected exactly 1 canonical import path for SSOT compliance but found multiple import paths."
         )
 
     @pytest.mark.expected_to_fail
@@ -120,11 +122,12 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
         # Get the module paths for each class
         module_paths = [emitter_type.__module__ for emitter_type in emitter_types]
         
-        # THIS ASSERTION MUST FAIL to prove different types exist
-        self.assertGreater(
+        # THIS ASSERTION WILL FAIL to prove different types exist
+        # (Before consolidation, we expect > 1 module, so this assertion should fail)
+        self.assertEqual(
             len(set(module_paths)), 1,
-            f"SSOT VIOLATION: UserWebSocketEmitter classes from different modules: {module_paths}. "
-            f"Expected single module for SSOT compliance. This causes inconsistent behavior."
+            f"SSOT VIOLATION DETECTED: UserWebSocketEmitter classes from different modules: {module_paths}. "
+            f"Expected single module for SSOT compliance but found multiple modules causing inconsistent behavior."
         )
         
         self.logger.critical(f"Found UserWebSocketEmitter in {len(set(module_paths))} different modules")
@@ -159,10 +162,11 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
         param_sets = [set(sig[1]) for sig in signatures]
         all_same = all(param_set == param_sets[0] for param_set in param_sets)
         
-        # THIS ASSERTION MUST FAIL to prove signature inconsistency
-        self.assertFalse(
+        # THIS ASSERTION WILL FAIL to prove signature inconsistency
+        # (Before consolidation, we expect inconsistent signatures, so this assertion should fail)
+        self.assertTrue(
             all_same,
-            f"SSOT VIOLATION: UserWebSocketEmitter __init__ signatures are inconsistent across modules. "
+            f"SSOT VIOLATION DETECTED: UserWebSocketEmitter __init__ signatures are inconsistent across modules. "
             f"Signatures: {signatures}. This breaks API compatibility and causes integration failures."
         )
         
