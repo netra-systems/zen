@@ -86,6 +86,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 - System not meeting SLA requirements
 
 ### 🔶 MEDIUM - Issue 5: WebSocket Protocol Parameter Issues
+**GitHub Issue:** [#682 - failing-test-websocket-parameter-medium-api-compatibility-extra-headers](https://github.com/netra-systems/netra-apex/issues/682)
 **File:** `tests/e2e/golden_path/test_complete_golden_path_e2e_staging.py`
 **Error:** `BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'`
 **Impact:** WebSocket connection parameter incompatibility
