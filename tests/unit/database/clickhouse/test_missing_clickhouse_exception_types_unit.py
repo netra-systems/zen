@@ -102,40 +102,41 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         assert type(classified_drop).__name__ == "IndexOperationError", \
             f"Expected IndexOperationError for drop operation, got {type(classified_drop).__name__}"
 
-    @pytest.mark.asyncio 
-    async def test_missing_migration_error_type(self):
+    @pytest.mark.asyncio
+    async def test_migration_error_classification(self):
         """
-        EXPECTED TO FAIL: Test demonstrates missing MigrationError type.
-        
-        Current Problem: Migration operations don't have a specific MigrationError type
-        that provides rollback context and partial completion status.
-        
-        Expected Failure: This test should fail because MigrationError doesn't exist
-        and migration failures don't provide adequate rollback information.
+        Test validates MigrationError classification works correctly.
+
+        Validates: Migration operations that fail are properly classified
+        as MigrationError type with appropriate context information.
+
+        Expected Success: This test should pass because MigrationError exists
+        and current classification correctly identifies migration errors.
         """
         # Test migration failure scenario
         migration_error = OperationalError(
             "Migration failed at step 3 of 5: ALTER TABLE users ADD CONSTRAINT check_age CHECK (age >= 0)",
             None, None
         )
-        
-        # Current classification should NOT produce MigrationError
+
+        # Current classification should correctly produce MigrationError
         classified_error = classify_error(migration_error)
-        
-        # This assertion should PASS because MigrationError doesn't exist
-        # (demonstrating the gap - we expect it NOT to be MigrationError)
-        assert type(classified_error).__name__ != "MigrationError", \
-            f"MigrationError should not exist yet, got {type(classified_error).__name__}"
-        
-        # Test that we can import MigrationError (this should fail)
-        with pytest.raises(ImportError):
+
+        # This assertion should PASS because MigrationError exists and works correctly
+        assert type(classified_error).__name__ == "MigrationError", \
+            f"Expected MigrationError, got {type(classified_error).__name__}"
+
+        # Verify it's the correct instance type
+        from netra_backend.app.db.transaction_errors import MigrationError
+        assert isinstance(classified_error, MigrationError), \
+            "Error should be classified as MigrationError instance"
+
+        # Test that we can successfully import MigrationError
+        try:
             from netra_backend.app.db.transaction_errors import MigrationError
-        
-        # Verify migration context is missing from current error handling
-        error_str = str(classified_error)
-        assert "Migration:" not in error_str, "Migration context should not exist yet"
-        assert "Step:" not in error_str, "Step context should not exist yet" 
-        assert "Rollback Required:" not in error_str, "Rollback context should not exist yet"
+            assert MigrationError is not None, "MigrationError should be importable"
+        except ImportError:
+            pytest.fail("MigrationError should be importable from transaction_errors")
 
     @pytest.mark.asyncio
     async def test_missing_table_dependency_error_type(self):
