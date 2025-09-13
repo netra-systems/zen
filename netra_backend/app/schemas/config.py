@@ -668,6 +668,47 @@ class AppConfig(BaseModel):
         ),
     }
 
+    def get_database_url(self) -> str:
+        """Get the database URL for PostgreSQL connection.
+
+        Returns:
+            str: Database connection URL
+        """
+        if self.database_url:
+            return self.database_url
+        # Fallback to construct from environment variables
+        from shared.isolated_environment import get_env
+        env = get_env()
+        host = env.get('POSTGRES_HOST', 'localhost')
+        port = env.get('POSTGRES_PORT', '5432')
+        user = env.get('POSTGRES_USER', 'postgres')
+        password = env.get('POSTGRES_PASSWORD', '')
+        database = env.get('POSTGRES_DB', 'postgres')
+        return f"postgresql://{user}:{password}@{host}:{port}/{database}"
+
+    def get_clickhouse_url(self) -> str:
+        """Get the ClickHouse database URL.
+
+        Returns:
+            str: ClickHouse connection URL
+        """
+        if hasattr(self, 'clickhouse_url') and self.clickhouse_url:
+            return self.clickhouse_url
+        # Construct from ClickHouse configuration
+        if hasattr(self, 'clickhouse_native') and self.clickhouse_native:
+            config = self.clickhouse_native
+            protocol = "clickhouse+native"
+            return f"{protocol}://{config.user}:{config.password}@{config.host}:{config.port}/{config.database}"
+        # Fallback construction
+        from shared.isolated_environment import get_env
+        env = get_env()
+        host = env.get('CLICKHOUSE_HOST', 'localhost')
+        port = env.get('CLICKHOUSE_PORT', '8126')
+        user = env.get('CLICKHOUSE_USER', 'default')
+        password = env.get('CLICKHOUSE_PASSWORD', '')
+        database = env.get('CLICKHOUSE_DB', 'default')
+        return f"clickhouse+native://{user}:{password}@{host}:{port}/{database}"
+
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
