@@ -121,7 +121,7 @@ class CacheError(TransactionError):
 def _has_deadlock_keywords(error_msg: str) -> bool:
     """Check if error message contains deadlock keywords."""
     deadlock_keywords = ['deadlock', 'lock timeout', 'lock wait timeout']
-    return any(keyword in error_msg for keyword in deadlock_keywords)
+    return any(keyword in error_msg.lower() for keyword in deadlock_keywords)
 
 
 def _has_connection_keywords(error_msg: str) -> bool:
@@ -417,11 +417,11 @@ def _attempt_error_classification(error: Exception, error_msg: str) -> Exception
     if classified != error:
         return classified
 
-    classified = _classify_timeout_error(error, error_msg)
+    classified = _classify_connection_error(error, error_msg)
     if classified != error:
         return classified
 
-    classified = _classify_connection_error(error, error_msg)
+    classified = _classify_timeout_error(error, error_msg)
     if classified != error:
         return classified
 
