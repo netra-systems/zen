@@ -4,7 +4,7 @@ from typing import Any, Dict, Optional, Annotated
 from fastapi import APIRouter, Depends, Request, WebSocket, HTTPException
 from pydantic import BaseModel, Field
 
-from netra_backend.app.agents.supervisor_consolidated import (
+from netra_backend.app.agents.supervisor_ssot import (
     SupervisorAgent as Supervisor,
 )
 from netra_backend.app.logging_config import central_logger

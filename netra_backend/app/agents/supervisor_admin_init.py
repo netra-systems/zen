@@ -27,7 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 #     AdminToolDispatcherMigrationHelper,
 #     upgrade_admin_dispatcher_creation
 # )
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 # SSOT COMPLIANCE: Use the facade that redirects to SSOT
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.services.user_execution_context import UserExecutionContext

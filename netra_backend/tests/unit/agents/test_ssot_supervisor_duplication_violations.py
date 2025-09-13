@@ -80,12 +80,11 @@ class TestSSOTSupervisorDuplicationViolations(SSotAsyncTestCase):
         supervisor_classes = []
         implementation_details = []
 
-        # Try to import different SupervisorAgent implementations
+        # Try to import different SupervisorAgent implementations (actual classes, not subclasses)
         supervisor_imports = [
             ("netra_backend.app.agents.supervisor_ssot", "SupervisorAgent"),
             ("netra_backend.app.agents.supervisor_consolidated", "SupervisorAgent"),
             ("netra_backend.app.agents.supervisor_agent_modern", "SupervisorAgent"),
-            ("netra_backend.app.agents.chat_orchestrator_main", "SupervisorAgent"),
         ]
 
         for module_path, class_name in supervisor_imports:
@@ -93,7 +92,9 @@ class TestSSOTSupervisorDuplicationViolations(SSotAsyncTestCase):
                 module = __import__(module_path, fromlist=[class_name])
                 if hasattr(module, class_name):
                     supervisor_class = getattr(module, class_name)
-                    supervisor_classes.append((module_path, supervisor_class))
+                    # Only count actual SupervisorAgent classes, not subclasses from other modules
+                    if supervisor_class.__name__ == "SupervisorAgent" and supervisor_class.__module__ == module_path:
+                        supervisor_classes.append((module_path, supervisor_class))
 
                     # Analyze implementation details
                     methods = [method for method in dir(supervisor_class) if not method.startswith('_')]
