@@ -75,12 +75,35 @@ from test_framework.websocket_helpers import WebSocketTestHelpers
 def require_docker_services_session():
     """Session-level Docker services requirement with graceful degradation.
     
+    Issue #773: Enhanced to prevent 2-minute hangs with fast timeout checks.
     Prevents 120s+ hangs by using fast Docker availability check.
     Skips entire test session if Docker unavailable.
     
     Business Impact: Prevents mission critical test suite blockage affecting $500K+ ARR validation.
     """
-    require_docker_services_smart()
+    try:
+        # Issue #773: Wrap in timeout to prevent session-level hangs
+        import signal
+        import time
+        
+        def timeout_handler(signum, frame):
+            raise TimeoutError("Docker services check timed out after 15 seconds")
+        
+        # Set up timeout handler (Unix/Linux systems)
+        if hasattr(signal, 'SIGALRM'):
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(15)  # 15 second timeout for entire session check
+        
+        try:
+            require_docker_services_smart()
+        finally:
+            if hasattr(signal, 'SIGALRM'):
+                signal.alarm(0)  # Cancel alarm
+                
+    except TimeoutError as e:
+        pytest.skip(f"Docker services session check timed out: {e}")
+    except Exception as e:
+        pytest.skip(f"Docker services session check failed: {e}")
 
 
 # ============================================================================
@@ -197,7 +220,7 @@ class MissionCriticalEventValidator:
             failures.append("CRITICAL: Invalid event data structure")
         
         # 3. Check for reasonable timing (more lenient for real connections)
-        if not self._validate_timing(timeout=60.0):  # Increased timeout for real connections
+        if not self._validate_timing(timeout=30.0):  # Issue #773: Cloud Run compatible timeout
             failures.append("CRITICAL: Event timing violations")
         
         # 4. Validate event sequence (if we have enough events)
@@ -210,7 +233,7 @@ class MissionCriticalEventValidator:
         
         return len(failures) == 0, failures
     
-    def _validate_timing(self, timeout: float = 60.0) -> bool:
+    def _validate_timing(self, timeout: float = 30.0) -> bool:  # Issue #773: Cloud Run compatible timeout
         """Validate event timing constraints (relaxed for real connections)."""
         if not self.event_timeline:
             return True
@@ -927,7 +950,7 @@ class TestRealWebSocketIntegration:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(45)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout
     async def test_real_agent_websocket_events(self):
         """Test complete flow with REAL WebSocket connections and agent events."""
         test_context = self.test_contexts[0]
@@ -942,7 +965,7 @@ class TestRealWebSocketIntegration:
         
         # Listen for agent events on real WebSocket connection
         start_time = time.time()
-        timeout = 30.0
+        timeout = 20.0  # Issue #773: Reduced for Cloud Run compatibility
         
         captured_events = []
         while time.time() - start_time < timeout:
@@ -975,7 +998,7 @@ class TestRealWebSocketIntegration:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_concurrent_real_websocket_connections(self):
         """Test multiple concurrent REAL WebSocket connections."""
         # Test concurrent connections using the test base
@@ -1001,7 +1024,7 @@ class TestRealWebSocketIntegration:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(45)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout
     async def test_real_websocket_error_handling(self):
         """Test error handling with REAL WebSocket connections."""
         test_context = self.test_contexts[1]
@@ -1031,7 +1054,7 @@ class TestRealWebSocketIntegration:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(60)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_websocket_performance_metrics(self):
         """Test performance metrics collection with REAL WebSocket connections."""
         test_context = self.test_contexts[2]
@@ -1077,8 +1100,8 @@ class TestRealE2EWebSocketAgentFlow:
         # Create comprehensive real WebSocket test base
         self.test_base = WebSocketTestBase(
             config=RealWebSocketTestConfig(
-                connection_timeout=20.0,
-                event_timeout=15.0,
+                connection_timeout=10.0,  # Issue #773: Cloud Run compatible
+                event_timeout=8.0,  # Issue #773: Cloud Run compatible
                 concurrent_connections=10  # Reduced for E2E stability
             )
         )
@@ -1104,7 +1127,7 @@ class TestRealE2EWebSocketAgentFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.critical
-    @pytest.mark.timeout(90)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_e2e_agent_conversation_flow(self):
         """Test complete agent conversation flow with REAL WebSocket connections."""
         test_context = self.e2e_contexts[0]
@@ -1124,7 +1147,7 @@ class TestRealE2EWebSocketAgentFlow:
         # Listen for real WebSocket events with extended timeout
         captured_events = []
         start_time = time.time()
-        timeout = 45.0
+        timeout = 25.0  # Issue #773: Reduced for Cloud Run compatibility
         
         while time.time() - start_time < timeout:
             try:
@@ -1157,7 +1180,7 @@ class TestRealE2EWebSocketAgentFlow:
     
     @pytest.mark.asyncio
     @pytest.mark.critical 
-    @pytest.mark.timeout(90)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_websocket_resilience_and_recovery(self):
         """Test WebSocket resilience with REAL connections under load."""
         # Test resilience by creating multiple connections and testing recovery
@@ -1740,8 +1763,8 @@ class TestRealWebSocketPerformance:
         """Setup real performance test environment."""
         # Create high-performance test configuration
         perf_config = RealWebSocketTestConfig(
-            connection_timeout=10.0,
-            event_timeout=5.0,
+            connection_timeout=8.0,  # Issue #773: Cloud Run compatible
+            event_timeout=4.0,  # Issue #773: Cloud Run compatible
             concurrent_connections=15,  # Higher for performance testing
             max_retries=3
         )
@@ -1761,7 +1784,7 @@ class TestRealWebSocketPerformance:
             logger.warning(f"Performance test cleanup error: {e}")
     
     @pytest.mark.asyncio
-    @pytest.mark.timeout(120)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_high_throughput_websocket_connections(self):
         """Test high throughput with REAL WebSocket connections."""
         connection_count = 10  # Realistic for real connections
@@ -1791,7 +1814,7 @@ class TestRealWebSocketPerformance:
                 f"Real connection throughput too low: {connections_per_second:.2f} connections/sec"
     
     @pytest.mark.asyncio
-    @pytest.mark.timeout(180)
+    @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_websocket_connection_stability(self):
         """Test REAL WebSocket connection stability under extended operation."""
         # Test stability with real connections over time
@@ -1880,7 +1903,7 @@ class TestRealWebSocketPerformance:
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_real_websocket_agent_event_flow_comprehensive():
     """Comprehensive test of real WebSocket agent event flow - standalone test."""
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
@@ -1900,7 +1923,7 @@ async def test_real_websocket_agent_event_flow_comprehensive():
         # Listen for any response
         events_captured = []
         start_time = time.time()
-        timeout = 15.0
+        timeout = 10.0  # Issue #773: Reduced for Cloud Run compatibility
         
         while time.time() - start_time < timeout:
             try:
@@ -1931,7 +1954,7 @@ async def test_real_websocket_agent_event_flow_comprehensive():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(90)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_comprehensive_event_content_validation():
     """Comprehensive validation of event content structure and data quality.
     
@@ -1991,7 +2014,7 @@ async def test_comprehensive_event_content_validation():
                 },
                 "execution_context": {
                     "retry_count": 0,
-                    "timeout": 30.0,
+                    "timeout": 20.0,  # Issue #773: Cloud Run compatible
                     "priority": "normal"
                 },
                 "timestamp": time.time()
@@ -2112,7 +2135,7 @@ async def test_comprehensive_event_content_validation():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_event_latency_performance_validation():
     """Test that all events meet the < 100ms latency requirement.
     
@@ -2207,7 +2230,7 @@ async def test_event_latency_performance_validation():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(90) 
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773) 
 async def test_reconnection_within_3_seconds():
     """Test that WebSocket reconnection completes within 3 seconds.
     
@@ -2327,7 +2350,7 @@ async def test_reconnection_within_3_seconds():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(90)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_real_websocket_concurrent_users():
     """Test multiple concurrent users with real WebSocket connections."""
     async with WebSocketTestBase().real_websocket_test_session() as test_base:
@@ -2406,7 +2429,7 @@ async def test_real_websocket_concurrent_users():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_malformed_event_handling():
     """Test handling of malformed WebSocket events.
     
@@ -2500,7 +2523,7 @@ async def test_malformed_event_handling():
 
 @pytest.mark.asyncio
 @pytest.mark.critical
-@pytest.mark.timeout(90)
+@pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
 async def test_event_burst_handling():
     """Test handling of rapid event bursts without message loss.
     
@@ -3043,7 +3066,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         
         # Test bridge initialization
         bridge_config = IntegrationConfig(
-            initialization_timeout_s=30,
+            initialization_timeout_s=20,  # Issue #773: Cloud Run compatible
             health_check_interval_s=10,
             recovery_attempt_limit=3
         )

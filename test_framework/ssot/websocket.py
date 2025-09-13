@@ -1259,6 +1259,12 @@ WebSocketTestHelper = WebSocketTestUtility  # Alias for WebSocketTestUtility
 # Create alias for backward compatibility and Issue #485 fix
 websocket_test_utilities = WebSocketTestUtility
 
+# Import new WebSocket infrastructure components for backward compatibility
+from .websocket_test_infrastructure_factory import WebSocketTestInfrastructureFactory
+from .websocket_auth_helper import WebSocketAuthHelper
+from .websocket_bridge_test_helper import WebSocketBridgeTestHelper
+from .communication_metrics_collector import CommunicationMetricsCollector
+
 # Export SSOT WebSocket utilities
 __all__ = [
     'WebSocketTestUtility',
@@ -1271,5 +1277,10 @@ __all__ = [
     'get_websocket_test_utility',
     'cleanup_global_websocket_utility',
     'create_test_websocket_manager',
-    'websocket_test_utilities'  # Issue #485 fix: Missing import
+    'websocket_test_utilities',  # Issue #485 fix: Missing import
+    # New WebSocket infrastructure components
+    'WebSocketTestInfrastructureFactory',
+    'WebSocketAuthHelper', 
+    'WebSocketBridgeTestHelper',
+    'CommunicationMetricsCollector'
 ]
