@@ -232,6 +232,32 @@ class WebSocketAuthResult:
     error_message: Optional[str] = None
     error_code: Optional[str] = None
     
+    # Backward compatibility properties for tests
+    @property
+    def is_valid(self) -> bool:
+        """Compatibility property: Returns True if authentication was successful."""
+        return self.success
+
+    @property
+    def user_id(self) -> Optional[str]:
+        """Compatibility property: Returns user ID from user context."""
+        return self.user_context.user_id if self.user_context else None
+
+    @property
+    def email(self) -> Optional[str]:
+        """Compatibility property: Returns email from auth result."""
+        return self.auth_result.email if self.auth_result else None
+
+    @property
+    def subscription_tier(self) -> Optional[str]:
+        """Compatibility property: Returns subscription tier from user context."""
+        return self.user_context.subscription_tier if self.user_context else None
+
+    @property
+    def permissions(self) -> Optional[List[str]]:
+        """Compatibility property: Returns permissions from auth result."""
+        return self.auth_result.permissions if self.auth_result else None
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for compatibility."""
         result = {
@@ -239,7 +265,7 @@ class WebSocketAuthResult:
             "error_message": self.error_message,
             "error_code": self.error_code
         }
-        
+
         if self.user_context:
             result.update({
                 "user_id": self.user_context.user_id,
@@ -247,14 +273,14 @@ class WebSocketAuthResult:
                 "thread_id": self.user_context.thread_id,
                 "run_id": self.user_context.run_id
             })
-        
+
         if self.auth_result:
             result.update({
                 "email": self.auth_result.email,
                 "permissions": self.auth_result.permissions,
                 "validated_at": self.auth_result.validated_at
             })
-            
+
         return result
 
 
@@ -1543,6 +1569,64 @@ class UnifiedWebSocketAuthenticator:
             stacklevel=2
         )
         return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
+
+    async def authenticate_token(self, token: str, websocket: Optional[WebSocket] = None) -> WebSocketAuthResult:
+        """
+        DEPRECATED: Direct token authentication method - use authenticate_websocket_ssot() instead.
+
+        This method provides backward compatibility for tests that call authenticate_token() directly.
+        It creates a mock WebSocket if needed and delegates to the SSOT authentication function.
+
+        Args:
+            token: JWT token to authenticate
+            websocket: Optional WebSocket connection (created if not provided)
+
+        Returns:
+            WebSocketAuthResult with authentication outcome
+        """
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.authenticate_token() is deprecated. "
+            "Use authenticate_websocket_ssot() function instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
+        # Update deprecated stats for backward compatibility
+        self._websocket_auth_attempts += 1
+
+        try:
+            # If no websocket provided, create a mock one for token validation
+            if websocket is None:
+                from test_framework.websocket_helpers import MockWebSocketConnection
+                websocket = MockWebSocketConnection()
+
+                # Add token to subprotocols for extraction
+                websocket.subprotocols = [f"jwt-auth.{token}"]
+                websocket.headers = {"authorization": f"Bearer {token}"}
+
+            # Delegate to SSOT function
+            result = await authenticate_websocket_ssot(websocket, e2e_context=None)
+
+            # Update deprecated stats
+            if result.success:
+                self._websocket_auth_successes += 1
+            else:
+                self._websocket_auth_failures += 1
+
+            return result
+
+        except Exception as e:
+            # Handle token authentication errors
+            self._websocket_auth_failures += 1
+
+            return WebSocketAuthResult(
+                success=False,
+                user_context=None,
+                auth_result=None,
+                error_message=f"Token authentication failed: {str(e)}",
+                error_code="TOKEN_AUTH_ERROR"
+            )
     
     def get_websocket_auth_stats(self) -> Dict[str, Any]:
         """DEPRECATED: Get authentication statistics (for backward compatibility only)."""

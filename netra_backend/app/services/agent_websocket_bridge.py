@@ -3021,7 +3021,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         
         try:
             from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as WebSocketEventEmitter, WebSocketEmitterFactory
-            from netra_backend.app.agents.supervisor.user_execution_context import validate_user_context
+            from netra_backend.app.services.user_execution_context import validate_user_context
             from netra_backend.app.core.config import get_config
             
             # PHASE 2 FEATURE FLAG: Check if SSOT consolidation is enabled

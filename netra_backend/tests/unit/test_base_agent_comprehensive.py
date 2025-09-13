@@ -380,7 +380,7 @@ class TestBaseAgentModernExecutionPatterns(SSotAsyncTestCase):
     def setUp(self):
         """Set up test environment."""
         super().setUp()
-        self.modern_agent = TestBaseAgent(name="ModernAgent")
+        self.modern_agent = MockBaseAgent(name="ModernAgent")
         self.legacy_agent = LegacyTestAgent(name="LegacyAgent")
         
     async def asyncTearDown(self):

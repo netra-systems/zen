@@ -29,7 +29,7 @@ from netra_backend.app.agents.chat_orchestrator.pipeline_executor import (
     PipelineExecutor,
 )
 from netra_backend.app.agents.chat_orchestrator.trace_logger import TraceLogger
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger

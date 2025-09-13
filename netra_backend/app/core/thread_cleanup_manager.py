@@ -263,7 +263,7 @@ class ThreadCleanupManager:
     
     def _schedule_cleanup(self) -> None:
         """
-        Schedule a background cleanup task.
+        Schedule a background cleanup task with comprehensive NoneType validation.
 
         ISSUE #704 FIX: Enhanced validation to prevent 'NoneType' object is not callable errors.
         This method now performs comprehensive validation of the asyncio event loop and its methods
@@ -275,9 +275,11 @@ class ThreadCleanupManager:
         # Skip cleanup during Python shutdown
         try:
             if hasattr(sys, 'meta_path') and sys.meta_path is None:
+                logger.warning("Thread cleanup skipped - Python shutdown detected (sys.meta_path is None)")
                 return
         except (ImportError, AttributeError):
             # Python is shutting down, skip cleanup
+            logger.warning("Thread cleanup skipped - Python shutdown detected (ImportError/AttributeError)")
             return
 
         self._cleanup_scheduled = True
@@ -297,75 +299,87 @@ class ThreadCleanupManager:
             finally:
                 self._cleanup_scheduled = False
 
-        # Schedule the cleanup task with proper error handling and NoneType protection
+        # Schedule the cleanup task with comprehensive NoneType validation
         try:
-            # Check if we have an active event loop first
+            # COMPREHENSIVE VALIDATION - Check if we have an active event loop first
             try:
                 loop = asyncio.get_running_loop()
-                # ISSUE #704 FIX: Comprehensive validation to prevent NoneType errors
-                if (loop is not None and
-                    hasattr(loop, 'create_task') and
-                    callable(loop.create_task) and
-                    not loop.is_closed()):
 
-                    # Create task in the running loop - loop is now guaranteed to be valid
-                    task = loop.create_task(background_cleanup())
-                    logger.debug("Background cleanup task scheduled in active event loop")
-                else:
-                    # Loop is invalid or closed, raise to trigger fallback
-                    # Enhanced logging to diagnose specific conditions
-                    loop_state = "None" if loop is None else "not None"
-                    has_create_task = hasattr(loop, 'create_task') if loop else False
-                    is_callable = callable(getattr(loop, 'create_task', None)) if loop and has_create_task else False
-                    is_closed = loop.is_closed() if loop else "N/A"
+                # ISSUE #704 FIX: Multi-level validation to prevent NoneType errors
+                if loop is None:
+                    logger.warning("Thread cleanup fallback - asyncio.get_running_loop() returned None")
+                    raise RuntimeError("Event loop is None")
 
-                    logger.warning(f"Event loop validation failed - loop: {loop_state}, "
-                                 f"has_create_task: {has_create_task}, is_callable: {is_callable}, "
-                                 f"is_closed: {is_closed}")
-                    raise RuntimeError("Event loop is invalid or closed")
-            except (RuntimeError, AttributeError):
-                # No running loop or invalid loop - try to get any loop
+                if not hasattr(loop, 'create_task'):
+                    logger.warning("Thread cleanup fallback - event loop missing create_task method")
+                    raise RuntimeError("Event loop missing create_task method")
+
+                if not callable(getattr(loop, 'create_task', None)):
+                    logger.warning("Thread cleanup fallback - event loop create_task is not callable")
+                    raise RuntimeError("Event loop create_task is not callable")
+
+                if hasattr(loop, 'is_closed') and callable(loop.is_closed) and loop.is_closed():
+                    logger.warning("Thread cleanup fallback - event loop is closed")
+                    raise RuntimeError("Event loop is closed")
+
+                # If all validations pass, create the task
+                task = loop.create_task(background_cleanup())
+                logger.debug("Background cleanup task scheduled in active event loop (comprehensive validation passed)")
+
+            except RuntimeError as e:
+                # No running loop or validation failed - try to get any loop
+                logger.debug(f"Active event loop validation failed: {e}, trying existing event loop")
+
                 try:
                     loop = asyncio.get_event_loop()
-                    if (loop is not None and
-                        hasattr(loop, 'create_task') and
-                        callable(loop.create_task) and
-                        loop.is_running() and
-                        not loop.is_closed()):
 
+                    # COMPREHENSIVE VALIDATION for existing loop
+                    if loop is None:
+                        logger.warning("Thread cleanup fallback - asyncio.get_event_loop() returned None")
+                        raise RuntimeError("Existing event loop is None")
+
+                    if not hasattr(loop, 'create_task'):
+                        logger.warning("Thread cleanup fallback - existing event loop missing create_task method")
+                        raise RuntimeError("Existing event loop missing create_task method")
+
+                    if not callable(getattr(loop, 'create_task', None)):
+                        logger.warning("Thread cleanup fallback - existing event loop create_task is not callable")
+                        raise RuntimeError("Existing event loop create_task is not callable")
+
+                    if hasattr(loop, 'is_closed') and callable(loop.is_closed) and loop.is_closed():
+                        logger.warning("Thread cleanup fallback - existing event loop is closed")
+                        raise RuntimeError("Existing event loop is closed")
+
+                    if hasattr(loop, 'is_running') and callable(loop.is_running) and loop.is_running():
                         task = loop.create_task(background_cleanup())
-                        logger.debug("Background cleanup task scheduled in existing event loop")
+                        logger.debug("Background cleanup task scheduled in existing event loop (comprehensive validation passed)")
                     else:
-                        # Enhanced logging for fallback loop validation failure
-                        loop_state = "None" if loop is None else "not None"
-                        has_create_task = hasattr(loop, 'create_task') if loop else False
-                        is_callable = callable(getattr(loop, 'create_task', None)) if loop and has_create_task else False
-                        is_running = loop.is_running() if loop else "N/A"
-                        is_closed = loop.is_closed() if loop else "N/A"
+                        logger.warning("Thread cleanup fallback - existing event loop is not running")
+                        raise RuntimeError("Existing event loop not running")
 
-                        logger.warning(f"Fallback event loop validation failed - loop: {loop_state}, "
-                                     f"has_create_task: {has_create_task}, is_callable: {is_callable}, "
-                                     f"is_running: {is_running}, is_closed: {is_closed}")
-                        raise RuntimeError("Event loop not running or invalid")
-                except (RuntimeError, AttributeError, ImportError):
-                    # Fallback to thread-based cleanup
-                    raise RuntimeError("No asyncio event loop available")
+                except (RuntimeError, AttributeError, ImportError) as inner_e:
+                    # All asyncio approaches failed - fallback to thread-based cleanup
+                    logger.info(f"Thread cleanup fallback - asyncio unavailable: {inner_e}")
+                    raise RuntimeError(f"No asyncio event loop available: {inner_e}")
 
-        except (RuntimeError, ImportError):
-            # No event loop running, cleanup immediately in thread
+        except (RuntimeError, ImportError, AttributeError) as e:
+            # No event loop running or all validations failed - cleanup immediately in thread
+            logger.info(f"Thread cleanup using synchronous fallback - asyncio validation failed: {e}")
+
             def sync_cleanup():
                 try:
                     time.sleep(5.0)
                     self.cleanup_stale_threads(max_age_minutes=5)
                     gc.collect()
-                except Exception as e:
-                    logger.error(f"Sync cleanup failed: {e}")
+                    logger.debug("Synchronous thread cleanup completed successfully")
+                except Exception as cleanup_e:
+                    logger.error(f"Sync cleanup failed: {cleanup_e}")
                 finally:
                     self._cleanup_scheduled = False
 
             cleanup_thread = threading.Thread(target=sync_cleanup, daemon=True)
             cleanup_thread.start()
-            logger.debug("Background cleanup scheduled in separate thread (no event loop)")
+            logger.debug("Background cleanup scheduled in separate thread (comprehensive asyncio validation failed)")
     
     def force_cleanup_all(self) -> Dict[str, int]:
         """

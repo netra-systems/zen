@@ -253,17 +253,17 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         """
         logger.info("[U+1F9EA] Testing multiple BaseModel registration attempts")
         
-        class TestDataModel2(BaseModel):
+        class MockDataModel2(BaseModel):
             field1: str
             field2: int
-        
-        class TestDataModel3(BaseModel):
+
+        class MockDataModel3(BaseModel):
             data: Dict[str, Any]
         
         basemodels = [
             MockDataModel(name="test1", value=1),
-            TestDataModel2(field1="test2", field2=2), 
-            TestDataModel3(data={"test": 3})
+            MockDataModel2(field1="test2", field2=2),
+            MockDataModel3(data={"test": 3})
         ]
         
         registration_attempts = []

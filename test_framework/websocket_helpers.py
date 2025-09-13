@@ -315,18 +315,31 @@ class MockWebSocketConnection:
         self.state.name = "OPEN"
         self._sent_messages = []
         self._receive_queue = asyncio.Queue()
-        
+
         # SSOT COMPLIANCE FIX: Use UnifiedIdGenerator instead of direct UUID
         from shared.id_generation import generate_uuid_replacement, UnifiedIdGenerator
-        
+
         if not user_id:
             user_id = f"mock_user_{generate_uuid_replacement()}"
         self.user_id = user_id
         self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
-        
+
         # Track sequence numbers for ordering tests
         self._sequence_number = 0
-        
+
+        # Add WebSocket attributes expected by authentication system
+        self.client = MagicMock()
+        self.client.host = "localhost"
+        self.client.port = 8000
+
+        # Add WebSocket state attributes
+        self.client_state = WebSocketState.CONNECTED
+        self.application_state = WebSocketState.CONNECTED
+
+        # Add headers and subprotocols
+        self.headers = {}
+        self.subprotocols = []
+
         # Don't auto-populate with mock responses - let tests control what they receive
     
     async def _add_mock_responses(self):

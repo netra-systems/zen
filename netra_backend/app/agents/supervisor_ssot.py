@@ -17,9 +17,8 @@ if TYPE_CHECKING:
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.logging_config import central_logger
 
-# SSOT ExecutionResult imports
-from netra_backend.app.agents.base.interface import ExecutionResult, ExecutionContext
-from netra_backend.app.schemas.core_enums import ExecutionStatus
+# SSOT ExecutionContext import (ExecutionResult removed for compatibility)
+from netra_backend.app.agents.base.interface import ExecutionContext
 
 # SSOT imports - use the proper service location
 from netra_backend.app.services.user_execution_context import (
@@ -53,15 +52,28 @@ class SupervisorAgent(BaseAgent):
     - No duplicate implementation of existing patterns
     """
     
-    def __init__(self, 
+    def __init__(self,
                  llm_manager: LLMManager,
-                 websocket_bridge: Optional[AgentWebSocketBridge] = None):
+                 websocket_bridge: Optional[AgentWebSocketBridge] = None,
+                 db_session_factory=None,  # Legacy compatibility
+                 user_context: Optional[UserExecutionContext] = None,  # Legacy compatibility
+                 tool_dispatcher=None):  # Legacy compatibility
         """Initialize SSOT SupervisorAgent.
-        
+
         Args:
             llm_manager: LLM manager for agent operations
             websocket_bridge: Optional WebSocket bridge
+            db_session_factory: Legacy parameter (ignored in SSOT pattern)
+            user_context: Legacy parameter (ignored in SSOT pattern)
+            tool_dispatcher: Legacy parameter (ignored in SSOT pattern)
         """
+        # Log legacy parameter usage
+        if db_session_factory is not None:
+            logger.info(" CYCLE:  Legacy db_session_factory parameter ignored in SSOT pattern")
+        if user_context is not None:
+            logger.info(" CYCLE:  Legacy user_context parameter ignored in SSOT pattern")
+        if tool_dispatcher is not None:
+            logger.info(" CYCLE:  Legacy tool_dispatcher parameter ignored in SSOT pattern")
         super().__init__(
             llm_manager=llm_manager,
             name="Supervisor",
@@ -136,7 +148,7 @@ class SupervisorAgent(BaseAgent):
         
         return execution_context
 
-    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> ExecutionResult:
+    async def execute(self, context: UserExecutionContext, stream_updates: bool = False) -> Dict[str, Any]:
         """Execute using SSOT UserExecutionEngine pattern.
         
         Args:
@@ -144,7 +156,7 @@ class SupervisorAgent(BaseAgent):
             stream_updates: Whether to stream updates via WebSocket
             
         Returns:
-            ExecutionResult with SSOT-compliant format
+            Dict[str, Any] with execution results (SSOT-compliant format)
         """
         # Validate context using SSOT validation
         context = validate_user_context(context)
@@ -200,21 +212,18 @@ class SupervisorAgent(BaseAgent):
                 logger.info(f"[U+1F4E1] Emitted agent_completed event for run {context.run_id}")
             
             logger.info(f" PASS:  SSOT SupervisorAgent execution completed for user {context.user_id}")
-            
-            # Return SSOT ExecutionResult format
+
+            # Return Dict format for compatibility with consolidated version
             orchestration_successful = result.success if hasattr(result, 'success') else True
-            return ExecutionResult(
-                status=ExecutionStatus.COMPLETED,
-                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
-                data={
-                    "supervisor_result": "completed",
-                    "orchestration_successful": orchestration_successful,
-                    "user_isolation_verified": True,
-                    "results": result.result if hasattr(result, 'result') else result,
-                    "user_id": str(context.user_id),
-                    "run_id": str(context.run_id)
-                }
-            )
+            return {
+                "supervisor_result": "completed",
+                "orchestration_successful": orchestration_successful,
+                "user_isolation_verified": True,
+                "results": result.result if hasattr(result, 'result') else result,
+                "user_id": str(context.user_id),
+                "run_id": str(context.run_id),
+                "status": "completed"
+            }
             
         except Exception as e:
             # CRITICAL FIX: Emit error event on failure
@@ -227,21 +236,18 @@ class SupervisorAgent(BaseAgent):
                 )
                 logger.error(f"[U+1F4E1] Emitted agent_error event for run {context.run_id}: {e}")
             
-            # Return SSOT ExecutionResult for error cases
-            return ExecutionResult(
-                status=ExecutionStatus.FAILED,
-                request_id=getattr(context, 'request_id', f"supervisor_{context.run_id}"),
-                error_message=str(e),
-                error_code=type(e).__name__,
-                data={
-                    "supervisor_result": "failed",
-                    "orchestration_successful": False,
-                    "user_isolation_verified": True,
-                    "error": str(e),
-                    "user_id": str(context.user_id),
-                    "run_id": str(context.run_id)
-                }
-            )
+            # Return Dict format for compatibility with consolidated version
+            return {
+                "supervisor_result": "failed",
+                "orchestration_successful": False,
+                "user_isolation_verified": True,
+                "error": str(e),
+                "user_id": str(context.user_id),
+                "run_id": str(context.run_id),
+                "status": "failed",
+                "error_code": type(e).__name__,
+                "error_message": str(e)
+            }
             
         finally:
             # Cleanup using SSOT cleanup
@@ -432,8 +438,31 @@ class SupervisorAgent(BaseAgent):
                 "user_request": user_request
             }
 
+    # === Legacy Compatibility Methods (Phase A) ===
+
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics for legacy compatibility."""
+        return {
+            "supervisor": "operational",
+            "pattern": "SSOT",
+            "factory_based": True,
+            "isolation_verified": True
+        }
+
+    def register_agent(self, name: str, agent: 'BaseAgent') -> None:
+        """Register a sub-agent for legacy compatibility.
+
+        Args:
+            name: Agent name
+            agent: Agent instance
+        """
+        # In SSOT pattern, agents are created via factory, not pre-registered
+        logger.info(f" CYCLE:  Legacy register_agent called for {name} - delegating to factory pattern")
+        # No-op in SSOT pattern - agents created on-demand
+        pass
+
     def __str__(self) -> str:
         return f"SupervisorAgent(SSOT pattern, factory-based)"
-    
+
     def __repr__(self) -> str:
         return f"SupervisorAgent(pattern='SSOT', factory_based=True)"

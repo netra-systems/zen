@@ -422,19 +422,23 @@ class TestRealWebSocketComponents:
         """Test that tool dispatcher integrates with WebSocket properly."""
         # Create user context for proper isolation
         user_context = UserExecutionContext(
-            user_id="test_user",
-            run_id="test_run", 
-            thread_id="test_thread"
+            user_id="test-user-123",
+            run_id="test-run-456",
+            thread_id="test-thread-789"
         )
         
         # Import and create WebSocket manager using secure factory pattern
         from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
         websocket_manager = await create_websocket_manager(user_context=user_context)
-        
+
+        # Create WebSocket emitter from manager for tool dispatcher
+        from netra_backend.app.websocket_core.unified_emitter import WebSocketEmitterFactory
+        websocket_emitter = WebSocketEmitterFactory.create_scoped_emitter(websocket_manager, user_context)
+
         # Test that tool dispatcher can be created and has proper integration points
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
             user_context=user_context,
-            websocket_manager=websocket_manager
+            websocket_emitter=websocket_emitter
         )
         
         # Verify initial state
@@ -452,9 +456,9 @@ class TestRealWebSocketComponents:
         
         # Create user context for proper isolation
         user_context = UserExecutionContext(
-            user_id="test_user", 
-            run_id="test_run",
-            thread_id="test_thread"
+            user_id="test-user-456",
+            run_id="test-run-789",
+            thread_id="test-thread-123"
         )
         
         # Use real LLM manager instead of mock

@@ -48,15 +48,46 @@ Legacy singleton patterns remain in agent factory system causing:
 - **10% E2E Staging tests** - Business value protection
 - **Strategy:** 20% failing tests (prove violations) + 60% validation + 20% performance
 
-### Phase 2: Test Creation 🔄
-- [ ] Create failing tests for SSOT violations
-- [ ] Create user isolation validation tests
-- [ ] Validate test execution (no docker required)
+### Phase 2: Test Creation ✅
+- [x] Create failing tests for SSOT violations (**10 tests in 3 files**)
+- [x] Create user isolation validation tests (**Cross-user contamination exposed**)
+- [x] Validate test execution (no docker required) (**All 10 tests fail as expected**)
 
-### Phase 3: SSOT Remediation Planning 🔄
-- [ ] Plan singleton removal strategy
-- [ ] Plan factory pattern consolidation
-- [ ] Plan UserExecutionContext standardization
+#### Test Creation Results:
+- **`test_ssot_user_contamination_violations.py`** (3 tests) - Cross-user factory/WebSocket contamination
+- **`test_ssot_supervisor_duplication_violations.py`** (3 tests) - Multiple SupervisorAgent implementations
+- **`test_ssot_factory_singleton_violations.py`** (4 tests) - Factory returning singletons instead of unique instances
+
+#### Major Discovery:
+- **3 SupervisorAgent implementations found:** `supervisor_ssot.py`, `supervisor_consolidated.py`, `chat_orchestrator_main.py`
+- **Agent Registry Configuration:** Singleton registry breaks multi-user isolation
+- **WebSocket Bridge Sharing:** Events delivered to wrong users
+- **100% failure rate:** All 10 tests fail as expected, proving violations exist
+
+### Phase 3: SSOT Remediation Planning ✅
+- [x] Plan singleton removal strategy (**4-phase approach: A-D over 7 weeks**)
+- [x] Plan factory pattern consolidation (**Interface standardization + consumer migration**)
+- [x] Plan UserExecutionContext standardization (**Per-user registry patterns**)
+
+#### SSOT Remediation Strategy:
+**Phase A (Weeks 1-2):** SupervisorAgent Consolidation
+- Establish `supervisor_ssot.py` as canonical SSOT implementation
+- Migrate 140+ consumers from `supervisor_consolidated.py` (10-15 files/day)
+- Standardize interfaces, eliminate duplicate methods
+
+**Phase B (Weeks 3-4):** Agent Registry De-Singletonization
+- Replace global AgentRegistry singleton with factory pattern
+- Implement UserExecutionContext-scoped registries
+- Ensure complete user isolation
+
+**Phase C (Weeks 5-6):** WebSocket Bridge Isolation
+- Leverage existing UnifiedWebSocketEmitter SSOT implementation
+- Ensure event delivery isolation per UserExecutionContext
+- Validate no cross-user event contamination
+
+**Phase D (Week 7):** Final Factory Pattern Compliance
+- Standardize all factory interfaces across agent types
+- Complete SSOT compliance validation
 
 ### Phase 4: Execute Remediation 🔄
 - [ ] Remove legacy singleton patterns
