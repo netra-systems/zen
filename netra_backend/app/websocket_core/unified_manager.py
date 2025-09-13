@@ -267,11 +267,14 @@ class RegistryCompat:
     async def register_connection(self, user_id: str, connection_info):
         """Register a connection for test compatibility."""
         # Convert ConnectionInfo to WebSocketConnection format for the unified manager
+        # ISSUE #556 FIX: Extract thread_id from connection_info if available
+        thread_id = getattr(connection_info, 'thread_id', None)
         websocket_conn = WebSocketConnection(
             connection_id=connection_info.connection_id,
             user_id=user_id,
             websocket=connection_info.websocket,
             connected_at=connection_info.connected_at,
+            thread_id=thread_id,  # ISSUE #556 FIX: Include thread_id for propagation
             metadata={"connection_info": connection_info}
         )
         await self.manager.add_connection(websocket_conn)
@@ -926,6 +929,7 @@ class UnifiedWebSocketManager:
     def get_connection_info(self, connection_id: str) -> Optional[Dict[str, Any]]:
         """
         ISSUE #618 FIX: Compatibility method for legacy connection info access.
+        ISSUE #556 FIX: Include thread_id for thread propagation support.
         
         Tests expect to access connection metadata through get_connection_info.
         """
@@ -940,6 +944,7 @@ class UnifiedWebSocketManager:
                 'user_id': connection.user_id,
                 'websocket': connection.websocket,
                 'connected_at': connection.connected_at,
+                'thread_id': connection.thread_id,  # ISSUE #556 FIX: Include thread_id for propagation
                 'is_active': True
             }
         
@@ -1507,11 +1512,12 @@ class UnifiedWebSocketManager:
         )
         await self.add_connection(connection)
         
-        # Return a ConnectionInfo-like object for compatibility
+        # Return a ConnectionInfo-like object for compatibility - ISSUE #556 FIX: Include thread_id
         conn_info = type('ConnectionInfo', (), {
             'user_id': user_id,
             'connection_id': final_connection_id,
-            'websocket': websocket
+            'websocket': websocket,
+            'thread_id': thread_id  # ISSUE #556 FIX: Include thread_id for propagation
         })()
         
         # Store in connection registry for compatibility

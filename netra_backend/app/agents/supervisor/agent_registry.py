@@ -874,7 +874,8 @@ class AgentRegistry(BaseAgentRegistry):
                             user_context = UserExecutionContext(
                                 user_id=user_id,
                                 request_id=f"websocket_update_{user_id}_{id(self)}",
-                                thread_id=f"ws_thread_{user_id}"
+                                thread_id=f"ws_thread_{user_id}",
+                                run_id=f"ws_run_{user_id}_{id(self)}"  # ISSUE #556 FIX: Add required run_id parameter
                             )
                             # Set WebSocket manager on user session using factory pattern
                             await user_session.set_websocket_manager(manager, user_context)
