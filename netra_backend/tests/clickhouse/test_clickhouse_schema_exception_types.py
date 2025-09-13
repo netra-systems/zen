@@ -84,9 +84,9 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
             error_name = type(exc_info.value).__name__
             error_message = str(exc_info.value)
 
-            # These assertions validate that exception types are available
-            assert error_name != "TableCreationError" or "Exception" in error_name, \
-                f"Exception type properly handled: {error_name}"
+            # These assertions validate that exception types work properly
+            assert "TableCreationError" in error_name or "Exception" in error_name, \
+                f"Exception type properly classified: {error_name}"
             assert "test_table" in error_message or "CREATE TABLE" in error_message, "Includes table context"
             assert len(error_message) > 0, "Error message is provided"
 
@@ -115,8 +115,8 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
             error_message = str(exc_info.value)
 
             # These assertions validate that column error handling works
-            assert error_name != "ColumnModificationError" or "Exception" in error_name, \
-                f"Exception type properly handled: {error_name}"
+            assert "ColumnModificationError" in error_name or "Exception" in error_name, \
+                f"Exception type properly classified: {error_name}"
             assert "id" in error_message or "column" in error_message.lower(), "Includes column context"
             assert len(error_message) > 0, "Error message is provided"
 
@@ -145,8 +145,8 @@ class TestClickHouseSchemaExceptionTypes(SSotAsyncTestCase):
             error_message = str(exc_info.value)
 
             # These assertions validate that index error handling works
-            assert error_name != "IndexCreationError" or "Exception" in error_name, \
-                f"Exception type properly handled: {error_name}"
+            assert "IndexCreationError" in error_name or "Exception" in error_name, \
+                f"Exception type properly classified: {error_name}"
             assert "test_index" in error_message or "index" in error_message.lower(), "Includes index context"
             assert len(error_message) > 0, "Error message is provided"
 
