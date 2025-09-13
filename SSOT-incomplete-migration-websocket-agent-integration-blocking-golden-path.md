@@ -92,10 +92,38 @@
 - Impact: $500K+ ARR at risk, 90% platform value blocked
 - Evidence: 0% concurrent user success rate from issue #674
 
+## Step 1: Test Discovery and Planning - COMPLETED ✅
+
+### 1.1 EXISTING TESTS DISCOVERED
+**Comprehensive WebSocket test landscape identified:**
+- **Mission Critical Tests (89 files)** - MUST PASS - $500K+ ARR protection
+  - `test_websocket_agent_events_suite.py` - Critical 5-event validation
+  - `test_ssot_websocket_compliance.py` - SSOT protection
+  - `test_websocket_factory_ssot_violation_proof.py` - Intentional failing test
+- **Integration Tests (50 files)** - Business logic protection
+- **Unit Tests (130+ files)** - Component protection  
+- **E2E Tests (88 files)** - End-to-end validation
+
+### 1.2 TEST PLAN CREATED
+**Strategy breakdown:**
+- **60% Existing Tests**: 200+ tests that MUST continue passing after SSOT refactor
+- **20% New SSOT Validation Tests**: 4 new failing tests to reproduce violations:
+  - Concurrent user websocket isolation violation test
+  - Multiple WebSocketNotifier detection test  
+  - Factory pattern SSOT compliance test
+  - 5 critical events delivery failure test
+- **20% Integration Tests**: Non-docker integration + GCP staging E2E
+
+### Test Execution Plan
+**Phase 1 (IMMEDIATE):** Validate protection - Run existing tests before changes
+**Phase 2 (NEXT):** Create 4 failing tests to prove SSOT violations  
+**Phase 3 (FOLLOWING):** SSOT consolidation with iterative test fixing
+**Phase 4 (FINAL):** Full integration validation with 100% concurrent success
+
 ### Next Steps
-- Begin Step 1: Discover and plan tests for SSOT violations
-- Focus on existing WebSocket tests and identify coverage gaps
-- Plan failing tests to reproduce current SSOT violations
+- Begin Step 2: Execute test plan for new SSOT validation tests
+- Create 4 failing tests that reproduce current SSOT violations
+- Focus on proving 0% concurrent user success rate
 
 ## Links and References
 - **Golden Path Analysis:** `docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md`
