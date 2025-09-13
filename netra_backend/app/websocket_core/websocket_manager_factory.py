@@ -496,54 +496,71 @@ class ConnectionLifecycleManager:
 
 class WebSocketManagerFactory:
     """
-    ENHANCED COMPATIBILITY CLASS: Extended factory class for backward compatibility.
-    
-    This class provides the same interface as the previous factory implementation
-    but uses the SSOT WebSocketManager under the hood. Enhanced with additional
-    compatibility methods expected by legacy tests.
+    DEPRECATED FACTORY CLASS: Issue #824 Remediation - SSOT Consolidation
+
+    This class is deprecated and all methods now redirect to the canonical SSOT implementation.
+    The factory pattern created fragmentation with 2+ WebSocket Manager implementations active.
+
+    MIGRATION INSTRUCTIONS:
+    OLD: manager = await WebSocketManagerFactory.create(user_context=context)
+    NEW: manager = await get_websocket_manager(user_context=context)
+
+    OR DIRECT:
+    NEW: manager = WebSocketManager(user_context=context)
     """
-    
+
     @staticmethod
     async def create(user_context=None, user_id: Optional[UserID] = None):
-        """Create WebSocket manager using static factory method."""
-        return await create_websocket_manager(user_context=user_context, user_id=user_id)
-    
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create() redirecting to SSOT")
+        return await get_websocket_manager(user_context=user_context)
+
     @classmethod
     async def create_for_user(cls, user_id: UserID):
-        """Create WebSocket manager for specific user ID."""
-        return await create_websocket_manager(user_id=user_id)
-    
-    @classmethod  
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_for_user() redirecting to SSOT")
+        # Create minimal context for user_id (legacy compatibility)
+        test_context = create_test_user_context()
+        test_context.user_id = ensure_user_id(user_id)
+        return await get_websocket_manager(user_context=test_context)
+
+    @classmethod
     async def create_isolated(cls, user_context):
-        """Create isolated WebSocket manager with user context."""
-        return await create_websocket_manager(user_context=user_context)
-    
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_isolated() redirecting to SSOT")
+        return await get_websocket_manager(user_context=user_context)
+
     @classmethod
     async def create_defensive(cls, user_id: UserID, **kwargs):
-        """Create WebSocket manager with defensive user context."""
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_defensive() redirecting to SSOT")
         defensive_context = create_defensive_user_execution_context(user_id, **kwargs)
-        return await create_websocket_manager(user_context=defensive_context)
-    
+        return await get_websocket_manager(user_context=defensive_context)
+
     @classmethod
     async def create_with_lifecycle_manager(cls, user_id: UserID):
-        """Create WebSocket manager with connection lifecycle manager."""
-        manager = await create_websocket_manager(user_id=user_id)
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_with_lifecycle_manager() redirecting to SSOT")
+        test_context = create_test_user_context()
+        test_context.user_id = ensure_user_id(user_id)
+        manager = await get_websocket_manager(user_context=test_context)
         lifecycle_manager = ConnectionLifecycleManager(manager)
-        
+
         # Attach lifecycle manager to the WebSocket manager for compatibility
         manager._lifecycle_manager = lifecycle_manager
         return manager
-    
+
     @classmethod
     async def create_validated(cls, user_context):
-        """Create WebSocket manager with validation."""
+        """DEPRECATED: Redirects to SSOT get_websocket_manager()"""
+        logger.warning("DEPRECATED: WebSocketManagerFactory.create_validated() redirecting to SSOT")
         if not user_context:
             raise FactoryInitializationError("User context required for validated creation")
-        
+
         if not hasattr(user_context, 'user_id') or not user_context.user_id:
             raise FactoryInitializationError("Valid user_id required in context")
-        
-        return await create_websocket_manager(user_context=user_context)
+
+        return await get_websocket_manager(user_context=user_context)
 
 
 # Export all compatibility functions and classes
@@ -565,4 +582,4 @@ __all__ = [
     '_validate_ssot_user_context_staging_safe'
 ]
 
-logger.info("WebSocket Manager Factory compatibility module loaded - Golden Path ready with enhanced compatibility")
+logger.info("WebSocket Manager Factory DEPRECATED module loaded - Issue #824 remediation (redirecting to SSOT)")
