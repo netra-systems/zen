@@ -188,7 +188,7 @@ class TestRealAuthServiceIntegration:
         
         # Test real User model instantiation
         test_user_data = {
-            "id": "test_user_123",
+            "id": "usr_4a8f9c2b1e5d",
             "email": "test@real-validation.com"
         }
         

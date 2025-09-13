@@ -214,7 +214,7 @@ class P0RegressionTest:
                 mock_send.return_value.set_result(True)
                 
                 # Test that each event type can be processed without errors
-                test_user_id = "test_user_123"
+                test_user_id = "usr_4a8f9c2b1e5d"
                 test_data = {"test": "data", "timestamp": "2024-01-01T00:00:00Z"}
                 
                 for event_type in critical_events:
@@ -323,7 +323,7 @@ class P0RegressionTest:
             from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
             
             # Test ID generation patterns
-            test_user_id = UserID("test_user_123")  
+            test_user_id = UserID("usr_4a8f9c2b1e5d")  
             test_thread_id = ThreadID("test_thread_456")
             print("    PASS:  Strongly typed ID creation works")
             

@@ -11,7 +11,7 @@ def validate_websocket_factory_fix():
     # Simulate the validation logic without actual imports
     class MockLegacyUserExecutionContext:
         def __init__(self):
-            self.user_id = "test_user_123"
+            self.user_id = "usr_4a8f9c2b1e5d"
             self.thread_id = "test_thread_456" 
             self.run_id = "test_run_789"
             self.request_id = "test_request_abc"
@@ -19,7 +19,7 @@ def validate_websocket_factory_fix():
     
     class MockSSOTUserExecutionContext:
         def __init__(self):
-            self.user_id = "test_user_123"
+            self.user_id = "usr_4a8f9c2b1e5d"
             self.thread_id = "test_thread_456"
             self.run_id = "test_run_789"
             self.request_id = "test_request_abc"
