@@ -75,7 +75,7 @@ class TestConfigurationLoaderEdgeCases(SSotBaseTestCase):
             mock_env.return_value = "staging"
 
             # Mock import error in config creation
-            with patch('netra_backend.app.core.configuration.loader.StagingConfig') as mock_staging_config:
+            with patch('netra_backend.app.schemas.config.StagingConfig') as mock_staging_config:
                 mock_staging_config.side_effect = ImportError("Config import failed")
 
                 config = self.loader.load()
@@ -135,13 +135,18 @@ class TestConfigurationLoaderEdgeCases(SSotBaseTestCase):
 
     def test_get_database_url_invalid_db_type(self):
         """Test database URL retrieval with invalid database type."""
-        config = self.loader.load()
+        # Test with standard db types
+        postgres_url = self.loader.get_database_url("postgres")
+        assert postgres_url is not None
 
-        # Should handle invalid db_type gracefully
-        with patch.object(config, 'get_clickhouse_url', return_value="clickhouse://test"):
-            url = self.loader.get_database_url("invalid_type")
-            # Should default to postgres path
-            assert url is not None
+        clickhouse_url = self.loader.get_database_url("clickhouse")
+        assert clickhouse_url is not None
+
+        # Test invalid db_type defaults to postgres behavior
+        invalid_url = self.loader.get_database_url("invalid_type")
+        assert invalid_url is not None
+        # Should be same as postgres URL since it defaults to postgres path
+        assert invalid_url == postgres_url
 
     def test_get_service_config_missing_attributes(self):
         """Test service config retrieval when config lacks expected attributes."""
