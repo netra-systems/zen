@@ -86,7 +86,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Try to create an agent using the "standard" ExecutionEngine path
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
-            # This is what most code would try to do
+            # This is what most code would try to do - prefer UserExecutionEngine for user isolation
             execution_engine = UserExecutionEngine()
             
             # Check if ExecutionEngine can handle user requests
@@ -110,6 +110,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
         if golden_path_execution_test['agent_creation']:
             try:
                 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                # Use UserExecutionEngine for better user isolation testing
                 execution_engine = UserExecutionEngine()
                 
                 # Mock agent request
@@ -158,6 +159,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                 try:
                     if engine_name == 'supervisor':
                         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                        # Use UserExecutionEngine for user isolation testing
                         engine = UserExecutionEngine()
                     elif engine_name == 'unified':
                         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -197,6 +199,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test if ExecutionEngines can deliver WebSocket events
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
+            # Use UserExecutionEngine for user isolation testing
             engine = UserExecutionEngine()
             
             # Check WebSocket event capabilities
@@ -276,7 +279,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Scenario 1: Both users use supervisor ExecutionEngine
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
-            # Create engines for both users (Golden Path simulation)
+            # Create engines for both users (Golden Path simulation) - prefer UserExecutionEngine for isolation
             user1_engine = UserExecutionEngine()
             user2_engine = UserExecutionEngine()
             
@@ -365,14 +368,24 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                     concurrent_user_test['user_engine_properly_isolated'] = True
             
             elif hasattr(UserExecutionEngine, 'create_from_legacy'):
-                # Test legacy creation method (correct signature: registry, websocket_bridge, user_context)
+                # Test legacy creation method with correct signature
                 mock_registry = MagicMock()
-                user1_isolated_engine = await UserExecutionEngine.create_from_legacy(
-                    mock_registry, None, user_context=user1_context
-                )
-                user2_isolated_engine = await UserExecutionEngine.create_from_legacy(
-                    mock_registry, None, user_context=user2_context
-                )
+                try:
+                    # Try the newer signature first (registry, websocket_bridge, user_context)
+                    user1_isolated_engine = await UserExecutionEngine.create_from_legacy(
+                        mock_registry, None, user_context=user1_context
+                    )
+                    user2_isolated_engine = await UserExecutionEngine.create_from_legacy(
+                        mock_registry, None, user_context=user2_context
+                    )
+                except TypeError:
+                    # Fallback to older signature pattern
+                    user1_isolated_engine = UserExecutionEngine.create_from_legacy(
+                        mock_websocket_manager=None, user_context=user1_context
+                    )
+                    user2_isolated_engine = UserExecutionEngine.create_from_legacy(
+                        mock_websocket_manager=None, user_context=user2_context
+                    )
                 
                 if user1_isolated_engine is user2_isolated_engine:
                     concurrent_user_test['user_engine_isolation_failed'] = True
@@ -448,6 +461,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test primary ExecutionEngine path (what most users would hit)
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
+            # Use UserExecutionEngine for user isolation testing
             primary_engine = UserExecutionEngine()
             
             # Mock comprehensive agent request
@@ -525,6 +539,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
                 try:
                     if engine_name == 'supervisor':
                         from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                        # Use UserExecutionEngine for user isolation testing
                         engine = UserExecutionEngine()
                     elif engine_name == 'unified':
                         from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
@@ -563,6 +578,7 @@ class TestIssue686GoldenPathExecutionEngineConflicts(SSotAsyncTestCase):
             # Test WebSocket event delivery for user feedback
             from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
             
+            # Use UserExecutionEngine for user isolation testing
             engine = UserExecutionEngine()
             
             # Mock WebSocket event tracking
