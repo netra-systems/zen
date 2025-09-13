@@ -186,7 +186,7 @@ class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
         if ssot_compliance_issues:
             issue_details = "\n".join([f"  - {issue}" for issue in ssot_compliance_issues])
 
-            self.fail(
+            assert False, (
                 f"SSOT INTEGRATION ISSUES: ErrorPolicy production detection not fully compatible with IsolatedEnvironment.\n"
                 f"Issues detected:\n{issue_details}\n\n"
                 f"This indicates ErrorPolicy may be using direct os.getenv() instead of IsolatedEnvironment.\n\n"
@@ -304,7 +304,7 @@ class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
         if ssot_compliance_issues:
             issue_details = "\n".join([f"  - {issue}" for issue in ssot_compliance_issues])
 
-            self.fail(
+            assert False, (
                 f"SSOT INTEGRATION ISSUES: ErrorPolicy staging detection not fully compatible with IsolatedEnvironment.\n"
                 f"Issues detected:\n{issue_details}\n\n"
                 f"This indicates ErrorPolicy may be using direct os.getenv() instead of IsolatedEnvironment.\n\n"
@@ -427,7 +427,7 @@ class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
         if ssot_compliance_issues:
             issue_details = "\n".join([f"  - {issue}" for issue in ssot_compliance_issues])
 
-            self.fail(
+            assert False, (
                 f"SSOT INTEGRATION ISSUES: ErrorPolicy testing detection not fully compatible with IsolatedEnvironment.\n"
                 f"Issues detected:\n{issue_details}\n\n"
                 f"This indicates ErrorPolicy may be using direct os.getenv() instead of IsolatedEnvironment.\n\n"
@@ -545,7 +545,7 @@ class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
         if isolation_violations:
             violation_details = "\n".join([f"  - {violation}" for violation in isolation_violations])
 
-            self.fail(
+            assert False, (
                 f"ISOLATION BOUNDARY VIOLATIONS: ErrorPolicy does not respect IsolatedEnvironment isolation.\n"
                 f"Violations detected:\n{violation_details}\n\n"
                 f"This indicates ErrorPolicy is using direct os.getenv() which bypasses isolation boundaries.\n\n"
@@ -626,7 +626,7 @@ class TestErrorPolicyIsolatedEnvironmentIntegration(SSotBaseTestCase):
         if fallback_test_issues:
             issue_details = "\n".join([f"  - {issue}" for issue in fallback_test_issues])
 
-            self.fail(
+            assert False, (
                 f"FALLBACK INTEGRATION ISSUES: ErrorPolicy development fallback not working with IsolatedEnvironment.\n"
                 f"Issues detected:\n{issue_details}\n\n"
                 f"This indicates ErrorPolicy may be using direct os.getenv() for fallback detection.\n\n"
