@@ -122,13 +122,13 @@ class TestRedisConfigurationValidationIntegration(SSotAsyncTestCase):
     async def test_redis_health_check_with_valid_configuration(self):
         """Test that Redis health check works with valid configuration."""
         # Set up staging environment with valid Redis configuration
-        self.env.set("ENVIRONMENT", "staging", source="test_redis_health_valid")
-        self.env.set("REDIS_HOST", "localhost", source="test_redis_health_valid")
-        self.env.set("REDIS_PORT", "6379", source="test_redis_health_valid")
-        self.env.set("REDIS_DB", "0", source="test_redis_health_valid")
+        self.set_env_var("ENVIRONMENT", "staging")
+        self.set_env_var("REDIS_HOST", "localhost")
+        self.set_env_var("REDIS_PORT", "6379")
+        self.set_env_var("REDIS_DB", "0")
 
         # Mock successful Redis connection
-        with patch('netra_backend.app.core.health_checkers.redis_manager') as mock_redis_manager:
+        with patch('netra_backend.app.redis_manager.redis_manager') as mock_redis_manager:
             # Configure successful Redis manager
             mock_redis_manager.enabled = True
             mock_client = AsyncMock()
