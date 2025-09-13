@@ -16,6 +16,7 @@ CRITICAL: This test MUST FAIL before consolidation to prove SSOT violations exis
 import asyncio
 import inspect
 import pytest
+import logging
 from typing import Dict, List, Set, Type, Any
 from pathlib import Path
 
@@ -27,6 +28,11 @@ class TestSSotViolationMultipleEmitterInstances(SSotAsyncTestCase):
     
     This test MUST FAIL before consolidation to prove the problem exists.
     """
+    
+    def setup_method(self, method):
+        """Set up test infrastructure."""
+        super().setup_method(method)
+        self.logger = logging.getLogger(__name__)
 
     @pytest.mark.expected_to_fail
     @pytest.mark.phase_1_pre_consolidation  
