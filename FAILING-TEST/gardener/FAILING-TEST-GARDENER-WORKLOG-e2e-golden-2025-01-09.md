@@ -46,6 +46,7 @@ The e2e golden path tests reveal critical infrastructure and code quality issues
 - Golden path user flow completely blocked
 
 ### 🚨 HIGH - Issue 2: Missing Authentication Helper Dependencies
+**GitHub Issue:** [#668 - failing-test-auth-helper-missing-dependencies-high-e2e-import-error](https://github.com/netra-systems/netra-apex/issues/668)
 **File:** `tests/e2e/golden_path/test_complete_golden_path_business_value.py`
 **Error:** `NameError: name 'E2EAuthHelper' is not defined`
 **Impact:** Authentication flow tests cannot execute
