@@ -496,7 +496,7 @@ class UnifiedWebSocketManager:
         # Task registry for recovery and restart capabilities
         self._task_registry: Dict[str, Dict[str, Any]] = {}  # task_name -> {func, args, kwargs, meta}
         self._shutdown_requested = False  # Track intentional shutdown vs error-based disable
-        self._last_health_check = datetime.utcnow()
+        self._last_health_check = datetime.now(timezone.utc)
         self._health_check_failures = 0
     
     def _initialize_isolated_mode(self, user_context):
@@ -1416,7 +1416,7 @@ class UnifiedWebSocketManager:
                 message = {
                     "type": event_type,
                     "data": data,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "critical": True,
                     "attempt": attempt + 1 if attempt > 0 else None
                 }
@@ -1459,7 +1459,7 @@ class UnifiedWebSocketManager:
         message = {
             "type": event_type,
             "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "critical": True
         }
         await self._store_failed_message(user_id, message, "no_active_connections_after_retry")
@@ -1772,7 +1772,7 @@ class UnifiedWebSocketManager:
             diagnostics = {
                 'has_websocket': websocket is not None,
                 'websocket_type': type(websocket).__name__ if websocket else None,
-                'connection_age_seconds': (datetime.utcnow() - connection.connected_at).total_seconds(),
+                'connection_age_seconds': (datetime.now(timezone.utc) - connection.connected_at).total_seconds(),
                 'metadata_present': bool(connection.metadata),
             }
             
@@ -1808,7 +1808,7 @@ class UnifiedWebSocketManager:
             failed_message = {
                 **message,
                 'failure_reason': failure_reason,
-                'failed_at': datetime.utcnow().isoformat(),
+                'failed_at': datetime.now(timezone.utc).isoformat(),
                 'recovery_attempts': 0
             }
             
@@ -1816,7 +1816,7 @@ class UnifiedWebSocketManager:
             
             # Increment error count
             self._connection_error_count[user_id] = self._connection_error_count.get(user_id, 0) + 1
-            self._last_error_time[user_id] = datetime.utcnow()
+            self._last_error_time[user_id] = datetime.now(timezone.utc)
             
             # Limit queue size to prevent memory issues
             max_queue_size = 50
@@ -1841,7 +1841,7 @@ class UnifiedWebSocketManager:
                     "action_required": "Consider refreshing the page if issues persist",
                     "support_code": f"CONN_ERR_{user_id[:8]}_{failed_event_type}"
                 },
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "critical": True
             }
             
@@ -1881,9 +1881,9 @@ class UnifiedWebSocketManager:
                     "event_type": failed_event_type,
                     "severity": "error",
                     "action_required": "Try refreshing the page or contact support if the problem persists",
-                    "support_code": f"SYS_ERR_{user_id[:8]}_{failed_event_type}_{datetime.utcnow().strftime('%H%M%S')}"
+                    "support_code": f"SYS_ERR_{user_id[:8]}_{failed_event_type}_{datetime.now(timezone.utc).strftime('%H%M%S')}"
                 },
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "critical": True
             }
             
@@ -1960,7 +1960,7 @@ class UnifiedWebSocketManager:
         
         # Recent errors (last 5 minutes)
         recent_errors = 0
-        cutoff_time = datetime.utcnow()
+        cutoff_time = datetime.now(timezone.utc)
         for error_time in self._last_error_time.values():
             if (cutoff_time - error_time).total_seconds() < 300:  # 5 minutes
                 recent_errors += 1
@@ -1984,7 +1984,7 @@ class UnifiedWebSocketManager:
     
     async def cleanup_error_data(self, older_than_hours: int = 24) -> Dict[str, int]:
         """Clean up old error data to prevent memory leaks."""
-        cutoff_time = datetime.utcnow()
+        cutoff_time = datetime.now(timezone.utc)
         
         # Clean up old error times
         old_error_users = []
@@ -2043,7 +2043,7 @@ class UnifiedWebSocketManager:
                 'func': coro_func,
                 'args': args,
                 'kwargs': kwargs,
-                'created_at': datetime.utcnow(),
+                'created_at': datetime.now(timezone.utc),
                 'restart_count': 0
             }
             
@@ -2066,13 +2066,13 @@ class UnifiedWebSocketManager:
         max_failures = 5  # Increased from 3 for better resilience
         base_delay = 1.0
         max_delay = 120.0  # Increased max delay
-        task_start_time = datetime.utcnow()
+        task_start_time = datetime.now(timezone.utc)
         
         logger.info(f"MONITORING TASK STARTED: {task_name} with recovery support")
         
         while self._monitoring_enabled and not self._shutdown_requested:
             try:
-                iteration_start = datetime.utcnow()
+                iteration_start = datetime.now(timezone.utc)
                 
                 if asyncio.iscoroutinefunction(coro_func):
                     await coro_func(*args, **kwargs)
@@ -2093,7 +2093,7 @@ class UnifiedWebSocketManager:
                 if task_name in self._task_last_failure:
                     del self._task_last_failure[task_name]
                 
-                execution_duration = (datetime.utcnow() - iteration_start).total_seconds()
+                execution_duration = (datetime.now(timezone.utc) - iteration_start).total_seconds()
                 logger.debug(f"Background task {task_name} completed successfully (duration: {execution_duration:.2f}s)")
                 break  # Task completed successfully
                 
@@ -2104,10 +2104,10 @@ class UnifiedWebSocketManager:
             except Exception as e:
                 failure_count += 1
                 self._task_failures[task_name] = failure_count
-                self._task_last_failure[task_name] = datetime.utcnow()
+                self._task_last_failure[task_name] = datetime.now(timezone.utc)
                 
                 # Enhanced error logging with more context
-                task_runtime = (datetime.utcnow() - task_start_time).total_seconds()
+                task_runtime = (datetime.now(timezone.utc) - task_start_time).total_seconds()
                 logger.critical(
                     f"BACKGROUND TASK FAILURE: {task_name} failed (attempt {failure_count}/{max_failures}) "
                     f"after {task_runtime:.1f}s runtime. Error: {e}. Error type: {type(e).__name__}. "
@@ -2168,7 +2168,7 @@ class UnifiedWebSocketManager:
                     break
         
         # Log final task state
-        total_runtime = (datetime.utcnow() - task_start_time).total_seconds()
+        total_runtime = (datetime.now(timezone.utc) - task_start_time).total_seconds()
         logger.info(
             f"MONITORING TASK ENDED: {task_name} finished after {total_runtime:.1f}s "
             f"(failures: {failure_count}, monitoring_enabled: {self._monitoring_enabled})"
@@ -2204,7 +2204,7 @@ class UnifiedWebSocketManager:
                 "error": str(error),
                 "error_type": type(error).__name__,
                 "failure_count": failure_count,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "requires_manual_intervention": True,
                 "impact": "System functionality may be degraded"
             }
@@ -2374,7 +2374,7 @@ class UnifiedWebSocketManager:
                     logger.warning(f"Task {task_name} has exception: {task.exception()}")
             
             # Update health check timestamp
-            self._last_health_check = datetime.utcnow()
+            self._last_health_check = datetime.now(timezone.utc)
             self._health_check_failures = 0
             
             logger.info(
@@ -2397,7 +2397,7 @@ class UnifiedWebSocketManager:
         Returns:
             Comprehensive health status dictionary
         """
-        current_time = datetime.utcnow()
+        current_time = datetime.now(timezone.utc)
         
         # Calculate task health metrics
         task_health = {
@@ -2610,7 +2610,7 @@ class UnifiedWebSocketManager:
             self._monitoring_enabled = True
             self._shutdown_requested = False
             self._health_check_failures = 0
-            self._last_health_check = datetime.utcnow()
+            self._last_health_check = datetime.now(timezone.utc)
             recovery_status['health_check_reset'] = True
             
             logger.info("Background task monitoring re-enabled")
@@ -2721,7 +2721,7 @@ class UnifiedWebSocketManager:
             self._monitoring_enabled = True
             self._shutdown_requested = False
             self._health_check_failures = 0
-            self._last_health_check = datetime.utcnow()
+            self._last_health_check = datetime.now(timezone.utc)
             restart_status['recovery_actions_taken'].append('state_reset')
             restart_status['monitoring_restarted'] = True
             
@@ -2758,7 +2758,7 @@ class UnifiedWebSocketManager:
                         
                         # Increment restart count
                         task_config['restart_count'] = restart_count + 1
-                        task_config['last_restart'] = datetime.utcnow()
+                        task_config['last_restart'] = datetime.now(timezone.utc)
                         
                         # Start the monitored task
                         recovery_result = await self.start_monitored_background_task(
