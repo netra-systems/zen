@@ -51,7 +51,7 @@ All 5 WebSocket events must work for Golden Path:
 - [x] **Step 0**: SSOT Audit Complete - Issue Created
 - [x] **Step 1**: Discover and Plan Test - COMPLETE
 - [x] **Step 2**: Execute Test Plan for new SSOT tests - COMPLETE
-- [ ] **Step 3**: Plan Remediation of SSOT  
+- [x] **Step 3**: Plan Remediation of SSOT - COMPLETE  
 - [ ] **Step 4**: Execute Remediation SSOT Plan
 - [ ] **Step 5**: Enter Test Fix Loop
 - [ ] **Step 6**: PR and Closure
@@ -113,6 +113,78 @@ All 5 WebSocket events must work for Golden Path:
 - **$500K+ ARR** comprehensive test coverage for WebSocket functionality
 - **100% SSOT violation detection** with quantified evidence
 - **Golden Path validation** ensuring end-to-end user flow protection
+
+## STEP 3 RESULTS - COMPREHENSIVE SSOT REMEDIATION PLAN
+
+### Strategic Decision: UnifiedWebSocketManager as SSOT
+**ANALYSIS CONCLUSION**: `/netra_backend/app/websocket_core/unified_manager.py` should be the single WebSocket manager
+
+**RATIONALE**:
+- **Most Complete Implementation**: Contains actual business logic and WebSocket connection management
+- **User Isolation Support**: Already supports `UserExecutionContext` for multi-user system
+- **Comprehensive Error Handling**: Has graceful degradation and error recovery
+- **Active Usage**: Used by existing working tests and integrations
+- **Wrapper Elimination**: `websocket_manager.py` is just a wrapper that re-exports from unified_manager
+
+### 4-Phase Remediation Strategy (11 Days Total)
+
+#### **Phase 1: Foundation Setup (2 days)**
+- Remove wrapper file (`websocket_manager.py`) 
+- Consolidate factory functionality into `unified_manager.py`
+- Update compatibility shim in `manager.py`
+- **Success Criteria**: All 169+ mission critical tests pass
+- **Risk Level**: LOW (only removes wrapper layer)
+
+#### **Phase 2: Golden Path Priority (3 days)**  
+- Update 15 critical Golden Path files first
+- Fix `/services/agent_websocket_bridge.py` and `/core/tools/unified_tool_dispatcher.py`
+- Standardize `WebSocketManagerProtocol` imports
+- **Success Criteria**: Login → AI responses flow 100% functional
+- **Risk Level**: MEDIUM (updates core business logic)
+
+#### **Phase 3: Bulk Import Remediation (4 days)**
+- Update 50 integration layer files 
+- Update 120+ test infrastructure files
+- Resolve all 451 import violations
+- **Success Criteria**: SSOT compliance from 84.4% to 99%+
+- **Risk Level**: LOW (bulk updates with established patterns)
+
+#### **Phase 4: Cleanup & Validation (2 days)**
+- Remove compatibility shim and temporary files
+- Final SSOT compliance validation
+- Performance benchmarking
+- **Success Criteria**: Single WebSocket manager, 100% SSOT compliance
+- **Risk Level**: LOW (final cleanup)
+
+### Import Remediation Strategy (451 violations across 185 files)
+
+```python
+# BEFORE (BROKEN - multiple sources)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.manager import WebSocketManager
+
+# AFTER (SSOT - single source)
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
+```
+
+### Business Value Protection Strategy
+- **$500K+ ARR Protection**: Compatibility shim maintains all functionality during migration
+- **Golden Path Preservation**: All 5 critical WebSocket events validated at each phase
+- **Zero Downtime**: Gradual migration with immediate rollback capability
+- **Mission Critical Tests**: 169+ tests maintained at 100% pass rate throughout
+
+### Risk Mitigation & Rollback Plan
+- **Compatibility Shim**: `manager.py` maintains import compatibility during transition
+- **Phase-by-Phase Validation**: Each phase validated before proceeding
+- **Immediate Rollback**: Each phase has documented rollback procedures
+- **Staging First**: All changes validated in staging before production
+
+### Files for Consolidation/Removal (12+ files)
+1. `websocket_manager.py` - REMOVE (wrapper only)
+2. `websocket_manager_factory.py` - CONSOLIDATE into unified_manager
+3. `migration_adapter.py` - REMOVE after migration
+4. `ssot_validation_enhancer.py` - REMOVE (temporary)
+5. Additional files TBD during implementation
 
 ## NOTES
 
