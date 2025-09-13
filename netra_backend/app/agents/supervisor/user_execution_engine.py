@@ -52,6 +52,7 @@ from netra_backend.app.core.agent_execution_tracker import (
     get_execution_tracker,
     ExecutionState
 )
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 from netra_backend.app.agents.supervisor.data_access_integration import (
     UserExecutionEngineExtensions
 )
@@ -384,14 +385,16 @@ class UserExecutionEngine(IExecutionEngine):
             if user_context is None:
                 # Create anonymous user context for compatibility
                 from netra_backend.app.services.user_execution_context import UserExecutionContext
-                import uuid
-                
+
+                # Use UnifiedIDManager for secure ID generation
+                id_manager = UnifiedIDManager()
+
                 # Create UserExecutionContext using factory method for compatibility
                 anonymous_user_context = UserExecutionContext.from_request_supervisor(
-                    user_id=f"legacy_compat_{uuid.uuid4().hex[:8]}",
-                    thread_id=f"legacy_thread_{uuid.uuid4().hex[:8]}",
-                    run_id=f"legacy_run_{uuid.uuid4().hex[:8]}",
-                    request_id=f"legacy_req_{uuid.uuid4().hex[:8]}",
+                    user_id=id_manager.generate_id(IDType.USER, prefix="legacy_compat"),
+                    thread_id=id_manager.generate_id(IDType.THREAD, prefix="legacy"),
+                    run_id=id_manager.generate_id(IDType.EXECUTION, prefix="legacy"),
+                    request_id=id_manager.generate_id(IDType.REQUEST, prefix="legacy"),
                     metadata={
                         'compatibility_mode': True,
                         'migration_issue': '#565',
@@ -1875,13 +1878,14 @@ async def create_execution_context_manager(
             result = await engine.execute_agent(context, user_context)
     """
     # Create anonymous user context for compatibility (similar to create_from_legacy)
-    import uuid
-    
+    # Use UnifiedIDManager for secure ID generation
+    id_manager = UnifiedIDManager()
+
     anonymous_user_context = UserExecutionContext(
-        user_id=f"context_mgr_{uuid.uuid4().hex[:8]}",
-        thread_id=f"context_thread_{uuid.uuid4().hex[:8]}",
-        run_id=f"context_run_{uuid.uuid4().hex[:8]}",
-        request_id=f"context_req_{uuid.uuid4().hex[:8]}",
+        user_id=id_manager.generate_id(IDType.USER, prefix="context_mgr"),
+        thread_id=id_manager.generate_id(IDType.THREAD, prefix="context"),
+        run_id=id_manager.generate_id(IDType.EXECUTION, prefix="context"),
+        request_id=id_manager.generate_id(IDType.REQUEST, prefix="context"),
         metadata={
             'compatibility_mode': True,
             'migration_issue': '#620',

@@ -567,8 +567,13 @@ class UnifiedWebSocketManager:
         async with user_lock:
             async with self._lock:
                 # ISSUE #414 FIX: Event contamination prevention setup
-                import uuid
-                isolation_token = str(uuid.uuid4())
+                # Use UnifiedIDManager for isolation token generation
+                id_manager = UnifiedIDManager()
+                isolation_token = id_manager.generate_id(IDType.WEBSOCKET, prefix="isolation", context={
+                    'user_id': connection.user_id,
+                    'connection_id': connection.connection_id,
+                    'purpose': 'event_contamination_prevention'
+                })
                 self._event_isolation_tokens[connection.connection_id] = isolation_token
                 
                 # Initialize user-specific event queue if not exists
@@ -590,8 +595,12 @@ class UnifiedWebSocketManager:
                             self._cross_user_detection[connection.user_id] += 1
                             self._event_queue_stats['contamination_prevented'] += 1
                             
-                            # Generate new token to fix collision
-                            isolation_token = str(uuid.uuid4())
+                            # Generate new token to fix collision using UnifiedIDManager
+                            isolation_token = id_manager.generate_id(IDType.WEBSOCKET, prefix="isolation_fix", context={
+                                'user_id': connection.user_id,
+                                'connection_id': connection.connection_id,
+                                'purpose': 'collision_recovery'
+                            })
                             self._event_isolation_tokens[connection.connection_id] = isolation_token
                             break
                 
@@ -1102,8 +1111,12 @@ class UnifiedWebSocketManager:
         validated_user_id = ensure_user_id(user_id)
         
         # ISSUE #414 FIX: Event contamination prevention and validation
-        import uuid
-        event_id = str(uuid.uuid4())
+        # Use UnifiedIDManager for event ID generation
+        id_manager = UnifiedIDManager()
+        event_id = id_manager.generate_id(IDType.WEBSOCKET, prefix="event", context={
+            'user_id': validated_user_id,
+            'purpose': 'cross_user_contamination_prevention'
+        })
         
         # Validate message doesn't contain foreign user data
         if isinstance(message, dict):

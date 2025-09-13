@@ -32,6 +32,7 @@ from typing import Dict, Set, Optional, Any, Union
 from datetime import datetime
 import asyncio
 import uuid
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType
 
 logger = central_logger.get_logger(__name__)
 
@@ -68,14 +69,16 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
         
         # For testing environments, create isolated test instance if no user context
         if user_context is None:
-            test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+            # Use UnifiedIDManager for test ID generation
+            id_manager = UnifiedIDManager()
+            test_user_id = id_manager.generate_id(IDType.USER, prefix="test")
             logger.warning(f"No user_context provided, creating test instance with user_id={test_user_id}")
-            
+
             # Create mock user context for testing
             test_context = type('MockUserContext', (), {
                 'user_id': test_user_id,
-                'thread_id': f"test_thread_{uuid.uuid4().hex[:8]}",
-                'request_id': f"test_request_{uuid.uuid4().hex[:8]}",
+                'thread_id': id_manager.generate_id(IDType.THREAD, prefix="test"),
+                'request_id': id_manager.generate_id(IDType.REQUEST, prefix="test"),
                 'is_test': True
             })()
             
