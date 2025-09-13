@@ -250,8 +250,8 @@ class TestClickHouseExceptionSpecificity(SSotAsyncTestCase):
         provide specific error types for cache failures.
         """
         # Mock cache operation failure
-        with patch.object(clickhouse_client, '_cache') as mock_cache:
-            mock_cache.get.side_effect = Exception("Cache connection failed")
+        with patch('netra_backend.app.db.clickhouse._clickhouse_cache.cache') as mock_cache_dict:
+            mock_cache_dict.get.side_effect = Exception("Cache connection failed")
             
             # This should raise a specific CacheError but currently raises generic Exception
             with pytest.raises(Exception) as exc_info:
