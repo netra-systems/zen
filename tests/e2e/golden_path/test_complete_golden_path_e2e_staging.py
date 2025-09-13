@@ -242,8 +242,8 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             
             websocket = await websockets.connect(
                 websocket_url,
-                extra_headers=headers,
-                timeout=10.0
+                additional_headers=headers,
+                open_timeout=10.0
             )
             
             self.websocket_connections.append(websocket)
@@ -472,8 +472,8 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 
                 websocket = await websockets.connect(
                     self.staging_config["websocket_url"],
-                    extra_headers=headers,
-                    timeout=10.0
+                    additional_headers=headers,
+                    open_timeout=10.0
                 )
                 
                 # Send user-specific message
@@ -549,6 +549,14 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         
         success_rate = len(successful_journeys) / len(results)
         
+        # Debug logging for failed journeys
+        logger.info(f"🔍 CONCURRENCY DEBUGGING: {len(successful_journeys)}/{len(results)} journeys successful")
+        for i, result in enumerate(results):
+            if isinstance(result, dict) and not result.get("success", True):
+                logger.error(f"❌ Journey {i} failed: {result.get('error', 'Unknown error')}")
+            elif isinstance(result, dict) and result.get("success", False):
+                logger.info(f"✅ Journey {i} succeeded: {result.get('events_received', 0)} events")
+        
         # Verify concurrent execution
         assert success_rate >= 0.5, f"Concurrent success rate too low: {success_rate:.2%}"
         assert concurrent_total_time < 60.0, f"Concurrent execution too slow: {concurrent_total_time:.2f}s"
@@ -593,8 +601,8 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 connection_start = time.time()
                 websocket = await websockets.connect(
                     self.staging_config["websocket_url"],
-                    extra_headers={"Authorization": f"Bearer {user['jwt_token']}"},
-                    timeout=10.0
+                    additional_headers={"Authorization": f"Bearer {user['jwt_token']}"},
+                    open_timeout=10.0
                 )
                 connection_time = time.time() - connection_start
                 

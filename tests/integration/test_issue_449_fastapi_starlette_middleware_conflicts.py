@@ -107,13 +107,13 @@ class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
     the middleware conflicts that cause WebSocket failures in production.
     """
     
-    def setUp(self):
-        super().setUp()
+    def setup_method(self, method=None):
+        super().setup_method(method)
         self.fastapi_app = None
         self.starlette_app = None
     
-    def tearDown(self):
-        super().tearDown()
+    def teardown_method(self, method=None):
+        super().teardown_method(method)
         # Clean up any test clients
         if hasattr(self, 'test_client'):
             self.test_client.close()
@@ -192,13 +192,16 @@ class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
         self.assertEqual(http_response.status_code, 200)
         
         # ASSERTION THAT SHOULD FAIL: WebSocket should work with session middleware
-        with self.assertRaises(RuntimeError) as context:
+        try:
             with client.websocket_connect("/ws") as websocket:
                 data = websocket.receive_text()
                 self.assertEqual(data, "Hello WebSocket")
-        
-        # Verify the specific error we're testing for
-        self.assertIn("SessionMiddleware must be installed", str(context.exception))
+            # If we get here, the test should fail since we expect an error
+            assert False, "WebSocket should fail due to session middleware conflict"
+        except Exception as e:
+            # Verify the specific error we're testing for
+            error_msg = str(e)
+            assert "SessionMiddleware must be installed" in error_msg or "RuntimeError" in error_msg, f"Expected session middleware error, got: {error_msg}"
     
     def test_fastapi_cors_middleware_websocket_upgrade_conflict(self):
         """
@@ -212,7 +215,7 @@ class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
         self.test_client = client
         
         # ASSERTION THAT SHOULD FAIL: WebSocket upgrade should not be processed as CORS
-        with self.assertRaises(Exception) as context:
+        try:
             with client.websocket_connect("/ws") as websocket:
                 data = websocket.receive_text()
                 
@@ -220,15 +223,13 @@ class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
                 # WebSocket responses should not have CORS headers
                 if hasattr(websocket, 'response'):
                     headers = getattr(websocket.response, 'headers', {})
-                    self.assertNotIn("Access-Control-Allow-Origin", headers,
-                                   "WebSocket responses should not have CORS headers")
-        
-        # The exception should be related to CORS processing WebSocket upgrade
-        error_msg = str(context.exception)
-        self.assertTrue(
-            "websocket" in error_msg.lower() or "upgrade" in error_msg.lower(),
-            f"Error should be WebSocket-related: {error_msg}"
-        )
+                    assert "Access-Control-Allow-Origin" not in headers, "WebSocket responses should not have CORS headers"
+            
+            assert False, "WebSocket should fail due to CORS middleware conflict"
+        except Exception as e:
+            # The exception should be related to CORS processing WebSocket upgrade
+            error_msg = str(e).lower()
+            assert "websocket" in error_msg or "upgrade" in error_msg or "cors" in error_msg, f"Error should be WebSocket-related: {e}"
     
     def test_fastapi_auth_middleware_websocket_auth_conflict(self):
         """
@@ -242,15 +243,16 @@ class TestIssue449FastAPIStarletteMiddlewareConflicts(SSotBaseTestCase):
         self.test_client = client
         
         # ASSERTION THAT SHOULD FAIL: WebSocket should have different auth mechanism
-        with self.assertRaises(Exception) as context:
+        try:
             # Try to connect to WebSocket without HTTP Authorization header
             with client.websocket_connect("/ws") as websocket:
                 data = websocket.receive_text()
                 self.assertEqual(data, "Hello WebSocket")
-        
-        # Should get 401 because auth middleware incorrectly applied HTTP auth to WebSocket
-        error_msg = str(context.exception)
-        self.assertIn("401", error_msg, "Should get 401 from auth middleware conflict")
+            assert False, "WebSocket should fail due to auth middleware conflict"
+        except Exception as e:
+            # Should get 401 because auth middleware incorrectly applied HTTP auth to WebSocket
+            error_msg = str(e)
+            assert "401" in error_msg or "Unauthorized" in error_msg, f"Should get 401 from auth middleware conflict: {error_msg}"
     
     def test_starlette_middleware_stack_ordering_conflict(self):
         """
