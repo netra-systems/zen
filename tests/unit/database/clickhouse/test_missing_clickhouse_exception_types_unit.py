@@ -315,7 +315,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         # This assertion should PASS because TableDependencyError exists and works correctly
 
         assert type(classified_error).__name__ == "TableDependencyError", \
-
             f"Expected TableDependencyError, got {type(classified_error).__name__}"
 
 
@@ -325,7 +324,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         from netra_backend.app.db.transaction_errors import TableDependencyError
 
         assert isinstance(classified_error, TableDependencyError), \
-
             "Error should be classified as TableDependencyError instance"
 
 
@@ -387,7 +385,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         # This assertion should PASS because ConstraintViolationError exists and works correctly
 
         assert type(classified_error).__name__ == "ConstraintViolationError", \
-
             f"Expected ConstraintViolationError, got {type(classified_error).__name__}"
 
 
@@ -397,7 +394,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         from netra_backend.app.db.transaction_errors import ConstraintViolationError
 
         assert isinstance(classified_error, ConstraintViolationError), \
-
             "Error should be classified as ConstraintViolationError instance"
 
 
@@ -459,7 +455,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         # This assertion should PASS because EngineConfigurationError exists and works correctly
 
         assert type(classified_error).__name__ == "EngineConfigurationError", \
-
             f"Expected EngineConfigurationError, got {type(classified_error).__name__}"
 
 
@@ -469,7 +464,6 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
         from netra_backend.app.db.transaction_errors import EngineConfigurationError
 
         assert isinstance(classified_error, EngineConfigurationError), \
-
             "Error should be classified as EngineConfigurationError instance"
 
 
@@ -541,8 +535,7 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             # These assertions should PASS because all types exist and are properly defined
 
             assert hasattr(errors_module, error_type), \
-
-                f"transaction_errors module should define {error_type}"
+            f"transaction_errors module should define {error_type}"
 
 
 
@@ -601,8 +594,7 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             # These assertions should PASS because the functions exist and are working
 
             assert hasattr(errors_module, func_name), \
-
-                f"transaction_errors module should define {func_name}"
+            f"transaction_errors module should define {func_name}"
 
 
 
@@ -637,8 +629,7 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             current_type = type(classified).__name__
 
             assert current_type == expected_type, \
-
-                f"Error '{error_msg}' should be classified as {expected_type}, got {current_type}"
+            f"Error '{error_msg}' should be classified as {expected_type}, got {current_type}"
 
 
 
@@ -687,8 +678,7 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             # These assertions should PASS because the methods don't exist (demonstrating the gap)
 
             assert not hasattr(schema_manager, method_name), \
-
-                f"ClickHouseTraceSchema should not have {method_name} yet (demonstrating gap)"
+            f"ClickHouseTraceSchema should not have {method_name} yet (demonstrating gap)"
 
         
 
@@ -713,6 +703,5 @@ class TestMissingClickHouseExceptionTypes(SSotAsyncTestCase):
             # These assertions should PASS because the methods don't exist (demonstrating the gap)
 
             assert not hasattr(schema_manager, method_name), \
-
-                f"ClickHouseTraceSchema should not have {method_name} yet (demonstrating gap)"
+            f"ClickHouseTraceSchema should not have {method_name} yet (demonstrating gap)"
 
