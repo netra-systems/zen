@@ -1574,6 +1574,27 @@ class SecretLoader:
         return _mask_sensitive_value(key, value)
 
 
+# Convenience function for backward compatibility with get_env(key, default) usage pattern
+def get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
+    """Get environment variable with default value (compatibility wrapper).
+    
+    This function maintains backward compatibility with old get_env(key, default) usage
+    while using the SSOT IsolatedEnvironment internally.
+    
+    Args:
+        key: Environment variable name
+        default: Default value if key not found
+        
+    Returns:
+        Environment variable value or default
+        
+    Example:
+        >>> host = get_env_var('REDIS_HOST', 'localhost')
+        >>> port = get_env_var('REDIS_PORT', '6379')
+    """
+    return get_env().get(key, default)
+
+
 # Legacy compatibility function  
 def get_environment_manager(isolation_mode: Optional[bool] = None):
     """Legacy compatibility function for get_environment_manager.

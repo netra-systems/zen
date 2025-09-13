@@ -6,7 +6,8 @@ Focused module adhering to 25-line function limit and modular architecture.
 Enhanced for Issue #374: Database Exception Remediation
 """
 
-from sqlalchemy.exc import DisconnectionError, OperationalError
+import asyncio
+from sqlalchemy.exc import DisconnectionError, OperationalError, InvalidRequestError
 
 
 class TransactionError(Exception):
@@ -47,7 +48,10 @@ def _has_deadlock_keywords(error_msg: str) -> bool:
 
 def _has_connection_keywords(error_msg: str) -> bool:
     """Check if error message contains connection keywords."""
-    connection_keywords = ['connection', 'network', 'timeout', 'broken pipe']
+    connection_keywords = [
+        'connection', 'network', 'timeout', 'broken pipe', 
+        'queuepool limit', 'pool limit exceeded', 'connection pool'
+    ]
     return any(keyword in error_msg for keyword in connection_keywords)
 
 
@@ -177,8 +181,18 @@ def _classify_operational_error(error: OperationalError) -> Exception:
     return _attempt_error_classification(error, error_msg)
 
 
+def _classify_invalid_request_error(error: InvalidRequestError) -> Exception:
+    """Classify InvalidRequestError into specific types."""
+    error_msg = str(error).lower()
+    return _attempt_error_classification(error, error_msg)
+
+
 def classify_error(error: Exception) -> Exception:
     """Classify and potentially wrap errors."""
     if isinstance(error, OperationalError):
         return _classify_operational_error(error)
+    elif isinstance(error, InvalidRequestError):
+        return _classify_invalid_request_error(error)
+    elif isinstance(error, asyncio.TimeoutError):
+        return TimeoutError(f"Timeout error: {error}")
     return error
