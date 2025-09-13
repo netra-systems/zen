@@ -68,7 +68,7 @@ try:
         DatabaseDeadlockError
     )
     from netra_backend.app.db.clickhouse_client import ClickHouseClient
-    from netra_backend.app.services.state_persistence_optimized import OptimizedStatePersistenceService
+    from netra_backend.app.services.state_persistence import StatePersistenceService
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.core.config import get_config
     from shared.database_url_builder import DatabaseURLBuilder
@@ -80,7 +80,7 @@ except ImportError as e:
     DatabaseManager = MagicMock
     TransactionEventCoordinator = MagicMock
     ClickHouseClient = MagicMock
-    OptimizedStatePersistenceService = MagicMock
+    StatePersistenceService = MagicMock
     UserExecutionContext = MagicMock
     DatabaseURLBuilder = MagicMock
     AgentInstanceFactory = MagicMock
@@ -102,6 +102,11 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
     - Performance requirements for business scalability
     - Error handling and data recovery mechanisms
     """
+    
+    async def setup_method(self, method):
+        """Set up test environment with real database infrastructure - pytest entry point."""
+        await super().setup_method(method)
+        await self.async_setup_method(method)
     
     async def async_setup_method(self, method=None):
         """Set up test environment with real database infrastructure."""
@@ -130,6 +135,11 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
         # Initialize database infrastructure
         await self._initialize_database_infrastructure()
         
+    async def teardown_method(self, method):
+        """Clean up database resources - pytest entry point."""
+        await self.async_teardown_method(method)
+        await super().teardown_method(method)
+    
     async def async_teardown_method(self, method=None):
         """Clean up database resources and record metrics."""
         try:
@@ -178,8 +188,8 @@ class TestDatabaseServiceIntegration(SSotAsyncTestCase):
             # Create ClickHouse client for analytics tier
             self.clickhouse_client = ClickHouseClient()
             
-            # Create optimized state persistence service
-            self.state_persistence = OptimizedStatePersistenceService()
+            # Create state persistence service
+            self.state_persistence = StatePersistenceService()
             
             # Create transaction event coordinator
             self.transaction_coordinator = TransactionEventCoordinator()
