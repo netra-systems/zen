@@ -17,7 +17,7 @@ import inspect
 import sys
 import time
 from typing import Any, Dict, List, Optional, Type, Callable
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -48,10 +48,10 @@ class TestFactoryMethodPatternCompliance(SSotAsyncTestCase):
 
         # Mock dependencies for testing
         self._mock_dependencies = {
-            'websocket_bridge': SSotMockFactory.create_mock_websocket_bridge(),
+            'websocket_bridge': SSotMockFactory.create_mock_agent_websocket_bridge(),
             'llm_manager': SSotMockFactory.create_mock_llm_manager(),
-            'tool_dispatcher': SSotMockFactory.create_mock_tool_dispatcher(),
-            'agent_registry': SSotMockFactory.create_mock_agent_registry()
+            'tool_dispatcher': MagicMock(),  # Simple mock for tool dispatcher
+            'agent_registry': MagicMock()   # Simple mock for agent registry
         }
 
         self.record_metric("test_setup_completed", True)

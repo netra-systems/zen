@@ -57,8 +57,10 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     _factory_lock
 )
 
-from netra_backend.app.agents.supervisor.user_execution_context import (
-    UserExecutionContext,
+from netra_backend.app.core.user_execution_context import (
+    UserExecutionContext
+)
+from netra_backend.app.services.user_execution_context import (
     InvalidContextError
 )
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
@@ -174,16 +176,16 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
         # Create test user contexts
         self.test_user_context = UserExecutionContext.from_request(
             user_id="test_user_123",
-            thread_id="test_thread_456", 
+            thread_id="test_thread_456",
             run_id="test_run_789",
-            websocket_connection_id="ws_connection_001"
+            websocket_client_id="ws_connection_001"
         )
         
         self.second_user_context = UserExecutionContext.from_request(
             user_id="test_user_456",
             thread_id="test_thread_789",
             run_id="test_run_012",
-            websocket_connection_id="ws_connection_002"
+            websocket_client_id="ws_connection_002"
         )
         
         # Initialize mock factory
@@ -292,7 +294,7 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
                 user_id="test_user_limit",
                 thread_id=f"thread_{i}",
                 run_id=f"run_{i}",
-                websocket_connection_id=f"ws_{i}"
+                websocket_client_id=f"ws_{i}"
             )
             manager = self.factory.create_manager(context)
             managers.append(manager)
@@ -306,7 +308,7 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
             user_id="test_user_limit",
             thread_id="thread_excess",
             run_id="run_excess",
-            websocket_connection_id="ws_excess"
+            websocket_client_id="ws_excess"
         )
         
         with self.expect_exception(RuntimeError, "has reached the maximum number of WebSocket managers"):
@@ -414,7 +416,7 @@ class TestWebSocketManagerFactory(SSotAsyncTestCase):
                 user_id="test_user_limit",
                 thread_id=f"thread_{i}",
                 run_id=f"run_{i}",
-                websocket_connection_id=f"ws_{i}"
+                websocket_client_id=f"ws_{i}"
             )
             self.factory.create_manager(context)
         
@@ -517,7 +519,7 @@ class TestIsolatedWebSocketManager(SSotAsyncTestCase):
             user_id="test_user_123",
             thread_id="test_thread_456",
             run_id="test_run_789",
-            websocket_connection_id="ws_connection_001"
+            websocket_client_id="ws_connection_001"
         )
         
         self.manager = IsolatedWebSocketManager(self.test_user_context)
@@ -1158,7 +1160,7 @@ class TestSecurityAndConcurrency(SSotAsyncTestCase):
                     user_id=user_id,
                     thread_id=f"thread_{thread_idx}",
                     run_id=f"run_{thread_idx}",
-                    websocket_connection_id=f"ws_{thread_idx}"
+                    websocket_client_id=f"ws_{thread_idx}"
                 )
                 manager = self.factory.create_manager(context)
                 results.append(manager)
@@ -1200,7 +1202,7 @@ class TestSecurityAndConcurrency(SSotAsyncTestCase):
                 user_id=f"temp_user_{i}",
                 thread_id=f"thread_{i}",
                 run_id=f"run_{i}",
-                websocket_connection_id=f"ws_{i}"
+                websocket_client_id=f"ws_{i}"
             )
             
             manager = self.factory.create_manager(context)
@@ -1308,7 +1310,7 @@ class TestSecurityAndConcurrency(SSotAsyncTestCase):
                     user_id=user_id,
                     thread_id=f"thread_{user_idx}_{conn_idx}",
                     run_id=f"run_{user_idx}_{conn_idx}",
-                    websocket_connection_id=f"ws_{user_idx}_{conn_idx}"
+                    websocket_client_id=f"ws_{user_idx}_{conn_idx}"
                 )
                 user_contexts.append(context)
                 

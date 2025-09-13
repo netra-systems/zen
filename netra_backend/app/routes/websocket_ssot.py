@@ -1097,7 +1097,7 @@ class WebSocketSSOTRouter:
                 user_id=user_id,
                 thread_id=thread_id,
                 request_id=f"isolated_req_{uuid.uuid4().hex[:8]}",
-                websocket_connection_id=connection_id,
+                websocket_client_id=connection_id,
                 run_id=f"isolated_run_{uuid.uuid4().hex[:8]}"
             )
             
