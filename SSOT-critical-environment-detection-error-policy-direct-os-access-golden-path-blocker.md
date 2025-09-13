@@ -29,12 +29,13 @@ Critical SSOT violation in ErrorPolicy class with 15+ direct `os.getenv()` calls
 - [x] **Step 0.1:** SSOT Audit completed - Critical violation identified
 - [x] **Step 0.2:** GitHub Issue #675 created
 - [x] **Step 0.3:** IND tracking document created
+- [x] **Step 1.1:** Test discovery completed - **CRITICAL FINDING: ZERO test coverage for ErrorPolicy**
+- [x] **Step 1.2:** Test strategy planned - 45 new tests required
 
 ### 🔄 Current Step
-- [ ] **Step 1:** Discover and plan tests for SSOT issue
+- [ ] **Step 2:** Execute test plan for new SSOT tests (20% focus)
 
 ### 📋 Upcoming Steps
-- [ ] **Step 2:** Execute test plan for new SSOT tests
 - [ ] **Step 3:** Plan SSOT remediation
 - [ ] **Step 4:** Execute SSOT remediation plan
 - [ ] **Step 5:** Test fix loop - prove system stability
