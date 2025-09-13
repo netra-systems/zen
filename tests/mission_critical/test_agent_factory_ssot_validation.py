@@ -132,7 +132,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
         except ImportError as e:
-            self.fail(f"CRITICAL FAILURE: Cannot import AgentRegistry for WebSocket testing: {e}")
+            raise AssertionError(f"CRITICAL FAILURE: Cannot import AgentRegistry for WebSocket testing: {e}")
 
         # Create user contexts with different session IDs
         user_contexts = []
@@ -172,7 +172,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
 
                     registries.append(registry)
                 except Exception as e:
-                    self.fail(
+                    raise AssertionError(
                         f"CRITICAL FAILURE: Registry creation with WebSocket failed: {e}. "
                         f"Issue #686: WebSocket integration must work in factory pattern."
                     )
@@ -218,7 +218,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
-            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for concurrency testing: {e}")
+            raise AssertionError(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for concurrency testing: {e}")
 
         # Create multiple concurrent user contexts
         num_concurrent_users = 3
@@ -254,7 +254,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
                 # Mock execution with user-specific data
                 mock_result = {
                     'user_id': user_context.user_id,
-                    'session_id': user_context.session_id,
+                    'thread_id': user_context.thread_id,  # Use thread_id instead of session_id
                     'engine_id': id(engine),
                     'timestamp': time.time()
                 }
@@ -324,7 +324,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
-            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for memory testing: {e}")
+            raise AssertionError(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for memory testing: {e}")
 
         # Create user contexts with different data
         user_data = [
@@ -340,8 +340,8 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
             context = UserExecutionContext.create_for_user(
                 user_id=user_info['user_id'],
                 thread_id=f"thread_{user_info['user_id']}",
-                run_id=f"run_{user_info['user_id']}_{uuid.uuid4().hex[:8]}",
-                private_data=user_info['data']  # Pass test data as keyword arg
+                run_id=f"run_{user_info['user_id']}_{uuid.uuid4().hex[:8]}"
+                # Note: private_data would be passed via agent_context if needed for test validation
             )
 
             try:
@@ -415,7 +415,7 @@ class TestAgentFactorySsotValidation(SSotAsyncTestCase):
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
         except ImportError as e:
-            self.fail(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for cleanup testing: {e}")
+            raise AssertionError(f"CRITICAL FAILURE: Cannot import UserExecutionEngine for cleanup testing: {e}")
 
         # Track initial object count
         import gc

@@ -336,14 +336,27 @@ class UnifiedTestRunner:
     def _detect_python_command(self) -> str:
         """Detect the correct Python command for the current platform."""
         import shutil
-        
-        # Try Python commands in order of preference
-        commands_to_try = ['python3', 'python', 'py']
-        
+        import platform
+
+        # Platform-aware command ordering
+        if platform.system() == 'Windows':
+            # On Windows, 'python' and 'py' are more reliable than 'python3'
+            commands_to_try = ['python', 'py', 'python3']
+            default_fallback = 'python'
+        else:
+            # On Unix-like systems, prefer python3
+            commands_to_try = ['python3', 'python', 'py']
+            default_fallback = 'python3'
+
+        print(f"[DEBUG] Detecting Python command on {platform.system()}...")
+        print(f"[DEBUG] Trying commands in order: {commands_to_try}")
+
         for cmd in commands_to_try:
+            print(f"[DEBUG] Checking if '{cmd}' is available...")
             if shutil.which(cmd):
                 # Verify it's actually Python 3
                 try:
+                    print(f"[DEBUG] Testing '{cmd}' for Python 3 compatibility...")
                     result = subprocess.run(
                         [cmd, '--version'],
                         capture_output=True,
@@ -351,13 +364,30 @@ class UnifiedTestRunner:
                         timeout=5
                     )
                     if result.returncode == 0 and 'Python 3' in result.stdout:
+                        print(f"[INFO] Successfully detected Python command: '{cmd}' -> {result.stdout.strip()}")
                         return cmd
-                except (subprocess.TimeoutExpired, Exception):
+                    else:
+                        print(f"[DEBUG] '{cmd}' version check failed: {result.stdout.strip()}")
+                except (subprocess.TimeoutExpired, Exception) as e:
+                    print(f"[DEBUG] '{cmd}' execution failed: {e}")
                     continue
-        
-        # Fallback to python3 if nothing found (will error later if not available)
-        print("[WARNING] Could not detect Python 3 command, defaulting to 'python3'")
-        return 'python3'
+            else:
+                print(f"[DEBUG] '{cmd}' not found in PATH")
+
+        # Enhanced fallback with platform awareness
+        print(f"[WARNING] Could not detect working Python 3 command from {commands_to_try}")
+        print(f"[WARNING] Falling back to '{default_fallback}' - this may fail if not available")
+
+        # Final verification of fallback
+        if shutil.which(default_fallback):
+            print(f"[INFO] Fallback command '{default_fallback}' is available")
+            return default_fallback
+        else:
+            # If even fallback doesn't exist, raise an error with helpful message
+            raise RuntimeError(
+                f"No working Python 3 command found on {platform.system()}. "
+                f"Tried: {commands_to_try}. Please ensure Python 3 is installed and available in PATH."
+            )
     
     def initialize_components(self, args: argparse.Namespace):
         """Initialize test execution components based on arguments."""
