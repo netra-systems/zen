@@ -77,7 +77,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 
 
 @dataclass
-class TestUserData:
+class UserDataHelper:
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -448,7 +448,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 "email": f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}@test.com",
                 "name": f"Concurrent User {i}"
             })
-            users.append(TestUserData(
+            users.append(UserDataHelper(
                 user_id=user_data["id"],
                 email=user_data["email"], 
                 name=user_data["name"],
@@ -456,7 +456,7 @@ class TestDatabasePersistenceGoldenPath(DatabaseIntegrationTest):
                 execution_ids=[]
             ))
         
-        async def create_user_data(user: TestUserData, operations_count: int):
+        async def create_user_data(user: UserDataHelper, operations_count: int):
             """Create threads and executions for a user concurrently."""
             tasks = []
             

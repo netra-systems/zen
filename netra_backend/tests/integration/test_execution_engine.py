@@ -58,7 +58,7 @@ class ExecutionStage(Enum):
     COMPLETION = "completion"
 
 
-class TestExecutionAgent(BaseAgent):
+class ExecutionTestAgent(BaseAgent):
     """Test agent for execution engine integration testing."""
     
     def __init__(self, name: str, llm_manager: LLMManager, execution_duration: float = 0.1, 
@@ -333,7 +333,7 @@ class MockExecutionRegistry(AgentRegistry):
     def _initialize_test_agents(self):
         """Initialize registry with test agents."""
         # Fast execution agent
-        self.agents["fast_executor"] = TestExecutionAgent(
+        self.agents["fast_executor"] = ExecutionTestAgent(
             "fast_executor", 
             self.llm_manager,
             execution_duration=0.05,
@@ -341,7 +341,7 @@ class MockExecutionRegistry(AgentRegistry):
         )
         
         # Comprehensive execution agent
-        self.agents["comprehensive_executor"] = TestExecutionAgent(
+        self.agents["comprehensive_executor"] = ExecutionTestAgent(
             "comprehensive_executor",
             self.llm_manager, 
             execution_duration=0.15,
@@ -349,7 +349,7 @@ class MockExecutionRegistry(AgentRegistry):
         )
         
         # Reliable execution agent
-        self.agents["reliable_executor"] = TestExecutionAgent(
+        self.agents["reliable_executor"] = ExecutionTestAgent(
             "reliable_executor",
             self.llm_manager,
             execution_duration=0.08,
@@ -357,7 +357,7 @@ class MockExecutionRegistry(AgentRegistry):
         )
         
         # Flaky execution agent (for error testing)
-        self.agents["flaky_executor"] = TestExecutionAgent(
+        self.agents["flaky_executor"] = ExecutionTestAgent(
             "flaky_executor",
             self.llm_manager,
             execution_duration=0.06,
