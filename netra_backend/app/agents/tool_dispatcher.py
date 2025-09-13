@@ -29,15 +29,29 @@ if TYPE_CHECKING:
 
 from langchain_core.tools import BaseTool
 
-# Import from new consolidated location
-from netra_backend.app.core.tools.unified_tool_dispatcher import (
-    UnifiedToolDispatcher,
-    UnifiedToolDispatcherFactory,
-    ToolDispatchRequest,
-    ToolDispatchResponse,
-    DispatchStrategy,
-    create_request_scoped_dispatcher,
+# TEMPORARY FIX: Import from working implementation until unified_tool_dispatcher is restored
+from netra_backend.app.agents.request_scoped_tool_dispatcher import (
+    RequestScopedToolDispatcher as UnifiedToolDispatcher,
 )
+
+# Create temporary factory and types for compatibility
+class UnifiedToolDispatcherFactory:
+    @staticmethod
+    def create_for_request(*args, **kwargs):
+        return UnifiedToolDispatcher(*args, **kwargs)
+
+# Temporary type aliases for compatibility
+class ToolDispatchRequest:
+    pass
+
+class ToolDispatchResponse:
+    pass
+
+class DispatchStrategy:
+    pass
+
+def create_request_scoped_dispatcher(*args, **kwargs):
+    return UnifiedToolDispatcher(*args, **kwargs)
 
 # Import core tool models (SSOT for tool execution results)
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
