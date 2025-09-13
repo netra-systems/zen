@@ -19,6 +19,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real WebSocket connections, real Execut
 import asyncio
 import json
 import pytest
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 
@@ -43,7 +44,7 @@ from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDisp
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class TestChatOrchestratorIntegration(SSotAsyncTestCase):
+class TestChatOrchestratorIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive integration tests for ChatOrchestrator with real services."""
 
     def setUp(self):
@@ -350,16 +351,17 @@ class TestChatOrchestratorIntegration(SSotAsyncTestCase):
         # Database session should be accessible for data operations
         # (Used for caching, metrics, and result persistence)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up integration test environment."""
-        # Clean up WebSocket connections
+        # Clean up WebSocket connections (sync cleanup)
         if hasattr(self, 'websocket_util'):
-            await self.websocket_util.cleanup()
+            # Note: Using sync cleanup since tearDown is not async
+            self.websocket_util.cleanup_sync()
 
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase):
+class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for WebSocket event integration during orchestration."""
 
     def setUp(self):
@@ -433,6 +435,6 @@ class TestChatOrchestratorWebSocketEventIntegration(SSotAsyncTestCase):
             user_id="websocket_test_user"
         )
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up WebSocket event test environment."""
-        await super().tearDown()
+        super().tearDown()

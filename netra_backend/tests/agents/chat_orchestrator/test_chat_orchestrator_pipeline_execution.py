@@ -17,6 +17,7 @@ SSOT Compliance: Uses SSotAsyncTestCase, real service integration, no mocks for 
 """
 
 import pytest
+import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 
@@ -38,7 +39,7 @@ class AgentState:
             self.accumulated_data = {}
 
 
-class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
+class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase, unittest.TestCase):
     """Comprehensive tests for ChatOrchestrator pipeline execution business logic."""
 
     def setUp(self):
@@ -371,12 +372,12 @@ class TestChatOrchestratorPipelineExecution(SSotAsyncTestCase):
         # Assert business logic: non-dictionary results don't modify accumulated data
         self.assertEqual(set(accumulated_data.keys()), original_keys)
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up test environment."""
-        await super().tearDown()
+        super().tearDown()
 
 
-class TestPipelineExecutorAgentRouting(SSotAsyncTestCase):
+class TestPipelineExecutorAgentRouting(SSotAsyncTestCase, unittest.TestCase):
     """Specialized tests for agent routing logic within pipeline execution."""
 
     def setUp(self):
@@ -467,6 +468,6 @@ class TestPipelineExecutorAgentRouting(SSotAsyncTestCase):
         self.assertEqual(placeholder["action"], "complex_analysis")
         self.assertIn("pending", placeholder["message"])
 
-    async def tearDown(self):
+    def tearDown(self):
         """Clean up agent routing test environment."""
-        await super().tearDown()
+        super().tearDown()
