@@ -25,9 +25,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestClickHouseExceptionBusinessValue(SSotAsyncTestCase):
     """Mission Critical: Business Value Protection for ClickHouse Exception Handling."""
 
-    def setUp(self):
+    def setup_method(self, method):
         """Set up mission critical test fixtures."""
-        super().setUp()
+        super().setup_method(method)
         self.service = ClickHouseService(force_mock=True)
 
     async def test_analytics_pipeline_exception_resilience(self):
@@ -277,7 +277,7 @@ class TestClickHouseExceptionBusinessValue(SSotAsyncTestCase):
         ]
 
         for error_message, expected_exception_type in test_scenarios:
-            with self.subTest(error_message=error_message):
+            # Test each error message scenario
                 mock_client = AsyncMock()
                 mock_client.execute.side_effect = Exception(error_message)
                 self.service._client = mock_client
