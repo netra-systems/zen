@@ -159,10 +159,10 @@ class ConfigurationLoader:
         config = self.load()
         service_configs = {
             "redis": {
-                "host": config.redis.host if hasattr(config, 'redis') else None,
-                "port": config.redis.port if hasattr(config, 'redis') else None,
-                "password": config.redis.password if hasattr(config, 'redis') else None,
-                "url": config.redis_url if hasattr(config, 'redis_url') else None
+                "host": self._get_redis_host(config),
+                "port": self._get_redis_port(config),
+                "password": self._get_redis_password(config),
+                "url": getattr(config, 'redis_url', None) if self._is_redis_configured(config) else None
             },
             "llm": {
                 "provider": config.llm_configs.get("default", {}).provider if hasattr(config, 'llm_configs') and config.llm_configs else None,
@@ -175,6 +175,63 @@ class ConfigurationLoader:
             }
         }
         return service_configs.get(service, {})
+
+    def _is_redis_configured(self, config) -> bool:
+        """Check if Redis is properly configured (not just defaults).
+
+        Args:
+            config: The configuration object
+
+        Returns:
+            bool: True if Redis appears to be configured with non-default values
+        """
+        if not hasattr(config, 'redis'):
+            return False
+        redis_config = config.redis
+
+        # Check for disabled/unconfigured states
+        if (hasattr(redis_config, 'host') and
+            redis_config.host in ['disabled', 'localhost', None]):
+            # If host is disabled/localhost, check if we have other explicit config
+            if not (hasattr(config, 'redis_url') and config.redis_url):
+                return False
+
+        # Check if password is explicitly disabled
+        if (hasattr(redis_config, 'password') and
+            redis_config.password in ['disabled', None]):
+            # If password is disabled, need redis_url or non-default host
+            if not ((hasattr(config, 'redis_url') and config.redis_url) or
+                   (hasattr(redis_config, 'host') and redis_config.host not in ['localhost', 'disabled'])):
+                return False
+
+        # If Redis has explicit redis_url, consider it configured
+        if hasattr(config, 'redis_url') and config.redis_url is not None:
+            return True
+
+        # If Redis has non-default host and it's not disabled, consider configured
+        if (hasattr(redis_config, 'host') and
+            redis_config.host not in ['localhost', 'disabled', None]):
+            return True
+
+        # If Redis has a password that's not disabled, consider configured
+        if (hasattr(redis_config, 'password') and
+            redis_config.password not in ['disabled', None]):
+            return True
+
+        # Otherwise, not configured
+        return False
+
+    def _get_redis_host(self, config) -> str:
+        """Get Redis host, returning None if Redis is not configured."""
+        return config.redis.host if self._is_redis_configured(config) else None
+
+    def _get_redis_port(self, config) -> int:
+        """Get Redis port, returning None if Redis is not configured."""
+        return config.redis.port if self._is_redis_configured(config) else None
+
+    def _get_redis_password(self, config) -> str:
+        """Get Redis password, returning None if Redis is not configured."""
+        return config.redis.password if self._is_redis_configured(config) else None
     
     def validate(self) -> bool:
         """Validate the current configuration.
