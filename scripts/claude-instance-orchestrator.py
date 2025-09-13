@@ -77,12 +77,13 @@ class InstanceStatus:
 class ClaudeInstanceOrchestrator:
     """Orchestrator for managing multiple Claude Code instances"""
 
-    def __init__(self, workspace_dir: Path):
+    def __init__(self, workspace_dir: Path, max_console_lines: int = 5):
         self.workspace_dir = workspace_dir
         self.instances: Dict[str, InstanceConfig] = {}
         self.statuses: Dict[str, InstanceStatus] = {}
         self.processes: Dict[str, subprocess.Popen] = {}
         self.start_datetime = datetime.now()
+        self.max_console_lines = max_console_lines  # Max lines to show per instance
 
     def add_instance(self, config: InstanceConfig):
         """Add a new instance configuration"""
@@ -349,19 +350,47 @@ class ClaudeInstanceOrchestrator:
     async def _stream_output_parallel(self, name: str, process):
         """Stream output in real-time for stream-json format with proper parallel execution"""
         status = self.statuses[name]
+        # Rolling buffer to show only recent lines (prevent console overflow)
+        recent_lines_buffer = []
+        line_count = 0
 
         async def read_stream(stream, prefix):
+            nonlocal line_count
             try:
                 while True:
                     line = await stream.readline()
                     if not line:
                         break
                     line_str = line.decode() if isinstance(line, bytes) else line
+                    line_count += 1
 
-                    # Print with instance name prefix for clarity
-                    print(f"[{name}] {prefix}: {line_str.strip()}", flush=True)
+                    # Add to rolling buffer
+                    display_line = f"[{name}] {line_str.strip()}"
+                    recent_lines_buffer.append(display_line)
 
-                    # Accumulate output in status
+                    # Keep only the most recent lines
+                    if len(recent_lines_buffer) > self.max_console_lines:
+                        recent_lines_buffer.pop(0)
+
+                    # Only show periodic updates to prevent spam
+                    # Show every 10th line, or important lines (errors, completions)
+                    # Respect quiet mode
+                    if self.max_console_lines > 0:
+                        should_display = (
+                            line_count % 10 == 0 or  # Every 10th line
+                            prefix == "STDERR" or    # All error lines
+                            "completed" in line_str.lower() or
+                            "error" in line_str.lower() or
+                            "failed" in line_str.lower()
+                        )
+
+                        if should_display:
+                            print(f"[{name}] Line {line_count}: {line_str.strip()}", flush=True)
+                    elif prefix == "STDERR":
+                        # In quiet mode, still show errors
+                        print(f"[{name}] ERROR: {line_str.strip()}", flush=True)
+
+                    # Accumulate output in status (keep full output for saving)
                     if prefix == "STDOUT":
                         status.output += line_str
                     else:
@@ -379,6 +408,15 @@ class ClaudeInstanceOrchestrator:
         except Exception as e:
             logger.error(f"Error in stream reading for instance {name}: {e}")
         finally:
+            # Show final summary of recent lines for this instance
+            if recent_lines_buffer and self.max_console_lines > 0:
+                print(f"\n[{name}] FINAL OUTPUT (last {len(recent_lines_buffer)} lines of {line_count} total):")
+                for i, line in enumerate(recent_lines_buffer, 1):
+                    print(f"  {i}: {line}")
+
+            # Always show completion message
+            print(f"[{name}] Completed with {line_count} total lines. Full output saved to results file.\n")
+
             # Ensure streams are properly closed
             if process.stdout and not process.stdout.at_eof():
                 process.stdout.close()
@@ -531,6 +569,10 @@ async def main():
                        help="Output format for Claude instances (default: stream-json)")
     parser.add_argument("--timeout", type=int, default=300,
                        help="Timeout in seconds for each instance (default: 300)")
+    parser.add_argument("--max-console-lines", type=int, default=5,
+                       help="Maximum recent lines to show per instance on console (default: 5)")
+    parser.add_argument("--quiet", action="store_true",
+                       help="Minimize console output, show only errors and final summaries")
 
     args = parser.parse_args()
 
@@ -557,8 +599,9 @@ async def main():
     
     logger.info(f"Using workspace: {workspace}")
 
-    # Initialize orchestrator
-    orchestrator = ClaudeInstanceOrchestrator(workspace)
+    # Initialize orchestrator with console output settings
+    max_lines = 0 if args.quiet else args.max_console_lines
+    orchestrator = ClaudeInstanceOrchestrator(workspace, max_console_lines=max_lines)
 
     # Handle command inspection modes
     if args.list_commands:
