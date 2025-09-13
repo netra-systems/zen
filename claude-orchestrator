@@ -1,0 +1,38 @@
+#!/bin/bash
+# Claude Code Instance Orchestrator - Mac-friendly wrapper script
+#
+# This script provides an easy way to run the Claude orchestrator from any directory
+# Usage: ./claude-orchestrator [options]
+#
+# Examples:
+#   ./claude-orchestrator --dry-run
+#   ./claude-orchestrator --list-commands  
+#   ./claude-orchestrator --config my-config.json
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Find the Python script (could be in scripts/ subdirectory)
+PYTHON_SCRIPT="$SCRIPT_DIR/scripts/claude-instance-orchestrator.py"
+
+if [ ! -f "$PYTHON_SCRIPT" ]; then
+    PYTHON_SCRIPT="$SCRIPT_DIR/claude-instance-orchestrator.py"
+fi
+
+if [ ! -f "$PYTHON_SCRIPT" ]; then
+    echo "Error: Could not find claude-instance-orchestrator.py"
+    echo "Looked in:"
+    echo "  $SCRIPT_DIR/scripts/claude-instance-orchestrator.py"
+    echo "  $SCRIPT_DIR/claude-instance-orchestrator.py"
+    exit 1
+fi
+
+# Check if python3 is available
+if ! command -v python3 &> /dev/null; then
+    echo "Error: python3 is required but not found in PATH"
+    echo "Please install Python 3.x"
+    exit 1
+fi
+
+# Run the Python script with all provided arguments
+exec python3 "$PYTHON_SCRIPT" "$@"
