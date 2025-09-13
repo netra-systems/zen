@@ -190,9 +190,9 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that successful agent execution delivers expected business value."""
         # BUSINESS VALUE: Validate that agent execution produces actionable optimization results
-        
-        # Setup registry to return successful agent
-        mock_registry.get.return_value = successful_agent
+
+        # Setup registry to return successful agent - using AsyncMock for get_async method
+        mock_registry.get_async = AsyncMock(return_value=successful_agent)
         
         # Execute agent
         result = await execution_core.execute_agent(business_context, business_state)
@@ -241,8 +241,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that dead agent detection prevents silent business failures."""
         # BUSINESS VALUE: Prevent silent failures that would leave users hanging
-        
-        mock_registry.get.return_value = dead_agent
+
+        mock_registry.get_async = AsyncMock(return_value=dead_agent)
         
         result = await execution_core.execute_agent(business_context, business_state)
         
@@ -285,8 +285,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
         slow_agent.set_trace_context = Mock()  # Should be synchronous 
         slow_agent.websocket_bridge = None
         slow_agent.execution_engine = None
-        
-        mock_registry.get.return_value = slow_agent
+
+        mock_registry.get_async = AsyncMock(return_value=slow_agent)
         
         # Execute with short timeout
         start_time = time.time()
@@ -310,8 +310,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that WebSocket bridge is properly propagated for user feedback."""
         # BUSINESS VALUE: Real-time feedback improves user experience and retention
-        
-        mock_registry.get.return_value = successful_agent
+
+        mock_registry.get_async = AsyncMock(return_value=successful_agent)
         
         await execution_core.execute_agent(business_context, business_state)
         
@@ -342,8 +342,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that trace context is properly propagated for business observability."""
         # BUSINESS VALUE: Observability enables debugging and performance optimization
-        
-        mock_registry.get.return_value = successful_agent
+
+        mock_registry.get_async = AsyncMock(return_value=successful_agent)
         
         with patch('netra_backend.app.agents.supervisor.agent_execution_core.get_unified_trace_context') as mock_trace:
             # Setup parent trace context
@@ -365,8 +365,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that error boundaries provide graceful degradation for business continuity."""
         # BUSINESS VALUE: Graceful failures maintain user trust and system stability
-        
-        mock_registry.get.return_value = failing_agent
+
+        mock_registry.get_async = AsyncMock(return_value=failing_agent)
         
         result = await execution_core.execute_agent(business_context, business_state)
         
@@ -392,8 +392,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that metrics collection enables business performance insights."""
         # BUSINESS VALUE: Performance metrics enable optimization and capacity planning
-        
-        mock_registry.get.return_value = successful_agent
+
+        mock_registry.get_async = AsyncMock(return_value=successful_agent)
         
         result = await execution_core.execute_agent(business_context, business_state)
         
@@ -420,9 +420,9 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that missing agents provide clear business-relevant error messages."""
         # BUSINESS VALUE: Clear error messages improve user experience and reduce support load
-        
+
         # Setup registry to return no agent
-        mock_registry.get.return_value = None
+        mock_registry.get_async = AsyncMock(return_value=None)
         
         result = await execution_core.execute_agent(business_context, business_state)
         
@@ -442,8 +442,8 @@ class TestAgentExecutionCoreBusiness(SSotBaseTestCase):
     ):
         """Test that heartbeat system is properly disabled to prevent error suppression."""
         # BUSINESS VALUE: Visible errors are better than hidden failures for reliability
-        
-        mock_registry.get.return_value = successful_agent
+
+        mock_registry.get_async = AsyncMock(return_value=successful_agent)
         
         # Verify heartbeat is disabled (set to None) in initialization
         assert execution_core.DEFAULT_TIMEOUT == 25.0
