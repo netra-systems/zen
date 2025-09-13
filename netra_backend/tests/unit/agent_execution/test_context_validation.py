@@ -136,14 +136,12 @@ class TestContextValidation(SSotAsyncTestCase):
         for invalid_value in invalid_values:
             with self.expect_exception((InvalidContextError, ValueError, TypeError)):
                 # Create context with invalid value - validation happens during creation
-                invalid_context = UserExecutionContext(
+                UserExecutionContext(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id, 
                     run_id=self.test_run_id,
                     request_id=self.test_request_id
                 )
-                # Then validate the context
-                validate_user_context(invalid_context)
     
     def test_context_validation_security_pattern_detection(self):
         """Test detection of security-sensitive patterns in context."""
@@ -163,14 +161,12 @@ class TestContextValidation(SSotAsyncTestCase):
         for attack_type, payload in security_violations:
             with self.expect_exception(InvalidContextError) as exc_info:
                 # Create context with security violation - validation happens during creation
-                invalid_context = UserExecutionContext(
+                UserExecutionContext(
                     user_id=f"user_{payload}",
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id,
                     request_id=self.test_request_id
                 )
-                # Then validate the context
-                validate_user_context(invalid_context)
             
             error_msg = str(exc_info.value)
             self.assertIn("security", error_msg.lower())
@@ -405,14 +401,12 @@ class TestContextValidation(SSotAsyncTestCase):
         for invalid_value, expected_keyword in test_cases:
             with self.expect_exception(InvalidContextError) as exc_info:
                 # Create context with invalid value - validation happens during creation
-                invalid_context = UserExecutionContext(
+                UserExecutionContext(
                     user_id=invalid_value,
                     thread_id=self.test_thread_id,
                     run_id=self.test_run_id,
                     request_id=self.test_request_id
                 )
-                # Then validate the context
-                validate_user_context(invalid_context)
             
             error_msg = str(exc_info.value).lower()
             self.assertIn(expected_keyword, error_msg,
