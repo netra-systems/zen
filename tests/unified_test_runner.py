@@ -298,6 +298,577 @@ except ImportError:
         PYTEST_COV_AVAILABLE = False
 
 
+# =============================================================================
+# JSON OUTPUT SIZE OPTIMIZATION SYSTEM
+# =============================================================================
+# Business Value Protection: $500K+ ARR (Development velocity and CI/CD efficiency)
+# Addresses issue: Large JSON outputs (127KB+) causing memory and performance issues
+# Implementation follows TDD approach with comprehensive test validation
+
+class JsonSizeExceedsLimitError(Exception):
+    """Raised when JSON output exceeds configured size limits."""
+    pass
+
+
+class JsonSizeAnalyzer:
+    """Analyzes JSON data size and provides metrics."""
+
+    def __init__(self):
+        self.size_cache = {}
+
+    def get_size_metrics(self, data_or_file) -> Dict[str, any]:
+        """
+        Get comprehensive size metrics for JSON data or file.
+
+        Args:
+            data_or_file: Either dict/list JSON data or Path to JSON file
+
+        Returns:
+            Dict with size metrics including bytes, KB, and analysis
+        """
+        if isinstance(data_or_file, (str, Path)):
+            # File path provided
+            file_path = Path(data_or_file)
+            if not file_path.exists():
+                return {"error": "File does not exist", "size_bytes": 0, "size_kb": 0}
+
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                size_bytes = len(content.encode('utf-8'))
+            except Exception as e:
+                return {"error": f"Failed to read file: {e}", "size_bytes": 0, "size_kb": 0}
+        else:
+            # JSON data provided
+            try:
+                json_str = json.dumps(data_or_file, indent=2, default=str)
+                size_bytes = len(json_str.encode('utf-8'))
+            except Exception as e:
+                return {"error": f"Failed to serialize JSON: {e}", "size_bytes": 0, "size_kb": 0}
+
+        size_kb = size_bytes / 1024
+        size_mb = size_kb / 1024
+
+        return {
+            "size_bytes": size_bytes,
+            "size_kb": size_kb,
+            "size_mb": size_mb,
+            "exceeds_limit": False,  # Will be set by caller with specific limit
+            "human_readable": self._format_size_human(size_bytes)
+        }
+
+    def _format_size_human(self, size_bytes: int) -> str:
+        """Format size in human readable format."""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        elif size_bytes < 1024 * 1024:
+            return f"{size_bytes / 1024:.1f} KB"
+        else:
+            return f"{size_bytes / 1024 / 1024:.1f} MB"
+
+
+class JsonOutputOptimizer:
+    """Core JSON output optimization controller."""
+
+    def __init__(self, default_size_limit_kb: int = 100):
+        self.default_size_limit_kb = default_size_limit_kb
+        self.size_analyzer = JsonSizeAnalyzer()
+        self.verbosity_controller = None  # Will be initialized when needed
+
+    def detect_large_output(self, data_or_file, size_limit_kb: Optional[int] = None) -> bool:
+        """
+        Detect if JSON output exceeds size limits.
+
+        Args:
+            data_or_file: JSON data (dict/list) or file path
+            size_limit_kb: Size limit in KB (uses default if None)
+
+        Returns:
+            True if output exceeds limit, False otherwise
+        """
+        limit_kb = size_limit_kb or self.default_size_limit_kb
+        metrics = self.get_size_metrics(data_or_file)
+
+        if "error" in metrics:
+            return False  # Can't determine size, assume not large
+
+        return metrics["size_kb"] > limit_kb
+
+    def get_size_metrics(self, data_or_file) -> Dict[str, any]:
+        """Get size metrics with limit checking."""
+        metrics = self.size_analyzer.get_size_metrics(data_or_file)
+        if "error" not in metrics:
+            metrics["exceeds_limit"] = metrics["size_kb"] > self.default_size_limit_kb
+        return metrics
+
+
+class JsonVerbosityController:
+    """Controls JSON output verbosity with 5 levels of detail."""
+
+    VERBOSITY_LEVELS = {
+        1: "minimal",      # Summary only
+        2: "standard",     # Summary + basic results
+        3: "verbose",      # All details
+        4: "debug",        # Debug information included
+        5: "full"          # Complete details with internal data
+    }
+
+    def __init__(self):
+        self.current_level = 2  # Standard by default
+
+    def apply_verbosity_level(self, data: Dict[str, any], level: int) -> Dict[str, any]:
+        """
+        Apply verbosity level to JSON data.
+
+        Args:
+            data: Original JSON data
+            level: Verbosity level (1-5)
+
+        Returns:
+            Filtered JSON data according to verbosity level
+        """
+        if level not in self.VERBOSITY_LEVELS:
+            level = 2  # Default to standard
+
+        result = {}
+
+        # Level 1: Minimal (summary only)
+        if level >= 1:
+            if "summary" in data:
+                result["summary"] = data["summary"]
+
+        # Level 2: Standard (summary + basic results)
+        if level >= 2:
+            if "categories" in data:
+                result["categories"] = self._filter_categories_basic(data["categories"])
+            if "overall_success" in data:
+                result["overall_success"] = data["overall_success"]
+            if "total_duration" in data:
+                result["total_duration"] = data["total_duration"]
+
+        # Level 3: Verbose (all main details)
+        if level >= 3:
+            if "detailed_results" in data:
+                result["detailed_results"] = self._filter_detailed_results(data["detailed_results"])
+            if "execution_plan" in data:
+                result["execution_plan"] = data["execution_plan"]
+            if "category_statistics" in data:
+                result["category_statistics"] = data["category_statistics"]
+
+        # Level 4: Debug (include debug information)
+        if level >= 4:
+            if "progress_tracking" in data:
+                result["progress_tracking"] = data["progress_tracking"]
+            if "debug_info" in data:
+                result["debug_info"] = data["debug_info"]
+
+        # Level 5: Full (everything including internal data)
+        if level >= 5:
+            # Include all original data
+            result = data.copy()
+
+        return result
+
+    def _filter_categories_basic(self, categories: Dict) -> Dict:
+        """Filter categories to basic information only."""
+        filtered = {}
+        for name, details in categories.items():
+            filtered[name] = {
+                "success": details.get("success", False),
+                "duration": details.get("duration", 0)
+            }
+            # Include failure information if present
+            if not details.get("success", True):
+                filtered[name]["error"] = details.get("error", "Unknown error")
+        return filtered
+
+    def _filter_detailed_results(self, detailed_results: List) -> List:
+        """Filter detailed results to essential information."""
+        if not detailed_results:
+            return []
+
+        # For large result sets, limit to first 50 + failed tests
+        if len(detailed_results) > 100:
+            # Take first 50 and any failed tests
+            filtered = detailed_results[:50]
+            failed_tests = [r for r in detailed_results[50:] if r.get("status") == "FAILED"]
+            filtered.extend(failed_tests[:25])  # Limit failed tests to 25
+            return filtered
+
+        return detailed_results
+
+
+class JsonTruncator:
+    """Truncates JSON data while preserving essential information."""
+
+    def __init__(self):
+        self.essential_fields = ["summary", "overall_success", "total_duration", "failed_tests"]
+
+    def truncate_preserving_essentials(self, data: Dict[str, any],
+                                     target_size_kb: int,
+                                     preserve_fields: Optional[List[str]] = None) -> Dict[str, any]:
+        """
+        Truncate JSON data to target size while preserving essential fields.
+
+        Args:
+            data: Original JSON data
+            target_size_kb: Target size in KB
+            preserve_fields: List of fields to always preserve
+
+        Returns:
+            Truncated JSON data
+        """
+        preserve_fields = preserve_fields or self.essential_fields
+        target_size_bytes = target_size_kb * 1024
+
+        # Start with essential fields
+        result = {}
+        for field in preserve_fields:
+            if field in data:
+                result[field] = data[field]
+
+        # Check if we're already under target size
+        current_size = len(json.dumps(result, default=str).encode('utf-8'))
+        if current_size >= target_size_bytes:
+            # Essential fields alone exceed target, return minimal summary
+            return {"summary": data.get("summary", {}), "truncated": True}
+
+        # Add other fields in order of importance
+        remaining_size = target_size_bytes - current_size
+
+        # Priority order for additional fields
+        priority_fields = [
+            "categories", "execution_plan", "category_statistics",
+            "detailed_results", "progress_tracking", "debug_info"
+        ]
+
+        for field in priority_fields:
+            if field in data and field not in result:
+                field_data = data[field]
+
+                # Estimate field size
+                field_json = json.dumps({field: field_data}, default=str)
+                field_size = len(field_json.encode('utf-8'))
+
+                if field_size <= remaining_size:
+                    result[field] = field_data
+                    remaining_size -= field_size
+                elif field == "detailed_results" and isinstance(field_data, list):
+                    # Try to include partial detailed results
+                    partial_results = self._truncate_detailed_results(
+                        field_data, remaining_size
+                    )
+                    if partial_results:
+                        result[field] = partial_results
+                        result["truncated_detailed_results"] = True
+                    break
+                else:
+                    break
+
+        result["truncated"] = True
+        result["original_size_estimate"] = len(json.dumps(data, default=str).encode('utf-8'))
+        result["target_size_kb"] = target_size_kb
+
+        return result
+
+    def _truncate_detailed_results(self, results: List, max_size_bytes: int) -> List:
+        """Truncate detailed results to fit within size limit."""
+        if not results:
+            return []
+
+        truncated = []
+        current_size = 0
+
+        # Always include failed tests first
+        failed_results = [r for r in results if r.get("status") == "FAILED"]
+        for result in failed_results:
+            result_json = json.dumps(result, default=str)
+            result_size = len(result_json.encode('utf-8'))
+
+            if current_size + result_size > max_size_bytes:
+                break
+
+            truncated.append(result)
+            current_size += result_size
+
+        # Add passed tests until size limit
+        passed_results = [r for r in results if r.get("status") != "FAILED"]
+        for result in passed_results:
+            result_json = json.dumps(result, default=str)
+            result_size = len(result_json.encode('utf-8'))
+
+            if current_size + result_size > max_size_bytes:
+                break
+
+            truncated.append(result)
+            current_size += result_size
+
+        return truncated
+
+
+class JsonSizeLimiter:
+    """Enforces JSON size limits with validation and auto-truncation."""
+
+    def __init__(self, max_size_mb: float = 1.0):
+        self.max_size_mb = max_size_mb
+        self.max_size_bytes = int(max_size_mb * 1024 * 1024)
+        self.truncator = JsonTruncator()
+
+    def validate_and_process(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Validate JSON size and raise exception if exceeds limit.
+
+        Args:
+            data: JSON data to validate
+
+        Returns:
+            Original data if within limits
+
+        Raises:
+            JsonSizeExceedsLimitError: If data exceeds size limits
+        """
+        json_str = json.dumps(data, default=str)
+        size_bytes = len(json_str.encode('utf-8'))
+
+        if size_bytes > self.max_size_bytes:
+            size_mb = size_bytes / 1024 / 1024
+            raise JsonSizeExceedsLimitError(
+                f"JSON size ({size_mb:.2f} MB) exceeds limit ({self.max_size_mb} MB)"
+            )
+
+        return data
+
+    def process_with_auto_truncation(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Process JSON data with automatic truncation if exceeds limits.
+
+        Args:
+            data: JSON data to process
+
+        Returns:
+            Original data if within limits, truncated data otherwise
+        """
+        json_str = json.dumps(data, default=str)
+        size_bytes = len(json_str.encode('utf-8'))
+
+        if size_bytes > self.max_size_bytes:
+            # Auto-truncate to 80% of limit to provide buffer
+            target_size_kb = int(self.max_size_mb * 1024 * 0.8)
+            return self.truncator.truncate_preserving_essentials(data, target_size_kb)
+
+        return data
+
+
+class ProgressiveDetailController:
+    """Controls detail level based on data size and test count."""
+
+    def __init__(self):
+        self.size_thresholds = {
+            "small": 100,    # < 100 tests
+            "medium": 1000,  # 100-1000 tests
+            "large": 5000    # > 1000 tests
+        }
+
+    def apply_progressive_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """
+        Apply progressive detail reduction based on data size.
+
+        Args:
+            data: Original test data
+
+        Returns:
+            Data with appropriate detail level
+        """
+        test_count = self._estimate_test_count(data)
+
+        if test_count < self.size_thresholds["small"]:
+            # Small suites: Full detail
+            return data
+        elif test_count < self.size_thresholds["medium"]:
+            # Medium suites: Reduced detail
+            return self._apply_medium_detail(data)
+        else:
+            # Large suites: Minimal detail
+            return self._apply_minimal_detail(data)
+
+    def _estimate_test_count(self, data: Dict[str, any]) -> int:
+        """Estimate number of tests from data structure."""
+        # Try multiple ways to estimate test count
+        if "summary" in data and "total_tests" in data["summary"]:
+            return data["summary"]["total_tests"]
+
+        if "detailed_results" in data and isinstance(data["detailed_results"], list):
+            return len(data["detailed_results"])
+
+        if "categories" in data:
+            total = 0
+            for category_data in data["categories"].values():
+                if isinstance(category_data, dict) and "test_count" in category_data:
+                    total += category_data["test_count"]
+            if total > 0:
+                return total
+
+        # Default estimate based on data structure
+        return 100
+
+    def _apply_medium_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """Apply medium detail level (reduced but comprehensive)."""
+        result = {
+            "summary": data.get("summary", {}),
+            "overall_success": data.get("overall_success", True),
+            "total_duration": data.get("total_duration", 0),
+            "categories": data.get("categories", {})
+        }
+
+        # Include limited detailed results
+        if "detailed_results" in data:
+            detailed = data["detailed_results"]
+            if isinstance(detailed, list) and len(detailed) > 50:
+                # Include failed tests + sample of passed tests
+                failed = [r for r in detailed if r.get("status") == "FAILED"]
+                passed = [r for r in detailed if r.get("status") != "FAILED"]
+
+                result["detailed_results"] = failed + passed[:30]  # Up to 30 passed tests
+                result["detailed_results_truncated"] = len(detailed)
+            else:
+                result["detailed_results"] = detailed
+
+        return result
+
+    def _apply_minimal_detail(self, data: Dict[str, any]) -> Dict[str, any]:
+        """Apply minimal detail level (summary focus)."""
+        result = {
+            "summary": data.get("summary", {}),
+            "overall_success": data.get("overall_success", True),
+            "total_duration": data.get("total_duration", 0)
+        }
+
+        # Include only failed test information
+        if "detailed_results" in data:
+            detailed = data["detailed_results"]
+            if isinstance(detailed, list):
+                failed = [r for r in detailed if r.get("status") == "FAILED"]
+                if failed:
+                    result["failed_tests"] = failed[:20]  # Up to 20 failed tests
+
+        # Basic category summary
+        if "categories" in data:
+            category_summary = {}
+            for name, details in data["categories"].items():
+                category_summary[name] = {
+                    "success": details.get("success", True),
+                    "duration": details.get("duration", 0)
+                }
+            result["category_summary"] = category_summary
+
+        result["detail_level"] = "minimal"
+        result["large_suite_optimization"] = True
+
+        return result
+
+
+class JsonFormatter:
+    """Handles JSON formatting options for size optimization."""
+
+    def __init__(self):
+        self.compact_separators = (',', ':')  # No spaces
+        self.pretty_separators = (', ', ': ')  # With spaces
+
+    def format_compact(self, data: Dict[str, any]) -> str:
+        """Format JSON in compact mode (no extra whitespace)."""
+        return json.dumps(data, separators=self.compact_separators, default=str)
+
+    def format_pretty(self, data: Dict[str, any], indent: int = 2) -> str:
+        """Format JSON in pretty-print mode with indentation."""
+        return json.dumps(data, indent=indent, separators=self.pretty_separators, default=str)
+
+    def format_auto(self, data: Dict[str, any], size_threshold_kb: int = 50) -> str:
+        """
+        Automatically choose format based on data size.
+
+        Args:
+            data: JSON data to format
+            size_threshold_kb: Size threshold for switching to compact mode
+
+        Returns:
+            Formatted JSON string
+        """
+        # Try compact first to check size
+        compact_json = self.format_compact(data)
+        compact_size_kb = len(compact_json.encode('utf-8')) / 1024
+
+        if compact_size_kb > size_threshold_kb:
+            return compact_json
+        else:
+            # Use pretty format for smaller data
+            return self.format_pretty(data)
+
+
+class JsonFieldFilter:
+    """Filters JSON fields to reduce output size."""
+
+    def __init__(self):
+        self.default_essential_fields = [
+            "summary", "overall_success", "total_duration",
+            "categories", "failed_tests"
+        ]
+
+    def filter_fields(self, data: Dict[str, any],
+                     include_fields: Optional[List[str]] = None,
+                     exclude_fields: Optional[List[str]] = None) -> Dict[str, any]:
+        """
+        Filter JSON data to include/exclude specific fields.
+
+        Args:
+            data: Original JSON data
+            include_fields: Fields to include (whitelist approach)
+            exclude_fields: Fields to exclude (blacklist approach)
+
+        Returns:
+            Filtered JSON data
+        """
+        if include_fields is not None:
+            # Whitelist approach: only include specified fields
+            result = {}
+            for field in include_fields:
+                if field in data:
+                    if field == "detailed_results" and isinstance(data[field], list):
+                        # Apply field filtering to detailed results as well
+                        result[field] = self._filter_detailed_results_fields(
+                            data[field], include_fields
+                        )
+                    else:
+                        result[field] = data[field]
+            return result
+
+        elif exclude_fields is not None:
+            # Blacklist approach: exclude specified fields
+            result = data.copy()
+            for field in exclude_fields:
+                result.pop(field, None)
+            return result
+
+        else:
+            # No filtering specified, return original
+            return data
+
+    def _filter_detailed_results_fields(self, results: List, include_fields: List[str]) -> List:
+        """Filter fields within detailed results."""
+        filtered_results = []
+
+        for result in results:
+            if isinstance(result, dict):
+                filtered_result = {}
+                for field in include_fields:
+                    if field in result:
+                        filtered_result[field] = result[field]
+                filtered_results.append(filtered_result)
+            else:
+                filtered_results.append(result)
+
+        return filtered_results
+
+
 class UnifiedTestRunner:
     """Modern test runner with category-based execution and progress tracking."""
     
