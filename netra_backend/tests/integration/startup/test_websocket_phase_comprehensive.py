@@ -377,9 +377,9 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             logger.info(" PASS:  WebSocket Auth middleware configuration test passed")
         finally:
             # Clean up test environment variables
-            env.unset('JWT_SECRET', source='test_websocket_auth')
-            env.unset('OAUTH_CLIENT_ID', source='test_websocket_auth')  
-            env.unset('OAUTH_CLIENT_SECRET', source='test_websocket_auth')
+            env.unset('JWT_SECRET')
+            env.unset('OAUTH_CLIENT_ID')
+            env.unset('OAUTH_CLIENT_SECRET')
             
     @pytest.mark.asyncio
     async def test_websocket_cors_middleware_setup(self):
