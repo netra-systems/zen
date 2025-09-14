@@ -239,10 +239,11 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
         manager_types = set()
 
         # Create test user context for manager creation
+        from netra_backend.app.core.unified_id_manager import generate_run_id
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="ssot_test_session"
+            run_id=generate_run_id()
         )
 
         for import_info in self.working_import_paths:
@@ -419,10 +420,11 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
             self.assertTrue(asyncio.iscoroutinefunction(get_manager_func), "Canonical function must be async")
 
             # Test that it works
+            from netra_backend.app.core.unified_id_manager import generate_run_id
             user_context = UserExecutionContext(
                 user_id=ensure_user_id(generate_user_id()),
                 thread_id=ensure_thread_id(generate_thread_id()),
-                session_id="canonical_test_session"
+                run_id=generate_run_id()
             )
 
             manager = await get_manager_func(user_context=user_context)

@@ -124,10 +124,11 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
         logger.info("🔍 PHASE 1: Testing single user instance uniqueness")
 
         # Create consistent user context with proper ID format
+        from netra_backend.app.core.unified_id_manager import generate_run_id
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="unique_test_session"
+            run_id=generate_run_id()
         )
 
         instances = []
@@ -245,7 +246,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             UserExecutionContext(
                 user_id=ensure_user_id(generate_user_id()),
                 thread_id=ensure_thread_id(generate_thread_id()),
-                session_id=f"isolation_session_{i}"
+                run_id=generate_run_id()
             )
             for i in range(3)
         ]
@@ -383,7 +384,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             UserExecutionContext(
                 user_id=ensure_user_id(generate_user_id()),
                 thread_id=ensure_thread_id(generate_thread_id()),
-                session_id=f"concurrent_session_{i}"
+                run_id=generate_run_id()
             )
             for i in range(10)
         ]
@@ -508,7 +509,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
                 UserExecutionContext(
                     user_id=ensure_user_id(generate_user_id()),
                     thread_id=ensure_thread_id(generate_thread_id()),
-                    session_id=f"memory_test_session_{cycle}_{i}"
+                    run_id=generate_run_id()
                 )
                 for i in range(10)
             ]

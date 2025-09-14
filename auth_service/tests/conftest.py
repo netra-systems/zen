@@ -98,7 +98,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def setup_real_services():
     """Setup services infrastructure for auth service tests.
     

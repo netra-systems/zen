@@ -149,10 +149,11 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
         }
 
         # Create consistent user context for all tests
+        from netra_backend.app.core.unified_id_manager import generate_run_id
         user_context = UserExecutionContext(
             user_id=ensure_user_id(generate_user_id()),
             thread_id=ensure_thread_id(generate_thread_id()),
-            session_id="consistency_test_session"
+            run_id=generate_run_id()
         )
 
         # Test each manager access path
