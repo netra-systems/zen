@@ -19,8 +19,9 @@ ISSUE #89 REMEDIATION: Migrated uuid.uuid4().hex[:8] patterns to UnifiedIDManage
 This eliminates ID collision risks and ensures consistent ID formats across WebSocket operations.
 """
 
+# ISSUE #824 REMEDIATION: Import from private implementation to enforce SSOT
 from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+    _UnifiedWebSocketManagerImplementation,
     WebSocketConnection,
     _serialize_message_safely,
     WebSocketManagerMode
@@ -107,10 +108,13 @@ def create_test_fallback_manager(user_context):
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
     )
 
-# SSOT CONSOLIDATION: Export the unified manager as WebSocketManager
+# SSOT CONSOLIDATION: Export the implementation as WebSocketManager
 # This is now the canonical SSOT import point for all WebSocket Manager usage
 # CRITICAL: Use this import path for all WebSocket Manager needs
-WebSocketManager = UnifiedWebSocketManager
+WebSocketManager = _UnifiedWebSocketManagerImplementation
+
+# ISSUE #824 REMEDIATION: Create public alias for backward compatibility
+UnifiedWebSocketManager = _UnifiedWebSocketManagerImplementation
 
 # SSOT Validation: Ensure we're truly the single source of truth
 def _validate_ssot_compliance():
@@ -143,7 +147,7 @@ except Exception as e:
     logger.error(f"WebSocket Manager SSOT validation failed: {e}")
 
 
-async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> UnifiedWebSocketManager:
+async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSocketManagerMode = WebSocketManagerMode.UNIFIED) -> _UnifiedWebSocketManagerImplementation:
     """
     Get a WebSocket manager instance following SSOT patterns and UserExecutionContext requirements.
 
@@ -197,14 +201,14 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
                 'is_test': True
             })()
 
-            manager = UnifiedWebSocketManager(
+            manager = _UnifiedWebSocketManagerImplementation(
                 mode=WebSocketManagerMode.ISOLATED if service_available else WebSocketManagerMode.UNIFIED,
                 user_context=test_context,
                 _ssot_authorization_token=auth_token
             )
         else:
             # Production mode with proper user context
-            manager = UnifiedWebSocketManager(
+            manager = _UnifiedWebSocketManagerImplementation(
                 mode=mode,
                 user_context=user_context,
                 _ssot_authorization_token=auth_token
@@ -237,7 +241,7 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
         except Exception as fallback_error:
             logger.error(f"Failed to create fallback manager: {fallback_error}")
             # Final fallback with minimal requirements
-            return UnifiedWebSocketManager(
+            return _UnifiedWebSocketManagerImplementation(
                 mode=WebSocketManagerMode.EMERGENCY,
                 user_context=create_test_user_context(),
                 _ssot_authorization_token=secrets.token_urlsafe(32)
