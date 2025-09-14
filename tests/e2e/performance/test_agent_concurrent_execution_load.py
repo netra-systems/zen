@@ -269,7 +269,7 @@ class ConcurrentAgentLoadTester(SSotAsyncTestCase, StagingTestBase):
                 "timestamp": time.time()
             }
             
-            await user.websocket_client.send_message(message)
+            await user.websocket_client.send_message("chat_message", message)
             user.messages_sent += 1
             
             # Wait for agent response with timeout

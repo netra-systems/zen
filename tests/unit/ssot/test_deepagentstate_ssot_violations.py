@@ -25,7 +25,7 @@ class TestDeepAgentStateSSotViolation:
         """
         # Test that deprecated path is now removed
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
             deprecated_exists = True
             deprecated_module = inspect.getmodule(DeprecatedState)
         except ImportError:
@@ -70,7 +70,7 @@ class TestDeepAgentStateSSotViolation:
         # Check if deprecated path is still importable (should fail during SSOT violation)
         deprecated_importable = True
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
         except ImportError:
             deprecated_importable = False
 
@@ -103,7 +103,7 @@ class TestDeepAgentStateSSotViolation:
         After Fix: N/A (deprecated class removed)
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
 
             # Deprecated class should have warning docstring
             docstring = DeprecatedState.__doc__ or ""

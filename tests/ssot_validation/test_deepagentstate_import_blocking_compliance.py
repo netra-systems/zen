@@ -364,7 +364,7 @@ class TestDeepAgentStateImportBlockingCompliance(SSotBaseTestCase):
         """
         # Create a mock DeepAgentState for testing
         try:
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             
             mock_state = DeepAgentState()
             mock_state.user_id = "test_user"

@@ -341,7 +341,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             "timestamp": time.time()
         }
         
-        await self.websocket_client.send_message(initial_message)
+        await self.websocket_client.send_message("chat_message", initial_message)
         
         # Brief wait to establish session
         await asyncio.sleep(2.0)
@@ -360,7 +360,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         ]
         
         for message in messages:
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             await asyncio.sleep(0.5)
     
     async def _trigger_failure(self, scenario: FailureScenario) -> bool:
@@ -403,7 +403,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             "recursive_depth": 1000  # Intentionally high
         }
         
-        await self.websocket_client.send_message(crash_message)
+        await self.websocket_client.send_message("chat_message", crash_message)
         return True
     
     async def _simulate_memory_pressure(self) -> bool:
@@ -424,7 +424,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         
         # Send all messages quickly to create memory pressure
         for message in memory_intensive_messages:
-            await self.websocket_client.send_message(message)
+            await self.websocket_client.send_message("chat_message", message)
             await asyncio.sleep(0.1)
         
         return True
@@ -450,7 +450,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             "require_historical_data": True
         }
         
-        await self.websocket_client.send_message(db_message)
+        await self.websocket_client.send_message("chat_message", db_message)
         return True
     
     async def _simulate_websocket_disconnect(self) -> bool:
@@ -473,7 +473,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             "require_external_services": True
         }
         
-        await self.websocket_client.send_message(timeout_message)
+        await self.websocket_client.send_message("chat_message", timeout_message)
         return True
     
     async def _simulate_invalid_state(self) -> bool:
@@ -492,7 +492,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         
         for message in invalid_messages:
             try:
-                await self.websocket_client.send_message(message)
+                await self.websocket_client.send_message("chat_message", message)
             except Exception:
                 pass  # Expected to potentially fail
         
@@ -523,8 +523,8 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
         
         # Send simultaneously to create potential corruption
         await asyncio.gather(
-            self.websocket_client.send_message(primary_message),
-            self.secondary_client.send_message(secondary_message),
+            self.websocket_client.send_message("chat_message", primary_message),
+            self.secondary_client.send_message("chat_message", secondary_message),
             return_exceptions=True
         )
         
@@ -582,7 +582,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
                     "timestamp": time.time()
                 }
                 
-                await self.websocket_client.send_message(test_message)
+                await self.websocket_client.send_message("chat_message", test_message)
                 
                 # Check for response within reasonable time
                 response = await self.websocket_client.receive_message(timeout=5.0)
@@ -610,7 +610,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
                 "timestamp": time.time()
             }
             
-            await self.websocket_client.send_message(context_test)
+            await self.websocket_client.send_message("chat_message", context_test)
             response = await self.websocket_client.receive_message(timeout=10.0)
             
             if response:
@@ -637,7 +637,7 @@ class AgentResilienceTester(SSotAsyncTestCase, StagingTestBase):
             }
             
             start_time = time.time()
-            await self.websocket_client.send_message(ux_test)
+            await self.websocket_client.send_message("chat_message", ux_test)
             response = await self.websocket_client.receive_message(timeout=15.0)
             response_time = time.time() - start_time
             
