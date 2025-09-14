@@ -154,7 +154,7 @@ class TestIssue845RegistryDuplication(SSotAsyncTestCase):
 
         # Create test user context
         user_context = UserExecutionContext(
-            user_id=self.test_user_id,
+            user_id="test_user_845",
             request_id="test_request_845",
             thread_id="test_thread_845",
             run_id="test_run_845"
@@ -278,8 +278,12 @@ class TestIssue845RegistryDuplication(SSotAsyncTestCase):
         # Register a test agent with basic registry
         test_agent = Mock()
         test_agent.agent_type = "test_agent"
+
+        # Import the enums from the basic registry module
+        from netra_backend.app.agents.registry import AgentType
+
         basic_registry.register_agent(
-            agent_type=basic_registry.AgentType.TRIAGE,
+            agent_type=AgentType.TRIAGE,
             name="Test Agent",
             description="Test agent for WebSocket events",
             agent_instance=test_agent
@@ -306,10 +310,10 @@ class TestIssue845RegistryDuplication(SSotAsyncTestCase):
 
         # Test advanced registry with proper user isolation
         user_context = UserExecutionContext(
-            user_id=self.test_user_id,
-            request_id="test_request_845",
-            thread_id="test_thread_845",
-            run_id="test_run_845"
+            user_id="test_user_845_advanced",
+            request_id="test_request_845_advanced",
+            thread_id="test_thread_845_advanced",
+            run_id="test_run_845_advanced"
         )
 
         mock_llm_manager = Mock()
