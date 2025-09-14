@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from test_framework.ssot.base_test_case import SsotAsyncTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.logging_config import central_logger
 
@@ -47,7 +47,7 @@ logger = central_logger.get_logger(__name__)
 
 
 @pytest.mark.skip(reason="SSOT message queue consolidation not yet implemented")
-class TestWebSocketMessageQueueSsotConsolidated(SsotAsyncTestCase):
+class TestWebSocketMessageQueueSsotConsolidated(SSotAsyncTestCase):
     """
     Test suite to validate SSOT consolidated message queue implementation.
 

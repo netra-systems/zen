@@ -31,7 +31,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, create_autospec
 
 import pytest
 
-from test_framework.ssot.base_test_case import SsotAsyncTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.logging_config import central_logger
 
@@ -53,7 +53,7 @@ from netra_backend.app.websocket_core.message_buffer import WebSocketMessageBuff
 logger = central_logger.get_logger(__name__)
 
 
-class TestGoldenPathWithSsotMessageQueue(SsotAsyncTestCase):
+class TestGoldenPathWithSsotMessageQueue(SSotAsyncTestCase):
     """
     Test suite to validate Golden Path user flow with SSOT message queue integration.
 

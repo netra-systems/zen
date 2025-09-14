@@ -30,7 +30,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from test_framework.ssot.base_test_case import SsotAsyncTestCase
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.types.core_types import UserID, ConnectionID
 from netra_backend.app.logging_config import central_logger
 
@@ -57,7 +57,7 @@ from netra_backend.app.websocket_core.message_buffer import (
 logger = central_logger.get_logger(__name__)
 
 
-class TestWebSocketMessageQueueSsotViolations(SsotAsyncTestCase):
+class TestWebSocketMessageQueueSsotViolations(SSotAsyncTestCase):
     """
     Test suite to reproduce and validate SSOT violations in message queue implementations.
 

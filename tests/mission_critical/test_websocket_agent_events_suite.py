@@ -119,10 +119,23 @@ class RealWebSocketEventCapture:
         self.event_counts: Dict[str, int] = {}
         self.start_time = time.time()
         self.connections: Dict[str, Any] = {}
-    
+
+    def _extract_event_type(self, event: Dict[str, Any]) -> str:
+        """Extract event type from any of the three supported formats.
+
+        Handles:
+        1. Flat format: type directly in event
+        2. ServerMessage format: type at top level, data in payload
+        3. Data format: type at top level, data in data field (staging)
+
+        Returns event type or "unknown" if not found.
+        """
+        # All formats should have type at top level
+        return event.get("type", "unknown")
+
     def record_event(self, event: Dict[str, Any]) -> None:
         """Record an event from real WebSocket."""
-        event_type = event.get("type", "unknown")
+        event_type = self._extract_event_type(event)
         event_with_timestamp = {
             **event,
             "capture_timestamp": time.time(),
@@ -140,7 +153,7 @@ class RealWebSocketEventCapture:
     def get_event_types_for_thread(self, thread_id: str) -> List[str]:
         """Get event types for a thread in order."""
         events = self.get_events_for_thread(thread_id)
-        return [event.get('type', 'unknown') for event in events]
+        return [self._extract_event_type(event) for event in events]
     
     def clear_events(self):
         """Clear all recorded events."""
@@ -685,7 +698,7 @@ class TestIndividualWebSocketEvents:
                 validator.record(received_event)
 
                 # Skip connection/status messages, look for agent_thinking
-                event_type = received_event.get("type", "unknown")
+                event_type = validator._extract_event_type(received_event)
                 if event_type == "agent_thinking":
                     # Validate thinking event has reasoning content
                     assert "reasoning" in received_event, "agent_thinking event missing reasoning content"
