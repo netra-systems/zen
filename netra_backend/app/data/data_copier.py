@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, Optional, Tuple
 
-from clickhouse_driver import Client
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 # For using remote() copy between clickhouse the driver is better then connect it seems.
 from sqlmodel import Session

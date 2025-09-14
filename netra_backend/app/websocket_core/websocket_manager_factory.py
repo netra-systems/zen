@@ -541,29 +541,9 @@ logger.info("WebSocketManagerFactory class removed - Issue #824 SSOT consolidati
 # Export compatibility functions only (Issue #824 Remediation)
 
 
-class WebSocketManagerFactory:
-    """
-    DEPRECATED: WebSocketManagerFactory for SSOT violation testing.
-    
-    This class exists only for testing SSOT violations and compatibility.
-    All production code should use the SSOT WebSocketManager directly.
-    """
-    
-    def __init__(self):
-        warnings.warn(
-            'WebSocketManagerFactory is deprecated. Use WebSocketManager directly.',
-            DeprecationWarning,
-            stacklevel=2
-        )
-        self._logger = get_logger(__name__)
-        
-    async def create_websocket_manager(self, redis_client=None, environment=None, **kwargs):
-        """Create WebSocketManager using SSOT implementation."""
-        self._logger.warning(
-            'create_websocket_manager is deprecated. Use get_websocket_manager() directly.'
-        )
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        return await get_websocket_manager(**kwargs)
+# WebSocketManagerFactory class REMOVED as part of Issue #1055 SSOT consolidation
+# All functionality moved to canonical websocket_manager.py:get_websocket_manager()
+# Use: from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 # WebSocketManagerFactory class REMOVED from exports
 __all__ = [

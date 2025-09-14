@@ -289,15 +289,18 @@ class TestAgentExecutionCoreIntegration:
 
     @pytest.mark.asyncio
     async def test_websocket_event_sequence_validation(
-        self, integration_core, sample_context, sample_state, real_registry, mock_websocket_bridge
+        self, sample_context, sample_state, real_registry, mock_websocket_bridge
     ):
         """Test that WebSocket events are sent in correct sequence."""
+        # Create integration core with mock websocket bridge for event tracking
+        mock_integration_core = AgentExecutionCore(real_registry, mock_websocket_bridge)
+
         # Register fast mock agent
         mock_agent = MockIntegrationAgent(execution_time=0.01)
         real_registry.register("integration_test_agent", mock_agent)
-        
+
         # Execute agent
-        result = await integration_core.execute_agent(sample_context, sample_state, 5.0)
+        result = await mock_integration_core.execute_agent(sample_context, sample_state, 5.0)
         
         # Verify event sequence
         call_log = mock_websocket_bridge.call_log
@@ -332,7 +335,7 @@ class TestAgentExecutionCoreIntegration:
         # Verify failure handling
         assert isinstance(result, AgentExecutionResult)
         assert result.success is False
-        assert "Mock agent failure" in result.error
+        assert "Real integration agent failure" in result.error
         assert result.duration is not None
         
         # Verify WebSocket error notification
