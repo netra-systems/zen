@@ -151,6 +151,22 @@ class StagingTestConfig:
         """
         return self.auth_url
     
+    def get_backend_base_url(self) -> str:
+        """Get the backend base URL for staging tests.
+        
+        Returns:
+            str: The backend base URL for staging
+        """
+        return self.urls.backend_url
+    
+    def get_api_health_endpoint(self) -> str:
+        """Get the API health endpoint for staging tests.
+        
+        Returns:
+            str: The health endpoint URL for staging backend API
+        """
+        return self.urls.health_endpoints["backend"]
+    
     def log_configuration(self) -> None:
         """Log current staging configuration for debugging."""
         logger.info("=== Staging Test Configuration ===")
