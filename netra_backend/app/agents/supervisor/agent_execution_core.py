@@ -723,13 +723,18 @@ class AgentExecutionCore:
                     
                     # CRITICAL FIX: Send agent_completed event for successful executions
                     # The agent tracker transition does not guarantee WebSocket notification propagation
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_completed(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            result={"status": "completed", "success": True, "duration_ms": result.duration * 1000 if result.duration else 0},
-                            execution_time_ms=result.duration * 1000 if result.duration else 0
-                        )
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_completed'):
+                        try:
+                            await self.websocket_bridge.notify_agent_completed(
+                                run_id=context.run_id,
+                                agent_name=context.agent_name,
+                                result={"status": "completed", "success": True, "duration_ms": result.duration * 1000 if result.duration else 0},
+                                execution_time_ms=result.duration * 1000 if result.duration else 0
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to send agent_completed notification: {e}")
+                    else:
+                        logger.warning(f"WebSocket bridge not available for completion notification: agent={context.agent_name}, run_id={context.run_id}")
                     
                     # Mark execution as successful in tracker state
                     self.agent_tracker.update_execution_state(state_exec_id, ExecutionState.COMPLETED)
@@ -764,13 +769,18 @@ class AgentExecutionCore:
                     # Removing manual call to prevent duplicate notifications
                     
                     # CRITICAL FIX: Send agent_completed event for error cases
-                    if self.websocket_bridge:
-                        await self.websocket_bridge.notify_agent_completed(
-                            run_id=context.run_id,
-                            agent_name=context.agent_name,
-                            result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"},
-                            execution_time_ms=result.duration * 1000 if result.duration else 0
-                        )
+                    if self.websocket_bridge and hasattr(self.websocket_bridge, 'notify_agent_completed'):
+                        try:
+                            await self.websocket_bridge.notify_agent_completed(
+                                run_id=context.run_id,
+                                agent_name=context.agent_name,
+                                result={"status": "completed", "success": False, "error": result.error or "Agent execution failed"},
+                                execution_time_ms=result.duration * 1000 if result.duration else 0
+                            )
+                        except Exception as e:
+                            logger.error(f"Failed to send agent_completed error notification: {e}")
+                    else:
+                        logger.warning(f"WebSocket bridge not available for error notification: agent={context.agent_name}, run_id={context.run_id}")
                 
                 # Finish the span
                 trace_context.finish_span(span)
