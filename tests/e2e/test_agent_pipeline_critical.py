@@ -63,7 +63,7 @@ import pytest
 import json
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent

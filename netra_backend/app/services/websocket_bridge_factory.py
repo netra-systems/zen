@@ -271,12 +271,12 @@ class WebSocketBridgeFactory:
                 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
-                # Try different registry import paths
+                # Try different registry import paths - SSOT first
                 try:
-                    from netra_backend.app.agents.registry import AgentRegistry
+                    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 except ImportError:
                     try:
-                        from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+                        from netra_backend.app.agents.registry import AgentRegistry
                     except ImportError:
                         AgentRegistry = None  # Use None if not available
 

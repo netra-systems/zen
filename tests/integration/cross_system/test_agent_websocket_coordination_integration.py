@@ -40,7 +40,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInst
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.agents.registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.core.configuration.base import get_config
 
 
