@@ -58,12 +58,11 @@ class TestIDTypeRunValidationFormats(SSotBaseTestCase):
         super().setup_method(method)
         
         # Test metrics for SSOT compliance
-        self.test_metrics = SsotTestMetrics(
-            category=CategoryType.UNIT,
-            test_name=method.__name__ if method else "setup",
-            business_value_segment="Platform/Internal",
-            expected_outcome="Validate IDType.RUN format validation works correctly"
-        )
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.record_custom("category", "UNIT")
+        self.test_metrics.record_custom("test_name", method.__name__ if method else "setup")
+        self.test_metrics.record_custom("business_value_segment", "Platform/Internal")
+        self.test_metrics.record_custom("expected_outcome", "Validate IDType.RUN format validation works correctly")
         
         # ID manager for generating test run IDs
         self.id_manager = UnifiedIDManager()

@@ -133,7 +133,7 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
         except AttributeError as e:
             # Expected failure before fix
             assert "RUN" in str(e), f"Expected 'RUN' in error message, got: {e}"
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN UserExecutionContext integration failed: {e}")
 
     def test_run_id_agent_execution_tracker_integration(self):
@@ -197,10 +197,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
             
             self.generated_run_ids.add(run_id)
             self.created_contexts.append(context)
-            self.test_metrics.record_custom("success",(f"AgentExecutionTracker integration with run_id successful")
+            self.test_metrics.record_custom("success", f"AgentExecutionTracker integration with run_id successful")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN AgentExecutionTracker integration failed: {e}")
 
     def test_run_id_golden_path_validation_integration(self):
@@ -256,10 +256,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
             
             self.generated_run_ids.add(run_id)
             self.created_contexts.append(golden_context)
-            self.test_metrics.record_custom("success",(f"Golden Path validation integration with run_id successful")
+            self.test_metrics.record_custom("success", f"Golden Path validation integration with run_id successful")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN Golden Path integration failed: {e}")
 
     def test_run_id_multi_user_isolation_integration(self):
@@ -320,10 +320,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
                 assert is_valid_id_format(context.run_id), f"Context run_id should be valid: {context.run_id}"
                 assert is_valid_id_format_compatible(context.run_id, IDType.RUN), f"Context run_id should be RUN compatible: {context.run_id}"
             
-            self.test_metrics.record_custom("success",(f"Multi-user isolation integration with run_ids successful: {len(user_contexts)} users")
+            self.test_metrics.record_custom("success", f"Multi-user isolation integration with run_ids successful: {len(user_contexts)} users")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN multi-user isolation integration failed: {e}")
 
     def test_run_id_cross_system_format_validation(self):
@@ -388,10 +388,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
             all_passed = all(result["all_passed"] for result in validation_results)
             assert all_passed, f"All run_id patterns should pass validation: {validation_results}"
             
-            self.test_metrics.record_custom("success",(f"Cross-system format validation successful: {len(test_patterns)} patterns")
+            self.test_metrics.record_custom("success", f"Cross-system format validation successful: {len(test_patterns)} patterns")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN cross-system validation failed: {e}")
 
     def test_run_id_concurrent_integration_load(self):
@@ -476,10 +476,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
             assert not total_errors, f"No errors should occur: {total_errors}"
             
             self.generated_run_ids.update(total_run_ids)
-            self.test_metrics.record_custom("success",(f"Concurrent integration load successful: {len(total_run_ids)} run_ids across {num_concurrent_users} users")
+            self.test_metrics.record_custom("success", f"Concurrent integration load successful: {len(total_run_ids)} run_ids across {num_concurrent_users} users")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN concurrent integration failed: {e}")
 
     def test_run_id_error_handling_integration(self):
@@ -545,10 +545,10 @@ class TestIDTypeRunSSOTIntegration(SSotBaseTestCase):
             assert self.id_manager.is_valid_id(run_id, IDType.RUN), f"Valid run_id should validate: {run_id}"
             
             self.generated_run_ids.add(run_id)
-            self.test_metrics.record_custom("success",(f"Error handling integration successful: {len(error_scenarios)} scenarios tested")
+            self.test_metrics.record_custom("success", f"Error handling integration successful: {len(error_scenarios)} scenarios tested")
             
         except AttributeError as e:
-            self.test_metrics.record_custom("expected_failure",(f"Expected failure before fix: {e}")
+            self.test_metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN error handling integration failed: {e}")
 
     def teardown_method(self, method=None):
