@@ -178,7 +178,8 @@ class AgentLifecycleMixin(ABC):
         if not await self._handle_entry_conditions(context, run_id, stream_updates):
             return False
         await self.execute(context, run_id, stream_updates)
-        context.step_count += 1
+        # UserExecutionContext is immutable - step counting handled by agent internally
+        self._increment_execution_step()
         return True
     
     async def _handle_entry_failure(self, run_id: str, stream_updates: bool, context: UserExecutionContext) -> None:
