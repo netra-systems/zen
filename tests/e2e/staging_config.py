@@ -135,6 +135,14 @@ class StagingTestConfig:
         logger.info("Staging configuration validated successfully")
         return True
     
+    def get_backend_websocket_url(self) -> str:
+        """Get the backend WebSocket URL for staging tests.
+        
+        Returns:
+            str: The WebSocket URL for staging backend
+        """
+        return self.websocket_url
+    
     def log_configuration(self) -> None:
         """Log current staging configuration for debugging."""
         logger.info("=== Staging Test Configuration ===")
