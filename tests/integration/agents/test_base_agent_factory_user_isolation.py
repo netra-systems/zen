@@ -106,8 +106,7 @@ class IsolatedUserAgent:
         result = AgentExecutionResult(
             success=True,
             agent_name=self.agent_name,
-            execution_time=0.01,
-            state=None,
+            duration=0.01,
             metadata={
                 'user_id': self.user_id,
                 'instance_id': self.instance_id,
@@ -269,7 +268,6 @@ class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
         
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.factory_isolation
     async def test_single_user_agent_factory_isolation(self):
         """Test agent factory creates properly isolated instances for single user.
         
@@ -343,7 +341,6 @@ class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents  
-    @pytest.mark.factory_isolation
     async def test_multi_user_factory_isolation_validation(self):
         """Test factory maintains strict isolation between multiple users.
         
@@ -484,7 +481,6 @@ class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.factory_isolation
     async def test_factory_memory_isolation_validation(self):
         """Test factory prevents memory contamination between user instances.
         
@@ -620,7 +616,6 @@ class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.factory_isolation
     async def test_high_load_factory_isolation_stress(self):
         """Test factory user isolation under high concurrent load.
         

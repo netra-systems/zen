@@ -42,7 +42,7 @@ class ConcreteAgentLifecycle(AgentLifecycleMixin):
         self.logger = Mock()
         self.start_time = None
         self.end_time = None
-        self._lifecycle_state = SubAgentLifecycle.IDLE
+        self._lifecycle_state = SubAgentLifecycle.PENDING
         self.timing_collector = ExecutionTimingCollector(correlation_id=f"test-{name}")
         self.context = {}  # Protected context for cleanup testing
         
@@ -101,7 +101,7 @@ class TestAgentLifecycleCore(SSotAsyncTestCase):
         """Clean up test resources."""
         super().teardown_method(method)
         # Reset agent state
-        self.agent.set_state(SubAgentLifecycle.IDLE)
+        self.agent.set_state(SubAgentLifecycle.PENDING)
 
     async def test_pre_run_successful_execution(self):
         """Test _pre_run method with successful entry conditions."""

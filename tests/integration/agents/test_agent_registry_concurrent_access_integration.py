@@ -216,7 +216,6 @@ class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents  
-    @pytest.mark.agent_registry
     async def test_concurrent_agent_registration(self):
         """Test concurrent agent registration from multiple users.
         
@@ -307,7 +306,6 @@ class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.agent_registry
     async def test_concurrent_agent_access_patterns(self):
         """Test concurrent agent access and execution patterns.
         
@@ -403,7 +401,6 @@ class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents  
-    @pytest.mark.agent_registry
     async def test_registry_cleanup_and_lifecycle_management(self):
         """Test registry cleanup and agent lifecycle management under load.
         
@@ -529,7 +526,6 @@ class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.agent_registry
     async def test_high_load_registry_performance(self):
         """Test agent registry performance under high concurrent load.
         
