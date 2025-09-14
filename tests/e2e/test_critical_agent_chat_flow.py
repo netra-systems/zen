@@ -96,7 +96,7 @@ from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Import WebSocket components (GOLDEN PATH COMPATIBLE)

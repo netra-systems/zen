@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter as UserWebSocketEmitter
 
 # SECURITY FIX: Removed DeepAgentState import - migrated to secure UserExecutionContext pattern
-# from netra_backend.app.agents.state import DeepAgentState  # REMOVED: Security vulnerability
+# from netra_backend.app.schemas.agent_models import DeepAgentState  # REMOVED: Security vulnerability
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,

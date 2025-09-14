@@ -47,7 +47,7 @@
     # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
     # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import WebSocketNotifier

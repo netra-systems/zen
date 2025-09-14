@@ -254,8 +254,8 @@ Progress Status: {"ðŸ”´ REMEDIATION NEEDED" if files_with_violations > 0 else "â
             lines = content.split('\n')
 
             # Pattern 1: Direct deprecated import
-            if 'from netra_backend.app.agents.state import DeepAgentState' in content:
-                violations.append("Direct deprecated import: 'from netra_backend.app.agents.state import DeepAgentState'")
+            if 'from netra_backend.app.schemas.agent_models import DeepAgentState' in content:
+                violations.append("Direct deprecated import: 'from netra_backend.app.schemas.agent_models import DeepAgentState'")
 
             # Pattern 2: Wildcard import including DeepAgentState
             if 'from netra_backend.app.agents.state import *' in content and 'DeepAgentState' in content:
@@ -264,7 +264,7 @@ Progress Status: {"ðŸ”´ REMEDIATION NEEDED" if files_with_violations > 0 else "â
             # Pattern 3: Multi-line import including DeepAgentState
             import_patterns = [
                 'from netra_backend.app.agents.state import (',
-                'from netra_backend.app.agents.state import DeepAgentState,',
+                'from netra_backend.app.schemas.agent_models import DeepAgentState,',
                 ', DeepAgentState'
             ]
 

@@ -26,7 +26,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
 from netra_backend.app.schemas.user_plan import PlanTier

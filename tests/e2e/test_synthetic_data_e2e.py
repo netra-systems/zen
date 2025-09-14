@@ -35,7 +35,7 @@ import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.generation import GenerationStatus
 from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile, DataGenerationType
 from netra_backend.app.schemas.generation import SyntheticDataResult

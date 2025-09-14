@@ -96,7 +96,7 @@
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.logging_config import central_logger
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager

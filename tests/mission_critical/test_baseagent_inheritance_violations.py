@@ -34,7 +34,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 # Import the components we're testing
 from netra_backend.app.agents.base_agent import BaseAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.schemas.core_enums import ExecutionStatus

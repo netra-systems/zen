@@ -38,7 +38,7 @@ env = get_env()
         # REMOVED_SYNTAX_ERROR: from sqlalchemy.exc import SQLAlchemyError
         # REMOVED_SYNTAX_ERROR: from sqlalchemy.ext.asyncio import AsyncSession
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.clickhouse import get_clickhouse_client
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.models_postgres import Assistant, Message, Run, Thread
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.postgres import get_postgres_db

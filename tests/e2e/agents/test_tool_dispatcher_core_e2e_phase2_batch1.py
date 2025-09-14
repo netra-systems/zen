@@ -23,7 +23,7 @@ from netra_backend.app.agents.tool_dispatcher import (
     ToolDispatchRequest,
     ToolDispatchResponse
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from langchain_core.tools import BaseTool
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user

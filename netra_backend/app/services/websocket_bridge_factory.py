@@ -279,6 +279,7 @@ class WebSocketBridgeFactory:
                         from netra_backend.app.agents.registry import AgentRegistry
                     except ImportError:
                         AgentRegistry = None  # Use None if not available
+                        logger.error("Issue #914: No AgentRegistry available in WebSocketBridgeFactory")
 
                 logger.warning("WebSocketBridgeFactory auto-configuring - creating manager with user context")
 

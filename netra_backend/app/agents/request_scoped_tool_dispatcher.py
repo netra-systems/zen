@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # DeepAgentState removed - using UserExecutionContext pattern
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.tool_dispatcher_validation import ToolValidator
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine

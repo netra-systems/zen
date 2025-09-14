@@ -1,0 +1,14 @@
+# Import performance optimizations for test collection
+# These optimizations reduce import overhead during pytest collection
+
+# Lazy loading indicators
+PYTEST_COLLECTION_PHASE=1
+OPTIMIZE_IMPORTS=1
+DEFER_HEAVY_IMPORTS=1
+
+# Memory optimization
+PYTHONDONTWRITEBYTECODE=1
+PYTHONHASHSEED=0
+
+# Collection-specific optimizations  
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1

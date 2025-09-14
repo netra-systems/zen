@@ -53,7 +53,7 @@
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult, ActionPlanResult
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState, OptimizationsResult, ActionPlanResult
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.llm.llm_manager import LLMManager
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.shared_types import DataAnalysisResponse

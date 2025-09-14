@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # CRITICAL SECURITY MIGRATION: Issue #271 - DeepAgentState removed for user isolation
-# from netra_backend.app.agents.state import DeepAgentState
+# from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.db.session import get_session_from_factory
 from netra_backend.app.agents.supervisor.execution_context import (

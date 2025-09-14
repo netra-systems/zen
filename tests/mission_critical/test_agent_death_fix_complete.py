@@ -429,7 +429,7 @@
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: except ImportError:
                 # REMOVED_SYNTAX_ERROR: pytest.skip("BaseAgent components not available")
 
@@ -535,7 +535,7 @@
 
         # Test successful state transition
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
 
         # REMOVED_SYNTAX_ERROR: success_context = ExecutionContext( )
         # REMOVED_SYNTAX_ERROR: run_id="state_success",
@@ -568,7 +568,7 @@
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                     # REMOVED_SYNTAX_ERROR: except ImportError:
                         # REMOVED_SYNTAX_ERROR: pytest.skip("BaseAgent components not available")
 
@@ -635,7 +635,7 @@
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: except ImportError:
                 # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -711,7 +711,7 @@
                             # REMOVED_SYNTAX_ERROR: try:
                                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                                 # REMOVED_SYNTAX_ERROR: except ImportError:
                                     # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -784,7 +784,7 @@
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                     # REMOVED_SYNTAX_ERROR: except ImportError:
                         # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -865,7 +865,7 @@
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                     # REMOVED_SYNTAX_ERROR: except ImportError:
                         # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -955,7 +955,7 @@
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent import SubAgentLifecycle
             # REMOVED_SYNTAX_ERROR: except ImportError:
                 # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
@@ -1066,7 +1066,7 @@
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                     # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                    # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                     # REMOVED_SYNTAX_ERROR: except ImportError:
                         # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -1166,7 +1166,7 @@
             # REMOVED_SYNTAX_ERROR: try:
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
                 # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-                # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+                # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
                 # REMOVED_SYNTAX_ERROR: except ImportError:
                     # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
@@ -1247,7 +1247,7 @@
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base_agent import BaseAgent
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ExecutionContext
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.state import DeepAgentState
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.schemas.agent_models import DeepAgentState
             # REMOVED_SYNTAX_ERROR: except ImportError:
                 # REMOVED_SYNTAX_ERROR: pytest.skip("Required components not available")
 
