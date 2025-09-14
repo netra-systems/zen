@@ -23,7 +23,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List, Optional
 
 from netra_backend.app.websocket_core import create_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
 
