@@ -80,7 +80,6 @@ class UnifiedIDManager:
         if isinstance(id_type_or_prefix, str) and prefix is None and context is None:
             # Legacy pattern: generate_id("user_test") -> "user_test_12345abc"
             prefix_val = id_type_or_prefix
-            import uuid
             return f"{prefix_val}_{uuid.uuid4().hex[:8]}"
         
         # New pattern: generate_id(IDType.USER, "prefix", context)
