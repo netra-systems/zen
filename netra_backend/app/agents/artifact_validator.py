@@ -13,7 +13,8 @@ from netra_backend.app.agents.data_sub_agent.models import (
     AnomalyDetectionResponse,
     DataAnalysisResponse,
 )
-from netra_backend.app.schemas.agent_models import DeepAgentState, OptimizationsResult
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.state import OptimizationsResult
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.logging_config import central_logger
 
