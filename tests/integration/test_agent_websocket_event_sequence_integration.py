@@ -57,8 +57,10 @@ from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmi
 
 # Context and State Management
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.schemas.agent_models import DeepAgentState, AgentType
-from netra_backend.app.schemas.message_models import MessageRequest, MessageType
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.registry import AgentType
+from netra_backend.app.routes.agent_route import MessageRequest
+from netra_backend.app.websocket_core.types import MessageType
 
 # Configuration and Tools
 from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
