@@ -991,7 +991,7 @@ class RealWebSocketTestBase:
             jwt_token: Optional JWT token for authentication
             
         Returns:
-            TestContext with real WebSocket capabilities
+            WebSocketTestContext with real WebSocket capabilities
         """
         if not user_id:
             user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -1001,8 +1001,8 @@ class RealWebSocketTestBase:
         if jwt_token:
             user_context.jwt_token = jwt_token
         
-        # Create TestContext
-        test_context = TestContext(
+        # Create WebSocketTestContext
+        test_context = WebSocketTestContext(
             user_context=user_context,
             websocket_timeout=self.config.connection_timeout,
             event_timeout=self.config.event_timeout
@@ -1022,10 +1022,10 @@ class RealWebSocketTestBase:
             user_context: Existing TestUserContext to use
 
         Returns:
-            TestContext with real WebSocket capabilities
+            WebSocketTestContext with real WebSocket capabilities
         """
-        # Create TestContext with provided user context
-        test_context = TestContext(
+        # Create WebSocketTestContext with provided user context
+        test_context = WebSocketTestContext(
             user_context=user_context,
             websocket_timeout=self.config.connection_timeout,
             event_timeout=self.config.event_timeout
@@ -1036,7 +1036,7 @@ class RealWebSocketTestBase:
 
     async def validate_agent_events(
         self,
-        test_context: TestContext,
+        test_context: WebSocketTestContext,
         required_events: Optional[Set[str]] = None,
         timeout: float = 30.0
     ) -> EventValidationResult:
