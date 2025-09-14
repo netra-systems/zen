@@ -1,7 +1,7 @@
 This Mermaid diagram illustrates the architecture of the AI-Native GitOps Factory and its two primary workflows: (1) Customization and Evolution via feature requests, and (2) Automated Synchronization of core updates across the organization.
 
 ```mermaid
-graph TD
+graph LR
     %% --- Component Definitions & Styling ---
     classDef human fill:#D1F2EB,stroke:#148F77,stroke-width:2px;
     classDef ai fill:#E8DAEF,stroke:#9B59B6,stroke-width:2px;
@@ -9,19 +9,30 @@ graph TD
     classDef coregit fill:#A9CCE3,stroke:#2E86C1,stroke-width:3px;
     classDef exec fill:#FCF3CF,stroke:#F39C12,stroke-width:2px;
 
+    %% --- Link Styling Definitions (The Fix) ---
+    %% Workflow A Style (Blue Solid)
+    classDef wfA stroke:#3498DB,stroke-width:2px;
+    %% Workflow B Style (Red Dashed). Using a clear red: #E74C3C
+    classDef wfB stroke:#E74C3C,stroke-width:2px,stroke-dasharray: 5 5;
+
+
     %% --- Architecture Components ---
 
     H([Human Curator / Architect]):::human
 
-    subgraph "AI Factory System"
+    %% Grouping the Factory components
+    subgraph "AI-Native GitOps Factory"
         direction TB
-        CP(AI Control Plane - Factory Manager):::ai
-        Swarm(AI Agent Swarm - 100x Workforce):::ai
-        CP -- Orchestrates --> Swarm
-    end
+        subgraph "AI Factory System"
+            direction TB
+            CP(AI Control Plane - Factory Manager):::ai
+            Swarm(AI Agent Swarm - 100x Workforce):::ai
+            CP -- Orchestrates --> Swarm
+        end
 
-    subgraph "Execution Layer"
-        Exec(Ephemeral Environments - Efficient Compute):::exec
+        subgraph "Execution Layer"
+            Exec(Ephemeral Environments - Efficient Compute):::exec
+        end
     end
 
     subgraph "Git Ecosystem (e.g., GitHub/GitLab)"
@@ -29,6 +40,7 @@ graph TD
         Core(Core Root Module - Optimized Foundation):::coregit
 
         subgraph "Application Repositories (The Delta)"
+            direction LR %% Better layout for lists of repos
             Repo1(App Repo 1):::git
             Repo2(App Repo 2):::git
             RepoN(App Repo N...):::git
@@ -40,44 +52,28 @@ graph TD
     end
 
     %% --- Workflow A: Customization & Evolution (Solid Blue Lines) ---
-    H -- "A1. Creates Issue (Intent)" --> Repo1
-    CP -- "A2. Monitors & Detects Issue" --> Repo1
-    CP -- "A3. Dispatches Agents" --> Swarm
-    Swarm -- "A4. Executes & Verifies" --> Exec
+    %% Apply wfA class using :::wfA
+    H -- "A1. Creates Issue (Intent)" --> Repo1:::wfA
+    CP -- "A2. Monitors & Detects Issue" --> Repo1:::wfA
+    CP -- "A3. Dispatches Agents" --> Swarm:::wfA
+    Swarm -- "A4. Executes & Verifies" --> Exec:::wfA
 
-    %% Execution Details
-    Exec -- "Clones Repo & Runs Tests" --> Repo1
-    Exec -- "Uses Core Toolchain & Constraints" --> Core
+    %% Execution Details (Internal actions during A4)
+    Exec -- "Clones Repo & Runs Tests" --> Repo1:::wfA
+    Exec -- "Uses Core Toolchain & Constraints" --> Core:::wfA
 
-    Swarm -- "A5. Submits PR (Solution)" --> Repo1
-    H -- "A6. Reviews & Merges PR" --> Repo1
+    Swarm -- "A5. Submits PR (Solution)" --> Repo1:::wfA
+    H -- "A6. Reviews & Merges PR" --> Repo1:::wfA
 
     %% --- Workflow B: Automated Synchronization & Refactoring (Dotted Red Lines) ---
-    Core -. "B1. Core Updated (v2.2)" .-> CP
-    CP -. "B2. Initiates Global Migration" .-> Swarm
-    Swarm -. "B3. Parallel Refactoring & Conflict Resolution" .-> Exec
-    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> Repo1
-    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> Repo2
-    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> RepoN
-
-    %% --- Link Styling ---
-    %% Workflow A Styling (Blue)
-    linkStyle 10 stroke:#3498DB,stroke-width:2px;
-    linkStyle 11 stroke:#3498DB,stroke-width:2px;
-    linkStyle 12 stroke:#3498DB,stroke-width:2px;
-    linkStyle 13 stroke:#3498DB,stroke-width:2px;
-    linkStyle 14 stroke:#3498DB,stroke-width:2px;
-    linkStyle 15 stroke:#3498DB,stroke-width:2px;
-    linkStyle 16 stroke:#3498DB,stroke-width:2px;
-    linkStyle 17 stroke:#3498DB,stroke-width:2px;
-
-    %% Workflow B Styling (Red Dashed)
-    linkStyle 18 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
-    linkStyle 19 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
-    linkStyle 20 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
-    linkStyle 21 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
-    linkStyle 22 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
-    linkStyle 23 stroke-width:2px,stroke:red,stroke-dasharray: 5, 5;
+    %% Apply wfB class using :::wfB
+    %% Note: Using -.-> also creates a dotted line, but the class ensures the color and specific dash style.
+    Core -. "B1. Core Updated (v2.2)" .-> CP:::wfB
+    CP -. "B2. Initiates Global Migration" .-> Swarm:::wfB
+    Swarm -. "B3. Parallel Refactoring & Conflict Resolution" .-> Exec:::wfB
+    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> Repo1:::wfB
+    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> Repo2:::wfB
+    Swarm -. "B4. Automated PRs (Update to v2.2)" .-> RepoN:::wfB
 ```
 
 ### Diagram Explanation
