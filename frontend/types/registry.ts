@@ -105,6 +105,13 @@ export {
   updateThreadState
 } from '@shared/types/frontend_types';
 
+// Thread state types
+export type {
+  ThreadState,
+  BaseThreadState,
+  StoreThreadState
+} from '@shared/types/frontend_types';
+
 // WebSocket domain - Type-only exports for interfaces, runtime exports for functions
 export type {
   // Payload interface types
