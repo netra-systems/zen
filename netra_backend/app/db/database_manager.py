@@ -474,7 +474,9 @@ class DatabaseManager:
                 engine_kwargs["poolclass"] = NullPool
                 # Remove pool_timeout for SQLite as NullPool doesn't support it
                 engine_kwargs.pop("pool_timeout", None)
-                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling (pool_timeout removed)")
+                # Remove connect_args for SQLite as they're PostgreSQL-specific
+                engine_kwargs["connect_args"] = {}
+                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling (pool_timeout and PostgreSQL connect_args removed)")
             else:
                 # Use AsyncAdaptedQueuePool for better concurrent handling with async engines
                 engine_kwargs["poolclass"] = AsyncAdaptedQueuePool
