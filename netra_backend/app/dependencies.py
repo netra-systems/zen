@@ -1142,15 +1142,51 @@ async def get_execution_engine_factory_dependency(request: Request):
 
 ExecutionEngineFactoryDep = Annotated[Any, Depends(get_execution_engine_factory_dependency)]
 
-async def get_agent_instance_factory_dependency(request: Request):
+async def get_agent_instance_factory_dependency(
+    user_id: str,
+    thread_id: str,
+    run_id: Optional[str] = None,
+    websocket_client_id: Optional[str] = None,
+    request: Request = None
+):
     """
     Create per-request AgentInstanceFactory with proper user isolation.
     
     ISSUE #1116: Uses SSOT create_agent_instance_factory for complete user isolation.
     CRITICAL: This creates a NEW factory instance for each request to ensure
     complete user isolation. No shared state exists between requests.
+    
+    Args:
+        user_id: Unique user identifier for request isolation
+        thread_id: Thread identifier for WebSocket routing
+        run_id: Optional run identifier (auto-generated if not provided)
+        websocket_client_id: Optional WebSocket client identifier
+        request: FastAPI request object for accessing app state
+    
+    Returns:
+        Configured AgentInstanceFactory for the user context
     """
     from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+    from netra_backend.app.services.user_execution_context import UserExecutionContext
+    from shared.id_generation import UnifiedIdGenerator
+    
+    # Generate run_id if not provided
+    if not run_id:
+        run_id = UnifiedIdGenerator.generate_base_id("run")
+    
+    # Generate websocket_client_id if not provided
+    if not websocket_client_id:
+        websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(user_id)
+    
+    # Create user context from parameters
+    user_context = UserExecutionContext(
+        user_id=user_id,
+        thread_id=thread_id,
+        run_id=run_id,
+        websocket_client_id=websocket_client_id
+    )
+    
+    logger.info(f"Creating AgentInstanceFactory for user {user_id} (run: {run_id})")
     
     # Get infrastructure components from app state (shared immutable resources)
     if not hasattr(request.app.state, 'agent_websocket_bridge'):
@@ -1174,7 +1210,7 @@ async def get_agent_instance_factory_dependency(request: Request):
         return factory
         
     except Exception as e:
-        logger.error(f"Failed to create per-request AgentInstanceFactory for user {user_context.user_id if user_context else 'unknown'}: {e}")
+        logger.error(f"Failed to create per-request AgentInstanceFactory for user {user_context.user_id}: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to create AgentInstanceFactory: {e}"
