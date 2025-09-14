@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-13T22:43:16.008107",
-    "root_directory": "C:\\GitHub\\netra-apex",
-    "total_literals": 1814
+    "generated_at": "2025-09-14T12:10:59.019118",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "total_literals": 1821
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -464,14 +464,14 @@
       "value": "/**/*_test.py",
       "category": "paths",
       "locations": [
-        "scripts/compliance/mock_justification_checker.py:61"
+        "scripts/compliance/mock_justification_checker.py:62"
       ]
     },
     "/**/test_*.py": {
       "value": "/**/test_*.py",
       "category": "paths",
       "locations": [
-        "scripts/compliance/mock_justification_checker.py:60"
+        "scripts/compliance/mock_justification_checker.py:61"
       ]
     },
     "/.dockerenv": {
@@ -588,7 +588,7 @@
       "value": "/1000",
       "category": "paths",
       "locations": [
-        "netra_backend/app/websocket_core/unified_manager.py:3218"
+        "netra_backend/app/websocket_core/unified_manager.py:3322"
       ]
     },
     "/100:": {
@@ -806,7 +806,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/monitoring/websocket_logging_enhanced.py:505",
-        "netra_backend/app/services/agent_websocket_bridge.py:3104"
+        "netra_backend/app/services/agent_websocket_bridge.py:3112"
       ]
     },
     "/Users/anthony/Desktop/netra-apex": {
@@ -2286,6 +2286,13 @@
         "scripts/validate_oauth_staging.py:306"
       ]
     },
+    "/auth/oauth/register": {
+      "value": "/auth/oauth/register",
+      "category": "paths",
+      "locations": [
+        "netra_backend/app/clients/auth_client_core.py:1867"
+      ]
+    },
     "/auth/oauth/status": {
       "value": "/auth/oauth/status",
       "category": "paths",
@@ -2378,8 +2385,8 @@
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1707",
         "netra_backend/app/clients/auth_client_core.py:1738",
-        "netra_backend/app/clients/auth_client_core.py:1822",
-        "netra_backend/app/clients/auth_client_core.py:1838"
+        "netra_backend/app/clients/auth_client_core.py:1929",
+        "netra_backend/app/clients/auth_client_core.py:1945"
       ]
     },
     "/auth/users/{user_id}": {
@@ -2597,11 +2604,11 @@
       "locations": [
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:311",
         "netra_backend/app/routes/demo.py:63",
-        "frontend/components/chat/ChatFallbackUI.tsx:113",
         "frontend/components/ChatHistorySection.tsx:89",
         "frontend/components/ChatHistorySection.tsx:90",
-        "frontend/components/demo/DemoCompletion.tsx:16",
-        "frontend/components/NavLinks.tsx:16"
+        "frontend/components/NavLinks.tsx:16",
+        "frontend/components/chat/ChatFallbackUI.tsx:113",
+        "frontend/components/demo/DemoCompletion.tsx:16"
       ]
     },
     "/chat/message": {
@@ -2653,8 +2660,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/llm_cache.py:65",
-        "scripts/claude-instance-orchestrator.py:137",
-        "scripts/claude-instance-orchestrator.py:218"
+        "scripts/claude-instance-orchestrator.py:147",
+        "scripts/claude-instance-orchestrator.py:228"
       ]
     },
     "/clickhouse": {
@@ -2729,8 +2736,8 @@
       "value": "/compact",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:140",
-        "scripts/claude-instance-orchestrator.py:218"
+        "scripts/claude-instance-orchestrator.py:150",
+        "scripts/claude-instance-orchestrator.py:228"
       ]
     },
     "/compare": {
@@ -2905,21 +2912,21 @@
       "value": "/createtestsv2 agent goldenpath messages work, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:804"
+        "scripts/claude-instance-orchestrator.py:1044"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, integration": {
       "value": "/createtestsv2 agent goldenpath messages work, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:799"
+        "scripts/claude-instance-orchestrator.py:1039"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, unit": {
       "value": "/createtestsv2 agent goldenpath messages work, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:789"
+        "scripts/claude-instance-orchestrator.py:1029"
       ]
     },
     "/dashboard": {
@@ -3250,14 +3257,14 @@
       "value": "/failingtestsgardener agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:854"
+        "scripts/claude-instance-orchestrator.py:1104"
       ]
     },
     "/failingtestsgardener critical": {
       "value": "/failingtestsgardener critical",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:859"
+        "scripts/claude-instance-orchestrator.py:1109"
       ]
     },
     "/favicon.ico": {
@@ -3288,10 +3295,10 @@
       "value": "/gcploggardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:794",
-        "scripts/claude-instance-orchestrator.py:824",
-        "scripts/claude-instance-orchestrator.py:864",
-        "scripts/claude-instance-orchestrator.py:904"
+        "scripts/claude-instance-orchestrator.py:1034",
+        "scripts/claude-instance-orchestrator.py:1074",
+        "scripts/claude-instance-orchestrator.py:1114",
+        "scripts/claude-instance-orchestrator.py:1164"
       ]
     },
     "/generate": {
@@ -3313,36 +3320,44 @@
       "value": "/gitcommitgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:899"
+        "scripts/claude-instance-orchestrator.py:1019",
+        "scripts/claude-instance-orchestrator.py:1159"
       ]
     },
-    "/gitissueprogressorv2 agents": {
-      "value": "/gitissueprogressorv2 agents",
+    "/gitissueprogressorv3 agents": {
+      "value": "/gitissueprogressorv3 agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:829",
-        "scripts/claude-instance-orchestrator.py:839"
+        "scripts/claude-instance-orchestrator.py:1079",
+        "scripts/claude-instance-orchestrator.py:1089"
       ]
     },
-    "/gitissueprogressorv2 p0": {
-      "value": "/gitissueprogressorv2 p0",
+    "/gitissueprogressorv3 goldenpath": {
+      "value": "/gitissueprogressorv3 goldenpath",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:834"
+        "scripts/claude-instance-orchestrator.py:1094"
       ]
     },
-    "/gitissueprogressorv2 tests p0": {
-      "value": "/gitissueprogressorv2 tests p0",
+    "/gitissueprogressorv3 p0": {
+      "value": "/gitissueprogressorv3 p0",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:844"
+        "scripts/claude-instance-orchestrator.py:1084"
       ]
     },
-    "/gitissueprogressorv2 tests p1": {
-      "value": "/gitissueprogressorv2 tests p1",
+    "/gitissueprogressorv3 removing legacy": {
+      "value": "/gitissueprogressorv3 removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:849"
+        "scripts/claude-instance-orchestrator.py:1124"
+      ]
+    },
+    "/gitissueprogressorv3 tests p1": {
+      "value": "/gitissueprogressorv3 tests p1",
+      "category": "paths",
+      "locations": [
+        "scripts/claude-instance-orchestrator.py:1099"
       ]
     },
     "/groups/": {
@@ -3597,7 +3612,7 @@
       "category": "paths",
       "locations": [
         "frontend/components/chat/ChatFallbackUI.tsx:179",
-        "scripts/claude-instance-orchestrator.py:218"
+        "scripts/claude-instance-orchestrator.py:228"
       ]
     },
     "/history": {
@@ -3611,8 +3626,8 @@
       "value": "/home/",
       "category": "paths",
       "locations": [
-        "netra_backend/app/services/agent_websocket_bridge.py:3104",
-        "netra_backend/app/services/agent_websocket_bridge.py:3104"
+        "netra_backend/app/services/agent_websocket_bridge.py:3112",
+        "netra_backend/app/services/agent_websocket_bridge.py:3112"
       ]
     },
     "/industry/{industry}/templates": {
@@ -4305,14 +4320,14 @@
       "value": "/opt/homebrew/bin",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:294"
+        "scripts/claude-instance-orchestrator.py:304"
       ]
     },
     "/opt/homebrew/bin/claude": {
       "value": "/opt/homebrew/bin/claude",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:159"
+        "scripts/claude-instance-orchestrator.py:169"
       ]
     },
     "/optimization": {
@@ -4361,7 +4376,7 @@
       "value": "/permissions",
       "category": "paths",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:1822"
+        "netra_backend/app/clients/auth_client_core.py:1929"
       ]
     },
     "/permissions/{tool_name}": {
@@ -4415,7 +4430,7 @@
       "value": "/prmergergit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:894"
+        "scripts/claude-instance-orchestrator.py:1154"
       ]
     },
     "/proc/": {
@@ -4595,6 +4610,13 @@
         "auth_service/auth_core/api/websocket_auth.py:357"
       ]
     },
+    "/refreshgardener": {
+      "value": "/refreshgardener",
+      "category": "paths",
+      "locations": [
+        "scripts/claude-instance-orchestrator.py:1024"
+      ]
+    },
     "/register": {
       "value": "/register",
       "category": "paths",
@@ -4667,7 +4689,7 @@
       "value": "/revoke-sessions",
       "category": "paths",
       "locations": [
-        "netra_backend/app/clients/auth_client_core.py:1838"
+        "netra_backend/app/clients/auth_client_core.py:1945"
       ]
     },
     "/revoke-token": {
@@ -4725,28 +4747,28 @@
       "value": "/runtests agents, e2e gcp",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:889"
+        "scripts/claude-instance-orchestrator.py:1149"
       ]
     },
     "/runtests all, integration": {
       "value": "/runtests all, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:884"
+        "scripts/claude-instance-orchestrator.py:1144"
       ]
     },
     "/runtests all, unit": {
       "value": "/runtests all, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:874"
+        "scripts/claude-instance-orchestrator.py:1134"
       ]
     },
     "/runtests critical, e2e": {
       "value": "/runtests critical, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:879"
+        "scripts/claude-instance-orchestrator.py:1139"
       ]
     },
     "/s": {
@@ -5022,21 +5044,36 @@
       "value": "/ssotgardener agent goldenpath messages work",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:819"
+        "scripts/claude-instance-orchestrator.py:1069"
       ]
     },
     "/ssotgardener message routing": {
       "value": "/ssotgardener message routing",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:809"
+        "scripts/claude-instance-orchestrator.py:1049"
       ]
     },
     "/ssotgardener removing legacy": {
       "value": "/ssotgardener removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:814"
+        "scripts/claude-instance-orchestrator.py:1064",
+        "scripts/claude-instance-orchestrator.py:1119"
+      ]
+    },
+    "/ssotgardener tests": {
+      "value": "/ssotgardener tests",
+      "category": "paths",
+      "locations": [
+        "scripts/claude-instance-orchestrator.py:1059"
+      ]
+    },
+    "/ssotgardener websockets or auth": {
+      "value": "/ssotgardener websockets or auth",
+      "category": "paths",
+      "locations": [
+        "scripts/claude-instance-orchestrator.py:1054"
       ]
     },
     "/staging": {
@@ -5360,7 +5397,7 @@
         "netra_backend/app/routes/factory_status/router.py:96",
         "netra_backend/app/websocket_core/unified_manager.py:342",
         "scripts/check_auth_ssot_compliance.py:210",
-        "scripts/compliance/core.py:207",
+        "scripts/compliance/core.py:217",
         "scripts/compliance/severity_tiers.py:253",
         "scripts/compliance/severity_tiers.py:259",
         "scripts/generate_wip_report.py:90",
@@ -5394,6 +5431,7 @@
       "category": "paths",
       "locations": [
         "scripts/compliance/core.py:99",
+        "scripts/compliance/mock_justification_checker.py:104",
         "scripts/compliance/relaxed_violation_counter.py:129"
       ]
     },
@@ -5415,14 +5453,14 @@
       "value": "/testgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:869"
+        "scripts/claude-instance-orchestrator.py:1129"
       ]
     },
     "/tests": {
       "value": "/tests",
       "category": "paths",
       "locations": [
-        "scripts/compliance/core.py:207",
+        "scripts/compliance/core.py:217",
         "scripts/compliance/severity_tiers.py:253",
         "scripts/compliance/severity_tiers.py:259",
         "scripts/generate_wip_report.py:90"
@@ -5436,19 +5474,19 @@
         "scripts/check_auth_ssot_compliance.py:210",
         "scripts/check_repository_compliance.py:284",
         "scripts/compliance/core.py:99",
+        "scripts/compliance/mock_justification_checker.py:104",
         "scripts/compliance/relaxed_violation_counter.py:128",
         "scripts/compliance/stub_checker.py:52",
         "scripts/coverage_intelligence.py:367",
         "scripts/find_large_app_files.py:24",
-        "scripts/monitor_ssot_compliance.py:337",
-        "scripts/scan_string_literals.py:45"
+        "scripts/monitor_ssot_compliance.py:337"
       ]
     },
     "/tests/**/*.py": {
       "value": "/tests/**/*.py",
       "category": "paths",
       "locations": [
-        "scripts/compliance/mock_justification_checker.py:62"
+        "scripts/compliance/mock_justification_checker.py:63"
       ]
     },
     "/thread/{thread_id}/runs": {
@@ -5613,7 +5651,21 @@
       "value": "/ultimate-test-deploy-loop",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:909"
+        "scripts/claude-instance-orchestrator.py:1169"
+      ]
+    },
+    "/unit/": {
+      "value": "/unit/",
+      "category": "paths",
+      "locations": [
+        "scripts/compliance/mock_justification_checker.py:105"
+      ]
+    },
+    "/units/": {
+      "value": "/units/",
+      "category": "paths",
+      "locations": [
+        "scripts/compliance/mock_justification_checker.py:105"
       ]
     },
     "/usage": {
@@ -5649,28 +5701,28 @@
       "value": "/usr/bin",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:296"
+        "scripts/claude-instance-orchestrator.py:306"
       ]
     },
     "/usr/bin/claude": {
       "value": "/usr/bin/claude",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:162"
+        "scripts/claude-instance-orchestrator.py:172"
       ]
     },
     "/usr/local/bin": {
       "value": "/usr/local/bin",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:295"
+        "scripts/claude-instance-orchestrator.py:305"
       ]
     },
     "/usr/local/bin/claude": {
       "value": "/usr/local/bin/claude",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:160"
+        "scripts/claude-instance-orchestrator.py:170"
       ]
     },
     "/usr/src/app/alembic.ini": {
@@ -11287,7 +11339,7 @@
         "scripts/boundary_enforcer_core_types.py:63",
         "scripts/check_environment_isolation.py:174",
         "scripts/compliance/analyze_mocks.py:66",
-        "scripts/compliance/mock_justification_checker.py:65",
+        "scripts/compliance/mock_justification_checker.py:66",
         "scripts/fix_modern_websockets_deprecation.py:178",
         "scripts/fix_websockets_deprecation.py:66",
         "scripts/fix_websockets_legacy_to_modern.py:103"
@@ -11412,7 +11464,7 @@
       "locations": [
         "scripts/check_environment_isolation.py:170",
         "scripts/compliance/analyze_mocks.py:65",
-        "scripts/compliance/mock_justification_checker.py:64",
+        "scripts/compliance/mock_justification_checker.py:65",
         "scripts/create_enforcement_tools.py:99",
         "scripts/fix_modern_websockets_deprecation.py:177",
         "scripts/fix_websockets_deprecation.py:65",

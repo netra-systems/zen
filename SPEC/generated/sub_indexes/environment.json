@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-13T22:43:15.641357",
-    "root_directory": "C:\\GitHub\\netra-apex",
+    "generated_at": "2025-09-14T12:10:58.620697",
+    "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 214
   },
   "literals": {
@@ -1467,8 +1467,7 @@
       "value": "PYTEST_REAL_DATABASE_TEST",
       "category": "environment",
       "locations": [
-        "netra_backend/app/db/clickhouse.py:204",
-        "netra_backend/app/db/clickhouse_backup.py:189"
+        "netra_backend/app/db/clickhouse.py:204"
       ]
     },
     "README_API_KEY": {
