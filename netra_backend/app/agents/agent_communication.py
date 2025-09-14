@@ -106,7 +106,7 @@ class AgentCommunicationMixin:
         
     def _get_websocket_user_id(self, run_id: str) -> str:
         """Get WebSocket user ID with fallback."""
-        if hasattr(self, '_user_id'):
+        if hasattr(self, '_user_id') and self._user_id:
             return self._user_id
         manager_id = self._get_manager_user_id(run_id)
         if manager_id:

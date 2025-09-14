@@ -197,9 +197,9 @@ class MockToolDispatcher:
 class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     """Integration tests for user execution engine patterns and coordination."""
     
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
-        await super().setUp()
+        super().setup_method(method)
         self.test_start_time = time.time()
         
     @pytest.mark.integration
@@ -714,11 +714,11 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
         
         await execution_engine.cleanup()
     
-    async def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test fixtures."""
         # Force garbage collection to clean up any remaining objects
         gc.collect()
         
         test_duration = time.time() - self.test_start_time
         logger.info(f"Test completed in {test_duration:.3f}s")
-        await super().tearDown()
+        super().teardown_method(method)

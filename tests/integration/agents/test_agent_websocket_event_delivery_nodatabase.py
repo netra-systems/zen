@@ -275,9 +275,9 @@ class MockAgent(BaseAgent):
 class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
     """Integration tests for agent WebSocket event delivery without database dependencies."""
     
-    async def setUp(self):
+    def setup_method(self, method):
         """Set up test fixtures."""
-        await super().setUp()
+        super().setup_method(method)
         self.test_start_time = time.time()
         
     @pytest.mark.integration
@@ -634,8 +634,8 @@ class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
                 assert started_idx < completed_idx, \
                     f"Agent {agent.agent_name} started event should come before completed event"
     
-    async def tearDown(self):
+    def teardown_method(self, method):
         """Clean up test fixtures."""
         test_duration = time.time() - self.test_start_time
         logger.info(f"Test completed in {test_duration:.3f}s")
-        await super().tearDown()
+        super().teardown_method(method)
