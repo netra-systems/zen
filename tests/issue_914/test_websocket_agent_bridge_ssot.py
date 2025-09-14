@@ -345,7 +345,7 @@ class TestWebSocketAgentBridgeSSot(SSotAsyncTestCase):
         except ImportError as e:
             self.skipTest(f"Could not test WebSocket diagnostics: {e}")
 
-    def test_websocket_error_handling_consistency(self):
+    async def test_websocket_error_handling_consistency(self):
         """
         Test that WebSocket error handling is consistent and robust.
 
@@ -477,78 +477,70 @@ class TestWebSocketAgentBridgeSSot(SSotAsyncTestCase):
         except ImportError as e:
             self.skipTest(f"Could not test WebSocket memory cleanup: {e}")
 
-    def test_websocket_concurrent_users_consistency(self):
+    async def test_websocket_concurrent_users_consistency(self):
         """
         Test WebSocket handling for concurrent users.
 
         EXPECTED: Should handle multiple users without conflicts
         PURPOSE: Validates multi-user scalability for production
         """
-        async def concurrent_user_test():
-            try:
-                from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
+        try:
+            from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedRegistry
 
-                registry = AdvancedRegistry()
-                registry.set_websocket_manager(self.mock_websocket_manager)
+            registry = AdvancedRegistry()
+            registry.set_websocket_manager(self.mock_websocket_manager)
 
-                # Create multiple user contexts
-                user_contexts = [
-                    UserExecutionContext(
-                        user_id=f"concurrent_user_{i}",
-                        request_id=f"concurrent_request_{i}",
-                        thread_id=f"concurrent_thread_{i}",
-                        run_id=f"concurrent_run_{i}"
-                    ) for i in range(3)
-                ]
+            # Create multiple user contexts
+            user_contexts = [
+                UserExecutionContext(
+                    user_id=f"concurrent_user_{i}",
+                    request_id=f"concurrent_request_{i}",
+                    thread_id=f"concurrent_thread_{i}",
+                    run_id=f"concurrent_run_{i}"
+                ) for i in range(3)
+            ]
 
-                # Create user sessions concurrently
-                async def create_user_session(context):
-                    user_session = await registry.get_user_session(context.user_id)
-                    await user_session.set_websocket_manager(self.mock_websocket_manager, context)
-                    return user_session
+            # Create user sessions concurrently
+            async def create_user_session(context):
+                user_session = await registry.get_user_session(context.user_id)
+                await user_session.set_websocket_manager(self.mock_websocket_manager, context)
+                return user_session
 
-                # Use asyncio.gather for concurrent execution
-                sessions = await asyncio.gather(*[
-                    create_user_session(context) for context in user_contexts
-                ])
+            # Use asyncio.gather for concurrent execution
+            sessions = await asyncio.gather(*[
+                create_user_session(context) for context in user_contexts
+            ])
 
-                self.assertEqual(len(sessions), len(user_contexts),
-                               "All user sessions should be created")
+            self.assertEqual(len(sessions), len(user_contexts),
+                           "All user sessions should be created")
 
-                # Verify each session has unique identity
-                user_ids = [session.user_id for session in sessions]
-                self.assertEqual(len(set(user_ids)), len(user_ids),
-                               "All user sessions should have unique IDs")
+            # Verify each session has unique identity
+            user_ids = [session.user_id for session in sessions]
+            self.assertEqual(len(set(user_ids)), len(user_ids),
+                           "All user sessions should have unique IDs")
 
-                print(f"✅ Created {len(sessions)} concurrent user sessions")
+            print(f"✅ Created {len(sessions)} concurrent user sessions")
 
-                # Cleanup all sessions concurrently
-                async def cleanup_user_session(user_id):
-                    return await registry.cleanup_user_session(user_id)
+            # Cleanup all sessions concurrently
+            async def cleanup_user_session(user_id):
+                return await registry.cleanup_user_session(user_id)
 
-                cleanup_results = await asyncio.gather(*[
-                    cleanup_user_session(context.user_id) for context in user_contexts
-                ])
+            cleanup_results = await asyncio.gather(*[
+                cleanup_user_session(context.user_id) for context in user_contexts
+            ])
 
-                successful_cleanups = sum(1 for result in cleanup_results
-                                        if result['status'] == 'cleaned')
+            successful_cleanups = sum(1 for result in cleanup_results
+                                    if result['status'] == 'cleaned')
 
-                self.assertEqual(successful_cleanups, len(user_contexts),
-                               "All user sessions should be cleaned successfully")
+            self.assertEqual(successful_cleanups, len(user_contexts),
+                           "All user sessions should be cleaned successfully")
 
-                print(f"✅ Cleaned up {successful_cleanups} concurrent user sessions")
-                print("✅ Concurrent users handled consistently without conflicts")
+            print(f"✅ Cleaned up {successful_cleanups} concurrent user sessions")
+            print("✅ Concurrent users handled consistently without conflicts")
 
-            except ImportError as e:
-                print(f"Could not test concurrent users: {e}")
+        except ImportError as e:
+            self.skipTest(f"Could not test concurrent users: {e}")
 
-        # Run the async test
-        if hasattr(self, '_testMethodName'):
-            # Running in pytest context
-            asyncio.run(concurrent_user_test())
-        else:
-            # Running standalone
-            concurrent_user_test()
 
 
 # Test runner for standalone execution

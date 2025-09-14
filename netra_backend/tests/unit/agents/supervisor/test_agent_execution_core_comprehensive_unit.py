@@ -31,7 +31,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, 
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 
@@ -128,7 +128,7 @@ class TestAgentExecutionCoreUnit(SSotBaseTestCase):
         in _ensure_user_execution_context(). Mock objects fail isinstance() checks
         which are required for Issue #159 security compliance.
         """
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         state = DeepAgentState(
             user_id=str(UserID("test-user-456")),

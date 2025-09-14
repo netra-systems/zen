@@ -20,7 +20,7 @@ from typing import Dict, Any, Optional
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Environment access through SSOT pattern only
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 # Test imports - both registries to validate consolidation
 from netra_backend.app.agents.registry import AgentRegistry as BasicRegistry

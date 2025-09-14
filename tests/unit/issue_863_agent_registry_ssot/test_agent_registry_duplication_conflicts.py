@@ -34,14 +34,9 @@ class TestAgentRegistryDuplicationConflicts(SSotAsyncTestCase):
     problem that prevents users from getting AI responses.
     """
 
-    def setUp(self):
-        """Set up test environment for registry conflict detection."""
-        super().setUp()
-        self._setup_test_data()
-
     def setup_method(self, method):
-        """Pytest setup method - ensures setUp is called."""
-        self.setUp()
+        """Pytest setup method."""
+        self._setup_test_data()
 
     def _setup_test_data(self):
         """Set up test data for registry conflict detection."""
