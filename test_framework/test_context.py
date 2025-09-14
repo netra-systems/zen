@@ -149,11 +149,14 @@ class TestContext:
         # Environment configuration
         self.env = get_env()
         self.frontend_url = self.env.get('FRONTEND_URL', 'http://localhost:3000')
-        self.backend_url = (
-            self.env.get('BACKEND_URL') or
-            self.env.get('NETRA_BACKEND_URL') or
-            'http://localhost:8000'
-        )
+        # Environment variable fallback priority: BACKEND_URL -> NETRA_BACKEND_URL -> default
+        # Handle both None and empty string as missing values
+        backend_url = self.env.get('BACKEND_URL')
+        if not backend_url:  # None or empty string
+            backend_url = self.env.get('NETRA_BACKEND_URL')
+        if not backend_url:  # Still None or empty string
+            backend_url = 'http://localhost:8000'
+        self.backend_url = backend_url
         self.websocket_base_url = self.backend_url.replace('http://', 'ws://').replace('https://', 'wss://')
     
     def _create_default_user_context(self) -> TestUserContext:

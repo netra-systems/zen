@@ -117,6 +117,10 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         mock_bridge.notify_agent_error = AsyncMock(return_value=True)
         mock_bridge.register_run_thread_mapping = AsyncMock(return_value=True)
         mock_bridge.unregister_run_mapping = AsyncMock(return_value=True)
+        # Add methods required by UnifiedWebSocketEmitter
+        mock_bridge.is_connection_active = MagicMock(return_value=True)
+        mock_bridge.emit_event = AsyncMock(return_value=True)
+        mock_bridge.emit_event_batch = AsyncMock(return_value=True)
         return mock_bridge
     
     @pytest.fixture
@@ -847,22 +851,22 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         assert ws_user_2.run_id in run_ids_used
         
         # Test emitter status tracking
-        status_1 = emitter_1.get_emitter_status()
-        status_2 = emitter_2.get_emitter_status()
-        
+        status_1 = emitter_1.get_stats()
+        status_2 = emitter_2.get_stats()
+
         assert status_1['user_id'] == ws_user_1.user_id
         assert status_2['user_id'] == ws_user_2.user_id
-        assert status_1['event_count'] >= 1
-        assert status_2['event_count'] >= 1
+        assert status_1['metrics']['total_events'] >= 1
+        assert status_2['metrics']['total_events'] >= 1
         
         # Test emitter cleanup isolation
         await emitter_1.cleanup()
         
         # Emitter 2 should still be functional after emitter 1 cleanup
         await emitter_2.notify_agent_thinking("test_agent_2", "still working")
-        
-        status_2_after = emitter_2.get_emitter_status()
-        assert status_2_after['event_count'] >= 2
+
+        status_2_after = emitter_2.get_stats()
+        assert status_2_after['metrics']['total_events'] >= 2
         
         await emitter_2.cleanup()
         
@@ -902,5 +906,11 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         if "error_scenarios" in method_name:
             assert metrics.get("error_isolation_maintained", False), "Error isolation must be verified"
 
-        if "websocket" in method_name:
+        if "websocket" in method_name and "emitter" not in method_name:
             assert metrics.get("websocket_integration_verified", False), "WebSocket integration must be verified"
+
+        if "configuration_validation" in method_name:
+            assert metrics.get("factory_configuration_validated", False), "Factory configuration must be verified"
+
+        if "websocket_emitter" in method_name:
+            assert metrics.get("websocket_emitter_isolation_verified", False), "WebSocket emitter isolation must be verified"

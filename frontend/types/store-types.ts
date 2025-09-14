@@ -47,7 +47,7 @@ export interface ProcessingState {
 
 // ThreadState moved to shared/types/frontend_types.ts for SSOT compliance
 // Use StoreThreadState for store-specific thread state with actions
-export { StoreThreadState as ThreadState } from '../../../shared/types/frontend_types';
+export { StoreThreadState as ThreadState } from '@shared/types/frontend_types';
 
 export interface ConnectionState {
   isConnected: boolean;
