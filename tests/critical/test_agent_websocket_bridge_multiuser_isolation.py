@@ -115,7 +115,7 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         bridge = AgentWebSocketBridge(user_context=None)
         
         # Simulate WebSocket manager with both connections
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
             mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
@@ -179,8 +179,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         # Create separate bridge instances (non-singleton)
         bridge = AgentWebSocketBridge()
         
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
+            mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
             
             # Mock connections for both users
@@ -249,8 +250,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         
         bridge = AgentWebSocketBridge()
         
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
+            mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
             
             # Setup connection mapping
@@ -323,8 +325,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         collector = WebSocketEventCollector("background_user")
         bridge = AgentWebSocketBridge()
         
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
+            mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
             mock_manager.get_connection = AsyncMock(return_value=collector)
             
@@ -384,8 +387,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         
         bridge = AgentWebSocketBridge()
         
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
+            mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
             
             # Setup error for user1, normal for user2
@@ -429,8 +433,9 @@ class TestAgentWebSocketBridgeMultiUserIsolation:
         
         collector = WebSocketEventCollector("cleanup_user")
         
-        with patch('netra_backend.app.websocket_core.unified_manager.get_websocket_manager') as mock_ws_mgr:
+        with patch('netra_backend.app.websocket_core.get_websocket_manager') as mock_ws_mgr:
             websocket = TestWebSocketConnection()
+            mock_manager = MagicMock()
             mock_ws_mgr.return_value = mock_manager
             mock_manager.get_connection = AsyncMock(return_value=collector)
             
