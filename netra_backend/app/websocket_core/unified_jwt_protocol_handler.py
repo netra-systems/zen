@@ -77,33 +77,35 @@ class UnifiedJWTProtocolHandler:
     def _extract_from_subprotocol_value(subprotocol_value: str) -> Optional[str]:
         """
         Extract JWT from subprotocol header value directly.
-        
+
         ISSUE #342 FIX: Enhanced subprotocol format support
-        
+        ISSUE #886 FIX: Enhanced staging environment authentication support
+
         This method supports multiple subprotocol formats:
         - jwt.TOKEN (original format)
         - jwt-auth.TOKEN (Issue #342 fix)
         - bearer.TOKEN (Issue #342 fix)
-        
+        - staging-auth.TOKEN (Issue #886 fix - staging environment)
+
         Args:
             subprotocol_value: Direct subprotocol header value
-            
+
         Returns:
             Optional[str]: Extracted JWT token or None if not found/invalid
-            
+
         Raises:
             ValueError: If subprotocol format is malformed in a way that should fail
         """
         if not subprotocol_value or not subprotocol_value.strip():
             return None
-            
+
         # Split comma-separated subprotocols
         subprotocols = [p.strip() for p in subprotocol_value.split(",")]
-        
+
         for protocol in subprotocols:
-            # ISSUE #342 FIX: Support multiple subprotocol formats
+            # ISSUE #342 & #886 FIX: Support multiple subprotocol formats
             extracted_token = None
-            
+
             if protocol.startswith("jwt."):
                 extracted_token = protocol[4:]  # Remove "jwt." prefix
                 logger.debug("Found jwt.TOKEN format")
@@ -113,19 +115,22 @@ class UnifiedJWTProtocolHandler:
             elif protocol.startswith("bearer."):
                 extracted_token = protocol[7:]  # Remove "bearer." prefix
                 logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
-            
+            elif protocol.startswith("staging-auth."):
+                extracted_token = protocol[13:]  # Remove "staging-auth." prefix
+                logger.debug("Found staging-auth.TOKEN format (Issue #886 staging fix)")
+
             if extracted_token:
                 # Validate minimum token length - return None instead of raising ValueError to prevent 1011 errors
                 if len(extracted_token) < 10:
                     logger.debug(f"JWT token too short in subprotocol: {protocol}, returning None to prevent 1011 error")
                     return None
-                
+
                 # Try to decode as base64url first (standard frontend implementation)
                 jwt_token = UnifiedJWTProtocolHandler._decode_base64url_token(extracted_token)
                 if jwt_token:
                     logger.debug(f"Extracted base64url-decoded JWT from subprotocol format: {protocol[:protocol.find('.')]}.")
                     return jwt_token
-                
+
                 # If base64url decode fails, treat as raw token (direct format)
                 if UnifiedJWTProtocolHandler._is_valid_jwt_format(extracted_token):
                     logger.debug(f"Extracted raw JWT from subprotocol format: {protocol[:protocol.find('.')]}.")
@@ -133,7 +138,7 @@ class UnifiedJWTProtocolHandler:
                 else:
                     logger.debug(f"Invalid JWT format in subprotocol: {protocol}, returning None to prevent 1011 error")
                     return None
-                
+
         return None
 
     @staticmethod
@@ -297,25 +302,27 @@ def extract_jwt_from_subprotocol(subprotocol_value: Optional[str]) -> Optional[s
 def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str]:
     """
     Negotiate WebSocket subprotocol for JWT authentication (RFC 6455 compliance).
-    
+
     ISSUE #342 FIX: Enhanced subprotocol negotiation
-    
+    ISSUE #886 FIX: Enhanced support for staging environment jwt-auth protocols
+
     This function implements server-side subprotocol negotiation with support for
     multiple JWT authentication formats:
     - jwt.TOKEN (original format)
     - jwt-auth.TOKEN (Issue #342 fix)
+    - jwt-auth (Issue #886 fix - staging environment compatibility)
     - bearer.TOKEN (Issue #342 fix)
-    
+
     Args:
         client_protocols: List of subprotocols requested by client
-        
+
     Returns:
         Optional[str]: Accepted subprotocol or None if no suitable protocol found
     """
     # FIVE WHYS FIX: Process token-bearing protocols FIRST (priority over simple names)
     # This fixes the issue where ['jwt-auth', 'jwt.TOKEN'] incorrectly returned 'jwt-auth'
     # instead of processing the actual token in 'jwt.TOKEN'
-    
+
     for protocol in client_protocols:
         # PRIORITY 1: Support multiple JWT token formats (these contain actual auth tokens)
         if protocol.startswith('jwt.') and len(protocol) > 4:
@@ -330,20 +337,22 @@ def negotiate_websocket_subprotocol(client_protocols: List[str]) -> Optional[str
             logger.debug("Found bearer.TOKEN format (Issue #342 fix)")
             # RFC 6455 COMPLIANCE: Return the EXACT client protocol, not a transformed name
             return protocol
-    
+
     # PRIORITY 2: Direct protocol match (only if no token-bearing protocols found)
-    # Extended supported protocols for backward compatibility
-    supported_protocols = ['jwt-auth', 'jwt', 'bearer', 'e2e-testing']
-    
+    # ISSUE #886 FIX: Enhanced staging environment support
+    # Extended supported protocols for backward compatibility and staging environment
+    supported_protocols = ['jwt-auth', 'jwt', 'bearer', 'e2e-testing', 'staging-auth']
+
     for protocol in client_protocols:
         if protocol in supported_protocols:
-            logger.debug(f"Direct protocol match: {protocol}")
+            logger.debug(f"Direct protocol match: {protocol} (Issue #886 staging fix)")
             return protocol
-    
-    # ISSUE #342 FIX: Improved error logging for debugging
+
+    # ISSUE #342 & #886 FIX: Improved error logging for debugging
     logger.warning(f"No supported subprotocols found in client request: {client_protocols}")
-    logger.debug(f"Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN")
-    
+    logger.debug(f"Supported formats: jwt.TOKEN, jwt-auth.TOKEN, bearer.TOKEN, jwt-auth, staging-auth")
+    logger.info(f"ISSUE #886: If you're seeing staging test failures, ensure tests request supported subprotocols")
+
     return None
 
 
