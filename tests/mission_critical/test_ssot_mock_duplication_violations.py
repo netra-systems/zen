@@ -127,7 +127,7 @@ class TestSSOTMockDuplicationViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(websocket_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} WebSocket mock SSOT violations.\n"
                 f"All WebSocket mocks MUST use SSotMockFactory.create_websocket_mock().\n\n"
                 f"Violations found:\n{violation_details}\n\n"

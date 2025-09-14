@@ -126,15 +126,15 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         
         # Test pipeline steps
         self.test_pipeline_steps = [
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="triage_agent",
                 metadata={"step_number": 1, "description": "Initial request triage"}
             ),
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="data_helper_agent", 
                 metadata={"step_number": 2, "description": "Data collection"}
             ),
-            PipelineStep(
+            PipelineStepConfig(
                 agent_name="reporting_agent",
                 metadata={"step_number": 3, "description": "Final report generation"}
             )
@@ -756,7 +756,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         # Create larger pipeline for performance testing
         large_pipeline = []
         for i in range(10):  # 10 steps
-            step = PipelineStep(
+            step = PipelineStepConfig(
                 agent_name=f"performance_agent_{i:02d}",
                 metadata={"step_number": i + 1, "performance_test": True}
             )
