@@ -138,7 +138,7 @@ class AgentLifecycleMixin(ABC):
         return True
     
     @time_operation("cleanup", TimingCategory.ORCHESTRATION)
-    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
+    async def cleanup(self, context: UserExecutionContext, run_id: str) -> None:
         """Cleanup after execution. Override in subclasses if needed."""
         self.context.clear()  # Clear protected context
     
