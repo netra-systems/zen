@@ -74,7 +74,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.db.clickhouse import get_clickhouse_service
-from test_framework.real_llm_config import configure_real_llm_testing
+from test_framework.llm_config_manager import configure_real_llm_testing
 from tests.e2e.agent_collaboration_helpers import AgentCollaborationTestCore
 
 

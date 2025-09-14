@@ -24,7 +24,8 @@ from shared.isolated_environment import IsolatedEnvironment
 import aiohttp
 import pytest
 
-from tests.e2e.config import TestEndpoints, get_test_config
+from tests.e2e.integration.config import TestEndpoints
+from tests.e2e.config import get_test_config
 from tests.e2e.jwt_token_helpers import JWTTestHelper
 
 
@@ -32,6 +33,7 @@ from tests.e2e.jwt_token_helpers import JWTTestHelper
 async def real_websocket_client():
     """Real WebSocket client for E2E testing - NO MOCKS"""
     config = get_test_config()
+    endpoints = TestEndpoints()  # Create endpoints instance
     jwt_helper = JWTTestHelper()
     
     # Create test user token
@@ -48,13 +50,13 @@ async def real_websocket_client():
     
     try:
         ws = await session.ws_connect(
-            config.endpoints.ws_url,
+            endpoints.ws_url,
             headers=headers,
             timeout=aiohttp.ClientTimeout(total=30)
         )
     except Exception as e:
         await session.close()
-        pytest.fail(f"Failed to connect to real WebSocket service at {config.endpoints.ws_url}: {e}")
+        pytest.fail(f"Failed to connect to real WebSocket service at {endpoints.ws_url}: {e}")
     
     yield ws, user_id, token
     
