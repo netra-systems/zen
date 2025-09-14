@@ -89,7 +89,7 @@ class MockUserExecutionContext:
             'created_at': datetime.now(timezone.utc).isoformat()
         }
         self.created_at = datetime.now(timezone.utc)
-        self.websocket_connection_id = f"ws_{uuid.uuid4().hex[:8]}"
+        self.websocket_client_id = f"ws_{uuid.uuid4().hex[:8]}"
 
 
 class MockAgentWebSocketBridge:

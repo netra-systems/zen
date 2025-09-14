@@ -47,7 +47,7 @@ class CorruptionAnalysis:
     business_impact_files: List[str]
 
 
-class TestSuiteCorruptionScanner:
+class SuiteCorruptionScanner:
     """Scans and analyzes test suite corruption for Issue #817."""
 
     CORRUPTION_PATTERNS = {

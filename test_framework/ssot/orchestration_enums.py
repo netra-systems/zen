@@ -10,7 +10,7 @@ Ensures consistent enum definitions, prevents duplication bugs, and provides sin
 CRITICAL: This is the ONLY source for orchestration enums and data classes in the system.
 ALL orchestration modules must import from this module to maintain SSOT compliance.
 
-Consolidated Enums:
+CONSOLIDATED Enums:
 - BackgroundTaskStatus: Status of background E2E tasks
 - E2ETestCategory: E2E test categories handled by background system
 - ExecutionStrategy: Category execution strategies within layers
@@ -21,7 +21,7 @@ Consolidated Enums:
 - ServiceStatus: Service dependency status types
 - ServiceAvailability: Service availability states for integration testing
 
-Previous Locations (Now Consolidated):
+Previous Locations (Now CONSOLIDATED):
 - test_framework/orchestration/background_e2e_agent.py (BackgroundTaskStatus, E2ETestCategory)
 - test_framework/orchestration/background_e2e_manager.py (BackgroundTaskStatus, E2ETestCategory)
 - test_framework/orchestration/layer_execution_agent.py (ExecutionStrategy)

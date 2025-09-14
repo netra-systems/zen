@@ -48,33 +48,36 @@ class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
     when trying to import ServiceAvailability from the SSOT location.
     """
 
-    def test_ssot_service_availability_import_failure_reproduction(self):
+    def test_ssot_service_availability_import_now_works_after_fix(self):
         """
-        Test that reproduces the ServiceAvailability import failure from SSOT location.
+        Test that ServiceAvailability import now works from SSOT location after fix.
 
-        This test should FAIL initially, demonstrating the issue exists.
-        After the fix, this test should PASS.
+        This test initially would have FAILED (ImportError), but after the fix it should PASS.
+        This demonstrates the issue has been resolved.
         """
-        # Try to import ServiceAvailability from SSOT location
-        # This should fail initially and pass after fix
-        import_error_occurred = False
+        # Import ServiceAvailability from SSOT location - this should now work
+        import_success = False
         error_message = ""
 
         try:
             from test_framework.ssot.orchestration_enums import ServiceAvailability
-            # If import succeeds, that means fix is already applied
-            self.fail("UNEXPECTED: ServiceAvailability import succeeded - fix may already be applied")
+            import_success = True
+            
+            # Verify it's an Enum with correct values
+            self.assertTrue(issubclass(ServiceAvailability, Enum))
+            expected_values = {"AVAILABLE", "UNAVAILABLE", "DEGRADED", "UNKNOWN"}
+            actual_values = {member.name for member in ServiceAvailability}
+            self.assertEqual(expected_values, actual_values)
+            
         except ImportError as e:
-            import_error_occurred = True
+            import_success = False
             error_message = str(e)
 
-        # Validate the import error occurred as expected
-        self.assertTrue(import_error_occurred, "Expected ImportError for ServiceAvailability from SSOT location")
-        self.assertIn("ServiceAvailability", error_message)
-        self.assertIn("test_framework.ssot.orchestration_enums", error_message)
-
-        # This test documents that ServiceAvailability is missing from SSOT
-        print(f"REPRODUCTION SUCCESS: ServiceAvailability import failed as expected: {error_message}")
+        # Validate the import succeeded (fix is applied)
+        self.assertTrue(import_success, f"ServiceAvailability import should work after fix. Error: {error_message}")
+        
+        # This test confirms that ServiceAvailability is now available from SSOT
+        print("FIX CONFIRMED: ServiceAvailability successfully imported from SSOT location")
 
     def test_service_availability_exists_in_legacy_location(self):
         """
@@ -101,20 +104,28 @@ class TestIssue1040ServiceAvailabilityImportReproduction(SSotBaseTestCase):
         self.assertEqual(ServiceAvailability.DEGRADED.value, "degraded")
         self.assertEqual(ServiceAvailability.UNKNOWN.value, "unknown")
 
-    def test_affected_mission_critical_tests_import_patterns(self):
+    def test_affected_mission_critical_tests_import_patterns_now_work(self):
         """
-        Test the import patterns used by affected mission-critical tests.
+        Test the import patterns used by affected mission-critical tests now work after fix.
 
-        This reproduces the exact import pattern that's failing in the critical tests.
+        This verifies the exact import pattern that was failing in the critical tests now succeeds.
         """
         # This reproduces the import pattern from test_deterministic_startup_memory_leak_fixed.py:41
+        # After fix, this should work
         try:
             from test_framework.ssot.orchestration_enums import ServiceAvailability
-            self.fail("Expected ImportError - ServiceAvailability should be missing from SSOT location")
+            
+            # Verify it's working correctly  
+            self.assertTrue(issubclass(ServiceAvailability, Enum))
+            self.assertTrue(hasattr(ServiceAvailability, 'AVAILABLE'))
+            self.assertTrue(hasattr(ServiceAvailability, 'UNAVAILABLE'))
+            self.assertTrue(hasattr(ServiceAvailability, 'DEGRADED'))
+            self.assertTrue(hasattr(ServiceAvailability, 'UNKNOWN'))
+            
+            print("MISSION CRITICAL TESTS UNBLOCKED: ServiceAvailability import now works")
+            
         except ImportError as e:
-            # Expected failure - document the exact error
-            expected_error = "cannot import name 'ServiceAvailability'"
-            self.assertIn(expected_error, str(e))
+            self.fail(f"ServiceAvailability import should work after fix. Import failed: {e}")
 
     def test_mission_critical_test_files_blocked_by_import_issue(self):
         """
@@ -159,7 +170,6 @@ class TestIssue1040ServiceAvailabilityPostFix(SSotBaseTestCase):
     They serve as acceptance criteria for the fix.
     """
 
-    @pytest.mark.skip(reason="This test will pass after ServiceAvailability is added to SSOT - enable after fix")
     def test_ssot_service_availability_import_success_after_fix(self):
         """
         Test that ServiceAvailability can be imported from SSOT location after fix.
@@ -177,7 +187,6 @@ class TestIssue1040ServiceAvailabilityPostFix(SSotBaseTestCase):
         actual_values = {member.name for member in ServiceAvailability}
         self.assertEqual(expected_values, actual_values)
 
-    @pytest.mark.skip(reason="This test validates post-fix behavior - enable after fix")
     def test_both_import_locations_work_during_migration(self):
         """
         Test that both old and new import locations work during migration period.

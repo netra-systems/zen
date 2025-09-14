@@ -569,8 +569,8 @@ class WebSocketManagerFactory:
 __all__ = [
     'create_websocket_manager',  # DEPRECATED: Use get_websocket_manager from SSOT
     'create_websocket_manager_sync',  # DEPRECATED: Use WebSocketManager directly
-    'get_websocket_manager_factory',  # DEPRECATED: Returns SSOT function
-    'WebSocketManagerFactory',  # COMPATIBILITY: For SSOT violation testing
+    # REMOVED: 'get_websocket_manager_factory'  # Issue #1126 SSOT fix
+    # REMOVED: 'WebSocketManagerFactory'  # Issue #1126 SSOT fix
     # 'IsolatedWebSocketManager',  # REMOVED: SSOT consolidation - use WebSocketManager directly
     'create_defensive_user_execution_context',  # Compatibility utility
     'ConnectionLifecycleManager',  # Compatibility class

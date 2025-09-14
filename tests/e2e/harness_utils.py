@@ -351,7 +351,7 @@ async def test_harness_context(test_name: str, seed_data: bool = False):
         yield harness
 
 
-class UnifiedTestHarnessComplete:
+class UnifiedHarnessComplete:
     """
     Complete test harness for E2E WebSocket authentication testing.
     
@@ -1010,6 +1010,10 @@ def create_test_harness(harness_name: str = "default") -> UnifiedTestHarnessComp
     Returns:
         UnifiedTestHarnessComplete instance
     """
-    harness = UnifiedTestHarnessComplete()
+    harness = UnifiedHarnessComplete()
     harness.harness_name = harness_name
     return harness
+
+
+# Backward compatibility alias
+UnifiedTestHarnessComplete = UnifiedHarnessComplete

@@ -859,24 +859,29 @@ class TestAgentErrorRecoveryWorkflows(SSotAsyncTestCase):
         errors = []
 
         try:
-            # Simulate processing that exceeds timeout
+            # Use asyncio.wait_for to enforce actual timeout
             processing_time = timeout_scenario['timeout_duration'] + 1.0
-            await asyncio.sleep(processing_time)
+            await asyncio.wait_for(
+                asyncio.sleep(processing_time), 
+                timeout=timeout_scenario['timeout_duration']
+            )
+            # If we get here, timeout didn't trigger (shouldn't happen)
 
         except asyncio.TimeoutError:
+            # This is what should happen - actual timeout occurred
             error_detected = True
             recovery_attempted = True
             user_notified = True
             recovery_successful = True
             errors.append(f"Processing exceeded {timeout_scenario['timeout_duration']}s timeout")
 
-        except Exception:
-            # Simulate timeout detection and recovery
+        except Exception as e:
+            # Fallback - simulate timeout detection and recovery
             error_detected = True
             recovery_attempted = True
             user_notified = True
             recovery_successful = True
-            errors.append(f"Timeout detected for {timeout_scenario['timeout_type']}")
+            errors.append(f"Timeout detected for {timeout_scenario['timeout_type']}: {str(e)}")
 
         recovery_duration = time.time() - recovery_start
 

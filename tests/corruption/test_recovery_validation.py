@@ -50,7 +50,7 @@ class RecoveryValidation:
     remaining_issues: List[str]
 
 
-class TestRecoveryValidator:
+class RecoveryValidator:
     """Validates effectiveness of Issue #817 recovery efforts."""
 
     BUSINESS_CRITICAL_FILES = [
@@ -260,7 +260,7 @@ class TestRecoveryValidation:
     def setup_method(self):
         """Set up test environment."""
         self.env = IsolatedEnvironment()
-        self.validator = TestRecoveryValidator()
+        self.validator = RecoveryValidator()
 
     @pytest.mark.unit
     def test_validator_initialization(self):
@@ -470,7 +470,7 @@ def incomplete_function(
 
 if __name__ == "__main__":
     """Run recovery validation directly."""
-    validator = TestRecoveryValidator()
+    validator = RecoveryValidator()
     validation = validator.validate_recovery_effectiveness()
 
     print("=== ISSUE #817 RECOVERY VALIDATION ===")

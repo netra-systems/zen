@@ -98,11 +98,11 @@ class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
         for enum_class in existing_enums:
             self.assertTrue(issubclass(enum_class, Enum), f"{enum_class.__name__} should be an Enum")
 
-    def test_service_availability_missing_from_ssot_before_fix(self):
+    def test_service_availability_now_available_in_ssot_after_fix(self):
         """
-        Test that ServiceAvailability is missing from SSOT location (demonstrates the issue).
+        Test that ServiceAvailability is now available from SSOT location after fix.
 
-        This test should FAIL before fix, confirming ServiceAvailability is missing.
+        This test should PASS after fix, confirming ServiceAvailability is available.
         """
         # Check if ServiceAvailability is in the __all__ exports
         from test_framework.ssot import orchestration_enums
@@ -110,15 +110,15 @@ class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
         # Get the __all__ list if it exists
         if hasattr(orchestration_enums, '__all__'):
             exported_names = orchestration_enums.__all__
-            self.assertNotIn('ServiceAvailability', exported_names,
-                           "ServiceAvailability should NOT be in __all__ before fix (this confirms the issue)")
+            self.assertIn('ServiceAvailability', exported_names,
+                         "ServiceAvailability should be in __all__ after fix")
 
         # Try to access ServiceAvailability directly from module
-        self.assertFalse(hasattr(orchestration_enums, 'ServiceAvailability'),
-                        "ServiceAvailability should NOT be available in SSOT module before fix")
+        self.assertTrue(hasattr(orchestration_enums, 'ServiceAvailability'),
+                       "ServiceAvailability should be available in SSOT module after fix")
 
-        # This documents the issue exists
-        self.assertTrue(True, "CONFIRMED: ServiceAvailability is missing from SSOT location")
+        # This documents the issue is resolved
+        self.assertTrue(True, "CONFIRMED: ServiceAvailability is now available from SSOT location")
 
     def test_service_availability_exists_in_legacy_location(self):
         """
@@ -172,11 +172,10 @@ class TestIssue1040SSOTEnumValidation(SSotBaseTestCase):
             self.assertTrue(hasattr(orchestration_enums, enum_name),
                           f"SSOT should have {enum_name} enum")
 
-        # Check missing enum (should fail before fix)
-        self.assertFalse(hasattr(orchestration_enums, 'ServiceAvailability'),
-                        "ServiceAvailability should be missing before fix (confirms issue)")
+        # Check ServiceAvailability enum (should pass after fix)
+        self.assertTrue(hasattr(orchestration_enums, 'ServiceAvailability'),
+                       "ServiceAvailability should be available after fix")
 
-    @pytest.mark.skip(reason="This test validates post-fix SSOT completeness - enable after fix")
     def test_ssot_service_availability_available_after_fix(self):
         """
         Test that ServiceAvailability is available from SSOT location after fix.
