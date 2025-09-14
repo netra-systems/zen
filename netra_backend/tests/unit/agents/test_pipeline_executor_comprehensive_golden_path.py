@@ -76,7 +76,7 @@ from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecut
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult,
-    PipelineStep
+    PipelineStepConfig
 )
 
 # Supporting Infrastructure
