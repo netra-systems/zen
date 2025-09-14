@@ -651,8 +651,8 @@ class MockWebSocketServer:
             self._running = True
             self._port = port
 
-            logger.info(f"🚀 Mock WebSocket server started on ws://{host}:{port}/ws")
-            logger.info(f"🎯 Server provides all 5 critical agent events for testing")
+            logger.info(f"Mock WebSocket server started on ws://{host}:{port}/ws")
+            logger.info(f"Server provides all 5 critical agent events for testing")
 
         except Exception as e:
             logger.error(f"❌ Failed to start mock WebSocket server: {e}")

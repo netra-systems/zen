@@ -2559,13 +2559,17 @@ class UnifiedTestRunner:
 
     def _fast_path_collect_tests(self, pattern: str, category: str) -> List[str]:
         """Fast-path test collection bypassing heavy setup"""
-        
+
         # Skip Docker/service setup for simple collection
         if hasattr(self, '_collection_cache'):
             cache_key = f"{pattern}:{category}"
             if cache_key in self._collection_cache:
                 return self._collection_cache[cache_key]
-        
+
+        # E2E-specific optimized collection for large volume directories
+        if category == 'e2e' or 'e2e' in pattern.lower():
+            return self._collect_e2e_optimized(pattern)
+
         # Use simple file discovery instead of full pytest collection
         test_files = []
         test_dirs = [
