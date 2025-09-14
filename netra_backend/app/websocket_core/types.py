@@ -50,6 +50,7 @@ class MessageType(str, Enum):
     # Connection lifecycle
     CONNECT = "connect"
     DISCONNECT = "disconnect"
+    CONNECTION_ESTABLISHED = "connection_established"  # Specific connection event
     HEARTBEAT = "heartbeat"
     HEARTBEAT_ACK = "heartbeat_ack"
     PING = "ping"
@@ -69,10 +70,14 @@ class MessageType(str, Enum):
     
     # Agent communication
     START_AGENT = "start_agent"
+    AGENT_STARTED = "agent_started"  # Required for mission critical tests
     AGENT_START = "agent_start"  # Alias for compatibility
     AGENT_COMPLETE = "agent_complete"  # Alias for compatibility
+    AGENT_COMPLETED = "agent_completed"  # Required for mission critical tests
     TOOL_EXECUTE = "tool_execute"  # Alias for compatibility  
+    TOOL_EXECUTING = "tool_executing"  # Required for mission critical tests
     TOOL_COMPLETE = "tool_complete"  # Alias for compatibility
+    TOOL_COMPLETED = "tool_completed"  # Required for mission critical tests
     AGENT_REQUEST = "agent_request"
     AGENT_TASK = "agent_task"
     AGENT_TASK_ACK = "agent_task_ack"
@@ -424,7 +429,6 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "connect": MessageType.CONNECT,
     "disconnect": MessageType.DISCONNECT,
     "connected": MessageType.CONNECT,
-    "connection_established": MessageType.CONNECT,
     
     # User messages
     "user": MessageType.USER_MESSAGE,  # Map 'user' to USER_MESSAGE
@@ -450,14 +454,14 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "agent_error": MessageType.AGENT_ERROR,
     "start_agent": MessageType.START_AGENT,
     
-    # Critical agent event types (for frontend chat UI)
-    "agent_started": MessageType.START_AGENT,
-    "agent_thinking": MessageType.AGENT_PROGRESS,
-    "agent_completed": MessageType.AGENT_RESPONSE_COMPLETE,
+    # Critical agent event types (for frontend chat UI) - FIXED for Issue #911
+    "agent_started": MessageType.AGENT_STARTED,
+    "agent_thinking": MessageType.AGENT_THINKING,
+    "agent_completed": MessageType.AGENT_COMPLETED,
     "agent_failed": MessageType.AGENT_ERROR,
     "agent_fallback": MessageType.AGENT_ERROR,
-    "tool_executing": MessageType.AGENT_PROGRESS,
-    "tool_completed": MessageType.AGENT_PROGRESS,
+    "tool_executing": MessageType.TOOL_EXECUTING,
+    "tool_completed": MessageType.TOOL_COMPLETED,
     
     # CRITICAL FIX: Add missing execute_agent mapping (causes Tests 23 & 25 failures)
     "execute_agent": MessageType.START_AGENT,
@@ -480,9 +484,10 @@ LEGACY_MESSAGE_TYPE_MAP = {
     "system_message": MessageType.SYSTEM_MESSAGE,
     
     # Connection establishment messages (websocket_ssot.py patterns)
-    "factory_connection_established": MessageType.CONNECT,
-    "isolated_connection_established": MessageType.CONNECT,  
-    "legacy_connection_established": MessageType.CONNECT,
+    "connection_established": MessageType.CONNECTION_ESTABLISHED,
+    "factory_connection_established": MessageType.CONNECTION_ESTABLISHED,
+    "isolated_connection_established": MessageType.CONNECTION_ESTABLISHED,  
+    "legacy_connection_established": MessageType.CONNECTION_ESTABLISHED,
     
     # Broadcasting
     "broadcast": MessageType.BROADCAST,
