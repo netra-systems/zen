@@ -102,7 +102,7 @@ def create_test_fallback_manager(user_context):
     Returns:
         UnifiedWebSocketManager configured for testing
     """
-    return UnifiedWebSocketManager(
+    return _UnifiedWebSocketManagerImplementation(
         mode=WebSocketManagerMode.UNIFIED,
         user_context=user_context or create_test_user_context(),
         _ssot_authorization_token=secrets.token_urlsafe(32)  # Stronger token for security
