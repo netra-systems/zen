@@ -77,6 +77,12 @@ class UnifiedExecutionEngineFactory:
             redis_manager=redis_manager
         )
 
+        # SSOT ENHANCEMENT: Track backwards compatibility usage
+        if hasattr(self._delegate, '_factory_metrics'):
+            self._delegate._factory_metrics['backwards_compatibility_usage'] += 1
+        if hasattr(self._delegate, '_ssot_validation_state'):
+            self._delegate._ssot_validation_state['backwards_compatibility_active'] = True
+
         logger.info("✅ UnifiedExecutionEngineFactory compatibility wrapper initialized")
 
     @classmethod
@@ -115,6 +121,12 @@ class UnifiedExecutionEngineFactory:
             # Create wrapper that delegates to canonical factory
             wrapper = cls.__new__(cls)  # Create without calling __init__
             wrapper._delegate = canonical_factory
+
+            # SSOT ENHANCEMENT: Track backwards compatibility usage in configure method
+            if hasattr(canonical_factory, '_factory_metrics'):
+                canonical_factory._factory_metrics['backwards_compatibility_usage'] += 1
+            if hasattr(canonical_factory, '_ssot_validation_state'):
+                canonical_factory._ssot_validation_state['backwards_compatibility_active'] = True
 
             logger.info("✅ UnifiedExecutionEngineFactory.configure() compatibility wrapper created")
             return wrapper
