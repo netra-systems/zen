@@ -2,19 +2,20 @@
 
 **GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1031  
 **Created:** 2025-09-14  
-**Priority:** P0 - Blocks Golden Path  
-**Status:** In Progress - Step 0 Complete
+**Priority:** P3 - Cleanup Task (Downgraded from P0)  
+**Status:** In Progress - Step 1 Complete - Issue Assessment Changed
 
 ## Problem Statement
 
-**CRITICAL SSOT VIOLATION:** SSOT websocket_manager.py imports from deprecated websocket_manager_factory.py, creating circular import dependencies that block Golden Path user login → AI responses flow.
+**SSOT CLEANUP TASK:** SSOT websocket_manager.py imports from deprecated websocket_manager_factory.py with proper deprecation warnings. No actual circular imports found - this is a deprecation cleanup task, not a Golden Path blocker.
 
 ## Root Cause Analysis
 
-### Primary Issue: Incomplete SSOT Migration
-- SSOT file imports from deprecated factory instead of being self-contained
-- Creates circular dependency: websocket_manager.py → websocket_manager_factory.py → (back to SSOT components)
-- Race conditions during WebSocket initialization can cause user context failures
+### Primary Issue: Deprecation Cleanup Needed
+- SSOT file imports from deprecated factory with proper deprecation warnings
+- **NO ACTUAL CIRCULAR IMPORTS** - factory properly redirects to SSOT implementations
+- Deprecation warnings indicate successful SSOT migration, cleanup needed
+- Golden Path functionality confirmed operational
 
 ### Files Affected
 1. **`/netra_backend/app/websocket_core/websocket_manager.py`** (SSOT importing deprecated)
