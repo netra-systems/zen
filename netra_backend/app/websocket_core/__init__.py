@@ -83,11 +83,11 @@ def create_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
 
-    # PHASE 1 FIX: Use UnifiedWebSocketManager directly with proper token generation
+    # PHASE 1 FIX: Use WebSocketManager directly with proper token generation
     # This ensures the SSOT authorization token is properly provided
     import asyncio
     import secrets
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
+    # Use canonical import from websocket_manager.py (not unified_manager.py which has __all__ = [])
 
     # Since this is a sync function but the factory is async, we need to handle this properly
     try:
@@ -100,15 +100,13 @@ def create_websocket_manager(user_context=None):
                 "Use 'await get_websocket_manager(user_context)' instead."
             )
         else:
-            return UnifiedWebSocketManager(
-                mode=WebSocketManagerMode.UNIFIED,
+            return WebSocketManager(
                 user_context=user_context,
                 _ssot_authorization_token=secrets.token_urlsafe(32)
             )
     except RuntimeError:
         # No event loop running, create one
-        return UnifiedWebSocketManager(
-            mode=WebSocketManagerMode.UNIFIED,
+        return WebSocketManager(
             user_context=user_context,
             _ssot_authorization_token=secrets.token_urlsafe(32)
         )
@@ -143,13 +141,12 @@ async def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
 
-    # PHASE 1 FIX: Use UnifiedWebSocketManager directly with proper token generation
+    # PHASE 1 FIX: Use WebSocketManager directly with proper token generation
     # This ensures the SSOT authorization token is properly provided
     import secrets
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
+    # Use canonical import from websocket_manager.py (not unified_manager.py which has __all__ = [])
     
-    return UnifiedWebSocketManager(
-        mode=WebSocketManagerMode.UNIFIED,
+    return WebSocketManager(
         user_context=user_context,
         _ssot_authorization_token=secrets.token_urlsafe(32)
     )

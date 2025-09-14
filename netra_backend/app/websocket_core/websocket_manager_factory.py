@@ -38,8 +38,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from shared.logging.unified_logging_ssot import get_logger
 
-# ISSUE #824 PHASE 1 REMEDIATION: Import from unified_manager.py SSOT
-from netra_backend.app.websocket_core.unified_manager import (
+# ISSUE #824 PHASE 1 REMEDIATION: Import from canonical SSOT path
+# The unified_manager.py is the implementation, but websocket_manager.py is the SSOT interface
+from netra_backend.app.websocket_core.websocket_manager import (
     UnifiedWebSocketManager,
     WebSocketManagerMode
 )
