@@ -84,7 +84,7 @@ class TestConfigSystemConsistencyIntegrationIssue667(SSotAsyncTestCase, unittest
             self.config_managers['unified_configuration_manager'] = {
                 'get_config': lambda: global_manager,  # Returns manager, not config
                 'manager': global_manager,
-                'source': 'netra_backend.app.core.managers.unified_configuration_manager'
+                'source': 'netra_backend.app.core.configuration.base'
             }
             
         except ImportError as e:

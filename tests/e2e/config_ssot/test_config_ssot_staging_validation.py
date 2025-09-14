@@ -75,7 +75,7 @@ class TestConfigSSotStagingValidation(SSotAsyncTestCase):
             },
             {
                 'name': 'UnifiedConfigurationManager',
-                'module': 'netra_backend.app.core.managers.unified_configuration_manager',
+                'module': 'netra_backend.app.core.configuration.base',
                 'class_name': 'UnifiedConfigurationManager'
             },
             {

@@ -97,7 +97,7 @@ def temp_config_dir():
 def config_manager(isolated_env):
     """Provide clean UnifiedConfigurationManager with isolated environment."""
     # Patch IsolatedEnvironment to use our test fixture
-    with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+    with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
         manager = UnifiedConfigurationManager(
             user_id="test_user_100_percent",
             environment="test",
@@ -137,7 +137,7 @@ class TestInitializationAndBasicOperations:
     
     def test_manager_initialization_with_all_parameters(self, isolated_env):
         """Test UnifiedConfigurationManager initialization with all possible parameters."""
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
             # Test with all parameters specified
             manager = UnifiedConfigurationManager(
                 user_id="full_test_user",
@@ -164,7 +164,7 @@ class TestInitializationAndBasicOperations:
     
     def test_manager_initialization_with_minimal_parameters(self, isolated_env):
         """Test initialization with minimal parameters (defaults)."""
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
             manager = UnifiedConfigurationManager()
             
             assert manager.user_id is None
@@ -197,7 +197,7 @@ class TestInitializationAndBasicOperations:
             for key, value in env_vars.items():
                 isolated_env.set(key, value, source="test")
             
-            with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+            with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
                 manager = UnifiedConfigurationManager()
                 assert manager.environment == expected_env
     
@@ -2233,7 +2233,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
     def test_isolated_environment_initialization_and_usage(self, isolated_env):
         """Test proper IsolatedEnvironment initialization and usage patterns."""
         # Test manager creation with isolated environment
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
             manager = UnifiedConfigurationManager(
                 user_id="iso_test_user",
                 environment="isolation_test",
@@ -2264,7 +2264,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
             for key, value in env_vars.items():
                 test_env.set(key, value, source="test")
             
-            with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=test_env):
+            with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=test_env):
                 manager = UnifiedConfigurationManager()
                 detected_env = manager._detect_environment()
                 assert detected_env == expected_env, f"Environment detection failed: expected {expected_env}, got {detected_env}"
@@ -2308,7 +2308,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
         os.environ = detector
         
         try:
-            with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=test_env):
+            with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=test_env):
                 manager = UnifiedConfigurationManager()
                 
                 # Perform operations that should NOT access os.environ directly
@@ -2346,7 +2346,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
         env3.set("SHARED_VAR", "env3_value", source="test")
         
         # Create managers with different isolated environments
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', side_effect=[env1, env2, env3]):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', side_effect=[env1, env2, env3]):
             mgr1 = ConfigurationManagerFactory.get_user_manager("iso_user1")
             mgr2 = ConfigurationManagerFactory.get_user_manager("iso_user2") 
             mgr3 = ConfigurationManagerFactory.get_service_manager("iso_service")
@@ -2379,7 +2379,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
         for key, value in test_env_configs.items():
             isolated_env.set(key, value, source="test")
         
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=isolated_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=isolated_env):
             manager = UnifiedConfigurationManager()
             
             # Force load environment configurations
@@ -2405,7 +2405,7 @@ class TestIsolatedEnvironmentIntegrationComplete:
         failing_env = Mock(spec=IsolatedEnvironment)
         failing_env.get.side_effect = Exception("IsolatedEnvironment error")
         
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', return_value=failing_env):
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment', return_value=failing_env):
             # Manager initialization should handle IsolatedEnvironment errors gracefully
             try:
                 manager = UnifiedConfigurationManager()

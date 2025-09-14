@@ -123,7 +123,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
     async def gcp_staging_manager(self, gcp_staging_env):
         """Provide UnifiedConfigurationManager configured for GCP staging."""
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+            mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                       lambda: gcp_staging_env)
             
             manager = UnifiedConfigurationManager(
@@ -273,7 +273,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
             
             # Create region-specific manager
             with pytest.MonkeyPatch.context() as mp:
-                mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                           lambda: region_env)
                 
                 manager = UnifiedConfigurationManager(
@@ -637,7 +637,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
             primary_env.set(key, value, source="primary_region")
         
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+            mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                       lambda: primary_env)
             
             primary_manager = UnifiedConfigurationManager(
@@ -744,7 +744,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
             dr_env.set(key, value, source="dr_region")
         
         with pytest.MonkeyPatch.context() as mp:
-            mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+            mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                       lambda: dr_env)
             
             dr_manager = UnifiedConfigurationManager(
@@ -886,7 +886,7 @@ class TestUnifiedConfigurationManagerGCPStagingProductionCritical(BaseE2ETest):
                 
                 # Create customer-specific configuration manager
                 with pytest.MonkeyPatch.context() as mp:
-                    mp.setattr('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment', 
+                    mp.setattr('netra_backend.app.core.configuration.base.IsolatedEnvironment', 
                               lambda: customer_env)
                     
                     customer_manager = ConfigurationManagerFactory.get_manager(

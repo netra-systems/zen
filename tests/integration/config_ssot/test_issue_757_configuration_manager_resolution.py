@@ -32,7 +32,7 @@ class TestIssue757ConfigurationManagerResolution(SSotBaseTestCase):
 
         # Attempt to import deprecated manager - should fail
         with pytest.raises(ModuleNotFoundError):
-            from netra_backend.app.core.managers.unified_configuration_manager import get_configuration_manager
+            from netra_backend.app.core.configuration.base import get_configuration_manager
 
         print("✅ ISSUE #757 SUCCESS: Deprecated configuration manager properly inaccessible")
 

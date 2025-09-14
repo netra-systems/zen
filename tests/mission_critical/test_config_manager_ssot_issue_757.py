@@ -81,7 +81,7 @@ class TestConfigManagerSSotViolationsIssue757(SSotBaseTestCase):
         **REVENUE RISK:** $500K+ ARR at risk from system unavailability
 
         **FAILURE SCENARIO:**
-        - Deprecated manager in netra_backend.app.core.managers.unified_configuration_manager
+        - Deprecated manager in netra_backend.app.core.configuration.base
         - Canonical manager in netra_backend.app.core.configuration.base
         - Import conflicts cause startup failures
 

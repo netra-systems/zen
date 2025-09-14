@@ -60,7 +60,7 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
     def _clear_import_cache(self):
         """Clear Python import cache for configuration modules."""
         modules_to_clear = [
-            'netra_backend.app.core.managers.unified_configuration_manager',
+            'netra_backend.app.core.configuration.base',
             'netra_backend.app.core.configuration.base',
             'netra_backend.app.services.configuration_service'
         ]
@@ -307,9 +307,9 @@ class TestConfigurationDuplicationViolations(SSotBaseTestCase):
         # Test various import patterns that should be consolidated
         import_attempts = [
             # Deprecated patterns
-            ("netra_backend.app.core.managers.unified_configuration_manager", "UnifiedConfigurationManager"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "ConfigurationManagerFactory"),
-            ("netra_backend.app.core.managers.unified_configuration_manager", "get_configuration_manager"),
+            ("netra_backend.app.core.configuration.base", "UnifiedConfigurationManager"),
+            ("netra_backend.app.core.configuration.base", "ConfigurationManagerFactory"),
+            ("netra_backend.app.core.configuration.base", "get_configuration_manager"),
 
             # Canonical patterns
             ("netra_backend.app.core.configuration.base", "UnifiedConfigManager"),

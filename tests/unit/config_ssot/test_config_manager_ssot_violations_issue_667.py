@@ -59,7 +59,7 @@ class TestConfigManagerSSOTViolationsIssue667(SSotBaseTestCase, unittest.TestCas
             },
             {
                 'name': 'UnifiedConfigurationManager',
-                'path': 'netra_backend.app.core.managers.unified_configuration_manager',
+                'path': 'netra_backend.app.core.configuration.base',
                 'class_name': 'UnifiedConfigurationManager'
             }
         ]

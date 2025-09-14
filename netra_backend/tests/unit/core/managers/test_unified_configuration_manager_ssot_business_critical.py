@@ -70,7 +70,7 @@ class TestUnifiedConfigurationManagerSSotBusinessCritical:
     def config_manager(self, isolated_env):
         """Provide clean UnifiedConfigurationManager instance."""
         # Patch environment detection to use isolated environment
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment') as mock_env_class:
             mock_env_class.return_value = isolated_env
             manager = UnifiedConfigurationManager(
                 user_id="test_user_12345",
@@ -595,7 +595,7 @@ class TestUnifiedConfigurationManagerSSotBusinessCritical:
             isolated_env.set(env_var, env_value, source="test")
             
             # Create manager with isolated environment
-            with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+            with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment') as mock_env_class:
                 mock_env_class.return_value = isolated_env
                 manager = UnifiedConfigurationManager()
                 
@@ -608,7 +608,7 @@ class TestUnifiedConfigurationManagerSSotBusinessCritical:
         
         # Test default fallback when no environment variables set
         isolated_env._environment_vars.clear()
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment') as mock_env_class:
             mock_env_class.return_value = isolated_env
             manager = UnifiedConfigurationManager()
             assert manager.environment == "development"  # Default fallback
@@ -627,7 +627,7 @@ class TestUnifiedConfigurationManagerSSotBusinessCritical:
         isolated_env.set("DEBUG", "true", source="test")
         
         # Create manager with isolated environment
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment') as mock_env_class:
             mock_env_class.return_value = isolated_env
             manager = UnifiedConfigurationManager()
             
@@ -648,7 +648,7 @@ class TestUnifiedConfigurationManagerSSotBusinessCritical:
             assert "***" in str(masked_jwt) or "*" in str(masked_jwt)
         
         # Verify isolation - changes don't affect other managers
-        with patch('netra_backend.app.core.managers.unified_configuration_manager.IsolatedEnvironment') as mock_env_class:
+        with patch('netra_backend.app.core.configuration.base.IsolatedEnvironment') as mock_env_class:
             clean_env = IsolatedEnvironment()
             mock_env_class.return_value = clean_env
             clean_manager = UnifiedConfigurationManager()

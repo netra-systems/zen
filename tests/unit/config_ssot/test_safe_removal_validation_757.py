@@ -71,7 +71,7 @@ class TestSafeRemovalValidation:
 
             try:
                 content = file_obj.read_text(encoding='utf-8')
-                if 'from netra_backend.app.core.managers.unified_configuration_manager' in content:
+                if 'from netra_backend.app.core.configuration.base' in content:
                     files_importing_deprecated.append(str(file_path))
             except Exception:
                 continue
