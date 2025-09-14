@@ -472,7 +472,9 @@ class DatabaseManager:
             if pool_size <= 0 or "sqlite" in database_url.lower():
                 # Use NullPool for SQLite or disabled pooling
                 engine_kwargs["poolclass"] = NullPool
-                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling")
+                # Remove pool_timeout for SQLite as NullPool doesn't support it
+                engine_kwargs.pop("pool_timeout", None)
+                logger.info("[U+1F3CA] Using NullPool for SQLite or disabled pooling (pool_timeout removed)")
             else:
                 # Use AsyncAdaptedQueuePool for better concurrent handling with async engines
                 engine_kwargs["poolclass"] = AsyncAdaptedQueuePool
