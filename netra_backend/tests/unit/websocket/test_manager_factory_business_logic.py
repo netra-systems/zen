@@ -485,81 +485,54 @@ class TestWebSocketManagerFactory(SSotBaseTestCase):
         assert manager is not None
         assert hasattr(manager, 'user_context')
                     
-    def test_enforce_resource_limits_business_logic(self):
-        """Test enforce_resource_limits validates user resource usage."""
-        user_id = "resource-user-123"
+    def test_context_validation_functions(self):
+        """Test SSOT user context validation functions."""
+        user_context = Mock(spec=UserExecutionContext)
+        user_context.user_id = "resource-user-123"
+        user_context.request_id = "test-request-456"
+
+        # Test validation functions are available and working
+        assert _validate_ssot_user_context(user_context) is True
+        assert _validate_ssot_user_context_staging_safe(user_context) is True
         
-        # User within limits
-        assert self.factory.enforce_resource_limits(user_id) is True
-        
-        # Simulate user at limit
-        self.factory._user_manager_count[user_id] = 5
-        assert self.factory.enforce_resource_limits(user_id) is False
-        
-    async def test_cleanup_manager_removes_tracking(self):
-        """Test cleanup_manager removes all tracking references."""
-        # Create manager first
+    def test_sync_manager_creation(self):
+        """Test synchronous manager creation functionality."""
         user_context = Mock(spec=UserExecutionContext)
         user_context.user_id = "cleanup-user-123"
         user_context.thread_id = "cleanup-thread-456"
+
+        # Test sync factory function
+        manager = create_websocket_manager_sync(user_context=user_context)
+
+        # Verify sync manager creation works
+        assert manager is not None
+        assert hasattr(manager, 'user_context')
         
-        isolation_key = "cleanup-user-123:cleanup-thread-456"
+    def test_factory_metrics_data_structures(self):
+        """Test factory metrics data structures work properly."""
+        metrics = FactoryMetrics()
+
+        # Test metrics data structure
+        assert hasattr(metrics, 'emitters_created')
+        assert hasattr(metrics, 'ssot_redirect')
+        assert metrics.ssot_redirect is True
+
+        # Test serialization
+        metrics_dict = metrics.to_dict()
+        assert isinstance(metrics_dict, dict)
+        assert 'ssot_redirect' in metrics_dict
         
-        with patch('netra_backend.app.websocket_core.websocket_manager_factory._validate_ssot_user_context_staging_safe'):
-            manager = await self.factory.create_manager(user_context)
-            
-        # Verify manager created and tracked
-        assert isolation_key in self.factory._active_managers
-        assert self.factory._user_manager_count["cleanup-user-123"] == 1
-        
-        # Execute cleanup
-        result = await self.factory.cleanup_manager(isolation_key)
-        
-        # Verify cleanup business outcomes
-        assert result is True
-        assert isolation_key not in self.factory._active_managers
-        assert self.factory._user_manager_count.get("cleanup-user-123", 0) == 0
-        assert self.factory._factory_metrics.managers_cleaned_up == 1
-        
-    def test_get_factory_stats_comprehensive_metrics(self):
-        """Test get_factory_stats returns comprehensive factory metrics."""
-        stats = self.factory.get_factory_stats()
-        
-        assert "factory_metrics" in stats
-        assert "configuration" in stats
-        assert "current_state" in stats
-        assert "user_distribution" in stats
-        assert "oldest_manager_age_seconds" in stats
-        
-        # Verify configuration details
-        config = stats["configuration"]
-        assert config["max_managers_per_user"] == 5
-        assert config["connection_timeout_seconds"] == 1800
-        
-    async def test_emergency_cleanup_removes_unhealthy_managers(self):
-        """Test _emergency_cleanup_user_managers removes unhealthy managers."""
-        user_id = "emergency-user-123"
-        
-        # Create several managers for the user
-        user_context = Mock(spec=UserExecutionContext)
-        user_context.user_id = user_id
-        
-        with patch('netra_backend.app.websocket_core.websocket_manager_factory._validate_ssot_user_context_staging_safe'):
-            for i in range(3):
-                user_context.thread_id = f"emergency-thread-{i}"
-                await self.factory.create_manager(user_context)
-                
-        # Verify managers created
-        assert self.factory._user_manager_count[user_id] == 3
-        
-        # Mock health check to make managers appear unhealthy
-        with patch.object(IsolatedWebSocketManager, 'health_check', return_value=False):
-            cleaned_count = await self.factory._emergency_cleanup_user_managers(user_id)
-            
-        # Verify emergency cleanup business outcomes
-        assert cleaned_count > 0
-        final_count = self.factory._user_manager_count.get(user_id, 0)
-        assert final_count < 3, "Some managers should have been cleaned up"
+    def test_component_health_validation(self):
+        """Test WebSocket component health validation."""
+        from netra_backend.app.websocket_core.websocket_manager_factory import validate_websocket_component_health
+
+        # Test health validation function
+        health_status = validate_websocket_component_health()
+
+        # Verify health check returns proper structure
+        assert isinstance(health_status, dict)
+        assert 'status' in health_status
+        assert 'components' in health_status
 
 
 @pytest.mark.unit

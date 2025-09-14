@@ -75,7 +75,7 @@ class AgentLifecycleMixin(ABC):
         except WebSocketDisconnect as e:
             await self._handle_websocket_disconnect(e, context, run_id, stream_updates)
         except Exception as e:
-            await self._handle_and_reraise_error(e, state, run_id, stream_updates)
+            await self._handle_and_reraise_error(e, context, run_id, stream_updates)
         finally:
             # Complete timing execution tree
             if hasattr(self, 'timing_collector'):
@@ -83,16 +83,16 @@ class AgentLifecycleMixin(ABC):
                 if completed_tree:
                     self.logger.debug(f"Execution timing completed: {completed_tree.get_total_duration_ms():.2f}ms")
     
-    async def _handle_and_reraise_error(self, e: Exception, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def _handle_and_reraise_error(self, e: Exception, context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """Handle execution error and reraise."""
-        await self._handle_execution_error(e, state, run_id, stream_updates)
+        await self._handle_execution_error(e, context, run_id, stream_updates)
         raise
     
-    async def _handle_entry_conditions(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
+    async def _handle_entry_conditions(self, context: UserExecutionContext, run_id: str, stream_updates: bool) -> bool:
         """Handle entry condition checks and failures."""
-        if await self._pre_run(state, run_id, stream_updates):
+        if await self._pre_run(context, run_id, stream_updates):
             return True
-        await self._handle_entry_failure(run_id, stream_updates, state)
+        await self._handle_entry_failure(run_id, stream_updates, context)
         return False
     
     async def _send_entry_condition_warning(self, run_id: str, stream_updates: bool) -> None:
@@ -106,7 +106,7 @@ class AgentLifecycleMixin(ABC):
             self.logger.debug(f"WebSocket disconnected when sending warning: {e}")
     
     
-    async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+    async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, context: UserExecutionContext, run_id: str, stream_updates: bool) -> None:
         """Handle WebSocket disconnection during execution."""
         self.logger.info(f"WebSocket disconnected during {self.name} execution: {e}")
         await self._post_run(state, run_id, stream_updates, success=False)

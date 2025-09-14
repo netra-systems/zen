@@ -87,7 +87,7 @@ def test_user_execution_context_compatibility():
         return True
 
     except Exception as e:
-        print(f"❌ Compatibility test failed: {e}")
+        print(f"Compatibility test failed: {e}")
         return False
 
 def main():
@@ -120,7 +120,7 @@ def main():
         print("TECHNICAL ACHIEVEMENT: UserExecutionContext API is stable and working")
         return True
     else:
-        print(f"⚠️  {success_count}/{total_tests} tests passed")
+        print(f"WARNING: {success_count}/{total_tests} tests passed")
         print("   Check individual test results above for details")
         return False
 

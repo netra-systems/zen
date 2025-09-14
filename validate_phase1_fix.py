@@ -8,7 +8,7 @@ This script validates that the SSOT interface fixes work correctly.
 
 def test_ssot_interface_compatibility():
     """Test the SSOT DeepAgentState interface compatibility fixes."""
-    print("🔍 Testing SSOT Interface Compatibility...")
+    print("TESTING SSOT Interface Compatibility...")
 
     try:
         from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
