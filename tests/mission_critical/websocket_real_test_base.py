@@ -509,11 +509,11 @@ class MockWebSocketServer:
     async def unregister_client(self, websocket):
         """Unregister a WebSocket client."""
         self.clients.discard(websocket)
-        logger.info(f"🔌 Mock WebSocket client disconnected. Total: {len(self.clients)}")
+        logger.info(f"Mock WebSocket client disconnected. Total: {len(self.clients)}")
 
     async def handle_client(self, websocket, path):
         """Handle WebSocket client connection."""
-        logger.info(f"🔌 New WebSocket connection on path: {path}")
+        logger.info(f"New WebSocket connection on path: {path}")
         await self.register_client(websocket)
 
         try:
@@ -533,7 +533,7 @@ class MockWebSocketServer:
         message_type = data.get('type', 'unknown')
         user_id = data.get('user_id', 'test_user')
 
-        logger.info(f"📨 Mock WebSocket received: {message_type}")
+        logger.info(f"Mock WebSocket received: {message_type}")
 
         # Simulate agent execution with all 5 required events
         if message_type in ('agent_request', 'chat', 'test_message'):
@@ -614,9 +614,9 @@ class MockWebSocketServer:
         """Send message to specific client."""
         try:
             await websocket.send(json.dumps(message))
-            logger.debug(f"📤 Sent to client: {message.get('type', 'unknown')}")
+            logger.debug(f"Sent to client: {message.get('type', 'unknown')}")
         except Exception as e:
-            logger.error(f"❌ Failed to send to client: {e}")
+            logger.error(f"Failed to send to client: {e}")
 
     async def broadcast(self, message):
         """Broadcast message to all connected clients."""
