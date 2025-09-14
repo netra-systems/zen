@@ -2,8 +2,9 @@
 
 **Priority**: P0 - CRITICAL (Blocking Golden Path)
 **Issue Type**: SSOT Violation - Agent State Management
-**Status**: DISCOVERED
+**Status**: ISSUE CREATED
 **Created**: 2025-09-13
+**GitHub Issue**: https://github.com/netra-systems/netra-apex/issues/871
 
 ## Problem Statement
 
