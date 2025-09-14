@@ -87,9 +87,11 @@ def test_collection_performance():
 
         print(f"  Optimized: {len(optimized_files)} files in {optimized_time:.2f}s")
 
-        if traditional_time > 0:
+        if traditional_time > 0 and optimized_time > 0:
             speedup = traditional_time / optimized_time
             print(f"  Speedup: {speedup:.1f}x faster")
+        else:
+            print(f"  Speedup: instant (cached)")
 
     # Clean up
     optimizer.save_cache()
