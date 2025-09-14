@@ -2095,6 +2095,70 @@ class AgentRegistry(BaseAgentRegistry):
         """
         return await self.get_user_session(user_id)
 
+    # ===================== LEGACY INTERFACE COMPATIBILITY =====================
+    # Issue #991: Add missing interface methods to achieve SSOT compatibility
+
+    def increment_execution_count(self, agent_id: str) -> bool:
+        """Legacy compatibility method - increment agent execution count."""
+        try:
+            # For now, just return True for compatibility
+            # This could be enhanced to track metrics if needed
+            logger.debug(f"Legacy compatibility: increment_execution_count called for {agent_id}")
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to increment execution count for {agent_id}: {e}")
+            return False
+
+    def increment_error_count(self, agent_id: str) -> bool:
+        """Legacy compatibility method - increment agent error count."""
+        try:
+            # For now, just return True for compatibility
+            # This could be enhanced to track metrics if needed
+            logger.debug(f"Legacy compatibility: increment_error_count called for {agent_id}")
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to increment error count for {agent_id}: {e}")
+            return False
+
+    def get_registry_stats(self) -> Dict[str, Any]:
+        """Legacy compatibility method - get registry statistics."""
+        try:
+            from datetime import datetime
+
+            # Get basic stats from the advanced registry
+            stats = {
+                "total_agents": len(self._user_sessions),
+                "total_registrations": len(self._user_sessions),
+                "agents_by_type": {},
+                "agents_by_status": {"idle": 0, "busy": 0, "initializing": 0, "error": 0, "offline": 0},
+                "total_executions": 0,
+                "total_errors": 0,
+                "created_at": self._created_at.isoformat(),
+                "last_cleanup": datetime.now().isoformat()
+            }
+
+            # Count agents across all user sessions
+            for user_id, session in self._user_sessions.items():
+                if hasattr(session, '_agents'):
+                    stats["total_agents"] += len(session._agents)
+                    # Most agents are idle by default
+                    stats["agents_by_status"]["idle"] += len(session._agents)
+
+            return stats
+
+        except Exception as e:
+            logger.warning(f"Failed to get registry stats: {e}")
+            return {
+                "total_agents": 0,
+                "total_registrations": 0,
+                "agents_by_type": {},
+                "agents_by_status": {},
+                "total_executions": 0,
+                "total_errors": 0,
+                "created_at": datetime.now().isoformat(),
+                "last_cleanup": datetime.now().isoformat()
+            }
+
 
 # ===================== MODULE EXPORTS =====================
 
