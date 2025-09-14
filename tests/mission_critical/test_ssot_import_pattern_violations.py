@@ -30,6 +30,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 from dataclasses import dataclass
+import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -135,7 +136,7 @@ class TestSSOTImportPatternViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(base_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} deprecated test_framework.base SSOT violations.\n"
                 f"All test base classes MUST import from test_framework.ssot.base_test_case.\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -159,7 +160,7 @@ class TestSSOTImportPatternViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(mock_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} deprecated mock factory SSOT violations.\n"
                 f"All mock creation MUST import from test_framework.ssot.mock_factory.\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -181,7 +182,7 @@ class TestSSOTImportPatternViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(orchestration_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} deprecated orchestration SSOT violations.\n"
                 f"All orchestration MUST import from test_framework.ssot.orchestration.\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -208,7 +209,7 @@ class TestSSOTImportPatternViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(nonexistent_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} nonexistent import SSOT violations.\n"
                 f"All imports MUST use verified paths from SSOT_IMPORT_REGISTRY.md.\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -237,7 +238,7 @@ class TestSSOTImportPatternViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(try_except_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} try/except import pattern SSOT violations.\n"
                 f"All imports MUST use deterministic SSOT patterns (no fallbacks).\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -326,7 +327,7 @@ BUSINESS IMPACT:
         
         # This test SHOULD FAIL to provide actionable violation report
         if total_violations > 0:
-            self.fail(f"SSOT Import Pattern Violation Report:\n{report}")
+            pytest.fail(f"SSOT Import Pattern Violation Report:\n{report}")
             
     def _scan_for_import_violations(self, deprecated_type: str) -> List[ImportPatternViolation]:
         """Scan codebase for specific type of import violations."""

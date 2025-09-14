@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple, Optional
 from dataclasses import dataclass
 import configparser
+import pytest
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -115,7 +116,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
             if len(unauthorized_conftest) > 15:
                 violation_details.append(f"  ... and {len(unauthorized_conftest) - 15} more conftest.py files")
                 
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} duplicate conftest.py SSOT violations.\n"
                 f"ONLY SSOT conftest files in test_framework/ssot/ are authorized.\n\n"
                 f"Unauthorized conftest.py files:\n" + "\n".join(violation_details) + "\n\n"
@@ -146,7 +147,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
                     for conflict in conflicts:
                         conflict_details.append(f"    - {conflict.file_path}:{conflict.line_number}")
                         
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} fixture definition SSOT violations.\n"
                 f"All fixtures MUST be centralized in SSOT conftest files.\n\n"
                 f"Conflicting fixtures:\n" + "\n".join(conflict_details) + "\n\n"
@@ -172,7 +173,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
             for violation in config_conflicts:
                 conflict_details.append(f"  - {violation.file_path}: {violation.description}")
                 
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} pytest configuration SSOT violations.\n"
                 f"ONLY single pytest.ini in project root is authorized.\n\n"
                 f"Configuration conflicts:\n" + "\n".join(conflict_details) + "\n\n"
@@ -199,7 +200,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
             for violation in test_runner_violations:
                 violation_details.append(f"  - {violation.file_path}: {violation.description}")
                 
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} test runner duplication SSOT violations.\n"
                 f"ONLY tests/unified_test_runner.py is authorized for test execution.\n\n"
                 f"Duplicate test runners:\n" + "\n".join(violation_details) + "\n\n"
@@ -226,7 +227,7 @@ class TestSSOTTestInfrastructureViolations(SSotBaseTestCase):
             for violation in direct_pytest_violations:
                 violation_details.append(f"  - {violation.file_path}:{violation.line_number}: {violation.description}")
                 
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} direct pytest execution SSOT violations.\n"
                 f"All test execution MUST use tests/unified_test_runner.py.\n\n"
                 f"Direct pytest calls:\n" + "\n".join(violation_details) + "\n\n"
@@ -336,7 +337,7 @@ SSOT TARGET STATE:
         
         # This test SHOULD FAIL to provide actionable violation report
         if total_violations > 0:
-            self.fail(f"SSOT Test Infrastructure Violation Report:\n{report}")
+            pytest.fail(f"SSOT Test Infrastructure Violation Report:\n{report}")
             
     def _find_all_conftest_files(self) -> List[Path]:
         """Find all conftest.py files in the project."""
