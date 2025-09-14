@@ -27,10 +27,10 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 from typing import Dict, Any
 
-# SSOT imports using absolute paths
+# SSOT imports using absolute paths - Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
+    # WebSocketManagerFactory,  # REMOVED: Use WebSocketManager directly
+    # IsolatedWebSocketManager,  # REMOVED: Use WebSocketManager directly
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
@@ -42,6 +42,8 @@ from netra_backend.app.websocket_core.websocket_manager_factory import (
     _validate_ssot_user_context,
     _validate_ssot_user_context_staging_safe
 )
+# SSOT replacement imports
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
