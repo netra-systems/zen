@@ -254,7 +254,7 @@ class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
         working_managers = [m for m in self.manager_instances if m.instance is not None]
 
         if len(working_managers) == 0:
-            self.fail("No WebSocket managers could be created - cannot test cross-import consistency")
+            pytest.fail("No WebSocket managers could be created - cannot test cross-import consistency")
 
         print(f"Successfully created {len(working_managers)} managers for testing")
 
@@ -286,7 +286,7 @@ class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
                 print(f"   - {violation}")
 
             # This should FAIL before SSOT consolidation
-            self.fail(
+            pytest.fail(
                 f"CROSS-IMPORT CONSISTENCY VIOLATIONS: Found {len(consistency_violations)} consistency "
                 f"violations across WebSocket manager import paths. After SSOT consolidation, all "
                 f"import paths should create managers with identical behavior. "
@@ -502,7 +502,7 @@ class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
                 print(f"❌ Failed to create manager for {user_id}: {manager_instance.last_error}")
 
         if len(user_managers) < 2:
-            self.fail("Need at least 2 working managers to test multi-user isolation")
+            pytest.fail("Need at least 2 working managers to test multi-user isolation")
 
         # Test user isolation
         isolation_violations = []
@@ -531,7 +531,7 @@ class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
                 print(f"   - {violation}")
 
             # This should FAIL before SSOT consolidation
-            self.fail(
+            pytest.fail(
                 f"MULTI-USER ISOLATION VIOLATIONS: Found {len(isolation_violations)} user isolation "
                 f"violations across WebSocket managers. This represents a critical security and "
                 f"functionality issue that SSOT consolidation must resolve. Users must be completely "
