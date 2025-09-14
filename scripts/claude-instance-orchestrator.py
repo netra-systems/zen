@@ -692,7 +692,37 @@ class ClaudeInstanceOrchestrator:
                     status.total_tokens += int(token_data)
                 return True
             
-            # Type 2: Usage statistics from Claude Code response
+            # Type 2a: Check if usage is nested in message (common Claude Code format)
+            if 'message' in json_data and isinstance(json_data['message'], dict):
+                message = json_data['message']
+                if 'usage' in message:
+                    usage = message['usage']
+                    if isinstance(usage, dict):
+                        if 'input_tokens' in usage:
+                            status.input_tokens += int(usage['input_tokens'])
+                        if 'output_tokens' in usage:
+                            status.output_tokens += int(usage['output_tokens'])
+                        if 'cache_read_input_tokens' in usage:
+                            status.cached_tokens += int(usage['cache_read_input_tokens'])
+                        if 'cache_creation_input_tokens' in usage:
+                            status.cached_tokens += int(usage['cache_creation_input_tokens'])
+                        # Calculate total if not explicitly provided
+                        if 'total_tokens' in usage:
+                            total = int(usage['total_tokens'])
+                            if total > status.total_tokens:
+                                status.total_tokens = total
+                        else:
+                            # Calculate total from all components
+                            cache_creation = int(usage.get('cache_creation_input_tokens', 0))
+                            cache_read = int(usage.get('cache_read_input_tokens', 0))
+                            input_tokens = int(usage.get('input_tokens', 0))
+                            output_tokens = int(usage.get('output_tokens', 0))
+                            calculated_total = input_tokens + output_tokens + cache_creation + cache_read
+                            if calculated_total > status.total_tokens:
+                                status.total_tokens = calculated_total
+                    return True
+                    
+            # Type 2b: Usage statistics from Claude Code response (root level)
             if 'usage' in json_data:
                 usage = json_data['usage']
                 if isinstance(usage, dict):
@@ -852,6 +882,12 @@ class ClaudeInstanceOrchestrator:
                 # Check for usage stats in root
                 if 'usage' in json_data:
                     self._extract_usage_stats(json_data['usage'], status)
+                
+                # Check for usage nested in message (common Claude Code format)
+                if 'message' in json_data and isinstance(json_data['message'], dict):
+                    message = json_data['message']
+                    if 'usage' in message:
+                        self._extract_usage_stats(message['usage'], status)
                 
                 # Check for token info in metadata
                 if 'metadata' in json_data and 'usage' in json_data['metadata']:

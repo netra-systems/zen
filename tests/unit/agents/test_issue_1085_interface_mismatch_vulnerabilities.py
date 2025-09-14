@@ -18,7 +18,7 @@ import uuid
 
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-from netra_backend.app.agents.supervisor.modern_execution_helpers import ModernExecutionHelpers
+from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
 
 
 class TestInterfaceMismatchVulnerabilities:
@@ -82,22 +82,22 @@ class TestInterfaceMismatchVulnerabilities:
         assert child_context.user_id == user_context.user_id  # Should inherit user ID
 
     async def test_modern_execution_helpers_interface_vulnerability(self):
-        """VULNERABILITY REPRODUCTION: ModernExecutionHelpers fails with DeepAgentState.
+        """VULNERABILITY REPRODUCTION: SupervisorExecutionHelpers fails with DeepAgentState.
         
         CRITICAL SECURITY IMPACT:
-        - Production code failure when DeepAgentState passed to ModernExecutionHelpers
+        - Production code failure when DeepAgentState passed to SupervisorExecutionHelpers
         - Interface mismatch causes runtime AttributeError
         - User isolation failures affecting enterprise compliance
         
         EXPECTED: This test MUST FAIL, reproducing the exact production vulnerability.
         """
-        # Create mock supervisor for ModernExecutionHelpers
+        # Create mock supervisor for SupervisorExecutionHelpers
         mock_supervisor = AsyncMock()
         mock_supervisor.run.return_value = Mock()
         mock_supervisor.run.return_value.to_dict.return_value = {"test": "result"}
         
-        # Initialize ModernExecutionHelpers
-        execution_helpers = ModernExecutionHelpers(supervisor=mock_supervisor)
+        # Initialize SupervisorExecutionHelpers
+        execution_helpers = SupervisorExecutionHelpers(supervisor_agent=mock_supervisor)
         
         # Create vulnerable DeepAgentState instance
         vulnerable_context = DeepAgentState(
@@ -110,8 +110,7 @@ class TestInterfaceMismatchVulnerabilities:
         # VULNERABILITY REPRODUCTION: This will fail at line 38 in modern_execution_helpers.py
         # when it tries to call context.create_child_context()
         with pytest.raises(AttributeError) as exc_info:
-            await execution_helpers.execute_supervisor_workflow(
-                user_request="enterprise security test",
+            await execution_helpers.run_supervisor_workflow(
                 context=vulnerable_context,
                 run_id="vulnerability_test_run"
             )

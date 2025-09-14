@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-14T12:10:59.019118",
+    "generated_at": "2025-09-14T12:14:28.863630",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 1821
   },
@@ -2912,21 +2912,21 @@
       "value": "/createtestsv2 agent goldenpath messages work, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1044"
+        "scripts/claude-instance-orchestrator.py:1080"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, integration": {
       "value": "/createtestsv2 agent goldenpath messages work, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1039"
+        "scripts/claude-instance-orchestrator.py:1075"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, unit": {
       "value": "/createtestsv2 agent goldenpath messages work, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1029"
+        "scripts/claude-instance-orchestrator.py:1065"
       ]
     },
     "/dashboard": {
@@ -3257,14 +3257,14 @@
       "value": "/failingtestsgardener agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1104"
+        "scripts/claude-instance-orchestrator.py:1140"
       ]
     },
     "/failingtestsgardener critical": {
       "value": "/failingtestsgardener critical",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1109"
+        "scripts/claude-instance-orchestrator.py:1145"
       ]
     },
     "/favicon.ico": {
@@ -3295,10 +3295,10 @@
       "value": "/gcploggardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1034",
-        "scripts/claude-instance-orchestrator.py:1074",
-        "scripts/claude-instance-orchestrator.py:1114",
-        "scripts/claude-instance-orchestrator.py:1164"
+        "scripts/claude-instance-orchestrator.py:1070",
+        "scripts/claude-instance-orchestrator.py:1110",
+        "scripts/claude-instance-orchestrator.py:1150",
+        "scripts/claude-instance-orchestrator.py:1200"
       ]
     },
     "/generate": {
@@ -3320,44 +3320,44 @@
       "value": "/gitcommitgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1019",
-        "scripts/claude-instance-orchestrator.py:1159"
+        "scripts/claude-instance-orchestrator.py:1055",
+        "scripts/claude-instance-orchestrator.py:1195"
       ]
     },
     "/gitissueprogressorv3 agents": {
       "value": "/gitissueprogressorv3 agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1079",
-        "scripts/claude-instance-orchestrator.py:1089"
+        "scripts/claude-instance-orchestrator.py:1115",
+        "scripts/claude-instance-orchestrator.py:1125"
       ]
     },
     "/gitissueprogressorv3 goldenpath": {
       "value": "/gitissueprogressorv3 goldenpath",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1094"
+        "scripts/claude-instance-orchestrator.py:1130"
       ]
     },
     "/gitissueprogressorv3 p0": {
       "value": "/gitissueprogressorv3 p0",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1084"
+        "scripts/claude-instance-orchestrator.py:1120"
       ]
     },
     "/gitissueprogressorv3 removing legacy": {
       "value": "/gitissueprogressorv3 removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1124"
+        "scripts/claude-instance-orchestrator.py:1160"
       ]
     },
     "/gitissueprogressorv3 tests p1": {
       "value": "/gitissueprogressorv3 tests p1",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1099"
+        "scripts/claude-instance-orchestrator.py:1135"
       ]
     },
     "/groups/": {
@@ -4430,7 +4430,7 @@
       "value": "/prmergergit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1154"
+        "scripts/claude-instance-orchestrator.py:1190"
       ]
     },
     "/proc/": {
@@ -4614,7 +4614,7 @@
       "value": "/refreshgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1024"
+        "scripts/claude-instance-orchestrator.py:1060"
       ]
     },
     "/register": {
@@ -4747,28 +4747,28 @@
       "value": "/runtests agents, e2e gcp",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1149"
+        "scripts/claude-instance-orchestrator.py:1185"
       ]
     },
     "/runtests all, integration": {
       "value": "/runtests all, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1144"
+        "scripts/claude-instance-orchestrator.py:1180"
       ]
     },
     "/runtests all, unit": {
       "value": "/runtests all, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1134"
+        "scripts/claude-instance-orchestrator.py:1170"
       ]
     },
     "/runtests critical, e2e": {
       "value": "/runtests critical, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1139"
+        "scripts/claude-instance-orchestrator.py:1175"
       ]
     },
     "/s": {
@@ -5044,36 +5044,36 @@
       "value": "/ssotgardener agent goldenpath messages work",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1069"
+        "scripts/claude-instance-orchestrator.py:1105"
       ]
     },
     "/ssotgardener message routing": {
       "value": "/ssotgardener message routing",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1049"
+        "scripts/claude-instance-orchestrator.py:1085"
       ]
     },
     "/ssotgardener removing legacy": {
       "value": "/ssotgardener removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1064",
-        "scripts/claude-instance-orchestrator.py:1119"
+        "scripts/claude-instance-orchestrator.py:1100",
+        "scripts/claude-instance-orchestrator.py:1155"
       ]
     },
     "/ssotgardener tests": {
       "value": "/ssotgardener tests",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1059"
+        "scripts/claude-instance-orchestrator.py:1095"
       ]
     },
     "/ssotgardener websockets or auth": {
       "value": "/ssotgardener websockets or auth",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1054"
+        "scripts/claude-instance-orchestrator.py:1090"
       ]
     },
     "/staging": {
@@ -5453,7 +5453,7 @@
       "value": "/testgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1129"
+        "scripts/claude-instance-orchestrator.py:1165"
       ]
     },
     "/tests": {
@@ -5651,7 +5651,7 @@
       "value": "/ultimate-test-deploy-loop",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1169"
+        "scripts/claude-instance-orchestrator.py:1205"
       ]
     },
     "/unit/": {

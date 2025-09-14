@@ -174,19 +174,24 @@ See [Staging Demo Setup Guide](./docs/STAGING_DEMO_SETUP.md) for detailed instru
 **Note:** With Issue #420 resolution, staging environment provides complete validation coverage as alternative to local Docker setup.
 
 ### 🔄 Latest Updates (September 2025)
-- System health improved to 92% with SSOT WebSocket bridge migration complete
-- Comprehensive SSOT message routing audit and migration completed (Issue #1101)
-- E2E agent golden path smoke tests and security validation infrastructure implemented
-- Agent integration test suite foundation established with clear Phase 2 roadmap  
-- Configuration SSOT testing infrastructure ready for advanced consolidation
-- Security vulnerability testing enhanced with comprehensive user isolation validation
-- Production readiness maintained with minimal operational risk
+- **System Health:** Improved to 92% with SSOT WebSocket bridge migration complete
+- **SSOT Progress:** Comprehensive message routing audit and migration completed (Issue #1101)
+- **Testing Infrastructure:** E2E agent golden path smoke tests and security validation infrastructure implemented
+- **Agent Coverage:** Integration test suite foundation established with clear Phase 2 roadmap  
+- **Configuration:** SSOT testing infrastructure ready for advanced consolidation
+- **Security:** Vulnerability testing enhanced with comprehensive user isolation validation
+- **Production Status:** Readiness maintained with minimal operational risk
+- **Development Branch:** Currently on develop-long-lived for active development
 
 ## 📖 Documentation
 
+### 🚀 Essential Reading
+- **[📖 Documentation Index](./docs/index.md)** - **START HERE**: Complete documentation navigator with essential reading order
+- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **MISSION CRITICAL**: Complete user journey analysis with critical issue identification and business impact ($500K+ ARR)
+- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - **ULTRA CRITICAL**: Essential project context, development guidelines, and business mandate
+
 ### Architecture & Design
-- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - **START HERE**: Complete user journey analysis with critical issue identification and business impact ($500K+ ARR)
-- **[User Context Architecture](./USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation architecture
+- **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and user isolation architecture
 - **[UVS Triage Architecture Transition](./docs/UVS_TRIAGE_ARCHITECTURE_TRANSITION.md)** - NEW: Unified Validation System with data sufficiency states
 - **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Complete frontend architecture with loading flows, WebSocket events, and state management
 - [Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md) - Agent execution pipeline
@@ -338,10 +343,20 @@ For questions or issues:
 - Contact the development team for architecture or deployment questions
 
 ### Development Resources
-- **[Definition of Done Checklist](./reports/DEFINITION_OF_DONE_CHECKLIST.md)** - Comprehensive validation for all changes
-- **[Test Execution Guide](./reports/TEST_EXECUTION_GUIDE.md)** - Complete testing methodology and patterns
-- **Claude Code Commands:** Access all 36 development commands via `/` slash commands in Claude Code
+- **[📋 Definition of Done Checklist](./reports/DEFINITION_OF_DONE_CHECKLIST.md)** - Comprehensive validation for all changes
+- **[📖 Test Execution Guide](./reports/TEST_EXECUTION_GUIDE.md)** - Complete testing methodology and patterns
+- **[⚡ Claude Code Command Index](./docs/COMMAND_INDEX.md)** - Access all 36 development commands via `/` slash commands in Claude Code
+- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - Essential project context and development guidelines
 
 ---
 
-**⚠️ IMPORTANT**: Always refer to the **[Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** for mission-critical user journey analysis and the **[User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** when working with execution engines, WebSocket events, or tool dispatchers. These documents are authoritative guides for the system's business value delivery and isolation patterns.
+## ⚠️ Important Notes
+
+**CRITICAL DOCUMENTS**: Always refer to these authoritative guides when working with the system:
+
+- **[🚀 Golden Path User Flow](./docs/GOLDEN_PATH_USER_FLOW_COMPLETE.md)** - Mission-critical user journey analysis ($500K+ ARR)
+- **[🏗️ User Context Architecture](./reports/archived/USER_CONTEXT_ARCHITECTURE.md)** - Factory patterns and isolation architecture  
+- **[📁 Project Instructions (CLAUDE.md)](./CLAUDE.md)** - Essential project context and development guidelines
+- **[📖 Documentation Index](./docs/index.md)** - Complete navigation with essential reading order
+
+These documents contain the authoritative guides for the system's business value delivery, isolation patterns, and development processes.
