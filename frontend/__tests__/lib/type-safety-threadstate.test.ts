@@ -29,19 +29,7 @@ describe('Type Safety - ThreadState Import Consistency', () => {
 
   // Test scenarios that would happen in real components
   const typeConflictScenarios = [
-    {
-      name: 'ChatComponent mixing shared and domains ThreadState',
-      imports: [
-        "import { ThreadState as SharedThreadState } from '@/shared/types/frontend_types';",
-        "import { ThreadState as DomainsThreadState } from '@/types/domains/threads';"
-      ],
-      usage: `
-        function processThread(state: SharedThreadState) {
-          const domainState: DomainsThreadState = state; // Should fail type check
-          return domainState.messages; // SharedThreadState has this, DomainsThreadState might not
-        }
-      `
-    },
+    // NOTE: domains/threads ThreadState was already migrated - test case removed
     {
       name: 'StoreSlice importing conflicting ThreadState definitions',
       imports: [
