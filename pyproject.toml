@@ -652,6 +652,12 @@ markers = [
     "error_recovery: Error recovery and resilience tests for system stability",
     "performance_validation: Performance validation tests for system efficiency",
     "security_edge_cases: Security edge case tests for authorization and isolation",
+    
+    # Issue #861 Phase 3 Missing Test Markers - P0 Critical Fix
+    "real_time: Real-time system response and WebSocket integration tests",
+    "scalability: System scalability and performance under load tests",
+    "startup_scenarios: Application startup and initialization scenario tests", 
+    "llm_fallback: LLM service fallback and resilience tests",
 ]
 
 # Coverage settings
