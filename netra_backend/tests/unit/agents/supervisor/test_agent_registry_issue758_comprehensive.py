@@ -46,26 +46,9 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.base_agent import BaseAgent
 
 
-class MockEnterpriseAgentRegistry:
-    """Mock agent registry with expected test API."""
-
-    def __init__(self):
-        self.registered_agents = {}
-
-    def register_agent(self, agent_name: str, agent_class):
-        """Mock register_agent method."""
-        self.registered_agents[agent_name] = agent_class
-
-    def list_registered_agents(self):
-        """Mock list_registered_agents method."""
-        return list(self.registered_agents.keys())
-
-    def create_agent_instance(self, agent_name: str, user_context, **kwargs):
-        """Mock create_agent_instance method."""
-        if agent_name in self.registered_agents:
-            agent_class = self.registered_agents[agent_name]
-            return agent_class(name=agent_name)
-        raise ValueError(f"Agent {agent_name} not registered")
+# REMOVED: MockEnterpriseAgentRegistry class - no longer needed
+# The test now uses the real AgentRegistry class for authentic testing
+# This follows SSOT compliance and ensures tests validate production behavior
 
 
 class MockEnterpriseWebSocketManager:
@@ -178,6 +161,14 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
 
         # FIXED: Use real AgentRegistry instead of mock for authentic testing
         # This follows SSOT compliance and tests real functionality
+        # 
+        # ISSUE RESOLUTION: The original test used MockEnterpriseAgentRegistry which
+        # was missing the register_factory() method, causing AttributeError.
+        # The fix replaces the mock with the real AgentRegistry class which inherits
+        # from UniversalRegistry and has all the required methods.
+        # 
+        # BUSINESS VALUE: This ensures tests validate actual production behavior
+        # rather than mock behavior, improving test reliability for $500K+ ARR.
         from netra_backend.app.llm.llm_manager import LLMManager
         
         # Create a mock LLM manager for testing
@@ -188,7 +179,7 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
         # Create real AgentRegistry with proper SSOT compliance
         self.registry = AgentRegistry(llm_manager=mock_llm_manager)
         
-        # Set WebSocket manager using the proper method
+        # Set WebSocket manager using the proper method for user isolation
         self.registry.set_websocket_manager(self.enterprise_websocket_manager)
 
     async def test_golden_path_agent_registration_workflow(self):

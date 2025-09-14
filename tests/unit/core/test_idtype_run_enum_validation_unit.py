@@ -87,7 +87,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
         except AttributeError as e:
             # Expected failure before fix
             assert "RUN" in str(e), f"Expected 'RUN' in error message, got: {e}"
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             
             # Re-raise to make test fail (as expected before fix)
             pytest.fail(f"IDType.RUN is missing from enum definition: {e}")
@@ -110,11 +111,13 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert run_value == "run", f"IDType.RUN.value should be 'run', got: '{run_value}'"
             assert isinstance(run_value, str), f"IDType.RUN.value should be string, got: {type(run_value)}"
             
-            self.test_metrics.record_success(f"IDType.RUN.value correctly equals 'run'")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success", f"IDType.RUN.value correctly equals 'run'")
             
         except AttributeError as e:
             # Expected failure before fix
-            self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("expected_failure", f"Expected failure before fix: {e}")
             pytest.fail(f"IDType.RUN enum value is missing: {e}")
 
     def test_idtype_enum_completeness_with_run(self):
@@ -143,7 +146,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             # Validate enum has reasonable count (should be 12 with RUN)
             assert len(current_names) >= 12, f"IDType enum too small, expected >= 12, got: {len(current_names)}"
             
-            self.test_metrics.record_success(f"IDType enum complete with {len(current_names)} values including RUN")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success"(f"IDType enum complete with {len(current_names)} values including RUN")
             
         except AssertionError as e:
             self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
@@ -179,7 +183,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             all_types = list(IDType)
             assert IDType.RUN in all_types, "IDType.RUN should be in list of all types"
             
-            self.test_metrics.record_success("IDType.RUN backwards compatibility validated")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success"("IDType.RUN backwards compatibility validated")
             
         except AttributeError as e:
             self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
@@ -210,7 +215,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             run_count = id_manager.count_active_ids(IDType.RUN)
             assert run_count == 0, "New manager should have zero RUN IDs"
             
-            self.test_metrics.record_success("UnifiedIDManager properly handles IDType.RUN initialization")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success"("UnifiedIDManager properly handles IDType.RUN initialization")
             
         except Exception as e:
             self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
@@ -244,7 +250,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             
             assert run_found, "IDType.RUN should be found during enum iteration"
             
-            self.test_metrics.record_success("IDType enum iteration properly includes RUN")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success"("IDType enum iteration properly includes RUN")
             
         except Exception as e:
             self.test_metrics.record_expected_failure(f"Expected failure before fix: {e}")
