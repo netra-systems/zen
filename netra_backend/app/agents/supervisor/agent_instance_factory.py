@@ -532,7 +532,16 @@ class AgentInstanceFactory:
                         logger.debug(f"Pre-injected websocket_bridge into context for {agent_name}")
                     
                     # Call factory method with dependencies available in context
-                    agent = AgentClass.create_agent_with_context(user_context)
+                    # CRITICAL FIX: Handle both sync and async factory methods
+                    factory_result = AgentClass.create_agent_with_context(user_context)
+
+                    # Check if factory method returned a coroutine (async method)
+                    import inspect
+                    if inspect.iscoroutine(factory_result):
+                        logger.debug(f"Factory method for {agent_name} is async - awaiting result")
+                        agent = await factory_result
+                    else:
+                        agent = factory_result
                     
                     # FALLBACK: Also inject dependencies directly as fallback for backward compatibility
                     # This ensures agents work even if they don't use context.get_dependency() methods
