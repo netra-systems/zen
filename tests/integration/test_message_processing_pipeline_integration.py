@@ -45,7 +45,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.core.websocket.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 # Import for message processing pipeline components
 try:

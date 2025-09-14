@@ -45,10 +45,10 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import UnifiedToolDispatcher
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
-from netra_backend.app.core.websocket.agent_websocket_bridge import AgentWebSocketBridge
+from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
-# Import for WebSocket event types
-from netra_backend.app.core.websocket.events import WebSocketEventType
+# Import WebSocket event types from SSOT
+from test_framework.ssot.websocket import WebSocketEventType
 
 
 class TestAgent(BaseAgent):
