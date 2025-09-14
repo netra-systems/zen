@@ -14,8 +14,15 @@ CONTEXT FOCUS STARTS:
 
 3x improve real system robustness of existing functions (purely quality of existing) and 10x improve test coverage all angles (per claude.md, cross link indexes and xml specs) for following context. MUST be bullet proof. Useful, difficult tests.Run all tests. Fix system under test issues. 
 CONTEXT FOCUS STARTS:  
-**Tool Progress Updates** - validating granular tool execution progress
+Frontend system init and first time page load
 
+3x improve real system robustness of existing functions (purely quality of existing) and 10x improve test coverage all angles (per claude.md, cross link indexes and xml specs) for following context. MUST be bullet proof. Useful, difficult tests.Run all tests. Fix system under test issues. 
+CONTEXT FOCUS STARTS:  
+Frontend page refresh. CHAT IS KING
+
+3x improve real system robustness of existing functions (purely quality of existing) and 10x improve test coverage all angles (per claude.md, cross link indexes and xml specs) for following context. MUST be bullet proof. Useful, difficult tests.Run all tests. Fix system under test issues. 
+CONTEXT FOCUS STARTS:  
+Websockets. CHAT IS KING
 
 ## User Experience Critical Paths
 20. **Typing Indicator Accuracy** - No tests for "agent is typing" indicator reliability
