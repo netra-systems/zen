@@ -37,16 +37,55 @@ Fix agent SSOT violations blocking Golden Path (users login → get AI responses
 - [x] **Step 0**: SSOT Audit - Agents violations discovered
 - [x] **GitHub Issue**: Created #909 with P0 priority
 - [x] **Progress Tracker**: SSOT-regression-agent-execution-engine-multiplicity-blocking-golden-path.md
+- [x] **Step 1**: Discover and plan tests for agent SSOT violations
 
-### 🔄 IN PROGRESS
-- [ ] **Step 1**: Discover and plan tests for agent SSOT violations
+### 🔄 IN PROGRESS  
 - [ ] **Step 2**: Execute test plan for new SSOT tests  
 - [ ] **Step 3**: Plan remediation of agent SSOT violations
 - [ ] **Step 4**: Execute the remediation SSOT plan
 - [ ] **Step 5**: Enter test fix loop - prove system stability
 - [ ] **Step 6**: Create PR and close issue
 
-## 🧪 TESTING STRATEGY
+## 🧪 COMPREHENSIVE TEST PLAN (Step 1 Complete)
+
+### 📊 EXISTING TEST INVENTORY DISCOVERED
+- **300+ Agent-Related Tests** across all categories
+- **169 Mission Critical Tests** (including $500K+ ARR WebSocket agent events suite)
+- **45+ Integration Tests** (focusing on user isolation and factory patterns)
+- **80+ Unit Tests** (BaseAgent and execution engine focus)
+- **30+ E2E Tests** (Golden Path validation)
+
+### 🎯 NEW SSOT VALIDATION TESTS PLANNED (50+ Tests)
+1. **Registry SSOT Tests** (P0 - Business Critical)
+   - Single registry validation
+   - Agent discovery consistency
+   - Factory pattern compliance
+   
+2. **Execution Engine SSOT Tests** (P0 - Business Critical)  
+   - Unified execution validation
+   - WebSocket event consistency
+   - Race condition prevention
+   
+3. **Import SSOT Tests** (P1 - System Integrity)
+   - Canonical import path validation
+   - Circular dependency prevention
+   - Module loading consistency
+   
+4. **Performance SSOT Tests** (P2 - System Efficiency)
+   - <2s initialization validation
+   - Memory usage consistency
+   - Concurrent execution stability
+   
+5. **User Isolation SSOT Tests** (P0 - Security Critical)
+   - Data contamination prevention
+   - Multi-user isolation validation
+   - Session state independence
+
+### ⚡ PHASED EXECUTION STRATEGY (6-Week Timeline)
+- **Phase 1**: Protection (preserve existing functionality)
+- **Phase 2**: Validation (implement SSOT tests)
+- **Phase 3**: Remediation (fix SSOT violations)
+- **Phase 4**: Validation (confirm success)
 
 ### Pre-Remediation Baseline
 - [ ] Run `python tests/mission_critical/test_websocket_agent_events_suite.py` (baseline)
