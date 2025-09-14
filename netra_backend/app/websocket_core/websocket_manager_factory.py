@@ -234,16 +234,10 @@ async def create_websocket_manager(user_context=None, user_id: Optional[UserID] 
     return await get_websocket_manager(user_context=user_context)
 
 
-# Legacy compatibility aliases for existing tests
-def get_websocket_manager_factory():
-    """
-    COMPATIBILITY FUNCTION: Returns factory function for legacy test compatibility.
-    
-    Returns:
-        callable: The create_websocket_manager factory function
-    """
-    logger.warning("get_websocket_manager_factory is deprecated. Use create_websocket_manager directly.")
-    return create_websocket_manager
+# REMOVED: get_websocket_manager_factory (Issue #1126 SSOT enforcement)
+# This function was removed to eliminate dual pattern fragmentation
+# Use create_websocket_manager directly or the canonical SSOT path:
+# from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 
 
 def create_websocket_manager_sync(user_context=None, user_id: Optional[UserID] = None):
@@ -541,29 +535,11 @@ logger.info("WebSocketManagerFactory class removed - Issue #824 SSOT consolidati
 # Export compatibility functions only (Issue #824 Remediation)
 
 
-class WebSocketManagerFactory:
-    """
-    DEPRECATED: WebSocketManagerFactory for SSOT violation testing.
-    
-    This class exists only for testing SSOT violations and compatibility.
-    All production code should use the SSOT WebSocketManager directly.
-    """
-    
-    def __init__(self):
-        warnings.warn(
-            'WebSocketManagerFactory is deprecated. Use WebSocketManager directly.',
-            DeprecationWarning,
-            stacklevel=2
-        )
-        self._logger = get_logger(__name__)
-        
-    async def create_websocket_manager(self, redis_client=None, environment=None, **kwargs):
-        """Create WebSocketManager using SSOT implementation."""
-        self._logger.warning(
-            'create_websocket_manager is deprecated. Use get_websocket_manager() directly.'
-        )
-        from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
-        return await get_websocket_manager(**kwargs)
+# REMOVED: WebSocketManagerFactory class (Issue #1126 SSOT enforcement)
+# This class was removed to eliminate dual pattern fragmentation
+# Use the canonical SSOT path:
+# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+# or get_websocket_manager for factory-style creation
 
 # WebSocketManagerFactory class REMOVED from exports
 __all__ = [
