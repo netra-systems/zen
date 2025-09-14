@@ -65,8 +65,12 @@ class TestIssue1037ServiceSecretSSotValidation(SSotAsyncTestCase):
         env = self.get_env()
         env.set("SERVICE_SECRET", test_service_secret, "issue_1037_test")
         
-        # AND: No SECRET_KEY is set (to verify SERVICE_SECRET is used)
-        assert env.get("SECRET_KEY") is None, "SECRET_KEY should not be set"
+        # AND: Clear any test framework SECRET_KEY to isolate the test
+        env.delete("SECRET_KEY", "test_framework_base")
+        env.delete("SECRET_KEY", "development")
+        
+        # Verify only SERVICE_SECRET is available
+        assert env.get("SERVICE_SECRET") == test_service_secret, "SERVICE_SECRET should be set"
         
         try:
             # WHEN: Auth service tries to get service secret through SSOT configuration

@@ -87,5 +87,5 @@ Multiple MessageRouter implementations exist causing race conditions and message
 
 ---
 **Status:** In Progress - Step 0 Complete
-**GitHub Issue:** TBD
+**GitHub Issue:** #1115 - https://github.com/netra-systems/netra-apex/issues/1115
 **Updated:** 2025-09-14

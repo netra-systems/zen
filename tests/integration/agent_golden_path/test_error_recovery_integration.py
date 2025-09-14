@@ -239,7 +239,7 @@ class ErrorRecoveryValidator:
             # Standard error scenario testing
             async with websockets.connect(
                 websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=connection_timeout,
                 ping_interval=30,
                 ping_timeout=10
@@ -361,7 +361,7 @@ class ErrorRecoveryValidator:
             # Attempt initial connection
             async with websockets.connect(
                 websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=10.0
             ) as websocket:
                 
@@ -391,7 +391,7 @@ class ErrorRecoveryValidator:
             # Attempt reconnection
             async with websockets.connect(
                 websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=15.0
             ) as websocket2:
                 
