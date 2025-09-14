@@ -262,7 +262,7 @@ All golden path testing is completely blocked until staging backend service is r
 
 ### Service Health Check Results
 ```bash
-✅ AUTH SERVICE: https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+✅ AUTH SERVICE: https://auth.staging.netrasystems.ai/health
    Status: 200 OK
    Response: {"status":"healthy","service":"auth-service","version":"1.0.0","timestamp":"2025-09-13T02:51:59.622085+00:00","uptime_seconds":201.932564,"database_status":"connected","environment":"staging"}
 

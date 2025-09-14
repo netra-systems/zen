@@ -4,7 +4,7 @@
 
 > 🚨 **CRITICAL**: This index is your first line of defense against config regressions and cascade failures. ALWAYS validate literals before use!
 
-*Generated on 2025-09-12*
+*Generated on 2025-09-14*
 
 ## 🎯 Quick Start Guide
 
@@ -37,9 +37,9 @@ python scripts/query_string_literals.py check-env staging
 
 | Metric | Value |
 |--------|-------|
-| **Files Scanned** | 3,366 |
-| **Total Literals Found** | 268,885 |
-| **Unique Literals** | 111,755 |
+| **Files Scanned** | 3,417 |
+| **Total Literals Found** | 273,865 |
+| **Unique Literals** | 113,670 |
 | **Critical Configs** | 11 |
 | **Critical Domains** | 12 (4 per env) |
 | **Categories** | 14 |
@@ -102,16 +102,16 @@ python scripts/query_string_literals.py check-env staging
 |----------|-------|-------------|------------|
 | **critical_config** | 11 | 🚨 Mission-critical environment variables | **CRITICAL** |
 | **critical_domain_***| 12 | 🚨 Environment-specific domains | **CRITICAL** |
-| **configuration** | 1,156 | System configuration keys | High |
-| **paths** | 1,664 | API endpoints, file paths | High |
-| **identifiers** | 49,241 | Component names, class names | Medium |
-| **messages** | 28,840 | Log messages, user text | Medium |
-| **database** | 387 | Table names, SQL keywords | Medium |
-| **environment** | 213 | Environment-specific configs | High |
-| **events** | 44 | WebSocket events, handlers | High |
+| **configuration** | 1,153 | System configuration keys | High |
+| **paths** | 1,821 | API endpoints, file paths | High |
+| **identifiers** | 49,834 | Component names, class names | Medium |
+| **messages** | 29,229 | Log messages, user text | Medium |
+| **database** | 395 | Table names, SQL keywords | Medium |
+| **environment** | 214 | Environment-specific configs | High |
+| **events** | 45 | WebSocket events, handlers | High |
 | **states** | 30 | Status values, boolean states | Medium |
-| **metrics** | 319 | Performance monitoring | Low |
-| **test_literals** | 29,838 | Test-specific strings | Low |
+| **metrics** | 314 | Performance monitoring | Low |
+| **test_literals** | 30,612 | Test-specific strings | Low |
 
 ### 🔍 Search Patterns
 
@@ -151,21 +151,21 @@ python scripts/query_string_literals.py search "config" --category configuration
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| **configuration** | 1,156 | System configuration keys and settings |
-| **paths** | 1,664 | API endpoints, file paths, directories |
-| **environment** | 213 | Environment-specific configuration |
-| **database** | 387 | Table names, SQL keywords, queries |
-| **events** | 44 | WebSocket events and handlers |
+| **configuration** | 1,153 | System configuration keys and settings |
+| **paths** | 1,821 | API endpoints, file paths, directories |
+| **environment** | 214 | Environment-specific configuration |
+| **database** | 395 | Table names, SQL keywords, queries |
+| **events** | 45 | WebSocket events and handlers |
 | **states** | 30 | Status values and boolean states |
-| **metrics** | 319 | Performance monitoring data |
+| **metrics** | 314 | Performance monitoring data |
 
 ### 📝 Content Categories (Medium Importance)
 
 | Category | Count | Description |
 |----------|-------|-------------|
-| **identifiers** | 49,241 | Component names, class names, functions |
-| **messages** | 28,840 | Log messages, user text, notifications |
-| **test_literals** | 29,838 | Test-specific strings and data |
+| **identifiers** | 49,834 | Component names, class names, functions |
+| **messages** | 29,229 | Log messages, user text, notifications |
+| **test_literals** | 30,612 | Test-specific strings and data |
 
 ### 📋 Sub-Index Access
 
@@ -266,6 +266,6 @@ python scripts/query_string_literals.py stats
 ---
 
 *This index is automatically generated and cross-referenced with mission-critical documentation.*
-*Last updated: 2025-09-12 | Index Version: 4.0.0 | Files: 3,366 | Literals: 111,755*
+*Last updated: 2025-09-14 | Index Version: 4.1.0 | Files: 3,417 | Literals: 113,670*
 
 **🔍 Quick Tools**: [Query](../scripts/query_string_literals.py) | [Scan](../scripts/scan_string_literals.py) | [Validate](../scripts/query_string_literals.py validate) | [Stats](../scripts/query_string_literals.py stats)

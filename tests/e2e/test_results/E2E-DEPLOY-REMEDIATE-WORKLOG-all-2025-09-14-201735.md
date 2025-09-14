@@ -30,7 +30,7 @@ Based on most recent worklog (2025-09-14-195853), critical WebSocket subprotocol
 **Result:** ✅ SUCCESS
 - **All Services Deployed:** backend, auth, frontend
 - **Backend URL:** https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-- **Auth URL:** https://netra-auth-service-pnovr5vsba-uc.a.run.app  
+- **Auth URL:** https://auth.staging.netrasystems.ai  
 - **Frontend URL:** https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 - **Health Checks:** All services healthy post-deployment
 

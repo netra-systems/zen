@@ -8,7 +8,7 @@
 ## Session Configuration
 - **Environment**: Staging GCP Remote (backend deployed successfully - both services healthy)
 - **Backend URL**: https://netra-backend-staging-pnovr5vsba-uc.a.run.app (200 OK)
-- **Auth URL**: https://netra-auth-service-pnovr5vsba-uc.a.run.app (200 OK)
+- **Auth URL**: https://auth.staging.netrasystems.ai (200 OK)
 - **Test Focus**: P1 Critical tests focusing on ACTUAL AGENT RESPONSES
 - **Strategy**: Fix known WebSocket 1011 and agent execution timeout issues
 

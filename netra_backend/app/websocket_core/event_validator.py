@@ -49,7 +49,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 # Consolidated imports from both original implementations
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 from shared.types.core_types import UserID, ThreadID, RunID, RequestID, WebSocketID
 from shared.types.execution_types import StronglyTypedUserExecutionContext
 from shared.isolated_environment import get_env

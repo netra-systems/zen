@@ -381,6 +381,38 @@ class DeepAgentState(BaseModel):
         step_count = max(self.step_count, other_state.step_count)
         return {'step_count': step_count, 'metadata': metadata, **results}
 
+    def create_child_context(
+        self,
+        operation_name: str,
+        additional_context: Optional[Dict[str, Any]] = None
+    ) -> 'DeepAgentState':
+        """COMPATIBILITY METHOD: Create child context for UserExecutionContext migration.
+        
+        Provides backward compatibility during DeepAgentState → UserExecutionContext transition.
+        Creates new DeepAgentState instance with enhanced context for sub-operations.
+        
+        Args:
+            operation_name: Name of the sub-operation
+            additional_context: Additional context data (maintains existing parameter name)
+            
+        Returns:
+            New DeepAgentState instance with child context data
+        """
+        enhanced_agent_context = self.agent_context.copy()
+        if additional_context:
+            enhanced_agent_context.update(additional_context)
+        
+        enhanced_agent_context.update({
+            'parent_operation': self.agent_context.get('operation_name', 'root'),
+            'operation_name': operation_name,
+            'operation_depth': self.agent_context.get('operation_depth', 0) + 1
+        })
+        
+        return self.copy_with_updates(
+            agent_context=enhanced_agent_context,
+            step_count=self.step_count + 1
+        )
+
 
 # Agent Execution Metrics
 class AgentExecutionMetrics(BaseModel):

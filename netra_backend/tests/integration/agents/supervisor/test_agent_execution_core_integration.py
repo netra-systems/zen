@@ -27,15 +27,19 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.execution_tracker import get_execution_tracker
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.base_agent import BaseAgent
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class RealIntegrationAgent:
+class RealIntegrationAgent(BaseAgent):
     """Real agent for integration testing with actual business logic."""
     
     def __init__(self, execution_time: float = 0.1, should_fail: bool = False, 
                  return_none: bool = False, websocket_compatible: bool = True):
+        # Initialize BaseAgent with test name
+        super().__init__(name="RealIntegrationAgent", description="Real agent for integration testing")
+        
         self.execution_time = execution_time
         self.should_fail = should_fail
         self.return_none = return_none
@@ -251,6 +255,7 @@ class TestAgentExecutionCoreIntegration:
     def sample_state(self, auth_helper):
         """Sample agent state with real user context using UserExecutionContext."""
         # Use UserExecutionContext instead of DeepAgentState (per Issue #271 security fix)
+        # UserExecutionContext is frozen, so set agent_context during creation
         state = UserExecutionContext(
             user_id="test-user-123",
             thread_id=f"test-thread-{uuid4()}",
@@ -473,7 +478,11 @@ class TestAgentExecutionCoreIntegration:
     ):
         """Test resilience when WebSocket bridge fails."""
         # Create core with failing WebSocket bridge using SSOT patterns
-        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge()
+<<<<<<< HEAD
+        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge(should_fail=True)
+=======
+        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge(should_fail=True)
+>>>>>>> 8764938e17e7cbfd22700a00d83f352704f5be9d
         failing_bridge.notify_agent_started.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_completed.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_error.side_effect = Exception("WebSocket error")

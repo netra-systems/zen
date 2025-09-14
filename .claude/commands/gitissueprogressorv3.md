@@ -76,7 +76,7 @@ if very bad mark and report as such and go back to 3) with the new added info.
     6.1) UPDATE the comment on the ISSUE with the results
     6.2) Run startup tests (non docker) fix import or other types of startup issues related to this change.
     6.3) Git commit work in conceptual batches. 
-    pull latest, and handle merge conflicts
+    6.4) Sync with origin: push/pull latest, and handle merge conflicts
 
 7) PROOF: SNST : Spawn a sub agent PROVE THAT THE CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
 otherwise go back and ensure that any code changes exclusively add value as one atomic package of commit and

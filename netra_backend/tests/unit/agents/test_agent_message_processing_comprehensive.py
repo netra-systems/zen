@@ -32,7 +32,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import get_env
 
 # Import core message processing components
-from netra_backend.app.agents.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.websocket_core.handlers import MessageHandler, ConnectionHandler, BaseMessageHandler
 from netra_backend.app.websocket_core.types import (
     MessageType, WebSocketMessage, ServerMessage, ErrorMessage,

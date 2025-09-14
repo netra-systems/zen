@@ -162,13 +162,14 @@ python scripts/scan_string_literals.py --dirs netra_backend/app auth_service
 
 ## 📈 Usage Statistics
 
-**Current Index (Generated 2025-09-12):**
-- **Files Scanned**: 3,366
-- **Total Literals**: 268,885
-- **Unique Literals**: 111,755
+**Current Index (Updated 2025-09-14):**
+- **Files Scanned**: 3,366+
+- **Total Literals**: 273,865
+- **Unique Literals**: 113,670
 - **Categories**: 14
 - **Critical Protections**: 23 (11 env vars + 12 domains)
 - **Scan Errors**: 2 (non-critical syntax issues in development files)
+- **System Integration**: Enhanced with SSOT WebSocket Bridge Migration Complete
 
 ## 🚨 Warning Patterns
 

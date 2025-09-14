@@ -12,9 +12,10 @@ from shared.logging.unified_logging_ssot import (
     request_context,
     reset_logging
 )
-from shared.logging.unified_logger_factory import (
-    configure_service_logging
-)
+# Import configure_service_logging from SSOT for compatibility
+def configure_service_logging(service_config=None):
+    """DEPRECATED: Use SSOT logging system - configuration is automatic."""
+    pass
 
 __all__ = [
     'get_logger',

@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.core.tools.unified_tool_dispatcher import RequestScopedToolDispatcher
@@ -71,7 +71,7 @@ class ToolExecutorFactory:
     - Simplifies testing and dependency management
     """
     
-    def __init__(self, websocket_manager: Optional['WebSocketManager'] = None):
+    def __init__(self, websocket_manager: Optional['AgentWebSocketBridge'] = None):
         """Initialize the tool executor factory.
         
         Args:
@@ -95,7 +95,7 @@ class ToolExecutorFactory:
     async def create_tool_executor(
         self,
         user_context: UserExecutionContext,
-        websocket_manager: Optional['WebSocketManager'] = None
+        websocket_manager: Optional['AgentWebSocketBridge'] = None
     ) -> UnifiedToolExecutionEngine:
         """Create a request-scoped UnifiedToolExecutionEngine.
         
@@ -174,7 +174,7 @@ class ToolExecutorFactory:
         self,
         user_context: UserExecutionContext,
         tools: List[Any] = None,
-        websocket_manager: Optional['WebSocketManager'] = None
+        websocket_manager: Optional['AgentWebSocketBridge'] = None
     ) -> RequestScopedToolDispatcher:
         """Create a request-scoped tool dispatcher with integrated WebSocket events.
         
@@ -255,7 +255,7 @@ class ToolExecutorFactory:
     async def create_scoped_tool_executor(
         self,
         user_context: UserExecutionContext,
-        websocket_manager: Optional['WebSocketManager'] = None
+        websocket_manager: Optional['AgentWebSocketBridge'] = None
     ):
         """Create scoped UnifiedToolExecutionEngine with automatic cleanup.
         
@@ -290,7 +290,7 @@ class ToolExecutorFactory:
         self,
         user_context: UserExecutionContext,
         tools: List[Any] = None,
-        websocket_manager: Optional['WebSocketManager'] = None
+        websocket_manager: Optional['AgentWebSocketBridge'] = None
     ):
         """Create scoped RequestScopedToolDispatcher with automatic cleanup.
         
@@ -323,7 +323,7 @@ class ToolExecutorFactory:
                 self._metrics['active_instances'] -= 1
                 logger.debug(f"[U+1F4E6] SCOPED DISPATCHER: {user_context.get_correlation_id()} disposed")
     
-    def set_websocket_manager(self, websocket_manager: 'WebSocketManager') -> None:
+    def set_websocket_manager(self, websocket_manager: 'AgentWebSocketBridge') -> None:
         """Set the default WebSocket manager for this factory.
         
         Args:
@@ -451,7 +451,7 @@ def get_tool_executor_factory() -> ToolExecutorFactory:
     return _global_tool_executor_factory
 
 
-def set_tool_executor_factory_websocket_manager(websocket_manager: 'WebSocketManager') -> None:
+def set_tool_executor_factory_websocket_manager(websocket_manager: 'AgentWebSocketBridge') -> None:
     """Set WebSocket manager on the global factory.
     
     Args:
@@ -465,7 +465,7 @@ def set_tool_executor_factory_websocket_manager(websocket_manager: 'WebSocketMan
 
 async def create_isolated_tool_executor(
     user_context: UserExecutionContext,
-    websocket_manager: Optional['WebSocketManager'] = None
+    websocket_manager: Optional['AgentWebSocketBridge'] = None
 ) -> UnifiedToolExecutionEngine:
     """Convenience function to create an isolated tool executor.
     
@@ -501,7 +501,7 @@ async def create_isolated_tool_executor(
 async def create_isolated_tool_dispatcher(
     user_context: UserExecutionContext,
     tools: List[Any] = None,
-    websocket_manager: Optional['WebSocketManager'] = None
+    websocket_manager: Optional['AgentWebSocketBridge'] = None
 ) -> RequestScopedToolDispatcher:
     """Convenience function to create an isolated tool dispatcher.
     
@@ -520,7 +520,7 @@ async def create_isolated_tool_dispatcher(
 @asynccontextmanager
 async def isolated_tool_executor_scope(
     user_context: UserExecutionContext,
-    websocket_manager: Optional['WebSocketManager'] = None
+    websocket_manager: Optional['AgentWebSocketBridge'] = None
 ):
     """Convenience context manager for scoped tool executor.
     
@@ -540,7 +540,7 @@ async def isolated_tool_executor_scope(
 async def isolated_tool_dispatcher_scope(
     user_context: UserExecutionContext,
     tools: List[Any] = None,
-    websocket_manager: Optional['WebSocketManager'] = None
+    websocket_manager: Optional['AgentWebSocketBridge'] = None
 ):
     """Convenience context manager for scoped tool dispatcher.
     

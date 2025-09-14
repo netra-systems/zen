@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from netra_backend.app.core.tools.unified_tool_dispatcher import UnifiedToolDispatcher
     from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge, create_agent_websocket_bridge
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
     # CRITICAL ISSUE #387 REMEDIATION: Prerequisites validation types
@@ -523,7 +522,7 @@ class AgentRegistry(BaseAgentRegistry):
     
     async def create_agent_for_user(self, user_id: str, agent_type: str, 
                                    user_context: 'UserExecutionContext',
-                                   websocket_manager: Optional['WebSocketManager'] = None) -> Any:
+                                   websocket_manager: Optional['AgentWebSocketBridge'] = None) -> Any:
         """Create isolated agent instance for specific user.
         
         SECURITY: Enforces complete user isolation with dedicated resources.
@@ -717,7 +716,7 @@ class AgentRegistry(BaseAgentRegistry):
     
     # ===================== WEBSOCKET INTEGRATION =====================
     
-    def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
+    def set_websocket_manager(self, manager: 'AgentWebSocketBridge') -> None:
         """Set WebSocket manager for agent events with user isolation support.
         
         This method integrates with the user isolation pattern by:
@@ -731,7 +730,6 @@ class AgentRegistry(BaseAgentRegistry):
         Args:
             manager: WebSocket manager instance for agent events
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:
@@ -809,7 +807,7 @@ class AgentRegistry(BaseAgentRegistry):
         
         logger.info(f" PASS:  WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
     
-    async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
+    async def set_websocket_manager_async(self, manager: 'AgentWebSocketBridge') -> None:
         """Async version of set_websocket_manager for async contexts.
         
         This method can be used when we're already in an async context and want
@@ -818,7 +816,6 @@ class AgentRegistry(BaseAgentRegistry):
         Args:
             manager: WebSocket manager instance for agent events
         """
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         if manager is None:

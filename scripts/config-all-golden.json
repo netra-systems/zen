@@ -1,0 +1,39 @@
+{
+  "instances": [
+    {
+      "command": "/gitissueprogressorv3 p0",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath blocking",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 agents",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+      {
+      "command": "/gitissueprogressorv3 tests",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 long standing issues",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    },
+    {
+      "command": "/gitissueprogressorv3 goldenpath p1",
+      "permission_mode": "acceptEdits",
+      "output_format": "stream-json"
+    }
+  ]
+}

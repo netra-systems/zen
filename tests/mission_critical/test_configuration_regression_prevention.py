@@ -25,16 +25,15 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class ConfigurationRegressionTests(IsolatedTestCase):
+class ConfigurationRegressionTests(IsolatedTestCase, unittest.TestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """
     
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         """Set up test environment."""
-        super().setUpClass()
-        cls.critical_configs = {
+        super().setUp()
+        self.critical_configs = {
             'SERVICE_SECRET': 'Critical for inter-service auth',
             'JWT_SECRET': 'Critical for token validation',
             'AUTH_SERVICE_URL': 'Critical for auth connectivity',
@@ -406,6 +405,17 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
     Integration tests for configuration regression prevention.
     """
     
+    def setUp(self):
+        """Set up test environment."""
+        super().setUp()
+        self.critical_configs = {
+            'SERVICE_SECRET': 'Critical for inter-service auth',
+            'JWT_SECRET': 'Critical for token validation',
+            'AUTH_SERVICE_URL': 'Critical for auth connectivity',
+            'DATABASE_URL': 'Critical for data persistence',
+            'REDIS_URL': 'Critical for caching and sessions'
+        }
+    
     def test_cross_service_config_consistency(self):
         """
         Test that configuration is consistent across services.
@@ -442,27 +452,13 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
                               f"Invalid secret mappings for {env_name}: {errors}")
 
 
-def suite():
-    """Create test suite for CI/CD pipeline."""
-    suite = unittest.TestSuite()
-    
-    # Add critical tests that must pass
-    suite.addTest(ConfigurationRegressionTests('test_service_secret_presence_all_environments'))
-    suite.addTest(ConfigurationRegressionTests('test_jwt_secret_resolution_consistency'))
-    suite.addTest(ConfigurationRegressionTests('test_oauth_dual_naming_consistency'))
-    suite.addTest(ConfigurationRegressionTests('test_config_validation_at_startup'))
-    suite.addTest(ConfigurationRegressionTests('test_service_secret_strength_validation'))
-    
-    # Add integration tests
-    suite.addTest(ConfigurationRegressionIntegrationTests('test_cross_service_config_consistency'))
-    
-    return suite
-
-
 if __name__ == '__main__':
-    # Run with verbose output for CI/CD
+    # Run with verbose output for CI/CD using unittest discovery
+    loader = unittest.TestLoader()
+    suite = loader.loadTestsFromModule(sys.modules[__name__])
+    
     runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite())
+    result = runner.run(suite)
     
     # Exit with non-zero if any failures
     sys.exit(0 if result.wasSuccessful() else 1)

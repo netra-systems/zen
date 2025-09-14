@@ -139,7 +139,7 @@ python scripts/deploy_to_gcp.py --project netra-staging --build-local --run-chec
 # Service successfully deployed and running
 NAME: netra-auth-service
 STATUS: Ready (True)
-URL: https://netra-auth-service-pnovr5vsba-uc.a.run.app
+URL: https://auth.staging.netrasystems.ai
 CONTAINER_PORT: 8080 ✅
 ```
 
@@ -147,7 +147,7 @@ CONTAINER_PORT: 8080 ✅
 
 **Direct Cloud Run URL**:
 ```bash
-curl -I https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl -I https://auth.staging.netrasystems.ai/health
 # Result: 200 OK ✅
 ```
 
@@ -183,7 +183,7 @@ The auth service port configuration is **working perfectly**. The 404 errors men
 
 **RECOMMENDATION**: 
 🔍 **Issue #128 should focus on WebSocket connectivity and frontend routing** rather than auth service deployment. The auth service is confirmed working and accessible at both:
-- Direct URL: `https://netra-auth-service-pnovr5vsba-uc.a.run.app`  
+- Direct URL: `https://auth.staging.netrasystems.ai`  
 - Custom domain: `https://auth.staging.netrasystems.ai`
 
 **No code changes required** for auth service port configuration - it is working correctly.

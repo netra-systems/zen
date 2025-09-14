@@ -508,40 +508,161 @@ class OrchestrationConfig:
             "debug_mode": self._debug_mode
         }
     
+    def get_service_config(self, service_name: str) -> Dict[str, Any]:
+        """
+        Get service-specific configuration for orchestration components.
+
+        This method provides configuration settings specific to individual services
+        within the orchestration system. It follows SSOT patterns by providing
+        a centralized location for service configuration management.
+
+        Args:
+            service_name: Name of service to get configuration for
+                         (e.g., 'orchestrator', 'master_orchestration', 'background_e2e')
+
+        Returns:
+            Dictionary containing service-specific configuration
+
+        Raises:
+            ValueError: If service_name is not recognized
+        """
+        # Define known service configurations
+        service_configs = {
+            'orchestrator': {
+                'availability_key': 'orchestrator',
+                'import_modules': [
+                    'test_framework.orchestration.test_orchestrator_agent',
+                ],
+                'required_classes': [
+                    'TestOrchestratorAgent',
+                    'OrchestrationConfig',
+                    'ExecutionMode'
+                ],
+                'timeout_seconds': 30,
+                'retry_attempts': 3,
+                'environment_vars': [
+                    'ORCHESTRATION_ORCHESTRATOR_AVAILABLE'
+                ]
+            },
+            'master_orchestration': {
+                'availability_key': 'master_orchestration',
+                'import_modules': [
+                    'test_framework.orchestration.master_orchestration_controller',
+                    'test_framework.orchestration.progress_streaming_agent'
+                ],
+                'required_classes': [
+                    'MasterOrchestrationController',
+                    'OrchestrationMode',
+                    'ProgressOutputMode'
+                ],
+                'timeout_seconds': 60,
+                'retry_attempts': 2,
+                'environment_vars': [
+                    'ORCHESTRATION_MASTER_ORCHESTRATION_AVAILABLE'
+                ]
+            },
+            'background_e2e': {
+                'availability_key': 'background_e2e',
+                'import_modules': [
+                    'test_framework.orchestration.background_e2e_agent'
+                ],
+                'required_classes': [
+                    'BackgroundE2EAgent',
+                    'E2ETestCategory',
+                    'BackgroundTaskConfig'
+                ],
+                'timeout_seconds': 90,
+                'retry_attempts': 1,
+                'environment_vars': [
+                    'ORCHESTRATION_BACKGROUND_E2E_AVAILABLE'
+                ]
+            }
+        }
+
+        # Validate service name
+        if service_name not in service_configs:
+            available_services = list(service_configs.keys())
+            raise ValueError(
+                f"Unknown service '{service_name}'. "
+                f"Available services: {available_services}"
+            )
+
+        # Get base configuration
+        base_config = service_configs[service_name].copy()
+
+        # Add dynamic configuration from environment and availability status
+        base_config.update({
+            'available': self._check_availability(service_name),
+            'cached_imports': {
+                name: obj for name, obj in self._import_cache.items()
+                if any(cls in name for cls in base_config['required_classes'])
+            },
+            'last_error': self._import_errors.get(service_name),
+            'environment_override': self._get_env_override(service_name),
+            'debug_mode': self._debug_mode
+        })
+
+        # Add environment-specific settings
+        if service_name in ['background_e2e']:
+            # Background E2E needs longer timeouts and specific resource limits
+            base_config.update({
+                'resource_limits': {
+                    'memory_gb': 4,
+                    'cpu_percent': 80,
+                    'disk_gb': 10
+                },
+                'background_eligible': True
+            })
+        elif service_name in ['orchestrator']:
+            # Orchestrator needs rapid response times
+            base_config.update({
+                'resource_limits': {
+                    'memory_gb': 1,
+                    'cpu_percent': 40,
+                    'disk_gb': 2
+                },
+                'background_eligible': False
+            })
+
+        if self._debug_mode:
+            logger.debug(f"Generated service config for {service_name}: {len(base_config)} keys")
+
+        return base_config
+
     def validate_configuration(self) -> List[str]:
         """
         Validate orchestration configuration and return any issues found.
-        
+
         Returns:
             List of configuration issues (empty list if all valid)
         """
         issues = []
-        
+
         # Check for basic availability
         if not self.any_orchestration_available:
             issues.append("No orchestration features are available - all imports failed")
-        
+
         # Check for partial availability that might indicate issues
         available_count = len(self.get_available_features())
         if 0 < available_count < 3:
             issues.append(f"Only {available_count}/3 orchestration features available - may indicate import issues")
-        
+
         # Check for import errors
         errors = self.get_import_errors()
         if errors:
             for feature, error in errors.items():
                 issues.append(f"Import error for {feature}: {error}")
-        
+
         # Check environment consistency
         env_overrides = {}
         for name in ['orchestrator', 'master_orchestration', 'background_e2e']:
             override = self._get_env_override(name)
             if override is not None:
                 env_overrides[name] = override
-        
+
         if env_overrides:
             issues.append(f"Environment overrides active: {env_overrides}")
-        
+
         return issues
     
     def __repr__(self) -> str:

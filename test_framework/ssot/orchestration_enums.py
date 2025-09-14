@@ -177,7 +177,7 @@ class ProgressEventType(Enum):
 class OrchestrationMode(Enum):
     """
     Master orchestration execution modes.
-    
+
     These modes define different orchestration strategies that balance
     execution time, resource usage, and test coverage.
     """
@@ -187,6 +187,38 @@ class OrchestrationMode(Enum):
     HYBRID = "hybrid"                  # Foreground layers + background E2E
     LEGACY = "legacy"                  # Legacy category-based execution
     CUSTOM = "custom"                  # Custom layer configuration
+
+
+class DockerOrchestrationMode(Enum):
+    """
+    Docker orchestration modes for test environment management.
+
+    These modes define how Docker environments should be orchestrated
+    during test execution, providing different levels of isolation and
+    resource usage patterns.
+
+    SSOT Enhancement: Centralizes Docker orchestration mode definitions
+    that were previously scattered across different orchestration modules.
+    """
+    # Environment Management Modes
+    DEDICATED = "dedicated"            # Each test run gets dedicated environment
+    SHARED = "shared"                  # Multiple test runs share environment
+    PERSISTENT = "persistent"          # Long-lived environment across sessions
+
+    # Execution Strategy Modes
+    PARALLEL = "parallel"              # Multiple Docker environments in parallel
+    SEQUENTIAL = "sequential"          # One Docker environment at a time
+    BACKGROUND = "background"          # Docker management in background
+
+    # Resource Management Modes
+    MINIMAL = "minimal"                # Minimal Docker resource allocation
+    STANDARD = "standard"              # Standard Docker resource allocation
+    INTENSIVE = "intensive"            # High Docker resource allocation for heavy tests
+
+    # Special Modes
+    CLEANUP_ONLY = "cleanup_only"      # Only perform cleanup operations
+    VALIDATION_ONLY = "validation_only"  # Only validate Docker setup
+    DISABLED = "disabled"              # Docker orchestration disabled
 
 
 # ========== Resource and Service Management ==========

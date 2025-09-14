@@ -213,46 +213,72 @@ class WebSocketBroadcastService:
     ) -> Dict[str, Any]:
         """Prevent cross-user data contamination in broadcast events.
 
-        Validates that event data doesn't contain foreign user IDs that could
-        lead to data leakage between users.
+        ISSUE #1058 FIX: Preserves event data integrity while preventing actual security violations.
+        Distinguishes between event data (provenance/context) and routing data (target delivery).
+
+        Event data integrity principles:
+        1. PRESERVE original event data including user_id (event creator/source)
+        2. ONLY sanitize fields that represent routing/targeting (recipient_id, target_user_id)
+        3. VALIDATE but don't overwrite provenance fields (user_id, sender_id, creator_id)
 
         Args:
-            target_user_id: The intended recipient user ID
-            event: Original event payload
+            target_user_id: The intended recipient user ID for routing
+            event: Original event payload to validate
             result: Result object to track contamination prevention
 
         Returns:
-            Dict: Sanitized event payload
+            Dict: Validated event payload with preserved data integrity
         """
         sanitized_event = event.copy()
         contamination_detected = False
 
-        # Check for potential user ID fields
-        user_id_fields = [
-            'user_id', 'userId', 'recipient_id', 'sender_id',
-            'owner_id', 'creator_id', 'target_user_id'
+        # Fields that represent EVENT DATA (preserve original values)
+        event_data_fields = [
+            'user_id',      # Event creator/source - PRESERVE for audit trails
+            'sender_id',    # Message sender - PRESERVE for attribution
+            'creator_id',   # Content creator - PRESERVE for provenance
+            'owner_id'      # Resource owner - PRESERVE for context
         ]
 
-        for field in user_id_fields:
+        # Fields that represent ROUTING/TARGETING (sanitize for security)
+        routing_fields = [
+            'recipient_id',     # Message recipient - sanitize to match target
+            'target_user_id',   # Explicit target - sanitize to match target
+            'userId'           # Legacy recipient field - sanitize to match target
+        ]
+
+        # PHASE 1: Validate event data fields (preserve but log discrepancies)
+        for field in event_data_fields:
+            if field in sanitized_event:
+                field_value = sanitized_event[field]
+                if field_value and str(field_value) != str(target_user_id):
+                    # LOG but don't modify - this is legitimate event data
+                    logger.debug(
+                        f"Event data field '{field}' contains different user ID: {field_value}. "
+                        f"This is preserved as event provenance data for target user {target_user_id}."
+                    )
+
+        # PHASE 2: Sanitize routing fields (security-critical)
+        for field in routing_fields:
             if field in sanitized_event:
                 field_value = sanitized_event[field]
                 if field_value and str(field_value) != str(target_user_id):
                     contamination_detected = True
-                    result.errors.append(f"Cross-user contamination in field '{field}': {field_value}")
+                    result.errors.append(f"Cross-user contamination in routing field '{field}': {field_value}")
 
-                    # Sanitize the field
+                    # Sanitize routing fields to prevent data leakage
                     sanitized_event[field] = str(target_user_id)
 
                     logger.warning(
-                        f"SECURITY: Cross-user contamination prevented in field '{field}'. "
+                        f"SECURITY: Cross-user contamination prevented in routing field '{field}'. "
                         f"Target user: {target_user_id}, contaminating value: {field_value}"
                     )
 
         if contamination_detected:
             self._stats['cross_user_contamination_prevented'] += 1
-            logger.warning(
+            logger.info(
                 f"Cross-user contamination prevented for user {target_user_id}. "
-                f"Event sanitized and delivery proceeding safely."
+                f"Routing fields sanitized while preserving event data integrity."
             )
 
         return sanitized_event

@@ -34,7 +34,14 @@ import logging
 from contextlib import asynccontextmanager
 
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
+
+# Use SSOT logging instead of deprecated central_logger
+class CentralLoggerCompat:
+    def get_logger(self, name):
+        return get_logger(name)
+
+central_logger = CentralLoggerCompat()
 from shared.isolated_environment import IsolatedEnvironment
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 

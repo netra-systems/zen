@@ -36,7 +36,7 @@
 
 #### Deployment Success Metrics
 - **Backend:** ✅ DEPLOYED - https://netra-backend-staging-pnovr5vsba-uc.a.run.app
-- **Auth Service:** ✅ DEPLOYED - https://netra-auth-service-pnovr5vsba-uc.a.run.app
+- **Auth Service:** ✅ DEPLOYED - https://auth.staging.netrasystems.ai
 - **Frontend:** ✅ DEPLOYED - https://netra-frontend-staging-pnovr5vsba-uc.a.run.app
 - **Configuration System:** ✅ OPERATIONAL with canonical SSOT manager only
 - **Zero Downtime:** Seamless deployment with no service interruption

@@ -369,6 +369,7 @@ class RealWebSocketTestConfig:
     event_timeout: float = 10.0
     max_retries: int = 5
     docker_startup_timeout: float = 30.0  # ISSUE #773: Reduced from 120s to prevent 2-minute hangs
+    concurrent_connections: int = 10  # REMEDIATION: Add missing concurrent_connections attribute for performance tests
 
 
 def _get_environment_backend_url() -> str:

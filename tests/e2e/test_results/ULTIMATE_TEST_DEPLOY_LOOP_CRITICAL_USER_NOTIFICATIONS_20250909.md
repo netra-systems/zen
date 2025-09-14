@@ -159,7 +159,7 @@ WebSocket welcome message: {"type":"handshake_validation","timestamp":1757452134
 
 ### Staging Environment Confirmed:
 - **Backend:** `https://netra-backend-staging-pnovr5vsba-uc.a.run.app`
-- **Auth Service:** `https://netra-auth-service-pnovr5vsba-uc.a.run.app`
+- **Auth Service:** `https://auth.staging.netrasystems.ai`
 - **Frontend:** `https://netra-frontend-staging-pnovr5vsba-uc.a.run.app`
 - **WebSocket:** `wss://api.staging.netrasystems.ai/ws`
 

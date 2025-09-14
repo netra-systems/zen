@@ -39,7 +39,7 @@ from shared.isolated_environment import get_env
 
 # System imports for integration testing
 from netra_backend.app.config import get_config
-from netra_backend.app.core.message_router import MessageRouter
+from netra_backend.app.websocket_core.handlers import MessageRouter
 from netra_backend.app.core.service_discovery import ServiceDiscovery
 
 

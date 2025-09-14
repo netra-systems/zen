@@ -11,7 +11,7 @@
 
 ## Staging Environment Status ✅
 - **Backend**: https://netra-backend-staging-pnovr5vsba-uc.a.run.app ✅ HEALTHY
-- **Auth**: https://netra-auth-service-pnovr5vsba-uc.a.run.app ✅ HEALTHY  
+- **Auth**: https://auth.staging.netrasystems.ai ✅ HEALTHY  
 - **Frontend**: https://netra-frontend-staging-pnovr5vsba-uc.a.run.app ✅ HEALTHY
 - **Deployment**: Fresh deployment completed successfully at 20:00 UTC
 - **Docker**: Not required - using remote staging services

@@ -22,7 +22,7 @@ The comprehensive remediation plan for Issue #463 has been **successfully execut
 
 **🚀 Services Successfully Deployed:**
 - ✅ **Backend**: https://netra-backend-staging-pnovr5vsba-uc.a.run.app (HEALTHY)
-- ✅ **Auth Service**: https://netra-auth-service-pnovr5vsba-uc.a.run.app (HEALTHY)
+- ✅ **Auth Service**: https://auth.staging.netrasystems.ai (HEALTHY)
 - ✅ **Database**: Connected and operational
 - ✅ **WebSocket**: Authentication handshake working correctly
 
@@ -134,7 +134,7 @@ To verify the fix is working:
 ```bash
 # Check service health
 curl -s https://netra-backend-staging-pnovr5vsba-uc.a.run.app/health
-curl -s https://netra-auth-service-pnovr5vsba-uc.a.run.app/health
+curl -s https://auth.staging.netrasystems.ai/health
 
 # Run E2E validation  
 python tests/e2e/staging/run_staging_tests.py

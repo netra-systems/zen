@@ -119,6 +119,12 @@ markers = [
     "websocket: WebSocket-related tests",
     "golden_path: Golden path user flow tests",
     "agent_goldenpath: Agent golden path message tests",
+    "agent_golden_path: Agent golden path integration tests",
+    "multi_user: Multi-user concurrency tests",
+    "concurrency: Concurrency and parallel processing tests",
+    "error_recovery: Error recovery and resilience tests",
+    "business_value: Business value validation tests",
+    "websocket_events: WebSocket event validation tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
     "timeout: Tests with custom timeout settings",
@@ -652,6 +658,18 @@ markers = [
     "error_recovery: Error recovery and resilience tests for system stability",
     "performance_validation: Performance validation tests for system efficiency",
     "security_edge_cases: Security edge case tests for authorization and isolation",
+    
+    # Test collection failure remediation markers (2025-09-14)
+    "protocol_negotiation: WebSocket protocol negotiation and handshake tests",
+    "websocket_messaging: WebSocket messaging flow and communication tests",
+    "staging_clickhouse: ClickHouse-related tests in staging environment",
+    "requires_real_services: Tests that explicitly require real external services (not mocks)",
+    "websocket_ssot: WebSocket Single Source of Truth pattern and consolidation tests",
+    "migration_safety: Migration safety and rollback validation tests",
+    "performance_safety: Performance safety and resource management tests",
+    "issue_1058_migration_safety: Issue #1058 migration safety specific tests",
+    "issue_1058_broadcast_consolidation: Issue #1058 broadcast consolidation specific tests",
+    "integration_demo: Integration demonstration and workflow tests",
 ]
 
 # Coverage settings

@@ -25,7 +25,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+    from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 
 from langchain_core.tools import BaseTool
 
@@ -148,7 +148,7 @@ def create_tool_dispatcher(
 
 def create_request_scoped_tool_dispatcher(
     user_context: 'UserExecutionContext',
-    websocket_manager: Optional['WebSocketManager'] = None,
+    websocket_manager: Optional['AgentWebSocketBridge'] = None,
     tools: Optional[List[BaseTool]] = None
 ) -> UnifiedToolDispatcher:
     """Create a request-scoped tool dispatcher (RECOMMENDED).
