@@ -3315,7 +3315,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         # Import from the actual location - use the create_scoped_emitter function
         from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager
         
         # Create scoped emitter using the factory pattern for user isolation
         manager = WebSocketManager(user_context=user_context)
