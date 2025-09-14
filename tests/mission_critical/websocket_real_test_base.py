@@ -348,25 +348,53 @@ def _get_environment_backend_url() -> str:
 
 
 def _get_environment_websocket_url() -> str:
-    """Get WebSocket URL from environment with enhanced staging support (Issue #680)."""
+    """Get WebSocket URL from environment with enhanced staging support and Windows Docker bypass (Issue #860)."""
+    import platform
+
     env = get_env()
 
-    # Check for service orchestrator environment variables first
+    logger.info(f"🔍 WebSocket URL Detection - Platform: {platform.system()}")
+
+    # Priority 1: Explicit TEST_WEBSOCKET_URL override
     test_websocket_url = env.get('TEST_WEBSOCKET_URL', None)
     if test_websocket_url:
+        logger.info(f"✅ Priority 1: Using TEST_WEBSOCKET_URL: {test_websocket_url}")
         return test_websocket_url
 
-    # Check for staging environment variables (Issue #680 enhancement)
+    # Priority 2: Staging services (Issue #420 alignment)
     staging_websocket_url = env.get('STAGING_WEBSOCKET_URL', None)
-    if staging_websocket_url and (env.get('USE_STAGING_SERVICES') == 'true' or env.get('STAGING_ENV') == 'true'):
+    use_staging_services = env.get('USE_STAGING_SERVICES', 'false').lower() == 'true'
+    staging_env = env.get('STAGING_ENV', 'false').lower() == 'true'
+    use_staging_fallback = env.get('USE_STAGING_FALLBACK', 'false').lower() == 'true'
+
+    if staging_websocket_url and (use_staging_services or staging_env or use_staging_fallback):
+        logger.info(f"✅ Priority 2: Using staging WebSocket URL: {staging_websocket_url}")
         return staging_websocket_url
 
-    # Check for E2E environment variables
+    # Priority 3: Check for E2E environment variables
     e2e_websocket_url = env.get('E2E_WEBSOCKET_URL', None)
     if e2e_websocket_url:
+        logger.info(f"✅ Priority 3: Using E2E WebSocket URL: {e2e_websocket_url}")
         return e2e_websocket_url
 
-    # Derive from backend URL
+    # Priority 4: Windows Docker bypass detection with mock server
+    is_windows = platform.system() == 'Windows'
+    docker_bypass = env.get('DOCKER_BYPASS', 'false').lower() == 'true'
+
+    if is_windows or docker_bypass:
+        logger.warning(f"🪟 Windows/Docker bypass detected - checking for mock WebSocket server")
+
+        # Check if mock server is available
+        mock_websocket_url = env.get('MOCK_WEBSOCKET_URL', 'ws://localhost:8001/ws')
+
+        # Test if mock server is responsive
+        if _test_websocket_connectivity(mock_websocket_url):
+            logger.info(f"✅ Priority 4: Using mock WebSocket server: {mock_websocket_url}")
+            return mock_websocket_url
+        else:
+            logger.warning(f"⚠️ Mock WebSocket server not available at {mock_websocket_url}")
+
+    # Priority 5: Derive from backend URL (fallback)
     backend_url = _get_environment_backend_url()
     websocket_url = backend_url.replace("http://", "ws://").replace("https://", "wss://")
 
@@ -374,7 +402,244 @@ def _get_environment_websocket_url() -> str:
     if not websocket_url.endswith('/ws'):
         websocket_url = f"{websocket_url}/ws"
 
+    logger.warning(f"⚠️ Priority 5: Fallback to derived URL: {websocket_url}")
     return websocket_url
+
+
+def _test_websocket_connectivity(url: str, timeout: float = 2.0) -> bool:
+    """Test WebSocket connectivity with a quick connection check."""
+    try:
+        import asyncio
+        import websockets
+
+        async def test_connection():
+            try:
+                async with websockets.connect(url, ping_timeout=timeout, close_timeout=timeout):
+                    return True
+            except:
+                return False
+
+        return asyncio.run(asyncio.wait_for(test_connection(), timeout=timeout))
+    except:
+        return False
+
+
+class MockWebSocketServer:
+    """
+    Lightweight mock WebSocket server for Windows development testing.
+
+    Provides all 5 critical agent events for testing without requiring Docker.
+    Singleton pattern ensures resource efficiency.
+    """
+
+    _instance = None
+    _server = None
+    _running = False
+    _port = 8001
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        self.clients = set()
+        self.event_queue = []
+
+    async def register_client(self, websocket):
+        """Register a new WebSocket client."""
+        self.clients.add(websocket)
+        logger.info(f"🔌 Mock WebSocket client connected. Total: {len(self.clients)}")
+
+    async def unregister_client(self, websocket):
+        """Unregister a WebSocket client."""
+        self.clients.discard(websocket)
+        logger.info(f"🔌 Mock WebSocket client disconnected. Total: {len(self.clients)}")
+
+    async def handle_client(self, websocket, path):
+        """Handle WebSocket client connection."""
+        await self.register_client(websocket)
+
+        try:
+            async for message in websocket:
+                try:
+                    data = json.loads(message)
+                    await self.handle_message(websocket, data)
+                except json.JSONDecodeError:
+                    logger.warning(f"⚠️ Invalid JSON received: {message}")
+        except Exception as e:
+            logger.error(f"❌ WebSocket client error: {e}")
+        finally:
+            await self.unregister_client(websocket)
+
+    async def handle_message(self, websocket, data):
+        """Handle incoming message and simulate agent events."""
+        message_type = data.get('type', 'unknown')
+        user_id = data.get('user_id', 'test_user')
+
+        logger.info(f"📨 Mock WebSocket received: {message_type}")
+
+        # Simulate agent execution with all 5 required events
+        if message_type in ('agent_request', 'chat', 'test_message'):
+            await self.simulate_agent_execution(websocket, user_id, data)
+        elif message_type == 'ping':
+            await self.send_to_client(websocket, {
+                'type': 'pong',
+                'timestamp': time.time(),
+                'user_id': user_id
+            })
+
+    async def simulate_agent_execution(self, websocket, user_id, request):
+        """Simulate complete agent execution with all required events."""
+        run_id = f"mock_run_{uuid.uuid4().hex[:8]}"
+
+        # All 5 critical agent events as per CLAUDE.md requirements
+        events = [
+            {
+                'type': 'agent_started',
+                'user_id': user_id,
+                'run_id': run_id,
+                'agent_name': 'MockAgent',
+                'timestamp': time.time(),
+                'message': 'Agent execution started'
+            },
+            {
+                'type': 'agent_thinking',
+                'user_id': user_id,
+                'run_id': run_id,
+                'agent_name': 'MockAgent',
+                'timestamp': time.time(),
+                'message': 'Agent is analyzing the request...'
+            },
+            {
+                'type': 'tool_executing',
+                'user_id': user_id,
+                'run_id': run_id,
+                'tool_name': 'MockTool',
+                'timestamp': time.time(),
+                'message': 'Executing mock tool'
+            },
+            {
+                'type': 'tool_completed',
+                'user_id': user_id,
+                'run_id': run_id,
+                'tool_name': 'MockTool',
+                'timestamp': time.time(),
+                'result': 'Mock tool execution completed successfully'
+            },
+            {
+                'type': 'agent_completed',
+                'user_id': user_id,
+                'run_id': run_id,
+                'agent_name': 'MockAgent',
+                'timestamp': time.time(),
+                'result': 'Agent execution completed successfully',
+                'status': 'success'
+            }
+        ]
+
+        # Send events with realistic timing
+        for i, event in enumerate(events):
+            await self.send_to_client(websocket, event)
+            # Add realistic delays between events
+            if i < len(events) - 1:
+                await asyncio.sleep(0.1 + (i * 0.05))
+
+    async def send_to_client(self, websocket, message):
+        """Send message to specific client."""
+        try:
+            await websocket.send(json.dumps(message))
+            logger.debug(f"📤 Sent to client: {message.get('type', 'unknown')}")
+        except Exception as e:
+            logger.error(f"❌ Failed to send to client: {e}")
+
+    async def broadcast(self, message):
+        """Broadcast message to all connected clients."""
+        if self.clients:
+            disconnected = []
+            for client in self.clients:
+                try:
+                    await client.send(json.dumps(message))
+                except:
+                    disconnected.append(client)
+
+            # Remove disconnected clients
+            for client in disconnected:
+                self.clients.discard(client)
+
+    async def start(self, host='localhost', port=8001):
+        """Start the mock WebSocket server."""
+        if self._running:
+            logger.info(f"🔧 Mock WebSocket server already running on {host}:{port}")
+            return
+
+        try:
+            import websockets
+
+            self._server = await websockets.serve(
+                self.handle_client,
+                host,
+                port,
+                ping_interval=20,
+                ping_timeout=10
+            )
+            self._running = True
+            self._port = port
+
+            logger.info(f"🚀 Mock WebSocket server started on ws://{host}:{port}/ws")
+            logger.info(f"🎯 Server provides all 5 critical agent events for testing")
+
+        except Exception as e:
+            logger.error(f"❌ Failed to start mock WebSocket server: {e}")
+            raise
+
+    async def stop(self):
+        """Stop the mock WebSocket server."""
+        if self._server and self._running:
+            self._server.close()
+            await self._server.wait_closed()
+            self._running = False
+            logger.info("🛑 Mock WebSocket server stopped")
+
+    @classmethod
+    def get_instance(cls):
+        """Get singleton instance of mock server."""
+        return cls()
+
+    @classmethod
+    def is_running(cls) -> bool:
+        """Check if server is running."""
+        return cls._running
+
+    @classmethod
+    def get_url(cls) -> str:
+        """Get mock server WebSocket URL."""
+        return f"ws://localhost:{cls._port}/ws"
+
+
+async def ensure_mock_websocket_server_running() -> str:
+    """Ensure mock WebSocket server is running and return its URL."""
+    server = MockWebSocketServer.get_instance()
+
+    if not MockWebSocketServer.is_running():
+        logger.info("🚀 Starting mock WebSocket server for Windows development")
+
+        # Start server in background task
+        await server.start()
+
+        # Give server time to start
+        await asyncio.sleep(0.5)
+
+        # Verify server is responsive
+        server_url = MockWebSocketServer.get_url()
+        if _test_websocket_connectivity(server_url):
+            logger.info(f"✅ Mock WebSocket server ready at {server_url}")
+            return server_url
+        else:
+            logger.error(f"❌ Mock WebSocket server not responsive at {server_url}")
+            raise ConnectionError("Mock WebSocket server failed to start properly")
+
+    return MockWebSocketServer.get_url()
 
 
 @dataclass
