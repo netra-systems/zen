@@ -21,9 +21,9 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 class TestWebSocketEventEmissionIntegration(SSotAsyncTestCase):
     """Integration test for WebSocket event emission during agent execution"""
     
-    async def asyncSetUp(self):
+    def setup_method(self, method):
         """Set up integration test environment"""
-        await super().asyncSetUp()
+        super().setup_method(method)
         self.websocket_manager = UnifiedWebSocketManager()
         self.test_user_id = "integration_user_456"
         
