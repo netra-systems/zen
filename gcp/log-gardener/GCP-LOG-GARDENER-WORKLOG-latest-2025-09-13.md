@@ -75,6 +75,79 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
    - **Latency:** 6.922760411s
    - **Impact:** Configuration retrieval failing
 
+---
+
+### 🚨 **CLUSTER 3: NEW - Critical Syntax Error (Latest Issue)**
+**Priority:** P0 (Critical - Service Completely Down)
+**Timestamp:** 2025-09-14T00:27:04.376098Z
+**Revision:** netra-backend-staging-00589-g9x
+
+#### Primary Error:
+```json
+{
+  "severity": "ERROR",
+  "timestamp": "2025-09-14T00:27:04.376098Z",
+  "textPayload": "SyntaxError: f-string: unmatched '(' in /app/netra_backend/app/routes/websocket_ssot.py line 658",
+  "traceback": "connection_id = f\"main_{UnifiedIdGenerator.generate_base_id(\"ws_conn\").split('_')[-1]}\""
+}
+```
+
+#### Technical Details:
+- **File:** `/app/netra_backend/app/routes/websocket_ssot.py:658`
+- **Error:** Nested quotes in f-string causing Python parsing failure
+- **Current Code:** `connection_id = f"main_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"`
+- **Fix Required:** Change inner quotes from `"` to `'`
+- **Impact:** Prevents entire application from starting - complete service outage
+
+---
+
+### ⚠️ **CLUSTER 4: SSOT Architecture Violations**
+**Priority:** P1 (High - Architecture Compliance)
+**Timestamp:** 2025-09-14T00:27:14.323437Z
+
+#### Warning Log:
+```json
+{
+  "severity": "WARNING",
+  "jsonPayload": {
+    "logger": "netra_backend.app.websocket_core.websocket_manager",
+    "message": "SSOT WARNING: Found other WebSocket Manager classes: ['netra_backend.app.websocket_core.websocket_manager.WebSocketManagerMode', 'netra_backend.app.websocket_core.websocket_manager.WebSocketManagerProtocol', 'netra_backend.app.websocket_core.unified_manager.WebSocketManagerMode', 'netra_backend.app.websocket_core.protocols.WebSocketManagerProtocol', 'netra_backend.app.websocket_core.protocols.WebSocketManagerProtocolValidator']",
+    "timestamp": "2025-09-14T00:27:14.323437Z"
+  }
+}
+```
+
+#### Duplicate Classes Requiring Consolidation:
+- `netra_backend.app.websocket_core.websocket_manager.WebSocketManagerMode`
+- `netra_backend.app.websocket_core.websocket_manager.WebSocketManagerProtocol`
+- `netra_backend.app.websocket_core.unified_manager.WebSocketManagerMode`
+- `netra_backend.app.websocket_core.protocols.WebSocketManagerProtocol`
+- `netra_backend.app.websocket_core.protocols.WebSocketManagerProtocolValidator`
+
+---
+
+### ⚠️ **CLUSTER 5: Configuration Service ID Issues**
+**Priority:** P2 (Medium - Configuration Noise)
+**Timestamp:** 2025-09-14T00:28:19.605885Z
+
+#### Warning Log:
+```json
+{
+  "severity": "WARNING",
+  "jsonPayload": {
+    "logger": "shared.logging.unified_logging_ssot",
+    "message": "SERVICE_ID contained whitespace - sanitized from 'netra-backend\\n' to 'netra-backend'",
+    "timestamp": "2025-09-14T00:28:19.605885Z"
+  }
+}
+```
+
+#### Configuration Issue:
+- **Problem:** SERVICE_ID contains trailing newline character
+- **Current Value:** `'netra-backend\n'`
+- **Auto-Sanitized To:** `'netra-backend'`
+- **Impact:** Repeated processing overhead and log noise
+
 ## Business Impact Analysis
 
 ### Revenue Impact: **HIGH RISK**
@@ -89,16 +162,33 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 ## Recommended Immediate Actions
 
 ### P0 - URGENT (Service Recovery):
-1. **Fix UnifiedWebSocketManager Import Error**
-   - Check if class exists in unified_manager.py
-   - Verify correct class name and export
-   - Test import chain resolution
+1. **IMMEDIATE: Fix Syntax Error in websocket_ssot.py:658**
+   - Change `connection_id = f"main_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"`
+   - To: `connection_id = f"main_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"`
+   - Deploy fixed version immediately
+   - Verify service startup and health endpoints
 
-### P1 - HIGH (Functionality Restoration):
-1. **Restore WebSocket Service Availability**
-   - Fix service boot sequence
-   - Verify all WebSocket endpoints functional
+2. **Fix UnifiedWebSocketManager Import Error (Historical)**
+   - Verify import issues are resolved in latest revision
+   - Test import chain resolution
+   - Monitor for regression
+
+### P1 - HIGH (Architecture and Functionality):
+1. **Consolidate SSOT Architecture Violations**
+   - Remove duplicate WebSocket manager classes
+   - Ensure single source of truth for WebSocket management
+   - Update imports to use consolidated classes
+
+2. **Restore WebSocket Service Availability**
+   - Verify all WebSocket endpoints functional after syntax fix
    - Test end-to-end chat functionality
+   - Monitor service stability
+
+### P2 - MEDIUM (Configuration and Maintenance):
+1. **Fix SERVICE_ID Configuration**
+   - Remove trailing newline from SERVICE_ID configuration
+   - Update configuration source to prevent recurring issue
+   - Reduce log noise and processing overhead
 
 ## Cross-References
 - **Related Architecture:** `/netra_backend/app/websocket_core/`
