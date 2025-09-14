@@ -30,11 +30,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 from shared.isolated_environment import get_env
 
 # Import factory patterns from architecture
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.services.websocket_bridge_factory import ( )
-WebSocketBridgeFactory,
-UserWebSocketEmitter,
-UserWebSocketContext,
-WebSocketEvent
+from netra_backend.app.services.websocket_bridge_factory import (
+    WebSocketBridgeFactory,
+    UserWebSocketEmitter,
+    UserWebSocketContext,
+    WebSocketEvent
+)
 
 
 # Import test framework components

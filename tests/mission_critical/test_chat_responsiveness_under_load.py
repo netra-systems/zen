@@ -2,7 +2,7 @@
 # REMOVED_SYNTAX_ERROR: '''MISSION CRITICAL: Real-Time Chat Responsiveness Under Load Test Suite
 
 # REMOVED_SYNTAX_ERROR: Business Value: $500K+ ARR - Chat delivers 90% of user value
-Priority: CRITICAL
+# Priority: CRITICAL
 # REMOVED_SYNTAX_ERROR: Impact: Core User Experience
 
 # REMOVED_SYNTAX_ERROR: This test suite validates that chat remains responsive during peak usage scenarios

@@ -21,9 +21,10 @@ sys.path.insert(0, str(project_root))
 
 from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.base.interface import ( )
-ExecutionContext,
-ExecutionResult
+from netra_backend.app.agents.base.interface import (
+    ExecutionContext,
+    ExecutionResult
+)
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.validation_sub_agent import ValidationSubAgent

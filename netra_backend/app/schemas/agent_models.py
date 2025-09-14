@@ -14,6 +14,7 @@ Usage:
     from netra_backend.app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
 """
 
+import copy
 import uuid
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -153,10 +154,38 @@ class DeepAgentState(BaseModel):
     @field_validator('metadata', mode='before')
     @classmethod
     def validate_metadata(cls, v: Union[Dict, AgentMetadata]) -> AgentMetadata:
-        """Convert dict metadata to AgentMetadata object."""
+        """Convert dict metadata to AgentMetadata object with deep copy protection.
+        
+        SECURITY FIX: Issue #953 - Prevents shared reference vulnerabilities by
+        creating deep copies of metadata objects to ensure user isolation.
+        """
         if isinstance(v, dict):
-            return AgentMetadata(**v)
-        return v if isinstance(v, AgentMetadata) else AgentMetadata()
+            # Deep copy the dictionary to prevent shared references
+            safe_dict = copy.deepcopy(v)
+            return AgentMetadata(**safe_dict)
+        elif isinstance(v, AgentMetadata):
+            # Deep copy the AgentMetadata object to prevent shared references
+            return copy.deepcopy(v)
+        else:
+            return AgentMetadata()
+    
+    @field_validator('agent_context', mode='before')
+    @classmethod
+    def validate_agent_context(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Deep copy agent_context to prevent cross-user contamination.
+        
+        SECURITY FIX: Issue #953 - Critical security vulnerability fix.
+        Prevents shared reference vulnerabilities by creating deep copies of
+        agent_context dictionaries to ensure complete user isolation.
+        
+        This is the primary fix for the cross-user data contamination vulnerability
+        where multiple users could access each other's sensitive data through
+        shared dictionary references.
+        """
+        if v is None:
+            return {}
+        # Deep copy the entire context dictionary to prevent shared references
+        return copy.deepcopy(v)
     
     @field_validator('step_count')
     @classmethod
@@ -203,11 +232,14 @@ class DeepAgentState(BaseModel):
         self.chat_thread_id = value
 
     def __init__(self, **data):
-        """Initialize DeepAgentState with SSOT interface compatibility.
+        """Initialize DeepAgentState with SSOT interface compatibility and security protection.
 
         SSOT INTERFACE COMPATIBILITY: This constructor ensures compatibility with the deprecated
         version by handling thread_id parameter mapping and maintaining backward compatibility
         for existing code that passes thread_id instead of chat_thread_id.
+
+        SECURITY FIX: Issue #953 - Implements deep copy protection for mutable objects
+        to prevent shared reference vulnerabilities and ensure user isolation.
 
         Args:
             **data: Initialization data, including potential thread_id parameter
@@ -228,6 +260,14 @@ class DeepAgentState(BaseModel):
         elif 'user_prompt' in data and 'user_request' in data:
             # If both are provided, prefer user_prompt as it's the expected interface
             data['user_request'] = data['user_prompt']
+
+        # SECURITY FIX: Deep copy protection for mutable objects to prevent shared references
+        # This ensures user isolation by preventing cross-user data contamination
+        mutable_fields = ['messages', 'quality_metrics', 'context_tracking', 'agent_context', 'agent_input']
+        for field_name in mutable_fields:
+            if field_name in data and data[field_name] is not None:
+                # Deep copy mutable objects to ensure no shared references
+                data[field_name] = copy.deepcopy(data[field_name])
 
         super().__init__(**data)
 

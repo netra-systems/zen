@@ -644,9 +644,9 @@ class ClaudeInstanceOrchestrator:
         print(f"║ Tokens: {self._format_tokens(total_tokens_all)} total, {self._format_tokens(total_cached_all)} cached | Median: {median_str} | Tools: {total_tools_all}")
         print(f"║")
         
-        # Print column headers
-        print(f"║  {'Status':<8} {'Name':<18} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
-        print(f"║  {'─'*8} {'─'*18} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
+        # Print column headers with wider name column
+        print(f"║  {'Status':<8} {'Name':<35} {'Duration':<10} {'Tokens':<8} {'vs Med':<8} {'Cache':<8} {'Tools':<6}")
+        print(f"║  {'─'*8} {'─'*35} {'─'*10} {'─'*8} {'─'*8} {'─'*8} {'─'*6}")
 
         for name, status in self.statuses.items():
             # Status emoji
@@ -677,8 +677,8 @@ class ClaudeInstanceOrchestrator:
             # Calculate percentage relative to median
             token_pct = self._calculate_token_percentage(status.total_tokens, token_median)
 
-            # Create detailed line with consistent spacing
-            detail = f"  {emoji:<8} {name:<18} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
+            # Create detailed line with consistent spacing and wider name column
+            detail = f"  {emoji:<8} {name:<35} {time_info:<10} {token_info:<8} {token_pct:<8} {cache_info:<8} {tool_info:<6}"
 
             print(f"║{detail}")
 

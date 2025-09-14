@@ -17,6 +17,7 @@ This module tests the timeout configuration logic to ensure:
 """
 
 import pytest
+import unittest
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
@@ -33,7 +34,7 @@ from netra_backend.app.agents.base.agent_business_rules import UserTier
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestTimeoutConfiguration(SSotBaseTestCase):
+class TestTimeoutConfiguration(SSotBaseTestCase, unittest.TestCase):
     """Unit tests for timeout configuration and calculations."""
     
     def setUp(self):

@@ -16,15 +16,9 @@ import time
 import pytest
 from shared.isolated_environment import IsolatedEnvironment
 
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_cache import ( )
-AuthCircuitBreakerManager,
-MockCircuitBreaker
-
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
-# REMOVED_SYNTAX_ERROR: from netra_backend.app.core.resilience.unified_circuit_breaker import ( )
-UnifiedCircuitBreaker,
-UnifiedCircuitConfig,
-UnifiedCircuitBreakerState
+# REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_cache import AuthCircuitBreakerManager, MockCircuitBreaker
+# REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
+# REMOVED_SYNTAX_ERROR: from netra_backend.app.core.resilience.unified_circuit_breaker import UnifiedCircuitBreaker, UnifiedCircuitConfig, UnifiedCircuitBreakerState
 
 from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager

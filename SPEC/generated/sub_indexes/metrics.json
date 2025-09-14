@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "metrics",
-    "generated_at": "2025-09-14T12:24:41.877674",
+    "generated_at": "2025-09-14T14:29:46.620339",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 314
   },
@@ -1530,7 +1530,8 @@
       "value": "middleware_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/core/message_router.py:151"
+        "netra_backend/app/core/message_router.py:169",
+        "netra_backend/app/websocket_core/handlers.py:1693"
       ]
     },
     "migration_count": {
@@ -2561,7 +2562,7 @@
       "value": "user_semaphores_count",
       "category": "metrics",
       "locations": [
-        "netra_backend/app/agents/supervisor/agent_instance_factory.py:952"
+        "netra_backend/app/agents/supervisor/agent_instance_factory.py:960"
       ]
     },
     "valid_count": {

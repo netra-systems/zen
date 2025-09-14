@@ -2245,7 +2245,978 @@ async def get_websocket_manager(
                 logger.debug(f"Updating WebSocket manager context for user {getattr(user_context, 'user_id', 'unknown')}")
                 _unified_manager_instance.user_context = user_context
     
-    return _unified_manager_instance
+    async def restart_background_monitoring(self, force_restart: bool = False) -> Dict[str, Any]:
+        """
+        CRITICAL RESILIENCE FIX: Restart background monitoring system with full recovery.
+        
+        This method addresses the permanent disable issue where monitoring could be
+        turned off without a way to recover. Provides comprehensive monitoring restart
+        with automatic task recovery and health validation.
+        
+        Args:
+            force_restart: Force restart even if monitoring appears to be running
+            
+        Returns:
+            Dictionary with detailed restart status and recovery metrics
+        """
+        restart_status = {
+            'monitoring_restarted': False,
+            'tasks_recovered': 0,
+            'tasks_failed_recovery': 0,
+            'failed_tasks': [],
+            'health_check_passed': False,
+            'monitoring_state_before': {
+                'enabled': self._monitoring_enabled,
+                'shutdown_requested': self._shutdown_requested,
+                'active_tasks': len([t for t in self._background_tasks.values() if not t.done()]),
+                'total_tasks': len(self._background_tasks),
+                'task_failures': len(self._task_failures)
+            },
+            'recovery_actions_taken': []
+        }
+        
+        async with self._monitoring_lock:
+            # Log the restart attempt with detailed context
+            logger.critical(
+                f"MONITORING RESTART INITIATED: force_restart={force_restart}, "
+                f"current_state=[enabled={self._monitoring_enabled}, "
+                f"shutdown={self._shutdown_requested}, tasks={len(self._background_tasks)}]"
+            )
+            restart_status['recovery_actions_taken'].append('restart_initiated')
+            
+            # Check if restart is needed
+            if self._monitoring_enabled and not force_restart and not self._shutdown_requested:
+                # Monitoring appears healthy, but verify task health
+                active_tasks = len([t for t in self._background_tasks.values() if not t.done()])
+                if active_tasks > 0 and len(self._task_failures) == 0:
+                    logger.info("Background monitoring appears healthy, skipping restart")
+                    restart_status['monitoring_restarted'] = False
+                    restart_status['health_check_passed'] = True
+                    return restart_status
+                else:
+                    logger.warning(
+                        f"Monitoring enabled but unhealthy: {active_tasks} active tasks, "
+                        f"{len(self._task_failures)} task failures - proceeding with restart"
+                    )
+            
+            # Force clean state reset
+            logger.info("Resetting monitoring system to clean state")
+            self._monitoring_enabled = True
+            self._shutdown_requested = False
+            self._health_check_failures = 0
+            self._last_health_check = datetime.now(timezone.utc)
+            restart_status['recovery_actions_taken'].append('state_reset')
+            restart_status['monitoring_restarted'] = True
+            
+            # Cancel and clean up existing failed tasks
+            failed_task_names = list(self._background_tasks.keys())
+            for task_name in failed_task_names:
+                try:
+                    await self.stop_background_task(task_name)
+                    logger.info(f"Cleaned up existing task: {task_name}")
+                except Exception as e:
+                    logger.error(f"Failed to clean up task {task_name}: {e}")
+            
+            restart_status['recovery_actions_taken'].append('existing_tasks_cleaned')
+            
+            # Clear failure tracking for fresh start
+            self._task_failures.clear()
+            self._task_last_failure.clear()
+            restart_status['recovery_actions_taken'].append('failure_tracking_cleared')
+            
+            # Attempt to recover registered tasks
+            if self._task_registry:
+                logger.info(f"Attempting to recover {len(self._task_registry)} registered tasks")
+                restart_status['recovery_actions_taken'].append('task_recovery_started')
+                
+                for task_name, task_config in list(self._task_registry.items()):
+                    try:
+                        # Limit restart attempts to prevent infinite loops
+                        restart_count = task_config.get('restart_count', 0)
+                        if restart_count > 10:
+                            logger.warning(f"Skipping {task_name} - too many restart attempts ({restart_count})")
+                            restart_status['tasks_failed_recovery'] += 1
+                            restart_status['failed_tasks'].append(f"{task_name}:too_many_restarts")
+                            continue
+                        
+                        # Increment restart count
+                        task_config['restart_count'] = restart_count + 1
+                        task_config['last_restart'] = datetime.now(timezone.utc)
+                        
+                        # Start the monitored task
+                        recovery_result = await self.start_monitored_background_task(
+                            task_name,
+                            task_config['func'],
+                            *task_config['args'],
+                            **task_config['kwargs']
+                        )
+                        
+                        if recovery_result:
+                            restart_status['tasks_recovered'] += 1
+                            logger.info(f"Successfully recovered task: {task_name} (attempt {restart_count + 1})")
+                        else:
+                            restart_status['tasks_failed_recovery'] += 1
+                            restart_status['failed_tasks'].append(f"{task_name}:start_failed")
+                            logger.error(f"Failed to recover task: {task_name}")
+                        
+                    except Exception as e:
+                        restart_status['tasks_failed_recovery'] += 1
+                        restart_status['failed_tasks'].append(f"{task_name}:exception:{str(e)}")
+                        logger.error(f"Exception recovering task {task_name}: {e}")
+            
+            # Verify monitoring is working
+            restart_status['health_check_passed'] = await self._verify_monitoring_health()
+            restart_status['recovery_actions_taken'].append('health_check_completed')
+            
+            # Log final status
+            logger.critical(
+                f"MONITORING RESTART COMPLETED: success={restart_status['monitoring_restarted']}, "
+                f"recovered={restart_status['tasks_recovered']}, "
+                f"failed={restart_status['tasks_failed_recovery']}, "
+                f"health_ok={restart_status['health_check_passed']}"
+            )
+            
+        return restart_status
+    
+    # ===========================================================================
+    # FIVE WHYS ROOT CAUSE PREVENTION METHODS
+    # ===========================================================================
+    
+    def get_connection_id_by_websocket(self, websocket) -> Optional[ConnectionID]:
+        """
+        FIVE WHYS CRITICAL METHOD: Get connection ID for a given WebSocket instance with type safety.
+        
+        This method was identified as missing in the Five Whys analysis and is
+        essential for WebSocket manager interface compatibility.
+        
+        Args:
+            websocket: WebSocket instance to search for
+            
+        Returns:
+            Strongly typed ConnectionID if found, None otherwise
+        """
+        for conn_id, connection in self._connections.items():
+            if connection.websocket == websocket:
+                logger.debug(f"Found connection ID {conn_id} for WebSocket {id(websocket)}")
+                return ConnectionID(conn_id)
+        
+        logger.debug(f"No connection found for WebSocket {id(websocket)}")
+        return None
+    
+    def update_connection_thread(self, connection_id: Union[str, ConnectionID], thread_id: Union[str, ThreadID]) -> bool:
+        """
+        FIVE WHYS CRITICAL METHOD: Update thread association for a connection with type validation.
+        
+        This method works with get_connection_id_by_websocket to manage thread
+        associations, as identified in the Five Whys analysis.
+        
+        Args:
+            connection_id: Connection ID to update (accepts both str and ConnectionID)
+            thread_id: New thread ID to associate (accepts both str and ThreadID)
+            
+        Returns:
+            True if update successful, False if connection not found
+        """
+        # Validate and convert IDs
+        try:
+            validated_connection_id = str(connection_id)
+            validated_thread_id = ensure_thread_id(thread_id)
+        except ValueError as e:
+            logger.error(f"Invalid ID in update_connection_thread: {e}")
+            return False
+        
+        connection = self._connections.get(validated_connection_id)
+        if connection:
+            # Update the thread_id on the connection object
+            if hasattr(connection, 'thread_id'):
+                old_thread_id = getattr(connection, 'thread_id', None)
+                connection.thread_id = validated_thread_id
+                logger.info(
+                    f"Updated thread association for connection {validated_connection_id}: "
+                    f"{old_thread_id}  ->  {validated_thread_id}"
+                )
+                return True
+            else:
+                # Add thread_id attribute if it doesn't exist
+                setattr(connection, 'thread_id', validated_thread_id)
+                logger.info(f"Added thread association for connection {validated_connection_id}: {validated_thread_id}")
+                return True
+        else:
+            logger.warning(f"Connection {validated_connection_id} not found for thread update")
+            return False
+    
+    # ============================================================================
+    # SSOT INTERFACE STANDARDIZATION METHODS (Week 1 - Low Risk)
+    # ============================================================================
+    
+    async def broadcast_message(self, message: Dict[str, Any]) -> None:
+        """
+        Broadcast message to all connections.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            message: Message to broadcast to all connections
+        """
+        # Use existing broadcast method
+        await self.broadcast(message)
+    
+    async def send_message(self, connection_id: str, message: dict) -> bool:
+        """
+        Send direct message to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method is required by WebSocket 
+        manager interface validation tests and agent event delivery in Golden Path.
+        Missing this method blocks agent events (agent_started, agent_thinking, 
+        tool_executing, tool_completed, agent_completed) affecting $500K+ ARR.
+        
+        Args:
+            connection_id: Unique connection identifier  
+            message: Message payload to send
+            
+        Returns:
+            bool: Success status of message delivery
+        """
+        try:
+            # Validate connection exists
+            connection = self.get_connection(connection_id)
+            if not connection:
+                logger.warning(f"send_message failed: connection {connection_id} not found")
+                return False
+            
+            if not connection.websocket:
+                logger.warning(f"send_message failed: connection {connection_id} has no websocket")
+                return False
+            
+            # Safely serialize message for WebSocket transmission
+            safe_message = _serialize_message_safely(message)
+            
+            # Send message via WebSocket
+            await connection.websocket.send_json(safe_message)
+            
+            logger.debug(f"✅ Message sent successfully to connection {connection_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ send_message failed for connection {connection_id}: {e}")
+            return False
+    
+    async def send_event(self, connection_id: str, event_type: str, event_data: dict) -> bool:
+        """
+        Send event to specific WebSocket connection.
+        
+        CRITICAL SSOT INTERFACE COMPLIANCE: This method provides standard event 
+        interface expected by WebSocket validation tests and agent systems.
+        
+        ISSUE #1098 HOTFIX: Fixed to include all 7 required fields for Golden Path AI response delivery.
+        
+        Args:
+            connection_id: Unique connection identifier
+            event_type: Type of event being sent
+            event_data: Event payload data
+            
+        Returns:
+            bool: Success status of event delivery
+        """
+        try:
+            # Get connection to extract user context
+            connection = self._connections.get(connection_id)
+            if not connection:
+                logger.warning(f"Connection {connection_id} not found for event {event_type}")
+                return False
+            
+            # Extract user context fields from connection for proper event structure
+            user_id = getattr(connection, 'user_id', None)
+            thread_id = getattr(connection, 'thread_id', None)
+            run_id = getattr(connection, 'run_id', None)
+            
+            # Create event message with all 7 required fields for Golden Path compliance
+            event_message = {
+                "type": event_type,                                          # Field 1: Event type identifier
+                "user_id": str(user_id) if user_id else "unknown_user",     # Field 2: User isolation and security  
+                "thread_id": str(thread_id) if thread_id else "unknown_thread", # Field 3: Context routing
+                "run_id": str(run_id) if run_id else "unknown_run",         # Field 4: Request correlation
+                "timestamp": datetime.now(timezone.utc).isoformat(),        # Field 5: Time tracking
+                **event_data                                                # Fields 6-7: Event-specific data (agent_name, task, etc)
+            }
+            
+            # Use send_message for actual delivery
+            return await self.send_message(connection_id, event_message)
+            
+        except Exception as e:
+            logger.error(f"❌ send_event failed for connection {connection_id}, event {event_type}: {e}")
+            return False
+    
+    async def broadcast_system_message(self, message: Dict[str, Any]) -> None:
+        """
+        Broadcast system-level message to all connections.
+        
+        This method is specifically used for system events like lifecycle changes,
+        state changes, and administrative messages. It's functionally equivalent
+        to broadcast_message but provides semantic clarity for system events.
+        
+        INTEGRATION COMPLIANCE: This method is required by integration tests and
+        manager classes (UnifiedStateManager, UnifiedLifecycleManager, etc.)
+        
+        Args:
+            message: System message to broadcast to all connections
+        """
+        # Use existing broadcast method - same functionality as broadcast_message
+        await self.broadcast(message)
+    
+    def get_connection_count(self) -> int:
+        """
+        Get total number of connections managed by this instance.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Returns:
+            Total number of active connections
+        """
+        return len(self._connections)
+    
+    async def handle_connection(self, websocket: Any, user_id: Optional[str] = None) -> str:
+        """
+        Handle new WebSocket connection with proper isolation.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            websocket: WebSocket instance to handle
+            user_id: Optional user ID for the connection
+            
+        Returns:
+            Connection ID for the established connection
+        """
+        if not user_id:
+            # Generate a temporary user ID if none provided
+            id_manager = UnifiedIDManager()
+            user_id = id_manager.generate_id(
+                IDType.USER,
+                prefix="temp_user",
+                context={"component": "handle_connection"}
+            )
+        
+        # Use existing connect_user method
+        connection_id = await self.connect_user(user_id, websocket)
+        logger.info(f"[U+1F517] SSOT INTERFACE: Handled connection for user {user_id[:8]}...  ->  {connection_id}")
+        return connection_id
+    
+    # ISSUE #414 FIX: Event contamination monitoring and prevention methods
+    
+    def get_contamination_stats(self) -> Dict[str, Any]:
+        """Get current event contamination statistics (Issue #414 monitoring)."""
+        return {
+            **self._event_queue_stats,
+            'cross_user_violations': dict(self._cross_user_detection),
+            'active_isolation_tokens': len(self._event_isolation_tokens),
+            'user_event_queues': {
+                user_id: queue.qsize() 
+                for user_id, queue in self._user_event_queues.items()
+            },
+            'total_users_monitored': len(self._cross_user_detection)
+        }
+    
+    async def validate_event_isolation(self, user_id: str, connection_id: str) -> bool:
+        """Validate event isolation for user and connection (Issue #414 validation)."""
+        if connection_id not in self._event_isolation_tokens:
+            logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} has no isolation token")
+            return False
+        
+        if connection_id not in self._connections:
+            logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} not found in active connections")
+            return False
+        
+        connection = self._connections[connection_id]
+        if connection.user_id != user_id:
+            logger.error(
+                f" ALERT:  ISOLATION VIOLATION: Connection {connection_id} user mismatch. "
+                f"Expected: {user_id}, Actual: {connection.user_id}"
+            )
+            self._cross_user_detection[user_id] = self._cross_user_detection.get(user_id, 0) + 1
+            return False
+        
+        return True
+    
+    async def cleanup_expired_event_tracking(self, max_age_hours: int = 24):
+        """Clean up expired event tracking data (Issue #414 memory management)."""
+        current_time = datetime.now(timezone.utc)
+        expired_events = []
+        
+        for event_id, metadata in self._event_delivery_tracking.items():
+            event_age = (current_time - metadata['timestamp']).total_seconds() / 3600
+            if event_age > max_age_hours:
+                expired_events.append(event_id)
+        
+        for event_id in expired_events:
+            del self._event_delivery_tracking[event_id]
+        
+        if expired_events:
+            logger.info(f"[U+1F9F9] Cleaned up {len(expired_events)} expired event tracking entries")
+    
+    async def force_cleanup_user_events(self, user_id: str):
+        """Force cleanup of all event tracking for a specific user (Issue #414 isolation)."""
+        # Clear user event queue
+        if user_id in self._user_event_queues:
+            queue = self._user_event_queues[user_id]
+            while not queue.empty():
+                try:
+                    queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+            del self._user_event_queues[user_id]
+        
+        # Clear cross-user detection tracking
+        if user_id in self._cross_user_detection:
+            del self._cross_user_detection[user_id]
+        
+        # Clear event delivery tracking for this user
+        user_events = [
+            event_id for event_id, metadata in self._event_delivery_tracking.items()
+            if metadata.get('user_id') == user_id
+        ]
+        
+        for event_id in user_events:
+            del self._event_delivery_tracking[event_id]
+        
+        logger.info(f"[U+1F9F9] Force cleaned up all event tracking for user {user_id}")
+    
+    def detect_queue_overflow(self, user_id: str) -> bool:
+        """Detect if user's event queue is approaching overflow (Issue #414 monitoring)."""
+        if user_id not in self._user_event_queues:
+            return False
+        
+        queue = self._user_event_queues[user_id]
+        utilization = queue.qsize() / 1000.0  # Max size is 1000
+        
+        if utilization > 0.9:  # 90% full
+            logger.warning(f" ALERT:  Event queue near overflow for user {user_id}: {queue.qsize()}/1000")
+            self._event_queue_stats['queue_overflows'] += 1
+            return True
+        
+        return False
+    
+    async def handle_disconnection(self, user_id: str, websocket: Any = None) -> None:
+        """
+        Handle WebSocket disconnection with proper cleanup.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: User ID for the disconnecting connection
+            websocket: Optional WebSocket instance being disconnected
+        """
+        if websocket:
+            # Use existing disconnect_user method
+            await self.disconnect_user(user_id, websocket)
+        else:
+            # Disconnect all connections for the user
+            connection_ids = list(self.get_user_connections(user_id))
+            for conn_id in connection_ids:
+                await self.remove_connection(conn_id)
+        
+        logger.info(f"[U+1F50C] SSOT INTERFACE: Handled disconnection for user {user_id[:8]}...")
+    
+    async def send_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
+        """
+        Send agent event to user connections.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: Target user ID (accepts both str and UserID)
+            event_type: Type of agent event
+            data: Event payload data
+        """
+        # Use existing emit_critical_event method
+        await self.emit_critical_event(user_id, event_type, data)
+    
+    async def add_connection_by_user(self, user_id: str, websocket: Any, connection_id: str = None) -> str:
+        """
+        Add connection for a user with optional connection ID.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by SSOT validation tests for connection management.
+        
+        Args:
+            user_id: User identifier
+            websocket: WebSocket instance
+            connection_id: Optional connection ID to use
+            
+        Returns:
+            Connection ID for the added connection
+        """
+        # Use existing connect_user method which handles connection_id properly
+        return await self.connect_user(user_id, websocket, connection_id)
+    
+    async def remove_connection_by_user(self, user_id: str) -> None:
+        """
+        Remove all connections for a specific user.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by SSOT validation tests for user cleanup.
+        
+        Args:
+            user_id: User ID to remove connections for
+        """
+        connection_ids = list(self.get_user_connections(user_id))
+        for conn_id in connection_ids:
+            await self.remove_connection(conn_id)
+        
+        logger.info(f"[U+1F5D1][U+FE0F] SSOT INTERFACE: Removed all connections for user {user_id[:8]}...")
+    
+    def is_user_connected(self, user_id: Union[str, UserID]) -> bool:
+        """
+        Check if a user is currently connected.
+        
+        SSOT INTERFACE COMPLIANCE: This method provides the standard interface
+        expected by WebSocketManagerProtocol and SSOT validation tests.
+        
+        Args:
+            user_id: User ID to check (accepts both str and UserID)
+            
+        Returns:
+            True if user has active connections, False otherwise
+        """
+        # Use existing is_connection_active method
+        return self.is_connection_active(user_id)
+
+    async def handle_event_confirmation(self, user_id: Union[str, UserID], message: Dict[str, Any]) -> bool:
+        """Handle event confirmation messages from WebSocket clients.
+        
+        This method processes confirmation messages sent by clients to acknowledge
+        receipt of critical events (tool_executing, tool_completed, etc.).
+        
+        Args:
+            user_id: User ID sending the confirmation
+            message: Confirmation message with event_id and status
+            
+        Returns:
+            bool: True if confirmation was processed successfully
+        """
+        try:
+            # Validate message structure
+            if not isinstance(message, dict):
+                logger.warning(f"Invalid confirmation message format from user {user_id}: {type(message)}")
+                return False
+            
+            event_id = message.get('event_id')
+            confirmation_type = message.get('type', 'confirmation')
+            status = message.get('status', 'confirmed')
+            
+            if not event_id:
+                logger.warning(f"Confirmation message missing event_id from user {user_id}")
+                return False
+            
+            # Get event delivery tracker
+            from netra_backend.app.services.event_delivery_tracker import get_event_delivery_tracker
+            tracker = get_event_delivery_tracker()
+            
+            if confirmation_type == 'confirmation' and status == 'confirmed':
+                # Confirm successful delivery
+                success = tracker.confirm_event(event_id)
+                if success:
+                    logger.debug(f"Confirmed event {event_id} for user {user_id}")
+                    return True
+                else:
+                    logger.warning(f"Failed to confirm unknown event {event_id} for user {user_id}")
+                    return False
+                    
+            elif confirmation_type == 'confirmation' and status == 'failed':
+                # Event failed on client side
+                error_msg = message.get('error', 'Client-side event processing failed')
+                tracker.fail_event(event_id, f"Client failure: {error_msg}")
+                logger.warning(f"Client reported failure for event {event_id} from user {user_id}: {error_msg}")
+                return True
+                
+            else:
+                logger.warning(f"Unknown confirmation type/status: {confirmation_type}/{status} from user {user_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error processing event confirmation from user {user_id}: {e}")
+            return False
+    
+    async def process_incoming_message(self, user_id: Union[str, UserID], message: Any) -> bool:
+        """Process incoming WebSocket messages including confirmations.
+        
+        This method handles both regular messages and event confirmations.
+        
+        Args:
+            user_id: User ID sending the message
+            message: Raw WebSocket message
+            
+        Returns:
+            bool: True if message was processed successfully
+        """
+        try:
+            # Parse message if it's a string
+            if isinstance(message, str):
+                import json
+                try:
+                    parsed_message = json.loads(message)
+                except json.JSONDecodeError:
+                    logger.warning(f"Invalid JSON message from user {user_id}: {message[:100]}")
+                    return False
+            elif isinstance(message, dict):
+                parsed_message = message
+            else:
+                logger.warning(f"Unsupported message type from user {user_id}: {type(message)}")
+                return False
+            
+            # Check if this is an event confirmation
+            message_type = parsed_message.get('type', '')
+            if message_type == 'event_confirmation':
+                return await self.handle_event_confirmation(user_id, parsed_message)
+            
+            # Handle other message types here if needed
+            logger.debug(f"Received message type '{message_type}' from user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error processing incoming message from user {user_id}: {e}")
+            return False
+
+    # Transaction Coordination Methods
+    def set_transaction_coordinator(self, coordinator):
+        """Set transaction coordinator for database-WebSocket coordination.
+        
+        Args:
+            coordinator: TransactionEventCoordinator instance from DatabaseManager
+        """
+        self._transaction_coordinator = coordinator
+        self._coordination_enabled = True
+        logger.info("[U+1F517] Transaction coordinator linked to WebSocket manager")
+        
+    async def send_event_after_commit(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
+                                     connection_id: Optional[str] = None, user_id: Optional[str] = None,
+                                     thread_id: Optional[str] = None, priority: int = 0):
+        """Queue WebSocket event for sending after database transaction commit.
+        
+        This method ensures events are only sent AFTER database transactions commit,
+        preventing data inconsistency in the Golden Path user flow.
+        
+        Args:
+            transaction_id: Database transaction ID
+            event_type: Type of WebSocket event to send
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            thread_id: Optional thread ID for context
+            priority: Event priority (higher numbers sent first)
+        """
+        if not self._coordination_enabled or not self._transaction_coordinator:
+            # Fallback: send immediately if coordination not enabled
+            logger.warning(f" WARNING: [U+FE0F] Transaction coordination not enabled - sending WebSocket event '{event_type}' immediately")
+            return await self._send_event_immediate(event_type, event_data, connection_id, user_id)
+            
+        # Queue event for after transaction commit
+        await self._transaction_coordinator.add_pending_event(
+            transaction_id=transaction_id,
+            event_type=event_type,
+            event_data=event_data,
+            connection_id=connection_id,
+            user_id=user_id,
+            thread_id=thread_id,
+            priority=priority
+        )
+        
+        logger.debug(f"[U+1F4E4] Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+                    f"(user: {user_id}, priority: {priority})")
+        
+    async def _send_event_immediate(self, event_type: str, event_data: Dict[str, Any],
+                                   connection_id: Optional[str] = None, user_id: Optional[str] = None) -> bool:
+        """Send WebSocket event immediately (fallback when coordination disabled).
+        
+        ISSUE #1098 HOTFIX: Fixed to include all 7 required fields for Golden Path AI response delivery.
+        
+        Args:
+            event_type: Type of WebSocket event
+            event_data: Event data payload
+            connection_id: Optional specific connection ID
+            user_id: Optional user ID for targeting
+            
+        Returns:
+            True if sent successfully, False otherwise
+        """
+        try:
+            # Extract user context for proper event structure
+            extracted_user_id = user_id
+            thread_id = None
+            run_id = None
+            
+            # If sending to specific connection, extract context from connection
+            if connection_id and connection_id in self._connections:
+                connection = self._connections[connection_id]
+                extracted_user_id = getattr(connection, 'user_id', user_id)
+                thread_id = getattr(connection, 'thread_id', None)
+                run_id = getattr(connection, 'run_id', None)
+            
+            # Create message with all 7 required fields for Golden Path compliance
+            message = {
+                "type": event_type,                                             # Field 1: Event type identifier
+                "user_id": str(extracted_user_id) if extracted_user_id else "unknown_user", # Field 2: User isolation
+                "thread_id": str(thread_id) if thread_id else "unknown_thread", # Field 3: Context routing  
+                "run_id": str(run_id) if run_id else "unknown_run",            # Field 4: Request correlation
+                "timestamp": datetime.now(timezone.utc).isoformat(),           # Field 5: Time tracking
+                **event_data                                                   # Fields 6-7: Event-specific data
+            }
+            
+            if connection_id:
+                # Send to specific connection
+                if connection_id in self._connections:
+                    connection = self._connections[connection_id]
+                    await connection.websocket.send_json(_serialize_message_safely(message))
+                    logger.debug(f"[U+1F4E4] Sent WebSocket event '{event_type}' to connection {connection_id}")
+                    return True
+                else:
+                    logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} not found for event '{event_type}'")
+                    return False
+                    
+            elif user_id:
+                # Send to all user connections
+                await self.send_to_user(user_id, message)
+                logger.debug(f"[U+1F4E4] Sent WebSocket event '{event_type}' to user {user_id}")
+                return True
+                
+            else:
+                logger.warning(f" WARNING: [U+FE0F] No connection_id or user_id specified for event '{event_type}'")
+                return False
+                
+        except Exception as e:
+            logger.error(f" FAIL:  Failed to send immediate WebSocket event '{event_type}': {type(e).__name__}: {e}")
+            return False
+            
+    def is_coordination_enabled(self) -> bool:
+        """Check if transaction coordination is enabled.
+        
+        Returns:
+            True if coordination is enabled, False otherwise
+        """
+        return self._coordination_enabled and self._transaction_coordinator is not None
+        
+    def get_coordination_status(self) -> Dict[str, Any]:
+        """Get current transaction coordination status.
+        
+        Returns:
+            Dictionary containing coordination status information
+        """
+        if not self._coordination_enabled:
+            return {
+                "enabled": False,
+                "reason": "Coordination not enabled"
+            }
+            
+        if not self._transaction_coordinator:
+            return {
+                "enabled": False,
+                "reason": "No transaction coordinator configured"
+            }
+            
+        return {
+            "enabled": True,
+            "coordinator_available": True,
+            "pending_events": self._transaction_coordinator.get_pending_events_count(),
+            "metrics": self._transaction_coordinator.get_coordination_metrics()
+        }
+
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status for current operational mode."""
+        base_status = {
+            'healthy': getattr(self, '_is_healthy', True),
+            'manager_type': f'unified_{self.mode.value}',
+            'mode': self.mode.value,
+            'created_at': getattr(self, 'created_at', datetime.now(timezone.utc)).isoformat(),
+        }
+        
+        if self.mode == WebSocketManagerMode.UNIFIED:
+            return {
+                **base_status,
+                'functionality_level': 'full',
+                'error_recovery_enabled': getattr(self, '_error_recovery_enabled', True),
+                'monitoring_enabled': getattr(self, '_monitoring_enabled', True),
+                'connection_count': self.get_connection_count(),
+                'background_tasks': len(getattr(self, '_background_tasks', {}))
+            }
+        elif self.mode == WebSocketManagerMode.ISOLATED:
+            return {
+                **base_status,
+                'functionality_level': 'isolated',
+                'user_context': bool(self.user_context),
+                'private_error_count': getattr(self, '_private_error_count', 0),
+                'private_message_queue_size': len(getattr(self, '_private_message_queue', []))
+            }
+        elif self.mode == WebSocketManagerMode.EMERGENCY:
+            return {
+                **base_status,
+                'functionality_level': 'emergency',
+                'emergency_mode': True,
+                'queued_messages': len(getattr(self, '_emergency_message_queue', [])),
+                'uptime_seconds': (datetime.now(timezone.utc) - self.created_at).total_seconds()
+            }
+        elif self.mode == WebSocketManagerMode.DEGRADED:
+            return {
+                **base_status,
+                'healthy': False,
+                'functionality_level': 'minimal',
+                'degraded_mode': True,
+                'message': 'Operating in degraded mode - please retry connection'
+            }
+        
+        return base_status
+
+    def is_healthy(self) -> bool:
+        """
+        Check if WebSocket manager is healthy and operational.
+
+        Returns:
+            bool: True if manager is healthy and can process WebSocket events
+
+        Note:
+            This method is required by AgentWebSocketBridge and test infrastructure.
+            It provides a simple boolean interface to the detailed health status.
+        """
+        return getattr(self, '_is_healthy', True)
+    
+    # ===========================================================================
+    # GOLDEN PATH METHODS (Issue #1100 SSOT Consolidation)
+    # ===========================================================================
+    
+    async def broadcast_system_status(self, status_message: str, event_type: str = "system_status") -> int:
+        """
+        Broadcast system status message to all connected users.
+        
+        Golden Path method for system-wide notifications.
+        
+        Args:
+            status_message: Status message to broadcast
+            event_type: Event type for the status message
+            
+        Returns:
+            int: Number of users notified
+        """
+        logger.info(f"Broadcasting system status: {status_message}")
+        
+        notified_count = 0
+        status_data = {
+            "message": status_message,
+            "timestamp": datetime.now().isoformat(),
+            "event_type": event_type
+        }
+        
+        # Get all connected users
+        connected_users = set()
+        for connection in self._connections.values():
+            if hasattr(connection, 'user_id') and connection.user_id:
+                connected_users.add(connection.user_id)
+        
+        # Send to each user
+        for user_id in connected_users:
+            try:
+                await self.send_agent_event(user_id, event_type, status_data)
+                notified_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send system status to user {user_id}: {e}")
+        
+        logger.info(f"System status broadcasted to {notified_count} users")
+        return notified_count
+    
+    def get_connection_status(self, user_id: Optional[Union[str, UserID]] = None) -> Dict[str, Any]:
+        """
+        Get connection status for a user or all users.
+        
+        Golden Path method for connection monitoring.
+        
+        Args:
+            user_id: Optional user ID to check. If None, returns status for all users
+            
+        Returns:
+            Dictionary with connection status information
+        """
+        if user_id:
+            typed_user_id = str(user_id)
+            user_connections = self.get_user_connections(typed_user_id)
+            
+            return {
+                "user_id": typed_user_id,
+                "connected": len(user_connections) > 0,
+                "connection_count": len(user_connections),
+                "connection_ids": list(user_connections),
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            # Return status for all users
+            all_users = set()
+            for connection in self._connections.values():
+                if hasattr(connection, 'user_id') and connection.user_id:
+                    all_users.add(connection.user_id)
+            
+            users_status = {}
+            for user in all_users:
+                user_connections = self.get_user_connections(user)
+                users_status[user] = {
+                    "connected": len(user_connections) > 0,
+                    "connection_count": len(user_connections),
+                    "connection_ids": list(user_connections)
+                }
+            
+            return {
+                "total_users": len(all_users),
+                "total_connections": len(self._connections),
+                "users": users_status,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    async def cleanup_stale_connections(self, max_age_seconds: int = 3600) -> int:
+        """
+        Clean up stale WebSocket connections that are no longer active.
+        
+        Golden Path method for connection maintenance.
+        
+        Args:
+            max_age_seconds: Maximum age in seconds before considering connection stale
+            
+        Returns:
+            int: Number of stale connections cleaned up
+        """
+        logger.info(f"Starting cleanup of stale connections older than {max_age_seconds} seconds")
+        
+        current_time = time.time()
+        stale_connections = []
+        
+        # Find stale connections
+        for connection_id, connection in self._connections.items():
+            connection_age = current_time - getattr(connection, 'created_at', current_time)
+            
+            # Check if connection is stale
+            is_stale = (
+                connection_age > max_age_seconds or
+                not hasattr(connection, 'websocket') or
+                getattr(connection, 'websocket', None) is None
+            )
+            
+            if is_stale:
+                stale_connections.append((connection_id, connection))
+                logger.debug(f"Found stale connection: {connection_id} (age: {connection_age:.1f}s)")
+        
+        # Clean up stale connections
+        cleaned_count = 0
+        for connection_id, connection in stale_connections:
+            try:
+                await self.remove_connection(connection_id)
+                cleaned_count += 1
+                logger.debug(f"Cleaned up stale connection: {connection_id}")
+            except Exception as e:
+                logger.error(f"Failed to clean up stale connection {connection_id}: {e}")
+        
+        logger.info(f"Cleanup complete: {cleaned_count} stale connections removed")
+        return cleaned_count
+
 
 
 # For backward compatibility, we can alias the class name

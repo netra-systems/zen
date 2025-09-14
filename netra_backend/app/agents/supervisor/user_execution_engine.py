@@ -296,9 +296,9 @@ class UserExecutionEngine(IExecutionEngine):
         logger.info(f"🔄 API COMPATIBILITY: create_execution_engine() called with user context {user_context.user_id}")
         
         try:
-            # Create AgentInstanceFactory for user-scoped agent creation
-            from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
-            agent_factory = AgentInstanceFactory()
+            # ISSUE #1116 PHASE 2: Use SSOT factory pattern for user isolation
+            from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+            agent_factory = create_agent_instance_factory(user_context)
             
             # Set registry and websocket bridge if provided
             if registry and hasattr(agent_factory, 'set_registry'):
@@ -630,9 +630,9 @@ class UserExecutionEngine(IExecutionEngine):
             # Already a factory
             agent_factory = registry
         else:
-            # Need to wrap in factory pattern
-            from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
-            agent_factory = AgentInstanceFactory()
+            # ISSUE #1116 PHASE 2: Use SSOT factory pattern for user isolation
+            from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+            agent_factory = create_agent_instance_factory(self.user_context)
             # Set the registry after initialization (compatibility hack)
             agent_factory._agent_registry = registry
             # Store websocket_bridge for compatibility
@@ -1904,11 +1904,12 @@ async def create_execution_context_manager(
     
     # P1 ISSUE #802 FIX: Direct UserExecutionEngine constructor (no legacy bridge)
     # This eliminates the 40.981ms overhead per engine creation
-    from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
+    # ISSUE #1116 PHASE 2: Use SSOT factory pattern for user isolation
+    from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
     from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
-    # Create components directly without compatibility bridge
-    agent_factory = AgentInstanceFactory()
+    # Create components directly without compatibility bridge using SSOT pattern
+    agent_factory = create_agent_instance_factory(anonymous_user_context)
     if hasattr(agent_factory, 'set_registry'):
         agent_factory.set_registry(registry)
     if hasattr(agent_factory, 'set_websocket_bridge'):

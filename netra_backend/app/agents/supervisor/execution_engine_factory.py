@@ -37,7 +37,6 @@ from netra_backend.app.services.user_execution_context import (
 )
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
-    get_agent_instance_factory,
     create_agent_instance_factory,  # SSOT REMEDIATION: Per-request factory creation
     AgentInstanceFactory
 )

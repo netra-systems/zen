@@ -18,28 +18,30 @@ from typing import Any, Dict, List, Optional
 from shared.isolated_environment import IsolatedEnvironment
 
 # Real services fixtures with various scopes
-# REMOVED_SYNTAX_ERROR: from test_framework.conftest_real_services import ( )
-real_services_function,
-real_services_session,
-real_services,
-real_postgres,
-real_redis,
-real_clickhouse,
-real_websocket_client,
-real_http_client,
-websocket_connection,
-api_client,
-test_user,
-test_organization,
-test_agent,
-test_conversation,
-test_user_token
+# REMOVED_SYNTAX_ERROR: from test_framework.conftest_real_services import (
+# REMOVED_SYNTAX_ERROR:     real_services_function,
+# REMOVED_SYNTAX_ERROR:     real_services_session,
+# REMOVED_SYNTAX_ERROR:     real_services,
+# REMOVED_SYNTAX_ERROR:     real_postgres,
+# REMOVED_SYNTAX_ERROR:     real_redis,
+# REMOVED_SYNTAX_ERROR:     real_clickhouse,
+# REMOVED_SYNTAX_ERROR:     real_websocket_client,
+# REMOVED_SYNTAX_ERROR:     real_http_client,
+# REMOVED_SYNTAX_ERROR:     websocket_connection,
+# REMOVED_SYNTAX_ERROR:     api_client,
+# REMOVED_SYNTAX_ERROR:     test_user,
+# REMOVED_SYNTAX_ERROR:     test_organization,
+# REMOVED_SYNTAX_ERROR:     test_agent,
+# REMOVED_SYNTAX_ERROR:     test_conversation,
+# REMOVED_SYNTAX_ERROR:     test_user_token
+# REMOVED_SYNTAX_ERROR: )
 
 
 # Environment and isolation
-# REMOVED_SYNTAX_ERROR: from test_framework.environment_isolation import ( )
-get_test_env_manager,
-isolated_test_session
+# REMOVED_SYNTAX_ERROR: from test_framework.environment_isolation import (
+# REMOVED_SYNTAX_ERROR:     get_test_env_manager,
+# REMOVED_SYNTAX_ERROR:     isolated_test_session
+# REMOVED_SYNTAX_ERROR: )
 
 
 # Test context for advanced testing
@@ -48,9 +50,9 @@ from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from shared.isolated_environment import get_env
-TestContext,
-create_test_context,
-create_isolated_test_contexts
+# REMOVED_SYNTAX_ERROR: TestContext,
+# REMOVED_SYNTAX_ERROR: create_test_context,
+# REMOVED_SYNTAX_ERROR: create_isolated_test_contexts
 
 
 

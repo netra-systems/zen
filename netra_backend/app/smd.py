@@ -1220,13 +1220,22 @@ class StartupOrchestrator:
         if not agent_websocket_bridge:
             raise DeterministicStartupError("AgentWebSocketBridge not available for supervisor initialization")
         
+        # Create system user context for supervisor initialization
+        # SECURITY FIX: SupervisorAgent now requires user_context parameter to prevent user data leakage
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        system_user_context = UserExecutionContext.create_for_user(
+            user_id="system-startup",
+            thread_id="startup-thread",
+            run_id="startup-run"
+        )
+        
         # Create supervisor with bridge for proper WebSocket integration
-        # SECURITY FIX: SupervisorAgent created without global LLM manager to prevent user data mixing
+        # SECURITY FIX: SupervisorAgent created with system user context for startup
         # LLM managers are created per-request with user context for proper isolation
-        # SupervisorAgent expects 2 args: llm_manager and websocket_bridge (no tool_dispatcher)
         supervisor = SupervisorAgent(
             None,  # No global LLM manager - created per-request with user context
-            agent_websocket_bridge
+            agent_websocket_bridge,
+            user_context=system_user_context  # System context for startup
         )
         
         if supervisor is None:
@@ -1675,7 +1684,7 @@ class StartupOrchestrator:
             # 4. Initialize AgentInstanceFactory
             agent_instance_factory = await configure_agent_instance_factory(
                 websocket_bridge=self.app.state.agent_websocket_bridge,
-                websocket_manager=None,  # Will be created per-request in UserExecutionContext pattern
+                # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
                 llm_manager=self.app.state.llm_manager,
                 tool_dispatcher=None  # Will be created per-request in UserExecutionContext pattern
             )

@@ -175,25 +175,26 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             # CRITICAL FIX: Initialize agent registry before creating supervisor
             # This ensures the agent factory has a populated registry
             from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
-            from netra_backend.app.agents.supervisor.agent_instance_factory import get_agent_instance_factory
             
             # Initialize the agent class registry if not already done
             agent_registry = initialize_agent_class_registry()
             logger.info(f"Agent registry initialized with {len(agent_registry)} agents for demo")
             
-            # Configure the agent factory with the registry
-            factory = get_agent_instance_factory()
+            # ISSUE #1116: Migrate to per-request factory for user isolation
+            from netra_backend.app.agents.supervisor.agent_instance_factory import create_agent_instance_factory
+            factory = create_agent_instance_factory(user_context)
             factory.configure(
                 agent_class_registry=agent_registry,
                 websocket_bridge=bridge,
                 llm_manager=llm_manager
             )
             
-            # Import and create supervisor agent using SSOT pattern
+            # Import and create supervisor agent using SSOT pattern with user context
             from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
             supervisor = SupervisorAgent(
                 llm_manager=llm_manager,
-                websocket_bridge=bridge
+                websocket_bridge=bridge,
+                user_context=user_context
             )
                 
             # Execute using SSOT execute method with proper UserExecutionContext
