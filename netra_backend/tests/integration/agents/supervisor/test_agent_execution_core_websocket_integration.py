@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionResult
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
