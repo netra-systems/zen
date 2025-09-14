@@ -20,7 +20,7 @@ OLD IMPLEMENTATION REPLACED BY: UnifiedWebSocketEmitter + UnifiedWebSocketManage
 
 # SSOT REDIRECT: Import the unified implementation
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
-from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.monitoring.websocket_notification_monitor import get_websocket_notification_monitor
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool, ConnectionInfo
