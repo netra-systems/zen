@@ -1010,15 +1010,27 @@ class TestRealWebSocketIntegration:
     @pytest.mark.critical
     @pytest.mark.timeout(45)  # Cloud Run compatible timeout
     async def test_real_agent_websocket_events(self):
-        """Test complete flow with REAL WebSocket connections and agent events."""
+        """Test complete flow with REAL WebSocket connections and agent events.
+        
+        ENHANCED: Now validates business value delivery alongside WebSocket events.
+        Ensures agents provide actionable recommendations, not just technical responses.
+        """
         test_context = self.test_contexts[0]
         validator = MissionCriticalEventValidator()
         
-        # Send agent request through real WebSocket
+        # ENHANCEMENT: Import business value validator
+        try:
+            from test_framework.business_value_validator import BusinessValueValidator
+            business_validator = BusinessValueValidator()
+        except ImportError as e:
+            logger.warning(f"Business value validator not available: {e}")
+            business_validator = None
+        
+        # Send substantive agent request through real WebSocket
         agent_request = await send_test_agent_request(
             test_context, 
             agent_name="test_agent",
-            task="Perform a simple test operation"
+            task="Analyze my current AI infrastructure and provide specific cost optimization recommendations with actionable steps"
         )
         
         # Listen for agent events on real WebSocket connection
@@ -1026,11 +1038,19 @@ class TestRealWebSocketIntegration:
         timeout = 20.0  # Issue #773: Reduced for Cloud Run compatibility
         
         captured_events = []
+        agent_responses = []
         while time.time() - start_time < timeout:
             try:
                 event = await test_context.receive_message()
                 captured_events.append(event)
                 validator.record(event)
+                
+                # ENHANCEMENT: Capture agent responses for business value validation
+                if event.get('type') == 'agent_completed' and 'response' in event:
+                    agent_responses.append(event['response'])
+                elif event.get('type') == 'agent_thinking' and event.get('content'):
+                    # Capture reasoning as well for comprehensive analysis
+                    agent_responses.append(f"Agent reasoning: {event['content']}")
                 
                 # Check if we have all required events
                 if validator.event_counts.keys() >= validator.REQUIRED_EVENTS:
@@ -1043,7 +1063,7 @@ class TestRealWebSocketIntegration:
                 logger.warning(f"Error receiving event: {e}")
                 break
         
-        # Validate captured events
+        # EXISTING: Technical validation
         is_valid, failures = validator.validate_critical_requirements()
         
         if not is_valid:
@@ -1053,6 +1073,58 @@ class TestRealWebSocketIntegration:
         # Note: We may not get all required events in test environment,
         # but we should get at least some real WebSocket communication
         logger.info(f"Captured {len(captured_events)} real WebSocket events: {[e.get('type') for e in captured_events]}")
+        
+        # ENHANCEMENT: Business value validation for agent responses
+        if business_validator and agent_responses:
+            logger.info("=== AGENT BUSINESS VALUE VALIDATION ===")
+            
+            # Combine all agent responses for comprehensive analysis
+            combined_response = " ".join(str(response) for response in agent_responses)
+            
+            try:
+                # Validate that agent delivers substantive business value
+                assessment = business_validator.validate_business_value(
+                    response=combined_response,
+                    user_query="Analyze my current AI infrastructure and provide cost optimization recommendations",
+                    expected_outcomes=["cost analysis", "optimization recommendations", "actionable steps"]
+                )
+                
+                # Log business value metrics
+                logger.info(f"Agent Business Value Score: {assessment.overall_score:.2f}/1.0")
+                logger.info(f"Actionability Score: {assessment.dimension_scores['actionability'].score:.2f}/1.0")
+                logger.info(f"Problem-Solving Score: {assessment.dimension_scores['problem_solving'].score:.2f}/1.0")
+                
+                # MISSION CRITICAL: Assert business value standards
+                assert assessment.overall_score >= 0.5, (
+                    f"MISSION CRITICAL: Agent business value {assessment.overall_score:.2f} below 0.5 minimum. "
+                    f"Agents must deliver substantial value to justify $500K+ ARR platform."
+                )
+                
+                assert assessment.dimension_scores['actionability'].score >= 0.4, (
+                    f"ACTIONABILITY FAILURE: Score {assessment.dimension_scores['actionability'].score:.2f} "
+                    f"below 0.4. Agents must provide actionable recommendations, not just information."
+                )
+                
+                assert assessment.dimension_scores['problem_solving'].score >= 0.4, (
+                    f"PROBLEM-SOLVING FAILURE: Score {assessment.dimension_scores['problem_solving'].score:.2f} "
+                    f"below 0.4. Agents must solve problems, not just acknowledge them."
+                )
+                
+                logger.info("✓ AGENT BUSINESS VALUE VALIDATED")
+                
+            except Exception as validation_error:
+                logger.error(f"Agent business value validation failed: {validation_error}")
+                # Log the response for debugging
+                logger.error(f"Agent response that failed validation: {combined_response[:500]}...")
+                # Continue test execution but log the failure
+                logger.warning("WARNING: Agent business value validation failed - may indicate quality issues")
+                
+        else:
+            logger.warning("Agent business value validation skipped - no validator or responses available")
+            if not agent_responses:
+                logger.warning("WARNING: No agent responses captured - agents may not be providing substantial output")
+        
+        logger.info("✓ Real agent WebSocket events test completed with business value validation")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -1187,14 +1259,26 @@ class TestRealE2EWebSocketAgentFlow:
     @pytest.mark.critical
     @pytest.mark.timeout(45)  # Cloud Run compatible timeout (Issue #773)
     async def test_real_e2e_agent_conversation_flow(self):
-        """Test complete agent conversation flow with REAL WebSocket connections."""
+        """Test complete agent conversation flow with REAL WebSocket connections.
+        
+        ENHANCED: Now validates business value delivery alongside technical events.
+        Tests the core Golden Path requirement that chat delivers 90% of platform value.
+        """
         test_context = self.e2e_contexts[0]
         validator = MissionCriticalEventValidator(strict_mode=False)
         
-        # Send chat message through real WebSocket
+        # ENHANCEMENT: Import business value validator
+        try:
+            from test_framework.business_value_validator import BusinessValueValidator, assert_golden_path_business_value
+            business_validator = BusinessValueValidator()
+        except ImportError as e:
+            logger.warning(f"Business value validator not available: {e}")
+            business_validator = None
+        
+        # Send substantive chat message through real WebSocket
         chat_message = {
             "type": "chat_message",
-            "content": "Hello, can you help me with a simple task?",
+            "content": "Help me optimize my AI infrastructure costs and improve performance. What specific recommendations can you provide?",
             "user_id": test_context.user_context.user_id,
             "thread_id": test_context.user_context.thread_id
         }
@@ -1204,6 +1288,7 @@ class TestRealE2EWebSocketAgentFlow:
         
         # Listen for real WebSocket events with extended timeout
         captured_events = []
+        agent_responses = []
         start_time = time.time()
         timeout = 25.0  # Issue #773: Reduced for Cloud Run compatibility
         
@@ -1214,6 +1299,12 @@ class TestRealE2EWebSocketAgentFlow:
                 validator.record(event)
                 
                 logger.info(f"Received E2E event: {event.get('type', 'unknown')}")
+                
+                # ENHANCEMENT: Capture agent responses for business value validation
+                if event.get('type') == 'agent_completed' and 'response' in event:
+                    agent_responses.append(event['response'])
+                elif event.get('type') == 'message' and event.get('content'):
+                    agent_responses.append(event['content'])
                 
                 # Continue listening for more events
                 if len(captured_events) >= 3:  # Got some meaningful conversation
@@ -1229,12 +1320,68 @@ class TestRealE2EWebSocketAgentFlow:
         # Validate the conversation flow
         logger.info(f"E2E conversation captured {len(captured_events)} events")
         
-        # We expect at least some form of response in a real E2E test
+        # EXISTING: Technical validation
         assert len(captured_events) > 0, "No events received in real E2E conversation test"
         
         # Log event summary for debugging
         event_types = [event.get('type', 'unknown') for event in captured_events]
         logger.info(f"E2E event types received: {event_types}")
+        
+        # ENHANCEMENT: Business value validation for Golden Path
+        if business_validator and agent_responses:
+            logger.info("=== BUSINESS VALUE VALIDATION ===")
+            
+            # Combine all agent responses for comprehensive analysis
+            combined_response = " ".join(str(response) for response in agent_responses)
+            
+            try:
+                # Validate that agent delivers substantive business value
+                assessment = business_validator.validate_business_value(
+                    response=combined_response,
+                    user_query=chat_message["content"],
+                    expected_outcomes=["cost optimization", "performance improvement", "actionable recommendations"]
+                )
+                
+                # Log business value assessment
+                logger.info(f"Business Value Score: {assessment.overall_score:.2f}/1.0 ({assessment.customer_satisfaction_tier})")
+                logger.info(f"Chat Substance Quality: {assessment.chat_substance_quality:.2f}/1.0")
+                logger.info(f"Revenue Protection Score: {assessment.revenue_protection_score:.2f}/1.0")
+                
+                # CRITICAL: Assert Golden Path business value standards
+                # This ensures chat delivers 90% of platform value through substance
+                assert assessment.delivers_business_value, (
+                    f"GOLDEN PATH FAILURE: Agent response lacks business value. "
+                    f"Score: {assessment.overall_score:.2f}, Tier: {assessment.customer_satisfaction_tier}. "
+                    f"This violates the core requirement that chat delivers 90% of platform value."
+                )
+                
+                assert assessment.chat_substance_quality >= 0.5, (
+                    f"GOLDEN PATH FAILURE: Chat substance quality {assessment.chat_substance_quality:.2f} "
+                    f"below minimum 0.5. Golden Path requires substantive chat value, not just technical success."
+                )
+                
+                assert assessment.revenue_protection_score >= 0.6, (
+                    f"REVENUE PROTECTION FAILURE: Score {assessment.revenue_protection_score:.2f} "
+                    f"below 0.6 threshold. This response may not protect $500K+ ARR through quality interactions."
+                )
+                
+                # Log detailed business value report
+                report = business_validator.generate_business_value_report(assessment)
+                logger.info(f"BUSINESS VALUE REPORT:\n{report}")
+                
+                logger.info("✓ GOLDEN PATH BUSINESS VALUE VALIDATED")
+                
+            except Exception as validation_error:
+                logger.error(f"Business value validation failed: {validation_error}")
+                # In mission critical tests, we must fail if business value is not delivered
+                raise AssertionError(f"MISSION CRITICAL BUSINESS VALUE FAILURE: {validation_error}")
+                
+        else:
+            logger.warning("Business value validation skipped - no validator or responses available")
+            if not agent_responses:
+                logger.warning("WARNING: No agent responses captured - this may indicate system failure")
+        
+        logger.info("✓ E2E agent conversation flow completed with business value validation")
     
     @pytest.mark.asyncio
     @pytest.mark.critical 

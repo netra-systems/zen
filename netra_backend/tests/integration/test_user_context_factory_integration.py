@@ -40,7 +40,7 @@ from netra_backend.app.services.user_execution_context import (
 )
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
     ExecutionEngineFactory,
-    ExecutionFactoryConfig
+    configure_execution_engine_factory
 )
 from netra_backend.app.services.factory_adapter import (
     FactoryAdapter,

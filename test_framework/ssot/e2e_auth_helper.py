@@ -1599,6 +1599,35 @@ def get_test_jwt_token(
     )
 
 
+def get_user_auth_token(
+    user_id: str = "test-user",
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None
+) -> str:
+    """
+    Get authentication token for user in E2E tests.
+    
+    This function provides a simplified interface for getting JWT tokens
+    for E2E test authentication scenarios.
+    
+    Args:
+        user_id: User ID to authenticate
+        email: User email (generated if not provided)
+        permissions: User permissions (defaults to ["read", "write"])
+        
+    Returns:
+        JWT authentication token string
+    """
+    email = email or f"{user_id}@test.netra.ai"
+    permissions = permissions or ["read", "write"]
+    
+    return get_jwt_token_for_user(
+        user_id=user_id,
+        email=email,
+        permissions=permissions
+    )
+
+
 def get_test_user_context(
     user_id: Optional[str] = None,
     email: Optional[str] = None,
