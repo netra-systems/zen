@@ -444,6 +444,7 @@ class ConfigurationRegressionIntegrationTests(IsolatedTestCase):
 
 def suite():
     """Create test suite for CI/CD pipeline."""
+    loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     
     # Add critical tests that must pass

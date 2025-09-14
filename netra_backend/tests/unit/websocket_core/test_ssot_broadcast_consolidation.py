@@ -159,7 +159,7 @@ class TestSSOTBroadcastConsolidation:
         ISSUE #1058: SSOT should consolidate connection management instead of
         having 3 separate broadcast functions each managing connections differently.
         """
-        user_id = "pool_test_user_456"
+        user_id = "pool_user_456"
 
         # Mock multiple connection scenarios
         mock_connections = [

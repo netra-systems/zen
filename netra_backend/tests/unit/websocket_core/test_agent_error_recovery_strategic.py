@@ -23,7 +23,7 @@ import asyncio
 import time
 import json
 from datetime import datetime, timezone, timedelta
-from unittest.mock import AsyncMock, Mock, patch, MagicMock, call
+from unittest.mock import AsyncMock, Mock, patch, MagicMock, call, PropertyMock
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
@@ -234,7 +234,9 @@ class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
         run_id = "recovery_test_run_123"
         agent_name = "RecoveryTestAgent"
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Execute operations that will encounter partial failure
             
             # Phase 1: Normal operations before failure
@@ -314,7 +316,9 @@ class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
         run_id = "connection_recovery_test"
         agent_name = "ConnectionRecoveryAgent"
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Operations during connection failure
             
             # Phase 1: Normal operation before connection drop
@@ -402,7 +406,9 @@ class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
             {"run_id": "cascade_test_3", "agent": "TertiaryAgent"}
         ]
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Trigger failure in one service, observe cascade prevention
             
             # Phase 1: Normal operations across all agents
@@ -514,7 +520,9 @@ class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
         
         self.mock_websocket_manager.emit_to_run.side_effect = execute_step_with_failure
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Execute multi-step operation that will fail and rollback
             
             # Phase 1: Start operation
@@ -628,7 +636,9 @@ class TestAgentErrorRecoveryStrategic(SSotAsyncTestCase):
         
         self.mock_websocket_manager.emit_to_run.side_effect = simulate_infrastructure_outage
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Operations during infrastructure outage
             
             operations = [
