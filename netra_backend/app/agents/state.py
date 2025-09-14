@@ -190,20 +190,6 @@ class SupplyResearchResult(BaseModel):
 # ==================================================================================
 
 
-def rebuild_model() -> None:
-    """Rebuild the model after imports are complete."""
-    try:
-        DeepAgentState.model_rebuild()
-    except Exception:
-        # Safe to ignore - model will rebuild when needed
-        pass
-
-# Initialize model rebuild
-rebuild_model()
-
-# Force model rebuild to resolve forward references
-try:
-    DeepAgentState.model_rebuild()
-except Exception:
-    # Safe to ignore - will rebuild when dependencies are available
-    pass
+# REMOVED: rebuild_model() function and DeepAgentState.model_rebuild() calls
+# DeepAgentState is now in SSOT location: netra_backend.app.schemas.agent_models
+# Model rebuilding is handled by the SSOT version automatically
