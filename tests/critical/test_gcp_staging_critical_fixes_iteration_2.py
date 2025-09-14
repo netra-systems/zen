@@ -60,7 +60,7 @@ from typing import Dict, Any, List
 from shared.types.core_types import UserID, ensure_user_id
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager, is_valid_id_format, is_valid_id_format_compatible, IDType
 from netra_backend.app.websocket_core.service_readiness_validator import ServiceReadinessValidator
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
@@ -337,7 +337,7 @@ class TestThreadIDConsistencyFix:
         INTEGRATION TEST: WebSocket manager factory should use SSOT ID generation
         """
         # Test factory initialization without direct timestamp usage
-        factory = WebSocketManagerFactory()
+        manager = WebSocketManager()
         
         # Create test user context
         test_context = UserExecutionContext(
@@ -434,7 +434,7 @@ class TestCriticalFixesIntegration:
             )
             
             # Step 4: WebSocket manager creation should succeed
-            factory = WebSocketManagerFactory()
+            manager = WebSocketManager()
             manager = await factory.create_manager(context)
             
             assert manager is not None

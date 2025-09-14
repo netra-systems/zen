@@ -63,7 +63,7 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
 
         # This should fail if regression exists
         if deepagent_import_found:
-            self.fail(
+            pytest.fail(
                 f"REGRESSION CONFIRMED: DeepAgentState import still present in agent_lifecycle.py\n"
                 f"Import found: {import_location}\n"
                 f"Expected: DeepAgentState should be migrated to UserExecutionContext pattern\n"
@@ -71,7 +71,7 @@ class TestDeepAgentStateImportRegression(SSotBaseTestCase):
             )
 
         # If we reach here, the import was removed (regression fixed)
-        self.assertTrue(True, "DeepAgentState import properly removed from agent_lifecycle.py")
+        assert True, "DeepAgentState import properly removed from agent_lifecycle.py"
 
     def test_agent_lifecycle_method_signatures_use_deepagentstate(self):
         """Test that agent_lifecycle.py method signatures still use DeepAgentState.
