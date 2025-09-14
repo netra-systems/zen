@@ -2,7 +2,7 @@
 
 **GitHub Issue:** [#1064](https://github.com/netra-systems/netra-apex/issues/1064)
 **Created:** 2025-01-14
-**Status:** NEW SSOT Tests Created and Validated
+**Status:** Remediation Plan Complete - Ready for Implementation
 **Priority:** P0 - Critical Golden Path Blocker
 
 ## Business Impact
@@ -141,11 +141,63 @@ python -m pytest netra_backend/tests/unit/agents/test_websocket_bridge_adapter_s
 ### SSOT Target Pattern
 **Chosen SSOT:** WebSocketBridgeAdapter pattern from BaseAgent as canonical approach
 
-### Migration Plan
-1. **Phase 1:** Standardize all agents to inherit from BaseAgent WebSocket pattern
-2. **Phase 2:** Deprecate direct websocket_manager and _emit_websocket_event methods
-3. **Phase 3:** Unify bridge factory to single adapter type
-4. **Phase 4:** Add backward compatibility shims during transition
+### Detailed 15-Day Implementation Plan (Approved)
+
+**PHASE 1: FOUNDATION STABILIZATION (Days 1-5)**
+1. **Enhance SSOT WebSocketBridgeAdapter** (Days 1-2)
+   - Add user context validation to prevent shared state
+   - Implement thread-safe bridge initialization
+   - Add business value protection logging
+   - Ensure all 5 critical events supported
+
+2. **Consolidate Factory Pattern** (Days 3-4)
+   - Replace 3 adapter types with single factory method
+   - Add proper user context isolation
+   - Implement memory leak prevention
+   - Add compatibility shims during transition
+
+3. **Add Backward Compatibility Shims** (Day 5)
+   - Ensure zero-downtime migration capability
+   - Implement deprecated pattern warnings
+   - Create gradual migration pathways
+
+**PHASE 2: INCREMENTAL AGENT MIGRATION (Days 6-11)**
+1. **UnifiedDataAgent Migration** (Days 6-7)
+   - Replace `_emit_websocket_event` with WebSocketBridgeAdapter
+   - Update inheritance to use BaseAgent SSOT pattern
+   - Maintain existing functionality with SSOT approach
+
+2. **BaseExecutor Migration** (Days 8-9)
+   - Replace `context.websocket_manager` access with WebSocketBridgeAdapter
+   - Add WebSocketBridgeAdapter injection
+   - Maintain user context isolation
+
+3. **UnifiedToolExecution Migration** (Days 10-11)
+   - Replace `user_emitter.notify_*` with WebSocketBridgeAdapter
+   - Add WebSocketBridgeAdapter dependency injection
+   - Preserve user-specific message delivery
+
+**PHASE 3: VALIDATION AND CLEANUP (Days 12-15)**
+1. **Comprehensive Testing** (Days 12-13)
+   - All failing SSOT tests must PASS
+   - 100% concurrent user success rate validation
+   - Business value protection confirmation
+
+2. **Documentation and Pattern Enforcement** (Day 14)
+   - Update architecture documentation
+   - Create SSOT pattern examples and guides
+   - Update code review standards
+
+3. **Deprecation and Cleanup** (Day 15)
+   - Remove compatibility shims after validation
+   - Delete duplicate WebSocket implementations
+   - Archive legacy pattern documentation
+
+### Success Metrics
+- **SSOT Compliance:** 100% (from current <50%)
+- **Concurrent User Success:** 100% (from 0%)
+- **Event Delivery:** 100% reliability for all 5 critical events
+- **Business Protection:** $500K+ ARR maintained
 
 ## Progress Log
 
@@ -168,10 +220,12 @@ python -m pytest netra_backend/tests/unit/agents/test_websocket_bridge_adapter_s
 - [x] Integration test foundation established
 - [x] Mission critical golden path protection validated
 
-### Step 3: Plan SSOT Remediation
-- [ ] Design migration strategy
-- [ ] Plan backward compatibility approach
-- [ ] Design factory consolidation approach
+### Step 3: Plan SSOT Remediation ✅ COMPLETE
+- [x] **15-Day Implementation Plan** designed and approved by user
+- [x] **3-Phase Migration Strategy** with incremental rollout and rollback plans
+- [x] **Backward Compatibility Shims** planned for zero-downtime migration
+- [x] **Factory Consolidation** from 3 adapters to single SSOT pattern
+- [x] **Business Value Protection** with $500K+ ARR safeguards
 
 ### Step 4: Execute SSOT Remediation
 - [ ] Implement WebSocketBridgeAdapter as SSOT
