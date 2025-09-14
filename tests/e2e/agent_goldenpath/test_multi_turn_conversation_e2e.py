@@ -61,7 +61,6 @@ class TestMultiTurnConversationE2E(SSotAsyncTestCase):
     @classmethod
     def setUpClass(cls):
         """Setup staging environment configuration and dependencies."""
-        super().setUpClass()
 
         # Initialize staging configuration
         cls.staging_config = get_staging_config()

@@ -67,8 +67,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
     @classmethod
     def setUpClass(cls):
         """Setup staging environment for WebSocket event testing."""
-        super().setUpClass()
-        
+
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)

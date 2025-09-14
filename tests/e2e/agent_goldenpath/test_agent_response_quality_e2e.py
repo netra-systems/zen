@@ -75,10 +75,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         cls.auth_helper = E2EAuthHelper(environment="staging")
 
         # Initialize WebSocket test utilities
-        cls.websocket_helper = WebSocketTestHelper(
-            base_url=cls.staging_config.urls.websocket_url,
-            environment="staging"
-        )
+        cls.websocket_helper = WebSocketTestHelper()
 
         # Test user configuration
         cls.test_user_id = f"quality_test_user_{int(time.time())}"
@@ -98,7 +95,7 @@ class TestAgentResponseQualityE2E(SSotAsyncTestCase):
         self.access_token = self.__class__.auth_helper.create_test_jwt_token(
             user_id=self.__class__.test_user_id,
             email=self.__class__.test_user_email,
-            expires_in_hours=1
+            exp_minutes=60
         )
 
         self.__class__.logger.info(f"Quality test setup complete - thread_id: {self.thread_id}")

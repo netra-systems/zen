@@ -60,8 +60,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
     @classmethod
     def setUpClass(cls):
         """Setup staging environment configuration and dependencies."""
-        super().setUpClass()
-        
+
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
@@ -97,7 +96,7 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         self.access_token = self.__class__.auth_helper.create_test_jwt_token(
             user_id=self.__class__.test_user_id,
             email=self.__class__.test_user_email,
-            expires_in_hours=1
+            exp_minutes=60
         )
         
         self.__class__.logger.info(f"Test setup complete - thread_id: {self.thread_id}")
