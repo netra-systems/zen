@@ -173,12 +173,22 @@ class ViolationBuilder:
     def duplicate_violation(type_name: str, files: List[str]) -> Violation:
         """Build duplicate type violation with context-aware severity"""
         file_list = ", ".join(files[:3]) + ("..." if len(files) > 3 else "")
-        
+
         # Check if it's a critical type based on naming
         critical_patterns = ['Agent', 'Service', 'Config', 'Auth', 'Security']
         is_critical = any(pattern in type_name for pattern in critical_patterns)
-        
-        if is_critical and len(files) > 2:
+
+        # Common UI types that are often legitimately duplicated
+        common_ui_types = ['Props', 'State', 'FormData', 'ButtonProps', 'ModalProps']
+        is_common_ui = any(ui_type in type_name for ui_type in common_ui_types)
+
+        # Different components can have their own Props/State - reduce severity
+        if is_common_ui and len(files) <= 5:
+            severity = "low"
+            violation_type = "duplicate_ui_types"
+            business_impact = "Common UI type duplication - may be acceptable"
+            timeline = "Low priority - review during refactor"
+        elif is_critical and len(files) > 2:
             severity = "high"
             violation_type = "duplicate_critical_logic"
             business_impact = "Critical logic fragmentation, high bug risk"
@@ -188,7 +198,7 @@ class ViolationBuilder:
             violation_type = "duplicate_types"
             business_impact = "Type system inconsistency, maintenance burden"
             timeline = "Current sprint"
-        
+
         return Violation(
             file_path=file_list, violation_type=violation_type, severity=severity,
             actual_value=len(files), expected_value=1,

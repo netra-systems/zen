@@ -50,7 +50,7 @@ class TestServiceToServiceAuthFailures(BaseIntegrationTest):
     """
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.real_services
     async def test_backend_to_auth_service_403_reproduction(self, real_services_fixture):
         """
@@ -123,7 +123,7 @@ class TestServiceToServiceAuthFailures(BaseIntegrationTest):
                     assert True, "Service communication failure reproduces auth service unavailability"
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.real_services
     async def test_service_token_validation_request_failure(self, real_services_fixture):
         """
@@ -165,7 +165,7 @@ class TestServiceToServiceAuthFailures(BaseIntegrationTest):
                 assert True, "Authentication failure reproduced"
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.real_services
     async def test_auth_client_circuit_breaker_authentication_failure(self, real_services_fixture):
         """
@@ -203,8 +203,8 @@ class TestServiceToServiceAuthFailures(BaseIntegrationTest):
             logger.error("   This reproduces cascading service authentication issues")
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
-    @pytest.mark.gcp_integration
+    
+    @pytest.mark.integration
     async def test_gcp_secret_manager_service_secret_sync_failure(self, real_services_fixture):
         """
         Test scenario where GCP Secret Manager returns different SERVICE_SECRET values.
@@ -273,7 +273,7 @@ class TestRequestScopedSessionAuthFailure(BaseIntegrationTest):
     """Test database session creation authentication failures."""
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.real_services
     async def test_database_session_creation_auth_failure(self, real_services_fixture):
         """
@@ -317,7 +317,7 @@ class TestRequestScopedSessionAuthFailure(BaseIntegrationTest):
                 assert True, "Database session authentication failure reproduced"
 
     @pytest.mark.integration
-    @pytest.mark.auth_failure_reproduction
+    
     @pytest.mark.real_services
     async def test_service_user_auth_middleware_rejection(self, real_services_fixture):
         """

@@ -1,100 +1,112 @@
 # SSOT-incomplete-migration-websocket-event-broadcasting-duplication
 
-**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1058
+**GitHub Issue:** #1092 - https://github.com/netra-systems/netra-apex/issues/1092
+**Priority:** P0 - Mission Critical
+**Status:** DISCOVERY COMPLETE - PLANNING TESTS
+**Created:** 2025-09-14
 
-**Created:** 2025-01-14
-**Status:** STEP 1.1 COMPLETE - STEP 1.2 IN PROGRESS
-**Priority:** P0 CRITICAL
+## Executive Summary
 
-## Problem Summary
-Multiple independent implementations of `broadcast_to_user` functionality creating security vulnerabilities and Golden Path failures.
+**CRITICAL SSOT VIOLATION:** Multiple WebSocket event broadcasting implementations fragmenting Golden Path ($500K+ ARR) user flow.
 
-### Files Involved
-- `netra_backend/app/services/websocket_event_router.py` (Lines 198-248)
-- `netra_backend/app/services/user_scoped_websocket_event_router.py` (Lines 234-248)
-- `netra_backend/app/services/websocket_broadcast_service.py` (SSOT target)
+**Core Problem:** Legacy incomplete migration creating race conditions in real-time chat updates, authentication failures, and memory leaks.
 
-### Business Impact
-- **$500K+ ARR at Risk**: Cross-user event leakage
-- **Security Breach**: Events reaching wrong users
-- **Golden Path Blocked**: Users login → AI responses flow compromised
+## Technical Analysis
 
-## SSOT Gardener Process Log
+### Primary SSOT Violations Identified
 
-### Step 0: DISCOVER NEXT SSOT ISSUE ✅ COMPLETE
-- [x] SSOT audit completed - Critical WebSocket broadcasting duplication identified
-- [x] GitHub issue #1058 created
-- [x] Local .md tracker created
+1. **unified_emitter.py Duplication** (Lines 235-236, 259-260)
+   - Multiple `emit_event` and `emit_event_batch` methods
+   - Competing event broadcasting paths causing race conditions
 
-### Step 1: DISCOVER AND PLAN TEST ✅ STEP 1.1 COMPLETE - 🔄 STEP 1.2 IN PROGRESS
-- [x] 1.1 DISCOVER EXISTING: Find existing tests protecting WebSocket broadcasting ✅
-- [ ] 1.2 PLAN ONLY: Plan unit/integration/e2e tests for SSOT refactor
+2. **Cross-Module Broadcast Duplication**
+   - `websocket_core/auth.py` - Duplicate `broadcast()` method
+   - `websocket_core/handlers.py` - Another `broadcast()` method
+   - `websocket_core/protocols.py` - `emit_critical_event()` duplication
 
-#### Step 1.1 Results: EXCELLENT TEST COVERAGE FOUND
+3. **Legacy Factory Pattern**
+   - `websocket_manager_factory.py` DEPRECATED but imported by 40+ files
+   - Creates parallel WebSocket manager instances violating SSOT
 
-**CRITICAL TESTS (Must Continue Passing):**
-- `tests/mission_critical/test_websocket_agent_events_suite.py` - E2E validation protecting $500K+ ARR
-- `netra_backend/tests/unit/services/test_ssot_broadcast_consolidation_issue_982.py` - SSOT adapter validation
-- `tests/unit/websocket/test_broadcast_function_ssot_compliance.py` - SSOT compliance validation
+### Business Impact on Golden Path
 
-**INTEGRATION TESTS:**
-- `netra_backend/tests/integration/test_multi_user_isolation_routing.py` - Multi-user security validation
-- `tests/integration/test_broadcast_function_integration_issue_982.py` - Cross-implementation validation
-- `tests/e2e/test_broadcast_golden_path_staging_issue_982.py` - Complete pipeline validation
+**User Experience Degradation:**
+- Race conditions in chat message delivery
+- Inconsistent real-time agent progress updates
+- Authentication state synchronization failures
+- Critical events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed) lost or duplicated
 
-**PROTECTION ASSESSMENT:** ✅ ROBUST COVERAGE
-- Comprehensive coverage across unit/integration/E2E levels
-- Real service validation in mission critical tests
-- Security focus with user isolation testing
-- SSOT-aware tests designed for Issue #982 consolidation
-- Tests designed to fail until SSOT properly implemented
+**Technical Debt:**
+- Memory leaks from multiple emitter instances
+- Connection ID conflicts between managers
+- Complex debugging due to multiple event paths
 
-### Step 2: EXECUTE THE TEST PLAN
-- [ ] Create 20% new SSOT tests for broadcasting functionality
-- [ ] Audit and run test checks (non-docker only)
+## Remediation Plan Overview
 
-### Step 3: PLAN REMEDIATION OF SSOT
-- [ ] Plan SSOT consolidation strategy for WebSocket broadcasting
+**Complexity: HIGH** - 40+ file dependencies requiring careful migration
 
-### Step 4: EXECUTE THE REMEDIATION SSOT PLAN
-- [ ] Execute SSOT remediation
+### Phase 1: Event Broadcasting Consolidation
+- Consolidate all event broadcasting to single SSOT method in `unified_emitter.py`
+- Remove duplicate `broadcast()` methods from auth.py and handlers.py
 
-### Step 5: ENTER TEST FIX LOOP
-- [ ] 5.1 Run and fix all test cases
-- [ ] 5.2 IND_GCIFS_UINF cycles until all tests pass
-- [ ] 5.3 Run startup tests (non-docker)
+### Phase 2: Factory Migration
+- Migrate 40+ files from deprecated factory to canonical imports
+- Remove `websocket_manager_factory.py` entirely
 
-### Step 6: PR AND CLOSURE
-- [ ] Create PR with cross-link to issue #1058
+### Phase 3: Connection Management SSOT
+- Unified connection lifecycle management
+- Single source of truth for user connection state
 
-## Technical Details
+## Progress Log
 
-### Current State Analysis
-- **3+ broadcast implementations** with different error handling patterns
-- **Inconsistent user validation** approaches across implementations
-- **Race conditions** in multi-user chat scenarios
-- **Conflicting adapter patterns** attempting SSOT consolidation
+### 2025-09-14 - Discovery Phase Complete ✅
+- [x] SSOT violation audit complete
+- [x] GitHub issue #1092 created
+- [x] Impact analysis on Golden Path documented
+- [x] Remediation complexity assessment: HIGH
+- [ ] **NEXT:** Test discovery and planning (Step 1)
 
-### SSOT Target
-Consolidate to single authoritative implementation in:
-`netra_backend/app/services/websocket_broadcast_service.py`
+## Test Strategy (Planned)
 
-### Security Implications
-- Cross-user event contamination
-- User isolation failures
-- Enterprise security compliance violations
+### Existing Tests to Protect (Step 1.1)
+- Mission critical WebSocket event tests
+- Integration tests for real-time chat functionality
+- Authentication flow tests with WebSocket
 
-### Test Infrastructure Status
-- **EXCELLENT**: Robust test coverage protecting against regressions
-- **FOCUSED**: Tests specifically designed for SSOT consolidation
-- **SECURE**: Multi-user isolation validation comprehensive
-- **BUSINESS-ALIGNED**: Tests protect $500K+ ARR functionality
+### New Tests Required (Step 1.2)
+- SSOT event broadcasting validation
+- Race condition reproduction tests
+- Memory leak detection for multiple emitters
+- Connection ID conflict detection
 
-## Next Actions
-1. ✅ Complete Step 1.1: Discover existing tests
-2. 🔄 Step 1.2: Spawn sub-agent to plan test strategy
-3. Continue through SSOT Gardener process
+## Files Requiring Changes
+
+**High Impact (40+ dependencies):**
+- `websocket_core/unified_emitter.py` - Primary consolidation
+- `websocket_core/websocket_manager_factory.py` - REMOVAL
+- All files importing deprecated factory
+
+**Medium Impact:**
+- `websocket_core/auth.py` - Remove duplicate broadcast()
+- `websocket_core/handlers.py` - Remove duplicate broadcast()
+- `websocket_core/protocols.py` - Remove emit_critical_event()
+
+## Success Metrics
+
+- [ ] Single event broadcasting path in codebase
+- [ ] Zero race conditions in chat message delivery
+- [ ] Memory usage stable under load
+- [ ] All Golden Path events reliably delivered
+- [ ] 40+ files successfully migrated from deprecated factory
+
+## Risk Assessment
+
+**HIGH RISK - Mission Critical System**
+- Must preserve zero-downtime during migration
+- Cannot break existing WebSocket connections
+- User context isolation must be maintained
+- All tests must pass after each phase
 
 ---
-**Process Status:** Step 1.1 Complete - Moving to Step 1.2
-**Last Updated:** 2025-01-14
+*Last Updated: 2025-09-14*
+*Next Update: After test discovery and planning phase*

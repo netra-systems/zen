@@ -1492,10 +1492,10 @@ class _UnifiedWebSocketManagerImplementation:
                 # Connection exists, try to send
                 message = {
                     "type": event_type,
-                    "data": data,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "critical": True,
-                    "attempt": attempt + 1 if attempt > 0 else None
+                    "attempt": attempt + 1 if attempt > 0 else None,
+                    **data  # Spread business data to root level
                 }
                 
                 try:
