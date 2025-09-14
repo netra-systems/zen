@@ -92,27 +92,83 @@ class BroadcastFunctionDiscovery:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            tree = ast.parse(content)
             relative_path = file_path.relative_to(self.project_root)
 
-            # Scan for function definitions
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef):
-                    if self._is_broadcast_function(node):
-                        func_info = self._extract_function_info(node, str(relative_path), None)
-                        self.discovered_functions.append(func_info)
-
-                elif isinstance(node, ast.ClassDef):
-                    # Scan class methods
-                    for item in node.body:
-                        if isinstance(item, ast.FunctionDef):
-                            if self._is_broadcast_function(item):
-                                func_info = self._extract_function_info(item, str(relative_path), node.name)
-                                self.discovered_functions.append(func_info)
+            # First try AST parsing
+            try:
+                tree = ast.parse(content)
+                self._scan_ast_tree(tree, str(relative_path))
+            except SyntaxError:
+                # If AST fails, try regex-based scanning
+                self._scan_with_regex(content, str(relative_path))
 
         except Exception as e:
             # Skip files that can't be parsed
             pass
+
+    def _scan_ast_tree(self, tree: ast.AST, relative_path: str):
+        """Scan AST tree for broadcast functions."""
+        # Scan for function definitions
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                if self._is_broadcast_function(node):
+                    func_info = self._extract_function_info(node, relative_path, None)
+                    self.discovered_functions.append(func_info)
+
+            elif isinstance(node, ast.ClassDef):
+                # Scan class methods
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef):
+                        if self._is_broadcast_function(item):
+                            func_info = self._extract_function_info(item, relative_path, node.name)
+                            self.discovered_functions.append(func_info)
+
+    def _scan_with_regex(self, content: str, relative_path: str):
+        """Fallback regex-based scanning for broadcast functions."""
+        import re
+        lines = content.split('\n')
+
+        # Pattern for async/sync methods and functions
+        patterns = [
+            r'async\s+def\s+(broadcast_to_user|broadcast_user_event)\s*\(',
+            r'def\s+(broadcast_to_user|broadcast_user_event)\s*\(',
+        ]
+
+        current_class = None
+        for line_num, line in enumerate(lines, 1):
+            # Track class context
+            class_match = re.match(r'class\s+(\w+)', line.strip())
+            if class_match:
+                current_class = class_match.group(1)
+                continue
+
+            # Check for broadcast functions
+            for pattern in patterns:
+                match = re.search(pattern, line)
+                if match:
+                    func_name = match.group(1)
+                    # Extract basic parameter info from the line
+                    params_match = re.search(r'\((.*?)\)', line)
+                    parameters = []
+                    if params_match:
+                        param_str = params_match.group(1)
+                        if param_str.strip():
+                            # Simple parameter parsing
+                            parameters = [p.strip().split(':')[0].strip()
+                                        for p in param_str.split(',') if p.strip()]
+
+                    func_info = BroadcastFunction(
+                        name=func_name,
+                        module_path=relative_path,
+                        class_name=current_class,
+                        signature=f"{func_name}({', '.join(parameters)})",
+                        line_number=line_num,
+                        parameters=parameters,
+                        return_type=None,
+                        docstring=None
+                    )
+                    self.discovered_functions.append(func_info)
+                    break
 
     def _is_broadcast_function(self, node: ast.FunctionDef) -> bool:
         """Check if function node is a broadcast function."""
@@ -192,6 +248,30 @@ class TestBroadcastFunctionSSotCompliance(SSotBaseTestCase):
 
         print(f"\n=== BROADCAST FUNCTION DISCOVERY ===")
         print(f"Total broadcast functions discovered: {len(broadcast_functions)}")
+
+        if len(broadcast_functions) == 0:
+            # Debug: Let's see what files were scanned
+            project_root = Path(__file__).parent.parent.parent.parent
+            target_files = [
+                project_root / "netra_backend" / "app" / "services" / "websocket_event_router.py",
+                project_root / "netra_backend" / "app" / "services" / "user_scoped_websocket_event_router.py"
+            ]
+
+            print("\nDebug: Checking specific target files:")
+            for file_path in target_files:
+                if file_path.exists():
+                    print(f"  ✓ {file_path} exists")
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        if "broadcast_to_user" in content:
+                            print(f"    - Contains 'broadcast_to_user'")
+                        if "broadcast_user_event" in content:
+                            print(f"    - Contains 'broadcast_user_event'")
+                    except Exception as e:
+                        print(f"    - Error reading file: {e}")
+                else:
+                    print(f"  ✗ {file_path} does not exist")
 
         for func in broadcast_functions:
             print(f"- {func.full_identifier} (line {func.line_number})")
