@@ -2,7 +2,7 @@
 
 **GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1125  
 **Created:** 2025-09-14  
-**Status:** DISCOVERY COMPLETE  
+**Status:** TEST PLANNING COMPLETE  
 **Priority:** P0 - CRITICAL
 
 ## **SSOT Violation Summary**
@@ -38,11 +38,21 @@ Three different MessageRouter implementations causing routing conflicts and bloc
 - [x] Progress tracker created
 - [x] Critical violations identified and prioritized
 
-### ⏳ Phase 1: DISCOVER AND PLAN TEST
-- [ ] Find existing tests protecting MessageRouter functionality
-- [ ] Identify tests that will break during SSOT consolidation
-- [ ] Plan new SSOT tests to validate consolidated implementation
-- [ ] Document test strategy for regression prevention
+### ✅ Phase 1: DISCOVER AND PLAN TEST - COMPLETE
+- [x] Find existing tests protecting MessageRouter functionality
+  - **65+ test files** affected by MessageRouter SSOT consolidation
+  - **12 existing SSOT validation tests** identified
+- [x] Identify tests that will break during SSOT consolidation
+  - Tests importing from deprecated paths will need updates
+  - Existing functional tests should continue working
+- [x] Plan new SSOT tests to validate consolidated implementation
+  - ~20% new SSOT tests: Import validation, implementation detection, violation reproduction
+  - ~60% existing test validation: Functional routing, WebSocket integration, agent pipeline
+  - ~20% test updates: Consolidation safety, regression prevention
+- [x] Document test strategy for regression prevention
+  - Gradual migration with backwards compatibility
+  - Continuous test monitoring for regressions
+  - Risk mitigation through parallel execution and rollback
 
 ### 📋 Phase 2: EXECUTE TEST PLAN
 - [ ] Create failing tests that reproduce SSOT violations
@@ -97,6 +107,13 @@ CANONICAL IMPORT: from netra_backend.app.websocket_core.handlers import MessageR
 - Ensure no breaking changes to public APIs
 
 ## **Next Actions**
-1. Spawn subagent for Phase 1: Discover and plan tests
-2. Continue through systematic SSOT gardener process
-3. Maintain focus on Golden Path protection
+1. ✅ Phase 1 Complete: Test discovery and planning finished
+2. **NEXT:** Spawn subagent for Phase 2: Execute test plan (create 20% new SSOT tests)
+3. Continue through systematic SSOT gardener process
+4. Maintain focus on Golden Path protection
+
+## **Test Plan Summary**
+- **65+ test files** identified that will be affected
+- **12 existing SSOT validation tests** found
+- **Test Strategy:** 20% new / 60% validation / 20% updates
+- **Focus:** Non-docker tests (unit, integration, e2e staging)
