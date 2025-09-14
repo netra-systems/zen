@@ -3539,3 +3539,13 @@
         </related-learnings>
     </learning>
 </specification>
+
+<learning_file>
+  <name>gcp_log_gardener_process_learnings_20250913.xml</name>
+  <title>GCP Log Gardener Process - Automated Log Monitoring and Issue Creation</title>
+  <date>2025-09-13</date>
+  <priority>high</priority>
+  <category>production_monitoring</category>
+  <business_value>00K+ ARR protection through automated production issue detection</business_value>
+  <tags>gcp-logs, issue-automation, production-monitoring, error-clustering, business-impact</tags>
+</learning_file>
