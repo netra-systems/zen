@@ -34,7 +34,7 @@ from shared.isolated_environment import get_env
 # Import WebSocket and Agent integration components
 from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core.types import (
-    MessageType, WebSocketMessage, create_standard_message, WebSocketConnection
+    MessageType, WebSocketMessage, create_standard_message, ConnectionInfo
 )
 from netra_backend.app.agents.mixins.websocket_bridge_adapter import WebSocketBridgeAdapter
 from netra_backend.app.agents.base_agent import BaseAgent

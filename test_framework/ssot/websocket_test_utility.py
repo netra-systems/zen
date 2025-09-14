@@ -46,8 +46,12 @@ class WebSocketTestUtility(WebSocketBridgeTestHelper):
         """Create authenticated WebSocket connection."""
         return await self.auth_helper.create_authenticated_connection(*args, **kwargs)
 
+# Create alias for compatibility with existing test files
+WebSocketTestHelper = WebSocketTestUtility
+
 __all__ = [
     "WebSocketTestUtility",
+    "WebSocketTestHelper",  # Compatibility alias
     "WebSocketBridgeTestHelper",
     "WebSocketAuthHelper",
 ]
