@@ -1,40 +1,55 @@
-# GCP Log Gardener Worklog - Latest - 2025-09-14
+# GCP Log Gardener Worklog - Latest - 2025-09-14 (UPDATED)
 
 ## Session Details
 - **Date**: 2025-09-14
-- **Time**: Generated from Claude Code session
+- **Time**: Updated at 2025-09-14T02:54:00Z
 - **Service Analyzed**: netra-backend-staging
-- **Log Window**: Last 24 hours
-- **Total Log Entries**: 100 entries analyzed
+- **Log Window**: Last 24 hours  
+- **Total Log Entries**: 150+ entries analyzed
+- **Update**: New critical WebSocket errors discovered
 
 ## Raw Log Summary
 
 ### Issues Discovered
 
-#### 🔴 CLUSTER 1: SSOT Validation Warnings (Multiple Manager Instances)
-**Severity**: P3 - Warning (Non-blocking but indicates potential duplication)
-**Count**: Multiple occurrences
-**Context Module**: `netra_backend.app.websocket_core.ssot_validation_enhancer`
+#### 🔴 CLUSTER 1: WebSocket Legacy Message Type Errors (CRITICAL - NEW)
+**Severity**: ERROR - P1 (Critical - Affects Golden Path)
+**Count**: 20+ occurrences in recent hours
+**Context Module**: `netra_backend.app.routes.websocket_ssot`
+**Business Impact**: Directly affects Golden Path chat functionality ($500K+ ARR)
 
 **Sample Log Entry**:
 ```json
 {
-  "severity": "WARNING",
+  "severity": "ERROR",
   "jsonPayload": {
     "context": {
-      "name": "netra_backend.app.websocket_core.ssot_validation_enhancer",
+      "name": "netra_backend.app.routes.websocket_ssot",
       "service": "netra-service"
     },
     "labels": {
-      "function": "validate_manager_creation",
-      "line": "118",
-      "module": "netra_backend.app.websocket_core.ssot_validation_enhancer"
+      "function": "_legacy_message_loop",
+      "line": "1619",
+      "module": "netra_backend.app.routes.websocket_ssot"
     },
-    "message": "SSOT VALIDATION: Multiple manager instances for user demo-user-001 - potential duplication",
-    "timestamp": "2025-09-14T01:31:26.327866+00:00"
+    "message": "[LEGACY MODE] Message loop error: Invalid message type 'legacy_response': Unknown message type: 'legacy_response'. Valid types: [extensive list of valid types]",
+    "timestamp": "2025-09-14T02:53:03.978591+00:00"
   }
 }
 ```
+
+**Description**: The WebSocket legacy compatibility layer is receiving an unrecognized message type 'legacy_response' that is not included in the allowed message types enum. This causes message loop errors and connection cleanup.
+
+**Technical Details**:
+- **Location**: `netra_backend.app.routes.websocket_ssot:1619`
+- **Function**: `_legacy_message_loop` 
+- **Missing Type**: 'legacy_response' not in enum validation
+- **Impact**: Forces connection cleanup and WebSocket disconnect
+
+#### 🔴 CLUSTER 2: SSOT Validation Warnings (Multiple Manager Instances) - PREVIOUS
+**Severity**: P3 - Warning (Non-blocking but indicates potential duplication)
+**Count**: Multiple occurrences (earlier logs)
+**Context Module**: `netra_backend.app.websocket_core.ssot_validation_enhancer`
 
 **Description**: System detects potential duplication of manager instances for the same user, which could lead to resource waste or race conditions.
 
