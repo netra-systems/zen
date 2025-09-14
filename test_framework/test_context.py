@@ -653,7 +653,7 @@ def create_test_context(
     user_id: Optional[str] = None,
     jwt_token: Optional[str] = None,
     websocket_timeout: float = 10.0
-) -> TestContext:
+) -> WebSocketTestContext:
     """
     Factory function to create a TestContext with common defaults.
     
@@ -672,13 +672,13 @@ def create_test_context(
     if jwt_token:
         user_context.jwt_token = jwt_token
     
-    return TestContext(
+    return WebSocketTestContext(
         user_context=user_context,
         websocket_timeout=websocket_timeout
     )
 
 
-def create_isolated_test_contexts(count: int = 2) -> List[TestContext]:
+def create_isolated_test_contexts(count: int = 2) -> List[WebSocketTestContext]:
     """
     Create multiple isolated test contexts for concurrent testing.
     
@@ -686,7 +686,7 @@ def create_isolated_test_contexts(count: int = 2) -> List[TestContext]:
         count: Number of contexts to create
         
     Returns:
-        List of isolated TestContext instances
+        List of isolated WebSocketTestContext instances
     """
     contexts = []
     for i in range(count):

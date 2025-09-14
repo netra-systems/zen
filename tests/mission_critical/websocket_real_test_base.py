@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 # CRITICAL: Use real services - import from proper locations
 from shared.isolated_environment import get_env
-from test_framework.test_context import TestContext, TestUserContext
+from test_framework.test_context import WebSocketTestContext, TestUserContext
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType, ServiceHealth
 from test_framework.websocket_helpers import (
     WebSocketTestHelpers, 
@@ -823,7 +823,7 @@ class RealWebSocketTestBase:
         
         # Connection management
         self.connection_pool = WebSocketConnectionPool()
-        self.test_contexts: List[TestContext] = []
+        self.test_contexts: List[WebSocketTestContext] = []
         
         # Event and performance tracking
         self.performance_monitor = WebSocketPerformanceMonitor()
@@ -982,9 +982,9 @@ class RealWebSocketTestBase:
         self,
         user_id: Optional[str] = None,
         jwt_token: Optional[str] = None
-    ) -> TestContext:
+    ) -> WebSocketTestContext:
         """
-        Create a TestContext with real WebSocket connection.
+        Create a WebSocketTestContext with real WebSocket connection.
         
         Args:
             user_id: Optional user ID for testing
@@ -1014,9 +1014,9 @@ class RealWebSocketTestBase:
     async def create_test_context_with_user_context(
         self,
         user_context: TestUserContext
-    ) -> TestContext:
+    ) -> WebSocketTestContext:
         """
-        Create a TestContext with existing user context.
+        Create a WebSocketTestContext with existing user context.
 
         Args:
             user_context: Existing TestUserContext to use
