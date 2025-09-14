@@ -178,15 +178,15 @@ class TestUserSessionManagement:
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         
         # Test empty string
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session("")
-        
+
         # Test None
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session(None)
-        
+
         # Test non-string
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session(123)
     
     async def test_cleanup_user_session_removes_session(self, mock_llm_manager, test_user_id):
