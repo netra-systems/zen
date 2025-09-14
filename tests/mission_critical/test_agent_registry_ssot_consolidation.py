@@ -30,9 +30,9 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as 
 class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
     """Critical P0 tests for AgentRegistry SSOT consolidation validation"""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment with SSOT patterns"""
-        super().setUp()
+        super().setup_method(method)
         self.env = IsolatedEnvironment()
         self.basic_registry = BasicRegistry()
         self.advanced_registry = AdvancedRegistry()
@@ -168,7 +168,7 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
             basic_registry_works = True
         except Exception as e:
             basic_registry_works = False
-            self.fail(f"Basic registry functionality broken: {e}")
+            raise AssertionError(f"Basic registry functionality broken: {e}")
         
         # Test advanced agent registry functionality  
         try:
@@ -176,7 +176,7 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
             advanced_registry_works = True
         except Exception as e:
             advanced_registry_works = False
-            self.fail(f"Advanced registry functionality broken: {e}")
+            raise AssertionError(f"Advanced registry functionality broken: {e}")
         
         # Both should work for now (before consolidation)
         self.assertTrue(basic_registry_works, "Basic registry must work")
@@ -188,9 +188,9 @@ class TestAgentRegistrySSoTConsolidation(SSotAsyncTestCase):
         )
         self.assertIsNotNone(user_context, "User context creation must work")
 
-    def tearDown(self):
+    def teardown_method(self, method=None):
         """Clean up test resources with SSOT patterns"""
-        super().tearDown()
+        super().teardown_method(method)
 
 
 if __name__ == "__main__":

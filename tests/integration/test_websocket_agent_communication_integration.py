@@ -63,7 +63,7 @@ try:
     )
     from netra_backend.app.services.user_execution_context import UserExecutionContext
     from netra_backend.app.agents.base_agent import BaseAgent
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper
     REAL_COMPONENTS_AVAILABLE = True
 except ImportError as e:

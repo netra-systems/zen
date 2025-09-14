@@ -304,7 +304,7 @@ IMMEDIATE ACTION: Fix DeepAgentState SSOT violations to prevent data leakage.
 
         try:
             # Import both versions to test for inconsistencies
-            from netra_backend.app.agents.state import DeepAgentState as DeprecatedState
+            from netra_backend.app.schemas.agent_models import DeepAgentState as DeprecatedState
             from netra_backend.app.schemas.agent_models import DeepAgentState as SsotState
 
             # Create state using deprecated version (simulating current system)
@@ -359,7 +359,7 @@ IMMEDIATE ACTION: Fix DeepAgentState SSOT violations to prevent data leakage.
     async def _execute_agent_with_sensitive_data(self, user_id: str, sensitive_data: Dict[str, str]) -> Any:
         """Execute agent with sensitive data to test memory isolation"""
         try:
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
 
             state = DeepAgentState(
                 user_id=user_id,

@@ -36,17 +36,17 @@ from typing import Dict, List, Set, Tuple, Any, Optional
 from unittest.mock import patch, MagicMock
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
-from netra_backend.app.logging_config import central_logger
+from shared.logging.unified_logging_ssot import get_logger
 
-logger = central_logger.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class TestRegistrySSotValidation(SSotBaseTestCase):
     """Test suite for validating Agent Registry SSOT compliance."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment for registry SSOT validation."""
-        super().setUp()
+        super().setup_method(method)
         self.codebase_root = Path(__file__).parent.parent.parent.parent
         self.registry_violations = []
         self.registry_instances = []

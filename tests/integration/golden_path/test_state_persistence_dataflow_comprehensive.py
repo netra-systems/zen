@@ -41,7 +41,7 @@ from netra_backend.app.services.state_persistence import state_persistence_servi
 from netra_backend.app.schemas.agent_state import (
     StatePersistenceRequest, StateRecoveryRequest, CheckpointType, RecoveryType
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 # SSOT CONSOLIDATION: StateCacheManager functionality integrated into StatePersistenceService
 from netra_backend.app.services.state_persistence import state_cache_manager
 from shared.isolated_environment import get_env
