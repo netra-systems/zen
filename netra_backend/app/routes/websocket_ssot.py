@@ -1100,9 +1100,9 @@ class WebSocketSSOTRouter:
             user_context = UserExecutionContext(
                 user_id=user_id,
                 thread_id=thread_id,
-                request_id=f"isolated_req_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}",
+                request_id=f"isolated_req_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}",
                 websocket_client_id=connection_id,
-                run_id=f"isolated_run_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+                run_id=f"isolated_run_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
             )
             
             # Step 4: Create connection-scoped manager (no shared state)
@@ -1154,7 +1154,7 @@ class WebSocketSSOTRouter:
         Simplified WebSocket handling for legacy clients that don't support
         the new modes but still need basic connectivity and messaging.
         """
-        connection_id = f"legacy_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+        connection_id = f"legacy_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
         
         try:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
@@ -1834,7 +1834,7 @@ class WebSocketSSOTRouter:
     async def websocket_api_create(self):
         """REST API: WebSocket session preparation (POST /api/v1/websocket)"""
         try:
-            session_id = f"ws_session_{UnifiedIdGenerator.generate_base_id("ws_conn").split('_')[-1]}"
+            session_id = f"ws_session_{UnifiedIdGenerator.generate_base_id('ws_conn').split('_')[-1]}"
             response_data = {
                 "session_id": session_id,
                 "websocket_url": "/ws", 
