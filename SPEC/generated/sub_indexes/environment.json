@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-14T12:24:41.565664",
+    "generated_at": "2025-09-14T14:28:01.636297",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 214
   },
@@ -489,7 +489,7 @@
       "value": "AUTH_SERVICE_HOST",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:684"
+        "auth_service/auth_core/auth_environment.py:708"
       ]
     },
     "AUTH_SERVICE_INTERNAL_URL": {
@@ -507,7 +507,7 @@
       "value": "AUTH_SERVICE_PORT",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:651",
+        "auth_service/auth_core/auth_environment.py:675",
         "scripts/fix_authentication_system.py:174",
         "shared/port_discovery.py:90"
       ]
@@ -825,7 +825,7 @@
         "netra_backend/app/core/config_dependencies.py:274",
         "netra_backend/app/core/config_dependencies.py:311",
         "netra_backend/app/schemas/config.py:1322",
-        "auth_service/auth_core/auth_environment.py:582",
+        "auth_service/auth_core/auth_environment.py:606",
         "scripts/demonstrate_config_protection.py:33",
         "scripts/demonstrate_config_protection.py:54",
         "scripts/demonstrate_config_protection.py:55",
@@ -838,7 +838,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:579",
+        "auth_service/auth_core/auth_environment.py:603",
         "shared/configuration/central_config_validator.py:1173",
         "shared/configuration/cross_service_validator.py:418"
       ]
@@ -928,7 +928,7 @@
         "netra_backend/app/core/config_dependencies.py:298",
         "netra_backend/app/core/config_dependencies.py:287",
         "netra_backend/app/schemas/config.py:1325",
-        "auth_service/auth_core/auth_environment.py:614",
+        "auth_service/auth_core/auth_environment.py:638",
         "scripts/staging_environment_validation_suite.py:649",
         "shared/configuration/central_config_validator.py:105",
         "shared/configuration/cross_service_validator.py:94"
@@ -938,7 +938,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:611",
+        "auth_service/auth_core/auth_environment.py:635",
         "shared/configuration/central_config_validator.py:1174",
         "shared/configuration/cross_service_validator.py:419"
       ]
@@ -1315,28 +1315,28 @@
       "value": "OAUTH_GITHUB_CLIENT_ID",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:639"
+        "auth_service/auth_core/auth_environment.py:663"
       ]
     },
     "OAUTH_GITHUB_CLIENT_SECRET": {
       "value": "OAUTH_GITHUB_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:643"
+        "auth_service/auth_core/auth_environment.py:667"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID": {
       "value": "OAUTH_GOOGLE_CLIENT_ID",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:581"
+        "auth_service/auth_core/auth_environment.py:605"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_": {
       "value": "OAUTH_GOOGLE_CLIENT_ID_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:580"
+        "auth_service/auth_core/auth_environment.py:604"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_ENV": {
@@ -1354,14 +1354,14 @@
       "value": "OAUTH_GOOGLE_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:613"
+        "auth_service/auth_core/auth_environment.py:637"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_SECRET_": {
       "value": "OAUTH_GOOGLE_CLIENT_SECRET_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:612"
+        "auth_service/auth_core/auth_environment.py:636"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_SECRET_ENV": {
@@ -1741,7 +1741,7 @@
       "value": "SERVICE_AUTH_ERROR",
       "category": "environment",
       "locations": [
-        "netra_backend/app/services/unified_authentication_service.py:978"
+        "netra_backend/app/services/unified_authentication_service.py:979"
       ]
     },
     "SKIP_AUTH_VALIDATION": {

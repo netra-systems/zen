@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "configuration",
-    "generated_at": "2025-09-14T12:24:41.558292",
+    "generated_at": "2025-09-14T14:28:01.629251",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 1153
   },
@@ -27,7 +27,7 @@
       "value": "ACCOUNT_LOCKOUT_DURATION",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1060"
+        "auth_service/auth_core/auth_environment.py:1084"
       ]
     },
     "ACI_RESOURCE_GROUP": {
@@ -508,7 +508,7 @@
         "netra_backend/app/core/environment_validator.py:59",
         "netra_backend/app/infrastructure/monitoring.py:144",
         "netra_backend/app/websocket_core/unified_manager.py:1469",
-        "auth_service/auth_core/auth_environment.py:709",
+        "auth_service/auth_core/auth_environment.py:733",
         "scripts/P0_SYSTEM_REGRESSION_TEST.py:272",
         "scripts/P0_SYSTEM_REGRESSION_TEST.py:281"
       ]
@@ -538,7 +538,7 @@
       "value": "BCRYPT_ROUNDS",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:261"
+        "auth_service/auth_core/auth_environment.py:285"
       ]
     },
     "BEAM_SIZE": {
@@ -665,7 +665,7 @@
         "netra_backend/app/smd.py:801",
         "netra_backend/app/smd.py:815",
         "netra_backend/app/smd.py:916",
-        "netra_backend/app/smd.py:1347",
+        "netra_backend/app/smd.py:1356",
         "scripts/deploy_to_gcp_actual.py:123"
       ]
     },
@@ -1481,7 +1481,7 @@
         "netra_backend/app/schemas/config.py:1146",
         "netra_backend/app/schemas/config.py:1341",
         "netra_backend/app/schemas/config.py:1743",
-        "auth_service/auth_core/auth_environment.py:888",
+        "auth_service/auth_core/auth_environment.py:912",
         "auth_service/auth_core/validation/pre_deployment_validator.py:611",
         "auth_service/auth_core/validation/pre_deployment_validator.py:768"
       ]
@@ -1995,7 +1995,7 @@
         "netra_backend/app/websocket_core/auth_remediation.py:74",
         "netra_backend/app/websocket_core/unified_websocket_auth.py:134",
         "netra_backend/app/websocket_core/unified_websocket_auth.py:1079",
-        "auth_service/auth_core/auth_environment.py:844"
+        "auth_service/auth_core/auth_environment.py:868"
       ]
     },
     "DEMO_PERMISSIVE_AUTH": {
@@ -4571,7 +4571,7 @@
       "locations": [
         "netra_backend/app/core/environment_validator.py:66",
         "auth_service/auth_core/auth_environment.py:82",
-        "auth_service/auth_core/auth_environment.py:1248",
+        "auth_service/auth_core/auth_environment.py:1272",
         "auth_service/auth_core/validation/pre_deployment_validator.py:196",
         "auth_service/auth_core/validation/pre_deployment_validator.py:602",
         "shared/config_change_tracker.py:373",
@@ -5006,14 +5006,14 @@
       "value": "LOGIN_RATE_LIMIT",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:961"
+        "auth_service/auth_core/auth_environment.py:985"
       ]
     },
     "LOGIN_RATE_LIMIT_PERIOD": {
       "value": "LOGIN_RATE_LIMIT_PERIOD",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:993"
+        "auth_service/auth_core/auth_environment.py:1017"
       ]
     },
     "LOG_ASYNC_CHECKOUT": {
@@ -5040,7 +5040,7 @@
         "netra_backend/app/core/config_dependencies.py:724",
         "netra_backend/app/core/configuration_validator.py:676",
         "netra_backend/app/core/unified_logging.py:204",
-        "auth_service/auth_core/auth_environment.py:914",
+        "auth_service/auth_core/auth_environment.py:938",
         "auth_service/auth_core/config.py:189",
         "auth_service/auth_core/config.py:197",
         "auth_service/gunicorn_config.py:107",
@@ -5096,7 +5096,7 @@
       "value": "MAX_FAILED_LOGIN_ATTEMPTS",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1030"
+        "auth_service/auth_core/auth_environment.py:1054"
       ]
     },
     "MAX_LENGTH": {
@@ -5299,7 +5299,7 @@
       "value": "MIN_PASSWORD_LENGTH",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1075"
+        "auth_service/auth_core/auth_environment.py:1099"
       ]
     },
     "MISSING": {
@@ -6958,7 +6958,7 @@
       "value": "REQUIRE_PASSWORD_COMPLEXITY",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1111"
+        "auth_service/auth_core/auth_environment.py:1135"
       ]
     },
     "REQUIRE_USER_EXECUTION_CONTEXT": {
@@ -7458,7 +7458,7 @@
       "value": "SERVICE_VALIDATION_FAILED",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/services/unified_authentication_service.py:951"
+        "netra_backend/app/services/unified_authentication_service.py:952"
       ]
     },
     "SERVICE_VERSION": {
@@ -7572,7 +7572,7 @@
       "value": "SESSION_TTL",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:545"
+        "auth_service/auth_core/auth_environment.py:569"
       ]
     },
     "SESSION_TTL_HOURS": {
@@ -7812,35 +7812,35 @@
       "value": "SMTP_FROM_EMAIL",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1149"
+        "auth_service/auth_core/auth_environment.py:1173"
       ]
     },
     "SMTP_HOST": {
       "value": "SMTP_HOST",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1130"
+        "auth_service/auth_core/auth_environment.py:1154"
       ]
     },
     "SMTP_PASSWORD": {
       "value": "SMTP_PASSWORD",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1145"
+        "auth_service/auth_core/auth_environment.py:1169"
       ]
     },
     "SMTP_PORT": {
       "value": "SMTP_PORT",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1135"
+        "auth_service/auth_core/auth_environment.py:1159"
       ]
     },
     "SMTP_USERNAME": {
       "value": "SMTP_USERNAME",
       "category": "configuration",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:1141"
+        "auth_service/auth_core/auth_environment.py:1165"
       ]
     },
     "SOC2_VALIDATION_ENABLED": {
@@ -7877,7 +7877,7 @@
       "value": "SSOT",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/agents/supervisor_ssot.py:447",
+        "netra_backend/app/agents/supervisor_ssot.py:458",
         "netra_backend/app/websocket_core/utils.py:1656",
         "scripts/validate_bug_fixes.py:47",
         "scripts/validate_docker_workflow.py:586",
@@ -7933,7 +7933,7 @@
       "value": "STARTUP_CRITICAL_FIXES_VALIDATION_FAILED",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/smd.py:1554"
+        "netra_backend/app/smd.py:1563"
       ]
     },
     "STARTUP_ENDPOINT_PATH": {
@@ -7961,7 +7961,7 @@
       "value": "STARTUP_FIXES_UNEXPECTED_",
       "category": "configuration",
       "locations": [
-        "netra_backend/app/smd.py:1583"
+        "netra_backend/app/smd.py:1592"
       ]
     },
     "STARTUP_TIMEOUT": {
@@ -8708,7 +8708,7 @@
         "netra_backend/app/routes/agents_execute.py:180",
         "netra_backend/app/routes/agents_execute.py:195",
         "netra_backend/app/routes/websocket_ssot.py:774",
-        "netra_backend/app/smd.py:1822",
+        "netra_backend/app/smd.py:1831",
         "netra_backend/app/websocket_core/auth_remediation.py:162",
         "netra_backend/app/websocket_core/context.py:131",
         "netra_backend/app/websocket_core/event_validator.py:1347"

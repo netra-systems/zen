@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-14T12:24:41.879130",
+    "generated_at": "2025-09-14T14:28:01.932412",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 1821
   },
@@ -720,14 +720,14 @@
       "value": "/5 startup fixes applied - some functionality may be degraded",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1571"
+        "netra_backend/app/smd.py:1580"
       ]
     },
     "/5 startup fixes applied with": {
       "value": "/5 startup fixes applied with",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1569"
+        "netra_backend/app/smd.py:1578"
       ]
     },
     "/5 successful": {
@@ -741,7 +741,7 @@
       "value": "/5 successful,",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1519"
+        "netra_backend/app/smd.py:1528"
       ]
     },
     "/50+ tests)": {
@@ -762,7 +762,7 @@
       "value": "/7",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1776"
+        "netra_backend/app/smd.py:1785"
       ]
     },
     "/8 tests": {
@@ -1242,7 +1242,7 @@
       "value": "/api/agents/run_agent_v2",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1711"
+        "netra_backend/app/smd.py:1720"
       ]
     },
     "/api/agents/start": {
@@ -1272,21 +1272,21 @@
       "value": "/api/agents/v2/thread/{thread_id}/runs",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1714"
+        "netra_backend/app/smd.py:1723"
       ]
     },
     "/api/agents/v2/{run_id}/state": {
       "value": "/api/agents/v2/{run_id}/state",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1713"
+        "netra_backend/app/smd.py:1722"
       ]
     },
     "/api/agents/v2/{run_id}/status": {
       "value": "/api/agents/v2/{run_id}/status",
       "category": "paths",
       "locations": [
-        "netra_backend/app/smd.py:1712"
+        "netra_backend/app/smd.py:1721"
       ]
     },
     "/api/auth": {
@@ -2912,21 +2912,21 @@
       "value": "/createtestsv2 agent goldenpath messages work, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1080"
+        "scripts/claude-instance-orchestrator.py:1113"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, integration": {
       "value": "/createtestsv2 agent goldenpath messages work, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1075"
+        "scripts/claude-instance-orchestrator.py:1108"
       ]
     },
     "/createtestsv2 agent goldenpath messages work, unit": {
       "value": "/createtestsv2 agent goldenpath messages work, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1065"
+        "scripts/claude-instance-orchestrator.py:1098"
       ]
     },
     "/dashboard": {
@@ -3257,14 +3257,14 @@
       "value": "/failingtestsgardener agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1140"
+        "scripts/claude-instance-orchestrator.py:1173"
       ]
     },
     "/failingtestsgardener critical": {
       "value": "/failingtestsgardener critical",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1145"
+        "scripts/claude-instance-orchestrator.py:1178"
       ]
     },
     "/favicon.ico": {
@@ -3295,10 +3295,10 @@
       "value": "/gcploggardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1070",
-        "scripts/claude-instance-orchestrator.py:1110",
-        "scripts/claude-instance-orchestrator.py:1150",
-        "scripts/claude-instance-orchestrator.py:1200"
+        "scripts/claude-instance-orchestrator.py:1103",
+        "scripts/claude-instance-orchestrator.py:1143",
+        "scripts/claude-instance-orchestrator.py:1183",
+        "scripts/claude-instance-orchestrator.py:1233"
       ]
     },
     "/generate": {
@@ -3320,44 +3320,44 @@
       "value": "/gitcommitgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1055",
-        "scripts/claude-instance-orchestrator.py:1195"
+        "scripts/claude-instance-orchestrator.py:1088",
+        "scripts/claude-instance-orchestrator.py:1228"
       ]
     },
     "/gitissueprogressorv3 agents": {
       "value": "/gitissueprogressorv3 agents",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1115",
-        "scripts/claude-instance-orchestrator.py:1125"
+        "scripts/claude-instance-orchestrator.py:1148",
+        "scripts/claude-instance-orchestrator.py:1158"
       ]
     },
     "/gitissueprogressorv3 goldenpath": {
       "value": "/gitissueprogressorv3 goldenpath",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1130"
+        "scripts/claude-instance-orchestrator.py:1163"
       ]
     },
     "/gitissueprogressorv3 p0": {
       "value": "/gitissueprogressorv3 p0",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1120"
+        "scripts/claude-instance-orchestrator.py:1153"
       ]
     },
     "/gitissueprogressorv3 removing legacy": {
       "value": "/gitissueprogressorv3 removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1160"
+        "scripts/claude-instance-orchestrator.py:1193"
       ]
     },
     "/gitissueprogressorv3 tests p1": {
       "value": "/gitissueprogressorv3 tests p1",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1135"
+        "scripts/claude-instance-orchestrator.py:1168"
       ]
     },
     "/groups/": {
@@ -4430,7 +4430,7 @@
       "value": "/prmergergit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1190"
+        "scripts/claude-instance-orchestrator.py:1223"
       ]
     },
     "/proc/": {
@@ -4614,7 +4614,7 @@
       "value": "/refreshgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1060"
+        "scripts/claude-instance-orchestrator.py:1093"
       ]
     },
     "/register": {
@@ -4747,28 +4747,28 @@
       "value": "/runtests agents, e2e gcp",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1185"
+        "scripts/claude-instance-orchestrator.py:1218"
       ]
     },
     "/runtests all, integration": {
       "value": "/runtests all, integration",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1180"
+        "scripts/claude-instance-orchestrator.py:1213"
       ]
     },
     "/runtests all, unit": {
       "value": "/runtests all, unit",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1170"
+        "scripts/claude-instance-orchestrator.py:1203"
       ]
     },
     "/runtests critical, e2e": {
       "value": "/runtests critical, e2e",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1175"
+        "scripts/claude-instance-orchestrator.py:1208"
       ]
     },
     "/s": {
@@ -5044,36 +5044,36 @@
       "value": "/ssotgardener agent goldenpath messages work",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1105"
+        "scripts/claude-instance-orchestrator.py:1138"
       ]
     },
     "/ssotgardener message routing": {
       "value": "/ssotgardener message routing",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1085"
+        "scripts/claude-instance-orchestrator.py:1118"
       ]
     },
     "/ssotgardener removing legacy": {
       "value": "/ssotgardener removing legacy",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1100",
-        "scripts/claude-instance-orchestrator.py:1155"
+        "scripts/claude-instance-orchestrator.py:1133",
+        "scripts/claude-instance-orchestrator.py:1188"
       ]
     },
     "/ssotgardener tests": {
       "value": "/ssotgardener tests",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1095"
+        "scripts/claude-instance-orchestrator.py:1128"
       ]
     },
     "/ssotgardener websockets or auth": {
       "value": "/ssotgardener websockets or auth",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1090"
+        "scripts/claude-instance-orchestrator.py:1123"
       ]
     },
     "/staging": {
@@ -5453,7 +5453,7 @@
       "value": "/testgardener",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1165"
+        "scripts/claude-instance-orchestrator.py:1198"
       ]
     },
     "/tests": {
@@ -5651,7 +5651,7 @@
       "value": "/ultimate-test-deploy-loop",
       "category": "paths",
       "locations": [
-        "scripts/claude-instance-orchestrator.py:1205"
+        "scripts/claude-instance-orchestrator.py:1238"
       ]
     },
     "/unit/": {

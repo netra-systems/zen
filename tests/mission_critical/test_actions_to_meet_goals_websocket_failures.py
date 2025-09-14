@@ -42,7 +42,7 @@ from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 
 # Import for WebSocket event validation
-from tests.mission_critical.test_websocket_agent_events_suite import WebSocketEventValidator
+from tests.mission_critical.test_websocket_agent_events_suite import MissionCriticalEventValidator
 
 
 class TestActionsToMeetGoalsWebSocketFailures(SSotAsyncTestCase):
@@ -65,7 +65,7 @@ class TestActionsToMeetGoalsWebSocketFailures(SSotAsyncTestCase):
         self.test_client_id = f"ws_test_{uuid.uuid4().hex[:8]}"
         
         # Initialize WebSocket event validator
-        self.event_validator = WebSocketEventValidator()
+        self.event_validator = MissionCriticalEventValidator()
         
         # Track mission critical metrics
         self.record_metric("test_category", "mission_critical_websocket")
