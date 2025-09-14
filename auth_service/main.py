@@ -662,7 +662,7 @@ async def health_auth() -> Dict[str, Any]:
             auth_svc = get_auth_service()
             
             # Verify JWT creation and validation capabilities
-            if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'verify_token'):
+            if hasattr(auth_svc, 'create_access_token') and hasattr(auth_svc, 'validate_token'):
                 health_response["capabilities"]["jwt_validation"] = True
             
         except Exception as jwt_error:
