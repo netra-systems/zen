@@ -142,7 +142,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify proper error handling
@@ -184,7 +184,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         start_time = time.time()
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state,
+            user_context=self.test_user_context,
             timeout=timeout
         )
         execution_time = time.time() - start_time
@@ -223,7 +223,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify exception handling
@@ -259,7 +259,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify WebSocket bridge was set on agent (multiple methods)
@@ -282,7 +282,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         with patch.object(self.execution_core, '_setup_agent_websocket') as mock_setup:
             await self.execution_core.execute_agent(
                 context=self.test_context,
-                state=self.test_state
+                user_context=self.test_user_context
             )
             mock_setup.assert_called_once()
         
@@ -303,7 +303,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify death detection
@@ -346,7 +346,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify metrics collection
@@ -391,7 +391,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
                 # Execute agent
                 result = await self.execution_core.execute_agent(
                     context=self.test_context,
-                    state=self.test_state
+                    user_context=self.test_user_context
                 )
                 
                 # Verify trace context creation
@@ -422,7 +422,7 @@ class TestAgentExecutionCore(SSotAsyncTestCase):
         # Execute agent
         result = await self.execution_core.execute_agent(
             context=self.test_context,
-            state=self.test_state
+            user_context=self.test_user_context
         )
         
         # Verify heartbeat is disabled (business requirement)
