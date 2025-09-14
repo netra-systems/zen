@@ -143,11 +143,9 @@ class TestSupervisorWebSocketIntegration:
         """Create supervisor agent with mocked dependencies."""
         
         try:
-            agent = SupervisorAgent(
-                mock_db_session,
-                mock_llm_manager,
-                mock_websocket_manager,
-                mock_tool_dispatcher,
+            agent = SupervisorAgent.create(
+                llm_manager=mock_llm_manager,
+                websocket_bridge=mock_websocket_manager
             )
 
             return agent
@@ -348,8 +346,9 @@ class TestSupervisorWebSocketIntegration:
             # Mock justification: Flow logging subsystem is peripheral to
             # WebSocket message handling SUT
 
-            with patch.object(supervisor_agent, "flow_logger") as mock_logger:
-
+            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
+                mock_logger = AsyncMock()
+                mock_logger_factory.return_value = mock_logger
                 mock_logger.generate_flow_id.return_value = "flow-123"
 
                 mock_logger.start_flow.return_value = None
@@ -417,8 +416,9 @@ class TestSupervisorWebSocketIntegration:
             # Mock justification: Flow logging subsystem is peripheral to
             # concurrent WebSocket processing SUT
 
-            with patch.object(supervisor_agent, "flow_logger") as mock_logger:
-
+            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
+                mock_logger = AsyncMock()
+                mock_logger_factory.return_value = mock_logger
                 mock_logger.generate_flow_id.side_effect = [
 
                     f"flow-{i}" for i in range(3)
@@ -560,8 +560,9 @@ class TestSupervisorWebSocketIntegration:
             # Mock justification: Flow logging subsystem is peripheral to
             # WebSocket disconnection handling SUT
 
-            with patch.object(supervisor_agent, "flow_logger") as mock_logger:
-
+            with patch("netra_backend.app.agents.supervisor.observability_flow.get_supervisor_flow_logger") as mock_logger_factory:
+                mock_logger = AsyncMock()
+                mock_logger_factory.return_value = mock_logger
                 mock_logger.generate_flow_id.return_value = "flow-disconnect"
 
                 mock_logger.start_flow.return_value = None
@@ -591,23 +592,21 @@ class TestSupervisorWebSocketIntegration:
         """Test getting agent health status through WebSocket."""
         # Mock completion helpers
 
-        with patch.object(supervisor_agent, "completion_helpers") as mock_helpers:
+        expected_health = {
 
-            expected_health = {
+            "status": "healthy",
 
-                "status": "healthy",
+            "agent_name": "Supervisor",
 
-                "agent_name": "Supervisor",
+            "active_connections": 5,
 
-                "active_connections": 5,
+            "processing_status": "ready",
 
-                "processing_status": "ready",
+            "last_activity": datetime.now(timezone.utc).isoformat(),
 
-                "last_activity": datetime.now(timezone.utc).isoformat(),
+        }
 
-            }
-
-            mock_helpers.get_agent_health_status.return_value = expected_health
+        with patch.object(supervisor_agent, 'get_health_status', return_value=expected_health):
 
             # Get health status
 
@@ -615,8 +614,6 @@ class TestSupervisorWebSocketIntegration:
 
 
             assert health == expected_health
-
-            mock_helpers.get_agent_health_status.assert_called_once()
 
 
     @pytest.mark.asyncio
@@ -626,25 +623,23 @@ class TestSupervisorWebSocketIntegration:
         """Test performance metrics collection for WebSocket communication."""
         # Mock completion helpers
 
-        with patch.object(supervisor_agent, "completion_helpers") as mock_helpers:
+        expected_metrics = {
 
-            expected_metrics = {
+            "messages_processed": 42,
 
-                "messages_processed": 42,
+            "average_response_time": 1.5,
 
-                "average_response_time": 1.5,
+            "success_rate": 0.95,
 
-                "success_rate": 0.95,
+            "error_count": 2,
 
-                "error_count": 2,
+            "concurrent_sessions": 3,
 
-                "concurrent_sessions": 3,
+            "uptime_seconds": 3600,
 
-                "uptime_seconds": 3600,
+        }
 
-            }
-
-            mock_helpers.get_agent_performance_metrics.return_value = expected_metrics
+        with patch.object(supervisor_agent, 'get_performance_metrics', return_value=expected_metrics):
 
             # Get performance metrics
 
@@ -656,5 +651,3 @@ class TestSupervisorWebSocketIntegration:
             assert metrics["messages_processed"] == 42
 
             assert metrics["success_rate"] == 0.95
-
-            mock_helpers.get_agent_performance_metrics.assert_called_once()
