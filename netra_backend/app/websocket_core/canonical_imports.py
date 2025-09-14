@@ -29,12 +29,32 @@ from netra_backend.app.websocket_core.canonical_imports import (
 # CANONICAL IMPORT PATHS - Single Source of Truth
 # ============================================================================
 
-# CANONICAL: WebSocket Manager Factory (PREFERRED)
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    create_websocket_manager,
-    FactoryInitializationError,
-    WebSocketComponentError,
+# SSOT REDIRECT: WebSocket Manager (PREFERRED) - Issue #989 fix
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager,
+    get_websocket_manager,
 )
+
+# BACKWARDS COMPATIBILITY: Deprecated factory imports
+async def create_websocket_manager(user_context=None, **kwargs):
+    """DEPRECATED: Backwards compatibility redirect to SSOT get_websocket_manager."""
+    import warnings
+    warnings.warn(
+        "create_websocket_manager from canonical_imports is deprecated. "
+        "Use get_websocket_manager from websocket_manager directly.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return await get_websocket_manager(user_context=user_context, **kwargs)
+
+# For backwards compatibility
+class FactoryInitializationError(Exception):
+    """DEPRECATED: Use standard exceptions instead."""
+    pass
+
+class WebSocketComponentError(Exception):
+    """DEPRECATED: Use standard exceptions instead."""
+    pass
 
 # CANONICAL: Unified WebSocket Manager (Direct Use - Use Factory Instead)
 from netra_backend.app.websocket_core.unified_manager import (
@@ -72,10 +92,14 @@ from netra_backend.app.websocket_core.migration_adapter import (
 # CANONICAL EXPORT INTERFACE
 # ============================================================================
 
-# Single source of truth exports
+# SSOT exports (Issue #989 fix)
 __all__ = [
-    # PREFERRED: Use these for new code
-    'create_websocket_manager',
+    # SSOT: Use these for new code
+    'WebSocketManager',  # Direct SSOT class
+    'get_websocket_manager',  # SSOT factory function
+    
+    # BACKWARDS COMPATIBILITY: Deprecated - will be removed
+    'create_websocket_manager',  # Redirects to get_websocket_manager
     
     # INTERFACE: Use for type checking and contracts
     'WebSocketManagerProtocol',
