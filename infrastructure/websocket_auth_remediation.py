@@ -465,12 +465,12 @@ class WebSocketAuthManager:
     
     def _create_demo_auth_result(self, connection_id: str) -> WebSocketAuthResult:
         """Create authentication result for demo mode."""
-        # Create demo user context
-        demo_user_context = UserExecutionContext(
-            user_id=UserID("demo-user"),
-            session_id=SessionID("demo-session"),
-            organization_id=None,
-            permissions=set(),
+        # Create demo user context using SSOT factory method
+        demo_user_context = UserExecutionContext.from_request_supervisor(
+            user_id="demo-user",
+            thread_id=f"demo-thread-{int(time.time())}",
+            run_id=f"demo-run-{int(time.time())}",
+            websocket_connection_id=connection_id,
             metadata={"demo_mode": True}
         )
         

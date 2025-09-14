@@ -56,6 +56,7 @@ from shared.logging.unified_logging_ssot import get_logger
 # Import types and utilities
 from shared.types.core_types import UserID, ThreadID, ensure_user_id, ensure_thread_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id
 
 # Import WebSocket manager (canonical path)
 from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
@@ -122,10 +123,10 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
         """
         logger.info("🔍 PHASE 1: Testing single user instance uniqueness")
 
-        # Create consistent user context
+        # Create consistent user context with proper ID format
         user_context = UserExecutionContext(
-            user_id=ensure_user_id("unique_test_user"),
-            thread_id=ensure_thread_id("unique_test_thread"),
+            user_id=ensure_user_id(generate_user_id()),
+            thread_id=ensure_thread_id(generate_thread_id()),
             session_id="unique_test_session"
         )
 
@@ -203,7 +204,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
                 self.record_metric("instance_leak_detected", True)
 
                 # This assertion should FAIL if instances are not properly managed
-                self.fail(failure_message)
+                raise AssertionError(failure_message)
 
             else:
                 logger.info("✅ INSTANCE CLEANUP SUCCESS: Old instances properly cleaned up")
@@ -223,7 +224,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             self.record_metric("instance_pattern", "inconsistent")
 
             # This assertion should FAIL for inconsistent behavior
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
     async def test_websocket_manager_multi_user_isolation(self):
         """
@@ -242,8 +243,8 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
         # Create different user contexts
         user_contexts = [
             UserExecutionContext(
-                user_id=ensure_user_id(f"isolation_user_{i}"),
-                thread_id=ensure_thread_id(f"isolation_thread_{i}"),
+                user_id=ensure_user_id(generate_user_id()),
+                thread_id=ensure_thread_id(generate_thread_id()),
                 session_id=f"isolation_session_{i}"
             )
             for i in range(3)
@@ -314,7 +315,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             self.record_metric("shared_instances", len(shared_instances))
 
             # This assertion should FAIL for user isolation breaches
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         else:
             # Perfect isolation - each user has their own instance
@@ -380,8 +381,8 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
         # Create multiple user contexts for concurrent testing
         user_contexts = [
             UserExecutionContext(
-                user_id=ensure_user_id(f"concurrent_user_{i}"),
-                thread_id=ensure_thread_id(f"concurrent_thread_{i}"),
+                user_id=ensure_user_id(generate_user_id()),
+                thread_id=ensure_thread_id(generate_thread_id()),
                 session_id=f"concurrent_session_{i}"
             )
             for i in range(10)
@@ -471,7 +472,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             self.record_metric("concurrent_instance_sharing", True)
 
             # This should fail if instances are shared inappropriately
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         logger.info("✅ CONCURRENT CREATION SUCCESS: All managers created safely with unique instances")
         self.record_metric("concurrent_creation_success_rate", len(successful_creations) / len(user_contexts))
@@ -505,8 +506,8 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             # Create multiple managers
             user_contexts = [
                 UserExecutionContext(
-                    user_id=ensure_user_id(f"memory_test_user_{cycle}_{i}"),
-                    thread_id=ensure_thread_id(f"memory_test_thread_{cycle}_{i}"),
+                    user_id=ensure_user_id(generate_user_id()),
+                    thread_id=ensure_thread_id(generate_thread_id()),
                     session_id=f"memory_test_session_{cycle}_{i}"
                 )
                 for i in range(10)
@@ -578,7 +579,7 @@ class TestWebSocketManagerInstanceUniqueness(SSotAsyncTestCase):
             self.record_metric("memory_leak_detected", True)
 
             # This should fail for significant memory leaks
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         elif memory_growth > acceptable_growth:
             logger.warning(f"⚠️ MODERATE MEMORY GROWTH: +{memory_growth} objects (above {acceptable_growth} threshold)")

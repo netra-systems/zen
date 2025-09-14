@@ -52,6 +52,7 @@ from shared.logging.unified_logging_ssot import get_logger
 # Import types for validation
 from shared.types.core_types import UserID, ensure_user_id, ensure_thread_id
 from netra_backend.app.services.user_execution_context import UserExecutionContext
+from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id
 
 logger = get_logger(__name__)
 
@@ -192,7 +193,7 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
                 logger.error(f"   - {import_info['module_path']}.{import_info['attribute_name']} ({import_info['attribute_type']})")
 
             # This assertion should FAIL before SSOT consolidation
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         else:
             # If we get here, SSOT consolidation was successful
@@ -239,8 +240,8 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
 
         # Create test user context for manager creation
         user_context = UserExecutionContext(
-            user_id=ensure_user_id("ssot_test_user"),
-            thread_id=ensure_thread_id("ssot_test_thread"),
+            user_id=ensure_user_id(generate_user_id()),
+            thread_id=ensure_thread_id(generate_thread_id()),
             session_id="ssot_test_session"
         )
 
@@ -303,7 +304,7 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
             logger.error(failure_message)
 
             # This assertion should FAIL before SSOT consolidation
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         elif len(manager_types) == 1:
             # Success case - all imports return same type
@@ -435,9 +436,9 @@ class TestWebSocketManagerImportConsolidation(SSotAsyncTestCase):
             logger.info(f"✅ CANONICAL PATH SUCCESS: {canonical_path} -> {manager_type}")
 
         except ImportError as e:
-            self.fail(f"❌ CANONICAL PATH FAILURE: Cannot import {canonical_path}: {e}")
+            raise AssertionError(f"❌ CANONICAL PATH FAILURE: Cannot import {canonical_path}: {e}")
         except Exception as e:
-            self.fail(f"❌ CANONICAL PATH ERROR: {canonical_path} failed: {e}")
+            raise AssertionError(f"❌ CANONICAL PATH ERROR: {canonical_path} failed: {e}")
 
     def teardown_method(self, method):
         """Teardown with comprehensive reporting."""

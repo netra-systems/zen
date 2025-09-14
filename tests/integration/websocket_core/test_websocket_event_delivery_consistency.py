@@ -366,7 +366,7 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
             self.record_metric("path_availability_failure", True)
 
             # This should fail if paths are not working
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         # Analyze event delivery consistency
         await self._check_event_content_consistency(successful_paths)
@@ -432,7 +432,7 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
             self.record_metric("content_inconsistencies", len(content_inconsistencies))
 
             # This should FAIL if content is inconsistent
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         else:
             logger.info("✅ EVENT CONTENT CONSISTENCY: All paths deliver identical event content")
@@ -485,7 +485,7 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
             self.record_metric("completeness_inconsistencies", len(incomplete_paths))
 
             # This should FAIL if completeness is inconsistent
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         else:
             logger.info(f"✅ EVENT COMPLETENESS CONSISTENCY: All paths deliver all {expected_event_count} critical events")
@@ -541,7 +541,7 @@ class TestWebSocketEventDeliveryConsistency(SSotAsyncTestCase):
             self.record_metric("performance_inconsistency", True)
 
             # This may fail for significant performance differences
-            self.fail(failure_message)
+            raise AssertionError(failure_message)
 
         elif time_variance > acceptable_variance:
             logger.warning(f"⚠️ MODERATE PERFORMANCE VARIANCE: {time_variance:.4f}s (above {acceptable_variance:.3f}s)")
