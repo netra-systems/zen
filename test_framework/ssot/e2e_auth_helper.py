@@ -743,10 +743,11 @@ class E2EAuthHelper:
         staging_user_id = f"e2e-staging-{hash(email) & 0xFFFFFFFF:08x}"
         
         # Create token with staging-appropriate claims
+        # PHASE 2 FIX: Include agent permissions for WebSocket agent events
         payload = {
             "sub": staging_user_id,
             "email": email,
-            "permissions": ["read", "write", "e2e_test"],
+            "permissions": ["read", "write", "execute", "basic_chat", "agent_access", "e2e_test"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=30),
             "type": "access",

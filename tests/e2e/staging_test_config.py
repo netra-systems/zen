@@ -233,10 +233,11 @@ class StagingConfig:
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             
             # Create token for EXISTING staging user (should pass user validation)
+            # PHASE 2 FIX: Add agent-specific permissions for WebSocket agent events
             token = auth_helper.create_test_jwt_token(
                 user_id=test_user["user_id"],
                 email=test_user["email"],
-                permissions=["read", "write", "execute"]  # Standard test permissions
+                permissions=["read", "write", "execute", "basic_chat", "agent_access"]  # Agent-enabled permissions
             )
             
             print(f"[SUCCESS] Created staging JWT for EXISTING user: {test_user['user_id']}")
@@ -259,10 +260,11 @@ class StagingConfig:
                 staging_secret = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
                 
                 # Create fallback payload - NOTE: This may still fail in staging
+                # PHASE 2 FIX: Include agent permissions in fallback JWT
                 payload = {
                     "sub": f"fallback-user-{uuid.uuid4().hex[:8]}",
-                    "email": "fallback-test@netrasystems.ai", 
-                    "permissions": ["read", "write"],
+                    "email": "fallback-test@netrasystems.ai",
+                    "permissions": ["read", "write", "execute", "basic_chat", "agent_access"],
                     "iat": int(datetime.now(timezone.utc).timestamp()),
                     "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
                     "iss": "netra-auth-service",
