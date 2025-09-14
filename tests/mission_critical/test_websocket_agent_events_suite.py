@@ -3160,8 +3160,10 @@ class TestAgentWebSocketIntegrationEnhanced:
         assert agent_registry._websocket_manager is websocket_manager, "WebSocket manager reference mismatch"
         
         # Test enhanced tool dispatcher creation with WebSocket integration
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
@@ -3185,8 +3187,10 @@ class TestAgentWebSocketIntegrationEnhanced:
         context = create_test_context()
         
         # Setup execution engine with WebSocket integration
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
@@ -3227,8 +3231,10 @@ class TestAgentWebSocketIntegrationEnhanced:
         event_capture = RealWebSocketEventCapture()
         
         # Setup enhanced tool execution engine
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
@@ -3295,8 +3301,10 @@ class TestAgentWebSocketIntegrationEnhanced:
         
         # Test user context integration
         user_id = f"test_user_{uuid.uuid4().hex[:8]}"
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=user_id,
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         
@@ -3352,8 +3360,10 @@ class TestAgentWebSocketIntegrationEnhanced:
         assert bridge.get_integration_state() == IntegrationState.UNINITIALIZED, "Bridge should start uninitialized"
         
         # Test integration initialization
-        user_context = UserExecutionContext.create_for_request(
+        user_context = UserExecutionContext.from_request(
             user_id=f"test_user_{uuid.uuid4().hex[:8]}",
+            thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+            run_id=f"test_run_{uuid.uuid4().hex[:8]}",
             request_id=f"test_req_{uuid.uuid4().hex[:8]}"
         )
         

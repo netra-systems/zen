@@ -129,13 +129,13 @@ class TestSupervisorAgentCore(BaseTestCase):
         self.websocket_bridge.websocket_manager = self.websocket_manager
         self.websocket_bridge.emit_agent_event = AsyncMock()
         
-        # Create real UserExecutionContext for testing using supervisor compatibility method
-        self.test_context = UserExecutionContext.from_request_supervisor(
+        # Create real UserExecutionContext for testing using modern API
+        self.test_context = UserExecutionContext.from_request(
             user_id=f"test-user-{uuid.uuid4().hex[:8]}",
             thread_id=f"test-thread-{uuid.uuid4().hex[:8]}",
             run_id=f"test-run-{uuid.uuid4().hex[:8]}",
-            websocket_connection_id="test-connection-123",
-            metadata={"user_request": "test request for SupervisorAgent"}
+            websocket_client_id="test-connection-123",
+            agent_context={"user_request": "test request for SupervisorAgent"}
         )
         
         # Mock database session
@@ -174,7 +174,8 @@ class TestSupervisorAgentCore(BaseTestCase):
         # Create real SupervisorAgent instance for testing
         self.supervisor = SupervisorAgent(
             llm_manager=self.llm_manager,
-            websocket_bridge=self.websocket_bridge
+            websocket_bridge=self.websocket_bridge,
+            user_context=self.test_context
         )
         
         # Track resources for cleanup
@@ -262,12 +263,12 @@ class TestSupervisorAgentCore(BaseTestCase):
         # Create multiple user contexts
         contexts = []
         for i in range(5):
-            context = UserExecutionContext.from_request_supervisor(
+            context = UserExecutionContext.from_request(
                 user_id=f"concurrent-user-{i}",
                 thread_id=f"concurrent-thread-{i}",
                 run_id=f"concurrent-run-{i}",
-                websocket_connection_id=f"connection-{i}",
-                metadata={"user_request": f"concurrent test {i}"}
+                websocket_client_id=f"connection-{i}",
+                agent_context={"user_request": f"concurrent test {i}"}
             )
             context = context.with_db_session(AsyncMock())
             contexts.append(context)
