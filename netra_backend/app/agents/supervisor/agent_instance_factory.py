@@ -1193,6 +1193,7 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
                                           agent_registry: Optional[AgentRegistry] = None,
                                           websocket_bridge: Optional[AgentWebSocketBridge] = None,
                                           # SSOT COMPLIANCE: Removed websocket_manager parameter - use AgentWebSocketBridge only
+                                          websocket_manager: Optional[Any] = None,  # DEPRECATED: Ignored for backward compatibility
                                           llm_manager: Optional[Any] = None,
                                           tool_dispatcher: Optional[Any] = None) -> AgentInstanceFactory:
     """
@@ -1202,6 +1203,7 @@ async def configure_agent_instance_factory(agent_class_registry: Optional[AgentC
         agent_class_registry: Registry containing agent classes (preferred)
         agent_registry: Legacy agent registry (for backward compatibility)
         websocket_bridge: WebSocket bridge for notifications (SSOT)
+        websocket_manager: DEPRECATED - Ignored for backward compatibility
         llm_manager: LLM manager for agent communication
         tool_dispatcher: Tool dispatcher for agent tools
         
