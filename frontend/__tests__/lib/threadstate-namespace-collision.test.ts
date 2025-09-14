@@ -1,12 +1,12 @@
 /**
  * ThreadState Namespace Collision Reproduction Test
  * 
- * Purpose: Demonstrate the namespace collision between:
- * 1. ThreadState interface (thread data) from store/slices/types.ts
+ * Purpose: Demonstrate the RESOLVED namespace collision between:
+ * 1. ThreadSliceState interface (thread data) from store/slices/types.ts
  * 2. ThreadOperationState type (operation states) from lib/thread-state-machine.ts
  * 
- * This test should FAIL initially, demonstrating the SSOT violation.
- * After remediation, it should PASS with clear semantic distinction.
+ * After remediation, this test validates that namespace collision is RESOLVED
+ * and demonstrates clear semantic distinction between thread data and operation states.
  * 
  * Issue: #879 - SSOT ThreadState migration
  */
@@ -22,14 +22,14 @@ describe('ThreadState Namespace Collision Detection', () => {
     let namespaceLCollisionError: Error | null = null;
 
     try {
-      // Import ThreadState from store (interface extending StoreThreadState)  
-      const { ThreadState: StoreThreadState } = await import('../../store/slices/types');
+      // Import ThreadSliceState from store (interface extending StoreThreadState)  
+      const { ThreadSliceState: StoreThreadSliceState } = await import('../../store/slices/types');
       
       // Import ThreadOperationState from thread-state-machine (operation state type)
       const { ThreadOperationState: MachineThreadState } = await import('../../lib/thread-state-machine');
       
-      // Try to use both in same context - this should cause type confusion
-      const testStoreState: StoreThreadState = {
+      // Try to use both in same context - this should now work without collision
+      const testStoreState: StoreThreadSliceState = {
         threads: new Map(),
         activeThreadId: null,
         setActiveThread: () => {},
@@ -48,9 +48,9 @@ describe('ThreadState Namespace Collision Detection', () => {
       namespaceLCollisionError = error as Error;
     }
     
-    // This test should fail because we have namespace collision
-    // After remediation, ThreadState should be unambiguous
-    expect(namespaceLCollisionError).toBeTruthy(); // Should have collision error initially
+    // After remediation, there should be NO namespace collision
+    // The test should now pass with clear semantic distinction
+    expect(namespaceLCollisionError).toBeFalsy(); // Should have NO collision error after fix
   });
 
   it('should show different semantics between thread data and operation states', () => {
