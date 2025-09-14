@@ -42,21 +42,57 @@ Multiple WebSocket message queue implementations causing message loss, duplicate
 - [x] SSOT audit completed - identified 3 critical violations
 - [x] GitHub issue created (#1011)
 - [x] Local progress tracker established
+- [x] **Step 1**: Discover existing test coverage - **COMPLETE**
+- [x] **Step 2**: Plan comprehensive test strategy - **COMPLETE**
 
 ### 🔄 IN PROGRESS
-- [ ] **Step 1**: Discover existing test coverage
-- [ ] **Step 2**: Plan comprehensive test strategy
 - [ ] **Step 3**: Execute new SSOT test creation
 - [ ] **Step 4**: Plan SSOT remediation approach
 - [ ] **Step 5**: Execute SSOT consolidation
 - [ ] **Step 6**: Test validation cycles
 - [ ] **Step 7**: PR creation and closure
 
-## Test Strategy (To Be Planned)
-- [ ] Identify existing WebSocket message queue tests
-- [ ] Plan integration tests for SSOT message queue
-- [ ] Create failing tests demonstrating current violations
-- [ ] Design tests for consolidated SSOT implementation
+## Test Discovery Results ✅
+
+### Critical Test Coverage Found
+- **156 WebSocket integration tests** covering message queue functionality
+- **Mission Critical Tests**: `test_websocket_message_queue_resilience.py` (474 lines) protecting $500K+ ARR
+- **Comprehensive Unit Tests**: `test_message_queue_comprehensive.py` (1,356 lines) for ConnectionState MessageQueue
+- **E2E Tests**: `test_websocket_message_guarantees.py` validating delivery guarantees
+
+### Critical Test Gaps Identified
+- **No SSOT violation testing** - Missing tests reproducing 3-implementation duplication issue
+- **No cross-queue integration tests** - Missing tests validating Redis + ConnectionState + Buffer interaction
+- **No SSOT consolidation validation** - Missing tests ensuring consolidated implementation maintains all behaviors
+- **Limited golden path message flow testing** - Missing comprehensive end-to-end validation
+
+### Tests at Risk During SSOT Consolidation
+- **HIGH RISK**: 156 WebSocket integration tests may experience timing issues
+- **CRITICAL PROTECTION**: Mission critical tests protecting $500K+ ARR functionality MUST continue passing
+- **MEDIUM RISK**: Performance tests may show temporary regression during consolidation
+
+## Test Strategy ✅ PLANNED
+
+### Three-Phase Testing Approach
+1. **Phase A: Pre-SSOT Consolidation (Baseline)**
+   - Document current behavior of all 3 message queue implementations
+   - Create comprehensive behavior baseline tests
+   - Establish performance benchmarks
+
+2. **Phase B: SSOT Implementation Testing**
+   - Test consolidated queue against documented baselines
+   - Validate all 3 queue behaviors preserved in single implementation
+   - Test queue selection logic based on use case requirements
+
+3. **Phase C: Post-SSOT Integration Testing**
+   - End-to-end golden path validation with consolidated queue
+   - Performance regression testing
+   - Multi-user concurrent testing with single queue system
+
+### New Tests Planned (20% of work)
+- **SSOT Violation Reproduction Tests**: `test_websocket_message_queue_ssot_violations.py`
+- **SSOT Consolidation Validation Tests**: `test_websocket_message_queue_ssot_consolidated.py`
+- **Golden Path SSOT Integration Tests**: `test_golden_path_with_ssot_message_queue.py`
 
 ## Remediation Plan (To Be Detailed)
 - [ ] Analyze current queue implementations
