@@ -15,6 +15,7 @@ Discovered **5 distinct clusters** of issues affecting the netra-backend-staging
 **Priority:** P1 - Critical  
 **Severity:** ERROR  
 **Impact:** Core chat functionality - affects $500K+ ARR Golden Path  
+**GitHub Issue:** #1061 (Updated with regression analysis - escalated to P1)  
 
 **Representative Log Entry:**
 ```json
