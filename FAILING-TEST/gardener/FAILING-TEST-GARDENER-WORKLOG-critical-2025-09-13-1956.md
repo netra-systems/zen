@@ -110,6 +110,8 @@ SSOT WARNING: Found other WebSocket Manager classes: ['netra_backend.app.websock
 
 **LOCATION**: `netra_backend.app.websocket_core` module
 
+**GITHUB ISSUE**: Updated existing Issue #885 "failing-test-ssot-medium-websocket-manager-fragmentation" with latest SSOT violation context from 2025-09-13 19:56:40, adjusted priority from P1 to P2, and cross-referenced with related SSOT compliance issues
+
 ---
 
 ## TEST EXECUTION ENVIRONMENT
