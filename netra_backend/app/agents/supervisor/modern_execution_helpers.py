@@ -71,17 +71,21 @@ class SupervisorExecutionHelpers:
             "run_id": run_id
         }
     
-    async def _execute_run_with_logging(self, flow_id: str, context: dict) -> DeepAgentState:
+    async def _execute_run_with_logging(self, flow_id: str, context: dict) -> dict:
         """Execute run with flow logging."""
         self.supervisor.flow_logger.step_started(flow_id, "execute_run", "supervisor")
-        updated_state = await self.supervisor.run(
+        updated_result = await self.supervisor.run(
             context["user_prompt"], context["thread_id"], context["user_id"], context["run_id"]
         )
         self.supervisor.flow_logger.step_completed(flow_id, "execute_run", "supervisor")
-        return updated_state
+        return {"result": updated_result.to_dict() if hasattr(updated_result, 'to_dict') else str(updated_result)}
     
-    def _finalize_execution(self, flow_id: str, state: DeepAgentState, updated_state: DeepAgentState) -> None:
-        """Finalize execution and merge states."""
-        if updated_state:
-            state = state.merge_from(updated_state)
+    def _finalize_execution(self, flow_id: str, context: UserExecutionContext, updated_result: dict) -> UserExecutionContext:
+        """Finalize execution and create updated context."""
+        # Create child context with execution results
+        updated_context = context.create_child_context(
+            operation_name="finalized_execution",
+            additional_context=updated_result
+        )
         self.supervisor.flow_logger.complete_flow(flow_id)
+        return updated_context

@@ -13,7 +13,8 @@ import asyncio
 import time
 from shared.isolated_environment import IsolatedEnvironment
 
-from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager, DatabaseType, ConnectionMetrics
+from netra_backend.app.db.database_manager import DatabaseManager as ConnectionManager, ConnectionMetrics
+from netra_backend.app.core.database_types import DatabaseType
 from netra_backend.app.core.database_types import DatabaseConfig
 from netra_backend.app.core.resilience.unified_retry_handler import UnifiedRetryHandler
 
