@@ -70,7 +70,7 @@ from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
-from netra_backend.app.agents.optimizations_sub_agent.agent import OptimizationsSubAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent as OptimizationsSubAgent
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as WebSocketManager
 from netra_backend.app.logging_config import central_logger

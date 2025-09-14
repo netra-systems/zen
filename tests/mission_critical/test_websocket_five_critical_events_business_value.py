@@ -1,5 +1,5 @@
 
-# PERFORMANCE: Lazy loading for mission critical tests
+import pytest
 
 # PERFORMANCE: Lazy loading for mission critical tests
 _lazy_imports = {}
@@ -83,7 +83,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # SSOT Imports - Following CLAUDE.md absolute import requirements
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from test_framework.real_services_test_fixtures import RealServicesTestFixtures
+from test_framework.ssot.real_services_test_fixtures import E2ETestFixture
 from shared.isolated_environment import get_env
 from shared.types.core_types import (
     UserID, ThreadID, ConnectionID, WebSocketID, RequestID,
@@ -386,9 +386,13 @@ class RealWebSocketEventTester:
 class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
     """Mission critical tests for the 5 WebSocket events that drive business value."""
     
-    async def setUp(self):
+    @pytest.fixture(autouse=True)
+    async def setup_websocket_event_testing(self):
         """Set up real WebSocket event testing environment."""
-        await super().setUp()
+        # Set up base test case
+        self.setup_method()
+        
+        # Initialize WebSocket testing components
         self.manager = UnifiedWebSocketManager()
         self.test_user_id = ensure_user_id("critical-events-user-123")
         self.event_tester = RealWebSocketEventTester()
@@ -396,10 +400,11 @@ class TestWebSocketFiveCriticalEventsBusinessValue(SSotAsyncTestCase):
         # Start real WebSocket server for event testing
         self.server_port = await self.event_tester.start_test_server()
         
-    async def tearDown(self):
-        """Clean up event testing environment."""
+        yield  # This is where the test runs
+        
+        # Teardown
         await self.event_tester.stop_server()
-        await super().tearDown()
+        self.teardown_method()
         
     # ========== MISSION CRITICAL EVENT TESTS ==========
     

@@ -3723,6 +3723,140 @@ class _UnifiedWebSocketManagerImplementation:
             It provides a simple boolean interface to the detailed health status.
         """
         return getattr(self, '_is_healthy', True)
+    
+    # ===========================================================================
+    # GOLDEN PATH METHODS (Issue #1100 SSOT Consolidation)
+    # ===========================================================================
+    
+    async def broadcast_system_status(self, status_message: str, event_type: str = "system_status") -> int:
+        """
+        Broadcast system status message to all connected users.
+        
+        Golden Path method for system-wide notifications.
+        
+        Args:
+            status_message: Status message to broadcast
+            event_type: Event type for the status message
+            
+        Returns:
+            int: Number of users notified
+        """
+        logger.info(f"Broadcasting system status: {status_message}")
+        
+        notified_count = 0
+        status_data = {
+            "message": status_message,
+            "timestamp": datetime.now().isoformat(),
+            "event_type": event_type
+        }
+        
+        # Get all connected users
+        connected_users = set()
+        for connection in self._connections.values():
+            if hasattr(connection, 'user_id') and connection.user_id:
+                connected_users.add(connection.user_id)
+        
+        # Send to each user
+        for user_id in connected_users:
+            try:
+                await self.send_agent_event(user_id, event_type, status_data)
+                notified_count += 1
+            except Exception as e:
+                logger.error(f"Failed to send system status to user {user_id}: {e}")
+        
+        logger.info(f"System status broadcasted to {notified_count} users")
+        return notified_count
+    
+    def get_connection_status(self, user_id: Optional[Union[str, UserID]] = None) -> Dict[str, Any]:
+        """
+        Get connection status for a user or all users.
+        
+        Golden Path method for connection monitoring.
+        
+        Args:
+            user_id: Optional user ID to check. If None, returns status for all users
+            
+        Returns:
+            Dictionary with connection status information
+        """
+        if user_id:
+            typed_user_id = str(user_id)
+            user_connections = self.get_user_connections(typed_user_id)
+            
+            return {
+                "user_id": typed_user_id,
+                "connected": len(user_connections) > 0,
+                "connection_count": len(user_connections),
+                "connection_ids": list(user_connections),
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            # Return status for all users
+            all_users = set()
+            for connection in self._connections.values():
+                if hasattr(connection, 'user_id') and connection.user_id:
+                    all_users.add(connection.user_id)
+            
+            users_status = {}
+            for user in all_users:
+                user_connections = self.get_user_connections(user)
+                users_status[user] = {
+                    "connected": len(user_connections) > 0,
+                    "connection_count": len(user_connections),
+                    "connection_ids": list(user_connections)
+                }
+            
+            return {
+                "total_users": len(all_users),
+                "total_connections": len(self._connections),
+                "users": users_status,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    async def cleanup_stale_connections(self, max_age_seconds: int = 3600) -> int:
+        """
+        Clean up stale WebSocket connections that are no longer active.
+        
+        Golden Path method for connection maintenance.
+        
+        Args:
+            max_age_seconds: Maximum age in seconds before considering connection stale
+            
+        Returns:
+            int: Number of stale connections cleaned up
+        """
+        logger.info(f"Starting cleanup of stale connections older than {max_age_seconds} seconds")
+        
+        current_time = time.time()
+        stale_connections = []
+        
+        # Find stale connections
+        for connection_id, connection in self._connections.items():
+            connection_age = current_time - getattr(connection, 'created_at', current_time)
+            
+            # Check if connection is stale
+            is_stale = (
+                connection_age > max_age_seconds or
+                not hasattr(connection, 'websocket') or
+                getattr(connection, 'websocket', None) is None
+            )
+            
+            if is_stale:
+                stale_connections.append((connection_id, connection))
+                logger.debug(f"Found stale connection: {connection_id} (age: {connection_age:.1f}s)")
+        
+        # Clean up stale connections
+        cleaned_count = 0
+        for connection_id, connection in stale_connections:
+            try:
+                await self.remove_connection(connection_id)
+                cleaned_count += 1
+                logger.debug(f"Cleaned up stale connection: {connection_id}")
+            except Exception as e:
+                logger.error(f"Failed to clean up stale connection {connection_id}: {e}")
+        
+        logger.info(f"Cleanup complete: {cleaned_count} stale connections removed")
+        return cleaned_count
 
 
 # SECURITY FIX: Replace singleton with factory pattern
