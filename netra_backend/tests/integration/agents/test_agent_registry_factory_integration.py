@@ -117,6 +117,10 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         mock_bridge.notify_agent_error = AsyncMock(return_value=True)
         mock_bridge.register_run_thread_mapping = AsyncMock(return_value=True)
         mock_bridge.unregister_run_mapping = AsyncMock(return_value=True)
+        # Add methods required by UnifiedWebSocketEmitter
+        mock_bridge.is_connection_active = MagicMock(return_value=True)
+        mock_bridge.emit_event = AsyncMock(return_value=True)
+        mock_bridge.emit_event_batch = AsyncMock(return_value=True)
         return mock_bridge
     
     @pytest.fixture
@@ -902,5 +906,11 @@ class TestAgentRegistryFactoryIntegration(SSotAsyncTestCase):
         if "error_scenarios" in method_name:
             assert metrics.get("error_isolation_maintained", False), "Error isolation must be verified"
 
-        if "websocket" in method_name:
+        if "websocket" in method_name and "emitter" not in method_name:
             assert metrics.get("websocket_integration_verified", False), "WebSocket integration must be verified"
+
+        if "configuration_validation" in method_name:
+            assert metrics.get("factory_configuration_validated", False), "Factory configuration must be verified"
+
+        if "websocket_emitter" in method_name:
+            assert metrics.get("websocket_emitter_isolation_verified", False), "WebSocket emitter isolation must be verified"
