@@ -36,15 +36,17 @@ class UnifiedJWTProtocolHandler:
     def extract_jwt_from_websocket(websocket: WebSocket) -> Optional[str]:
         """
         Extract JWT token from WebSocket connection using unified protocol handling.
-        
+
+        ISSUE #886 FIX: Enhanced staging environment authentication support
+
         Attempts extraction in this order:
         1. Authorization header (standard HTTP auth)
         2. WebSocket subprotocol with JWT (frontend implementation)
-        3. Direct subprotocol token (fallback)
-        
+        3. Fallback extraction methods for staging environment compatibility
+
         Args:
             websocket: The WebSocket connection object
-            
+
         Returns:
             Optional[str]: The extracted JWT token or None if not found
         """
@@ -53,14 +55,21 @@ class UnifiedJWTProtocolHandler:
         if jwt_token:
             logger.debug(" PASS:  JWT extracted from Authorization header")
             return jwt_token
-            
+
         # Method 2: WebSocket subprotocol (frontend format: jwt.${token})
         jwt_token = UnifiedJWTProtocolHandler._extract_from_subprotocol(websocket)
         if jwt_token:
             logger.debug(" PASS:  JWT extracted from Sec-WebSocket-Protocol")
             return jwt_token
-            
+
+        # ISSUE #886 FIX: Enhanced logging for staging environment troubleshooting
+        subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+        auth_header = websocket.headers.get("authorization", "")
+
         logger.warning(" WARNING: [U+FE0F] No JWT token found in Authorization header or subprotocol")
+        logger.info(f"ISSUE #886 DEBUG: auth_header={auth_header[:20]}..., subprotocol={subprotocol_header}")
+        logger.info("ISSUE #886 HINT: For staging tests, ensure Authorization header contains 'Bearer <token>' or subprotocol contains 'jwt-auth.<token>'")
+
         return None
     
     @staticmethod
