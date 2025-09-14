@@ -698,9 +698,9 @@ class UnifiedHarnessComplete:
 
 
 # Factory function for easy instantiation
-def create_unified_test_harness() -> UnifiedTestHarnessComplete:
+def create_unified_test_harness() -> UnifiedHarnessComplete:
     """Create unified test harness instance for WebSocket authentication testing."""
-    return UnifiedTestHarnessComplete()
+    return UnifiedHarnessComplete()
 
 
 # Issue #732: TestClient and create_minimal_harness implementation

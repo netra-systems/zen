@@ -635,16 +635,16 @@ class TestAgentExecutionCoreGoldenPath(SSotAsyncTestCase):
         user2_id = str(uuid.uuid4())
         
         # Test context creation and isolation
-        context1 = await context_manager.create_isolated_execution_context(
+        context1 = await create_isolated_execution_context(
             user_id=user1_id,
-            thread_id=str(uuid.uuid4()),
-            run_id=str(uuid.uuid4())
+            request_id=str(uuid.uuid4()),
+            thread_id=str(uuid.uuid4())
         )
         
-        context2 = await context_manager.create_isolated_execution_context(
+        context2 = await create_isolated_execution_context(
             user_id=user2_id,
-            thread_id=str(uuid.uuid4()),
-            run_id=str(uuid.uuid4())
+            request_id=str(uuid.uuid4()),
+            thread_id=str(uuid.uuid4())
         )
         
         # Verify contexts are isolated
