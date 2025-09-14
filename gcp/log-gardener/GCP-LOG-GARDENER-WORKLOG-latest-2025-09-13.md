@@ -208,6 +208,9 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 - **Issue #869**: "[failing-test-syntax-error-critical-websocket-fragmentation](https://github.com/netra-systems/netra-apex/issues/869)"
   - **Labels**: claude-code-generated-issue, P0, critical, websocket, golden-path
   - **Purpose**: F-string syntax error in test_websocket_manager_fragmentation_detection.py:293 blocking mission critical test execution
+- **Issue #878**: "[failing-test-infrastructure-high-docker-daemon](https://github.com/netra-systems/netra-apex/issues/878)"
+  - **Labels**: claude-code-generated-issue, P1, bug, infrastructure-dependency, critical
+  - **Purpose**: Docker daemon connectivity failure blocking all Docker-dependent critical tests (CreateFile system cannot find file)
 
 **EXISTING ISSUES UPDATED:**
 1. **Issue #856**: "🚨 P0 CRITICAL SERVICE OUTAGE: F-string syntax error in websocket_ssot.py causing complete backend failure" (Reopened)
@@ -226,6 +229,7 @@ File "/app/netra_backend/app/services/websocket_bridge_factory.py", line 23, in 
 ### Immediate Actions Required
 **P0 - CRITICAL**: Fix syntax error in websocket_ssot.py:658 (Issue #856) - commit local fixes and redeploy
 **P0 - CRITICAL**: Fix f-string syntax error in test_websocket_manager_fragmentation_detection.py:293 (Issue #869) - blocking mission critical test execution
+**P1 - HIGH**: Resolve Docker daemon connectivity failure (Issue #878) - Docker daemon not accessible, blocks critical test infrastructure
 **P1 - HIGH**: Continue SSOT consolidation (Issue #824) - remove duplicate classes identified in logs
 **P3 - MEDIUM**: Update GCP SERVICE_ID secret (Issue #398) - remove trailing newline
 

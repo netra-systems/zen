@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 18:00:46
+**Generated:** 2025-09-13 18:17:03
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 4
-- **Passed:** 0 (0.0%)
-- **Failed:** 4 (100.0%)
+- **Total Tests:** 5
+- **Passed:** 1 (20.0%)
+- **Failed:** 4 (80.0%)
 - **Skipped:** 0
-- **Duration:** 1.60 seconds
-- **Pass Rate:** 0.0%
+- **Duration:** 11.59 seconds
+- **Pass Rate:** 20.0%
 
 ## Test Results by Priority
 
@@ -19,62 +19,85 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_golden_path_complete_user_flow_e2e | FAIL failed | 0.000s | test_websocket_manager_golden_path_fragmentation_e2e.py |
-| test_multi_user_golden_path_isolation_e2e | FAIL failed | 0.000s | test_websocket_manager_golden_path_fragmentation_e2e.py |
-| test_websocket_manager_race_condition_reproduction_e2e | FAIL failed | 0.000s | test_websocket_manager_golden_path_fragmentation_e2e.py |
-| test_golden_path_resilience_under_load_e2e | FAIL failed | 0.000s | test_websocket_manager_golden_path_fragmentation_e2e.py |
+| test_health_check | FAIL failed | 5.573s | test_1_websocket_events_staging.py |
+| test_websocket_connection | FAIL failed | 0.742s | test_1_websocket_events_staging.py |
+| test_api_endpoints_for_agents | PASS passed | 0.558s | test_1_websocket_events_staging.py |
+| test_websocket_event_flow_real | FAIL failed | 0.720s | test_1_websocket_events_staging.py |
+| test_concurrent_websocket_real | FAIL failed | 1.339s | test_1_websocket_events_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_golden_path_complete_user_flow_e2e
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py:116: in test_golden_path_complete_user_flow_e2e
-    if not self.staging_available:
-           ^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketManagerGoldenPathFragmentationE2E' object has no attribute 'staging_available'...
+### FAILED: test_health_check
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 5.573s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
+    await self.verify_api_health()
+tests\e2e\staging_test_base.py:274: in verify_api_health
+    assert data["status"] == "healthy"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError...
 
-### FAILED: test_multi_user_golden_path_isolation_e2e
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py:240: in test_multi_user_golden_path_isolation_e2e
-    if not self.staging_available:
-           ^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketManagerGoldenPathFragmentationE2E' object has no attribute 'staging_available'...
+### FAILED: test_websocket_connection
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 0.742s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:80: in test_websocket_connection
+    async with websockets.connect(
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: in __a...
 
-### FAILED: test_websocket_manager_race_condition_reproduction_e2e
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py:363: in test_websocket_manager_race_condition_reproduction_e2e
-    if not self.staging_available:
-           ^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketManagerGoldenPathFragmentationE2E' object has no attribute 'staging_available'...
+### FAILED: test_websocket_event_flow_real
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 0.720s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:222: in test_websocket_event_flow_real
+    async with websockets.connect(
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:587: in __aenter__
+    return await self
+           ^^^^^^^^^^
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: ...
 
-### FAILED: test_golden_path_resilience_under_load_e2e
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py
-- **Duration:** 0.000s
-- **Error:** tests\e2e\staging\test_websocket_manager_golden_path_fragmentation_e2e.py:482: in test_golden_path_resilience_under_load_e2e
-    if not self.staging_available:
-           ^^^^^^^^^^^^^^^^^^^^^^
-E   AttributeError: 'TestWebSocketManagerGoldenPathFragmentationE2E' object has no attribute 'staging_available'...
+### FAILED: test_concurrent_websocket_real
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
+- **Duration:** 1.339s
+- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
+    return await func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:376: in test_concurrent_websocket_real
+    results = await asyncio.gather(*tasks)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\e2e\staging\test_1_websocket_events_staging.py:350: in test_connection
+    async with websockets.connect(
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\clien...
 
 ## Pytest Output Format
 
 ```
-test_websocket_manager_golden_path_fragmentation_e2e.py::test_golden_path_complete_user_flow_e2e FAILED
-test_websocket_manager_golden_path_fragmentation_e2e.py::test_multi_user_golden_path_isolation_e2e FAILED
-test_websocket_manager_golden_path_fragmentation_e2e.py::test_websocket_manager_race_condition_reproduction_e2e FAILED
-test_websocket_manager_golden_path_fragmentation_e2e.py::test_golden_path_resilience_under_load_e2e FAILED
+test_1_websocket_events_staging.py::test_health_check FAILED
+test_1_websocket_events_staging.py::test_websocket_connection FAILED
+test_1_websocket_events_staging.py::test_api_endpoints_for_agents PASSED
+test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
+test_1_websocket_events_staging.py::test_concurrent_websocket_real FAILED
 
 ==================================================
-0 passed, 4 failed in 1.60s
+1 passed, 4 failed in 11.59s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 1 | 0 | 1 | 0.0% |
+| WebSocket | 3 | 0 | 3 | 0.0% |
+| Agent | 1 | 1 | 0 | 100.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*
