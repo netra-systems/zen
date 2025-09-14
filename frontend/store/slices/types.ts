@@ -52,10 +52,9 @@ export interface AgentTrackingState {
   setProcessing: (isProcessing: boolean) => void;
 }
 
-// Thread management slice state - use canonical base and extend for store actions
-export interface ThreadState extends StoreThreadState {
-  // Additional store-specific methods can be added here if needed
-}
+// Thread management slice state - SSOT import eliminates local ThreadState definition
+// Use StoreThreadState directly to avoid namespace collision with canonical ThreadState
+export type ThreadSliceState = StoreThreadState;
 
 // Connection state slice - import from consolidated types
 export interface ConnectionSlice extends ConnectionState, ConnectionActions {}

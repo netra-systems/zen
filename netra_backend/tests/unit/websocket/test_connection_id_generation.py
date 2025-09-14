@@ -30,7 +30,12 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.websocket_core.utils import generate_connection_id, generate_message_id
 from netra_backend.app.websocket_core.types import ConnectionInfo, WebSocketMessage, MessageType, create_standard_message
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+<<<<<<< HEAD
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+=======
+# SSOT import after Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
 from netra_backend.app.websocket_core.connection_manager import ConnectionManager
 
 # Import ID generation components
@@ -50,7 +55,7 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
     """
     
     def setup_method(self):
-        """Set up test fixtures with different user types."""
+        """Set up test fixtures with different user types.""" 
         super().setup_method()
 
         # Test users that expose different routing behaviors
@@ -62,17 +67,21 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         self.test_user_context = UserExecutionContext(
             user_id=self.regular_user_id,
-            request_id="test-request-123",
-            session_data={}
+            thread_id="test-thread-123",
+            run_id="test-run-456",
+            request_id="test-request-123"
         )
 
-        # Connection manager for testing routing - use proper factory pattern
-        from netra_backend.app.websocket_core import create_websocket_manager
-        self.connection_manager = create_websocket_manager(user_context=self.test_user_context)
-
-        # Factory for testing manager creation patterns
-        from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
-        self.factory = get_websocket_manager_factory()
+        # Connection manager for testing routing - create synchronously for tests
+        from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
+        import secrets
+        
+        # Create test manager with authorization token (bypasses factory restriction)
+        self.connection_manager = _UnifiedWebSocketManagerImplementation(
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=self.test_user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(32)
+        )
 
     def test_connection_id_format_consistency_across_components(self):
         """
@@ -99,10 +108,10 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
         direct_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
         connection_ids['unified_generator'] = direct_id
         
-        # 4. Test factory pattern (simulate what factory would generate)
-        # Factory methods are async, so we test the underlying pattern
-        factory_style_id = generate_connection_id(user_id)
-        connection_ids['factory_style'] = str(factory_style_id)
+        # 4. Test manager pattern (direct WebSocketManager usage)
+        # Use canonical WebSocketManager for ID generation
+        manager_style_id = generate_connection_id(user_id)
+        connection_ids['manager_style'] = str(manager_style_id)
         
         print(f"Connection ID patterns for user {user_id}:")
         for component, conn_id in connection_ids.items():

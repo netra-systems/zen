@@ -297,3 +297,18 @@ async def database_cleanup():
                 action()
         except Exception:
             pass  # Ignore cleanup errors
+
+
+def database_session_factory():
+    """
+    Factory function for creating database session managers.
+    
+    Returns:
+        Callable that creates database sessions with transaction management
+    """
+    def _session_factory():
+        """Create a mock database session factory for testing."""
+        from test_framework.unified.auth_database_session import AuthDatabaseSessionTestManager
+        return AuthDatabaseSessionTestManager()
+    
+    return _session_factory

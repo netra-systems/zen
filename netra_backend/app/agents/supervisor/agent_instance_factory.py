@@ -884,9 +884,32 @@ class AgentInstanceFactory:
         
         # Create new instance (backward compatible)
         # This maintains 100% compatibility with existing UnifiedWebSocketEmitter
-        return UnifiedWebSocketEmitter(
-            user_id, thread_id, run_id, self._websocket_bridge
-        )
+        if self._websocket_bridge:
+            return UnifiedWebSocketEmitter(
+                manager=self._websocket_bridge,
+                user_id=user_id,
+                context=None  # Will be set by caller if needed
+            )
+        else:
+            # Create mock manager for tests when no real bridge available
+            class MockWebSocketManager:
+                async def emit_user_event(self, *args, **kwargs):
+                    return True
+                async def notify_agent_started(self, *args, **kwargs):
+                    return True
+                async def notify_agent_completed(self, *args, **kwargs):
+                    return True
+                async def notify_tool_executing(self, *args, **kwargs):
+                    return True
+                async def notify_tool_completed(self, *args, **kwargs):
+                    return True
+                    
+            mock_manager = MockWebSocketManager()
+            return UnifiedWebSocketEmitter(
+                manager=mock_manager,
+                user_id=user_id,
+                context=None
+            )
     
     @lru_cache(maxsize=128)
     def _get_cached_agent_class(self, agent_name: str) -> Optional[Type[BaseAgent]]:

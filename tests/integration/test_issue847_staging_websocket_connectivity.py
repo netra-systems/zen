@@ -51,10 +51,10 @@ class TestIssue847StagingWebSocketConnectivity(unittest.TestCase):
             'USE_STAGING_SERVICES': 'true',
 
             # From .env.staging.tests
-            'NETRA_BACKEND_URL': 'https://netra-backend-701982941522.us-central1.run.app',
-            'AUTH_SERVICE_URL': 'https://auth-service-701982941522.us-central1.run.app',
-            'FRONTEND_URL': 'https://frontend-701982941522.us-central1.run.app',
-            'WEBSOCKET_URL': 'wss://netra-backend-701982941522.us-central1.run.app/ws',
+            'NETRA_BACKEND_URL': 'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
+            'AUTH_SERVICE_URL': 'https://auth-service-staging-pnovr5vsba-uc.a.run.app',
+            'FRONTEND_URL': 'https://frontend-staging-pnovr5vsba-uc.a.run.app',
+            'WEBSOCKET_URL': 'wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws',
         }
 
     def test_staging_backend_api_connectivity(self):

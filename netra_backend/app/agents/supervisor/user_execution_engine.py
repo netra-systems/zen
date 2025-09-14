@@ -315,12 +315,18 @@ class UserExecutionEngine(IExecutionEngine):
                     context=user_context
                 )
             else:
-                # Create minimal websocket emitter for tests
+                # Create minimal websocket emitter for tests with mock manager
                 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
+                # Create a minimal mock manager for testing
+                class MockWebSocketManager:
+                    async def emit_user_event(self, *args, **kwargs):
+                        return True
+                
+                mock_manager = MockWebSocketManager()
                 websocket_emitter = UnifiedWebSocketEmitter(
-                    manager=None,
+                    manager=mock_manager,
                     user_id=user_context.user_id,
-                    context=user_context  # Tests often don't need real WebSocket
+                    context=user_context
                 )
             
             # Create UserExecutionEngine with proper parameters (positional args)

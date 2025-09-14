@@ -40,8 +40,13 @@ from netra_backend.app.websocket_core.utils import (
     is_websocket_connected, safe_websocket_send
 )
 
+<<<<<<< HEAD
 # Import routing-related modules
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+=======
+# Import routing-related modules - SSOT after Issue #824
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
 from netra_backend.app.websocket_core.batch_message_handler import BatchMessageHandler
 

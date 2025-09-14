@@ -1,5 +1,5 @@
 """
-Comprehensive Unit Tests for WebSocketManagerFactory - CRITICAL SECURITY MISSION
+Comprehensive Unit Tests for WebSocketManager - CRITICAL SECURITY MISSION
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise) 
@@ -11,8 +11,8 @@ MISSION CRITICAL: These tests prevent the most serious security vulnerability:
 user message cross-contamination between different users in AI chat sessions.
 
 Target Classes:
-- WebSocketManagerFactory (Line 1153): Factory pattern for isolated instances
-- IsolatedWebSocketManager (Line 581): Per-connection manager with private state  
+- WebSocketManager (Line 1153): Factory pattern for isolated instances
+- WebSocketManager (Line 581): Per-connection manager with private state  
 - ConnectionLifecycleManager (Line 391): Connection lifecycle and cleanup
 
 Test Categories:
@@ -41,9 +41,11 @@ import weakref
 import gc
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# SSOT import after Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager, 
+    # WebSocketManager,  # REMOVED: Use WebSocketManager directly after Issue #824
+    # WebSocketManager,  # REMOVED: Use WebSocketManager directly after Issue #824
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
@@ -59,9 +61,9 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
-class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
+class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
     """
-    Comprehensive unit tests for WebSocketManagerFactory.
+    Comprehensive unit tests for WebSocketManager.
     
     CRITICAL: Factory pattern ensures isolated manager instances per user connection,
     preventing message cross-contamination vulnerabilities.
@@ -70,7 +72,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for each test method."""
         super().setup_method(method)
-        self.factory = WebSocketManagerFactory(max_managers_per_user=3, connection_timeout_seconds=300)
+        self.factory = WebSocketManager(max_managers_per_user=3, connection_timeout_seconds=300)
         self.user_contexts = []  # Track created contexts for cleanup
     
     def teardown_method(self, method=None):
@@ -113,7 +115,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
 
     def test_factory_initialization_default_config(self):
         """Test factory initialization with default configuration."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         assert factory.max_managers_per_user == 5
         assert factory.connection_timeout_seconds == 1800
@@ -124,7 +126,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
 
     def test_factory_initialization_custom_config(self):
         """Test factory initialization with custom configuration."""
-        factory = WebSocketManagerFactory(
+        factory = WebSocketManager(
             max_managers_per_user=10,
             connection_timeout_seconds=3600
         )
@@ -138,11 +140,11 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
         factory2 = get_websocket_manager_factory()
         
         assert factory1 is factory2
-        assert isinstance(factory1, WebSocketManagerFactory)
+        assert isinstance(factory1, WebSocketManager)
 
     def test_factory_metrics_initialization(self):
         """Test factory metrics are properly initialized."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         stats = factory.get_factory_stats()
         
         assert stats["factory_metrics"]["managers_created"] == 0
@@ -157,7 +159,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_creation_user_isolation(self):
         """Test that each user gets completely isolated manager instances."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Create contexts for two different users
         user1_context = self.create_test_user_context("user1")
@@ -181,7 +183,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio 
     async def test_cross_user_contamination_prevention(self):
         """SECURITY CRITICAL: Test prevention of cross-user message contamination."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         user1_context = self.create_test_user_context("user1")
         user2_context = self.create_test_user_context("user2")
@@ -211,7 +213,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_hijacking_prevention(self):
         """SECURITY CRITICAL: Test prevention of connection hijacking attempts."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         user1_context = self.create_test_user_context("user1")
         manager1 = await factory.create_manager(user1_context)
@@ -231,7 +233,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_isolation_key_generation_uniqueness(self):
         """Test that isolation keys prevent manager sharing between contexts."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Same user, different contexts should get different managers
         user_context1 = self.create_test_user_context("user1", websocket_client_id="ws1")
@@ -252,12 +254,12 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_creation_success_flow(self):
         """Test successful manager creation flow."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
         
-        assert isinstance(manager, IsolatedWebSocketManager)
+        assert isinstance(manager, WebSocketManager)
         assert manager.user_context is user_context
         assert manager._is_active is True
         assert isinstance(manager._metrics, ManagerMetrics)
@@ -271,7 +273,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_creation_invalid_context_validation(self):
         """Test validation of invalid UserExecutionContext during creation."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Test with None
         with pytest.raises(ValueError) as exc_info:
@@ -286,7 +288,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_reuse_for_same_context(self):
         """Test that same context returns existing manager."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager1 = await factory.create_manager(user_context)
@@ -298,7 +300,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio 
     async def test_manager_cleanup_lifecycle(self):
         """Test complete manager lifecycle including cleanup."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -320,7 +322,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_protocol_compliance(self):
         """Test that created managers comply with WebSocketManagerProtocol."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -338,7 +340,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_addition_and_tracking(self):
         """Test connection addition and proper tracking."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -358,7 +360,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_removal_and_cleanup(self):
         """Test connection removal and proper cleanup."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -375,7 +377,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_health_monitoring(self):
         """Test connection health monitoring functionality."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -393,7 +395,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_multiple_connections_per_manager(self):
         """Test handling of multiple connections within single manager."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -417,7 +419,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_resource_limit_enforcement(self):
         """Test resource limit enforcement prevents manager creation overflow."""
-        factory = WebSocketManagerFactory(max_managers_per_user=2)
+        factory = WebSocketManager(max_managers_per_user=2)
         user_id = "test-user"
         
         # Create managers up to limit
@@ -440,7 +442,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
 
     def test_resource_limit_checking(self):
         """Test resource limit checking without manager creation."""
-        factory = WebSocketManagerFactory(max_managers_per_user=3)
+        factory = WebSocketManager(max_managers_per_user=3)
         
         # No managers created yet
         assert factory.enforce_resource_limits("user1") is True
@@ -455,7 +457,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_invalid_manager_cleanup(self):
         """Test cleanup of non-existent managers."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Cleanup non-existent manager should return False
         result = await factory.cleanup_manager("non-existent-key")
@@ -464,7 +466,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_inactive_state_handling(self):
         """Test handling of inactive manager states."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -495,7 +497,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_concurrent_manager_creation_same_user(self):
         """Test concurrent manager creation for same user context."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         # Create managers concurrently
@@ -514,7 +516,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_concurrent_manager_creation_different_users(self):
         """Test concurrent manager creation for different users."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         contexts = [
             self.create_test_user_context(f"user{i}") 
@@ -536,7 +538,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_thread_safety_factory_operations(self):
         """Test thread safety of factory operations."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         results = []
         exceptions = []
         
@@ -572,7 +574,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_cleanup_during_creation_race_condition(self):
         """Test race condition between manager creation and cleanup."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         # Create manager
@@ -598,7 +600,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_cleanup_memory_release(self):
         """Test that manager cleanup properly releases memory references."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -625,7 +627,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_lifecycle_memory_management(self):
         """Test connection lifecycle prevents memory leaks."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -655,7 +657,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_factory_shutdown_complete_cleanup(self):
         """Test factory shutdown performs complete cleanup."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Create multiple managers
         managers = []
@@ -737,7 +739,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
         user_context = self.create_test_user_context()
         manager = await create_websocket_manager(user_context)
         
-        assert isinstance(manager, IsolatedWebSocketManager)
+        assert isinstance(manager, WebSocketManager)
         assert manager.user_context is user_context
         
         # Test validation failure
@@ -752,7 +754,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_background_cleanup_task_management(self):
         """Test background cleanup task lifecycle management."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Initially cleanup should not be started
         assert not factory._cleanup_started
@@ -767,7 +769,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_emergency_cleanup_functionality(self):
         """Test emergency cleanup for resource limit situations."""
-        factory = WebSocketManagerFactory(max_managers_per_user=1)
+        factory = WebSocketManager(max_managers_per_user=1)
         user_id = "test-user"
         
         # Create manager and force cleanup
@@ -787,7 +789,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_automatic_expired_manager_cleanup(self):
         """Test automatic cleanup of expired managers."""
-        factory = WebSocketManagerFactory(connection_timeout_seconds=1)  # 1 second timeout
+        factory = WebSocketManager(connection_timeout_seconds=1)  # 1 second timeout
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -813,7 +815,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_websocket_event_emission(self):
         """Test manager integration with WebSocket event emission."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -836,7 +838,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio 
     async def test_manager_message_sending_with_failures(self):
         """Test manager message sending with connection failures."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -862,7 +864,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
 
     def test_factory_metrics_tracking(self):
         """Test factory metrics tracking functionality."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Initial metrics
         initial_stats = factory.get_factory_stats()
@@ -881,7 +883,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_metrics_tracking(self):
         """Test individual manager metrics tracking."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -905,7 +907,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio 
     async def test_comprehensive_factory_statistics(self):
         """Test comprehensive factory statistics collection."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Create multiple managers for different users
         contexts = [self.create_test_user_context(f"user{i}") for i in range(3)]
@@ -934,7 +936,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_creation_with_special_characters_in_user_id(self):
         """Test manager creation with special characters in user IDs."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         special_user_ids = [
             "user@example.com",
@@ -957,7 +959,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_manager_behavior_after_multiple_cleanups(self):
         """Test manager behavior after multiple cleanup attempts."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         manager = await factory.create_manager(user_context)
@@ -975,7 +977,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_factory_behavior_with_corrupted_state(self):
         """Test factory resilience with corrupted internal state."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         
         # Create manager normally
@@ -994,7 +996,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_protocol_compatibility_methods(self):
         """Test WebSocket protocol compatibility method implementations."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         user_context = self.create_test_user_context()
         manager = await factory.create_manager(user_context)
         
@@ -1028,7 +1030,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_user_isolation_security_validation(self):
         """COMPREHENSIVE SECURITY TEST: Validate complete user isolation."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Create 5 users with multiple contexts each
         users_data = {}
@@ -1075,7 +1077,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_connection_security_boundary_enforcement(self):
         """Test that security boundaries are enforced at the connection level."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         user1_context = self.create_test_user_context("security-user-1")
         user2_context = self.create_test_user_context("security-user-2")
@@ -1106,7 +1108,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
 
     def test_factory_security_metrics_tracking(self):
         """Test that factory tracks security-related metrics."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         # Initial security metrics
         stats = factory.get_factory_stats()
@@ -1128,7 +1130,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_complete_factory_lifecycle_comprehensive(self):
         """COMPREHENSIVE TEST: Complete factory lifecycle with all features."""
-        factory = WebSocketManagerFactory(max_managers_per_user=3, connection_timeout_seconds=300)
+        factory = WebSocketManager(max_managers_per_user=3, connection_timeout_seconds=300)
         
         # Phase 1: Create multiple users with multiple managers each
         test_data = {}

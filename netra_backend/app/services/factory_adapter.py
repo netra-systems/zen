@@ -285,12 +285,19 @@ class FactoryAdapter:
                     if not registry:
                         raise ValueError("Legacy mode requires 'registry' parameter")
                 
-                from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
-                unified_factory = UnifiedExecutionEngineFactory()
-                self._legacy_execution_engine = await unified_factory.create_execution_engine(
-                    registry=registry, 
-                    websocket_bridge=websocket_bridge
+                from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+                ssot_factory = ExecutionEngineFactory(websocket_bridge)
+                # Create anonymous user context for legacy compatibility
+                from netra_backend.app.services.user_execution_context import UserExecutionContext
+                from netra_backend.app.core.unified_id_manager import UnifiedIDManager
+                id_manager = UnifiedIDManager()
+                legacy_context = UserExecutionContext(
+                    user_id=id_manager.generate_id_with_prefix("legacy", "adapter"),
+                    thread_id=id_manager.generate_id_with_prefix("thread", "adapter"),
+                    run_id=id_manager.generate_id_with_prefix("run", "adapter"),
+                    metadata={'legacy_adapter': True}
                 )
+                self._legacy_execution_engine = await ssot_factory.create_for_user(legacy_context)
             
             creation_time_ms = (time.time() - start_time) * 1000
             

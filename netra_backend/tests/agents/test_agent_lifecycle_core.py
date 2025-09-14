@@ -42,8 +42,8 @@ class ConcreteAgentLifecycle(AgentLifecycleMixin):
         self.logger = Mock()
         self.start_time = None
         self.end_time = None
-        self._lifecycle_state = SubAgentLifecycle.IDLE
-        self.timing_collector = ExecutionTimingCollector(correlation_id=f"test-{name}")
+        self._lifecycle_state = SubAgentLifecycle.PENDING
+        self.timing_collector = ExecutionTimingCollector(agent_name=f"test-{name}")
         self.context = {}  # Protected context for cleanup testing
         
         # Mock WebSocket methods
@@ -101,7 +101,7 @@ class TestAgentLifecycleCore(SSotAsyncTestCase):
         """Clean up test resources."""
         super().teardown_method(method)
         # Reset agent state
-        self.agent.set_state(SubAgentLifecycle.IDLE)
+        self.agent.set_state(SubAgentLifecycle.PENDING)
 
     async def test_pre_run_successful_execution(self):
         """Test _pre_run method with successful entry conditions."""
@@ -354,9 +354,15 @@ class TestAgentLifecycleExecution(SSotAsyncTestCase):
         
         # Verify: Disconnect was logged
         self.agent.logger.info.assert_called()
-        log_msg = self.agent.logger.info.call_args[0][0]
-        assert "WebSocket disconnected" in log_msg
-        assert self.agent.name in log_msg
+        # Check all logger.info calls to find the WebSocket disconnect message
+        calls = self.agent.logger.info.call_args_list
+        disconnect_found = False
+        for call in calls:
+            log_msg = call[0][0]
+            if "WebSocket disconnected" in log_msg and self.agent.name in log_msg:
+                disconnect_found = True
+                break
+        assert disconnect_found, f"WebSocket disconnect message not found in logs: {[call[0][0] for call in calls]}"
 
     async def test_check_entry_conditions_default(self):
         """Test default entry conditions check (should always pass)."""

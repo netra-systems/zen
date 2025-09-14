@@ -59,12 +59,8 @@ from typing import Dict, List, Set, Optional, Any
 import logging
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager,
-    get_websocket_manager_factory,
-    create_websocket_manager
-)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from shared.isolated_environment import get_env
@@ -229,7 +225,7 @@ class ResourceLeakTracker:
             logger.warning(f"Failed to get memory usage: {e}")
             return 0.0
     
-    def take_snapshot(self, description: str, factory: WebSocketManagerFactory) -> Dict[str, Any]:
+    def take_snapshot(self, description: str, factory: WebSocketManager) -> Dict[str, Any]:
         """Take a resource usage snapshot with memory tracking."""
         stats = factory.get_factory_stats()
         current_memory_mb = self._get_memory_usage_mb()
@@ -360,7 +356,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         self.test_config = TestConfiguration()
         self.resource_tracker = ResourceLeakTracker(self.test_config)
         # Use higher limits to test the resource management properly
-        self.factory = WebSocketManagerFactory(max_managers_per_user=20, connection_timeout_seconds=300)
+        self.factory = WebSocketManager()
         self.test_user_contexts = {}
         
         logger.info(f"Test setup with environment: {self.test_config.environment_type}")

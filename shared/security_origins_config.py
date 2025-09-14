@@ -98,9 +98,9 @@ class SecurityOriginsConfig:
             ],
             "cloud_run": [
                 # Cloud Run service URLs for staging
-                "https://netra-frontend-701982941522.us-central1.run.app",
-                "https://netra-backend-701982941522.us-central1.run.app",
-                "https://netra-auth-701982941522.us-central1.run.app"
+                "https://frontend-staging-pnovr5vsba-uc.a.run.app",
+                "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+                "https://auth-service-staging-pnovr5vsba-uc.a.run.app"
             ],
             "websocket": [
                 "wss://app.staging.netrasystems.ai",

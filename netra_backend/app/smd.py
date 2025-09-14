@@ -1634,14 +1634,14 @@ class StartupOrchestrator:
         self.logger.info("    - Initializing factory patterns for singleton removal...")
         
         try:
-            # 1. Initialize UnifiedExecutionEngineFactory (MIGRATION COMPLETE)
-            from netra_backend.app.agents.execution_engine_unified_factory import UnifiedExecutionEngineFactory
+            # 1. Initialize SSOT ExecutionEngineFactory (SSOT CONSOLIDATION COMPLETE)
+            from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
             
-            # Note: UnifiedExecutionEngineFactory is a class with class methods, not requiring instantiation
-            # Configuration will be done later after WebSocket bridge is available
+            # Note: ExecutionEngineFactory is the SSOT implementation that requires proper instantiation
+            # with WebSocket bridge dependency - will be configured later after WebSocket bridge is available
             # We store the class reference directly for later configuration and use
-            self.app.state.execution_engine_factory = UnifiedExecutionEngineFactory
-            self.logger.info("    [U+2713] UnifiedExecutionEngineFactory assigned (will be configured after WebSocket bridge)")
+            self.app.state.execution_engine_factory_class = ExecutionEngineFactory
+            self.logger.info("    [U+2713] SSOT ExecutionEngineFactory class assigned (will be configured after WebSocket bridge)")
             
             
             # 2. Initialize WebSocketConnectionPool first (required by factory)

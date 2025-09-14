@@ -11,9 +11,10 @@
 import { logger } from '@/lib/logger';
 
 /**
- * Thread operation states
+ * Thread operation states - renamed from ThreadState to avoid SSOT collision
+ * with ThreadState interface from @shared/types/frontend_types
  */
-export type ThreadState = 
+export type ThreadOperationState = 
   | 'idle'
   | 'creating'
   | 'switching'
@@ -37,7 +38,7 @@ export type ThreadEvent =
  * Thread state data
  */
 export interface ThreadStateData {
-  readonly currentState: ThreadState;
+  readonly currentState: ThreadOperationState;
   readonly targetThreadId: string | null;
   readonly operationId: string | null;
   readonly startTime: number | null;
@@ -49,8 +50,8 @@ export interface ThreadStateData {
  * Thread state transition
  */
 export interface ThreadTransition {
-  readonly from: ThreadState;
-  readonly to: ThreadState;
+  readonly from: ThreadOperationState;
+  readonly to: ThreadOperationState;
   readonly event: ThreadEvent;
   readonly guard?: (data: ThreadStateData) => boolean;
   readonly action?: (data: ThreadStateData) => void;
@@ -60,17 +61,17 @@ export interface ThreadTransition {
  * Thread state machine configuration
  */
 export interface ThreadStateMachineConfig {
-  readonly initialState: ThreadState;
+  readonly initialState: ThreadOperationState;
   readonly transitions: ThreadTransition[];
-  readonly onStateChange?: (from: ThreadState, to: ThreadState, data: ThreadStateData) => void;
-  readonly onTransitionBlocked?: (event: ThreadEvent, currentState: ThreadState) => void;
+  readonly onStateChange?: (from: ThreadOperationState, to: ThreadOperationState, data: ThreadStateData) => void;
+  readonly onTransitionBlocked?: (event: ThreadEvent, currentState: ThreadOperationState) => void;
 }
 
 /**
  * Thread state machine
  */
 export class ThreadStateMachine {
-  private currentState: ThreadState;
+  private currentState: ThreadOperationState;
   private stateData: ThreadStateData;
   private readonly config: ThreadStateMachineConfig;
   private readonly listeners = new Set<(data: ThreadStateData) => void>();
@@ -84,7 +85,7 @@ export class ThreadStateMachine {
   /**
    * Gets current state
    */
-  public getState(): ThreadState {
+  public getState(): ThreadOperationState {
     return this.currentState;
   }
 
@@ -172,7 +173,7 @@ export class ThreadStateMachine {
   /**
    * Finds transition for current state and event
    */
-  private findTransition(state: ThreadState, event: ThreadEvent): ThreadTransition | undefined {
+  private findTransition(state: ThreadOperationState, event: ThreadEvent): ThreadTransition | undefined {
     return this.config.transitions.find(t => t.from === state && t.event === event);
   }
 

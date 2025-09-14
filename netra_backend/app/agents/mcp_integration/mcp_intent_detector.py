@@ -233,7 +233,7 @@ class MCPIntentDetector:
     
     def _create_detection_context(self, request: str, run_id: str) -> ExecutionContext:
         """Create execution context for intent detection."""
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         state = DeepAgentState(agent_name="MCPIntentDetector")
         state.current_request = request
         return self.create_execution_context(state, run_id)

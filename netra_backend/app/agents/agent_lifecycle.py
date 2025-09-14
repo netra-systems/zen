@@ -36,6 +36,8 @@ class AgentLifecycleMixin(ABC):
     def _finalize_execution_timing(self) -> float:
         """Finalize execution timing and return duration."""
         self.end_time = time.time()
+        if self.start_time is None:
+            return 0.0  # Return 0 if start_time was never set
         return self.end_time - self.start_time
     
     def _update_lifecycle_status(self, success: bool) -> str:
@@ -155,12 +157,12 @@ class AgentLifecycleMixin(ABC):
             await self.emit_agent_started(f"{self.name} is starting")
     
     async def _complete_agent_run(
-        self, run_id: str, stream_updates: bool, status: str, execution_time: float, state: DeepAgentState
+        self, run_id: str, stream_updates: bool, status: str, execution_time: float, context: UserExecutionContext
     ) -> None:
         """Complete agent run with logging and updates."""
         self._log_execution_completion(run_id, status, execution_time)
         await self._send_completion_update(run_id, stream_updates, status, execution_time)
-        await self.cleanup(state, run_id)
+        await self.cleanup(context, run_id)
     
     def _build_completion_data(self, status: str, execution_time: float) -> Dict[str, Any]:
         """Build completion update data dictionary."""
@@ -171,19 +173,19 @@ class AgentLifecycleMixin(ABC):
         }
     
     @time_operation("execute_with_conditions", TimingCategory.ORCHESTRATION)
-    async def _execute_with_conditions(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
+    async def _execute_with_conditions(self, context: UserExecutionContext, run_id: str, stream_updates: bool) -> bool:
         """Execute agent if entry conditions pass."""
-        if not await self._handle_entry_conditions(state, run_id, stream_updates):
+        if not await self._handle_entry_conditions(context, run_id, stream_updates):
             return False
-        await self.execute(state, run_id, stream_updates)
-        state.step_count += 1
+        await self.execute(context, run_id, stream_updates)
+        context.step_count += 1
         return True
     
-    async def _handle_entry_failure(self, run_id: str, stream_updates: bool, state: DeepAgentState) -> None:
+    async def _handle_entry_failure(self, run_id: str, stream_updates: bool, context: UserExecutionContext) -> None:
         """Handle failed entry conditions."""
         self.logger.warning(f"{self.name} entry conditions not met for run_id: {run_id}")
         await self._send_entry_condition_warning(run_id, stream_updates)
-        await self._post_run(state, run_id, stream_updates, success=False)
+        await self._post_run(context, run_id, stream_updates, success=False)
     
     def _get_websocket_user_id(self, run_id: str) -> str:
         """Get WebSocket user ID for messaging."""

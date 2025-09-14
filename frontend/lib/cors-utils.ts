@@ -91,7 +91,7 @@ function getStagingOrigins(): string[] {
     
     // Cloud Run patterns for staging
     'https://netra-frontend-701982941522.us-central1.run.app',
-    'https://netra-backend-701982941522.us-central1.run.app',
+    'https://netra-backend-staging-pnovr5vsba-uc.a.run.app',
     
     // Local development support for staging testing
     'http://localhost:3000',

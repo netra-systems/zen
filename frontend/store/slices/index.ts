@@ -13,7 +13,7 @@ export type {
   LayerDataState,
   MessageState,
   AgentTrackingState,
-  ThreadState,
+  ThreadSliceState,
   ConnectionState,
   SubAgentUIState,
   PerformanceState,

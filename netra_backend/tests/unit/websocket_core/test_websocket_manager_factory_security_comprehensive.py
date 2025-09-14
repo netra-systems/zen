@@ -1,5 +1,5 @@
 """
-Comprehensive Security Unit Tests for WebSocketManagerFactory - CRITICAL SECURITY MISSION
+Comprehensive Security Unit Tests for WebSocketManager - CRITICAL SECURITY MISSION
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free, Early, Mid, Enterprise) 
@@ -11,8 +11,8 @@ MISSION CRITICAL: These tests prevent the most serious security vulnerability:
 user message cross-contamination between different users in AI chat sessions.
 
 Target Classes:
-- WebSocketManagerFactory (Line 1153): Factory pattern for isolated instances
-- IsolatedWebSocketManager (Line 581): Per-connection manager with private state  
+- WebSocketManager (Line 1153): Factory pattern for isolated instances
+- WebSocketManager (Line 581): Per-connection manager with private state  
 - ConnectionLifecycleManager (Line 391): Connection lifecycle and cleanup
 
 Test Categories:
@@ -41,15 +41,13 @@ import weakref
 import gc
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# SSOT imports - Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager, 
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,
     FactoryInitializationError,
-    get_websocket_manager_factory,
-    create_websocket_manager,
     create_defensive_user_execution_context,
     _validate_ssot_user_context,
     _validate_ssot_user_context_staging_safe
@@ -59,9 +57,9 @@ from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
 
 
-class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
+class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
     """
-    Comprehensive unit tests for WebSocketManagerFactory.
+    Comprehensive unit tests for WebSocketManager.
     
     CRITICAL: Factory pattern ensures isolated manager instances per user connection,
     preventing message cross-contamination vulnerabilities.
@@ -70,7 +68,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for each test method."""
         super().setup_method(method)
-        self.factory = WebSocketManagerFactory(max_managers_per_user=3, connection_timeout_seconds=300)
+        self.factory = WebSocketManager(max_managers_per_user=3, connection_timeout_seconds=300)
         self.user_contexts = []  # Track created contexts for cleanup
     
     def teardown_method(self, method=None):
@@ -102,7 +100,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     
     def test_factory_initialization_sets_correct_defaults(self):
         """Test factory initializes with correct default configuration."""
-        factory = WebSocketManagerFactory()
+        factory = WebSocketManager()
         
         assert factory.max_managers_per_user == 5  # Default
         assert factory.connection_timeout_seconds == 1800  # 30 minutes default
@@ -115,7 +113,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
     
     def test_factory_initialization_respects_custom_parameters(self):
         """Test factory initialization with custom parameters."""
-        factory = WebSocketManagerFactory(max_managers_per_user=10, connection_timeout_seconds=600)
+        factory = WebSocketManager(max_managers_per_user=10, connection_timeout_seconds=600)
         
         assert factory.max_managers_per_user == 10
         assert factory.connection_timeout_seconds == 600
@@ -133,7 +131,7 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
         manager = await self.factory.create_manager(user_context)
         
         # Assert
-        assert isinstance(manager, IsolatedWebSocketManager)
+        assert isinstance(manager, WebSocketManager)
         assert manager.user_context == user_context
         assert manager._is_active is True
         assert len(manager._connections) == 0
@@ -201,12 +199,12 @@ class TestWebSocketManagerFactoryComprehensive(SSotAsyncTestCase):
         factory2 = get_websocket_manager_factory()
         
         assert factory1 is factory2
-        assert isinstance(factory1, WebSocketManagerFactory)
+        assert isinstance(factory1, WebSocketManager)
 
 
-class TestIsolatedWebSocketManagerComprehensive(SSotAsyncTestCase):
+class TestWebSocketManagerComprehensive(SSotAsyncTestCase):
     """
-    Comprehensive unit tests for IsolatedWebSocketManager.
+    Comprehensive unit tests for WebSocketManager.
     
     CRITICAL: Tests user isolation, message routing, and connection management
     to prevent cross-user contamination vulnerabilities.
@@ -216,7 +214,7 @@ class TestIsolatedWebSocketManagerComprehensive(SSotAsyncTestCase):
         """Setup for each test method."""
         super().setup_method(method)
         self.user_context = self._create_test_user_context()
-        self.manager = IsolatedWebSocketManager(self.user_context)
+        self.manager = WebSocketManager(self.user_context)
         self.mock_connections = []
     
     def teardown_method(self, method=None):
@@ -263,7 +261,7 @@ class TestIsolatedWebSocketManagerComprehensive(SSotAsyncTestCase):
     # === INITIALIZATION TESTS ===
     
     def test_manager_initialization_creates_isolated_state(self):
-        """Test IsolatedWebSocketManager initializes with completely isolated state."""
+        """Test WebSocketManager initializes with completely isolated state."""
         assert self.manager.user_context == self.user_context
         assert len(self.manager._connections) == 0
         assert len(self.manager._connection_ids) == 0
@@ -285,7 +283,7 @@ class TestIsolatedWebSocketManagerComprehensive(SSotAsyncTestCase):
     def test_manager_initialization_validates_user_context(self):
         """Test manager validates UserExecutionContext on initialization."""
         with pytest.raises(ValueError, match="user_context must be a UserExecutionContext"):
-            IsolatedWebSocketManager("not_a_context")
+            WebSocketManager("not_a_context")
     
     def test_manager_implements_websocket_protocol(self):
         """Test manager implements WebSocketManagerProtocol interface."""
@@ -362,7 +360,7 @@ class TestConnectionLifecycleManagerComprehensive(SSotAsyncTestCase):
         """Setup for each test method."""
         super().setup_method(method)
         self.user_context = self._create_test_user_context()
-        self.mock_ws_manager = Mock(spec=IsolatedWebSocketManager)
+        self.mock_ws_manager = Mock(spec=WebSocketManager)
         self.mock_ws_manager.user_context = self.user_context
         self.mock_ws_manager.get_connection = Mock(return_value=None)
         self.mock_ws_manager.remove_connection = AsyncMock()
@@ -456,7 +454,7 @@ class TestWebSocketFactorySecurityIsolation(SSotAsyncTestCase):
     def setup_method(self, method=None):
         """Setup for security isolation tests."""
         super().setup_method(method)
-        self.factory = WebSocketManagerFactory(max_managers_per_user=5)
+        self.factory = WebSocketManager(max_managers_per_user=5)
         self.user_contexts = {}
         self.managers = {}
         self.mock_connections = {}
@@ -680,7 +678,7 @@ class TestWebSocketFactoryGlobalFunctions(SSotAsyncTestCase):
         
         manager = await create_websocket_manager(context)
         
-        assert isinstance(manager, IsolatedWebSocketManager)
+        assert isinstance(manager, WebSocketManager)
         assert manager.user_context == context
         assert manager._is_active is True
     

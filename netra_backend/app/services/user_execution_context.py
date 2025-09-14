@@ -1421,7 +1421,7 @@ class UserExecutionContext:
             ExecutionContext instance compatible with existing agent infrastructure
         """
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         # Create minimal state for compatibility
         state = DeepAgentState()

@@ -563,12 +563,42 @@ def get_service_port(service_name: str, port_type: str = "postgres") -> Optional
 # Legacy alias for backward compatibility
 TestConfigurationValidator = ConfigurationValidator
 
+
+# Standalone functions for backwards compatibility
+def validate_database_configuration(service_name: str):
+    """Standalone function for database configuration validation."""
+    validator = get_config_validator()
+    return validator.validate_database_configuration(service_name)
+
+
+def validate_service_flags():
+    """Standalone function for service flags validation."""
+    validator = get_config_validator()
+    return validator.validate_service_flags()
+
+
+def validate_port_allocation():
+    """Standalone function for port allocation validation."""
+    validator = get_config_validator()
+    return validator.validate_port_allocation()
+
+
+def get_service_config_requirements(service_name: str):
+    """Get service configuration requirements."""
+    validator = get_config_validator()
+    return validator.get_service_config_requirements(service_name)
+
+
 # Export key classes and functions
 __all__ = [
     "ConfigurationValidator",
     "TestConfigurationValidator",  # Legacy alias
     "get_config_validator", 
     "validate_test_config",
+    "validate_database_configuration",
+    "validate_service_flags", 
+    "validate_port_allocation",
+    "get_service_config_requirements",
     "is_service_enabled",
     "get_service_port"
 ]

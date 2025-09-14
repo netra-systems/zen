@@ -22,8 +22,14 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List, Optional
 
+<<<<<<< HEAD
 from netra_backend.app.websocket_core import create_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+=======
+# SSOT imports after Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+# from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManager  # REMOVED: Use WebSocketManager directly
+>>>>>>> cdc129325dc110e1452f134d617cc76bf55b1cfa
 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
 
@@ -287,7 +293,7 @@ class TestWebSocketConnectionLifecycle:
             assert sent_message["user_id"] == user_id
 
 
-class TestWebSocketManagerFactory:
+class TestWebSocketManager:
     """
     Unit tests for WebSocket manager factory patterns.
     
@@ -298,7 +304,7 @@ class TestWebSocketManagerFactory:
     @pytest.fixture
     def manager_factory(self):
         """Create WebSocket manager factory."""
-        return WebSocketManagerFactory()
+        return WebSocketManager()
     
     async def test_websocket_manager_creation(self, manager_factory):
         """

@@ -1092,6 +1092,35 @@ class E2EAuthHelper:
                 "details": f"Unexpected error: {str(e)}"
             }
 
+    def get_jwt_token_for_user(
+        self,
+        user_id: str,
+        email: str,
+        permissions: Optional[List[str]] = None,
+        exp_minutes: int = 30
+    ) -> str:
+        """
+        Get JWT token for specific user (instance method).
+        
+        This method provides the same functionality as the standalone function
+        but as an instance method for tests that expect it on E2EAuthHelper.
+        
+        Args:
+            user_id: User ID for the token
+            email: User email address
+            permissions: User permissions (defaults to ["read", "write"])
+            exp_minutes: Token expiry in minutes
+            
+        Returns:
+            Valid JWT token string
+        """
+        return self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=permissions if permissions is not None else ["read", "write"],
+            exp_minutes=exp_minutes
+        )
+
 
 class E2EWebSocketAuthHelper(E2EAuthHelper):
     """
