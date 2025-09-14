@@ -36,6 +36,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
 import uuid
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class TestJWTAdvancedSecurity(SSotBaseTestCase):
