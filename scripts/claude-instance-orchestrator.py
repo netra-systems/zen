@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 """
 Claude Code Instance Orchestrator
-Simple orchestrator for running 3 Claude Code instances in headless mode,
-each executing specific slash commands.
+Simple orchestrator for running multiple Claude Code instances in headless mode,
+each executing specific slash commands with modern JSON parsing.
+
+**Modernized Token Parsing Features:**
+- JSON-first parsing for accurate token tracking from Claude Code output
+- Supports both stream-json (real-time) and json (batch) output formats
+- Structured parsing of usage statistics, tool calls, and cost information
+- Fallback regex parsing for backward compatibility with text-based output
+- Enhanced token breakdown: input/output/cached tokens with cache hit rates
 
 Multi-platform support with enhanced Mac compatibility for local directories.
 
@@ -30,11 +37,14 @@ Usage Examples:
 Features:
   - Soft startup: Configurable delay between instance launches to prevent resource contention
   - Rolling status reports: Periodic updates showing instance status, uptime, and token usage
-  - Token tracking: Automatic parsing and tracking of Claude token usage per instance
+  - Modern JSON token parsing: Primary JSON parsing with regex fallback for reliability
+    * JSON-first approach for stream-json and json output formats
+    * Structured extraction of usage statistics, tool calls, and metadata
+    * Support for Claude Code's native JSON message formats
     * Total tokens, input/output tokens, cached tokens, and cache hit rates
     * Real-time token consumption monitoring across all instances
   - Formatted output: Clear visual separation between instances with truncated lines
-  - Tool call tracking: Counts tool executions across all instances
+  - Enhanced tool call tracking: Counts tool executions from both JSON and text patterns
 
 IDEAS
     Record and contrast tool use by command 
@@ -330,7 +340,10 @@ class ClaudeInstanceOrchestrator:
                 returncode = process.returncode
 
                 if stdout:
-                    status.output += stdout.decode() if isinstance(stdout, bytes) else stdout
+                    stdout_str = stdout.decode() if isinstance(stdout, bytes) else stdout
+                    status.output += stdout_str
+                    # Parse token usage from final output
+                    self._parse_final_output_token_usage(stdout_str, status, config.output_format)
                 if stderr:
                     status.error += stderr.decode() if isinstance(stderr, bytes) else stderr
 
@@ -640,37 +653,162 @@ class ClaudeInstanceOrchestrator:
         print(f"{footer}\n")
 
     def _parse_token_usage(self, line: str, status: InstanceStatus):
-        """Parse token usage information from Claude output lines"""
+        """Parse token usage information from Claude Code JSON output lines"""
+        # First try to parse as JSON - this is the modern approach for stream-json format
+        if self._try_parse_json_token_usage(line, status):
+            return
+        
+        # Fallback to regex parsing for backward compatibility or non-JSON output
+        self._parse_token_usage_fallback(line, status)
+    
+    def _try_parse_json_token_usage(self, line: str, status: InstanceStatus) -> bool:
+        """Try to parse token usage from JSON format output"""
+        line = line.strip()
+        if not line.startswith('{'):
+            return False
+            
+        try:
+            json_data = json.loads(line)
+            
+            # Look for different JSON message types from Claude Code
+            
+            # Type 1: Token usage summary message
+            if 'tokens' in json_data:
+                token_data = json_data['tokens']
+                if isinstance(token_data, dict):
+                    # Structured token data
+                    if 'total' in token_data:
+                        total = int(token_data['total'])
+                        if total > status.total_tokens:
+                            status.total_tokens = total
+                    if 'input' in token_data:
+                        status.input_tokens += int(token_data['input'])
+                    if 'output' in token_data:
+                        status.output_tokens += int(token_data['output'])
+                    if 'cached' in token_data:
+                        status.cached_tokens += int(token_data['cached'])
+                elif isinstance(token_data, (int, float)):
+                    # Simple token count
+                    status.total_tokens += int(token_data)
+                return True
+            
+            # Type 2: Usage statistics from Claude Code response
+            if 'usage' in json_data:
+                usage = json_data['usage']
+                if isinstance(usage, dict):
+                    if 'input_tokens' in usage:
+                        status.input_tokens += int(usage['input_tokens'])
+                    if 'output_tokens' in usage:
+                        status.output_tokens += int(usage['output_tokens'])
+                    if 'cache_read_input_tokens' in usage:
+                        status.cached_tokens += int(usage['cache_read_input_tokens'])
+                    # Calculate total if not explicitly provided
+                    if 'total_tokens' in usage:
+                        total = int(usage['total_tokens'])
+                        if total > status.total_tokens:
+                            status.total_tokens = total
+                    else:
+                        # Calculate total from input + output
+                        calculated_total = status.input_tokens + status.output_tokens
+                        if calculated_total > status.total_tokens:
+                            status.total_tokens = calculated_total
+                return True
+            
+            # Type 3: Tool execution messages
+            if 'type' in json_data:
+                if json_data['type'] in ['tool_use', 'tool_call', 'tool_execution']:
+                    status.tool_calls += 1
+                    return True
+                if json_data['type'] == 'message' and 'tool_calls' in json_data:
+                    # Count tool calls in message
+                    tool_calls = json_data['tool_calls']
+                    if isinstance(tool_calls, list):
+                        status.tool_calls += len(tool_calls)
+                    elif isinstance(tool_calls, (int, float)):
+                        status.tool_calls += int(tool_calls)
+                    return True
+            
+            # Type 4: Claude Code specific metrics
+            if 'metrics' in json_data:
+                metrics = json_data['metrics']
+                if isinstance(metrics, dict):
+                    for key, value in metrics.items():
+                        if 'token' in key.lower() and isinstance(value, (int, float)):
+                            if 'total' in key.lower():
+                                total = int(value)
+                                if total > status.total_tokens:
+                                    status.total_tokens = total
+                            elif 'input' in key.lower():
+                                status.input_tokens += int(value)
+                            elif 'output' in key.lower():
+                                status.output_tokens += int(value)
+                            elif 'cached' in key.lower() or 'cache' in key.lower():
+                                status.cached_tokens += int(value)
+                        elif 'tool' in key.lower() and isinstance(value, (int, float)):
+                            status.tool_calls += int(value)
+                return True
+            
+            # Type 5: Direct token fields at root level
+            token_fields_found = False
+            if 'input_tokens' in json_data:
+                status.input_tokens += int(json_data['input_tokens'])
+                token_fields_found = True
+            if 'output_tokens' in json_data:
+                status.output_tokens += int(json_data['output_tokens'])
+                token_fields_found = True
+            if 'cached_tokens' in json_data:
+                status.cached_tokens += int(json_data['cached_tokens'])
+                token_fields_found = True
+            if 'total_tokens' in json_data:
+                total = int(json_data['total_tokens'])
+                if total > status.total_tokens:
+                    status.total_tokens = total
+                token_fields_found = True
+            if 'tool_calls' in json_data:
+                if isinstance(json_data['tool_calls'], (int, float)):
+                    status.tool_calls += int(json_data['tool_calls'])
+                    token_fields_found = True
+            
+            return token_fields_found
+            
+        except (json.JSONDecodeError, ValueError, KeyError, TypeError) as e:
+            # Not valid JSON or doesn't contain expected fields
+            logger.debug(f"JSON parsing failed for line: {e}")
+            return False
+    
+    def _parse_token_usage_fallback(self, line: str, status: InstanceStatus):
+        """Fallback regex-based token parsing for backward compatibility"""
         line_lower = line.lower()
-
-        # Look for various token usage patterns in Claude output
+        
+        # Import regex here to avoid overhead when JSON parsing succeeds
         import re
-
+        
         # Pattern 1: "Used X tokens" or "X tokens used"
         token_match = re.search(r'(?:used|consumed)\s+(\d+)\s+tokens?|(?:(\d+)\s+tokens?\s+(?:used|consumed))', line_lower)
         if token_match:
             tokens = int(token_match.group(1) or token_match.group(2))
             status.total_tokens += tokens
-
+            return
+        
         # Pattern 2: Input/Output/Cached token breakdown
         input_match = re.search(r'input[:\s]+(\d+)\s+tokens?', line_lower)
         if input_match:
             status.input_tokens += int(input_match.group(1))
-
+        
         output_match = re.search(r'output[:\s]+(\d+)\s+tokens?', line_lower)
         if output_match:
             status.output_tokens += int(output_match.group(1))
-
+        
         # Pattern 2b: Cached tokens
         cached_match = re.search(r'cached[:\s]+(\d+)\s+tokens?', line_lower)
         if cached_match:
             status.cached_tokens += int(cached_match.group(1))
-
+        
         # Pattern 2c: Cache hit patterns
         cache_hit_match = re.search(r'cache\s+hit[:\s]+(\d+)\s+tokens?', line_lower)
         if cache_hit_match:
             status.cached_tokens += int(cache_hit_match.group(1))
-
+        
         # Pattern 3: Total token counts "Total: X tokens"
         total_match = re.search(r'total[:\s]+(\d+)\s+tokens?', line_lower)
         if total_match:
@@ -678,30 +816,110 @@ class ClaudeInstanceOrchestrator:
             # Only update if this is larger than current total (avoid double counting)
             if total_tokens > status.total_tokens:
                 status.total_tokens = total_tokens
-
+        
         # Pattern 4: Tool calls - look for tool execution indicators
         if any(phrase in line_lower for phrase in ['tool call', 'executing tool', 'calling tool', 'tool execution']):
             status.tool_calls += 1
-
-        # Pattern 5: JSON format token usage (for stream-json output)
-        if 'tokens' in line_lower and '{' in line and '}' in line:
-            try:
-                # Try to extract JSON and parse token info
-                import json
-                # Look for JSON-like structures containing token info
-                json_match = re.search(r'\{[^{}]*"tokens"[^{}]*\}', line)
-                if json_match:
-                    json_data = json.loads(json_match.group())
-                    if 'tokens' in json_data and isinstance(json_data['tokens'], (int, float)):
-                        status.total_tokens += int(json_data['tokens'])
-                    if 'cached_tokens' in json_data and isinstance(json_data['cached_tokens'], (int, float)):
-                        status.cached_tokens += int(json_data['cached_tokens'])
-                    if 'input_tokens' in json_data and isinstance(json_data['input_tokens'], (int, float)):
-                        status.input_tokens += int(json_data['input_tokens'])
-                    if 'output_tokens' in json_data and isinstance(json_data['output_tokens'], (int, float)):
-                        status.output_tokens += int(json_data['output_tokens'])
-            except (json.JSONDecodeError, ValueError):
-                pass  # Ignore JSON parsing errors
+    
+    def _parse_final_output_token_usage(self, output: str, status: InstanceStatus, output_format: str):
+        """Parse token usage from final Claude Code output for non-streaming formats"""
+        if output_format == "json":
+            # For standard JSON format, try to parse the entire output as JSON
+            self._parse_json_final_output(output, status)
+        else:
+            # For other formats, parse line by line
+            for line in output.split('\n'):
+                line = line.strip()
+                if line:
+                    self._parse_token_usage(line, status)
+    
+    def _parse_json_final_output(self, output: str, status: InstanceStatus):
+        """Parse token usage from complete JSON output"""
+        try:
+            # Try to parse the entire output as JSON
+            json_data = json.loads(output)
+            
+            # Extract token information from the final JSON response
+            if isinstance(json_data, dict):
+                # Look for usage information in various locations
+                
+                # Check for usage stats in root
+                if 'usage' in json_data:
+                    self._extract_usage_stats(json_data['usage'], status)
+                
+                # Check for token info in metadata
+                if 'metadata' in json_data and 'usage' in json_data['metadata']:
+                    self._extract_usage_stats(json_data['metadata']['usage'], status)
+                
+                # Check for response-level token info
+                if 'tokens' in json_data:
+                    self._extract_token_info(json_data['tokens'], status)
+                
+                # Check for turns/conversations with token info
+                if 'turns' in json_data:
+                    for turn in json_data['turns']:
+                        if isinstance(turn, dict) and 'usage' in turn:
+                            self._extract_usage_stats(turn['usage'], status)
+                
+                # Check for tool calls
+                if 'tool_calls' in json_data:
+                    tool_calls = json_data['tool_calls']
+                    if isinstance(tool_calls, list):
+                        status.tool_calls += len(tool_calls)
+                    elif isinstance(tool_calls, (int, float)):
+                        status.tool_calls += int(tool_calls)
+                
+                logger.debug(f"Parsed JSON final output: tokens={status.total_tokens}, tools={status.tool_calls}")
+                
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.debug(f"Failed to parse final output as JSON: {e}")
+            # Fallback to line-by-line parsing
+            for line in output.split('\n'):
+                line = line.strip()
+                if line:
+                    self._parse_token_usage(line, status)
+    
+    def _extract_usage_stats(self, usage_data: dict, status: InstanceStatus):
+        """Extract usage statistics from a usage object"""
+        if not isinstance(usage_data, dict):
+            return
+            
+        # Standard Claude API usage fields
+        if 'input_tokens' in usage_data:
+            status.input_tokens += int(usage_data['input_tokens'])
+        if 'output_tokens' in usage_data:
+            status.output_tokens += int(usage_data['output_tokens'])
+        if 'cache_read_input_tokens' in usage_data:
+            status.cached_tokens += int(usage_data['cache_read_input_tokens'])
+        
+        # Calculate or use provided total
+        if 'total_tokens' in usage_data:
+            total = int(usage_data['total_tokens'])
+            if total > status.total_tokens:
+                status.total_tokens = total
+        else:
+            # Calculate total from components
+            calculated_total = status.input_tokens + status.output_tokens
+            if calculated_total > status.total_tokens:
+                status.total_tokens = calculated_total
+    
+    def _extract_token_info(self, token_data, status: InstanceStatus):
+        """Extract token information from various token data formats"""
+        if isinstance(token_data, dict):
+            # Structured token data
+            if 'total' in token_data:
+                total = int(token_data['total'])
+                if total > status.total_tokens:
+                    status.total_tokens = total
+            if 'input' in token_data:
+                status.input_tokens += int(token_data['input'])
+            if 'output' in token_data:
+                status.output_tokens += int(token_data['output'])
+            if 'cached' in token_data:
+                status.cached_tokens += int(token_data['cached'])
+        elif isinstance(token_data, (int, float)):
+            # Simple token count
+            status.total_tokens += int(token_data)
 
     def get_status_summary(self) -> Dict:
         """Get summary of all instance statuses"""
