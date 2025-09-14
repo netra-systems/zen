@@ -423,6 +423,7 @@ class IsolatedEnvironment:
             'SERVER_PORT': '8000',
             'AUTH_PORT': '8081',
             'FRONTEND_PORT': '3000',
+            'AUTH_SERVICE_URL': 'http://localhost:8081',
             'LOG_LEVEL': 'DEBUG',
             
             # Staging environment test defaults - FIXES GitHub Issue #259
