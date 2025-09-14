@@ -69,7 +69,12 @@ class TraceLogger:
     
     def _format_trace_line(self, trace: Dict[str, Any]) -> str:
         """Format single trace line."""
-        timestamp = trace['timestamp'][-8:]  # Last 8 chars of timestamp
+        full_timestamp = trace['timestamp']
+        # Extract last 8 chars, but handle cases where timestamp is shorter
+        if len(full_timestamp) >= 8:
+            timestamp = full_timestamp[-8:]
+        else:
+            timestamp = ""  # Empty for short timestamps
         action = trace['action']
         return f"[{timestamp}] {action}"
     

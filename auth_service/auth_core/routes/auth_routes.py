@@ -13,13 +13,14 @@ from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import JSONResponse, RedirectResponse
 
 # Import auth service models and services
-from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import RefreshRequest
 from auth_service.auth_core.oauth_manager import OAuthManager
 from auth_service.auth_core.config import AuthConfig
 from shared.isolated_environment import get_env
 # SSOT: Import SERVICE_ID constant for critical auth validation
 from shared.constants.service_identifiers import SERVICE_ID
+# Import lazy initialization for AuthService to prevent race conditions
+from auth_service.auth_core.core.lazy_auth_service import get_auth_service
 
 # Import MockAuthService for testing (conditional import for deployment safety)
 try:
@@ -38,15 +39,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 oauth_router = APIRouter()
 
-# Global auth service instance - use real implementation with defensive initialization
-try:
-    auth_service = AuthService()
-    logger.info("AuthService initialized successfully")
-except Exception as init_error:
-    logger.error(f"CRITICAL: Failed to initialize AuthService during module import: {init_error}")
-    logger.error("This will cause auth service startup failures - auth_service variable will be undefined")
-    # Re-raise the exception to make the failure visible
-    raise RuntimeError(f"AuthService initialization failed: {init_error}") from init_error
+# Auth service instance - now using lazy initialization to prevent race conditions
+# No longer instantiating at module level to avoid initialization race conditions
+logger.info("Auth routes module loaded - AuthService will be initialized on demand")
 
 @router.get("/auth/status")
 async def auth_status() -> Dict[str, Any]:
@@ -66,6 +61,7 @@ async def auth_health() -> Dict[str, Any]:
         database_status = "disconnected"
         database_details = {}
         
+        auth_service = get_auth_service()
         if auth_service._db_connection:
             try:
                 # Check database connectivity using the connection health method
@@ -228,6 +224,7 @@ async def refresh_tokens_endpoint(request: Request) -> Dict[str, Any]:
         
         # Call auth service to refresh tokens
         try:
+            auth_service = get_auth_service()
             result = await auth_service.refresh_tokens(refresh_token.strip())
         except Exception as e:
             logger.error(f"Auth service refresh_tokens failed: {e}")
