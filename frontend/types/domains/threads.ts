@@ -245,33 +245,13 @@ export function searchThreads(threads: Thread[], query: string): Thread[] {
 }
 
 // ============================================================================
-// THREAD STATE HELPERS - Each function ≤8 lines
+// THREAD STATE HELPERS - Use canonical factories from @shared/types/frontend_types
 // ============================================================================
-
-export function createThreadState(): ThreadState {
-  return {
-    threads: [],
-    activeThreadId: null,
-    currentThread: null,
-    isLoading: false,
-    error: null
-  };
-}
-
-export function setActiveThread(
-  state: ThreadState,
-  threadId: string | null
-): ThreadState {
-  const currentThread = threadId 
-    ? state.threads.find(t => t.id === threadId) || null
-    : null;
-  
-  return {
-    ...state,
-    activeThreadId: threadId,
-    currentThread
-  };
-}
+//
+// NOTE: createThreadState and setActiveThread moved to shared/types/frontend_types.ts
+// Import these functions from there instead of defining locally
+//
+// These functions have been consolidated to prevent SSOT violations
 
 // ============================================================================
 // DEFAULT EXPORT FOR CONVENIENCE
@@ -285,7 +265,6 @@ export default {
   createThread,
   isValidThread,
   sortThreadsByDate,
-  filterActiveThreads,
-  createThreadState,
-  setActiveThread
+  filterActiveThreads
+  // createThreadState and setActiveThread moved to @shared/types/frontend_types
 };
