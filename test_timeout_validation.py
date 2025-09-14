@@ -109,7 +109,7 @@ def check_pyproject_toml_global_timeout():
     pyproject_path = "pyproject.toml"
 
     if not os.path.exists(pyproject_path):
-        print("⚠️ pyproject.toml not found - assuming no global timeout conflict")
+        print("WARNING: pyproject.toml not found - assuming no global timeout conflict")
         return True
 
     try:
@@ -129,7 +129,7 @@ def check_pyproject_toml_global_timeout():
             return True
 
     except Exception as e:
-        print(f"⚠️ Could not read pyproject.toml: {e}")
+        print(f"WARNING: Could not read pyproject.toml: {e}")
         return True  # Assume OK if we can't read it
 
 def main():
@@ -147,19 +147,19 @@ def main():
 
     # 3. Overall result
     print("\n" + "=" * 80)
-    print("📊 OVERALL VALIDATION RESULTS:")
-    print(f"   • Timeout Matrix: {'✅ PASS' if timeout_validation_passed else '❌ FAIL'}")
-    print(f"   • pyproject.toml:  {'✅ PASS' if pyproject_validation_passed else '❌ FAIL'}")
+    print("OVERALL VALIDATION RESULTS:")
+    print(f"   * Timeout Matrix: {'PASS' if timeout_validation_passed else 'FAIL'}")
+    print(f"   * pyproject.toml:  {'PASS' if pyproject_validation_passed else 'FAIL'}")
 
     if timeout_validation_passed and pyproject_validation_passed:
-        print("\n🎉 SUCCESS: Issue #818 pytest timeout fix VALIDATED!")
-        print("   • Staging tests get appropriate timeouts (300s unit, 900s e2e)")
-        print("   • Local tests maintain fast execution (180s unit, 600s e2e)")
-        print("   • Golden Path ($500K+ ARR) protected from timeout failures")
-        print("   • No breaking changes to existing test infrastructure")
+        print("\nSUCCESS: Issue #818 pytest timeout fix VALIDATED!")
+        print("   * Staging tests get appropriate timeouts (300s unit, 900s e2e)")
+        print("   * Local tests maintain fast execution (180s unit, 600s e2e)")
+        print("   * Golden Path ($500K+ ARR) protected from timeout failures")
+        print("   * No breaking changes to existing test infrastructure")
         sys.exit(0)
     else:
-        print("\n🚨 FAILURE: Issues detected in timeout configuration")
+        print("\nFAILURE: Issues detected in timeout configuration")
         sys.exit(1)
 
 if __name__ == "__main__":

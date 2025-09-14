@@ -466,8 +466,16 @@ def _test_websocket_connectivity(url: str, timeout: float = 2.0) -> bool:
             except:
                 return False
 
-        return asyncio.run(asyncio.wait_for(test_connection(), timeout=timeout))
-    except:
+        # Create new event loop to avoid issues with existing loops
+        try:
+            return asyncio.run(asyncio.wait_for(test_connection(), timeout=timeout))
+        except RuntimeError:
+            # If there's already a running event loop, use it
+            loop = asyncio.get_event_loop()
+            task = asyncio.create_task(asyncio.wait_for(test_connection(), timeout=timeout))
+            return loop.run_until_complete(task)
+    except Exception as e:
+        logger.debug(f"WebSocket connectivity test failed: {e}")
         return False
 
 
@@ -505,6 +513,7 @@ class MockWebSocketServer:
 
     async def handle_client(self, websocket, path):
         """Handle WebSocket client connection."""
+        logger.info(f"🔌 New WebSocket connection on path: {path}")
         await self.register_client(websocket)
 
         try:
@@ -534,6 +543,15 @@ class MockWebSocketServer:
                 'type': 'pong',
                 'timestamp': time.time(),
                 'user_id': user_id
+            })
+        else:
+            # Default response for any message - helps with connection testing
+            await self.send_to_client(websocket, {
+                'type': 'mock_response',
+                'original_type': message_type,
+                'timestamp': time.time(),
+                'user_id': user_id,
+                'message': f'Mock server received: {message_type}'
             })
 
     async def simulate_agent_execution(self, websocket, user_id, request):
