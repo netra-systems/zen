@@ -184,9 +184,10 @@ Discovered multiple critical and recurring issues in the netra-backend-staging s
 
 ---
 
-## Cluster 7: 🟡 MEDIUM - Session Middleware Configuration Issues (P3)
+## Cluster 7: 🔴 CRITICAL - Session Middleware Configuration Issues (P1 ESCALATED)
 
 **Pattern:** SessionMiddleware not properly installed, affecting session management
+**ESCALATION:** Issue #169 updated with latest critical findings - 25+ failures in 2 minutes indicating active user impact
 
 ### Key Log Entries:
 ```json
@@ -200,9 +201,16 @@ Discovered multiple critical and recurring issues in the netra-backend-staging s
 }
 ```
 
-**Impact:** Medium - Session management compromised, may affect user authentication state
-**Frequency:** Intermittent
-**Business Risk:** Medium - User experience degradation
+### CRITICAL UPDATE (18:01-18:02)
+- **Latest Detection:** 25+ failures in 2-minute window every ~300ms
+- **Service Revision:** netra-backend-staging-00611-cr5 (post-deployment regression)
+- **User Impact:** ACTIVE authentication failures blocking Golden Path
+- **GitHub Issue:** #169 updated with critical escalation
+- **Issue URL:** https://github.com/netra-systems/netra-apex/issues/169#issuecomment-3289743804
+
+**Impact:** CRITICAL - Active user authentication failures, Golden Path blocked
+**Frequency:** Every ~300ms (25+ occurrences in 2 minutes)
+**Business Risk:** HIGH - $500K+ ARR authentication flow disrupted
 
 ---
 
@@ -216,10 +224,10 @@ Discovered multiple critical and recurring issues in the netra-backend-staging s
 ### Priority 2 - High Impact Issues
 4. **LLM Manager:** Debug LLM Manager initialization failure
 5. **WebSocket Bridge:** Fix missing `handle_message` method and race condition detection
+6. **Session Middleware:** URGENT - Fix SessionMiddleware installation causing active user authentication failures (Issue #169 ESCALATED)
 
 ### Priority 3 - Medium Impact Issues
-6. **SSOT Compliance:** Address manager instance duplication for user isolation
-7. **Session Middleware:** Ensure proper SessionMiddleware installation
+7. **SSOT Compliance:** Address manager instance duplication for user isolation
 
 ---
 
