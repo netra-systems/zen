@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "configuration",
-    "generated_at": "2025-09-14T14:29:46.288801",
+    "generated_at": "2025-09-14T16:01:13.240500",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 1153
   },
@@ -2590,6 +2590,7 @@
       "value": "ENHANCED",
       "category": "configuration",
       "locations": [
+        "netra_backend/app/agents/supervisor/execution_engine_factory.py:849",
         "scripts/P0_INFRASTRUCTURE_STABILITY_PROOF.py:47"
       ]
     },
@@ -6085,7 +6086,7 @@
         "netra_backend/app/monitoring/performance_metrics.py:270",
         "netra_backend/app/monitoring/performance_metrics.py:278",
         "netra_backend/app/startup_checks/checker.py:150",
-        "netra_backend/app/websocket_core/websocket_manager.py:177",
+        "netra_backend/app/websocket_core/websocket_manager.py:178",
         "auth_service/auth_core/database/staging_validation.py:375",
         "scripts/api_contract_validator.py:497",
         "scripts/async_pattern_enforcer.py:417",
@@ -8708,7 +8709,7 @@
         "netra_backend/app/routes/agents_execute.py:180",
         "netra_backend/app/routes/agents_execute.py:195",
         "netra_backend/app/routes/websocket_ssot.py:774",
-        "netra_backend/app/smd.py:1831",
+        "netra_backend/app/smd.py:1827",
         "netra_backend/app/websocket_core/auth_remediation.py:162",
         "netra_backend/app/websocket_core/context.py:131",
         "netra_backend/app/websocket_core/event_validator.py:1347"

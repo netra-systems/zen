@@ -30,7 +30,6 @@
     "UserExecutionContext missing required user_id",
     "UserExecutionContext.*connection_id",
     "Using run_id",
-    "WebSocket manager sync factory called without user context or user_id",
     "_created_at",
     "_current_request_id",
     "_pool_id",
