@@ -41,6 +41,12 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
     def setUp(self):
         """Set up test environment for SSOT violation detection."""
         super().setUp()
+        # Set up instance attributes after parent setup
+        self._initialize_test_attributes()
+        logger.info("Starting ExecutionEngine SSOT violation detection")
+    
+    def _initialize_test_attributes(self):
+        """Initialize test attributes - separate method to avoid conflicts."""
         self.codebase_root = Path(__file__).parent.parent.parent
         self.execution_engine_classes = []
         self.execution_engine_modules = []
@@ -50,12 +56,14 @@ class TestExecutionEngineSSotViolations(SSotBaseTestCase):
         # Expected SSOT pattern
         self.canonical_module = "netra_backend.app.agents.supervisor.user_execution_engine"
         self.canonical_class = "UserExecutionEngine"
-        
-        logger.info("Starting ExecutionEngine SSOT violation detection")
     
     def test_detect_multiple_execution_engine_classes(self):
         """Detect multiple ExecutionEngine class definitions - SHOULD INITIALLY FAIL."""
         logger.info("🔍 SSOT VIOLATION DETECTION: Scanning for multiple ExecutionEngine classes")
+        
+        # Ensure attributes are initialized (safety check)
+        if not hasattr(self, 'codebase_root'):
+            self._initialize_test_attributes()
         
         execution_engine_classes = self._find_all_execution_engine_classes()
         
