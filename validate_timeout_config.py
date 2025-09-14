@@ -48,19 +48,19 @@ def validate_timeout_configuration():
         with open('tests/unified_test_runner.py', 'r') as f:
             content = f.read()
             if 'Environment-aware timeout configuration' in content:
-                print("✅ PASS: Environment-aware timeout configuration found")
+                print("[PASS] Environment-aware timeout configuration found")
             else:
-                print("❌ FAIL: Environment-aware timeout configuration not found")
+                print("[FAIL] Environment-aware timeout configuration not found")
                 success = False
 
             if 'args.env == \'staging\'' in content and '--timeout=900' in content:
-                print("✅ PASS: Staging-specific timeout configuration found")
+                print("[PASS] Staging-specific timeout configuration found")
             else:
-                print("❌ FAIL: Staging-specific timeout configuration not found")
+                print("[FAIL] Staging-specific timeout configuration not found")
                 success = False
 
     except Exception as e:
-        print(f"❌ FAIL: Could not read unified_test_runner.py: {e}")
+        print(f"[FAIL] Could not read unified_test_runner.py: {e}")
         success = False
 
     # Summary

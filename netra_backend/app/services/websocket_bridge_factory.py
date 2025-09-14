@@ -267,7 +267,8 @@ class WebSocketBridgeFactory:
             # Create WebSocket manager using proper factory pattern with user context
             # SECURITY FIX: Use create_websocket_manager instead of direct instantiation
             try:
-                from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+                # ISSUE #824 FIX: Use canonical SSOT import path
+                from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
                 from netra_backend.app.services.websocket_connection_pool import WebSocketConnectionPool
 
                 # Try different registry import paths
