@@ -129,14 +129,36 @@ target alpine-test-backend: failed to solve: failed to compute cache key: failed
 - Pydantic V2 migration warnings (class-based config, json_encoders)
 - netra_backend.app.logging_config deprecated
 
+### Issue 10: BaseAgent Session Management and Factory Pattern Failures
+**Category**: Agents/Session Management  
+**Severity**: P1 - High (Core agent functionality affected)  
+**Description**: BaseAgent comprehensive test failures affecting session management and factory patterns
+**Details**:
+- 10 out of 66 BaseAgent tests failing (84.8% pass rate)
+- Session manager retrieval issues
+- Factory pattern method failures
+- User execution context integration problems
+- Status update mechanism not working
+- Metadata storage/retrieval broken
+
+**Failed Test Categories**:
+- Session Management: test_get_session_manager_success, test_execute_with_user_execution_context, test_execute_with_context_method_directly
+- Factory Patterns: test_create_with_context_factory_method, test_create_with_context_invalid_context_type, test_create_agent_with_context_factory
+- Execution/Status: test_execute_with_execution_failure, test_execute_modern_legacy_compatibility, test_send_status_update_variants
+- Metadata: test_get_metadata_value_with_agent_context_fallback
+
+**Business Impact**: Core agent execution and user session isolation affected
+**GitHub Issue**: #891 - failing-test-regression-p1-base-agent-session-factory-failures
+
 ## Next Steps
 1. **URGENT**: Address auth service connection failures (P0)
 2. **URGENT**: Fix WebSocket event tester missing attribute (P0)
 3. Address Docker build and disk space issues (P0)
 4. Fix missing imports in Docker lifecycle tests (P1)
 5. Repair corrupted test file syntax (P1)
-6. Address deprecation warnings (P2)
-7. Create GitHub issues for each problem category
+6. **NEW**: Fix BaseAgent session management and factory pattern failures (P1) - Issue #891
+7. Address deprecation warnings (P2)
+8. Create GitHub issues for remaining problem categories
 
 ## Test Execution Summary
 ### Infrastructure Tests
