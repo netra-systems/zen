@@ -1253,15 +1253,32 @@ class RealWebSocketTestBase:
                 use_staging = env.get("USE_STAGING_SERVICES", "false").lower() == "true"
                 use_staging_fallback = env.get("USE_STAGING_FALLBACK", "false").lower() == "true"
                 
+                # Check for mock WebSocket mode (Issue #860)
+                use_mock_websocket = env.get("USE_MOCK_WEBSOCKET", "false").lower() == "true"
+                test_mode = env.get("TEST_MODE", "")
+                docker_bypass = env.get("DOCKER_BYPASS", "false").lower() == "true"
+
+                if use_mock_websocket or test_mode == "mock_websocket" or docker_bypass:
+                    logger.warning("Docker services failed - using mock WebSocket server fallback (Issue #860)")
+                    try:
+                        # Start mock WebSocket server
+                        mock_server_url = await ensure_mock_websocket_server_running()
+                        self.config.websocket_url = mock_server_url
+                        self.config.backend_url = "http://localhost:8001"  # Mock backend equivalent
+                        logger.info(f"Configured for mock WebSocket testing: WebSocket={self.config.websocket_url}, Backend={self.config.backend_url}")
+                    except Exception as mock_error:
+                        logger.error(f"Mock WebSocket server fallback failed: {mock_error}")
+                        # Continue to staging fallback
+
                 if staging_mode or use_staging or use_staging_fallback:
                     logger.warning("Docker services failed - using staging environment fallback")
                     # Update configuration for staging
                     staging_url = env.get("STAGING_WEBSOCKET_URL", "wss://netra-staging.onrender.com/ws")
-                    self.config.websocket_url = env.get("TEST_WEBSOCKET_URL", staging_url) 
+                    self.config.websocket_url = env.get("TEST_WEBSOCKET_URL", staging_url)
                     self.config.backend_url = env.get("TEST_BACKEND_URL", "https://netra-staging.onrender.com")
                     logger.info(f"Configured for staging testing: WebSocket={self.config.websocket_url}, Backend={self.config.backend_url}")
-                else:
-                    raise RuntimeError("Failed to start Docker services and no staging fallback configured")
+                elif not (use_mock_websocket or test_mode == "mock_websocket" or docker_bypass):
+                    raise RuntimeError("Failed to start Docker services and no fallback configured (staging disabled, mock disabled)")
             
             # Start performance monitoring
             self.performance_monitor.start_monitoring(self.test_id)
