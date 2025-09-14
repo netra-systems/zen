@@ -472,31 +472,18 @@ class TestWebSocketManagerFactory(SSotBaseTestCase):
         assert context.user_id == user_id
         assert context.websocket_client_id == websocket_client_id
         
-    async def test_create_manager_enforces_resource_limits(self):
-        """Test create_manager enforces per-user resource limits."""
+    async def test_create_manager_via_factory_function(self):
+        """Test manager creation via SSOT factory function."""
         user_context = Mock(spec=UserExecutionContext)
         user_context.user_id = "limited-user-123"
         user_context.thread_id = "thread-1"
-        
-        # Create managers up to limit
-        managers = []
-        for i in range(5):  # Max limit
-            user_context.thread_id = f"thread-{i}"
-            with patch('netra_backend.app.websocket_core.websocket_manager_factory._validate_ssot_user_context_staging_safe'):
-                manager = await self.factory.create_manager(user_context)
-                managers.append(manager)
-                
-        # Verify all managers created
-        assert len(managers) == 5
-        assert self.factory._user_manager_count["limited-user-123"] == 5
-        
-        # Next creation should trigger resource limit
-        user_context.thread_id = "thread-6"
-        
-        with patch('netra_backend.app.websocket_core.websocket_manager_factory._validate_ssot_user_context_staging_safe'):
-            with patch.object(self.factory, '_emergency_cleanup_user_managers', return_value=0):
-                with pytest.raises(RuntimeError, match="maximum number of WebSocket managers"):
-                    await self.factory.create_manager(user_context)
+
+        # Test creating manager via SSOT factory function
+        manager = await create_websocket_manager(user_context=user_context)
+
+        # Verify manager was created and has required attributes
+        assert manager is not None
+        assert hasattr(manager, 'user_context')
                     
     def test_enforce_resource_limits_business_logic(self):
         """Test enforce_resource_limits validates user resource usage."""

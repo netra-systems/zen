@@ -76,7 +76,7 @@ def test_user_execution_context_compatibility():
             audit_metadata={"test_key": "test_value"}
         )
 
-        print("✅ Successfully created UserExecutionContext with agent_context and audit_metadata")
+        print("Successfully created UserExecutionContext with agent_context and audit_metadata")
         print(f"   - Agent Context: {context.agent_context}")
         print(f"   - Audit Metadata: {context.audit_metadata}")
 

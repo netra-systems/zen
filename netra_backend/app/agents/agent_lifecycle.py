@@ -73,7 +73,7 @@ class AgentLifecycleMixin(ABC):
             if success:
                 await self._post_run(context, run_id, stream_updates, success=True)
         except WebSocketDisconnect as e:
-            await self._handle_websocket_disconnect(e, state, run_id, stream_updates)
+            await self._handle_websocket_disconnect(e, context, run_id, stream_updates)
         except Exception as e:
             await self._handle_and_reraise_error(e, state, run_id, stream_updates)
         finally:

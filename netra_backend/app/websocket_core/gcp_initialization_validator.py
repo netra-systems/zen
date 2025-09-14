@@ -1048,39 +1048,101 @@ class GCPWebSocketInitializationValidator:
             )
     
     async def _validate_service_group(
-        self, 
-        service_names: list[str], 
+        self,
+        service_names: list[str],
         timeout_seconds: float = 60.0
     ) -> Dict[str, Any]:
-        """Validate a group of services with timeout and retry logic."""
+        """Validate a group of services with timeout and retry logic and enhanced error reporting."""
         failed = []
         success_count = 0
-        
+        detailed_failures = {}
+
+        # Enhanced logging for service group validation
+        self.logger.info(f"🔍 Validating service group: {service_names} (timeout: {timeout_seconds}s)")
+
         for service_name in service_names:
             if service_name not in self.readiness_checks:
-                self.logger.warning(f"Service check not found: {service_name}")
+                error_detail = f"Service check configuration not found for: {service_name}"
+                self.logger.warning(f"❌ {error_detail}")
                 failed.append(service_name)
+                detailed_failures[service_name] = {
+                    "error": "configuration_missing",
+                    "detail": error_detail,
+                    "available_checks": list(self.readiness_checks.keys())
+                }
                 continue
-            
+
             check = self.readiness_checks[service_name]
-            service_ready = await self._validate_single_service(check, timeout_seconds)
-            
-            if service_ready:
-                success_count += 1
-                self.logger.info(f"    PASS:  {service_name}: Ready ({check.description})")
-            else:
+            start_time = time.time()
+
+            # Enhanced service validation with detailed error tracking
+            try:
+                service_ready = await self._validate_single_service(check, timeout_seconds)
+                elapsed_time = time.time() - start_time
+
+                if service_ready:
+                    success_count += 1
+                    self.logger.info(f"    ✅ PASS: {service_name}: Ready in {elapsed_time:.2f}s ({check.description})")
+                else:
+                    failure_detail = {
+                        "error": "service_not_ready",
+                        "elapsed_time": elapsed_time,
+                        "timeout_used": check.timeout_seconds,
+                        "retry_count": check.retry_count,
+                        "description": check.description,
+                        "is_critical": check.is_critical
+                    }
+
+                    detailed_failures[service_name] = failure_detail
+
+                    if check.is_critical:
+                        failed.append(service_name)
+                        self.logger.error(
+                            f"    ❌ CRITICAL FAIL: {service_name}: Not ready after {elapsed_time:.2f}s "
+                            f"({check.description}) - {failure_detail}"
+                        )
+                    else:
+                        self.logger.warning(
+                            f"    ⚠️ WARNING: {service_name}: Not ready after {elapsed_time:.2f}s "
+                            f"({check.description}) - Non-critical"
+                        )
+
+            except Exception as e:
+                elapsed_time = time.time() - start_time
+                error_detail = {
+                    "error": "validation_exception",
+                    "exception": str(e),
+                    "elapsed_time": elapsed_time,
+                    "service": service_name
+                }
+                detailed_failures[service_name] = error_detail
+
                 if check.is_critical:
                     failed.append(service_name)
-                    self.logger.error(f"    FAIL:  {service_name}: Failed ({check.description})")
+                    self.logger.error(f"    💥 EXCEPTION FAIL: {service_name}: {e} - {error_detail}")
                 else:
-                    self.logger.warning(f"    WARNING: [U+FE0F]  {service_name}: Failed (non-critical)")
-        
-        return {
+                    self.logger.warning(f"    ⚠️ EXCEPTION WARNING: {service_name}: {e} (non-critical)")
+
+        result = {
             "success": len(failed) == 0,
             "failed": failed,
             "success_count": success_count,
-            "total_count": len(service_names)
+            "total_count": len(service_names),
+            "detailed_failures": detailed_failures,
+            "environment": self.environment,
+            "validation_summary": f"{success_count}/{len(service_names)} services ready"
         }
+
+        # Enhanced result logging
+        if result["success"]:
+            self.logger.info(f"✅ Service group validation SUCCESS: {result['validation_summary']}")
+        else:
+            self.logger.error(
+                f"❌ Service group validation FAILED: {result['validation_summary']}. "
+                f"Failed services: {failed}. Detailed failures: {detailed_failures}"
+            )
+
+        return result
     
     async def _validate_single_service(
         self, 
