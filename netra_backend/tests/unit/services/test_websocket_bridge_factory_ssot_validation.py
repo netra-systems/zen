@@ -188,7 +188,7 @@ class TestWebSocketBridgeFactorySSotValidation:
         
         for key in env_keys_to_test:
             original_env_values[key] = env.get(key)
-            env.unset(key, source='test_ssot_validation')
+            env.unset(key)
         
         try:
             # Clear all environment variables - SSOT violation
