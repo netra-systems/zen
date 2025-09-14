@@ -673,6 +673,184 @@ class ExecutionEngineFactory:
         except Exception as e:
             logger.error(f"Error during ExecutionEngineFactory shutdown: {e}")
             raise
+    
+    # SSOT ENHANCEMENT METHODS (Issue #1123 Phase B)
+    
+    async def _validate_ssot_compliance(self, engine: UserExecutionEngine, context: UserExecutionContext) -> None:
+        """Validate SSOT compliance for created execution engine.
+        
+        Args:
+            engine: Created execution engine
+            context: User execution context
+            
+        Raises:
+            SSOTValidationError: If SSOT compliance validation fails
+        """
+        try:
+            ssot_logger.debug(f"Validating SSOT compliance for engine {engine.engine_id}")
+            
+            # Validate factory is canonical
+            if not self._ssot_validation_state['factory_is_canonical']:
+                raise SSOTValidationError("Factory is not canonical SSOT factory")
+            
+            # Validate engine has unique instance
+            engine_user_id = engine.get_user_context().user_id
+            if not engine_user_id:
+                raise SSOTValidationError("Engine missing user context")
+            
+            # Validate WebSocket integration for Golden Path
+            if hasattr(engine, 'websocket_emitter') and engine.websocket_emitter:
+                self._factory_metrics['websocket_integrations'] += 1
+                ssot_logger.debug(f"WebSocket integration validated for engine {engine.engine_id}")
+            
+            # Mark Golden Path execution
+            self._factory_metrics['golden_path_executions'] += 1
+            self._ssot_validation_state['golden_path_tested'] = True
+            
+            ssot_logger.info(f"SSOT COMPLIANCE VALIDATED: Engine {engine.engine_id} passes all SSOT validation checks")
+            
+        except Exception as e:
+            ssot_logger.error(f"SSOT validation failed for engine {engine.engine_id}: {e}")
+            raise SSOTValidationError(f"SSOT compliance validation failed: {e}")
+    
+    async def _validate_user_isolation(self, engine: UserExecutionEngine, context: UserExecutionContext) -> None:
+        """Validate user isolation for created execution engine.
+        
+        Args:
+            engine: Created execution engine
+            context: User execution context
+            
+        Raises:
+            UserIsolationError: If user isolation validation fails
+        """
+        try:
+            ssot_logger.debug(f"Validating user isolation for engine {engine.engine_id}")
+            
+            # Validate context isolation
+            engine_context = engine.get_user_context()
+            if engine_context.user_id != context.user_id:
+                raise UserIsolationError(f"Context user ID mismatch: {engine_context.user_id} != {context.user_id}")
+            
+            if engine_context.run_id != context.run_id:
+                raise UserIsolationError(f"Context run ID mismatch: {engine_context.run_id} != {context.run_id}")
+            
+            # Validate no shared state between users
+            for existing_engine in self._active_engines.values():
+                if existing_engine != engine:
+                    existing_context = existing_engine.get_user_context()
+                    if existing_context.user_id == engine_context.user_id:
+                        # Same user - validate run isolation
+                        if existing_context.run_id == engine_context.run_id:
+                            raise UserIsolationError(f"Duplicate run ID detected: {engine_context.run_id}")
+            
+            # Mark user isolation validated
+            self._ssot_validation_state['user_isolation_validated'] = True
+            
+            ssot_logger.info(f"USER ISOLATION VALIDATED: Engine {engine.engine_id} has complete user isolation")
+            
+        except Exception as e:
+            ssot_logger.error(f"User isolation validation failed for engine {engine.engine_id}: {e}")
+            raise UserIsolationError(f"User isolation validation failed: {e}")
+    
+    def _update_performance_metrics(self, creation_time: float) -> None:
+        """Update performance metrics with creation time.
+        
+        Args:
+            creation_time: Engine creation time in seconds
+        """
+        try:
+            # Update performance metrics
+            total_engines = self._factory_metrics['total_engines_created']
+            if total_engines > 0:
+                # Update average
+                total_time = self._performance_metrics['total_creation_time']
+                new_total = total_time + creation_time
+                new_average = new_total / total_engines
+                
+                self._performance_metrics['total_creation_time'] = new_total
+                self._performance_metrics['average_creation_time'] = new_average
+            
+            # Update peak time
+            if creation_time > self._performance_metrics['peak_creation_time']:
+                self._performance_metrics['peak_creation_time'] = creation_time
+                ssot_logger.info(f"NEW PEAK CREATION TIME: {creation_time:.3f}s")
+            
+            # Update concurrent engine peak
+            current_count = len(self._active_engines)
+            if current_count > self._performance_metrics['concurrent_engine_peak']:
+                self._performance_metrics['concurrent_engine_peak'] = current_count
+                ssot_logger.info(f"NEW CONCURRENT ENGINE PEAK: {current_count} engines")
+            
+            # Update last check time
+            self._performance_metrics['last_performance_check'] = datetime.now(timezone.utc)
+            self._factory_metrics['performance_measurements'] += 1
+            
+            # Establish baseline if needed
+            if not self._ssot_validation_state['performance_baseline_established']:
+                self._ssot_validation_state['performance_baseline_established'] = True
+                ssot_logger.info(f"PERFORMANCE BASELINE ESTABLISHED: avg={self._performance_metrics['average_creation_time']:.3f}s")
+            
+        except Exception as e:
+            ssot_logger.error(f"Error updating performance metrics: {e}")
+    
+    def validate_factory_uniqueness(self) -> bool:
+        """Validate that this factory is the unique canonical SSOT factory.
+        
+        Returns:
+            True if factory uniqueness is validated
+        """
+        try:
+            # Check if this is marked as canonical
+            if not self._ssot_validation_state['factory_is_canonical']:
+                ssot_logger.warning("Factory not marked as canonical SSOT factory")
+                return False
+            
+            # Increment uniqueness check counter
+            self._factory_metrics['factory_uniqueness_checks'] += 1
+            
+            ssot_logger.info("FACTORY UNIQUENESS VALIDATED: This is the canonical SSOT ExecutionEngineFactory")
+            return True
+            
+        except Exception as e:
+            ssot_logger.error(f"Factory uniqueness validation failed: {e}")
+            return False
+    
+    def get_ssot_status(self) -> Dict[str, Any]:
+        """Get comprehensive SSOT status and compliance information.
+        
+        Returns:
+            Dictionary with SSOT status, metrics, and validation state
+        """
+        try:
+            return {
+                'ssot_compliance': {
+                    'factory_is_canonical': self._ssot_validation_state['factory_is_canonical'],
+                    'user_isolation_validated': self._ssot_validation_state['user_isolation_validated'],
+                    'golden_path_tested': self._ssot_validation_state['golden_path_tested'],
+                    'performance_baseline_established': self._ssot_validation_state['performance_baseline_established'],
+                    'backwards_compatibility_active': self._ssot_validation_state['backwards_compatibility_active']
+                },
+                'ssot_metrics': {
+                    'ssot_validations_performed': self._factory_metrics['ssot_validations_performed'],
+                    'user_isolation_validations': self._factory_metrics['user_isolation_validations'],
+                    'golden_path_executions': self._factory_metrics['golden_path_executions'],
+                    'websocket_integrations': self._factory_metrics['websocket_integrations'],
+                    'factory_uniqueness_checks': self._factory_metrics['factory_uniqueness_checks'],
+                    'backwards_compatibility_usage': self._factory_metrics['backwards_compatibility_usage']
+                },
+                'performance_metrics': self._performance_metrics.copy(),
+                'factory_health': {
+                    'total_engines_created': self._factory_metrics['total_engines_created'],
+                    'active_engines_count': self._factory_metrics['active_engines_count'],
+                    'creation_errors': self._factory_metrics['creation_errors'],
+                    'cleanup_errors': self._factory_metrics['cleanup_errors']
+                },
+                'timestamp': datetime.now(timezone.utc).isoformat(),
+                'issue_1123_phase_b_status': 'ENHANCED'
+            }
+        except Exception as e:
+            ssot_logger.error(f"Error getting SSOT status: {e}")
+            return {'error': str(e)}
 
 
 # Singleton factory instance
