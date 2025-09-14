@@ -25,7 +25,7 @@ from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.isolated_test_helper import IsolatedTestCase
 
 
-class ConfigurationRegressionTests(IsolatedTestCase):
+class ConfigurationRegressionTests(IsolatedTestCase, unittest.TestCase):
     """
     Critical tests to prevent configuration regressions that cause cascade failures.
     """

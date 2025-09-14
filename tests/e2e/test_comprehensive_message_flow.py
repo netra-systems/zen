@@ -63,40 +63,41 @@ except ImportError as e:
 
 
             # ============================================================================
-            # MESSAGE TYPES AND TEST DATA
-            # ============================================================================
+# MESSAGE TYPES AND TEST DATA
+# ============================================================================
 
-# REMOVED_SYNTAX_ERROR: class MessageType(Enum):
-    # REMOVED_SYNTAX_ERROR: """Comprehensive message types for flow testing."""
-    # REMOVED_SYNTAX_ERROR: TEXT_SIMPLE = "text_simple"
-    # REMOVED_SYNTAX_ERROR: TEXT_LARGE = "text_large"
-    # REMOVED_SYNTAX_ERROR: JSON_SIMPLE = "json_simple"
-    # REMOVED_SYNTAX_ERROR: JSON_COMPLEX = "json_complex"
-    # REMOVED_SYNTAX_ERROR: JSON_NESTED = "json_nested"
-    # REMOVED_SYNTAX_ERROR: MARKDOWN = "markdown"
-    # REMOVED_SYNTAX_ERROR: CODE_PYTHON = "code_python"
-    # REMOVED_SYNTAX_ERROR: CODE_JAVASCRIPT = "code_javascript"
-    # REMOVED_SYNTAX_ERROR: CODE_SQL = "code_sql"
-    # REMOVED_SYNTAX_ERROR: UNICODE_EMOJI = "unicode_emoji"
-    # REMOVED_SYNTAX_ERROR: UNICODE_MULTILANG = "unicode_multilang"
-    # REMOVED_SYNTAX_ERROR: BINARY_REF = "binary_ref"
-    # REMOVED_SYNTAX_ERROR: STREAMING_CHUNK = "streaming_chunk"
-    # REMOVED_SYNTAX_ERROR: BATCH_MESSAGES = "batch_messages"
-    # REMOVED_SYNTAX_ERROR: COMMAND_SIMPLE = "command_simple"
-    # REMOVED_SYNTAX_ERROR: COMMAND_COMPLEX = "command_complex"
-    # REMOVED_SYNTAX_ERROR: SYSTEM_STATUS = "system_status"
-    # REMOVED_SYNTAX_ERROR: ERROR_MESSAGE = "error_message"
-    # REMOVED_SYNTAX_ERROR: WARNING_MESSAGE = "warning_message"
-    # REMOVED_SYNTAX_ERROR: INFO_MESSAGE = "info_message"
-    # REMOVED_SYNTAX_ERROR: DEBUG_MESSAGE = "debug_message"
-    # REMOVED_SYNTAX_ERROR: METRICS_DATA = "metrics_data"
-    # REMOVED_SYNTAX_ERROR: EVENT_NOTIFICATION = "event_notification"
-    # REMOVED_SYNTAX_ERROR: AGENT_REQUEST = "agent_request"
-    # REMOVED_SYNTAX_ERROR: AGENT_RESPONSE = "agent_response"
-    # REMOVED_SYNTAX_ERROR: TOOL_EXECUTION = "tool_execution"
-    # REMOVED_SYNTAX_ERROR: STATUS_UPDATE = "status_update"
-    # REMOVED_SYNTAX_ERROR: HEARTBEAT = "heartbeat"
-    # REMOVED_SYNTAX_ERROR: COMPRESSION_TEST = "compression_test"
+
+class MessageType(Enum):
+    """Comprehensive message types for flow testing."""
+    TEXT_SIMPLE = "text_simple"
+    TEXT_LARGE = "text_large"
+    JSON_SIMPLE = "json_simple"
+    JSON_COMPLEX = "json_complex"
+    JSON_NESTED = "json_nested"
+    MARKDOWN = "markdown"
+    CODE_PYTHON = "code_python"
+    CODE_JAVASCRIPT = "code_javascript"
+    CODE_SQL = "code_sql"
+    UNICODE_EMOJI = "unicode_emoji"
+    UNICODE_MULTILANG = "unicode_multilang"
+    BINARY_REF = "binary_ref"
+    STREAMING_CHUNK = "streaming_chunk"
+    BATCH_MESSAGES = "batch_messages"
+    COMMAND_SIMPLE = "command_simple"
+    COMMAND_COMPLEX = "command_complex"
+    SYSTEM_STATUS = "system_status"
+    ERROR_MESSAGE = "error_message"
+    WARNING_MESSAGE = "warning_message"
+    INFO_MESSAGE = "info_message"
+    DEBUG_MESSAGE = "debug_message"
+    METRICS_DATA = "metrics_data"
+    EVENT_NOTIFICATION = "event_notification"
+    AGENT_REQUEST = "agent_request"
+    AGENT_RESPONSE = "agent_response"
+    TOOL_EXECUTION = "tool_execution"
+    STATUS_UPDATE = "status_update"
+    HEARTBEAT = "heartbeat"
+    COMPRESSION_TEST = "compression_test"
 
 
     # REMOVED_SYNTAX_ERROR: @dataclass
