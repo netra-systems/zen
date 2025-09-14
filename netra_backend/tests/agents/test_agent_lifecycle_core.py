@@ -26,7 +26,7 @@ from shared.isolated_environment import get_env
 
 # Import target classes
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.agent import SubAgentLifecycle
 from netra_backend.app.agents.base.timing_collector import ExecutionTimingCollector
 from netra_backend.app.services.user_execution_context import UserExecutionContext
