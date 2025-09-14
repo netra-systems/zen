@@ -145,7 +145,7 @@ class TestPerformanceRealisticLoadE2E(SSotAsyncTestCase):
             access_token = self.__class__.auth_helper.create_test_jwt_token(
                 user_id=user_id,
                 email=user_email,
-                expires_in_hours=1
+                exp_minutes=60
             )
 
             # Establish WebSocket connection
