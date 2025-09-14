@@ -77,7 +77,7 @@ from netra_backend.app.agents.supervisor.execution_context import PipelineStep, 
 
 # Supporting Infrastructure
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 

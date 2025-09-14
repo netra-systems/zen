@@ -32,7 +32,7 @@ from netra_backend.app.agents.tool_dispatcher_core import (
     ToolDispatchRequest, 
     ToolDispatchResponse
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.tool import ToolInput, ToolResult, ToolStatus
 
 

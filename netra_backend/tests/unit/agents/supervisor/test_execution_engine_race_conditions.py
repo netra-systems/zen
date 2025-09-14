@@ -57,7 +57,7 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 # SSOT imports for agent infrastructure
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.agent_execution_tracker import get_execution_tracker, ExecutionState

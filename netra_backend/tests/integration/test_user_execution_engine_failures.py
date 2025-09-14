@@ -41,7 +41,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     PipelineStep
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestUserExecutionEngineComponentFailures(BaseIntegrationTest):

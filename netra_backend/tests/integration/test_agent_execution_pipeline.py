@@ -36,7 +36,7 @@ from netra_backend.app.agents.supervisor.execution_engine_factory import Executi
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager

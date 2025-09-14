@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, ValidationError
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import TriageResult
 from netra_backend.app.schemas.shared_types import (
     AnomalyDetectionResponse,

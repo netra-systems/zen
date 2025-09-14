@@ -8,7 +8,7 @@ import asyncio
 import time
 from typing import Any, Callable, Optional, Tuple
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.tests.e2e.state_validation_utils import StateIntegrityChecker
 from netra_backend.tests.e2e.validators.performance_analyzer import (
     BenchmarkComparator,

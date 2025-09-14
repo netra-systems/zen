@@ -29,7 +29,7 @@ from netra_backend.app.schemas.tool import (
     ToolExecuteResponse,
     ToolExecutionEngineInterface
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestToolExecutionEngineUnit(SSotBaseTestCase):

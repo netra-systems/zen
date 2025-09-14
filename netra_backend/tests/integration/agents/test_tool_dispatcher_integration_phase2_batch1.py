@@ -24,7 +24,7 @@ from netra_backend.app.agents.tool_dispatcher import (
 )
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
 from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from langchain_core.tools import BaseTool
 from test_framework.ssot.base_test_case import SSotBaseTestCase

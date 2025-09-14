@@ -62,7 +62,7 @@ from netra_backend.app.agents.supervisor.user_execution_context import (
     UserExecutionContext,
     InvalidContextError,
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 

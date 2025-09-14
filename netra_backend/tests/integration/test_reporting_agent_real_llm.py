@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from shared.isolated_environment import IsolatedEnvironment

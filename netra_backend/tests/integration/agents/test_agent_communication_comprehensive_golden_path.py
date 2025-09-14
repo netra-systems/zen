@@ -80,7 +80,7 @@ from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOr
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 
 # Supporting Infrastructure
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.supervisor.execution_context import (

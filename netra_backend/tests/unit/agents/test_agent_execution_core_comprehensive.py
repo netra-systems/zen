@@ -52,7 +52,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     PipelineStep,
     AgentExecutionStrategy
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 
 # SSOT Dependencies

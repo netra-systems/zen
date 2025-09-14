@@ -30,7 +30,7 @@ from netra_backend.app.services.user_execution_context import (
     UserExecutionContext, 
     UserExecutionContextFactory
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from test_framework.ssot.real_services_test_fixtures import *
 

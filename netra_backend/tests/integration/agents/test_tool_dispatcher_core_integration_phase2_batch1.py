@@ -23,7 +23,7 @@ from netra_backend.app.agents.tool_dispatcher import (
     ToolDispatchRequest,
     ToolDispatchResponse
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import ToolRegistry
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from langchain_core.tools import BaseTool

@@ -3,7 +3,7 @@
 from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher import (
     ProductionTool,
     ToolDispatcher,
