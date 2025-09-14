@@ -1,8 +1,8 @@
 # SSOT Gardener Progress: WebSocket Authentication Path Fragmentation
 
 **Issue Name:** SSOT-regression-WebSocket Authentication path fragmentation blocking Golden Path
-**GitHub Issue:** [To be created]
-**Status:** In Progress
+**GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1060
+**Status:** In Progress - Phase 1: Test Discovery
 **Created:** 2025-09-14
 
 ## SSOT Violation Summary
