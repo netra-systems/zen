@@ -42,9 +42,9 @@ from test_framework.base_integration_test import BaseIntegrationTest
 from shared.isolated_environment import IsolatedEnvironment
 
 # WebSocket core imports
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketConnection, WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
@@ -181,8 +181,8 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         await self.async_setup()
         
         # Test unified manager creation
-        manager = UnifiedWebSocketManager()
-        self._mark_component_initialized("UnifiedWebSocketManager")
+        manager = WebSocketManager()
+        self._mark_component_initialized("WebSocketManager")
         
         # Validate initialization state
         assert manager is not None, "WebSocket manager must initialize successfully"
@@ -217,7 +217,7 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         # Test business value: connection health check
         assert manager.is_connection_active(test_user["id"]), "Connection should be active"
         
-        logger.info(" PASS:  UnifiedWebSocketManager initialization test passed")
+        logger.info(" PASS:  WebSocketManager initialization test passed")
         
     @pytest.mark.asyncio
     async def test_websocket_factory_initialization(self):
@@ -229,15 +229,15 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         await self.async_setup()
         
         # Test factory creation
-        factory = WebSocketManagerFactory(
+        manager = WebSocketManager(
             max_managers_per_user=self.max_connections_per_user,
             connection_timeout_seconds=1800
         )
         self._mark_component_initialized("WebSocketManagerFactory")
         
         # Validate factory configuration
-        assert factory.max_managers_per_user == self.max_connections_per_user
-        assert factory.connection_timeout_seconds == 1800
+        assert manager.max_managers_per_user == self.max_connections_per_user
+        assert manager.connection_timeout_seconds == 1800
         
         # Test multi-user isolation
         users = await self.simulate_multi_user_scenario(user_count=3)
@@ -1139,9 +1139,9 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         await self.async_setup()
         
         # Test comprehensive health monitoring
-        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+        from netra_backend.app.websocket_core.unified_manager import WebSocketManager
         
-        manager = UnifiedWebSocketManager()
+        manager = WebSocketManager()
         self._mark_component_initialized("WebSocketHealthMonitoring")
         
         test_users = await self.simulate_multi_user_scenario(user_count=2)
