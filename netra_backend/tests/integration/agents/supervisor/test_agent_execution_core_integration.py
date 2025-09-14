@@ -434,7 +434,7 @@ class TestAgentExecutionCoreIntegration:
     ):
         """Test resilience when WebSocket bridge fails."""
         # Create core with failing WebSocket bridge using SSOT patterns
-        failing_bridge = SSotMockFactory.create_websocket_bridge_mock(should_fail=True)
+        failing_bridge = SSotMockFactory.create_mock_agent_websocket_bridge(should_fail=True)
         failing_bridge.notify_agent_started.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_completed.side_effect = Exception("WebSocket error")
         failing_bridge.notify_agent_error.side_effect = Exception("WebSocket error")
