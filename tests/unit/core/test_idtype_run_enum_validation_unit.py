@@ -50,13 +50,11 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
         """Set up test environment."""
         super().setup_method(method)
         
-        # Test metrics for SSOT compliance
-        self.test_metrics = SsotTestMetrics(
-            category=CategoryType.UNIT,
-            test_name=method.__name__ if method else "setup",
-            business_value_segment="Platform/Internal",
-            expected_outcome="Validate IDType.RUN enum exists and works correctly"
-        )
+        # Record test metadata in custom metrics
+        if hasattr(self, '_metrics'):
+            self._metrics.record_custom("test_category", "unit")
+            self._metrics.record_custom("business_value", "Platform/Internal")
+            self._metrics.record_custom("expected_outcome", "Validate IDType.RUN enum exists and works correctly")
         
         # Expected IDType values (including RUN after fix)
         self.expected_id_types = {
@@ -83,7 +81,8 @@ class TestIDTypeRunEnumValidation(SSotBaseTestCase):
             assert run_enum_value is not None, "IDType.RUN should not be None"
             assert isinstance(run_enum_value, IDType), "IDType.RUN should be an IDType enum instance"
             
-            self.test_metrics.record_success("IDType.RUN enum value exists and is valid")
+            if hasattr(self, '_metrics'):
+                self._metrics.record_custom("success", "IDType.RUN enum value exists and is valid")
             
         except AttributeError as e:
             # Expected failure before fix

@@ -176,8 +176,20 @@ class TestAgentRegistryGoldenPathWorkflows(SSotBaseTestCase):
         # Create enterprise WebSocket manager
         self.enterprise_websocket_manager = MockEnterpriseWebSocketManager()
 
-        # Create mock registry for testing (real AgentRegistry API is different)
-        self.registry = MockEnterpriseAgentRegistry()
+        # FIXED: Use real AgentRegistry instead of mock for authentic testing
+        # This follows SSOT compliance and tests real functionality
+        from netra_backend.app.llm.llm_manager import LLMManager
+        
+        # Create a mock LLM manager for testing
+        mock_llm_manager = Mock(spec=LLMManager)
+        mock_llm_manager.create_completion = AsyncMock()
+        mock_llm_manager.create_chat_completion = AsyncMock()
+        
+        # Create real AgentRegistry with proper SSOT compliance
+        self.registry = AgentRegistry(llm_manager=mock_llm_manager)
+        
+        # Set WebSocket manager using the proper method
+        self.registry.set_websocket_manager(self.enterprise_websocket_manager)
 
     async def test_golden_path_agent_registration_workflow(self):
         """Test complete golden path agent registration workflow."""

@@ -63,8 +63,9 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         self.test_user_context = UserExecutionContext(
             user_id=self.regular_user_id,
-            request_id="test-request-123",
-            session_data={}
+            thread_id="test-thread-123",
+            run_id="test-run-456",
+            request_id="test-request-123"
         )
 
         # Connection manager for testing routing - create synchronously for tests
