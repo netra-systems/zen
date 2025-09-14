@@ -1,17 +1,17 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 18:25:18
+**Generated:** 2025-09-13 18:27:32
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 5
-- **Passed:** 1 (20.0%)
-- **Failed:** 4 (80.0%)
+- **Total Tests:** 3
+- **Passed:** 2 (66.7%)
+- **Failed:** 1 (33.3%)
 - **Skipped:** 0
-- **Duration:** 11.61 seconds
-- **Pass Rate:** 20.0%
+- **Duration:** 9.50 seconds
+- **Pass Rate:** 66.7%
 
 ## Test Results by Priority
 
@@ -19,85 +19,41 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_health_check | FAIL failed | 5.430s | test_1_websocket_events_staging.py |
-| test_websocket_connection | FAIL failed | 0.741s | test_1_websocket_events_staging.py |
-| test_api_endpoints_for_agents | PASS passed | 0.530s | test_1_websocket_events_staging.py |
-| test_websocket_event_flow_real | FAIL failed | 0.727s | test_1_websocket_events_staging.py |
-| test_concurrent_websocket_real | FAIL failed | 1.266s | test_1_websocket_events_staging.py |
+| test_message_endpoints | PASS passed | 5.434s | test_2_message_flow_staging.py |
+| test_real_message_api_endpoints | PASS passed | 0.722s | test_2_message_flow_staging.py |
+| test_real_websocket_message_flow | FAIL failed | 0.717s | test_2_message_flow_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_health_check
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 5.430s
+### FAILED: test_real_websocket_message_flow
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_2_message_flow_staging.py
+- **Duration:** 0.717s
 - **Error:** tests\e2e\staging_test_base.py:322: in wrapper
     return await func(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:54: in test_health_check
-    await self.verify_api_health()
-tests\e2e\staging_test_base.py:274: in verify_api_health
-    assert data["status"] == "healthy"
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   AssertionError...
-
-### FAILED: test_websocket_connection
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.741s
-- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:80: in test_websocket_connection
+tests\e2e\staging\test_2_message_flow_staging.py:120: in test_real_websocket_message_flow
     async with websockets.connect(
 C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:587: in __aenter__
     return await self
            ^^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: in __a...
-
-### FAILED: test_websocket_event_flow_real
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.727s
-- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:222: in test_websocket_event_flow_real
-    async with websockets.connect(
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: ...
-
-### FAILED: test_concurrent_websocket_real
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 1.266s
-- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:376: in test_concurrent_websocket_real
-    results = await asyncio.gather(*tasks)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:350: in test_connection
-    async with websockets.connect(
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\clien...
+C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: in...
 
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_health_check FAILED
-test_1_websocket_events_staging.py::test_websocket_connection FAILED
-test_1_websocket_events_staging.py::test_api_endpoints_for_agents PASSED
-test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
-test_1_websocket_events_staging.py::test_concurrent_websocket_real FAILED
+test_2_message_flow_staging.py::test_message_endpoints PASSED
+test_2_message_flow_staging.py::test_real_message_api_endpoints PASSED
+test_2_message_flow_staging.py::test_real_websocket_message_flow FAILED
 
 ==================================================
-1 passed, 4 failed in 11.61s
+2 passed, 1 failed in 9.50s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-| WebSocket | 3 | 0 | 3 | 0.0% |
-| Agent | 1 | 1 | 0 | 100.0% |
+| WebSocket | 1 | 0 | 1 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

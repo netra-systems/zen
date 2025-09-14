@@ -28,7 +28,7 @@ from test_framework.ssot.websocket import WebSocketTestHelper
 from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket_core.handlers import WebSocketHandler
-from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
 from netra_backend.app.core.registry.universal_registry import get_global_registry
 
 

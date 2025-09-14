@@ -29,7 +29,7 @@ HeartbeatHandler,
 JsonRpcHandler,
 ErrorHandler
 )
-from netra_backend.app.websocket_core.websocket_manager_factory import IsolatedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as BroadcastManager
 from netra_backend.app.services.websocket.message_handler import MessageHandlerService
 from netra_backend.app.websocket_core.handlers import MessageRouter as ServiceMessageRouter
@@ -70,18 +70,18 @@ class TestWebSocketExecutionEngineInitialization:
                 """Test BroadcastManager is properly initialized."""
         # Mock WebSocketManager for BroadcastManager
         # Mock: WebSocket infrastructure isolation for unit tests without real connections
-                mock_ws_manager = Mock(spec=IsolatedWebSocketManager)
+                mock_ws_manager = Mock(spec=WebSocketManager)
                 broadcast_manager = BroadcastManager()
 
                 assert broadcast_manager is not None
                 assert hasattr(broadcast_manager, 'broadcast_message')
 
                 def test_websocket_manager_initialization(self):
-                    """Test IsolatedWebSocketManager is properly initialized."""
+                    """Test WebSocketManager is properly initialized."""
                     # Create mock user context for isolated manager
                     mock_user_context = Mock(spec=UserExecutionContext)
                     mock_user_context.user_id = "test_user_123"
-                    ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
+                    ws_manager = WebSocketManager(user_context=mock_user_context)
 
                     assert ws_manager is not None
                     assert hasattr(ws_manager, 'connect_user')
@@ -253,7 +253,7 @@ class TestWebSocketExecutionEngineInitialization:
         # All components should initialize successfully
                                                             mock_user_context = Mock(spec=UserExecutionContext)
                                                             mock_user_context.user_id = "test_user_123"
-                                                            ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
+                                                            ws_manager = WebSocketManager(user_context=mock_user_context)
                                                             router = get_message_router()
                                                             handler = UserMessageHandler()
                                                             broadcast_manager = BroadcastManager()
@@ -274,7 +274,7 @@ class TestWebSocketExecutionEngineInitialization:
                                                                     """Test WebSocket manager handles None connections gracefully."""
                                                                     mock_user_context = Mock(spec=UserExecutionContext)
                                                                     mock_user_context.user_id = "test_user_123"
-                                                                    ws_manager = IsolatedWebSocketManager(user_context=mock_user_context)
+                                                                    ws_manager = WebSocketManager(user_context=mock_user_context)
 
                                                                     # Test that stats can be retrieved even with no connections
                                                                     stats = ws_manager.get_stats()
