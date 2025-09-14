@@ -33,6 +33,7 @@ Location: tests\integration\agents\test_chat_orchestrator_workflows_integration.
 ```
 **Impact:** Chat orchestrator integration tests cannot execute
 **Business Impact:** Blocks validation of chat workflow integration (90% of platform value)
+**GitHub Issue:** [#963 - uncollectable-test-regression-p1-websocket-test-utility-module-missing](https://github.com/netra-systems/netra-apex/issues/963) (Created - SSOT import path issue)
 
 ### Error 3: WebSocketConnection Import Error - P1 High
 **File:** `netra_backend/tests/unit/agents/test_websocket_agent_integration_comprehensive.py`
@@ -44,6 +45,7 @@ Location: netra_backend\tests\unit\agents\test_websocket_agent_integration_compr
 ```
 **Impact:** WebSocket agent integration unit tests cannot execute
 **Business Impact:** Blocks validation of critical WebSocket agent functionality
+**GitHub Issue:** [#961 - failing-test-collection-P1-websocket-connection-import-error](https://github.com/netra-systems/netra-apex/issues/961) (Updated with latest analysis)
 
 ## Skipped Tests
 
@@ -72,7 +74,7 @@ Location: netra_backend\tests\unit\agents\test_websocket_agent_integration_compr
 
 1. **uncollectable-test-regression-p1-deepagentstate-import-missing** → [Updated existing issue #953](https://github.com/netra-systems/netra-apex/issues/953)
 2. **uncollectable-test-regression-p1-websocket-test-utility-module-missing**
-3. **uncollectable-test-regression-p1-websocket-connection-import-missing**
+3. **uncollectable-test-regression-p1-websocket-connection-import-missing** → [Updated existing issue #961](https://github.com/netra-systems/netra-apex/issues/961)
 4. **uncollectable-test-active-dev-p2-execution-engine-module-missing**
 
 ## Next Actions Required
