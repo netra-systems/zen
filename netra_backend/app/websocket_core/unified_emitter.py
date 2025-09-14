@@ -33,7 +33,8 @@ from dataclasses import dataclass, field
 from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
-    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    # ISSUE #824 REMEDIATION: Use canonical SSOT import path
+    from netra_backend.app.websocket_core.websocket_manager import UnifiedWebSocketManager
     from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = central_logger.get_logger(__name__)

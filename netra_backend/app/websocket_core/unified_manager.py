@@ -291,7 +291,7 @@ class RegistryCompat:
         return []
 
 
-class UnifiedWebSocketManager:
+class _UnifiedWebSocketManagerImplementation:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
      ALERT:  FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
@@ -3518,15 +3518,37 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
     raise RuntimeError(error_message)
 
 
-# CRITICAL: Export alias for backward compatibility with migration_adapter
-# This ensures migration_adapter can import WebSocketManager 
-WebSocketManager = UnifiedWebSocketManager
+# ISSUE #824 REMEDIATION: SSOT CONSOLIDATION
+# This implementation is only accessible through the canonical SSOT import path.
+# Direct imports from this module violate SSOT principles.
 
-# Export list for the module
-__all__ = [
-    'WebSocketConnection',
-    'UnifiedWebSocketManager', 
-    'WebSocketManager',  # Alias for UnifiedWebSocketManager
-    '_serialize_message_safely',
-    'get_websocket_manager'
-]
+# Implementation is available as a private class only
+# Public access must go through: netra_backend.app.websocket_core.websocket_manager
+
+# ISSUE #824 REMEDIATION: EXPORTS REMOVED FOR SSOT CONSOLIDATION
+#
+# This module now contains the implementation but does NOT export classes directly.
+# All imports must go through the canonical SSOT path:
+# from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+#
+# This prevents fragmented import paths and enforces SSOT compliance.
+
+# NO EXPORTS - Issue #824 SSOT consolidation
+# Direct imports from this module are not supported
+__all__ = []
+
+# SSOT Consolidation: Log that direct imports are not supported
+import sys
+if __name__ not in sys.modules:
+    # Only log if this module is being imported (not executed directly)
+    try:
+        from shared.logging.unified_logging_ssot import get_logger
+        logger = get_logger(__name__)
+        logger.warning(
+            "SSOT CONSOLIDATION (Issue #824): Direct imports from unified_manager.py are deprecated. "
+            "Use canonical path: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager"
+        )
+    except ImportError:
+        # Fallback logging if logging import fails
+        import logging
+        logging.warning("SSOT CONSOLIDATION (Issue #824): Use websocket_manager.py canonical import path")
