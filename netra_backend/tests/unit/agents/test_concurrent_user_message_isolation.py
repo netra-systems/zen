@@ -39,7 +39,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.agents.base_agent import BaseAgent
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngine
-from netra_backend.app.agents.registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.agent_models import DeepAgentState

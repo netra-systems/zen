@@ -301,7 +301,7 @@ class TestBusinessValueProtectionValidation(SSotBaseTestCase):
         try:
             # Try to import agent validation utilities
             from test_framework.agent_test_helpers import create_test_agent
-            from netra_backend.app.agents.registry import agent_registry
+            from netra_backend.app.agents.supervisor.agent_registry import agent_registry
             
             return {
                 'functional': True,

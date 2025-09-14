@@ -57,7 +57,7 @@ from netra_backend.app.websocket_core.types import (
 )
 from netra_backend.app.websocket_core.manager import WebSocketManager
 from netra_backend.app.websocket_core.user_session_manager import UserSessionManager
-from netra_backend.app.agents.registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 # Import factory isolation components
 from netra_backend.app.agents.execution_engine_unified_factory import ExecutionEngineFactory

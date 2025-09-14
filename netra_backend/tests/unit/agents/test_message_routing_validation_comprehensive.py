@@ -38,7 +38,7 @@ from netra_backend.app.agents.message_router import MessageRouter
 from netra_backend.app.agents.supervisor_agent_modern import SupervisorAgent
 from netra_backend.app.agents.triage_agent import TriageAgent
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent
-from netra_backend.app.agents.registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus

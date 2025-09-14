@@ -23,16 +23,20 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 import unittest
+import pytest
 
+# Add project root to path for test framework imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
 class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
     """Detects SSOT violations in execution engine consolidation and prevents regression."""
 
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up SSOT violation detection test environment."""
-        super().setUp()
+        super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         self.netra_backend_root = self.project_root / "netra_backend"
         
@@ -96,7 +100,7 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
             error_msg.append(f"\nIssue #1146: All execution engines must be consolidated into UserExecutionEngine")
             error_msg.append(f"Business Impact: Multiple execution engines cause state contamination affecting $500K+ ARR")
             
-            self.fail("\n".join(error_msg))
+            pytest.fail("\n".join(error_msg))
 
     def test_no_forbidden_execution_engine_imports(self):
         """CRITICAL: Detect imports of forbidden execution engine classes in production code."""
@@ -153,7 +157,7 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
             error_msg.append(f"\nIssue #1146: All execution engine imports must use UserExecutionEngine")
             error_msg.append(f"Golden Path Impact: Multiple engines cause user isolation failures")
             
-            self.fail("\n".join(error_msg))
+            pytest.fail("\n".join(error_msg))
 
     def test_only_user_execution_engine_allowed_in_ssot_registry(self):
         """CRITICAL: Validate SSOT import registry only allows UserExecutionEngine."""
@@ -191,10 +195,10 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
                     error_msg.append(f"    Contains forbidden: {violation['forbidden_class']}")
                 error_msg.append(f"\nIssue #1146: SSOT registry must only contain UserExecutionEngine entries")
                 
-                self.fail("\n".join(error_msg))
+                pytest.fail("\n".join(error_msg))
                 
         except (UnicodeDecodeError, PermissionError) as e:
-            self.fail(f"Cannot read SSOT registry: {e}")
+            pytest.fail(f"Cannot read SSOT registry: {e}")
 
     def test_execution_engine_file_consolidation_complete(self):
         """CRITICAL: Verify files containing forbidden execution engines are removed/consolidated."""
@@ -241,7 +245,7 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
             error_msg.append(f"\nIssue #1146: These files must be refactored to use UserExecutionEngine")
             error_msg.append(f"Business Impact: File fragmentation prevents SSOT consolidation success")
             
-            self.fail("\n".join(error_msg))
+            pytest.fail("\n".join(error_msg))
         
         # Warn about files that still exist but don't have forbidden classes
         if files_still_exist and not files_with_forbidden_classes:
@@ -291,7 +295,7 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
             error_msg.append(f"\nIssue #1146: Only UserExecutionEngine should implement execution engine interface")
             error_msg.append(f"Allowed classes: {list(self.allowed_execution_engines.keys())}")
             
-            self.fail("\n".join(error_msg))
+            pytest.fail("\n".join(error_msg))
 
     def test_no_execution_engine_factory_creates_forbidden_engines(self):
         """CRITICAL: Validate factories only create UserExecutionEngine instances."""
@@ -342,7 +346,7 @@ class TestSSotExecutionEngineViolationDetection1146(SSotBaseTestCase):
                 error_msg.append(f"    Code: {violation['code']}")
             error_msg.append(f"\nIssue #1146: All factories must create only UserExecutionEngine instances")
             
-            self.fail("\n".join(error_msg))
+            pytest.fail("\n".join(error_msg))
 
 
 if __name__ == '__main__':

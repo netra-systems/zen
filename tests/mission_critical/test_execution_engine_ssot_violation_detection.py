@@ -16,8 +16,9 @@ from pathlib import Path
 from typing import List, Set, Dict, Any
 import sys
 
-# Add test framework to path
-sys.path.append(str(Path(__file__).parent.parent / "test_framework"))
+# Add project root to path for test framework imports
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
@@ -33,12 +34,15 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
     Business Value: Prevents regression that blocks $500K+ ARR Golden Path functionality.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """Set up test class with execution engine scanning."""
-        super().setUpClass()
-        cls.project_root = Path(__file__).parent.parent.parent
-        cls.backend_path = cls.project_root / "netra_backend"
+    def setup_method(self, method=None):
+        """Set up test method with execution engine scanning."""
+        super().setup_method(method)
+        self.project_root = Path(__file__).parent.parent.parent
+        self.backend_path = self.project_root / "netra_backend"
+        
+        # Verify backend path exists
+        if not self.backend_path.exists():
+            raise ValueError(f"Backend path not found: {self.backend_path}")
         
     def test_only_user_execution_engine_class_exists(self):
         """
@@ -62,13 +66,14 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
                 files = execution_engine_classes[engine_name]
                 violation_details.append(f"  - {engine_name}: {files}")
             
-            self.fail(
+            violation_message = (
                 f"SSOT VIOLATION: Multiple execution engines detected!\n"
                 f"Only UserExecutionEngine should exist, but found:\n"
                 + "\n".join(violation_details) + "\n\n"
                 f"This violates SSOT principle and fragments execution logic.\n"
                 f"Issue #1146: Consolidate to UserExecutionEngine only."
             )
+            pytest.fail(violation_message)
         
         # Ensure UserExecutionEngine exists
         self.assertIn("UserExecutionEngine", found_engines, 
@@ -96,7 +101,7 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
                 "Issue #1146: Consolidate execution engine imports."
             ])
             
-            self.fail("\n".join(violation_report))
+            pytest.fail("\n".join(violation_report))
     
     def test_execution_engine_factory_ssot_compliance(self):
         """
@@ -120,7 +125,7 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
                 "Issue #1146: Consolidate factory patterns."
             ])
             
-            self.fail("\n".join(violation_report))
+            pytest.fail("\n".join(violation_report))
     
     def test_websocket_event_routing_ssot_compliance(self):
         """
@@ -144,7 +149,7 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
                 "Issue #1146: Consolidate WebSocket event routing."
             ])
             
-            self.fail("\n".join(violation_report))
+            pytest.fail("\n".join(violation_report))
     
     def test_golden_path_execution_engine_uniqueness(self):
         """
@@ -168,7 +173,7 @@ class TestExecutionEngineSSotViolationDetection(SSotBaseTestCase):
                 "Issue #1146: Critical for $500K+ ARR chat functionality."
             ])
             
-            self.fail("\n".join(violation_report))
+            pytest.fail("\n".join(violation_report))
 
     def _find_execution_engine_classes(self) -> Dict[str, List[str]]:
         """Find all execution engine class definitions in codebase."""

@@ -35,12 +35,66 @@ logger = logging.getLogger(__name__)
 
 # ISSUE #914 PHASE 1: Compatibility layer imports
 try:
-    from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry as AdvancedAgentRegistry
+    from netra_backend.app.agents.supervisor.agent_registry import (
+        AgentRegistry as AdvancedAgentRegistry,
+        AgentType,
+        AgentStatus,
+        AgentInfo
+    )
     ADVANCED_REGISTRY_AVAILABLE = True
     logger.info("Issue #914 Phase 1: Advanced AgentRegistry imported successfully for compatibility layer")
 except ImportError as e:
     ADVANCED_REGISTRY_AVAILABLE = False
     logger.error(f"Issue #914 Phase 1: Failed to import advanced AgentRegistry: {e}")
+    
+    # Define fallback enums if supervisor registry not available
+    class AgentStatus(Enum):
+        """Agent status enumeration."""
+        IDLE = "idle"
+        BUSY = "busy"
+        INITIALIZING = "initializing"
+        ERROR = "error"
+        OFFLINE = "offline"
+
+    class AgentType(Enum):
+        """Agent type enumeration."""
+        SUPERVISOR = "supervisor"
+        TRIAGE = "triage"
+        DATA_HELPER = "data_helper"
+        OPTIMIZER = "optimizer"
+        RESEARCHER = "researcher"
+        ANALYST = "analyst"
+        SYNTHETIC_DATA = "synthetic_data"
+        CORPUS_ADMIN = "corpus_admin"
+
+    @dataclass
+    class AgentInfo:
+        """Agent information structure."""
+        agent_id: str
+        agent_type: AgentType
+        name: str
+        description: str
+        status: AgentStatus = AgentStatus.IDLE
+        created_at: datetime = field(default_factory=datetime.now)
+        last_active: datetime = field(default_factory=datetime.now)
+        execution_count: int = 0
+        error_count: int = 0
+        metadata: Dict[str, Any] = field(default_factory=dict)
+        
+        def to_dict(self) -> Dict[str, Any]:
+            """Convert to dictionary for serialization."""
+            return {
+                "agent_id": self.agent_id,
+                "agent_type": self.agent_type.value,
+                "name": self.name,
+                "description": self.description,
+                "status": self.status.value,
+                "created_at": self.created_at.isoformat(),
+                "last_active": self.last_active.isoformat(),
+                "execution_count": self.execution_count,
+                "error_count": self.error_count,
+                "metadata": self.metadata
+            }
 
 # Issue deprecation warning when this module is imported
 warnings.warn(
@@ -50,57 +104,6 @@ warnings.warn(
     DeprecationWarning,
     stacklevel=2
 )
-
-
-class AgentStatus(Enum):
-    """Agent status enumeration."""
-    IDLE = "idle"
-    BUSY = "busy"
-    INITIALIZING = "initializing"
-    ERROR = "error"
-    OFFLINE = "offline"
-
-
-class AgentType(Enum):
-    """Agent type enumeration."""
-    SUPERVISOR = "supervisor"
-    TRIAGE = "triage"
-    DATA_HELPER = "data_helper"
-    OPTIMIZER = "optimizer"
-    RESEARCHER = "researcher"
-    ANALYST = "analyst"
-    SYNTHETIC_DATA = "synthetic_data"
-    CORPUS_ADMIN = "corpus_admin"
-
-
-@dataclass
-class AgentInfo:
-    """Agent information structure."""
-    agent_id: str
-    agent_type: AgentType
-    name: str
-    description: str
-    status: AgentStatus = AgentStatus.IDLE
-    created_at: datetime = field(default_factory=datetime.now)
-    last_active: datetime = field(default_factory=datetime.now)
-    execution_count: int = 0
-    error_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
-        return {
-            "agent_id": self.agent_id,
-            "agent_type": self.agent_type.value,
-            "name": self.name,
-            "description": self.description,
-            "status": self.status.value,
-            "created_at": self.created_at.isoformat(),
-            "last_active": self.last_active.isoformat(),
-            "execution_count": self.execution_count,
-            "error_count": self.error_count,
-            "metadata": self.metadata
-        }
 
 
 class AgentRegistry:
