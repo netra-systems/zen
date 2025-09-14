@@ -11,6 +11,8 @@ minimal mocking per CLAUDE.md standards. No test cheating.
 Coverage Target: AdminToolExecutors methods, service integration, tool execution
 Current Coverage: 0% -> Target: 80%+ (175 lines total)
 
+Note: AdminToolExecutors methods return Dict[str, Any] despite ToolResult type hints.
+
 GitHub Issue: #872 Agents Module Unit Tests - Phase 1 Foundation
 """
 
@@ -26,7 +28,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 # Import target classes
 from netra_backend.app.agents.admin_tool_executors import AdminToolExecutors
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.schemas.tool import ToolResult
 
 
 class TestAdminToolExecutorsCore(SSotAsyncTestCase):

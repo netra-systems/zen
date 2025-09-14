@@ -3,7 +3,7 @@
  * 
  * Purpose: Demonstrate the namespace collision between:
  * 1. ThreadState interface (thread data) from store/slices/types.ts
- * 2. ThreadState type (operation states) from lib/thread-state-machine.ts
+ * 2. ThreadOperationState type (operation states) from lib/thread-state-machine.ts
  * 
  * This test should FAIL initially, demonstrating the SSOT violation.
  * After remediation, it should PASS with clear semantic distinction.
@@ -25,8 +25,8 @@ describe('ThreadState Namespace Collision Detection', () => {
       // Import ThreadState from store (interface extending StoreThreadState)  
       const { ThreadState: StoreThreadState } = await import('../../store/slices/types');
       
-      // Import ThreadState from thread-state-machine (operation state type)
-      const { ThreadState: MachineThreadState } = await import('../../lib/thread-state-machine');
+      // Import ThreadOperationState from thread-state-machine (operation state type)
+      const { ThreadOperationState: MachineThreadState } = await import('../../lib/thread-state-machine');
       
       // Try to use both in same context - this should cause type confusion
       const testStoreState: StoreThreadState = {
