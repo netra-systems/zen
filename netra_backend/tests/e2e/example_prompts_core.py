@@ -5,7 +5,7 @@ Maximum 300 lines, functions  <= 8 lines.
 """
 
 from datetime import datetime, timezone
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent as Supervisor
 from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.app.websocket_core import WebSocketManager

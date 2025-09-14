@@ -18,7 +18,7 @@ import pytest
 from typing import Dict, Any, List
 
 from test_framework.base_e2e_test import BaseE2ETest
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.triage.unified_triage_agent import UnifiedTriageAgent
 from netra_backend.app.agents.data_sub_agent import DataSubAgent
 

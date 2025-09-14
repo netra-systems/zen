@@ -17,7 +17,7 @@ from shared.types import UserID, ThreadID, RequestID
 from test_framework.base_integration_test import BaseIntegrationTest
 
 from netra_backend.app.agents.tool_dispatcher_execution import ToolExecutionEngine
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.schemas.tool import (
     ToolInput,
     ToolResult,

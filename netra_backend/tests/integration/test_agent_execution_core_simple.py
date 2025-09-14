@@ -62,7 +62,7 @@ class TestAgentExecutionCoreSimple(BaseIntegrationTest):
             from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
             from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
             from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             
             # Validate imports successful
             assert AgentExecutionCore is not None, "AgentExecutionCore should import successfully"
@@ -150,7 +150,7 @@ class TestAgentExecutionCoreSimple(BaseIntegrationTest):
         This validates agent state creation and basic properties.
         """
         try:
-            from netra_backend.app.agents.state import DeepAgentState
+            from netra_backend.app.schemas.agent_models import DeepAgentState
             
             # Create agent state
             state = DeepAgentState()

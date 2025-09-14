@@ -235,7 +235,7 @@ class TestWorkflowOrchestratorSSotIntegration(SSotBaseTestCase, unittest.TestCas
         
         # Runtime validation should catch this and raise exception
         from netra_backend.app.agents.base.interface import ExecutionContext
-        from netra_backend.app.agents.state import DeepAgentState
+        from netra_backend.app.schemas.agent_models import DeepAgentState
         
         mock_context = Mock(spec=ExecutionContext)
         mock_state = Mock(spec=DeepAgentState)

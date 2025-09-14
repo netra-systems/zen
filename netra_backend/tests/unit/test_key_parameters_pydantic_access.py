@@ -11,7 +11,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from shared.isolated_environment import IsolatedEnvironment
 
 try:
-    from netra_backend.app.agents.state import DeepAgentState
+    from netra_backend.app.schemas.agent_models import DeepAgentState
     from netra_backend.app.agents.triage.unified_triage_agent import KeyParameters, TriageResult
 except ImportError:
     pytest.skip("Data sub agent execution engine has been removed/moved", allow_module_level=True)

@@ -29,7 +29,7 @@ from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecut
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from test_framework.ssot.real_services_test_fixtures import *
 

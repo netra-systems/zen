@@ -20,7 +20,7 @@ from uuid import uuid4
 import pytest
 from langchain_core.tools import BaseTool
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.tool_dispatcher_core import (
     ToolDispatcher,
     ToolDispatchRequest,

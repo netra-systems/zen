@@ -42,7 +42,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
     AgentExecutionResult
 )
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext, TraceContextManager
 from netra_backend.app.core.execution_tracker import ExecutionTracker, ExecutionState
 from netra_backend.app.core.logging_context import get_unified_trace_context

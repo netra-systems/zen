@@ -45,7 +45,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
 from netra_backend.app.core.execution_tracker import get_execution_tracker

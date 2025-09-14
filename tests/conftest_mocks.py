@@ -1,4 +1,4 @@
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
     
     def __init__(self):
@@ -216,8 +216,8 @@ def mock_llm_manager():
     Memory Impact: LOW - Simple service interface mock
     Use for: Unit tests requiring LLM interface without external API calls
     """
-    mock = TestWebSocketConnection()  # Real implementation
-    mock.get_llm = MagicMock(return_value=TestWebSocketConnection())  # Real implementation
+    mock = MockWebSocketConnection()  # Real implementation
+    mock.get_llm = MagicMock(return_value=MockWebSocketConnection())  # Real implementation
     return mock
 
 @pytest.fixture

@@ -73,7 +73,7 @@ from netra_backend.app.agents.execution_engine_consolidated import (
     get_execution_engine_factory,
 )
 
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.core.agent_execution_tracker import ExecutionState
 
 
