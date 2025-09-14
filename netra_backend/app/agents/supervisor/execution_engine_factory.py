@@ -38,6 +38,7 @@ from netra_backend.app.services.user_execution_context import (
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory,
+    create_agent_instance_factory,  # SSOT REMEDIATION: Per-request factory creation
     AgentInstanceFactory
 )
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
@@ -172,10 +173,10 @@ class ExecutionEngineFactory:
                 # Check per-user engine limits
                 await self._enforce_user_engine_limits(validated_context.user_id)
                 
-                # Create NEW agent factory instance per user for complete isolation
-                # This prevents shared state between users - each gets their own factory
-                from netra_backend.app.agents.supervisor.agent_instance_factory import AgentInstanceFactory
-                agent_factory = AgentInstanceFactory()
+                # SSOT REMEDIATION: Create per-request agent factory for complete user isolation
+                # This uses the SSOT-compliant factory creation pattern that ensures
+                # zero shared state between users and prevents context leakage
+                agent_factory = create_agent_instance_factory(validated_context)
                 
                 if not agent_factory:
                     raise ExecutionEngineFactoryError("AgentInstanceFactory creation failed")

@@ -24,7 +24,7 @@ import time
 import psutil
 import gc
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch, MagicMock, PropertyMock
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 import statistics
@@ -164,7 +164,9 @@ class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
         
         self._start_resource_monitoring()
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Generate high-volume concurrent load
             concurrent_tasks = []
             
@@ -250,7 +252,9 @@ class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
         self._start_resource_monitoring()
         baseline_memory = psutil.Process().memory_info().rss / 1024 / 1024
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Sustained operations with memory monitoring
             end_time = time.time() + duration_seconds
             operation_count = 0
@@ -345,7 +349,9 @@ class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
         
         self._start_resource_monitoring()
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Simulate normal load followed by burst
             
             # Phase 1: Normal load baseline
@@ -451,7 +457,9 @@ class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
         
         slow_websocket_manager.emit_to_run.side_effect = constrained_emission
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=slow_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = slow_websocket_manager
             # Act - Operations under resource constraints
             constrained_tasks = []
             
@@ -534,12 +542,13 @@ class TestAgentPerformanceValidationStrategic(SSotAsyncTestCase):
             manager.emit_to_run.side_effect = self._track_performance_emission
             connection_managers.append(manager)
         
-        with patch.object(self.bridge, '_get_websocket_manager') as mock_get_manager:
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
             # Act - Distribute operations across multiple connections
             scaling_tasks = []
             
             for conn_id, manager in enumerate(connection_managers):
-                mock_get_manager.return_value = manager
+                mock_ws_property.return_value = manager
                 
                 for msg_id in range(messages_per_connection):
                     run_id = f"scale_run_{conn_id}_{msg_id}"

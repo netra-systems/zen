@@ -251,18 +251,18 @@ class TestSSOTBroadcastConsolidation:
         contaminated_event = {
             "type": "agent_message",
             "data": {"message": "Response for user"},
-            "user_id": "wrong_user_999",  # CONTAMINATION: wrong user ID
-            "sender_id": "different_user_888",  # CONTAMINATION: wrong sender
-            "target_user_id": "another_user_777"  # CONTAMINATION: wrong target
+            "user_id": "wrong_user_999",  # EVENT DATA: preserved for audit/provenance
+            "sender_id": "different_user_888",  # EVENT DATA: preserved for attribution
+            "target_user_id": "another_user_777"  # ROUTING FIELD: sanitized for security
         }
 
-        # SSOT should detect and prevent contamination
+        # SSOT should detect and prevent contamination in routing fields only
         result = await ssot_broadcast_service.broadcast_to_user(target_user, contaminated_event)
 
-        # Validate contamination was detected and prevented
+        # Validate routing contamination was detected and prevented
         assert len(result.errors) > 0
         contamination_errors = [err for err in result.errors if "contamination" in err.lower()]
-        assert len(contamination_errors) >= 3  # Should detect all 3 contamination fields
+        assert len(contamination_errors) >= 1  # Should detect routing field contamination only
 
         # Verify stats tracked contamination prevention
         stats = ssot_broadcast_service.get_stats()
@@ -272,14 +272,16 @@ class TestSSOTBroadcastConsolidation:
         # Ensure broadcast still succeeded (after sanitization)
         assert result.successful_sends > 0
 
-        # Verify the actual sent event was sanitized
+        # Verify the actual sent event maintains data integrity while fixing routing
         call_args = ssot_broadcast_service.websocket_manager.send_to_user.call_args
         sent_event = call_args[0][1]  # Second argument is the event
 
-        # All user ID fields should be corrected to target user
-        assert sent_event.get("user_id") == target_user
-        assert sent_event.get("sender_id") == target_user
-        assert sent_event.get("target_user_id") == target_user
+        # EVENT DATA fields should be PRESERVED (Issue #1058 fix)
+        assert sent_event.get("user_id") == "wrong_user_999"  # PRESERVED as event data
+        assert sent_event.get("sender_id") == "different_user_888"  # PRESERVED as event data
+        
+        # ROUTING fields should be SANITIZED for security
+        assert sent_event.get("target_user_id") == target_user  # SANITIZED for security
 
         logger.info("✅ SSOT contamination prevention validated - security enhanced")
 

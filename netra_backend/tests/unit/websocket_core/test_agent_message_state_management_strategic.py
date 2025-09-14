@@ -21,7 +21,7 @@ import pytest
 import asyncio
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch, MagicMock, PropertyMock
 from enum import Enum
 from typing import Dict, Any, Optional, List
 
@@ -107,7 +107,9 @@ class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
         # Arrange - Simulate WebSocket in reconnecting state
         self._current_connection_state = ConnectionState.RECONNECTING
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Simulate reconnection scenario - connection drops mid-stream
             self._current_connection_state = ConnectionState.DISCONNECTED
             
@@ -163,7 +165,9 @@ class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
             {"user_id": "user_3", "run_id": "run_3", "agent": "Agent3"}
         ]
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Simulate rapid concurrent state transitions
             tasks = []
             for user in users:
@@ -218,7 +222,9 @@ class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
         run_id = "recovery_test_run"
         agent_name = "RecoveryTestAgent"
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Normal start
             result1 = await self.bridge.notify_agent_started(
                 run_id=run_id,
@@ -294,7 +300,9 @@ class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
             True   # Third call succeeds - system stable
         ]
         
-        with patch.object(startup_bridge, '_get_websocket_manager', return_value=mock_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(startup_bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = mock_manager
             # Act - Send messages during startup phase
             result1 = await startup_bridge.notify_agent_started(
                 run_id="startup_run",
@@ -339,7 +347,9 @@ class TestAgentMessageStateManagementStrategic(SSotAsyncTestCase):
         run_id = "high_freq_test"
         agent_name = "HighFreqAgent"
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Rapid state transitions simulating real-world burst activity
             rapid_tasks = []
             

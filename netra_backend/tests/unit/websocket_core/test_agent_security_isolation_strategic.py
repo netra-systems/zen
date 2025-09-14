@@ -24,7 +24,7 @@ import uuid
 import json
 import time
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from unittest.mock import AsyncMock, Mock, patch, MagicMock, PropertyMock
 from typing import Dict, Any, Optional, List, Set
 from dataclasses import dataclass, field
 
@@ -168,7 +168,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
         charlie_context.run_id = self.user_charlie.run_id
         charlie_context.thread_id = self.user_charlie.thread_id
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Concurrent operations with sensitive data
             concurrent_tasks = [
                 # Alice (HIPAA) processes medical data
@@ -259,7 +261,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
         # Arrange - Create agents with intentionally similar contexts to test bleeding
         shared_agent_name = "DataProcessorAgent"  # Same agent, different users
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Sequential agent operations that could cause context bleeding
             
             # Alice starts agent with sensitive medical context
@@ -336,7 +340,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
             security_level="BASIC_ACCESS"
         )
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Malicious user attempts privilege escalation
             
             # Attempt 1: Impersonation through context manipulation
@@ -410,7 +416,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
         mock_bob_connection.session_token = bob_session_token
         mock_bob_connection.user_id = self.user_bob.user_id
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Simulate session hijacking attempt
             
             # Alice starts normal session with sensitive data
@@ -478,7 +486,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
         it in seemingly legitimate agent results.
         """
         # Arrange - Set up cross-tenant scenario with different security levels
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - Legitimate operations followed by exfiltration attempt
             
             # Alice performs legitimate medical analysis
@@ -568,7 +578,9 @@ class TestAgentSecurityIsolationStrategic(SSotAsyncTestCase):
             )
             stress_users.append(user)
         
-        with patch.object(self.bridge, '_get_websocket_manager', return_value=self.mock_websocket_manager):
+        # Mock the websocket_manager property directly since _get_websocket_manager doesn't exist
+        with patch.object(type(self.bridge), 'websocket_manager', new_callable=PropertyMock) as mock_ws_property:
+            mock_ws_property.return_value = self.mock_websocket_manager
             # Act - High-concurrency stress test with sensitive data
             stress_tasks = []
             

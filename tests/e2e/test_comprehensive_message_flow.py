@@ -534,9 +534,9 @@
     # REMOVED_SYNTAX_ERROR: return '''
 # REMOVED_SYNTAX_ERROR: class WebSocketMessageHandler { )
 # REMOVED_SYNTAX_ERROR: constructor(config = {}) { )
-this.config = config;
+# REMOVED_SYNTAX_ERROR: this.config = config;
 # REMOVED_SYNTAX_ERROR: this.handlers = new Map();
-this.messageQueue = [];
+# REMOVED_SYNTAX_ERROR: this.messageQueue = [];
 
 
 # REMOVED_SYNTAX_ERROR: registerHandler(messageType, handler) { )

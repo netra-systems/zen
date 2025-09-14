@@ -23,6 +23,7 @@ import re
 from typing import Dict, List, Set
 from pathlib import Path
 
+import unittest
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from netra_backend.app.logging_config import central_logger
 
@@ -48,20 +49,66 @@ class TestWebSocketManagerImportPathViolations(SSotBaseTestCase):
         "from netra_backend.app.websocket_core import WebSocketManager"
     ]
 
-    def setUp(self):
-        """Set up test environment."""
-        super().setUp()
-        self.project_root = Path("/Users/anthony/Desktop/netra-apex")
-        self.backend_root = self.project_root / "netra_backend"
+    @classmethod
+    def setUpClass(cls):
+        """Set up test class environment."""
+        super().setUpClass() if hasattr(super(), 'setUpClass') else None
+        
+        # Get project root from current working directory
+        import os
+        current_dir = Path(os.getcwd())
+        
+        # Navigate to project root (should be netra-apex)
+        if current_dir.name == "netra-apex":
+            cls.project_root = current_dir
+        else:
+            # Try to find netra-apex in parent directories
+            potential_root = current_dir
+            while potential_root.parent != potential_root:
+                if potential_root.name == "netra-apex":
+                    cls.project_root = potential_root
+                    break
+                potential_root = potential_root.parent
+            else:
+                # Fallback to absolute path
+                cls.project_root = Path("/Users/anthony/Desktop/netra-apex")
+        
+        cls.backend_root = cls.project_root / "netra_backend"
         
         # Ensure project structure exists
-        if not self.backend_root.exists():
-            self.fail(f"Backend root not found: {self.backend_root}")
+        if not cls.backend_root.exists():
+            raise unittest.SkipTest(f"Backend root not found: {cls.backend_root}. Test requires netra-apex project structure.")
         
-        logger.info(f"Testing WebSocket Manager import violations in: {self.backend_root}")
+        logger.info(f"Testing WebSocket Manager import violations in: {cls.backend_root}")
+
+    def setUp(self):
+        """Set up individual test."""
+        super().setUp() if hasattr(super(), 'setUp') else None
 
     def test_detect_legacy_import_violations_in_dependencies(self):
         """FAILING TEST: Detect legacy WebSocket Manager imports in dependencies.py"""
+        # Initialize paths if not set by setUpClass
+        if not hasattr(self, 'backend_root'):
+            import os
+            current_dir = Path(os.getcwd())
+            
+            # Navigate to project root (should be netra-apex)
+            if current_dir.name == "netra-apex":
+                self.project_root = current_dir
+            else:
+                # Try to find netra-apex in parent directories
+                potential_root = current_dir
+                while potential_root.parent != potential_root:
+                    if potential_root.name == "netra-apex":
+                        self.project_root = potential_root
+                        break
+                    potential_root = potential_root.parent
+                else:
+                    # Fallback to absolute path
+                    self.project_root = Path("/Users/anthony/Desktop/netra-apex")
+            
+            self.backend_root = self.project_root / "netra_backend"
+        
         file_path = self.backend_root / "app" / "dependencies.py"
         
         if not file_path.exists():
@@ -119,6 +166,23 @@ class TestWebSocketManagerImportPathViolations(SSotBaseTestCase):
 
     def test_comprehensive_legacy_import_scan(self):
         """FAILING TEST: Comprehensive scan for ALL legacy import violations."""
+        # Initialize paths if not set
+        if not hasattr(self, 'project_root'):
+            import os
+            current_dir = Path(os.getcwd())
+            
+            if current_dir.name == "netra-apex":
+                self.project_root = current_dir
+            else:
+                potential_root = current_dir
+                while potential_root.parent != potential_root:
+                    if potential_root.name == "netra-apex":
+                        self.project_root = potential_root
+                        break
+                    potential_root = potential_root.parent
+                else:
+                    self.project_root = Path("/Users/anthony/Desktop/netra-apex")
+        
         all_violations = {}
         total_violations = 0
         
