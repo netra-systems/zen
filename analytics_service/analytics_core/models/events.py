@@ -307,7 +307,8 @@ class ProcessingResult(BaseModel):
     processing_time_ms: float = Field(..., description="Processing time in milliseconds")
     success: bool = Field(default=True, description="Overall processing success status")
     
-    @validator('success', always=True)
+    @field_validator('success')
+    @classmethod
     def validate_success(cls, v, values):
         """Auto-calculate success based on failed count."""
         failed_count = values.get('failed_count', 0)
