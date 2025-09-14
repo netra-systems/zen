@@ -780,6 +780,10 @@ class ClaudeInstanceOrchestrator:
 
         logger.info(f"Results saved to {output_file}")
 
+
+
+
+
 def create_default_instances(output_format: str = "stream-json") -> List[InstanceConfig]:
     """Create default instance configurations"""
     return [
@@ -839,6 +843,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
+            command="/failingtestsgardener critical",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/gcploggardener",
             permission_mode="acceptEdits",
             output_format=output_format
@@ -850,6 +859,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/runtests all, unit",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/runtests critical, e2e",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -870,6 +884,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/gitcommitgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ultimate-test-deploy-loop",
             permission_mode="acceptEdits",
             output_format=output_format
         )
