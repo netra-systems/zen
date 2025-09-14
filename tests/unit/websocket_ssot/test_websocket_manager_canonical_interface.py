@@ -78,7 +78,8 @@ class TestWebSocketManagerCanonicalInterface(SSotBaseTestCase):
         """Set up test environment with SSOT compliance."""
         super().setup_method(method)
         self.interface_analyses: List[InterfaceAnalysis] = []
-        self.test_user_id = ensure_user_id("test_user_canonical_interface")
+        import uuid
+        self.test_user_id = ensure_user_id(str(uuid.uuid4()))
 
     def get_canonical_interface_specification(self) -> Dict[str, MethodSignature]:
         """

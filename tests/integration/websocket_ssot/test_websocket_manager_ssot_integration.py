@@ -114,10 +114,11 @@ class TestWebSocketManagerSSOTIntegration(SSotAsyncTestCase):
         await super().setup_method(method)
         self.manager_instances: List[WebSocketManagerTestInstance] = []
         self.mock_websockets: Dict[ConnectionID, MockWebSocket] = {}
+        import uuid
         self.test_users = [
-            ensure_user_id("user_ssot_integration_1"),
-            ensure_user_id("user_ssot_integration_2"),
-            ensure_user_id("user_ssot_integration_3")
+            ensure_user_id(str(uuid.uuid4())),
+            ensure_user_id(str(uuid.uuid4())),
+            ensure_user_id(str(uuid.uuid4()))
         ]
 
         # Track integration test results

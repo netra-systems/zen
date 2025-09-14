@@ -79,7 +79,8 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
         super().setup_method(method)
         self.import_results: List[ImportValidationResult] = []
         self.discovered_instances: Dict[str, Any] = {}
-        self.test_user_id = ensure_user_id("test_user_ssot_import_validation")
+        import uuid
+        self.test_user_id = ensure_user_id(str(uuid.uuid4()))
 
         # Clear import cache to ensure fresh imports
         modules_to_clear = [
@@ -291,7 +292,7 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
             print()
 
             # This should FAIL before SSOT fix
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(unique_types)} different WebSocket Manager types. "
                 f"Expected exactly 1 unified type after SSOT consolidation. "
                 f"Types: {[str(t) for t in unique_types]}"
@@ -369,7 +370,7 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
             print()
 
             # This should FAIL before SSOT consolidation
-            self.fail(
+            pytest.fail(
                 f"SSOT VIOLATION: Found {len(unique_types)} different instance types from "
                 f"different import paths. After SSOT consolidation, all paths should create "
                 f"instances of the same underlying type. Types found: {list(unique_types)}"
@@ -469,7 +470,7 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
                 print()
 
                 # This should FAIL before SSOT consolidation
-                self.fail(
+                pytest.fail(
                     f"BACKWARDS COMPATIBILITY VIOLATION: Deprecated paths return types "
                     f"{deprecated_types} but current paths return types {current_types}. "
                     f"After SSOT consolidation, all paths should return the same type."

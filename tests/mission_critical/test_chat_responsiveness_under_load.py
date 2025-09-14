@@ -35,7 +35,7 @@ Priority: CRITICAL
         # REMOVED_SYNTAX_ERROR: import threading
         # REMOVED_SYNTAX_ERROR: import random
         # REMOVED_SYNTAX_ERROR: from dataclasses import dataclass, field
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
         # Add project root to Python path for imports
         # REMOVED_SYNTAX_ERROR: project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

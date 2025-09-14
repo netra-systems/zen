@@ -50,7 +50,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 from unittest import TestCase
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 # NO MOCKS - Real services only for mission critical isolation testing
 
 import pytest

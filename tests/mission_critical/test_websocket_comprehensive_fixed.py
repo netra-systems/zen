@@ -28,7 +28,7 @@
             # REMOVED_SYNTAX_ERROR: import uuid
             # REMOVED_SYNTAX_ERROR: from datetime import datetime, timezone
             # REMOVED_SYNTAX_ERROR: from typing import Dict, List, Any, Optional
-            # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
+            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
             # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
 
             # CRITICAL: Add project root to Python path
