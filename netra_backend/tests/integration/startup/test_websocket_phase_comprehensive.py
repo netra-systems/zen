@@ -342,12 +342,12 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
         await self.async_setup()
         
         # Test auth middleware initialization
-        with patch.dict('os.environ', {
-            'JWT_SECRET': 'test_jwt_secret_key_for_websocket_auth',
-            'OAUTH_CLIENT_ID': 'test_oauth_client_id',
-            'OAUTH_CLIENT_SECRET': 'test_oauth_client_secret'
-        }):
-            env = IsolatedEnvironment()
+        env = IsolatedEnvironment()
+        env.set('JWT_SECRET', 'test_jwt_secret_key_for_websocket_auth', source='test_websocket_auth')
+        env.set('OAUTH_CLIENT_ID', 'test_oauth_client_id', source='test_websocket_auth')
+        env.set('OAUTH_CLIENT_SECRET', 'test_oauth_client_secret', source='test_websocket_auth')
+        
+        try:
             
             # Mock auth middleware (since we don't have real auth server)
             auth_middleware = MagicMock(spec=WebSocketAuthMiddleware)
@@ -375,6 +375,11 @@ class WebSocketPhaseIntegrationTest(BaseIntegrationTest):
             assert auth_result["subscription_tier"] == "enterprise"
             
             logger.info(" PASS:  WebSocket Auth middleware configuration test passed")
+        finally:
+            # Clean up test environment variables
+            env.unset('JWT_SECRET', source='test_websocket_auth')
+            env.unset('OAUTH_CLIENT_ID', source='test_websocket_auth')  
+            env.unset('OAUTH_CLIENT_SECRET', source='test_websocket_auth')
             
     @pytest.mark.asyncio
     async def test_websocket_cors_middleware_setup(self):
