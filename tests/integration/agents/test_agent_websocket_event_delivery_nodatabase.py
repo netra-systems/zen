@@ -249,8 +249,7 @@ class MockAgent(BaseAgent):
         execution_result = AgentExecutionResult(
             success=True,
             agent_name=self.name,
-            execution_time=0.05,
-            state=None,
+            duration=0.05,
             metadata={
                 'prompt': prompt,
                 'user_id': context.user_id,
@@ -283,7 +282,6 @@ class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
         
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.websocket_integration
     async def test_single_user_agent_event_delivery(self):
         """Test complete WebSocket event delivery for single user agent execution.
         
@@ -353,7 +351,6 @@ class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.websocket_integration
     async def test_multi_user_agent_event_isolation(self):
         """Test WebSocket event isolation between multiple concurrent users.
         
@@ -457,7 +454,6 @@ class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.websocket_integration
     async def test_agent_event_payload_validation(self):
         """Test WebSocket event payload structure and content validation.
         
@@ -546,7 +542,6 @@ class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.websocket_integration
     async def test_concurrent_agent_executions_event_ordering(self):
         """Test event ordering and isolation with concurrent agent executions.
         

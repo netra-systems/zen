@@ -116,8 +116,7 @@ class MockAgentForExecution:
         return AgentExecutionResult(
             success=True,
             agent_name=self.agent_name,
-            execution_time=0.01,
-            state=None,
+            duration=0.01,
             metadata={
                 'prompt': prompt,
                 'user_id': self.user_id,
@@ -205,7 +204,6 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
         
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.execution_engine
     async def test_execution_engine_agent_lifecycle_integration(self):
         """Test execution engine coordination with agent lifecycle and WebSocket events.
         
@@ -294,7 +292,6 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.execution_engine
     async def test_multi_user_execution_engine_isolation(self):
         """Test execution engine isolation between multiple concurrent users.
         
@@ -431,7 +428,6 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.execution_engine
     async def test_execution_engine_tool_integration(self):
         """Test execution engine integration with tool dispatcher and WebSocket events.
         
@@ -528,7 +524,6 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.execution_engine
     async def test_execution_engine_resource_management(self):
         """Test execution engine resource management and cleanup patterns.
         
@@ -610,7 +605,6 @@ class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     
     @pytest.mark.integration
     @pytest.mark.agents
-    @pytest.mark.execution_engine
     async def test_execution_engine_concurrent_operations(self):
         """Test execution engine handling of concurrent operations within single user.
         
