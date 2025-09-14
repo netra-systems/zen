@@ -53,9 +53,16 @@ Per CLAUDE.md: ALL tests must inherit from `SSotBaseTestCase` or `SSotAsyncTestC
 - [x] **SYNTAX VALIDATED:** All files compile without errors
 - [x] **NON-DOCKER COMPATIBLE:** Tests designed for unit/integration/e2e staging execution
 
-### Phase 3: Plan SSOT Remediation
-- [ ] Plan migration to SSotBaseTestCase
-- [ ] Plan environment access updates
+### Phase 3: Plan SSOT Remediation ✅
+- [x] **MIGRATION ANALYSIS COMPLETE:** 4 target files analyzed with risk assessment
+- [x] **REMEDIATION STRATEGY PLANNED:** 3-phase approach (Low→Medium→High risk)
+- [x] **SEQUENCING DEFINED:**
+  - Phase 1: `test_auth_minimal_unit.py` (LOW risk)
+  - Phase 2: `test_auth_standalone_unit.py`, `test_auth_comprehensive_security.py` (MEDIUM risk)
+  - Phase 3: `test_golden_path_integration.py` (HIGH risk - $500K+ ARR)
+- [x] **MIGRATION PATTERNS:** Base class, environment access, import cleanup planned
+- [x] **RISK MITIGATION:** Staged rollout, rollback procedures, Golden Path protection
+- [x] **SUCCESS CRITERIA:** Zero behavior changes, SSOT compliance, Golden Path preserved
 
 ### Phase 4: Execute Remediation
 - [ ] Migrate test base classes
