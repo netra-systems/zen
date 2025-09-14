@@ -15,8 +15,8 @@ async def test_staging_websocket_fallback():
 
     # Set up staging environment
     os.environ["USE_STAGING_SERVICES"] = "true"
-    os.environ["STAGING_WEBSOCKET_URL"] = "wss://netra-backend-701982941522.us-central1.run.app/ws"
-    os.environ["TEST_WEBSOCKET_URL"] = "wss://netra-backend-701982941522.us-central1.run.app/ws"
+    os.environ["STAGING_WEBSOCKET_URL"] = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
+    os.environ["TEST_WEBSOCKET_URL"] = "wss://netra-backend-staging-pnovr5vsba-uc.a.run.app/ws"
 
     print("🧪 Testing WebSocket staging fallback (Issue #680)")
     print(f"   📡 Staging WebSocket URL: {os.environ['STAGING_WEBSOCKET_URL']}")

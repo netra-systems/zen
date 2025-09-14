@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @pytest.mark.integration
 @pytest.mark.github_integration
-@pytest.mark.external_api
+@pytest.mark.integration
 class TestGitHubAPIRealConnection(BaseTestCase):
     """Test real GitHub API connections and operations."""
 

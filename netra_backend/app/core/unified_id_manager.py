@@ -30,6 +30,7 @@ class IDType(Enum):
     TRACE = "trace"
     METRIC = "metric"
     THREAD = "thread"
+    RUN = "run"
 
 
 @dataclass
