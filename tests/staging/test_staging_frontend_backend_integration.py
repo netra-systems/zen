@@ -31,6 +31,12 @@ class StagingFrontendBackendIntegrationTestRunner:
     
     def __init__(self):
         self.env = IsolatedEnvironment()
+        
+        # CRITICAL: Staging tests must run against staging environment
+        # Override test environment detection to ensure staging infrastructure is used
+        if not self.env.get('ENVIRONMENT'):
+            self.env.set('ENVIRONMENT', 'staging', 'staging_test_override')
+        
         self.environment = StagingConfig.get_environment()
         self.timeout = StagingConfig.TIMEOUTS["default"]
         self.access_token = None

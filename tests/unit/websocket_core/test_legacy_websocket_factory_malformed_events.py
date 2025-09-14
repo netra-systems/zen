@@ -38,9 +38,9 @@ logger = get_logger(__name__)
 class LegacyWebSocketFactoryMalformedEventsTest(SSotAsyncTestCase):
     """Test suite to reproduce legacy WebSocket factory malformed events blocking AI responses."""
     
-    async def asyncSetUp(self):
+    def setup_method(self, method):
         """Set up test infrastructure with real user context."""
-        await super().asyncSetUp()
+        super().setup_method(method)
         
         # Create proper user execution context for isolation
         from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -313,9 +313,9 @@ class LegacyWebSocketFactoryMalformedEventsTest(SSotAsyncTestCase):
 class LegacyVsSSotEventComparisonTest(SSotAsyncTestCase):
     """Compare legacy factory events vs SSOT events to show the differences."""
     
-    async def asyncSetUp(self):
+    def setup_method(self, method):
         """Set up both legacy and SSOT managers for comparison."""
-        await super().asyncSetUp()
+        super().setup_method(method)
         
         # Create test context
         from netra_backend.app.services.user_execution_context import UserExecutionContext

@@ -920,6 +920,266 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
         finally:
             await websocket.close()
 
+    async def test_multi_agent_orchestration_flow_validation(self):
+        """
+        Test complete multi-agent orchestration: Supervisor → Triage → APEX flow.
+        
+        PHASE 1 ENHANCEMENT (Issue #1059): Validates the multi-agent coordination
+        that delivers superior business value through specialized agent expertise.
+        
+        Flow validation:
+        1. Supervisor agent receives complex request
+        2. Supervisor routes to appropriate specialized agents
+        3. Triage agent analyzes request complexity and data requirements
+        4. APEX optimizer agent provides detailed optimization recommendations
+        5. Results are coordinated and returned with business value
+        
+        DIFFICULTY: Very High (60+ minutes)
+        REAL SERVICES: Yes - Complete multi-agent staging orchestration
+        STATUS: Should PASS - Multi-agent coordination is core platform differentiator
+        """
+        orchestration_start_time = time.time()
+        orchestration_metrics = {
+            "agents_invoked": [],
+            "agent_transitions": [],
+            "coordination_events": [],
+            "business_value_score": 0.0
+        }
+        
+        self.logger.info("🔄 Testing multi-agent orchestration flow validation")
+        
+        try:
+            # Establish WebSocket connection
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            websocket = await asyncio.wait_for(
+                websockets.connect(
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
+                        "Authorization": f"Bearer {self.access_token}",
+                        "X-Environment": "staging",
+                        "X-Test-Suite": "multi-agent-orchestration-e2e",
+                        "X-Business-Scenario": "complex-optimization"
+                    },
+                    ssl=ssl_context,
+                    ping_interval=30,
+                    ping_timeout=10
+                ),
+                timeout=20.0
+            )
+            
+            # Send complex enterprise scenario requiring multi-agent coordination
+            complex_scenario = {
+                "type": "agent_request",
+                "agent": "supervisor_agent",  # Start with supervisor for routing
+                "message": (
+                    "I'm the CTO of a FinTech company processing 500,000 transactions daily. "
+                    "Our current AI infrastructure costs $45,000/month with the following challenges: "
+                    "1) GPT-4 usage for fraud detection (80% of costs), "
+                    "2) Real-time response requirements (<100ms), "
+                    "3) SOC2 and PCI compliance requirements, "
+                    "4) 99.99% uptime SLA commitments, "
+                    "5) Scaling to 2M transactions/day by Q4. "
+                    "I need a comprehensive multi-phase optimization strategy that addresses "
+                    "cost reduction (target: 40%), performance optimization, compliance maintenance, "
+                    "and scalability planning. Please provide specific technical recommendations, "
+                    "implementation timelines, ROI calculations, and risk assessments."
+                ),
+                "thread_id": f"orchestration_test_{int(time.time())}",
+                "run_id": f"orchestration_run_{int(time.time())}",
+                "user_id": self.__class__.test_user_id,
+                "context": {
+                    "business_scenario": "enterprise_fintech_optimization",
+                    "expected_agents": ["supervisor_agent", "triage_agent", "apex_optimizer_agent"],
+                    "complexity": "very_high",
+                    "expected_business_value": [
+                        "cost reduction", "performance optimization", "compliance", 
+                        "scalability", "roi calculations", "implementation timeline"
+                    ],
+                    "quality_threshold": self.__class__.QUALITY_THRESHOLD_HIGH
+                }
+            }
+            
+            await websocket.send(json.dumps(complex_scenario))
+            self.logger.info("📤 Complex multi-agent scenario sent")
+            
+            # Monitor multi-agent orchestration events
+            orchestration_events = []
+            agent_activity = defaultdict(list)
+            response_timeout = 150.0  # Extended for complex multi-agent processing
+            collection_start = time.time()
+            
+            final_response = None
+            
+            while time.time() - collection_start < response_timeout:
+                try:
+                    event_data = await asyncio.wait_for(websocket.recv(), timeout=20.0)
+                    event = json.loads(event_data)
+                    orchestration_events.append(event)
+                    
+                    event_type = event.get("type", "unknown")
+                    event_data_content = event.get("data", {})
+                    
+                    # Track agent activity and transitions
+                    if "agent" in event_type or "agent" in str(event_data_content).lower():
+                        agent_info = self._extract_agent_info(event)
+                        if agent_info:
+                            agent_activity[agent_info["agent_name"]].append({
+                                "event_type": event_type,
+                                "timestamp": time.time() - collection_start,
+                                "data": agent_info
+                            })
+                            orchestration_metrics["agents_invoked"].append(agent_info["agent_name"])
+                    
+                    # Track coordination events (agent handoffs, data sharing)
+                    if any(keyword in event_type.lower() for keyword in ["routing", "handoff", "coordination", "triage"]):
+                        orchestration_metrics["coordination_events"].append({
+                            "event_type": event_type,
+                            "timestamp": time.time() - collection_start
+                        })
+                    
+                    self.logger.info(f"📨 Multi-agent event: {event_type}")
+                    
+                    # Check for final completion
+                    if event_type == "agent_completed":
+                        final_response = event
+                        self.logger.info("🏁 Multi-agent orchestration completed")
+                        break
+                        
+                    # Check for orchestration errors
+                    if "error" in event_type.lower():
+                        raise AssertionError(f"Multi-agent orchestration error: {event}")
+                        
+                except asyncio.TimeoutError:
+                    # Continue monitoring for orchestration completion
+                    continue
+            
+            orchestration_duration = time.time() - collection_start
+            
+            # Validate multi-agent orchestration results
+            assert len(orchestration_events) > 0, "Should receive orchestration events"
+            assert final_response is not None, "Should receive final orchestrated response"
+            
+            # Extract and validate orchestrated response
+            response_data = final_response.get("data", {})
+            result = response_data.get("result", {})
+            response_text = result.get("response", str(result)) if isinstance(result, dict) else str(result)
+            
+            # PHASE 1: Comprehensive business value validation for orchestrated response
+            quality_evaluation = self._calculate_response_quality_score(
+                response_text,
+                complex_scenario["context"]
+            )
+            orchestration_metrics["business_value_score"] = quality_evaluation["overall_quality_score"]
+            
+            # Multi-agent coordination validation
+            unique_agents = list(set(orchestration_metrics["agents_invoked"]))
+            assert len(unique_agents) >= 2, (
+                f"Multi-agent orchestration should involve ≥2 agents, detected: {unique_agents}"
+            )
+            
+            # Validate sophisticated response quality for complex scenario
+            assert len(response_text) > 800, (
+                f"Complex enterprise scenario should generate comprehensive response: "
+                f"{len(response_text)} chars (expected >800 for FinTech optimization)"
+            )
+            
+            assert quality_evaluation["meets_threshold"], (
+                f"Multi-agent orchestrated response fails quality threshold. "
+                f"Score: {quality_evaluation['overall_quality_score']:.3f} "
+                f"(required ≥{self.__class__.QUALITY_THRESHOLD_HIGH})"
+            )
+            
+            # Validate enterprise-specific business value indicators
+            enterprise_indicators_found = [
+                indicator for indicator in complex_scenario["context"]["expected_business_value"]
+                if indicator.lower() in response_text.lower()
+            ]
+            
+            indicator_coverage = len(enterprise_indicators_found) / len(complex_scenario["context"]["expected_business_value"])
+            assert indicator_coverage >= 0.6, (
+                f"Insufficient enterprise topic coverage in orchestrated response: "
+                f"{indicator_coverage:.1%} (found: {enterprise_indicators_found})"
+            )
+            
+            # Validate technical sophistication (should be higher for multi-agent)
+            assert quality_evaluation["technical_specificity"] >= 0.5, (
+                f"Multi-agent response should be technically sophisticated: "
+                f"{quality_evaluation['technical_specificity']:.3f} (expected ≥0.5)"
+            )
+            
+            await websocket.close()
+            
+            # Comprehensive orchestration reporting
+            total_orchestration_time = time.time() - orchestration_start_time
+            
+            self.logger.info("🎯 MULTI-AGENT ORCHESTRATION SUCCESS")
+            self.logger.info(f"🔄 Orchestration Metrics:")
+            self.logger.info(f"   Total Orchestration Time: {total_orchestration_time:.1f}s")
+            self.logger.info(f"   Agent Processing Time: {orchestration_duration:.1f}s")
+            self.logger.info(f"   Agents Involved: {unique_agents}")
+            self.logger.info(f"   Coordination Events: {len(orchestration_metrics['coordination_events'])}")
+            self.logger.info(f"   Total Events: {len(orchestration_events)}")
+            self.logger.info(f"💰 Business Value Metrics:")
+            self.logger.info(f"   Quality Score: {quality_evaluation['overall_quality_score']:.3f}/1.0")
+            self.logger.info(f"   Enterprise Coverage: {indicator_coverage:.1%}")
+            self.logger.info(f"   Technical Sophistication: {quality_evaluation['technical_specificity']:.3f}/1.0")
+            self.logger.info(f"   Response Length: {len(response_text)} characters")
+            
+            # Business success assertions for orchestration
+            assert total_orchestration_time < 180.0, (
+                f"Multi-agent orchestration too slow: {total_orchestration_time:.1f}s (max 180s)"
+            )
+            assert quality_evaluation["overall_quality_score"] >= self.__class__.QUALITY_THRESHOLD_HIGH, (
+                f"Multi-agent orchestration quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
+            )
+            
+        except Exception as e:
+            total_time = time.time() - orchestration_start_time
+            
+            self.logger.error("❌ MULTI-AGENT ORCHESTRATION FAILED")
+            self.logger.error(f"   Error: {str(e)}")
+            self.logger.error(f"   Duration: {total_time:.1f}s")
+            self.logger.error(f"   Events collected: {len(orchestration_metrics.get('coordination_events', []))}")
+            self.logger.error(f"   Agents detected: {orchestration_metrics.get('agents_invoked', [])}")
+            
+            raise AssertionError(
+                f"Multi-agent orchestration validation failed after {total_time:.1f}s: {e}. "
+                f"This breaks advanced platform capabilities and enterprise value proposition ($500K+ ARR impact). "
+                f"Orchestration metrics: {orchestration_metrics}"
+            )
+    
+    def _extract_agent_info(self, event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Extract agent information from WebSocket events."""
+        event_str = json.dumps(event).lower()
+        event_type = event.get("type", "unknown")
+        
+        # Common agent names to detect
+        agents = ["supervisor", "triage", "apex", "optimizer", "data_helper"]
+        
+        for agent in agents:
+            if agent in event_str:
+                return {
+                    "agent_name": agent,
+                    "event_type": event_type,
+                    "detected_via": "content_analysis"
+                }
+        
+        # Try to extract from event data structure
+        event_data = event.get("data", {})
+        if isinstance(event_data, dict):
+            for key, value in event_data.items():
+                if "agent" in key.lower() and isinstance(value, str):
+                    return {
+                        "agent_name": value.lower(),
+                        "event_type": event_type,
+                        "detected_via": f"data_field_{key}"
+                    }
+        
+        return None
+
 
 if __name__ == "__main__":
     pytest.main([

@@ -212,9 +212,9 @@ This test will PASS after dual pattern elimination.
             print(violation_details)
             
             # This assertion should FAIL initially, PASS after remediation
-            assert False, f"SSOT VIOLATION: Dual WebSocket patterns detected in AgentInstanceFactory. "
-                     f"Found {len(ssot_imports)} SSOT imports AND {len(violation_imports)} violation imports. "
-                     f"See details above for remediation guidance.")
+            assert False, (f"SSOT VIOLATION: Dual WebSocket patterns detected in AgentInstanceFactory. "
+                          f"Found {len(ssot_imports)} SSOT imports AND {len(violation_imports)} violation imports. "
+                          f"See details above for remediation guidance.")
 
         elif violation_imports and not ssot_imports:
             # Only violations, no SSOT - still a failure
@@ -248,14 +248,14 @@ This test will PASS after dual pattern elimination.
         file_path = self.agent_instance_factory_path
 
         if not file_path.exists():
-            self.fail(f"CRITICAL: Factory file not found at {file_path}")
+            assert False, f"CRITICAL: Factory file not found at {file_path}"
 
         # Read file content for pattern analysis
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
         except Exception as e:
-            self.fail(f"Error reading factory file: {e}")
+            assert False, (f"Error reading factory file: {e}")
 
         # Analyze method-level WebSocket usage patterns
         websocket_manager_usage = []
@@ -321,13 +321,13 @@ REMEDIATION:
 """
             print(violation_summary)
             
-            self.fail(f"MIXED PATTERNS VIOLATION: Factory methods use both direct WebSocketManager "
+            assert False, (f"MIXED PATTERNS VIOLATION: Factory methods use both direct WebSocketManager "
                      f"({len(websocket_manager_usage)} usages) AND bridge patterns "
                      f"({len(websocket_bridge_usage)} usages). SSOT requires single access pattern.")
 
         elif websocket_manager_usage and not websocket_bridge_usage:
             # Only manager usage - violation, needs bridge pattern
-            self.fail(f"SSOT VIOLATION: Factory uses only direct WebSocketManager patterns "
+            assert False, (f"SSOT VIOLATION: Factory uses only direct WebSocketManager patterns "
                      f"({len(websocket_manager_usage)} usages). Must use AgentWebSocketBridge SSOT pattern.")
 
         elif websocket_bridge_usage and not websocket_manager_usage:
@@ -340,7 +340,7 @@ REMEDIATION:
             
         else:
             # No WebSocket usage patterns found - might indicate issue
-            self.fail("UNEXPECTED: No WebSocket usage patterns found in factory methods. "
+            assert False, ("UNEXPECTED: No WebSocket usage patterns found in factory methods. "
                      "Factory should have bridge pattern usage.")
 
     def test_factory_runtime_websocket_pattern_consistency(self):
@@ -356,13 +356,13 @@ REMEDIATION:
         file_path = self.agent_instance_factory_path
 
         if not file_path.exists():
-            self.fail(f"CRITICAL: Factory file not found at {file_path}")
+            assert False, f"CRITICAL: Factory file not found at {file_path}"
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
         except Exception as e:
-            self.fail(f"Error reading factory file: {e}")
+            assert False, (f"Error reading factory file: {e}")
 
         # Analyze factory initialization patterns
         initialization_patterns = {
@@ -443,13 +443,13 @@ Factory must use single, consistent initialization pattern for all instances.
 """
             print(violation_summary)
             
-            self.fail(f"INITIALIZATION INCONSISTENCY: Factory uses mixed WebSocket initialization patterns. "
+            assert False, (f"INITIALIZATION INCONSISTENCY: Factory uses mixed WebSocket initialization patterns. "
                      f"Manager: {len(manager_init)}, Bridge: {len(bridge_init)}, Mixed: {len(mixed_init)}. "
                      f"SSOT requires consistent pattern.")
 
         elif manager_init and not bridge_init:
             # Only manager initialization - violation
-            self.fail(f"SSOT VIOLATION: Factory initialization uses only WebSocketManager pattern "
+            assert False, (f"SSOT VIOLATION: Factory initialization uses only WebSocketManager pattern "
                      f"({len(manager_init)} occurrences). Must use AgentWebSocketBridge SSOT pattern.")
 
         elif bridge_init and not manager_init:
@@ -482,7 +482,7 @@ Factory must use single, consistent initialization pattern for all instances.
         file_path = self.agent_instance_factory_path
 
         if not file_path.exists():
-            self.fail(f"CRITICAL: AgentInstanceFactory not found at {file_path}")
+            assert False, (f"CRITICAL: AgentInstanceFactory not found at {file_path}")
 
         # Comprehensive SSOT compliance check
         ssot_imports, violation_imports = self._analyze_file_imports(file_path)
@@ -493,7 +493,7 @@ Factory must use single, consistent initialization pattern for all instances.
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
         except Exception as e:
-            self.fail(f"Error reading factory file: {e}")
+            assert False, (f"Error reading factory file: {e}")
 
         # Check for any remaining violation patterns in comments or strings
         violation_in_comments = []
@@ -547,7 +547,7 @@ This test will PASS when Issue #1103 is fully resolved.
 """
             print(remediation_summary)
             
-            self.fail(f"REMEDIATION INCOMPLETE: Issue #1103 not fully resolved. "
+            assert False, (f"REMEDIATION INCOMPLETE: Issue #1103 not fully resolved. "
                      f"{len(remediation_issues)} remaining issues: {remediation_issues}")
 
         else:
@@ -578,7 +578,7 @@ This test will PASS when Issue #1103 is fully resolved.
         file_path = self.agent_instance_factory_path
 
         if not file_path.exists():
-            self.fail(f"CRITICAL: AgentInstanceFactory not found at {file_path}")
+            assert False, (f"CRITICAL: AgentInstanceFactory not found at {file_path}")
 
         # Static import analysis using AST parsing for precision
         try:
@@ -588,7 +588,7 @@ This test will PASS when Issue #1103 is fully resolved.
             # Parse AST to get exact import information
             tree = ast.parse(content)
         except Exception as e:
-            self.fail(f"Error parsing factory file: {e}")
+            assert False, (f"Error parsing factory file: {e}")
 
         direct_websocket_imports = []
         ssot_bridge_imports = []
@@ -627,7 +627,7 @@ This test will PASS when Issue #1103 is fully resolved.
             import_details = [f"Line {imp['line']}: {imp['module']}.{imp['name']}" 
                              for imp in direct_websocket_imports]
             
-            self.fail(f"DIRECT IMPORT VIOLATION: WebSocketManager imports still present. "
+            assert False, (f"DIRECT IMPORT VIOLATION: WebSocketManager imports still present. "
                      f"Found {len(direct_websocket_imports)} violations: {import_details}. "
                      f"Must be eliminated for SSOT compliance.")
 

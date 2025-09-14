@@ -919,6 +919,303 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         self.logger.info("📋 Event data structure and content validation complete")
 
+    async def test_tool_integration_websocket_event_pipeline(self):
+        """
+        Test WebSocket events during tool integration pipeline execution.
+        
+        PHASE 1 ENHANCEMENT (Issue #1059): Validates that WebSocket events properly
+        deliver real-time feedback during tool integration scenarios, ensuring
+        users see transparent tool usage that enhances business value delivery.
+        
+        Tool Integration Event Pipeline:
+        1. agent_started → User knows processing began
+        2. agent_thinking → User sees reasoning process
+        3. tool_executing → User sees specific tool being used
+        4. tool_completed → User sees tool results and outcomes
+        5. agent_completed → User receives final integrated response
+        
+        DIFFICULTY: Very High (70+ minutes)
+        REAL SERVICES: Yes - Complete staging tool integration with WebSocket monitoring
+        STATUS: Should PASS - Tool transparency is critical for user trust and value perception
+        """
+        tool_pipeline_start_time = time.time()
+        tool_pipeline_metrics = {
+            "tool_events_received": [],
+            "tool_transparency_score": 0.0,
+            "user_value_indicators": [],
+            "event_timing_analysis": {}
+        }
+        
+        self.logger.info("🔧 Testing tool integration WebSocket event pipeline")
+        
+        try:
+            # Establish WebSocket connection for tool monitoring
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            connection_start = time.time()
+            websocket = await asyncio.wait_for(
+                websockets.connect(
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
+                        "Authorization": f"Bearer {self.access_token}",
+                        "X-Environment": "staging",
+                        "X-Test-Suite": "tool-integration-websocket-pipeline",
+                        "X-Tool-Transparency": "maximum",
+                        "X-Business-Value": "tool-enhanced-analysis"
+                    },
+                    ssl=ssl_context,
+                    ping_interval=30,
+                    ping_timeout=10
+                ),
+                timeout=20.0
+            )
+            
+            connection_time = time.time() - connection_start
+            self.logger.info(f"✅ WebSocket connected for tool monitoring in {connection_time:.2f}s")
+            
+            # Send scenario requiring multiple tool integrations
+            tool_integration_scenario = {
+                "type": "agent_request", 
+                "agent": "apex_optimizer_agent",  # Agent likely to use multiple tools
+                "message": (
+                    "I'm evaluating a $500,000 annual AI infrastructure investment for my SaaS company. "
+                    "Please perform a comprehensive analysis using your available tools: "
+                    "\n\n"
+                    "REQUIREMENTS FOR TOOL-BASED ANALYSIS:\n"
+                    "1. Calculate current vs projected costs with different model configurations\n"
+                    "2. Analyze performance trade-offs between GPT-4 and GPT-3.5 usage\n"
+                    "3. Evaluate caching strategies and their ROI impact\n"
+                    "4. Assess scaling requirements for 5x growth scenario\n"
+                    "5. Generate implementation timeline with risk analysis\n"
+                    "\n"
+                    "Please use your calculation, analysis, and planning tools to provide "
+                    "quantified recommendations with specific data points. I need to see "
+                    "exactly how you're using tools to enhance your analysis quality."
+                ),
+                "thread_id": f"tool_integration_ws_{int(time.time())}",
+                "run_id": f"tool_ws_run_{int(time.time())}",
+                "user_id": self.__class__.test_user_id,
+                "context": {
+                    "business_scenario": "tool_enhanced_analysis",
+                    "expected_tools": ["cost_calculator", "performance_analyzer", "roi_calculator", "timeline_planner"],
+                    "transparency_required": True,
+                    "tool_integration_complexity": "high"
+                }
+            }
+            
+            message_send_start = time.time()
+            await websocket.send(json.dumps(tool_integration_scenario))
+            
+            self.logger.info("📤 Tool integration scenario sent - monitoring tool events...")
+            
+            # Monitor tool integration WebSocket events with detailed analysis
+            all_events = []
+            tool_events = []
+            event_sequence = []
+            tool_usage_phases = {}
+            
+            response_timeout = 120.0  # Allow time for multiple tool integrations
+            collection_deadline = time.time() + response_timeout
+            
+            while time.time() < collection_deadline:
+                try:
+                    event_data = await asyncio.wait_for(websocket.recv(), timeout=15.0)
+                    event = json.loads(event_data)
+                    all_events.append(event)
+                    
+                    event_type = event.get("type", "unknown")
+                    event_timestamp = time.time() - message_send_start
+                    event_sequence.append((event_type, event_timestamp))
+                    
+                    # Detailed tool event analysis
+                    if "tool" in event_type.lower():
+                        tool_events.append(event)
+                        tool_event_analysis = self._analyze_tool_event(event, event_timestamp)
+                        tool_pipeline_metrics["tool_events_received"].append(tool_event_analysis)
+                        
+                        # Track tool usage phases
+                        tool_name = tool_event_analysis.get("tool_name", "unknown")
+                        if tool_name not in tool_usage_phases:
+                            tool_usage_phases[tool_name] = []
+                        tool_usage_phases[tool_name].append(tool_event_analysis)
+                        
+                        self.logger.info(f"🔧 Tool event: {event_type} - {tool_name}")
+                    
+                    # Track all critical WebSocket events
+                    if event_type in self.CRITICAL_EVENTS:
+                        tool_pipeline_metrics["event_timing_analysis"][event_type] = event_timestamp
+                        
+                        self.logger.info(f"📨 Critical event during tool integration: {event_type} (+{event_timestamp:.1f}s)")
+                    
+                    # Check for completion
+                    if event_type == "agent_completed":
+                        self.logger.info("🏁 Tool integration pipeline completed")
+                        break
+                        
+                    # Check for errors
+                    if "error" in event_type.lower():
+                        raise AssertionError(f"Tool integration error: {event}")
+                        
+                except asyncio.TimeoutError:
+                    continue
+            
+            tool_integration_duration = time.time() - message_send_start
+            
+            # PHASE 1: Comprehensive tool integration validation
+            
+            # Validate tool event delivery
+            assert len(tool_events) >= 2, (
+                f"Should receive at least 2 tool events (executing + completed), got {len(tool_events)}. "
+                f"Tool integration transparency is critical for user trust."
+            )
+            
+            # Validate tool event types
+            tool_event_types = {event.get("type", "unknown") for event in tool_events}
+            required_tool_events = {"tool_executing", "tool_completed"}
+            missing_tool_events = required_tool_events - tool_event_types
+            
+            assert len(missing_tool_events) == 0, (
+                f"Missing critical tool events: {missing_tool_events}. "
+                f"Users must see transparent tool usage for business value perception. "
+                f"Received tool events: {tool_event_types}"
+            )
+            
+            # Validate critical WebSocket events during tool integration
+            critical_events_received = set(tool_pipeline_metrics["event_timing_analysis"].keys())
+            missing_critical_events = set(self.CRITICAL_EVENTS) - critical_events_received
+            
+            assert len(missing_critical_events) <= 1, (
+                f"Too many missing critical events during tool integration: {missing_critical_events}. "
+                f"All 5 critical events should be delivered during tool-enhanced analysis. "
+                f"Received: {critical_events_received}"
+            )
+            
+            # Validate tool usage diversity (multiple tools for complex analysis)
+            unique_tools_used = len(tool_usage_phases.keys())
+            assert unique_tools_used >= 1, (
+                f"Complex analysis should use multiple tools, detected: {unique_tools_used}. "
+                f"Tools used: {list(tool_usage_phases.keys())}"
+            )
+            
+            # Validate event timing (tools should not cause excessive delays)
+            if "agent_started" in tool_pipeline_metrics["event_timing_analysis"]:
+                agent_started_time = tool_pipeline_metrics["event_timing_analysis"]["agent_started"]
+                assert agent_started_time < 10.0, (
+                    f"agent_started delayed during tool integration: {agent_started_time:.1f}s (max 10s)"
+                )
+            
+            if "agent_completed" in tool_pipeline_metrics["event_timing_analysis"]:
+                total_processing_time = tool_pipeline_metrics["event_timing_analysis"]["agent_completed"]
+                assert total_processing_time < 150.0, (
+                    f"Tool integration processing too slow: {total_processing_time:.1f}s (max 150s)"
+                )
+            
+            # Validate tool transparency score
+            tool_transparency_indicators = 0
+            for tool_event in tool_pipeline_metrics["tool_events_received"]:
+                if tool_event.get("has_tool_name", False):
+                    tool_transparency_indicators += 1
+                if tool_event.get("has_context", False):
+                    tool_transparency_indicators += 1
+                if tool_event.get("event_type") == "tool_completed" and tool_event.get("has_result_info", False):
+                    tool_transparency_indicators += 2  # Results are especially important
+            
+            tool_pipeline_metrics["tool_transparency_score"] = tool_transparency_indicators / max(len(tool_pipeline_metrics["tool_events_received"]), 1)
+            
+            assert tool_pipeline_metrics["tool_transparency_score"] >= 0.5, (
+                f"Tool transparency insufficient for user value perception: "
+                f"{tool_pipeline_metrics['tool_transparency_score']:.2f} (expected ≥0.5)"
+            )
+            
+            await websocket.close()
+            
+            # Final tool integration reporting
+            total_tool_pipeline_time = time.time() - tool_pipeline_start_time
+            
+            self.logger.info("🔧 TOOL INTEGRATION WEBSOCKET PIPELINE SUCCESS")
+            self.logger.info(f"🛠️ Tool Integration Metrics:")
+            self.logger.info(f"   Total Pipeline Time: {total_tool_pipeline_time:.1f}s")
+            self.logger.info(f"   Tool Processing Time: {tool_integration_duration:.1f}s")
+            self.logger.info(f"   Tool Events Received: {len(tool_events)}")
+            self.logger.info(f"   Unique Tools Used: {unique_tools_used}")
+            self.logger.info(f"   Tool Transparency Score: {tool_pipeline_metrics['tool_transparency_score']:.2f}/1.0")
+            self.logger.info(f"   Critical Events During Tools: {len(critical_events_received)}/5")
+            self.logger.info(f"📊 Event Timing Analysis:")
+            for event_type, timing in tool_pipeline_metrics["event_timing_analysis"].items():
+                self.logger.info(f"   {event_type}: +{timing:.1f}s")
+            
+            # Business success assertions for tool integration
+            assert total_tool_pipeline_time < 180.0, (
+                f"Tool integration pipeline too slow: {total_tool_pipeline_time:.1f}s (max 180s)"
+            )
+            assert len(tool_events) >= 2, (
+                f"Insufficient tool transparency events: {len(tool_events)} (expected ≥2)"
+            )
+            assert tool_pipeline_metrics["tool_transparency_score"] >= 0.4, (
+                f"Tool transparency below business value threshold: {tool_pipeline_metrics['tool_transparency_score']:.2f}"
+            )
+            
+        except Exception as e:
+            total_time = time.time() - tool_pipeline_start_time
+            
+            self.logger.error("❌ TOOL INTEGRATION WEBSOCKET PIPELINE FAILED")
+            self.logger.error(f"   Error: {str(e)}")
+            self.logger.error(f"   Duration: {total_time:.1f}s")
+            self.logger.error(f"   Tool events collected: {len(tool_pipeline_metrics.get('tool_events_received', []))}")
+            self.logger.error(f"   Tool transparency score: {tool_pipeline_metrics.get('tool_transparency_score', 0.0):.2f}")
+            
+            raise AssertionError(
+                f"Tool integration WebSocket pipeline failed after {total_time:.1f}s: {e}. "
+                f"Tool transparency is critical for user trust and value perception ($500K+ ARR impact). "
+                f"Tool pipeline metrics: {tool_pipeline_metrics}"
+            )
+    
+    def _analyze_tool_event(self, event: Dict[str, Any], timestamp: float) -> Dict[str, Any]:
+        """Analyze tool event for transparency and business value indicators."""
+        event_type = event.get("type", "unknown")
+        event_data = event.get("data", {})
+        event_str = json.dumps(event).lower()
+        
+        analysis = {
+            "event_type": event_type,
+            "timestamp": timestamp,
+            "has_tool_name": False,
+            "has_context": False,
+            "has_result_info": False,
+            "tool_name": "unknown",
+            "transparency_indicators": []
+        }
+        
+        # Extract tool name
+        common_tools = ["calculator", "analyzer", "optimizer", "planner", "validator", "evaluator"]
+        for tool in common_tools:
+            if tool in event_str:
+                analysis["tool_name"] = tool
+                analysis["has_tool_name"] = True
+                analysis["transparency_indicators"].append("tool_name_identified")
+                break
+        
+        # Check for contextual information
+        context_indicators = ["analyzing", "calculating", "processing", "evaluating", "optimizing"]
+        for indicator in context_indicators:
+            if indicator in event_str:
+                analysis["has_context"] = True
+                analysis["transparency_indicators"].append("context_provided")
+                break
+        
+        # Check for result information (especially for tool_completed)
+        if event_type == "tool_completed":
+            result_indicators = ["result", "output", "completed", "finished", "calculated", "analyzed"]
+            for indicator in result_indicators:
+                if indicator in event_str:
+                    analysis["has_result_info"] = True
+                    analysis["transparency_indicators"].append("results_provided")
+                    break
+        
+        return analysis
+
 
 if __name__ == "__main__":
     pytest.main([
