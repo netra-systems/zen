@@ -1359,7 +1359,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "status": "started",
                     "context": context or {},
                     "message": f"{agent_name} has started processing your request"
@@ -1543,7 +1543,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "reasoning": reasoning,
                     "step_number": step_number,
                     "progress_percentage": progress_percentage,
@@ -1687,7 +1687,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "tool_name": tool_name,
                     "parameters": self._sanitize_parameters(parameters) if parameters else {},
                     "status": "executing",
@@ -1833,7 +1833,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": effective_agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "tool_name": tool_name,
                     "result": self._sanitize_result(result) if result else {},
                     "execution_time_ms": execution_time_ms,
@@ -1979,7 +1979,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "user_id": effective_user_context.user_id,  # PHASE 1 FIX: Include user_id for routing
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "status": "completed",
                     "result": self._sanitize_result(result) if result else {},
                     "execution_time_ms": execution_time_ms,
@@ -2100,8 +2100,8 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "run_id": run_id,
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
-                    "status": "error", 
+                "data": {
+                    "status": "error",
                     "error_message": self._sanitize_error_message(error),
                     "error_context": self._sanitize_error_context(error_context) if error_context else {},
                     "message": f"{agent_name} encountered an issue processing your request"
@@ -2169,7 +2169,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "run_id": run_id,
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "status": "dead",
                     "death_cause": death_cause,
                     "death_context": death_context or {},
@@ -2244,7 +2244,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "run_id": run_id,
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": {
+                "data": {
                     "status": "progress",
                     "progress_data": self._sanitize_progress_data(progress),
                     "message": progress.get("message", f"{agent_name} is making progress")
@@ -2305,7 +2305,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 "run_id": run_id,
                 "agent_name": agent_name,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "payload": self._sanitize_custom_data(data)
+                "data": self._sanitize_custom_data(data)
             }
             
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
