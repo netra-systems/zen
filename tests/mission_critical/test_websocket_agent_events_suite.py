@@ -352,7 +352,14 @@ class MissionCriticalEventValidator:
                     missing_fields.append(field)
 
         if missing_fields:
-            self.errors.append(f"Event {event_type} ({format_type} format) missing required fields: {missing_fields}")
+            # Debug logging to help diagnose field issues
+            available_top_level = list(event.keys()) if isinstance(event, dict) else []
+            available_data_level = list(event_data.keys()) if isinstance(event_data, dict) else []
+            self.errors.append(
+                f"Event {event_type} ({format_type} format) missing required fields: {missing_fields}. "
+                f"Available top-level fields: {available_top_level}. "
+                f"Available data-level fields: {available_data_level}"
+            )
             return False
 
         return True

@@ -283,7 +283,7 @@ class PipelineExecutor:
             logger.error(f"Error in user context persistence for user {user_context.user_id}: {e}")
             # Don't re-raise to avoid breaking pipeline execution
 
-    def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
+    def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStepConfig]) -> None:
         """Log pipeline execution type (parallel vs sequential)."""
         agent_names = self._extract_agent_names(pipeline)
         if len(agent_names) > 1:
@@ -291,11 +291,11 @@ class PipelineExecutor:
         else:
             self.flow_logger.log_sequential_execution(flow_id, agent_names)
 
-    def _extract_agent_names(self, pipeline: List[PipelineStep]) -> List[str]:
+    def _extract_agent_names(self, pipeline: List[PipelineStepConfig]) -> List[str]:
         """Extract agent names from pipeline steps."""
         return [step.agent_name for step in pipeline if hasattr(step, 'agent_name')]
 
-    async def _execute_with_step_logging(self, pipeline: List[PipelineStep],
+    async def _execute_with_step_logging(self, pipeline: List[PipelineStepConfig],
                                         context: AgentExecutionContext,
                                         user_context: UserExecutionContext, 
                                         flow_id: str) -> List[AgentExecutionResult]:

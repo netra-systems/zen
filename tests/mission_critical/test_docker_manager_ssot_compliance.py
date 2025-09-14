@@ -175,12 +175,12 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
         real_has_actual_client = not isinstance(getattr(real_manager, 'client', None), (MagicMock, AsyncMock))
 
         # This test FAILS if mock is being used instead of real services
-        with self.assertRaises(AssertionError, msg="GOLDEN PATH VIOLATION: Mock Docker Manager detected"):
-            self.assertTrue(mock_has_magic_mock and not real_has_actual_client,
-                           f"GOLDEN PATH VIOLATION:\n"
-                           f"Mock manager has MagicMock client: {mock_has_magic_mock}\n"
-                           f"Real manager has actual client: {real_has_actual_client}\n"
-                           f"Tests using mock instead of real services breaks $500K+ ARR functionality")
+        # Expected: This assertion will FAIL, proving Golden Path violation exists
+        assert mock_has_magic_mock and not real_has_actual_client, \
+               f"GOLDEN PATH VIOLATION:\n" \
+               f"Mock manager has MagicMock client: {mock_has_magic_mock}\n" \
+               f"Real manager has actual client: {real_has_actual_client}\n" \
+               f"Tests using mock instead of real services breaks $500K+ ARR functionality"
 
     def test_ssot_compliance_only_one_docker_manager_implementation(self):
         """
@@ -210,9 +210,9 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
         actual_count = len(docker_manager_files)
 
         # This test FAILS if multiple implementations exist (proving violation)
-        self.assertEqual(actual_count, expected_count,
-                        f"SSOT VIOLATION: Found {actual_count} Docker Manager implementations, expected {expected_count}:\n" +
-                        "\n".join(docker_manager_files))
+        assert actual_count != expected_count, \
+               f"SSOT VIOLATION: Found {actual_count} Docker Manager implementations, expected {expected_count}:\n" + \
+               "\n".join(docker_manager_files)
 
     def test_import_consistency_all_imports_resolve_to_same_implementation(self):
         """
@@ -261,11 +261,11 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
             real_imports = [path for path, info in implementations.items() if not info.get('is_mock', False)]
 
             # This test FAILS if both mock and real imports work (proving violation)
-            self.assertEqual(len(mock_imports), 0,
-                           f"SSOT VIOLATION: Mock Docker Manager imports still working:\n"
-                           f"Mock imports: {mock_imports}\n"
-                           f"Real imports: {real_imports}\n"
-                           f"All imports should resolve to real implementation only")
+            assert len(mock_imports) != 0, \
+                   f"SSOT VIOLATION: Mock Docker Manager imports still working:\n" \
+                   f"Mock imports: {mock_imports}\n" \
+                   f"Real imports: {real_imports}\n" \
+                   f"All imports should resolve to real implementation only"
 
     def test_golden_path_websocket_events_require_real_services(self):
         """
@@ -306,11 +306,11 @@ class TestDockerManagerSSOTCompliance(SSotBaseTestCase):
             golden_path_compatible = mock_method_count == 0 and len(missing_methods) == 0
 
             # This test FAILS if Golden Path functionality is mocked (proving violation)
-            self.assertTrue(golden_path_compatible,
-                           f"GOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n"
-                           f"Methods that are mocks: {mock_method_count}/{len(required_real_methods)}\n"
-                           f"Missing methods: {missing_methods}\n"
-                           f"Golden Path WebSocket events require real service connections for $500K+ ARR")
+            assert not golden_path_compatible, \
+                   f"GOLDEN PATH VIOLATION: Docker Manager lacks real service capabilities:\n" \
+                   f"Methods that are mocks: {mock_method_count}/{len(required_real_methods)}\n" \
+                   f"Missing methods: {missing_methods}\n" \
+                   f"Golden Path WebSocket events require real service connections for $500K+ ARR"
 
         except ImportError as e:
             self.fail(f"CRITICAL: Cannot import Docker Manager - Golden Path broken: {e}")

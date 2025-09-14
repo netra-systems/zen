@@ -124,13 +124,13 @@ class TestAgentExecutionCoreIntegration:
 
         # Override register method for testing
         original_register = registry.register
-        def test_register(name, agent, source="test"):
+        def test_register(name, agent):
             # Store in our simple test storage
             if not hasattr(registry, '_test_agents'):
                 registry._test_agents = {}
             registry._test_agents[name] = agent
             # Also call original register
-            original_register(name, agent, source)
+            original_register(name, agent)
 
         registry.get = test_get
         registry.register = test_register
