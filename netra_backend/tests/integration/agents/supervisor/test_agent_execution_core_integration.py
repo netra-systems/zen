@@ -27,15 +27,19 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
 from netra_backend.app.core.execution_tracker import get_execution_tracker
 from netra_backend.app.core.unified_trace_context import UnifiedTraceContext
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.base_agent import BaseAgent
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper
 from test_framework.ssot.mock_factory import SSotMockFactory
 
 
-class RealIntegrationAgent:
+class RealIntegrationAgent(BaseAgent):
     """Real agent for integration testing with actual business logic."""
     
     def __init__(self, execution_time: float = 0.1, should_fail: bool = False, 
                  return_none: bool = False, websocket_compatible: bool = True):
+        # Initialize BaseAgent with test name
+        super().__init__(name="RealIntegrationAgent", description="Real agent for integration testing")
+        
         self.execution_time = execution_time
         self.should_fail = should_fail
         self.return_none = return_none

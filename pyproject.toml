@@ -652,6 +652,12 @@ markers = [
     "error_recovery: Error recovery and resilience tests for system stability",
     "performance_validation: Performance validation tests for system efficiency",
     "security_edge_cases: Security edge case tests for authorization and isolation",
+    
+    # Test collection failure remediation markers (2025-09-14)
+    "protocol_negotiation: WebSocket protocol negotiation and handshake tests",
+    "websocket_messaging: WebSocket messaging flow and communication tests",
+    "staging_clickhouse: ClickHouse-related tests in staging environment",
+    "requires_real_services: Tests that explicitly require real external services (not mocks)",
 ]
 
 # Coverage settings

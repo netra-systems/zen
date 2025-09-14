@@ -1547,7 +1547,15 @@ class AgentWebSocketBridge(MonitorableComponent):
                     "reasoning": reasoning,
                     "step_number": step_number,
                     "progress_percentage": progress_percentage,
-                    "status": "thinking"
+                    "status": "thinking",
+                    # BUSINESS VALUE ENHANCEMENT: Add substantive business progress indicators
+                    "business_progress": {
+                        "phase": self._extract_business_phase(reasoning, agent_name, step_number),
+                        "value_indicators": self._extract_value_indicators(reasoning),
+                        "actionable_insights": self._extract_actionable_content(reasoning),
+                        "technical_specificity": self._calculate_technical_depth(reasoning),
+                        "business_impact": self._determine_business_impact(agent_name, reasoning)
+                    }
                 }
             }
             
