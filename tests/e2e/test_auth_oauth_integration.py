@@ -30,14 +30,14 @@ import pytest
 
 from netra_backend.app.logging_config import central_logger
 from tests.e2e.test_auth_oauth_flows import (
-    TestOAuthFlowRunner,
+    OAuthFlowTestRunner,
 )
 from tests.e2e.oauth_test_providers import OAuthUserFactory
 
 logger = central_logger.get_logger(__name__)
 
 
-class TestOAuthIntegrationRunner(TestOAuthFlowRunner):
+class TestOAuthIntegrationRunner(OAuthFlowTestRunner):
     """Extended OAuth test runner for integration scenarios - REAL PROVIDERS ONLY"""
     
     def __init__(self):

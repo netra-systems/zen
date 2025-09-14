@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-13T20:38:38.410418",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-13T22:42:26.963330",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 11
   },
   "literals": {
@@ -86,9 +86,9 @@
         "netra_backend/app/core/config_dependencies.py:66",
         "netra_backend/app/core/config_dependencies.py:72",
         "netra_backend/app/core/config_dependencies.py:405",
-        "netra_backend/app/core/configuration/base.py:139",
-        "netra_backend/app/core/configuration/staging_validator.py:38",
-        "netra_backend/app/core/configuration/staging_validator.py:219"
+        "netra_backend/app/core/configuration/base.py:149",
+        "netra_backend/app/core/configuration/base.py:256",
+        "netra_backend/app/core/configuration/staging_validator.py:38"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -175,12 +175,12 @@
         "netra_backend/app/api/health_checks.py:511",
         "netra_backend/app/core/auth_constants.py:124",
         "netra_backend/app/core/config_dependencies.py:340",
+        "netra_backend/app/core/configuration/base.py:260",
         "netra_backend/app/core/configuration/compatibility_shim.py:220",
         "netra_backend/app/core/configuration/compatibility_shim.py:238",
         "netra_backend/app/core/configuration/environment_detector.py:265",
         "netra_backend/app/core/configuration/environment_detector.py:299",
-        "netra_backend/app/core/configuration/environment_detector.py:299",
-        "netra_backend/app/core/configuration/staging_validator.py:48"
+        "netra_backend/app/core/configuration/environment_detector.py:299"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     }

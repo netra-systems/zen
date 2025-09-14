@@ -11,7 +11,7 @@
 
 from typing import Any, Awaitable, Callable, Dict, Optional
 
-from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.synthetic_data_generator import (
     GenerationStatus,
     SyntheticDataResult,
@@ -30,34 +30,45 @@ class SyntheticDataApprovalHandler:
         self.send_update = send_update_callback
     
     async def requires_approval(
-        self, profile: WorkloadProfile, state: DeepAgentState
+        self, profile: WorkloadProfile, context: UserExecutionContext
     ) -> bool:
         """Check if user approval is required"""
-        return await self.check_approval_requirements(profile, state)
+        return await self.check_approval_requirements(profile, context)
     
     async def handle_approval_flow(
         self,
         profile: WorkloadProfile,
-        state: DeepAgentState,
+        context: UserExecutionContext,
         run_id: str,
         stream_updates: bool
-    ) -> None:
+    ) -> UserExecutionContext:
         """Handle approval request flow"""
         approval_message = self.generate_approval_message(profile)
         approval_result = self.create_approval_result(profile, approval_message)
-        
-        state.synthetic_data_result = approval_result.model_dump()
+
+        # Store approval result in secure context instead of mutable state
+        updated_context = context.create_child_context(
+            operation_name="synthetic_data_approval",
+            additional_context={
+                "synthetic_data_result": approval_result.model_dump(),
+                "approval_message": approval_message,
+                "requires_approval": True
+            }
+        )
+
         await self.send_approval_if_needed(
             stream_updates, run_id, profile, approval_message
         )
+
+        return updated_context
     
     async def check_approval_requirements(
-        self, profile: WorkloadProfile, state: DeepAgentState
+        self, profile: WorkloadProfile, context: UserExecutionContext
     ) -> bool:
         """Check if user approval is required for this generation"""
         large_volume = self.is_large_volume(profile)
         sensitive_data = self.is_sensitive_data(profile)
-        explicit_approval = self.requires_explicit_approval(state)
+        explicit_approval = self.requires_explicit_approval(context)
         return large_volume or sensitive_data or explicit_approval
     
     def is_large_volume(self, profile: WorkloadProfile) -> bool:
@@ -69,9 +80,10 @@ class SyntheticDataApprovalHandler:
         custom_params = profile.custom_parameters
         return custom_params.get("data_sensitivity") == "high"
     
-    def requires_explicit_approval(self, state: DeepAgentState) -> bool:
+    def requires_explicit_approval(self, context: UserExecutionContext) -> bool:
         """Check if explicit approval is requested"""
-        triage_result = state.triage_result or {}
+        # Check for triage result in agent context
+        triage_result = context.agent_context.get("triage_result") or {}
         if not isinstance(triage_result, dict):
             return False
         return triage_result.get("require_approval", False)
@@ -139,9 +151,9 @@ class ApprovalValidationHelper:
     """Helper class for approval validation logic"""
     
     @staticmethod
-    def validate_approval_state(state: DeepAgentState) -> bool:
-        """Validate that state is ready for approval checking"""
-        return isinstance(state, DeepAgentState)
+    def validate_approval_context(context: UserExecutionContext) -> bool:
+        """Validate that context is ready for approval checking"""
+        return isinstance(context, UserExecutionContext) and context.user_id and context.thread_id
     
     @staticmethod
     def validate_profile(profile: WorkloadProfile) -> bool:
@@ -155,9 +167,9 @@ class ApprovalValidationHelper:
         return custom_params.get("data_sensitivity", "low")
     
     @staticmethod
-    def extract_approval_flag(state: DeepAgentState) -> bool:
-        """Extract approval requirement flag from state"""
-        triage_result = state.triage_result or {}
+    def extract_approval_flag(context: UserExecutionContext) -> bool:
+        """Extract approval requirement flag from context"""
+        triage_result = context.agent_context.get("triage_result") or {}
         if not isinstance(triage_result, dict):
             return False
         return triage_result.get("require_approval", False)
@@ -230,24 +242,24 @@ class ApprovalFlowOrchestrator:
     async def execute_approval_flow(
         self,
         profile: WorkloadProfile,
-        state: DeepAgentState,
+        context: UserExecutionContext,
         run_id: str,
         stream_updates: bool
-    ) -> bool:
-        """Execute complete approval flow, return True if handled"""
-        if not self._validate_flow_prerequisites(profile, state):
-            return False
-        
-        if not await self.handler.requires_approval(profile, state):
-            return False
-        
-        await self.handler.handle_approval_flow(profile, state, run_id, stream_updates)
-        return True
+    ) -> tuple[bool, UserExecutionContext]:
+        """Execute complete approval flow, return (handled, updated_context)"""
+        if not self._validate_flow_prerequisites(profile, context):
+            return False, context
+
+        if not await self.handler.requires_approval(profile, context):
+            return False, context
+
+        updated_context = await self.handler.handle_approval_flow(profile, context, run_id, stream_updates)
+        return True, updated_context
     
     def _validate_flow_prerequisites(
-        self, profile: WorkloadProfile, state: DeepAgentState
+        self, profile: WorkloadProfile, context: UserExecutionContext
     ) -> bool:
         """Validate prerequisites for approval flow"""
         profile_valid = self.validator.validate_profile(profile)
-        state_valid = self.validator.validate_approval_state(state)
-        return profile_valid and state_valid
+        context_valid = self.validator.validate_approval_context(context)
+        return profile_valid and context_valid

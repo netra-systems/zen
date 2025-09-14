@@ -10,6 +10,7 @@
     "API_BASE_URL",
     "API_ENDPOINT",
     "API_KEY",
+    "API_SECURITY",
     "API_URL",
     "API_VERSION",
     "AUTH_",

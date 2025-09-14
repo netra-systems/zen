@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_production",
-    "generated_at": "2025-09-13T20:38:38.410935",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-13T22:42:26.964232",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 4
   },
   "literals": {
@@ -11,7 +11,7 @@
       "value": "api.netrasystems.ai",
       "category": "critical_domain_production",
       "locations": [
-        "auth_service/main.py:433",
+        "auth_service/main.py:432",
         "scripts/scan_string_literals.py:86",
         "scripts/verify_oauth_redirect_uris.py:64"
       ],
@@ -22,7 +22,7 @@
       "value": "app.netrasystems.ai",
       "category": "critical_domain_production",
       "locations": [
-        "auth_service/main.py:434",
+        "auth_service/main.py:433",
         "scripts/scan_string_literals.py:85",
         "scripts/verify_oauth_redirect_uris.py:63"
       ],
@@ -33,7 +33,7 @@
       "value": "auth.netrasystems.ai",
       "category": "critical_domain_production",
       "locations": [
-        "auth_service/main.py:432",
+        "auth_service/main.py:431",
         "scripts/scan_string_literals.py:87",
         "scripts/verify_oauth_redirect_uris.py:65"
       ],
