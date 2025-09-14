@@ -159,7 +159,7 @@ export const threadStateMachineManager = new MockThreadStateMachineManager();
 // Export other classes for testing
 export { MockThreadStateMachine as ThreadStateMachine };
 export const createThreadStateMachineConfig = () => ({
-  initialState: 'idle' as ThreadState,
+  initialState: 'idle' as ThreadOperationState,
   transitions: [],
   onStateChange: () => {},
   onTransitionBlocked: () => {}
