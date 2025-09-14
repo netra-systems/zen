@@ -27,7 +27,7 @@ from test_framework.base_e2e_test import BaseE2ETest
 from test_framework.websocket_helpers import WebSocketTestClient
 
 from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from langchain_core.tools import BaseTool
 
