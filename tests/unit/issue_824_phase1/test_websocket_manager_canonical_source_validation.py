@@ -8,6 +8,7 @@ Business Value: Protects $500K+ ARR by preventing SSOT fragmentation failures.
 """
 
 import sys
+import warnings
 import importlib
 import inspect
 from typing import Set, Dict, Any, List

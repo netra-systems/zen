@@ -1625,10 +1625,22 @@ class _UnifiedWebSocketManagerImplementation:
             "total_connections": len(self._connections),
             "unique_users": len(self._user_connections),
             "connections_by_user": {
-                user_id: len(conns) 
+                user_id: len(conns)
                 for user_id, conns in self._user_connections.items()
             }
         }
+
+    def get_connection_stats(self) -> Dict[str, Any]:
+        """
+        ISSUE #824 FIX: Alias for get_stats() to ensure SSOT interface compliance.
+
+        This method provides the standard interface expected by SSOT tests and
+        ensures compatibility with existing code that expects get_connection_stats.
+
+        Returns:
+            Dict containing connection statistics
+        """
+        return self.get_stats()
     
     def is_connection_active(self, user_id: Union[str, UserID]) -> bool:
         """
