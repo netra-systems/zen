@@ -1,0 +1,333 @@
+{
+  "overall_line_coverage": 0.005143768324674657,
+  "overall_branch_coverage": 0.0,
+  "coverage_gap": 0.005143768324674657,
+  "total_files_analyzed": 1470,
+  "files_below_threshold": 1453,
+  "high_priority_files": [
+    {
+      "file_path": "netra_backend/app/agents/actions_agent_execution.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 71,
+      "covered_lines": 0,
+      "missing_lines": 71,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/__init__.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 2,
+      "covered_lines": 0,
+      "missing_lines": 2,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/admin_tool_execution.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 101,
+      "covered_lines": 0,
+      "missing_lines": 101,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_handlers_base.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 39,
+      "covered_lines": 0,
+      "missing_lines": 39,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_models.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 23,
+      "covered_lines": 0,
+      "missing_lines": 23,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_modern_handlers.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 137,
+      "covered_lines": 0,
+      "missing_lines": 137,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_tool_handlers.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 61,
+      "covered_lines": 0,
+      "missing_lines": 61,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_tools.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 51,
+      "covered_lines": 0,
+      "missing_lines": 51,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_validators.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 32,
+      "covered_lines": 0,
+      "missing_lines": 32,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py",
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "total_lines": 150,
+      "covered_lines": 0,
+      "missing_lines": 150,
+      "total_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "complexity_score": 5.0,
+      "business_value_score": 9.5,
+      "test_priority_score": 71.95
+    }
+  ],
+  "test_recommendations": [
+    {
+      "file_path": "netra_backend/app/agents/actions_agent_execution.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_actions_agent_execution_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/__init__.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test___init___integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/admin_tool_execution.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_admin_tool_execution_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_handlers_base.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_handlers_base_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_models.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_models_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_modern_handlers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_modern_handlers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_tool_handlers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_tool_handlers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_tools.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_tools_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/corpus_validators.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_corpus_validators_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_core.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_dispatcher_core_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/dispatcher_helpers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_dispatcher_helpers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/execution_helpers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_execution_helpers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/execution_pattern_helpers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_execution_pattern_helpers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/modern_execution_helpers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_modern_execution_helpers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    },
+    {
+      "file_path": "netra_backend/app/agents/admin_tool_dispatcher/operation_helpers.py",
+      "test_type": "integration",
+      "priority_score": 71.95,
+      "reason": "Line coverage: 0.0%, Branch coverage: 0.0%, Complexity: 5.0",
+      "missing_coverage_areas": [
+        "Core business logic paths",
+        "Conditional branches and error handling"
+      ],
+      "suggested_test_name": "test_operation_helpers_integration",
+      "business_justification": "CRITICAL: Core business logic affecting user experience. Integration tests prevent revenue-impacting bugs."
+    }
+  ],
+  "line_vs_branch_explanation": "\nLINE COVERAGE vs BRANCH COVERAGE EXPLAINED:\n==========================================\n\n CHART:  LINE COVERAGE (Statement Coverage):\n   - Measures: Which lines of code were executed during tests\n   - Example: If function has 10 lines and tests execute 7 lines = 70% line coverage\n   - Good for: Basic code execution validation\n   - Limitation: Doesn't test decision logic thoroughly\n\n[U+1F500] BRANCH COVERAGE (Decision Coverage):  \n   - Measures: Which decision branches (if/else, try/catch) were tested\n   - Example: if condition_a or condition_b: needs tests for both True/False paths\n   - Good for: Testing conditional logic and error handling paths  \n   - Critical for: Business logic with complex decision trees\n\n TARGET:  WHY BOTH MATTER FOR NETRA:\n   - Line coverage ensures basic functionality works\n   - Branch coverage ensures edge cases and error conditions are handled\n   - For AI/LLM systems: Branch coverage critical for handling model failures\n   - For multi-user systems: Branch coverage tests isolation boundaries\n   - For WebSocket systems: Branch coverage tests connection/disconnection scenarios\n\n IDEA:  PRIORITY GUIDANCE:\n   - Target 80%+ line coverage for core business logic\n   - Target 70%+ branch coverage for conditional logic\n   - Branch coverage gaps often indicate missing error handling tests\n   - Focus branch testing on user-facing APIs and agent execution paths\n        ",
+  "summary": "[U+1F4C8] COVERAGE INTELLIGENCE SUMMARY:\n[U+2022] Overall Line Coverage: 0.0%\n[U+2022] Overall Branch Coverage: 0.0%\n[U+2022] Coverage Gap: 0.0% (line higher)\n[U+2022] Files Below Threshold (80.0%): 1453/1470\n[U+2022] High Priority Test Opportunities: 15"
+}
