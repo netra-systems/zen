@@ -38,6 +38,7 @@ Business Value Justification (BVJ):
 """
 
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, patch
 from netra_backend.app.schemas.agent_models import DeepAgentState
 from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
@@ -239,6 +240,7 @@ class TestSupervisorWebSocketIntegration:
 
         """Test that AgentService properly handles WebSocket messages."""
         # Create mock supervisor
+        mock_supervisor = AsyncMock(spec=SupervisorAgent)
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -460,6 +462,8 @@ class TestSupervisorWebSocketIntegration:
     async def test_agent_service_websocket_message_validation(self):
 
         """Test WebSocket message validation in agent service."""
+        # Create mock supervisor
+        mock_supervisor = AsyncMock(spec=SupervisorAgent)
 
         # Mock: Generic component isolation for controlled unit testing
         websocket = MockWebSocketConnection()
@@ -489,9 +493,12 @@ class TestSupervisorWebSocketIntegration:
             mock_handler.websocket = MockWebSocketConnection()
 
 
+            # Create mock db session for validation test
+            mock_db_session = AsyncMock(spec=AsyncSession)
+
             await agent_service.handle_websocket_message(
 
-                user_id, valid_message, db_session
+                user_id, valid_message, mock_db_session
 
             )
 
@@ -511,9 +518,12 @@ class TestSupervisorWebSocketIntegration:
             # Mock the websocket manager to capture send_error calls
             with patch("netra_backend.app.services.agent_service_core.manager") as mock_manager:
                 mock_manager.websocket = MockWebSocketConnection()
+                # Create mock db session for invalid message test
+                mock_invalid_db_session = AsyncMock(spec=AsyncSession)
+
                 await agent_service.handle_websocket_message(
 
-                    user_id, invalid_message, db_session
+                    user_id, invalid_message, mock_invalid_db_session
 
                 )
 
