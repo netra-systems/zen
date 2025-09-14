@@ -912,5 +912,44 @@ class MessageBatch(BaseModel):
     compression_enabled: bool = False
 
 
+# Additional WebSocket types for integration tests
+
+class ConnectionMetadata(BaseModel):
+    """Connection metadata for WebSocket connections."""
+    connection_id: str
+    user_id: str
+    thread_id: Optional[str] = None
+    connected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    client_info: Optional[Dict[str, Any]] = None
+    session_data: Optional[Dict[str, Any]] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.connection_id:
+            # Generate connection_id using user_id for proper pattern
+            self.connection_id = UnifiedIdGenerator.generate_websocket_connection_id(self.user_id)
+
+
+class AgentEvent(BaseModel):
+    """Agent event data model for WebSocket communication."""
+    event_type: str
+    agent_id: Optional[str] = None
+    user_id: Optional[str] = None
+    thread_id: Optional[str] = None
+    data: Dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    event_id: Optional[str] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.event_id:
+            # Generate event_id for tracking
+            self.event_id = UnifiedIdGenerator.generate_base_id(
+                f"evt_{self.event_type}",
+                include_random=True,
+                random_length=8
+            )
+
+
 # Backward compatibility aliases
 ConnectionState = WebSocketConnectionState

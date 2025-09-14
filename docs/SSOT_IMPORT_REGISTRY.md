@@ -30,8 +30,9 @@ from netra_backend.app.services.user_execution_context import create_isolated_ex
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
-# WebSocket Manager (CRITICAL - VERIFIED 2025-09-11)
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
+# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #996 Cleanup)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
 
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
@@ -110,6 +111,12 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # �
 # AVAILABLE: CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
 
 # CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
+
+# ISSUE #996 FIX: WebSocket Import Deprecations (2025-09-14)
+from netra_backend.app.websocket_core import WebSocketManager  # ⚠️ DEPRECATED (generates warnings)
+# USE INSTEAD: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # ⚠️ LEGACY
+# USE INSTEAD: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.schemas.agent_schemas import RequestModel  # ❌ BROKEN PATH
 # USE INSTEAD: from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.schemas.agent_schemas import AgentExecutionResult  # ❌ BROKEN PATH
