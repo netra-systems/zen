@@ -41,9 +41,11 @@ import weakref
 import gc
 
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
+# SSOT import after Issue #824 remediation
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory,
-    IsolatedWebSocketManager, 
+    # WebSocketManagerFactory,  # REMOVED: Use WebSocketManager directly after Issue #824
+    # IsolatedWebSocketManager,  # REMOVED: Use WebSocketManager directly after Issue #824
     ConnectionLifecycleManager,
     FactoryMetrics,
     ManagerMetrics,

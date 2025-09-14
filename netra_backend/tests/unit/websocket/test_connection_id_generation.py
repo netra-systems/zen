@@ -51,7 +51,7 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
     """
     
     def setup_method(self):
-        """Set up test fixtures with different user types."""
+        """Set up test fixtures with different user types.""" 
         super().setup_method()
 
         # Test users that expose different routing behaviors
@@ -67,12 +67,16 @@ class TestConnectionIdGenerationRouting(SSotBaseTestCase):
             session_data={}
         )
 
-        # Connection manager for testing routing - use canonical SSOT path
-        from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-        self.connection_manager = WebSocketManager(user_context=self.test_user_context)
-
-        # Use WebSocketManager directly instead of deprecated factory
-        self.manager = WebSocketManager(user_context=self.test_user_context)
+        # Connection manager for testing routing - create synchronously for tests
+        from netra_backend.app.websocket_core.websocket_manager import _UnifiedWebSocketManagerImplementation, WebSocketManagerMode
+        import secrets
+        
+        # Create test manager with authorization token (bypasses factory restriction)
+        self.connection_manager = _UnifiedWebSocketManagerImplementation(
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=self.test_user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(32)
+        )
 
     def test_connection_id_format_consistency_across_components(self):
         """

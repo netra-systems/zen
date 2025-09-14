@@ -15,7 +15,7 @@ import { describe, it, expect } from '@jest/globals';
 
 describe('ThreadState Namespace Collision Detection', () => {
   
-  it('should detect namespace collision when importing ThreadState from multiple sources', async () => {
+  it('should validate NO namespace collision after remediation with distinct type names', async () => {
     // Test setup: Try to import ThreadState from both sources
     let storeThreadStateImportError: Error | null = null;
     let machineThreadStateImportError: Error | null = null;
