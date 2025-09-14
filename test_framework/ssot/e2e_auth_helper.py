@@ -1102,16 +1102,16 @@ class E2EAuthHelper:
     ) -> str:
         """
         Get JWT token for specific user (instance method).
-        
+
         This method provides the same functionality as the standalone function
         but as an instance method for tests that expect it on E2EAuthHelper.
-        
+
         Args:
             user_id: User ID for the token
             email: User email address
             permissions: User permissions (defaults to ["read", "write"])
             exp_minutes: Token expiry in minutes
-            
+
         Returns:
             Valid JWT token string
         """
@@ -1121,6 +1121,35 @@ class E2EAuthHelper:
             permissions=permissions if permissions is not None else ["read", "write"],
             exp_minutes=exp_minutes
         )
+
+    async def create_test_user_with_token(self, user_id: str) -> str:
+        """
+        REMEDIATION FIX: Create test user with token - missing method for Issue #861.
+
+        This method was missing and causing 21 integration test failures with AttributeError.
+        All integration tests expect this method to exist on E2EAuthHelper instances.
+
+        The method creates a test user and returns just the JWT token (not full user data).
+        This is the specific API that integration tests are calling.
+
+        Args:
+            user_id: User ID to create token for (required)
+
+        Returns:
+            Valid JWT token string for the user
+        """
+        # Generate email from user_id for consistency
+        email = f"{user_id}@test.example.com"
+
+        # Create JWT token using existing SSOT method
+        jwt_token = self.create_test_jwt_token(
+            user_id=user_id,
+            email=email,
+            permissions=["read", "write"],  # Standard test permissions
+            exp_minutes=30
+        )
+
+        return jwt_token
 
 
 class E2EWebSocketAuthHelper(E2EAuthHelper):

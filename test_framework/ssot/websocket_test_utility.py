@@ -46,6 +46,21 @@ class WebSocketTestUtility(WebSocketBridgeTestHelper):
         """Create authenticated WebSocket connection."""
         return await self.auth_helper.create_authenticated_connection(*args, **kwargs)
 
+    async def get_staging_websocket_url(self):
+        """
+        REMEDIATION FIX: Get staging WebSocket URL - missing method for Issue #861.
+
+        This method was missing and causing integration test failures.
+        It provides the staging WebSocket URL for E2E testing.
+
+        Returns:
+            str: Staging WebSocket URL
+        """
+        # Use staging config to get proper URL
+        from tests.e2e.staging_config import StagingTestConfig
+        staging_config = StagingTestConfig()
+        return staging_config.urls.websocket_url
+
 # Create alias for compatibility with existing test files
 WebSocketTestHelper = WebSocketTestUtility
 

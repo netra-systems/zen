@@ -25,13 +25,13 @@ from netra_backend.app.db.postgres_events import (
     setup_sync_engine_events,
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 
 
 # Import settings lazily to avoid circular dependency
 def get_settings():
     """Get settings lazily to avoid circular import."""
-    return get_unified_config()
+    return get_config()
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,20 +46,20 @@ class Database:
     def _get_pool_size(self, pool_class) -> int:
         """Get pool size based on pool class with resilient defaults."""
         # Increase pool size for better resilience
-        config = get_unified_config()
+        config = get_config()
         base_size = config.db_pool_size if pool_class == QueuePool else 0
         return max(base_size, 10) if pool_class == QueuePool else 0
 
     def _get_max_overflow(self, pool_class) -> int:
         """Get max overflow based on pool class with resilient defaults."""
         # Increase overflow for better resilience
-        config = get_unified_config()
+        config = get_config()
         base_overflow = config.db_max_overflow if pool_class == QueuePool else 0
         return max(base_overflow, 20) if pool_class == QueuePool else 0
 
     def _create_engine(self, db_url: str, pool_class):
         """Create database engine with resilient pooling configuration."""
-        config = get_unified_config()
+        config = get_config()
         
         # Determine connect_args based on connection type
         # Cloud SQL connections may not support PostgreSQL options parameter
@@ -249,7 +249,7 @@ class AsyncDatabase:
         
         # Add pool sizing for non-NullPool connections with environment-aware optimization
         if pool_class != NullPool:
-            config = get_unified_config()
+            config = get_config()
             
             # Get environment-aware database configuration
             from netra_backend.app.core.database_timeout_config import get_cloud_sql_optimized_config
@@ -409,7 +409,7 @@ def _get_pool_class_for_async(async_db_url: str):
 
 def _get_base_engine_args(pool_class):
     """Get base engine arguments for all pool types."""
-    config = get_unified_config()
+    config = get_config()
     return {
         "echo": False,  # Disable to reduce logging noise in dev
         "echo_pool": False,  # Disable pool logging to reduce noise
