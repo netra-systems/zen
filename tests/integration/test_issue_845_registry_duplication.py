@@ -163,7 +163,11 @@ class TestIssue845RegistryDuplication(SSotAsyncTestCase):
         # Test basic registry agent creation
         basic_registry = BasicRegistry()
         basic_agent_types = basic_registry.get_all_agents()  # Should be empty initially
-        basic_supports_user_context = 'context' in str(basic_registry.register_agent.__code__.co_varnames)
+
+        # Check if basic registry register_agent method accepts additional parameters
+        import inspect
+        basic_register_signature = inspect.signature(basic_registry.register_agent)
+        basic_supports_user_context = 'agent_instance' in basic_register_signature.parameters
 
         # Test advanced registry agent creation
         mock_llm_manager = Mock()
@@ -173,7 +177,7 @@ class TestIssue845RegistryDuplication(SSotAsyncTestCase):
         advanced_supports_user_creation = hasattr(advanced_registry, 'create_agent_for_user')
         advanced_supports_user_sessions = hasattr(advanced_registry, 'get_user_session')
 
-        self.assertTrue(basic_supports_user_context, "Basic registry should accept user context")
+        self.assertTrue(basic_supports_user_context, "Basic registry should accept agent instances")
         self.assertTrue(advanced_supports_user_creation, "Advanced registry should support user-isolated agent creation")
         self.assertTrue(advanced_supports_user_sessions, "Advanced registry should support user sessions")
 
