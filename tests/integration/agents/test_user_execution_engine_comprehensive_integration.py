@@ -59,7 +59,6 @@ from netra_backend.app.agents.base_agent import BaseAgent
 
 # WebSocket and Orchestration Components
 from netra_backend.app.websocket_core.event_monitor import ChatEventMonitor
-from netra_backend.app.websocket_core.types import WebSocketEventType
 
 import logging
 logger = logging.getLogger(__name__)
