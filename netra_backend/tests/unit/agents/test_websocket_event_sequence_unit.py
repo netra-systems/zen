@@ -333,19 +333,24 @@ class TestWebSocketEventSequenceValidation(SSotAsyncTestCase):
         assert second_validator.record_event('agent_started', {'run_id': second_run_id})
 
         # Progress sequences independently
-        assert self.event_validator.record_event('agent_thinking', {'reasoning': 'first agent'})
-        assert second_validator.record_event('agent_thinking', {'reasoning': 'second agent'})
+        assert self.event_validator.record_event('agent_thinking', {'reasoning': 'first agent', 'run_id': self.run_id})
+        assert second_validator.record_event('agent_thinking', {'reasoning': 'second agent', 'run_id': second_run_id})
 
         # Validate isolation
         assert len(self.event_validator.events_received) == 2, "First validator should have 2 events"
         assert len(second_validator.events_received) == 2, "Second validator should have 2 events"
 
-        # Events should be isolated by run_id
-        first_events = [e for e in self.event_validator.events_received if e['data'].get('run_id') == self.run_id]
-        second_events = [e for e in second_validator.events_received if e['data'].get('run_id') == second_run_id]
+        # Events should be isolated by run_id - each validator only has its own events
+        first_events = self.event_validator.events_received
+        second_events = second_validator.events_received
 
-        assert len(first_events) == 2, "First sequence should be isolated"
-        assert len(second_events) == 2, "Second sequence should be isolated"
+        # Verify all events in first validator match first run_id
+        for event in first_events:
+            assert event["data"].get("run_id") == self.run_id, "First validator events should match first run_id"
+
+        # Verify all events in second validator match second run_id
+        for event in second_events:
+            assert event["data"].get("run_id") == second_run_id, "Second validator events should match second run_id"
 
     async def test_sequence_timeout_handling(self):
         """Test handling of sequence timeouts for incomplete event chains."""

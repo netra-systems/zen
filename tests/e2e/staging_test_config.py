@@ -143,30 +143,49 @@ class StagingConfig:
             headers["Authorization"] = f"Bearer {jwt_token}"
             
             # Method 2: WebSocket subprotocol header (secondary)
-            # CRITICAL FIX: Add sec-websocket-protocol header to prevent "[MISSING]" error
+            # PHASE 1 FIX: Remove unsupported subprotocol to prevent "no subprotocols supported" error
             try:
                 import base64
                 # Remove "Bearer " prefix if present for subprotocol encoding
                 clean_token = jwt_token.replace("Bearer ", "").strip()
                 # Base64url encode the token for WebSocket subprotocol
                 encoded_token = base64.urlsafe_b64encode(clean_token.encode()).decode().rstrip('=')
-                # CRITICAL FIX: Use proper subprotocol format for staging
-                headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
-                print(f"[STAGING AUTH FIX] Added WebSocket subprotocol: jwt.{encoded_token[:20]}...")
+                # PHASE 1 FIX: Only use subprotocol if backend supports it (disabled for staging)
+                # headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
+                print(f"[STAGING PHASE1 FIX] Subprotocol disabled - staging backend doesn't support jwt-auth subprotocols")
+                print(f"[STAGING PHASE1 FIX] Using Authorization header only for WebSocket auth")
             except Exception as e:
                 print(f"[WARNING] Could not encode JWT for WebSocket subprotocol: {e}")
-                # Fallback: set a recognizable subprotocol for debugging
-                headers["sec-websocket-protocol"] = "jwt-auth"
+                # PHASE 1 FIX: Don't set fallback subprotocol that causes negotiation failure
+                print(f"[STAGING PHASE1 FIX] No subprotocol set - using header auth only")
             
             print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
         else:
             # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
-            headers["sec-websocket-protocol"] = "e2e-testing"
-            print(f"[WARNING] No JWT token available - using test header fallback with subprotocol")
+            # PHASE 1 FIX: Remove fallback subprotocol that causes negotiation failure
+            # headers["sec-websocket-protocol"] = "e2e-testing"
+            print(f"[WARNING] No JWT token available - using test header fallback without subprotocol")
             
         print(f"[STAGING AUTH FIX] WebSocket headers include E2E detection: {list(headers.keys())}")
         return headers
+
+    def get_websocket_subprotocols(self, token: Optional[str] = None) -> list:
+        """
+        Get WebSocket subprotocols for staging environment.
+
+        PHASE 1 FIX: Staging backend doesn't support subprotocols, so return empty list
+        to prevent "no subprotocols supported" negotiation errors.
+
+        Args:
+            token: JWT token (not used since staging doesn't support subprotocol auth)
+
+        Returns:
+            Empty list - staging backend doesn't support subprotocols
+        """
+        # PHASE 1 FIX: Return empty list since staging backend doesn't support subprotocols
+        print(f"[STAGING PHASE1 FIX] get_websocket_subprotocols returning empty list - staging backend doesn't support subprotocols")
+        return []
     
     def create_test_jwt_token(self) -> Optional[str]:
         """Create a test JWT token for staging authentication using EXISTING staging users.
