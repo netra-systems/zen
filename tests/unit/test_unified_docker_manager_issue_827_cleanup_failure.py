@@ -53,8 +53,10 @@ class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
             'open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.'
         )
         
-        # Mock force_shutdown to succeed as fallback
-        mock_force_shutdown_success = Mock(return_value=True)
+        # Mock force_shutdown to succeed as fallback (must return coroutine for async method)
+        async def mock_force_shutdown_success(*args, **kwargs):
+            return True
+        mock_force_shutdown_success = Mock(side_effect=mock_force_shutdown_success)
         
         with patch('test_framework.unified_docker_manager._run_subprocess_safe') as mock_subprocess, \
              patch.object(self.docker_manager, 'force_shutdown', mock_force_shutdown_success):
@@ -109,8 +111,10 @@ class TestUnifiedDockerManagerIssue827CleanupFailure(SSotAsyncTestCase):
         # Mock subprocess.TimeoutExpired exception
         timeout_error = subprocess.TimeoutExpired(cmd=['docker-compose', 'down'], timeout=5)
         
-        # Mock force_shutdown to simulate recovery attempt  
-        mock_force_shutdown = Mock(return_value=True)
+        # Mock force_shutdown to simulate recovery attempt (must return coroutine for async method)
+        async def mock_force_shutdown(*args, **kwargs):
+            return True
+        mock_force_shutdown = Mock(side_effect=mock_force_shutdown)
         
         with patch('test_framework.unified_docker_manager._run_subprocess_safe') as mock_subprocess, \
              patch.object(self.docker_manager, 'force_shutdown', mock_force_shutdown):

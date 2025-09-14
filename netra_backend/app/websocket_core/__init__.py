@@ -22,14 +22,21 @@ warnings.warn(
     stacklevel=2
 )
 
+# ISSUE #824 REMEDIATION: Import from canonical SSOT path only
 from netra_backend.app.websocket_core.websocket_manager import (
     WebSocketManager,
+    UnifiedWebSocketManager,  # Backward compatibility alias
     WebSocketConnection,
-    WebSocketManagerProtocol,
     _serialize_message_safely
 )
-# Backward compatibility alias
-UnifiedWebSocketManager = WebSocketManager
+
+# WebSocketManager and UnifiedWebSocketManager are already imported above
+
+# Import protocol for type checking
+try:
+    from netra_backend.app.websocket_core.protocols import WebSocketManagerProtocol
+except ImportError:
+    WebSocketManagerProtocol = None
 
 from netra_backend.app.websocket_core.unified_emitter import (
     UnifiedWebSocketEmitter,
@@ -76,10 +83,11 @@ def create_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
 
-    # PHASE 1 FIX: Use the proper factory function from websocket_manager.py
+    # PHASE 1 FIX: Use UnifiedWebSocketManager directly with proper token generation
     # This ensures the SSOT authorization token is properly provided
     import asyncio
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_websocket_manager_factory
+    import secrets
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
 
     # Since this is a sync function but the factory is async, we need to handle this properly
     try:
@@ -92,10 +100,18 @@ def create_websocket_manager(user_context=None):
                 "Use 'await get_websocket_manager(user_context)' instead."
             )
         else:
-            return loop.run_until_complete(_get_websocket_manager_factory(user_context))
+            return UnifiedWebSocketManager(
+                mode=WebSocketManagerMode.UNIFIED,
+                user_context=user_context,
+                _ssot_authorization_token=secrets.token_urlsafe(32)
+            )
     except RuntimeError:
         # No event loop running, create one
-        return asyncio.run(_get_websocket_manager_factory(user_context))
+        return UnifiedWebSocketManager(
+            mode=WebSocketManagerMode.UNIFIED,
+            user_context=user_context,
+            _ssot_authorization_token=secrets.token_urlsafe(32)
+        )
 
 # Backward compatibility function using factory pattern
 async def get_websocket_manager(user_context=None):
@@ -127,10 +143,16 @@ async def get_websocket_manager(user_context=None):
             "See User Context Architecture documentation for proper implementation."
         )
 
-    # PHASE 1 FIX: Use the proper factory function from websocket_manager.py
+    # PHASE 1 FIX: Use UnifiedWebSocketManager directly with proper token generation
     # This ensures the SSOT authorization token is properly provided
-    from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager as _get_websocket_manager_factory
-    return await _get_websocket_manager_factory(user_context)
+    import secrets
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager, WebSocketManagerMode
+    
+    return UnifiedWebSocketManager(
+        mode=WebSocketManagerMode.UNIFIED,
+        user_context=user_context,
+        _ssot_authorization_token=secrets.token_urlsafe(32)
+    )
 
 from netra_backend.app.websocket_core.migration_adapter import (
     get_legacy_websocket_manager,

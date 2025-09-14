@@ -29,6 +29,7 @@ class CloudPlatform(Enum):
     CLOUD_RUN = "cloud_run"
     APP_ENGINE = "app_engine" 
     GKE = "gke"
+    GCP = "gcp"  # Generic Google Cloud Platform for broader compatibility
     UNKNOWN = "unknown"
 
 

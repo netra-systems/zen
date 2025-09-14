@@ -1,2 +1,1 @@
 """Database unit tests package."""
-
