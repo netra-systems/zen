@@ -40,10 +40,10 @@ from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class TestExecutionEngineLifecycle(unittest.TestCase):
+class TestExecutionEngineLifecycle(SSotBaseTestCase):
     """Test ExecutionEngine lifecycle management and resource handling."""
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment for lifecycle testing."""
         self.lifecycle_violations = []
         self.resource_leaks = []
