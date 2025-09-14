@@ -1,8 +1,8 @@
 # Netra Apex AI Optimization Platform
 
-🎯 **System Health Score: 92% (EXCELLENT)** | **Status: Production Ready** | **Last Updated: September 14, 2025**
+🎯 **System Health Score: 92% (EXCELLENT)** | **Status: Production Ready** | **Branch: develop-long-lived** | **Last Updated: September 14, 2025**
 
-**Quick Navigation:** [Quick Start](#-quick-start) | [Architecture](#-architecture-overview) | [Testing](#-testing) | [Monitoring](#-monitoring--health) | [Documentation](#-additional-resources) | [Support](#-support--development)
+**Quick Navigation:** [Quick Start](#-quick-start) | [Architecture](#-architecture-overview) | [Testing](#-testing) | [Monitoring](#-monitoring--health) | [Documentation](#-documentation) | [Support](#-support--development)
 
 ## 🚀 Recent Major Achievements
 
@@ -109,6 +109,7 @@ The Netra Apex system implements a **Factory-based, request-scoped architecture*
 - **Agent Test Coverage:** BaseAgent 92%+ success, WebSocket Bridge 57%+ success, Agent Integration 50%+ success
 - **Security Testing:** ✅ ENHANCED - Comprehensive user isolation vulnerability validation complete
 - **E2E Testing Infrastructure:** ✅ COMPREHENSIVE - Agent golden path smoke tests and security validation complete
+- **Current Branch:** develop-long-lived (main deployment branch)
 
 ### Prerequisites
 - Python 3.11+
@@ -298,6 +299,7 @@ Please read our contributing guidelines before submitting PRs.
 ## 📚 Additional Resources
 
 ### Core Documentation
+- **[📖 Documentation Index](./docs/index.md)** - Complete documentation navigator with essential reading order
 - **[Agent System Architecture](./docs/AGENT_SYSTEM_ARCHITECTURE.md)** - Complete agent execution pipeline
 - **[Frontend Architecture Diagrams](./frontend/docs/FRONTEND_ARCHITECTURE_DIAGRAMS.md)** - Frontend architecture and WebSocket events
 - **[Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md)** - Visual architecture guides

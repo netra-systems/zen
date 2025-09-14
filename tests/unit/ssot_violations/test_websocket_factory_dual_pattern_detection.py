@@ -212,14 +212,14 @@ This test will PASS after dual pattern elimination.
             print(violation_details)
             
             # This assertion should FAIL initially, PASS after remediation
-            self.fail(f"SSOT VIOLATION: Dual WebSocket patterns detected in AgentInstanceFactory. "
+            assert False, f"SSOT VIOLATION: Dual WebSocket patterns detected in AgentInstanceFactory. "
                      f"Found {len(ssot_imports)} SSOT imports AND {len(violation_imports)} violation imports. "
                      f"See details above for remediation guidance.")
 
         elif violation_imports and not ssot_imports:
             # Only violations, no SSOT - still a failure
-            self.fail(f"CRITICAL: Only violation patterns found, no SSOT compliance detected. "
-                     f"Violations: {violation_imports}")
+            assert False, f"CRITICAL: Only violation patterns found, no SSOT compliance detected. "\
+                     f"Violations: {violation_imports}"
 
         elif ssot_imports and not violation_imports:
             # Only SSOT patterns - this is success state after remediation
@@ -232,8 +232,8 @@ This test will PASS after dual pattern elimination.
             
         else:
             # No WebSocket imports at all - this might indicate an issue
-            self.fail("UNEXPECTED: No WebSocket imports found in AgentInstanceFactory. "
-                     "Factory should have SSOT AgentWebSocketBridge imports.")
+            assert False, "UNEXPECTED: No WebSocket imports found in AgentInstanceFactory. "\
+                     "Factory should have SSOT AgentWebSocketBridge imports."
 
     def test_factory_methods_use_single_websocket_access_pattern(self):
         """
