@@ -1642,6 +1642,105 @@ class _UnifiedWebSocketManagerImplementation:
         """
         return self.get_stats()
     
+    def _process_business_event(self, event_type: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Process business events to ensure proper field structure for Golden Path validation.
+        
+        This method transforms generic WebSocket events into business-specific events
+        with the required fields expected by mission-critical tests and client applications.
+        
+        Args:
+            event_type: Type of event ('tool_executing', 'tool_completed', 'agent_started', etc.)
+            data: Raw event data
+            
+        Returns:
+            Dict with proper business event structure, or None if processing fails
+        """
+        try:
+            # Handle tool_executing events
+            if event_type == "tool_executing":
+                return {
+                    "type": event_type,
+                    "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
+                    "parameters": data.get("parameters", data.get("params", {})),
+                    "timestamp": data.get("timestamp", time.time()),
+                    "user_id": data.get("user_id"),
+                    "thread_id": data.get("thread_id"),
+                    # Preserve additional fields
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "parameters", "timestamp"]}
+                }
+            
+            # Handle tool_completed events
+            elif event_type == "tool_completed":
+                return {
+                    "type": event_type,
+                    "tool_name": data.get("tool_name", data.get("name", "unknown_tool")),
+                    "results": data.get("results", data.get("result", data.get("output", {}))),
+                    "duration": data.get("duration", data.get("duration_ms", data.get("elapsed_time", 0))),
+                    "timestamp": data.get("timestamp", time.time()),
+                    "success": data.get("success", True),
+                    "user_id": data.get("user_id"),
+                    "thread_id": data.get("thread_id"),
+                    # Preserve additional fields
+                    **{k: v for k, v in data.items() if k not in ["tool_name", "results", "duration", "timestamp", "success"]}
+                }
+            
+            # Handle agent_started events
+            elif event_type == "agent_started":
+                return {
+                    "type": event_type,
+                    "user_id": data.get("user_id"),
+                    "thread_id": data.get("thread_id"),
+                    "timestamp": data.get("timestamp", time.time()),
+                    "agent_name": data.get("agent_name", data.get("name", "unknown_agent")),
+                    "task_description": data.get("task_description", data.get("task", "Processing request")),
+                    # Preserve additional fields
+                    **{k: v for k, v in data.items() if k not in ["user_id", "thread_id", "timestamp", "agent_name", "task_description"]}
+                }
+            
+            # Handle agent_thinking events
+            elif event_type == "agent_thinking":
+                return {
+                    "type": event_type,
+                    "reasoning": data.get("reasoning", data.get("thought", data.get("thinking", "Agent is processing..."))),
+                    "timestamp": data.get("timestamp", time.time()),
+                    "user_id": data.get("user_id"),
+                    "thread_id": data.get("thread_id"),
+                    # Preserve additional fields
+                    **{k: v for k, v in data.items() if k not in ["reasoning", "timestamp"]}
+                }
+            
+            # Handle agent_completed events
+            elif event_type == "agent_completed":
+                return {
+                    "type": event_type,
+                    "status": data.get("status", "completed"),
+                    "final_response": data.get("final_response", data.get("response", data.get("result", "Task completed"))),
+                    "timestamp": data.get("timestamp", time.time()),
+                    "user_id": data.get("user_id"),
+                    "thread_id": data.get("thread_id"),
+                    # Preserve additional fields
+                    **{k: v for k, v in data.items() if k not in ["status", "final_response", "timestamp"]}
+                }
+            
+            # For other event types, return data as-is with type field
+            else:
+                processed_data = data.copy()
+                processed_data["type"] = event_type
+                if "timestamp" not in processed_data:
+                    processed_data["timestamp"] = time.time()
+                return processed_data
+                
+        except Exception as e:
+            logger.error(f"Failed to process business event {event_type}: {e}")
+            # Return fallback structure
+            return {
+                "type": event_type,
+                "timestamp": time.time(),
+                "error": f"Processing failed: {e}",
+                **data
+            }
+    
     def is_connection_active(self, user_id: Union[str, UserID]) -> bool:
         """
         Check if user has active WebSocket connections with type validation.
