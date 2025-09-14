@@ -550,7 +550,7 @@ class TestBusinessValueValidationIntegration(SSotAsyncTestCase):
             print(f"[BUSINESS VALUE] Connecting to WebSocket for business value validation")
             async with websockets.connect(
                 self.websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=self.connection_timeout,
                 ping_interval=30,
                 ping_timeout=10
@@ -805,7 +805,7 @@ class TestBusinessValueValidationIntegration(SSotAsyncTestCase):
         try:
             async with websockets.connect(
                 self.websocket_url,
-                extra_headers=websocket_headers,
+                additional_headers=websocket_headers,
                 timeout=self.connection_timeout
             ) as websocket:
                 
