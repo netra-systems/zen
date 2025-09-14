@@ -13,7 +13,7 @@ import {
   type LayerDataState,
   type MessageState,
   type AgentTrackingState,
-  type ThreadState,
+  type ThreadSliceState,
   type ConnectionState,
   type SubAgentState,
   type PerformanceState
@@ -24,7 +24,7 @@ interface ModularUnifiedChatState extends
   LayerDataState,
   MessageState,
   AgentTrackingState,
-  ThreadState,
+  ThreadSliceState,
   ConnectionState,
   SubAgentState,
   PerformanceState,
