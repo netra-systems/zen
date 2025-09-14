@@ -8,18 +8,19 @@ specific collection failures that prevent proper test execution.
 import os
 import sys
 import subprocess
-import unittest
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import tempfile
 import json
 
 
-class TestCollectionValidation(unittest.TestCase):
+class TestCollectionValidation(SSotBaseTestCase):
     """Validate pytest test collection functionality."""
     
-    def setUp(self):
+    def setup_method(self, method=None):
         """Set up test environment."""
+        super().setup_method(method)
         self.project_root = Path(__file__).parent.parent.parent
         self.test_directories = [
             self.project_root / "tests" / "mission_critical",
@@ -284,4 +285,5 @@ class TestCollectionValidation(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    import pytest
+    pytest.main([__file__, '-v'])
