@@ -86,18 +86,18 @@ def _check_environment():
     if _env_checked:
         return
     
-    # Use os.environ directly to avoid heavy imports during collection
-    import os
-    
-    # Check environment variables
+    # Use IsolatedEnvironment for SSOT compliance
+    # _env is already initialized from shared.isolated_environment import get_env()
+
+    # Check environment variables using IsolatedEnvironment
     _should_load_real_services = (
-        os.environ.get("USE_REAL_SERVICES", "false").lower() == "true" or
-        os.environ.get("ENVIRONMENT", "").lower() == "staging"
+        _env.get("USE_REAL_SERVICES", "false").lower() == "true" or
+        _env.get("ENVIRONMENT", "").lower() == "staging"
     )
-    
+
     _should_load_e2e = (
-        os.environ.get("RUN_E2E_TESTS", "false").lower() == "true" or 
-        os.environ.get("ENVIRONMENT", "").lower() == "staging"
+        _env.get("RUN_E2E_TESTS", "false").lower() == "true" or
+        _env.get("ENVIRONMENT", "").lower() == "staging"
     )
     
     # Always load services if we're loading real services or E2E
@@ -117,23 +117,24 @@ def pytest_configure(config):
     
     This hook runs AFTER collection, preventing resource exhaustion.
     """
-    import os
-    
+    # Use IsolatedEnvironment for SSOT compliance
+    # _env is already initialized from shared.isolated_environment import get_env()
+
     # Check if we need service fixtures
     if (
-        os.environ.get("USE_REAL_SERVICES", "false").lower() == "true" or
-        os.environ.get("ENVIRONMENT", "").lower() == "staging" or
+        _env.get("USE_REAL_SERVICES", "false").lower() == "true" or
+        _env.get("ENVIRONMENT", "").lower() == "staging" or
         config.getoption("--real-services", default=False)
     ):
         # Import service fixtures only when needed
         # Note: Can't use 'import *' inside function/conditional
         # These imports need to be at module level
         pass
-    
+
     # Check if we need E2E fixtures
     if (
-        os.environ.get("RUN_E2E_TESTS", "false").lower() == "true" or
-        os.environ.get("ENVIRONMENT", "").lower() == "staging"
+        _env.get("RUN_E2E_TESTS", "false").lower() == "true" or
+        _env.get("ENVIRONMENT", "").lower() == "staging"
     ):
         # Note: Can't use 'import *' inside function/conditional
         # These imports need to be at module level
@@ -142,10 +143,11 @@ def pytest_configure(config):
 def pytest_collection_modifyitems(config, items):
     """Skip tests that require Docker if Docker is not available."""
     import platform
-    import os
-    
+    # Use IsolatedEnvironment for SSOT compliance
+    # _env is already initialized from shared.isolated_environment import get_env()
+
     # Skip Docker tests on Windows if requested
-    if platform.system() == "Windows" and os.environ.get("SKIP_DOCKER_TESTS", "").lower() == "true":
+    if platform.system() == "Windows" and _env.get("SKIP_DOCKER_TESTS", "").lower() == "true":
         skip_docker = pytest.mark.skip(reason="Docker tests skipped on Windows (SKIP_DOCKER_TESTS=true)")
         for item in items:
             if item.get_closest_marker("requires_docker"):

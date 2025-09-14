@@ -283,13 +283,16 @@ async def get_websocket_manager(user_context: Optional[Any] = None, mode: WebSoc
 # Import UnifiedWebSocketEmitter for compatibility
 from netra_backend.app.websocket_core.unified_emitter import UnifiedWebSocketEmitter
 
-# Backward compatibility alias
+# Backward compatibility aliases
 WebSocketEventEmitter = UnifiedWebSocketEmitter
+# ISSUE #824 FIX: Add WebSocketConnectionManager alias for SSOT test compliance
+WebSocketConnectionManager = WebSocketManager
 
 # Export the protocol for type checking and SSOT compliance
 __all__ = [
     'WebSocketManager',  # SSOT: Canonical WebSocket Manager import
     'UnifiedWebSocketManager',  # SSOT: Direct access to implementation
+    'WebSocketConnectionManager',  # SSOT: Backward compatibility alias (Issue #824)
     'WebSocketConnection',
     'WebSocketManagerProtocol',
     'WebSocketManagerMode',  # SSOT: Manager modes enum
