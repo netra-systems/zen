@@ -702,14 +702,20 @@ class ClaudeInstanceOrchestrator:
                         status.output_tokens += int(usage['output_tokens'])
                     if 'cache_read_input_tokens' in usage:
                         status.cached_tokens += int(usage['cache_read_input_tokens'])
+                    if 'cache_creation_input_tokens' in usage:
+                        status.cached_tokens += int(usage['cache_creation_input_tokens'])
                     # Calculate total if not explicitly provided
                     if 'total_tokens' in usage:
                         total = int(usage['total_tokens'])
                         if total > status.total_tokens:
                             status.total_tokens = total
                     else:
-                        # Calculate total from input + output
-                        calculated_total = status.input_tokens + status.output_tokens
+                        # Calculate total from all components
+                        cache_creation = int(usage.get('cache_creation_input_tokens', 0))
+                        cache_read = int(usage.get('cache_read_input_tokens', 0))
+                        input_tokens = int(usage.get('input_tokens', 0))
+                        output_tokens = int(usage.get('output_tokens', 0))
+                        calculated_total = input_tokens + output_tokens + cache_creation + cache_read
                         if calculated_total > status.total_tokens:
                             status.total_tokens = calculated_total
                 return True
@@ -892,14 +898,20 @@ class ClaudeInstanceOrchestrator:
         if 'cache_read_input_tokens' in usage_data:
             status.cached_tokens += int(usage_data['cache_read_input_tokens'])
         
+        # Handle cache_creation_input_tokens (also counts as cached)
+        if 'cache_creation_input_tokens' in usage_data:
+            status.cached_tokens += int(usage_data['cache_creation_input_tokens'])
+        
         # Calculate or use provided total
         if 'total_tokens' in usage_data:
             total = int(usage_data['total_tokens'])
             if total > status.total_tokens:
                 status.total_tokens = total
         else:
-            # Calculate total from components
-            calculated_total = status.input_tokens + status.output_tokens
+            # Calculate total from all components including cache creation
+            cache_creation = int(usage_data.get('cache_creation_input_tokens', 0))
+            cache_read = int(usage_data.get('cache_read_input_tokens', 0))
+            calculated_total = status.input_tokens + status.output_tokens + cache_creation + cache_read
             if calculated_total > status.total_tokens:
                 status.total_tokens = calculated_total
     
