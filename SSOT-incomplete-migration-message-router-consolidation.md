@@ -2,7 +2,7 @@
 
 **GitHub Issue:** https://github.com/netra-systems/netra-apex/issues/1125  
 **Created:** 2025-09-14  
-**Status:** NEW SSOT TESTS COMPLETE  
+**Status:** REMEDIATION PLAN COMPLETE  
 **Priority:** P0 - CRITICAL
 
 ## **SSOT Violation Summary**
@@ -68,10 +68,19 @@ Three different MessageRouter implementations causing routing conflicts and bloc
   - **CONFIRMED:** Tests FAIL as expected, proving SSOT violations exist
   - Evidence: Multiple MessageRouter classes found (Core ≠ WebSocket)
 
-### 📋 Phase 3: PLAN REMEDIATION
-- [ ] Plan MessageRouter consolidation strategy
-- [ ] Plan import path migration approach
-- [ ] Plan backward compatibility during transition
+### ✅ Phase 3: PLAN REMEDIATION - COMPLETE
+- [x] Plan MessageRouter consolidation strategy
+  - **3-Phase Approach:** Safe consolidation → Import migration → Validation & deployment
+  - **Timeline:** 5-7 days with comprehensive validation and rollback safety
+  - **Risk Mitigation:** Gradual migration with compatibility layers during transition
+- [x] Plan import path migration approach
+  - **Automated Migration:** Script-based find/replace across 65+ affected files
+  - **Priority Order:** Production files → Integration tests → Unit tests
+  - **Rollback Strategy:** Emergency rollback procedures ready
+- [x] Plan backward compatibility during transition
+  - **Compatibility Layers:** Convert deprecated implementations to proxies
+  - **Feature Flags:** Gradual rollout capabilities if needed
+  - **Interface Preservation:** Maintain test compatibility during migration
 
 ### 📋 Phase 4: EXECUTE REMEDIATION
 - [ ] Consolidate MessageRouter to single SSOT implementation
@@ -118,9 +127,10 @@ CANONICAL IMPORT: from netra_backend.app.websocket_core.handlers import MessageR
 ## **Next Actions**
 1. ✅ Phase 1 Complete: Test discovery and planning finished
 2. ✅ Phase 2 Complete: New SSOT tests created and validated
-3. **NEXT:** Spawn subagent for Phase 3: Plan MessageRouter SSOT remediation strategy
-4. Continue through systematic SSOT gardener process
-5. Maintain focus on Golden Path protection
+3. ✅ Phase 3 Complete: Comprehensive remediation strategy planned (3-phase, 5-7 days)
+4. **NEXT:** Spawn subagent for Phase 4: Execute remediation plan (Safe consolidation)
+5. Continue through systematic SSOT gardener process
+6. Maintain focus on Golden Path protection ($500K+ ARR)
 
 ## **Test Plan Summary**
 - **65+ test files** identified that will be affected
@@ -133,3 +143,24 @@ CANONICAL IMPORT: from netra_backend.app.websocket_core.handlers import MessageR
 - **CONFIRMED VIOLATION:** Core Router ≠ WebSocket Router (different classes)
 - **ROUTING CONFLICTS:** Multiple routers with different handlers
 - **BUSINESS IMPACT:** Race conditions affecting $500K+ ARR Golden Path
+
+## **Remediation Strategy Overview**
+**Timeline:** 5-7 days with comprehensive validation and rollback safety
+
+### **Phase 1: Safe Consolidation (1-2 days)**
+- Validate canonical implementation completeness
+- Convert deprecated implementations to proxy pattern  
+- Integrate QualityMessageRouter functionality
+- Maintain backward compatibility
+
+### **Phase 2: Import Path Migration (2-3 days)**
+- Automated import migration across 65+ affected files
+- Priority: production → integration → unit tests
+- Update SSOT_IMPORT_REGISTRY.md documentation
+- Validate all test suites remain functional
+
+### **Phase 3: Validation & Deployment (1-2 days)**
+- Comprehensive testing of consolidated implementation
+- Staging environment validation
+- Golden Path user flow verification
+- Production rollout with emergency rollback ready
