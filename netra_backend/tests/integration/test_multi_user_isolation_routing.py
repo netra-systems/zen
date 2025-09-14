@@ -46,10 +46,10 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from shared.isolated_environment import get_env
 
 from netra_backend.app.websocket_core.websocket_manager_factory import (
-    WebSocketManagerFactory, 
-    IsolatedWebSocketManager,
+    WebSocketManagerFactory,
     create_defensive_user_execution_context
 )
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as IsolatedWebSocketManager
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
 from netra_backend.app.websocket_core import create_websocket_manager

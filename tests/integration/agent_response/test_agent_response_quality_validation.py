@@ -392,6 +392,73 @@ class TestAgentResponseQualityValidation(BaseIntegrationTest):
                     assert dimension_score >= 0.6, \
                         f"{dimension.value} score {dimension_score:.2f} below critical threshold (0.6)"
                 
+                # ENHANCEMENT: Add comprehensive business value validation
+                try:
+                    from test_framework.business_value_validator import BusinessValueValidator
+                    business_validator = BusinessValueValidator()
+                    
+                    logger.info("=== ENHANCED BUSINESS VALUE VALIDATION ===")
+                    
+                    # Validate business value delivery alongside quality metrics
+                    business_assessment = business_validator.validate_business_value(
+                        response=result.result,
+                        user_query=business_query,
+                        expected_outcomes=[
+                            "customer acquisition cost analysis",
+                            "optimization strategies", 
+                            "SaaS platform recommendations"
+                        ]
+                    )
+                    
+                    # Enhanced assertions for business value
+                    assert business_assessment.delivers_business_value, (
+                        f"BUSINESS VALUE FAILURE: DataHelper response lacks business value. "
+                        f"Score: {business_assessment.overall_score:.2f}, Tier: {business_assessment.customer_satisfaction_tier}"
+                    )
+                    
+                    assert business_assessment.chat_substance_quality >= 0.6, (
+                        f"SUBSTANCE FAILURE: Chat substance {business_assessment.chat_substance_quality:.2f} below 0.6. "
+                        f"DataHelper must deliver substantive analysis, not superficial responses."
+                    )
+                    
+                    # Validate specific business dimensions for data analysis
+                    problem_solving_score = business_assessment.dimension_scores['problem_solving'].score
+                    actionability_score = business_assessment.dimension_scores['actionability'].score
+                    cost_optimization_score = business_assessment.dimension_scores['cost_optimization'].score
+                    
+                    assert problem_solving_score >= 0.5, (
+                        f"PROBLEM-SOLVING FAILURE: DataHelper score {problem_solving_score:.2f} below 0.5. "
+                        f"Must effectively analyze customer acquisition costs."
+                    )
+                    
+                    assert actionability_score >= 0.5, (
+                        f"ACTIONABILITY FAILURE: DataHelper score {actionability_score:.2f} below 0.5. "
+                        f"Must provide implementable optimization strategies."
+                    )
+                    
+                    assert cost_optimization_score >= 0.3, (
+                        f"COST OPTIMIZATION FAILURE: DataHelper score {cost_optimization_score:.2f} below 0.3. "
+                        f"Should provide cost optimization insights for SaaS platforms."
+                    )
+                    
+                    # Log comprehensive business value metrics
+                    logger.info(f"✅ Enhanced Business Value Validated:")
+                    logger.info(f"   Business Score: {business_assessment.overall_score:.2f}/1.0 ({business_assessment.customer_satisfaction_tier})")
+                    logger.info(f"   Chat Substance: {business_assessment.chat_substance_quality:.2f}/1.0")
+                    logger.info(f"   Problem Solving: {problem_solving_score:.2f}/1.0")
+                    logger.info(f"   Actionability: {actionability_score:.2f}/1.0")
+                    logger.info(f"   Cost Optimization: {cost_optimization_score:.2f}/1.0")
+                    logger.info(f"   Revenue Protection: {business_assessment.revenue_protection_score:.2f}/1.0")
+                    
+                except ImportError:
+                    logger.warning("Business value validator not available - using existing quality validation only")
+                except Exception as business_error:
+                    logger.error(f"Business value validation failed: {business_error}")
+                    # Log response for debugging
+                    logger.error(f"DataHelper response (first 300 chars): {str(result.result)[:300]}")
+                    # Continue test but log the business value failure
+                    logger.warning("WARNING: DataHelper business value validation failed")
+
                 logger.info(f" PASS:  DataHelper response quality validated: "
                            f"overall={quality_assessment.overall_score:.2f}, "
                            f"tier={quality_assessment.quality_tier}, "

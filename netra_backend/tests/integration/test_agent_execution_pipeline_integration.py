@@ -39,7 +39,7 @@ from netra_backend.app.dependencies import (
     SessionIsolationError
 )
 from netra_backend.app.agents.supervisor.execution_engine_factory import (
-    ExecutionEngineFactory, ExecutionFactoryConfig
+    ExecutionEngineFactory, configure_execution_engine_factory
 )
 from netra_backend.app.agents.supervisor.agent_instance_factory import (
     get_agent_instance_factory, configure_agent_instance_factory

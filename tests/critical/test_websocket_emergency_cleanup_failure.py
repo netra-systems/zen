@@ -23,7 +23,7 @@ from typing import Dict, Any, List, Optional
 
 # Core imports  
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
-from netra_backend.app.websocket_core.websocket_manager import FactoryInitializationError
+from netra_backend.app.websocket_core.websocket_manager_factory import FactoryInitializationError
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types.core_types import UserID
 
