@@ -450,3 +450,53 @@ def reset_websocket_router() -> None:
     """Reset the router instance (for testing)."""
     global _router_instance
     _router_instance = None
+
+
+# ISSUE #982 SSOT CONSOLIDATION: Module-level adapter functions for backward compatibility
+async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
+    """ISSUE #982 ADAPTER: Module-level broadcast function that delegates to SSOT service.
+
+    This is a compatibility adapter that maintains the existing module-level interface
+    while delegating to the SSOT WebSocketBroadcastService implementation.
+
+    Args:
+        user_id: User to broadcast to
+        event: Event payload
+
+    Returns:
+        int: Number of successful sends (legacy compatibility)
+    """
+    # ISSUE #982 SSOT CONSOLIDATION: Direct delegation to WebSocketBroadcastService
+    try:
+        # Import here to avoid circular dependency
+        from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+
+        # Get WebSocket manager instance
+        websocket_manager = UnifiedWebSocketManager()
+
+        # Create SSOT broadcast service
+        broadcast_service = create_broadcast_service(websocket_manager)
+
+        # Delegate to SSOT implementation
+        result = await broadcast_service.broadcast_to_user(user_id, event)
+
+        # Log adapter usage for migration tracking
+        logger.debug(
+            f"MODULE ADAPTER: websocket_event_router.broadcast_to_user delegated to SSOT service. "
+            f"User: {user_id[:8]}..., Event: {event.get('type', 'unknown')}, "
+            f"Result: {result.successful_sends}/{result.connections_attempted}"
+        )
+
+        # Return legacy-compatible integer result
+        return result.successful_sends
+
+    except Exception as e:
+        # Adapter failure handling
+        logger.error(
+            f"MODULE ADAPTER FAILURE: SSOT delegation failed for user {user_id[:8]}..., "
+            f"event {event.get('type', 'unknown')}: {e}"
+        )
+
+        # Return 0 to indicate failure in legacy-compatible way
+        return 0
