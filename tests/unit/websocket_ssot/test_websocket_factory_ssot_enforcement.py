@@ -16,12 +16,13 @@ GitHub Issue: https://github.com/netra-systems/netra-apex/issues/1126
 
 import pytest
 import warnings
+import unittest
 from unittest.mock import patch, MagicMock
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from typing import Type, Any
 
 
-class TestWebSocketFactorySSotEnforcement(SSotBaseTestCase):
+class TestWebSocketFactorySSotEnforcement(SSotBaseTestCase, unittest.TestCase):
     """Test WebSocket Factory SSOT enforcement patterns."""
     
     def test_deprecated_websocket_manager_factory_class_not_accessible(self):

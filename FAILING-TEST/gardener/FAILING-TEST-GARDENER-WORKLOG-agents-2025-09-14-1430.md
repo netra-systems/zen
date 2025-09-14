@@ -33,3 +33,46 @@
 1. **WebSocket Emitter API Mismatch** - P1 Critical blocking agent factory initialization
 2. **Test Infrastructure Issues** - P2 Medium affecting test reliability
 3. **Deprecation Warnings** - P3 Low priority cleanup needed
+
+### GitHub Issues Processed:
+
+#### Issue #1 - WebSocket Emitter API Mismatch (P1)
+- **Status**: ✅ PROCESSED
+- **Actions**: 
+  - Updated existing issue #920: "failing-test-active-dev-P1-agent-websocket-integration-api-breaking-changes"
+  - Created new issue #1129: "failing-test-regression-p1-websocket-emitter-api-mismatch"
+- **Root Cause**: UnifiedWebSocketEmitter constructor no longer accepts `thread_id` parameter
+- **Impact**: Blocks $500K+ ARR Golden Path agent factory functionality testing
+
+#### Issue #2 - Test Infrastructure Issues (P2)
+- **Status**: ✅ PROCESSED  
+- **Actions**: Created issue #1130: "failing-test-regression-p2-base-agent-comprehensive-test-infrastructure"
+- **Root Cause**: Improper test class inheritance patterns in test_base_agent_comprehensive.py
+- **Impact**: Affects BaseAgent test coverage and development confidence
+
+#### Issue #3 - Deprecation Warnings (P3)
+- **Status**: ✅ PROCESSED
+- **Actions**: Updated existing issue #416: "[TECH-DEBT] failing-test-regression-P2-deprecation-warnings-cleanup"  
+- **Root Cause**: Pydantic class-based config and WebSocket import deprecations
+- **Impact**: Non-blocking cleanup for future compatibility
+
+### Continuing Test Discovery...
+
+#### Additional Test Results Found:
+
+4. **test_agent_execution_core_comprehensive.py** - Multiple failures
+   - AttributeError: ExecutionTracker object does not have the attribute 'complete_execution'
+   - AttributeError: 'TestAgentExecutionCoreBusinessLogic' object has no attribute 'mock_registry'
+   - Status: **P2 MEDIUM PRIORITY** - Core agent execution API mismatch
+
+5. **Mission Critical Agent Tests** - ALL PASSING ✅
+   - tests/mission_critical/test_websocket_agent_events_suite.py (42/42 tests)
+   - Status: **HEALTHY** - $500K+ ARR Golden Path functionality working
+
+6. **Missing Test Files** - File not found errors
+   - netra_backend/tests/unit/agents/test_agent_orchestrator.py missing
+   - Status: **P3 LOW PRIORITY** - File cleanup/organization
+
+#### Additional Issues to Process:
+4. **Agent Execution Core API Mismatch** - P2 Medium priority affecting supervisor tests
+5. **Missing Test File Organization** - P3 Low priority cleanup
