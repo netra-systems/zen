@@ -102,7 +102,7 @@ class GCPDeployer:
                 environment_vars={
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "AUTH_SERVICE_INTERNAL_URL": f"https://netra-auth-service-uc.a.run.app",  # Internal VPC communication
                     "AUTH_SERVICE_ENABLED": "true",  # CRITICAL: Enable auth service integration
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
@@ -143,7 +143,7 @@ class GCPDeployer:
                     "ENVIRONMENT": "staging",
                     "PYTHONUNBUFFERED": "1",
                     "FRONTEND_URL": "https://app.staging.netrasystems.ai",
-                    "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
+                    "AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",
                     "JWT_ALGORITHM": "HS256",
                     "JWT_ACCESS_EXPIRY_MINUTES": "15",
                     "JWT_REFRESH_EXPIRY_DAYS": "7",
@@ -178,9 +178,9 @@ class GCPDeployer:
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
                     "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
-                    "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
-                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
-                    "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
+                    "NEXT_PUBLIC_AUTH_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",  # CRITICAL: Auth service endpoint
+                    "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",  # CRITICAL: Auth service alternative
+                    "NEXT_PUBLIC_AUTH_API_URL": "https://netra-auth-service-pnovr5vsba-uc.a.run.app",  # CRITICAL: Auth API endpoint
                     "NEXT_PUBLIC_BACKEND_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend alternative endpoint
                     "NEXT_PUBLIC_FRONTEND_URL": "https://app.staging.netrasystems.ai",  # CRITICAL: OAuth redirects
                     "NEXT_PUBLIC_FORCE_HTTPS": "true",  # CRITICAL: Security enforcement
@@ -1043,7 +1043,7 @@ CMD ["npm", "start"]
             #  ALERT:  CRITICAL: All these URLs are REQUIRED for frontend connectivity
             # Missing any of these will cause complete frontend failure
             staging_api_url = "https://api.staging.netrasystems.ai"
-            staging_auth_url = "https://auth.staging.netrasystems.ai"
+            staging_auth_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
             staging_ws_url = "wss://api.staging.netrasystems.ai"
             staging_frontend_url = "https://app.staging.netrasystems.ai"
             

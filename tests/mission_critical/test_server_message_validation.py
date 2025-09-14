@@ -41,8 +41,8 @@ class TestServerMessageValidation(unittest.TestCase):
         self.assertTrue(result, "Flat event validation should work")
         self.assertEqual(len(self.validator.errors), 0, "No validation errors expected")
     
-    def test_server_message_format_fails_current_validation(self):
-        """Demonstrate that ServerMessage format fails with current validator."""
+    def test_server_message_format_now_passes_after_fix(self):
+        """Verify that ServerMessage format now passes with fixed validator."""
         # This is the actual ServerMessage format being sent
         server_message = {
             "type": "agent_started",
@@ -60,20 +60,14 @@ class TestServerMessageValidation(unittest.TestCase):
         # Clear any previous errors
         self.validator.errors = []
         
-        # This should fail with current implementation because it looks for 
-        # user_id, thread_id directly in the event dict, not in payload
+        # This now passes with the fixed implementation that handles
+        # ServerMessage format with nested payload structure
         result = self.validator.validate_event_content_structure(server_message, "agent_started")
-        self.assertFalse(result, "ServerMessage format should fail with current validator")
-        self.assertGreater(len(self.validator.errors), 0, "Should have validation errors")
-        
-        # Verify the specific error mentions missing required fields
-        error_message = str(self.validator.errors)
-        self.assertIn("missing required fields", error_message)
-        self.assertIn("user_id", error_message)
-        self.assertIn("thread_id", error_message)
+        self.assertTrue(result, f"ServerMessage format should now pass with fixed validator, errors: {self.validator.errors}")
+        self.assertEqual(len(self.validator.errors), 0, "Should have no validation errors")
     
-    def test_tool_executing_server_message_format_fails(self):
-        """Test tool_executing event in ServerMessage format fails current validation."""
+    def test_tool_executing_server_message_format_now_passes(self):
+        """Test tool_executing event in ServerMessage format now passes after fix."""
         server_message = {
             "type": "tool_executing",
             "payload": {
@@ -90,11 +84,11 @@ class TestServerMessageValidation(unittest.TestCase):
         self.validator.errors = []
         
         result = self.validator.validate_event_content_structure(server_message, "tool_executing")
-        self.assertFalse(result, "ServerMessage tool_executing should fail with current validator")
-        self.assertGreater(len(self.validator.errors), 0, "Should have validation errors for tool_executing")
+        self.assertTrue(result, f"ServerMessage tool_executing should now pass with fixed validator, errors: {self.validator.errors}")
+        self.assertEqual(len(self.validator.errors), 0, "Should have no validation errors for tool_executing")
     
-    def test_agent_completed_server_message_format_fails(self):
-        """Test agent_completed event in ServerMessage format fails current validation."""
+    def test_agent_completed_server_message_format_now_passes(self):
+        """Test agent_completed event in ServerMessage format now passes after fix."""
         server_message = {
             "type": "agent_completed",
             "payload": {
@@ -112,8 +106,8 @@ class TestServerMessageValidation(unittest.TestCase):
         self.validator.errors = []
         
         result = self.validator.validate_event_content_structure(server_message, "agent_completed")
-        self.assertFalse(result, "ServerMessage agent_completed should fail with current validator")
-        self.assertGreater(len(self.validator.errors), 0, "Should have validation errors for agent_completed")
+        self.assertTrue(result, f"ServerMessage agent_completed should now pass with fixed validator, errors: {self.validator.errors}")
+        self.assertEqual(len(self.validator.errors), 0, "Should have no validation errors for agent_completed")
     
     def test_mixed_format_handling(self):
         """Test that validator can handle both formats after fix."""
