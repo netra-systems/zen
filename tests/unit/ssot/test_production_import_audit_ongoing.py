@@ -44,7 +44,7 @@ class TestProductionImportAuditOngoing(SSotBaseTestCase):
         cls.deprecated_patterns = {
             "DeepAgentState": [
                 "netra_backend.app.agents.state",
-                "from netra_backend.app.agents.state import DeepAgentState",
+                "from netra_backend.app.schemas.agent_models import DeepAgentState",
                 "import netra_backend.app.agents.state",
             ],
         }
