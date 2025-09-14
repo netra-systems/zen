@@ -1,0 +1,112 @@
+# SSOT-incomplete-migration-Duplicate AgentRegistry Classes Blocking Golden Path
+
+**GitHub Issue**: [#914](https://github.com/netra-systems/netra-apex/issues/914)
+**Status**: 🔍 DISCOVERY PHASE
+**Priority**: P0 CRITICAL - Blocks Golden Path
+**Session**: ssotgardener-agents-2025-09-13
+
+## 🚨 MISSION CRITICAL FINDINGS
+
+### Business Impact
+- **Revenue Risk**: $500K+ ARR chat functionality COMPROMISED
+- **Golden Path Status**: BLOCKED - Users cannot get AI responses
+- **Critical Events**: All 5 WebSocket events affected
+
+### SSOT Violation Identified
+**Two conflicting AgentRegistry classes with identical names:**
+
+1. **Basic Registry** (TO BE ELIMINATED):
+   - File: `/netra_backend/app/agents/registry.py:81`
+   - Size: 419 lines
+   - Usage: 13+ files import from this path
+   - Issues: No WebSocket integration, no user isolation
+
+2. **Advanced Registry** (PRODUCTION SSOT):
+   - File: `/netra_backend/app/agents/supervisor/agent_registry.py:286`
+   - Size: 1,817 lines
+   - Usage: 464+ files import from this path
+   - Features: WebSocket bridge, user isolation, factory patterns
+
+### Technical Evidence
+```python
+# VIOLATION: Same class name, different implementations cause import conflicts
+from netra_backend.app.agents.registry import AgentRegistry  # Basic (419 lines)
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry  # Advanced (1,817 lines)
+```
+
+**Critical WebSocket Bridge Impact**:
+- `/netra_backend/app/services/websocket_bridge_factory.py` has unpredictable import behavior
+- Runtime decision on which registry to load affects Golden Path
+
+## 📋 PROCESS TRACKING
+
+### Step 0) ✅ COMPLETED - SSOT AUDIT
+- [x] **Discovery Complete**: Critical SSOT violation identified
+- [x] **GitHub Issue Created**: #914
+- [x] **Local Tracking File**: Created this file
+- [x] **Initial Commit**: Ready for GCIFS
+
+### Step 1) 🔄 NEXT - DISCOVER AND PLAN TEST
+- [ ] **1.1 DISCOVER EXISTING**: Find existing tests protecting AgentRegistry functionality
+- [ ] **1.2 PLAN ONLY**: Plan unit/integration/e2e tests for SSOT refactor validation
+
+### Step 2) 🔄 PENDING - EXECUTE TEST PLAN (20% new SSOT tests)
+- [ ] Create new SSOT-focused tests
+- [ ] Validate test execution (no docker required)
+
+### Step 3) 🔄 PENDING - PLAN REMEDIATION
+- [ ] Plan SSOT remediation approach
+- [ ] Safety-first atomic changes
+
+### Step 4) 🔄 PENDING - EXECUTE REMEDIATION
+- [ ] Implement SSOT remediation plan
+- [ ] Preserve system stability
+
+### Step 5) 🔄 PENDING - TEST FIX LOOP
+- [ ] Proof changes maintain stability
+- [ ] Fix any breaking changes
+- [ ] All tests pass
+
+### Step 6) 🔄 PENDING - PR AND CLOSURE
+- [ ] Create PR when tests passing
+- [ ] Cross-reference issue #914
+
+## 🎯 REMEDIATION STRATEGY
+
+### Phase 1: Import Redirect (Preserve Compatibility)
+- Create import redirect in basic registry file
+- Maintain backward compatibility
+- Zero downtime transition
+
+### Phase 2: Systematic Import Updates (~60% affected)
+- Update imports in batches
+- Validate each batch before proceeding
+- Rollback capability at each step
+
+### Phase 3: Remove Duplicate Implementation
+- Remove basic registry implementation
+- Clean up dead code
+- Final validation
+
+### Phase 4: Golden Path Validation
+- End-to-end testing
+- WebSocket events validation
+- User flow confirmation
+
+## 🔒 SAFETY MEASURES
+
+**Branch**: develop-long-lived (current)
+**Rollback Time**: <5min to <45min per phase
+**Test Coverage**: Comprehensive validation at each phase
+
+## 📊 SUCCESS METRICS
+
+- [ ] Golden Path user flow operational
+- [ ] All 5 WebSocket events working
+- [ ] Import conflicts eliminated
+- [ ] System stability maintained
+- [ ] $500K+ ARR functionality protected
+
+---
+**Last Updated**: 2025-09-13
+**Next Action**: Step 1 - Discover and Plan Test

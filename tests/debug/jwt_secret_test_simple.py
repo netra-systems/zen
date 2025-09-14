@@ -12,30 +12,34 @@ import uuid
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, project_root)
 
+# Import IsolatedEnvironment for SSOT compliance
+from shared.isolated_environment import get_env
+
 
 async def main():  # CRITICAL FIX: Made async
     print("WEBSOCKET JWT SECRET MISMATCH DIAGNOSIS")
     print("=" * 60)
     
     # STEP 1: Get test environment JWT secret
-    original_env = os.environ.get("ENVIRONMENT")
-    
+    _env = get_env()
+    original_env = _env.get("ENVIRONMENT")
+
     try:
-        os.environ["ENVIRONMENT"] = "staging"
+        _env.set("ENVIRONMENT", "staging", source="jwt_secret_test")
         from shared.jwt_secret_manager import get_unified_jwt_secret
         test_secret = get_unified_jwt_secret()
         print(f"Test JWT secret (first 20 chars): {test_secret[:20]}...")
         print(f"Test JWT secret length: {len(test_secret)} chars")
-        
+
     except Exception as e:
         print(f"ERROR: Failed to get test JWT secret: {e}")
         test_secret = None
-        
+
     finally:
         if original_env:
-            os.environ["ENVIRONMENT"] = original_env
+            _env.set("ENVIRONMENT", original_env, source="jwt_secret_test_restore")
         else:
-            os.environ.pop("ENVIRONMENT", None)
+            _env.remove("ENVIRONMENT", source="jwt_secret_test_cleanup")
     
     # STEP 2: Get backend JWT secret
     try:
