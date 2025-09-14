@@ -3,7 +3,7 @@
 **GitHub Issue:** [#1104](https://github.com/netra-systems/netra-apex/issues/1104)
 **Created:** 2025-09-14
 **Priority:** HIGH - Blocks Golden Path WebSocket events
-**Status:** ✅ SSOT TESTS CREATED
+**Status:** 🔧 PARTIAL IMPLEMENTATION
 
 ## Problem Summary
 Multiple conflicting import paths for WebSocketManager creating initialization race conditions and inconsistent WebSocket event delivery critical for Golden Path user flow.
@@ -54,11 +54,14 @@ Consolidate to single canonical WebSocket manager import path following SSOT pri
 - [x] Detected 4 legacy import violations across 3 files
 - [x] Tests ready for post-fix validation (currently failing by design)
 - [x] No Docker dependencies - unit/integration/staging compatible
-### 🔄 Step 3: PLAN REMEDIATION OF SSOT (NEXT)
-- [ ] Design import path consolidation strategy
-- [ ] Plan migration sequence to minimize disruption  
-- [ ] Identify backward compatibility requirements 
-### ⏳ Step 4: EXECUTE THE REMEDIATION SSOT PLAN (PENDING)
+### ✅ Step 3: PLAN REMEDIATION OF SSOT (COMPLETE)
+- [x] Design import path consolidation strategy (comprehensive plan created)
+- [x] Plan migration sequence to minimize disruption (3-phase plan)
+- [x] Identify backward compatibility requirements (alias preservation) 
+### 🔧 Step 4: EXECUTE THE REMEDIATION SSOT PLAN (PARTIAL - 1/3 COMPLETE)
+- [x] ✅ Phase 2: Agent Instance Factory COMPLETE (already fixed)
+- [ ] 🔄 Phase 1: Dependencies.py (NEXT - legacy import on line 16)
+- [ ] ⏳ Phase 3: Agent WebSocket Bridge (legacy imports on lines 25, 3318)
 ### ⏳ Step 5: ENTER TEST FIX LOOP (PENDING)
 ### ⏳ Step 6: PR AND CLOSURE (PENDING)
 
@@ -84,10 +87,10 @@ Consolidate to single canonical WebSocket manager import path following SSOT pri
 - **`tests/unit/ssot/test_websocket_manager_ssot_compliance.py`** - SSOT compliance validation  
 - **`tests/integration/websocket/test_websocket_manager_initialization_race.py`** - Race condition testing
 
-### Violations Detected (4 legacy imports across 3 files)
-- **`/netra_backend/app/dependencies.py`** (Line 16) ❌
-- **`/netra_backend/app/services/agent_websocket_bridge.py`** (Lines 25, 3318) ❌❌
-- **`/netra_backend/app/agents/supervisor/agent_instance_factory.py`** (Line 46) ❌
+### Current Violations Status (3 legacy imports across 2 files)
+- **`/netra_backend/app/dependencies.py`** (Line 16) ❌ PENDING
+- **`/netra_backend/app/services/agent_websocket_bridge.py`** (Lines 25, 3318) ❌❌ PENDING
+- **`/netra_backend/app/agents/supervisor/agent_instance_factory.py`** ✅ **FIXED** (SSOT compliant)
 
 ### Test Results
 - **All tests FAIL as expected** ✅ - proving Issue #1104 exists  
