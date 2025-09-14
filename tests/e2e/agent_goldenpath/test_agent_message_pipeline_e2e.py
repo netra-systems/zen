@@ -436,8 +436,8 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
                 "success": True
             })
             
-            # Log comprehensive results
-            self.logger.info("🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS")
+            # PHASE 1 ENHANCEMENT: Comprehensive business value reporting
+            self.logger.info("🎉 GOLDEN PATH MESSAGE PIPELINE SUCCESS WITH BUSINESS VALUE VALIDATION")
             self.logger.info(f"📊 Pipeline Metrics:")
             self.logger.info(f"   Total Duration: {total_pipeline_time:.1f}s")
             self.logger.info(f"   WebSocket Connection: {connection_time:.2f}s")
@@ -446,10 +446,21 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             self.logger.info(f"   Event Types: {received_events}")
             self.logger.info(f"   Response Length: {len(response_text)} characters")
             self.logger.info(f"   Pipeline Events: {len(pipeline_events)}")
+            self.logger.info(f"💰 Business Value Metrics:")
+            self.logger.info(f"   Quality Score: {quality_evaluation['overall_quality_score']:.3f}/1.0")
+            self.logger.info(f"   Actionability: {quality_evaluation['actionability_score']:.3f}/1.0")
+            self.logger.info(f"   Technical Specificity: {quality_evaluation['technical_specificity']:.3f}/1.0")
+            self.logger.info(f"   Business Indicators: {quality_evaluation['business_indicators']}")
+            self.logger.info(f"   Meets Threshold: {quality_evaluation['meets_threshold']}")
             
-            # Business value assertions
+            # PHASE 1 ENHANCED: Business value performance assertions
             assert total_pipeline_time < 120.0, f"Pipeline too slow: {total_pipeline_time:.1f}s (max 120s)"
-            assert len(response_text) > 100, f"Response not substantive enough: {len(response_text)} chars"
+            assert quality_evaluation["overall_quality_score"] >= self.__class__.QUALITY_THRESHOLD_HIGH, (
+                f"Overall business value quality insufficient: {quality_evaluation['overall_quality_score']:.3f}"
+            )
+            assert len(quality_evaluation["business_indicators"]) >= 1, (
+                f"Response lacks expected business value indicators: {quality_evaluation['business_indicators']}"
+            )
             
         except Exception as e:
             total_time = time.time() - pipeline_start_time
@@ -461,9 +472,9 @@ class TestAgentMessagePipelineE2E(SSotAsyncTestCase):
             
             # Fail with detailed context for debugging
             raise AssertionError(
-                f"Golden Path message pipeline failed after {total_time:.1f}s: {e}. "
+                f"PHASE 1 ENHANCED: Golden Path message pipeline with business value validation failed after {total_time:.1f}s: {e}. "
                 f"Events: {pipeline_events}. "
-                f"This breaks core user functionality ($500K+ ARR impact)."
+                f"This breaks core user functionality and business value delivery ($500K+ ARR impact)."
             )
 
     async def test_agent_error_handling_and_recovery(self):
