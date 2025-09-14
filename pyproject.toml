@@ -635,8 +635,15 @@ markers = [
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
     
-    # Missing agent_handoff_chain marker causing collection failures  
+    # Missing agent_handoff_chain marker causing collection failures
     "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Issue #861 Phase 1 Integration Test Markers
+    "websocket_flow: WebSocket message flow integration tests",
+    "agent_execution_logic: Agent execution logic and workflow tests",
+    "business_logic_flow: End-to-end business logic flow tests",
+    "e2e_business_logic: End-to-end business logic integration tests",
+    "agent_execution: Agent execution integration tests",
 ]
 
 # Coverage settings
