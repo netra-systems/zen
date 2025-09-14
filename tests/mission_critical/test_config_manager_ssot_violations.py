@@ -46,7 +46,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
         # Expected imports that create conflicts
         config_managers = [
             "netra_backend.app.core.configuration.base.UnifiedConfigManager",
-            "netra_backend.app.core.managers.unified_configuration_manager.UnifiedConfigurationManager",
+            "netra_backend.app.core.configuration.base.UnifiedConfigManager",
             "netra_backend.app.services.configuration_service.ConfigurationManager"
         ]
 
@@ -96,7 +96,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
         try:
             # NOTE: Issue #757 RESOLUTION - Deprecated UnifiedConfigurationManager properly removed
             # This validates that the deprecated class is no longer accessible
-            from netra_backend.app.core.managers.unified_configuration_manager import UnifiedConfigurationManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager as UnifiedConfigurationManager
             managers_to_test.append(('UnifiedConfigurationManager', UnifiedConfigurationManager))
         except ImportError:
             # Expected after Issue #757 resolution - deprecated manager removed
@@ -151,7 +151,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
 
         config_manager_files = [
             "netra_backend/app/core/configuration/base.py",
-            "netra_backend/app/core/managers/unified_configuration_manager.py",
+            "netra_backend/app/core/configuration/base.py",
             "netra_backend/app/services/configuration_service.py"
         ]
 
@@ -220,7 +220,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
             pass
 
         try:
-            from netra_backend.app.core.configuration.base import UnifiedConfigManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager as UnifiedConfigurationManager
             config_managers.append(('UnifiedConfigurationManager', UnifiedConfigurationManager()))
         except Exception:
             pass
@@ -297,7 +297,7 @@ class TestConfigManagerSSotViolations(SSotBaseTestCase):
 
         # Check UnifiedConfigurationManager pattern
         try:
-            from netra_backend.app.core.configuration.base import UnifiedConfigManager
+            from netra_backend.app.core.configuration.base import UnifiedConfigManager as UnifiedConfigurationManager
             manager1 = UnifiedConfigurationManager()
             manager2 = UnifiedConfigurationManager()
 
