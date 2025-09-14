@@ -19,8 +19,8 @@ class StagingConfig:
     # CRITICAL FIX: Add missing base_url attribute (required by configuration system)
     base_url: str = "https://api.staging.netrasystems.ai"
     
-    # Auth service URLs (when deployed)
-    auth_url: str = "https://auth.staging.netrasystems.ai"
+    # Auth service URLs (when deployed) - Updated after commit 630b63ca2
+    auth_url: str = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
     
     # Frontend URL (when deployed)
     frontend_url: str = "https://app.staging.netrasystems.ai"
@@ -150,18 +150,19 @@ class StagingConfig:
                 clean_token = jwt_token.replace("Bearer ", "").strip()
                 # Base64url encode the token for WebSocket subprotocol
                 encoded_token = base64.urlsafe_b64encode(clean_token.encode()).decode().rstrip('=')
-                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
+                # CRITICAL FIX: Use proper subprotocol format for staging
+                headers["sec-websocket-protocol"] = f"jwt.{encoded_token}"
                 print(f"[STAGING AUTH FIX] Added WebSocket subprotocol: jwt.{encoded_token[:20]}...")
             except Exception as e:
                 print(f"[WARNING] Could not encode JWT for WebSocket subprotocol: {e}")
                 # Fallback: set a recognizable subprotocol for debugging
-                headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
+                headers["sec-websocket-protocol"] = "jwt-auth"
             
             print(f"[STAGING AUTH FIX] Added JWT token to WebSocket headers (Authorization + subprotocol)")
         else:
             # Fallback test headers (will likely be rejected but enables auth flow testing)
             headers["X-Test-Auth"] = "test-token-for-staging"
-            headers["sec-websocket-protocol"] = "e2e-testing, jwt-auth"
+            headers["sec-websocket-protocol"] = "e2e-testing"
             print(f"[WARNING] No JWT token available - using test header fallback with subprotocol")
             
         print(f"[STAGING AUTH FIX] WebSocket headers include E2E detection: {list(headers.keys())}")
@@ -206,8 +207,10 @@ class StagingConfig:
                 os.environ["E2E_OAUTH_SIMULATION_KEY"] = "staging-e2e-test-bypass-key-2025"
                 print(f"[STAGING TEST FIX] Set E2E_OAUTH_SIMULATION_KEY for staging testing")
             
-            # Create staging config
+            # Create staging config with updated auth service URL
             staging_config = E2EAuthConfig.for_staging()
+            staging_config.auth_service_url = "https://netra-auth-service-pnovr5vsba-uc.a.run.app"
+            staging_config.jwt_validation_strict = False  # Allow E2E test tokens in staging
             auth_helper = E2EAuthHelper(config=staging_config, environment="staging")
             
             # Create token for EXISTING staging user (should pass user validation)
