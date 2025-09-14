@@ -1722,7 +1722,7 @@ class AgentRegistry(BaseAgentRegistry):
             self._compatibility_instances = {}
         
         # Create AgentInfo for compatibility
-        from netra_backend.app.agents.registry import AgentInfo
+        from netra_backend.app.agents.types import AgentInfo
         agent_info = AgentInfo(
             agent_id=agent_id,
             agent_type=agent_type,
@@ -1809,7 +1809,7 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             True if updated, False if not found
         """
-        from netra_backend.app.agents.registry import AgentStatus
+        from netra_backend.app.agents.types import AgentStatus
         from datetime import datetime
         
         if not hasattr(self, '_compatibility_agents'):
@@ -1883,7 +1883,7 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of AgentInfo matching the type
         """
-        from netra_backend.app.agents.registry import AgentType
+        from netra_backend.app.agents.types import AgentType
         
         if not hasattr(self, '_compatibility_agents'):
             return []
@@ -1905,7 +1905,7 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of AgentInfo matching the status
         """
-        from netra_backend.app.agents.registry import AgentStatus
+        from netra_backend.app.agents.types import AgentStatus
         
         if not hasattr(self, '_compatibility_agents'):
             return []
@@ -1938,7 +1938,7 @@ class AgentRegistry(BaseAgentRegistry):
         Returns:
             List of available (idle) AgentInfo objects
         """
-        from netra_backend.app.agents.registry import AgentStatus, AgentType
+        from netra_backend.app.agents.types import AgentStatus, AgentType
         
         if not hasattr(self, '_compatibility_agents'):
             return []
