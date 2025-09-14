@@ -208,12 +208,12 @@ See [Staging Demo Setup Guide](./docs/STAGING_DEMO_SETUP.md) for detailed instru
 - [Agent Architecture Diagrams](./docs/agent_architecture_mermaid.md) - Visual architecture guides
 
 ### Migration Guides
-- [Tool Dispatcher Migration](./TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migrate from singleton to request-scoped
-- [WebSocket Modernization](./WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation patterns
+- [Tool Dispatcher Migration](./reports/archived/TOOL_DISPATCHER_MIGRATION_GUIDE.md) - Migrate from singleton to request-scoped
+- [WebSocket Modernization](./reports/archived/WEBSOCKET_MODERNIZATION_REPORT.md) - WebSocket isolation patterns
 
 ### Critical Reports
-- [Critical Security Implementation](./CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)
-- [Phase 0 Completion Report](./PHASE_0_COMPLETION_REPORT.md)
+- [Critical Security Implementation](./reports/archived/CRITICAL_SECURITY_IMPLEMENTATION_SUMMARY.md)
+- [Phase 0 Completion Report](./reports/archived/PHASE_0_COMPLETION_REPORT.md)
 
 ## 🏛️ System Architecture
 

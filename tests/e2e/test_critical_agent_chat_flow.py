@@ -101,7 +101,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 # Import WebSocket components (GOLDEN PATH COMPATIBLE)
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
+from netra_backend.app.websocket_core.canonical_imports import create_websocket_manager
 
 # Import authentication services
 from auth_service.auth_core.services.auth_service import AuthService

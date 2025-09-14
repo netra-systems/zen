@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from pydantic import ValidationError
 
-from tests.clients.factory import TestClientFactory
+from tests.clients.factory import ClientFactory
 
 
 @pytest.mark.e2e
@@ -27,7 +27,7 @@ class TestWebSocketEventStructure:
     @pytest.fixture
     async def client_factory(self):
         """Get test client factory."""
-        factory = TestClientFactory()
+        factory = ClientFactory()
         try:
             yield factory
         finally:

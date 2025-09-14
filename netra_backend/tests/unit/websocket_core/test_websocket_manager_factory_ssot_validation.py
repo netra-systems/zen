@@ -26,8 +26,10 @@ from typing import Optional, Dict, Any
 
 # SSOT imports - Issue #824 remediation
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
-from netra_backend.app.websocket_core.websocket_manager_factory import (
-    FactoryInitializationError,
+from netra_backend.app.websocket_core.canonical_imports import (
+    FactoryInitializationError
+)
+from netra_backend.app.services.user_execution_context import (
     create_defensive_user_execution_context
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext

@@ -44,7 +44,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # WebSocket core imports
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket_core.unified_manager import WebSocketConnection
-from netra_backend.app.websocket_core.websocket_manager_factory import (
+from netra_backend.app.websocket_core.canonical_imports import (
     create_websocket_manager
 )
 from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler

@@ -208,6 +208,28 @@ class QueueMetrics:
 
 
 @dataclass
+class ManagerMetrics:
+    """Metrics for individual WebSocket manager instances."""
+    connections_managed: int = 0
+    messages_sent_total: int = 0
+    messages_failed_total: int = 0
+    last_activity: Optional[datetime] = None
+    manager_age_seconds: float = 0.0
+    cleanup_scheduled: bool = False
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary format."""
+        return {
+            "connections_managed": self.connections_managed,
+            "messages_sent_total": self.messages_sent_total,
+            "messages_failed_total": self.messages_failed_total,
+            "last_activity": self.last_activity.isoformat() if self.last_activity else None,
+            "manager_age_seconds": self.manager_age_seconds,
+            "cleanup_scheduled": self.cleanup_scheduled
+        }
+
+
+@dataclass
 class FactoryMetrics:
     """Metrics for WebSocket factory instances."""
     factories_created: int = 0
@@ -224,6 +246,18 @@ class FactoryMetrics:
     
     # Creation rate tracking
     creation_times: deque = field(default_factory=lambda: deque(maxlen=100))
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert metrics to dictionary format."""
+        return {
+            "factories_created": self.factories_created,
+            "factories_destroyed": self.factories_destroyed,
+            "active_factories": self.active_factories,
+            "total_memory_mb": self.total_memory_mb,
+            "total_cpu_percent": self.total_cpu_percent,
+            "isolation_violations": self.isolation_violations,
+            "cross_user_events": self.cross_user_events
+        }
     
     def record_factory_created(self):
         """Record factory creation."""

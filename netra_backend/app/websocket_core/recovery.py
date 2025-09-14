@@ -6,7 +6,7 @@ to maintain backward compatibility with existing tests.
 
 # Import from actual locations and re-export
 from netra_backend.app.core.exceptions_websocket import WebSocketError
-from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager as UnifiedWebSocketManager
 WebSocketRecoveryManager = UnifiedWebSocketManager
 from netra_backend.app.core.unified_error_handler import RecoveryStrategy
 
