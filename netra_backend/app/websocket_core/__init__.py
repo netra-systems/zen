@@ -22,15 +22,15 @@ warnings.warn(
     stacklevel=2
 )
 
-# PHASE 1 UPDATE: Import directly from unified_manager.py (SSOT) 
-from netra_backend.app.websocket_core.unified_manager import (
-    UnifiedWebSocketManager,
+# ISSUE #824 REMEDIATION: Import from canonical SSOT path only
+from netra_backend.app.websocket_core.websocket_manager import (
+    WebSocketManager,
+    UnifiedWebSocketManager,  # Backward compatibility alias
     WebSocketConnection,
     _serialize_message_safely
 )
 
-# Compatibility alias
-WebSocketManager = UnifiedWebSocketManager
+# WebSocketManager and UnifiedWebSocketManager are already imported above
 
 # Import protocol for type checking
 try:
