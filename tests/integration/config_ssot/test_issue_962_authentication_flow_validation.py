@@ -42,7 +42,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 from shared.isolated_environment import IsolatedEnvironment
 
 
-class TestIssue962AuthenticationFlowValidation(SSotAsyncTestCase, unittest.TestCase):
+class TestIssue962AuthenticationFlowValidation(SSotAsyncTestCase):
     """
     Integration tests to validate authentication flow consistency with SSOT configuration.
 

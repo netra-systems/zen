@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, MagicMock
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 
-class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase, unittest.TestCase):
+class TestWebSocketEventsSSotDelivery(SSotAsyncTestCase):
     """Test WebSocket events delivery with SSOT patterns."""
     
     # The 5 critical WebSocket events for Golden Path

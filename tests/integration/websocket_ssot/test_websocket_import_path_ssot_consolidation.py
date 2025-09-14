@@ -24,8 +24,10 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple, Any
 import ast
 
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
-class WebSocketImportPathSSotConsolidationTest(unittest.TestCase):
+
+class WebSocketImportPathSSotConsolidationTest(SSotBaseTestCase):
     """
     Test to validate SSOT consolidation of WebSocket import paths.
     

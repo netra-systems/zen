@@ -31,9 +31,10 @@ from deployment.secrets_config import (
     get_backend_secrets_string,
     get_auth_secrets_string
 )
+from test_framework.ssot.base_test_case import SSotBaseTestCase
 
 
-class TestConfigurationBridgeIntegration(unittest.TestCase):
+class TestConfigurationBridgeIntegration(SSotBaseTestCase):
     """
     Integration tests for configuration bridge functions.
     
@@ -285,7 +286,7 @@ class TestConfigurationBridgeIntegration(unittest.TestCase):
                     )
 
 
-class TestConfigurationBridgeErrorHandling(unittest.TestCase):
+class TestConfigurationBridgeErrorHandling(SSotBaseTestCase):
     """
     Test error handling in configuration bridge functions.
     """
