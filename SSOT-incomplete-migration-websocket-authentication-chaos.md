@@ -37,11 +37,23 @@
 - [x] Progress tracker created
 - [x] Business impact assessed
 
-### 🔄 Step 1: Discover and Plan Tests (NEXT)
-- [ ] Find existing WebSocket authentication tests
-- [ ] Plan test coverage for SSOT consolidation
-- [ ] Identify tests that must continue passing
-- [ ] Plan new failing tests to reproduce violation
+### ✅ Step 1.1: Discover Existing Tests Complete
+- [x] **COMPREHENSIVE DISCOVERY**: 1000+ WebSocket auth test files found
+- [x] **MISSION CRITICAL PROTECTION**: 6 mission critical tests protecting $500K+ ARR chat
+- [x] **INTEGRATION COVERAGE**: 49 files using `authenticate_websocket_ssot()`, 29 using deprecated function
+- [x] **DIRECT CLASS DEPENDENCIES**: 48 files directly instantiate `UnifiedWebSocketAuthenticator()` (HIGH RISK)
+- [x] **E2E VALIDATION**: Staging GCP tests available (no Docker dependency)
+- [x] **RISK ASSESSMENT**: P0 mission critical tests must continue passing
+
+### ✅ Step 1.2: Plan Test Strategy Complete  
+- [x] **NEW FAILING TESTS DESIGNED**: 4 tests to reproduce SSOT violation
+  - `test_duplicate_authenticator_classes_violation.py` - Detect duplicate classes
+  - `test_deprecated_function_usage_detection.py` - Detect deprecated function usage
+  - `test_websocket_auth_ssot_consolidation_validation.py` - Validate single entry point
+  - `test_authentication_race_condition_prevention.py` - Test race condition prevention
+- [x] **MIGRATION PLAN**: 77 files prioritized by risk (48 high-risk, 29 moderate-risk)
+- [x] **RISK MITIGATION**: Phased approach with staging validation and rollback options
+- [x] **EXECUTION STRATEGY**: Non-Docker using unit, integration via staging GCP, e2e via staging
 
 ### ⏳ Step 2: Execute Test Plan
 - [ ] Create new SSOT validation tests
