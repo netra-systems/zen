@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas.shared_types import ToolResult
+from netra_backend.app.schemas.tool import ToolResult
 
 logger = central_logger.get_logger(__name__)
 
