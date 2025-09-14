@@ -511,9 +511,9 @@ class MockWebSocketServer:
         self.clients.discard(websocket)
         logger.info(f"Mock WebSocket client disconnected. Total: {len(self.clients)}")
 
-    async def handle_client(self, websocket, path):
+    async def handle_client(self, websocket, path=None):
         """Handle WebSocket client connection."""
-        logger.info(f"New WebSocket connection on path: {path}")
+        logger.info(f"New WebSocket connection on path: {path or '/ws'}")
         await self.register_client(websocket)
 
         try:
