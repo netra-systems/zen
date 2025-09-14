@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-13 21:17:29
+**Generated:** 2025-09-13 22:01:46
 **Environment:** Staging
 **Test Framework:** Pytest
 
