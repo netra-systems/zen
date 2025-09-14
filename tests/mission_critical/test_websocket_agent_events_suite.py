@@ -292,7 +292,13 @@ class MissionCriticalEventValidator:
         return True
     
     def validate_event_content_structure(self, event: Dict, event_type: str) -> bool:
-        """Validate the content structure of specific event types."""
+        """Validate the content structure of specific event types.
+        
+        Handles both flat event format and ServerMessage format where
+        event data is nested in 'payload' field.
+        
+        Issue #892: Fixed to handle ServerMessage format for Golden Path compatibility.
+        """
         required_fields = {
             "agent_started": ["type", "user_id", "thread_id", "timestamp"],
             "agent_thinking": ["type", "reasoning", "timestamp"],
@@ -304,13 +310,32 @@ class MissionCriticalEventValidator:
         if event_type not in required_fields:
             return True  # No specific validation for this event type
         
+        # Determine if this is ServerMessage format (has payload field)
+        # or flat format (event data directly in event dict)
+        if "payload" in event and isinstance(event["payload"], dict):
+            # ServerMessage format: event data is in payload
+            event_data = event["payload"]
+            # 'type' field is at top level in ServerMessage format
+            has_type = "type" in event
+        else:
+            # Flat format: event data is directly in event dict
+            event_data = event
+            has_type = "type" in event_data
+        
         missing_fields = []
         for field in required_fields[event_type]:
-            if field not in event:
-                missing_fields.append(field)
+            if field == "type":
+                # Type field handling depends on format
+                if not has_type:
+                    missing_fields.append(field)
+            else:
+                # All other fields should be in event_data
+                if field not in event_data:
+                    missing_fields.append(field)
         
         if missing_fields:
-            self.errors.append(f"Event {event_type} missing required fields: {missing_fields}")
+            format_type = "ServerMessage" if "payload" in event else "flat"
+            self.errors.append(f"Event {event_type} ({format_type} format) missing required fields: {missing_fields}")
             return False
         
         return True

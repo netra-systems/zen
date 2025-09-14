@@ -32,7 +32,7 @@ from test_framework.websocket_helpers import WebSocketTestClient
 
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.agent_models import DeepAgentState
 
 
 class TestMultiUserIsolationValidationE2E(BaseE2ETest):
