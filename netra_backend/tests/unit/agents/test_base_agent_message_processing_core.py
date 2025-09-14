@@ -53,16 +53,15 @@ class TestBaseAgentMessageProcessingCore(SSotAsyncTestCase):
         # Create mock dependencies using SSOT patterns
         self.mock_factory = SSotMockFactory()
         self.mock_llm_manager = self.mock_factory.create_mock_llm_manager()
-        self.mock_tool_dispatcher = self.mock_factory.create_mock_tool_dispatcher()
-        self.mock_redis_manager = self.mock_factory.create_mock_redis_manager()
+        self.mock_tool_dispatcher = self.mock_factory.create_tool_mock("unified_dispatcher")
+        self.mock_redis_manager = Mock()  # Simple mock for Redis manager
         
-        # Create real user context for proper isolation testing
+        # Create user context for proper isolation testing
         self.test_user_id = "test_user_123"
         self.test_session_id = "session_456"
-        self.user_context = UserExecutionContext(
+        self.user_context = self.mock_factory.create_mock_user_context(
             user_id=self.test_user_id,
-            session_id=self.test_session_id,
-            context={"test_mode": True}
+            session_id=self.test_session_id
         )
         
         # Create base agent instance
