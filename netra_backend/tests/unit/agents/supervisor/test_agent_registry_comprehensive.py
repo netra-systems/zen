@@ -457,17 +457,17 @@ class TestToolDispatcherIntegration:
         assert result is None
     
     async def test_tool_dispatcher_setter_logs_warning(self, mock_llm_manager):
-        """Test that legacy tool_dispatcher setter logs warning and ignores value."""
+        """Test that legacy tool_dispatcher setter logs warning and stores value but getter returns None for security."""
         # Arrange
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         mock_dispatcher = Mock()
-        
+
         # Act
         registry.tool_dispatcher = mock_dispatcher
-        
+
         # Assert
-        assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value for backward compatibility
+        assert registry._legacy_dispatcher == mock_dispatcher  # Setter stores value
+        assert registry.tool_dispatcher is None  # Getter always returns None for SSOT security
 
 
 @pytest.mark.asyncio

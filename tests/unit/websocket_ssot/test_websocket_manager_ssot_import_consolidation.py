@@ -217,8 +217,25 @@ class TestWebSocketManagerSSOTImportConsolidation(SSotBaseTestCase):
                     result.success = False
                     return result
 
+                # ISSUE #996 FIX: Handle factory-only classes (SSOT enforcement)
+                # Some classes like WebSocketManager enforce factory-only instantiation
+                # Try direct instantiation first, fall back to factory if blocked
                 user_context = create_user_context_from_id(self.test_user_id)
-                instance = cls(user_context=user_context)
+                try:
+                    instance = cls(user_context=user_context)
+                except Exception as e:
+                    if "factory function" in str(e) or "Direct instantiation not allowed" in str(e):
+                        # This class enforces factory-only instantiation - use get_websocket_manager
+                        try:
+                            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
+                            instance = get_websocket_manager(user_context=user_context)
+                        except Exception as factory_error:
+                            result.error_message = f"Factory instantiation also failed: {factory_error}"
+                            result.success = False
+                            return result
+                    else:
+                        # Different error - re-raise
+                        raise
 
             # Record successful creation
             result.success = True

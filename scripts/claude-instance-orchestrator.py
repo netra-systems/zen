@@ -386,10 +386,16 @@ class ClaudeInstanceOrchestrator:
         line_count = 0
 
         def format_instance_line(content: str, prefix: str = "") -> str:
-            """Format a line with clear instance separation and truncation"""
-            # Truncate content to max_line_length
+            """Format a line with clear instance separation and smart truncation"""
+            # Smart truncation - preserve important content
             if len(content) > self.max_line_length:
-                content = content[:self.max_line_length-3] + "..."
+                # Don't truncate if it contains token or tool information
+                if any(keyword in content.lower() for keyword in ['tokens', 'tool', 'completed', 'error', 'success']):
+                    # Keep important lines intact, just add line break if very long
+                    if len(content) > self.max_line_length * 2:
+                        content = content[:self.max_line_length*2-3] + "..."
+                else:
+                    content = content[:self.max_line_length-3] + "..."
 
             # Create clear visual separation
             instance_header = f"╔═[{name}]" + "═" * (20 - len(name) - 4) if len(name) < 16 else f"╔═[{name}]═"
@@ -420,16 +426,19 @@ class ClaudeInstanceOrchestrator:
                         recent_lines_buffer.pop(0)
 
                     # Only show periodic updates to prevent spam
-                    # Show every 10th line, or important lines (errors, completions)
+                    # Show every 5th line, or important lines (errors, completions)
                     # Respect quiet mode
                     if self.max_console_lines > 0:
                         should_display = (
-                            line_count % 10 == 0 or  # Every 10th line
+                            line_count % 5 == 0 or  # Every 5th line (increased frequency)
                             prefix == "STDERR" or    # All error lines
                             "completed" in clean_line.lower() or
                             "error" in clean_line.lower() or
                             "failed" in clean_line.lower() or
-                            "success" in clean_line.lower()
+                            "success" in clean_line.lower() or
+                            "tokens" in clean_line.lower() or  # Show token information
+                            "tool" in clean_line.lower() or    # Show tool usage
+                            len(clean_line) > 50  # Show substantial content
                         )
 
                         if should_display:
@@ -933,8 +942,8 @@ async def main():
                        help="Minimize console output, show only errors and final summaries")
     parser.add_argument("--startup-delay", type=float, default=5.0,
                        help="Delay in seconds between launching each instance (default: 5.0)")
-    parser.add_argument("--max-line-length", type=int, default=800,
-                       help="Maximum characters per line in console output (default: 500)")
+    parser.add_argument("--max-line-length", type=int, default=1500,
+                       help="Maximum characters per line in console output (default: 1500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
                        help="Seconds between rolling status reports (default: 30)")
 
