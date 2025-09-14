@@ -9,10 +9,10 @@ This document tracks failing and uncollectable agent-related tests discovered du
 
 ## Discovered Issues
 
-### Issue 1: DeepAgentState Import Error - Unit Test Collection Failure
-**File**: `netra_backend/tests/unit/test_agent.py:10`  
-**Type**: Import Error - Uncollectable Test  
-**Severity**: P1 (High - blocks test execution)  
+### Issue 1: DeepAgentState Import Error - Widespread Collection Failure
+**Files Affected**: Multiple test files  
+**Type**: Import Error - Uncollectable Tests  
+**Severity**: P1 (High - blocks test execution across multiple files)  
 **Status**: Discovered  
 
 **Error Details**:
@@ -20,15 +20,15 @@ This document tracks failing and uncollectable agent-related tests discovered du
 ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.state' (/Users/anthony/Desktop/netra-apex/netra_backend/app/agents/state.py)
 ```
 
-**Impact**:
-- Test file cannot be collected/executed
-- Unit test coverage for agent functionality is incomplete
-- May indicate missing or relocated class definition
+**Affected Test Files**:
+- `netra_backend/tests/unit/test_agent.py:10`
+- `netra_backend/tests/integration/test_agent_execution_core.py:48`
+- `netra_backend/tests/unit/agents/test_agent_execution_core_comprehensive.py:55`
 
-**Context**:
-- Test file: `/Users/anthony/Desktop/netra-apex/netra_backend/tests/unit/test_agent.py`
-- Import statement: `from netra_backend.app.agents.state import DeepAgentState`
-- Target module: `/Users/anthony/Desktop/netra-apex/netra_backend/app/agents/state.py`
+**Impact**:
+- Multiple test files cannot be collected/executed
+- Unit and integration test coverage for agent functionality is severely compromised
+- Indicates missing or relocated class definition affecting multiple test suites
 
 **Next Actions**:
 - [ ] Search for existing GitHub issues related to DeepAgentState import
@@ -37,11 +37,68 @@ ImportError: cannot import name 'DeepAgentState' from 'netra_backend.app.agents.
 
 ---
 
+### Issue 2: BaseAgent Comprehensive Test Execution Failures
+**File**: `netra_backend/tests/unit/agents/test_base_agent_comprehensive.py`  
+**Type**: Test Execution Failures  
+**Severity**: P2 (Medium - tests can execute but fail)  
+**Status**: Discovered  
+
+**Failure Summary**:
+- 10 failed tests, 55 passed, 76 warnings
+- Issues with session isolation, execution patterns, factory patterns, and metadata storage
+
+**Sample Failures**:
+- `TestBaseAgentSessionIsolation::test_get_session_manager_success`
+- `TestBaseAgentExecutionPatterns::test_execute_with_user_execution_context`
+- `TestBaseAgentFactoryPatterns::test_create_with_context_factory_method`
+
+**Impact**:
+- Core BaseAgent functionality partially tested but with significant failures
+- User execution context and session isolation may have issues
+- Factory pattern implementations may be problematic
+
+**Next Actions**:
+- [ ] Search for existing GitHub issues related to BaseAgent test failures
+- [ ] Create or update GitHub issue with current failure details
+- [ ] Link to related issues if found
+
+---
+
+### Issue 3: WebSocket Agent Events Mission Critical Test Failures
+**File**: `tests/mission_critical/test_websocket_agent_events_suite.py`  
+**Type**: Test Execution Failures and Timeouts  
+**Severity**: P0 (Critical - mission critical functionality)  
+**Status**: Discovered  
+
+**Failure Summary**:
+- Multiple test failures in critical WebSocket event handling
+- Test execution timeout (60+ seconds)
+- Issues with event structure validation
+
+**Sample Failures**:
+- `TestIndividualWebSocketEvents::test_agent_started_event_structure`
+- `TestIndividualWebSocketEvents::test_tool_executing_event_structure`
+- `TestRealWebSocketIntegration::test_real_websocket_performance_metrics`
+- `TestRealE2EWebSocketAgentFlow::test_real_e2e_agent_conversation_flow` (ERROR)
+
+**Impact**:
+- Critical business functionality ($500K+ ARR) may be compromised
+- WebSocket real-time chat functionality may have issues
+- Performance and E2E conversation flows are failing
+
+**Next Actions**:
+- [ ] Search for existing GitHub issues related to WebSocket agent events
+- [ ] Create or update GitHub issue with current failure details
+- [ ] Link to related issues if found
+
+---
+
 ## Test Execution Summary
-- **Total Issues Found**: 1
-- **Import Errors**: 1
-- **Collection Failures**: 1
-- **Execution Failures**: 0 (cannot execute due to collection failures)
+- **Total Issues Found**: 3 major issue categories
+- **Import Errors**: 1 (affecting multiple files)
+- **Collection Failures**: 3+ files
+- **Execution Failures**: 10+ in BaseAgent comprehensive, 4+ in WebSocket mission critical
+- **Timeouts**: 1 (mission critical test suite)
 
 ## Next Steps
 1. Continue collecting failures from other agent test files
