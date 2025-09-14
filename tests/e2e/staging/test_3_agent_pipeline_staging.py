@@ -247,12 +247,21 @@ class TestAgentPipelineStaging(StagingTestBase):
         # If no token in config, use our test token
         if not config.test_jwt_token:
             headers["Authorization"] = f"Bearer {self.test_token}"
-        
+
+        # ISSUE #886 FIX: Support both Authorization headers and subprotocol-based authentication
+        # Some staging environments may require subprotocol negotiation
+        token = config.test_jwt_token or self.test_token
+        subprotocols = []
+        if token:
+            # Try subprotocol-based auth for staging compatibility
+            subprotocols = [f"jwt-auth.{token}", "jwt-auth"]
+
         # Attempt real agent pipeline execution via authenticated WebSocket
         async with websockets.connect(
-            config.websocket_url, 
+            config.websocket_url,
             close_timeout=10,
-            additional_headers=headers
+            additional_headers=headers,
+            subprotocols=subprotocols if subprotocols else None
         ) as ws:
             print("[INFO] WebSocket connected for agent pipeline test")
             
@@ -400,11 +409,20 @@ class TestAgentPipelineStaging(StagingTestBase):
         # If no token in config, use our test token
         if not config.test_jwt_token:
             headers["Authorization"] = f"Bearer {self.test_token}"
-        
+
+        # ISSUE #886 FIX: Support both Authorization headers and subprotocol-based authentication
+        # Some staging environments may require subprotocol negotiation
+        token = config.test_jwt_token or self.test_token
+        subprotocols = []
+        if token:
+            # Try subprotocol-based auth for staging compatibility
+            subprotocols = [f"jwt-auth.{token}", "jwt-auth"]
+
         async with websockets.connect(
-            config.websocket_url, 
+            config.websocket_url,
             close_timeout=5,
-            additional_headers=headers
+            additional_headers=headers,
+            subprotocols=subprotocols if subprotocols else None
         ) as ws:
             # Send status request
             status_request = {
@@ -494,11 +512,20 @@ class TestAgentPipelineStaging(StagingTestBase):
         # If no token in config, use our test token
         if not config.test_jwt_token:
             headers["Authorization"] = f"Bearer {self.test_token}"
-        
+
+        # ISSUE #886 FIX: Support both Authorization headers and subprotocol-based authentication
+        # Some staging environments may require subprotocol negotiation
+        token = config.test_jwt_token or self.test_token
+        subprotocols = []
+        if token:
+            # Try subprotocol-based auth for staging compatibility
+            subprotocols = [f"jwt-auth.{token}", "jwt-auth"]
+
         async with websockets.connect(
-            config.websocket_url, 
+            config.websocket_url,
             close_timeout=5,
-            additional_headers=headers
+            additional_headers=headers,
+            subprotocols=subprotocols if subprotocols else None
         ) as ws:
             # Send invalid pipeline requests to trigger errors
             invalid_requests = [
