@@ -189,9 +189,13 @@ collected 0 items
 - Agent event generation vs connection handshake separation
 - Staging environment WebSocket server behavior analysis
 
-**Docker Infrastructure Issue (#2):**
-- Requires separate GitHub issue creation for Docker daemon unavailability
-- Lower priority but affects local development workflow
+**Docker Infrastructure Issue (#979):**
+✅ **COMPLETED** - Updated existing GitHub issue #979 with latest Docker daemon failure context
+- GitHub Issue: https://github.com/netra-systems/netra-apex/issues/979
+- Priority: P3 (consistent with strategic Docker resolution per Issue #420)
+- Impact: Local development workflow affected, but alternative validation via staging available
+- Technical Details: Windows named pipe Docker daemon connectivity failures
+- Files Affected: test_framework/unified_docker_manager.py, test_framework/resource_monitor.py
 
 ---
 
