@@ -318,14 +318,15 @@ class TestJWTHandlerStandalone(SSotBaseTestCase):
             self.assertIsNone(payload, f"Mock token should be rejected: {mock_token}")
 
 
-class TestAuthConfigStandalone(unittest.TestCase):
+class TestAuthConfigStandalone(SSotBaseTestCase):
     """
     Standalone AuthConfig unit tests
     Test configuration handling without external dependencies
     """
     
-    def setUp(self):
+    def setup_method(self, method):
         """Set up test environment"""
+        super().setup_method(method)
         if not IMPORTS_AVAILABLE:
             self.skipTest("Auth service imports not available")
     
