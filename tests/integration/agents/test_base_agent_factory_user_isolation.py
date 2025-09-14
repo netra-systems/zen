@@ -260,9 +260,9 @@ class IsolatingAgentFactory:
 class TestBaseAgentFactoryUserIsolation(SSotAsyncTestCase):
     """Integration tests for base agent factory user isolation patterns."""
     
-    def setUp(self):
+    async def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        await super().setUp()
         self.factory = IsolatingAgentFactory()
         self.test_start_time = time.time()
         

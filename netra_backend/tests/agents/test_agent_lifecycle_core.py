@@ -43,7 +43,7 @@ class ConcreteAgentLifecycle(AgentLifecycleMixin):
         self.start_time = None
         self.end_time = None
         self._lifecycle_state = SubAgentLifecycle.PENDING
-        self.timing_collector = ExecutionTimingCollector(correlation_id=f"test-{name}")
+        self.timing_collector = ExecutionTimingCollector(agent_name=f"test-{name}")
         self.context = {}  # Protected context for cleanup testing
         
         # Mock WebSocket methods

@@ -208,9 +208,9 @@ class ThreadSafeAgentRegistry:
 class TestAgentRegistryConcurrentAccess(SSotAsyncTestCase):
     """Integration tests for concurrent agent registry access patterns."""
     
-    def setUp(self):
+    async def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        await super().setUp()
         self.registry = ThreadSafeAgentRegistry()
         self.test_start_time = time.time()
     

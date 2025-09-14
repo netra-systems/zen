@@ -275,9 +275,9 @@ class MockAgent(BaseAgent):
 class TestAgentWebSocketEventDeliveryNoDB(SSotAsyncTestCase):
     """Integration tests for agent WebSocket event delivery without database dependencies."""
     
-    def setUp(self):
+    async def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        await super().setUp()
         self.test_start_time = time.time()
         
     @pytest.mark.integration

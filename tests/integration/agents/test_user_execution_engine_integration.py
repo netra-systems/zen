@@ -197,9 +197,9 @@ class MockToolDispatcher:
 class TestUserExecutionEngineIntegration(SSotAsyncTestCase):
     """Integration tests for user execution engine patterns and coordination."""
     
-    def setUp(self):
+    async def setUp(self):
         """Set up test fixtures."""
-        super().setUp()
+        await super().setUp()
         self.test_start_time = time.time()
         
     @pytest.mark.integration
