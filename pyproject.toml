@@ -118,6 +118,7 @@ markers = [
     "asyncio: Asynchronous test functions",
     "websocket: WebSocket-related tests",
     "golden_path: Golden path user flow tests",
+    "agent_goldenpath: Agent golden path message tests",
     "deployment: Deployment-related tests",
     "regression: Regression prevention tests",
     "timeout: Tests with custom timeout settings",
@@ -635,8 +636,22 @@ markers = [
     # Missing supervisor orchestration marker causing collection failures
     "supervisor_orchestration: Supervisor orchestration and multi-user isolation tests",
     
-    # Missing agent_handoff_chain marker causing collection failures  
+    # Missing agent_handoff_chain marker causing collection failures
     "agent_handoff_chain: Agent handoff chain coordination tests",
+
+    # Issue #861 Phase 1 Integration Test Markers
+    "websocket_flow: WebSocket message flow integration tests",
+    "agent_execution_logic: Agent execution logic and workflow tests",
+    "business_logic_flow: End-to-end business logic flow tests",
+    "e2e_business_logic: End-to-end business logic integration tests",
+    "agent_execution: Agent execution integration tests",
+
+    # Issue #861 Phase 2 E2E Test Markers - Missing markers for new test files
+    "concurrent_scenarios: Concurrent user scenario tests for multi-user validation",
+    "advanced_features: Advanced agent feature tests for golden path enhancements",
+    "error_recovery: Error recovery and resilience tests for system stability",
+    "performance_validation: Performance validation tests for system efficiency",
+    "security_edge_cases: Security edge case tests for authorization and isolation",
 ]
 
 # Coverage settings

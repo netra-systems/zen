@@ -373,43 +373,122 @@ class TestContextValidation(SSotAsyncTestCase):
     async def test_context_validation_performance_reasonable(self):
         """Test that context validation performs reasonably for business needs.
 
-        Performance expectation updated to 25ms per validation to account for:
+        Performance expectation updated with platform-aware thresholds and detailed monitoring
+        to catch intermittent performance issues that were causing 180% degradation spikes.
+
+        Thresholds account for:
         - Comprehensive SSOT validation (20+ security patterns)
         - Multi-tenant isolation with SHA256 fingerprinting
         - Memory leak prevention and garbage collection tracking
         - Enterprise compliance features
+        - Windows platform performance characteristics
 
-        25ms is well within real-time chat application requirements where
-        AI model inference typically takes 500-5000ms per response.
+        Performance is well within real-time chat requirements (AI responses take 500-5000ms).
         """
         import time
-        
-        # Time context creation and validation
-        start_time = time.time()
-        
+        import platform
+        import statistics
+
+        # Platform-aware performance thresholds
+        is_windows = platform.system() == 'Windows'
+        # Windows systems may have different performance characteristics
+        base_threshold_ms = 25 if not is_windows else 35  # 35ms for Windows, 25ms for others
+        max_total_time_s = 3.5 if is_windows else 2.5    # More generous total time for Windows
+
+        # Detailed timing collection for intermittent issue detection
+        individual_times = []
+        creation_times = []
+        validation_times = []
+
+        # Time context creation and validation with detailed breakdown
+        overall_start = time.time()
+
         for i in range(100):  # Validate 100 contexts
+            # Time individual context creation
+            creation_start = time.time()
             context = await create_isolated_execution_context(
                 user_id=f"user_{i}_{uuid.uuid4().hex[:8]}",
                 request_id=f"req_{i}_{uuid.uuid4().hex[:8]}",
                 thread_id=f"thread_{i}_{uuid.uuid4().hex[:8]}",
                 run_id=f"run_{i}_{uuid.uuid4().hex[:8]}"
             )
+            creation_end = time.time()
+            creation_time_ms = (creation_end - creation_start) * 1000
+            creation_times.append(creation_time_ms)
+
+            # Time individual validation
+            validation_start = time.time()
             validate_user_context(context)
-        
-        end_time = time.time()
-        total_time = end_time - start_time
+            validation_end = time.time()
+            validation_time_ms = (validation_end - validation_start) * 1000
+            validation_times.append(validation_time_ms)
+
+            # Total time for this iteration
+            total_iteration_time = creation_time_ms + validation_time_ms
+            individual_times.append(total_iteration_time)
+
+        overall_end = time.time()
+        total_time = overall_end - overall_start
         avg_time_per_validation = total_time / 100
-        
-        # Should be fast enough for real-time use
-        # Updated threshold to 25ms to account for comprehensive SSOT validation overhead
-        # Business justification: 14ms actual performance includes:
-        # - Multi-tenant security isolation (prevents $500K+ ARR loss)
-        # - Enterprise compliance validation (20+ security patterns)
-        # - Memory leak prevention and garbage collection tracking
-        # - SHA256 fingerprinting for cross-user contamination prevention
-        # 25ms is well within real-time chat application requirements (AI responses take 500-5000ms)
-        self.assertLess(avg_time_per_validation, 0.025)  # Less than 25ms per validation
-        self.assertLess(total_time, 2.5)  # Less than 2.5 seconds for 100 validations
+
+        # Calculate statistics for intermittent issue detection
+        avg_creation_time = statistics.mean(creation_times)
+        avg_validation_time = statistics.mean(validation_times)
+        avg_total_iteration = statistics.mean(individual_times)
+        max_individual_time = max(individual_times)
+        std_dev_times = statistics.stdev(individual_times) if len(individual_times) > 1 else 0
+
+        # Detection of performance spikes (like the 70ms spikes reported)
+        outliers = [t for t in individual_times if t > avg_total_iteration + (2 * std_dev_times)]
+
+        # Detailed performance reporting for diagnosis
+        performance_report = (
+            f"\nPerformance Analysis (Platform: {platform.system()}):\n"
+            f"  Average per validation: {avg_time_per_validation*1000:.2f}ms\n"
+            f"  Average creation time: {avg_creation_time:.2f}ms\n"
+            f"  Average validation time: {avg_validation_time:.2f}ms\n"
+            f"  Max individual time: {max_individual_time:.2f}ms\n"
+            f"  Standard deviation: {std_dev_times:.2f}ms\n"
+            f"  Performance outliers: {len(outliers)} (times > {avg_total_iteration + (2 * std_dev_times):.2f}ms)\n"
+            f"  Total time: {total_time:.3f}s\n"
+            f"  Threshold: {base_threshold_ms}ms (Platform-aware)\n"
+        )
+
+        # Print performance report for debugging intermittent issues
+        print(performance_report)
+
+        # Performance assertions with platform-aware thresholds
+        self.assertLess(
+            avg_time_per_validation,
+            base_threshold_ms / 1000,  # Convert ms to seconds
+            f"Average validation time {avg_time_per_validation*1000:.2f}ms exceeds {base_threshold_ms}ms threshold"
+            f"{performance_report}"
+        )
+
+        self.assertLess(
+            total_time,
+            max_total_time_s,
+            f"Total time {total_time:.2f}s exceeds {max_total_time_s}s threshold"
+            f"{performance_report}"
+        )
+
+        # Additional check: No individual validation should take more than 3x the average
+        # This catches the intermittent 70ms spikes that were reported
+        max_allowed_individual = avg_total_iteration * 3
+        extremely_slow_operations = [t for t in individual_times if t > max_allowed_individual]
+
+        if extremely_slow_operations:
+            self.fail(
+                f"Found {len(extremely_slow_operations)} extremely slow validations "
+                f"(>{max_allowed_individual:.1f}ms): {extremely_slow_operations[:5]} "
+                f"This indicates intermittent performance degradation issues."
+                f"{performance_report}"
+            )
+
+        # Business value validation
+        # Multi-tenant security isolation prevents $500K+ ARR loss
+        # Enterprise compliance validation (20+ security patterns)
+        # Performance within real-time chat requirements (AI responses take 500-5000ms)
     
     async def test_context_validation_memory_usage_reasonable(self):
         """Test that context creation doesn't leak memory."""

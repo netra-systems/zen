@@ -2,9 +2,9 @@ from shared.isolated_environment import IsolatedEnvironment
 import asyncio
 
 
-class TestWebSocketConnection:
+class MockWebSocketConnection:
     """Real WebSocket connection for testing instead of mocks."""
-    
+
     def __init__(self):
         pass
         self.messages_sent = []

@@ -4,7 +4,7 @@ from test_framework.docker.unified_docker_manager import UnifiedDockerManager
 from test_framework.database.test_database_manager import DatabaseTestManager
 from netra_backend.app.redis_manager import redis_manager
 from auth_service.core.auth_manager import AuthManager
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
 from shared.isolated_environment import IsolatedEnvironment
 # REMOVED_SYNTAX_ERROR: '''

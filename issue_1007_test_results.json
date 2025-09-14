@@ -1,0 +1,61 @@
+{
+  "environment_config": {
+    "service_secret_env": true,
+    "service_secret_length": 49,
+    "service_id_env": true,
+    "config_service_secret": true,
+    "config_service_id": true,
+    "environment_type": "test"
+  },
+  "auth_client_init": {
+    "client_initialized": true,
+    "service_id_configured": true,
+    "service_secret_configured": true,
+    "auth_service_enabled": false,
+    "auth_service_url": "http://localhost:8001"
+  },
+  "header_generation": {
+    "headers_generated": true,
+    "service_id_header": true,
+    "service_secret_header": true,
+    "header_count": 2,
+    "header_keys": [
+      "X-Service-ID",
+      "X-Service-Secret"
+    ]
+  },
+  "service_communication": {
+    "error": "'AuthServiceClient' object has no attribute 'check_service_availability'"
+  },
+  "api_signature": {
+    "expected_request": {
+      "headers": [
+        "X-Service-ID",
+        "X-Service-Secret"
+      ],
+      "body_format": "JSON",
+      "required_fields": [
+        "token"
+      ]
+    },
+    "expected_response": {
+      "success_fields": [
+        "valid",
+        "user_id",
+        "exp"
+      ],
+      "error_fields": [
+        "valid",
+        "error",
+        "message"
+      ]
+    },
+    "compatibility_check": "pending"
+  },
+  "summary": {
+    "total_tests": 5,
+    "failed_tests": 1,
+    "success_rate": 80.0,
+    "reproduction_success": false
+  }
+}

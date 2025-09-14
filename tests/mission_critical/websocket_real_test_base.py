@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 # CRITICAL: Use real services - import from proper locations
 from shared.isolated_environment import get_env
-from test_framework.test_context import TestContext, TestUserContext
+from test_framework.test_context import WebSocketTestContext, TestUserContext
 from test_framework.unified_docker_manager import UnifiedDockerManager, EnvironmentType, ServiceHealth
 from test_framework.websocket_helpers import (
     WebSocketTestHelpers, 
@@ -823,7 +823,7 @@ class RealWebSocketTestBase:
         
         # Connection management
         self.connection_pool = WebSocketConnectionPool()
-        self.test_contexts: List[TestContext] = []
+        self.test_contexts: List[WebSocketTestContext] = []
         
         # Event and performance tracking
         self.performance_monitor = WebSocketPerformanceMonitor()
@@ -982,16 +982,16 @@ class RealWebSocketTestBase:
         self,
         user_id: Optional[str] = None,
         jwt_token: Optional[str] = None
-    ) -> TestContext:
+    ) -> WebSocketTestContext:
         """
-        Create a TestContext with real WebSocket connection.
+        Create a WebSocketTestContext with real WebSocket connection.
         
         Args:
             user_id: Optional user ID for testing
             jwt_token: Optional JWT token for authentication
             
         Returns:
-            TestContext with real WebSocket capabilities
+            WebSocketTestContext with real WebSocket capabilities
         """
         if not user_id:
             user_id = f"test_user_{uuid.uuid4().hex[:8]}"
@@ -1001,8 +1001,8 @@ class RealWebSocketTestBase:
         if jwt_token:
             user_context.jwt_token = jwt_token
         
-        # Create TestContext
-        test_context = TestContext(
+        # Create WebSocketTestContext
+        test_context = WebSocketTestContext(
             user_context=user_context,
             websocket_timeout=self.config.connection_timeout,
             event_timeout=self.config.event_timeout
@@ -1014,18 +1014,18 @@ class RealWebSocketTestBase:
     async def create_test_context_with_user_context(
         self,
         user_context: TestUserContext
-    ) -> TestContext:
+    ) -> WebSocketTestContext:
         """
-        Create a TestContext with existing user context.
+        Create a WebSocketTestContext with existing user context.
 
         Args:
             user_context: Existing TestUserContext to use
 
         Returns:
-            TestContext with real WebSocket capabilities
+            WebSocketTestContext with real WebSocket capabilities
         """
-        # Create TestContext with provided user context
-        test_context = TestContext(
+        # Create WebSocketTestContext with provided user context
+        test_context = WebSocketTestContext(
             user_context=user_context,
             websocket_timeout=self.config.connection_timeout,
             event_timeout=self.config.event_timeout
@@ -1036,7 +1036,7 @@ class RealWebSocketTestBase:
 
     async def validate_agent_events(
         self,
-        test_context: TestContext,
+        test_context: WebSocketTestContext,
         required_events: Optional[Set[str]] = None,
         timeout: float = 30.0
     ) -> EventValidationResult:
@@ -1044,7 +1044,7 @@ class RealWebSocketTestBase:
         Validate that required agent events are received through real WebSocket.
         
         Args:
-            test_context: TestContext to validate events for
+            test_context: WebSocketTestContext to validate events for
             required_events: Set of required event types
             timeout: Maximum time to wait for events
             
@@ -1367,7 +1367,7 @@ async def real_websocket_connection(real_websocket_test_base):
 
 @pytest.fixture
 async def real_test_context(real_websocket_test_base):
-    """Pytest fixture providing a TestContext with real WebSocket."""
+    """Pytest fixture providing a WebSocketTestContext with real WebSocket."""
     context = await real_websocket_test_base.create_test_context()
     await context.setup_websocket_connection(endpoint="/ws/test", auth_required=False)
     yield context
@@ -1375,7 +1375,7 @@ async def real_test_context(real_websocket_test_base):
 
 @pytest.fixture
 async def multiple_real_test_contexts(real_websocket_test_base):
-    """Pytest fixture providing multiple TestContexts with real WebSockets."""
+    """Pytest fixture providing multiple WebSocketTestContexts with real WebSockets."""
     contexts = []
     for i in range(3):
         context = await real_websocket_test_base.create_test_context(
@@ -1390,7 +1390,7 @@ async def multiple_real_test_contexts(real_websocket_test_base):
 # Utility functions for common test patterns
 
 async def assert_agent_events_received(
-    test_context: TestContext,
+    test_context: WebSocketTestContext,
     required_events: Optional[Set[str]] = None,
     timeout: float = 30.0
 ) -> None:
@@ -1428,7 +1428,7 @@ async def assert_agent_events_received(
 
 
 async def send_test_agent_request(
-    test_context: TestContext,
+    test_context: WebSocketTestContext,
     agent_name: str = "test_agent",
     task: str = "Perform a simple test task"
 ) -> Dict[str, Any]:

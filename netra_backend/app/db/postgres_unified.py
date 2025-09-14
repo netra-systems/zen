@@ -14,7 +14,7 @@ from typing import AsyncGenerator, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.config import get_config
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -40,7 +40,7 @@ class UnifiedPostgresDB:
         self._database_manager = DatabaseManager
         
         # Detect environment from unified config for compatibility
-        config = get_unified_config()
+        config = get_config()
         from netra_backend.app.core.environment_constants import EnvironmentDetector
         self.is_cloud_run = EnvironmentDetector.is_cloud_run()
         self.is_staging = config.environment == "staging"

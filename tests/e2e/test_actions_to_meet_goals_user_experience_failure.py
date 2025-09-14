@@ -52,7 +52,8 @@ from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 # Database and state management
 from netra_backend.app.db.database_manager import DatabaseManager
-from netra_backend.app.schemas.agent_models import DeepAgentState, OptimizationsResult
+from netra_backend.app.schemas.agent_models import DeepAgentState
+from netra_backend.app.agents.state import OptimizationsResult
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse
 
 

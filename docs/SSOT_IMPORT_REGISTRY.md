@@ -30,14 +30,16 @@ from netra_backend.app.services.user_execution_context import create_isolated_ex
 # WebSocket Agent Bridge (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
 
-# WebSocket Manager (CRITICAL - VERIFIED 2025-09-11)
-from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager, WebSocketManager
+# WebSocket Manager (CRITICAL - UPDATED 2025-09-14 - Issue #996 Cleanup)
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager, get_websocket_manager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketConnection, WebSocketManagerMode
 
 # Request Scoped Execution (VERIFIED 2025-09-11)
 from netra_backend.app.agents.supervisor.request_scoped_execution_engine import RequestScopedExecutionEngine
 
-# Execution Factory Pattern (VERIFIED 2025-09-11)
-from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory, ExecutionEngineFactory, ExecutionFactoryConfig
+# Execution Factory Pattern (FIXED 2025-01-14 - Issue #1004)
+from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory, get_execution_engine_factory, configure_execution_engine_factory
+from netra_backend.app.core.managers.execution_engine_factory import ExecutionEngineFactory  # COMPATIBILITY ALIAS - Use supervisor version for new code
 
 # ExecutionEngine - SSOT Pattern (FIXED 2025-09-12)
 from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine  # RECOMMENDED: Use alias for backward compatibility
@@ -110,6 +112,17 @@ from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # �
 # AVAILABLE: CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
 
 # CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
+
+# CRITICAL: Fixed 2025-01-14 - ExecutionEngineFactory import path issue (Issue #1004)
+from netra_backend.app.agents.supervisor.execution_factory import ExecutionEngineFactory  # ❌ BROKEN PATH - Module does not exist
+from netra_backend.app.services.user_execution_context import ExecutionEngineFactory  # ❌ BROKEN IMPORT - Not available in user_execution_context
+# USE INSTEAD: from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
+
+# ISSUE #996 FIX: WebSocket Import Deprecations (2025-09-14)
+from netra_backend.app.websocket_core import WebSocketManager  # ⚠️ DEPRECATED (generates warnings)
+# USE INSTEAD: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager  # ⚠️ LEGACY
+# USE INSTEAD: from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.schemas.agent_schemas import RequestModel  # ❌ BROKEN PATH
 # USE INSTEAD: from netra_backend.app.schemas.request import RequestModel
 from netra_backend.app.schemas.agent_schemas import AgentExecutionResult  # ❌ BROKEN PATH
@@ -844,4 +857,16 @@ Components still containing DeepAgentState imports (non-critical or deprecated):
 - **✅ User Isolation**: Cross-user contamination risks eliminated in critical paths
 
 **STATUS**: Phase 1 COMPLETE - Critical infrastructure secured. Issue #271 remediation 60% complete.
+
+## RECENT FIXES (2025-09-14)
+
+### SessionManager Import Fix
+- **Problem**: Tests failing due to missing `auth_service.auth_core.core.session_manager` module
+- **Solution**: Created compatibility SessionManager class wrapping JWTHandler functionality
+- **Import Path**: `from auth_service.auth_core.core.session_manager import SessionManager`
+- **SSOT Compliance**: SessionManager delegates to JWTHandler (maintains single source of truth)
+- **Test Impact**: Fixed 2 E2E test collection failures:
+  - `tests/e2e/test_auth_race_conditions_core.py`
+  - `tests/e2e/test_cold_start_critical_issues.py`
+- **Interface**: Provides `create_session()`, `validate_session()`, `invalidate_session()` methods
 

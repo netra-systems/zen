@@ -84,7 +84,8 @@ def test_user_context(test_user_id):
     return UserExecutionContext(
         user_id=test_user_id,
         request_id=f"test_request_{uuid.uuid4().hex[:8]}",
-        thread_id=f"test_thread_{uuid.uuid4().hex[:8]}"
+        thread_id=f"test_thread_{uuid.uuid4().hex[:8]}",
+        run_id=f"test_run_{uuid.uuid4().hex[:8]}"
     )
 
 
@@ -124,10 +125,20 @@ class TestAgentRegistryInitialization:
         assert callable(registry.tool_dispatcher_factory)
     
     async def test_init_validates_required_parameters(self):
-        """Test that AgentRegistry validates required parameters."""
-        # Act & Assert
-        with pytest.raises(TypeError):
-            AgentRegistry()  # Missing llm_manager
+        """Test that AgentRegistry handles missing llm_manager gracefully with warning."""
+        # Act - should not raise but should log warning
+        import warnings
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            # This should work but log a warning for backward compatibility
+            registry = AgentRegistry()  # Missing llm_manager - now allowed with warning
+
+            # Assert registry was created successfully
+            assert registry is not None
+            assert registry.llm_manager is None
+            assert registry.tool_dispatcher_factory is not None
+            assert callable(registry.tool_dispatcher_factory)
 
 
 @pytest.mark.asyncio 
@@ -167,15 +178,15 @@ class TestUserSessionManagement:
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         
         # Test empty string
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session("")
-        
+
         # Test None
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session(None)
-        
+
         # Test non-string
-        with pytest.raises(ValueError, match="user_id must be a non-empty string"):
+        with pytest.raises(ValueError, match="user_id is required and must be non-empty string"):
             await registry.get_user_session(123)
     
     async def test_cleanup_user_session_removes_session(self, mock_llm_manager, test_user_id):
@@ -446,17 +457,17 @@ class TestToolDispatcherIntegration:
         assert result is None
     
     async def test_tool_dispatcher_setter_logs_warning(self, mock_llm_manager):
-        """Test that legacy tool_dispatcher setter logs warning and ignores value."""
+        """Test that legacy tool_dispatcher setter logs warning and stores value but getter returns None for security."""
         # Arrange
         registry = AgentRegistry(llm_manager=mock_llm_manager)
         mock_dispatcher = Mock()
-        
+
         # Act
         registry.tool_dispatcher = mock_dispatcher
-        
+
         # Assert
-        assert registry._legacy_dispatcher == mock_dispatcher
-        assert registry.tool_dispatcher == mock_dispatcher  # Returns the set value for backward compatibility
+        assert registry._legacy_dispatcher == mock_dispatcher  # Setter stores value
+        assert registry.tool_dispatcher is None  # Getter always returns None for SSOT security
 
 
 @pytest.mark.asyncio

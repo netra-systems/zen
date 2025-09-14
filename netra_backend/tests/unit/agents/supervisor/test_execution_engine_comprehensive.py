@@ -56,7 +56,7 @@ sys.modules['netra_backend.app.websocket_core.get_websocket_manager'] = Mock()
 
 try:
     # Import execution engine components with compatibility bridge
-    from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
     from netra_backend.app.agents.supervisor.execution_engine_factory import (
         create_request_scoped_engine,
     )

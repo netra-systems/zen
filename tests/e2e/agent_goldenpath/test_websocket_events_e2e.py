@@ -65,10 +65,9 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Setup staging environment for WebSocket event testing."""
-        super().setUpClass()
-        
+
         # Initialize staging configuration
         cls.staging_config = get_staging_config()
         cls.logger = logging.getLogger(__name__)
@@ -101,19 +100,19 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         cls.logger.info(f"WebSocket events e2e tests initialized for staging")
 
-    def setUp(self):
+    def setup_method(self, method):
         """Setup for each test method."""
-        super().setUp()
+        super().setup_method(method)
         
         # Generate test-specific context
         self.thread_id = f"ws_events_test_{int(time.time())}"
         self.run_id = f"run_{self.thread_id}"
         
         # Create JWT token for this test
-        self.access_token = self.auth_helper.create_test_jwt_token(
-            user_id=self.test_user_id,
-            email=self.test_user_email,
-            expires_in_hours=1
+        self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+            user_id=self.__class__.test_user_id,
+            email=self.__class__.test_user_email,
+            exp_minutes=60
         )
         
         self.logger.info(f"WebSocket events test setup - thread_id: {self.thread_id}")
@@ -137,6 +136,24 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         STATUS: Should PASS - Critical events are fundamental to user experience
         """
         events_start_time = time.time()
+
+        # Initialize class attributes if not already done
+        if not hasattr(self.__class__, 'logger'):
+            self.__class__.setUpClass()
+
+        # Initialize instance attributes if not already done
+        if not hasattr(self, 'access_token'):
+            # Generate test-specific user context
+            self.thread_id = f"websocket_events_test_{int(time.time())}"
+            self.run_id = f"run_{self.thread_id}"
+
+            # Create JWT token for this test
+            self.access_token = self.__class__.auth_helper.create_test_jwt_token(
+                user_id=self.__class__.test_user_id,
+                email=self.__class__.test_user_email,
+                exp_minutes=60
+            )
+
         self.logger.info("🔥 Testing ALL 5 critical WebSocket events delivery")
         
         # Track event delivery metrics
@@ -158,8 +175,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             connection_start = time.time()
             websocket = await asyncio.wait_for(
                 websockets.connect(
-                    self.staging_config.urls.websocket_url,
-                    extra_headers={
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Test-Suite": "critical-events-validation"
@@ -185,7 +202,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 ),
                 "thread_id": self.thread_id,
                 "run_id": self.run_id,
-                "user_id": self.test_user_id,
+                "user_id": self.__class__.test_user_id,
                 "context": {
                     "test_scenario": "critical_events_validation",
                     "requires_tool_usage": True,
@@ -413,8 +430,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             
             websocket = await asyncio.wait_for(
                 websockets.connect(
-                    self.staging_config.urls.websocket_url,
-                    extra_headers={
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging", 
                         "X-Test-Suite": "event-timing-performance"
@@ -431,7 +448,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                     "agent": test_scenario["agent"],
                     "message": test_scenario["message"],
                     "thread_id": f"timing_test_{test_scenario['name']}_{int(time.time())}",
-                    "user_id": self.test_user_id
+                    "user_id": self.__class__.test_user_id
                 }
                 
                 request_sent_time = time.time()
@@ -558,8 +575,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
-                extra_headers={
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "event-resilience-recovery"
@@ -576,7 +593,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 "agent": "triage_agent",
                 "message": "Test message for resilience testing",
                 "thread_id": f"resilience_test_{int(time.time())}",
-                "user_id": self.test_user_id
+                "user_id": self.__class__.test_user_id
             }
             
             await websocket.send(json.dumps(message))
@@ -600,8 +617,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             # Reconnect
             websocket = await asyncio.wait_for(
                 websockets.connect(
-                    self.staging_config.urls.websocket_url,
-                    extra_headers={
+                    self.__class__.staging_config.urls.websocket_url,
+                    additional_headers={
                         "Authorization": f"Bearer {self.access_token}",
                         "X-Environment": "staging",
                         "X-Connection": "recovery"
@@ -617,7 +634,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 "agent": "triage_agent", 
                 "message": "Recovery test message after connection interruption",
                 "thread_id": f"recovery_test_{int(time.time())}",
-                "user_id": self.test_user_id
+                "user_id": self.__class__.test_user_id
             }
             
             await websocket.send(json.dumps(recovery_message))
@@ -663,8 +680,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
             try:
                 ws = await asyncio.wait_for(
                     websockets.connect(
-                        self.staging_config.urls.websocket_url,
-                        extra_headers={
+                        self.__class__.staging_config.urls.websocket_url,
+                        additional_headers={
                             "Authorization": f"Bearer {self.access_token}",
                             "X-Environment": "staging",
                             "X-Stream-ID": str(stream_id)
@@ -680,7 +697,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                     "agent": "triage_agent",
                     "message": f"Concurrent stream {stream_id} test message",
                     "thread_id": f"concurrent_stream_{stream_id}_{int(time.time())}",
-                    "user_id": self.test_user_id
+                    "user_id": self.__class__.test_user_id
                 }
                 
                 await ws.send(json.dumps(message))
@@ -772,8 +789,8 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
         
         websocket = await asyncio.wait_for(
             websockets.connect(
-                self.staging_config.urls.websocket_url,
-                extra_headers={
+                self.__class__.staging_config.urls.websocket_url,
+                additional_headers={
                     "Authorization": f"Bearer {self.access_token}",
                     "X-Environment": "staging",
                     "X-Test-Suite": "event-data-validation"
@@ -794,7 +811,7 @@ class TestWebSocketEventsE2E(SSotAsyncTestCase):
                 ),
                 "thread_id": f"data_validation_test_{int(time.time())}",
                 "run_id": f"data_val_run_{int(time.time())}",
-                "user_id": self.test_user_id
+                "user_id": self.__class__.test_user_id
             }
             
             await websocket.send(json.dumps(message))

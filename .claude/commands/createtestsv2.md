@@ -21,7 +21,7 @@ TEST_TYPE = ${2 : unit} tests.
 
 If TEST_TYPE == integration: then do non-docker integration tests
 
-REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 10 TIMES.
+REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 3 TIMES.
 
 AGENT_SESSION_ID = agent-session-{date}-{time}
 
@@ -82,5 +82,3 @@ PROCESS INSTRUCTIONS START:
         6.6) Safely merge PR
 
 END PROCESS INSTRUCTIONS
-
-You MUST repeat the entire PROCESS UNTIL ALL TESTS PASS OR stop after 10 PROCESS CYCLES

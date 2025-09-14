@@ -232,37 +232,99 @@ class UserScopedWebSocketEventRouter:
             return result
     
     async def broadcast_to_user(self, event: Dict[str, Any]) -> int:
-        """
-        Broadcast event to all connections for this user.
-        
+        """ISSUE #982 ADAPTER: Broadcast event to all connections for this user.
+
+        This method is now an adapter that delegates to the SSOT WebSocketBroadcastService
+        while maintaining user-scoped context and the original interface.
+
         Args:
             event: Event payload
-            
+
         Returns:
-            int: Number of successful sends
+            int: Number of successful sends (legacy compatibility)
         """
         async with self._lock:
             self.registry.update_access_time()
             self.registry.routing_count += 1
-            
-            # Add user context to event for validation
-            enriched_event = event.copy()
-            enriched_event.update({
-                'user_id': self.user_context.user_id,
-                'request_id': self.user_context.request_id
-            })
-            
-            result = await self.registry.router.broadcast_to_user(
-                user_id=self.user_context.user_id,
-                event=enriched_event
-            )
-            
-            logger.debug(
-                f"Event broadcasted for user {self.user_context.user_id[:8]}...: "
-                f"{event.get('type', 'unknown')} (sent to {result} connections)"
-            )
-            
-            return result
+
+            try:
+                # ISSUE #982 SSOT CONSOLIDATION: Delegate to WebSocketBroadcastService
+                # Import here to avoid circular dependency
+                from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
+
+                # Get WebSocket manager from registry
+                websocket_manager = getattr(self.registry, 'websocket_manager', None)
+                if not websocket_manager:
+                    # Try to get from router
+                    websocket_manager = getattr(self.registry.router, 'websocket_manager', None)
+
+                if not websocket_manager:
+                    logger.error(
+                        f"ADAPTER ERROR: No WebSocket manager available for SSOT broadcast. "
+                        f"User {self.user_context.user_id[:8]}... will not receive event {event.get('type', 'unknown')}"
+                    )
+                    return 0
+
+                # Create SSOT broadcast service
+                broadcast_service = create_broadcast_service(websocket_manager)
+
+                # Add user context to event for validation (preserve existing behavior)
+                enriched_event = event.copy()
+                enriched_event.update({
+                    'user_id': self.user_context.user_id,
+                    'request_id': self.user_context.request_id
+                })
+
+                # Delegate to SSOT implementation with user context
+                result = await broadcast_service.broadcast_to_user(
+                    self.user_context.user_id,
+                    enriched_event
+                )
+
+                # Log adapter usage for migration tracking
+                logger.debug(
+                    f"ADAPTER: UserScopedWebSocketEventRouter delegated to SSOT service. "
+                    f"User: {self.user_context.user_id[:8]}..., Event: {event.get('type', 'unknown')}, "
+                    f"Result: {result.successful_sends}/{result.connections_attempted}"
+                )
+
+                return result.successful_sends
+
+            except Exception as e:
+                # Fallback error handling for adapter failures
+                logger.error(
+                    f"ADAPTER FAILURE: SSOT delegation failed for user {self.user_context.user_id[:8]}..., "
+                    f"event {event.get('type', 'unknown')}: {e}"
+                )
+
+                # Emergency fallback to legacy implementation via registry router
+                logger.warning("Falling back to legacy broadcast via registry router")
+                return await self._legacy_broadcast_to_user(event)
+
+    async def _legacy_broadcast_to_user(self, event: Dict[str, Any]) -> int:
+        """Legacy broadcast implementation as emergency fallback.
+
+        This method preserves the original registry router delegation for emergency fallback
+        if the SSOT adapter fails. Should only be used in exceptional cases.
+        """
+        # Add user context to event for validation
+        enriched_event = event.copy()
+        enriched_event.update({
+            'user_id': self.user_context.user_id,
+            'request_id': self.user_context.request_id
+        })
+
+        result = await self.registry.router.broadcast_to_user(
+            user_id=self.user_context.user_id,
+            event=enriched_event
+        )
+
+        logger.debug(
+            f"LEGACY: Event broadcasted for user {self.user_context.user_id[:8]}...: "
+            f"{event.get('type', 'unknown')} (sent to {result} connections)"
+        )
+
+        return result
     
     async def get_user_connections(self) -> List[str]:
         """
@@ -544,18 +606,89 @@ async def route_user_event(event: Dict[str, Any],
 
 async def broadcast_user_event(event: Dict[str, Any],
                               user_context: UserExecutionContext) -> int:
-    """
-    Convenience function to broadcast an event to all connections for a specific user.
-    
+    """ISSUE #982 ADAPTER: Convenience function to broadcast an event to a specific user.
+
+    This function is now an adapter that delegates to the SSOT WebSocketBroadcastService
+    while maintaining the original convenience interface for backward compatibility.
+
     Args:
         event: Event data to broadcast
         user_context: UserExecutionContext for isolation
-        
+
     Returns:
-        int: Number of successful sends
+        int: Number of successful sends (legacy compatibility)
+    """
+    try:
+        # ISSUE #982 SSOT CONSOLIDATION: Direct delegation to WebSocketBroadcastService
+        # Import here to avoid circular dependency
+        from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
+
+        # Get WebSocket manager from application context
+        try:
+            # Try to get manager from existing patterns
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
+
+            # Create manager with user context for proper isolation
+            websocket_manager = WebSocketManager(user_context=user_context)
+
+        except Exception as manager_error:
+            logger.error(
+                f"ADAPTER ERROR: Could not create WebSocket manager for SSOT broadcast. "
+                f"User {user_context.user_id[:8]}...: {manager_error}"
+            )
+            return 0
+
+        # Create SSOT broadcast service
+        broadcast_service = create_broadcast_service(websocket_manager)
+
+        # Add user context to event for validation (preserve existing behavior)
+        enriched_event = event.copy()
+        enriched_event.update({
+            'user_id': user_context.user_id,
+            'request_id': user_context.request_id,
+            'thread_id': user_context.thread_id
+        })
+
+        # Delegate to SSOT implementation
+        result = await broadcast_service.broadcast_to_user(user_context.user_id, enriched_event)
+
+        # Log adapter usage for migration tracking
+        logger.debug(
+            f"ADAPTER: broadcast_user_event delegated to SSOT service. "
+            f"User: {user_context.user_id[:8]}..., Event: {event.get('type', 'unknown')}, "
+            f"Result: {result.successful_sends}/{result.connections_attempted}"
+        )
+
+        return result.successful_sends
+
+    except Exception as e:
+        # Fallback error handling for adapter failures
+        logger.error(
+            f"ADAPTER FAILURE: SSOT delegation failed for user {user_context.user_id[:8]}..., "
+            f"event {event.get('type', 'unknown')}: {e}"
+        )
+
+        # Emergency fallback to legacy implementation
+        logger.warning("Falling back to legacy broadcast_user_event via router")
+        return await _legacy_broadcast_user_event(event, user_context)
+
+
+async def _legacy_broadcast_user_event(event: Dict[str, Any],
+                                       user_context: UserExecutionContext) -> int:
+    """Legacy broadcast_user_event implementation as emergency fallback.
+
+    This function preserves the original router creation pattern for emergency fallback
+    if the SSOT adapter fails. Should only be used in exceptional cases.
     """
     router = create_user_event_router(user_context)
-    return await router.broadcast_to_user(event)
+    result = await router.broadcast_to_user(event)
+
+    logger.debug(
+        f"LEGACY: broadcast_user_event via router for user {user_context.user_id[:8]}...: "
+        f"{event.get('type', 'unknown')} (sent to {result} connections)"
+    )
+
+    return result
 
 
 # Backward Compatibility Bridge
@@ -584,19 +717,72 @@ def get_websocket_router_with_context(user_context: Optional[UserExecutionContex
         return get_websocket_router(websocket_manager)
 
 
+# ISSUE #982 SSOT CONSOLIDATION: Additional module-level adapter functions for backward compatibility
+async def broadcast_to_user(user_id: str, event: Dict[str, Any]) -> int:
+    """ISSUE #982 ADAPTER: Module-level broadcast_to_user function that delegates to SSOT service.
+
+    This is a compatibility adapter that maintains the existing module-level interface
+    while delegating to the SSOT WebSocketBroadcastService implementation.
+
+    Args:
+        user_id: User to broadcast to
+        event: Event payload
+
+    Returns:
+        int: Number of successful sends (legacy compatibility)
+    """
+    # ISSUE #982 SSOT CONSOLIDATION: Direct delegation to WebSocketBroadcastService
+    try:
+        # Import here to avoid circular dependency
+        from netra_backend.app.services.websocket_broadcast_service import create_broadcast_service
+        from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+
+        # Get WebSocket manager instance
+        websocket_manager = UnifiedWebSocketManager()
+
+        # Create SSOT broadcast service
+        broadcast_service = create_broadcast_service(websocket_manager)
+
+        # Delegate to SSOT implementation
+        result = await broadcast_service.broadcast_to_user(user_id, event)
+
+        # Log adapter usage for migration tracking
+        logger.debug(
+            f"MODULE ADAPTER: user_scoped_websocket_event_router.broadcast_to_user delegated to SSOT service. "
+            f"User: {user_id[:8]}..., Event: {event.get('type', 'unknown')}, "
+            f"Result: {result.successful_sends}/{result.connections_attempted}"
+        )
+
+        # Return legacy-compatible integer result
+        return result.successful_sends
+
+    except Exception as e:
+        # Adapter failure handling
+        logger.error(
+            f"MODULE ADAPTER FAILURE: SSOT delegation failed for user {user_id[:8]}..., "
+            f"event {event.get('type', 'unknown')}: {e}"
+        )
+
+        # Return 0 to indicate failure in legacy-compatible way
+        return 0
+
+
 # SSOT Exports
 __all__ = [
     # Core classes
     "UserScopedWebSocketEventRouter",
     "WebSocketEventRouterFactory",
     "UserEventRoutingRegistry",
-    
+
     # Factory functions
     "get_event_router_factory",
     "create_user_event_router",
     "route_user_event",
     "broadcast_user_event",
-    
+
+    # Module-level adapters (ISSUE #982)
+    "broadcast_to_user",
+
     # Compatibility functions
     "get_websocket_router_with_context"
 ]

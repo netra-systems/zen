@@ -1,5 +1,5 @@
 from shared.isolated_environment import get_env
-from netra_backend.app.core.agent_registry import AgentRegistry
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from shared.isolated_environment import IsolatedEnvironment
 #!/usr/bin/env python
 """MISSION CRITICAL: WebSocket Bridge Lifecycle Audit 20250902

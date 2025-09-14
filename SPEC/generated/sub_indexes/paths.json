@@ -2,9 +2,9 @@
   "metadata": {
     "version": "3.0.0",
     "category": "paths",
-    "generated_at": "2025-09-13T20:38:38.706542",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
-    "total_literals": 1718
+    "generated_at": "2025-09-13T22:43:16.008107",
+    "root_directory": "C:\\GitHub\\netra-apex",
+    "total_literals": 1814
   },
   "literals": {
     "\"\n\n# Default to local build with checks\ncommand = [\n    sys.executable,\n    \"scripts/deploy_to_gcp.py\",\n    \"--project\", \"netra-staging\",\n    \"--build-local\",\n    \"--service-account\", SERVICE_ACCOUNT_KEY\n]\n\n# Add any additional arguments passed to this script\nif len(sys.argv) > 1:\n    command.extend(sys.argv[1:])\nelse:\n    # Default to running checks\n    command.append(\"--run-checks\")\n\n# Execute deployment\nsys.exit(subprocess.call(command))": {
@@ -1990,7 +1990,7 @@
       "value": "/auth/agents/{agent_id}",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1166"
+        "auth_service/auth_core/routes/auth_routes.py:1183"
       ]
     },
     "/auth/api-call": {
@@ -1998,7 +1998,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1594",
-        "auth_service/auth_core/routes/auth_routes.py:1220"
+        "auth_service/auth_core/routes/auth_routes.py:1238"
       ]
     },
     "/auth/callback": {
@@ -2036,7 +2036,7 @@
       "value": "/auth/callback?",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1425"
+        "auth_service/auth_core/routes/auth_routes.py:1446"
       ]
     },
     "/auth/callback?token=": {
@@ -2051,7 +2051,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1519",
-        "auth_service/auth_core/routes/auth_routes.py:1009"
+        "auth_service/auth_core/routes/auth_routes.py:1023"
       ]
     },
     "/auth/check-blacklist": {
@@ -2059,7 +2059,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1208",
-        "auth_service/auth_core/routes/auth_routes.py:912"
+        "auth_service/auth_core/routes/auth_routes.py:925"
       ]
     },
     "/auth/check-permission": {
@@ -2067,7 +2067,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1560",
-        "auth_service/auth_core/routes/auth_routes.py:1064"
+        "auth_service/auth_core/routes/auth_routes.py:1079"
       ]
     },
     "/auth/config": {
@@ -2075,7 +2075,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/cross_service_validators/contract_validators.py:121",
-        "auth_service/auth_core/routes/auth_routes.py:114",
+        "auth_service/auth_core/routes/auth_routes.py:115",
         "scripts/audit_oauth_gcp_logs.py:82",
         "scripts/audit_staging_auth_issues.py:85",
         "scripts/audit_staging_auth_issues.py:243",
@@ -2089,7 +2089,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1622",
-        "auth_service/auth_core/routes/auth_routes.py:1113"
+        "auth_service/auth_core/routes/auth_routes.py:1129"
       ]
     },
     "/auth/create-token": {
@@ -2097,7 +2097,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1353",
-        "auth_service/auth_core/routes/auth_routes.py:702"
+        "auth_service/auth_core/routes/auth_routes.py:712"
       ]
     },
     "/auth/dev-login": {
@@ -2112,8 +2112,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/auth_routes/dev_login.py:43",
-        "auth_service/auth_core/routes/auth_routes.py:156",
-        "auth_service/auth_core/routes/auth_routes.py:464"
+        "auth_service/auth_core/routes/auth_routes.py:157",
+        "auth_service/auth_core/routes/auth_routes.py:469"
       ]
     },
     "/auth/dev_login": {
@@ -2135,14 +2135,14 @@
       "value": "/auth/e2e/test-auth",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:511"
+        "auth_service/auth_core/routes/auth_routes.py:517"
       ]
     },
     "/auth/error?": {
       "value": "/auth/error?",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1354"
+        "auth_service/auth_core/routes/auth_routes.py:1374"
       ]
     },
     "/auth/error?message=": {
@@ -2185,7 +2185,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1318",
-        "auth_service/auth_core/routes/auth_routes.py:675"
+        "auth_service/auth_core/routes/auth_routes.py:684"
       ]
     },
     "/auth/health": {
@@ -2250,8 +2250,8 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:31",
         "netra_backend/app/routes/auth_routes/config_handler.py:87",
         "netra_backend/app/routes/auth_routes/config_handler.py:126",
-        "auth_service/auth_core/routes/auth_routes.py:152",
-        "auth_service/auth_core/routes/auth_routes.py:382"
+        "auth_service/auth_core/routes/auth_routes.py:153",
+        "auth_service/auth_core/routes/auth_routes.py:385"
       ]
     },
     "/auth/me": {
@@ -2260,8 +2260,8 @@
       "locations": [
         "netra_backend/app/routes/auth_routes/config_handler.py:89",
         "netra_backend/app/routes/auth_routes/config_handler.py:128",
-        "auth_service/auth_core/routes/auth_routes.py:155",
-        "auth_service/auth_core/routes/auth_routes.py:1438",
+        "auth_service/auth_core/routes/auth_routes.py:156",
+        "auth_service/auth_core/routes/auth_routes.py:1459",
         "scripts/verify_auth_config.py:33"
       ]
     },
@@ -2269,7 +2269,7 @@
       "value": "/auth/oauth/callback",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1330"
+        "auth_service/auth_core/routes/auth_routes.py:1350"
       ]
     },
     "/auth/oauth/config": {
@@ -2301,7 +2301,7 @@
         "netra_backend/app/clients/auth_client_core.py:1251",
         "netra_backend/app/middleware/fastapi_auth_middleware.py:300",
         "netra_backend/app/middleware/security_middleware.py:160",
-        "auth_service/auth_core/routes/auth_routes.py:172",
+        "auth_service/auth_core/routes/auth_routes.py:173",
         "scripts/audit_staging_auth_issues.py:161",
         "scripts/audit_staging_auth_issues.py:246",
         "scripts/staging_environment_validation_suite.py:183"
@@ -2311,7 +2311,7 @@
       "value": "/auth/register",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:406"
+        "auth_service/auth_core/routes/auth_routes.py:410"
       ]
     },
     "/auth/service-token": {
@@ -2320,7 +2320,7 @@
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1290",
         "netra_backend/app/routes/auth_routes/debug_helpers.py:123",
-        "auth_service/auth_core/routes/auth_routes.py:607",
+        "auth_service/auth_core/routes/auth_routes.py:614",
         "scripts/fix_authentication_system.py:308"
       ]
     },
@@ -2346,7 +2346,7 @@
         "netra_backend/app/routes/auth_routes/config_handler.py:32",
         "netra_backend/app/routes/auth_routes/config_handler.py:88",
         "netra_backend/app/routes/auth_routes/config_handler.py:127",
-        "auth_service/auth_core/routes/auth_routes.py:154",
+        "auth_service/auth_core/routes/auth_routes.py:155",
         "scripts/audit_oauth_gcp_logs.py:78",
         "scripts/verify_auth_config.py:32"
       ]
@@ -2386,7 +2386,7 @@
       "value": "/auth/users/{user_id}",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1274"
+        "auth_service/auth_core/routes/auth_routes.py:1293"
       ]
     },
     "/auth/validate": {
@@ -2395,7 +2395,7 @@
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:975",
         "netra_backend/app/core/cross_service_validators/contract_validators.py:127",
-        "auth_service/auth_core/routes/auth_routes.py:735",
+        "auth_service/auth_core/routes/auth_routes.py:746",
         "scripts/audit_oauth_gcp_logs.py:79",
         "scripts/audit_staging_auth_issues.py:247",
         "scripts/gcp_health_diagnostics.py:42",
@@ -2408,7 +2408,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1670",
-        "auth_service/auth_core/routes/auth_routes.py:847"
+        "auth_service/auth_core/routes/auth_routes.py:859"
       ]
     },
     "/auth/validate/domain": {
@@ -2422,8 +2422,8 @@
       "value": "/auth/verify",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1518",
-        "auth_service/auth_core/routes/auth_routes.py:1519"
+        "auth_service/auth_core/routes/auth_routes.py:1540",
+        "auth_service/auth_core/routes/auth_routes.py:1541"
       ]
     },
     "/auth/verify-password": {
@@ -2431,7 +2431,7 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/clients/auth_client_core.py:1334",
-        "auth_service/auth_core/routes/auth_routes.py:647"
+        "auth_service/auth_core/routes/auth_routes.py:655"
       ]
     },
     "/auth_service/": {
@@ -2597,11 +2597,11 @@
       "locations": [
         "netra_backend/app/core/cross_service_validators/data_consistency_validators.py:311",
         "netra_backend/app/routes/demo.py:63",
+        "frontend/components/chat/ChatFallbackUI.tsx:113",
         "frontend/components/ChatHistorySection.tsx:89",
         "frontend/components/ChatHistorySection.tsx:90",
-        "frontend/components/NavLinks.tsx:16",
-        "frontend/components/chat/ChatFallbackUI.tsx:113",
-        "frontend/components/demo/DemoCompletion.tsx:16"
+        "frontend/components/demo/DemoCompletion.tsx:16",
+        "frontend/components/NavLinks.tsx:16"
       ]
     },
     "/chat/message": {
@@ -2890,8 +2890,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/routes/health_extended.py:83",
-        "auth_service/main.py:616",
-        "auth_service/main.py:617"
+        "auth_service/main.py:615",
+        "auth_service/main.py:616"
       ]
     },
     "/create": {
@@ -3078,7 +3078,7 @@
         "netra_backend/app/middleware/security_headers_middleware.py:156",
         "netra_backend/app/middleware/security_response_middleware.py:95",
         "netra_backend/app/middleware/telemetry_middleware.py:58",
-        "auth_service/main.py:401",
+        "auth_service/main.py:400",
         "scripts/fix_authentication_system.py:267",
         "scripts/gcp_health_diagnostics.py:41"
       ]
@@ -3404,8 +3404,8 @@
       "category": "paths",
       "locations": [
         "netra_backend/app/core/service_dependencies/service_health_client.py:156",
-        "auth_service/main.py:631",
-        "auth_service/main.py:632"
+        "auth_service/main.py:630",
+        "auth_service/main.py:631"
       ]
     },
     "/health/backend": {
@@ -3536,8 +3536,8 @@
         "netra_backend/app/routes/unified_health.py:145",
         "netra_backend/app/routes/unified_health.py:146",
         "auth_service/auth_core/validation/pre_deployment_validator.py:484",
-        "auth_service/main.py:559",
-        "auth_service/main.py:560"
+        "auth_service/main.py:558",
+        "auth_service/main.py:559"
       ]
     },
     "/health/redis": {
@@ -4274,15 +4274,15 @@
       "value": "/oauth/providers",
       "category": "paths",
       "locations": [
-        "auth_service/auth_core/routes/auth_routes.py:1593"
+        "auth_service/auth_core/routes/auth_routes.py:1616"
       ]
     },
     "/oauth/status": {
       "value": "/oauth/status",
       "category": "paths",
       "locations": [
-        "auth_service/main.py:768",
-        "auth_service/main.py:769"
+        "auth_service/main.py:767",
+        "auth_service/main.py:768"
       ]
     },
     "/openapi.json": {
@@ -4296,7 +4296,7 @@
         "netra_backend/app/middleware/security_headers_middleware.py:156",
         "netra_backend/app/middleware/security_response_middleware.py:95",
         "netra_backend/app/middleware/telemetry_middleware.py:59",
-        "auth_service/main.py:403",
+        "auth_service/main.py:402",
         "scripts/validate_user_context_staging.py:150",
         "scripts/validate_user_context_staging_fixed.py:83"
       ]
@@ -4506,8 +4506,8 @@
       "category": "paths",
       "locations": [
         "auth_service/health_check.py:73",
-        "auth_service/main.py:609",
-        "auth_service/main.py:610"
+        "auth_service/main.py:608",
+        "auth_service/main.py:609"
       ]
     },
     "/ready": {
@@ -4560,7 +4560,7 @@
         "netra_backend/app/middleware/security_headers_middleware.py:91",
         "netra_backend/app/middleware/security_headers_middleware.py:156",
         "netra_backend/app/middleware/security_response_middleware.py:95",
-        "auth_service/main.py:402"
+        "auth_service/main.py:401"
       ]
     },
     "/references": {
@@ -5921,7 +5921,7 @@
         "netra_backend/app/core/unified_error_handler.py:1257",
         "netra_backend/app/middleware/security_response_middleware.py:96",
         "netra_backend/app/routes/websocket_ssot.py:303",
-        "netra_backend/app/routes/websocket_ssot.py:1824",
+        "netra_backend/app/routes/websocket_ssot.py:1830",
         "scripts/staging_validation_part2_corrected.py:285",
         "scripts/staging_validation_part2_corrected.py:299",
         "scripts/staging_validation_part2_user_flows.py:328",
@@ -5960,7 +5960,7 @@
         "netra_backend/app/routes/websocket_ssot.py:299",
         "netra_backend/app/routes/websocket_ssot.py:300",
         "netra_backend/app/routes/websocket_ssot.py:301",
-        "netra_backend/app/routes/websocket_ssot.py:1823",
+        "netra_backend/app/routes/websocket_ssot.py:1829",
         "scripts/staging_validation_part2_corrected.py:213",
         "scripts/staging_validation_part2_corrected.py:227",
         "scripts/staging_validation_part2_user_flows.py:240"
@@ -8722,6 +8722,13 @@
         "scripts/fix_execution_error_handler_calls.py:27"
       ]
     },
+    "netra_backend/app/agents/request_scoped_tool_dispatcher.py": {
+      "value": "netra_backend/app/agents/request_scoped_tool_dispatcher.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:148"
+      ]
+    },
     "netra_backend/app/agents/supervisor/agent_execution_context_manager.py": {
       "value": "netra_backend/app/agents/supervisor/agent_execution_context_manager.py",
       "category": "paths",
@@ -8737,6 +8744,13 @@
         "scripts/phase1_websocket_id_migration.py:59"
       ]
     },
+    "netra_backend/app/agents/supervisor/execution_context.py": {
+      "value": "netra_backend/app/agents/supervisor/execution_context.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:152"
+      ]
+    },
     "netra_backend/app/agents/supervisor/execution_engine.py": {
       "value": "netra_backend/app/agents/supervisor/execution_engine.py",
       "category": "paths",
@@ -8744,11 +8758,32 @@
         "scripts/fix_execution_engine_ssot.py:25"
       ]
     },
+    "netra_backend/app/agents/supervisor/mcp_execution_engine.py": {
+      "value": "netra_backend/app/agents/supervisor/mcp_execution_engine.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:153"
+      ]
+    },
+    "netra_backend/app/agents/supervisor/pipeline_executor.py": {
+      "value": "netra_backend/app/agents/supervisor/pipeline_executor.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:151"
+      ]
+    },
     "netra_backend/app/agents/supervisor/request_scoped_execution_engine.py": {
       "value": "netra_backend/app/agents/supervisor/request_scoped_execution_engine.py",
       "category": "paths",
       "locations": [
         "scripts/fix_execution_engine_ssot.py:27"
+      ]
+    },
+    "netra_backend/app/agents/supervisor/user_execution_engine.py": {
+      "value": "netra_backend/app/agents/supervisor/user_execution_engine.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:147"
       ]
     },
     "netra_backend/app/agents/supervisor_admin_init.py": {
@@ -11272,6 +11307,20 @@
         "scripts/complete_remaining_mock_cleanup.py:18"
       ]
     },
+    "test_framework/examples/unified_agent_test_example.py": {
+      "value": "test_framework/examples/unified_agent_test_example.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:150"
+      ]
+    },
+    "test_framework/fixtures/agent_fixtures.py": {
+      "value": "test_framework/fixtures/agent_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:149"
+      ]
+    },
     "test_framework/fixtures/auth.py": {
       "value": "test_framework/fixtures/auth.py",
       "category": "paths",
@@ -11380,6 +11429,13 @@
         "scripts/fix_import_issues.py:145"
       ]
     },
+    "tests/chat_system/test_nacis_standalone.py": {
+      "value": "tests/chat_system/test_nacis_standalone.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:110"
+      ]
+    },
     "tests/compliance/configuration_ssot/test_configuration_manager_enforcement.py": {
       "value": "tests/compliance/configuration_ssot/test_configuration_manager_enforcement.py",
       "category": "paths",
@@ -11392,6 +11448,27 @@
       "category": "paths",
       "locations": [
         "scripts/fix_import_issues.py:139"
+      ]
+    },
+    "tests/critical/phase1/test_data_context_migration.py": {
+      "value": "tests/critical/phase1/test_data_context_migration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:109"
+      ]
+    },
+    "tests/critical/phase1/test_supervisor_context_migration.py": {
+      "value": "tests/critical/phase1/test_supervisor_context_migration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:108"
+      ]
+    },
+    "tests/critical/phase1/test_triage_context_migration.py": {
+      "value": "tests/critical/phase1/test_triage_context_migration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:107"
       ]
     },
     "tests/critical/test_websocket_agent_startup.py": {
@@ -11415,6 +11492,13 @@
         "scripts/fix_ws_manager_imports.py:36"
       ]
     },
+    "tests/critical/test_websocket_notification_failures_comprehensive.py": {
+      "value": "tests/critical/test_websocket_notification_failures_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:106"
+      ]
+    },
     "tests/e2e/agent_isolation/test_file_system_isolation.py": {
       "value": "tests/e2e/agent_isolation/test_file_system_isolation.py",
       "category": "paths",
@@ -11429,11 +11513,46 @@
         "scripts/fix_simple_import_errors.py:85"
       ]
     },
+    "tests/e2e/agent_orchestration_fixtures.py": {
+      "value": "tests/e2e/agent_orchestration_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:119"
+      ]
+    },
+    "tests/e2e/agent_response_test_utilities.py": {
+      "value": "tests/e2e/agent_response_test_utilities.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:120"
+      ]
+    },
+    "tests/e2e/agent_startup_integration.py": {
+      "value": "tests/e2e/agent_startup_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:105"
+      ]
+    },
     "tests/e2e/agent_startup_performance_measurer.py": {
       "value": "tests/e2e/agent_startup_performance_measurer.py",
       "category": "paths",
       "locations": [
         "scripts/fix_performance_monitor_imports.py:113"
+      ]
+    },
+    "tests/e2e/agents/test_tool_dispatcher_core_e2e_phase2_batch1.py": {
+      "value": "tests/e2e/agents/test_tool_dispatcher_core_e2e_phase2_batch1.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:122"
+      ]
+    },
+    "tests/e2e/agents/test_tool_dispatcher_execution_e2e_phase2_batch1.py": {
+      "value": "tests/e2e/agents/test_tool_dispatcher_execution_e2e_phase2_batch1.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:123"
       ]
     },
     "tests/e2e/conftest.py": {
@@ -11512,6 +11631,13 @@
         "scripts/migrate_mock_to_usercontext.py:143"
       ]
     },
+    "tests/e2e/integration/test_agent_orchestration.py": {
+      "value": "tests/e2e/integration/test_agent_orchestration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:125"
+      ]
+    },
     "tests/e2e/integration/test_agent_orchestration_real_llm.py": {
       "value": "tests/e2e/integration/test_agent_orchestration_real_llm.py",
       "category": "paths",
@@ -11533,11 +11659,25 @@
         "scripts/fix_all_e2e_imports.py:125"
       ]
     },
+    "tests/e2e/journeys/test_agent_response_flow.py": {
+      "value": "tests/e2e/journeys/test_agent_response_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:104"
+      ]
+    },
     "tests/e2e/jwt_token_helpers.py": {
       "value": "tests/e2e/jwt_token_helpers.py",
       "category": "paths",
       "locations": [
         "scripts/check_auth_ssot_compliance.py:164"
+      ]
+    },
+    "tests/e2e/performance/test_agent_orchestration_production.py": {
+      "value": "tests/e2e/performance/test_agent_orchestration_production.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:112"
       ]
     },
     "tests/e2e/performance/test_performance_sla_validation.py": {
@@ -11565,7 +11705,8 @@
       "value": "tests/e2e/resilience/test_response_persistence_recovery.py",
       "category": "paths",
       "locations": [
-        "scripts/complete_remaining_mock_cleanup.py:28"
+        "scripts/complete_remaining_mock_cleanup.py:28",
+        "scripts/fix_deepagentstate_imports.py:103"
       ]
     },
     "tests/e2e/resource_isolation/infrastructure/__init__.py": {
@@ -11619,6 +11760,55 @@
         "scripts/run_database_api_compatibility_tests.py:65"
       ]
     },
+    "tests/e2e/state/test_multi_browser_state_isolation.py": {
+      "value": "tests/e2e/state/test_multi_browser_state_isolation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:102"
+      ]
+    },
+    "tests/e2e/state/test_user_session_state_continuity.py": {
+      "value": "tests/e2e/state/test_user_session_state_continuity.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:101"
+      ]
+    },
+    "tests/e2e/test_actions_to_meet_goals_user_experience_failure.py": {
+      "value": "tests/e2e/test_actions_to_meet_goals_user_experience_failure.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:100"
+      ]
+    },
+    "tests/e2e/test_agent_compensation_integration_fixtures.py": {
+      "value": "tests/e2e/test_agent_compensation_integration_fixtures.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:124"
+      ]
+    },
+    "tests/e2e/test_agent_compensation_integration_helpers.py": {
+      "value": "tests/e2e/test_agent_compensation_integration_helpers.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:126"
+      ]
+    },
+    "tests/e2e/test_agent_context_accumulation.py": {
+      "value": "tests/e2e/test_agent_context_accumulation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:113"
+      ]
+    },
+    "tests/e2e/test_agent_context_isolation_integration.py": {
+      "value": "tests/e2e/test_agent_context_isolation_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:99"
+      ]
+    },
     "tests/e2e/test_agent_message_flow_implementation.py": {
       "value": "tests/e2e/test_agent_message_flow_implementation.py",
       "category": "paths",
@@ -11630,6 +11820,7 @@
       "value": "tests/e2e/test_agent_orchestration.py",
       "category": "paths",
       "locations": [
+        "scripts/fix_deepagentstate_imports.py:118",
         "scripts/validate_remediation_simple.py:14"
       ]
     },
@@ -11648,6 +11839,20 @@
         "scripts/run_critical_agent_tests.py:145"
       ]
     },
+    "tests/e2e/test_agent_pipeline_critical.py": {
+      "value": "tests/e2e/test_agent_pipeline_critical.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:114"
+      ]
+    },
+    "tests/e2e/test_agent_tool_websocket_flow_e2e.py": {
+      "value": "tests/e2e/test_agent_tool_websocket_flow_e2e.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:116"
+      ]
+    },
     "tests/e2e/test_agent_websocket_events_comprehensive.py": {
       "value": "tests/e2e/test_agent_websocket_events_comprehensive.py",
       "category": "paths",
@@ -11660,6 +11865,20 @@
       "category": "paths",
       "locations": [
         "scripts/run_critical_agent_tests.py:172"
+      ]
+    },
+    "tests/e2e/test_chat_ui_flow_comprehensive.py": {
+      "value": "tests/e2e/test_chat_ui_flow_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:98"
+      ]
+    },
+    "tests/e2e/test_cold_start_critical_issues.py": {
+      "value": "tests/e2e/test_cold_start_critical_issues.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:111"
       ]
     },
     "tests/e2e/test_concurrent_agent_startup_core.py": {
@@ -11677,12 +11896,26 @@
         "scripts/fix_performance_monitor_imports.py:121"
       ]
     },
+    "tests/e2e/test_corpus_admin_e2e.py": {
+      "value": "tests/e2e/test_corpus_admin_e2e.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:128"
+      ]
+    },
     "tests/e2e/test_cors_dynamic_ports.py": {
       "value": "tests/e2e/test_cors_dynamic_ports.py",
       "category": "paths",
       "locations": [
         "scripts/fix_remaining_syntax.py:13",
         "scripts/simple_syntax_fix.py:33"
+      ]
+    },
+    "tests/e2e/test_critical_agent_chat_flow.py": {
+      "value": "tests/e2e/test_critical_agent_chat_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:127"
       ]
     },
     "tests/e2e/test_data_factory.py": {
@@ -11715,11 +11948,26 @@
         "scripts/fix_simple_import_errors.py:91"
       ]
     },
+    "tests/e2e/test_minimal_3agent_workflow.py": {
+      "value": "tests/e2e/test_minimal_3agent_workflow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:97"
+      ]
+    },
+    "tests/e2e/test_multi_agent_collaboration_integration.py": {
+      "value": "tests/e2e/test_multi_agent_collaboration_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:115"
+      ]
+    },
     "tests/e2e/test_multi_agent_collaboration_response.py": {
       "value": "tests/e2e/test_multi_agent_collaboration_response.py",
       "category": "paths",
       "locations": [
-        "scripts/complete_remaining_mock_cleanup.py:26"
+        "scripts/complete_remaining_mock_cleanup.py:26",
+        "scripts/fix_deepagentstate_imports.py:96"
       ]
     },
     "tests/e2e/test_performance_targets.py": {
@@ -11728,6 +11976,13 @@
       "locations": [
         "scripts/fix_remaining_syntax.py:14",
         "scripts/simple_syntax_fix.py:34"
+      ]
+    },
+    "tests/e2e/test_primary_chat_websocket_flow.py": {
+      "value": "tests/e2e/test_primary_chat_websocket_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:95"
       ]
     },
     "tests/e2e/test_quality_gate_response_validation.py": {
@@ -11759,6 +12014,20 @@
       "locations": [
         "scripts/fix_remaining_syntax.py:17",
         "scripts/simple_syntax_fix.py:37"
+      ]
+    },
+    "tests/e2e/test_real_agent_execution_engine.py": {
+      "value": "tests/e2e/test_real_agent_execution_engine.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:129"
+      ]
+    },
+    "tests/e2e/test_real_agent_pipeline.py": {
+      "value": "tests/e2e/test_real_agent_pipeline.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:117"
       ]
     },
     "tests/e2e/test_resource_limits.py": {
@@ -11814,11 +12083,123 @@
         "scripts/fix_background_imports.py:52"
       ]
     },
+    "tests/e2e/test_supervisor_orchestration_e2e.py": {
+      "value": "tests/e2e/test_supervisor_orchestration_e2e.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:94"
+      ]
+    },
+    "tests/e2e/test_supervisor_real_llm_integration.py": {
+      "value": "tests/e2e/test_supervisor_real_llm_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:93"
+      ]
+    },
+    "tests/e2e/test_synthetic_data_e2e.py": {
+      "value": "tests/e2e/test_synthetic_data_e2e.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:130"
+      ]
+    },
+    "tests/e2e/test_tool_dispatcher_execution_e2e_batch2.py": {
+      "value": "tests/e2e/test_tool_dispatcher_execution_e2e_batch2.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:131"
+      ]
+    },
+    "tests/e2e/test_user_message_agent_pipeline.py": {
+      "value": "tests/e2e/test_user_message_agent_pipeline.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:92"
+      ]
+    },
+    "tests/e2e/test_websocket_events_during_execution.py": {
+      "value": "tests/e2e/test_websocket_events_during_execution.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:121"
+      ]
+    },
     "tests/e2e/test_websocket_immediate_disconnect_regression.py": {
       "value": "tests/e2e/test_websocket_immediate_disconnect_regression.py",
       "category": "paths",
       "locations": [
         "scripts/verify_websocket_regression_tests.py:41"
+      ]
+    },
+    "tests/e2e/websocket/test_agent_execution_websocket_integration.py": {
+      "value": "tests/e2e/websocket/test_agent_execution_websocket_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:91"
+      ]
+    },
+    "tests/e2e/websocket/test_complete_agent_execution_with_events.py": {
+      "value": "tests/e2e/websocket/test_complete_agent_execution_with_events.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:90"
+      ]
+    },
+    "tests/e2e/websocket/test_complete_chat_business_value_flow.py": {
+      "value": "tests/e2e/websocket/test_complete_chat_business_value_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:89"
+      ]
+    },
+    "tests/e2e/websocket/test_multi_user_concurrent_agent_execution.py": {
+      "value": "tests/e2e/websocket/test_multi_user_concurrent_agent_execution.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:88"
+      ]
+    },
+    "tests/e2e/websocket/test_websocket_reconnection_during_agent_execution.py": {
+      "value": "tests/e2e/websocket/test_websocket_reconnection_during_agent_execution.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:87"
+      ]
+    },
+    "tests/e2e/websocket_e2e_tests/test_agent_execution_websocket_integration.py": {
+      "value": "tests/e2e/websocket_e2e_tests/test_agent_execution_websocket_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:86"
+      ]
+    },
+    "tests/e2e/websocket_e2e_tests/test_complete_agent_execution_with_events.py": {
+      "value": "tests/e2e/websocket_e2e_tests/test_complete_agent_execution_with_events.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:85"
+      ]
+    },
+    "tests/e2e/websocket_e2e_tests/test_complete_chat_business_value_flow.py": {
+      "value": "tests/e2e/websocket_e2e_tests/test_complete_chat_business_value_flow.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:84"
+      ]
+    },
+    "tests/e2e/websocket_e2e_tests/test_multi_user_concurrent_agent_execution.py": {
+      "value": "tests/e2e/websocket_e2e_tests/test_multi_user_concurrent_agent_execution.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:83"
+      ]
+    },
+    "tests/e2e/websocket_e2e_tests/test_websocket_reconnection_during_agent_execution.py": {
+      "value": "tests/e2e/websocket_e2e_tests/test_websocket_reconnection_during_agent_execution.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:82"
       ]
     },
     "tests/e2e/websocket_resilience/test_2_midstream_disconnection_recovery_websocket.py": {
@@ -11873,11 +12254,25 @@
         "scripts/fix_simple_import_errors.py:98"
       ]
     },
+    "tests/enhanced_error_handling_tests.py": {
+      "value": "tests/enhanced_error_handling_tests.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:81"
+      ]
+    },
     "tests/factories.py": {
       "value": "tests/factories.py",
       "category": "paths",
       "locations": [
         "scripts/fix_remaining_e2e_imports.py:157"
+      ]
+    },
+    "tests/fixtures/golden_datasets.py": {
+      "value": "tests/fixtures/golden_datasets.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:132"
       ]
     },
     "tests/integration/agent_execution_flows/test_agent_execution_context_management.py": {
@@ -12092,6 +12487,20 @@
         "scripts/run_docker_integration_tests.py:70"
       ]
     },
+    "tests/integration/test_agent_instance_factory_isolation.py": {
+      "value": "tests/integration/test_agent_instance_factory_isolation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:80"
+      ]
+    },
+    "tests/integration/test_agent_websocket_ssot.py": {
+      "value": "tests/integration/test_agent_websocket_ssot.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:79"
+      ]
+    },
     "tests/integration/test_database_cross_service_integration.py": {
       "value": "tests/integration/test_database_cross_service_integration.py",
       "category": "paths",
@@ -12104,6 +12513,13 @@
       "category": "paths",
       "locations": [
         "scripts/run_deepagentstate_vulnerability_tests.py:36"
+      ]
+    },
+    "tests/integration/test_split_architecture_integration.py": {
+      "value": "tests/integration/test_split_architecture_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:78"
       ]
     },
     "tests/integration/test_user_context_manager_integration.py": {
@@ -12127,6 +12543,13 @@
         "scripts/fix_ws_manager_imports.py:35"
       ]
     },
+    "tests/load/test_production_load_persistence.py": {
+      "value": "tests/load/test_production_load_persistence.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:145"
+      ]
+    },
     "tests/logging_coverage/test_authentication_failure_logging.py": {
       "value": "tests/logging_coverage/test_authentication_failure_logging.py",
       "category": "paths",
@@ -12141,11 +12564,81 @@
         "scripts/run_logging_coverage_validation.py:110"
       ]
     },
+    "tests/mission_critical/test_actions_to_meet_goals_golden.py": {
+      "value": "tests/mission_critical/test_actions_to_meet_goals_golden.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:77"
+      ]
+    },
+    "tests/mission_critical/test_agent_death_fix_complete.py": {
+      "value": "tests/mission_critical/test_agent_death_fix_complete.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:142"
+      ]
+    },
+    "tests/mission_critical/test_agent_error_context_handling.py": {
+      "value": "tests/mission_critical/test_agent_error_context_handling.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:76"
+      ]
+    },
+    "tests/mission_critical/test_agent_execution_llm_failure_websocket_events.py": {
+      "value": "tests/mission_critical/test_agent_execution_llm_failure_websocket_events.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:143"
+      ]
+    },
+    "tests/mission_critical/test_agent_resilience_patterns.py": {
+      "value": "tests/mission_critical/test_agent_resilience_patterns.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:75"
+      ]
+    },
+    "tests/mission_critical/test_agent_type_safety_comprehensive.py": {
+      "value": "tests/mission_critical/test_agent_type_safety_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:139"
+      ]
+    },
     "tests/mission_critical/test_async_pattern_compliance.py": {
       "value": "tests/mission_critical/test_async_pattern_compliance.py",
       "category": "paths",
       "locations": [
         "scripts/ci_pipeline_enhancer.py:246"
+      ]
+    },
+    "tests/mission_critical/test_baseagent_edge_cases_comprehensive.py": {
+      "value": "tests/mission_critical/test_baseagent_edge_cases_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:74"
+      ]
+    },
+    "tests/mission_critical/test_baseagent_inheritance_violations.py": {
+      "value": "tests/mission_critical/test_baseagent_inheritance_violations.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:136"
+      ]
+    },
+    "tests/mission_critical/test_chat_responsiveness_under_load.py": {
+      "value": "tests/mission_critical/test_chat_responsiveness_under_load.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:73"
+      ]
+    },
+    "tests/mission_critical/test_circuit_breaker_comprehensive.py": {
+      "value": "tests/mission_critical/test_circuit_breaker_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:72"
       ]
     },
     "tests/mission_critical/test_config_manager_ssot_violations.py": {
@@ -12162,6 +12655,27 @@
         "scripts/run_config_ssot_violation_tests.py:90"
       ]
     },
+    "tests/mission_critical/test_data_sub_agent_golden_ssot.py": {
+      "value": "tests/mission_critical/test_data_sub_agent_golden_ssot.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:71"
+      ]
+    },
+    "tests/mission_critical/test_database_session_isolation.py": {
+      "value": "tests/mission_critical/test_database_session_isolation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:70"
+      ]
+    },
+    "tests/mission_critical/test_deepagentstate_business_protection.py": {
+      "value": "tests/mission_critical/test_deepagentstate_business_protection.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:133"
+      ]
+    },
     "tests/mission_critical/test_final_validation.py": {
       "value": "tests/mission_critical/test_final_validation.py",
       "category": "paths",
@@ -12176,11 +12690,53 @@
         "scripts/update_websocket_notifier_imports.py:68"
       ]
     },
+    "tests/mission_critical/test_inheritance_architecture_violations.py": {
+      "value": "tests/mission_critical/test_inheritance_architecture_violations.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:141"
+      ]
+    },
+    "tests/mission_critical/test_inheritance_refactor_validation.py": {
+      "value": "tests/mission_critical/test_inheritance_refactor_validation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:135"
+      ]
+    },
+    "tests/mission_critical/test_orchestration_partial_data_handling.py": {
+      "value": "tests/mission_critical/test_orchestration_partial_data_handling.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:140"
+      ]
+    },
     "tests/mission_critical/test_single_config_manager_ssot.py": {
       "value": "tests/mission_critical/test_single_config_manager_ssot.py",
       "category": "paths",
       "locations": [
         "scripts/run_config_ssot_violation_tests.py:89"
+      ]
+    },
+    "tests/mission_critical/test_supervisor_golden_compliance_comprehensive.py": {
+      "value": "tests/mission_critical/test_supervisor_golden_compliance_comprehensive.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:69"
+      ]
+    },
+    "tests/mission_critical/test_supervisor_golden_pattern.py": {
+      "value": "tests/mission_critical/test_supervisor_golden_pattern.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:68"
+      ]
+    },
+    "tests/mission_critical/test_supervisor_websocket_validation.py": {
+      "value": "tests/mission_critical/test_supervisor_websocket_validation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:67"
       ]
     },
     "tests/mission_critical/test_token_optimization_compliance.py": {
@@ -12190,12 +12746,20 @@
         "scripts/deploy_token_optimization_production.py:220"
       ]
     },
+    "tests/mission_critical/test_tool_discovery_golden.py": {
+      "value": "tests/mission_critical/test_tool_discovery_golden.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:66"
+      ]
+    },
     "tests/mission_critical/test_websocket_agent_events_suite.py": {
       "value": "tests/mission_critical/test_websocket_agent_events_suite.py",
       "category": "paths",
       "locations": [
         "scripts/ci_pipeline_enhancer.py:244",
         "scripts/critical_remediation_tracker.py:539",
+        "scripts/fix_deepagentstate_imports.py:134",
         "scripts/migrate_mock_to_usercontext.py:146",
         "scripts/run_critical_agent_tests.py:136",
         "scripts/update_websocket_notifier_imports.py:67",
@@ -12208,6 +12772,20 @@
       "category": "paths",
       "locations": [
         "scripts/deploy_to_gcp_actual.py:416"
+      ]
+    },
+    "tests/mission_critical/test_websocket_agent_performance_benchmarks.py": {
+      "value": "tests/mission_critical/test_websocket_agent_performance_benchmarks.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:65"
+      ]
+    },
+    "tests/mission_critical/test_websocket_basic.py": {
+      "value": "tests/mission_critical/test_websocket_basic.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:64"
       ]
     },
     "tests/mission_critical/test_websocket_basic_events.py": {
@@ -12225,6 +12803,20 @@
         "scripts/migrate_mock_to_usercontext.py:149"
       ]
     },
+    "tests/mission_critical/test_websocket_bridge_integration.py": {
+      "value": "tests/mission_critical/test_websocket_bridge_integration.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:63"
+      ]
+    },
+    "tests/mission_critical/test_websocket_bridge_lifecycle_audit_20250902.py": {
+      "value": "tests/mission_critical/test_websocket_bridge_lifecycle_audit_20250902.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:138"
+      ]
+    },
     "tests/mission_critical/test_websocket_comprehensive_validation.py": {
       "value": "tests/mission_critical/test_websocket_comprehensive_validation.py",
       "category": "paths",
@@ -12237,6 +12829,13 @@
       "category": "paths",
       "locations": [
         "scripts/migrate_mock_to_usercontext.py:150"
+      ]
+    },
+    "tests/mission_critical/test_websocket_event_guarantees.py": {
+      "value": "tests/mission_critical/test_websocket_event_guarantees.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:137"
       ]
     },
     "tests/mission_critical/test_websocket_event_reliability_comprehensive.py": {
@@ -12253,6 +12852,41 @@
         "scripts/run_websocket_validation.py:66"
       ]
     },
+    "tests/mission_critical/test_websocket_events_advanced.py": {
+      "value": "tests/mission_critical/test_websocket_events_advanced.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:62"
+      ]
+    },
+    "tests/mission_critical/test_websocket_final.py": {
+      "value": "tests/mission_critical/test_websocket_final.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:61"
+      ]
+    },
+    "tests/mission_critical/test_websocket_json_agent_events.py": {
+      "value": "tests/mission_critical/test_websocket_json_agent_events.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:144"
+      ]
+    },
+    "tests/mission_critical/test_websocket_json_performance.py": {
+      "value": "tests/mission_critical/test_websocket_json_performance.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:60"
+      ]
+    },
+    "tests/mission_critical/test_websocket_mission_critical_fixed.py": {
+      "value": "tests/mission_critical/test_websocket_mission_critical_fixed.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:59"
+      ]
+    },
     "tests/mission_critical/test_websocket_reliability_focused.py": {
       "value": "tests/mission_critical/test_websocket_reliability_focused.py",
       "category": "paths",
@@ -12265,6 +12899,27 @@
       "category": "paths",
       "locations": [
         "scripts/complete_remaining_mock_cleanup.py:22"
+      ]
+    },
+    "tests/netra_backend/agents/test_execution_isolation.py": {
+      "value": "tests/netra_backend/agents/test_execution_isolation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:58"
+      ]
+    },
+    "tests/performance/test_agent_performance_metrics.py": {
+      "value": "tests/performance/test_agent_performance_metrics.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:57"
+      ]
+    },
+    "tests/performance/websocket/test_websocket_agent_event_load.py": {
+      "value": "tests/performance/websocket/test_websocket_agent_event_load.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:56"
       ]
     },
     "tests/pre_deployment/test_environment_url_validation.py": {
@@ -12336,6 +12991,20 @@
       "category": "paths",
       "locations": [
         "scripts/fix_ws_manager_imports.py:21"
+      ]
+    },
+    "tests/stress/test_supervisor_stress.py": {
+      "value": "tests/stress/test_supervisor_stress.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:55"
+      ]
+    },
+    "tests/test_websocket_critical_fix_validation.py": {
+      "value": "tests/test_websocket_critical_fix_validation.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:54"
       ]
     },
     "tests/unified/e2e/concurrent_user_simulators.py": {
@@ -12709,6 +13378,13 @@
       "locations": [
         "scripts/complete_remaining_mock_cleanup.py:27",
         "scripts/test/fix_indentation_errors.py:43"
+      ]
+    },
+    "tests/unit/ssot/test_deepagentstate_production_imports.py": {
+      "value": "tests/unit/ssot/test_deepagentstate_production_imports.py",
+      "category": "paths",
+      "locations": [
+        "scripts/fix_deepagentstate_imports.py:146"
       ]
     },
     "tests/unit/ssot_validation/test_websocket_notifier_ssot_compliance.py": {

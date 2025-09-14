@@ -18,9 +18,10 @@
 ## Discovered Issues
 
 ### Issue 1: WebSocket Agent Event Structure Validation Failures
-**File:** `tests/mission_critical/test_websocket_agent_events_suite.py`  
-**Type:** failing-test-regression-P1-websocket-event-validation-failures  
+**File:** `tests/mission_critical/test_websocket_agent_events_suite.py`
+**Type:** failing-test-regression-P1-websocket-event-validation-failures
 **Status:** FAILING (3/39 tests)
+**GitHub Issue:** [#973 - failing-test-regression-p1-websocket-event-structure-validation](https://github.com/netra-systems/netra-apex/issues/973)
 
 **Failed Tests:**
 1. `test_agent_started_event_structure` - agent_started event structure validation failed

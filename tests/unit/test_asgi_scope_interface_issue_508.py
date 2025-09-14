@@ -16,12 +16,12 @@ from urllib.parse import parse_qs
 
 # Import the actual modules that are failing
 try:
-    from netra_backend.app.routes.websocket_ssot import WebSocketSSoTRoute
+    from netra_backend.app.routes.websocket_ssot import WebSocketSSOTRouter
     from netra_backend.app.core.middleware_setup import WebSocketExclusionMiddleware
 except ImportError as e:
     # If imports fail, we'll create mock implementations for testing
     print(f"Warning: Could not import actual modules, using mocks: {e}")
-    WebSocketSSoTRoute = None
+    WebSocketSSOTRouter = None
     WebSocketExclusionMiddleware = None
 
 
@@ -62,11 +62,11 @@ class TestASGIScopeInterface:
     
     def test_websocket_url_object_type_detection(self):
         """Test WebSocket URL object type detection - WILL FAIL if logic is flawed."""
-        if WebSocketSSoTRoute is None:
-            pytest.skip("WebSocketSSoTRoute not available for testing")
-            
+        if WebSocketSSOTRouter is None:
+            pytest.skip("WebSocketSSOTRouter not available for testing")
+
         # Create WebSocket SSOT route instance for testing
-        route_instance = WebSocketSSoTRoute()
+        route_instance = WebSocketSSOTRouter()
         
         # Create a WebSocket mock that might have malformed URL
         websocket_mock = Mock()
@@ -90,10 +90,10 @@ class TestASGIScopeInterface:
     
     def test_asgi_scope_malformation_scenarios(self):
         """Test malformed ASGI scopes that could cause URL object corruption - WILL FAIL."""
-        if WebSocketSSoTRoute is None:
-            pytest.skip("WebSocketSSoTRoute not available for testing")
-            
-        route_instance = WebSocketSSoTRoute()
+        if WebSocketSSOTRouter is None:
+            pytest.skip("WebSocketSSOTRouter not available for testing")
+
+        route_instance = WebSocketSSOTRouter()
         
         # Scenario 1: Missing URL entirely
         websocket_mock = Mock()
