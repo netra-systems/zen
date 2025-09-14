@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """
 Claude Code Instance Orchestrator
-Simple orchestrator for running 3 Claude Code instances in headless mode,
+Simple orchestrator for running multiple Claude Code instances in headless mode,
 each executing specific slash commands.
+
+KEY ARCHITECTURE:
+- BACKGROUND DATA COLLECTION: ALL output is captured in full, regardless of display settings
+- VISUAL DISPLAY: Separate truncation and filtering for console output only
+- COMPLETE OUTPUT SAVED: Full responses available in JSON output file
 
 Multi-platform support with enhanced Mac compatibility for local directories.
 
@@ -16,6 +21,9 @@ Auto runs a set of parallel claude code instance commands
 Saves having to manually sping up terminal windows
 Path towards integration and automation
 collects more data than human readable output, e.g. token use, tool use names etc
+
+IMPORTANT: Visual truncation settings (--max-line-length, --max-console-lines) only affect
+console display. All complete output is always captured and saved to the output file.
 
 Usage Examples:
   python3 claude-instance-orchestrator.py --workspace ~/my-project --dry-run
@@ -939,14 +947,14 @@ async def main():
                        help="Output format for Claude instances (default: stream-json)")
     parser.add_argument("--timeout", type=int, default=10000,
                        help="Timeout in seconds for each instance (default: 10000)")
-    parser.add_argument("--max-console-lines", type=int, default=5,
-                       help="Maximum recent lines to show per instance on console (default: 5)")
+    parser.add_argument("--max-console-lines", type=int, default=10,
+                       help="Maximum recent lines to show per instance on console for DISPLAY ONLY - all output always captured (default: 10)")
     parser.add_argument("--quiet", action="store_true",
                        help="Minimize console output, show only errors and final summaries")
     parser.add_argument("--startup-delay", type=float, default=5.0,
                        help="Delay in seconds between launching each instance (default: 5.0)")
     parser.add_argument("--max-line-length", type=int, default=1500,
-                       help="Maximum characters per line in console output (default: 1500)")
+                       help="Maximum characters per line in console DISPLAY ONLY - full content always saved (default: 1500)")
     parser.add_argument("--status-report-interval", type=int, default=5,
                        help="Seconds between rolling status reports (default: 30)")
 
