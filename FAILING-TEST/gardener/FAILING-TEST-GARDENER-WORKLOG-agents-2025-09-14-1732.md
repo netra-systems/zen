@@ -43,6 +43,7 @@ Discovered multiple categories of failing tests across the agent infrastructure:
 **Failed Tests:** 9 out of 9 tests (100% failure rate)
 **Severity:** P0 - Critical Priority
 **Category:** failing-test-active-dev-p0-agent-execution-core-complete-failure
+**GitHub Issue:** [#887](https://github.com/netra-systems/netra-apex/issues/887) - Created 2025-09-14
 
 **Key Error:**
 ```
@@ -99,11 +100,18 @@ TypeError: AgentExecutionCore.execute_agent() got an unexpected keyword argument
 - Interface contract violations
 
 ## Next Actions Required
-1. **Immediate (P0):** Fix AgentExecutionCore API signature issues
+1. **Immediate (P0):** Fix AgentExecutionCore API signature issues - **GitHub Issue #887 Created**
 2. **High Priority (P1):** Resolve BaseAgent session management and factory failures  
 3. **Medium Priority (P2):** Fix WebSocket integration in agent registry
 4. **Security:** Address DeepAgentState security vulnerabilities
 5. **Technical Debt:** Address deprecation warnings system-wide
+
+## GitHub Issues Created
+- **Issue #887:** failing-test-active-dev-p0-agent-execution-core-complete-failure
+  - **Status:** Open
+  - **Priority:** P0 Critical
+  - **Labels:** claude-code-generated-issue, P0, critical, security, infrastructure-dependency
+  - **Related Issues:** #877, #871, #876 (linked with cross-references)
 
 ## Test Statistics
 - **Total Tests Run:** 88 tests across 3 critical test files
