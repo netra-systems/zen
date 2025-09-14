@@ -149,7 +149,7 @@ class TestSSOTMockDuplicationViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(database_violations)
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} database mock SSOT violations.\n"
                 f"All database mocks MUST use SSotMockFactory.create_database_session_mock().\n\n"
                 f"Violations found:\n{violation_details}\n\n"
@@ -182,7 +182,7 @@ class TestSSOTMockDuplicationViolations(SSotBaseTestCase):
         
         if violation_count > 0:
             violation_details = self._format_violations(filtered_violations[:20])  # Show first 20
-            self.fail(
+            pytest.fail(
                 f"DETECTED {violation_count} generic mock SSOT violations.\n"
                 f"Consider using SSOT MockFactory for consistent mock behavior.\n\n"
                 f"Sample violations (showing first 20):\n{violation_details}\n\n"
@@ -249,7 +249,7 @@ BUSINESS IMPACT:
         
         # This test SHOULD FAIL to provide actionable violation report
         if total_violations > 0:
-            self.fail(f"SSOT Mock Violation Report:\n{report}")
+            pytest.fail(f"SSOT Mock Violation Report:\n{report}")
             
     def _scan_for_mock_violations(self, mock_type: str) -> List[MockDuplicationViolation]:
         """Scan codebase for specific type of mock violations."""
