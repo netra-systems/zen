@@ -786,6 +786,11 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
     """Create default instance configurations"""
     return [
         InstanceConfig(
+            command="/gitcommitgardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
             command="/createtestsv2 agent goldenpath messages work, unit",
             permission_mode="acceptEdits",
             output_format=output_format
@@ -841,7 +846,7 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
             output_format=output_format
         ),
         InstanceConfig(
-            command="/gitissueprogressorv2 tests p0",
+            command="/gitissueprogressorv2 goldenpath",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
@@ -862,6 +867,16 @@ def create_default_instances(output_format: str = "stream-json") -> List[Instanc
         ),
         InstanceConfig(
             command="/gcploggardener",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/ssotgardener removing legacy",
+            permission_mode="acceptEdits",
+            output_format=output_format
+        ),
+        InstanceConfig(
+            command="/gitissueprogressorv2 removing legacy",
             permission_mode="acceptEdits",
             output_format=output_format
         ),
